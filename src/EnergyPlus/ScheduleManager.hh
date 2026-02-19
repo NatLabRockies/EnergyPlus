@@ -499,6 +499,8 @@ struct ScheduleManagerData : BaseGlobalStruct
     // Logical Variables for Module
     bool ScheduleInputProcessed = false;       // This is false until the Schedule Input has been processed.
     bool ScheduleFileShadingProcessed = false; // This is false unless there is a Schedule:File:Shading object.
+    // ESL: new variable to store shading csv filename
+    std::string ShadingSunlitFracFileName;     // Filename from Schedule:File:Shading object
 
     // Object Data
     std::vector<Sched::ScheduleType *> scheduleTypes; // Allowed Schedule Types

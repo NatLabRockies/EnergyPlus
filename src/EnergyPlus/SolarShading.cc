@@ -4990,15 +4990,66 @@ void CalcPerSolarBeam(EnergyPlusData &state,
     }
     // Initialize/update the Complex Fenestration geometry and optical properties
     UpdateComplexWindows(state);
-    if (!state.dataSysVars->DetailedSolarTimestepIntegration) {
-        for (iHour = 1; iHour <= 24; ++iHour) { // Do for all hours.
-            for (TS = 1; TS <= state.dataGlobal->TimeStepsInHour; ++TS) {
-                FigureSolarBeamAtTimestep(state, iHour, TS);
-            } // TimeStep Loop
-        } // Hour Loop
+
+    // ESL edit start
+    using DataSystemVariables::ShadingMethod;
+    bool loadedHourlySched = false;
+
+    // use dictionary keyed by surface id: importedSchedBySurface[surfNum][timeIndex] = {4 factors}
+    std::unordered_map<int, std::vector<std::vector<Real64>>> importedSchedBySurface;
+    int const totalTimesteps = state.dataGlobal->TimeStepsInHour * 24;
+
+    if (state.dataSysVars->shadingMethod == ShadingMethod::Imported) {
+        std::string shadingSchedFilePath = state.dataSched->ShadingSunlitFracFileName;
+        const int dot_pos = shadingSchedFilePath.rfind(".");
+        const std::string csvFilePath = shadingSchedFilePath.substr(0, dot_pos) + "_diffuse.csv";
+        std::ifstream csvFile(csvFilePath);
+        std::cout << "Reading from " << csvFilePath << std::endl;
+        if (!csvFile.is_open()) {
+            ShowWarningError(state, "Could not open csv for reading.");
+        } else {
+            // read header (first line) then data lines
+            std::string line;
+            if (!std::getline(csvFile, line)) {
+                std::cout << "empty file?" << std::endl;
+            } else {
+                int dataTimestep = 0;
+                while (std::getline(csvFile, line) && dataTimestep < totalTimesteps) {
+                    std::istringstream ss(line);
+                    std::string value;
+                    std::getline(ss, value, ','); // Skip the first value (TimeStamp)
+
+                    int surfIndex = 0; // Index into the AllExtSolAndShadingSurfaceList
+                    while (std::getline(ss, value, ',') && surfIndex < static_cast<int>(s_surf->AllExtSolAndShadingSurfaceList.size())) {
+                        int surfNum = s_surf->AllExtSolAndShadingSurfaceList[surfIndex];
+
+                        Real64 SurfWithShdgIsoSky = std::stod(value);
+                        if (!std::getline(ss, value, ',')) break;
+                        Real64 SurfWoShdgIsoSky = std::stod(value);
+                        if (!std::getline(ss, value, ',')) break;
+                        Real64 SurfWithShdgHoriz = std::stod(value);
+                        if (!std::getline(ss, value, ',')) break;
+                        Real64 SurfWoShdgHoriz = std::stod(value);
+
+                        auto &vecByTime = importedSchedBySurface[surfNum];
+                        if (vecByTime.empty()) vecByTime.resize(totalTimesteps);
+                        vecByTime[dataTimestep] = {SurfWithShdgIsoSky, SurfWoShdgIsoSky, SurfWithShdgHoriz, SurfWoShdgHoriz};
+
+                        ++surfIndex;
+                    }
+                    ++dataTimestep;
+                }
+                loadedHourlySched = dataTimestep > 0;
+            }
+            csvFile.close();
+        }
+    }
+    if (loadedHourlySched) {
+        FigureSolarBeamAtTimestep(state, state.dataGlobal->HourOfDay, state.dataGlobal->TimeStep, importedSchedBySurface);
     } else {
         FigureSolarBeamAtTimestep(state, state.dataGlobal->HourOfDay, state.dataGlobal->TimeStep);
     }
+    // ESL edit end
 }
 
 void FigureSunCosines(EnergyPlusData &state,
@@ -5048,7 +5099,8 @@ void FigureSunCosines(EnergyPlusData &state,
     state.dataBSDFWindow->SUNCOSTS(iTimeStep, iHour) = state.dataSolarShading->SUNCOS;
 }
 
-void FigureSolarBeamAtTimestep(EnergyPlusData &state, int const iHour, int const iTimeStep)
+void FigureSolarBeamAtTimestep(EnergyPlusData &state, int const iHour, int const iTimeStep,
+                              std::unordered_map<int, std::vector<std::vector<Real64>>> const &importedSchedBySurface)
 {
 
     // SUBROUTINE INFORMATION:
@@ -5125,6 +5177,7 @@ void FigureSolarBeamAtTimestep(EnergyPlusData &state, int const iHour, int const
             }
         }
     }
+    // ESL edit start
     //   Note -- if not the below, values are set in SkyDifSolarShading routine (constant for simulation)
     if (state.dataSysVars->DetailedSkyDiffuseAlgorithm && s_surf->ShadingTransmittanceVaries &&
         state.dataHeatBal->SolarDistribution != DataHeatBalance::Shadowing::Minimal) {
@@ -5134,69 +5187,136 @@ void FigureSolarBeamAtTimestep(EnergyPlusData &state, int const iHour, int const
             state.dataSolarShading->SurfWithShdgHoriz(SurfNum) = 0.;
             state.dataSolarShading->SurfWoShdgHoriz(SurfNum) = 0.;
         }
-
-        for (int IPhi = 0; IPhi < NPhi; ++IPhi) { // Loop over patch altitude values
-            state.dataSolarShading->SUNCOS(3) = state.dataSolarShading->sin_Phi[IPhi];
-
-            for (int ITheta = 0; ITheta < NTheta; ++ITheta) { // Loop over patch azimuth values
-                state.dataSolarShading->SUNCOS(1) = state.dataSolarShading->cos_Phi[IPhi] * state.dataSolarShading->cos_Theta[ITheta];
-                state.dataSolarShading->SUNCOS(2) = state.dataSolarShading->cos_Phi[IPhi] * state.dataSolarShading->sin_Theta[ITheta];
-
-                for (int SurfNum : s_surf->AllExtSolAndShadingSurfaceList) {
-                    state.dataSolarShading->SurfSunCosTheta(SurfNum) = state.dataSolarShading->SUNCOS(1) * s_surf->Surface(SurfNum).OutNormVec(1) +
-                                                                       state.dataSolarShading->SUNCOS(2) * s_surf->Surface(SurfNum).OutNormVec(2) +
-                                                                       state.dataSolarShading->SUNCOS(3) * s_surf->Surface(SurfNum).OutNormVec(3);
+        if (!importedSchedBySurface.empty()) {
+            // compute timestep index
+            std::cout << "FigureSolarBeamAtTimestep using imported schedule" << std::endl;
+            int const tIndex = (iHour - 1) * state.dataGlobal->TimeStepsInHour + (iTimeStep - 1);
+            for (int surfIndex = 0; surfIndex < static_cast<int>(s_surf->AllExtSolAndShadingSurfaceList.size()); ++surfIndex) {
+                int surfNum = s_surf->AllExtSolAndShadingSurfaceList[surfIndex];
+                auto it = importedSchedBySurface.find(surfNum);
+                if (it != importedSchedBySurface.end()) {
+                    if (tIndex >= 0 && tIndex < static_cast<int>(it->second.size())) {
+                        auto const &vals = it->second[tIndex];
+                        if (vals.size() >= 4) {
+                            state.dataSolarShading->SurfWithShdgIsoSky(surfNum) = vals[0];
+                            state.dataSolarShading->SurfWoShdgIsoSky(surfNum) = vals[1];
+                            state.dataSolarShading->SurfWithShdgHoriz(surfNum) = vals[2];
+                            state.dataSolarShading->SurfWoShdgHoriz(surfNum) = vals[3];
+                        }
+                    }
                 }
-
-                SHADOW(state, iHour, iTimeStep); // Determine sunlit areas and solar multipliers for all surfaces.
-
-                for (int SurfNum : s_surf->AllExtSolAndShadingSurfaceList) {
-
-                    if (state.dataSolarShading->SurfSunCosTheta(SurfNum) < 0.0) {
-                        continue;
-                    }
-
-                    Fac1WoShdg = state.dataSolarShading->cos_Phi[IPhi] * DThetaDPhi * state.dataSolarShading->SurfSunCosTheta(SurfNum);
-                    SurfArea = s_surf->Surface(SurfNum).NetAreaShadowCalc;
-                    if (SurfArea > Eps) {
-                        FracIlluminated = state.dataSolarShading->SurfSunlitArea(SurfNum) / SurfArea;
-                    } else {
-                        FracIlluminated = state.dataSolarShading->SurfSunlitArea(SurfNum) / (SurfArea + Eps);
-                    }
-                    Fac1WithShdg = Fac1WoShdg * FracIlluminated;
-                    state.dataSolarShading->SurfWithShdgIsoSky(SurfNum) += Fac1WithShdg;
-                    state.dataSolarShading->SurfWoShdgIsoSky(SurfNum) += Fac1WoShdg;
-
-                    // Horizon region
-                    if (IPhi == 0) {
-                        state.dataSolarShading->SurfWithShdgHoriz(SurfNum) += Fac1WithShdg;
-                        state.dataSolarShading->SurfWoShdgHoriz(SurfNum) += Fac1WoShdg;
-                    }
-                } // End of surface loop
-            } // End of Theta loop
-        } // End of Phi loop
-
-        for (int SurfNum : s_surf->AllExtSolAndShadingSurfaceList) {
-            // Original conditions:
-            // if (!s_surf->Surface(SurfNum).IsShadowing &&
-            //    (!s_surf->Surface(SurfNum).HeatTransSurf || !s_surf->Surface(SurfNum).ExtSolar))
-            //    continue;
-
-            if (std::abs(state.dataSolarShading->SurfWoShdgIsoSky(SurfNum)) > Eps) {
-                state.dataSolarShading->SurfDifShdgRatioIsoSkyHRTS(iTimeStep, iHour, SurfNum) =
-                    (state.dataSolarShading->SurfWithShdgIsoSky(SurfNum)) / (state.dataSolarShading->SurfWoShdgIsoSky(SurfNum));
-            } else {
-                state.dataSolarShading->SurfDifShdgRatioIsoSkyHRTS(iTimeStep, iHour, SurfNum) =
-                    (state.dataSolarShading->SurfWithShdgIsoSky(SurfNum)) / (state.dataSolarShading->SurfWoShdgIsoSky(SurfNum) + Eps);
             }
-            if (std::abs(state.dataSolarShading->SurfWoShdgHoriz(SurfNum)) > Eps) {
-                state.dataSolarShading->SurfDifShdgRatioHorizHRTS(iTimeStep, iHour, SurfNum) =
-                    (state.dataSolarShading->SurfWithShdgHoriz(SurfNum)) / (state.dataSolarShading->SurfWoShdgHoriz(SurfNum));
-            } else {
-                state.dataSolarShading->SurfDifShdgRatioHorizHRTS(iTimeStep, iHour, SurfNum) =
-                    (state.dataSolarShading->SurfWithShdgHoriz(SurfNum)) / (state.dataSolarShading->SurfWoShdgHoriz(SurfNum) + Eps);
+        } else {
+            std::cout << "FigureSolarBeamAtTimestep not using import" << std::endl;
+            // ESL edit end
+
+            for (int IPhi = 0; IPhi < NPhi; ++IPhi) { // Loop over patch altitude values
+                state.dataSolarShading->SUNCOS(3) = state.dataSolarShading->sin_Phi[IPhi];
+
+                for (int ITheta = 0; ITheta < NTheta; ++ITheta) { // Loop over patch azimuth values
+                    state.dataSolarShading->SUNCOS(1) = state.dataSolarShading->cos_Phi[IPhi] * state.dataSolarShading->cos_Theta[ITheta];
+                    state.dataSolarShading->SUNCOS(2) = state.dataSolarShading->cos_Phi[IPhi] * state.dataSolarShading->sin_Theta[ITheta];
+
+                    for (int SurfNum : s_surf->AllExtSolAndShadingSurfaceList) {
+                        state.dataSolarShading->SurfSunCosTheta(SurfNum) = state.dataSolarShading->SUNCOS(1) * s_surf->Surface(SurfNum).OutNormVec(1) +
+                                                                        state.dataSolarShading->SUNCOS(2) * s_surf->Surface(SurfNum).OutNormVec(2) +
+                                                                        state.dataSolarShading->SUNCOS(3) * s_surf->Surface(SurfNum).OutNormVec(3);
+                    }
+
+                    SHADOW(state, iHour, iTimeStep); // Determine sunlit areas and solar multipliers for all surfaces.
+
+                    for (int SurfNum : s_surf->AllExtSolAndShadingSurfaceList) {
+
+                        if (state.dataSolarShading->SurfSunCosTheta(SurfNum) < 0.0) {
+                            continue;
+                        }
+
+                        Fac1WoShdg = state.dataSolarShading->cos_Phi[IPhi] * DThetaDPhi * state.dataSolarShading->SurfSunCosTheta(SurfNum);
+                        SurfArea = s_surf->Surface(SurfNum).NetAreaShadowCalc;
+                        if (SurfArea > Eps) {
+                            FracIlluminated = state.dataSolarShading->SurfSunlitArea(SurfNum) / SurfArea;
+                        } else {
+                            FracIlluminated = state.dataSolarShading->SurfSunlitArea(SurfNum) / (SurfArea + Eps);
+                        }
+                        Fac1WithShdg = Fac1WoShdg * FracIlluminated;
+                        state.dataSolarShading->SurfWithShdgIsoSky(SurfNum) += Fac1WithShdg;
+                        state.dataSolarShading->SurfWoShdgIsoSky(SurfNum) += Fac1WoShdg;
+
+                        // Horizon region
+                        if (IPhi == 0) {
+                            state.dataSolarShading->SurfWithShdgHoriz(SurfNum) += Fac1WithShdg;
+                            state.dataSolarShading->SurfWoShdgHoriz(SurfNum) += Fac1WoShdg;
+                        }
+                    } // End of surface loop
+                } // End of Theta loop
+            } // End of Phi loop
+
+            for (int SurfNum : s_surf->AllExtSolAndShadingSurfaceList) {
+                // Original conditions:
+                // if (!s_surf->Surface(SurfNum).IsShadowing &&
+                //    (!s_surf->Surface(SurfNum).HeatTransSurf || !s_surf->Surface(SurfNum).ExtSolar))
+                //    continue;
+
+                if (std::abs(state.dataSolarShading->SurfWoShdgIsoSky(SurfNum)) > Eps) {
+                    state.dataSolarShading->SurfDifShdgRatioIsoSkyHRTS(iTimeStep, iHour, SurfNum) =
+                        (state.dataSolarShading->SurfWithShdgIsoSky(SurfNum)) / (state.dataSolarShading->SurfWoShdgIsoSky(SurfNum));
+                } else {
+                    state.dataSolarShading->SurfDifShdgRatioIsoSkyHRTS(iTimeStep, iHour, SurfNum) =
+                        (state.dataSolarShading->SurfWithShdgIsoSky(SurfNum)) / (state.dataSolarShading->SurfWoShdgIsoSky(SurfNum) + Eps);
+                }
+                if (std::abs(state.dataSolarShading->SurfWoShdgHoriz(SurfNum)) > Eps) {
+                    state.dataSolarShading->SurfDifShdgRatioHorizHRTS(iTimeStep, iHour, SurfNum) =
+                        (state.dataSolarShading->SurfWithShdgHoriz(SurfNum)) / (state.dataSolarShading->SurfWoShdgHoriz(SurfNum));
+                } else {
+                    state.dataSolarShading->SurfDifShdgRatioHorizHRTS(iTimeStep, iHour, SurfNum) =
+                        (state.dataSolarShading->SurfWithShdgHoriz(SurfNum)) / (state.dataSolarShading->SurfWoShdgHoriz(SurfNum) + Eps);
+                }
+            }
+
+            // ESL edit start
+            if (state.dataSysVars->ReportExtShadingSunlitFrac) {
+                std::cout << "Dumping computed surface attributes to CSV file" << std::endl;
+                std::ofstream csvOut("computed_surface_attributes_hourly.csv");
+                if (!csvOut.is_open()) {
+                    ShowWarningError(state, "Could not open computed_surface_attributes.csv for writing.");
+                } else {
+                    csvOut << "Surface Name";
+                    for (int SurfNum : s_surf->AllExtSolAndShadingSurfaceList) {
+                        auto &surface = s_surf->Surface(SurfNum);
+                        
+                        // Write comma separator between surface data (not before first surface)
+                        csvOut << ",";
+                        
+                        // Write headers for the 4 attributes only
+                        csvOut << "\"" << surface.Name << ": SurfWithShdgIsoSky\","
+                            << "\"" << surface.Name << ": SurfWoShdgIsoSky\","
+                            << "\"" << surface.Name << ": SurfWithShdgHoriz\","
+                            << "\"" << surface.Name << ": SurfWoShdgHoriz\"";
+                    }
+                    csvOut << "\n"; // End the header row
+                    
+                    // Write data row with only the 4 attributes per surface
+                    csvOut << iHour << ":" << iTimeStep;
+                    for (int SurfNum : s_surf->AllExtSolAndShadingSurfaceList) {
+                        auto &surface = s_surf->Surface(SurfNum);
+                        
+                        // Write comma separator between surface data (not before first surface)
+                        csvOut << ",";
+                        
+                        // Write only the 4 attributes for this surface
+                        csvOut << state.dataSolarShading->SurfWithShdgIsoSky << ","
+                            << state.dataSolarShading->SurfWoShdgIsoSky << ","
+                            << state.dataSolarShading->SurfWithShdgHoriz << ","
+                            << state.dataSolarShading->SurfWoShdgHoriz;
+                    }
+                    csvOut << "\n"; // End the data row
+                    
+                    csvOut.close();
+                    std::cout << "Successfully wrote computed_surface_attributes_hourly.csv" << std::endl;
+                }
             }
         }
+        // ESL edit end
 
         //  ! Get IR view factors. An exterior surface can receive IR radiation from
         //  ! sky, ground or shadowing surfaces. Assume shadowing surfaces have same
@@ -10565,77 +10685,184 @@ void SkyDifSolarShading(EnergyPlusData &state)
                             surf.Name);
     }
 
-    for (int IPhi = 0; IPhi < NPhi; ++IPhi) { // Loop over patch altitude values
-        state.dataSolarShading->SUNCOS(3) = state.dataSolarShading->sin_Phi[IPhi];
+    bool loadedImportedSched = false;
 
-        for (int ITheta = 0; ITheta < NTheta; ++ITheta) { // Loop over patch azimuth values
-            state.dataSolarShading->SUNCOS(1) = state.dataSolarShading->cos_Phi[IPhi] * state.dataSolarShading->cos_Theta[ITheta];
-            state.dataSolarShading->SUNCOS(2) = state.dataSolarShading->cos_Phi[IPhi] * state.dataSolarShading->sin_Theta[ITheta];
+    // ESL edit start vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    using DataSystemVariables::ShadingMethod;
+    // ----------------------------------------------------
+    // 1) Only attempt CSV import in Scheduled/Imported mode
+    // ----------------------------------------------------
+    if (state.dataSysVars->shadingMethod == ShadingMethod::Scheduled ||
+        state.dataSysVars->shadingMethod == ShadingMethod::Imported) {
+        std::cout << "SkyDifSolarShading: Attempt CSV diffuse shading import" << std::endl;
 
-            for (int SurfNum : s_surf->AllExtSolAndShadingSurfaceList) {
-                auto &surf = s_surf->Surface(SurfNum);
+        std::string shadingSchedFilePath = state.dataSched->ShadingSunlitFracFileName;
+        const int dot_pos = shadingSchedFilePath.rfind(".");
+        const std::string csvFilePath = shadingSchedFilePath.substr(0, dot_pos) + "_diffuse.csv";
 
-                // Cosine of angle of incidence on surface of solar radiation from patch
-                state.dataSolarShading->SurfSunCosTheta(SurfNum) = state.dataSolarShading->SUNCOS.x * surf.OutNormVec.x +
-                                                                   state.dataSolarShading->SUNCOS.y * surf.OutNormVec.y +
-                                                                   state.dataSolarShading->SUNCOS.z * surf.OutNormVec.z;
+        std::ifstream csvFile(csvFilePath);
+        std::cout << "Reading from " << csvFilePath << std::endl;
+
+        if (!csvFile.is_open()) {
+            ShowWarningError(state, "Could not open input csv for reading. Falling back to computed diffuse shading.");
+        } else {
+            std::string headerLine;
+            std::string dataLine;
+
+            if (std::getline(csvFile, headerLine) && std::getline(csvFile, dataLine)) {
+                std::istringstream ss(dataLine);
+                std::string value;
+
+                // Skip first column (timestamp/label)
+                std::getline(ss, value, ',');
+
+                int surfIndex = 0;
+                int parsedSurfaces = 0;
+
+                auto read_next = [&](std::istringstream &iss, std::string &out) -> bool {
+                    return static_cast<bool>(std::getline(iss, out, ','));
+                };
+
+                while (surfIndex < static_cast<int>(s_surf->AllExtSolAndShadingSurfaceList.size())) {
+                    int surfNum = s_surf->AllExtSolAndShadingSurfaceList[surfIndex];
+
+                    std::string v;
+
+                    if (!read_next(ss, v)) break;
+                    Real64 ratioIso = std::stod(v);
+
+                    if (!read_next(ss, v)) break;
+                    Real64 ratioHoriz = std::stod(v);
+
+                    if (!read_next(ss, v)) break;
+                    Real64 woIso = std::stod(v);
+
+                    if (!read_next(ss, v)) break;
+                    Real64 withIso = std::stod(v);
+
+                    if (!read_next(ss, v)) break;
+                    Real64 woHoriz = std::stod(v);
+
+                    if (!read_next(ss, v)) break;
+                    Real64 withHoriz = std::stod(v);
+
+                    if (!read_next(ss, v)) break;
+                    Real64 baseVFSky = std::stod(v);
+
+                    if (!read_next(ss, v)) break;
+                    Real64 baseVFGround = std::stod(v);
+                    (void)baseVFGround;
+
+                    if (surfNum >= 1 && surfNum <= s_surf->TotSurfaces) {
+                        // Primary shading ratios
+                        state.dataSolarShading->SurfDifShdgRatioIsoSky(surfNum) = ratioIso;
+                        state.dataSolarShading->SurfDifShdgRatioHoriz(surfNum)  = ratioHoriz;
+
+                        // Accumulators exactly as exported
+                        state.dataSolarShading->SurfWoShdgIsoSky(surfNum)   = woIso;
+                        state.dataSolarShading->SurfWithShdgIsoSky(surfNum) = withIso;
+                        state.dataSolarShading->SurfWoShdgHoriz(surfNum)    = woHoriz;
+                        state.dataSolarShading->SurfWithShdgHoriz(surfNum)  = withHoriz;
+
+                        // IMPORTANT: set BASE ViewFactorSkyIR only; tail logic applies scaling.
+                        s_surf->Surface(surfNum).ViewFactorSkyIR = baseVFSky;
+
+                        parsedSurfaces++;
+                    }
+
+                    surfIndex++;
+                }
+
+                loadedImportedSched =
+                    (parsedSurfaces == static_cast<int>(s_surf->AllExtSolAndShadingSurfaceList.size()));
+
+                if (!loadedImportedSched) {
+                    ShowWarningError(state, "CSV diffuse shading import did not parse all surfaces. Falling back to computed diffuse shading.");
+                } else {
+                    std::cout << "Successfully loaded diffuse shading state from CSV" << std::endl;
+                }
+            } else {
+                ShowWarningError(state, "CSV diffuse shading import missing header or data row. Falling back to computed diffuse shading.");
             }
 
-            SHADOW(state, 24, 0);
-
-            for (int SurfNum : s_surf->AllExtSolAndShadingSurfaceList) {
-                auto &surf = s_surf->Surface(SurfNum);
-
-                if (state.dataSolarShading->SurfSunCosTheta(SurfNum) < 0.0) {
-                    continue;
-                }
-
-                Fac1WoShdg = state.dataSolarShading->cos_Phi[IPhi] * DThetaDPhi * state.dataSolarShading->SurfSunCosTheta(SurfNum);
-                SurfArea = surf.NetAreaShadowCalc;
-                if (SurfArea > Eps) {
-                    FracIlluminated = state.dataSolarShading->SurfSunlitArea(SurfNum) / SurfArea;
-                } else {
-                    FracIlluminated = state.dataSolarShading->SurfSunlitArea(SurfNum) / (SurfArea + Eps);
-                }
-                Fac1WithShdg = Fac1WoShdg * FracIlluminated;
-                state.dataSolarShading->SurfWithShdgIsoSky(SurfNum) += Fac1WithShdg;
-                state.dataSolarShading->SurfWoShdgIsoSky(SurfNum) += Fac1WoShdg;
-
-                // Horizon region
-                if (IPhi == 0) {
-                    state.dataSolarShading->SurfWithShdgHoriz(SurfNum) += Fac1WithShdg;
-                    state.dataSolarShading->SurfWoShdgHoriz(SurfNum) += Fac1WoShdg;
-                }
-            } // End of surface loop
-        } // End of Theta loop
-    } // End of Phi loop
-
-    for (int SurfNum : s_surf->AllExtSolAndShadingSurfaceList) {
-
-        if (std::abs(state.dataSolarShading->SurfWoShdgIsoSky(SurfNum)) > Eps) {
-            state.dataSolarShading->SurfDifShdgRatioIsoSky(SurfNum) =
-                (state.dataSolarShading->SurfWithShdgIsoSky(SurfNum)) / (state.dataSolarShading->SurfWoShdgIsoSky(SurfNum));
-        } else {
-            state.dataSolarShading->SurfDifShdgRatioIsoSky(SurfNum) =
-                (state.dataSolarShading->SurfWithShdgIsoSky(SurfNum)) / (state.dataSolarShading->SurfWoShdgIsoSky(SurfNum) + Eps);
-        }
-        if (std::abs(state.dataSolarShading->SurfWoShdgHoriz(SurfNum)) > Eps) {
-            state.dataSolarShading->SurfDifShdgRatioHoriz(SurfNum) =
-                (state.dataSolarShading->SurfWithShdgHoriz(SurfNum)) / (state.dataSolarShading->SurfWoShdgHoriz(SurfNum));
-        } else {
-            state.dataSolarShading->SurfDifShdgRatioHoriz(SurfNum) =
-                (state.dataSolarShading->SurfWithShdgHoriz(SurfNum)) / (state.dataSolarShading->SurfWoShdgHoriz(SurfNum) + Eps);
+            csvFile.close();
         }
     }
 
-    // Get IR view factors. An exterior surface can receive IR radiation from
-    // sky, ground or shadowing surfaces. Assume shadowing surfaces have same
-    // temperature as outside air (and therefore same temperature as ground),
-    // so that the view factor to these shadowing surfaces can be included in
-    // the ground view factor. Sky IR is assumed to be isotropic and shadowing
-    // surfaces are assumed to be opaque to IR so they totally "shade" IR from
-    // sky or ground.
+    // ----------------------------------------------------
+    // 2) Default path: compute patch loop + ratios
+    //    (this runs for NORMAL shading, and for import failure)
+    // ----------------------------------------------------
+    if (!loadedImportedSched) {
+        std::cout << "SkyDifSolarShading: not using import, recomputing with SHADOW" << std::endl;
 
+        for (int IPhi = 0; IPhi < NPhi; ++IPhi) {
+            state.dataSolarShading->SUNCOS(3) = state.dataSolarShading->sin_Phi[IPhi];
+
+            for (int ITheta = 0; ITheta < NTheta; ++ITheta) {
+                state.dataSolarShading->SUNCOS(1) = state.dataSolarShading->cos_Phi[IPhi] * state.dataSolarShading->cos_Theta[ITheta];
+                state.dataSolarShading->SUNCOS(2) = state.dataSolarShading->cos_Phi[IPhi] * state.dataSolarShading->sin_Theta[ITheta];
+
+                for (int SurfNum : s_surf->AllExtSolAndShadingSurfaceList) {
+                    auto &surf = s_surf->Surface(SurfNum);
+                    state.dataSolarShading->SurfSunCosTheta(SurfNum) =
+                        state.dataSolarShading->SUNCOS.x * surf.OutNormVec.x +
+                        state.dataSolarShading->SUNCOS.y * surf.OutNormVec.y +
+                        state.dataSolarShading->SUNCOS.z * surf.OutNormVec.z;
+                }
+
+                SHADOW(state, 24, 0);
+
+                for (int SurfNum : s_surf->AllExtSolAndShadingSurfaceList) {
+                    auto &surf = s_surf->Surface(SurfNum);
+
+                    if (state.dataSolarShading->SurfSunCosTheta(SurfNum) < 0.0) continue;
+
+                    Fac1WoShdg = state.dataSolarShading->cos_Phi[IPhi] * DThetaDPhi * state.dataSolarShading->SurfSunCosTheta(SurfNum);
+                    SurfArea = surf.NetAreaShadowCalc;
+                    if (SurfArea > Eps) {
+                        FracIlluminated = state.dataSolarShading->SurfSunlitArea(SurfNum) / SurfArea;
+                    } else {
+                        FracIlluminated = state.dataSolarShading->SurfSunlitArea(SurfNum) / (SurfArea + Eps);
+                    }
+
+                    Fac1WithShdg = Fac1WoShdg * FracIlluminated;
+
+                    state.dataSolarShading->SurfWithShdgIsoSky(SurfNum) += Fac1WithShdg;
+                    state.dataSolarShading->SurfWoShdgIsoSky(SurfNum) += Fac1WoShdg;
+
+                    if (IPhi == 0) {
+                        state.dataSolarShading->SurfWithShdgHoriz(SurfNum) += Fac1WithShdg;
+                        state.dataSolarShading->SurfWoShdgHoriz(SurfNum) += Fac1WoShdg;
+                    }
+                }
+            }
+        }
+
+        for (int SurfNum : s_surf->AllExtSolAndShadingSurfaceList) {
+            if (std::abs(state.dataSolarShading->SurfWoShdgIsoSky(SurfNum)) > Eps) {
+                state.dataSolarShading->SurfDifShdgRatioIsoSky(SurfNum) =
+                    state.dataSolarShading->SurfWithShdgIsoSky(SurfNum) / state.dataSolarShading->SurfWoShdgIsoSky(SurfNum);
+            } else {
+                state.dataSolarShading->SurfDifShdgRatioIsoSky(SurfNum) =
+                    state.dataSolarShading->SurfWithShdgIsoSky(SurfNum) / (state.dataSolarShading->SurfWoShdgIsoSky(SurfNum) + Eps);
+            }
+
+            if (std::abs(state.dataSolarShading->SurfWoShdgHoriz(SurfNum)) > Eps) {
+                state.dataSolarShading->SurfDifShdgRatioHoriz(SurfNum) =
+                    state.dataSolarShading->SurfWithShdgHoriz(SurfNum) / state.dataSolarShading->SurfWoShdgHoriz(SurfNum);
+            } else {
+                state.dataSolarShading->SurfDifShdgRatioHoriz(SurfNum) =
+                    state.dataSolarShading->SurfWithShdgHoriz(SurfNum) / (state.dataSolarShading->SurfWoShdgHoriz(SurfNum) + Eps);
+            }
+        }
+    }
+
+    // ----------------------------------------------------
+    // 3) ALWAYS run tail/finalization logic (unchanged)
+    // ----------------------------------------------------
+
+    // IR view factors scaling + ground recompute
     for (int SurfNum = 1; SurfNum <= s_surf->TotSurfaces; ++SurfNum) {
         auto &surface = s_surf->Surface(SurfNum);
         if (!state.dataSysVars->DetailedSkyDiffuseAlgorithm || !s_surf->ShadingTransmittanceVaries ||
@@ -10644,18 +10871,14 @@ void SkyDifSolarShading(EnergyPlusData &state)
         } else {
             surface.ViewFactorSkyIR *= state.dataSolarShading->SurfDifShdgRatioIsoSkyHRTS(1, 1, SurfNum);
         }
-        surface.ViewFactorGroundIR = 1.0 - surface.ViewFactorSkyIR;
 
+        surface.ViewFactorGroundIR = 1.0 - surface.ViewFactorSkyIR;
         if (surface.SurfHasSurroundingSurfProperty) {
             surface.ViewFactorGroundIR = 1.0 - surface.ViewFactorSkyIR - surface.ViewFactorSrdSurfs;
         }
     }
 
-    //  DEALLOCATE(WithShdgIsoSky)
-    //  DEALLOCATE(WoShdgIsoSky)
-    //  DEALLOCATE(WithShdgHoriz)
-    //  DEALLOCATE(WoShdgHoriz)
-
+    // HRTS fill (guarded)
     if (state.dataSysVars->DetailedSkyDiffuseAlgorithm && s_surf->ShadingTransmittanceVaries &&
         state.dataHeatBal->SolarDistribution != DataHeatBalance::Shadowing::Minimal) {
         for (int SurfNum = 1; SurfNum <= s_surf->TotSurfaces; ++SurfNum) {
@@ -10665,6 +10888,73 @@ void SkyDifSolarShading(EnergyPlusData &state)
                 state.dataSolarShading->SurfDifShdgRatioHoriz(SurfNum);
         }
     }
+
+    // CSV dump (extended) — this should remain wherever you already had it
+    // (keep your existing dump block, but make sure it is OUTSIDE the !loadedImportedSched block)
+
+    // ESL edit start - Add CSV output for computed surface attributes (extended)
+    if (!loadedImportedSched && state.dataSysVars->ReportExtShadingSunlitFrac) {
+        std::cout << "Dumping computed surface attributes to CSV file" << std::endl;
+        std::ofstream csvOut("eplusshading_diffuse.csv");
+        if (!csvOut.is_open()) {
+            ShowWarningError(state, "Could not open eplusshading_diffuse.csv for writing.");
+        } else {
+            // Header row
+            csvOut << "Surface Name";
+            for (int SurfNum : s_surf->AllExtSolAndShadingSurfaceList) {
+                auto &surface = s_surf->Surface(SurfNum);
+                csvOut << ",";
+
+                // 8 attributes per surface
+                csvOut << "\"" << surface.Name << ": SurfDifShdgRatioIsoSky\","
+                    << "\"" << surface.Name << ": SurfDifShdgRatioHoriz\","
+                    << "\"" << surface.Name << ": SurfWoShdgIsoSky\","
+                    << "\"" << surface.Name << ": SurfWithShdgIsoSky\","
+                    << "\"" << surface.Name << ": SurfWoShdgHoriz\","
+                    << "\"" << surface.Name << ": SurfWithShdgHoriz\","
+                    << "\"" << surface.Name << ": BaseViewFactorSkyIR\","
+                    << "\"" << surface.Name << ": BaseViewFactorGroundIR\"";
+            }
+            csvOut << "\n";
+
+            // Data row
+            csvOut << "Constant";
+            for (int SurfNum : s_surf->AllExtSolAndShadingSurfaceList) {
+                auto &surface = s_surf->Surface(SurfNum);
+
+                Real64 ratioIso  = state.dataSolarShading->SurfDifShdgRatioIsoSky(SurfNum);
+                Real64 ratioHoriz = state.dataSolarShading->SurfDifShdgRatioHoriz(SurfNum);
+
+                // Reconstruct BASE (unshaded) ViewFactorSkyIR from the stored (already-shaded) value
+                Real64 baseViewFactorSkyIR = surface.ViewFactorSkyIR;
+                if (std::abs(ratioIso) > Eps) {
+                    baseViewFactorSkyIR = surface.ViewFactorSkyIR / ratioIso;
+                }
+
+                // Base ground view factor consistent with base sky VF
+                Real64 baseViewFactorGroundIR = 1.0 - baseViewFactorSkyIR;
+                if (surface.SurfHasSurroundingSurfProperty) {
+                    baseViewFactorGroundIR = 1.0 - baseViewFactorSkyIR - surface.ViewFactorSrdSurfs;
+                }
+
+                csvOut << ",";
+
+                csvOut << ratioIso << ","
+                    << ratioHoriz << ","
+                    << state.dataSolarShading->SurfWoShdgIsoSky(SurfNum) << ","
+                    << state.dataSolarShading->SurfWithShdgIsoSky(SurfNum) << ","
+                    << state.dataSolarShading->SurfWoShdgHoriz(SurfNum) << ","
+                    << state.dataSolarShading->SurfWithShdgHoriz(SurfNum) << ","
+                    << baseViewFactorSkyIR << ","
+                    << baseViewFactorGroundIR;
+            }
+            csvOut << "\n";
+
+            csvOut.close();
+            std::cout << "Successfully wrote eplusshading_diffuse.csv" << std::endl;
+        }
+    }
+    // ESL edit end
 }
 
 void CalcWindowProfileAngles(EnergyPlusData &state)

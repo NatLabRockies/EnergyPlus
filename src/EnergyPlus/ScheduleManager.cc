@@ -573,6 +573,10 @@ namespace Sched {
                                 cNumericFields);
             std::string ShadingSunlitFracFileName = Alphas(1);
 
+            // ESL: new variable to store shading csv filename
+            // Store the filename in the global state for access by other modules
+            s_sched->ShadingSunlitFracFileName = ShadingSunlitFracFileName;
+
             std::string contextString = CurrentModuleObject + ", " + cAlphaFields(1) + ": ";
             state.files.TempFullFilePath.filePath = CheckForActualFilePath(state, ShadingSunlitFracFileName, contextString);
 
