@@ -1,7 +1,7 @@
 # Data-Driven GitHub Stale Issue Management for EnergyPlus
 
 **Brian L Ball, NLR**
-- Original Date: February 2026\
+- Original Date: February 2026
 - Final Date: TBD
 
 ------------------------------------------------------------------------
@@ -12,17 +12,17 @@ The EnergyPlus GitHub repository currently contains a significant
 backlog of open issues that have not been updated in more than two years.
 Based on internal analysis:
 
--   581 open issues are unassigned and inactive for \> 2 year\
--   141 open issues are assigned but inactive for \> 2 year\
+-   581 open issues are unassigned and inactive for \> 2 year
+-   141 open issues are assigned but inactive for \> 2 year
 -   230 open issues labeled `NewFeatureRequest` are inactive for \> 2
     year
 
 This volume of stale issues:
 
--   Obscures active work\
--   Makes triage more difficult\
--   Discourages contributors\
--   Increases cognitive load for maintainers\
+-   Obscures active work
+-   Makes triage more difficult
+-   Discourages contributors
+-   Increases cognitive load for maintainers
 -   Distorts project health metrics
 
 Currently, stale issue management is manual and inconsistent.
@@ -30,11 +30,11 @@ Currently, stale issue management is manual and inconsistent.
 This NFP proposes implementing a data-driven GitHub Actions workflow
 using `actions/stale` to:
 
-1.  Systematically identify inactive issues.\
-2.  Notify reporters before closure.\
-3.  Close inactive issues after a grace period.\
+1.  Systematically identify inactive issues.
+2.  Notify reporters before closure.
+3.  Close inactive issues after a grace period.
 4.  Route New Feature Requests (NFRs) to the formal NFP process via a
-    documented URL.\
+    documented URL.
 5.  Preserve assigned issues and high-priority categories.
 
 ------------------------------------------------------------------------
@@ -60,11 +60,11 @@ disruption.
 Two automated workflows are proposed:
 
 1.  **General Stale Policy**
-    -   Target: Unassigned issues inactive \> 365 days\
-    -   Action: Label as `Stale`\
+    -   Target: Unassigned issues inactive \> 365 days
+    -   Action: Label as `Stale`
     -   After 30 days without activity: Close automatically
 2.  **New Feature Requests (NFRs)**
-    -   Target: Issues labeled `NewFeatureRequest` inactive \> 365 days\
+    -   Target: Issues labeled `NewFeatureRequest` inactive \> 365 days
     -   Action:
         -   Post comment directing reporter to official NFP page (URL to
             be inserted)
@@ -111,8 +111,8 @@ New Feature Requests will receive a comment such as:
 
 ## Workflow Implementation
 
--   Use `actions/stale@v10`\
--   Scheduled daily via cron\
+-   Use `actions/stale@v10`
+-   Scheduled daily via cron
 -   Workflow dispatch enabled for manual testing
 
 ``` yaml
@@ -176,9 +176,9 @@ jobs:
 
 ### Rollout Plan
 
-Phase 1 -- Debug-only dry run (no changes applied)\
-Phase 2 -- Label-only mode (no auto-close)\
-Phase 3 -- Enable auto-close for non-NFR issues\
+Phase 1 -- Debug-only dry run (no changes applied)
+Phase 2 -- Label-only mode (no auto-close)
+Phase 3 -- Enable auto-close for non-NFR issues
 Phase 4 -- Enable NFR closure routing
 
 Metrics will be collected during rollout.
@@ -189,17 +189,17 @@ Metrics will be collected during rollout.
 
 Validation metrics:
 
--   Count of stale issues labeled\
--   Count of issues closed\
--   Rescue rate (issues updated after stale label)\
--   Reduction in backlog size\
+-   Count of stale issues labeled
+-   Count of issues closed
+-   Rescue rate (issues updated after stale label)
+-   Reduction in backlog size
 -   Time-to-triage improvements
 
 Testing approach:
 
--   Enable `debug-only: true`\
--   Run on fork or test branch\
--   Confirm exemption rules behave as expected\
+-   Enable `debug-only: true`
+-   Run on fork or test branch
+-   Confirm exemption rules behave as expected
 -   Validate label application before closure
 
 ------------------------------------------------------------------------
@@ -236,13 +236,13 @@ Not applicable.
 
 ## Transition Changes
 
-No simulation transition impacts.\
+No simulation transition impacts.
 Repository workflow change only.
 
 ------------------------------------------------------------------------
 
 ## Other Documents
 
--   EP_issues.pptx (backlog data analysis)\
--   GitHub documentation for `actions/stale`\
+-   EP_issues.pptx (backlog data analysis)
+-   GitHub documentation for `actions/stale`
 -   Official EnergyPlus NFP process documentation (URL to be inserted)
