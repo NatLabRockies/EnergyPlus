@@ -37636,8 +37636,9 @@ ZoneHVAC:HybridUnitaryHVAC,
         \key Second Fuel Use
         \key Third Fuel Use
         \key Water Use
+        \key Supply Temperature
         \note In each time step, controlled variables will be chosen to minimize the selection in this field, subject to constraints.
-        \note If this field is blank, the objective function will minimize electricity use.
+        \note If this field is blank, the default objective function to minimize is Electricity Use.
         \default Electricity Use
    A19, \field Design Specification Outdoor Air Object Name
         \type object-list

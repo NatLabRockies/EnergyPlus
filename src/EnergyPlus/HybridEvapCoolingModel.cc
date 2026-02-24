@@ -1250,6 +1250,8 @@ namespace HybridEvapCoolingModel {
         bool DidWeMeetHumidificaiton = false;
         bool DidWePartlyMeetLoad = false;
         Real64 OptimalSetting_RunFractionTotalFuel = IMPLAUSIBLE_POWER;
+        Real64 OptimalSetting_RunFractionSupplyTemperature =
+            CoolingRequested ? std::numeric_limits<Real64>::max() : std::numeric_limits<Real64>::min();
         Real64 Tma;
         Real64 Wma;
         Real64 Hsa;
@@ -1523,12 +1525,32 @@ namespace HybridEvapCoolingModel {
 
             Real64 RunFractionTotalFuel =
                 thisSetting.ElectricalPower * PartRuntimeFraction; // fraction can be above 1 meaning its not able to do it completely in a time step.
+            Real64 RunFractionSupplyTemperature = thisSetting.SupplyAirTemperature * PartRuntimeFraction;
             thisSetting.Runtime_Fraction = PartRuntimeFraction;
 
             if (Conditioning_load_met && Humidification_load_met) {
-                // store best performing mode
+                bool store_best_performing_mode = false;
                 if (ObjectiveFunction == ObjectiveFunctionType::ElectricityUse && RunFractionTotalFuel < OptimalSetting_RunFractionTotalFuel) {
+                    store_best_performing_mode = true;
                     OptimalSetting_RunFractionTotalFuel = RunFractionTotalFuel;
+                }
+                if (ObjectiveFunction == ObjectiveFunctionType::SupplyTemperature) {
+                    if (CoolingRequested && RunFractionSupplyTemperature < OptimalSetting_RunFractionSupplyTemperature) {
+                        store_best_performing_mode = true;
+                        OptimalSetting_RunFractionSupplyTemperature = RunFractionSupplyTemperature;
+                    }
+                    if (HeatingRequested && RunFractionSupplyTemperature > OptimalSetting_RunFractionSupplyTemperature) {
+                        store_best_performing_mode = true;
+                        OptimalSetting_RunFractionSupplyTemperature = RunFractionSupplyTemperature;
+                    }
+                    // fall back to ElectricityUse since ventilation-only is just fan operation
+                    if (!CoolingRequested && !HeatingRequested && VentilationRequested &&
+                        RunFractionTotalFuel < OptimalSetting_RunFractionTotalFuel) {
+                        store_best_performing_mode = true;
+                        OptimalSetting_RunFractionTotalFuel = RunFractionTotalFuel;
+                    }
+                }
+                if (store_best_performing_mode) {
                     OptimalSetting = thisSetting;
                     DidWeMeetLoad = true;
                     DidWeMeetHumidificaiton = true;
@@ -1565,9 +1587,22 @@ namespace HybridEvapCoolingModel {
                         if (ObjectiveFunction == ObjectiveFunctionType::ElectricityUse &&
                             RunFractionTotalFuel < OptimalSetting_RunFractionTotalFuel) {
                             OptimalSetting_RunFractionTotalFuel = RunFractionTotalFuel;
-                            OptimalSetting = thisSetting;
-                            DidWePartlyMeetLoad = true;
                         }
+                        if (ObjectiveFunction == ObjectiveFunctionType::SupplyTemperature) {
+                            if (CoolingRequested && RunFractionSupplyTemperature < OptimalSetting_RunFractionSupplyTemperature) {
+                                OptimalSetting_RunFractionSupplyTemperature = RunFractionSupplyTemperature;
+                            }
+                            if (HeatingRequested && RunFractionSupplyTemperature > OptimalSetting_RunFractionSupplyTemperature) {
+                                OptimalSetting_RunFractionSupplyTemperature = RunFractionSupplyTemperature;
+                            }
+                            // fall back to ElectricityUse since ventilation-only is just fan operation
+                            if (!CoolingRequested && !HeatingRequested && VentilationRequested &&
+                                RunFractionTotalFuel < OptimalSetting_RunFractionTotalFuel) {
+                                OptimalSetting_RunFractionTotalFuel = RunFractionTotalFuel;
+                            }
+                        }
+                        OptimalSetting = thisSetting;
+                        DidWePartlyMeetLoad = true;
                     }
                 }
             }

@@ -98,11 +98,12 @@ namespace HybridEvapCoolingModel {
         SecondFuelUse,
         ThirdFuelUse,
         WaterUse,
+        SupplyTemperature,
         Num
     };
 
     constexpr std::array<std::string_view, (int)ObjectiveFunctionType::Num> objectiveFunctionNamesUC = {
-        "ELECTRICITY USE", "SECOND FUEL USE", "THIRD FUEL USE", "WATER USE"};
+        "ELECTRICITY USE", "SECOND FUEL USE", "THIRD FUEL USE", "WATER USE", "SUPPLY TEMPERATURE"};
 
     class CModeSolutionSpace
     {
@@ -262,7 +263,7 @@ namespace HybridEvapCoolingModel {
         Constant::eFuel secondFuel = Constant::eFuel::Invalid; // Second fuel type
         Constant::eFuel thirdFuel = Constant::eFuel::Invalid;  // Third fuel type
         ObjectiveFunctionType ObjectiveFunction =
-            ObjectiveFunctionType::ElectricityUse; // Objective function to minimize, currently only Electricity Use works
+            ObjectiveFunctionType::ElectricityUse; // Objective function to minimize, currently only Electricity Use and Supply Temperature work
 
         int UnitOn;                          // feels like it should be a bool but its an output and I couldn't get it to work as a bool
         Real64 UnitTotalCoolingRate;         // unit output to zone, total cooling rate [W]
