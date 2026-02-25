@@ -69,7 +69,7 @@ Two automated workflows are proposed:
     -   Action:
         -   Post comment directing reporter to official NFP page (URL to
             be inserted)
-        -   Close issue with reason `not_planned`
+        -   Close issue
 
 Assigned issues will be exempt from automation.
 
