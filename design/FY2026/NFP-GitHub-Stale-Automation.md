@@ -70,19 +70,20 @@ Two automated workflows are proposed:
         -   Post comment directing reporter to official NFP page (URL to
             be inserted)
         -   Close issue
-
-Assigned issues will be exempt from automation.
+3.  **General Assigned Policy**
+    -   Target: Assigned issues inactive \> 30 days
+    -   Action: Label as `Stale`
+    -   Auto comment something like: `automatically labeled as Stale, will unassign in 30days unless updated`
+    -   After 30 days without activity: unassign developer
 
 ### Policy Rules
 
-  Category              Stale After   Close After       Notes
-  --------------------- ------------- ----------------- ------------------------
-  Unassigned, non-NFR   365 days      30 days           Primary cleanup target
-  NewFeatureRequest     365 days      Immediate close   Direct to NFP URL
-  Assigned issues       Exempt        Exempt            Ownership preserved
-  Security/pinned       Exempt        Exempt            Protected categories
-
-------------------------------------------------------------------------
+| Category              | Stale After | Close After     | Notes                      |
+|-----------------------|-------------|-----------------|----------------------------|
+| Unassigned, non-NFR   | 365 days    | 30 days         | Primary cleanup target     |
+| NewFeatureRequest     | 365 days    | Immediate close | Direct to NFP URL          |
+| Assigned issues       | 30 days     | Exempt          | Unassign / not close       |
+| `??`                  | Exempt      | Exempt          | Protected categories       |
 
 ## New Feature Request Routing
 
