@@ -62,6 +62,7 @@ Two automated workflows are proposed:
 1.  **General Stale Policy**
     -   Target: Unassigned issues inactive \> 365 days
     -   Action: Label as `Stale`
+    -   Auto comment something like: `automatically labeled as Stale, will close in 30days unless updated`
     -   After 30 days without activity: Close automatically
 2.  **New Feature Requests (NFRs)**
     -   Target: Issues labeled `NewFeatureRequest` inactive \> 365 days
