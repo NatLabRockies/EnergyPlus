@@ -67,8 +67,7 @@ Two automated workflows are proposed:
 2.  **New Feature Requests (NFRs)**
     -   Target: Issues labeled `NewFeatureRequest` inactive \> 365 days
     -   Action:
-        -   Post comment directing reporter to official NFP page (URL to
-            be inserted)
+        -   Post comment directing reporter to official NFP page (`URL to be inserted`)
         -   Close issue
 3.  **General Assigned Policy**
     -   Target: Assigned issues inactive \> 30 days
@@ -89,8 +88,7 @@ Two automated workflows are proposed:
 
 NewFeatureRequest issues inactive \> 365 days will:
 
-1.  Receive a comment directing users to:
-    https://energyplus.net/new-feature-proposal
+1.  Receive a comment directing users to: (`URL to be inserted`)
 2.  Be closed.
 
 ### NFR Closure Messaging
