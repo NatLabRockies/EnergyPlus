@@ -1136,6 +1136,192 @@ Compute the hourly loads as each hour and monthly loads as each month passes. Ca
 
 \textbf{End do}
 
+\subsubsection{GLHEC Transient Segment Model (GLHECcalc)}\label{glhec-transient-segment-model-glheccalc}
+
+When \emph{GroundHeatExchanger:System} is configured with \emph{g-Function Calculation Method = \mbox{GLHECcalc}}, EnergyPlus uses a transient segment model for short-time borehole dynamics and a dynamic/sub-hour load aggregation scheme for long-term superposition.
+
+The GLHEC formulation uses:
+
+\begin{enumerate}
+\item The same response-factor (\emph{g}-function) data infrastructure used by the vertical GHE framework.
+\item A coupled ODE model of fluid and grout temperatures along borehole segments.
+\item Dynamic temporal aggregation to limit history growth while preserving long-horizon response.
+\end{enumerate}
+
+\paragraph{Borehole wall temperature superposition}\label{borehole-wall-temperature-superposition}
+
+At each simulation step \(n\), borehole wall temperature is computed from far-field ground temperature and superposed load history:
+
+\begin{equation}
+T_{bw,n} = T_{\infty,n} + \frac{1}{2\pi k_s}\sum_{i=1}^{N_h} \Delta q_i g\left(\ln\left(\frac{\tau_i}{t_s}\right)\right)
+\end{equation}
+
+where:
+
+\begin{equation}
+t_s = \frac{H^2}{9\alpha_s}
+\end{equation}
+
+\(T_{bw,n}\) is borehole wall temperature for the current time step (\(^\circ\)C)
+
+\(T_{\infty,n}\) is the far-field ground temperature (\(^\circ\)C)
+
+\(k_s\) is soil thermal conductivity (W/m-K)
+
+\(H\) is borehole length (m)
+
+\(\alpha_s\) is soil thermal diffusivity (m\(^2\)/s)
+
+\(\Delta q_i\) is the change in aggregated load rate for history bin \(i\) (W/m)
+
+\(\tau_i\) is elapsed time between the current step and the implementation-defined cumulative time location for history bin \(i\) (s).
+
+\paragraph{Dynamic and sub-hour aggregation}\label{dynamic-and-sub-hour-aggregation}
+
+GLHEC uses two aggregation levels:
+
+\begin{enumerate}
+\item A \textbf{sub-hour} tracker that retains irregular bins over the first hour.
+\item A \textbf{dynamic} bin stack beginning at 1 hour, with level width growth controlled by user inputs.
+\end{enumerate}
+
+Dynamic bins are stored from oldest to youngest. For each dynamic bin \(i\), with stored energy \(E_i\) (J/m) and width \(\Delta t_i\) (s), the shifted amount over current step \(\Delta t_n\) is:
+
+\begin{equation}
+\delta_i = E_i \frac{\Delta t_n}{\Delta t_i}
+\end{equation}
+
+and bin update is:
+
+\begin{equation}
+E_i^{+} = E_i - \delta_i + \delta_{i+1}, \qquad i=0,\ldots,N_d-2,\qquad \delta_0 = 0
+\end{equation}
+
+\begin{equation}
+E_{N_d-1}^{+} = E_{N_d-1} - \delta_{N_d-1} + E_{\text{subhr}\rightarrow\text{dyn}}
+\end{equation}
+
+The sub-hour tracker exports energy older than one hour into the youngest dynamic bin. Superposition uses \(q_i = E_i/\Delta t_i\), then differences \(\Delta q_i = q_i - q_{i-1}\).
+
+\paragraph{Per-borehole flow and energy bookkeeping}\label{per-borehole-flow-and-energy-bookkeeping}
+
+Total loop flow is split uniformly across boreholes:
+
+\begin{equation}
+\dot m_{bh} = \frac{\dot m_{loop}}{N_{bh}}
+\end{equation}
+
+Loop-side heat transfer is:
+
+\begin{equation}
+\dot Q_{loop} = \dot m_{loop} c_p(T_{in}) \left(T_{in} - T_{out}\right)
+\end{equation}
+
+Segment borehole heat transfer is accumulated per borehole and then scaled by number of boreholes:
+
+\begin{equation}
+\dot Q_{bh,total} = N_{bh}\sum_{s=1}^{N_{seg}} \dot Q_{bh,s}
+\end{equation}
+
+Energy stored in history for the current time step is normalized by borehole length:
+
+\begin{equation}
+E_n = \left(\frac{\dot Q_{bh,total}/N_{bh}}{H}\right)\Delta t_n
+\end{equation}
+
+\paragraph{Segment ODE system}\label{segment-ode-system}
+
+Each borehole segment solves five coupled states:
+
+\begin{equation}
+\left[T_{f,1},T_{f,2},T_{g,c},T_{g,1},T_{g,2}\right]
+\end{equation}
+
+where \(T_{f,1}\) and \(T_{f,2}\) are fluid temperatures in the down/up legs, \(T_{g,c}\) is the central grout node, and \(T_{g,1}, T_{g,2}\) are grout nodes adjacent to each leg.
+
+The fluid-leg equations are:
+
+\begin{equation}
+\frac{dT_{f,1}}{dt} = \frac{\left(T_{in,1}-T_{f,1}\right)/R_f + \left(T_{g,c}-T_{f,1}\right)L_s/(R_{12}/2) + \left(T_{g,1}-T_{f,1}\right)L_s/R_b}{C_f}
+\end{equation}
+
+\begin{equation}
+\frac{dT_{f,2}}{dt} = \frac{\left(T_{in,2}-T_{f,2}\right)/R_f + \left(T_{g,c}-T_{f,2}\right)L_s/(R_{12}/2) + \left(T_{g,2}-T_{f,2}\right)L_s/R_b}{C_f}
+\end{equation}
+
+The grout-node equations are:
+
+\begin{equation}
+\frac{dT_{g,c}}{dt} = \frac{\left(T_{f,1}-T_{g,c}\right)L_s/(R_{12}/2) + \left(T_{f,2}-T_{g,c}\right)L_s/(R_{12}/2)}{C_{g,1}}
+\end{equation}
+
+\begin{equation}
+\frac{dT_{g,1}}{dt} = \frac{\left(T_{f,1}-T_{g,1}\right)L_s/R_b + \left(T_{bw}-T_{g,1}\right)L_s/R_b}{C_{g,2}}
+\end{equation}
+
+\begin{equation}
+\frac{dT_{g,2}}{dt} = \frac{\left(T_{f,2}-T_{g,2}\right)L_s/R_b + \left(T_{bw}-T_{g,2}\right)L_s/R_b}{C_{g,2}}
+\end{equation}
+
+where:
+
+\(L_s\) is segment length (m)
+
+\(R_f = 1/(\dot m_{bh} c_p)\) is fluid flow resistance term
+
+\(R_b\) is average borehole resistance (m-K/W)
+
+\(R_{12}\) is direct-coupling resistance between U-tube legs (m-K/W)
+
+\(C_f\), \(C_{g,1}\), and \(C_{g,2}\) are fluid and grout/pipe effective thermal capacitances (J/K).
+
+\paragraph{Pipe and borehole resistances}\label{pipe-and-borehole-resistances-glhec}
+
+Pipe resistance combines convection and pipe-wall conduction:
+
+\begin{equation}
+R_p = \frac{1}{Nu \pi k_f} + \frac{\ln\left(d_o/d_i\right)}{2\pi k_p}
+\end{equation}
+
+where \(Nu\) is computed from Reynolds/Prandtl number correlations with laminar-transition-turbulent smoothing.
+
+The borehole resistance and direct-coupling resistance use the multipole-style relations in Claesson and Hellstr\"om (2011), parameterized by:
+
+\begin{equation}
+\theta_1 = \frac{s}{D_b}, \qquad \theta_2 = \frac{D_b}{d_o}, \qquad \theta_3 = \frac{1}{\theta_1\theta_2}, \qquad
+\sigma = \frac{k_g-k_s}{k_g+k_s}
+\end{equation}
+
+with \(s\) shank spacing, \(D_b\) borehole diameter, \(d_o\) outer pipe diameter, \(k_g\) grout conductivity, and \(k_s\) soil conductivity.
+
+\paragraph{Segment coupling iteration and integration}\label{segment-coupling-iteration-and-integration}
+
+Within each plant/system time step, segment equations are solved iteratively to couple downflow and upflow legs through the U-bend boundary condition. A fixed-step fourth-order Runge-Kutta (RK4) integrator advances each segment state.
+
+\subsubsection{GLHEC User Controls and Solver Defaults}\label{glhec-user-controls-and-solver-defaults}
+
+Table~\ref{tab:glhec-user-controls} summarizes user-facing controls in \emph{GroundHeatExchanger:System} and core solver defaults currently used by the GLHEC implementation.
+
+\begin{table}[hbtp]
+\centering
+\caption{GLHEC User Controls and Defaults\protect\label{tab:glhec-user-controls}}
+\begin{tabular}{p{0.38\textwidth}p{0.18\textwidth}p{0.38\textwidth}}
+\toprule
+\textbf{Input/Setting} & \textbf{Default} & \textbf{Effect} \\
+\midrule
+g-Function Calculation Method = \mbox{GLHECcalc} & N/A & Activates GLHEC transient segment model path. \\
+GLHEC Number of Borehole Segments & 10 & Number of axial thermal segments per borehole. \\
+GLHEC Number of Iterations & 2 & Number of within-step segment-coupling iterations. \\
+GLHEC Grout Fraction & 0.5 & Splits grout/pipe thermal mass between central and side grout nodes. \\
+GLHEC Aggregation Expansion Rate & 1.62 & Dynamic-bin width growth factor between aggregation levels. \\
+GLHEC Aggregation Bins Per Level & 9 & Number of bins before dynamic-bin width is expanded. \\
+RK4 substep control (internal) & 100 substeps per plant/system step & Fixed-step RK4 advancement for each segment state. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+When total loop mass flow is effectively zero, GLHEC returns \(T_{out}=T_{in}\) with zero heat transfer for the current step while retaining borehole wall state history.
+
 \subsubsection{References}\label{references-2-006}
 
 \hangindent=2em

@@ -23,6 +23,11 @@ The data defining this function is read from input.
 The heat pulse histories need to be recorded over an extended period (months).
 To aid computational efficiency past pulses are continuously aggregated into equivalent heat pulses of longer duration, as each pulse becomes less recent.
 
+## GLHEC Mode
+`GroundHeatExchanger:System` also supports `g-Function Calculation Method = GLHECcalc` to run the GLHEC transient borehole model located under `GroundHeatExchangers/GLHEC/`.
+
+This mode uses in-tree RK4 ODE integration for segment state advancement and consumes the same long-term g-function curves used by the vertical GLHE framework.
+
 ## References
 - Eskilson, P. 'Thermal Analysis of Heat Extraction Boreholes' Ph.D. Thesis: Dept. of Mathematical Physics, University of Lund, Sweden, June 1987.
 - Yavuzturk, C., J.D. Spitler. 1999. 'A Short Time Step Response Factor Model for Vertical Ground Loop Heat Exchangers. ASHRAE Transactions. 105(2): 475-485.

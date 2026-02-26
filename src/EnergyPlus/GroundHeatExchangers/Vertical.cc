@@ -61,6 +61,8 @@
 #include <EnergyPlus/UtilityRoutines.hh>
 #include <EnergyPlus/WeatherManager.hh>
 
+#include <cmath>
+
 namespace EnergyPlus::GroundHeatExchangers {
 GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::json const &j)
 {
@@ -111,6 +113,40 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
     this->soil.k = j["ground_thermal_conductivity"].get<Real64>();
     this->soil.rhoCp = j["ground_thermal_heat_capacity"].get<Real64>();
 
+    this->gFuncCalcMethod = GFuncCalcMethod::UniformHeatFlux;
+    if (j.find("g_function_calculation_method") != j.end()) {
+        std::string const gFunctionMethodStr = Util::makeUPPER(j["g_function_calculation_method"].get<std::string>());
+        if (gFunctionMethodStr == "UHFCALC") {
+            this->gFuncCalcMethod = GFuncCalcMethod::UniformHeatFlux;
+        } else if (gFunctionMethodStr == "UBHWTCALC") {
+            this->gFuncCalcMethod = GFuncCalcMethod::UniformBoreholeWallTemp;
+        } else if (gFunctionMethodStr == "FULLDESIGN") {
+            this->gFuncCalcMethod = GFuncCalcMethod::FullDesign;
+        } else if (gFunctionMethodStr == "GLHECCALC") {
+            this->gFuncCalcMethod = GFuncCalcMethod::UniformHeatFlux;
+            this->useGLHEC = true;
+        } else {
+            errorsFound = true;
+            ShowSevereError(state, fmt::format("g-Function Calculation Method: \"{}\" is invalid", gFunctionMethodStr));
+        }
+    }
+
+    if (auto const it = j.find("glhec_number_of_borehole_segments"); it != j.end()) {
+        this->glhecNumSegments = std::max(1, it.value().get<int>());
+    }
+    if (auto const it = j.find("glhec_number_of_iterations"); it != j.end()) {
+        this->glhecNumIterations = std::max(1, it.value().get<int>());
+    }
+    if (auto const it = j.find("glhec_grout_fraction"); it != j.end()) {
+        this->glhecGroutFraction = it.value().get<Real64>();
+    }
+    if (auto const it = j.find("glhec_aggregation_expansion_rate"); it != j.end()) {
+        this->glhecAggExpansionRate = it.value().get<Real64>();
+    }
+    if (auto const it = j.find("glhec_aggregation_bins_per_level"); it != j.end()) {
+        this->glhecAggBinsPerLevel = std::max(1, it.value().get<int>());
+    }
+
     if (j.find("ghe_vertical_responsefactors_object_name") != j.end()) {
         // Response factors come from IDF object
         this->myRespFactors = GetResponseFactor(state, Util::makeUPPER(j["ghe_vertical_responsefactors_object_name"].get<std::string>()));
@@ -119,21 +155,6 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
 
     // no g-functions in the input file, so they need to be calculated
     if (!this->gFunctionsExist) {
-
-        // g-function calculation method
-        if (j.find("g_function_calculation_method") != j.end()) {
-            std::string gFunctionMethodStr = Util::makeUPPER(j["g_function_calculation_method"].get<std::string>());
-            if (gFunctionMethodStr == "UHFCALC") {
-                this->gFuncCalcMethod = GFuncCalcMethod::UniformHeatFlux;
-            } else if (gFunctionMethodStr == "UBHWTCALC") {
-                this->gFuncCalcMethod = GFuncCalcMethod::UniformBoreholeWallTemp;
-            } else if (gFunctionMethodStr == "FULLDESIGN") {
-                this->gFuncCalcMethod = GFuncCalcMethod::FullDesign;
-            } else {
-                errorsFound = true;
-                ShowSevereError(state, fmt::format("g-Function Calculation Method: \"{}\" is invalid", gFunctionMethodStr));
-            }
-        }
 
         // get borehole data from array or individual borehole instance objects
         if (this->gFuncCalcMethod == GFuncCalcMethod::FullDesign) {
@@ -404,6 +425,42 @@ void GLHEVert::simulate(EnergyPlusData &state,
 
     this->initGLHESimVars(state);
     if (state.dataGlobal->KickOffSimulation) {
+        return;
+    }
+
+    if (this->useGLHEC) {
+        if (!this->gFunctionsExist) {
+            this->calcGFunctions(state);
+            this->gFunctionsExist = true;
+        }
+        if (!this->glhecModel) {
+            this->setupGLHECModel(state);
+        }
+
+        this->inletTemp = state.dataLoopNodes->Node(this->inletNodeNum).Temp;
+
+        Real64 const currTimeSeconds = ((state.dataGlobal->DayOfSim - 1) * 24 + (state.dataGlobal->HourOfDay - 1) +
+                                        (state.dataGlobal->TimeStep - 1) * state.dataGlobal->TimeStepZone + state.dataHVACGlobal->SysTimeElapsed) *
+                                       Constant::rSecsInHour;
+
+        GLHEC::ModelStepInputs stepInputs;
+        stepInputs.timeSeconds = std::max(0, static_cast<int>(std::llround(currTimeSeconds)));
+        stepInputs.timeStepSeconds = std::max(1, static_cast<int>(std::llround(state.dataHVACGlobal->TimeStepSysSec)));
+        stepInputs.massFlowRate = this->massFlowRate;
+        stepInputs.inletTemp = this->inletTemp;
+        stepInputs.farFieldGroundTemp = this->tempGround;
+
+        auto const outputs = this->glhecModel->simulate(stepInputs);
+        this->outletTemp = outputs.outletTemp;
+        this->QGLHE = outputs.heatRate;
+        this->bhTemp = outputs.boreholeWallTemp;
+        this->aveFluidTemp = outputs.avgFluidTemp;
+        if (this->totalTubeLength > 0.0) {
+            this->lastQnSubHr = outputs.boreholeHeatRate / this->totalTubeLength;
+        } else {
+            this->lastQnSubHr = 0.0;
+        }
+        this->updateGHX(state);
         return;
     }
 
@@ -1499,6 +1556,64 @@ void GLHEVert::initGLHESimVars(EnergyPlusData &state)
     }
 }
 
+void GLHEVert::setupGLHECModel(EnergyPlusData &state)
+{
+    GLHEC::ModelConfig cfg;
+    cfg.boreholeLength = this->bhLength;
+    cfg.boreholeDiameter = this->bhDiameter;
+    cfg.shankSpacing = this->bhUTubeDist;
+    cfg.groutConductivity = this->grout.k;
+    cfg.soilConductivity = this->soil.k;
+    cfg.soilDiffusivity = this->soil.diffusivity;
+    cfg.pipeConductivity = this->pipe.k;
+    cfg.pipeInnerDiameter = this->pipe.innerDia;
+    cfg.pipeOuterDiameter = this->pipe.outDia;
+    cfg.numBoreholes = this->myRespFactors->numBoreholes;
+    cfg.numSegments = this->glhecNumSegments;
+    cfg.numIterations = this->glhecNumIterations;
+    cfg.groutFraction = this->glhecGroutFraction;
+    cfg.pipeTransitCells = 16;
+    cfg.applyPipeTransitDelay = true;
+    cfg.ode.absoluteTolerance = 1.0e-10;
+    cfg.ode.relativeTolerance = 1.0e-8;
+    cfg.ode.stepsPerTimeStep = 20;
+    cfg.ode.minInitialStep = 1.0;
+
+    // Input objects provide volumetric heat capacity. These default density assumptions preserve rho*cp.
+    constexpr Real64 assumedGroutDensity = 2200.0;
+    constexpr Real64 assumedPipeDensity = 950.0;
+    cfg.groutDensity = assumedGroutDensity;
+    cfg.groutSpecificHeat = this->grout.rhoCp / assumedGroutDensity;
+    cfg.pipeDensity = assumedPipeDensity;
+    cfg.pipeSpecificHeat = this->pipe.rhoCp / assumedPipeDensity;
+
+    cfg.aggregation.expansionRate = this->glhecAggExpansionRate;
+    cfg.aggregation.binsPerLevel = this->glhecAggBinsPerLevel;
+    cfg.aggregation.simulationHorizonSeconds = this->myRespFactors->maxSimYears * 365.0 * 24.0 * 3600.0;
+
+    cfg.lntts = this->myRespFactors->LNTTS;
+    cfg.gValues = this->myRespFactors->GFNC;
+    cfg.gBValues = this->myRespFactors->GFNC;
+
+    EnergyPlusData *statePtr = &state;
+    GLHEC::FluidPropertyFunctions fluidFuncs;
+    fluidFuncs.cp = [this, statePtr](Real64 temp) {
+        return statePtr->dataPlnt->PlantLoop(this->plantLoc.loopNum).glycol->getSpecificHeat(*statePtr, temp, "GLHEC::cp");
+    };
+    fluidFuncs.rho = [this, statePtr](Real64 temp) {
+        return statePtr->dataPlnt->PlantLoop(this->plantLoc.loopNum).glycol->getDensity(*statePtr, temp, "GLHEC::rho");
+    };
+    fluidFuncs.viscosity = [this, statePtr](Real64 temp) {
+        return statePtr->dataPlnt->PlantLoop(this->plantLoc.loopNum).glycol->getViscosity(*statePtr, temp, "GLHEC::mu");
+    };
+    fluidFuncs.conductivity = [this, statePtr](Real64 temp) {
+        return statePtr->dataPlnt->PlantLoop(this->plantLoc.loopNum).glycol->getConductivity(*statePtr, temp, "GLHEC::k");
+    };
+
+    this->glhecModel = std::make_unique<GLHEC::Model>(std::move(cfg), std::move(fluidFuncs));
+    this->glhecModel->reset(this->tempGround);
+}
+
 void GLHEVert::initEnvironment(EnergyPlusData &state, [[maybe_unused]] Real64 const CurTime)
 {
     constexpr std::string_view RoutineName = "initEnvironment";
@@ -1521,6 +1636,9 @@ void GLHEVert::initEnvironment(EnergyPlusData &state, [[maybe_unused]] Real64 co
     this->currentSimTime = 0.0;
     this->QGLHE = 0.0;
     this->prevHour = 1;
+    if (this->glhecModel) {
+        this->glhecModel->reset(this->tempGround);
+    }
 }
 
 void GLHEVert::oneTimeInit_new(EnergyPlusData &state)

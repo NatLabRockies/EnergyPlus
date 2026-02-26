@@ -10,6 +10,7 @@ DetailedGeometry
 Evaporative
 EvaporativeCooler
 FlatPlate
+GLHEC
 HeatExchanger
 HeatExchangerAssisted
 HVACDOAS
