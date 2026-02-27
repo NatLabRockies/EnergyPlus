@@ -1684,16 +1684,18 @@ namespace HeatBalFiniteDiffManager {
             // Boundary Conditions from Simulation for Exterior
             Real64 const hconvo(state.dataMstBal->HConvExtFD(Surf));
 
-            Real64 const hrad(state.dataMstBal->HAirFD(Surf));
-            Real64 const hsky(state.dataMstBal->HSkyFD(Surf));
-            Real64 const hgnd(state.dataMstBal->HGrndFD(Surf));
-            Real64 const hsurr(state.dataMstBal->HSurrFD(Surf));
+            // LW coefficients/temps — commented out while Enet override is active.
+            // Restore these when reverting to per-term LW radiation model.
+            // Real64 const hrad(state.dataMstBal->HAirFD(Surf));
+            // Real64 const hsky(state.dataMstBal->HSkyFD(Surf));
+            // Real64 const hgnd(state.dataMstBal->HGrndFD(Surf));
+            // Real64 const hsurr(state.dataMstBal->HSurrFD(Surf));
             Real64 const Toa(state.dataMstBal->TempOutsideAirFD(Surf));
-            Real64 const Tgnd(Tgndsurface);
-            Real64 const Tsurr(TsurrSurface);
+            // Real64 const Tgnd(Tgndsurface);
+            // Real64 const Tsurr(TsurrSurface);
 
             // Enet: override for net longwave radiation flux (W/m2).
-            // Replaces hrad*(Toa-T) + hsky*(Tsky-T) + hgnd*(Tgnd-T) + hsurr*(Tsurr-T).
+            // Replaces the four linearized LW h*dT terms (hrad, hsky, hgnd, hsurr).
             // TEST VALUE: change to -200.0 or +200.0 and rebuild for Phase 2 testing.
             Real64 const Enet = 0.0;
 
