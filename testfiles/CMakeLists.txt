@@ -29,6 +29,7 @@ add_simulation_test(IDF_FILE 1ZoneUncontrolled3SurfaceZone.idf EPW_FILE USA_CO_G
 add_simulation_test(IDF_FILE 1ZoneUncontrolledAnnualOutputs.idf EPW_FILE USA_CO_Golden-NREL.724666_TMY3.epw)
 add_simulation_test(IDF_FILE 1ZoneUncontrolledCondFDWithVariableKat24C.idf EPW_FILE USA_CO_Golden-NREL.724666_TMY3.epw)
 add_simulation_test(IDF_FILE 1ZoneCondFD_Enet_Test.idf EPW_FILE USA_CO_Golden-NREL.724666_TMY3.epw DESIGN_DAY_ONLY)
+add_simulation_test(IDF_FILE 1ZoneCondFD_Enet_Test_Annual.idf EPW_FILE USA_CO_Golden-NREL.724666_TMY3.epw DESIGN_DAY_ONLY)
 add_simulation_test(IDF_FILE 1ZoneUncontrolledFourAlgorithms.idf EPW_FILE 94810-1956.epw)
 add_simulation_test(IDF_FILE 1ZoneUncontrolledResLayers.idf EPW_FILE 94810-1956.epw)
 add_simulation_test(IDF_FILE 1ZoneUncontrolledUTF8.idf EPW_FILE USA_CO_Golden-NREL.724666_TMY3.epw)
