@@ -1684,20 +1684,13 @@ namespace HeatBalFiniteDiffManager {
             // Boundary Conditions from Simulation for Exterior
             Real64 const hconvo(state.dataMstBal->HConvExtFD(Surf));
 
-            // LW coefficients/temps — commented out while Enet override is active.
-            // Restore these when reverting to per-term LW radiation model.
-            // Real64 const hrad(state.dataMstBal->HAirFD(Surf));
-            // Real64 const hsky(state.dataMstBal->HSkyFD(Surf));
-            // Real64 const hgnd(state.dataMstBal->HGrndFD(Surf));
-            // Real64 const hsurr(state.dataMstBal->HSurrFD(Surf));
+            Real64 const hrad(state.dataMstBal->HAirFD(Surf));
+            Real64 const hsky(state.dataMstBal->HSkyFD(Surf));
+            Real64 const hgnd(state.dataMstBal->HGrndFD(Surf));
+            Real64 const hsurr(state.dataMstBal->HSurrFD(Surf));
             Real64 const Toa(state.dataMstBal->TempOutsideAirFD(Surf));
-            // Real64 const Tgnd(Tgndsurface);
-            // Real64 const Tsurr(TsurrSurface);
-
-            // Enet: override for net longwave radiation flux (W/m2).
-            // Replaces the four linearized LW h*dT terms (hrad, hsky, hgnd, hsurr).
-            // TEST VALUE: change to -200.0 or +200.0 and rebuild for Phase 2 testing.
-            Real64 const Enet = 0.0;
+            Real64 const Tgnd(Tgndsurface);
+            Real64 const Tsurr(TsurrSurface);
 
             if (surface.HeatTransferAlgorithm == DataSurfaces::HeatTransferModel::CondFD) {
 
@@ -1715,7 +1708,8 @@ namespace HeatBalFiniteDiffManager {
                 if (mat->ROnly || mat->group == Material::Group::AirGap) { // R Layer or Air Layer  **********
                     // Use algebraic equation for TDT based on R
                     Real64 const Rlayer(mat->Resistance);
-                    TDT_i = (TDT_p + (QRadSWOutFD + Enet + hconvo * Toa) * Rlayer) / (1.0 + hconvo * Rlayer);
+                    TDT_i = (TDT_p + (QRadSWOutFD + hgnd * Tgnd + (hconvo + hrad) * Toa + hsky * Tsky + hsurr * Tsurr) * Rlayer) /
+                            (1.0 + (hconvo + hgnd + hrad + hsky + hsurr) * Rlayer);
 
                 } else { // Regular or phase change material layer
 
@@ -1783,16 +1777,17 @@ namespace HeatBalFiniteDiffManager {
                         if (s_hbfd->CondFDSchemeType == CondFDScheme::CrankNicholsonSecondOrder) { // Second Order equation
                             Real64 const Cp_DelX_RhoS_2Delt(Cp * DelX * RhoS / (2.0 * Delt));
                             Real64 const kt_2DelX(kt / (2.0 * DelX));
-                            Real64 const hsum(0.5 * hconvo);
-                            TDT_i = (QRadSWOutFD + Enet + Cp_DelX_RhoS_2Delt * TD_i + kt_2DelX * (TDT_p - TD_i + TD(i + 1)) +
-                                     hconvo * Toa - hsum * TD_i) /
+                            Real64 const hsum(0.5 * (hconvo + hgnd + hrad + hsky + hsurr));
+                            TDT_i = (QRadSWOutFD + Cp_DelX_RhoS_2Delt * TD_i + kt_2DelX * (TDT_p - TD_i + TD(i + 1)) + hgnd * Tgnd +
+                                     (hconvo + hrad) * Toa + hsky * Tsky + hsurr * Tsurr - hsum * TD_i) /
                                     (hsum + kt_2DelX + Cp_DelX_RhoS_2Delt);
                         } else if (s_hbfd->CondFDSchemeType == CondFDScheme::FullyImplicitFirstOrder) { // First Order
                             Real64 const Two_Delt_DelX(2.0 * Delt_DelX);
                             Real64 const Cp_DelX2_RhoS(Cp * pow_2(DelX) * RhoS);
                             Real64 const Two_Delt_kt(2.0 * Delt * kt);
-                            TDT_i = (Two_Delt_DelX * (QRadSWOutFD + Enet + hconvo * Toa) + Cp_DelX2_RhoS * TD_i + Two_Delt_kt * TDT_p) /
-                                    (Two_Delt_DelX * hconvo + Two_Delt_kt + Cp_DelX2_RhoS);
+                            TDT_i = (Two_Delt_DelX * (QRadSWOutFD + hgnd * Tgnd + (hconvo + hrad) * Toa + hsky * Tsky + hsurr * Tsurr) +
+                                     Cp_DelX2_RhoS * TD_i + Two_Delt_kt * TDT_p) /
+                                    (Two_Delt_DelX * (hconvo + hgnd + hrad + hsky + hsurr) + Two_Delt_kt + Cp_DelX2_RhoS);
                         }
 
                     } else { // HMovInsul > 0.0: Transparent insulation on outside
@@ -1801,8 +1796,8 @@ namespace HeatBalFiniteDiffManager {
                         // Movable Insulation Layer Outside surface temp
 
                         Real64 const TInsulOut(
-                            (QRadSWOutMvInsulFD + Enet + HMovInsul * TDT_i + hconvo * Toa) /
-                            (hconvo + HMovInsul)); // Temperature of outside face of Outside Insulation
+                            (QRadSWOutMvInsulFD + hgnd * Tgnd + HMovInsul * TDT_i + (hconvo + hrad) * Toa + hsky * Tsky + hsurr * Tsurr) /
+                            (hconvo + hgnd + HMovInsul + hrad + hsky + hsurr)); // Temperature of outside face of Outside Insulation
                         Real64 const Two_Delt_DelX(2.0 * Delt_DelX);
                         Real64 const Cp_DelX2_RhoS(Cp * pow_2(DelX) * RhoS);
                         Real64 const Two_Delt_kt(2.0 * Delt * kt);
@@ -1833,13 +1828,15 @@ namespace HeatBalFiniteDiffManager {
             // One formulation that works for Fully Implicit and CrankNicholson and massless wall
 
             Real64 const Toa_TDT_i(Toa - TDT_i);
-            Real64 const QNetSurfFromOutside(QRadSWOutFD + hconvo * Toa_TDT_i + Enet);
+            Real64 const QNetSurfFromOutside(
+                QRadSWOutFD + (hgnd * (-TDT_i + Tgnd) + (hconvo + hrad) * Toa_TDT_i + hsky * (-TDT_i + Tsky) + hsurr * (-TDT_i + Tsurr)));
 
             // Same sign convention as CTFs
             state.dataHeatBalSurf->SurfOpaqOutFaceCondFlux(Surf) = -QNetSurfFromOutside;
 
             // Report all outside BC heat fluxes
-            state.dataHeatBalSurf->SurfQdotRadOutRepPerArea(Surf) = Enet;
+            state.dataHeatBalSurf->SurfQdotRadOutRepPerArea(Surf) =
+                -(hgnd * (TDT_i - Tgnd) + hrad * (-Toa_TDT_i) + hsky * (TDT_i - Tsky) + hsurr * (TDT_i - Tsurr));
             state.dataHeatBalSurf->SurfQdotRadOutRep(Surf) = surface.Area * state.dataHeatBalSurf->SurfQdotRadOutRepPerArea(Surf);
             state.dataHeatBalSurf->SurfQRadOutReport(Surf) = state.dataHeatBalSurf->SurfQdotRadOutRep(Surf) * state.dataGlobal->TimeStepZoneSec;
 
