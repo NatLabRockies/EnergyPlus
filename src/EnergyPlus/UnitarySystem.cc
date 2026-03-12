@@ -1569,6 +1569,13 @@ namespace UnitarySystems {
         std::string CompType = this->UnitType;
         int CoolingSAFlowMethod = this->m_CoolingSAFMethod;
         int HeatingSAFlowMethod = this->m_HeatingSAFMethod;
+        if (state.dataSize->CurZoneEqNum > 0) {
+            EqSizing.SizingMethod = 0;
+            EqSizing.SizingMethod(HVAC::CoolingAirflowSizing) = CoolingSAFlowMethod;
+            if (this->m_HeatPump) {
+                EqSizing.SizingMethod(HVAC::HeatingAirflowSizing) = HeatingSAFlowMethod;
+            }
+        }
         // can't reset this to 0 for systems where DX heating coil is in downstream unit and DX cooling coil is in upstream unit
         //        DXCoolCap = 0.0;
         state.dataSize->UnitaryHeatCap = 0.0;
@@ -1653,9 +1660,6 @@ namespace UnitarySystems {
         bool coolingAirFlowIsAutosized = this->m_MaxCoolAirVolFlow == DataSizing::AutoSize;
         bool heatingAirFlowIsAutosized = this->m_MaxHeatAirVolFlow == DataSizing::AutoSize;
         if (this->m_CoolCoilExists) {
-            if (state.dataSize->CurZoneEqNum > 0) {
-                EqSizing.SizingMethod = CoolingSAFlowMethod;
-            }
             if (!this->m_HeatCoilExists) {
                 state.dataSize->ZoneCoolingOnlyFan = true;
             }
@@ -1822,9 +1826,6 @@ namespace UnitarySystems {
 
         // STEP 2: find the DataSizing::AutoSized heating air flow rate and capacity
         if (this->m_HeatCoilExists) {
-            if (state.dataSize->CurZoneEqNum > 0) {
-                EqSizing.SizingMethod = HeatingSAFlowMethod;
-            }
             if (!this->m_CoolCoilExists) {
                 state.dataSize->ZoneHeatingOnlyFan = true;
             }
