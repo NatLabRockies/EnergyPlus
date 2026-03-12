@@ -1653,6 +1653,9 @@ namespace UnitarySystems {
         bool coolingAirFlowIsAutosized = this->m_MaxCoolAirVolFlow == DataSizing::AutoSize;
         bool heatingAirFlowIsAutosized = this->m_MaxHeatAirVolFlow == DataSizing::AutoSize;
         if (this->m_CoolCoilExists) {
+            if (state.dataSize->CurZoneEqNum > 0) {
+                EqSizing.SizingMethod = CoolingSAFlowMethod;
+            }
             if (!this->m_HeatCoilExists) {
                 state.dataSize->ZoneCoolingOnlyFan = true;
             }
@@ -1819,6 +1822,9 @@ namespace UnitarySystems {
 
         // STEP 2: find the DataSizing::AutoSized heating air flow rate and capacity
         if (this->m_HeatCoilExists) {
+            if (state.dataSize->CurZoneEqNum > 0) {
+                EqSizing.SizingMethod = HeatingSAFlowMethod;
+            }
             if (!this->m_CoolCoilExists) {
                 state.dataSize->ZoneHeatingOnlyFan = true;
             }

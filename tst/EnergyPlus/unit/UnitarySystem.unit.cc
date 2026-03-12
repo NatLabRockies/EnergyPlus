@@ -1692,6 +1692,10 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_MultiSpeedDXCoolCoil_Only_NoFan)
 
     // Test System behavior with no supply fan
     EXPECT_FALSE(thisSys->m_FanExists);
+    EXPECT_NEAR(1.8, thisSys->m_MaxCoolAirVolFlow, 0.001);
+    EXPECT_NEAR(1.8, thisSys->m_MaxHeatAirVolFlow, 0.001);
+    EXPECT_NEAR(37248.572, thisSys->m_DesignCoolingCapacity, 0.001);
+    EXPECT_NEAR(0.0, thisSys->m_DesignHeatingCapacity, 0.001);
 
     // set up node conditions to test UnitarySystem set point based control
     // Unitary system air inlet node = 1
@@ -1730,7 +1734,7 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_MultiSpeedDXCoolCoil_Only_NoFan)
     EXPECT_NEAR(state->dataLoopNodes->Node(thisSys->AirOutNode).Temp, state->dataLoopNodes->Node(thisSys->AirOutNode).TempSetPoint, 0.1);
     // cooling coil air inlet node temp is greater than cooling coil air outlet node temp
     EXPECT_GT(state->dataLoopNodes->Node(thisSys->AirInNode).Temp, state->dataLoopNodes->Node(thisSys->AirOutNode).Temp);
-    EXPECT_NEAR(thisSys->m_CoolingCycRatio, 0.36056, 0.001);
+    EXPECT_NEAR(thisSys->m_CoolingCycRatio, 0.37971, 0.001);
     EXPECT_EQ(thisSys->m_CoolingSpeedRatio, 0);
     EXPECT_EQ(thisSys->m_CoolingSpeedNum, 1);
     EXPECT_EQ(state->dataLoopNodes->Node(thisSys->AirInNode).MassFlowRate, 1.2);
