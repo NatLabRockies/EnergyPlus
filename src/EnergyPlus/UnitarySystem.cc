@@ -1690,7 +1690,7 @@ namespace UnitarySystems {
                 this->m_MaxCoolAirVolFlow = DataSizing::AutoSize;
             } else if (CoolingSAFlowMethod == DataSizing::FlowPerCoolingCapacity) {
                 if (this->m_DesignCoolingCapacity == DataSizing::AutoSize) {
-                    // SizingMethod comes in as FlowPerCoolingCapacity and gets calculated here, so switch back to SupplyAirFlowRate
+                    // switch to normal airflow sizing to get capacity
                     EqSizing.SizingMethod(HVAC::CoolingAirflowSizing) = DataSizing::SupplyAirFlowRate;
                     TempSize = DataSizing::AutoSize;
                     CoolingAirFlowSizer sizingCoolingAirFlow;
@@ -1714,6 +1714,10 @@ namespace UnitarySystems {
                     CoolCapAtPeak = sizerCoolingCapacity.size(state, TempSize, errorsFound);
                     SysCoolingFlow = CoolCapAtPeak * this->m_MaxCoolAirVolFlow;
                     state.dataSize->DataTotCapCurveIndex = 0;
+                    state.dataSize->DataFlowPerCoolingCapacity = this->m_MaxCoolAirVolFlow;
+                    state.dataSize->DataAutosizedCoolingCapacity = CoolCapAtPeak;
+                    // now switch back to original user input
+                    EqSizing.SizingMethod(HVAC::CoolingAirflowSizing) = DataSizing::FlowPerCoolingCapacity;
                     EqSizing.CoolingCapacity = true;
                     EqSizing.DesCoolingLoad = CoolCapAtPeak;
                 } else {
@@ -1860,7 +1864,7 @@ namespace UnitarySystems {
                 SysHeatingFlow *= this->m_MaxHeatAirVolFlow;
                 this->m_MaxHeatAirVolFlow = DataSizing::AutoSize;
             } else if (HeatingSAFlowMethod == DataSizing::FlowPerHeatingCapacity) {
-                // SizingMethod comes in as FlowPerHeatingCapacity and gets calculated here, so switch back to SupplyAirFlowRate
+                // switch to normal airflow sizing to get capacity
                 EqSizing.SizingMethod(HVAC::HeatingAirflowSizing) = DataSizing::SupplyAirFlowRate;
                 TempSize = DataSizing::AutoSize;
                 bool errorsFound = false;
@@ -1887,6 +1891,10 @@ namespace UnitarySystems {
                     state.dataAirLoop->AirLoopControlInfo(AirLoopNum).UnitarySysSimulating = true;
                 }
                 SysHeatingFlow = HeatCapAtPeak * this->m_MaxHeatAirVolFlow;
+                state.dataSize->DataFlowPerHeatingCapacity = this->m_MaxHeatAirVolFlow;
+                state.dataSize->DataAutosizedHeatingCapacity = HeatCapAtPeak;
+                // now switch back to original user input
+                EqSizing.SizingMethod(HVAC::HeatingAirflowSizing) = DataSizing::FlowPerHeatingCapacity;
                 this->m_MaxHeatAirVolFlow = DataSizing::AutoSize;
                 EqSizing.HeatingCapacity = true;
                 EqSizing.DesHeatingLoad = HeatCapAtPeak;
