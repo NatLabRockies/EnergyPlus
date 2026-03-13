@@ -9827,6 +9827,7 @@ Curve:Biquadratic,
     DataZoneEquipment::GetZoneEquipmentData(*state); // read zone equipment configuration and list objects
 
     state->dataSize->ZoneEqSizing.allocate(1);
+    state->dataSize->ZoneEqSizing(1).SizingMethod.allocate(25);
     state->dataZoneEquip->ZoneEquipList(1).EquipIndex.allocate(1);
     state->dataZoneEquip->ZoneEquipList(1).EquipIndex(1) = 1; // initialize equipment index for ZoneHVAC
 
@@ -10326,6 +10327,7 @@ Curve:Biquadratic,
     DataZoneEquipment::GetZoneEquipmentData(*state); // read zone equipment configuration and list objects
 
     state->dataSize->ZoneEqSizing.allocate(1);
+    state->dataSize->ZoneEqSizing(1).SizingMethod.allocate(25);
     state->dataZoneEquip->ZoneEquipList(1).EquipIndex.allocate(1);
     state->dataZoneEquip->ZoneEquipList(1).EquipIndex(1) = 1; // initialize equipment index for ZoneHVAC
 
@@ -12521,6 +12523,7 @@ Curve:QuadLinear,
     DataZoneEquipment::GetZoneEquipmentData(*state); // read zone equipment configuration and list objects
 
     state->dataSize->ZoneEqSizing.allocate(1);
+    state->dataSize->ZoneEqSizing(1).SizingMethod.allocate(25);
     state->dataZoneEquip->ZoneEquipList(1).EquipIndex.allocate(1);
     state->dataZoneEquip->ZoneEquipList(1).EquipIndex(1) = 1; // initialize equipment index for ZoneHVAC
 
@@ -12862,6 +12865,7 @@ Schedule:Compact,
 
     state->dataSize->CurZoneEqNum = 1;
     state->dataSize->ZoneEqSizing.allocate(1);
+    state->dataSize->ZoneEqSizing(1).SizingMethod.allocate(25);
     state->dataZoneEquip->ZoneEquipList(1).EquipIndex.allocate(1);
     state->dataZoneEquip->ZoneEquipList(1).EquipIndex(1) = 1; // initialize equipment index for ZoneHVAC
 
@@ -26743,7 +26747,7 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_MultiSpeedFanWSHP_Test)
                       latOut);
     // First speed heating
     EXPECT_NEAR(thisSys1.m_SpeedRatio, 0.0, 0.0001);
-    EXPECT_NEAR(thisSys1.m_CycRatio, 0.244995, 0.0001);
+    EXPECT_NEAR(thisSys1.m_CycRatio, 0.242557, 0.0001);
     EXPECT_EQ(thisSys1.m_SpeedNum, 1);
     EXPECT_NEAR(sensOut, 100.0, 2);
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand[1].RemainingOutputRequired = 500.0;
@@ -26762,7 +26766,7 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_MultiSpeedFanWSHP_Test)
                       sensOut,
                       latOut);
     // Second speed heating
-    EXPECT_NEAR(thisSys1.m_SpeedRatio, 0.933306, 0.0001);
+    EXPECT_NEAR(thisSys1.m_SpeedRatio, 0.8921246, 0.0001);
     EXPECT_NEAR(thisSys1.m_CycRatio, 1.0, 0.0001);
     EXPECT_EQ(thisSys1.m_SpeedNum, 2);
     EXPECT_NEAR(sensOut, 500.0, 2);

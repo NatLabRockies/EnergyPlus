@@ -1690,6 +1690,8 @@ namespace UnitarySystems {
                 this->m_MaxCoolAirVolFlow = DataSizing::AutoSize;
             } else if (CoolingSAFlowMethod == DataSizing::FlowPerCoolingCapacity) {
                 if (this->m_DesignCoolingCapacity == DataSizing::AutoSize) {
+                    // SizingType comes in as FlowPreCoolingCapacity and gets calculated here, so switch back to SystemAirflowSizing
+                    EqSizing.SizingMethod(HVAC::CoolingAirflowSizing) = HVAC::SystemAirflowSizing;
                     TempSize = DataSizing::AutoSize;
                     CoolingAirFlowSizer sizingCoolingAirFlow;
                     sizingCoolingAirFlow.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
@@ -1858,6 +1860,8 @@ namespace UnitarySystems {
                 SysHeatingFlow *= this->m_MaxHeatAirVolFlow;
                 this->m_MaxHeatAirVolFlow = DataSizing::AutoSize;
             } else if (HeatingSAFlowMethod == DataSizing::FlowPerHeatingCapacity) {
+                // SizingType comes in as FlowPreHeatingCapacity and gets calculated here, so switch back to SystemAirflowSizing
+                EqSizing.SizingMethod(HVAC::HeatingAirflowSizing) = HVAC::SystemAirflowSizing;
                 TempSize = DataSizing::AutoSize;
                 bool errorsFound = false;
                 HeatingAirFlowSizer sizingHeatingAirFlow;

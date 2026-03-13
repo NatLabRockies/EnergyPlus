@@ -1274,6 +1274,7 @@ TEST_F(EnergyPlusFixture, SimPTAC_SZVAVTest)
     // simulate PTAC zoneHVAC equipment
     state->dataSize->CurZoneEqNum = 1;
     state->dataSize->ZoneEqSizing.allocate(1);
+    state->dataSize->ZoneEqSizing(1).SizingMethod.allocate(25);
     bool HeatActive = false;
     bool CoolActive = false;
     Real64 latOut = 0.0;
@@ -4971,6 +4972,7 @@ TEST_F(EnergyPlusFixture, PTAC_AvailabilityManagerTest)
     state->dataZoneEnergyDemand->ZoneSysMoistureDemand(1).SequencedOutputRequiredToHumidSP.allocate(1);
     state->dataZoneEnergyDemand->ZoneSysMoistureDemand(1).SequencedOutputRequiredToDehumidSP.allocate(1);
     state->dataSize->ZoneEqSizing.allocate(1);
+    state->dataSize->ZoneEqSizing(1).SizingMethod.allocate(25);
     state->dataHeatBal->MassConservation.allocate(state->dataGlobal->NumOfZones);
     state->dataHeatBalFanSys->ZoneMassBalanceFlag.allocate(state->dataGlobal->NumOfZones);
     state->dataHeatBal->spaceIntGainDevices.allocate(1);
