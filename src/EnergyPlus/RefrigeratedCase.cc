@@ -691,6 +691,20 @@ void GetRefrigerationInput(EnergyPlusData &state)
     cNumericFieldNames.allocate(MaxNumNumbersAll);
     lAlphaBlanks.dimension(MaxNumAlphasAll, true);
     lNumericBlanks.dimension(MaxNumNumbersAll, true);
+
+    // Helper lambda to read the three optional refrigerant-inventory fields that appear on every
+    // condenser and gas-cooler object.  Zeros each field first, then overwrites from Numbers if
+    // the corresponding input field is not blank.
+    auto readRefrigInventory = [&](Real64 &refOpCharge, Real64 &refReceiverInv, Real64 &refPipingInv,
+                                   int n1, int n2, int n3) {
+        refOpCharge = 0.0;
+        refReceiverInv = 0.0;
+        refPipingInv = 0.0;
+        if (!lNumericBlanks(n1)) refOpCharge = Numbers(n1);
+        if (!lNumericBlanks(n2)) refReceiverInv = Numbers(n2);
+        if (!lNumericBlanks(n3)) refPipingInv = Numbers(n3);
+    };
+
     // bbb stovall note for future - for all curve entries, see if need fail on type or if can allow table input
     if (state.dataRefrigCase->NumSimulationCases > 0) {
         CurrentModuleObject = "Refrigeration:Case";
@@ -3361,18 +3375,10 @@ void GetRefrigerationInput(EnergyPlusData &state)
                     Condenser(CondNum).EndUseSubcategory = Alphas(5);
                 }
 
-                Condenser(CondNum).RefOpCharge = 0.0;
-                Condenser(CondNum).RefReceiverInventory = 0.0;
-                Condenser(CondNum).RefPipingInventory = 0.0;
-                if (!lNumericBlanks(4)) {
-                    Condenser(CondNum).RefOpCharge = Numbers(4);
-                }
-                if (!lNumericBlanks(5)) {
-                    Condenser(CondNum).RefReceiverInventory = Numbers(5);
-                }
-                if (!lNumericBlanks(6)) {
-                    Condenser(CondNum).RefPipingInventory = Numbers(6);
-                }
+                readRefrigInventory(Condenser(CondNum).RefOpCharge,
+                                    Condenser(CondNum).RefReceiverInventory,
+                                    Condenser(CondNum).RefPipingInventory,
+                                    4, 5, 6);
 
             } // Read input for REFRIGERATION:Condenser:AirCooled
         } // NumSimulationCondAir > 0
@@ -3631,21 +3637,10 @@ void GetRefrigerationInput(EnergyPlusData &state)
                     Condenser(CondNum).EndUseSubcategory = Alphas(6);
                 }
 
-                Condenser(CondNum).RefOpCharge = 0.0;
-                Condenser(CondNum).RefReceiverInventory = 0.0;
-                Condenser(CondNum).RefPipingInventory = 0.0;
-                NumNum = 15;
-                if (!lNumericBlanks(NumNum)) {
-                    Condenser(CondNum).RefOpCharge = Numbers(NumNum);
-                }
-                NumNum = 16;
-                if (!lNumericBlanks(NumNum)) {
-                    Condenser(CondNum).RefReceiverInventory = Numbers(NumNum);
-                }
-                NumNum = 17;
-                if (!lNumericBlanks(NumNum)) {
-                    Condenser(CondNum).RefPipingInventory = Numbers(NumNum);
-                }
+                readRefrigInventory(Condenser(CondNum).RefOpCharge,
+                                    Condenser(CondNum).RefReceiverInventory,
+                                    Condenser(CondNum).RefPipingInventory,
+                                    15, 16, 17);
             } // Read input for CONDENSER:REFRIGERATION:EVAPorativeCooled
         } // If NumSimulationCondEvap > 0
 
@@ -3824,18 +3819,10 @@ void GetRefrigerationInput(EnergyPlusData &state)
                     Condenser(CondNum).EndUseSubcategory = Alphas(6);
                 }
 
-                Condenser(CondNum).RefOpCharge = 0.0;
-                Condenser(CondNum).RefReceiverInventory = 0.0;
-                Condenser(CondNum).RefPipingInventory = 0.0;
-                if (!lNumericBlanks(9)) {
-                    Condenser(CondNum).RefOpCharge = Numbers(9);
-                }
-                if (!lNumericBlanks(10)) {
-                    Condenser(CondNum).RefReceiverInventory = Numbers(10);
-                }
-                if (!lNumericBlanks(11)) {
-                    Condenser(CondNum).RefPipingInventory = Numbers(11);
-                }
+                readRefrigInventory(Condenser(CondNum).RefOpCharge,
+                                    Condenser(CondNum).RefReceiverInventory,
+                                    Condenser(CondNum).RefPipingInventory,
+                                    9, 10, 11);
 
             } // Read input for CONDENSER:REFRIGERATION:WaterCooled
 
@@ -3927,18 +3914,10 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 Condenser(CondNum).CascadeRatedEvapTemp = Condenser(CondNum).RatedTCondense - Condenser(CondNum).RatedApproachT;
 
                 // future - add refrigerant inventory on system side accepting reject heat (as was done for secondary)
-                Condenser(CondNum).RefOpCharge = 0.0;
-                Condenser(CondNum).RefReceiverInventory = 0.0;
-                Condenser(CondNum).RefPipingInventory = 0.0;
-                if (!lNumericBlanks(4)) {
-                    Condenser(CondNum).RefOpCharge = Numbers(4);
-                }
-                if (!lNumericBlanks(5)) {
-                    Condenser(CondNum).RefReceiverInventory = Numbers(5);
-                }
-                if (!lNumericBlanks(6)) {
-                    Condenser(CondNum).RefPipingInventory = Numbers(6);
-                }
+                readRefrigInventory(Condenser(CondNum).RefOpCharge,
+                                    Condenser(CondNum).RefReceiverInventory,
+                                    Condenser(CondNum).RefPipingInventory,
+                                    4, 5, 6);
 
             } // Read input for CONDENSER:REFRIGERATION:Cascade
         } // NumSimulationCascadeCondensers > 0
@@ -4149,18 +4128,10 @@ void GetRefrigerationInput(EnergyPlusData &state)
                     GasCooler(GCNum).EndUseSubcategory = Alphas(5);
                 }
 
-                GasCooler(GCNum).RefOpCharge = 0.0;
-                GasCooler(GCNum).RefReceiverInventory = 0.0;
-                GasCooler(GCNum).RefPipingInventory = 0.0;
-                if (!lNumericBlanks(7)) {
-                    GasCooler(GCNum).RefOpCharge = Numbers(7);
-                }
-                if (!lNumericBlanks(8)) {
-                    GasCooler(GCNum).RefReceiverInventory = Numbers(8);
-                }
-                if (!lNumericBlanks(9)) {
-                    GasCooler(GCNum).RefPipingInventory = Numbers(9);
-                }
+                readRefrigInventory(GasCooler(GCNum).RefOpCharge,
+                                    GasCooler(GCNum).RefReceiverInventory,
+                                    GasCooler(GCNum).RefPipingInventory,
+                                    7, 8, 9);
 
             } // Read input for REFRIGERATION:GasCooler:AirCooled
         } // NumSimulationGasCooler > 0
