@@ -1819,6 +1819,17 @@ void GetRefrigerationInput(EnergyPlusData &state)
 
             // Here have to do select case with one numeric field with units of W and the second with units of W/deltaC,
             //  (RatedRH field only used for RatedCapacityTotal type)
+            // Lambda used by every switch case below to issue the same "must be > 0" error.
+            auto showCoilCapError = [&](int numNum, std::string_view units = "W") {
+                ShowSevereError(state,
+                                EnergyPlus::format("{}{}=\"{}\", {} must be input and be greater than 0 {}",
+                                                   RoutineName,
+                                                   CurrentModuleObject,
+                                                   WarehouseCoil(CoilID).Name,
+                                                   cNumericFieldNames(numNum),
+                                                   units));
+                ErrorsFound = true;
+            };
             { // Why is this a new scope
                 switch (WarehouseCoil(CoilID).ratingType) {
                 case RatingType::UnitLoadFactorSens: {
@@ -1827,13 +1838,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
                     if (!lNumericBlanks(NumNum) && Numbers(NumNum) > 0.0) {
                         WarehouseCoil(CoilID).UnitLoadFactorSens = Numbers(NumNum);
                     } else {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} must be input and be greater than 0 W/C",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           WarehouseCoil(CoilID).Name,
-                                                           cNumericFieldNames(NumNum)));
-                        ErrorsFound = true;
+                        showCoilCapError(NumNum, "W/C");
                     }
                 } break;
 
@@ -1859,13 +1864,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
                             WarehouseCoil(CoilID).RatedRH = Numbers(NumNum) / 100.0;
                         }
                     } else {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} must be input and be greater than 0 W",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           WarehouseCoil(CoilID).Name,
-                                                           cNumericFieldNames(NumNum)));
-                        ErrorsFound = true;
+                        showCoilCapError(NumNum);
                     }
                 } break;
 
@@ -1876,13 +1875,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
                         WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum);
                         WarehouseCoil(CoilID).SCIndex = 1;
                     } else {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} must be input and be greater than 0 W",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           WarehouseCoil(CoilID).Name,
-                                                           cNumericFieldNames(NumNum)));
-                        ErrorsFound = true;
+                        showCoilCapError(NumNum);
                     }
                 } break;
 
@@ -1894,13 +1887,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
                         WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum) / EuropeanWetCoilFactor[0];
                         WarehouseCoil(CoilID).SCIndex = 1;
                     } else {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} must be input and be greater than 0 W",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           WarehouseCoil(CoilID).Name,
-                                                           cNumericFieldNames(NumNum)));
-                        ErrorsFound = true;
+                        showCoilCapError(NumNum);
                     }
                 } break;
 
@@ -1911,13 +1898,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
                         WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum);
                         WarehouseCoil(CoilID).SCIndex = 2;
                     } else {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} must be input and be greater than 0 W",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           WarehouseCoil(CoilID).Name,
-                                                           cNumericFieldNames(NumNum)));
-                        ErrorsFound = true;
+                        showCoilCapError(NumNum);
                     }
                 } break;
 
@@ -1929,13 +1910,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
                         WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum) / EuropeanWetCoilFactor[1];
                         WarehouseCoil(CoilID).SCIndex = 2;
                     } else {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} must be input and be greater than 0 W",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           WarehouseCoil(CoilID).Name,
-                                                           cNumericFieldNames(NumNum)));
-                        ErrorsFound = true;
+                        showCoilCapError(NumNum);
                     }
                 } break;
 
@@ -1946,13 +1921,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
                         WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum);
                         WarehouseCoil(CoilID).SCIndex = 3;
                     } else {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} must be input and be greater than 0 W",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           WarehouseCoil(CoilID).Name,
-                                                           cNumericFieldNames(NumNum)));
-                        ErrorsFound = true;
+                        showCoilCapError(NumNum);
                     }
                 } break;
 
@@ -1964,13 +1933,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
                         WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum) / EuropeanWetCoilFactor[2];
                         WarehouseCoil(CoilID).SCIndex = 3;
                     } else {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} must be input and be greater than 0 W",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           WarehouseCoil(CoilID).Name,
-                                                           cNumericFieldNames(NumNum)));
-                        ErrorsFound = true;
+                        showCoilCapError(NumNum);
                     }
                 } break;
 
@@ -1981,13 +1944,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
                         WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum);
                         WarehouseCoil(CoilID).SCIndex = 4;
                     } else {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} must be input and be greater than 0 W",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           WarehouseCoil(CoilID).Name,
-                                                           cNumericFieldNames(NumNum)));
-                        ErrorsFound = true;
+                        showCoilCapError(NumNum);
                     }
                 } break;
 
@@ -1999,13 +1956,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
                         WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum) / EuropeanWetCoilFactor[3];
                         WarehouseCoil(CoilID).SCIndex = 4;
                     } else {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} must be input and be greater than 0 W",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           WarehouseCoil(CoilID).Name,
-                                                           cNumericFieldNames(NumNum)));
-                        ErrorsFound = true;
+                        showCoilCapError(NumNum);
                     }
                 } break;
 
@@ -2016,13 +1967,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
                         WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum);
                         WarehouseCoil(CoilID).SCIndex = 5;
                     } else {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} must be input and be greater than 0 W",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           WarehouseCoil(CoilID).Name,
-                                                           cNumericFieldNames(NumNum)));
-                        ErrorsFound = true;
+                        showCoilCapError(NumNum);
                     }
                 } break;
 
@@ -2034,13 +1979,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
                         WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum) / EuropeanWetCoilFactor[4];
                         WarehouseCoil(CoilID).SCIndex = 5;
                     } else {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} must be input and be greater than 0 W",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           WarehouseCoil(CoilID).Name,
-                                                           cNumericFieldNames(NumNum)));
-                        ErrorsFound = true;
+                        showCoilCapError(NumNum);
                     }
                 } break;
 
