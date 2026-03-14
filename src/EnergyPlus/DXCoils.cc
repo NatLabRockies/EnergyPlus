@@ -1126,6 +1126,31 @@ static void setupCondensateTankSupply(EnergyPlusData &state,
     }
 }
 
+// Parse the condenser type string for a single-mode coil (CondenserType index 1).
+// condenserTypeStr = Alphas(N), alphaFieldName = cAlphaFields(N).
+// Sets CondenserType(1) and ReportEvapCondVars; logs error if unrecognised.
+static void parseCondenserType(EnergyPlusData &state,
+                                DXCoilData &thisDXCoil,
+                                std::string_view routineName,
+                                std::string const &currentModuleObject,
+                                std::string const &condenserTypeStr,
+                                std::string const &alphaFieldName,
+                                bool isBlank,
+                                bool &errorsFound)
+{
+    if ((Util::SameString(condenserTypeStr, "AirCooled")) || isBlank) {
+        thisDXCoil.CondenserType(1) = DataHeatBalance::RefrigCondenserType::Air;
+    } else if (Util::SameString(condenserTypeStr, "EvaporativelyCooled")) {
+        thisDXCoil.CondenserType(1) = DataHeatBalance::RefrigCondenserType::Evap;
+        thisDXCoil.ReportEvapCondVars = true;
+    } else {
+        ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", routineName, currentModuleObject, thisDXCoil.Name));
+        ShowContinueError(state, EnergyPlus::format("...{}=\"{}\":", alphaFieldName, condenserTypeStr));
+        ShowContinueError(state, "...must be AirCooled or EvaporativelyCooled.");
+        errorsFound = true;
+    }
+}
+
 void GetDXCoils(EnergyPlusData &state)
 {
 
@@ -1567,17 +1592,7 @@ void GetDXCoils(EnergyPlusData &state)
             }
         }
 
-        if ((Util::SameString(Alphas(11), "AirCooled")) || lAlphaBlanks(11)) {
-            thisDXCoil.CondenserType(1) = DataHeatBalance::RefrigCondenserType::Air;
-        } else if (Util::SameString(Alphas(11), "EvaporativelyCooled")) {
-            thisDXCoil.CondenserType(1) = DataHeatBalance::RefrigCondenserType::Evap;
-            thisDXCoil.ReportEvapCondVars = true;
-        } else {
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-            ShowContinueError(state, EnergyPlus::format("...{}=\"{}\":", cAlphaFields(11), Alphas(11)));
-            ShowContinueError(state, "...must be AirCooled or EvaporativelyCooled.");
-            ErrorsFound = true;
-        }
+        parseCondenserType(state, thisDXCoil, RoutineName, CurrentModuleObject, Alphas(11), cAlphaFields(11), lAlphaBlanks(11), ErrorsFound);
 
         thisDXCoil.EvapCondEffect(1) = Numbers(12);
         if (thisDXCoil.EvapCondEffect(1) < 0.0 || thisDXCoil.EvapCondEffect(1) > 1.0) {
@@ -2992,17 +3007,7 @@ void GetDXCoils(EnergyPlusData &state)
             }
         }
 
-        if ((Util::SameString(Alphas(13), "AirCooled")) || lAlphaBlanks(13)) {
-            thisDXCoil.CondenserType(1) = DataHeatBalance::RefrigCondenserType::Air;
-        } else if (Util::SameString(Alphas(13), "EvaporativelyCooled")) {
-            thisDXCoil.CondenserType(1) = DataHeatBalance::RefrigCondenserType::Evap;
-            thisDXCoil.ReportEvapCondVars = true;
-        } else {
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-            ShowContinueError(state, EnergyPlus::format("...{}=\"{}\":", cAlphaFields(13), Alphas(13)));
-            ShowContinueError(state, "...must be AirCooled or EvaporativelyCooled.");
-            ErrorsFound = true;
-        }
+        parseCondenserType(state, thisDXCoil, RoutineName, CurrentModuleObject, Alphas(13), cAlphaFields(13), lAlphaBlanks(13), ErrorsFound);
 
         thisDXCoil.EvapCondEffect(1) = Numbers(15);
         if (thisDXCoil.EvapCondEffect(1) < 0.0 || thisDXCoil.EvapCondEffect(1) > 1.0) {
@@ -4242,17 +4247,7 @@ void GetDXCoils(EnergyPlusData &state)
             }
         }
 
-        if ((Util::SameString(Alphas(6), "AirCooled")) || lAlphaBlanks(6)) {
-            thisDXCoil.CondenserType(1) = DataHeatBalance::RefrigCondenserType::Air;
-        } else if (Util::SameString(Alphas(6), "EvaporativelyCooled")) {
-            thisDXCoil.CondenserType(1) = DataHeatBalance::RefrigCondenserType::Evap;
-            thisDXCoil.ReportEvapCondVars = true;
-        } else {
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-            ShowContinueError(state, EnergyPlus::format("...{}=\"{}\":", cAlphaFields(6), Alphas(6)));
-            ShowContinueError(state, "...must be AirCooled or EvaporativelyCooled.");
-            ErrorsFound = true;
-        }
+        parseCondenserType(state, thisDXCoil, RoutineName, CurrentModuleObject, Alphas(6), cAlphaFields(6), lAlphaBlanks(6), ErrorsFound);
 
         // Get Water System tank connections
         //  A8, \field Name of Water Storage Tank for Supply
