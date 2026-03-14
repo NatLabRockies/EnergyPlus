@@ -769,6 +769,73 @@ static void validateAndCapPLFCurve(EnergyPlusData &state,
     }
 }
 
+static void setupEvapCondOutputVars(EnergyPlusData &state, DXCoilData &thisDXCoil)
+{
+    SetupOutputVariable(state,
+                        "Cooling Coil Condenser Inlet Temperature",
+                        Constant::Units::C,
+                        thisDXCoil.CondInletTemp,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        thisDXCoil.Name);
+    SetupOutputVariable(state,
+                        "Cooling Coil Evaporative Condenser Water Volume",
+                        Constant::Units::m3,
+                        thisDXCoil.EvapWaterConsump,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        thisDXCoil.Name,
+                        Constant::eResource::Water,
+                        OutputProcessor::Group::HVAC,
+                        OutputProcessor::EndUseCat::Cooling);
+    SetupOutputVariable(state,
+                        "Cooling Coil Evaporative Condenser Mains Supply Water Volume",
+                        Constant::Units::m3,
+                        thisDXCoil.EvapWaterConsump,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        thisDXCoil.Name,
+                        Constant::eResource::MainsWater,
+                        OutputProcessor::Group::HVAC,
+                        OutputProcessor::EndUseCat::Cooling);
+    SetupOutputVariable(state,
+                        "Cooling Coil Evaporative Condenser Pump Electricity Rate",
+                        Constant::Units::W,
+                        thisDXCoil.EvapCondPumpElecPower,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        thisDXCoil.Name);
+    SetupOutputVariable(state,
+                        "Cooling Coil Evaporative Condenser Pump Electricity Energy",
+                        Constant::Units::J,
+                        thisDXCoil.EvapCondPumpElecConsumption,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        thisDXCoil.Name,
+                        Constant::eResource::Electricity,
+                        OutputProcessor::Group::HVAC,
+                        OutputProcessor::EndUseCat::Cooling);
+    if (thisDXCoil.BasinHeaterPowerFTempDiff > 0.0) {
+        SetupOutputVariable(state,
+                            "Cooling Coil Basin Heater Electricity Rate",
+                            Constant::Units::W,
+                            thisDXCoil.BasinHeaterPower,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Average,
+                            thisDXCoil.Name);
+        SetupOutputVariable(state,
+                            "Cooling Coil Basin Heater Electricity Energy",
+                            Constant::Units::J,
+                            thisDXCoil.BasinHeaterConsumption,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Sum,
+                            thisDXCoil.Name,
+                            Constant::eResource::Electricity,
+                            OutputProcessor::Group::HVAC,
+                            OutputProcessor::EndUseCat::Cooling);
+    }
+}
+
 void GetDXCoils(EnergyPlusData &state)
 {
 
@@ -5430,69 +5497,7 @@ void GetDXCoils(EnergyPlusData &state)
             }
 
             if (thisDXCoil.ReportEvapCondVars) {
-                SetupOutputVariable(state,
-                                    "Cooling Coil Condenser Inlet Temperature",
-                                    Constant::Units::C,
-                                    thisDXCoil.CondInletTemp,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    thisDXCoil.Name);
-                SetupOutputVariable(state,
-                                    "Cooling Coil Evaporative Condenser Water Volume",
-                                    Constant::Units::m3,
-                                    thisDXCoil.EvapWaterConsump,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    thisDXCoil.Name,
-                                    Constant::eResource::Water,
-                                    OutputProcessor::Group::HVAC,
-                                    OutputProcessor::EndUseCat::Cooling);
-                SetupOutputVariable(state,
-                                    "Cooling Coil Evaporative Condenser Mains Supply Water Volume",
-                                    Constant::Units::m3,
-                                    thisDXCoil.EvapWaterConsump,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    thisDXCoil.Name,
-                                    Constant::eResource::MainsWater,
-                                    OutputProcessor::Group::HVAC,
-                                    OutputProcessor::EndUseCat::Cooling);
-                SetupOutputVariable(state,
-                                    "Cooling Coil Evaporative Condenser Pump Electricity Rate",
-                                    Constant::Units::W,
-                                    thisDXCoil.EvapCondPumpElecPower,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    thisDXCoil.Name);
-                SetupOutputVariable(state,
-                                    "Cooling Coil Evaporative Condenser Pump Electricity Energy",
-                                    Constant::Units::J,
-                                    thisDXCoil.EvapCondPumpElecConsumption,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    thisDXCoil.Name,
-                                    Constant::eResource::Electricity,
-                                    OutputProcessor::Group::HVAC,
-                                    OutputProcessor::EndUseCat::Cooling);
-                if (thisDXCoil.BasinHeaterPowerFTempDiff > 0.0) {
-                    SetupOutputVariable(state,
-                                        "Cooling Coil Basin Heater Electricity Rate",
-                                        Constant::Units::W,
-                                        thisDXCoil.BasinHeaterPower,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        thisDXCoil.Name);
-                    SetupOutputVariable(state,
-                                        "Cooling Coil Basin Heater Electricity Energy",
-                                        Constant::Units::J,
-                                        thisDXCoil.BasinHeaterConsumption,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        thisDXCoil.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::HVAC,
-                                        OutputProcessor::EndUseCat::Cooling);
-                }
+                setupEvapCondOutputVars(state, thisDXCoil);
             }
 
             if (thisDXCoil.DXCoilType_Num == HVAC::CoilDX_CoolingTwoStageWHumControl) {
@@ -5753,69 +5758,7 @@ void GetDXCoils(EnergyPlusData &state)
             }
 
             if (thisDXCoil.ReportEvapCondVars) {
-                SetupOutputVariable(state,
-                                    "Cooling Coil Condenser Inlet Temperature",
-                                    Constant::Units::C,
-                                    thisDXCoil.CondInletTemp,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    thisDXCoil.Name);
-                SetupOutputVariable(state,
-                                    "Cooling Coil Evaporative Condenser Water Volume",
-                                    Constant::Units::m3,
-                                    thisDXCoil.EvapWaterConsump,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    thisDXCoil.Name,
-                                    Constant::eResource::Water,
-                                    OutputProcessor::Group::HVAC,
-                                    OutputProcessor::EndUseCat::Cooling);
-                SetupOutputVariable(state,
-                                    "Cooling Coil Evaporative Condenser Mains Supply Water Volume",
-                                    Constant::Units::m3,
-                                    thisDXCoil.EvapWaterConsump,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    thisDXCoil.Name,
-                                    Constant::eResource::MainsWater,
-                                    OutputProcessor::Group::HVAC,
-                                    OutputProcessor::EndUseCat::Cooling);
-                SetupOutputVariable(state,
-                                    "Cooling Coil Evaporative Condenser Pump Electricity Rate",
-                                    Constant::Units::W,
-                                    thisDXCoil.EvapCondPumpElecPower,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    thisDXCoil.Name);
-                SetupOutputVariable(state,
-                                    "Cooling Coil Evaporative Condenser Pump Electricity Energy",
-                                    Constant::Units::J,
-                                    thisDXCoil.EvapCondPumpElecConsumption,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    thisDXCoil.Name,
-                                    Constant::eResource::Electricity,
-                                    OutputProcessor::Group::HVAC,
-                                    OutputProcessor::EndUseCat::Cooling);
-                if (thisDXCoil.BasinHeaterPowerFTempDiff > 0.0) {
-                    SetupOutputVariable(state,
-                                        "Cooling Coil Basin Heater Electricity Rate",
-                                        Constant::Units::W,
-                                        thisDXCoil.BasinHeaterPower,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        thisDXCoil.Name);
-                    SetupOutputVariable(state,
-                                        "Cooling Coil Basin Heater Electricity Energy",
-                                        Constant::Units::J,
-                                        thisDXCoil.BasinHeaterConsumption,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        thisDXCoil.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::HVAC,
-                                        OutputProcessor::EndUseCat::Cooling);
-                }
+                setupEvapCondOutputVars(state, thisDXCoil);
             }
 
         }
@@ -6041,69 +5984,7 @@ void GetDXCoils(EnergyPlusData &state)
                                 thisDXCoil.Name);
 
             if (thisDXCoil.ReportEvapCondVars) {
-                SetupOutputVariable(state,
-                                    "Cooling Coil Condenser Inlet Temperature",
-                                    Constant::Units::C,
-                                    thisDXCoil.CondInletTemp,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    thisDXCoil.Name);
-                SetupOutputVariable(state,
-                                    "Cooling Coil Evaporative Condenser Water Volume",
-                                    Constant::Units::m3,
-                                    thisDXCoil.EvapWaterConsump,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    thisDXCoil.Name,
-                                    Constant::eResource::Water,
-                                    OutputProcessor::Group::HVAC,
-                                    OutputProcessor::EndUseCat::Cooling);
-                SetupOutputVariable(state,
-                                    "Cooling Coil Evaporative Condenser Mains Supply Water Volume",
-                                    Constant::Units::m3,
-                                    thisDXCoil.EvapWaterConsump,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    thisDXCoil.Name,
-                                    Constant::eResource::MainsWater,
-                                    OutputProcessor::Group::HVAC,
-                                    OutputProcessor::EndUseCat::Cooling);
-                SetupOutputVariable(state,
-                                    "Cooling Coil Evaporative Condenser Pump Electricity Rate",
-                                    Constant::Units::W,
-                                    thisDXCoil.EvapCondPumpElecPower,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    thisDXCoil.Name);
-                SetupOutputVariable(state,
-                                    "Cooling Coil Evaporative Condenser Pump Electricity Energy",
-                                    Constant::Units::J,
-                                    thisDXCoil.EvapCondPumpElecConsumption,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    thisDXCoil.Name,
-                                    Constant::eResource::Electricity,
-                                    OutputProcessor::Group::HVAC,
-                                    OutputProcessor::EndUseCat::Cooling);
-                if (thisDXCoil.BasinHeaterPowerFTempDiff > 0.0) {
-                    SetupOutputVariable(state,
-                                        "Cooling Coil Basin Heater Electricity Rate",
-                                        Constant::Units::W,
-                                        thisDXCoil.BasinHeaterPower,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        thisDXCoil.Name);
-                    SetupOutputVariable(state,
-                                        "Cooling Coil Basin Heater Electricity Energy",
-                                        Constant::Units::J,
-                                        thisDXCoil.BasinHeaterConsumption,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        thisDXCoil.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::HVAC,
-                                        OutputProcessor::EndUseCat::Cooling);
-                }
+                setupEvapCondOutputVars(state, thisDXCoil);
             }
             if (thisDXCoil.IsSecondaryDXCoilInZone) {
                 SetupOutputVariable(state,
