@@ -1104,6 +1104,28 @@ static void setupEvapCondOutputVars(EnergyPlusData &state, DXCoilData &thisDXCoi
     }
 }
 
+// Set the condensate collect mode on a coil and register its tank supply component when needed.
+// Call after assigning thisDXCoil.CondensateCollectName from Alphas(N); pass lAlphaBlanks(N) as isBlank.
+static void setupCondensateTankSupply(EnergyPlusData &state,
+                                      DXCoilData &thisDXCoil,
+                                      bool isBlank,
+                                      std::string const &currentModuleObject,
+                                      bool &errorsFound)
+{
+    if (isBlank) {
+        thisDXCoil.CondensateCollectMode = CondensateCollectAction::Discard;
+    } else {
+        thisDXCoil.CondensateCollectMode = CondensateCollectAction::ToTank;
+        WaterManager::SetupTankSupplyComponent(state,
+                                               thisDXCoil.Name,
+                                               currentModuleObject,
+                                               thisDXCoil.CondensateCollectName,
+                                               errorsFound,
+                                               thisDXCoil.CondensateTankID,
+                                               thisDXCoil.CondensateTankSupplyARRID);
+    }
+}
+
 void GetDXCoils(EnergyPlusData &state)
 {
 
@@ -1633,18 +1655,7 @@ void GetDXCoils(EnergyPlusData &state)
 
         // A14; \field Name of Water Storage Tank for Condensate Collection
         thisDXCoil.CondensateCollectName = Alphas(14);
-        if (lAlphaBlanks(14)) {
-            thisDXCoil.CondensateCollectMode = CondensateCollectAction::Discard;
-        } else {
-            thisDXCoil.CondensateCollectMode = CondensateCollectAction::ToTank;
-            SetupTankSupplyComponent(state,
-                                     thisDXCoil.Name,
-                                     CurrentModuleObject,
-                                     thisDXCoil.CondensateCollectName,
-                                     ErrorsFound,
-                                     thisDXCoil.CondensateTankID,
-                                     thisDXCoil.CondensateTankSupplyARRID);
-        }
+        setupCondensateTankSupply(state, thisDXCoil, lAlphaBlanks(14), CurrentModuleObject, ErrorsFound);
 
         //   Basin heater power as a function of temperature must be greater than or equal to 0
         thisDXCoil.BasinHeaterPowerFTempDiff = Numbers(17);
@@ -2227,18 +2238,7 @@ void GetDXCoils(EnergyPlusData &state)
 
         // A15; \field Name of Water Storage Tank for Condensate Collection
         thisDXCoil.CondensateCollectName = Alphas(15);
-        if (lAlphaBlanks(15)) {
-            thisDXCoil.CondensateCollectMode = CondensateCollectAction::Discard;
-        } else {
-            thisDXCoil.CondensateCollectMode = CondensateCollectAction::ToTank;
-            SetupTankSupplyComponent(state,
-                                     thisDXCoil.Name,
-                                     CurrentModuleObject,
-                                     thisDXCoil.CondensateCollectName,
-                                     ErrorsFound,
-                                     thisDXCoil.CondensateTankID,
-                                     thisDXCoil.CondensateTankSupplyARRID);
-        }
+        setupCondensateTankSupply(state, thisDXCoil, lAlphaBlanks(15), CurrentModuleObject, ErrorsFound);
 
         // Set minimum OAT for compressor operation
         thisDXCoil.MinOATCompressor = Numbers(5);
@@ -3072,18 +3072,7 @@ void GetDXCoils(EnergyPlusData &state)
 
         // A15; \field Name of Water Storage Tank for Condensate Collection
         thisDXCoil.CondensateCollectName = Alphas(15);
-        if (lAlphaBlanks(15)) {
-            thisDXCoil.CondensateCollectMode = CondensateCollectAction::Discard;
-        } else {
-            thisDXCoil.CondensateCollectMode = CondensateCollectAction::ToTank;
-            SetupTankSupplyComponent(state,
-                                     thisDXCoil.Name,
-                                     CurrentModuleObject,
-                                     thisDXCoil.CondensateCollectName,
-                                     ErrorsFound,
-                                     thisDXCoil.CondensateTankID,
-                                     thisDXCoil.CondensateTankSupplyARRID);
-        }
+        setupCondensateTankSupply(state, thisDXCoil, lAlphaBlanks(15), CurrentModuleObject, ErrorsFound);
 
         // Basin heater power as a function of temperature must be greater than or equal to 0
         thisDXCoil.BasinHeaterPowerFTempDiff = Numbers(21);
@@ -4283,18 +4272,7 @@ void GetDXCoils(EnergyPlusData &state)
 
         // A9; \field Name of Water Storage Tank for Condensate Collection
         thisDXCoil.CondensateCollectName = Alphas(8);
-        if (lAlphaBlanks(8)) {
-            thisDXCoil.CondensateCollectMode = CondensateCollectAction::Discard;
-        } else {
-            thisDXCoil.CondensateCollectMode = CondensateCollectAction::ToTank;
-            SetupTankSupplyComponent(state,
-                                     thisDXCoil.Name,
-                                     CurrentModuleObject,
-                                     thisDXCoil.CondensateCollectName,
-                                     ErrorsFound,
-                                     thisDXCoil.CondensateTankID,
-                                     thisDXCoil.CondensateTankSupplyARRID);
-        }
+        setupCondensateTankSupply(state, thisDXCoil, lAlphaBlanks(8), CurrentModuleObject, ErrorsFound);
 
         // Set minimum OAT for compressor operation
         thisDXCoil.MinOATCompressor = Numbers(1);
@@ -5321,18 +5299,7 @@ void GetDXCoils(EnergyPlusData &state)
         TestCompSet(state, CurrentModuleObject, Alphas(1), Alphas(5), Alphas(6), "Air Nodes");
 
         thisDXCoil.CondensateCollectName = Alphas(7);
-        if (lAlphaBlanks(7)) {
-            thisDXCoil.CondensateCollectMode = CondensateCollectAction::Discard;
-        } else {
-            thisDXCoil.CondensateCollectMode = CondensateCollectAction::ToTank;
-            SetupTankSupplyComponent(state,
-                                     thisDXCoil.Name,
-                                     CurrentModuleObject,
-                                     thisDXCoil.CondensateCollectName,
-                                     ErrorsFound,
-                                     thisDXCoil.CondensateTankID,
-                                     thisDXCoil.CondensateTankSupplyARRID);
-        }
+        setupCondensateTankSupply(state, thisDXCoil, lAlphaBlanks(7), CurrentModuleObject, ErrorsFound);
     }
 
     if (ErrorsFound) {
@@ -5545,18 +5512,7 @@ void GetDXCoils(EnergyPlusData &state)
         }
 
         thisDXCoil.CondensateCollectName = Alphas(6);
-        if (lAlphaBlanks(6)) {
-            thisDXCoil.CondensateCollectMode = CondensateCollectAction::Discard;
-        } else {
-            thisDXCoil.CondensateCollectMode = CondensateCollectAction::ToTank;
-            SetupTankSupplyComponent(state,
-                                     thisDXCoil.Name,
-                                     CurrentModuleObject,
-                                     thisDXCoil.CondensateCollectName,
-                                     ErrorsFound,
-                                     thisDXCoil.CondensateTankID,
-                                     thisDXCoil.CondensateTankSupplyARRID);
-        }
+        setupCondensateTankSupply(state, thisDXCoil, lAlphaBlanks(6), CurrentModuleObject, ErrorsFound);
     }
 
     if (ErrorsFound) {
