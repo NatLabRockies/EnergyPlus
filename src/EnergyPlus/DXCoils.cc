@@ -690,6 +690,18 @@ void SimDXCoilMultiMode(EnergyPlusData &state,
     ReportDXCoil(state, DXCoilNum);
 }
 
+// Helper: allocate and populate single-performance-mode numeric field names for a coil.
+// Eliminates the 3-line allocate/assign boilerplate repeated for each single-mode coil type.
+static void allocateSinglePerfModeNumericFields(EnergyPlusData &state,
+                                                int const DXCoilNum,
+                                                int const MaxNumbers,
+                                                Array1D_string const &cNumericFields)
+{
+    state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode.allocate(1);
+    state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode(1).FieldNames.allocate(MaxNumbers);
+    state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode(1).FieldNames = cNumericFields;
+}
+
 // Helper: scan a PLF(PLR) curve over [0,1], cap if out of [0.7,1.0], and emit warnings.
 // This consolidates the identical PLF validation block repeated across coil-type parsers.
 static void validateAndCapPLFCurve(EnergyPlusData &state,
@@ -938,9 +950,7 @@ void GetDXCoils(EnergyPlusData &state)
 
         ++DXCoilNum;
         // allocate single performance mode for numeric field strings used for sizing routine
-        state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode.allocate(1);
-        state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode(1).FieldNames.allocate(MaxNumbers);
-        state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode(1).FieldNames = cNumericFields;
+        allocateSinglePerfModeNumericFields(state, DXCoilNum, MaxNumbers, cNumericFields);
         // ErrorsFound will be set to True if problem was found, left untouched otherwise
         VerifyUniqueCoilName(state, CurrentModuleObject, Alphas(1), ErrorsFound, CurrentModuleObject + " Name");
 
@@ -1967,9 +1977,7 @@ void GetDXCoils(EnergyPlusData &state)
 
         ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
         // allocate single performance mode for numeric field strings used for sizing routine
-        state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode.allocate(1);
-        state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode(1).FieldNames.allocate(MaxNumbers);
-        state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode(1).FieldNames = cNumericFields;
+        allocateSinglePerfModeNumericFields(state, DXCoilNum, MaxNumbers, cNumericFields);
         // ErrorsFound will be set to True if problem was found, left untouched otherwise
         VerifyUniqueCoilName(state, CurrentModuleObject, Alphas(1), ErrorsFound, CurrentModuleObject + " Name");
 
@@ -2422,9 +2430,7 @@ void GetDXCoils(EnergyPlusData &state)
         ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
 
         // allocate single performance mode for numeric field strings used for sizing routine
-        state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode.allocate(1);
-        state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode(1).FieldNames.allocate(MaxNumbers);
-        state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode(1).FieldNames = cNumericFields;
+        allocateSinglePerfModeNumericFields(state, DXCoilNum, MaxNumbers, cNumericFields);
         // ErrorsFound will be set to True if problem was found, left untouched otherwise
         VerifyUniqueCoilName(state, CurrentModuleObject, Alphas(1), ErrorsFound, CurrentModuleObject + " Name");
 
@@ -2965,9 +2971,7 @@ void GetDXCoils(EnergyPlusData &state)
             s_ip->markObjectAsUsed(CurrentModuleObject, thisObjectName);
 
             // allocate single performance mode for numeric field strings used for sizing routine
-            state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode.allocate(1);
-            state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode(1).FieldNames.allocate(MaxNumbers);
-            state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode(1).FieldNames = cNumericFields;
+            allocateSinglePerfModeNumericFields(state, DXCoilNum, MaxNumbers, cNumericFields);
 
             auto &thisDXCoil = state.dataDXCoils->DXCoil(DXCoilNum);
             thisDXCoil.Name = Util::makeUPPER(thisObjectName);
@@ -3505,9 +3509,7 @@ void GetDXCoils(EnergyPlusData &state)
             s_ip->markObjectAsUsed(CurrentModuleObject, thisObjectName);
 
             // allocate single performance mode for numeric field strings used for sizing routine
-            state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode.allocate(1);
-            state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode(1).FieldNames.allocate(MaxNumbers);
-            state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode(1).FieldNames = cNumericFields;
+            allocateSinglePerfModeNumericFields(state, DXCoilNum, MaxNumbers, cNumericFields);
 
             auto &thisDXCoil = state.dataDXCoils->DXCoil(DXCoilNum);
             thisDXCoil.Name = Util::makeUPPER(thisObjectName);
@@ -3933,9 +3935,7 @@ void GetDXCoils(EnergyPlusData &state)
 
         ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
         // allocate single performance mode for numeric field strings used for sizing routine (all fields are in this object)
-        state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode.allocate(1);
-        state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode(1).FieldNames.allocate(MaxNumbers);
-        state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode(1).FieldNames = cNumericFields;
+        allocateSinglePerfModeNumericFields(state, DXCoilNum, MaxNumbers, cNumericFields);
         // ErrorsFound will be set to True if problem was found, left untouched otherwise
         VerifyUniqueCoilName(state, CurrentModuleObject, Alphas(1), ErrorsFound, CurrentModuleObject + " Name");
 
@@ -4502,9 +4502,7 @@ void GetDXCoils(EnergyPlusData &state)
 
         // *** will have to circle back to this one to fix since the multispeed coil has all fields in this coil object ***
         // allocate single performance mode for numeric field strings used for sizing routine
-        state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode.allocate(1);
-        state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode(1).FieldNames.allocate(MaxNumbers);
-        state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode(1).FieldNames = cNumericFields;
+        allocateSinglePerfModeNumericFields(state, DXCoilNum, MaxNumbers, cNumericFields);
         // ErrorsFound will be set to True if problem was found, left untouched otherwise
         VerifyUniqueCoilName(state, CurrentModuleObject, Alphas(1), ErrorsFound, CurrentModuleObject + " Name");
 
@@ -4982,9 +4980,7 @@ void GetDXCoils(EnergyPlusData &state)
         ++DXCoilNum;
 
         // allocate single performance mode for numeric field strings used for sizing routine
-        state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode.allocate(1);
-        state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode(1).FieldNames.allocate(MaxNumbers);
-        state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode(1).FieldNames = cNumericFields;
+        allocateSinglePerfModeNumericFields(state, DXCoilNum, MaxNumbers, cNumericFields);
         // ErrorsFound will be set to True if problem was found, left untouched otherwise
         VerifyUniqueCoilName(state, CurrentModuleObject, Alphas(1), ErrorsFound, CurrentModuleObject + " Name");
 
@@ -5124,9 +5120,7 @@ void GetDXCoils(EnergyPlusData &state)
         ++DXCoilNum;
 
         // allocate single performance mode for numeric field strings used for sizing routine
-        state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode.allocate(1);
-        state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode(1).FieldNames.allocate(MaxNumbers);
-        state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode(1).FieldNames = cNumericFields;
+        allocateSinglePerfModeNumericFields(state, DXCoilNum, MaxNumbers, cNumericFields);
         // ErrorsFound will be set to True if problem was found, left untouched otherwise
         VerifyUniqueCoilName(state, CurrentModuleObject, Alphas(1), ErrorsFound, CurrentModuleObject + " Name");
 
@@ -5254,9 +5248,7 @@ void GetDXCoils(EnergyPlusData &state)
         ++DXCoilNum;
 
         // allocate single performance mode for numeric field strings used for sizing routine
-        state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode.allocate(1);
-        state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode(1).FieldNames.allocate(MaxNumbers);
-        state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode(1).FieldNames = cNumericFields;
+        allocateSinglePerfModeNumericFields(state, DXCoilNum, MaxNumbers, cNumericFields);
         // ErrorsFound will be set to True if problem was found, left untouched otherwise
         VerifyUniqueCoilName(state, CurrentModuleObject, Alphas(1), ErrorsFound, CurrentModuleObject + " Name");
 
@@ -5370,9 +5362,7 @@ void GetDXCoils(EnergyPlusData &state)
         ++DXCoilNum;
 
         // allocate single performance mode for numeric field strings used for sizing routine
-        state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode.allocate(1);
-        state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode(1).FieldNames.allocate(MaxNumbers);
-        state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode(1).FieldNames = cNumericFields;
+        allocateSinglePerfModeNumericFields(state, DXCoilNum, MaxNumbers, cNumericFields);
         // ErrorsFound will be set to True if problem was found, left untouched otherwise
         VerifyUniqueCoilName(state, CurrentModuleObject, Alphas(1), ErrorsFound, CurrentModuleObject + " Name");
 
