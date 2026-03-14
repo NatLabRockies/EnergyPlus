@@ -740,6 +740,15 @@ void GetRefrigerationInput(EnergyPlusData &state)
         return {listNum, caseNum, walkInNum, coilNum};
     };
 
+    // Helper lambda to initialise the NumSysAttach counter and pre-allocate the SysNum
+    // array on each condenser / gas-cooler object.  Uses an abbreviated-function-template
+    // (C++20 auto parameter) so it works for both RefrigCondenserData and GasCoolerData
+    // without code duplication.
+    auto initSysAttach = [&](auto &obj, int numSystems) {
+        obj.NumSysAttach = 0;
+        if (!allocated(obj.SysNum)) obj.SysNum.allocate(numSystems);
+    };
+
     // Helper lambda used in the System / TranscriticalSystem WalkIn assignment loops.
     // For detailed systems, a DefrostCapacity of -99 is a sentinel meaning the field was
     // left blank; blank input is only a warning for compressor racks but an error for
@@ -3037,10 +3046,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 }
 
                 // set start of count for number of systems attached to this condenser
-                Condenser(CondNum).NumSysAttach = 0;
-                if (!allocated(Condenser(CondNum).SysNum)) {
-                    Condenser(CondNum).SysNum.allocate(state.dataRefrigCase->NumRefrigSystems);
-                }
+                initSysAttach(Condenser(CondNum), state.dataRefrigCase->NumRefrigSystems);
 
                 // set CondenserType and rated temperature difference (51.7 - 35)C per ARI 460
                 Condenser(CondNum).CondenserType = DataHeatBalance::RefrigCondenserType::Air;
@@ -3170,10 +3176,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 state.dataHeatBal->HeatReclaimRefrigCondenser(CondNum).Name = Alphas(1);
 
                 // set start of count for number of systems attached to this condenser
-                Condenser(CondNum).NumSysAttach = 0;
-                if (!allocated(Condenser(CondNum).SysNum)) {
-                    Condenser(CondNum).SysNum.allocate(state.dataRefrigCase->NumRefrigSystems);
-                }
+                initSysAttach(Condenser(CondNum), state.dataRefrigCase->NumRefrigSystems);
 
                 // set CondenserType and rated Heat Rejection per ARI 490 rating
                 Condenser(CondNum).CondenserType = DataHeatBalance::RefrigCondenserType::Evap;
@@ -3420,10 +3423,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 state.dataHeatBal->HeatReclaimRefrigCondenser(CondNum).Name = Alphas(1);
 
                 // set start of count for number of systems attached to this condenser
-                Condenser(CondNum).NumSysAttach = 0;
-                if (!allocated(Condenser(CondNum).SysNum)) {
-                    Condenser(CondNum).SysNum.allocate(state.dataRefrigCase->NumRefrigSystems);
-                }
+                initSysAttach(Condenser(CondNum), state.dataRefrigCase->NumRefrigSystems);
 
                 // set CondenserType and rated Heat Rejection per ARI 450 rating
                 Condenser(CondNum).CondenserType = DataHeatBalance::RefrigCondenserType::Water;
@@ -3596,10 +3596,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 state.dataHeatBal->HeatReclaimRefrigCondenser(CondNum).Name = Alphas(1);
 
                 // set start of count for number of systems attached to this condenser
-                Condenser(CondNum).NumSysAttach = 0;
-                if (!allocated(Condenser(CondNum).SysNum)) {
-                    Condenser(CondNum).SysNum.allocate(state.dataRefrigCase->NumRefrigSystems);
-                }
+                initSysAttach(Condenser(CondNum), state.dataRefrigCase->NumRefrigSystems);
 
                 // set CondenserType
                 Condenser(CondNum).CondenserType = DataHeatBalance::RefrigCondenserType::Cascade;
@@ -3681,10 +3678,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 }
 
                 // set start of count for number of systems attached to this gas cooler
-                GasCooler(GCNum).NumSysAttach = 0;
-                if (!allocated(GasCooler(GCNum).SysNum)) {
-                    GasCooler(GCNum).SysNum.allocate(state.dataRefrigCase->NumTransRefrigSystems);
-                }
+                initSysAttach(GasCooler(GCNum), state.dataRefrigCase->NumTransRefrigSystems);
 
                 GasCooler(GCNum).RatedApproachT = 3.0; // rated CO2 gas cooler approach temperature
                 if (GasCooler(GCNum).CapCurvePtr > 0) {
