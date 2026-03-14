@@ -740,6 +740,21 @@ void GetRefrigerationInput(EnergyPlusData &state)
         return {listNum, caseNum, walkInNum, coilNum};
     };
 
+    // Helper lambda used in the System / TranscriticalSystem WalkIn assignment loops.
+    // For detailed systems, a DefrostCapacity of -99 is a sentinel meaning the field was
+    // left blank; blank input is only a warning for compressor racks but an error for
+    // detailed systems that need capacity for both fluid and electric defrost types.
+    auto checkWalkInDefrostCap = [&](int walkInID) {
+        if (WalkIn(walkInID).DefrostCapacity <= -98.0) {
+            ShowSevereError(state,
+                            EnergyPlus::format("{}Refrigeration:WalkIn=\"{}\", Defrost capacity must be greater than or equal to 0 W for "
+                                               "electric and hotfluid defrost types",
+                                               RoutineName,
+                                               WalkIn(walkInID).Name));
+            ErrorsFound = true;
+        }
+    };
+
     // bbb stovall note for future - for all curve entries, see if need fail on type or if can allow table input
     if (state.dataRefrigCase->NumSimulationCases > 0) {
         CurrentModuleObject = "Refrigeration:Case";
@@ -5009,19 +5024,9 @@ void GetRefrigerationInput(EnergyPlusData &state)
                     ++WalkIn(WalkInID).NumSysAttach;
                     NominalTotalWalkInCap += WalkIn(WalkInID).DesignRatedCap;
                     System(RefrigSysNum).RefInventory += WalkIn(WalkInID).DesignRefrigInventory;
-                    // Defrost capacity is treated differently by compressor racks and detailed systems,
-                    //  so this value may be adjusted (or warnings issued) after the walkin is assigned
-                    //  to either the rack or system.
-                    // for walkins served by detailed system, need capacity for both fluid and electric types.
-                    if (WalkIn(WalkInID).DefrostCapacity <= -98.0) {
-                        // - 99 used as a flag for blank input error message for detailed systems
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}Refrigeration:WalkIn=\"{}\", Defrost capacity must be greater than or equal to 0 W for "
-                                                           "electric and hotfluid defrost types",
-                                                           RoutineName,
-                                                           WalkIn(WalkInID).Name));
-                        ErrorsFound = true;
-                    }
+                    // Defrost capacity is treated differently by compressor racks and detailed systems;
+                    // for detailed systems, blank input is an error (flag value <= -98).
+                    checkWalkInDefrostCap(WalkInID);
                     // Find design evaporating temperature for system by getting min design evap for ALL loads
                     if ((WalkInIndex == 1) && (System(RefrigSysNum).NumCases == 0) && (System(RefrigSysNum).NumCoils == 0)) {
                         // note use walk in index, not walkinid here to get
@@ -5997,19 +6002,9 @@ void GetRefrigerationInput(EnergyPlusData &state)
                     ++WalkIn(WalkInID).NumSysAttach;
                     NominalTotalWalkInCapMT += WalkIn(WalkInID).DesignRatedCap;
                     TransSystem(TransRefrigSysNum).RefInventory += WalkIn(WalkInID).DesignRefrigInventory;
-                    // Defrost capacity is treated differently by compressor racks and detailed systems,
-                    //  so this value may be adjusted (or warnings issued) after the walkin is assigned
-                    //  to either the rack or system.
-                    // for walkins served by detailed system, need capacity for both fluid and electric types.
-                    if (WalkIn(WalkInID).DefrostCapacity <= -98.0) {
-                        // - 99 used as a flag for blank input error message for detailed systems
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}Refrigeration:WalkIn=\"{}\", Defrost capacity must be greater than or equal to 0 W for "
-                                                           "electric and hotfluid defrost types",
-                                                           RoutineName,
-                                                           WalkIn(WalkInID).Name));
-                        ErrorsFound = true;
-                    }
+                    // Defrost capacity is treated differently by compressor racks and detailed systems;
+                    // for detailed systems, blank input is an error (flag value <= -98).
+                    checkWalkInDefrostCap(WalkInID);
                     // Find design evaporating temperature for system by getting min design evap for ALL loads
                     if ((WalkInIndex == 1) && (TransSystem(TransRefrigSysNum).NumCasesMT == 0)) {
                         // note use walk in index, not walkinid here to get
@@ -6110,19 +6105,9 @@ void GetRefrigerationInput(EnergyPlusData &state)
                     ++WalkIn(WalkInID).NumSysAttach;
                     NominalTotalWalkInCapLT += WalkIn(WalkInID).DesignRatedCap;
                     TransSystem(TransRefrigSysNum).RefInventory += WalkIn(WalkInID).DesignRefrigInventory;
-                    // Defrost capacity is treated differently by compressor racks and detailed systems,
-                    //  so this value may be adjusted (or warnings issued) after the walkin is assigned
-                    //  to either the rack or system.
-                    // for walkins served by detailed system, need capacity for both fluid and electric types.
-                    if (WalkIn(WalkInID).DefrostCapacity <= -98.0) {
-                        // - 99 used as a flag for blank input error message for detailed systems
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}Refrigeration:WalkIn=\"{}\", Defrost capacity must be greater than or equal to 0 W for "
-                                                           "electric and hotfluid defrost types",
-                                                           RoutineName,
-                                                           WalkIn(WalkInID).Name));
-                        ErrorsFound = true;
-                    }
+                    // Defrost capacity is treated differently by compressor racks and detailed systems;
+                    // for detailed systems, blank input is an error (flag value <= -98).
+                    checkWalkInDefrostCap(WalkInID);
                     // Find design evaporating temperature for system by getting min design evap for ALL loads
                     if ((WalkInIndex == 1) && (TransSystem(TransRefrigSysNum).NumCasesLT == 0)) {
                         // note use walk in index, not walkinid here to get
