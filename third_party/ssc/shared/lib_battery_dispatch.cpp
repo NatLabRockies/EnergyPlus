@@ -26,6 +26,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <math.h>
 #include <algorithm>
+#include <climits>
+#include <cstdint>
 
 /*
 Dispatch base class
