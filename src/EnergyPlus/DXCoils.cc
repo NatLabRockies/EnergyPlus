@@ -902,6 +902,103 @@ static void setupVRFCoolingOutputVars(EnergyPlusData &state, DXCoilData &thisDXC
                         thisDXCoil.Name);
 }
 
+// Setup 4 common DX heating coil output variables (Heating Rate/Energy + Electricity Rate/Energy)
+static void setupStdDXHeatingOutputVars(EnergyPlusData &state, DXCoilData &thisDXCoil)
+{
+    SetupOutputVariable(state,
+                        "Heating Coil Heating Rate",
+                        Constant::Units::W,
+                        thisDXCoil.TotalHeatingEnergyRate,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        thisDXCoil.Name);
+    SetupOutputVariable(state,
+                        "Heating Coil Heating Energy",
+                        Constant::Units::J,
+                        thisDXCoil.TotalHeatingEnergy,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        thisDXCoil.Name,
+                        Constant::eResource::EnergyTransfer,
+                        OutputProcessor::Group::HVAC,
+                        OutputProcessor::EndUseCat::HeatingCoils);
+    SetupOutputVariable(state,
+                        "Heating Coil Electricity Rate",
+                        Constant::Units::W,
+                        thisDXCoil.ElecHeatingPower,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        thisDXCoil.Name);
+    SetupOutputVariable(state,
+                        "Heating Coil Electricity Energy",
+                        Constant::Units::J,
+                        thisDXCoil.ElecHeatingConsumption,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        thisDXCoil.Name,
+                        Constant::eResource::Electricity,
+                        OutputProcessor::Group::HVAC,
+                        OutputProcessor::EndUseCat::Heating);
+}
+
+// Setup crankcase heater and runtime fraction output variables common to heating coils
+static void setupDXHeatingCrankcaseAndRuntimeOutputVars(EnergyPlusData &state, DXCoilData &thisDXCoil)
+{
+    SetupOutputVariable(state,
+                        "Heating Coil Crankcase Heater Electricity Rate",
+                        Constant::Units::W,
+                        thisDXCoil.CrankcaseHeaterPower,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        thisDXCoil.Name);
+    SetupOutputVariable(state,
+                        "Heating Coil Crankcase Heater Electricity Energy",
+                        Constant::Units::J,
+                        thisDXCoil.CrankcaseHeaterConsumption,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        thisDXCoil.Name,
+                        Constant::eResource::Electricity,
+                        OutputProcessor::Group::HVAC,
+                        OutputProcessor::EndUseCat::Heating);
+    SetupOutputVariable(state,
+                        "Heating Coil Runtime Fraction",
+                        Constant::Units::None,
+                        thisDXCoil.HeatingCoilRuntimeFraction,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        thisDXCoil.Name);
+}
+
+// Setup 3 standard VRF heating coil output variables (Heating Rate/Energy + Runtime Fraction)
+static void setupVRFHeatingOutputVars(EnergyPlusData &state, DXCoilData &thisDXCoil)
+{
+    SetupOutputVariable(state,
+                        "Heating Coil Heating Rate",
+                        Constant::Units::W,
+                        thisDXCoil.TotalHeatingEnergyRate,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        thisDXCoil.Name);
+    SetupOutputVariable(state,
+                        "Heating Coil Heating Energy",
+                        Constant::Units::J,
+                        thisDXCoil.TotalHeatingEnergy,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        thisDXCoil.Name,
+                        Constant::eResource::EnergyTransfer,
+                        OutputProcessor::Group::HVAC,
+                        OutputProcessor::EndUseCat::HeatingCoils);
+    SetupOutputVariable(state,
+                        "Heating Coil Runtime Fraction",
+                        Constant::Units::None,
+                        thisDXCoil.HeatingCoilRuntimeFraction,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        thisDXCoil.Name);
+}
+
 static void setupEvapCondOutputVars(EnergyPlusData &state, DXCoilData &thisDXCoil)
 {
     SetupOutputVariable(state,
@@ -5589,40 +5686,7 @@ void GetDXCoils(EnergyPlusData &state)
         else if (thisDXCoil.DXCoilType_Num == HVAC::CoilDX_HeatingEmpirical) {
             // Setup Report Variables for Heating Equipment
             // CurrentModuleObject='Coil:Heating:DX:SingleSpeed'
-            SetupOutputVariable(state,
-                                "Heating Coil Heating Rate",
-                                Constant::Units::W,
-                                thisDXCoil.TotalHeatingEnergyRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Heating Coil Heating Energy",
-                                Constant::Units::J,
-                                thisDXCoil.TotalHeatingEnergy,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                thisDXCoil.Name,
-                                Constant::eResource::EnergyTransfer,
-                                OutputProcessor::Group::HVAC,
-                                OutputProcessor::EndUseCat::HeatingCoils);
-            SetupOutputVariable(state,
-                                "Heating Coil Electricity Rate",
-                                Constant::Units::W,
-                                thisDXCoil.ElecHeatingPower,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Heating Coil Electricity Energy",
-                                Constant::Units::J,
-                                thisDXCoil.ElecHeatingConsumption,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                thisDXCoil.Name,
-                                Constant::eResource::Electricity,
-                                OutputProcessor::Group::HVAC,
-                                OutputProcessor::EndUseCat::Heating);
+            setupStdDXHeatingOutputVars(state, thisDXCoil);
             SetupOutputVariable(state,
                                 "Heating Coil Defrost Electricity Rate",
                                 Constant::Units::W,
@@ -5640,30 +5704,7 @@ void GetDXCoils(EnergyPlusData &state)
                                 Constant::eResource::Electricity,
                                 OutputProcessor::Group::HVAC,
                                 OutputProcessor::EndUseCat::Heating);
-            SetupOutputVariable(state,
-                                "Heating Coil Crankcase Heater Electricity Rate",
-                                Constant::Units::W,
-                                thisDXCoil.CrankcaseHeaterPower,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Heating Coil Crankcase Heater Electricity Energy",
-                                Constant::Units::J,
-                                thisDXCoil.CrankcaseHeaterConsumption,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                thisDXCoil.Name,
-                                Constant::eResource::Electricity,
-                                OutputProcessor::Group::HVAC,
-                                OutputProcessor::EndUseCat::Heating);
-            SetupOutputVariable(state,
-                                "Heating Coil Runtime Fraction",
-                                Constant::Units::None,
-                                thisDXCoil.HeatingCoilRuntimeFraction,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
+            setupDXHeatingCrankcaseAndRuntimeOutputVars(state, thisDXCoil);
             if (thisDXCoil.IsSecondaryDXCoilInZone) {
                 SetupOutputVariable(state,
                                     "Secondary Coil Total Heat Removal Rate",
@@ -5998,40 +6039,7 @@ void GetDXCoils(EnergyPlusData &state)
         else if (thisDXCoil.DXCoilType_Num == HVAC::CoilDX_MultiSpeedHeating) {
             // Setup Report Variables for Heating Equipment:
             // CurrentModuleObject='Coil:Heating:DX:MultiSpeed'
-            SetupOutputVariable(state,
-                                "Heating Coil Heating Rate",
-                                Constant::Units::W,
-                                thisDXCoil.TotalHeatingEnergyRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Heating Coil Heating Energy",
-                                Constant::Units::J,
-                                thisDXCoil.TotalHeatingEnergy,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                thisDXCoil.Name,
-                                Constant::eResource::EnergyTransfer,
-                                OutputProcessor::Group::HVAC,
-                                OutputProcessor::EndUseCat::HeatingCoils);
-            SetupOutputVariable(state,
-                                "Heating Coil Electricity Rate",
-                                Constant::Units::W,
-                                thisDXCoil.ElecHeatingPower,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Heating Coil Electricity Energy",
-                                Constant::Units::J,
-                                thisDXCoil.ElecHeatingConsumption,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                thisDXCoil.Name,
-                                Constant::eResource::Electricity,
-                                OutputProcessor::Group::HVAC,
-                                OutputProcessor::EndUseCat::Heating);
+            setupStdDXHeatingOutputVars(state, thisDXCoil);
 
             if (thisDXCoil.FuelType != Constant::eFuel::Electricity) {
                 std::string_view sFuelType = Constant::eFuelNames[static_cast<int>(thisDXCoil.FuelType)];
@@ -6093,30 +6101,7 @@ void GetDXCoils(EnergyPlusData &state)
                                     OutputProcessor::EndUseCat::Heating);
             }
 
-            SetupOutputVariable(state,
-                                "Heating Coil Crankcase Heater Electricity Rate",
-                                Constant::Units::W,
-                                thisDXCoil.CrankcaseHeaterPower,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Heating Coil Crankcase Heater Electricity Energy",
-                                Constant::Units::J,
-                                thisDXCoil.CrankcaseHeaterConsumption,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                thisDXCoil.Name,
-                                Constant::eResource::Electricity,
-                                OutputProcessor::Group::HVAC,
-                                OutputProcessor::EndUseCat::Heating);
-            SetupOutputVariable(state,
-                                "Heating Coil Runtime Fraction",
-                                Constant::Units::None,
-                                thisDXCoil.HeatingCoilRuntimeFraction,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
+            setupDXHeatingCrankcaseAndRuntimeOutputVars(state, thisDXCoil);
 
             if (thisDXCoil.IsSecondaryDXCoilInZone) {
                 SetupOutputVariable(state,
@@ -6198,30 +6183,7 @@ void GetDXCoils(EnergyPlusData &state)
         else if (thisDXCoil.DXCoilType_Num == HVAC::CoilVRF_Heating) {
             // Setup Report Variables for Heating Equipment:
             // CurrentModuleObject='Coil:Heating:DX:VariableRefrigerantFlow
-            SetupOutputVariable(state,
-                                "Heating Coil Heating Rate",
-                                Constant::Units::W,
-                                thisDXCoil.TotalHeatingEnergyRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Heating Coil Heating Energy",
-                                Constant::Units::J,
-                                thisDXCoil.TotalHeatingEnergy,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                thisDXCoil.Name,
-                                Constant::eResource::EnergyTransfer,
-                                OutputProcessor::Group::HVAC,
-                                OutputProcessor::EndUseCat::HeatingCoils);
-            SetupOutputVariable(state,
-                                "Heating Coil Runtime Fraction",
-                                Constant::Units::None,
-                                thisDXCoil.HeatingCoilRuntimeFraction,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
+            setupVRFHeatingOutputVars(state, thisDXCoil);
 
             if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
                 SetupEMSActuator(state,
@@ -6288,30 +6250,7 @@ void GetDXCoils(EnergyPlusData &state)
         else if (thisDXCoil.DXCoilType_Num == HVAC::CoilVRF_FluidTCtrl_Heating) {
             // Setup Report Variables for Heating Equipment:
             // CurrentModuleObject='Coil:Heating:DX:VariableRefrigerantFlow:FluidTemperatureControl
-            SetupOutputVariable(state,
-                                "Heating Coil Heating Rate",
-                                Constant::Units::W,
-                                thisDXCoil.TotalHeatingEnergyRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Heating Coil Heating Energy",
-                                Constant::Units::J,
-                                thisDXCoil.TotalHeatingEnergy,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                thisDXCoil.Name,
-                                Constant::eResource::EnergyTransfer,
-                                OutputProcessor::Group::HVAC,
-                                OutputProcessor::EndUseCat::HeatingCoils);
-            SetupOutputVariable(state,
-                                "Heating Coil Runtime Fraction",
-                                Constant::Units::None,
-                                thisDXCoil.HeatingCoilRuntimeFraction,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
+            setupVRFHeatingOutputVars(state, thisDXCoil);
             // Following for VRF_FluidTCtrl Only
             SetupOutputVariable(state,
                                 "Heating Coil VRF Condensing Temperature",
