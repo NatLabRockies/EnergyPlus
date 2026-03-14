@@ -999,6 +999,44 @@ static void setupVRFHeatingOutputVars(EnergyPlusData &state, DXCoilData &thisDXC
                         thisDXCoil.Name);
 }
 
+// Setup condensate tank output variables (2 vars) when CondensateCollectMode == ToTank
+static void setupCondensateTankOutputVars(EnergyPlusData &state, DXCoilData &thisDXCoil)
+{
+    if (thisDXCoil.CondensateCollectMode == CondensateCollectAction::ToTank) {
+        SetupOutputVariable(state,
+                            "Cooling Coil Condensate Volume Flow Rate",
+                            Constant::Units::m3_s,
+                            thisDXCoil.CondensateVdot,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Average,
+                            thisDXCoil.Name);
+        SetupOutputVariable(state,
+                            "Cooling Coil Condensate Volume",
+                            Constant::Units::m3,
+                            thisDXCoil.CondensateVol,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Sum,
+                            thisDXCoil.Name,
+                            Constant::eResource::OnSiteWater,
+                            OutputProcessor::Group::HVAC,
+                            OutputProcessor::EndUseCat::Condensate);
+    }
+}
+
+// Setup secondary cooling coil heat rejection output variable
+static void setupSecondaryCoolingHeatRejectionOutputVar(EnergyPlusData &state, DXCoilData &thisDXCoil)
+{
+    if (thisDXCoil.IsSecondaryDXCoilInZone) {
+        SetupOutputVariable(state,
+                            "Secondary Coil Heat Rejection Rate",
+                            Constant::Units::W,
+                            thisDXCoil.SecCoilSensibleHeatGainRate,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Average,
+                            thisDXCoil.Name);
+    }
+}
+
 static void setupEvapCondOutputVars(EnergyPlusData &state, DXCoilData &thisDXCoil)
 {
     SetupOutputVariable(state,
@@ -5627,36 +5665,10 @@ void GetDXCoils(EnergyPlusData &state)
             // Setup Report Variables for Cooling Equipment
             // CurrentModuleObject='Coil:Cooling:DX:SingleSpeed/Coil:Cooling:DX:TwoStageWithHumidityControlMode'
             setupStdCoolingOutputVars(state, thisDXCoil);
-            if (thisDXCoil.IsSecondaryDXCoilInZone) {
-                SetupOutputVariable(state,
-                                    "Secondary Coil Heat Rejection Rate",
-                                    Constant::Units::W,
-                                    thisDXCoil.SecCoilSensibleHeatGainRate,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    thisDXCoil.Name);
-            }
+            setupSecondaryCoolingHeatRejectionOutputVar(state, thisDXCoil);
 
             // do we report these even if no storage tank?
-            if (thisDXCoil.CondensateCollectMode == CondensateCollectAction::ToTank) {
-                SetupOutputVariable(state,
-                                    "Cooling Coil Condensate Volume Flow Rate",
-                                    Constant::Units::m3_s,
-                                    thisDXCoil.CondensateVdot,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    thisDXCoil.Name);
-                SetupOutputVariable(state,
-                                    "Cooling Coil Condensate Volume",
-                                    Constant::Units::m3,
-                                    thisDXCoil.CondensateVol,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    thisDXCoil.Name,
-                                    Constant::eResource::OnSiteWater,
-                                    OutputProcessor::Group::HVAC,
-                                    OutputProcessor::EndUseCat::Condensate);
-            }
+            setupCondensateTankOutputVars(state, thisDXCoil);
 
             if (thisDXCoil.ReportEvapCondVars) {
                 setupEvapCondOutputVars(state, thisDXCoil);
@@ -5765,35 +5777,9 @@ void GetDXCoils(EnergyPlusData &state)
             // Setup Report Variables for Cooling Equipment
             // CurrentModuleObject='Coil:Cooling:DX:TwoSpeed'
             setupStdCoolingOutputVars(state, thisDXCoil);
-            if (thisDXCoil.IsSecondaryDXCoilInZone) {
-                SetupOutputVariable(state,
-                                    "Secondary Coil Heat Rejection Rate",
-                                    Constant::Units::W,
-                                    thisDXCoil.SecCoilSensibleHeatGainRate,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    thisDXCoil.Name);
-            }
+            setupSecondaryCoolingHeatRejectionOutputVar(state, thisDXCoil);
 
-            if (thisDXCoil.CondensateCollectMode == CondensateCollectAction::ToTank) {
-                SetupOutputVariable(state,
-                                    "Cooling Coil Condensate Volume Flow Rate",
-                                    Constant::Units::m3_s,
-                                    thisDXCoil.CondensateVdot,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    thisDXCoil.Name);
-                SetupOutputVariable(state,
-                                    "Cooling Coil Condensate Volume",
-                                    Constant::Units::m3,
-                                    thisDXCoil.CondensateVol,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    thisDXCoil.Name,
-                                    Constant::eResource::OnSiteWater,
-                                    OutputProcessor::Group::HVAC,
-                                    OutputProcessor::EndUseCat::Condensate);
-            }
+            setupCondensateTankOutputVars(state, thisDXCoil);
 
             if (thisDXCoil.ReportEvapCondVars) {
                 setupEvapCondOutputVars(state, thisDXCoil);
@@ -6024,15 +6010,7 @@ void GetDXCoils(EnergyPlusData &state)
             if (thisDXCoil.ReportEvapCondVars) {
                 setupEvapCondOutputVars(state, thisDXCoil);
             }
-            if (thisDXCoil.IsSecondaryDXCoilInZone) {
-                SetupOutputVariable(state,
-                                    "Secondary Coil Heat Rejection Rate",
-                                    Constant::Units::W,
-                                    thisDXCoil.SecCoilSensibleHeatGainRate,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    thisDXCoil.Name);
-            }
+            setupSecondaryCoolingHeatRejectionOutputVar(state, thisDXCoil);
 
         }
 
@@ -6158,25 +6136,7 @@ void GetDXCoils(EnergyPlusData &state)
             // Setup Report Variables for Cooling Equipment:
             // CurrentModuleObject='Coil:Cooling:DX:VariableRefrigerantFlow
             setupVRFCoolingOutputVars(state, thisDXCoil);
-            if (thisDXCoil.CondensateCollectMode == CondensateCollectAction::ToTank) {
-                SetupOutputVariable(state,
-                                    "Cooling Coil Condensate Volume Flow Rate",
-                                    Constant::Units::m3_s,
-                                    thisDXCoil.CondensateVdot,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    thisDXCoil.Name);
-                SetupOutputVariable(state,
-                                    "Cooling Coil Condensate Volume",
-                                    Constant::Units::m3,
-                                    thisDXCoil.CondensateVol,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    thisDXCoil.Name,
-                                    Constant::eResource::OnSiteWater,
-                                    OutputProcessor::Group::HVAC,
-                                    OutputProcessor::EndUseCat::Condensate);
-            }
+            setupCondensateTankOutputVars(state, thisDXCoil);
         }
 
         // VRF heating coil report variables
@@ -6225,25 +6185,7 @@ void GetDXCoils(EnergyPlusData &state)
                                 OutputProcessor::StoreType::Average,
                                 thisDXCoil.Name);
 
-            if (thisDXCoil.CondensateCollectMode == CondensateCollectAction::ToTank) {
-                SetupOutputVariable(state,
-                                    "Cooling Coil Condensate Volume Flow Rate",
-                                    Constant::Units::m3_s,
-                                    thisDXCoil.CondensateVdot,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    thisDXCoil.Name);
-                SetupOutputVariable(state,
-                                    "Cooling Coil Condensate Volume",
-                                    Constant::Units::m3,
-                                    thisDXCoil.CondensateVol,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    thisDXCoil.Name,
-                                    Constant::eResource::OnSiteWater,
-                                    OutputProcessor::Group::HVAC,
-                                    OutputProcessor::EndUseCat::Condensate);
-            }
+            setupCondensateTankOutputVars(state, thisDXCoil);
         }
 
         // VRF heating coil for FluidTCtrl, report variables
