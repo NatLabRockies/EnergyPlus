@@ -1624,26 +1624,12 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 }
             }
 
-            // Calculate the number of zones exposed to walk-in based on number of input fields, all integer math,
-            // This approach used because last zone could have less than NumWIFieldsPerZone due to optional values
+            // Calculate the number of zones exposed to walk-in based on number of input fields, all integer math.
+            // Ceiling-divide total fields by fields-per-zone, capped at 6.  The last zone may supply fewer
+            // than NumWIFieldsPerZone fields because some per-zone inputs are optional.
             int NumWIFieldsPerZone = NumWIAlphaFieldsPerZone + NumWINumberFieldsPerZone;
             int NumWIFieldsTotal = NumNumbers + NumAlphas - NumWIAlphaFieldsBeforeZoneInput - NumWINumberFieldsBeforeZoneInput;
-            int NumZones = 1;
-            if (NumWIFieldsTotal > NumWIFieldsPerZone) {
-                NumZones = 2;
-            }
-            if (NumWIFieldsTotal > (2 * NumWIFieldsPerZone)) {
-                NumZones = 3;
-            }
-            if (NumWIFieldsTotal > (3 * NumWIFieldsPerZone)) {
-                NumZones = 4;
-            }
-            if (NumWIFieldsTotal > (4 * NumWIFieldsPerZone)) {
-                NumZones = 5;
-            }
-            if (NumWIFieldsTotal > (5 * NumWIFieldsPerZone)) {
-                NumZones = 6;
-            }
+            int NumZones = min(6, max(1, (NumWIFieldsTotal + NumWIFieldsPerZone - 1) / NumWIFieldsPerZone));
             WalkIn(WalkInID).NumZones = NumZones;
 
             // All variables for walk-in/zone interactions need to be allocated after know number of zones
