@@ -1126,6 +1126,28 @@ static void setupCondensateTankSupply(EnergyPlusData &state,
     }
 }
 
+// Set evaporative water supply mode and register tank demand component when needed.
+// Call after assigning thisDXCoil.EvapWaterSupplyName from Alphas(N); pass lAlphaBlanks(N) as isBlank.
+static void setupEvapWaterSupplyTank(EnergyPlusData &state,
+                                     DXCoilData &thisDXCoil,
+                                     bool isBlank,
+                                     std::string const &currentModuleObject,
+                                     bool &errorsFound)
+{
+    if (isBlank) {
+        thisDXCoil.EvapWaterSupplyMode = EvapWaterSupply::FromMains;
+    } else {
+        thisDXCoil.EvapWaterSupplyMode = EvapWaterSupply::FromTank;
+        WaterManager::SetupTankDemandComponent(state,
+                                               thisDXCoil.Name,
+                                               currentModuleObject,
+                                               thisDXCoil.EvapWaterSupplyName,
+                                               errorsFound,
+                                               thisDXCoil.EvapWaterSupTankID,
+                                               thisDXCoil.EvapWaterTankDemandARRID);
+    }
+}
+
 // Parse the condenser type string for a single-mode coil (CondenserType index 1).
 // condenserTypeStr = Alphas(N), alphaFieldName = cAlphaFields(N).
 // Sets CondenserType(1) and ReportEvapCondVars; logs error if unrecognised.
@@ -1655,18 +1677,7 @@ void GetDXCoils(EnergyPlusData &state)
         // Get Water System tank connections
         //  A13, \field Name of Water Storage Tank for Supply
         thisDXCoil.EvapWaterSupplyName = Alphas(13);
-        if (lAlphaBlanks(13)) {
-            thisDXCoil.EvapWaterSupplyMode = EvapWaterSupply::FromMains;
-        } else {
-            thisDXCoil.EvapWaterSupplyMode = EvapWaterSupply::FromTank;
-            SetupTankDemandComponent(state,
-                                     thisDXCoil.Name,
-                                     CurrentModuleObject,
-                                     thisDXCoil.EvapWaterSupplyName,
-                                     ErrorsFound,
-                                     thisDXCoil.EvapWaterSupTankID,
-                                     thisDXCoil.EvapWaterTankDemandARRID);
-        }
+        setupEvapWaterSupplyTank(state, thisDXCoil, lAlphaBlanks(13), CurrentModuleObject, ErrorsFound);
 
         // A14; \field Name of Water Storage Tank for Condensate Collection
         thisDXCoil.CondensateCollectName = Alphas(14);
@@ -2238,18 +2249,7 @@ void GetDXCoils(EnergyPlusData &state)
         // Get Water System tank connections
         //  A14, \field Name of Water Storage Tank for Supply
         thisDXCoil.EvapWaterSupplyName = Alphas(14);
-        if (lAlphaBlanks(14)) {
-            thisDXCoil.EvapWaterSupplyMode = EvapWaterSupply::FromMains;
-        } else {
-            thisDXCoil.EvapWaterSupplyMode = EvapWaterSupply::FromTank;
-            SetupTankDemandComponent(state,
-                                     thisDXCoil.Name,
-                                     CurrentModuleObject,
-                                     thisDXCoil.EvapWaterSupplyName,
-                                     ErrorsFound,
-                                     thisDXCoil.EvapWaterSupTankID,
-                                     thisDXCoil.EvapWaterTankDemandARRID);
-        }
+        setupEvapWaterSupplyTank(state, thisDXCoil, lAlphaBlanks(14), CurrentModuleObject, ErrorsFound);
 
         // A15; \field Name of Water Storage Tank for Condensate Collection
         thisDXCoil.CondensateCollectName = Alphas(15);
@@ -3062,18 +3062,7 @@ void GetDXCoils(EnergyPlusData &state)
         // Get Water System tank connections
         //  A14, \field Name of Water Storage Tank for Supply
         thisDXCoil.EvapWaterSupplyName = Alphas(14);
-        if (lAlphaBlanks(14)) {
-            thisDXCoil.EvapWaterSupplyMode = EvapWaterSupply::FromMains;
-        } else {
-            thisDXCoil.EvapWaterSupplyMode = EvapWaterSupply::FromTank;
-            SetupTankDemandComponent(state,
-                                     thisDXCoil.Name,
-                                     CurrentModuleObject,
-                                     thisDXCoil.EvapWaterSupplyName,
-                                     ErrorsFound,
-                                     thisDXCoil.EvapWaterSupTankID,
-                                     thisDXCoil.EvapWaterTankDemandARRID);
-        }
+        setupEvapWaterSupplyTank(state, thisDXCoil, lAlphaBlanks(14), CurrentModuleObject, ErrorsFound);
 
         // A15; \field Name of Water Storage Tank for Condensate Collection
         thisDXCoil.CondensateCollectName = Alphas(15);
@@ -4252,18 +4241,7 @@ void GetDXCoils(EnergyPlusData &state)
         // Get Water System tank connections
         //  A8, \field Name of Water Storage Tank for Supply
         thisDXCoil.EvapWaterSupplyName = Alphas(7);
-        if (lAlphaBlanks(7)) {
-            thisDXCoil.EvapWaterSupplyMode = EvapWaterSupply::FromMains;
-        } else {
-            thisDXCoil.EvapWaterSupplyMode = EvapWaterSupply::FromTank;
-            SetupTankDemandComponent(state,
-                                     thisDXCoil.Name,
-                                     CurrentModuleObject,
-                                     thisDXCoil.EvapWaterSupplyName,
-                                     ErrorsFound,
-                                     thisDXCoil.EvapWaterSupTankID,
-                                     thisDXCoil.EvapWaterTankDemandARRID);
-        }
+        setupEvapWaterSupplyTank(state, thisDXCoil, lAlphaBlanks(7), CurrentModuleObject, ErrorsFound);
 
         // A9; \field Name of Water Storage Tank for Condensate Collection
         thisDXCoil.CondensateCollectName = Alphas(8);
