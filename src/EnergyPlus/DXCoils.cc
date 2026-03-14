@@ -846,52 +846,30 @@ void GetDXCoils(EnergyPlusData &state)
                                     state.dataDXCoils->NumVRFHeatingFluidTCtrlCoils;
 
     // Determine max number of alpha and numeric arguments for all objects being read, in order to allocate local arrays
-    state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state, "Coil:Cooling:DX:SingleSpeed", TotalArgs, NumAlphas, NumNumbers);
-    MaxNumbers = NumNumbers;
-    MaxAlphas = NumAlphas;
-    state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state, "Coil:Heating:DX:SingleSpeed", TotalArgs, NumAlphas, NumNumbers);
-    MaxNumbers = max(MaxNumbers, NumNumbers);
-    MaxAlphas = max(MaxAlphas, NumAlphas);
-    state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state, "Coil:Cooling:DX:TwoSpeed", TotalArgs, NumAlphas, NumNumbers);
-    MaxNumbers = max(MaxNumbers, NumNumbers);
-    MaxAlphas = max(MaxAlphas, NumAlphas);
-    state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(
-        state, "Coil:Cooling:DX:TwoStageWithHumidityControlMode", TotalArgs, NumAlphas, NumNumbers);
-    MaxNumbers = max(MaxNumbers, NumNumbers);
-    MaxAlphas = max(MaxAlphas, NumAlphas);
-    state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(
-        state, HVAC::cAllCoilTypes(HVAC::CoilDX_HeatPumpWaterHeaterPumped), TotalArgs, NumAlphas, NumNumbers);
-    MaxNumbers = max(MaxNumbers, NumNumbers);
-    MaxAlphas = max(MaxAlphas, NumAlphas);
-    state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(
-        state, HVAC::cAllCoilTypes(HVAC::CoilDX_HeatPumpWaterHeaterWrapped), TotalArgs, NumAlphas, NumNumbers);
-    MaxNumbers = max(MaxNumbers, NumNumbers);
-    MaxAlphas = max(MaxAlphas, NumAlphas);
-    state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state, "Coil:Cooling:DX:MultiSpeed", TotalArgs, NumAlphas, NumNumbers);
-    MaxNumbers = max(MaxNumbers, NumNumbers);
-    MaxAlphas = max(MaxAlphas, NumAlphas);
-    state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state, "Coil:Heating:DX:MultiSpeed", TotalArgs, NumAlphas, NumNumbers);
-    MaxNumbers = max(MaxNumbers, NumNumbers);
-    MaxAlphas = max(MaxAlphas, NumAlphas);
-    state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(
-        state, HVAC::cAllCoilTypes(HVAC::CoilVRF_Cooling), TotalArgs, NumAlphas, NumNumbers);
-    MaxNumbers = max(MaxNumbers, NumNumbers);
-    MaxAlphas = max(MaxAlphas, NumAlphas);
-    state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(
-        state, HVAC::cAllCoilTypes(HVAC::CoilVRF_Heating), TotalArgs, NumAlphas, NumNumbers);
-    MaxNumbers = max(MaxNumbers, NumNumbers);
-    MaxAlphas = max(MaxAlphas, NumAlphas);
-    state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(
-        state, HVAC::cAllCoilTypes(HVAC::CoilVRF_FluidTCtrl_Cooling), TotalArgs, NumAlphas, NumNumbers);
-    MaxNumbers = max(MaxNumbers, NumNumbers);
-    MaxAlphas = max(MaxAlphas, NumAlphas);
-    state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(
-        state, HVAC::cAllCoilTypes(HVAC::CoilVRF_FluidTCtrl_Heating), TotalArgs, NumAlphas, NumNumbers);
-    MaxNumbers = max(MaxNumbers, NumNumbers);
-    MaxAlphas = max(MaxAlphas, NumAlphas);
-    state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state, "CoilPerformance:DX:Cooling", TotalArgs, NumAlphas, NumNumbers);
-    MaxNumbers = max(MaxNumbers, NumNumbers);
-    MaxAlphas = max(MaxAlphas, NumAlphas);
+    {
+        const std::array<std::string, 13> dxCoilObjectTypes = {
+            "Coil:Cooling:DX:SingleSpeed",
+            "Coil:Heating:DX:SingleSpeed",
+            "Coil:Cooling:DX:TwoSpeed",
+            "Coil:Cooling:DX:TwoStageWithHumidityControlMode",
+            std::string{HVAC::cAllCoilTypes(HVAC::CoilDX_HeatPumpWaterHeaterPumped)},
+            std::string{HVAC::cAllCoilTypes(HVAC::CoilDX_HeatPumpWaterHeaterWrapped)},
+            "Coil:Cooling:DX:MultiSpeed",
+            "Coil:Heating:DX:MultiSpeed",
+            std::string{HVAC::cAllCoilTypes(HVAC::CoilVRF_Cooling)},
+            std::string{HVAC::cAllCoilTypes(HVAC::CoilVRF_Heating)},
+            std::string{HVAC::cAllCoilTypes(HVAC::CoilVRF_FluidTCtrl_Cooling)},
+            std::string{HVAC::cAllCoilTypes(HVAC::CoilVRF_FluidTCtrl_Heating)},
+            "CoilPerformance:DX:Cooling",
+        };
+        MaxNumbers = 0;
+        MaxAlphas = 0;
+        for (auto const &objType : dxCoilObjectTypes) {
+            state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state, objType, TotalArgs, NumAlphas, NumNumbers);
+            MaxNumbers = max(MaxNumbers, NumNumbers);
+            MaxAlphas = max(MaxAlphas, NumAlphas);
+        }
+    }
 
     Alphas.allocate(MaxAlphas);
     cAlphaFields.allocate(MaxAlphas);
