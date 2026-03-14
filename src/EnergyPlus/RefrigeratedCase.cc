@@ -723,6 +723,23 @@ void GetRefrigerationInput(EnergyPlusData &state)
                                                                  cNumericFieldNames);
     };
 
+    // Helper lambda that looks up a load name (Alphas(alphaNum)) in the Case, WalkIn,
+    // CaseAndWalkInList, and optionally WarehouseCoil arrays.  Returns a tuple of
+    // {CaseAndWalkInListNum, CaseNum, WalkInNum, CoilNum} (0 = not found).
+    // Pass includeCoil=false for TranscriticalSystem load loops that do not support coils.
+    auto findLoadNames = [&](int alphaNum, bool includeCoil = true) -> std::tuple<int, int, int, int> {
+        int listNum = 0, caseNum = 0, walkInNum = 0, coilNum = 0;
+        if (state.dataRefrigCase->NumSimulationCaseAndWalkInLists > 0)
+            listNum = Util::FindItemInList(Alphas(alphaNum), CaseAndWalkInList);
+        if (state.dataRefrigCase->NumSimulationCases > 0)
+            caseNum = Util::FindItemInList(Alphas(alphaNum), RefrigCase);
+        if (state.dataRefrigCase->NumSimulationWalkIns > 0)
+            walkInNum = Util::FindItemInList(Alphas(alphaNum), WalkIn);
+        if (includeCoil && state.dataRefrigCase->NumSimulationRefrigAirChillers > 0)
+            coilNum = Util::FindItemInList(Alphas(alphaNum), WarehouseCoil);
+        return {listNum, caseNum, walkInNum, coilNum};
+    };
+
     // bbb stovall note for future - for all curve entries, see if need fail on type or if can allow table input
     if (state.dataRefrigCase->NumSimulationCases > 0) {
         CurrentModuleObject = "Refrigeration:Case";
@@ -2887,35 +2904,8 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 ErrorsFound = true;
             } else { // (.NOT. lAlphaBlanks(AlphaNum))
                 // Entry for Alphas(AlphaNum) can be either a Case, WalkIn, Coil, or CaseAndWalkInList name
-                int CaseAndWalkInListNum = 0;
-                int CaseNum = 0;
-                int WalkInNum = 0;
-                int CoilNum = 0;
-                if (state.dataRefrigCase->NumSimulationCaseAndWalkInLists > 0) {
-                    CaseAndWalkInListNum = Util::FindItemInList(Alphas(AlphaNum), CaseAndWalkInList);
-                }
-                if (state.dataRefrigCase->NumSimulationCases > 0) {
-                    CaseNum = Util::FindItemInList(Alphas(AlphaNum), RefrigCase);
-                }
-                if (state.dataRefrigCase->NumSimulationWalkIns > 0) {
-                    WalkInNum = Util::FindItemInList(Alphas(AlphaNum), WalkIn);
-                }
-                if (state.dataRefrigCase->NumSimulationRefrigAirChillers > 0) {
-                    CoilNum = Util::FindItemInList(Alphas(AlphaNum), WarehouseCoil);
-                }
-                int NumNameMatches = 0;
-                if (CaseAndWalkInListNum != 0) {
-                    ++NumNameMatches;
-                }
-                if (CaseNum != 0) {
-                    ++NumNameMatches;
-                }
-                if (WalkInNum != 0) {
-                    ++NumNameMatches;
-                }
-                if (CoilNum != 0) {
-                    ++NumNameMatches;
-                }
+                auto [CaseAndWalkInListNum, CaseNum, WalkInNum, CoilNum] = findLoadNames(AlphaNum);
+                int NumNameMatches = (CaseAndWalkInListNum != 0) + (CaseNum != 0) + (WalkInNum != 0) + (CoilNum != 0);
 
                 if (NumNameMatches != 1) { // name must uniquely point to a list or a single case or walkin
                     ErrorsFound = true;
@@ -3991,36 +3981,9 @@ void GetRefrigerationInput(EnergyPlusData &state)
                     ErrorsFound = true;
                 } else { // (.NOT. lAlphaBlanks(AlphaNum))
 
-                    // Entry for Alphas(AlphaNum) can be either a Case, WalkIn Coil, or CaseAndWalkInList name
-                    int CaseAndWalkInListNum = 0;
-                    int CaseNum = 0;
-                    int WalkInNum = 0;
-                    int CoilNum = 0;
-                    if (state.dataRefrigCase->NumSimulationCaseAndWalkInLists > 0) {
-                        CaseAndWalkInListNum = Util::FindItemInList(Alphas(AlphaNum), CaseAndWalkInList);
-                    }
-                    if (state.dataRefrigCase->NumSimulationCases > 0) {
-                        CaseNum = Util::FindItemInList(Alphas(AlphaNum), RefrigCase);
-                    }
-                    if (state.dataRefrigCase->NumSimulationWalkIns > 0) {
-                        WalkInNum = Util::FindItemInList(Alphas(AlphaNum), WalkIn);
-                    }
-                    if (state.dataRefrigCase->NumSimulationRefrigAirChillers > 0) {
-                        CoilNum = Util::FindItemInList(Alphas(AlphaNum), WarehouseCoil);
-                    }
-                    int NumNameMatches = 0;
-                    if (CaseAndWalkInListNum != 0) {
-                        ++NumNameMatches;
-                    }
-                    if (CaseNum != 0) {
-                        ++NumNameMatches;
-                    }
-                    if (WalkInNum != 0) {
-                        ++NumNameMatches;
-                    }
-                    if (CoilNum != 0) {
-                        ++NumNameMatches;
-                    }
+                    // Entry for Alphas(AlphaNum) can be either a Case, WalkIn, Coil, or CaseAndWalkInList name
+                    auto [CaseAndWalkInListNum, CaseNum, WalkInNum, CoilNum] = findLoadNames(AlphaNum);
+                    int NumNameMatches = (CaseAndWalkInListNum != 0) + (CaseNum != 0) + (WalkInNum != 0) + (CoilNum != 0);
 
                     if (NumNameMatches != 1) { // name must uniquely point to a list or a single case or walkin or coil
                         ErrorsFound = true;
@@ -5028,36 +4991,9 @@ void GetRefrigerationInput(EnergyPlusData &state)
             AlphaNum = 2;
             if (!lAlphaBlanks(AlphaNum)) {
 
-                // Entry for Alphas(AlphaNum) can be either a Case, WalkIn or CaseAndWalkInList name
-                int CaseAndWalkInListNum = 0;
-                int CaseNum = 0;
-                int WalkInNum = 0;
-                int CoilNum = 0;
-                if (state.dataRefrigCase->NumSimulationCaseAndWalkInLists > 0) {
-                    CaseAndWalkInListNum = Util::FindItemInList(Alphas(AlphaNum), CaseAndWalkInList);
-                }
-                if (state.dataRefrigCase->NumSimulationCases > 0) {
-                    CaseNum = Util::FindItemInList(Alphas(AlphaNum), RefrigCase);
-                }
-                if (state.dataRefrigCase->NumSimulationWalkIns > 0) {
-                    WalkInNum = Util::FindItemInList(Alphas(AlphaNum), WalkIn);
-                }
-                if (state.dataRefrigCase->NumSimulationRefrigAirChillers > 0) {
-                    CoilNum = Util::FindItemInList(Alphas(AlphaNum), WarehouseCoil);
-                }
-                int NumNameMatches = 0;
-                if (CaseAndWalkInListNum != 0) {
-                    ++NumNameMatches;
-                }
-                if (CaseNum != 0) {
-                    ++NumNameMatches;
-                }
-                if (WalkInNum != 0) {
-                    ++NumNameMatches;
-                }
-                if (CoilNum != 0) {
-                    ++NumNameMatches;
-                }
+                // Entry for Alphas(AlphaNum) can be either a Case, WalkIn, Coil, or CaseAndWalkInList name
+                auto [CaseAndWalkInListNum, CaseNum, WalkInNum, CoilNum] = findLoadNames(AlphaNum);
+                int NumNameMatches = (CaseAndWalkInListNum != 0) + (CaseNum != 0) + (WalkInNum != 0) + (CoilNum != 0);
 
                 if (NumNameMatches != 1) { // name must uniquely point to a list or a single case or walkin or coil
                     ErrorsFound = true;
@@ -6075,28 +6011,8 @@ void GetRefrigerationInput(EnergyPlusData &state)
             if (!lAlphaBlanks(AlphaNum)) {
 
                 // Entry for Alphas(AlphaNum) can be either a Case, WalkIn or CaseAndWalkInList name
-                int CaseAndWalkInListNum = 0;
-                int CaseNum = 0;
-                int WalkInNum = 0;
-                if (state.dataRefrigCase->NumSimulationCaseAndWalkInLists > 0) {
-                    CaseAndWalkInListNum = Util::FindItemInList(Alphas(AlphaNum), CaseAndWalkInList);
-                }
-                if (state.dataRefrigCase->NumSimulationCases > 0) {
-                    CaseNum = Util::FindItemInList(Alphas(AlphaNum), RefrigCase);
-                }
-                if (state.dataRefrigCase->NumSimulationWalkIns > 0) {
-                    WalkInNum = Util::FindItemInList(Alphas(AlphaNum), WalkIn);
-                }
-                int NumNameMatches = 0;
-                if (CaseAndWalkInListNum != 0) {
-                    ++NumNameMatches;
-                }
-                if (CaseNum != 0) {
-                    ++NumNameMatches;
-                }
-                if (WalkInNum != 0) {
-                    ++NumNameMatches;
-                }
+                auto [CaseAndWalkInListNum, CaseNum, WalkInNum, CoilNum] = findLoadNames(AlphaNum, /*includeCoil=*/false);
+                int NumNameMatches = (CaseAndWalkInListNum != 0) + (CaseNum != 0) + (WalkInNum != 0);
 
                 if (NumNameMatches != 1) { // name must uniquely point to a list or a single case or walkin or coil
                     ErrorsFound = true;
@@ -6208,28 +6124,8 @@ void GetRefrigerationInput(EnergyPlusData &state)
             if (!lAlphaBlanks(AlphaNum)) {
 
                 // Entry for Alphas(AlphaNum) can be either a Case, WalkIn or CaseAndWalkInList name
-                int CaseAndWalkInListNum = 0;
-                int CaseNum = 0;
-                int WalkInNum = 0;
-                if (state.dataRefrigCase->NumSimulationCaseAndWalkInLists > 0) {
-                    CaseAndWalkInListNum = Util::FindItemInList(Alphas(AlphaNum), CaseAndWalkInList);
-                }
-                if (state.dataRefrigCase->NumSimulationCases > 0) {
-                    CaseNum = Util::FindItemInList(Alphas(AlphaNum), RefrigCase);
-                }
-                if (state.dataRefrigCase->NumSimulationWalkIns > 0) {
-                    WalkInNum = Util::FindItemInList(Alphas(AlphaNum), WalkIn);
-                }
-                int NumNameMatches = 0;
-                if (CaseAndWalkInListNum != 0) {
-                    ++NumNameMatches;
-                }
-                if (CaseNum != 0) {
-                    ++NumNameMatches;
-                }
-                if (WalkInNum != 0) {
-                    ++NumNameMatches;
-                }
+                auto [CaseAndWalkInListNum, CaseNum, WalkInNum, CoilNum] = findLoadNames(AlphaNum, /*includeCoil=*/false);
+                int NumNameMatches = (CaseAndWalkInListNum != 0) + (CaseNum != 0) + (WalkInNum != 0);
 
                 if (NumNameMatches != 1) { // name must uniquely point to a list or a single case or walkin or coil
                     ErrorsFound = true;
