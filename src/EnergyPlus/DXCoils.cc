@@ -702,6 +702,27 @@ static void allocateSinglePerfModeNumericFields(EnergyPlusData &state,
     state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode(1).FieldNames = cNumericFields;
 }
 
+// Helper: emit "missing/blank" or "not found/invalid" severe error for a required curve field.
+// Consolidates the 5-line if/else error block that appears whenever a required curve index is 0.
+static void reportMissingOrInvalidCurve(EnergyPlusData &state,
+                                         bool const isBlank,
+                                         std::string_view const routineName,
+                                         std::string_view const objectType,
+                                         std::string_view const coilName,
+                                         std::string_view const fieldName,
+                                         std::string_view const alphaValue,
+                                         bool &ErrorsFound)
+{
+    if (isBlank) {
+        ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", routineName, objectType, coilName));
+        ShowContinueError(state, EnergyPlus::format("...required {} is blank.", fieldName));
+    } else {
+        ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", routineName, objectType, coilName));
+        ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", fieldName, alphaValue));
+    }
+    ErrorsFound = true;
+}
+
 // Helper: scan a PLF(PLR) curve over [0,1], cap if out of [0.7,1.0], and emit warnings.
 // This consolidates the identical PLF validation block repeated across coil-type parsers.
 static void validateAndCapPLFCurve(EnergyPlusData &state,
@@ -1004,14 +1025,8 @@ void GetDXCoils(EnergyPlusData &state)
 
         thisDXCoil.CCapFTemp(1) = GetCurveIndex(state, Alphas(5)); // convert curve name to number
         if (thisDXCoil.CCapFTemp(1) == 0) {
-            if (lAlphaBlanks(5)) {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(5)));
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(5), Alphas(5)));
-            }
-            ErrorsFound = true;
+            reportMissingOrInvalidCurve(
+                state, lAlphaBlanks(5), RoutineName, CurrentModuleObject, thisDXCoil.Name, cAlphaFields(5), Alphas(5), ErrorsFound);
         } else {
             // Verify Curve Object, only legal type is BiQuadratic
             ErrorsFound |= Curve::CheckCurveDims(state,
@@ -1036,14 +1051,8 @@ void GetDXCoils(EnergyPlusData &state)
 
         thisDXCoil.CCapFFlow(1) = GetCurveIndex(state, Alphas(6)); // convert curve name to number
         if (thisDXCoil.CCapFFlow(1) == 0) {
-            if (lAlphaBlanks(6)) {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(6)));
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(6), Alphas(6)));
-            }
-            ErrorsFound = true;
+            reportMissingOrInvalidCurve(
+                state, lAlphaBlanks(6), RoutineName, CurrentModuleObject, thisDXCoil.Name, cAlphaFields(6), Alphas(6), ErrorsFound);
         } else {
             // Verify Curve Object, only legal type is Quadratic
             ErrorsFound |= Curve::CheckCurveDims(state,
@@ -1062,14 +1071,8 @@ void GetDXCoils(EnergyPlusData &state)
 
         thisDXCoil.EIRFTemp(1) = GetCurveIndex(state, Alphas(7)); // convert curve name to number
         if (thisDXCoil.EIRFTemp(1) == 0) {
-            if (lAlphaBlanks(7)) {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(7)));
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(7), Alphas(7)));
-            }
-            ErrorsFound = true;
+            reportMissingOrInvalidCurve(
+                state, lAlphaBlanks(7), RoutineName, CurrentModuleObject, thisDXCoil.Name, cAlphaFields(7), Alphas(7), ErrorsFound);
         } else {
             // Verify Curve Object, only legal type is BiQuadratic
             ErrorsFound |= Curve::CheckCurveDims(state,
@@ -1094,14 +1097,8 @@ void GetDXCoils(EnergyPlusData &state)
 
         thisDXCoil.EIRFFlow(1) = GetCurveIndex(state, Alphas(8)); // convert curve name to number
         if (thisDXCoil.EIRFFlow(1) == 0) {
-            if (lAlphaBlanks(8)) {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(8)));
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(8), Alphas(8)));
-            }
-            ErrorsFound = true;
+            reportMissingOrInvalidCurve(
+                state, lAlphaBlanks(8), RoutineName, CurrentModuleObject, thisDXCoil.Name, cAlphaFields(8), Alphas(8), ErrorsFound);
         } else {
             // Verify Curve Object, only legal type is Quadratic
             ErrorsFound |= Curve::CheckCurveDims(state,
@@ -1120,14 +1117,8 @@ void GetDXCoils(EnergyPlusData &state)
 
         thisDXCoil.PLFFPLR(1) = GetCurveIndex(state, Alphas(9)); // convert curve name to number
         if (thisDXCoil.PLFFPLR(1) == 0) {
-            if (lAlphaBlanks(9)) {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(9)));
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(9), Alphas(9)));
-            }
-            ErrorsFound = true;
+            reportMissingOrInvalidCurve(
+                state, lAlphaBlanks(9), RoutineName, CurrentModuleObject, thisDXCoil.Name, cAlphaFields(9), Alphas(9), ErrorsFound);
         } else {
             // Verify Curve Object, only legal types are Quadratic or Cubic
             ErrorsFound |= Curve::CheckCurveDims(state,
@@ -2016,14 +2007,8 @@ void GetDXCoils(EnergyPlusData &state)
 
         thisDXCoil.CCapFTemp(1) = GetCurveIndex(state, Alphas(5)); // convert curve name to number
         if (thisDXCoil.CCapFTemp(1) == 0) {
-            if (lAlphaBlanks(5)) {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(5)));
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(5), Alphas(5)));
-            }
-            ErrorsFound = true;
+            reportMissingOrInvalidCurve(
+                state, lAlphaBlanks(5), RoutineName, CurrentModuleObject, thisDXCoil.Name, cAlphaFields(5), Alphas(5), ErrorsFound);
         } else {
             // only legal types are Quadratic, BiQuadratic and Cubic
             ErrorsFound |= Curve::CheckCurveDims(state,
@@ -2058,14 +2043,8 @@ void GetDXCoils(EnergyPlusData &state)
 
         thisDXCoil.CCapFFlow(1) = GetCurveIndex(state, Alphas(6)); // convert curve name to number
         if (thisDXCoil.CCapFFlow(1) == 0) {
-            if (lAlphaBlanks(6)) {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(6)));
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(6), Alphas(6)));
-            }
-            ErrorsFound = true;
+            reportMissingOrInvalidCurve(
+                state, lAlphaBlanks(6), RoutineName, CurrentModuleObject, thisDXCoil.Name, cAlphaFields(6), Alphas(6), ErrorsFound);
         } else {
             // Verify Curve Object, only legal type is Quadratic
             ErrorsFound |= Curve::CheckCurveDims(state,
@@ -2084,14 +2063,8 @@ void GetDXCoils(EnergyPlusData &state)
 
         thisDXCoil.EIRFTemp(1) = GetCurveIndex(state, Alphas(7)); // convert curve name to number
         if (thisDXCoil.EIRFTemp(1) == 0) {
-            if (lAlphaBlanks(7)) {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(7)));
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(7), Alphas(7)));
-            }
-            ErrorsFound = true;
+            reportMissingOrInvalidCurve(
+                state, lAlphaBlanks(7), RoutineName, CurrentModuleObject, thisDXCoil.Name, cAlphaFields(7), Alphas(7), ErrorsFound);
         } else {
             // only legal types are Quadratic, BiQuadratic and Cubic
             ErrorsFound |= Curve::CheckCurveDims(state,
@@ -2126,14 +2099,8 @@ void GetDXCoils(EnergyPlusData &state)
 
         thisDXCoil.EIRFFlow(1) = GetCurveIndex(state, Alphas(8)); // convert curve name to number
         if (thisDXCoil.EIRFFlow(1) == 0) {
-            if (lAlphaBlanks(8)) {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(8)));
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(8), Alphas(8)));
-            }
-            ErrorsFound = true;
+            reportMissingOrInvalidCurve(
+                state, lAlphaBlanks(8), RoutineName, CurrentModuleObject, thisDXCoil.Name, cAlphaFields(8), Alphas(8), ErrorsFound);
         } else {
             // Verify Curve Object, only legal type is Quadratic or Cubic
             ErrorsFound |= Curve::CheckCurveDims(state,
@@ -2152,14 +2119,8 @@ void GetDXCoils(EnergyPlusData &state)
 
         thisDXCoil.PLFFPLR(1) = GetCurveIndex(state, Alphas(9)); // convert curve name to number
         if (thisDXCoil.PLFFPLR(1) == 0) {
-            if (lAlphaBlanks(9)) {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(9)));
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(9), Alphas(9)));
-            }
-            ErrorsFound = true;
+            reportMissingOrInvalidCurve(
+                state, lAlphaBlanks(9), RoutineName, CurrentModuleObject, thisDXCoil.Name, cAlphaFields(9), Alphas(9), ErrorsFound);
         } else {
             // Verify Curve Object, only legal types are Quadratic or Cubic
             ErrorsFound |= Curve::CheckCurveDims(state,
@@ -2487,14 +2448,8 @@ void GetDXCoils(EnergyPlusData &state)
 
         thisDXCoil.CCapFTemp(1) = GetCurveIndex(state, Alphas(5)); // convert curve name to number
         if (thisDXCoil.CCapFTemp(1) == 0) {
-            if (lAlphaBlanks(5)) {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(5)));
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(5), Alphas(5)));
-            }
-            ErrorsFound = true;
+            reportMissingOrInvalidCurve(
+                state, lAlphaBlanks(5), RoutineName, CurrentModuleObject, thisDXCoil.Name, cAlphaFields(5), Alphas(5), ErrorsFound);
         } else {
             // Verify Curve Object, only legal type is BiQuadratic
             ErrorsFound |= Curve::CheckCurveDims(state,
@@ -2519,14 +2474,8 @@ void GetDXCoils(EnergyPlusData &state)
 
         thisDXCoil.CCapFFlow(1) = GetCurveIndex(state, Alphas(6)); // convert curve name to number
         if (thisDXCoil.CCapFFlow(1) == 0) {
-            if (lAlphaBlanks(6)) {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(6)));
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(6), Alphas(6)));
-            }
-            ErrorsFound = true;
+            reportMissingOrInvalidCurve(
+                state, lAlphaBlanks(6), RoutineName, CurrentModuleObject, thisDXCoil.Name, cAlphaFields(6), Alphas(6), ErrorsFound);
         } else {
             // Verify Curve Object, only legal type is Quadratic
             ErrorsFound |= Curve::CheckCurveDims(state,
@@ -2545,14 +2494,8 @@ void GetDXCoils(EnergyPlusData &state)
 
         thisDXCoil.EIRFTemp(1) = GetCurveIndex(state, Alphas(7)); // convert curve name to number
         if (thisDXCoil.EIRFTemp(1) == 0) {
-            if (lAlphaBlanks(7)) {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(7)));
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(7), Alphas(7)));
-            }
-            ErrorsFound = true;
+            reportMissingOrInvalidCurve(
+                state, lAlphaBlanks(7), RoutineName, CurrentModuleObject, thisDXCoil.Name, cAlphaFields(7), Alphas(7), ErrorsFound);
         } else {
             // Verify Curve Object, only legal type is BiQuadratic
             ErrorsFound |= Curve::CheckCurveDims(state,
@@ -2577,14 +2520,8 @@ void GetDXCoils(EnergyPlusData &state)
 
         thisDXCoil.EIRFFlow(1) = GetCurveIndex(state, Alphas(8)); // convert curve name to number
         if (thisDXCoil.EIRFFlow(1) == 0) {
-            if (lAlphaBlanks(8)) {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(8)));
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(8), Alphas(8)));
-            }
-            ErrorsFound = true;
+            reportMissingOrInvalidCurve(
+                state, lAlphaBlanks(8), RoutineName, CurrentModuleObject, thisDXCoil.Name, cAlphaFields(8), Alphas(8), ErrorsFound);
         } else {
             // Verify Curve Object, only legal type is Quadratic
             ErrorsFound |= Curve::CheckCurveDims(state,
@@ -2603,14 +2540,8 @@ void GetDXCoils(EnergyPlusData &state)
 
         thisDXCoil.PLFFPLR(1) = GetCurveIndex(state, Alphas(9)); // convert curve name to number
         if (thisDXCoil.PLFFPLR(1) == 0) {
-            if (lAlphaBlanks(9)) {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(9)));
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(9), Alphas(9)));
-            }
-            ErrorsFound = true;
+            reportMissingOrInvalidCurve(
+                state, lAlphaBlanks(9), RoutineName, CurrentModuleObject, thisDXCoil.Name, cAlphaFields(9), Alphas(9), ErrorsFound);
         } else {
             // Verify Curve Object, only legal types are Quadratic or Cubic
             ErrorsFound |= Curve::CheckCurveDims(state,
@@ -2652,14 +2583,8 @@ void GetDXCoils(EnergyPlusData &state)
 
         thisDXCoil.CCapFTemp2 = GetCurveIndex(state, Alphas(10)); // convert curve name to number
         if (thisDXCoil.CCapFTemp2 == 0) {
-            if (lAlphaBlanks(10)) {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(10)));
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(10), Alphas(10)));
-            }
-            ErrorsFound = true;
+            reportMissingOrInvalidCurve(
+                state, lAlphaBlanks(10), RoutineName, CurrentModuleObject, thisDXCoil.Name, cAlphaFields(10), Alphas(10), ErrorsFound);
         } else {
             // Verify Curve Object, only legal type is BiQuadratic
             ErrorsFound |= Curve::CheckCurveDims(state,
@@ -2684,14 +2609,8 @@ void GetDXCoils(EnergyPlusData &state)
 
         thisDXCoil.EIRFTemp2 = GetCurveIndex(state, Alphas(11)); // convert curve name to number
         if (thisDXCoil.EIRFTemp2 == 0) {
-            if (lAlphaBlanks(11)) {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(11)));
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(11), Alphas(11)));
-            }
-            ErrorsFound = true;
+            reportMissingOrInvalidCurve(
+                state, lAlphaBlanks(11), RoutineName, CurrentModuleObject, thisDXCoil.Name, cAlphaFields(11), Alphas(11), ErrorsFound);
         } else {
             // Verify Curve Object, only legal type is BiQuadratic
             ErrorsFound |= Curve::CheckCurveDims(state,
@@ -4171,14 +4090,14 @@ void GetDXCoils(EnergyPlusData &state)
 
             thisDXCoil.MSCCapFTemp(I) = GetCurveIndex(state, Alphas(14 + (I - 1) * 6)); // convert curve name to number
             if (thisDXCoil.MSCCapFTemp(I) == 0) {
-                if (lAlphaBlanks(14 + (I - 1) * 6)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(14 + (I - 1) * 6)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(14 + (I - 1) * 6), Alphas(14 + (I - 1) * 6)));
-                }
-                ErrorsFound = true;
+                reportMissingOrInvalidCurve(state,
+                                            lAlphaBlanks(14 + (I - 1) * 6),
+                                            RoutineName,
+                                            CurrentModuleObject,
+                                            thisDXCoil.Name,
+                                            cAlphaFields(14 + (I - 1) * 6),
+                                            Alphas(14 + (I - 1) * 6),
+                                            ErrorsFound);
             } else {
                 // Verify Curve Object, only legal type is BiQuadratic
                 ErrorsFound |= Curve::CheckCurveDims(state,
@@ -4203,14 +4122,14 @@ void GetDXCoils(EnergyPlusData &state)
 
             thisDXCoil.MSCCapFFlow(I) = GetCurveIndex(state, Alphas(15 + (I - 1) * 6)); // convert curve name to number
             if (thisDXCoil.MSCCapFFlow(I) == 0) {
-                if (lAlphaBlanks(15 + (I - 1) * 6)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(15 + (I - 1) * 6)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(15 + (I - 1) * 6), Alphas(15 + (I - 1) * 6)));
-                }
-                ErrorsFound = true;
+                reportMissingOrInvalidCurve(state,
+                                            lAlphaBlanks(15 + (I - 1) * 6),
+                                            RoutineName,
+                                            CurrentModuleObject,
+                                            thisDXCoil.Name,
+                                            cAlphaFields(15 + (I - 1) * 6),
+                                            Alphas(15 + (I - 1) * 6),
+                                            ErrorsFound);
             } else {
                 // Verify Curve Object, only legal type is Quadratic
                 ErrorsFound |= Curve::CheckCurveDims(state,
@@ -4234,14 +4153,14 @@ void GetDXCoils(EnergyPlusData &state)
 
             thisDXCoil.MSEIRFTemp(I) = GetCurveIndex(state, Alphas(16 + (I - 1) * 6)); // convert curve name to number
             if (thisDXCoil.MSEIRFTemp(I) == 0) {
-                if (lAlphaBlanks(16 + (I - 1) * 6)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(16 + (I - 1) * 6)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(16 + (I - 1) * 6), Alphas(16 + (I - 1) * 6)));
-                }
-                ErrorsFound = true;
+                reportMissingOrInvalidCurve(state,
+                                            lAlphaBlanks(16 + (I - 1) * 6),
+                                            RoutineName,
+                                            CurrentModuleObject,
+                                            thisDXCoil.Name,
+                                            cAlphaFields(16 + (I - 1) * 6),
+                                            Alphas(16 + (I - 1) * 6),
+                                            ErrorsFound);
             } else {
                 // Verify Curve Object, only legal type is BiQuadratic
                 ErrorsFound |= Curve::CheckCurveDims(state,
@@ -4266,14 +4185,14 @@ void GetDXCoils(EnergyPlusData &state)
 
             thisDXCoil.MSEIRFFlow(I) = GetCurveIndex(state, Alphas(17 + (I - 1) * 6)); // convert curve name to number
             if (thisDXCoil.MSEIRFFlow(I) == 0) {
-                if (lAlphaBlanks(17 + (I - 1) * 6)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(17 + (I - 1) * 6)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(17 + (I - 1) * 6), Alphas(17 + (I - 1) * 6)));
-                }
-                ErrorsFound = true;
+                reportMissingOrInvalidCurve(state,
+                                            lAlphaBlanks(17 + (I - 1) * 6),
+                                            RoutineName,
+                                            CurrentModuleObject,
+                                            thisDXCoil.Name,
+                                            cAlphaFields(17 + (I - 1) * 6),
+                                            Alphas(17 + (I - 1) * 6),
+                                            ErrorsFound);
             } else {
                 // Verify Curve Object, only legal type is Quadratic
                 ErrorsFound |= Curve::CheckCurveDims(state,
@@ -4297,14 +4216,14 @@ void GetDXCoils(EnergyPlusData &state)
 
             thisDXCoil.MSPLFFPLR(I) = GetCurveIndex(state, Alphas(18 + (I - 1) * 6)); // convert curve name to number
             if (thisDXCoil.MSPLFFPLR(I) == 0) {
-                if (lAlphaBlanks(18 + (I - 1) * 6)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(18 + (I - 1) * 6)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(18 + (I - 1) * 6), Alphas(18 + (I - 1) * 6)));
-                }
-                ErrorsFound = true;
+                reportMissingOrInvalidCurve(state,
+                                            lAlphaBlanks(18 + (I - 1) * 6),
+                                            RoutineName,
+                                            CurrentModuleObject,
+                                            thisDXCoil.Name,
+                                            cAlphaFields(18 + (I - 1) * 6),
+                                            Alphas(18 + (I - 1) * 6),
+                                            ErrorsFound);
             } else {
                 // Verify Curve Object, only legal types are Quadratic or Cubic
                 ErrorsFound |= Curve::CheckCurveDims(state,
@@ -4579,14 +4498,8 @@ void GetDXCoils(EnergyPlusData &state)
         thisDXCoil.DefrostEIRFT = GetCurveIndex(state, Alphas(6)); // convert curve name to number
         if (Util::SameString(Alphas(7), "ReverseCycle")) {
             if (thisDXCoil.DefrostEIRFT == 0) {
-                if (lAlphaBlanks(6)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(6)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(6), Alphas(6)));
-                }
-                ErrorsFound = true;
+                reportMissingOrInvalidCurve(
+                    state, lAlphaBlanks(6), RoutineName, CurrentModuleObject, thisDXCoil.Name, cAlphaFields(6), Alphas(6), ErrorsFound);
             } else {
                 // Verify Curve Object, only legal type is BiQuadratic
                 ErrorsFound |= Curve::CheckCurveDims(state,
@@ -4752,14 +4665,14 @@ void GetDXCoils(EnergyPlusData &state)
 
             thisDXCoil.MSCCapFFlow(I) = GetCurveIndex(state, Alphas(12 + (I - 1) * 6)); // convert curve name to number
             if (thisDXCoil.MSCCapFFlow(I) == 0) {
-                if (lAlphaBlanks(12 + (I - 1) * 6)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(12 + (I - 1) * 6)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(12 + (I - 1) * 6), Alphas(12 + (I - 1) * 6)));
-                }
-                ErrorsFound = true;
+                reportMissingOrInvalidCurve(state,
+                                            lAlphaBlanks(12 + (I - 1) * 6),
+                                            RoutineName,
+                                            CurrentModuleObject,
+                                            thisDXCoil.Name,
+                                            cAlphaFields(12 + (I - 1) * 6),
+                                            Alphas(12 + (I - 1) * 6),
+                                            ErrorsFound);
             } else {
                 // Verify Curve Object, only legal type is Quadratic
                 ErrorsFound |= Curve::CheckCurveDims(state,
@@ -4783,14 +4696,14 @@ void GetDXCoils(EnergyPlusData &state)
 
             thisDXCoil.MSEIRFTemp(I) = GetCurveIndex(state, Alphas(13 + (I - 1) * 6)); // convert curve name to number
             if (thisDXCoil.MSEIRFTemp(I) == 0) {
-                if (lAlphaBlanks(13 + (I - 1) * 6)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(13 + (I - 1) * 6)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(13 + (I - 1) * 6), Alphas(13 + (I - 1) * 6)));
-                }
-                ErrorsFound = true;
+                reportMissingOrInvalidCurve(state,
+                                            lAlphaBlanks(13 + (I - 1) * 6),
+                                            RoutineName,
+                                            CurrentModuleObject,
+                                            thisDXCoil.Name,
+                                            cAlphaFields(13 + (I - 1) * 6),
+                                            Alphas(13 + (I - 1) * 6),
+                                            ErrorsFound);
             } else {
                 // only legal types are Quadratic, BiQuadratic and Cubic
                 ErrorsFound |= Curve::CheckCurveDims(state,
@@ -4825,14 +4738,14 @@ void GetDXCoils(EnergyPlusData &state)
 
             thisDXCoil.MSEIRFFlow(I) = GetCurveIndex(state, Alphas(14 + (I - 1) * 6)); // convert curve name to number
             if (thisDXCoil.MSEIRFFlow(I) == 0) {
-                if (lAlphaBlanks(14 + (I - 1) * 6)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(14 + (I - 1) * 6)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(14 + (I - 1) * 6), Alphas(14 + (I - 1) * 6)));
-                }
-                ErrorsFound = true;
+                reportMissingOrInvalidCurve(state,
+                                            lAlphaBlanks(14 + (I - 1) * 6),
+                                            RoutineName,
+                                            CurrentModuleObject,
+                                            thisDXCoil.Name,
+                                            cAlphaFields(14 + (I - 1) * 6),
+                                            Alphas(14 + (I - 1) * 6),
+                                            ErrorsFound);
             } else {
                 // Verify Curve Object, only legal type is Quadratic
                 ErrorsFound |= Curve::CheckCurveDims(state,
@@ -4856,14 +4769,14 @@ void GetDXCoils(EnergyPlusData &state)
 
             thisDXCoil.MSPLFFPLR(I) = GetCurveIndex(state, Alphas(15 + (I - 1) * 6)); // convert curve name to number
             if (thisDXCoil.MSPLFFPLR(I) == 0) {
-                if (lAlphaBlanks(15 + (I - 1) * 6)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(15 + (I - 1) * 6)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(15 + (I - 1) * 6), Alphas(15 + (I - 1) * 6)));
-                }
-                ErrorsFound = true;
+                reportMissingOrInvalidCurve(state,
+                                            lAlphaBlanks(15 + (I - 1) * 6),
+                                            RoutineName,
+                                            CurrentModuleObject,
+                                            thisDXCoil.Name,
+                                            cAlphaFields(15 + (I - 1) * 6),
+                                            Alphas(15 + (I - 1) * 6),
+                                            ErrorsFound);
             } else {
                 // Verify Curve Object, only legal types are Quadratic or Cubic
                 ErrorsFound |= Curve::CheckCurveDims(state,
@@ -5032,14 +4945,8 @@ void GetDXCoils(EnergyPlusData &state)
 
         thisDXCoil.CCapFFlow(1) = GetCurveIndex(state, Alphas(4)); // convert curve name to number
         if (thisDXCoil.CCapFFlow(1) == 0) {
-            if (lAlphaBlanks(4)) {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(4)));
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(4), Alphas(4)));
-            }
-            ErrorsFound = true;
+            reportMissingOrInvalidCurve(
+                state, lAlphaBlanks(4), RoutineName, CurrentModuleObject, thisDXCoil.Name, cAlphaFields(4), Alphas(4), ErrorsFound);
         } else {
             // Verify Curve Object, only legal type is Linear, Quadratic or Cubic
             ErrorsFound |= Curve::CheckCurveDims(state,
@@ -5161,14 +5068,8 @@ void GetDXCoils(EnergyPlusData &state)
 
         thisDXCoil.CCapFTemp = GetCurveIndex(state, Alphas(5));
         if (thisDXCoil.CCapFTemp(1) == 0) {
-            if (lAlphaBlanks(5)) {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(5)));
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(5), Alphas(5)));
-            }
-            ErrorsFound = true;
+            reportMissingOrInvalidCurve(
+                state, lAlphaBlanks(5), RoutineName, CurrentModuleObject, thisDXCoil.Name, cAlphaFields(5), Alphas(5), ErrorsFound);
         } else {
             ErrorsFound |= Curve::CheckCurveDims(state,
                                                  thisDXCoil.CCapFTemp(1), // Curve index
@@ -5196,14 +5097,8 @@ void GetDXCoils(EnergyPlusData &state)
 
         thisDXCoil.CCapFFlow(1) = GetCurveIndex(state, Alphas(6)); // convert curve name to number
         if (thisDXCoil.CCapFFlow(1) == 0) {
-            if (lAlphaBlanks(6)) {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(6)));
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(6), Alphas(6)));
-            }
-            ErrorsFound = true;
+            reportMissingOrInvalidCurve(
+                state, lAlphaBlanks(6), RoutineName, CurrentModuleObject, thisDXCoil.Name, cAlphaFields(6), Alphas(6), ErrorsFound);
         } else {
             // Verify Curve Object, only legal type is Quadratic
             ErrorsFound |= Curve::CheckCurveDims(state,
@@ -5292,14 +5187,8 @@ void GetDXCoils(EnergyPlusData &state)
         int indexSHCurve = GetCurveIndex(state, Alphas(5)); // convert curve name to index number
         // Verify curve name and type
         if (indexSHCurve == 0) {
-            if (lAlphaBlanks(5)) {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(5)));
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(5), Alphas(5)));
-            }
-            ErrorsFound = true;
+            reportMissingOrInvalidCurve(
+                state, lAlphaBlanks(5), RoutineName, CurrentModuleObject, thisDXCoil.Name, cAlphaFields(5), Alphas(5), ErrorsFound);
         } else {
             {
                 if (state.dataCurveManager->curves(indexSHCurve)->curveType == Curve::CurveType::Quadratic) {
@@ -5404,14 +5293,8 @@ void GetDXCoils(EnergyPlusData &state)
         int indexSCCurve = GetCurveIndex(state, Alphas(5)); // convert curve name to index number
         // Verify curve name and type
         if (indexSCCurve == 0) {
-            if (lAlphaBlanks(5)) {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", missing", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...required {} is blank.", cAlphaFields(5)));
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...not found {}=\"{}\".", cAlphaFields(5), Alphas(5)));
-            }
-            ErrorsFound = true;
+            reportMissingOrInvalidCurve(
+                state, lAlphaBlanks(5), RoutineName, CurrentModuleObject, thisDXCoil.Name, cAlphaFields(5), Alphas(5), ErrorsFound);
         } else {
             {
                 if (state.dataCurveManager->curves(indexSCCurve)->curveType == Curve::CurveType::Quadratic) {
