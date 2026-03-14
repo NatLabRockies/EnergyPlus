@@ -769,6 +769,139 @@ static void validateAndCapPLFCurve(EnergyPlusData &state,
     }
 }
 
+// Setup the 9 standard output variables for single-speed and two-speed cooling coils
+// (Total, Sensible, Latent cooling rate/energy + Electricity rate/energy + Runtime Fraction)
+static void setupStdCoolingOutputVars(EnergyPlusData &state, DXCoilData &thisDXCoil)
+{
+    SetupOutputVariable(state,
+                        "Cooling Coil Total Cooling Rate",
+                        Constant::Units::W,
+                        thisDXCoil.TotalCoolingEnergyRate,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        thisDXCoil.Name);
+    SetupOutputVariable(state,
+                        "Cooling Coil Total Cooling Energy",
+                        Constant::Units::J,
+                        thisDXCoil.TotalCoolingEnergy,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        thisDXCoil.Name,
+                        Constant::eResource::EnergyTransfer,
+                        OutputProcessor::Group::HVAC,
+                        OutputProcessor::EndUseCat::CoolingCoils);
+    SetupOutputVariable(state,
+                        "Cooling Coil Sensible Cooling Rate",
+                        Constant::Units::W,
+                        thisDXCoil.SensCoolingEnergyRate,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        thisDXCoil.Name);
+    SetupOutputVariable(state,
+                        "Cooling Coil Sensible Cooling Energy",
+                        Constant::Units::J,
+                        thisDXCoil.SensCoolingEnergy,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        thisDXCoil.Name);
+    SetupOutputVariable(state,
+                        "Cooling Coil Latent Cooling Rate",
+                        Constant::Units::W,
+                        thisDXCoil.LatCoolingEnergyRate,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        thisDXCoil.Name);
+    SetupOutputVariable(state,
+                        "Cooling Coil Latent Cooling Energy",
+                        Constant::Units::J,
+                        thisDXCoil.LatCoolingEnergy,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        thisDXCoil.Name);
+    SetupOutputVariable(state,
+                        "Cooling Coil Electricity Rate",
+                        Constant::Units::W,
+                        thisDXCoil.ElecCoolingPower,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        thisDXCoil.Name);
+    SetupOutputVariable(state,
+                        "Cooling Coil Electricity Energy",
+                        Constant::Units::J,
+                        thisDXCoil.ElecCoolingConsumption,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        thisDXCoil.Name,
+                        Constant::eResource::Electricity,
+                        OutputProcessor::Group::HVAC,
+                        OutputProcessor::EndUseCat::Cooling);
+    SetupOutputVariable(state,
+                        "Cooling Coil Runtime Fraction",
+                        Constant::Units::None,
+                        thisDXCoil.CoolingCoilRuntimeFraction,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        thisDXCoil.Name);
+}
+
+// Setup the 7 standard output variables for VRF cooling coils
+// (Total, Sensible, Latent cooling rate/energy + Runtime Fraction, no Electricity)
+static void setupVRFCoolingOutputVars(EnergyPlusData &state, DXCoilData &thisDXCoil)
+{
+    SetupOutputVariable(state,
+                        "Cooling Coil Total Cooling Rate",
+                        Constant::Units::W,
+                        thisDXCoil.TotalCoolingEnergyRate,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        thisDXCoil.Name);
+    SetupOutputVariable(state,
+                        "Cooling Coil Total Cooling Energy",
+                        Constant::Units::J,
+                        thisDXCoil.TotalCoolingEnergy,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        thisDXCoil.Name,
+                        Constant::eResource::EnergyTransfer,
+                        OutputProcessor::Group::HVAC,
+                        OutputProcessor::EndUseCat::CoolingCoils);
+    SetupOutputVariable(state,
+                        "Cooling Coil Sensible Cooling Rate",
+                        Constant::Units::W,
+                        thisDXCoil.SensCoolingEnergyRate,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        thisDXCoil.Name);
+    SetupOutputVariable(state,
+                        "Cooling Coil Sensible Cooling Energy",
+                        Constant::Units::J,
+                        thisDXCoil.SensCoolingEnergy,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        thisDXCoil.Name);
+    SetupOutputVariable(state,
+                        "Cooling Coil Latent Cooling Rate",
+                        Constant::Units::W,
+                        thisDXCoil.LatCoolingEnergyRate,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        thisDXCoil.Name);
+    SetupOutputVariable(state,
+                        "Cooling Coil Latent Cooling Energy",
+                        Constant::Units::J,
+                        thisDXCoil.LatCoolingEnergy,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        thisDXCoil.Name);
+    SetupOutputVariable(state,
+                        "Cooling Coil Runtime Fraction",
+                        Constant::Units::None,
+                        thisDXCoil.CoolingCoilRuntimeFraction,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        thisDXCoil.Name);
+}
+
 static void setupEvapCondOutputVars(EnergyPlusData &state, DXCoilData &thisDXCoil)
 {
     SetupOutputVariable(state,
@@ -5396,75 +5529,7 @@ void GetDXCoils(EnergyPlusData &state)
         if (thisDXCoil.DXCoilType_Num == HVAC::CoilDX_CoolingSingleSpeed || thisDXCoil.DXCoilType_Num == HVAC::CoilDX_CoolingTwoStageWHumControl) {
             // Setup Report Variables for Cooling Equipment
             // CurrentModuleObject='Coil:Cooling:DX:SingleSpeed/Coil:Cooling:DX:TwoStageWithHumidityControlMode'
-            SetupOutputVariable(state,
-                                "Cooling Coil Total Cooling Rate",
-                                Constant::Units::W,
-                                thisDXCoil.TotalCoolingEnergyRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Cooling Coil Total Cooling Energy",
-                                Constant::Units::J,
-                                thisDXCoil.TotalCoolingEnergy,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                thisDXCoil.Name,
-                                Constant::eResource::EnergyTransfer,
-                                OutputProcessor::Group::HVAC,
-                                OutputProcessor::EndUseCat::CoolingCoils);
-            SetupOutputVariable(state,
-                                "Cooling Coil Sensible Cooling Rate",
-                                Constant::Units::W,
-                                thisDXCoil.SensCoolingEnergyRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Cooling Coil Sensible Cooling Energy",
-                                Constant::Units::J,
-                                thisDXCoil.SensCoolingEnergy,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Cooling Coil Latent Cooling Rate",
-                                Constant::Units::W,
-                                thisDXCoil.LatCoolingEnergyRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Cooling Coil Latent Cooling Energy",
-                                Constant::Units::J,
-                                thisDXCoil.LatCoolingEnergy,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Cooling Coil Electricity Rate",
-                                Constant::Units::W,
-                                thisDXCoil.ElecCoolingPower,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Cooling Coil Electricity Energy",
-                                Constant::Units::J,
-                                thisDXCoil.ElecCoolingConsumption,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                thisDXCoil.Name,
-                                Constant::eResource::Electricity,
-                                OutputProcessor::Group::HVAC,
-                                OutputProcessor::EndUseCat::Cooling);
-            SetupOutputVariable(state,
-                                "Cooling Coil Runtime Fraction",
-                                Constant::Units::None,
-                                thisDXCoil.CoolingCoilRuntimeFraction,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
+            setupStdCoolingOutputVars(state, thisDXCoil);
             if (thisDXCoil.IsSecondaryDXCoilInZone) {
                 SetupOutputVariable(state,
                                     "Secondary Coil Heat Rejection Rate",
@@ -5658,75 +5723,7 @@ void GetDXCoils(EnergyPlusData &state)
         else if (thisDXCoil.DXCoilType_Num == HVAC::CoilDX_CoolingTwoSpeed) {
             // Setup Report Variables for Cooling Equipment
             // CurrentModuleObject='Coil:Cooling:DX:TwoSpeed'
-            SetupOutputVariable(state,
-                                "Cooling Coil Total Cooling Rate",
-                                Constant::Units::W,
-                                thisDXCoil.TotalCoolingEnergyRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Cooling Coil Total Cooling Energy",
-                                Constant::Units::J,
-                                thisDXCoil.TotalCoolingEnergy,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                thisDXCoil.Name,
-                                Constant::eResource::EnergyTransfer,
-                                OutputProcessor::Group::HVAC,
-                                OutputProcessor::EndUseCat::CoolingCoils);
-            SetupOutputVariable(state,
-                                "Cooling Coil Sensible Cooling Rate",
-                                Constant::Units::W,
-                                thisDXCoil.SensCoolingEnergyRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Cooling Coil Sensible Cooling Energy",
-                                Constant::Units::J,
-                                thisDXCoil.SensCoolingEnergy,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Cooling Coil Latent Cooling Rate",
-                                Constant::Units::W,
-                                thisDXCoil.LatCoolingEnergyRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Cooling Coil Latent Cooling Energy",
-                                Constant::Units::J,
-                                thisDXCoil.LatCoolingEnergy,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Cooling Coil Electricity Rate",
-                                Constant::Units::W,
-                                thisDXCoil.ElecCoolingPower,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Cooling Coil Electricity Energy",
-                                Constant::Units::J,
-                                thisDXCoil.ElecCoolingConsumption,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                thisDXCoil.Name,
-                                Constant::eResource::Electricity,
-                                OutputProcessor::Group::HVAC,
-                                OutputProcessor::EndUseCat::Cooling);
-            SetupOutputVariable(state,
-                                "Cooling Coil Runtime Fraction",
-                                Constant::Units::None,
-                                thisDXCoil.CoolingCoilRuntimeFraction,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
+            setupStdCoolingOutputVars(state, thisDXCoil);
             if (thisDXCoil.IsSecondaryDXCoilInZone) {
                 SetupOutputVariable(state,
                                     "Secondary Coil Heat Rejection Rate",
@@ -6175,58 +6172,7 @@ void GetDXCoils(EnergyPlusData &state)
         else if (thisDXCoil.DXCoilType_Num == HVAC::CoilVRF_Cooling) {
             // Setup Report Variables for Cooling Equipment:
             // CurrentModuleObject='Coil:Cooling:DX:VariableRefrigerantFlow
-            SetupOutputVariable(state,
-                                "Cooling Coil Total Cooling Rate",
-                                Constant::Units::W,
-                                thisDXCoil.TotalCoolingEnergyRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Cooling Coil Total Cooling Energy",
-                                Constant::Units::J,
-                                thisDXCoil.TotalCoolingEnergy,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                thisDXCoil.Name,
-                                Constant::eResource::EnergyTransfer,
-                                OutputProcessor::Group::HVAC,
-                                OutputProcessor::EndUseCat::CoolingCoils);
-            SetupOutputVariable(state,
-                                "Cooling Coil Sensible Cooling Rate",
-                                Constant::Units::W,
-                                thisDXCoil.SensCoolingEnergyRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Cooling Coil Sensible Cooling Energy",
-                                Constant::Units::J,
-                                thisDXCoil.SensCoolingEnergy,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Cooling Coil Latent Cooling Rate",
-                                Constant::Units::W,
-                                thisDXCoil.LatCoolingEnergyRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Cooling Coil Latent Cooling Energy",
-                                Constant::Units::J,
-                                thisDXCoil.LatCoolingEnergy,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Cooling Coil Runtime Fraction",
-                                Constant::Units::None,
-                                thisDXCoil.CoolingCoilRuntimeFraction,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
+            setupVRFCoolingOutputVars(state, thisDXCoil);
             if (thisDXCoil.CondensateCollectMode == CondensateCollectAction::ToTank) {
                 SetupOutputVariable(state,
                                     "Cooling Coil Condensate Volume Flow Rate",
@@ -6300,58 +6246,7 @@ void GetDXCoils(EnergyPlusData &state)
         else if (thisDXCoil.DXCoilType_Num == HVAC::CoilVRF_FluidTCtrl_Cooling) {
             // Setup Report Variables for Cooling Equipment:
             // CurrentModuleObject='Coil:Cooling:DX:VariableRefrigerantFlow:FluidTemperatureControl
-            SetupOutputVariable(state,
-                                "Cooling Coil Total Cooling Rate",
-                                Constant::Units::W,
-                                thisDXCoil.TotalCoolingEnergyRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Cooling Coil Total Cooling Energy",
-                                Constant::Units::J,
-                                thisDXCoil.TotalCoolingEnergy,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                thisDXCoil.Name,
-                                Constant::eResource::EnergyTransfer,
-                                OutputProcessor::Group::HVAC,
-                                OutputProcessor::EndUseCat::CoolingCoils);
-            SetupOutputVariable(state,
-                                "Cooling Coil Sensible Cooling Rate",
-                                Constant::Units::W,
-                                thisDXCoil.SensCoolingEnergyRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Cooling Coil Sensible Cooling Energy",
-                                Constant::Units::J,
-                                thisDXCoil.SensCoolingEnergy,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Cooling Coil Latent Cooling Rate",
-                                Constant::Units::W,
-                                thisDXCoil.LatCoolingEnergyRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Cooling Coil Latent Cooling Energy",
-                                Constant::Units::J,
-                                thisDXCoil.LatCoolingEnergy,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Cooling Coil Runtime Fraction",
-                                Constant::Units::None,
-                                thisDXCoil.CoolingCoilRuntimeFraction,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
+            setupVRFCoolingOutputVars(state, thisDXCoil);
             // Following for VRF_FluidTCtrl Only
             SetupOutputVariable(state,
                                 "Cooling Coil VRF Evaporating Temperature",
