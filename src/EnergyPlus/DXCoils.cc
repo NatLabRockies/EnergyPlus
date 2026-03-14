@@ -690,6 +690,52 @@ void SimDXCoilMultiMode(EnergyPlusData &state,
     ReportDXCoil(state, DXCoilNum);
 }
 
+// Helper: scan a PLF(PLR) curve over [0,1], cap if out of [0.7,1.0], and emit warnings.
+// This consolidates the identical PLF validation block repeated across coil-type parsers.
+static void validateAndCapPLFCurve(EnergyPlusData &state,
+                                   int const curveIndex,
+                                   bool &ErrorsFound,
+                                   std::string_view const routineName,
+                                   std::string_view const objectType,
+                                   std::string_view const coilName,
+                                   std::string_view const fieldName,
+                                   std::string_view const alphaValue)
+{
+    Real64 minCurveVal = 999.0;
+    Real64 maxCurveVal = -999.0;
+    Real64 minCurvePLR = 0.0;
+    Real64 maxCurvePLR = 0.0;
+    Real64 curveInput = 0.0;
+    while (curveInput <= 1.0) {
+        Real64 curveVal = Curve::CurveValue(state, curveIndex, curveInput);
+        if (curveVal < minCurveVal) {
+            minCurveVal = curveVal;
+            minCurvePLR = curveInput;
+        }
+        if (curveVal > maxCurveVal) {
+            maxCurveVal = curveVal;
+            maxCurvePLR = curveInput;
+        }
+        curveInput += 0.01;
+    }
+    if (minCurveVal < 0.7) {
+        ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", invalid", routineName, objectType, coilName));
+        ShowContinueError(state, EnergyPlus::format("...{} = {} has out of range value.", fieldName, alphaValue));
+        ShowContinueError(
+            state, EnergyPlus::format("...Curve minimum must be >= 0.7, curve min at PLR = {:.2T} is {:.3T}", minCurvePLR, minCurveVal));
+        ShowContinueError(state, "...Setting curve minimum to 0.7 and simulation continues.");
+        Curve::SetCurveOutputMinValue(state, curveIndex, ErrorsFound, 0.7);
+    }
+    if (maxCurveVal > 1.0) {
+        ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", invalid", routineName, objectType, coilName));
+        ShowContinueError(state, EnergyPlus::format("...{} = {} has out of range value.", fieldName, alphaValue));
+        ShowContinueError(
+            state, EnergyPlus::format("...Curve maximum must be <= 1.0, curve max at PLR = {:.2T} is {:.3T}", maxCurvePLR, maxCurveVal));
+        ShowContinueError(state, "...Setting curve maximum to 1.0 and simulation continues.");
+        Curve::SetCurveOutputMaxValue(state, curveIndex, ErrorsFound, 1.0);
+    }
+}
+
 void GetDXCoils(EnergyPlusData &state)
 {
 
@@ -1704,42 +1750,14 @@ void GetDXCoils(EnergyPlusData &state)
 
                             if (!ErrorsFound) {
                                 //             Test PLF curve minimum and maximum. Cap if less than 0.7 or greater than 1.0.
-                                MinCurveVal = 999.0;
-                                MaxCurveVal = -999.0;
-                                CurveInput = 0.0;
-                                while (CurveInput <= 1.0) {
-                                    CurveVal = CurveValue(state, thisDXCoil.PLFFPLR(PerfModeNum), CurveInput);
-                                    if (CurveVal < MinCurveVal) {
-                                        MinCurveVal = CurveVal;
-                                        MinCurvePLR = CurveInput;
-                                    }
-                                    if (CurveVal > MaxCurveVal) {
-                                        MaxCurveVal = CurveVal;
-                                        MaxCurvePLR = CurveInput;
-                                    }
-                                    CurveInput += 0.01;
-                                }
-                                if (MinCurveVal < 0.7) {
-                                    ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, PerfObjectType, PerfObjectName));
-                                    ShowContinueError(state, EnergyPlus::format("...{} = {} has out of range value.", cAlphaFields2(6), Alphas2(6)));
-                                    ShowContinueError(state,
-                                                      EnergyPlus::format("...Curve minimum must be >= 0.7, curve min at PLR = {:.2T} is {:.3T}",
-                                                                         MinCurvePLR,
-                                                                         MinCurveVal));
-                                    ShowContinueError(state, "...Setting curve minimum to 0.7 and simulation continues.");
-                                    Curve::SetCurveOutputMinValue(state, thisDXCoil.PLFFPLR(PerfModeNum), ErrorsFound, 0.7);
-                                }
-
-                                if (MaxCurveVal > 1.0) {
-                                    ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, PerfObjectType, PerfObjectName));
-                                    ShowContinueError(state, EnergyPlus::format("...{} = {} has out of range value.", cAlphaFields2(6), Alphas2(6)));
-                                    ShowContinueError(state,
-                                                      EnergyPlus::format("...Curve maximum must be <= 1.0, curve max at PLR = {:.2T} is {:.3T}",
-                                                                         MaxCurvePLR,
-                                                                         MaxCurveVal));
-                                    ShowContinueError(state, "...Setting curve maximum to 1.0 and simulation continues.");
-                                    Curve::SetCurveOutputMaxValue(state, thisDXCoil.PLFFPLR(PerfModeNum), ErrorsFound, 1.0);
-                                }
+                                validateAndCapPLFCurve(state,
+                                                       thisDXCoil.PLFFPLR(PerfModeNum),
+                                                       ErrorsFound,
+                                                       RoutineName,
+                                                       PerfObjectType,
+                                                       PerfObjectName,
+                                                       cAlphaFields2(6),
+                                                       Alphas2(6));
                             }
                         }
 
@@ -2168,38 +2186,14 @@ void GetDXCoils(EnergyPlusData &state)
 
             if (!ErrorsFound) {
                 //     Test PLF curve minimum and maximum. Cap if less than 0.7 or greater than 1.0.
-                MinCurveVal = 999.0;
-                MaxCurveVal = -999.0;
-                CurveInput = 0.0;
-                while (CurveInput <= 1.0) {
-                    CurveVal = CurveValue(state, thisDXCoil.PLFFPLR(1), CurveInput);
-                    if (CurveVal < MinCurveVal) {
-                        MinCurveVal = CurveVal;
-                        MinCurvePLR = CurveInput;
-                    }
-                    if (CurveVal > MaxCurveVal) {
-                        MaxCurveVal = CurveVal;
-                        MaxCurvePLR = CurveInput;
-                    }
-                    CurveInput += 0.01;
-                }
-                if (MinCurveVal < 0.7) {
-                    ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("...{} = {} has out of range value.", cAlphaFields(9), Alphas(9)));
-                    ShowContinueError(
-                        state, EnergyPlus::format("...Curve minimum must be >= 0.7, curve min at PLR = {:.2T} is {:.3T}", MinCurvePLR, MinCurveVal));
-                    ShowContinueError(state, "...Setting curve minimum to 0.7 and simulation continues.");
-                    Curve::SetCurveOutputMinValue(state, thisDXCoil.PLFFPLR(1), ErrorsFound, 0.7);
-                }
-
-                if (MaxCurveVal > 1.0) {
-                    ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("...{} = {} has out of range value.", cAlphaFields(9), Alphas(9)));
-                    ShowContinueError(
-                        state, EnergyPlus::format("...Curve maximum must be <= 1.0, curve max at PLR = {:.2T} is {:.3T}", MaxCurvePLR, MaxCurveVal));
-                    ShowContinueError(state, "...Setting curve maximum to 1.0 and simulation continues.");
-                    Curve::SetCurveOutputMaxValue(state, thisDXCoil.PLFFPLR(1), ErrorsFound, 1.0);
-                }
+                validateAndCapPLFCurve(state,
+                                       thisDXCoil.PLFFPLR(1),
+                                       ErrorsFound,
+                                       RoutineName,
+                                       CurrentModuleObject,
+                                       thisDXCoil.Name,
+                                       cAlphaFields(9),
+                                       Alphas(9));
             }
         }
 
@@ -2645,38 +2639,14 @@ void GetDXCoils(EnergyPlusData &state)
 
             if (!ErrorsFound) {
                 //     Test PLF curve minimum and maximum. Cap if less than 0.7 or greater than 1.0.
-                MinCurveVal = 999.0;
-                MaxCurveVal = -999.0;
-                CurveInput = 0.0;
-                while (CurveInput <= 1.0) {
-                    CurveVal = CurveValue(state, thisDXCoil.PLFFPLR(1), CurveInput);
-                    if (CurveVal < MinCurveVal) {
-                        MinCurveVal = CurveVal;
-                        MinCurvePLR = CurveInput;
-                    }
-                    if (CurveVal > MaxCurveVal) {
-                        MaxCurveVal = CurveVal;
-                        MaxCurvePLR = CurveInput;
-                    }
-                    CurveInput += 0.01;
-                }
-                if (MinCurveVal < 0.7) {
-                    ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("...{} = {} has out of range value.", cAlphaFields(9), Alphas(9)));
-                    ShowContinueError(
-                        state, EnergyPlus::format("...Curve minimum must be >= 0.7, curve min at PLR = {:.2T} is {:.3T}", MinCurvePLR, MinCurveVal));
-                    ShowContinueError(state, "...Setting curve minimum to 0.7 and simulation continues.");
-                    Curve::SetCurveOutputMinValue(state, thisDXCoil.PLFFPLR(1), ErrorsFound, 0.7);
-                }
-
-                if (MaxCurveVal > 1.0) {
-                    ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("...{} = {} has out of range value.", cAlphaFields(9), Alphas(9)));
-                    ShowContinueError(
-                        state, EnergyPlus::format("...Curve maximum must be <= 1.0, curve max at PLR = {:.2T} is {:.3T}", MaxCurvePLR, MaxCurveVal));
-                    ShowContinueError(state, "...Setting curve maximum to 1.0 and simulation continues.");
-                    Curve::SetCurveOutputMaxValue(state, thisDXCoil.PLFFPLR(1), ErrorsFound, 1.0);
-                }
+                validateAndCapPLFCurve(state,
+                                       thisDXCoil.PLFFPLR(1),
+                                       ErrorsFound,
+                                       RoutineName,
+                                       CurrentModuleObject,
+                                       thisDXCoil.Name,
+                                       cAlphaFields(9),
+                                       Alphas(9));
             }
         }
 
@@ -4930,44 +4900,14 @@ void GetDXCoils(EnergyPlusData &state)
 
                 if (!ErrorsFound) {
                     //       Test PLF curve minimum and maximum. Cap if less than 0.7 or greater than 1.0.
-                    MinCurveVal = 999.0;
-                    MaxCurveVal = -999.0;
-                    CurveInput = 0.0;
-                    while (CurveInput <= 1.0) {
-                        CurveVal = CurveValue(state, thisDXCoil.MSPLFFPLR(I), CurveInput);
-                        if (CurveVal < MinCurveVal) {
-                            MinCurveVal = CurveVal;
-                            MinCurvePLR = CurveInput;
-                        }
-                        if (CurveVal > MaxCurveVal) {
-                            MaxCurveVal = CurveVal;
-                            MaxCurvePLR = CurveInput;
-                        }
-                        CurveInput += 0.01;
-                    }
-                    if (MinCurveVal < 0.7) {
-                        ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format("...{} = {} has out of range value.", cAlphaFields(15 + (I - 1) * 6), Alphas(15 + (I - 1) * 6)));
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format("...Curve minimum must be >= 0.7, curve min at PLR = {:.2T} is {:.3T}", MinCurvePLR, MinCurveVal));
-                        ShowContinueError(state, "...Setting curve minimum to 0.7 and simulation continues.");
-                        Curve::SetCurveOutputMinValue(state, thisDXCoil.MSPLFFPLR(I), ErrorsFound, 0.7);
-                    }
-
-                    if (MaxCurveVal > 1.0) {
-                        ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format("...{} = {} has out of range value.", cAlphaFields(15 + (I - 1) * 6), Alphas(15 + (I - 1) * 6)));
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format("...Curve maximum must be <= 1.0, curve max at PLR = {:.2T} is {:.3T}", MaxCurvePLR, MaxCurveVal));
-                        ShowContinueError(state, "...Setting curve maximum to 1.0 and simulation continues.");
-                        Curve::SetCurveOutputMaxValue(state, thisDXCoil.MSPLFFPLR(I), ErrorsFound, 1.0);
-                    }
+                    validateAndCapPLFCurve(state,
+                                           thisDXCoil.MSPLFFPLR(I),
+                                           ErrorsFound,
+                                           RoutineName,
+                                           CurrentModuleObject,
+                                           thisDXCoil.Name,
+                                           cAlphaFields(15 + (I - 1) * 6),
+                                           Alphas(15 + (I - 1) * 6));
                 }
             }
 
