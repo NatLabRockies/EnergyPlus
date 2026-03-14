@@ -740,6 +740,30 @@ void GetRefrigerationInput(EnergyPlusData &state)
         return {listNum, caseNum, walkInNum, coilNum};
     };
 
+    // Helper lambda to report the standard "invalid name" / "non-unique name" errors when
+    // a load-list name lookup yields NumNameMatches != 1.  Sets ErrorsFound = true.
+    // AlphaNum must already hold the relevant input field index.
+    auto reportNameMatchError = [&](const std::string &objName, int numMatches) {
+        ErrorsFound = true;
+        if (numMatches == 0) {
+            ShowSevereError(state,
+                            EnergyPlus::format("{}{}=\"{}\", has an invalid {}: {}",
+                                               RoutineName,
+                                               CurrentModuleObject,
+                                               objName,
+                                               cAlphaFieldNames(AlphaNum),
+                                               Alphas(AlphaNum)));
+        } else {
+            ShowSevereError(state,
+                            EnergyPlus::format("{}{}=\"{}\", has a non-unique name that could be either a {}: {}",
+                                               RoutineName,
+                                               CurrentModuleObject,
+                                               objName,
+                                               cAlphaFieldNames(AlphaNum),
+                                               Alphas(AlphaNum)));
+        }
+    };
+
     // Helper lambda to initialise the NumSysAttach counter and pre-allocate the SysNum
     // array on each condenser / gas-cooler object.  Uses an abbreviated-function-template
     // (C++20 auto parameter) so it works for both RefrigCondenserData and GasCoolerData
@@ -3897,25 +3921,8 @@ void GetRefrigerationInput(EnergyPlusData &state)
                     auto [CaseAndWalkInListNum, CaseNum, WalkInNum, CoilNum] = findLoadNames(AlphaNum);
                     int NumNameMatches = (CaseAndWalkInListNum != 0) + (CaseNum != 0) + (WalkInNum != 0) + (CoilNum != 0);
 
-                    if (NumNameMatches != 1) { // name must uniquely point to a list or a single case or walkin or coil
-                        ErrorsFound = true;
-                        if (NumNameMatches == 0) {
-                            ShowSevereError(state,
-                                            EnergyPlus::format("{}{}=\"{}\", has an invalid {}: {}",
-                                                               RoutineName,
-                                                               CurrentModuleObject,
-                                                               Secondary(SecondaryNum).Name,
-                                                               cAlphaFieldNames(AlphaNum),
-                                                               Alphas(AlphaNum)));
-                        } else if (NumNameMatches > 1) {
-                            ShowSevereError(state,
-                                            EnergyPlus::format("{}{}=\"{}\", has a non-unique name that could be either a {}: {}",
-                                                               RoutineName,
-                                                               CurrentModuleObject,
-                                                               Secondary(SecondaryNum).Name,
-                                                               cAlphaFieldNames(AlphaNum),
-                                                               Alphas(AlphaNum)));
-                        } // num matches = 0 or > 1
+                    if (NumNameMatches != 1) { // name must uniquely point to a list or a single item
+                        reportNameMatchError(Secondary(SecondaryNum).Name, NumNameMatches);
                     } else if (CaseAndWalkInListNum != 0) { // Name points to a CaseAndWalkInList
                         NumCoils = CaseAndWalkInList(CaseAndWalkInListNum).NumCoils;
                         NumCases = CaseAndWalkInList(CaseAndWalkInListNum).NumCases;
@@ -4907,25 +4914,8 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 auto [CaseAndWalkInListNum, CaseNum, WalkInNum, CoilNum] = findLoadNames(AlphaNum);
                 int NumNameMatches = (CaseAndWalkInListNum != 0) + (CaseNum != 0) + (WalkInNum != 0) + (CoilNum != 0);
 
-                if (NumNameMatches != 1) { // name must uniquely point to a list or a single case or walkin or coil
-                    ErrorsFound = true;
-                    if (NumNameMatches == 0) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", has an invalid {}: {}",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           System(RefrigSysNum).Name,
-                                                           cAlphaFieldNames(AlphaNum),
-                                                           Alphas(AlphaNum)));
-                    } else if (NumNameMatches > 1) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\",  has a non-unique name that could be either a {}: {}",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           System(RefrigSysNum).Name,
-                                                           cAlphaFieldNames(AlphaNum),
-                                                           Alphas(AlphaNum)));
-                    } // num matches = 0 or > 1
+                if (NumNameMatches != 1) { // name must uniquely point to a list or a single item
+                    reportNameMatchError(System(RefrigSysNum).Name, NumNameMatches);
                 } else if (CaseAndWalkInListNum != 0) { // Name points to a CaseAndWalkInList
                     NumCases = CaseAndWalkInList(CaseAndWalkInListNum).NumCases;
                     NumWalkIns = CaseAndWalkInList(CaseAndWalkInListNum).NumWalkIns;
@@ -5065,24 +5055,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 int NumCascadeLoad = 0;
 
                 if (NumNameMatches != 1) { // name must uniquely point to a list or a single transfer load
-                    ErrorsFound = true;
-                    if (NumNameMatches == 0) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", has an invalid {}: {}",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           System(RefrigSysNum).Name,
-                                                           cAlphaFieldNames(AlphaNum),
-                                                           Alphas(AlphaNum)));
-                    } else if (NumNameMatches > 1) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", has a non-unique name that could be either a {}: {}",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           System(RefrigSysNum).Name,
-                                                           cAlphaFieldNames(AlphaNum),
-                                                           Alphas(AlphaNum)));
-                    } // num matches = 0 or > 1
+                    reportNameMatchError(System(RefrigSysNum).Name, NumNameMatches);
                 } else if (TransferLoadListNum != 0) { // Name points to a transferLoad list
                     NumSecondary = TransferLoadList(TransferLoadListNum).NumSecondarys;
                     NumCascadeLoad = TransferLoadList(TransferLoadListNum).NumCascadeLoads;
@@ -5916,25 +5889,8 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 auto [CaseAndWalkInListNum, CaseNum, WalkInNum, CoilNum] = findLoadNames(AlphaNum, /*includeCoil=*/false);
                 int NumNameMatches = (CaseAndWalkInListNum != 0) + (CaseNum != 0) + (WalkInNum != 0);
 
-                if (NumNameMatches != 1) { // name must uniquely point to a list or a single case or walkin or coil
-                    ErrorsFound = true;
-                    if (NumNameMatches == 0) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", has an invalid {}: {}",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           TransSystem(TransRefrigSysNum).Name,
-                                                           cAlphaFieldNames(AlphaNum),
-                                                           Alphas(AlphaNum)));
-                    } else if (NumNameMatches > 1) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\",  has a non-unique name that could be either a {}: {}",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           TransSystem(TransRefrigSysNum).Name,
-                                                           cAlphaFieldNames(AlphaNum),
-                                                           Alphas(AlphaNum)));
-                    } // num matches = 0 or > 1
+                if (NumNameMatches != 1) { // name must uniquely point to a list or a single item
+                    reportNameMatchError(TransSystem(TransRefrigSysNum).Name, NumNameMatches);
                 } else if (CaseAndWalkInListNum != 0) { // Name points to a CaseAndWalkInList
                     NumCasesMT = CaseAndWalkInList(CaseAndWalkInListNum).NumCases;
                     NumWalkInsMT = CaseAndWalkInList(CaseAndWalkInListNum).NumWalkIns;
@@ -6019,25 +5975,8 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 auto [CaseAndWalkInListNum, CaseNum, WalkInNum, CoilNum] = findLoadNames(AlphaNum, /*includeCoil=*/false);
                 int NumNameMatches = (CaseAndWalkInListNum != 0) + (CaseNum != 0) + (WalkInNum != 0);
 
-                if (NumNameMatches != 1) { // name must uniquely point to a list or a single case or walkin or coil
-                    ErrorsFound = true;
-                    if (NumNameMatches == 0) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", has an invalid {}: {}",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           TransSystem(TransRefrigSysNum).Name,
-                                                           cAlphaFieldNames(AlphaNum),
-                                                           Alphas(AlphaNum)));
-                    } else if (NumNameMatches > 1) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\",  has a non-unique name that could be either a {}: {}",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           TransSystem(TransRefrigSysNum).Name,
-                                                           cAlphaFieldNames(AlphaNum),
-                                                           Alphas(AlphaNum)));
-                    } // num matches = 0 or > 1
+                if (NumNameMatches != 1) { // name must uniquely point to a list or a single item
+                    reportNameMatchError(TransSystem(TransRefrigSysNum).Name, NumNameMatches);
                 } else if (CaseAndWalkInListNum != 0) { // Name points to a CaseAndWalkInList
                     NumCasesLT = CaseAndWalkInList(CaseAndWalkInListNum).NumCases;
                     NumWalkInsLT = CaseAndWalkInList(CaseAndWalkInListNum).NumWalkIns;
