@@ -1632,71 +1632,9 @@ void GetRefrigerationInput(EnergyPlusData &state)
             int NumZones = min(6, max(1, (NumWIFieldsTotal + NumWIFieldsPerZone - 1) / NumWIFieldsPerZone));
             WalkIn(WalkInID).NumZones = NumZones;
 
-            // All variables for walk-in/zone interactions need to be allocated after know number of zones
+            // Allocate all per-zone arrays (idempotent: skips any that are already allocated).
             // Autodesk Missing initialization added below: At least SensZoneCreditRate was used uninitialized
-            if (!allocated(WalkIn(WalkInID).ZoneName)) {
-                WalkIn(WalkInID).ZoneName.allocate(NumZones);
-            }
-            if (!allocated(WalkIn(WalkInID).ZoneNum)) {
-                WalkIn(WalkInID).ZoneNum.allocate(NumZones) = 0;
-            }
-            if (!allocated(WalkIn(WalkInID).ZoneNodeNum)) {
-                WalkIn(WalkInID).ZoneNodeNum.allocate(NumZones) = 0;
-            }
-            if (!allocated(WalkIn(WalkInID).SurfaceArea)) {
-                WalkIn(WalkInID).SurfaceArea.allocate(NumZones) = 0.0;
-            }
-            if (!allocated(WalkIn(WalkInID).UValue)) {
-                WalkIn(WalkInID).UValue.allocate(NumZones) = 0.0;
-            }
-            if (!allocated(WalkIn(WalkInID).UValueGlassDr)) {
-                WalkIn(WalkInID).UValueGlassDr.allocate(NumZones) = 0.0;
-            }
-            if (!allocated(WalkIn(WalkInID).glassDoorOpenScheds)) {
-                WalkIn(WalkInID).glassDoorOpenScheds.allocate(NumZones) = nullptr; // What is this?
-            }
-            if (!allocated(WalkIn(WalkInID).AreaGlassDr)) {
-                WalkIn(WalkInID).AreaGlassDr.allocate(NumZones) = 0.0;
-            }
-            if (!allocated(WalkIn(WalkInID).HeightGlassDr)) {
-                WalkIn(WalkInID).HeightGlassDr.allocate(NumZones) = 0.0;
-            }
-            if (!allocated(WalkIn(WalkInID).UValueStockDr)) {
-                WalkIn(WalkInID).UValueStockDr.allocate(NumZones) = 0.0;
-            }
-            if (!allocated(WalkIn(WalkInID).stockDoorOpenScheds)) {
-                WalkIn(WalkInID).stockDoorOpenScheds.allocate(NumZones) = nullptr; // What is this?
-            }
-            if (!allocated(WalkIn(WalkInID).StockDoorProtectType)) {
-                WalkIn(WalkInID).StockDoorProtectType.allocate(NumZones) = WIStockDoor::Invalid;
-            }
-            if (!allocated(WalkIn(WalkInID).AreaStockDr)) {
-                WalkIn(WalkInID).AreaStockDr.allocate(NumZones) = 0.0;
-            }
-            if (!allocated(WalkIn(WalkInID).HeightStockDr)) {
-                WalkIn(WalkInID).HeightStockDr.allocate(NumZones) = 0.0;
-            }
-            if (!allocated(WalkIn(WalkInID).SensZoneCreditRate)) {
-                WalkIn(WalkInID).SensZoneCreditRate.allocate(NumZones) = 0.0;
-            }
-            if (!allocated(WalkIn(WalkInID).SensZoneCreditCoolRate)) {
-                WalkIn(WalkInID).SensZoneCreditCoolRate.allocate(NumZones) = 0.0;
-            }
-            if (!allocated(WalkIn(WalkInID).SensZoneCreditCool)) {
-                WalkIn(WalkInID).SensZoneCreditCool.allocate(NumZones) = 0.0;
-            }
-            if (!allocated(WalkIn(WalkInID).SensZoneCreditHeatRate)) {
-                WalkIn(WalkInID).SensZoneCreditHeatRate.allocate(NumZones) = 0.0;
-            }
-            if (!allocated(WalkIn(WalkInID).SensZoneCreditHeat)) {
-                WalkIn(WalkInID).SensZoneCreditHeat.allocate(NumZones) = 0.0;
-            }
-            if (!allocated(WalkIn(WalkInID).LatZoneCreditRate)) {
-                WalkIn(WalkInID).LatZoneCreditRate.allocate(NumZones) = 0.0;
-            }
-            if (!allocated(WalkIn(WalkInID).LatZoneCredit)) {
-                WalkIn(WalkInID).LatZoneCredit.allocate(NumZones) = 0.0;
-            }
+            WalkIn(WalkInID).allocateZoneArrays(NumZones);
 
             int AStart = NumWIAlphaFieldsBeforeZoneInput + 1;
             int NStart = NumWINumberFieldsBeforeZoneInput + 1;
