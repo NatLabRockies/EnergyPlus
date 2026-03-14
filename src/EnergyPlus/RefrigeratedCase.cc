@@ -751,6 +751,18 @@ void GetRefrigerationInput(EnergyPlusData &state)
 
             ++NumDisplayCases;
 
+            // Lambda for the repeated "must be >= 0 <unit>" error in this loop.
+            auto showCaseRangeError = [&](int numNum, std::string_view units = "W/m") {
+                ShowSevereError(state,
+                                EnergyPlus::format("{}{}=\"{}\", {} must be greater than or equal to 0 {}",
+                                                   RoutineName,
+                                                   CurrentModuleObject,
+                                                   RefrigCase(CaseNum).Name,
+                                                   cNumericFieldNames(numNum),
+                                                   units));
+                ErrorsFound = true;
+            };
+
             AlphaNum = 1;
 
             RefrigCase(CaseNum).Name = Alphas(AlphaNum);
@@ -890,13 +902,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
             if (!lNumericBlanks(NumNum)) {
                 RefrigCase(CaseNum).STDFanPower = Numbers(NumNum);
                 if (Numbers(NumNum) < 0.0) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}{}=\"{}\", {} must be greater than or equal to 0 W/m",
-                                                       RoutineName,
-                                                       CurrentModuleObject,
-                                                       RefrigCase(CaseNum).Name,
-                                                       cNumericFieldNames(NumNum)));
-                    ErrorsFound = true;
+                    showCaseRangeError(NumNum);
                 }
             } else { // blank use default of 75 W/m
                 RefrigCase(CaseNum).STDFanPower = 75.0;
@@ -906,13 +912,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
             if (!lNumericBlanks(NumNum)) {
                 RefrigCase(CaseNum).OperatingFanPower = Numbers(NumNum);
                 if (Numbers(NumNum) < 0.0) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}{}=\"{}\", {} must be greater than or equal to 0 W/m",
-                                                       RoutineName,
-                                                       CurrentModuleObject,
-                                                       RefrigCase(CaseNum).Name,
-                                                       cNumericFieldNames(NumNum)));
-                    ErrorsFound = true;
+                    showCaseRangeError(NumNum);
                 }
             } else { // if blank set = to std fan power
                 RefrigCase(CaseNum).OperatingFanPower = RefrigCase(CaseNum).STDFanPower;
@@ -922,13 +922,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
             if (!lNumericBlanks(NumNum)) {
                 RefrigCase(CaseNum).RatedLightingPower = Numbers(NumNum);
                 if (Numbers(NumNum) < 0.0) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}{}=\"{}\", {} must be greater than or equal to 0 W/m",
-                                                       RoutineName,
-                                                       CurrentModuleObject,
-                                                       RefrigCase(CaseNum).Name,
-                                                       cNumericFieldNames(NumNum)));
-                    ErrorsFound = true;
+                    showCaseRangeError(NumNum);
                 }
             } else { // blank input - use default of 90 W/m
                 RefrigCase(CaseNum).RatedLightingPower = 90.0;
@@ -938,13 +932,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
             if (!lNumericBlanks(NumNum)) {
                 RefrigCase(CaseNum).LightingPower = Numbers(NumNum);
                 if (Numbers(NumNum) < 0.0) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}{}=\"{}\", {} must be greater than or equal to 0 W/m",
-                                                       RoutineName,
-                                                       CurrentModuleObject,
-                                                       RefrigCase(CaseNum).Name,
-                                                       cNumericFieldNames(NumNum)));
-                    ErrorsFound = true;
+                    showCaseRangeError(NumNum);
                 }
             } else { // blank input so set lighting power equal to rated/std lighting power
                 RefrigCase(CaseNum).LightingPower = RefrigCase(CaseNum).RatedLightingPower;
@@ -980,25 +968,13 @@ void GetRefrigerationInput(EnergyPlusData &state)
             NumNum = 13;
             RefrigCase(CaseNum).AntiSweatPower = Numbers(NumNum);
             if (Numbers(NumNum) < 0.0) {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}{}=\"{}\", {} must be greater than or equal to 0 W/m",
-                                                   RoutineName,
-                                                   CurrentModuleObject,
-                                                   RefrigCase(CaseNum).Name,
-                                                   cNumericFieldNames(NumNum)));
-                ErrorsFound = true;
+                showCaseRangeError(NumNum);
             }
 
             NumNum = 14;
             RefrigCase(CaseNum).MinimumASPower = Numbers(NumNum);
             if (Numbers(NumNum) < 0.0) {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}{}=\"{}\", {} must be greater than or equal to 0 W/m",
-                                                   RoutineName,
-                                                   CurrentModuleObject,
-                                                   RefrigCase(CaseNum).Name,
-                                                   cNumericFieldNames(NumNum)));
-                ErrorsFound = true;
+                showCaseRangeError(NumNum);
             }
 
             RefrigCase(CaseNum).AntiSweatControlType = static_cast<ASHtrCtrlType>(getEnumValue(asHtrCtrlTypeNamesUC, Alphas(7)));
@@ -1043,13 +1019,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
             NumNum = 16;
             RefrigCase(CaseNum).Height = Numbers(NumNum);
             if (Numbers(NumNum) < 0.0) {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}{}=\"{}\", {} must be greater than or equal to 0 m",
-                                                   RoutineName,
-                                                   CurrentModuleObject,
-                                                   RefrigCase(CaseNum).Name,
-                                                   cNumericFieldNames(NumNum)));
-                ErrorsFound = true;
+                showCaseRangeError(NumNum, "m");
             }
 
             if (RefrigCase(CaseNum).Height <= 0.0 && RefrigCase(CaseNum).AntiSweatControlType == ASHtrCtrlType::HeatBalance) {
@@ -1122,13 +1092,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
             if (!lNumericBlanks(NumNum)) {
                 RefrigCase(CaseNum).DefrostPower = Numbers(NumNum);
                 if (Numbers(NumNum) < 0.0) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}{}=\"{}\", {} must be greater than or equal to 0 W/m",
-                                                       RoutineName,
-                                                       CurrentModuleObject,
-                                                       RefrigCase(CaseNum).Name,
-                                                       cNumericFieldNames(NumNum)));
-                    ErrorsFound = true;
+                    showCaseRangeError(NumNum);
                 }
                 //   disregard defrost power for Off-Cycle or None defrost types
                 if ((DefType == RefCaseDefrostType::OffCycle || DefType == RefCaseDefrostType::None) && (RefrigCase(CaseNum).DefrostPower > 0.0)) {
