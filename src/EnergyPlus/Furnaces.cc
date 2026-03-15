@@ -958,6 +958,8 @@ namespace Furnaces {
     // Helper: find controlled zone and verify it is served by the furnace air loop.
     // Populates NodeNumOfControlledZone, ZoneInletNode, and airloopNum on thisFurnace.
     // Reports errors when the zone or air loop cannot be found.
+    // Helper: look up the control zone by name, validate it, then find the air loop and inlet node.
+    // Sets ControlZoneNum, NodeNumOfControlledZone, ZoneInletNode, and airloopNum on thisFurnace.
     static void findControlledZoneAirLoop(EnergyPlusData &state,
                                           FurnaceEquipConditions &thisFurnace,
                                           std::string_view CurrentModuleObject,
@@ -965,6 +967,12 @@ namespace Furnaces {
                                           std::string_view zoneAlphaValue,
                                           bool &ErrorsFound)
     {
+        thisFurnace.ControlZoneNum = Util::FindItemInList(std::string{zoneAlphaValue}, state.dataHeatBal->Zone);
+        if (thisFurnace.ControlZoneNum == 0) {
+            ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisFurnace.Name));
+            ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", zoneAlphaField, zoneAlphaValue));
+            ErrorsFound = true;
+        }
         if (thisFurnace.ControlZoneNum <= 0) return;
 
         bool AirNodeFound = false;
@@ -1390,13 +1398,6 @@ namespace Furnaces {
 
             // Get the Controlling Zone or Location of the Furnace Thermostat
 
-            thisFurnace.ControlZoneNum = Util::FindItemInList(Alphas(6), state.dataHeatBal->Zone);
-            if (thisFurnace.ControlZoneNum == 0) {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(6), Alphas(6)));
-                ErrorsFound = true;
-            }
-
             // Get the node number for the zone with the thermostat
             findControlledZoneAirLoop(state, thisFurnace, CurrentModuleObject, cAlphaFields(6), Alphas(6), ErrorsFound);
 
@@ -1770,13 +1771,6 @@ namespace Furnaces {
             }
 
             // Get the Controlling Zone or Location of the Furnace Thermostat
-            thisFurnace.ControlZoneNum = Util::FindItemInList(Alphas(6), state.dataHeatBal->Zone);
-            if (thisFurnace.ControlZoneNum == 0) {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(6), Alphas(6)));
-                ErrorsFound = true;
-            }
-
             // Get the node number for the zone with the thermostat
             findControlledZoneAirLoop(state, thisFurnace, CurrentModuleObject, cAlphaFields(6), Alphas(6), ErrorsFound);
 
@@ -2835,13 +2829,6 @@ namespace Furnaces {
             Node::TestCompSet(state, CurrentModuleObject, Alphas(1), Alphas(3), Alphas(4), "Air Nodes");
 
             // Get the Controlling Zone or Location of the Furnace Thermostat
-            thisFurnace.ControlZoneNum = Util::FindItemInList(Alphas(5), state.dataHeatBal->Zone);
-            if (thisFurnace.ControlZoneNum == 0) {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(5), Alphas(5)));
-                ErrorsFound = true;
-            }
-
             // Get the node number for the zone with the thermostat
             findControlledZoneAirLoop(state, thisFurnace, CurrentModuleObject, cAlphaFields(5), Alphas(5), ErrorsFound);
 
@@ -3558,13 +3545,6 @@ namespace Furnaces {
             Node::TestCompSet(state, CurrentModuleObject, Alphas(1), Alphas(3), Alphas(4), "Air Nodes");
 
             // Get the Controlling Zone or Location of the Furnace Thermostat
-            thisFurnace.ControlZoneNum = Util::FindItemInList(Alphas(5), state.dataHeatBal->Zone);
-            if (thisFurnace.ControlZoneNum == 0) {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(5), Alphas(5)));
-                ErrorsFound = true;
-            }
-
             // Get the node number for the zone with the thermostat
             findControlledZoneAirLoop(state, thisFurnace, CurrentModuleObject, cAlphaFields(5), Alphas(5), ErrorsFound);
 
