@@ -6446,6 +6446,28 @@ void GetRefrigerationInput(EnergyPlusData &state)
     lAlphaBlanks.deallocate();
     lNumericBlanks.deallocate();
 
+    // Helper lambda: iterate a 1-based Array1D collection checking NumSysAttach.
+    // Items with NumSysAttach < 1 are counted as unused and optionally listed.
+    // The caller supplies onUnused (called with the item index when unused) and
+    // onMultiple (called with the item index when NumSysAttach > 1) so that
+    // per-type error messages are preserved exactly.
+    auto checkUnusedComponents = [&](auto &collection, int numItems, int &unusedCount,
+                                     std::string_view idfType,
+                                     auto onMultiple) {
+        unusedCount = 0;
+        for (int i = 1; i <= numItems; ++i) {
+            if (collection(i).NumSysAttach == 1) continue;
+            if (collection(i).NumSysAttach < 1) {
+                ++unusedCount;
+                if (state.dataGlobal->DisplayExtraWarnings)
+                    ShowWarningError(state, EnergyPlus::format("{}: {}=\"{}\" unused. ", RoutineName, idfType, collection(i).Name));
+            }
+            if (collection(i).NumSysAttach > 1) {
+                onMultiple(i);
+            }
+        }
+    };
+
     if (state.dataRefrigCase->NumSimulationCases > 0) {
         // Find unused and non-unique display case objects to report in eio and err file and sum
         //    all HVAC RA fractions and write error message if greater than 1 for any zone
@@ -6474,26 +6496,14 @@ void GetRefrigerationInput(EnergyPlusData &state)
         // check for cases not connected to systems and cases connected
         // more than once (twice in a system or to more than one system)
 
-        state.dataRefrigCase->NumUnusedRefrigCases = 0;
-        for (int CaseNum = 1; CaseNum <= state.dataRefrigCase->NumSimulationCases; ++CaseNum) {
-            if (RefrigCase(CaseNum).NumSysAttach == 1) {
-                continue;
-            }
-            if (RefrigCase(CaseNum).NumSysAttach < 1) {
-                ++state.dataRefrigCase->NumUnusedRefrigCases;
-                if (state.dataGlobal->DisplayExtraWarnings) {
-                    //  individual case names listed if DataGlobals::DisplayExtraWarnings option selected
-                    ShowWarningError(state, EnergyPlus::format("{}: Refrigeration:Case=\"{}\" unused. ", RoutineName, RefrigCase(CaseNum).Name));
-                } // display extra warnings - give a list of unused cases
-            } // unused case
-            if (RefrigCase(CaseNum).NumSysAttach > 1) {
-                ErrorsFound = true;
-                ShowSevereError(state,
-                                EnergyPlus::format(
-                                    "{}: Refrigeration:Case=\"{}\", Same refrigerated case name referenced ", RoutineName, RefrigCase(CaseNum).Name));
-                ShowContinueError(state, " by more than one refrigeration system and/or compressor rack.");
-            } // if looking for same case attached to multiple systems/racks
-        } // NumSimulationCases
+        checkUnusedComponents(RefrigCase, state.dataRefrigCase->NumSimulationCases,
+                              state.dataRefrigCase->NumUnusedRefrigCases, "Refrigeration:Case",
+                              [&](int CaseNum) {
+                                  ErrorsFound = true;
+                                  ShowSevereError(state, EnergyPlus::format("{}: Refrigeration:Case=\"{}\", Same refrigerated case name referenced ",
+                                                                            RoutineName, RefrigCase(CaseNum).Name));
+                                  ShowContinueError(state, " by more than one refrigeration system and/or compressor rack.");
+                              });
 
         if ((state.dataRefrigCase->NumUnusedRefrigCases > 0) && (!state.dataGlobal->DisplayExtraWarnings)) {
             //  write to error file,
@@ -6511,28 +6521,14 @@ void GetRefrigerationInput(EnergyPlusData &state)
     if (state.dataRefrigCase->NumSimulationCompressors > 0) {
         // check for compressors not connected to systems and compressors connected more than once
         // (twice in a system or to more than one system)
-        state.dataRefrigCase->NumUnusedCompressors = 0;
-        for (int CompNum = 1; CompNum <= state.dataRefrigCase->NumSimulationCompressors; ++CompNum) {
-            if (Compressor(CompNum).NumSysAttach == 1) {
-                continue;
-            }
-            if (Compressor(CompNum).NumSysAttach < 1) {
-                ++state.dataRefrigCase->NumUnusedCompressors;
-                if (state.dataGlobal->DisplayExtraWarnings) {
-                    //  individual compressor names listed if DataGlobals::DisplayExtraWarnings option selected
-                    ShowWarningError(state,
-                                     EnergyPlus::format("{}: Refrigeration:Compressor=\"{}\" unused. ", RoutineName, Compressor(CompNum).Name));
-                } // display extra warnings - give a list of unused compressors
-            } // unused compressor
-            if (Compressor(CompNum).NumSysAttach > 1) {
-                ErrorsFound = true;
-                ShowSevereError(state,
-                                EnergyPlus::format("{}: Refrigeration:Compressor=\"{}\", Same refrigeration compressor name referenced",
-                                                   RoutineName,
-                                                   Compressor(CompNum).Name));
-                ShowContinueError(state, " by more than one refrigeration system.");
-            } // looking for same compressor attached to multiple systems/racks
-        } // NumSimulationCompressors
+        checkUnusedComponents(Compressor, state.dataRefrigCase->NumSimulationCompressors,
+                              state.dataRefrigCase->NumUnusedCompressors, "Refrigeration:Compressor",
+                              [&](int CompNum) {
+                                  ErrorsFound = true;
+                                  ShowSevereError(state, EnergyPlus::format("{}: Refrigeration:Compressor=\"{}\", Same refrigeration compressor name referenced",
+                                                                            RoutineName, Compressor(CompNum).Name));
+                                  ShowContinueError(state, " by more than one refrigeration system.");
+                              });
 
         if ((state.dataRefrigCase->NumUnusedCompressors > 0) && (!state.dataGlobal->DisplayExtraWarnings)) {
             //  write to error file,
@@ -6551,26 +6547,14 @@ void GetRefrigerationInput(EnergyPlusData &state)
     if (state.dataRefrigCase->NumSimulationWalkIns > 0) {
         // check for refrigeration WalkIns not connected to any systems and
         //  refrigeration WalkIns connected more than once
-        for (int WalkInNum = 1; WalkInNum <= state.dataRefrigCase->NumSimulationWalkIns; ++WalkInNum) {
-            if (WalkIn(WalkInNum).NumSysAttach == 1) {
-                continue;
-            }
-            if (WalkIn(WalkInNum).NumSysAttach < 1) {
-                ++NumUnusedWalkIns;
-                if (state.dataGlobal->DisplayExtraWarnings) {
-                    //  individual walkin names listed if DataGlobals::DisplayExtraWarnings option selected
-                    ShowWarningError(state, EnergyPlus::format("{}: Refrigeration:WalkIn=\"{}\" unused. ", RoutineName, WalkIn(WalkInNum).Name));
-                } // display extra warnings - give a list of unused WalkIns
-            } // unused walkin
-            if (WalkIn(WalkInNum).NumSysAttach > 1) {
-                ErrorsFound = true;
-                ShowSevereError(state,
-                                EnergyPlus::format("{}: Refrigeration:WalkIn=\"{}\", Same Refrigeration WalkIn name referenced",
-                                                   RoutineName,
-                                                   WalkIn(WalkInNum).Name));
-                ShowContinueError(state, " by more than one refrigeration system and/or compressor rack.");
-            } // if looking for same walk in attached to multiple systems/racks
-        } // NumSimulationWalkIns
+        checkUnusedComponents(WalkIn, state.dataRefrigCase->NumSimulationWalkIns,
+                              NumUnusedWalkIns, "Refrigeration:WalkIn",
+                              [&](int WalkInNum) {
+                                  ErrorsFound = true;
+                                  ShowSevereError(state, EnergyPlus::format("{}: Refrigeration:WalkIn=\"{}\", Same Refrigeration WalkIn name referenced",
+                                                                            RoutineName, WalkIn(WalkInNum).Name));
+                                  ShowContinueError(state, " by more than one refrigeration system and/or compressor rack.");
+                              });
 
         if ((NumUnusedWalkIns > 0) && (!state.dataGlobal->DisplayExtraWarnings)) {
             //  write to error file,
@@ -6629,28 +6613,14 @@ void GetRefrigerationInput(EnergyPlusData &state)
     if (state.dataRefrigCase->NumSimulationSecondarySystems > 0) {
         // check for refrigeration Secondarys not connected to detailed systems and
         //  refrigeration Secondarys connected more than once
-        state.dataRefrigCase->NumUnusedSecondarys = 0;
-        for (int SecondaryNum = 1; SecondaryNum <= state.dataRefrigCase->NumSimulationSecondarySystems; ++SecondaryNum) {
-            if (Secondary(SecondaryNum).NumSysAttach == 1) {
-                continue;
-            }
-            if (Secondary(SecondaryNum).NumSysAttach < 1) {
-                ++state.dataRefrigCase->NumUnusedSecondarys;
-                if (state.dataGlobal->DisplayExtraWarnings) {
-                    //  individual secondary names listed if DataGlobals::DisplayExtraWarnings option selected
-                    ShowWarningError(state,
-                                     EnergyPlus::format("{}: Refrigeration:Secondary=\"{}\" unused. ", RoutineName, Secondary(SecondaryNum).Name));
-                } // display extra warnings - give a list of unused Secondaries
-            } // unused secondary
-            if (Secondary(SecondaryNum).NumSysAttach > 1) {
-                ErrorsFound = true;
-                ShowSevereError(state,
-                                EnergyPlus::format("{}: Refrigeration:Secondary=\"{}\", Same Refrigeration Secondary name referenced",
-                                                   RoutineName,
-                                                   Secondary(SecondaryNum).Name));
-                ShowContinueError(state, "   by more than one refrigeration system");
-            } // looking for same secondary loop attached to multiple systems/racks
-        } // NumSimulationSecondarys
+        checkUnusedComponents(Secondary, state.dataRefrigCase->NumSimulationSecondarySystems,
+                              state.dataRefrigCase->NumUnusedSecondarys, "Refrigeration:Secondary",
+                              [&](int SecondaryNum) {
+                                  ErrorsFound = true;
+                                  ShowSevereError(state, EnergyPlus::format("{}: Refrigeration:Secondary=\"{}\", Same Refrigeration Secondary name referenced",
+                                                                            RoutineName, Secondary(SecondaryNum).Name));
+                                  ShowContinueError(state, "   by more than one refrigeration system");
+                              });
 
         if ((state.dataRefrigCase->NumUnusedSecondarys > 0) && (!state.dataGlobal->DisplayExtraWarnings)) {
             //  write to error file,
@@ -6670,22 +6640,9 @@ void GetRefrigerationInput(EnergyPlusData &state)
         //     - determines number of loops through refrigeration simulation
         //       because of dependence of performance on total condenser load
         state.dataRefrigCase->NumSimulationSharedCondensers = 0;
-        state.dataRefrigCase->NumUnusedCondensers = 0;
-        for (int CondNum = 1; CondNum <= state.dataRefrigCase->NumRefrigCondensers; ++CondNum) {
-            if (Condenser(CondNum).NumSysAttach == 1) {
-                continue;
-            }
-            if (Condenser(CondNum).NumSysAttach < 1) {
-                ++state.dataRefrigCase->NumUnusedCondensers;
-                if (state.dataGlobal->DisplayExtraWarnings) {
-                    //  individual condenser names listed if DataGlobals::DisplayExtraWarnings option selected
-                    ShowWarningError(state, EnergyPlus::format("{}: Refrigeration:Condenser=\"{}\" unused. ", RoutineName, Condenser(CondNum).Name));
-                } // display extra warnings - give a list of unused condensers
-            } // unused condenser
-            if (Condenser(CondNum).NumSysAttach > 1) {
-                ++state.dataRefrigCase->NumSimulationSharedCondensers;
-            } // looking for shared condensers
-        } // CondNum
+        checkUnusedComponents(Condenser, state.dataRefrigCase->NumRefrigCondensers,
+                              state.dataRefrigCase->NumUnusedCondensers, "Refrigeration:Condenser",
+                              [&](int /*CondNum*/) { ++state.dataRefrigCase->NumSimulationSharedCondensers; });
 
         if ((state.dataRefrigCase->NumUnusedCondensers > 0) && (!state.dataGlobal->DisplayExtraWarnings)) {
             //  write to error file,
@@ -6703,22 +6660,9 @@ void GetRefrigerationInput(EnergyPlusData &state)
     if (state.dataRefrigCase->NumSimulationGasCooler > 0) {
         // Check for presence of shared gas coolers and for unused gas coolers
         state.dataRefrigCase->NumSimulationSharedGasCoolers = 0;
-        state.dataRefrigCase->NumUnusedGasCoolers = 0;
-        for (int GCNum = 1; GCNum <= state.dataRefrigCase->NumSimulationGasCooler; ++GCNum) {
-            if (GasCooler(GCNum).NumSysAttach == 1) {
-                continue;
-            }
-            if (GasCooler(GCNum).NumSysAttach < 1) {
-                ++state.dataRefrigCase->NumUnusedGasCoolers;
-                if (state.dataGlobal->DisplayExtraWarnings) {
-                    //  individual gas cooler names listed if DataGlobals::DisplayExtraWarnings option selected
-                    ShowWarningError(state, EnergyPlus::format("{}: Refrigeration:GasCooler=\"{}\" unused. ", RoutineName, GasCooler(GCNum).Name));
-                } // display extra warnings - give a list of unused gas coolers
-            } // unused gas cooler
-            if (GasCooler(GCNum).NumSysAttach > 1) {
-                ++state.dataRefrigCase->NumSimulationSharedGasCoolers;
-            } // looking for shared gas coolers
-        } // GCNum
+        checkUnusedComponents(GasCooler, state.dataRefrigCase->NumSimulationGasCooler,
+                              state.dataRefrigCase->NumUnusedGasCoolers, "Refrigeration:GasCooler",
+                              [&](int /*GCNum*/) { ++state.dataRefrigCase->NumSimulationSharedGasCoolers; });
 
         if ((state.dataRefrigCase->NumUnusedGasCoolers > 0) && (!state.dataGlobal->DisplayExtraWarnings)) {
             //  write to error file,
