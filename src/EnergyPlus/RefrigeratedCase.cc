@@ -862,6 +862,30 @@ void GetRefrigerationInput(EnergyPlusData &state)
         }
     };
 
+    // Helper lambda: look up a compressor-or-list name from Alphas(alphaNum), validate that it
+    // resolves to exactly one item, report errors for missing or non-unique names, and (on success)
+    // delegate to assignCompressors to fill destArray.  Returns false when an error was reported.
+    auto lookupAndAssignCompressors = [&](int alphaNum,
+                                          int &numCompressorsSys, int &memberCount, auto &destArray) -> bool {
+        int ListNum = Util::FindItemInList(Alphas(alphaNum), CompressorLists);
+        int CompNum = Util::FindItemInList(Alphas(alphaNum), Compressor);
+        if ((ListNum == 0) && (CompNum == 0)) {
+            ShowSevereError(state,
+                            EnergyPlus::format(R"({}{}, "{}", has an invalid or undefined value="{}".)",
+                                               RoutineName, CurrentModuleObject, cAlphaFieldNames(alphaNum), Alphas(alphaNum)));
+            ErrorsFound = true;
+            return false;
+        } else if ((ListNum != 0) && (CompNum != 0)) {
+            ShowSevereError(state,
+                            EnergyPlus::format("{}{} {}, has a non-unique name used for both Compressor and CompressorList name: \"{}\".",
+                                               RoutineName, CurrentModuleObject, cAlphaFieldNames(alphaNum), Alphas(alphaNum)));
+            ErrorsFound = true;
+            return false;
+        }
+        assignCompressors(ListNum, CompNum, numCompressorsSys, memberCount, destArray);
+        return true;
+    };
+
     // bbb stovall note for future - for all curve entries, see if need fail on type or if can allow table input
     if (state.dataRefrigCase->NumSimulationCases > 0) {
         CurrentModuleObject = "Refrigeration:Case";
@@ -5337,38 +5361,9 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 ShowSevereError(state,
                                 EnergyPlus::format("{}{} {}\" : must be input.", RoutineName, CurrentModuleObject, cAlphaFieldNames(AlphaNum)));
                 ErrorsFound = true;
-            } else { //     Entry for Alphas(AlphaNum) can be either a compressor name or a compressorlist name
-                int ListNum;
-                if (NumCompressorLists > 0) {
-                    ListNum = Util::FindItemInList(Alphas(AlphaNum), CompressorLists);
-                } else {
-                    ListNum = 0;
-                }
-                int CompNum;
-                if (state.dataRefrigCase->NumSimulationCompressors > 0) {
-                    CompNum = Util::FindItemInList(Alphas(AlphaNum), Compressor);
-                } else {
-                    CompNum = 0;
-                }
-                if ((ListNum == 0) && (CompNum == 0)) { // name doesn't match either a compressor or a compressor list
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}{} {}, has an invalid or undefined value=\"{}\".",
-                                                       RoutineName,
-                                                       CurrentModuleObject,
-                                                       cAlphaFieldNames(AlphaNum),
-                                                       Alphas(AlphaNum)));
-                    ErrorsFound = true;
-                } else if ((ListNum != 0) && (CompNum != 0)) { // have compressor list and compressor with same name
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}{} {}, has a non-unique name used for both Compressor and CompressorList name: \"{}\".",
-                                                       RoutineName,
-                                                       CurrentModuleObject,
-                                                       cAlphaFieldNames(AlphaNum),
-                                                       Alphas(AlphaNum)));
-                    ErrorsFound = true;
-                } else {
-                    assignCompressors(ListNum, CompNum, NumCompressorsSys, System(RefrigSysNum).NumCompressors, System(RefrigSysNum).CompressorNum);
-                }
+            } else {
+                lookupAndAssignCompressors(AlphaNum,
+                                           NumCompressorsSys, System(RefrigSysNum).NumCompressors, System(RefrigSysNum).CompressorNum);
             }
 
             if (!lNumericBlanks(1)) {
@@ -5579,32 +5574,10 @@ void GetRefrigerationInput(EnergyPlusData &state)
                                                        System(RefrigSysNum).Name,
                                                        cAlphaFieldNames(AlphaNum)));
                     ErrorsFound = true;
-                } else { //     Entry for Alphas(AlphaNum) can be either a compressor name or a compressorlist name
-                    int ListNum = Util::FindItemInList(Alphas(AlphaNum), CompressorLists);
-                    int CompNum = Util::FindItemInList(Alphas(AlphaNum), Compressor);
-                    if ((ListNum == 0) && (CompNum == 0)) { // name doesn't match either a compressor or a compressor list
-                        ShowSevereError(state,
-                                        EnergyPlus::format(R"({}{}="{}", {} has an invalid or undefined value="{}".)",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           System(RefrigSysNum).Name,
-                                                           cAlphaFieldNames(AlphaNum),
-                                                           Alphas(AlphaNum)));
-                        ErrorsFound = true;
-                    } else if ((ListNum != 0) && (CompNum != 0)) { // have compressor list and compressor with same name
-                        ShowSevereError(
-                            state,
-                            EnergyPlus::format(R"({}{}="{}", {} has a non-unique name used for both Compressor and CompressorList name: "{}".)",
-                                               RoutineName,
-                                               CurrentModuleObject,
-                                               System(RefrigSysNum).Name,
-                                               cAlphaFieldNames(AlphaNum),
-                                               Alphas(AlphaNum)));
-                        ErrorsFound = true;
-                    } else {
-                        assignCompressors(ListNum, CompNum, NumHiStageCompressorsSys,
-                                          System(RefrigSysNum).NumHiStageCompressors, System(RefrigSysNum).HiStageCompressorNum);
-                    }
+                } else {
+                    lookupAndAssignCompressors(AlphaNum,
+                                               NumHiStageCompressorsSys, System(RefrigSysNum).NumHiStageCompressors,
+                                               System(RefrigSysNum).HiStageCompressorNum);
                 }
             }
 
@@ -6057,32 +6030,13 @@ void GetRefrigerationInput(EnergyPlusData &state)
                                 EnergyPlus::format("{}{} {}\" : must be input.", RoutineName, CurrentModuleObject, cAlphaFieldNames(AlphaNum)));
                 ErrorsFound = true;
             } else { //     Entry for Alphas(AlphaNum) can be either a compressor name or a compressorlist name
-                int ListNum = Util::FindItemInList(Alphas(AlphaNum), CompressorLists);
-                int CompNum = Util::FindItemInList(Alphas(AlphaNum), Compressor);
-                if ((ListNum == 0) && (CompNum == 0)) { // name doesn't match either a compressor or a compressor list
-                    ShowSevereError(state,
-                                    EnergyPlus::format(R"({}{}, "{}", has an invalid or undefined value="{}".)",
-                                                       RoutineName,
-                                                       CurrentModuleObject,
-                                                       cAlphaFieldNames(AlphaNum),
-                                                       Alphas(AlphaNum)));
-                    ErrorsFound = true;
-                } else if ((ListNum != 0) && (CompNum != 0)) { // have compressor list and compressor with same name
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}{} {}, has a non-unique name used for both Compressor and CompressorList name: \"{}\".",
-                                                       RoutineName,
-                                                       CurrentModuleObject,
-                                                       cAlphaFieldNames(AlphaNum),
-                                                       Alphas(AlphaNum)));
-                    ErrorsFound = true;
-                } else {
-                    assignCompressors(ListNum, CompNum, NumCompressorsSys,
-                                      TransSystem(TransRefrigSysNum).NumCompressorsHP, TransSystem(TransRefrigSysNum).CompressorNumHP);
-                }
+                lookupAndAssignCompressors(AlphaNum,
+                                           NumCompressorsSys, TransSystem(TransRefrigSysNum).NumCompressorsHP,
+                                           TransSystem(TransRefrigSysNum).CompressorNumHP);
                 // Sum rated capacity of all HP compressors on system
                 NominalTotalCompCapHP = 0.0;
                 for (int CompIndex = 1; CompIndex <= NumCompressorsSys; ++CompIndex) {
-                    CompNum = TransSystem(TransRefrigSysNum).CompressorNumHP(CompIndex);
+                    int CompNum = TransSystem(TransRefrigSysNum).CompressorNumHP(CompIndex);
 
                     if (Compressor(CompNum).TransFlag) { //  Calculate nominal capacity of transcritical Compressor
                         Real64 GCOutletH = TransSystem(TransRefrigSysNum)
@@ -6132,32 +6086,13 @@ void GetRefrigerationInput(EnergyPlusData &state)
                                        cAlphaFieldNames(AlphaNum)));
             } else if ((!(lAlphaBlanks(AlphaNum))) && (TransSystem(TransRefrigSysNum).transSysType == TransSysType::TwoStage)) {
                 // TwoStage system with low pressure compressors specified
-                int ListNum = Util::FindItemInList(Alphas(AlphaNum), CompressorLists);
-                int CompNum = Util::FindItemInList(Alphas(AlphaNum), Compressor);
-                if ((ListNum == 0) && (CompNum == 0)) { // name doesn't match either a compressor or a compressor list
-                    ShowSevereError(state,
-                                    EnergyPlus::format(R"({}{}, "{}", has an invalid or undefined value="{}".)",
-                                                       RoutineName,
-                                                       CurrentModuleObject,
-                                                       cAlphaFieldNames(AlphaNum),
-                                                       Alphas(AlphaNum)));
-                    ErrorsFound = true;
-                } else if ((ListNum != 0) && (CompNum != 0)) { // have compressor list and compressor with same name
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}{} {}, has a non-unique name used for both Compressor and CompressorList name: \"{}\".",
-                                                       RoutineName,
-                                                       CurrentModuleObject,
-                                                       cAlphaFieldNames(AlphaNum),
-                                                       Alphas(AlphaNum)));
-                    ErrorsFound = true;
-                } else {
-                    assignCompressors(ListNum, CompNum, NumCompressorsSys,
-                                      TransSystem(TransRefrigSysNum).NumCompressorsLP, TransSystem(TransRefrigSysNum).CompressorNumLP);
-                }
+                lookupAndAssignCompressors(AlphaNum,
+                                           NumCompressorsSys, TransSystem(TransRefrigSysNum).NumCompressorsLP,
+                                           TransSystem(TransRefrigSysNum).CompressorNumLP);
                 // Sum rated capacity of all LP compressors on system
                 NominalTotalCompCapLP = 0.0;
                 for (int CompIndex = 1; CompIndex <= NumCompressorsSys; ++CompIndex) {
-                    CompNum = TransSystem(TransRefrigSysNum).CompressorNumLP(CompIndex);
+                    int CompNum = TransSystem(TransRefrigSysNum).CompressorNumLP(CompIndex);
                     if (TransSystem(TransRefrigSysNum).transSysType == TransSysType::TwoStage) { //  Calculate capacity of LP compressors
                         Compressor(CompNum).NomCap = Curve::CurveValue(state,
                                                                        Compressor(CompNum).CapacityCurvePtr,
