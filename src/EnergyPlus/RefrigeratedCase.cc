@@ -788,6 +788,23 @@ void GetRefrigerationInput(EnergyPlusData &state)
         }
     };
 
+    // Helper lambda: given already-resolved listNum and compNum (from FindItemInList
+    // calls at the call site), populate both a local count variable and a system member
+    // count, then allocate and fill the destination compressor-index array.
+    // The caller is responsible for the "not found" and "non-unique" error checks before
+    // calling this lambda.  localCount and memberCount are both set to the resolved count.
+    auto assignCompressors = [&](int listNum, int compNum, int &localCount, int &memberCount, auto &destArray) {
+        if (listNum != 0) {
+            localCount = memberCount = CompressorLists(listNum).NumCompressors;
+            if (!allocated(destArray)) destArray.allocate(localCount);
+            destArray({1, localCount}) = CompressorLists(listNum).CompItemNum({1, localCount});
+        } else if (compNum != 0) {
+            localCount = memberCount = 1;
+            if (!allocated(destArray)) destArray.allocate(1);
+            destArray(1) = compNum;
+        }
+    };
+
     // bbb stovall note for future - for all curve entries, see if need fail on type or if can allow table input
     if (state.dataRefrigCase->NumSimulationCases > 0) {
         CurrentModuleObject = "Refrigeration:Case";
@@ -5292,20 +5309,8 @@ void GetRefrigerationInput(EnergyPlusData &state)
                                                        cAlphaFieldNames(AlphaNum),
                                                        Alphas(AlphaNum)));
                     ErrorsFound = true;
-                } else if (ListNum != 0) {
-                    NumCompressorsSys = CompressorLists(ListNum).NumCompressors;
-                    System(RefrigSysNum).NumCompressors = NumCompressorsSys;
-                    if (!allocated(System(RefrigSysNum).CompressorNum)) {
-                        System(RefrigSysNum).CompressorNum.allocate(NumCompressorsSys);
-                    }
-                    System(RefrigSysNum).CompressorNum({1, NumCompressorsSys}) = CompressorLists(ListNum).CompItemNum({1, NumCompressorsSys});
-                } else if (CompNum != 0) {
-                    NumCompressorsSys = 1;
-                    System(RefrigSysNum).NumCompressors = 1;
-                    if (!allocated(System(RefrigSysNum).CompressorNum)) {
-                        System(RefrigSysNum).CompressorNum.allocate(NumCompressorsSys);
-                    }
-                    System(RefrigSysNum).CompressorNum(NumCompressorsSys) = CompNum;
+                } else {
+                    assignCompressors(ListNum, CompNum, NumCompressorsSys, System(RefrigSysNum).NumCompressors, System(RefrigSysNum).CompressorNum);
                 }
             }
 
@@ -5569,21 +5574,9 @@ void GetRefrigerationInput(EnergyPlusData &state)
                                                cAlphaFieldNames(AlphaNum),
                                                Alphas(AlphaNum)));
                         ErrorsFound = true;
-                    } else if (ListNum != 0) {
-                        NumHiStageCompressorsSys = CompressorLists(ListNum).NumCompressors;
-                        System(RefrigSysNum).NumHiStageCompressors = NumHiStageCompressorsSys;
-                        if (!allocated(System(RefrigSysNum).HiStageCompressorNum)) {
-                            System(RefrigSysNum).HiStageCompressorNum.allocate(NumHiStageCompressorsSys);
-                        }
-                        System(RefrigSysNum).HiStageCompressorNum({1, NumHiStageCompressorsSys}) =
-                            CompressorLists(ListNum).CompItemNum({1, NumHiStageCompressorsSys});
-                    } else if (CompNum != 0) {
-                        NumHiStageCompressorsSys = 1;
-                        System(RefrigSysNum).NumHiStageCompressors = 1;
-                        if (!allocated(System(RefrigSysNum).HiStageCompressorNum)) {
-                            System(RefrigSysNum).HiStageCompressorNum.allocate(NumHiStageCompressorsSys);
-                        }
-                        System(RefrigSysNum).HiStageCompressorNum(NumHiStageCompressorsSys) = CompNum;
+                    } else {
+                        assignCompressors(ListNum, CompNum, NumHiStageCompressorsSys,
+                                          System(RefrigSysNum).NumHiStageCompressors, System(RefrigSysNum).HiStageCompressorNum);
                     }
                 }
             }
@@ -6115,21 +6108,9 @@ void GetRefrigerationInput(EnergyPlusData &state)
                                                        cAlphaFieldNames(AlphaNum),
                                                        Alphas(AlphaNum)));
                     ErrorsFound = true;
-                } else if (ListNum != 0) {
-                    NumCompressorsSys = CompressorLists(ListNum).NumCompressors;
-                    TransSystem(TransRefrigSysNum).NumCompressorsHP = NumCompressorsSys;
-                    if (!allocated(TransSystem(TransRefrigSysNum).CompressorNumHP)) {
-                        TransSystem(TransRefrigSysNum).CompressorNumHP.allocate(NumCompressorsSys);
-                    }
-                    TransSystem(TransRefrigSysNum).CompressorNumHP({1, NumCompressorsSys}) =
-                        CompressorLists(ListNum).CompItemNum({1, NumCompressorsSys});
-                } else if (CompNum != 0) {
-                    NumCompressorsSys = 1;
-                    TransSystem(TransRefrigSysNum).NumCompressorsHP = 1;
-                    if (!allocated(TransSystem(TransRefrigSysNum).CompressorNumHP)) {
-                        TransSystem(TransRefrigSysNum).CompressorNumHP.allocate(NumCompressorsSys);
-                    }
-                    TransSystem(TransRefrigSysNum).CompressorNumHP(NumCompressorsSys) = CompNum;
+                } else {
+                    assignCompressors(ListNum, CompNum, NumCompressorsSys,
+                                      TransSystem(TransRefrigSysNum).NumCompressorsHP, TransSystem(TransRefrigSysNum).CompressorNumHP);
                 }
                 // Sum rated capacity of all HP compressors on system
                 NominalTotalCompCapHP = 0.0;
@@ -6202,21 +6183,9 @@ void GetRefrigerationInput(EnergyPlusData &state)
                                                        cAlphaFieldNames(AlphaNum),
                                                        Alphas(AlphaNum)));
                     ErrorsFound = true;
-                } else if (ListNum != 0) {
-                    NumCompressorsSys = CompressorLists(ListNum).NumCompressors;
-                    TransSystem(TransRefrigSysNum).NumCompressorsLP = NumCompressorsSys;
-                    if (!allocated(TransSystem(TransRefrigSysNum).CompressorNumLP)) {
-                        TransSystem(TransRefrigSysNum).CompressorNumLP.allocate(NumCompressorsSys);
-                    }
-                    TransSystem(TransRefrigSysNum).CompressorNumLP({1, NumCompressorsSys}) =
-                        CompressorLists(ListNum).CompItemNum({1, NumCompressorsSys});
-                } else if (CompNum != 0) {
-                    NumCompressorsSys = 1;
-                    TransSystem(TransRefrigSysNum).NumCompressorsLP = 1;
-                    if (!allocated(TransSystem(TransRefrigSysNum).CompressorNumLP)) {
-                        TransSystem(TransRefrigSysNum).CompressorNumLP.allocate(NumCompressorsSys);
-                    }
-                    TransSystem(TransRefrigSysNum).CompressorNumLP(NumCompressorsSys) = CompNum;
+                } else {
+                    assignCompressors(ListNum, CompNum, NumCompressorsSys,
+                                      TransSystem(TransRefrigSysNum).NumCompressorsLP, TransSystem(TransRefrigSysNum).CompressorNumLP);
                 }
                 // Sum rated capacity of all LP compressors on system
                 NominalTotalCompCapLP = 0.0;
