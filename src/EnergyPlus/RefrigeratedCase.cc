@@ -6359,28 +6359,15 @@ void GetRefrigerationInput(EnergyPlusData &state)
     if (state.dataRefrigCase->NumSimulationRefrigAirChillers > 0) {
         // check for air chillers not connected to any systems and
         //  air chillers connected more than once
-        state.dataRefrigCase->NumUnusedCoils = 0;
-        for (int CoilNum = 1; CoilNum <= state.dataRefrigCase->NumSimulationRefrigAirChillers; ++CoilNum) {
-            if (WarehouseCoil(CoilNum).NumSysAttach == 1) {
-                continue;
-            }
-            if (WarehouseCoil(CoilNum).NumSysAttach < 1) {
-                ++NumUnusedWalkIns;
-                if (state.dataGlobal->DisplayExtraWarnings) {
-                    //  individual walkin names listed if DataGlobals::DisplayExtraWarnings option selected
-                    ShowWarningError(state,
-                                     EnergyPlus::format("{}: Refrigeration:AirChiller=\"{}\" unused. ", RoutineName, WarehouseCoil(CoilNum).Name));
-                } // display extra warnings - give a list of unused chillers
-            } // unused chiller
-            if (WarehouseCoil(CoilNum).NumSysAttach > 1) {
-                ErrorsFound = true;
-                ShowSevereError(state,
-                                EnergyPlus::format("{}: Refrigeration:AirChiller=\"{}\", Same Refrigeration Air Chiller name referenced",
-                                                   RoutineName,
-                                                   WarehouseCoil(CoilNum).Name));
-                ShowContinueError(state, " by more than one refrigeration system and/or compressor rack.");
-            } // if looking for same walk in attached to multiple systems/racks
-        } // NumSimulationRefrigAirchillers
+        checkUnusedComponents(WarehouseCoil, state.dataRefrigCase->NumSimulationRefrigAirChillers,
+                              state.dataRefrigCase->NumUnusedCoils, "Refrigeration:AirChiller",
+                              [&](int CoilNum) {
+                                  ErrorsFound = true;
+                                  ShowSevereError(state,
+                                                  EnergyPlus::format("{}: Refrigeration:AirChiller=\"{}\", Same Refrigeration Air Chiller name referenced",
+                                                                     RoutineName, WarehouseCoil(CoilNum).Name));
+                                  ShowContinueError(state, " by more than one refrigeration system and/or compressor rack.");
+                              });
 
         if ((state.dataRefrigCase->NumUnusedCoils > 0) && (!state.dataGlobal->DisplayExtraWarnings)) {
             //  write to error file,
