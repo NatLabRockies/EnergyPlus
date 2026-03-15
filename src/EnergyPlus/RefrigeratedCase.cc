@@ -993,6 +993,22 @@ void GetRefrigerationInput(EnergyPlusData &state)
         }
     };
 
+    // Helper lambda: if alpha field n is blank assign the always-on schedule, otherwise look up the
+    // schedule by name, report a severe error if not found, and validate the 0-1 min/max range.
+    // eoh must be the ErrorObjectHeader for the current object being read (passed by const-ref so
+    // the lambda does not need to be redefined on each loop iteration).
+    auto getScheduleOrAlwaysOn = [&](const ErrorObjectHeader &eoh, int alphaNum, Sched::Schedule *&schedOut) {
+        if (lAlphaBlanks(alphaNum)) {
+            schedOut = Sched::GetScheduleAlwaysOn(state);
+        } else if ((schedOut = Sched::GetSchedule(state, Alphas(alphaNum))) == nullptr) {
+            ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(alphaNum), Alphas(alphaNum));
+            ErrorsFound = true;
+        } else if (!schedOut->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
+            Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(alphaNum), Alphas(alphaNum), Clusive::In, 0.0, Clusive::In, 1.0);
+            ErrorsFound = true;
+        }
+    };
+
     // bbb stovall note for future - for all curve entries, see if need fail on type or if can allow table input
     if (state.dataRefrigCase->NumSimulationCases > 0) {
         CurrentModuleObject = "Refrigeration:Case";
@@ -1021,15 +1037,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
             RefrigCase(CaseNum).Name = Alphas(AlphaNum);
 
             AlphaNum = 2;
-            if (lAlphaBlanks(AlphaNum)) {
-                RefrigCase(CaseNum).availSched = Sched::GetScheduleAlwaysOn(state);
-            } else if ((RefrigCase(CaseNum).availSched = Sched::GetSchedule(state, Alphas(AlphaNum))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum));
-                ErrorsFound = true;
-            } else if (!RefrigCase(CaseNum).availSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum), Clusive::In, 0.0, Clusive::In, 1.0);
-                ErrorsFound = true;
-            }
+            getScheduleOrAlwaysOn(eoh, AlphaNum, RefrigCase(CaseNum).availSched);
 
             // Get the Zone node number from the zone name entered by the user
             RefrigCase(CaseNum).ZoneName = Alphas(3);
@@ -1191,15 +1199,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 RefrigCase(CaseNum).LightingPower = RefrigCase(CaseNum).RatedLightingPower;
             } // blank input
 
-            if (lAlphaBlanks(6)) {
-                RefrigCase(CaseNum).lightingSched = Sched::GetScheduleAlwaysOn(state); // Not an availability schedule, but defaults to constant-1.0
-            } else if ((RefrigCase(CaseNum).lightingSched = Sched::GetSchedule(state, Alphas(6))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(6), Alphas(6));
-                ErrorsFound = true;
-            } else if (!RefrigCase(CaseNum).lightingSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(6), Alphas(6), Clusive::In, 0.0, Clusive::In, 1.0);
-                ErrorsFound = true;
-            }
+            getScheduleOrAlwaysOn(eoh, 6, RefrigCase(CaseNum).lightingSched);
 
             NumNum = 12;
             RefrigCase(CaseNum).LightingFractionToCase = 1.0; // default value
@@ -1636,15 +1636,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
 
             WalkIn(WalkInID).Name = Alphas(1);
 
-            if (lAlphaBlanks(2)) {
-                WalkIn(WalkInID).availSched = Sched::GetScheduleAlwaysOn(state);
-            } else if ((WalkIn(WalkInID).availSched = Sched::GetSchedule(state, Alphas(2))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(2), Alphas(2));
-                ErrorsFound = true;
-            } else if (!WalkIn(WalkInID).availSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(2), Alphas(2), Clusive::In, 0.0, Clusive::In, 1.0);
-                ErrorsFound = true;
-            }
+            getScheduleOrAlwaysOn(eoh, 2, WalkIn(WalkInID).availSched);
 
             WalkIn(WalkInID).DesignRatedCap = Numbers(1);
             if (Numbers(1) <= 0.0) {
@@ -1677,15 +1669,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
             }
 
             AlphaNum = 3;
-            if (lAlphaBlanks(AlphaNum)) {
-                WalkIn(WalkInID).heaterSched = Sched::GetScheduleAlwaysOn(state); // Not an availability schedule, but defaults to constant-1.0
-            } else if ((WalkIn(WalkInID).heaterSched = Sched::GetSchedule(state, Alphas(AlphaNum))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum));
-                ErrorsFound = true;
-            } else if (!WalkIn(WalkInID).heaterSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum), Clusive::In, 0.0, Clusive::In, 1.0);
-                ErrorsFound = true;
-            }
+            getScheduleOrAlwaysOn(eoh, AlphaNum, WalkIn(WalkInID).heaterSched);
 
             if (!lNumericBlanks(5) && Numbers(5) > 0.0) {
                 WalkIn(WalkInID).CoilFanPower = Numbers(5);
@@ -1722,15 +1706,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
             }
 
             AlphaNum = 4;
-            if (lAlphaBlanks(AlphaNum)) {
-                WalkIn(WalkInID).lightingSched = Sched::GetScheduleAlwaysOn(state); // Not an availability schedule, but defaults to constant-1.0
-            } else if ((WalkIn(WalkInID).lightingSched = Sched::GetSchedule(state, Alphas(AlphaNum))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum));
-                ErrorsFound = true;
-            } else if (!WalkIn(WalkInID).lightingSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum), Clusive::In, 0.0, Clusive::In, 1.0);
-                ErrorsFound = true;
-            }
+            getScheduleOrAlwaysOn(eoh, AlphaNum, WalkIn(WalkInID).lightingSched);
 
             // Input walk-in cooler defrost information
             AlphaNum = 5;
@@ -2004,15 +1980,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
 
             // A2
             ++AlphaNum;
-            if (lAlphaBlanks(AlphaNum)) {
-                WarehouseCoil(CoilID).availSched = Sched::GetScheduleAlwaysOn(state);
-            } else if ((WarehouseCoil(CoilID).availSched = Sched::GetSchedule(state, Alphas(AlphaNum))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum));
-                ErrorsFound = true;
-            } else if (!WarehouseCoil(CoilID).availSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum), Clusive::In, 0.0, Clusive::In, 1.0);
-                ErrorsFound = true;
-            }
+            getScheduleOrAlwaysOn(eoh, AlphaNum, WarehouseCoil(CoilID).availSched);
 
             // Input capacity rating type
             // bbbbb input values (DT1 or DTM type)translate DT1 to DTm here because node will give avg temp?
@@ -2395,15 +2363,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
             }
 
             ++AlphaNum; // A6
-            if (lAlphaBlanks(AlphaNum)) {
-                WarehouseCoil(CoilID).heaterAvailSched = Sched::GetScheduleAlwaysOn(state);
-            } else if ((WarehouseCoil(CoilID).heaterAvailSched = Sched::GetSchedule(state, Alphas(AlphaNum))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum));
-                ErrorsFound = true;
-            } else if (!WarehouseCoil(CoilID).heaterAvailSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum), Clusive::In, 0.0, Clusive::In, 1.0);
-                ErrorsFound = true;
-            }
+            getScheduleOrAlwaysOn(eoh, AlphaNum, WarehouseCoil(CoilID).heaterAvailSched);
 
             // Input fan control type
             ++AlphaNum; // A7
@@ -2569,15 +2529,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
             AirChillerSet(SetID).Name = Alphas(AlphaNum);
 
             AlphaNum = 2;
-            if (lAlphaBlanks(AlphaNum)) {
-                AirChillerSet(SetID).availSched = Sched::GetScheduleAlwaysOn(state);
-            } else if ((AirChillerSet(SetID).availSched = Sched::GetSchedule(state, Alphas(AlphaNum))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum));
-                ErrorsFound = true;
-            } else if (!AirChillerSet(SetID).availSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum), Clusive::In, 0.0, Clusive::In, 1.0);
-                ErrorsFound = true;
-            }
+            getScheduleOrAlwaysOn(eoh, AlphaNum, AirChillerSet(SetID).availSched);
 
             ++AlphaNum;
             AirChillerSet(SetID).ZoneName = Alphas(AlphaNum);
