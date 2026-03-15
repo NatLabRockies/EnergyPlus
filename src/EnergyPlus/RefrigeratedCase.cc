@@ -788,6 +788,43 @@ void GetRefrigerationInput(EnergyPlusData &state)
         }
     };
 
+    // Helper lambda: accumulate case loads for one temperature level of a TranscriticalSystem.
+    // Iterates the supplied caseNumArray (1-based, length numCases), increments NumSysAttach,
+    // adds to nomCapAccum and to the system's RefInventory, and tracks the running minimum
+    // design evaporating temperature in TEvapDesign.
+    auto accumTransSysCases = [&](const auto &caseNumArray, int numCases, Real64 &nomCapAccum, Real64 &TEvapDesign, Real64 &refInventory) {
+        for (int caseIndex = 1; caseIndex <= numCases; ++caseIndex) {
+            int cn = caseNumArray(caseIndex);
+            ++RefrigCase(cn).NumSysAttach;
+            nomCapAccum += RefrigCase(cn).DesignRatedCap;
+            refInventory += RefrigCase(cn).DesignRefrigInventory;
+            if (caseIndex == 1) {
+                TEvapDesign = RefrigCase(cn).EvapTempDesign;
+            } else {
+                TEvapDesign = min(RefrigCase(cn).EvapTempDesign, TEvapDesign);
+            }
+        }
+    };
+
+    // Helper lambda: accumulate walkin loads for one temperature level of a TranscriticalSystem.
+    // numCasesOnLevel is the number of cases already assigned at this temperature level; when it
+    // is 0 and WalkInIndex == 1 the first walkin sets TEvapDesign rather than taking the min.
+    auto accumTransSysWalkIns = [&](const auto &walkInNumArray, int numWalkIns, Real64 &nomCapAccum,
+                                    Real64 &TEvapDesign, int numCasesOnLevel, Real64 &refInventory) {
+        for (int wi = 1; wi <= numWalkIns; ++wi) {
+            int wid = walkInNumArray(wi);
+            ++WalkIn(wid).NumSysAttach;
+            nomCapAccum += WalkIn(wid).DesignRatedCap;
+            refInventory += WalkIn(wid).DesignRefrigInventory;
+            checkWalkInDefrostCap(wid);
+            if ((wi == 1) && (numCasesOnLevel == 0)) {
+                TEvapDesign = WalkIn(wid).TEvapDesign;
+            } else {
+                TEvapDesign = min(WalkIn(wid).TEvapDesign, TEvapDesign);
+            }
+        }
+    };
+
     // Helper lambda: given already-resolved listNum and compNum (from FindItemInList
     // calls at the call site), populate both a local count variable and a system member
     // count, then allocate and fill the destination compressor-index array.
@@ -5920,45 +5957,15 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 } // NumNameMatches /= 1
             } // blank input for cases, walkins, or caseandwalkinlist
 
-            if (NumCasesMT > 0) {
-                // Find lowest design evap T
-                // Sum rated capacity of all MT cases on system
-                for (int caseIndex = 1; caseIndex <= NumCasesMT; ++caseIndex) {
-                    // mark all cases on system as used by this system - checking for unused or non-unique cases
-                    int CaseNum = TransSystem(TransRefrigSysNum).CaseNumMT(caseIndex);
-                    ++RefrigCase(CaseNum).NumSysAttach;
-                    NominalTotalCaseCapMT += RefrigCase(CaseNum).DesignRatedCap;
-                    TransSystem(TransRefrigSysNum).RefInventory += RefrigCase(CaseNum).DesignRefrigInventory;
-                    if (caseIndex == 1) { // look for lowest case design evap T for system
-                        TransSystem(TransRefrigSysNum).TEvapDesignMT = RefrigCase(CaseNum).EvapTempDesign;
-                    } else {
-                        TransSystem(TransRefrigSysNum).TEvapDesignMT =
-                            min(RefrigCase(CaseNum).EvapTempDesign, TransSystem(TransRefrigSysNum).TEvapDesignMT);
-                    }
-                } // CaseIndex=1,NumCases
-            } // NumcasesMT > 0
+            if (NumCasesMT > 0)
+                accumTransSysCases(TransSystem(TransRefrigSysNum).CaseNumMT, NumCasesMT,
+                                   NominalTotalCaseCapMT, TransSystem(TransRefrigSysNum).TEvapDesignMT,
+                                   TransSystem(TransRefrigSysNum).RefInventory);
 
-            if (NumWalkInsMT > 0) {
-                for (int WalkInIndex = 1; WalkInIndex <= NumWalkInsMT; ++WalkInIndex) {
-                    int WalkInID = TransSystem(TransRefrigSysNum).WalkInNumMT(WalkInIndex);
-                    // mark all WalkIns on rack as used by this system (checking for unused or non-unique WalkIns)
-                    ++WalkIn(WalkInID).NumSysAttach;
-                    NominalTotalWalkInCapMT += WalkIn(WalkInID).DesignRatedCap;
-                    TransSystem(TransRefrigSysNum).RefInventory += WalkIn(WalkInID).DesignRefrigInventory;
-                    // Defrost capacity is treated differently by compressor racks and detailed systems;
-                    // for detailed systems, blank input is an error (flag value <= -98).
-                    checkWalkInDefrostCap(WalkInID);
-                    // Find design evaporating temperature for system by getting min design evap for ALL loads
-                    if ((WalkInIndex == 1) && (TransSystem(TransRefrigSysNum).NumCasesMT == 0)) {
-                        // note use walk in index, not walkinid here to get
-                        // first walkin on this suction group/system
-                        TransSystem(TransRefrigSysNum).TEvapDesignMT = WalkIn(WalkInID).TEvapDesign;
-                    } else {
-                        TransSystem(TransRefrigSysNum).TEvapDesignMT =
-                            min(WalkIn(WalkInID).TEvapDesign, TransSystem(TransRefrigSysNum).TEvapDesignMT);
-                    }
-                } // WalkInIndex=1,NumWalkIns
-            } // NumWalkInsMT > 0
+            if (NumWalkInsMT > 0)
+                accumTransSysWalkIns(TransSystem(TransRefrigSysNum).WalkInNumMT, NumWalkInsMT,
+                                     NominalTotalWalkInCapMT, TransSystem(TransRefrigSysNum).TEvapDesignMT,
+                                     TransSystem(TransRefrigSysNum).NumCasesMT, TransSystem(TransRefrigSysNum).RefInventory);
 
             //   Check for Low Temperature Case or Walk-In or CaseAndWalkInList names
             AlphaNum = 4;
@@ -6006,45 +6013,15 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 } // NumNameMatches /= 1
             } // blank input for cases, walkins, or caseandwalkinlist
 
-            if (NumCasesLT > 0) {
-                // Find lowest design evap T
-                // Sum rated capacity of all LT cases on system
-                for (int caseIndex = 1; caseIndex <= NumCasesLT; ++caseIndex) {
-                    // mark all cases on system as used by this system - checking for unused or non-unique cases
-                    int CaseNum = TransSystem(TransRefrigSysNum).CaseNumLT(caseIndex);
-                    ++RefrigCase(CaseNum).NumSysAttach;
-                    NominalTotalCaseCapLT += RefrigCase(CaseNum).DesignRatedCap;
-                    TransSystem(TransRefrigSysNum).RefInventory += RefrigCase(CaseNum).DesignRefrigInventory;
-                    if (caseIndex == 1) { // look for lowest case design evap T for system
-                        TransSystem(TransRefrigSysNum).TEvapDesignLT = RefrigCase(CaseNum).EvapTempDesign;
-                    } else {
-                        TransSystem(TransRefrigSysNum).TEvapDesignLT =
-                            min(RefrigCase(CaseNum).EvapTempDesign, TransSystem(TransRefrigSysNum).TEvapDesignLT);
-                    }
-                } // CaseIndex=1,NumCases
-            } // NumcasesLT > 0
+            if (NumCasesLT > 0)
+                accumTransSysCases(TransSystem(TransRefrigSysNum).CaseNumLT, NumCasesLT,
+                                   NominalTotalCaseCapLT, TransSystem(TransRefrigSysNum).TEvapDesignLT,
+                                   TransSystem(TransRefrigSysNum).RefInventory);
 
-            if (NumWalkInsLT > 0) {
-                for (int WalkInIndex = 1; WalkInIndex <= NumWalkInsLT; ++WalkInIndex) {
-                    int WalkInID = TransSystem(TransRefrigSysNum).WalkInNumLT(WalkInIndex);
-                    // mark all WalkIns on rack as used by this system (checking for unused or non-unique WalkIns)
-                    ++WalkIn(WalkInID).NumSysAttach;
-                    NominalTotalWalkInCapLT += WalkIn(WalkInID).DesignRatedCap;
-                    TransSystem(TransRefrigSysNum).RefInventory += WalkIn(WalkInID).DesignRefrigInventory;
-                    // Defrost capacity is treated differently by compressor racks and detailed systems;
-                    // for detailed systems, blank input is an error (flag value <= -98).
-                    checkWalkInDefrostCap(WalkInID);
-                    // Find design evaporating temperature for system by getting min design evap for ALL loads
-                    if ((WalkInIndex == 1) && (TransSystem(TransRefrigSysNum).NumCasesLT == 0)) {
-                        // note use walk in index, not walkinid here to get
-                        // first walkin on this suction group/system
-                        TransSystem(TransRefrigSysNum).TEvapDesignLT = WalkIn(WalkInID).TEvapDesign;
-                    } else {
-                        TransSystem(TransRefrigSysNum).TEvapDesignLT =
-                            min(WalkIn(WalkInID).TEvapDesign, TransSystem(TransRefrigSysNum).TEvapDesignLT);
-                    }
-                } // WalkInIndex=1,NumWalkIns
-            } // NumWalkInsMT > 0
+            if (NumWalkInsLT > 0)
+                accumTransSysWalkIns(TransSystem(TransRefrigSysNum).WalkInNumLT, NumWalkInsLT,
+                                     NominalTotalWalkInCapLT, TransSystem(TransRefrigSysNum).TEvapDesignLT,
+                                     TransSystem(TransRefrigSysNum).NumCasesLT, TransSystem(TransRefrigSysNum).RefInventory);
 
             NominalTotalCoolingCap = NominalTotalCaseCapMT + NominalTotalCaseCapLT + NominalTotalWalkInCapMT + NominalTotalWalkInCapLT;
 
