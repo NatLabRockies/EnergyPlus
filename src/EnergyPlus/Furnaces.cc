@@ -929,6 +929,32 @@ namespace Furnaces {
         }
     }
 
+    // Helper: verify the control zone has a humidistat when Humidistat is enabled.
+    // Sets AirNodeFound to true if a matching ZoneControl:Humidistat is found.
+    // Reports a severe error if none is found.
+    static void checkHumidistatZone(EnergyPlusData &state,
+                                    FurnaceEquipConditions &thisFurnace,
+                                    std::string_view CurrentModuleObject,
+                                    std::string_view zoneAlphaField,
+                                    std::string_view zoneAlphaValue,
+                                    bool &AirNodeFound,
+                                    bool &ErrorsFound)
+    {
+        if (!thisFurnace.Humidistat) return;
+        AirNodeFound = false;
+        for (int HStatZoneNum = 1; HStatZoneNum <= state.dataZoneCtrls->NumHumidityControlZones; ++HStatZoneNum) {
+            if (state.dataZoneCtrls->HumidityControlZone(HStatZoneNum).ActualZoneNum == thisFurnace.ControlZoneNum) {
+                AirNodeFound = true;
+            }
+        }
+        if (!AirNodeFound) {
+            ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisFurnace.Name));
+            ShowContinueError(state, "Did not find Air Node (Zone with Humidistat).");
+            ShowContinueError(state, EnergyPlus::format("Specified {} = {}", zoneAlphaField, zoneAlphaValue));
+            ErrorsFound = true;
+        }
+    }
+
     // Helper: find controlled zone and verify it is served by the furnace air loop.
     // Populates NodeNumOfControlledZone, ZoneInletNode, and airloopNum on thisFurnace.
     // Reports errors when the zone or air loop cannot be found.
@@ -1042,7 +1068,6 @@ namespace Furnaces {
         bool ErrorsFound(false);       // If errors detected in input
         bool IsNotOK;                  // Flag to verify name
         bool AirNodeFound;             // Used to determine if control zone has a humidistat object
-        int HStatZoneNum;              // Used to determine if control zone has a humidistat object
         bool errFlag;                  // Mining function error flag
         int FanInletNode;              // Used for node checking warning messages
         int FanOutletNode;             // Used for node checking warning messages
@@ -2047,20 +2072,7 @@ namespace Furnaces {
                     thisFurnace.DehumidControlType_Num = DehumidificationControlMode::None;
                     thisFurnace.Humidistat = false;
                 }
-                if (thisFurnace.Humidistat) {
-                    for (HStatZoneNum = 1; HStatZoneNum <= state.dataZoneCtrls->NumHumidityControlZones; ++HStatZoneNum) {
-                        if (state.dataZoneCtrls->HumidityControlZone(HStatZoneNum).ActualZoneNum != thisFurnace.ControlZoneNum) {
-                            continue;
-                        }
-                        AirNodeFound = true;
-                    }
-                    if (!AirNodeFound) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                        ShowContinueError(state, "Did not find Air Node (Zone with Humidistat).");
-                        ShowContinueError(state, EnergyPlus::format("Specified {} = {}", cAlphaFields(6), Alphas(6)));
-                        ErrorsFound = true;
-                    }
-                }
+                checkHumidistatZone(state, thisFurnace, CurrentModuleObject, cAlphaFields(6), Alphas(6), AirNodeFound, ErrorsFound);
             } else { // invalid input
                 ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
                 ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(14), Alphas(14)));
@@ -3147,20 +3159,7 @@ namespace Furnaces {
                     thisFurnace.DehumidControlType_Num = DehumidificationControlMode::None;
                     thisFurnace.Humidistat = false;
                 }
-                if (thisFurnace.Humidistat) {
-                    for (HStatZoneNum = 1; HStatZoneNum <= state.dataZoneCtrls->NumHumidityControlZones; ++HStatZoneNum) {
-                        if (state.dataZoneCtrls->HumidityControlZone(HStatZoneNum).ActualZoneNum != thisFurnace.ControlZoneNum) {
-                            continue;
-                        }
-                        AirNodeFound = true;
-                    }
-                    if (!AirNodeFound) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                        ShowContinueError(state, "Did not find Air Node (Zone with Humidistat).");
-                        ShowContinueError(state, EnergyPlus::format("Specified {} = {}", cAlphaFields(5), Alphas(5)));
-                        ErrorsFound = true;
-                    }
-                }
+                checkHumidistatZone(state, thisFurnace, CurrentModuleObject, cAlphaFields(5), Alphas(5), AirNodeFound, ErrorsFound);
             } else { // invalid input or blank
                 if (!lAlphaBlanks(16)) {
                     ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
@@ -3855,20 +3854,7 @@ namespace Furnaces {
                     thisFurnace.DehumidControlType_Num = DehumidificationControlMode::None;
                     thisFurnace.Humidistat = false;
                 }
-                if (thisFurnace.Humidistat) {
-                    for (HStatZoneNum = 1; HStatZoneNum <= state.dataZoneCtrls->NumHumidityControlZones; ++HStatZoneNum) {
-                        if (state.dataZoneCtrls->HumidityControlZone(HStatZoneNum).ActualZoneNum != thisFurnace.ControlZoneNum) {
-                            continue;
-                        }
-                        AirNodeFound = true;
-                    }
-                    if (!AirNodeFound) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                        ShowContinueError(state, "Did not find Air Node (Zone with Humidistat).");
-                        ShowContinueError(state, EnergyPlus::format("Specified {} = {}", cAlphaFields(5), Alphas(5)));
-                        ErrorsFound = true;
-                    }
-                }
+                checkHumidistatZone(state, thisFurnace, CurrentModuleObject, cAlphaFields(5), Alphas(5), AirNodeFound, ErrorsFound);
             } else { // invalid input or blank
                 if (!lAlphaBlanks(17)) {
                     ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
