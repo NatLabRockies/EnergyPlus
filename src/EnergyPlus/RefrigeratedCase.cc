@@ -969,6 +969,30 @@ void GetRefrigerationInput(EnergyPlusData &state)
         return true;
     };
 
+    // Helper lambda: given an already-computed RatedCapacity (with elevation correction applied),
+    // compute TempSlope and MinCondLoad from the capacity curve's min/max values.  Also applies
+    // the elevation correction factor to Capmin and Capmax.  On success updates tempSlopeOut and
+    // minCondLoadOut; on failure (RatedCapacity <= 0) emits a severe error and sets ErrorsFound.
+    // objName is used in the error message.  ratedCapacity is passed by reference so the
+    // elevation-corrected value can be read.
+    auto computeCapCurveSlopeAndMin = [&](int capCurvePtr, const std::string &objName,
+                                          const Real64 &ratedCapacity,
+                                          Real64 &tempSlopeOut, Real64 &minCondLoadOut) {
+        if (ratedCapacity > 0.0) {
+            Curve::GetCurveMinMaxValues(state, capCurvePtr, DelTempMin, DelTempMax);
+            Real64 elevFactor = 1.0 - 7.17e-5 * state.dataEnvrn->Elevation;
+            Real64 Capmin = Curve::CurveValue(state, capCurvePtr, DelTempMin) * elevFactor;
+            Real64 Capmax = Curve::CurveValue(state, capCurvePtr, DelTempMax) * elevFactor;
+            tempSlopeOut = (DelTempMax - DelTempMin) / (Capmax - Capmin);
+            minCondLoadOut = Capmax - DelTempMax / tempSlopeOut;
+        } else {
+            ShowSevereError(state,
+                            EnergyPlus::format("{}{}=\"{}\" Capacity curve must be input and must be greater than 0 Watts.",
+                                               RoutineName, CurrentModuleObject, objName));
+            ErrorsFound = true;
+        }
+    };
+
     // bbb stovall note for future - for all curve entries, see if need fail on type or if can allow table input
     if (state.dataRefrigCase->NumSimulationCases > 0) {
         CurrentModuleObject = "Refrigeration:Case";
@@ -3263,25 +3287,9 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 }
                 // elevation capacity correction on air-cooled condensers, Carrier correlation more conservative than Trane
                 Condenser(CondNum).RatedCapacity *= (1.0 - 7.17e-5 * state.dataEnvrn->Elevation);
-                if (Condenser(CondNum).RatedCapacity > 0.0) {
-                    Curve::GetCurveMinMaxValues(state, Condenser(CondNum).CapCurvePtr, DelTempMin, DelTempMax);
-                    Real64 Capmin = Curve::CurveValue(state, Condenser(CondNum).CapCurvePtr, DelTempMin) *
-                                    (1.0 - 7.17e-5 * state.dataEnvrn->Elevation); // Mar 2011 bug fix
-                    Real64 Capmax = Curve::CurveValue(state, Condenser(CondNum).CapCurvePtr, DelTempMax) *
-                                    (1.0 - 7.17e-5 * state.dataEnvrn->Elevation); // Mar 2011 bug
-                    Condenser(CondNum).TempSlope =
-                        (DelTempMax - DelTempMin) / ((Capmax - Capmin)); // * ( 1.0 - 7.17e-5 * Elevation ) ) //Mar 2011 bug fix
-                    Condenser(CondNum).MinCondLoad = Capmax - DelTempMax / Condenser(CondNum).TempSlope;
-                } else {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format("{}{}=\"{}\" Condenser capacity curve per ARI 460 must be input and must be greater than 0 Watts at "
-                                           "16.7C temperature difference.",
-                                           RoutineName,
-                                           CurrentModuleObject,
-                                           Condenser(CondNum).Name));
-                    ErrorsFound = true;
-                }
+                computeCapCurveSlopeAndMin(Condenser(CondNum).CapCurvePtr, Condenser(CondNum).Name,
+                                           Condenser(CondNum).RatedCapacity,
+                                           Condenser(CondNum).TempSlope, Condenser(CondNum).MinCondLoad);
 
                 Condenser(CondNum).RatedSubcool = 0.0; // default value
                 if (!lNumericBlanks(1)) {
@@ -3891,22 +3899,9 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 }
                 // elevation capacity correction on air-cooled condensers, Carrier correlation more conservative than Trane
                 GasCooler(GCNum).RatedCapacity *= (1.0 - 7.17e-5 * state.dataEnvrn->Elevation);
-                if (GasCooler(GCNum).RatedCapacity > 0.0) {
-                    Curve::GetCurveMinMaxValues(state, GasCooler(GCNum).CapCurvePtr, DelTempMin, DelTempMax);
-                    Real64 Capmin = Curve::CurveValue(state, GasCooler(GCNum).CapCurvePtr, DelTempMin) * (1.0 - 7.17e-5 * state.dataEnvrn->Elevation);
-                    Real64 Capmax = Curve::CurveValue(state, GasCooler(GCNum).CapCurvePtr, DelTempMax) * (1.0 - 7.17e-5 * state.dataEnvrn->Elevation);
-                    GasCooler(GCNum).TempSlope = (DelTempMax - DelTempMin) / ((Capmax - Capmin));
-                    GasCooler(GCNum).MinCondLoad = Capmax - DelTempMax / GasCooler(GCNum).TempSlope;
-                } else {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{}{}=\"{}\" Gas Cooler capacity curve must be input and must be greater than 0 Watts at 3C temperature difference.",
-                            RoutineName,
-                            CurrentModuleObject,
-                            GasCooler(GCNum).Name));
-                    ErrorsFound = true;
-                }
+                computeCapCurveSlopeAndMin(GasCooler(GCNum).CapCurvePtr, GasCooler(GCNum).Name,
+                                           GasCooler(GCNum).RatedCapacity,
+                                           GasCooler(GCNum).TempSlope, GasCooler(GCNum).MinCondLoad);
 
                 // Get fan control type
                 if (lAlphaBlanks(3)) {
