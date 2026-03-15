@@ -718,6 +718,111 @@ namespace Furnaces {
     // Get Input Section of the Module
     //******************************************************************************
 
+    // Helper: read hot water heating coil data into thisFurnace fields.
+    // Populates CoilControlNode, MaxHeatCoilFluidFlow, HWCoilAirInletNode, HWCoilAirOutletNode.
+    // Also checks for a conflicting Controller:WaterCoil object.
+    // Returns inlet and outlet node numbers via HeatingCoilInletNode / HeatingCoilOutletNode.
+    static void readHeatWaterCoilData(EnergyPlusData &state,
+                                      FurnaceEquipConditions &thisFurnace,
+                                      std::string_view CurrentModuleObject,
+                                      const std::string &HeatingCoilName,
+                                      int &HeatingCoilInletNode,
+                                      int &HeatingCoilOutletNode,
+                                      bool &ErrorsFound)
+    {
+        bool errFlag = false;
+        thisFurnace.CoilControlNode = WaterCoils::GetCoilWaterInletNode(state, "Coil:Heating:Water", HeatingCoilName, errFlag);
+        if (errFlag) {
+            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+            ErrorsFound = true;
+        }
+
+        errFlag = false;
+        thisFurnace.MaxHeatCoilFluidFlow = WaterCoils::GetCoilMaxWaterFlowRate(state, "Coil:Heating:Water", HeatingCoilName, errFlag);
+        if (errFlag) {
+            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+            ErrorsFound = true;
+        }
+
+        errFlag = false;
+        HeatingCoilInletNode = WaterCoils::GetCoilInletNode(state, "Coil:Heating:Water", HeatingCoilName, errFlag);
+        thisFurnace.HWCoilAirInletNode = HeatingCoilInletNode;
+        if (errFlag) {
+            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+            ErrorsFound = true;
+        }
+
+        errFlag = false;
+        HeatingCoilOutletNode = WaterCoils::GetCoilOutletNode(state, "Coil:Heating:Water", HeatingCoilName, errFlag);
+        thisFurnace.HWCoilAirOutletNode = HeatingCoilOutletNode;
+        if (errFlag) {
+            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+            ErrorsFound = true;
+        }
+
+        errFlag = false;
+        HVACControllers::CheckCoilWaterInletNode(state, thisFurnace.CoilControlNode, errFlag);
+        if (!errFlag) {
+            ShowSevereError(
+                state, EnergyPlus::format("{} = {} has a conflicting Controller:WaterCoil object", CurrentModuleObject, thisFurnace.Name));
+            ShowContinueError(state, "Hot water coils are controlled directly by unitary and furnace systems.");
+            ShowContinueError(state, "No water coil controller should be input for the coil.");
+            ErrorsFound = true;
+        }
+    }
+
+    // Helper: read steam heating coil data into thisFurnace fields.
+    // Populates HeatingCoilIndex, CoilControlNode, MaxHeatCoilFluidFlow, HWCoilAirInletNode, HWCoilAirOutletNode.
+    // Returns inlet and outlet node numbers via HeatingCoilInletNode / HeatingCoilOutletNode.
+    static void readHeatSteamCoilData(EnergyPlusData &state,
+                                      FurnaceEquipConditions &thisFurnace,
+                                      std::string_view CurrentModuleObject,
+                                      std::string_view coilAlphaField,
+                                      const std::string &HeatingCoilName,
+                                      std::string_view routineNameForSteam,
+                                      int &HeatingCoilInletNode,
+                                      int &HeatingCoilOutletNode,
+                                      bool &ErrorsFound)
+    {
+        bool errFlag = false;
+        thisFurnace.HeatingCoilIndex = SteamCoils::GetSteamCoilIndex(state, "COIL:HEATING:STEAM", HeatingCoilName, errFlag);
+        if (thisFurnace.HeatingCoilIndex == 0) {
+            ShowSevereError(state, EnergyPlus::format("{} illegal {} = {}", CurrentModuleObject, coilAlphaField, HeatingCoilName));
+            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+            ErrorsFound = true;
+        }
+
+        errFlag = false;
+        thisFurnace.CoilControlNode = SteamCoils::GetCoilSteamInletNode(state, "COIL:HEATING:STEAM", HeatingCoilName, errFlag);
+        if (errFlag) {
+            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+            ErrorsFound = true;
+        }
+
+        thisFurnace.MaxHeatCoilFluidFlow = SteamCoils::GetCoilMaxSteamFlowRate(state, thisFurnace.HeatingCoilIndex, errFlag);
+        if (thisFurnace.MaxHeatCoilFluidFlow > 0.0) {
+            Real64 SteamDensity =
+                Fluid::GetSteam(state)->getSatDensity(state, state.dataFurnaces->TempSteamIn, 1.0, routineNameForSteam);
+            thisFurnace.MaxHeatCoilFluidFlow *= SteamDensity;
+        }
+
+        errFlag = false;
+        HeatingCoilInletNode = SteamCoils::GetCoilAirInletNode(state, thisFurnace.HeatingCoilIndex, HeatingCoilName, errFlag);
+        thisFurnace.HWCoilAirInletNode = HeatingCoilInletNode;
+        if (errFlag) {
+            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+            ErrorsFound = true;
+        }
+
+        errFlag = false;
+        HeatingCoilOutletNode = SteamCoils::GetCoilAirOutletNode(state, thisFurnace.HeatingCoilIndex, HeatingCoilName, errFlag);
+        thisFurnace.HWCoilAirOutletNode = HeatingCoilOutletNode;
+        if (errFlag) {
+            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+            ErrorsFound = true;
+        }
+    }
+
     // Helper: find controlled zone and verify it is served by the furnace air loop.
     // Populates NodeNumOfControlledZone, ZoneInletNode, and airloopNum on thisFurnace.
     // Reports errors when the zone or air loop cannot be found.
@@ -1121,53 +1226,9 @@ namespace Furnaces {
                 if (IsNotOK) {
                     ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
                     ErrorsFound = true;
-                } else { // mine data from heating coil object
-
-                    // Get the Heating Coil water Inlet or control Node number
-                    errFlag = false;
-                    thisFurnace.CoilControlNode = WaterCoils::GetCoilWaterInletNode(state, "Coil:Heating:Water", HeatingCoilName, errFlag);
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the Heating Coil hot water max volume flow rate
-                    errFlag = false;
-                    thisFurnace.MaxHeatCoilFluidFlow = WaterCoils::GetCoilMaxWaterFlowRate(state, "Coil:Heating:Water", HeatingCoilName, errFlag);
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the Heating Coil Inlet Node
-                    errFlag = false;
-                    HeatingCoilInletNode = WaterCoils::GetCoilInletNode(state, "Coil:Heating:Water", HeatingCoilName, errFlag);
-                    thisFurnace.HWCoilAirInletNode = HeatingCoilInletNode;
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the Heating Coil Outlet Node
-                    errFlag = false;
-                    HeatingCoilOutletNode = WaterCoils::GetCoilOutletNode(state, "Coil:Heating:Water", HeatingCoilName, errFlag);
-                    thisFurnace.HWCoilAirOutletNode = HeatingCoilOutletNode;
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // check if user has also used a water coil controller, which they should not do
-                    errFlag = false;
-                    HVACControllers::CheckCoilWaterInletNode(state, thisFurnace.CoilControlNode, errFlag);
-                    if (!errFlag) { // then did find a controller so that is bad
-                        ShowSevereError(
-                            state,
-                            EnergyPlus::format("{} = {} has a conflicting Controller:WaterCoil object", CurrentModuleObject, thisFurnace.Name));
-                        ShowContinueError(state, "Hot water coils are controlled directly by unitary and furnace systems.");
-                        ShowContinueError(state, "No water coil controller should be input for the coil.");
-                        ErrorsFound = true;
-                    }
+                } else {
+                    readHeatWaterCoilData(
+                        state, thisFurnace, CurrentModuleObject, HeatingCoilName, HeatingCoilInletNode, HeatingCoilOutletNode, ErrorsFound);
                 }
 
             } else if (Util::SameString(HeatingCoilType, "Coil:Heating:Steam")) {
@@ -1176,48 +1237,16 @@ namespace Furnaces {
                 if (IsNotOK) {
                     ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
                     ErrorsFound = true;
-                } else { // mine data from heating coil object
-
-                    errFlag = false;
-                    thisFurnace.HeatingCoilIndex = SteamCoils::GetSteamCoilIndex(state, "COIL:HEATING:STEAM", HeatingCoilName, errFlag);
-                    if (thisFurnace.HeatingCoilIndex == 0) {
-                        ShowSevereError(state, EnergyPlus::format("{} illegal {} = {}", CurrentModuleObject, cAlphaFields(11), HeatingCoilName));
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the Heating Coil steam inlet node number
-                    errFlag = false;
-                    thisFurnace.CoilControlNode = SteamCoils::GetCoilSteamInletNode(state, "COIL:HEATING:STEAM", HeatingCoilName, errFlag);
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the Heating Coil steam max volume flow rate
-                    thisFurnace.MaxHeatCoilFluidFlow = SteamCoils::GetCoilMaxSteamFlowRate(state, thisFurnace.HeatingCoilIndex, errFlag);
-                    if (thisFurnace.MaxHeatCoilFluidFlow > 0.0) {
-                        SteamDensity = Fluid::GetSteam(state)->getSatDensity(state, state.dataFurnaces->TempSteamIn, 1.0, getUnitaryHeatOnly);
-                        thisFurnace.MaxHeatCoilFluidFlow *= SteamDensity;
-                    }
-
-                    // Get the Heating Coil Inlet Node
-                    errFlag = false;
-                    HeatingCoilInletNode = SteamCoils::GetCoilAirInletNode(state, thisFurnace.HeatingCoilIndex, HeatingCoilName, errFlag);
-                    thisFurnace.HWCoilAirInletNode = HeatingCoilInletNode;
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the Heating Coil Outlet Node
-                    errFlag = false;
-                    HeatingCoilOutletNode = SteamCoils::GetCoilAirOutletNode(state, thisFurnace.HeatingCoilIndex, HeatingCoilName, errFlag);
-                    thisFurnace.HWCoilAirOutletNode = HeatingCoilOutletNode;
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
+                } else {
+                    readHeatSteamCoilData(state,
+                                          thisFurnace,
+                                          CurrentModuleObject,
+                                          cAlphaFields(11),
+                                          HeatingCoilName,
+                                          getUnitaryHeatOnly,
+                                          HeatingCoilInletNode,
+                                          HeatingCoilOutletNode,
+                                          ErrorsFound);
                 }
 
             } else {
@@ -1624,53 +1653,9 @@ namespace Furnaces {
                 if (IsNotOK) {
                     ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
                     ErrorsFound = true;
-                } else { // mine data from heating coil object
-
-                    // Get the Heating Coil water Inlet or control Node number
-                    errFlag = false;
-                    thisFurnace.CoilControlNode = WaterCoils::GetCoilWaterInletNode(state, "Coil:Heating:Water", HeatingCoilName, errFlag);
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the Heating Coil hot water max volume flow rate
-                    errFlag = false;
-                    thisFurnace.MaxHeatCoilFluidFlow = WaterCoils::GetCoilMaxWaterFlowRate(state, "Coil:Heating:Water", HeatingCoilName, errFlag);
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the Heating Coil Inlet Node
-                    errFlag = false;
-                    HeatingCoilInletNode = WaterCoils::GetCoilInletNode(state, "Coil:Heating:Water", HeatingCoilName, errFlag);
-                    thisFurnace.HWCoilAirInletNode = HeatingCoilInletNode;
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the Heating Coil Outlet Node
-                    errFlag = false;
-                    HeatingCoilOutletNode = WaterCoils::GetCoilOutletNode(state, "Coil:Heating:Water", HeatingCoilName, errFlag);
-                    thisFurnace.HWCoilAirOutletNode = HeatingCoilOutletNode;
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // check if user has also used a water coil controller, which they should not do
-                    errFlag = false;
-                    HVACControllers::CheckCoilWaterInletNode(state, thisFurnace.CoilControlNode, errFlag);
-                    if (!errFlag) { // then did find a controller so that is bad
-                        ShowSevereError(
-                            state,
-                            EnergyPlus::format("{} = {} has a conflicting Controller:WaterCoil object", CurrentModuleObject, thisFurnace.Name));
-                        ShowContinueError(state, "Hot water coils are controlled directly by unitary and furnace systems.");
-                        ShowContinueError(state, "No water coil controller should be input for the coil.");
-                        ErrorsFound = true;
-                    }
+                } else {
+                    readHeatWaterCoilData(
+                        state, thisFurnace, CurrentModuleObject, HeatingCoilName, HeatingCoilInletNode, HeatingCoilOutletNode, ErrorsFound);
                 }
 
             } else if (Util::SameString(HeatingCoilType, "Coil:Heating:Steam")) {
@@ -1679,49 +1664,16 @@ namespace Furnaces {
                 if (IsNotOK) {
                     ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
                     ErrorsFound = true;
-                } else { // mine data from heating coil object
-
-                    errFlag = false;
-                    thisFurnace.HeatingCoilIndex = SteamCoils::GetSteamCoilIndex(state, "COIL:HEATING:STEAM", HeatingCoilName, errFlag);
-                    if (thisFurnace.HeatingCoilIndex == 0) {
-                        ShowSevereError(state, EnergyPlus::format("{} illegal {} = {}", CurrentModuleObject, cAlphaFields(11), HeatingCoilName));
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the Heating Coil steam inlet node number
-                    errFlag = false;
-                    thisFurnace.CoilControlNode = SteamCoils::GetCoilSteamInletNode(state, "Coil:Heating:Steam", HeatingCoilName, errFlag);
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the Heating Coil steam max volume flow rate
-                    thisFurnace.MaxHeatCoilFluidFlow = SteamCoils::GetCoilMaxSteamFlowRate(state, thisFurnace.HeatingCoilIndex, errFlag);
-                    if (thisFurnace.MaxHeatCoilFluidFlow > 0.0) {
-                        SteamDensity =
-                            Fluid::GetSteam(state)->getSatDensity(state, state.dataFurnaces->TempSteamIn, 1.0, getAirLoopHVACHeatCoolInput);
-                        thisFurnace.MaxHeatCoilFluidFlow *= SteamDensity;
-                    }
-
-                    // Get the Heating Coil Inlet Node
-                    errFlag = false;
-                    HeatingCoilInletNode = SteamCoils::GetCoilAirInletNode(state, thisFurnace.HeatingCoilIndex, HeatingCoilName, errFlag);
-                    thisFurnace.HWCoilAirInletNode = HeatingCoilInletNode;
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the Heating Coil Outlet Node
-                    errFlag = false;
-                    HeatingCoilOutletNode = SteamCoils::GetCoilAirOutletNode(state, thisFurnace.HeatingCoilIndex, HeatingCoilName, errFlag);
-                    thisFurnace.HWCoilAirOutletNode = HeatingCoilOutletNode;
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
+                } else {
+                    readHeatSteamCoilData(state,
+                                          thisFurnace,
+                                          CurrentModuleObject,
+                                          cAlphaFields(11),
+                                          HeatingCoilName,
+                                          getAirLoopHVACHeatCoolInput,
+                                          HeatingCoilInletNode,
+                                          HeatingCoilOutletNode,
+                                          ErrorsFound);
                 }
 
             } else {
