@@ -825,6 +825,26 @@ void GetRefrigerationInput(EnergyPlusData &state)
         }
     };
 
+    // Helper lambda: look up and assign one subcooler slot for a detailed refrigeration system.
+    // alphaIdx is the 1-based index into Alphas[] for this subcooler field; subcoolerSlot is
+    // the 1-based slot in System(RefrigSysNum).SubcoolerNum to fill.  Does nothing when the
+    // alpha field is blank.  Sets ErrorsFound on a bad name; on a good name, copies the system's
+    // CoilFlag to the subcooler.  The RefrigSysNum variable is captured by reference so the lambda
+    // always operates on the current system being processed.
+    auto assignSubcoolerToSystem = [&](int alphaIdx, int subcoolerSlot) {
+        if (lAlphaBlanks(alphaIdx)) return;
+        System(RefrigSysNum).SubcoolerNum(subcoolerSlot) =
+            state.dataInputProcessing->inputProcessor->getObjectItemNum(state, "Refrigeration:Subcooler", Alphas(alphaIdx));
+        if (System(RefrigSysNum).SubcoolerNum(subcoolerSlot) <= 0) {
+            ShowSevereError(state, EnergyPlus::format(R"({}{}="{}", has an invalid {} defined as "{}".)",
+                                                      RoutineName, CurrentModuleObject, System(RefrigSysNum).Name,
+                                                      cAlphaFieldNames(alphaIdx), Alphas(alphaIdx)));
+            ErrorsFound = true;
+        } else {
+            Subcooler(System(RefrigSysNum).SubcoolerNum(subcoolerSlot)).CoilFlag = System(RefrigSysNum).CoilFlag;
+        }
+    };
+
     // Helper lambda: given already-resolved listNum and compNum (from FindItemInList
     // calls at the call site), populate both a local count variable and a system member
     // count, then allocate and fill the destination compressor-index array.
@@ -5422,39 +5442,9 @@ void GetRefrigerationInput(EnergyPlusData &state)
                     System(RefrigSysNum).SubcoolerNum.allocate(System(RefrigSysNum).NumSubcoolers);
                 }
                 int NumSubcooler = 1;
-                if (!lAlphaBlanks(AlphaNum)) {
-                    System(RefrigSysNum).SubcoolerNum(NumSubcooler) =
-                        state.dataInputProcessing->inputProcessor->getObjectItemNum(state, "Refrigeration:Subcooler", Alphas(AlphaNum));
-                    if (System(RefrigSysNum).SubcoolerNum(NumSubcooler) <= 0) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format(R"({}{}="{}", has an invalid {} defined as "{}".)",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           System(RefrigSysNum).Name,
-                                                           cAlphaFieldNames(AlphaNum),
-                                                           Alphas(AlphaNum)));
-                        ErrorsFound = true;
-                    } else {
-                        Subcooler(System(RefrigSysNum).SubcoolerNum(NumSubcooler)).CoilFlag = System(RefrigSysNum).CoilFlag;
-                    }
-                    ++NumSubcooler;
-                }
-                if (!lAlphaBlanks(AlphaNum + 1)) {
-                    System(RefrigSysNum).SubcoolerNum(NumSubcooler) =
-                        state.dataInputProcessing->inputProcessor->getObjectItemNum(state, "Refrigeration:Subcooler", Alphas(AlphaNum + 1));
-                    if (System(RefrigSysNum).SubcoolerNum(NumSubcooler) <= 0) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format(R"({}{}="{}", has an invalid {} defined as "{}".)",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           System(RefrigSysNum).Name,
-                                                           cAlphaFieldNames(AlphaNum + 1),
-                                                           Alphas(AlphaNum + 1)));
-                        ErrorsFound = true;
-                    } else {
-                        Subcooler(System(RefrigSysNum).SubcoolerNum(NumSubcooler)).CoilFlag = System(RefrigSysNum).CoilFlag;
-                    }
-                }
+                assignSubcoolerToSystem(AlphaNum, NumSubcooler);
+                if (!lAlphaBlanks(AlphaNum)) ++NumSubcooler;
+                assignSubcoolerToSystem(AlphaNum + 1, NumSubcooler);
             }
 
             // Suction piping heat gain - optional
