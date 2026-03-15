@@ -921,6 +921,54 @@ void GetRefrigerationInput(EnergyPlusData &state)
         }
     };
 
+    // Helper lambda: resolve a CaseAndWalkInList/Case/WalkIn/Coil name (with coil support)
+    // for one load-assignment alpha field and populate the destination arrays.
+    // objName is used in error messages.  numCasesOut, numWalkInsOut, numCoilsOut are set
+    // to the resolved counts.  caseNumArray, walkInNumArray, coilNumArray are the target
+    // 1-based index arrays.  Returns false when an error was reported.
+    auto resolveLoadsWithCoils = [&](int alphaNum, const std::string &objName,
+                                     int &numCasesOut, int &numWalkInsOut, int &numCoilsOut,
+                                     auto &caseNumArray, auto &walkInNumArray, auto &coilNumArray) -> bool {
+        if (lAlphaBlanks(alphaNum)) return true; // blank is allowed; caller handles the check
+        auto [CaseAndWalkInListNum, CaseNum, WalkInNum, CoilNum] = findLoadNames(alphaNum);
+        int NumNameMatches = (CaseAndWalkInListNum != 0) + (CaseNum != 0) + (WalkInNum != 0) + (CoilNum != 0);
+        if (NumNameMatches != 1) {
+            AlphaNum = alphaNum;
+            reportNameMatchError(objName, NumNameMatches);
+            return false;
+        }
+        if (CaseAndWalkInListNum != 0) {
+            numCasesOut   = CaseAndWalkInList(CaseAndWalkInListNum).NumCases;
+            numWalkInsOut = CaseAndWalkInList(CaseAndWalkInListNum).NumWalkIns;
+            numCoilsOut   = CaseAndWalkInList(CaseAndWalkInListNum).NumCoils;
+            if (numCasesOut > 0) {
+                if (!allocated(caseNumArray)) caseNumArray.allocate(numCasesOut);
+                caseNumArray({1, numCasesOut}) = CaseAndWalkInList(CaseAndWalkInListNum).CaseItemNum({1, numCasesOut});
+            }
+            if (numWalkInsOut > 0) {
+                if (!allocated(walkInNumArray)) walkInNumArray.allocate(numWalkInsOut);
+                walkInNumArray({1, numWalkInsOut}) = CaseAndWalkInList(CaseAndWalkInListNum).WalkInItemNum({1, numWalkInsOut});
+            }
+            if (numCoilsOut > 0) {
+                if (!allocated(coilNumArray)) coilNumArray.allocate(numCoilsOut);
+                coilNumArray({1, numCoilsOut}) = CaseAndWalkInList(CaseAndWalkInListNum).CoilItemNum({1, numCoilsOut});
+            }
+        } else if (CaseNum != 0) {
+            numCasesOut = 1;
+            if (!allocated(caseNumArray)) caseNumArray.allocate(1);
+            caseNumArray(1) = CaseNum;
+        } else if (WalkInNum != 0) {
+            numWalkInsOut = 1;
+            if (!allocated(walkInNumArray)) walkInNumArray.allocate(1);
+            walkInNumArray(1) = WalkInNum;
+        } else if (CoilNum != 0) {
+            numCoilsOut = 1;
+            if (!allocated(coilNumArray)) coilNumArray.allocate(1);
+            coilNumArray(1) = CoilNum;
+        }
+        return true;
+    };
+
     // bbb stovall note for future - for all curve entries, see if need fail on type or if can allow table input
     if (state.dataRefrigCase->NumSimulationCases > 0) {
         CurrentModuleObject = "Refrigeration:Case";
@@ -4049,54 +4097,14 @@ void GetRefrigerationInput(EnergyPlusData &state)
                                                        cAlphaFieldNames(AlphaNum)));
                     ErrorsFound = true;
                 } else { // (.NOT. lAlphaBlanks(AlphaNum))
-
-                    // Entry for Alphas(AlphaNum) can be either a Case, WalkIn, Coil, or CaseAndWalkInList name
-                    auto [CaseAndWalkInListNum, CaseNum, WalkInNum, CoilNum] = findLoadNames(AlphaNum);
-                    int NumNameMatches = (CaseAndWalkInListNum != 0) + (CaseNum != 0) + (WalkInNum != 0) + (CoilNum != 0);
-
-                    if (NumNameMatches != 1) { // name must uniquely point to a list or a single item
-                        reportNameMatchError(Secondary(SecondaryNum).Name, NumNameMatches);
-                    } else if (CaseAndWalkInListNum != 0) { // Name points to a CaseAndWalkInList
-                        NumCoils = CaseAndWalkInList(CaseAndWalkInListNum).NumCoils;
-                        NumCases = CaseAndWalkInList(CaseAndWalkInListNum).NumCases;
-                        NumWalkIns = CaseAndWalkInList(CaseAndWalkInListNum).NumWalkIns;
-                        Secondary(SecondaryNum).NumCases = NumCases;
-                        Secondary(SecondaryNum).NumCoils = NumCoils;
-                        Secondary(SecondaryNum).NumWalkIns = NumWalkIns;
-                        if (!allocated(Secondary(SecondaryNum).CaseNum)) {
-                            Secondary(SecondaryNum).CaseNum.allocate(NumCases);
-                        }
-                        Secondary(SecondaryNum).CaseNum({1, NumCases}) = CaseAndWalkInList(CaseAndWalkInListNum).CaseItemNum({1, NumCases});
-                        if (!allocated(Secondary(SecondaryNum).CoilNum)) {
-                            Secondary(SecondaryNum).CoilNum.allocate(NumCoils);
-                        }
-                        Secondary(SecondaryNum).CoilNum({1, NumCoils}) = CaseAndWalkInList(CaseAndWalkInListNum).CoilItemNum({1, NumCoils});
-                        if (!allocated(Secondary(SecondaryNum).WalkInNum)) {
-                            Secondary(SecondaryNum).WalkInNum.allocate(NumWalkIns);
-                        }
-                        Secondary(SecondaryNum).WalkInNum({1, NumWalkIns}) = CaseAndWalkInList(CaseAndWalkInListNum).WalkInItemNum({1, NumWalkIns});
-                    } else if (CaseNum != 0) { // Name points to a case
-                        NumCases = 1;
-                        Secondary(SecondaryNum).NumCases = 1;
-                        if (!allocated(Secondary(SecondaryNum).CaseNum)) {
-                            Secondary(SecondaryNum).CaseNum.allocate(NumCases);
-                        }
-                        Secondary(SecondaryNum).CaseNum(NumCases) = CaseNum;
-                    } else if (CoilNum != 0) { // Name points to a coil
-                        NumCoils = 1;
-                        Secondary(SecondaryNum).NumCoils = 1;
-                        if (!allocated(Secondary(SecondaryNum).CoilNum)) {
-                            Secondary(SecondaryNum).CoilNum.allocate(NumCoils);
-                        }
-                        Secondary(SecondaryNum).CoilNum(NumCoils) = CoilNum;
-                    } else if (WalkInNum != 0) { // Name points to a walkin
-                        NumWalkIns = 1;
-                        Secondary(SecondaryNum).NumWalkIns = 1;
-                        if (!allocated(Secondary(SecondaryNum).WalkInNum)) {
-                            Secondary(SecondaryNum).WalkInNum.allocate(NumWalkIns);
-                        }
-                        Secondary(SecondaryNum).WalkInNum(NumWalkIns) = WalkInNum;
-                    } // NumNameMatches /= 1
+                    resolveLoadsWithCoils(AlphaNum, Secondary(SecondaryNum).Name,
+                                         NumCases, NumWalkIns, NumCoils,
+                                         Secondary(SecondaryNum).CaseNum,
+                                         Secondary(SecondaryNum).WalkInNum,
+                                         Secondary(SecondaryNum).CoilNum);
+                    Secondary(SecondaryNum).NumCases = NumCases;
+                    Secondary(SecondaryNum).NumWalkIns = NumWalkIns;
+                    Secondary(SecondaryNum).NumCoils = NumCoils;
                 } // blank input for loads on secondary
 
                 if (NumCases > 0) {
@@ -5041,62 +5049,14 @@ void GetRefrigerationInput(EnergyPlusData &state)
 
             //   Check for case or walkin or CaseAndWalkInList names
             AlphaNum = 2;
-            if (!lAlphaBlanks(AlphaNum)) {
-
-                // Entry for Alphas(AlphaNum) can be either a Case, WalkIn, Coil, or CaseAndWalkInList name
-                auto [CaseAndWalkInListNum, CaseNum, WalkInNum, CoilNum] = findLoadNames(AlphaNum);
-                int NumNameMatches = (CaseAndWalkInListNum != 0) + (CaseNum != 0) + (WalkInNum != 0) + (CoilNum != 0);
-
-                if (NumNameMatches != 1) { // name must uniquely point to a list or a single item
-                    reportNameMatchError(System(RefrigSysNum).Name, NumNameMatches);
-                } else if (CaseAndWalkInListNum != 0) { // Name points to a CaseAndWalkInList
-                    NumCases = CaseAndWalkInList(CaseAndWalkInListNum).NumCases;
-                    NumWalkIns = CaseAndWalkInList(CaseAndWalkInListNum).NumWalkIns;
-                    NumCoils = CaseAndWalkInList(CaseAndWalkInListNum).NumCoils;
-                    System(RefrigSysNum).NumCases = NumCases;
-                    System(RefrigSysNum).NumWalkIns = NumWalkIns;
-                    System(RefrigSysNum).NumCoils = NumCoils;
-                    if (NumCases > 0) {
-                        if (!allocated(System(RefrigSysNum).CaseNum)) {
-                            System(RefrigSysNum).CaseNum.allocate(NumCases);
-                        }
-                        System(RefrigSysNum).CaseNum({1, NumCases}) = CaseAndWalkInList(CaseAndWalkInListNum).CaseItemNum({1, NumCases});
-                    }
-                    if (NumCoils > 0) {
-                        if (!allocated(System(RefrigSysNum).CoilNum)) {
-                            System(RefrigSysNum).CoilNum.allocate(NumCoils);
-                        }
-                        System(RefrigSysNum).CoilNum({1, NumCoils}) = CaseAndWalkInList(CaseAndWalkInListNum).CoilItemNum({1, NumCoils});
-                    }
-                    if (NumWalkIns > 0) {
-                        if (!allocated(System(RefrigSysNum).WalkInNum)) {
-                            System(RefrigSysNum).WalkInNum.allocate(NumWalkIns);
-                        }
-                        System(RefrigSysNum).WalkInNum({1, NumWalkIns}) = CaseAndWalkInList(CaseAndWalkInListNum).WalkInItemNum({1, NumWalkIns});
-                    }
-                } else if (CaseNum != 0) { // Name points to a case
-                    NumCases = 1;
-                    System(RefrigSysNum).NumCases = 1;
-                    if (!allocated(System(RefrigSysNum).CaseNum)) {
-                        System(RefrigSysNum).CaseNum.allocate(NumCases);
-                    }
-                    System(RefrigSysNum).CaseNum(NumCases) = CaseNum;
-                } else if (CoilNum != 0) { // Name points to a coil
-                    NumCoils = 1;
-                    System(RefrigSysNum).NumCoils = 1;
-                    if (!allocated(System(RefrigSysNum).CoilNum)) {
-                        System(RefrigSysNum).CoilNum.allocate(NumCoils);
-                    }
-                    System(RefrigSysNum).CoilNum(NumCoils) = CoilNum;
-                } else if (WalkInNum != 0) { // Name points to a walkin
-                    NumWalkIns = 1;
-                    System(RefrigSysNum).NumWalkIns = 1;
-                    if (!allocated(System(RefrigSysNum).WalkInNum)) {
-                        System(RefrigSysNum).WalkInNum.allocate(NumWalkIns);
-                    }
-                    System(RefrigSysNum).WalkInNum(NumWalkIns) = WalkInNum;
-                } // NumNameMatches /= 1
-            } // blank input for cases, walkins, or caseandwalkinlist
+            resolveLoadsWithCoils(AlphaNum, System(RefrigSysNum).Name,
+                                  NumCases, NumWalkIns, NumCoils,
+                                  System(RefrigSysNum).CaseNum,
+                                  System(RefrigSysNum).WalkInNum,
+                                  System(RefrigSysNum).CoilNum);
+            System(RefrigSysNum).NumCases = NumCases;
+            System(RefrigSysNum).NumWalkIns = NumWalkIns;
+            System(RefrigSysNum).NumCoils = NumCoils;
 
             if (NumCases > 0) {
                 // Find lowest design evap T
