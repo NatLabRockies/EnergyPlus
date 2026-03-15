@@ -718,6 +718,75 @@ namespace Furnaces {
     // Get Input Section of the Module
     //******************************************************************************
 
+    // Helper: find controlled zone and verify it is served by the furnace air loop.
+    // Populates NodeNumOfControlledZone, ZoneInletNode, and airloopNum on thisFurnace.
+    // Reports errors when the zone or air loop cannot be found.
+    static void findControlledZoneAirLoop(EnergyPlusData &state,
+                                          FurnaceEquipConditions &thisFurnace,
+                                          std::string_view CurrentModuleObject,
+                                          std::string_view zoneAlphaField,
+                                          std::string_view zoneAlphaValue,
+                                          bool &ErrorsFound)
+    {
+        if (thisFurnace.ControlZoneNum <= 0) return;
+
+        bool AirNodeFound = false;
+        bool AirLoopFound = false;
+        int ControlledZoneNum = thisFurnace.ControlZoneNum;
+
+        thisFurnace.NodeNumOfControlledZone = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).ZoneNode;
+
+        for (int zoneInNode = 1; zoneInNode <= state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).NumInletNodes; ++zoneInNode) {
+            int AirLoopNumber = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNodeAirLoopNum(zoneInNode);
+            thisFurnace.airloopNum = AirLoopNumber;
+            if (AirLoopNumber > 0) {
+                for (int BranchNum = 1; BranchNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).NumBranches; ++BranchNum) {
+                    for (int CompNum = 1;
+                         CompNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).TotalComponents;
+                         ++CompNum) {
+                        if (!Util::SameString(
+                                state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).Comp(CompNum).Name,
+                                thisFurnace.Name) ||
+                            !Util::SameString(
+                                state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).Comp(CompNum).TypeOf,
+                                CurrentModuleObject)) {
+                            continue;
+                        }
+                        AirLoopFound = true;
+                        thisFurnace.ZoneInletNode = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNode(zoneInNode);
+                        break;
+                    }
+                    if (AirLoopFound) break;
+                }
+                for (int TstatZoneNum = 1; TstatZoneNum <= state.dataZoneCtrls->NumTempControlledZones; ++TstatZoneNum) {
+                    if (state.dataZoneCtrls->TempControlledZone(TstatZoneNum).ActualZoneNum == thisFurnace.ControlZoneNum) {
+                        AirNodeFound = true;
+                    }
+                }
+                for (int TstatZoneNum = 1; TstatZoneNum <= state.dataZoneCtrls->NumComfortControlledZones; ++TstatZoneNum) {
+                    if (state.dataZoneCtrls->ComfortControlledZone(TstatZoneNum).ActualZoneNum == thisFurnace.ControlZoneNum) {
+                        AirNodeFound = true;
+                    }
+                }
+            }
+            if (AirLoopFound) break;
+        }
+        if (!AirNodeFound) {
+            ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisFurnace.Name));
+            ShowContinueError(state, "Did not find air node (zone with thermostat).");
+            ShowContinueError(state, EnergyPlus::format("Specified {} = {}", zoneAlphaField, zoneAlphaValue));
+            ShowContinueError(
+                state, "Both a ZoneHVAC:EquipmentConnections object and a ZoneControl:Thermostat object must be specified for this zone.");
+            ErrorsFound = true;
+        }
+        if (!AirLoopFound) {
+            ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisFurnace.Name));
+            ShowContinueError(state, "Did not find correct AirLoopHVAC.");
+            ShowContinueError(state, EnergyPlus::format("Specified {} = {}", zoneAlphaField, zoneAlphaValue));
+            ErrorsFound = true;
+        }
+    }
+
     void GetFurnaceInput(EnergyPlusData &state)
     {
 
@@ -761,9 +830,7 @@ namespace Furnaces {
         std::string CompSetHeatOutlet;
         bool ErrorsFound(false);       // If errors detected in input
         bool IsNotOK;                  // Flag to verify name
-        bool AirNodeFound;             // Used to determine if control zone is valid
-        bool AirLoopFound;             // Used to determine if control zone is served by furnace air loop
-        int TstatZoneNum;              // Used to determine if control zone has a thermostat object
+        bool AirNodeFound;             // Used to determine if control zone has a humidistat object
         int HStatZoneNum;              // Used to determine if control zone has a humidistat object
         bool errFlag;                  // Mining function error flag
         int FanInletNode;              // Used for node checking warning messages
@@ -943,69 +1010,7 @@ namespace Furnaces {
             }
 
             // Get the node number for the zone with the thermostat
-            if (thisFurnace.ControlZoneNum > 0) {
-                AirNodeFound = false;
-                AirLoopFound = false;
-                int ControlledZoneNum = thisFurnace.ControlZoneNum;
-                //             Find the controlled zone number for the specified thermostat location
-                thisFurnace.NodeNumOfControlledZone = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).ZoneNode;
-                //             Determine if furnace is on air loop served by the thermostat location specified
-                for (int zoneInNode = 1; zoneInNode <= state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).NumInletNodes; ++zoneInNode) {
-                    int AirLoopNumber = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNodeAirLoopNum(zoneInNode);
-                    thisFurnace.airloopNum = AirLoopNumber;
-                    if (AirLoopNumber > 0) {
-                        for (int BranchNum = 1; BranchNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).NumBranches; ++BranchNum) {
-                            for (int CompNum = 1;
-                                 CompNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).TotalComponents;
-                                 ++CompNum) {
-                                if (!Util::SameString(state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).Comp(CompNum).Name,
-                                                      thisFurnace.Name) ||
-                                    !Util::SameString(
-                                        state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).Comp(CompNum).TypeOf,
-                                        CurrentModuleObject)) {
-                                    continue;
-                                }
-                                AirLoopFound = true;
-                                thisFurnace.ZoneInletNode = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNode(zoneInNode);
-                                break;
-                            }
-                            if (AirLoopFound) {
-                                break;
-                            }
-                        }
-                        for (TstatZoneNum = 1; TstatZoneNum <= state.dataZoneCtrls->NumTempControlledZones; ++TstatZoneNum) {
-                            if (state.dataZoneCtrls->TempControlledZone(TstatZoneNum).ActualZoneNum != thisFurnace.ControlZoneNum) {
-                                continue;
-                            }
-                            AirNodeFound = true;
-                        }
-                        for (TstatZoneNum = 1; TstatZoneNum <= state.dataZoneCtrls->NumComfortControlledZones; ++TstatZoneNum) {
-                            if (state.dataZoneCtrls->ComfortControlledZone(TstatZoneNum).ActualZoneNum != thisFurnace.ControlZoneNum) {
-                                continue;
-                            }
-                            AirNodeFound = true;
-                        }
-                    }
-                    if (AirLoopFound) {
-                        break;
-                    }
-                }
-                if (!AirNodeFound) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state, "Did not find Air Node (Zone with Thermostat).");
-                    ShowContinueError(state, EnergyPlus::format("Specified {} = {}", cAlphaFields(6), Alphas(6)));
-                    ShowContinueError(
-                        state, "Both a ZoneHVAC:EquipmentConnections object and a ZoneControl:Thermostat object must be specified for this zone.");
-                    ErrorsFound = true;
-                }
-                if (!AirLoopFound) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state, "Did not find correct Primary Air Loop.");
-                    ShowContinueError(
-                        state, EnergyPlus::format("Specified {} = {} is not served by this AirLoopHVAC equipment.", cAlphaFields(6), Alphas(6)));
-                    ErrorsFound = true;
-                }
-            }
+            findControlledZoneAirLoop(state, thisFurnace, CurrentModuleObject, cAlphaFields(6), Alphas(6), ErrorsFound);
 
             // Get fan data
             FanName = Alphas(8);
@@ -1499,68 +1504,7 @@ namespace Furnaces {
             }
 
             // Get the node number for the zone with the thermostat
-            if (thisFurnace.ControlZoneNum > 0) {
-                AirNodeFound = false;
-                AirLoopFound = false;
-                int ControlledZoneNum = thisFurnace.ControlZoneNum;
-                //             Find the controlled zone number for the specified thermostat location
-                thisFurnace.NodeNumOfControlledZone = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).ZoneNode;
-                //             Determine if system is on air loop served by the thermostat location specified
-                for (int zoneInNode = 1; zoneInNode <= state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).NumInletNodes; ++zoneInNode) {
-                    int AirLoopNumber = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNodeAirLoopNum(zoneInNode);
-                    thisFurnace.airloopNum = AirLoopNumber;
-                    if (AirLoopNumber > 0) {
-                        for (int BranchNum = 1; BranchNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).NumBranches; ++BranchNum) {
-                            for (int CompNum = 1;
-                                 CompNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).TotalComponents;
-                                 ++CompNum) {
-                                if (!Util::SameString(state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).Comp(CompNum).Name,
-                                                      Alphas(1)) ||
-                                    !Util::SameString(
-                                        state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).Comp(CompNum).TypeOf,
-                                        CurrentModuleObject)) {
-                                    continue;
-                                }
-                                AirLoopFound = true;
-                                thisFurnace.ZoneInletNode = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNode(zoneInNode);
-                                break;
-                            }
-                            if (AirLoopFound) {
-                                break;
-                            }
-                        }
-                        for (TstatZoneNum = 1; TstatZoneNum <= state.dataZoneCtrls->NumTempControlledZones; ++TstatZoneNum) {
-                            if (state.dataZoneCtrls->TempControlledZone(TstatZoneNum).ActualZoneNum != thisFurnace.ControlZoneNum) {
-                                continue;
-                            }
-                            AirNodeFound = true;
-                        }
-                        for (TstatZoneNum = 1; TstatZoneNum <= state.dataZoneCtrls->NumComfortControlledZones; ++TstatZoneNum) {
-                            if (state.dataZoneCtrls->ComfortControlledZone(TstatZoneNum).ActualZoneNum != thisFurnace.ControlZoneNum) {
-                                continue;
-                            }
-                            AirNodeFound = true;
-                        }
-                    }
-                    if (AirLoopFound) {
-                        break;
-                    }
-                }
-                if (!AirNodeFound) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state, "Did not find air node (zone with thermostat).");
-                    ShowContinueError(state, EnergyPlus::format("Specified {} = {}", cAlphaFields(6), Alphas(6)));
-                    ShowContinueError(
-                        state, "Both a ZoneHVAC:EquipmentConnections object and a ZoneControl:Thermostat object must be specified for this zone.");
-                    ErrorsFound = true;
-                }
-                if (!AirLoopFound) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state, "Did not find correct AirLoopHVAC.");
-                    ShowContinueError(state, EnergyPlus::format("Specified {} = {}", cAlphaFields(6), Alphas(6)));
-                    ErrorsFound = true;
-                }
-            }
+            findControlledZoneAirLoop(state, thisFurnace, CurrentModuleObject, cAlphaFields(6), Alphas(6), ErrorsFound);
 
             // Get fan data
             FanName = Alphas(8);
@@ -2841,68 +2785,7 @@ namespace Furnaces {
             }
 
             // Get the node number for the zone with the thermostat
-            if (thisFurnace.ControlZoneNum > 0) {
-                AirNodeFound = false;
-                AirLoopFound = false;
-                int ControlledZoneNum = thisFurnace.ControlZoneNum;
-                //             Find the controlled zone number for the specified thermostat location
-                thisFurnace.NodeNumOfControlledZone = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).ZoneNode;
-                //             Determine if furnace is on air loop served by the thermostat location specified
-                for (int zoneInNode = 1; zoneInNode <= state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).NumInletNodes; ++zoneInNode) {
-                    int AirLoopNumber = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNodeAirLoopNum(zoneInNode);
-                    thisFurnace.airloopNum = AirLoopNumber;
-                    if (AirLoopNumber > 0) {
-                        for (int BranchNum = 1; BranchNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).NumBranches; ++BranchNum) {
-                            for (int CompNum = 1;
-                                 CompNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).TotalComponents;
-                                 ++CompNum) {
-                                if (!Util::SameString(state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).Comp(CompNum).Name,
-                                                      Alphas(1)) ||
-                                    !Util::SameString(
-                                        state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).Comp(CompNum).TypeOf,
-                                        CurrentModuleObject)) {
-                                    continue;
-                                }
-                                AirLoopFound = true;
-                                thisFurnace.ZoneInletNode = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNode(zoneInNode);
-                                break;
-                            }
-                            if (AirLoopFound) {
-                                break;
-                            }
-                        }
-                        for (TstatZoneNum = 1; TstatZoneNum <= state.dataZoneCtrls->NumTempControlledZones; ++TstatZoneNum) {
-                            if (state.dataZoneCtrls->TempControlledZone(TstatZoneNum).ActualZoneNum != thisFurnace.ControlZoneNum) {
-                                continue;
-                            }
-                            AirNodeFound = true;
-                        }
-                        for (TstatZoneNum = 1; TstatZoneNum <= state.dataZoneCtrls->NumComfortControlledZones; ++TstatZoneNum) {
-                            if (state.dataZoneCtrls->ComfortControlledZone(TstatZoneNum).ActualZoneNum != thisFurnace.ControlZoneNum) {
-                                continue;
-                            }
-                            AirNodeFound = true;
-                        }
-                    }
-                    if (AirLoopFound) {
-                        break;
-                    }
-                }
-                if (!AirNodeFound) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state, "Did not find air node (zone with thermostat).");
-                    ShowContinueError(state, EnergyPlus::format("Specified {} = {}", cAlphaFields(5), Alphas(5)));
-                    ShowContinueError(
-                        state, "Both a ZoneHVAC:EquipmentConnections object and a ZoneControl:Thermostat object must be specified for this zone.");
-                    ErrorsFound = true;
-                }
-                if (!AirLoopFound) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state, "Did not find correct AirLoopHVAC.");
-                    ShowContinueError(state, EnergyPlus::format("Specified {} = {}", cAlphaFields(5), Alphas(5)));
-                    ErrorsFound = true;
-                }
-            }
+            findControlledZoneAirLoop(state, thisFurnace, CurrentModuleObject, cAlphaFields(5), Alphas(5), ErrorsFound);
 
             // Get fan data
             FanName = Alphas(7);
@@ -3788,68 +3671,7 @@ namespace Furnaces {
             }
 
             // Get the node number for the zone with the thermostat
-            if (thisFurnace.ControlZoneNum > 0) {
-                AirNodeFound = false;
-                AirLoopFound = false;
-                int ControlledZoneNum = thisFurnace.ControlZoneNum;
-                //             Find the controlled zone number for the specified thermostat location
-                thisFurnace.NodeNumOfControlledZone = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).ZoneNode;
-                //             Determine if furnace is on air loop served by the thermostat location specified
-                for (int zoneInNode = 1; zoneInNode <= state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).NumInletNodes; ++zoneInNode) {
-                    int AirLoopNumber = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNodeAirLoopNum(zoneInNode);
-                    thisFurnace.airloopNum = AirLoopNumber;
-                    if (AirLoopNumber > 0) {
-                        for (int BranchNum = 1; BranchNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).NumBranches; ++BranchNum) {
-                            for (int CompNum = 1;
-                                 CompNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).TotalComponents;
-                                 ++CompNum) {
-                                if (!Util::SameString(state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).Comp(CompNum).Name,
-                                                      Alphas(1)) ||
-                                    !Util::SameString(
-                                        state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).Comp(CompNum).TypeOf,
-                                        CurrentModuleObject)) {
-                                    continue;
-                                }
-                                AirLoopFound = true;
-                                thisFurnace.ZoneInletNode = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNode(zoneInNode);
-                                break;
-                            }
-                            if (AirLoopFound) {
-                                break;
-                            }
-                        }
-                        for (TstatZoneNum = 1; TstatZoneNum <= state.dataZoneCtrls->NumTempControlledZones; ++TstatZoneNum) {
-                            if (state.dataZoneCtrls->TempControlledZone(TstatZoneNum).ActualZoneNum != thisFurnace.ControlZoneNum) {
-                                continue;
-                            }
-                            AirNodeFound = true;
-                        }
-                        for (TstatZoneNum = 1; TstatZoneNum <= state.dataZoneCtrls->NumComfortControlledZones; ++TstatZoneNum) {
-                            if (state.dataZoneCtrls->ComfortControlledZone(TstatZoneNum).ActualZoneNum != thisFurnace.ControlZoneNum) {
-                                continue;
-                            }
-                            AirNodeFound = true;
-                        }
-                    }
-                    if (AirLoopFound) {
-                        break;
-                    }
-                }
-                if (!AirNodeFound) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state, "Did not find air node (zone with thermostat).");
-                    ShowContinueError(state, EnergyPlus::format("Specified {} = {}", cAlphaFields(5), Alphas(5)));
-                    ShowContinueError(
-                        state, "Both a ZoneHVAC:EquipmentConnections object and a ZoneControl:Thermostat object must be specified for this zone.");
-                    ErrorsFound = true;
-                }
-                if (!AirLoopFound) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state, "Did not find correct AirLoopHVAC.");
-                    ShowContinueError(state, EnergyPlus::format("Specified {} = {}", cAlphaFields(5), Alphas(5)));
-                    ErrorsFound = true;
-                }
-            }
+            findControlledZoneAirLoop(state, thisFurnace, CurrentModuleObject, cAlphaFields(5), Alphas(5), ErrorsFound);
 
             // Get fan data
             FanName = Alphas(7);
