@@ -3450,78 +3450,29 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 Condenser(CondNum).EvapCoeff4 = -0.322;
                 Condenser(CondNum).MinCapFacEvap = 0.5;
                 Condenser(CondNum).MaxCapFacEvap = 5.0;
-                NumNum = 5; // added warnings if below not blank but unused due to limits
-                if (!lNumericBlanks(NumNum)) {
-                    if (Numbers(NumNum) >= 0.0) {
-                        Condenser(CondNum).EvapCoeff1 = Numbers(NumNum);
+
+                // Helper: if field n is not blank and value passes the bound check, assign to dest;
+                // otherwise emit a warning and leave dest at its default.  boundDesc is the text
+                // used in the "is <boundDesc> and was not used" warning message.
+                auto tryReadEvapCoeff = [&](int n, Real64 lowerBound, bool strict, std::string_view boundDesc, Real64 &dest) {
+                    if (lNumericBlanks(n)) return;
+                    bool ok = strict ? (Numbers(n) > lowerBound) : (Numbers(n) >= lowerBound);
+                    if (ok) {
+                        dest = Numbers(n);
                     } else {
                         ShowWarningError(state,
-                                         EnergyPlus::format("{}=\"{}\", {} is less than 0 and was not used. Default was used.",
-                                                            CurrentModuleObject,
-                                                            Condenser(CondNum).Name,
-                                                            cNumericFieldNames(NumNum)));
+                                         EnergyPlus::format("{}=\"{}\", {} is {} and was not used. Default was used.",
+                                                            CurrentModuleObject, Condenser(CondNum).Name,
+                                                            cNumericFieldNames(n), boundDesc));
                     }
-                }
-                NumNum = 6; // EvapCoeff2 can't be equal to 0 because used in a denominator
-                if (!lNumericBlanks(NumNum)) {
-                    if (Numbers(NumNum) > 0.0) {
-                        Condenser(CondNum).EvapCoeff2 = Numbers(NumNum);
-                    } else {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("{}=\"{}\", {} is less than or equal to 0 and was not used. Default was used.",
-                                                            CurrentModuleObject,
-                                                            Condenser(CondNum).Name,
-                                                            cNumericFieldNames(NumNum)));
-                    }
-                }
-                NumNum = 7;
-                if (!lNumericBlanks(NumNum)) {
-                    if (Numbers(NumNum) >= 0.0) {
-                        Condenser(CondNum).EvapCoeff3 = Numbers(NumNum);
-                    } else {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("{}=\"{}\", {} is less than 0 and was not used. Default was used.",
-                                                            CurrentModuleObject,
-                                                            Condenser(CondNum).Name,
-                                                            cNumericFieldNames(NumNum)));
-                    }
-                }
-                NumNum = 8;
-                if (!lNumericBlanks(NumNum)) {
-                    if (Numbers(NumNum) >= -20.0) {
-                        Condenser(CondNum).EvapCoeff4 = Numbers(NumNum);
-                    } else {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("{}=\"{}\", {} is less than -20 and was not used. Default was used.",
-                                                            CurrentModuleObject,
-                                                            Condenser(CondNum).Name,
-                                                            cNumericFieldNames(NumNum)));
-                    }
-                }
-                NumNum = 9;
-                if (!lNumericBlanks(NumNum)) {
-                    if (Numbers(NumNum) >= 0.0) {
-                        Condenser(CondNum).MinCapFacEvap = Numbers(NumNum);
-                    } else {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("{}=\"{}\", {} is less than 0 and was not used. Default was used.",
-                                                            CurrentModuleObject,
-                                                            Condenser(CondNum).Name,
-                                                            cNumericFieldNames(NumNum)));
-                    }
-                }
-                NumNum = 10;
-                if (!lNumericBlanks(NumNum)) {
-                    if (Numbers(NumNum) >= 0.0) {
-                        Condenser(CondNum).MaxCapFacEvap = Numbers(NumNum);
-                    } else {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("{}=\"{}\", {} is less than 0 and was not used. Default was used.",
-                                                            CurrentModuleObject,
-                                                            Condenser(CondNum).Name,
-                                                            cNumericFieldNames(NumNum)));
-                    }
-                }
+                };
+
+                tryReadEvapCoeff(5, 0.0, false, "less than 0",              Condenser(CondNum).EvapCoeff1);   // EvapCoeff2 can't be 0 (denominator)
+                tryReadEvapCoeff(6, 0.0, true,  "less than or equal to 0",  Condenser(CondNum).EvapCoeff2);
+                tryReadEvapCoeff(7, 0.0, false, "less than 0",              Condenser(CondNum).EvapCoeff3);
+                tryReadEvapCoeff(8, -20.0, false, "less than -20",          Condenser(CondNum).EvapCoeff4);
+                tryReadEvapCoeff(9, 0.0, false, "less than 0",              Condenser(CondNum).MinCapFacEvap);
+                tryReadEvapCoeff(10, 0.0, false, "less than 0",             Condenser(CondNum).MaxCapFacEvap);
 
                 // Check condenser air inlet node connection
                 if (lAlphaBlanks(3)) {
