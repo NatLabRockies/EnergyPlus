@@ -886,6 +886,41 @@ void GetRefrigerationInput(EnergyPlusData &state)
         return true;
     };
 
+    // Helper lambda: resolve a CaseAndWalkInList/Case/WalkIn name (no coils) for one temperature
+    // level of a TranscriticalSystem and fill the destination arrays.  sysName is used only in
+    // error messages.  numCasesOut and numWalkInsOut are set to the resolved counts.
+    // caseNumArray and walkInNumArray must be allocatable Array1D<int> members of TransSystem.
+    auto resolveTransSysLoads = [&](int alphaNum, const std::string &sysName,
+                                    int &numCasesOut, int &numWalkInsOut,
+                                    auto &caseNumArray, auto &walkInNumArray) {
+        if (lAlphaBlanks(alphaNum)) return;
+        auto [CaseAndWalkInListNum, CaseNum, WalkInNum, CoilNum] = findLoadNames(alphaNum, /*includeCoil=*/false);
+        int NumNameMatches = (CaseAndWalkInListNum != 0) + (CaseNum != 0) + (WalkInNum != 0);
+        if (NumNameMatches != 1) {
+            AlphaNum = alphaNum; // reportNameMatchError reads AlphaNum for the field name
+            reportNameMatchError(sysName, NumNameMatches);
+        } else if (CaseAndWalkInListNum != 0) {
+            numCasesOut = CaseAndWalkInList(CaseAndWalkInListNum).NumCases;
+            numWalkInsOut = CaseAndWalkInList(CaseAndWalkInListNum).NumWalkIns;
+            if (numCasesOut > 0) {
+                if (!allocated(caseNumArray)) caseNumArray.allocate(numCasesOut);
+                caseNumArray({1, numCasesOut}) = CaseAndWalkInList(CaseAndWalkInListNum).CaseItemNum({1, numCasesOut});
+            }
+            if (numWalkInsOut > 0) {
+                if (!allocated(walkInNumArray)) walkInNumArray.allocate(numWalkInsOut);
+                walkInNumArray({1, numWalkInsOut}) = CaseAndWalkInList(CaseAndWalkInListNum).WalkInItemNum({1, numWalkInsOut});
+            }
+        } else if (CaseNum != 0) {
+            numCasesOut = 1;
+            if (!allocated(caseNumArray)) caseNumArray.allocate(1);
+            caseNumArray(1) = CaseNum;
+        } else if (WalkInNum != 0) {
+            numWalkInsOut = 1;
+            if (!allocated(walkInNumArray)) walkInNumArray.allocate(1);
+            walkInNumArray(1) = WalkInNum;
+        }
+    };
+
     // bbb stovall note for future - for all curve entries, see if need fail on type or if can allow table input
     if (state.dataRefrigCase->NumSimulationCases > 0) {
         CurrentModuleObject = "Refrigeration:Case";
@@ -5875,50 +5910,12 @@ void GetRefrigerationInput(EnergyPlusData &state)
 
             //   Check for Medium Temperature Case or Walk-In or CaseAndWalkInList names
             AlphaNum = 3;
-
-            if (!lAlphaBlanks(AlphaNum)) {
-
-                // Entry for Alphas(AlphaNum) can be either a Case, WalkIn or CaseAndWalkInList name
-                auto [CaseAndWalkInListNum, CaseNum, WalkInNum, CoilNum] = findLoadNames(AlphaNum, /*includeCoil=*/false);
-                int NumNameMatches = (CaseAndWalkInListNum != 0) + (CaseNum != 0) + (WalkInNum != 0);
-
-                if (NumNameMatches != 1) { // name must uniquely point to a list or a single item
-                    reportNameMatchError(TransSystem(TransRefrigSysNum).Name, NumNameMatches);
-                } else if (CaseAndWalkInListNum != 0) { // Name points to a CaseAndWalkInList
-                    NumCasesMT = CaseAndWalkInList(CaseAndWalkInListNum).NumCases;
-                    NumWalkInsMT = CaseAndWalkInList(CaseAndWalkInListNum).NumWalkIns;
-                    TransSystem(TransRefrigSysNum).NumCasesMT = NumCasesMT;
-                    TransSystem(TransRefrigSysNum).NumWalkInsMT = NumWalkInsMT;
-                    if (NumCasesMT > 0) {
-                        if (!allocated(TransSystem(TransRefrigSysNum).CaseNumMT)) {
-                            TransSystem(TransRefrigSysNum).CaseNumMT.allocate(NumCasesMT);
-                        }
-                        TransSystem(TransRefrigSysNum).CaseNumMT({1, NumCasesMT}) =
-                            CaseAndWalkInList(CaseAndWalkInListNum).CaseItemNum({1, NumCasesMT});
-                    }
-                    if (NumWalkInsMT > 0) {
-                        if (!allocated(TransSystem(TransRefrigSysNum).WalkInNumMT)) {
-                            TransSystem(TransRefrigSysNum).WalkInNumMT.allocate(NumWalkInsMT);
-                        }
-                        TransSystem(TransRefrigSysNum).WalkInNumMT({1, NumWalkInsMT}) =
-                            CaseAndWalkInList(CaseAndWalkInListNum).WalkInItemNum({1, NumWalkInsMT});
-                    }
-                } else if (CaseNum != 0) { // Name points to a case
-                    NumCasesMT = 1;
-                    TransSystem(TransRefrigSysNum).NumCasesMT = 1;
-                    if (!allocated(TransSystem(TransRefrigSysNum).CaseNumMT)) {
-                        TransSystem(TransRefrigSysNum).CaseNumMT.allocate(NumCasesMT);
-                    }
-                    TransSystem(TransRefrigSysNum).CaseNumMT(NumCases) = CaseNum;
-                } else if (WalkInNum != 0) { // Name points to a walkin
-                    NumWalkInsMT = 1;
-                    TransSystem(TransRefrigSysNum).NumWalkInsMT = 1;
-                    if (!allocated(TransSystem(TransRefrigSysNum).WalkInNumMT)) {
-                        TransSystem(TransRefrigSysNum).WalkInNumMT.allocate(NumWalkInsMT);
-                    }
-                    TransSystem(TransRefrigSysNum).WalkInNumMT(NumWalkIns) = WalkInNum;
-                } // NumNameMatches /= 1
-            } // blank input for cases, walkins, or caseandwalkinlist
+            resolveTransSysLoads(AlphaNum, TransSystem(TransRefrigSysNum).Name,
+                                 NumCasesMT, NumWalkInsMT,
+                                 TransSystem(TransRefrigSysNum).CaseNumMT,
+                                 TransSystem(TransRefrigSysNum).WalkInNumMT);
+            TransSystem(TransRefrigSysNum).NumCasesMT = NumCasesMT;
+            TransSystem(TransRefrigSysNum).NumWalkInsMT = NumWalkInsMT;
 
             if (NumCasesMT > 0)
                 accumTransSysCases(TransSystem(TransRefrigSysNum).CaseNumMT, NumCasesMT,
@@ -5932,49 +5929,12 @@ void GetRefrigerationInput(EnergyPlusData &state)
 
             //   Check for Low Temperature Case or Walk-In or CaseAndWalkInList names
             AlphaNum = 4;
-            if (!lAlphaBlanks(AlphaNum)) {
-
-                // Entry for Alphas(AlphaNum) can be either a Case, WalkIn or CaseAndWalkInList name
-                auto [CaseAndWalkInListNum, CaseNum, WalkInNum, CoilNum] = findLoadNames(AlphaNum, /*includeCoil=*/false);
-                int NumNameMatches = (CaseAndWalkInListNum != 0) + (CaseNum != 0) + (WalkInNum != 0);
-
-                if (NumNameMatches != 1) { // name must uniquely point to a list or a single item
-                    reportNameMatchError(TransSystem(TransRefrigSysNum).Name, NumNameMatches);
-                } else if (CaseAndWalkInListNum != 0) { // Name points to a CaseAndWalkInList
-                    NumCasesLT = CaseAndWalkInList(CaseAndWalkInListNum).NumCases;
-                    NumWalkInsLT = CaseAndWalkInList(CaseAndWalkInListNum).NumWalkIns;
-                    TransSystem(TransRefrigSysNum).NumCasesLT = NumCasesLT;
-                    TransSystem(TransRefrigSysNum).NumWalkInsLT = NumWalkInsLT;
-                    if (NumCasesLT > 0) {
-                        if (!allocated(TransSystem(TransRefrigSysNum).CaseNumLT)) {
-                            TransSystem(TransRefrigSysNum).CaseNumLT.allocate(NumCasesLT);
-                        }
-                        TransSystem(TransRefrigSysNum).CaseNumLT({1, NumCasesLT}) =
-                            CaseAndWalkInList(CaseAndWalkInListNum).CaseItemNum({1, NumCasesLT});
-                    }
-                    if (NumWalkInsLT > 0) {
-                        if (!allocated(TransSystem(TransRefrigSysNum).WalkInNumLT)) {
-                            TransSystem(TransRefrigSysNum).WalkInNumLT.allocate(NumWalkInsLT);
-                        }
-                        TransSystem(TransRefrigSysNum).WalkInNumLT({1, NumWalkInsLT}) =
-                            CaseAndWalkInList(CaseAndWalkInListNum).WalkInItemNum({1, NumWalkInsLT});
-                    }
-                } else if (CaseNum != 0) { // Name points to a case
-                    NumCasesLT = 1;
-                    TransSystem(TransRefrigSysNum).NumCasesLT = 1;
-                    if (!allocated(TransSystem(TransRefrigSysNum).CaseNumLT)) {
-                        TransSystem(TransRefrigSysNum).CaseNumLT.allocate(NumCasesLT);
-                    }
-                    TransSystem(TransRefrigSysNum).CaseNumLT(NumCases) = CaseNum;
-                } else if (WalkInNum != 0) { // Name points to a walkin
-                    NumWalkInsLT = 1;
-                    TransSystem(TransRefrigSysNum).NumWalkInsLT = 1;
-                    if (!allocated(TransSystem(TransRefrigSysNum).WalkInNumLT)) {
-                        TransSystem(TransRefrigSysNum).WalkInNumLT.allocate(NumWalkInsLT);
-                    }
-                    TransSystem(TransRefrigSysNum).WalkInNumLT(NumWalkIns) = WalkInNum;
-                } // NumNameMatches /= 1
-            } // blank input for cases, walkins, or caseandwalkinlist
+            resolveTransSysLoads(AlphaNum, TransSystem(TransRefrigSysNum).Name,
+                                 NumCasesLT, NumWalkInsLT,
+                                 TransSystem(TransRefrigSysNum).CaseNumLT,
+                                 TransSystem(TransRefrigSysNum).WalkInNumLT);
+            TransSystem(TransRefrigSysNum).NumCasesLT = NumCasesLT;
+            TransSystem(TransRefrigSysNum).NumWalkInsLT = NumWalkInsLT;
 
             if (NumCasesLT > 0)
                 accumTransSysCases(TransSystem(TransRefrigSysNum).CaseNumLT, NumCasesLT,
