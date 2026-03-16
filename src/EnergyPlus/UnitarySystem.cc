@@ -6795,20 +6795,6 @@ namespace UnitarySystems {
             }
         }
 
-        if (this->m_fanOpModeSched != nullptr) {
-            if (!this->m_fanOpModeSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 0.0)) {
-                //  set air flow control mode:
-                //  m_AirFlowControl = UseCompFlow::On means operate at last cooling or heating air flow requested when compressor is off
-                //  m_AirFlowControl = UseCompFlow::Off means operate at no load air flow value specified by user
-                //  AirFlowControl only valid if fan opmode = ContFanCycComp
-                if (this->m_MaxNoCoolHeatAirVolFlow == 0.0) {
-                    this->m_AirFlowControl = UseCompFlow::On;
-                } else {
-                    this->m_AirFlowControl = UseCompFlow::Off;
-                }
-            }
-        }
-
         // Set minimum OAT for heat pump compressor operation in cooling mode
         // get from coil module
         errFlag = false;
