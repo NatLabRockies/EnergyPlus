@@ -1394,6 +1394,26 @@ void GetDXCoils(EnergyPlusData &state)
         }
     };
 
+    // Helper lambda: read an optional outdoor condenser inlet air node field.
+    // If blank, sets CondenserInletNodeNum to 0.  Otherwise creates the node and warns if not outdoor.
+    auto readOutdoorCondenserNode = [&](int &nodeNum, int alphaFieldNum,
+                                        Node::ConnectionObjectType connObjType,
+                                        const std::string &coilName) {
+        if (lAlphaBlanks(alphaFieldNum)) {
+            nodeNum = 0;
+        } else {
+            nodeNum = GetOnlySingleNode(state, Alphas(alphaFieldNum), ErrorsFound, connObjType, coilName,
+                                        Node::FluidType::Air, Node::ConnectionType::OutsideAirReference,
+                                        Node::CompFluidStream::Primary, Node::ObjectIsNotParent);
+            if (!CheckOutAirNodeNumber(state, nodeNum)) {
+                ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", may be invalid", RoutineName, CurrentModuleObject, coilName));
+                ShowContinueError(state, EnergyPlus::format("{}=\"{}\", node does not appear in an OutdoorAir:NodeList or as an OutdoorAir:Node.",
+                                                             cAlphaFields(alphaFieldNum), Alphas(alphaFieldNum)));
+                ShowContinueError(state, "This node needs to be included in an air system or the coil model will not be valid, and the simulation continues");
+            }
+        }
+    };
+
     // Helper lambda: look up a 2D cooling temperature curve, check dims={2}, and verify normalized
     // to 1.0 at RatedInletWetBulbTemp and RatedOutdoorAirTemp.
     auto getAndCheck2DCoolingTempCurve = [&](int &curveIdx, int alphaFieldNum,
@@ -1551,30 +1571,8 @@ void GetDXCoils(EnergyPlusData &state)
             ShowContinueError(state, "...is set to zero. Therefore, the latent degradation model will not be used for this simulation.");
         }
 
-        // outdoor condenser node
-        if (lAlphaBlanks(10)) {
-            thisDXCoil.CondenserInletNodeNum(1) = 0;
-        } else {
-            thisDXCoil.CondenserInletNodeNum(1) = GetOnlySingleNode(state,
-                                                                    Alphas(10),
-                                                                    ErrorsFound,
-                                                                    Node::ConnectionObjectType::CoilCoolingDXSingleSpeed,
-                                                                    thisDXCoil.Name,
-                                                                    Node::FluidType::Air,
-                                                                    Node::ConnectionType::OutsideAirReference,
-                                                                    Node::CompFluidStream::Primary,
-                                                                    Node::ObjectIsNotParent);
-
-            if (!CheckOutAirNodeNumber(state, thisDXCoil.CondenserInletNodeNum(1))) {
-                ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", may be invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{}=\"{}\", node does not appear in an OutdoorAir:NodeList or as an OutdoorAir:Node.",
-                                                     cAlphaFields(10),
-                                                     Alphas(10)));
-                ShowContinueError(
-                    state, "This node needs to be included in an air system or the coil model will not be valid, and the simulation continues");
-            }
-        }
+        readOutdoorCondenserNode(thisDXCoil.CondenserInletNodeNum(1), 10,
+                                Node::ConnectionObjectType::CoilCoolingDXSingleSpeed, thisDXCoil.Name);
 
         parseCondenserType(state, thisDXCoil, RoutineName, CurrentModuleObject, Alphas(11), cAlphaFields(11), lAlphaBlanks(11), ErrorsFound);
 
@@ -2495,30 +2493,8 @@ void GetDXCoils(EnergyPlusData &state)
 
         thisDXCoil.RatedEIR(1) = 1.0 / thisDXCoil.RatedCOP(1);
 
-        // A14 is optional evaporator node name
-        if (lAlphaBlanks(14)) {
-            thisDXCoil.CondenserInletNodeNum(1) = 0;
-        } else {
-            thisDXCoil.CondenserInletNodeNum(1) = GetOnlySingleNode(state,
-                                                                    Alphas(14),
-                                                                    ErrorsFound,
-                                                                    Node::ConnectionObjectType::CoilHeatingDXSingleSpeed,
-                                                                    thisDXCoil.Name,
-                                                                    Node::FluidType::Air,
-                                                                    Node::ConnectionType::OutsideAirReference,
-                                                                    Node::CompFluidStream::Primary,
-                                                                    Node::ObjectIsNotParent);
-            // warn if not an outdoor node, but allow
-            if (!CheckOutAirNodeNumber(state, thisDXCoil.CondenserInletNodeNum(1))) {
-                ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", may be invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{}=\"{}\", node does not appear in an OutdoorAir:NodeList or as an OutdoorAir:Node.",
-                                                     cAlphaFields(14),
-                                                     Alphas(14)));
-                ShowContinueError(
-                    state, "This node needs to be included in an air system or the coil model will not be valid, and the simulation continues");
-            }
-        }
+        readOutdoorCondenserNode(thisDXCoil.CondenserInletNodeNum(1), 14,
+                                Node::ConnectionObjectType::CoilHeatingDXSingleSpeed, thisDXCoil.Name);
 
         // A14, \field Zone Name for Evaporator Placement
         if (!lAlphaBlanks(15) && NumAlphas > 14) {
@@ -2703,29 +2679,8 @@ void GetDXCoils(EnergyPlusData &state)
 
         getAndCheck2DCoolingTempCurve(thisDXCoil.EIRFTemp2, 11, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
-        // outdoor condenser node
-        if (lAlphaBlanks(12)) {
-            thisDXCoil.CondenserInletNodeNum(1) = 0;
-        } else {
-            thisDXCoil.CondenserInletNodeNum(1) = GetOnlySingleNode(state,
-                                                                    Alphas(12),
-                                                                    ErrorsFound,
-                                                                    Node::ConnectionObjectType::CoilCoolingDXTwoSpeed,
-                                                                    thisDXCoil.Name,
-                                                                    Node::FluidType::Air,
-                                                                    Node::ConnectionType::OutsideAirReference,
-                                                                    Node::CompFluidStream::Primary,
-                                                                    Node::ObjectIsNotParent);
-            if (!CheckOutAirNodeNumber(state, thisDXCoil.CondenserInletNodeNum(1))) {
-                ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", may be invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{}=\"{}\", node does not appear in an OutdoorAir:NodeList or as an OutdoorAir:Node.",
-                                                     cAlphaFields(12),
-                                                     Alphas(12)));
-                ShowContinueError(
-                    state, "This node needs to be included in an air system or the coil model will not be valid, and the simulation continues");
-            }
-        }
+        readOutdoorCondenserNode(thisDXCoil.CondenserInletNodeNum(1), 12,
+                                Node::ConnectionObjectType::CoilCoolingDXTwoSpeed, thisDXCoil.Name);
 
         parseCondenserType(state, thisDXCoil, RoutineName, CurrentModuleObject, Alphas(13), cAlphaFields(13), lAlphaBlanks(13), ErrorsFound);
 
@@ -3919,28 +3874,8 @@ void GetDXCoils(EnergyPlusData &state)
         TestCompSet(state, CurrentModuleObject, Alphas(1), Alphas(3), Alphas(4), "Air Nodes");
 
         // outdoor condenser node
-        if (lAlphaBlanks(5)) {
-            thisDXCoil.CondenserInletNodeNum(1) = 0;
-        } else {
-            thisDXCoil.CondenserInletNodeNum(1) = GetOnlySingleNode(state,
-                                                                    Alphas(5),
-                                                                    ErrorsFound,
-                                                                    Node::ConnectionObjectType::CoilCoolingDXMultiSpeed,
-                                                                    thisDXCoil.Name,
-                                                                    Node::FluidType::Air,
-                                                                    Node::ConnectionType::OutsideAirReference,
-                                                                    Node::CompFluidStream::Primary,
-                                                                    Node::ObjectIsNotParent);
-            if (!CheckOutAirNodeNumber(state, thisDXCoil.CondenserInletNodeNum(1))) {
-                ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", may be invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{}=\"{}\", node does not appear in an OutdoorAir:NodeList or as an OutdoorAir:Node.",
-                                                     cAlphaFields(5),
-                                                     Alphas(5)));
-                ShowContinueError(
-                    state, "This node needs to be included in an air system or the coil model will not be valid, and the simulation continues");
-            }
-        }
+        readOutdoorCondenserNode(thisDXCoil.CondenserInletNodeNum(1), 5,
+                                 Node::ConnectionObjectType::CoilCoolingDXMultiSpeed, thisDXCoil.Name);
 
         parseCondenserType(state, thisDXCoil, RoutineName, CurrentModuleObject, Alphas(6), cAlphaFields(6), lAlphaBlanks(6), ErrorsFound);
 
