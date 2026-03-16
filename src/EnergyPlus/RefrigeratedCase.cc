@@ -3051,6 +3051,52 @@ void GetRefrigerationInput(EnergyPlusData &state)
         state.dataRefrigCase->CheckEquipNameRackWaterCondenser.dimension(state.dataRefrigCase->NumRefrigeratedRacks, true);
     } //(NumRefrigeratedRacks > 0)
 
+    // Helper lambda: read one suction-piping UA + zone field pair.
+    // alphaFieldNum is the alpha field index for the zone name.
+    // numericFieldNum is the numeric field index for the UA value.
+    // objName is the parent object's name (for error messages).
+    // sumUASuctionPiping, suctionPipeActualZoneNum, suctionPipeZoneNodeNum are the output members.
+    // tempLevelLabel is an optional qualifier ("medium temperature", "low temperature", or "" for
+    // single-level systems) used in error/warning messages.
+    auto readSuctionPiping = [&](int alphaFieldNum, int numericFieldNum,
+                                 const std::string &objName,
+                                 Real64 &sumUASuctionPiping,
+                                 int &suctionPipeActualZoneNum,
+                                 int &suctionPipeZoneNodeNum,
+                                 std::string_view tempLevelLabel = "") {
+        sumUASuctionPiping = 0.0;
+        std::string levelPrefix = tempLevelLabel.empty() ? std::string("S") : EnergyPlus::format("  The {} s", tempLevelLabel);
+        if (!lNumericBlanks(numericFieldNum) && !lAlphaBlanks(alphaFieldNum)) {
+            sumUASuctionPiping = Numbers(numericFieldNum);
+            suctionPipeActualZoneNum = Util::FindItemInList(Alphas(alphaFieldNum), state.dataHeatBal->Zone);
+            suctionPipeZoneNodeNum = DataZoneEquipment::GetSystemNodeNumberForZone(state, suctionPipeActualZoneNum);
+            if (suctionPipeZoneNodeNum == 0) {
+                ShowSevereError(
+                    state,
+                    EnergyPlus::format(
+                        "{}{}=\"{}\", System Node Number not found for {} = {} even though {} is greater than zero.",
+                        RoutineName, CurrentModuleObject, objName,
+                        cAlphaFieldNames(alphaFieldNum), Alphas(alphaFieldNum),
+                        cNumericFieldNames(numericFieldNum)));
+                ShowContinueError(state, EnergyPlus::format("{}uction piping heat gain cannot be calculated unless a Zone is defined to "
+                                                            "determine the environmental temperature surrounding the piping.", levelPrefix));
+                ErrorsFound = true;
+            } else {
+                state.dataRefrigCase->RefrigPresentInZone(suctionPipeActualZoneNum) = true;
+            }
+        } else if (!lNumericBlanks(numericFieldNum) && lAlphaBlanks(alphaFieldNum)) {
+            ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\" {} not found even though {} is greater than zero.",
+                                                       RoutineName, CurrentModuleObject, objName,
+                                                       cAlphaFieldNames(alphaFieldNum), cNumericFieldNames(numericFieldNum)));
+            ShowContinueError(state, EnergyPlus::format("{}uction piping heat gain will not be calculated unless a Zone is defined to "
+                                                        "determine the environmental temperature surrounding the piping.", levelPrefix));
+        } else if (lNumericBlanks(numericFieldNum) && !lAlphaBlanks(alphaFieldNum)) {
+            ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\" {} will not be used and suction piping heat gain will not be calculated because {} was blank.",
+                                                       RoutineName, CurrentModuleObject, objName,
+                                                       cAlphaFieldNames(alphaFieldNum), cNumericFieldNames(numericFieldNum)));
+        }
+    };
+
     if (state.dataRefrigCase->NumRefrigSystems > 0 || state.dataRefrigCase->NumTransRefrigSystems > 0) {
 
         if (state.dataRefrigCase->NumRefrigSystems > 0 && state.dataRefrigCase->NumRefrigCondensers == 0) {
@@ -5147,54 +5193,11 @@ void GetRefrigerationInput(EnergyPlusData &state)
             }
 
             // Suction piping heat gain - optional
-            //  Input UA and identify the Zone containing the bulk of the suction piping
-            //  This Zone ID will be used to determine the temperature used for suction piping heat gain.
-            //  The pipe heat gains are also counted as cooling credit for the zone.
-            //  Zone Id is only required if Sum UA Suction Piping >0.0
-            //  Get the Zone and zone node numbers from the zone name entered by the user
             AlphaNum = 10;
-            System(RefrigSysNum).SumUASuctionPiping = 0.0;
-            if (!lNumericBlanks(2) && !lAlphaBlanks(AlphaNum)) {
-                System(RefrigSysNum).SumUASuctionPiping = Numbers(2);
-                System(RefrigSysNum).SuctionPipeActualZoneNum = Util::FindItemInList(Alphas(AlphaNum), state.dataHeatBal->Zone);
-                System(RefrigSysNum).SuctionPipeZoneNodeNum =
-                    DataZoneEquipment::GetSystemNodeNumberForZone(state, System(RefrigSysNum).SuctionPipeActualZoneNum);
-                if (System(RefrigSysNum).SuctionPipeZoneNodeNum == 0) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{}{}=\"{}\", System Node Number not found for {} = {} even though {} is greater than zero. Suction piping heat gain "
-                            "cannot be calculated unless a Zone is defined to determine the environmental temperature surrounding the piping.",
-                            RoutineName,
-                            CurrentModuleObject,
-                            System(RefrigSysNum).Name,
-                            cAlphaFieldNames(AlphaNum),
-                            Alphas(AlphaNum),
-                            cNumericFieldNames(2)));
-                    ErrorsFound = true;
-                } else {
-                    state.dataRefrigCase->RefrigPresentInZone(System(RefrigSysNum).SuctionPipeActualZoneNum) = true;
-                }
-            } else if (!lNumericBlanks(2) && lAlphaBlanks(AlphaNum)) {
-                ShowWarningError(
-                    state,
-                    EnergyPlus::format("{}{}=\"{}\" {} not found even though {} is greater than zero. Suction piping heat gain will not be "
-                                       "calculated unless a Zone is defined to determine the environmental temperature surrounding the piping.",
-                                       RoutineName,
-                                       CurrentModuleObject,
-                                       System(RefrigSysNum).Name,
-                                       cAlphaFieldNames(AlphaNum),
-                                       cNumericFieldNames(2)));
-            } else if (lNumericBlanks(2) && !lAlphaBlanks(AlphaNum)) {
-                ShowWarningError(
-                    state,
-                    EnergyPlus::format("{}{}=\"{}\" {} will not be used and suction piping heat gain will not be calculated because {} was blank.",
-                                       RoutineName,
-                                       CurrentModuleObject,
-                                       System(RefrigSysNum).Name,
-                                       cAlphaFieldNames(AlphaNum),
-                                       cNumericFieldNames(2)));
-            } // suction piping heat gains
+            readSuctionPiping(AlphaNum, 2, System(RefrigSysNum).Name,
+                              System(RefrigSysNum).SumUASuctionPiping,
+                              System(RefrigSysNum).SuctionPipeActualZoneNum,
+                              System(RefrigSysNum).SuctionPipeZoneNodeNum);
 
             AlphaNum = 11;
             if (!lAlphaBlanks(AlphaNum)) {
@@ -5820,60 +5823,19 @@ void GetRefrigerationInput(EnergyPlusData &state)
             //  Zone Id is only required if Sum UA Suction Piping >0.0
             //  Get the Zone and zone node numbers from the zone name entered by the user
 
-            // Helper lambda: read one suction-piping UA + zone field pair for a TranscriticalSystem.
-            // alphaFieldNum is the alpha field index (9 for MT, 10 for LT).
-            // numericFieldNum is the numeric field index (3 for MT, 4 for LT).
-            // sumUASuctionPiping, suctionPipeActualZoneNum, suctionPipeZoneNodeNum are the output members.
-            // tempLevelLabel is "medium temperature" or "low temperature" for error messages.
-            auto readTransSuctionPiping = [&](int alphaFieldNum, int numericFieldNum,
-                                              Real64 &sumUASuctionPiping,
-                                              int &suctionPipeActualZoneNum,
-                                              int &suctionPipeZoneNodeNum,
-                                              std::string_view tempLevelLabel) {
-                sumUASuctionPiping = 0.0;
-                if (!lNumericBlanks(numericFieldNum) && !lAlphaBlanks(alphaFieldNum)) {
-                    sumUASuctionPiping = Numbers(numericFieldNum);
-                    suctionPipeActualZoneNum = Util::FindItemInList(Alphas(alphaFieldNum), state.dataHeatBal->Zone);
-                    suctionPipeZoneNodeNum = DataZoneEquipment::GetSystemNodeNumberForZone(state, suctionPipeActualZoneNum);
-                    if (suctionPipeZoneNodeNum == 0) {
-                        ShowSevereError(
-                            state,
-                            EnergyPlus::format(R"({}{}="{}", System Node Number not found for {} = "{}" even though {} is greater than zero.)",
-                                               RoutineName, CurrentModuleObject, TransSystem(TransRefrigSysNum).Name,
-                                               cAlphaFieldNames(alphaFieldNum), Alphas(alphaFieldNum),
-                                               cNumericFieldNames(numericFieldNum)));
-                        ShowContinueError(state, EnergyPlus::format("  The {} suction piping heat gain cannot be calculated unless a Zone is defined to "
-                                                                    "determine the environmental temperature surrounding the piping.", tempLevelLabel));
-                        ErrorsFound = true;
-                    } else {
-                        state.dataRefrigCase->RefrigPresentInZone(suctionPipeActualZoneNum) = true;
-                    }
-                } else if (!lNumericBlanks(numericFieldNum) && lAlphaBlanks(alphaFieldNum)) {
-                    ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\" {} not found even though {} is greater than zero.",
-                                                               RoutineName, CurrentModuleObject, TransSystem(TransRefrigSysNum).Name,
-                                                               cAlphaFieldNames(alphaFieldNum), cNumericFieldNames(numericFieldNum)));
-                    ShowContinueError(state, EnergyPlus::format("  The {} suction piping heat gain will not be calculated unless a Zone is defined to "
-                                                                "determine the environmental temperature surrounding the piping.", tempLevelLabel));
-                } else if (lNumericBlanks(numericFieldNum) && !lAlphaBlanks(alphaFieldNum)) {
-                    ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\" {} will not be used and suction piping heat gain will not be calculated because {} was blank.",
-                                                               RoutineName, CurrentModuleObject, TransSystem(TransRefrigSysNum).Name,
-                                                               cAlphaFieldNames(alphaFieldNum), cNumericFieldNames(numericFieldNum)));
-                }
-            };
-
             AlphaNum = 9; // Medium temperature suction piping
-            readTransSuctionPiping(AlphaNum, 3,
-                                   TransSystem(TransRefrigSysNum).SumUASuctionPipingMT,
-                                   TransSystem(TransRefrigSysNum).SuctionPipeActualZoneNumMT,
-                                   TransSystem(TransRefrigSysNum).SuctionPipeZoneNodeNumMT,
-                                   "medium temperature");
+            readSuctionPiping(AlphaNum, 3, TransSystem(TransRefrigSysNum).Name,
+                              TransSystem(TransRefrigSysNum).SumUASuctionPipingMT,
+                              TransSystem(TransRefrigSysNum).SuctionPipeActualZoneNumMT,
+                              TransSystem(TransRefrigSysNum).SuctionPipeZoneNodeNumMT,
+                              "medium temperature");
 
             AlphaNum = 10; // Low temperature suction piping
-            readTransSuctionPiping(AlphaNum, 4,
-                                   TransSystem(TransRefrigSysNum).SumUASuctionPipingLT,
-                                   TransSystem(TransRefrigSysNum).SuctionPipeActualZoneNumLT,
-                                   TransSystem(TransRefrigSysNum).SuctionPipeZoneNodeNumLT,
-                                   "low temperature");
+            readSuctionPiping(AlphaNum, 4, TransSystem(TransRefrigSysNum).Name,
+                              TransSystem(TransRefrigSysNum).SumUASuctionPipingLT,
+                              TransSystem(TransRefrigSysNum).SuctionPipeActualZoneNumLT,
+                              TransSystem(TransRefrigSysNum).SuctionPipeZoneNodeNumLT,
+                              "low temperature");
 
             AlphaNum = 11;
             if (!lAlphaBlanks(AlphaNum)) {
