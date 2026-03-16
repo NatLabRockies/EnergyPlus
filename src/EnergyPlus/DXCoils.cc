@@ -797,8 +797,8 @@ static void validateAndCapPLFCurve(EnergyPlusData &state,
     }
 }
 
-// Setup the 9 standard output variables for single-speed and two-speed cooling coils
-// (Total, Sensible, Latent cooling rate/energy + Electricity rate/energy + Runtime Fraction)
+// Setup the 8 standard output variables for single-speed and two-speed cooling coils
+// (Total, Sensible, Latent cooling rate/energy + Electricity rate/energy)
 static void setupStdCoolingOutputVars(EnergyPlusData &state, DXCoilData &thisDXCoil)
 {
     SetupOutputVariable(state,
@@ -863,13 +863,6 @@ static void setupStdCoolingOutputVars(EnergyPlusData &state, DXCoilData &thisDXC
                         Constant::eResource::Electricity,
                         OutputProcessor::Group::HVAC,
                         OutputProcessor::EndUseCat::Cooling);
-    SetupOutputVariable(state,
-                        "Cooling Coil Runtime Fraction",
-                        Constant::Units::None,
-                        thisDXCoil.CoolingCoilRuntimeFraction,
-                        OutputProcessor::TimeStepType::System,
-                        OutputProcessor::StoreType::Average,
-                        thisDXCoil.Name);
 }
 
 // Setup the 7 standard output variables for VRF cooling coils
@@ -5484,6 +5477,13 @@ void GetDXCoils(EnergyPlusData &state)
             // Setup Report Variables for Cooling Equipment
             // CurrentModuleObject='Coil:Cooling:DX:SingleSpeed/Coil:Cooling:DX:TwoStageWithHumidityControlMode'
             setupStdCoolingOutputVars(state, thisDXCoil);
+            SetupOutputVariable(state,
+                                "Cooling Coil Runtime Fraction",
+                                Constant::Units::None,
+                                thisDXCoil.CoolingCoilRuntimeFraction,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                thisDXCoil.Name);
             setupSecondaryCoolingHeatRejectionOutputVar(state, thisDXCoil);
 
             // do we report these even if no storage tank?
@@ -5596,6 +5596,13 @@ void GetDXCoils(EnergyPlusData &state)
             // Setup Report Variables for Cooling Equipment
             // CurrentModuleObject='Coil:Cooling:DX:TwoSpeed'
             setupStdCoolingOutputVars(state, thisDXCoil);
+            SetupOutputVariable(state,
+                                "Cooling Coil Runtime Fraction",
+                                Constant::Units::None,
+                                thisDXCoil.CoolingCoilRuntimeFraction,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                thisDXCoil.Name);
             setupSecondaryCoolingHeatRejectionOutputVar(state, thisDXCoil);
 
             setupCondensateTankOutputVars(state, thisDXCoil);
@@ -5756,6 +5763,14 @@ void GetDXCoils(EnergyPlusData &state)
                                     OutputProcessor::Group::HVAC,
                                     OutputProcessor::EndUseCat::Cooling);
             }
+
+            SetupOutputVariable(state,
+                                "Cooling Coil Runtime Fraction",
+                                Constant::Units::None,
+                                thisDXCoil.CoolingCoilRuntimeFraction,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                thisDXCoil.Name);
 
             if (thisDXCoil.ReportEvapCondVars) {
                 setupEvapCondOutputVars(state, thisDXCoil);
