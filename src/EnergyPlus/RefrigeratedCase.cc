@@ -4444,43 +4444,37 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 ErrorsFound = true;
             }
 
+            // Helper lambda: exactly one of the two numeric fields (n1, n2) must be supplied.
+            // On success sets ratingType and ratedValue from the filled field.
+            // On failure (both blank or both filled) reports a severe error.
+            auto readOneOfTwoRatingFields = [&](int n1, int n2,
+                                                CompRatingType type1, CompRatingType type2,
+                                                CompRatingType &ratingType, Real64 &ratedValue) {
+                if (((!lNumericBlanks(n1)) && (!lNumericBlanks(n2))) || (lNumericBlanks(n1) && lNumericBlanks(n2))) {
+                    ShowSevereError(state,
+                                    EnergyPlus::format("{}{}=\"{}\"One, and Only One of {} or {}",
+                                                       RoutineName, CurrentModuleObject, Compressor(CompNum).Name,
+                                                       cNumericFieldNames(n1), cNumericFieldNames(n2)));
+                    ShowContinueError(state, "Must Be Entered. Check input value choices.");
+                    ErrorsFound = true;
+                } else if (!lNumericBlanks(n1)) {
+                    ratingType = type1;
+                    ratedValue = Numbers(n1);
+                } else {
+                    ratingType = type2;
+                    ratedValue = Numbers(n2);
+                }
+            };
+
             // Get superheat rating type (Either N1 or N2 Must be input)
-            if (((!lNumericBlanks(1)) && (!lNumericBlanks(2))) || (lNumericBlanks(1) && lNumericBlanks(2))) {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}{}=\"{}\"One, and Only One of {} or {}",
-                                                   RoutineName,
-                                                   CurrentModuleObject,
-                                                   Compressor(CompNum).Name,
-                                                   cNumericFieldNames(1),
-                                                   cNumericFieldNames(2)));
-                ShowContinueError(state, "Must Be Entered. Check input value choices.");
-                ErrorsFound = true;
-            } else if (!lNumericBlanks(1)) {
-                Compressor(CompNum).SuperheatRatingType = CompRatingType::Superheat;
-                Compressor(CompNum).RatedSuperheat = Numbers(1);
-            } else if (!lNumericBlanks(2)) {
-                Compressor(CompNum).SuperheatRatingType = CompRatingType::ReturnGasTemperature;
-                Compressor(CompNum).RatedSuperheat = Numbers(2);
-            } // Set SuperheatRatingType
+            readOneOfTwoRatingFields(1, 2,
+                                     CompRatingType::Superheat, CompRatingType::ReturnGasTemperature,
+                                     Compressor(CompNum).SuperheatRatingType, Compressor(CompNum).RatedSuperheat);
 
             // Get subcool rating type (Either N3 or N4 Must be input)
-            if (((!lNumericBlanks(3)) && (!lNumericBlanks(4))) || (lNumericBlanks(3) && lNumericBlanks(4))) {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}{}=\"{}\" One, and Only One of {} or {}",
-                                                   RoutineName,
-                                                   CurrentModuleObject,
-                                                   Compressor(CompNum).Name,
-                                                   cNumericFieldNames(3),
-                                                   cNumericFieldNames(4)));
-                ShowContinueError(state, "Must Be Entered. Check input value choices.");
-                ErrorsFound = true;
-            } else if (!lNumericBlanks(3)) {
-                Compressor(CompNum).SubcoolRatingType = CompRatingType::LiquidTemperature;
-                Compressor(CompNum).RatedSubcool = Numbers(3);
-            } else if (!lNumericBlanks(4)) {
-                Compressor(CompNum).SubcoolRatingType = CompRatingType::Subcooling;
-                Compressor(CompNum).RatedSubcool = Numbers(4);
-            } // Set SubcoolRatingType
+            readOneOfTwoRatingFields(3, 4,
+                                     CompRatingType::LiquidTemperature, CompRatingType::Subcooling,
+                                     Compressor(CompNum).SubcoolRatingType, Compressor(CompNum).RatedSubcool);
 
             Compressor(CompNum).EndUseSubcategory = "General";
             if (!lAlphaBlanks(4)) {
