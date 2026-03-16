@@ -4342,132 +4342,87 @@ void GetRefrigerationInput(EnergyPlusData &state)
                     } // range of pump moter heat to fluid
                 } // blank input for pumppowertoheat
 
-                // Distribution piping heat gain - optional
-                //  Input UA and Zone containing the bulk of the secondary coolant distribution piping
-                //  This Zone ID will be used to determine the temperature used for distribution piping heat gain.
-                //  Zone Id is only required if Sum UA Distribution Piping >0.0
-                //  Get the Zone node number from the zone name entered by the user
-                Secondary(SecondaryNum).SumUADistPiping = 0.0;
-                AlphaNum = 7;
-                NumNum = 12;
-                if (!lNumericBlanks(NumNum) && !lAlphaBlanks(AlphaNum)) {
-                    Secondary(SecondaryNum).SumUADistPiping = Numbers(NumNum);
-                    Secondary(SecondaryNum).DistPipeZoneNum = Util::FindItemInList(Alphas(AlphaNum), state.dataHeatBal->Zone);
-                    Secondary(SecondaryNum).DistPipeZoneNodeNum =
-                        DataZoneEquipment::GetSystemNodeNumberForZone(state, Secondary(SecondaryNum).DistPipeZoneNum);
-
-                    if (Secondary(SecondaryNum).DistPipeZoneNum == 0) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", invalid  {} not valid: {}",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           Secondary(SecondaryNum).Name,
-                                                           cAlphaFieldNames(AlphaNum),
-                                                           Alphas(AlphaNum)));
-                        ErrorsFound = true;
-                    } else {
-                        state.dataRefrigCase->RefrigPresentInZone(Secondary(SecondaryNum).DistPipeZoneNum) = true;
-                    }
-
-                    if (Secondary(SecondaryNum).DistPipeZoneNodeNum == 0) {
-                        ShowSevereError(
+                // Read distribution piping or receiver UA and zone heat-gain inputs (optional).
+                // The two blocks have identical structure; only field indices, member references,
+                // and message text differ, so they are handled by a single lambda.
+                auto readSecondaryPipingOrReceiver = [&](int alphaFieldNum, int numericFieldNum,
+                                                         Real64 &sumUA, int &zoneNum, int &zoneNodeNum,
+                                                         std::string_view heatGainLabel,
+                                                         std::string_view surroundingLabel) {
+                    sumUA = 0.0;
+                    if (!lNumericBlanks(numericFieldNum) && !lAlphaBlanks(alphaFieldNum)) {
+                        sumUA = Numbers(numericFieldNum);
+                        zoneNum = Util::FindItemInList(Alphas(alphaFieldNum), state.dataHeatBal->Zone);
+                        zoneNodeNum = DataZoneEquipment::GetSystemNodeNumberForZone(state, zoneNum);
+                        if (zoneNum == 0) {
+                            ShowSevereError(state,
+                                            EnergyPlus::format("{}{}=\"{}\", invalid  {} not valid: {}",
+                                                               RoutineName,
+                                                               CurrentModuleObject,
+                                                               Secondary(SecondaryNum).Name,
+                                                               cAlphaFieldNames(alphaFieldNum),
+                                                               Alphas(alphaFieldNum)));
+                            ErrorsFound = true;
+                        } else {
+                            state.dataRefrigCase->RefrigPresentInZone(zoneNum) = true;
+                        }
+                        if (zoneNodeNum == 0) {
+                            ShowSevereError(
+                                state,
+                                EnergyPlus::format(
+                                    "{}{}=\"{}\" System Node Number not found for {} = {} even though {} is greater than zero. {} heat gain "
+                                    "cannot be calculated unless a controlled Zone (appear in a ZoneHVAC:EquipmentConnections object.) is "
+                                    "defined to determine the environmental temperature surrounding the {}.",
+                                    RoutineName,
+                                    CurrentModuleObject,
+                                    Secondary(SecondaryNum).Name,
+                                    cAlphaFieldNames(alphaFieldNum),
+                                    Alphas(alphaFieldNum),
+                                    cNumericFieldNames(numericFieldNum),
+                                    heatGainLabel,
+                                    surroundingLabel));
+                            ErrorsFound = true;
+                        }
+                    } else if (!lNumericBlanks(numericFieldNum) && lAlphaBlanks(alphaFieldNum)) {
+                        ShowWarningError(
                             state,
                             EnergyPlus::format(
-                                "{}{}=\"{}\" System Node Number not found for {} = {} even though {} is greater than zero. Distribution "
-                                "piping heat gain cannot be calculated unless a controlled Zone (appear in a ZoneHVAC:EquipmentConnections "
-                                "object.) is defined to determine the environmental temperature surrounding the piping.",
+                                "{}{}=\"{}\", {} not found even though {} is greater than zero. {} heat gain will not be calculated unless "
+                                "a Zone is defined to determine the environmental temperature surrounding the {}.",
                                 RoutineName,
                                 CurrentModuleObject,
                                 Secondary(SecondaryNum).Name,
-                                cAlphaFieldNames(AlphaNum),
-                                Alphas(AlphaNum),
-                                cNumericFieldNames(NumNum)));
-                        ErrorsFound = true;
+                                cAlphaFieldNames(alphaFieldNum),
+                                cNumericFieldNames(numericFieldNum),
+                                heatGainLabel,
+                                surroundingLabel));
+                    } else if (lNumericBlanks(numericFieldNum) && !lAlphaBlanks(alphaFieldNum)) {
+                        ShowWarningError(
+                            state,
+                            EnergyPlus::format(
+                                "{}{}=\"{}\", {} will not be used and {} heat gain will not be calculated because {} was blank.",
+                                RoutineName,
+                                CurrentModuleObject,
+                                Secondary(SecondaryNum).Name,
+                                cAlphaFieldNames(alphaFieldNum),
+                                heatGainLabel,
+                                cNumericFieldNames(numericFieldNum)));
                     }
-                } else if (!lNumericBlanks(NumNum) && lAlphaBlanks(AlphaNum)) {
-                    ShowWarningError(
-                        state,
-                        EnergyPlus::format("{}{}=\"{}\", {} not found even though {} is greater than zero. Distribution piping heat gain will not be "
-                                           "calculated unless a Zone is defined to determine the environmental temperature surrounding the piping.",
-                                           RoutineName,
-                                           CurrentModuleObject,
-                                           Secondary(SecondaryNum).Name,
-                                           cAlphaFieldNames(AlphaNum),
-                                           cNumericFieldNames(NumNum)));
-                } else if (lNumericBlanks(NumNum) && !lAlphaBlanks(AlphaNum)) {
-                    ShowWarningError(
-                        state,
-                        EnergyPlus::format(
-                            "{}{}=\"{}\", {} will not be used and distribution piping heat gain will not be calculated because {} was blank.",
-                            RoutineName,
-                            CurrentModuleObject,
-                            Secondary(SecondaryNum).Name,
-                            cAlphaFieldNames(AlphaNum),
-                            cNumericFieldNames(NumNum)));
-                } // distribution piping
+                };
+
+                // Distribution piping heat gain - optional
+                readSecondaryPipingOrReceiver(7, 12,
+                                              Secondary(SecondaryNum).SumUADistPiping,
+                                              Secondary(SecondaryNum).DistPipeZoneNum,
+                                              Secondary(SecondaryNum).DistPipeZoneNodeNum,
+                                              "Distribution piping", "piping");
 
                 // Separator/receiver heat gain - optional
-                //  Input UA and Zone containing the Separator/receiver
-                //  This Zone ID will be used to determine the temperature used for Separator/receiver heat gain.
-                //  Zone Id is only required if Sum UA Separator/receiver >0.0
-                //  Get the Zone node number from the zone name entered by the user
-                Secondary(SecondaryNum).SumUAReceiver = 0.0;
-                AlphaNum = 8;
-                NumNum = 13;
-                if (!lNumericBlanks(NumNum) && !lAlphaBlanks(AlphaNum)) {
-                    Secondary(SecondaryNum).SumUAReceiver = Numbers(NumNum);
-                    Secondary(SecondaryNum).ReceiverZoneNum = Util::FindItemInList(Alphas(AlphaNum), state.dataHeatBal->Zone);
-                    Secondary(SecondaryNum).ReceiverZoneNodeNum =
-                        DataZoneEquipment::GetSystemNodeNumberForZone(state, Secondary(SecondaryNum).ReceiverZoneNum);
-
-                    if (Secondary(SecondaryNum).ReceiverZoneNum == 0) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", invalid  {} not valid: {}",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           Secondary(SecondaryNum).Name,
-                                                           cAlphaFieldNames(AlphaNum),
-                                                           Alphas(AlphaNum)));
-                        ErrorsFound = true;
-                    } else {
-                        state.dataRefrigCase->RefrigPresentInZone(Secondary(SecondaryNum).ReceiverZoneNum) = true;
-                    }
-                    if (Secondary(SecondaryNum).ReceiverZoneNodeNum == 0) {
-                        ShowSevereError(
-                            state,
-                            EnergyPlus::format(
-                                "{}{}=\"{}\" System Node Number not found for {} = {} even though {} is greater than zero. Receiver heat gain "
-                                "cannot be calculated unless a controlled Zone (appear in a ZoneHVAC:EquipmentConnections object.) is defined "
-                                "to determine the environmental temperature surrounding the Receiver.",
-                                RoutineName,
-                                CurrentModuleObject,
-                                Secondary(SecondaryNum).Name,
-                                cAlphaFieldNames(AlphaNum),
-                                Alphas(AlphaNum),
-                                cNumericFieldNames(NumNum)));
-                        ErrorsFound = true;
-                    }
-                } else if (!lNumericBlanks(NumNum) && lAlphaBlanks(AlphaNum)) {
-                    ShowWarningError(
-                        state,
-                        EnergyPlus::format(
-                            "{}{}=\"{}\", {} not found even though {} is greater than zero. Receiver heat gain will not be calculated unless "
-                            "a Zone is defined to determine the environmental temperature surrounding the Receiver.",
-                            RoutineName,
-                            CurrentModuleObject,
-                            Secondary(SecondaryNum).Name,
-                            cAlphaFieldNames(AlphaNum),
-                            cNumericFieldNames(NumNum)));
-                } else if (lNumericBlanks(NumNum) && !lAlphaBlanks(AlphaNum)) {
-                    ShowWarningError(
-                        state,
-                        EnergyPlus::format("{}{}=\"{}\", {} will not be used and Receiver heat gain will not be calculated because {} was blank.",
-                                           RoutineName,
-                                           CurrentModuleObject,
-                                           Secondary(SecondaryNum).Name,
-                                           cAlphaFieldNames(AlphaNum),
-                                           cNumericFieldNames(NumNum)));
-                } // Receiver
+                readSecondaryPipingOrReceiver(8, 13,
+                                              Secondary(SecondaryNum).SumUAReceiver,
+                                              Secondary(SecondaryNum).ReceiverZoneNum,
+                                              Secondary(SecondaryNum).ReceiverZoneNodeNum,
+                                              "Receiver", "Receiver");
 
                 NumNum = 14;
                 Secondary(SecondaryNum).ChillerRefInventory = 0.0;
