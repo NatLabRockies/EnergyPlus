@@ -232,6 +232,80 @@ void SetZoneMassConservationFlag(EnergyPlusData &state)
     }
 }
 
+// Helper: set up the 11 standard "Zone Mixing" output variables for a given zone.
+// Called from five places in GetSimpleAirModelInputs (Mixing, CrossMixing to-zone,
+// CrossMixing from-zone, RefDoorMixing zone-A, and RefDoorMixing zone-B).
+static void setupZoneMixingOutputVars(EnergyPlusData &state, DataHeatBalance::AirReportVars &znAirRpt, std::string const &zoneName)
+{
+    SetupOutputVariable(
+        state, "Zone Mixing Volume", Constant::Units::m3, znAirRpt.MixVolume, OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, zoneName);
+    SetupOutputVariable(state,
+                        "Zone Mixing Current Density Volume Flow Rate",
+                        Constant::Units::m3_s,
+                        znAirRpt.MixVdotCurDensity,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        zoneName);
+    SetupOutputVariable(state,
+                        "Zone Mixing Standard Density Volume Flow Rate",
+                        Constant::Units::m3_s,
+                        znAirRpt.MixVdotStdDensity,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        zoneName);
+    SetupOutputVariable(
+        state, "Zone Mixing Mass", Constant::Units::kg, znAirRpt.MixMass, OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, zoneName);
+    SetupOutputVariable(state,
+                        "Zone Mixing Mass Flow Rate",
+                        Constant::Units::kg_s,
+                        znAirRpt.MixMdot,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        zoneName);
+    SetupOutputVariable(state,
+                        "Zone Mixing Sensible Heat Loss Energy",
+                        Constant::Units::J,
+                        znAirRpt.MixHeatLoss,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        zoneName);
+    SetupOutputVariable(state,
+                        "Zone Mixing Sensible Heat Gain Energy",
+                        Constant::Units::J,
+                        znAirRpt.MixHeatGain,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        zoneName);
+    SetupOutputVariable(state,
+                        "Zone Mixing Latent Heat Loss Energy",
+                        Constant::Units::J,
+                        znAirRpt.MixLatentLoss,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        zoneName);
+    SetupOutputVariable(state,
+                        "Zone Mixing Latent Heat Gain Energy",
+                        Constant::Units::J,
+                        znAirRpt.MixLatentGain,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        zoneName);
+    SetupOutputVariable(state,
+                        "Zone Mixing Total Heat Loss Energy",
+                        Constant::Units::J,
+                        znAirRpt.MixTotalLoss,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        zoneName);
+    SetupOutputVariable(state,
+                        "Zone Mixing Total Heat Gain Energy",
+                        Constant::Units::J,
+                        znAirRpt.MixTotalGain,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        zoneName);
+}
+
 void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF errors found in input
 {
 
@@ -2735,83 +2809,8 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                 if (thisMixing.ZonePtr > 0) {
                     if (RepVarSet(thisMixing.ZonePtr)) {
                         RepVarSet(thisMixing.ZonePtr) = false;
-                        SetupOutputVariable(state,
-                                            "Zone Mixing Volume",
-                                            Constant::Units::m3,
-                                            state.dataHeatBal->ZnAirRpt(thisMixing.ZonePtr).MixVolume,
-                                            OutputProcessor::TimeStepType::System,
-                                            OutputProcessor::StoreType::Sum,
-                                            state.dataHeatBal->Zone(thisMixing.ZonePtr).Name);
-                        SetupOutputVariable(state,
-                                            "Zone Mixing Current Density Volume Flow Rate",
-                                            Constant::Units::m3_s,
-                                            state.dataHeatBal->ZnAirRpt(thisMixing.ZonePtr).MixVdotCurDensity,
-                                            OutputProcessor::TimeStepType::System,
-                                            OutputProcessor::StoreType::Average,
-                                            state.dataHeatBal->Zone(thisMixing.ZonePtr).Name);
-                        SetupOutputVariable(state,
-                                            "Zone Mixing Standard Density Volume Flow Rate",
-                                            Constant::Units::m3_s,
-                                            state.dataHeatBal->ZnAirRpt(thisMixing.ZonePtr).MixVdotStdDensity,
-                                            OutputProcessor::TimeStepType::System,
-                                            OutputProcessor::StoreType::Average,
-                                            state.dataHeatBal->Zone(thisMixing.ZonePtr).Name);
-                        SetupOutputVariable(state,
-                                            "Zone Mixing Mass",
-                                            Constant::Units::kg,
-                                            state.dataHeatBal->ZnAirRpt(thisMixing.ZonePtr).MixMass,
-                                            OutputProcessor::TimeStepType::System,
-                                            OutputProcessor::StoreType::Sum,
-                                            state.dataHeatBal->Zone(thisMixing.ZonePtr).Name);
-                        SetupOutputVariable(state,
-                                            "Zone Mixing Mass Flow Rate",
-                                            Constant::Units::kg_s,
-                                            state.dataHeatBal->ZnAirRpt(thisMixing.ZonePtr).MixMdot,
-                                            OutputProcessor::TimeStepType::System,
-                                            OutputProcessor::StoreType::Average,
-                                            state.dataHeatBal->Zone(thisMixing.ZonePtr).Name);
-                        SetupOutputVariable(state,
-                                            "Zone Mixing Sensible Heat Loss Energy",
-                                            Constant::Units::J,
-                                            state.dataHeatBal->ZnAirRpt(thisMixing.ZonePtr).MixHeatLoss,
-                                            OutputProcessor::TimeStepType::System,
-                                            OutputProcessor::StoreType::Sum,
-                                            state.dataHeatBal->Zone(thisMixing.ZonePtr).Name);
-                        SetupOutputVariable(state,
-                                            "Zone Mixing Sensible Heat Gain Energy",
-                                            Constant::Units::J,
-                                            state.dataHeatBal->ZnAirRpt(thisMixing.ZonePtr).MixHeatGain,
-                                            OutputProcessor::TimeStepType::System,
-                                            OutputProcessor::StoreType::Sum,
-                                            state.dataHeatBal->Zone(thisMixing.ZonePtr).Name);
-                        SetupOutputVariable(state,
-                                            "Zone Mixing Latent Heat Loss Energy",
-                                            Constant::Units::J,
-                                            state.dataHeatBal->ZnAirRpt(thisMixing.ZonePtr).MixLatentLoss,
-                                            OutputProcessor::TimeStepType::System,
-                                            OutputProcessor::StoreType::Sum,
-                                            state.dataHeatBal->Zone(thisMixing.ZonePtr).Name);
-                        SetupOutputVariable(state,
-                                            "Zone Mixing Latent Heat Gain Energy",
-                                            Constant::Units::J,
-                                            state.dataHeatBal->ZnAirRpt(thisMixing.ZonePtr).MixLatentGain,
-                                            OutputProcessor::TimeStepType::System,
-                                            OutputProcessor::StoreType::Sum,
-                                            state.dataHeatBal->Zone(thisMixing.ZonePtr).Name);
-                        SetupOutputVariable(state,
-                                            "Zone Mixing Total Heat Loss Energy",
-                                            Constant::Units::J,
-                                            state.dataHeatBal->ZnAirRpt(thisMixing.ZonePtr).MixTotalLoss,
-                                            OutputProcessor::TimeStepType::System,
-                                            OutputProcessor::StoreType::Sum,
-                                            state.dataHeatBal->Zone(thisMixing.ZonePtr).Name);
-                        SetupOutputVariable(state,
-                                            "Zone Mixing Total Heat Gain Energy",
-                                            Constant::Units::J,
-                                            state.dataHeatBal->ZnAirRpt(thisMixing.ZonePtr).MixTotalGain,
-                                            OutputProcessor::TimeStepType::System,
-                                            OutputProcessor::StoreType::Sum,
-                                            state.dataHeatBal->Zone(thisMixing.ZonePtr).Name);
+                        setupZoneMixingOutputVars(
+                            state, state.dataHeatBal->ZnAirRpt(thisMixing.ZonePtr), state.dataHeatBal->Zone(thisMixing.ZonePtr).Name);
                     }
                 }
                 if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
@@ -3269,172 +3268,16 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
         for (int mixingRepNum = 1; mixingRepNum <= state.dataHeatBal->TotCrossMixing; ++mixingRepNum) {
             int zoneNum = state.dataHeatBal->CrossMixing(mixingRepNum).ZonePtr;
             if (zoneNum > 0) {
-                std::string const &zoneName = state.dataHeatBal->Zone(zoneNum).Name;
-                auto &thisZnAirRpt = state.dataHeatBal->ZnAirRpt(zoneNum);
                 if (RepVarSet(zoneNum)) {
                     RepVarSet(zoneNum) = false;
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Volume",
-                                        Constant::Units::m3,
-                                        thisZnAirRpt.MixVolume,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        zoneName);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Current Density Volume Flow Rate",
-                                        Constant::Units::m3_s,
-                                        thisZnAirRpt.MixVdotCurDensity,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        zoneName);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Standard Density Volume Flow Rate",
-                                        Constant::Units::m3_s,
-                                        thisZnAirRpt.MixVdotStdDensity,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        zoneName);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Mass",
-                                        Constant::Units::kg,
-                                        thisZnAirRpt.MixMass,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        zoneName);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Mass Flow Rate",
-                                        Constant::Units::kg_s,
-                                        thisZnAirRpt.MixMdot,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        zoneName);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Sensible Heat Loss Energy",
-                                        Constant::Units::J,
-                                        thisZnAirRpt.MixHeatLoss,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        zoneName);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Sensible Heat Gain Energy",
-                                        Constant::Units::J,
-                                        thisZnAirRpt.MixHeatGain,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        zoneName);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Latent Heat Loss Energy",
-                                        Constant::Units::J,
-                                        thisZnAirRpt.MixLatentLoss,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        zoneName);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Latent Heat Gain Energy",
-                                        Constant::Units::J,
-                                        thisZnAirRpt.MixLatentGain,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        zoneName);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Total Heat Loss Energy",
-                                        Constant::Units::J,
-                                        thisZnAirRpt.MixTotalLoss,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        zoneName);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Total Heat Gain Energy",
-                                        Constant::Units::J,
-                                        thisZnAirRpt.MixTotalGain,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        zoneName);
+                    setupZoneMixingOutputVars(state, state.dataHeatBal->ZnAirRpt(zoneNum), state.dataHeatBal->Zone(zoneNum).Name);
                 }
             }
             int fromZoneNum = state.dataHeatBal->CrossMixing(mixingRepNum).FromZone;
             if (fromZoneNum > 0) {
                 if (RepVarSet(fromZoneNum)) {
                     RepVarSet(fromZoneNum) = false;
-                    std::string const &fromZoneName = state.dataHeatBal->Zone(fromZoneNum).Name;
-                    auto &thisZnAirRpt = state.dataHeatBal->ZnAirRpt(fromZoneNum);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Volume",
-                                        Constant::Units::m3,
-                                        thisZnAirRpt.MixVolume,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        fromZoneName);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Current Density Volume Flow Rate",
-                                        Constant::Units::m3_s,
-                                        thisZnAirRpt.MixVdotCurDensity,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        fromZoneName);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Standard Density Volume Flow Rate",
-                                        Constant::Units::m3_s,
-                                        thisZnAirRpt.MixVdotStdDensity,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        fromZoneName);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Mass",
-                                        Constant::Units::kg,
-                                        thisZnAirRpt.MixMass,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        fromZoneName);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Mass Flow Rate",
-                                        Constant::Units::kg_s,
-                                        thisZnAirRpt.MixMdot,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        fromZoneName);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Sensible Heat Loss Energy",
-                                        Constant::Units::J,
-                                        thisZnAirRpt.MixHeatLoss,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        fromZoneName);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Sensible Heat Gain Energy",
-                                        Constant::Units::J,
-                                        thisZnAirRpt.MixHeatGain,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        fromZoneName);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Latent Heat Loss Energy",
-                                        Constant::Units::J,
-                                        thisZnAirRpt.MixLatentLoss,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        fromZoneName);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Latent Heat Gain Energy",
-                                        Constant::Units::J,
-                                        thisZnAirRpt.MixLatentGain,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        fromZoneName);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Total Heat Loss Energy",
-                                        Constant::Units::J,
-                                        thisZnAirRpt.MixTotalLoss,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        fromZoneName);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Total Heat Gain Energy",
-                                        Constant::Units::J,
-                                        thisZnAirRpt.MixTotalGain,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        fromZoneName);
+                    setupZoneMixingOutputVars(state, state.dataHeatBal->ZnAirRpt(fromZoneNum), state.dataHeatBal->Zone(fromZoneNum).Name);
                 }
             }
 
@@ -3701,83 +3544,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
             if (ZoneNumA > 0) {
                 if (RepVarSet(ZoneNumA)) {
                     RepVarSet(ZoneNumA) = false;
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Volume",
-                                        Constant::Units::m3,
-                                        state.dataHeatBal->ZnAirRpt(ZoneNumA).MixVolume,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataHeatBal->Zone(ZoneNumA).Name);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Current Density Volume Flow Rate",
-                                        Constant::Units::m3_s,
-                                        state.dataHeatBal->ZnAirRpt(ZoneNumA).MixVdotCurDensity,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataHeatBal->Zone(ZoneNumA).Name);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Standard Density Volume Flow Rate",
-                                        Constant::Units::m3_s,
-                                        state.dataHeatBal->ZnAirRpt(ZoneNumA).MixVdotStdDensity,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataHeatBal->Zone(ZoneNumA).Name);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Mass",
-                                        Constant::Units::kg,
-                                        state.dataHeatBal->ZnAirRpt(ZoneNumA).MixMass,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataHeatBal->Zone(ZoneNumA).Name);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Mass Flow Rate",
-                                        Constant::Units::kg_s,
-                                        state.dataHeatBal->ZnAirRpt(ZoneNumA).MixMdot,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataHeatBal->Zone(ZoneNumA).Name);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Sensible Heat Loss Energy",
-                                        Constant::Units::J,
-                                        state.dataHeatBal->ZnAirRpt(ZoneNumA).MixHeatLoss,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataHeatBal->Zone(ZoneNumA).Name);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Sensible Heat Gain Energy",
-                                        Constant::Units::J,
-                                        state.dataHeatBal->ZnAirRpt(ZoneNumA).MixHeatGain,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataHeatBal->Zone(ZoneNumA).Name);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Latent Heat Loss Energy",
-                                        Constant::Units::J,
-                                        state.dataHeatBal->ZnAirRpt(ZoneNumA).MixLatentLoss,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataHeatBal->Zone(ZoneNumA).Name);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Latent Heat Gain Energy",
-                                        Constant::Units::J,
-                                        state.dataHeatBal->ZnAirRpt(ZoneNumA).MixLatentGain,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataHeatBal->Zone(ZoneNumA).Name);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Total Heat Loss Energy",
-                                        Constant::Units::J,
-                                        state.dataHeatBal->ZnAirRpt(ZoneNumA).MixTotalLoss,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataHeatBal->Zone(ZoneNumA).Name);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Total Heat Gain Energy",
-                                        Constant::Units::J,
-                                        state.dataHeatBal->ZnAirRpt(ZoneNumA).MixTotalGain,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataHeatBal->Zone(ZoneNumA).Name);
+                    setupZoneMixingOutputVars(state, state.dataHeatBal->ZnAirRpt(ZoneNumA), state.dataHeatBal->Zone(ZoneNumA).Name);
                 }
             }
             if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
@@ -3793,83 +3560,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
             if (ZoneNumB > 0) {
                 if (RepVarSet(ZoneNumB)) {
                     RepVarSet(ZoneNumB) = false;
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Volume",
-                                        Constant::Units::m3,
-                                        state.dataHeatBal->ZnAirRpt(ZoneNumB).MixVolume,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataHeatBal->Zone(ZoneNumB).Name);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Current Density Volume Flow Rate",
-                                        Constant::Units::m3_s,
-                                        state.dataHeatBal->ZnAirRpt(ZoneNumB).MixVdotCurDensity,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataHeatBal->Zone(ZoneNumB).Name);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Standard Density Volume Flow Rate",
-                                        Constant::Units::m3_s,
-                                        state.dataHeatBal->ZnAirRpt(ZoneNumB).MixVdotStdDensity,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataHeatBal->Zone(ZoneNumB).Name);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Mass",
-                                        Constant::Units::kg,
-                                        state.dataHeatBal->ZnAirRpt(ZoneNumB).MixMass,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataHeatBal->Zone(ZoneNumB).Name);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Mass Flow Rate",
-                                        Constant::Units::kg_s,
-                                        state.dataHeatBal->ZnAirRpt(ZoneNumB).MixMdot,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataHeatBal->Zone(ZoneNumB).Name);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Sensible Heat Loss Energy",
-                                        Constant::Units::J,
-                                        state.dataHeatBal->ZnAirRpt(ZoneNumB).MixHeatLoss,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataHeatBal->Zone(ZoneNumB).Name);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Sensible Heat Gain Energy",
-                                        Constant::Units::J,
-                                        state.dataHeatBal->ZnAirRpt(ZoneNumB).MixHeatGain,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataHeatBal->Zone(ZoneNumB).Name);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Latent Heat Loss Energy",
-                                        Constant::Units::J,
-                                        state.dataHeatBal->ZnAirRpt(ZoneNumB).MixLatentLoss,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataHeatBal->Zone(ZoneNumB).Name);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Latent Heat Gain Energy",
-                                        Constant::Units::J,
-                                        state.dataHeatBal->ZnAirRpt(ZoneNumB).MixLatentGain,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataHeatBal->Zone(ZoneNumB).Name);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Total Heat Loss Energy",
-                                        Constant::Units::J,
-                                        state.dataHeatBal->ZnAirRpt(ZoneNumB).MixTotalLoss,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataHeatBal->Zone(ZoneNumB).Name);
-                    SetupOutputVariable(state,
-                                        "Zone Mixing Total Heat Gain Energy",
-                                        Constant::Units::J,
-                                        state.dataHeatBal->ZnAirRpt(ZoneNumB).MixTotalGain,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataHeatBal->Zone(ZoneNumB).Name);
+                    setupZoneMixingOutputVars(state, state.dataHeatBal->ZnAirRpt(ZoneNumB), state.dataHeatBal->Zone(ZoneNumB).Name);
                 }
             }
             if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
