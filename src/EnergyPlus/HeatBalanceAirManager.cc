@@ -360,6 +360,23 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
         "! <{} Airflow Stats Nominal>,Name,Input Object, Schedule Name,Zone Name, Zone Floor Area {{m2}}, # Zone Occupants,{}\n");
     static constexpr std::string_view Format_722(" {}, {}\n");
 
+    // Helper lambda: look up an optional temperature-limit schedule by alpha index.
+    // If NumAlpha > alphaThreshold and the field is not blank, look up the schedule,
+    // validate that all values are within [-MixingTempLimit, MixingTempLimit], and
+    // assign the result to schedOut.  Reports errors on missing or out-of-range schedules.
+    auto getOptionalTempLimitSched = [&](const ErrorObjectHeader &eoh, int alphaThreshold, int alphaIdx, Sched::Schedule *&schedOut) {
+        if (NumAlpha <= alphaThreshold) return;
+        if (lAlphaFieldBlanks(alphaIdx)) return;
+        if ((schedOut = Sched::GetSchedule(state, cAlphaArgs(alphaIdx))) == nullptr) {
+            ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(alphaIdx), cAlphaArgs(alphaIdx));
+            ErrorsFound = true;
+        } else if (!schedOut->checkMinMaxVals(state, Clusive::In, -MixingTempLimit, Clusive::In, MixingTempLimit)) {
+            Sched::ShowSevereBadMinMax(
+                state, eoh, cAlphaFieldNames(alphaIdx), cAlphaArgs(alphaIdx), Clusive::In, -MixingTempLimit, Clusive::In, MixingTempLimit);
+            ErrorsFound = true;
+        }
+    };
+
     RepVarSet.dimension(state.dataGlobal->NumOfZones, true);
 
     // Following used for reporting
@@ -2728,83 +2745,12 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                     }
                 }
 
-                // Min indoor temp
-                if (NumAlpha > 6) {
-                    if (lAlphaFieldBlanks(7)) {
-                        // Is this an error or is there a default?
-                    } else if ((thisMixing.minIndoorTempSched = Sched::GetSchedule(state, cAlphaArgs(7))) == nullptr) {
-                        ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(7), cAlphaArgs(7));
-                        ErrorsFound = true;
-                    } else if (!thisMixing.minIndoorTempSched->checkMinMaxVals(state, Clusive::In, -MixingTempLimit, Clusive::In, MixingTempLimit)) {
-                        Sched::ShowSevereBadMinMax(
-                            state, eoh, cAlphaFieldNames(7), cAlphaArgs(7), Clusive::In, -MixingTempLimit, Clusive::In, MixingTempLimit);
-                        ErrorsFound = true;
-                    }
-                }
-
-                // Max indoor temp
-                if (NumAlpha > 7) {
-                    if (lAlphaFieldBlanks(8)) {
-                    } else if ((thisMixing.maxIndoorTempSched = Sched::GetSchedule(state, cAlphaArgs(8))) == nullptr) {
-                        ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(8), cAlphaArgs(8));
-                        ErrorsFound = true;
-                    } else if (!thisMixing.maxIndoorTempSched->checkMinMaxVals(state, Clusive::In, -MixingTempLimit, Clusive::In, MixingTempLimit)) {
-                        Sched::ShowSevereBadMinMax(
-                            state, eoh, cAlphaFieldNames(8), cAlphaArgs(8), Clusive::In, -MixingTempLimit, Clusive::In, MixingTempLimit);
-                        ErrorsFound = true;
-                    }
-                }
-
-                // Min source temp
-                if (NumAlpha > 8) {
-                    if (lAlphaFieldBlanks(9)) {
-                    } else if ((thisMixing.minSourceTempSched = Sched::GetSchedule(state, cAlphaArgs(9))) == nullptr) {
-                        ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(9), cAlphaArgs(9));
-                        ErrorsFound = true;
-                    } else if (!thisMixing.minSourceTempSched->checkMinMaxVals(state, Clusive::In, -MixingTempLimit, Clusive::In, MixingTempLimit)) {
-                        Sched::ShowSevereBadMinMax(
-                            state, eoh, cAlphaFieldNames(9), cAlphaArgs(9), Clusive::In, -MixingTempLimit, Clusive::In, MixingTempLimit);
-                        ErrorsFound = true;
-                    }
-                }
-
-                // Max source temp
-                if (NumAlpha > 9) {
-                    if (lAlphaFieldBlanks(10)) {
-                    } else if ((thisMixing.maxSourceTempSched = Sched::GetSchedule(state, cAlphaArgs(10))) == nullptr) {
-                        ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(10), cAlphaArgs(10));
-                        ErrorsFound = true;
-                    } else if (!thisMixing.maxSourceTempSched->checkMinMaxVals(state, Clusive::In, -MixingTempLimit, Clusive::In, MixingTempLimit)) {
-                        Sched::ShowSevereBadMinMax(
-                            state, eoh, cAlphaFieldNames(10), cAlphaArgs(10), Clusive::In, -MixingTempLimit, Clusive::In, MixingTempLimit);
-                        ErrorsFound = true;
-                    }
-                }
-
-                if (NumAlpha > 10) {
-                    if (lAlphaFieldBlanks(11)) {
-                    } else if ((thisMixing.minOutdoorTempSched = Sched::GetSchedule(state, cAlphaArgs(11))) == nullptr) {
-                        ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(11), cAlphaArgs(11));
-                        ErrorsFound = true;
-                    } else if (!thisMixing.minOutdoorTempSched->checkMinMaxVals(state, Clusive::In, -MixingTempLimit, Clusive::In, MixingTempLimit)) {
-                        Sched::ShowSevereBadMinMax(
-                            state, eoh, cAlphaFieldNames(11), cAlphaArgs(11), Clusive::In, -MixingTempLimit, Clusive::In, MixingTempLimit);
-                        ErrorsFound = true;
-                    }
-                }
-
-                //
-                if (NumAlpha > 11) {
-                    if (lAlphaFieldBlanks(12)) {
-                    } else if ((thisMixing.maxOutdoorTempSched = Sched::GetSchedule(state, cAlphaArgs(12))) == nullptr) {
-                        ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(12), cAlphaArgs(12));
-                        ErrorsFound = true;
-                    } else if (!thisMixing.maxOutdoorTempSched->checkMinMaxVals(state, Clusive::In, -MixingTempLimit, Clusive::In, MixingTempLimit)) {
-                        Sched::ShowSevereBadMinMax(
-                            state, eoh, cAlphaFieldNames(12), cAlphaArgs(12), Clusive::In, -MixingTempLimit, Clusive::In, MixingTempLimit);
-                        ErrorsFound = true;
-                    }
-                }
+                getOptionalTempLimitSched(eoh, 6, 7, thisMixing.minIndoorTempSched);
+                getOptionalTempLimitSched(eoh, 7, 8, thisMixing.maxIndoorTempSched);
+                getOptionalTempLimitSched(eoh, 8, 9, thisMixing.minSourceTempSched);
+                getOptionalTempLimitSched(eoh, 9, 10, thisMixing.maxSourceTempSched);
+                getOptionalTempLimitSched(eoh, 10, 11, thisMixing.minOutdoorTempSched);
+                getOptionalTempLimitSched(eoh, 11, 12, thisMixing.maxOutdoorTempSched);
 
                 if (thisMixing.ZonePtr > 0) {
                     if (RepVarSet(thisMixing.ZonePtr)) {
@@ -3168,82 +3114,12 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                     }
                 }
 
-                // Min indoor temp
-                if (NumAlpha > 6) {
-                    if (lAlphaFieldBlanks(7)) {
-                    } else if ((thisMixing.minIndoorTempSched = Sched::GetSchedule(state, cAlphaArgs(7))) == nullptr) {
-                        ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(7), cAlphaArgs(7));
-                        ErrorsFound = true;
-                    } else if (!thisMixing.minIndoorTempSched->checkMinMaxVals(state, Clusive::In, -MixingTempLimit, Clusive::In, MixingTempLimit)) {
-                        Sched::ShowSevereBadMinMax(
-                            state, eoh, cAlphaFieldNames(7), cAlphaArgs(7), Clusive::In, -MixingTempLimit, Clusive::In, MixingTempLimit);
-                        ErrorsFound = true;
-                    }
-                }
-
-                // Max indoor temp
-                if (NumAlpha > 7) {
-                    if (lAlphaFieldBlanks(8)) {
-                    } else if ((thisMixing.maxIndoorTempSched = Sched::GetSchedule(state, cAlphaArgs(8))) == nullptr) {
-                        ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(8), cAlphaArgs(8));
-                        ErrorsFound = true;
-                    } else if (!thisMixing.maxIndoorTempSched->checkMinMaxVals(state, Clusive::In, -MixingTempLimit, Clusive::In, MixingTempLimit)) {
-                        Sched::ShowSevereBadMinMax(
-                            state, eoh, cAlphaFieldNames(8), cAlphaArgs(8), Clusive::In, -MixingTempLimit, Clusive::In, MixingTempLimit);
-                        ErrorsFound = true;
-                    }
-                }
-
-                // Min source temp
-                if (NumAlpha > 8) {
-                    if (lAlphaFieldBlanks(9)) {
-                    } else if ((thisMixing.minSourceTempSched = Sched::GetSchedule(state, cAlphaArgs(9))) == nullptr) {
-                        ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(9), cAlphaArgs(9));
-                        ErrorsFound = true;
-                    } else if (!thisMixing.minSourceTempSched->checkMinMaxVals(state, Clusive::In, -MixingTempLimit, Clusive::In, MixingTempLimit)) {
-                        Sched::ShowSevereBadMinMax(
-                            state, eoh, cAlphaFieldNames(9), cAlphaArgs(9), Clusive::In, -MixingTempLimit, Clusive::In, MixingTempLimit);
-                        ErrorsFound = true;
-                    }
-                }
-
-                // Max source temp
-                if (NumAlpha > 9) {
-                    if (lAlphaFieldBlanks(10)) {
-                    } else if ((thisMixing.maxSourceTempSched = Sched::GetSchedule(state, cAlphaArgs(10))) == nullptr) {
-                        ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(10), cAlphaArgs(10));
-                        ErrorsFound = true;
-                    } else if (!thisMixing.maxSourceTempSched->checkMinMaxVals(state, Clusive::In, -MixingTempLimit, Clusive::In, MixingTempLimit)) {
-                        Sched::ShowSevereBadMinMax(
-                            state, eoh, cAlphaFieldNames(10), cAlphaArgs(10), Clusive::In, -MixingTempLimit, Clusive::In, MixingTempLimit);
-                        ErrorsFound = true;
-                    }
-                }
-
-                // Min outdoor temp
-                if (NumAlpha > 10) {
-                    if (lAlphaFieldBlanks(11)) {
-                    } else if ((thisMixing.minOutdoorTempSched = Sched::GetSchedule(state, cAlphaArgs(11))) == nullptr) {
-                        ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(11), cAlphaArgs(11));
-                        ErrorsFound = true;
-                    } else if (!thisMixing.minOutdoorTempSched->checkMinMaxVals(state, Clusive::In, -MixingTempLimit, Clusive::In, MixingTempLimit)) {
-                        Sched::ShowSevereBadMinMax(
-                            state, eoh, cAlphaFieldNames(11), cAlphaArgs(11), Clusive::In, -MixingTempLimit, Clusive::In, MixingTempLimit);
-                        ErrorsFound = true;
-                    }
-                }
-
-                if (NumAlpha > 11) {
-                    if (lAlphaFieldBlanks(12)) {
-                    } else if ((thisMixing.maxOutdoorTempSched = Sched::GetSchedule(state, cAlphaArgs(12))) == nullptr) {
-                        ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(12), cAlphaArgs(12));
-                        ErrorsFound = true;
-                    } else if (!thisMixing.maxOutdoorTempSched->checkMinMaxVals(state, Clusive::In, -MixingTempLimit, Clusive::In, MixingTempLimit)) {
-                        Sched::ShowSevereBadMinMax(
-                            state, eoh, cAlphaFieldNames(12), cAlphaArgs(12), Clusive::In, -MixingTempLimit, Clusive::In, MixingTempLimit);
-                        ErrorsFound = true;
-                    }
-                }
+                getOptionalTempLimitSched(eoh, 6, 7, thisMixing.minIndoorTempSched);
+                getOptionalTempLimitSched(eoh, 7, 8, thisMixing.maxIndoorTempSched);
+                getOptionalTempLimitSched(eoh, 8, 9, thisMixing.minSourceTempSched);
+                getOptionalTempLimitSched(eoh, 9, 10, thisMixing.maxSourceTempSched);
+                getOptionalTempLimitSched(eoh, 10, 11, thisMixing.minOutdoorTempSched);
+                getOptionalTempLimitSched(eoh, 11, 12, thisMixing.maxOutdoorTempSched);
             }
         } // for (mixingInputNum)
 
