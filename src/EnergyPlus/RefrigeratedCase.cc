@@ -2884,70 +2884,14 @@ void GetRefrigerationInput(EnergyPlusData &state)
                                                    cAlphaFieldNames(14)));
                 ErrorsFound = true;
             } else { // (.NOT. lAlphaBlanks(AlphaNum))
-                // Entry for Alphas(AlphaNum) can be either a Case, WalkIn, Coil, or CaseAndWalkInList name
-                auto [CaseAndWalkInListNum, CaseNum, WalkInNum, CoilNum] = findLoadNames(AlphaNum);
-                int NumNameMatches = (CaseAndWalkInListNum != 0) + (CaseNum != 0) + (WalkInNum != 0) + (CoilNum != 0);
-
-                if (NumNameMatches != 1) { // name must uniquely point to a list or a single case or walkin
-                    ErrorsFound = true;
-                    if (NumNameMatches == 0) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\" : has an invalid {}: {}",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           RefrigRack(RackNum).Name,
-                                                           cAlphaFieldNames(AlphaNum),
-                                                           Alphas(AlphaNum)));
-                    } else if (NumNameMatches > 1) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\" : has a non-unique name that could be either a {}: {}",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           RefrigRack(RackNum).Name,
-                                                           cAlphaFieldNames(AlphaNum),
-                                                           Alphas(AlphaNum)));
-                    } // num matches = 0 or > 1
-                } else if (CaseAndWalkInListNum != 0) { // Name points to a CaseAndWalkInList
-                    NumCoils = CaseAndWalkInList(CaseAndWalkInListNum).NumCoils;
-                    NumCases = CaseAndWalkInList(CaseAndWalkInListNum).NumCases;
-                    NumWalkIns = CaseAndWalkInList(CaseAndWalkInListNum).NumWalkIns;
-                    RefrigRack(RackNum).NumCoils = NumCoils;
-                    RefrigRack(RackNum).NumCases = NumCases;
-                    RefrigRack(RackNum).NumWalkIns = NumWalkIns;
-                    if (!allocated(RefrigRack(RackNum).CoilNum)) {
-                        RefrigRack(RackNum).CoilNum.allocate(NumCoils);
-                    }
-                    RefrigRack(RackNum).CoilNum({1, NumCoils}) = CaseAndWalkInList(CaseAndWalkInListNum).CoilItemNum({1, NumCoils});
-                    if (!allocated(RefrigRack(RackNum).CaseNum)) {
-                        RefrigRack(RackNum).CaseNum.allocate(NumCases);
-                    }
-                    RefrigRack(RackNum).CaseNum({1, NumCases}) = CaseAndWalkInList(CaseAndWalkInListNum).CaseItemNum({1, NumCases});
-                    if (!allocated(RefrigRack(RackNum).WalkInNum)) {
-                        RefrigRack(RackNum).WalkInNum.allocate(NumWalkIns);
-                    }
-                    RefrigRack(RackNum).WalkInNum({1, NumWalkIns}) = CaseAndWalkInList(CaseAndWalkInListNum).WalkInItemNum({1, NumWalkIns});
-                } else if (CoilNum != 0) { // Name points to a coil
-                    NumCoils = 1;
-                    RefrigRack(RackNum).NumCoils = 1;
-                    if (!allocated(RefrigRack(RackNum).CoilNum)) {
-                        RefrigRack(RackNum).CoilNum.allocate(NumCoils);
-                    }
-                    RefrigRack(RackNum).CoilNum(NumCoils) = CoilNum;
-                } else if (CaseNum != 0) { // Name points to a case
-                    NumCases = 1;
-                    RefrigRack(RackNum).NumCases = 1;
-                    if (!allocated(RefrigRack(RackNum).CaseNum)) {
-                        RefrigRack(RackNum).CaseNum.allocate(NumCases);
-                    }
-                    RefrigRack(RackNum).CaseNum(NumCases) = CaseNum;
-                } else if (WalkInNum != 0) { // Name points to a walkin
-                    NumWalkIns = 1;
-                    RefrigRack(RackNum).NumWalkIns = 1;
-                    if (!allocated(RefrigRack(RackNum).WalkInNum)) {
-                        RefrigRack(RackNum).WalkInNum.allocate(NumWalkIns);
-                    }
-                    RefrigRack(RackNum).WalkInNum(NumWalkIns) = WalkInNum;
-                } // NumNameMatches /= 1
+                resolveLoadsWithCoils(AlphaNum, RefrigRack(RackNum).Name,
+                                     NumCases, NumWalkIns, NumCoils,
+                                     RefrigRack(RackNum).CaseNum,
+                                     RefrigRack(RackNum).WalkInNum,
+                                     RefrigRack(RackNum).CoilNum);
+                RefrigRack(RackNum).NumCases = NumCases;
+                RefrigRack(RackNum).NumWalkIns = NumWalkIns;
+                RefrigRack(RackNum).NumCoils = NumCoils;
             } // blank input for loads on rack
 
             if (NumCases > 0) {
