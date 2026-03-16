@@ -1394,6 +1394,23 @@ void GetDXCoils(EnergyPlusData &state)
         }
     };
 
+    // Helper lambda: look up a PLF curve, check dims={1}, and validate/cap its range.
+    auto getAndCheckPLFCurve = [&](int &curveIdx, int alphaFieldNum,
+                                   const std::string &coilName,
+                                   const Array1D_string &alphaArr, const Array1D_bool &blankArr,
+                                   const Array1D_string &fieldNames) {
+        curveIdx = GetCurveIndex(state, alphaArr(alphaFieldNum));
+        if (curveIdx == 0) {
+            reportMissingOrInvalidCurve(
+                state, blankArr(alphaFieldNum), RoutineName, CurrentModuleObject, coilName, fieldNames(alphaFieldNum), alphaArr(alphaFieldNum), ErrorsFound);
+        } else {
+            ErrorsFound |= Curve::CheckCurveDims(state, curveIdx, {1}, RoutineName, CurrentModuleObject, coilName, fieldNames(alphaFieldNum));
+            if (!ErrorsFound) {
+                validateAndCapPLFCurve(state, curveIdx, ErrorsFound, RoutineName, CurrentModuleObject, coilName, fieldNames(alphaFieldNum), alphaArr(alphaFieldNum));
+            }
+        }
+    };
+
     // Loop over the Doe2 DX Coils and get & load the data
     CurrentModuleObject = "Coil:Cooling:DX:SingleSpeed";
     for (DXCoilIndex = 1; DXCoilIndex <= state.dataDXCoils->NumDoe2DXCoils; ++DXCoilIndex) {
@@ -1541,32 +1558,7 @@ void GetDXCoils(EnergyPlusData &state)
             }
         }
 
-        thisDXCoil.PLFFPLR(1) = GetCurveIndex(state, Alphas(9)); // convert curve name to number
-        if (thisDXCoil.PLFFPLR(1) == 0) {
-            reportMissingOrInvalidCurve(
-                state, lAlphaBlanks(9), RoutineName, CurrentModuleObject, thisDXCoil.Name, cAlphaFields(9), Alphas(9), ErrorsFound);
-        } else {
-            // Verify Curve Object, only legal types are Quadratic or Cubic
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisDXCoil.PLFFPLR(1), // Curve index
-                                                 {1},                   // Valid dimensions
-                                                 RoutineName,           // Routine name
-                                                 CurrentModuleObject,   // Object Type
-                                                 thisDXCoil.Name,       // Object Name
-                                                 cAlphaFields(9));      // Field Name
-
-            if (!ErrorsFound) {
-                //     Test PLF curve minimum and maximum. Cap if less than 0.7 or greater than 1.0.
-                validateAndCapPLFCurve(state,
-                                       thisDXCoil.PLFFPLR(1),
-                                       ErrorsFound,
-                                       RoutineName,
-                                       CurrentModuleObject,
-                                       thisDXCoil.Name,
-                                       cAlphaFields(9),
-                                       Alphas(9));
-            }
-        }
+        getAndCheckPLFCurve(thisDXCoil.PLFFPLR(1), 9, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
         // Set minimum OAT for compressor operation
         thisDXCoil.MinOATCompressor = Numbers(7);
@@ -2401,32 +2393,7 @@ void GetDXCoils(EnergyPlusData &state)
 
         getAndCheckFlowCurve(thisDXCoil.EIRFFlow(1), 8, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
-        thisDXCoil.PLFFPLR(1) = GetCurveIndex(state, Alphas(9)); // convert curve name to number
-        if (thisDXCoil.PLFFPLR(1) == 0) {
-            reportMissingOrInvalidCurve(
-                state, lAlphaBlanks(9), RoutineName, CurrentModuleObject, thisDXCoil.Name, cAlphaFields(9), Alphas(9), ErrorsFound);
-        } else {
-            // Verify Curve Object, only legal types are Quadratic or Cubic
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisDXCoil.PLFFPLR(1), // Curve index
-                                                 {1},                   // Valid dimensions
-                                                 RoutineName,           // Routine name
-                                                 CurrentModuleObject,   // Object Type
-                                                 thisDXCoil.Name,       // Object Name
-                                                 cAlphaFields(9));      // Field Name
-
-            if (!ErrorsFound) {
-                //     Test PLF curve minimum and maximum. Cap if less than 0.7 or greater than 1.0.
-                validateAndCapPLFCurve(state,
-                                       thisDXCoil.PLFFPLR(1),
-                                       ErrorsFound,
-                                       RoutineName,
-                                       CurrentModuleObject,
-                                       thisDXCoil.Name,
-                                       cAlphaFields(9),
-                                       Alphas(9));
-            }
-        }
+        getAndCheckPLFCurve(thisDXCoil.PLFFPLR(1), 9, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
         // Only required for reverse cycle heat pumps
         thisDXCoil.DefrostEIRFT = GetCurveIndex(state, Alphas(10)); // convert curve name to number
@@ -2790,32 +2757,7 @@ void GetDXCoils(EnergyPlusData &state)
             }
         }
 
-        thisDXCoil.PLFFPLR(1) = GetCurveIndex(state, Alphas(9)); // convert curve name to number
-        if (thisDXCoil.PLFFPLR(1) == 0) {
-            reportMissingOrInvalidCurve(
-                state, lAlphaBlanks(9), RoutineName, CurrentModuleObject, thisDXCoil.Name, cAlphaFields(9), Alphas(9), ErrorsFound);
-        } else {
-            // Verify Curve Object, only legal types are Quadratic or Cubic
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisDXCoil.PLFFPLR(1), // Curve index
-                                                 {1},                   // Valid dimensions
-                                                 RoutineName,           // Routine name
-                                                 CurrentModuleObject,   // Object Type
-                                                 thisDXCoil.Name,       // Object Name
-                                                 cAlphaFields(9));      // Field Name
-
-            if (!ErrorsFound) {
-                //     Test PLF curve minimum and maximum. Cap if less than 0.7 or greater than 1.0.
-                validateAndCapPLFCurve(state,
-                                       thisDXCoil.PLFFPLR(1),
-                                       ErrorsFound,
-                                       RoutineName,
-                                       CurrentModuleObject,
-                                       thisDXCoil.Name,
-                                       cAlphaFields(9),
-                                       Alphas(9));
-            }
-        }
+        getAndCheckPLFCurve(thisDXCoil.PLFFPLR(1), 9, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
         thisDXCoil.RatedEIR(1) = 1.0 / thisDXCoil.RatedCOP(1);
 
@@ -4316,38 +4258,7 @@ void GetDXCoils(EnergyPlusData &state)
 
             getAndCheckFlowCurve(thisDXCoil.MSEIRFFlow(I), 17 + (I - 1) * 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
-            thisDXCoil.MSPLFFPLR(I) = GetCurveIndex(state, Alphas(18 + (I - 1) * 6)); // convert curve name to number
-            if (thisDXCoil.MSPLFFPLR(I) == 0) {
-                reportMissingOrInvalidCurve(state,
-                                            lAlphaBlanks(18 + (I - 1) * 6),
-                                            RoutineName,
-                                            CurrentModuleObject,
-                                            thisDXCoil.Name,
-                                            cAlphaFields(18 + (I - 1) * 6),
-                                            Alphas(18 + (I - 1) * 6),
-                                            ErrorsFound);
-            } else {
-                // Verify Curve Object, only legal types are Quadratic or Cubic
-                ErrorsFound |= Curve::CheckCurveDims(state,
-                                                     thisDXCoil.MSPLFFPLR(I),         // Curve index
-                                                     {1},                             // Valid dimensions
-                                                     RoutineName,                     // Routine name
-                                                     CurrentModuleObject,             // Object Type
-                                                     thisDXCoil.Name,                 // Object Name
-                                                     cAlphaFields(18 + (I - 1) * 6)); // Field Name
-
-                if (!ErrorsFound) {
-                    //       Test PLF curve minimum and maximum. Cap if less than 0.7 or greater than 1.0.
-                    validateAndCapPLFCurve(state,
-                                           thisDXCoil.MSPLFFPLR(I),
-                                           ErrorsFound,
-                                           RoutineName,
-                                           CurrentModuleObject,
-                                           thisDXCoil.Name,
-                                           cAlphaFields(18 + (I - 1) * 6),
-                                           Alphas(18 + (I - 1) * 6));
-                }
-            }
+            getAndCheckPLFCurve(thisDXCoil.MSPLFFPLR(I), 18 + (I - 1) * 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
             // read data for latent degradation
             thisDXCoil.MSTwet_Rated(I) = Numbers(13 + (I - 1) * 14);
@@ -4767,38 +4678,7 @@ void GetDXCoils(EnergyPlusData &state)
 
             getAndCheckFlowCurve(thisDXCoil.MSEIRFFlow(I), 14 + (I - 1) * 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
-            thisDXCoil.MSPLFFPLR(I) = GetCurveIndex(state, Alphas(15 + (I - 1) * 6)); // convert curve name to number
-            if (thisDXCoil.MSPLFFPLR(I) == 0) {
-                reportMissingOrInvalidCurve(state,
-                                            lAlphaBlanks(15 + (I - 1) * 6),
-                                            RoutineName,
-                                            CurrentModuleObject,
-                                            thisDXCoil.Name,
-                                            cAlphaFields(15 + (I - 1) * 6),
-                                            Alphas(15 + (I - 1) * 6),
-                                            ErrorsFound);
-            } else {
-                // Verify Curve Object, only legal types are Quadratic or Cubic
-                ErrorsFound |= Curve::CheckCurveDims(state,
-                                                     thisDXCoil.MSPLFFPLR(I),         // Curve index
-                                                     {1},                             // Valid dimensions
-                                                     RoutineName,                     // Routine name
-                                                     CurrentModuleObject,             // Object Type
-                                                     thisDXCoil.Name,                 // Object Name
-                                                     cAlphaFields(15 + (I - 1) * 6)); // Field Name
-
-                if (!ErrorsFound) {
-                    //       Test PLF curve minimum and maximum. Cap if less than 0.7 or greater than 1.0.
-                    validateAndCapPLFCurve(state,
-                                           thisDXCoil.MSPLFFPLR(I),
-                                           ErrorsFound,
-                                           RoutineName,
-                                           CurrentModuleObject,
-                                           thisDXCoil.Name,
-                                           cAlphaFields(15 + (I - 1) * 6),
-                                           Alphas(15 + (I - 1) * 6));
-                }
-            }
+            getAndCheckPLFCurve(thisDXCoil.MSPLFFPLR(I), 15 + (I - 1) * 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
             // Read waste heat modifier curve name
             thisDXCoil.MSWasteHeat(I) = GetCurveIndex(state, Alphas(16 + (I - 1) * 6)); // convert curve name to number
