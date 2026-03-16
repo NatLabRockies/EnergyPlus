@@ -1892,61 +1892,53 @@ void GetRefrigerationInput(EnergyPlusData &state)
                     }
                 }
 
-                // start IF set for glass doors in this zone
-                WalkIn(WalkInID).AreaGlassDr(ZoneID) = 0.0;
-                WalkIn(WalkInID).HeightGlassDr(ZoneID) = 0.0;
-                WalkIn(WalkInID).UValueGlassDr(ZoneID) = 0.0;
-                if (!lNumericBlanks(NStart + 2)) {
-                    WalkIn(WalkInID).AreaGlassDr(ZoneID) = Numbers(NStart + 2);
-
-                    WalkIn(WalkInID).HeightGlassDr(ZoneID) = DefaultWIHeightGlassDr;
-                    if (!lNumericBlanks(NStart + 3)) {
-                        WalkIn(WalkInID).HeightGlassDr(ZoneID) = Numbers(NStart + 3);
+                // Helper lambda: read the common area/height/U-value/schedule fields for one
+                // door type in a walk-in zone.  nArea/nHeight/nUValue are numeric field offsets
+                // from NStart; aSchedule is the alpha field offset from AStart.
+                // defaultHeight and defaultUValue are the default values for that door type.
+                // schedOut is the schedule pointer member to fill; area/height/uvalue are the
+                // per-zone array members to fill.
+                // Returns true if the area field was present (i.e., this door type is present in
+                // this zone), allowing the caller to perform additional door-type-specific checks.
+                auto readWalkInDoor = [&](int nArea, int nHeight, int nUValue, int aSchedule,
+                                          Real64 defaultHeight, Real64 defaultUValue,
+                                          Real64 &area, Real64 &height, Real64 &uvalue,
+                                          Sched::Schedule *&schedOut) -> bool {
+                    area = 0.0; height = 0.0; uvalue = 0.0;
+                    if (lNumericBlanks(NStart + nArea)) return false;
+                    area   = Numbers(NStart + nArea);
+                    height = defaultHeight;
+                    if (!lNumericBlanks(NStart + nHeight)) height = Numbers(NStart + nHeight);
+                    uvalue = defaultUValue;
+                    if (!lNumericBlanks(NStart + nUValue)) uvalue = Numbers(NStart + nUValue);
+                    // convert door opening schedule name to pointer
+                    if (!lAlphaBlanks(AStart + aSchedule)) {
+                        if ((schedOut = Sched::GetSchedule(state, Alphas(AStart + aSchedule))) == nullptr) {
+                            ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(AStart + aSchedule), Alphas(AStart + aSchedule));
+                            ErrorsFound = true;
+                        } else if (!schedOut->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
+                            Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(AStart + aSchedule), Alphas(AStart + aSchedule), Clusive::In, 0.0, Clusive::In, 1.0);
+                            ErrorsFound = true;
+                        }
                     }
+                    return true;
+                };
 
-                    WalkIn(WalkInID).UValueGlassDr(ZoneID) = DefaultWIUValueGlassDr;
-                    if (!lNumericBlanks(NStart + 4)) {
-                        WalkIn(WalkInID).UValueGlassDr(ZoneID) = Numbers(NStart + 4);
-                    }
+                // Glass doors in this zone
+                readWalkInDoor(2, 3, 4, 1,
+                               DefaultWIHeightGlassDr, DefaultWIUValueGlassDr,
+                               WalkIn(WalkInID).AreaGlassDr(ZoneID),
+                               WalkIn(WalkInID).HeightGlassDr(ZoneID),
+                               WalkIn(WalkInID).UValueGlassDr(ZoneID),
+                               WalkIn(WalkInID).glassDoorOpenScheds(ZoneID));
 
-                    // convert door opening schedule name to pointer, default of 0.1 is assigned inside walkin subroutine if blank
-                    if (lAlphaBlanks(AStart + 1)) {
-                    } else if ((WalkIn(WalkInID).glassDoorOpenScheds(ZoneID) = Sched::GetSchedule(state, Alphas(AStart + 1))) == nullptr) {
-                        ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(AStart + 1), Alphas(AStart + 1));
-                        ErrorsFound = true;
-                    } else if (!WalkIn(WalkInID).glassDoorOpenScheds(ZoneID)->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                        Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(AStart + 1), Alphas(AStart + 1), Clusive::In, 0.0, Clusive::In, 1.0);
-                        ErrorsFound = true;
-                    } // blank on door opening schedule (AStart + 1)
-                } // have glassdoor area facing zone (blank on lNumericBlanks(NStart+2))
-
-                // start IF set for stock doors in this zone
-                WalkIn(WalkInID).AreaStockDr(ZoneID) = 0.0;
-                WalkIn(WalkInID).HeightStockDr(ZoneID) = 0.0;
-                WalkIn(WalkInID).UValueStockDr(ZoneID) = 0.0;
-                if (!lNumericBlanks(NStart + 5)) {
-                    WalkIn(WalkInID).AreaStockDr(ZoneID) = Numbers(NStart + 5);
-
-                    WalkIn(WalkInID).HeightStockDr(ZoneID) = DefaultWIHeightStockDr;
-                    if (!lNumericBlanks(NStart + 6)) {
-                        WalkIn(WalkInID).HeightStockDr(ZoneID) = Numbers(NStart + 6);
-                    }
-
-                    WalkIn(WalkInID).UValueStockDr(ZoneID) = DefaultWIUValueStockDr;
-                    if (!lNumericBlanks(NStart + 7)) {
-                        WalkIn(WalkInID).UValueStockDr(ZoneID) = Numbers(NStart + 7);
-                    }
-
-                    // convert door opening schedule name to pointer, default of 0.1 is assigned inside walkin subroutine if blank
-                    if (lAlphaBlanks(AStart + 2)) {
-                    } else if ((WalkIn(WalkInID).stockDoorOpenScheds(ZoneID) = Sched::GetSchedule(state, Alphas(AStart + 2))) == nullptr) {
-                        ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(AStart + 2), Alphas(AStart + 2));
-                        ErrorsFound = true;
-                    } else if (!WalkIn(WalkInID).stockDoorOpenScheds(ZoneID)->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                        Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(AStart + 2), Alphas(AStart + 2), Clusive::In, 0.0, Clusive::In, 1.0);
-                        ErrorsFound = true;
-                    } // blank on door opening schedule (AStart + 2)
-
+                // Stock doors in this zone
+                if (readWalkInDoor(5, 6, 7, 2,
+                                   DefaultWIHeightStockDr, DefaultWIUValueStockDr,
+                                   WalkIn(WalkInID).AreaStockDr(ZoneID),
+                                   WalkIn(WalkInID).HeightStockDr(ZoneID),
+                                   WalkIn(WalkInID).UValueStockDr(ZoneID),
+                                   WalkIn(WalkInID).stockDoorOpenScheds(ZoneID))) {
                     if (lAlphaBlanks(AStart + 3)) {
                         // default air curtain
                         WalkIn(WalkInID).StockDoorProtectType(ZoneID) = WIStockDoor::AirCurtain;
@@ -1955,7 +1947,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
                         ShowSevereInvalidKey(state, eoh, cAlphaFieldNames(AStart + 3), Alphas(AStart + 3));
                         ErrorsFound = true;
                     } // stock door protection (AStart + 3) blank
-                } // have Stockdoor area facing zone
+                } // have stock door area facing zone
 
                 AStart += NumWIAlphaFieldsPerZone;
                 NStart += NumWINumberFieldsPerZone;
