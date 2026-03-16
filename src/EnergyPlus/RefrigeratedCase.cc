@@ -3076,6 +3076,51 @@ void GetRefrigerationInput(EnergyPlusData &state)
 
         //************ START CONDENSER INPUT  **************
 
+        // Helper lambda: read the optional air-inlet node field (alphaNum) for an air-cooled
+        // condenser or gas cooler.  If blank, sets inletAirNodeNum=0.  Otherwise, first tries
+        // the name as a zone name; on match sets inletAirNodeNum via GetSystemNodeNumberForZone,
+        // sets rejectHeatToZone=true, and marks RefrigPresentInZone.  On no zone match, calls
+        // GetOnlySingleNode with the supplied ConnectionObjectType and verifies it is an
+        // OutsideAir node; reports a severe error + continue error if not found.
+        // The eoh argument is used only for the "not found" error message on the outside-air path.
+        auto readAirInletNodeField = [&](const ErrorObjectHeader &eoh,
+                                         int alphaNum,
+                                         Node::ConnectionObjectType connObjType,
+                                         int &inletAirNodeNum,
+                                         int &inletAirZoneNum,
+                                         bool &rejectHeatToZone) {
+            rejectHeatToZone = false;
+            if (lAlphaBlanks(alphaNum)) {
+                inletAirNodeNum = 0;
+                return;
+            }
+            // see if it's an outside air node name or an indoor zone name;
+            // have to check inside first because outside check automatically generates an error message
+            inletAirZoneNum = Util::FindItemInList(Alphas(alphaNum), state.dataHeatBal->Zone);
+            if (inletAirZoneNum != 0) {
+                // set flag (later used to set system flag) and zone flag
+                inletAirNodeNum = DataZoneEquipment::GetSystemNodeNumberForZone(state, inletAirZoneNum);
+                rejectHeatToZone = true;
+                state.dataRefrigCase->RefrigPresentInZone(inletAirZoneNum) = true;
+            } else { // not in a conditioned zone, so see if it's outside
+                inletAirNodeNum = Node::GetOnlySingleNode(state,
+                                                                       Alphas(alphaNum),
+                                                                       ErrorsFound,
+                                                                       connObjType,
+                                                                       Alphas(1),
+                                                                       Node::FluidType::Air,
+                                                                       Node::ConnectionType::OutsideAirReference,
+                                                                       Node::CompFluidStream::Primary,
+                                                                       Node::ObjectIsParent);
+                if (!OutAirNodeManager::CheckOutAirNodeNumber(state, inletAirNodeNum)) {
+                    // not outside and not a zone
+                    ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(alphaNum), Alphas(alphaNum));
+                    ShowContinueError(state, "...does not appear in an OutdoorAir:NodeList or as an OutdoorAir:Node or as a Zone.");
+                    ErrorsFound = true;
+                }
+            }
+        };
+
         if (state.dataRefrigCase->NumSimulationCondAir > 0) {
             CurrentModuleObject = "Refrigeration:Condenser:AirCooled";
             for (int CondNum = 1; CondNum <= state.dataRefrigCase->NumSimulationCondAir; ++CondNum) {
@@ -3150,42 +3195,11 @@ void GetRefrigerationInput(EnergyPlusData &state)
 
                 // Check condenser air inlet node connection
                 // Jan 2011 - added ability to reject heat to a zone from air-cooled condenser
-                Condenser(CondNum).CondenserRejectHeatToZone = false;
-                if (lAlphaBlanks(4)) {
-                    Condenser(CondNum).InletAirNodeNum = 0;
-                } else { // see if it's an outside air node name or an indoor zone name,
-                    // have to check inside first because outside check automatically generates an error message
-                    Condenser(CondNum).InletAirZoneNum = Util::FindItemInList(Alphas(4), state.dataHeatBal->Zone);
-                    // need to clearly id node number for air inlet conditions and zone number for casecredit assignment
-                    if (Condenser(CondNum).InletAirZoneNum != 0) {
-                        // set condenser flag (later used to set system flag) and zone flag
-                        Condenser(CondNum).InletAirNodeNum = DataZoneEquipment::GetSystemNodeNumberForZone(state, Condenser(CondNum).InletAirZoneNum);
-                        Condenser(CondNum).CondenserRejectHeatToZone = true;
-                        state.dataRefrigCase->RefrigPresentInZone(Condenser(CondNum).InletAirZoneNum) = true;
-                    } else { // not in a conditioned zone, so see if it's outside
-                        Condenser(CondNum).InletAirNodeNum = Node::GetOnlySingleNode(state,
-                                                                                     Alphas(4),
-                                                                                     ErrorsFound,
-                                                                                     Node::ConnectionObjectType::RefrigerationCondenserAirCooled,
-                                                                                     Alphas(1),
-                                                                                     Node::FluidType::Air,
-                                                                                     Node::ConnectionType::OutsideAirReference,
-                                                                                     Node::CompFluidStream::Primary,
-                                                                                     Node::ObjectIsParent);
-                        if (!OutAirNodeManager::CheckOutAirNodeNumber(state, Condenser(CondNum).InletAirNodeNum)) {
-                            // not outside and not a zone
-                            ShowSevereError(state,
-                                            EnergyPlus::format("{}{}=\"{}\", {} not found: {}",
-                                                               RoutineName,
-                                                               CurrentModuleObject,
-                                                               Condenser(CondNum).Name,
-                                                               cAlphaFieldNames(4),
-                                                               Alphas(4)));
-                            ShowContinueError(state, "...does not appear in an OutdoorAir:NodeList or as an OutdoorAir:Node or as a Zone.");
-                            ErrorsFound = true;
-                        } // checkoutairnodenumber
-                    } // InletAirZoneNum \=0
-                } // Condenser air inlet node connection
+                readAirInletNodeField(eoh, 4,
+                                      Node::ConnectionObjectType::RefrigerationCondenserAirCooled,
+                                      Condenser(CondNum).InletAirNodeNum,
+                                      Condenser(CondNum).InletAirZoneNum,
+                                      Condenser(CondNum).CondenserRejectHeatToZone);
 
                 Condenser(CondNum).EndUseSubcategory = "";
                 if (!lAlphaBlanks(5)) {
@@ -3791,36 +3805,11 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 }
 
                 // Check GasCooler air inlet node connection
-                GasCooler(GCNum).GasCoolerRejectHeatToZone = false;
-                if (lAlphaBlanks(4)) {
-                    GasCooler(GCNum).InletAirNodeNum = 0;
-                } else { // see if it's an outside air node name or an indoor zone name,
-                    // have to check inside first because outside check automatically generates an error message
-                    GasCooler(GCNum).InletAirZoneNum = Util::FindItemInList(Alphas(4), state.dataHeatBal->Zone);
-                    // need to clearly id node number for air inlet conditions and zone number for casecredit assignment
-                    if (GasCooler(GCNum).InletAirZoneNum != 0) {
-                        // set condenser flag (later used to set system flag) and zone flag
-                        GasCooler(GCNum).InletAirNodeNum = DataZoneEquipment::GetSystemNodeNumberForZone(state, GasCooler(GCNum).InletAirZoneNum);
-                        GasCooler(GCNum).GasCoolerRejectHeatToZone = true;
-                        state.dataRefrigCase->RefrigPresentInZone(GasCooler(GCNum).InletAirZoneNum) = true;
-                    } else { // not in a conditioned zone, so see if it's outside
-                        GasCooler(GCNum).InletAirNodeNum = Node::GetOnlySingleNode(state,
-                                                                                   Alphas(4),
-                                                                                   ErrorsFound,
-                                                                                   Node::ConnectionObjectType::RefrigerationGasCoolerAirCooled,
-                                                                                   Alphas(1),
-                                                                                   Node::FluidType::Air,
-                                                                                   Node::ConnectionType::OutsideAirReference,
-                                                                                   Node::CompFluidStream::Primary,
-                                                                                   Node::ObjectIsParent);
-                        if (!OutAirNodeManager::CheckOutAirNodeNumber(state, GasCooler(GCNum).InletAirNodeNum)) {
-                            // not outside and not a zone
-                            ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(4), Alphas(4));
-                            ShowContinueError(state, "...does not appear in an OutdoorAir:NodeList or as an OutdoorAir:Node or as a Zone.");
-                            ErrorsFound = true;
-                        } // checkoutairnodenumber
-                    } // InletAirZoneNum \=0
-                } // Gas cooler air inlet node connection
+                readAirInletNodeField(eoh, 4,
+                                      Node::ConnectionObjectType::RefrigerationGasCoolerAirCooled,
+                                      GasCooler(GCNum).InletAirNodeNum,
+                                      GasCooler(GCNum).InletAirZoneNum,
+                                      GasCooler(GCNum).GasCoolerRejectHeatToZone);
 
                 GasCooler(GCNum).EndUseSubcategory = "";
                 if (!lAlphaBlanks(5)) {
