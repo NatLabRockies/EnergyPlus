@@ -2043,116 +2043,33 @@ void GetRefrigerationInput(EnergyPlusData &state)
                     }
                 } break;
 
-                case RatingType::EuropeanSC1Std: {
-                    // N2
-                    NumNum = 2; // advance past rating in W/C to rating in W at N2
-                    if (!lNumericBlanks(NumNum) && Numbers(NumNum) > 0.0) {
-                        WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum);
-                        WarehouseCoil(CoilID).SCIndex = 1;
-                    } else {
-                        showCoilCapError(NumNum);
-                    }
-                } break;
-
-                case RatingType::EuropeanSC1Nom: {
-                    // N2
-                    NumNum = 2; // advance past rating in W/C to rating in W at N2
-                    if (!lNumericBlanks(NumNum) && Numbers(NumNum) > 0.0) {
-                        WarehouseCoil(CoilID).RatedCapTotal = Numbers(NumNum);
-                        WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum) / EuropeanWetCoilFactor[0];
-                        WarehouseCoil(CoilID).SCIndex = 1;
-                    } else {
-                        showCoilCapError(NumNum);
-                    }
-                } break;
-
-                case RatingType::EuropeanSC2Std: {
-                    // N2
-                    NumNum = 2; // advance past rating in W/C to rating in W at N2
-                    if (!lNumericBlanks(NumNum) && Numbers(NumNum) > 0.0) {
-                        WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum);
-                        WarehouseCoil(CoilID).SCIndex = 2;
-                    } else {
-                        showCoilCapError(NumNum);
-                    }
-                } break;
-
-                case RatingType::EuropeanSC2Nom: {
-                    // N2
-                    NumNum = 2; // advance past rating in W/C to rating in W at N2
-                    if (!lNumericBlanks(NumNum) && Numbers(NumNum) > 0.0) {
-                        WarehouseCoil(CoilID).RatedCapTotal = Numbers(NumNum);
-                        WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum) / EuropeanWetCoilFactor[1];
-                        WarehouseCoil(CoilID).SCIndex = 2;
-                    } else {
-                        showCoilCapError(NumNum);
-                    }
-                } break;
-
-                case RatingType::EuropeanSC3Std: {
-                    // N2
-                    NumNum = 2; // advance past rating in W/C to rating in W at N2
-                    if (!lNumericBlanks(NumNum) && Numbers(NumNum) > 0.0) {
-                        WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum);
-                        WarehouseCoil(CoilID).SCIndex = 3;
-                    } else {
-                        showCoilCapError(NumNum);
-                    }
-                } break;
-
-                case RatingType::EuropeanSC3Nom: {
-                    // N2
-                    NumNum = 2; // advance past rating in W/C to rating in W at N2
-                    if (!lNumericBlanks(NumNum) && Numbers(NumNum) > 0.0) {
-                        WarehouseCoil(CoilID).RatedCapTotal = Numbers(NumNum);
-                        WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum) / EuropeanWetCoilFactor[2];
-                        WarehouseCoil(CoilID).SCIndex = 3;
-                    } else {
-                        showCoilCapError(NumNum);
-                    }
-                } break;
-
-                case RatingType::EuropeanSC4Std: {
-                    // N2
-                    NumNum = 2; // advance past rating in W/C to rating in W at N2
-                    if (!lNumericBlanks(NumNum) && Numbers(NumNum) > 0.0) {
-                        WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum);
-                        WarehouseCoil(CoilID).SCIndex = 4;
-                    } else {
-                        showCoilCapError(NumNum);
-                    }
-                } break;
-
-                case RatingType::EuropeanSC4Nom: {
-                    // N2
-                    NumNum = 2; // advance past rating in W/C to rating in W at N2
-                    if (!lNumericBlanks(NumNum) && Numbers(NumNum) > 0.0) {
-                        WarehouseCoil(CoilID).RatedCapTotal = Numbers(NumNum);
-                        WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum) / EuropeanWetCoilFactor[3];
-                        WarehouseCoil(CoilID).SCIndex = 4;
-                    } else {
-                        showCoilCapError(NumNum);
-                    }
-                } break;
-
-                case RatingType::EuropeanSC5Std: {
-                    // N2
-                    NumNum = 2; // advance past rating in W/C to rating in W at N2
-                    if (!lNumericBlanks(NumNum) && Numbers(NumNum) > 0.0) {
-                        WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum);
-                        WarehouseCoil(CoilID).SCIndex = 5;
-                    } else {
-                        showCoilCapError(NumNum);
-                    }
-                } break;
-
+                case RatingType::EuropeanSC1Std:
+                case RatingType::EuropeanSC1Nom:
+                case RatingType::EuropeanSC2Std:
+                case RatingType::EuropeanSC2Nom:
+                case RatingType::EuropeanSC3Std:
+                case RatingType::EuropeanSC3Nom:
+                case RatingType::EuropeanSC4Std:
+                case RatingType::EuropeanSC4Nom:
+                case RatingType::EuropeanSC5Std:
                 case RatingType::EuropeanSC5Nom: {
-                    // N2
+                    // All EuropeanSCx types read N2, set SCIndex = 1..5.
+                    // For Nom types, also set RatedCapTotal and derive RatedSensibleCap via EuropeanWetCoilFactor.
+                    // Map: EuropeanSC1Std=0, EuropeanSC1Nom=1, ..., EuropeanSC5Std=8, EuropeanSC5Nom=9
+                    //      relative to the first European type enum value.
+                    int scOffset = static_cast<int>(WarehouseCoil(CoilID).ratingType) -
+                                   static_cast<int>(RatingType::EuropeanSC1Std);
+                    int scIndex = scOffset / 2 + 1; // 1..5
+                    bool isNom = (scOffset % 2) != 0;
                     NumNum = 2; // advance past rating in W/C to rating in W at N2
                     if (!lNumericBlanks(NumNum) && Numbers(NumNum) > 0.0) {
-                        WarehouseCoil(CoilID).RatedCapTotal = Numbers(NumNum);
-                        WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum) / EuropeanWetCoilFactor[4];
-                        WarehouseCoil(CoilID).SCIndex = 5;
+                        if (isNom) {
+                            WarehouseCoil(CoilID).RatedCapTotal = Numbers(NumNum);
+                            WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum) / EuropeanWetCoilFactor[scIndex - 1];
+                        } else {
+                            WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum);
+                        }
+                        WarehouseCoil(CoilID).SCIndex = scIndex;
                     } else {
                         showCoilCapError(NumNum);
                     }
