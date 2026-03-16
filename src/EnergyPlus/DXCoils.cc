@@ -5820,68 +5820,7 @@ void GetDXCoils(EnergyPlusData &state)
         else if (thisDXCoil.DXCoilType_Num == HVAC::CoilDX_MultiSpeedCooling) {
             // Setup Report Variables for Cooling Equipment:
             // CurrentModuleObject='Coil:Cooling:DX:MultiSpeed'
-            SetupOutputVariable(state,
-                                "Cooling Coil Total Cooling Rate",
-                                Constant::Units::W,
-                                thisDXCoil.TotalCoolingEnergyRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Cooling Coil Total Cooling Energy",
-                                Constant::Units::J,
-                                thisDXCoil.TotalCoolingEnergy,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                thisDXCoil.Name,
-                                Constant::eResource::EnergyTransfer,
-                                OutputProcessor::Group::HVAC,
-                                OutputProcessor::EndUseCat::CoolingCoils);
-            SetupOutputVariable(state,
-                                "Cooling Coil Sensible Cooling Rate",
-                                Constant::Units::W,
-                                thisDXCoil.SensCoolingEnergyRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Cooling Coil Sensible Cooling Energy",
-                                Constant::Units::J,
-                                thisDXCoil.SensCoolingEnergy,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Cooling Coil Latent Cooling Rate",
-                                Constant::Units::W,
-                                thisDXCoil.LatCoolingEnergyRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Cooling Coil Latent Cooling Energy",
-                                Constant::Units::J,
-                                thisDXCoil.LatCoolingEnergy,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Cooling Coil Electricity Rate",
-                                Constant::Units::W,
-                                thisDXCoil.ElecCoolingPower,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
-            SetupOutputVariable(state,
-                                "Cooling Coil Electricity Energy",
-                                Constant::Units::J,
-                                thisDXCoil.ElecCoolingConsumption,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                thisDXCoil.Name,
-                                Constant::eResource::Electricity,
-                                OutputProcessor::Group::HVAC,
-                                OutputProcessor::EndUseCat::Cooling);
+            setupStdCoolingOutputVars(state, thisDXCoil);
 
             if (thisDXCoil.FuelType != Constant::eFuel::Electricity) {
                 std::string_view sFuelType = Constant::eFuelNames[static_cast<int>(thisDXCoil.FuelType)];
@@ -5903,14 +5842,6 @@ void GetDXCoils(EnergyPlusData &state)
                                     OutputProcessor::Group::HVAC,
                                     OutputProcessor::EndUseCat::Cooling);
             }
-
-            SetupOutputVariable(state,
-                                "Cooling Coil Runtime Fraction",
-                                Constant::Units::None,
-                                thisDXCoil.CoolingCoilRuntimeFraction,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisDXCoil.Name);
 
             if (thisDXCoil.ReportEvapCondVars) {
                 setupEvapCondOutputVars(state, thisDXCoil);
