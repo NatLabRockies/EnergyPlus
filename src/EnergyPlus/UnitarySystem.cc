@@ -6812,13 +6812,9 @@ namespace UnitarySystems {
         // Set minimum OAT for heat pump compressor operation in cooling mode
         // get from coil module
         errFlag = false;
-        if (this->m_CoolingCoilType_Num == HVAC::CoilDX_CoolingSingleSpeed) {
-            this->m_MinOATCompressorCooling = DXCoils::GetMinOATCompressor(state, this->m_CoolingCoilIndex, errFlag);
-        } else if (this->m_CoolingCoilType_Num == HVAC::CoilDX_CoolingTwoSpeed) {
-            this->m_MinOATCompressorCooling = DXCoils::GetMinOATCompressor(state, this->m_CoolingCoilIndex, errFlag);
-        } else if (this->m_CoolingCoilType_Num == HVAC::CoilDX_MultiSpeedCooling) {
-            this->m_MinOATCompressorCooling = DXCoils::GetMinOATCompressor(state, this->m_CoolingCoilIndex, errFlag);
-        } else if (this->m_CoolingCoilType_Num == HVAC::CoilDX_CoolingTwoStageWHumControl) {
+        if (this->m_CoolingCoilType_Num == HVAC::CoilDX_CoolingSingleSpeed || this->m_CoolingCoilType_Num == HVAC::CoilDX_CoolingTwoSpeed ||
+            this->m_CoolingCoilType_Num == HVAC::CoilDX_MultiSpeedCooling ||
+            this->m_CoolingCoilType_Num == HVAC::CoilDX_CoolingTwoStageWHumControl) {
             this->m_MinOATCompressorCooling = DXCoils::GetMinOATCompressor(state, this->m_CoolingCoilIndex, errFlag);
         } else if (this->m_CoolingCoilType_Num == HVAC::Coil_CoolingAirToAirVariableSpeed) {
             this->m_MinOATCompressorCooling = VariableSpeedCoils::GetVSCoilMinOATCompressor(state, this->m_CoolingCoilIndex, errFlag);
