@@ -3878,22 +3878,8 @@ void GetDXCoils(EnergyPlusData &state)
             std::string const whCapFTCurveName =
                 s_ip->getAlphaFieldValue(fields, schemaProps, "crankcase_heater_capacity_function_of_temperature_curve_name");
             // Coil:WaterHeating:AirToWaterHeatPump:Wrapped
-            if (!whCapFTCurveName.empty()) {
-                thisDXCoil.CrankcaseHeaterCapacityCurveIndex = Curve::GetCurveIndex(state, whCapFTCurveName);
-                if (thisDXCoil.CrankcaseHeaterCapacityCurveIndex == 0) { // can't find the curve
-                    ShowSevereError(
-                        state, EnergyPlus::format("{} = {}:  {} not found = {}", CurrentModuleObject, thisDXCoil.Name, cFieldName, whCapFTCurveName));
-                    ErrorsFound = true;
-                } else {
-                    ErrorsFound |= Curve::CheckCurveDims(state,
-                                                         thisDXCoil.CrankcaseHeaterCapacityCurveIndex, // Curve index
-                                                         {1},                                          // Valid dimensions
-                                                         RoutineName,                                  // Routine name
-                                                         CurrentModuleObject,                          // Object Type
-                                                         thisDXCoil.Name,                              // Object Name
-                                                         cFieldName);                                  // Field Name
-                }
-            }
+            setupCrankcaseHeaterCapacityCurve(
+                state, thisDXCoil, whCapFTCurveName.empty(), whCapFTCurveName, ErrorsFound, RoutineName, CurrentModuleObject, cFieldName);
 
             cFieldName = "Evaporator Air Temperature Type for Curve Objects"; // Alphas(6)
             fieldValue = s_ip->getAlphaFieldValue(fields, schemaProps, "evaporator_air_temperature_type_for_curve_objects");
