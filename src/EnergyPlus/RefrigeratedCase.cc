@@ -6118,12 +6118,12 @@ void GetRefrigerationInput(EnergyPlusData &state)
 
     // Helper lambda: iterate a 1-based Array1D collection checking NumSysAttach.
     // Items with NumSysAttach < 1 are counted as unused and optionally listed.
-    // The caller supplies onUnused (called with the item index when unused) and
-    // onMultiple (called with the item index when NumSysAttach > 1) so that
-    // per-type error messages are preserved exactly.
+    // The caller supplies onMultiple (called with the item index when NumSysAttach > 1)
+    // and warnSummary (called with unusedCount when unusedCount > 0 and
+    // !DisplayExtraWarnings) so that per-type summary messages are preserved exactly.
     auto checkUnusedComponents = [&](auto &collection, int numItems, int &unusedCount,
                                      std::string_view idfType,
-                                     auto onMultiple) {
+                                     auto onMultiple, auto warnSummary) {
         unusedCount = 0;
         for (int i = 1; i <= numItems; ++i) {
             if (collection(i).NumSysAttach == 1) continue;
@@ -6136,6 +6136,8 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 onMultiple(i);
             }
         }
+        if (unusedCount > 0 && !state.dataGlobal->DisplayExtraWarnings)
+            warnSummary(unusedCount);
     };
 
     if (state.dataRefrigCase->NumSimulationCases > 0) {
@@ -6173,19 +6175,14 @@ void GetRefrigerationInput(EnergyPlusData &state)
                                   ShowSevereError(state, EnergyPlus::format("{}: Refrigeration:Case=\"{}\", Same refrigerated case name referenced ",
                                                                             RoutineName, RefrigCase(CaseNum).Name));
                                   ShowContinueError(state, " by more than one refrigeration system and/or compressor rack.");
+                              },
+                              [&](int n) {
+                                  ShowWarningError(state, EnergyPlus::format("Refrigeration:Case -> {} unused refrigerated case(s) found during input processing.", n));
+                                  ShowContinueError(state, "  These refrigerated cases are in the input file but are not connected to a ");
+                                  ShowContinueError(state, "  Refrigeration:CompressorRack, Refrigeration:System, or Refrigeration:SecondarySystem object.");
+                                  ShowContinueError(state, "  These unused refrigeration cases will not be simulated.");
+                                  ShowContinueError(state, "  Use Output:Diagnostics,DisplayUnusedObjects; to see them. ");
                               });
-
-        if ((state.dataRefrigCase->NumUnusedRefrigCases > 0) && (!state.dataGlobal->DisplayExtraWarnings)) {
-            //  write to error file,
-            //  summary number of unused cases given if DataGlobals::DisplayExtraWarnings option not selected
-            ShowWarningError(state,
-                             EnergyPlus::format("Refrigeration:Case -> {} unused refrigerated case(s) found during input processing.",
-                                                state.dataRefrigCase->NumUnusedRefrigCases));
-            ShowContinueError(state, "  These refrigerated cases are in the input file but are not connected to a ");
-            ShowContinueError(state, "  Refrigeration:CompressorRack, Refrigeration:System, or Refrigeration:SecondarySystem object.");
-            ShowContinueError(state, "  These unused refrigeration cases will not be simulated.");
-            ShowContinueError(state, "  Use Output:Diagnostics,DisplayUnusedObjects; to see them. ");
-        } // NumUnusedRefrigCases
     } // numsimulation cases > 0
 
     if (state.dataRefrigCase->NumSimulationCompressors > 0) {
@@ -6198,19 +6195,13 @@ void GetRefrigerationInput(EnergyPlusData &state)
                                   ShowSevereError(state, EnergyPlus::format("{}: Refrigeration:Compressor=\"{}\", Same refrigeration compressor name referenced",
                                                                             RoutineName, Compressor(CompNum).Name));
                                   ShowContinueError(state, " by more than one refrigeration system.");
+                              },
+                              [&](int n) {
+                                  ShowWarningError(state, EnergyPlus::format("Refrigeration:Compressor -> {} unused refrigeration compressor(s) found during input processing.", n));
+                                  ShowContinueError(state, "  Those refrigeration compressors are in the input file but are not connected to a Refrigeration:System object.");
+                                  ShowContinueError(state, "   These unused refrigeration compressors will not be simulated.");
+                                  ShowContinueError(state, "   Use Output:Diagnostics,DisplayUnusedObjects; to see them. ");
                               });
-
-        if ((state.dataRefrigCase->NumUnusedCompressors > 0) && (!state.dataGlobal->DisplayExtraWarnings)) {
-            //  write to error file,
-            //  summary number of unused compressors given if DataGlobals::DisplayExtraWarnings option not selected
-            ShowWarningError(state,
-                             EnergyPlus::format("Refrigeration:Compressor -> {} unused refrigeration compressor(s) found during input processing.",
-                                                state.dataRefrigCase->NumUnusedCompressors));
-            ShowContinueError(state,
-                              "  Those refrigeration compressors are in the input file but are not connected to a Refrigeration:System object.");
-            ShowContinueError(state, "   These unused refrigeration compressors will not be simulated.");
-            ShowContinueError(state, "   Use Output:Diagnostics,DisplayUnusedObjects; to see them. ");
-        } // NumUnusedCompressors
     } // NumSimulationCompressors > 0
 
     int NumUnusedWalkIns = 0;
@@ -6224,20 +6215,14 @@ void GetRefrigerationInput(EnergyPlusData &state)
                                   ShowSevereError(state, EnergyPlus::format("{}: Refrigeration:WalkIn=\"{}\", Same Refrigeration WalkIn name referenced",
                                                                             RoutineName, WalkIn(WalkInNum).Name));
                                   ShowContinueError(state, " by more than one refrigeration system and/or compressor rack.");
+                              },
+                              [&](int n) {
+                                  ShowWarningError(state, EnergyPlus::format("{}Refrigeration:WalkIn -> {} unused refrigeration WalkIns found during input processing.", RoutineName, n));
+                                  ShowContinueError(state, "   Those refrigeration WalkIns are in the input file but are not connected to a ");
+                                  ShowContinueError(state, "   Refrigeration:CompressorRack, Refrigeration:System or Refrigeration:SecondarySystem object.");
+                                  ShowContinueError(state, "   These unused refrigeration WalkIns will not be simulated.");
+                                  ShowContinueError(state, "   Use Output:Diagnostics,DisplayUnusedObjects; to see them. ");
                               });
-
-        if ((NumUnusedWalkIns > 0) && (!state.dataGlobal->DisplayExtraWarnings)) {
-            //  write to error file,
-            //  summary number of unused walkins given if DataGlobals::DisplayExtraWarnings option not selected
-            ShowWarningError(state,
-                             EnergyPlus::format("{}Refrigeration:WalkIn -> {} unused refrigeration WalkIns found during input processing.",
-                                                RoutineName,
-                                                NumUnusedWalkIns));
-            ShowContinueError(state, "   Those refrigeration WalkIns are in the input file but are not connected to a ");
-            ShowContinueError(state, "   Refrigeration:CompressorRack, Refrigeration:System or Refrigeration:SecondarySystem object.");
-            ShowContinueError(state, "   These unused refrigeration WalkIns will not be simulated.");
-            ShowContinueError(state, "   Use Output:Diagnostics,DisplayUnusedObjects; to see them. ");
-        } // NumUnusedWalkIns
     } // NumSimulationWalkIns > 0
 
     if (state.dataRefrigCase->NumSimulationRefrigAirChillers > 0) {
@@ -6251,20 +6236,14 @@ void GetRefrigerationInput(EnergyPlusData &state)
                                                   EnergyPlus::format("{}: Refrigeration:AirChiller=\"{}\", Same Refrigeration Air Chiller name referenced",
                                                                      RoutineName, WarehouseCoil(CoilNum).Name));
                                   ShowContinueError(state, " by more than one refrigeration system and/or compressor rack.");
+                              },
+                              [&](int n) {
+                                  ShowWarningError(state, EnergyPlus::format("{}Refrigeration:AirChiller -> {} unused refrigeration air chillers found during input processing.", RoutineName, n));
+                                  ShowContinueError(state, "   Those refrigeration air chillers are in the input file but are not connected to a ");
+                                  ShowContinueError(state, "   Refrigeration:CompressorRack, Refrigeration:System or Refrigeration:SecondarySystem object.");
+                                  ShowContinueError(state, "   These unused refrigeration air chillers will not be simulated.");
+                                  ShowContinueError(state, "   Use Output:Diagnostics,DisplayUnusedObjects; to see them. ");
                               });
-
-        if ((state.dataRefrigCase->NumUnusedCoils > 0) && (!state.dataGlobal->DisplayExtraWarnings)) {
-            //  write to error file,
-            //  summary number of unused air chillers given if DataGlobals::DisplayExtraWarnings option not selected
-            ShowWarningError(state,
-                             EnergyPlus::format("{}Refrigeration:AirChiller -> {} unused refrigeration air chillers found during input processing.",
-                                                RoutineName,
-                                                state.dataRefrigCase->NumUnusedCoils));
-            ShowContinueError(state, "   Those refrigeration air chillers are in the input file but are not connected to a ");
-            ShowContinueError(state, "   Refrigeration:CompressorRack, Refrigeration:System or Refrigeration:SecondarySystem object.");
-            ShowContinueError(state, "   These unused refrigeration air chillers will not be simulated.");
-            ShowContinueError(state, "   Use Output:Diagnostics,DisplayUnusedObjects; to see them. ");
-        } // NumUnusedAirChllerss
     } // NumSimulationAirChillers > 0
 
     if (state.dataRefrigCase->NumSimulationSecondarySystems > 0) {
@@ -6277,19 +6256,13 @@ void GetRefrigerationInput(EnergyPlusData &state)
                                   ShowSevereError(state, EnergyPlus::format("{}: Refrigeration:Secondary=\"{}\", Same Refrigeration Secondary name referenced",
                                                                             RoutineName, Secondary(SecondaryNum).Name));
                                   ShowContinueError(state, "   by more than one refrigeration system");
+                              },
+                              [&](int n) {
+                                  ShowWarningError(state, EnergyPlus::format("{}Refrigeration:Secondary -> {} unused refrigeration Secondary Loops found during input processing.", RoutineName, n));
+                                  ShowContinueError(state, "  Those refrigeration Secondary Loops are in the input file but are not connected to a refrigeration system.");
+                                  ShowContinueError(state, "   These unused refrigeration secondaries will not be simulated.");
+                                  ShowContinueError(state, "   Use Output:Diagnostics,DisplayUnusedObjects; to see them. ");
                               });
-
-        if ((state.dataRefrigCase->NumUnusedSecondarys > 0) && (!state.dataGlobal->DisplayExtraWarnings)) {
-            //  write to error file,
-            //  summary number of unused secondaries given if DataGlobals::DisplayExtraWarnings option not selected
-            ShowWarningError(state,
-                             EnergyPlus::format("{}Refrigeration:Secondary -> {} unused refrigeration Secondary Loops found during input processing.",
-                                                RoutineName,
-                                                state.dataRefrigCase->NumUnusedSecondarys));
-            ShowContinueError(state, "  Those refrigeration Secondary Loops are in the input file but are not connected to a refrigeration system.");
-            ShowContinueError(state, "   These unused refrigeration secondaries will not be simulated.");
-            ShowContinueError(state, "   Use Output:Diagnostics,DisplayUnusedObjects; to see them. ");
-        } // NumUnusedSecondarys
     } // NumSimulationSecondarySystems > 0
 
     if (state.dataRefrigCase->NumRefrigCondensers > 0) {
@@ -6299,19 +6272,13 @@ void GetRefrigerationInput(EnergyPlusData &state)
         state.dataRefrigCase->NumSimulationSharedCondensers = 0;
         checkUnusedComponents(Condenser, state.dataRefrigCase->NumRefrigCondensers,
                               state.dataRefrigCase->NumUnusedCondensers, "Refrigeration:Condenser",
-                              [&](int /*CondNum*/) { ++state.dataRefrigCase->NumSimulationSharedCondensers; });
-
-        if ((state.dataRefrigCase->NumUnusedCondensers > 0) && (!state.dataGlobal->DisplayExtraWarnings)) {
-            //  write to error file,
-            //  summary number of unused condensers given if DataGlobals::DisplayExtraWarnings option not selected
-            ShowWarningError(state,
-                             EnergyPlus::format("{}Refrigeration condenser -> {} unused refrigeration condensers found during input processing.",
-                                                RoutineName,
-                                                state.dataRefrigCase->NumUnusedCondensers));
-            ShowContinueError(state, "  Those refrigeration condensers are in the input file but are not connected to a refrigeration system.");
-            ShowContinueError(state, "   These unused refrigeration condensers will not be simulated.");
-            ShowContinueError(state, "   Use Output:Diagnostics,DisplayUnusedObjects; to see them. ");
-        } // NumUnusedCondensers and displayextra warnings
+                              [&](int /*CondNum*/) { ++state.dataRefrigCase->NumSimulationSharedCondensers; },
+                              [&](int n) {
+                                  ShowWarningError(state, EnergyPlus::format("{}Refrigeration condenser -> {} unused refrigeration condensers found during input processing.", RoutineName, n));
+                                  ShowContinueError(state, "  Those refrigeration condensers are in the input file but are not connected to a refrigeration system.");
+                                  ShowContinueError(state, "   These unused refrigeration condensers will not be simulated.");
+                                  ShowContinueError(state, "   Use Output:Diagnostics,DisplayUnusedObjects; to see them. ");
+                              });
     } // DataHeatBalance::NumRefrigCondensers > 0
 
     if (state.dataRefrigCase->NumSimulationGasCooler > 0) {
@@ -6319,19 +6286,13 @@ void GetRefrigerationInput(EnergyPlusData &state)
         state.dataRefrigCase->NumSimulationSharedGasCoolers = 0;
         checkUnusedComponents(GasCooler, state.dataRefrigCase->NumSimulationGasCooler,
                               state.dataRefrigCase->NumUnusedGasCoolers, "Refrigeration:GasCooler",
-                              [&](int /*GCNum*/) { ++state.dataRefrigCase->NumSimulationSharedGasCoolers; });
-
-        if ((state.dataRefrigCase->NumUnusedGasCoolers > 0) && (!state.dataGlobal->DisplayExtraWarnings)) {
-            //  write to error file,
-            //  summary number of unused gas coolers given if DataGlobals::DisplayExtraWarnings option not selected
-            ShowWarningError(state,
-                             EnergyPlus::format("{}Refrigeration gas cooler -> {} unused refrigeration gas cooler(s) found during input processing.",
-                                                RoutineName,
-                                                state.dataRefrigCase->NumUnusedGasCoolers));
-            ShowContinueError(state, "  These refrigeration gas coolers are in the input file but are not connected to a refrigeration system.");
-            ShowContinueError(state, "  These unused refrigeration gas coolers will not be simulated.");
-            ShowContinueError(state, "  Use Output:Diagnostics,DisplayUnusedObjects; to see them. ");
-        } // NumUnusedGasCoolers and displayextra warnings
+                              [&](int /*GCNum*/) { ++state.dataRefrigCase->NumSimulationSharedGasCoolers; },
+                              [&](int n) {
+                                  ShowWarningError(state, EnergyPlus::format("{}Refrigeration gas cooler -> {} unused refrigeration gas cooler(s) found during input processing.", RoutineName, n));
+                                  ShowContinueError(state, "  These refrigeration gas coolers are in the input file but are not connected to a refrigeration system.");
+                                  ShowContinueError(state, "  These unused refrigeration gas coolers will not be simulated.");
+                                  ShowContinueError(state, "  Use Output:Diagnostics,DisplayUnusedObjects; to see them. ");
+                              });
     } // NumSimulationGasCooler > 0
 
     // echo input to eio file.
