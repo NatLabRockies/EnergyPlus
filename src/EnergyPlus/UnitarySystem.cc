@@ -4836,17 +4836,6 @@ namespace UnitarySystems {
                                     thisCoolCoil.SupplyFanIndex);
                             }
                         }
-                        if (this->m_HeatCoilExists) {
-                            if (this->m_HeatingCoilType_Num == HVAC::Coil_HeatingAirToAirVariableSpeed ||
-                                this->m_HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHPVSEquationFit ||
-                                this->m_HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHP ||
-                                this->m_HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHPSimple ||
-                                this->m_HeatingCoilType_Num == HVAC::CoilDX_MultiSpeedHeating ||
-                                this->m_HeatingCoilType_Num == HVAC::CoilDX_HeatingEmpirical) {
-                                this->m_HeatPump = true;
-                            }
-                        }
-
                         // Push heating coil PLF curve index to DX coil
                         if (HeatingCoilPLFCurveIndex > 0) {
                             thisCoolCoil.HeatingCoilPLFCurvePTR = HeatingCoilPLFCurveIndex;
@@ -4918,18 +4907,10 @@ namespace UnitarySystems {
 
                     if (this->m_HeatCoilExists) {
                         if (this->m_HeatingCoilType_Num == HVAC::Coil_HeatingAirToAirVariableSpeed ||
-                            this->m_HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHPVSEquationFit ||
-                            this->m_HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHP ||
-                            this->m_HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHPSimple ||
                             this->m_HeatingCoilType_Num == HVAC::CoilDX_MultiSpeedHeating ||
                             this->m_HeatingCoilType_Num == HVAC::CoilDX_HeatingEmpirical) {
-                            this->m_HeatPump = true;
-                            if (this->m_HeatingCoilType_Num == HVAC::Coil_HeatingAirToAirVariableSpeed ||
-                                this->m_HeatingCoilType_Num == HVAC::CoilDX_MultiSpeedHeating ||
-                                this->m_HeatingCoilType_Num == HVAC::CoilDX_HeatingEmpirical) {
-                                auto &newCoil = state.dataCoilCoolingDX->coilCoolingDXs[this->m_CoolingCoilIndex];
-                                newCoil.performance->ReportCoolingCoilCrankcasePower = false;
-                            }
+                            auto &newCoil = state.dataCoilCoolingDX->coilCoolingDXs[this->m_CoolingCoilIndex];
+                            newCoil.performance->ReportCoolingCoilCrankcasePower = false;
                         }
                     }
                 }
@@ -4967,16 +4948,6 @@ namespace UnitarySystems {
                             thisCoolCoil.HeatingCoilPLFCurvePTR = HeatingCoilPLFCurveIndex;
                         }
 
-                        if (this->m_HeatCoilExists) {
-                            if (this->m_HeatingCoilType_Num == HVAC::Coil_HeatingAirToAirVariableSpeed ||
-                                this->m_HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHPVSEquationFit ||
-                                this->m_HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHP ||
-                                this->m_HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHPSimple ||
-                                this->m_HeatingCoilType_Num == HVAC::CoilDX_MultiSpeedHeating ||
-                                this->m_HeatingCoilType_Num == HVAC::CoilDX_HeatingEmpirical) {
-                                this->m_HeatPump = true;
-                            }
-                        }
                     }
                 } // IF (IsNotOK) THEN
 
@@ -5112,17 +5083,6 @@ namespace UnitarySystems {
                         // what could we do for VS coil here? odd thing here
                     }
 
-                    if (this->m_HeatCoilExists) {
-                        if (this->m_HeatingCoilType_Num == HVAC::Coil_HeatingAirToAirVariableSpeed ||
-                            this->m_HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHPVSEquationFit ||
-                            this->m_HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHP ||
-                            this->m_HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHPSimple ||
-                            this->m_HeatingCoilType_Num == HVAC::CoilDX_MultiSpeedHeating ||
-                            this->m_HeatingCoilType_Num == HVAC::CoilDX_HeatingEmpirical) {
-                            this->m_HeatPump = true;
-                        }
-                    }
-
                 } // IF (IsNotOK) THEN
             } else if (this->m_CoolingCoilType_Num == HVAC::CoilWater_CoolingHXAssisted) {
                 ValidateComponent(state, input_data.cooling_coil_object_type, this->m_CoolingCoilName, isNotOK, cCurrentModuleObject);
@@ -5245,16 +5205,6 @@ namespace UnitarySystems {
                     }
                 }
 
-                if (this->m_HeatCoilExists) {
-                    if (this->m_HeatingCoilType_Num == HVAC::Coil_HeatingAirToAirVariableSpeed ||
-                        this->m_HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHPVSEquationFit ||
-                        this->m_HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHP ||
-                        this->m_HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHPSimple ||
-                        this->m_HeatingCoilType_Num == HVAC::CoilDX_MultiSpeedHeating ||
-                        this->m_HeatingCoilType_Num == HVAC::CoilDX_HeatingEmpirical) {
-                        this->m_HeatPump = true;
-                    }
-                }
 
             } else if (this->m_CoolingCoilType_Num == HVAC::CoilDX_MultiSpeedCooling) {
                 ValidateComponent(state, input_data.cooling_coil_object_type, this->m_CoolingCoilName, isNotOK, cCurrentModuleObject);
@@ -5283,16 +5233,6 @@ namespace UnitarySystems {
                     }
                 }
 
-                if (this->m_HeatCoilExists) {
-                    if (this->m_HeatingCoilType_Num == HVAC::Coil_HeatingAirToAirVariableSpeed ||
-                        this->m_HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHPVSEquationFit ||
-                        this->m_HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHP ||
-                        this->m_HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHPSimple ||
-                        this->m_HeatingCoilType_Num == HVAC::CoilDX_MultiSpeedHeating ||
-                        this->m_HeatingCoilType_Num == HVAC::CoilDX_HeatingEmpirical) {
-                        this->m_HeatPump = true;
-                    }
-                }
 
             } else if (this->m_CoolingCoilType_Num == HVAC::Coil_CoolingWater || this->m_CoolingCoilType_Num == HVAC::Coil_CoolingWaterDetailed) {
 
@@ -5365,16 +5305,6 @@ namespace UnitarySystems {
                     }
                 }
 
-                if (this->m_HeatCoilExists) {
-                    if (this->m_HeatingCoilType_Num == HVAC::Coil_HeatingAirToAirVariableSpeed ||
-                        this->m_HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHPVSEquationFit ||
-                        this->m_HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHP ||
-                        this->m_HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHPSimple ||
-                        this->m_HeatingCoilType_Num == HVAC::CoilDX_MultiSpeedHeating ||
-                        this->m_HeatingCoilType_Num == HVAC::CoilDX_HeatingEmpirical) {
-                        this->m_HeatPump = true;
-                    }
-                }
 
             } else if (this->m_CoolingCoilType_Num == HVAC::Coil_CoolingWaterToAirHP) {
                 ValidateComponent(state, input_data.cooling_coil_object_type, this->m_CoolingCoilName, isNotOK, cCurrentModuleObject);
@@ -5398,16 +5328,6 @@ namespace UnitarySystems {
                     }
                 }
 
-                if (this->m_HeatCoilExists) {
-                    if (this->m_HeatingCoilType_Num == HVAC::Coil_HeatingAirToAirVariableSpeed ||
-                        this->m_HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHPVSEquationFit ||
-                        this->m_HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHP ||
-                        this->m_HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHPSimple ||
-                        this->m_HeatingCoilType_Num == HVAC::CoilDX_MultiSpeedHeating ||
-                        this->m_HeatingCoilType_Num == HVAC::CoilDX_HeatingEmpirical) {
-                        this->m_HeatPump = true;
-                    }
-                }
 
             } else if (this->m_CoolingCoilType_Num == HVAC::Coil_UserDefined) {
                 ValidateComponent(state, input_data.cooling_coil_object_type, this->m_CoolingCoilName, isNotOK, cCurrentModuleObject);
@@ -5468,6 +5388,18 @@ namespace UnitarySystems {
                 ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
                 // ShowContinueError(state, format("Illegal {} = {}", cAlphaFields(iCoolingCoilTypeAlphaNum), Alphas(iCoolingCoilTypeAlphaNum)));
                 errorsFound = true;
+            }
+
+            // Set heat pump flag once after resolving cooling coil type — all cooling coil branches share the same condition
+            if (this->m_HeatCoilExists) {
+                if (this->m_HeatingCoilType_Num == HVAC::Coil_HeatingAirToAirVariableSpeed ||
+                    this->m_HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHPVSEquationFit ||
+                    this->m_HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHP ||
+                    this->m_HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHPSimple ||
+                    this->m_HeatingCoilType_Num == HVAC::CoilDX_MultiSpeedHeating ||
+                    this->m_HeatingCoilType_Num == HVAC::CoilDX_HeatingEmpirical) {
+                    this->m_HeatPump = true;
+                }
             }
 
             if (!input_data.dx_cooling_coil_system_sensor_node_name.empty()) { // used by CoilSystem:Cooling:DX
