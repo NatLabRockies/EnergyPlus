@@ -1041,6 +1041,58 @@ void GetRefrigerationInput(EnergyPlusData &state)
         }
     };
 
+    // Helper lambda: read the defrost capacity (capFieldNum) and optional defrost energy
+    // fraction (fracFieldNum) for walk-in and air-chiller coil objects.  When the defrost
+    // type is OffCycle or None the capacity is set to 0 and both numeric fields are skipped;
+    // otherwise the capacity field is required and the fraction field is optional (default
+    // 0.7 for Elec, 0.3 for Fluid).  defTypeAlphaNum identifies the alpha field that holds
+    // the defrost-type choice, used only for the error message text.
+    auto readDefrostCapAndEnergyFraction = [&](DefrostType defrostType,
+                                               const std::string &objName,
+                                               int capFieldNum,
+                                               int fracFieldNum,
+                                               int defTypeAlphaNum,
+                                               Real64 &defrostCapacity,
+                                               Real64 &defEnergyFraction) {
+        if (defrostType == DefrostType::OffCycle || defrostType == DefrostType::None) {
+            defrostCapacity = 0.0;
+        } else { // have electric or hot gas/brine defrost
+            if ((lNumericBlanks(capFieldNum)) || (Numbers(capFieldNum) <= 0.0)) {
+                ShowSevereError(state,
+                                EnergyPlus::format("{}{}=\"{}\", {} must be input and greater than or equal to 0 W for {} {}",
+                                                   RoutineName,
+                                                   CurrentModuleObject,
+                                                   objName,
+                                                   cNumericFieldNames(capFieldNum),
+                                                   cAlphaFieldNames(defTypeAlphaNum),
+                                                   Alphas(defTypeAlphaNum)));
+                ErrorsFound = true;
+            } else {
+                defrostCapacity = Numbers(capFieldNum);
+            }
+            // defaults for defrost energy fraction are 0.7 for elec defrost and 0.3 for warm fluid
+            // note this value is only used for temperature terminated defrost control type
+            if (defrostType == DefrostType::Elec) {
+                defEnergyFraction = 0.7;
+            }
+            if (defrostType == DefrostType::Fluid) {
+                defEnergyFraction = 0.3;
+            }
+            if (!lNumericBlanks(fracFieldNum)) {
+                if ((Numbers(fracFieldNum) > 1.0) || (Numbers(fracFieldNum) < 0.0)) {
+                    ShowWarningError(state,
+                                     EnergyPlus::format("{}{}=\"{}\", {} must be between 0 and 1, default values will be used.",
+                                                        RoutineName,
+                                                        CurrentModuleObject,
+                                                        objName,
+                                                        cNumericFieldNames(fracFieldNum)));
+                } else {
+                    defEnergyFraction = Numbers(fracFieldNum);
+                }
+            }
+        }
+    };
+
     // bbb stovall note for future - for all curve entries, see if need fail on type or if can allow table input
     if (state.dataRefrigCase->NumSimulationCases > 0) {
         CurrentModuleObject = "Refrigeration:Case";
@@ -1752,45 +1804,11 @@ void GetRefrigerationInput(EnergyPlusData &state)
             AlphaNum = 8;
             getDripDownScheduleOrDefault(eoh, AlphaNum, WalkIn(WalkInID).defrostSched, WalkIn(WalkInID).defrostDripDownSched);
 
-            if (WalkIn(WalkInID).defrostType == DefrostType::OffCycle || WalkIn(WalkInID).defrostType == DefrostType::None) {
-                WalkIn(WalkInID).DefrostCapacity = 0.0;
-                // Don't even need to read N8 or N9 for those two defrost types.
-            } else { // have electric or hot gas/brine defrost
-                if ((lNumericBlanks(8)) || (Numbers(8) <= 0.0)) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}{}=\"{}\", {} must be input and greater than or equal to 0 W for {} {}",
-                                                       RoutineName,
-                                                       CurrentModuleObject,
-                                                       WalkIn(WalkInID).Name,
-                                                       cNumericFieldNames(8),
-                                                       cAlphaFieldNames(5),
-                                                       Alphas(5)));
-                    ErrorsFound = true;
-                } else {
-                    WalkIn(WalkInID).DefrostCapacity = Numbers(8);
-                } // Blank  or negative N8
-
-                // defaults for defrost energy fraction are 0.7 for elec defrost and 0.3 for warm fluid
-                // note this value is only used for temperature terminated defrost control type
-                if (WalkIn(WalkInID).defrostType == DefrostType::Elec) {
-                    WalkIn(WalkInID).DefEnergyFraction = 0.7;
-                }
-                if (WalkIn(WalkInID).defrostType == DefrostType::Fluid) {
-                    WalkIn(WalkInID).DefEnergyFraction = 0.3;
-                }
-                if (!lNumericBlanks(9)) {
-                    if ((Numbers(9) > 1.0) || (Numbers(9) < 0.0)) {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("{}{}=\"{}\", {} must be between 0 and 1, default values will be used.",
-                                                            RoutineName,
-                                                            CurrentModuleObject,
-                                                            WalkIn(WalkInID).Name,
-                                                            cNumericFieldNames(9)));
-                    } else {
-                        WalkIn(WalkInID).DefEnergyFraction = Numbers(9);
-                    } // number out of range
-                } // lnumericblanks
-            } // defrost type
+            readDefrostCapAndEnergyFraction(WalkIn(WalkInID).defrostType, WalkIn(WalkInID).Name,
+                                             /*capFieldNum=*/8, /*fracFieldNum=*/9,
+                                             /*defTypeAlphaNum=*/5,
+                                             WalkIn(WalkInID).DefrostCapacity,
+                                             WalkIn(WalkInID).DefEnergyFraction);
 
             // convert restocking schedule name to pointer, default of 0.1 is assigned inside walkin subroutine if blank
             AlphaNum = 9;
@@ -2342,47 +2360,12 @@ void GetRefrigerationInput(EnergyPlusData &state)
             getDripDownScheduleOrDefault(eoh, AlphaNum, WarehouseCoil(CoilID).defrostSched, WarehouseCoil(CoilID).defrostDripDownSched);
 
             ++NumNum; // N14
-            if (WarehouseCoil(CoilID).defrostType == DefrostType::OffCycle || WarehouseCoil(CoilID).defrostType == DefrostType::None) {
-                WarehouseCoil(CoilID).DefrostCapacity = 0.0;
-                // Don't even need to read Defrost capacity for those two defrost types.
-            } else { // have electric or hot gas/brine defrost
-                if ((lNumericBlanks(NumNum)) || (Numbers(NumNum) <= 0.0)) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}{}=\"{}\", {} must be input and greater than or equal to 0 W for {} {}",
-                                                       RoutineName,
-                                                       CurrentModuleObject,
-                                                       WarehouseCoil(CoilID).Name,
-                                                       cNumericFieldNames(NumNum),
-                                                       cAlphaFieldNames(AlphaNum),
-                                                       Alphas(AlphaNum)));
-                    ErrorsFound = true;
-                } else {
-                    WarehouseCoil(CoilID).DefrostCapacity = Numbers(NumNum);
-                } // Blank  or negative Defrost Capacity
-
-                // defaults for defrost energy fraction are 0.7 for elec defrost and 0.3 for warm fluid
-                // note this value is only used for temperature terminated defrost control type
-                if (WarehouseCoil(CoilID).defrostType == DefrostType::Elec) {
-                    WarehouseCoil(CoilID).DefEnergyFraction = 0.7;
-                }
-                if (WarehouseCoil(CoilID).defrostType == DefrostType::Fluid) {
-                    WarehouseCoil(CoilID).DefEnergyFraction = 0.3;
-                }
-
-                ++NumNum; // N15
-                if (!lNumericBlanks(NumNum)) {
-                    if ((Numbers(NumNum) > 1.0) || (Numbers(NumNum) < 0.0)) {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("{}{}=\"{}\", {} must be between 0 and 1, default values will be used.",
-                                                            RoutineName,
-                                                            CurrentModuleObject,
-                                                            WarehouseCoil(CoilID).Name,
-                                                            cNumericFieldNames(NumNum)));
-                    } else {
-                        WarehouseCoil(CoilID).DefEnergyFraction = Numbers(NumNum);
-                    } // number out of range
-                } // lnumericblanks
-            } // defrost type
+            readDefrostCapAndEnergyFraction(WarehouseCoil(CoilID).defrostType, WarehouseCoil(CoilID).Name,
+                                             /*capFieldNum=*/NumNum, /*fracFieldNum=*/NumNum + 1,
+                                             /*defTypeAlphaNum=*/AlphaNum,
+                                             WarehouseCoil(CoilID).DefrostCapacity,
+                                             WarehouseCoil(CoilID).DefEnergyFraction);
+            ++NumNum; // N15
 
             ++AlphaNum; // A12
             if (lAlphaBlanks(AlphaNum)) {
