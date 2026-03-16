@@ -1009,6 +1009,38 @@ void GetRefrigerationInput(EnergyPlusData &state)
         }
     };
 
+    // Helper lambda: required schedule field – blank is an error (ShowSevereEmptyField), otherwise look up by
+    // name, error if not found, and validate the 0-1 min/max range.
+    auto getRequiredSchedule = [&](const ErrorObjectHeader &eoh, int alphaNum, Sched::Schedule *&schedOut) {
+        if (lAlphaBlanks(alphaNum)) {
+            ShowSevereEmptyField(state, eoh, cAlphaFieldNames(alphaNum));
+            ErrorsFound = true;
+        } else if ((schedOut = Sched::GetSchedule(state, Alphas(alphaNum))) == nullptr) {
+            ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(alphaNum), Alphas(alphaNum));
+            ErrorsFound = true;
+        } else if (!schedOut->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
+            Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(alphaNum), Alphas(alphaNum), Clusive::In, 0.0, Clusive::In, 1.0);
+            ErrorsFound = true;
+        }
+    };
+
+    // Helper lambda: drip-down schedule field – if blank, reuse the defrost schedule pointer; otherwise look up by
+    // name, error if not found, and validate the 0-1 min/max range.
+    auto getDripDownScheduleOrDefault = [&](const ErrorObjectHeader &eoh,
+                                            int alphaNum,
+                                            Sched::Schedule *defrostSched,
+                                            Sched::Schedule *&schedOut) {
+        if (lAlphaBlanks(alphaNum)) {
+            schedOut = defrostSched;
+        } else if ((schedOut = Sched::GetSchedule(state, Alphas(alphaNum))) == nullptr) {
+            ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(alphaNum), Alphas(alphaNum));
+            ErrorsFound = true;
+        } else if (!schedOut->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
+            Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(alphaNum), Alphas(alphaNum), Clusive::In, 0.0, Clusive::In, 1.0);
+            ErrorsFound = true;
+        }
+    };
+
     // bbb stovall note for future - for all curve entries, see if need fail on type or if can allow table input
     if (state.dataRefrigCase->NumSimulationCases > 0) {
         CurrentModuleObject = "Refrigeration:Case";
@@ -1376,17 +1408,8 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 ErrorsFound = true;
             }
 
-            if (RefrigCase(CaseNum).defrostType == RefCaseDefrostType::None) {
-            } else if (lAlphaBlanks(9)) {
-                ShowSevereEmptyField(state, eoh, cAlphaFieldNames(9));
-                ErrorsFound = true;
-            } else if ((RefrigCase(CaseNum).defrostSched = Sched::GetSchedule(state, Alphas(9))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(9), Alphas(9));
-                ErrorsFound = true;
-            } else if (!RefrigCase(CaseNum).defrostSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(9), Alphas(9), Clusive::In, 0.0, Clusive::In, 1.0);
-                ErrorsFound = true;
-            }
+            if (RefrigCase(CaseNum).defrostType != RefCaseDefrostType::None)
+                getRequiredSchedule(eoh, 9, RefrigCase(CaseNum).defrostSched);
 
             //   Note that next section counting number cycles and setting maxkgfrost not used now, but may be in the future.
             //   count the number of defrost cycles
@@ -1418,15 +1441,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
             }
 
             //   some defrost types do not use drip-down schedules, use same defrost schedule pointer in that case
-            if (lAlphaBlanks(10)) {
-                RefrigCase(CaseNum).defrostDripDownSched = RefrigCase(CaseNum).defrostSched;
-            } else if ((RefrigCase(CaseNum).defrostDripDownSched = Sched::GetSchedule(state, Alphas(10))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(10), Alphas(10));
-                ErrorsFound = true;
-            } else if (!RefrigCase(CaseNum).defrostDripDownSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(10), Alphas(10), Clusive::In, 0.0, Clusive::In, 1.0);
-                ErrorsFound = true;
-            }
+            getDripDownScheduleOrDefault(eoh, 10, RefrigCase(CaseNum).defrostSched, RefrigCase(CaseNum).defrostDripDownSched);
 
             RefrigCase(CaseNum).DefrostEnergyCurveType = static_cast<EnergyEqnForm>(getEnumValue(energyEqnFormNamesUC, Alphas(11)));
             if (RefrigCase(CaseNum).DefrostEnergyCurveType == EnergyEqnForm::Invalid) {
@@ -1730,29 +1745,12 @@ void GetRefrigerationInput(EnergyPlusData &state)
             // convert defrost schedule name to pointer
             AlphaNum = 7;
 
-            if (lAlphaBlanks(AlphaNum)) {
-                ShowSevereEmptyField(state, eoh, cAlphaFieldNames(AlphaNum));
-                ErrorsFound = true;
-            } else if ((WalkIn(WalkInID).defrostSched = Sched::GetSchedule(state, Alphas(AlphaNum))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum));
-                ErrorsFound = true;
-            } else if (!WalkIn(WalkInID).defrostSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum), Clusive::In, 0.0, Clusive::In, 1.0);
-                ErrorsFound = true;
-            }
+            getRequiredSchedule(eoh, AlphaNum, WalkIn(WalkInID).defrostSched);
 
             // convert defrost drip-down schedule name to pointer
             // some defrost types do not use drip-down schedules, use same defrost schedule pointer in that case
             AlphaNum = 8;
-            if (lAlphaBlanks(AlphaNum)) { // blank input so use drip down schedule for defrost
-                WalkIn(WalkInID).defrostDripDownSched = WalkIn(WalkInID).defrostSched;
-            } else if ((WalkIn(WalkInID).defrostDripDownSched = Sched::GetSchedule(state, Alphas(AlphaNum))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum));
-                ErrorsFound = true;
-            } else if (!WalkIn(WalkInID).defrostDripDownSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum), Clusive::In, 0.0, Clusive::In, 1.0);
-                ErrorsFound = true;
-            }
+            getDripDownScheduleOrDefault(eoh, AlphaNum, WalkIn(WalkInID).defrostSched, WalkIn(WalkInID).defrostDripDownSched);
 
             if (WalkIn(WalkInID).defrostType == DefrostType::OffCycle || WalkIn(WalkInID).defrostType == DefrostType::None) {
                 WalkIn(WalkInID).DefrostCapacity = 0.0;
@@ -2427,29 +2425,12 @@ void GetRefrigerationInput(EnergyPlusData &state)
 
             // convert defrost schedule name to pointer
             ++AlphaNum; // A10
-            if (lAlphaBlanks(AlphaNum)) {
-                ShowSevereEmptyField(state, eoh, cAlphaFieldNames(AlphaNum));
-                ErrorsFound = true;
-            } else if ((WarehouseCoil(CoilID).defrostSched = Sched::GetSchedule(state, Alphas(AlphaNum))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum));
-                ErrorsFound = true;
-            } else if (!WarehouseCoil(CoilID).defrostSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum), Clusive::In, 0.0, Clusive::In, 1.0);
-                ErrorsFound = true;
-            } // check for valid schedule name
+            getRequiredSchedule(eoh, AlphaNum, WarehouseCoil(CoilID).defrostSched);
 
             // convert defrost drip-down schedule name to pointer
             // some defrost types do not use drip-down schedules, use same defrost schedule pointer in that case
             ++AlphaNum; // A11
-            if (lAlphaBlanks(AlphaNum)) {
-                WarehouseCoil(CoilID).defrostDripDownSched = WarehouseCoil(CoilID).defrostSched;
-            } else if ((WarehouseCoil(CoilID).defrostDripDownSched = Sched::GetSchedule(state, Alphas(AlphaNum))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum));
-                ErrorsFound = true;
-            } else if (!WarehouseCoil(CoilID).defrostDripDownSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum), Clusive::In, 0.0, Clusive::In, 1.0);
-                ErrorsFound = true;
-            } // check for valid schedule name
+            getDripDownScheduleOrDefault(eoh, AlphaNum, WarehouseCoil(CoilID).defrostSched, WarehouseCoil(CoilID).defrostDripDownSched);
 
             ++NumNum; // N14
             if (WarehouseCoil(CoilID).defrostType == DefrostType::OffCycle || WarehouseCoil(CoilID).defrostType == DefrostType::None) {
