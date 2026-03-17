@@ -50,6 +50,7 @@
 // C++ Headers
 #include <algorithm>
 #include <cmath>
+#include <functional>
 #include <set>
 #include <string>
 
@@ -148,6 +149,33 @@ namespace AirflowNetwork {
 
     Solver::Solver(EnergyPlusData &state) : m_state(state), properties(state)
     {
+    }
+
+    // Populate a range of AirflowNetworkCompData entries with the common boilerplate fields.
+    // Returns the updated offset (j + count) for chaining.
+    static int populateCompDataRange(Array1D<AirflowNetworkCompProp> &compData,
+                                     std::unordered_map<std::string, int> &compnumMap,
+                                     int j,
+                                     int count,
+                                     iComponentTypeNum compType,
+                                     std::function<std::string(int)> const &getName,
+                                     iEPlusComponentType ePlusType = iEPlusComponentType::Invalid)
+    {
+        for (int i = 1 + j; i <= count + j; ++i) {
+            int n = i - j;
+            compData(i).Name = getName(n);
+            compnumMap[compData(i).Name] = i;
+            compData(i).CompTypeNum = compType;
+            compData(i).TypeNum = n;
+            compData(i).EPlusName = "";
+            compData(i).EPlusCompName = "";
+            compData(i).EPlusType = "";
+            compData(i).CompNum = i;
+            if (ePlusType != iEPlusComponentType::Invalid) {
+                compData(i).EPlusTypeNum = ePlusType;
+            }
+        }
+        return j + count;
     }
 
     int constexpr NumOfVentCtrTypes(6); // Number of zone level venting control types
@@ -4410,273 +4438,56 @@ namespace AirflowNetwork {
                                    AirflowNetworkNumOfSFR;
         AirflowNetworkCompData.allocate(AirflowNetworkNumOfComps);
 
-        for (int i = 1; i <= AirflowNetworkNumOfDetOpenings; ++i) { // Detailed opening component
-            AirflowNetworkCompData(i).Name = MultizoneCompDetOpeningData(i).name;
-            compnum[AirflowNetworkCompData(i).Name] = i;
-            AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::DOP;
-            AirflowNetworkCompData(i).TypeNum = i;
-            AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
-        }
-
-        int j = AirflowNetworkNumOfDetOpenings;
-        for (int i = 1 + j; i <= AirflowNetworkNumOfSimOpenings + j; ++i) { // Simple opening component
-            n = i - j;
-            AirflowNetworkCompData(i).Name = MultizoneCompSimpleOpeningData(n).name;
-            compnum[AirflowNetworkCompData(i).Name] = i;
-            AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::SOP;
-            AirflowNetworkCompData(i).TypeNum = n;
-            AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
-        }
-
-        j += AirflowNetworkNumOfSimOpenings;
-        for (int i = 1 + j; i <= AirflowNetworkNumOfSurCracks + j; ++i) { // Surface crack component
-            n = i - j;
-            AirflowNetworkCompData(i).Name = MultizoneSurfaceCrackData(n).name;
-            compnum[AirflowNetworkCompData(i).Name] = i;
-            AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::SCR;
-            AirflowNetworkCompData(i).TypeNum = n;
-            AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
-        }
-
-        j += AirflowNetworkNumOfSurCracks;
-        for (int i = 1 + j; i <= AirflowNetworkNumOfSurELA + j; ++i) { // Surface crack component
-            n = i - j;
-            AirflowNetworkCompData(i).Name = MultizoneSurfaceELAData(n).name;
-            compnum[AirflowNetworkCompData(i).Name] = i;
-            AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::SEL;
-            AirflowNetworkCompData(i).TypeNum = n;
-            AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
-        }
-
-        j += AirflowNetworkNumOfSurELA;
-        for (int i = 1 + j; i <= AirflowNetworkNumOfExhFan + j; ++i) { // Zone exhaust fan component
-            n = i - j;
-            AirflowNetworkCompData(i).Name = MultizoneCompExhaustFanData(n).name;
-            compnum[AirflowNetworkCompData(i).Name] = i;
-            AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::EXF;
-            AirflowNetworkCompData(i).TypeNum = n;
-            AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
-        }
-
-        j += AirflowNetworkNumOfExhFan;
-        for (int i = 1 + j; i <= AirflowNetworkNumOfHorOpenings + j; ++i) { // Distribution system crack component
-            n = i - j;
-            AirflowNetworkCompData(i).Name = MultizoneCompHorOpeningData(n).name;
-            compnum[AirflowNetworkCompData(i).Name] = i;
-            AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::HOP;
-            AirflowNetworkCompData(i).TypeNum = n;
-            AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
-        }
-
-        j += AirflowNetworkNumOfHorOpenings;
-        for (int i = 1 + j; i <= DisSysNumOfLeaks + j; ++i) { // Distribution system crack component
-            n = i - j;
-            AirflowNetworkCompData(i).Name = DisSysCompLeakData(n).name;
-            compnum[AirflowNetworkCompData(i).Name] = i;
-            AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::PLR;
-            AirflowNetworkCompData(i).TypeNum = n;
-            AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
-        }
-
-        j += DisSysNumOfLeaks;
-        for (int i = 1 + j; i <= DisSysNumOfELRs + j; ++i) { // Distribution system effective leakage ratio component
-            n = i - j;
-            AirflowNetworkCompData(i).Name = DisSysCompELRData(n).name;
-            compnum[AirflowNetworkCompData(i).Name] = i;
-            AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::ELR;
-            AirflowNetworkCompData(i).TypeNum = n;
-            AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
-        }
-
-        j += DisSysNumOfELRs;
-        for (int i = 1 + j; i <= DisSysNumOfDucts + j; ++i) { // Distribution system effective leakage ratio component
-            n = i - j;
-            AirflowNetworkCompData(i).Name = DisSysCompDuctData(n).name;
-            compnum[AirflowNetworkCompData(i).Name] = i;
-            AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::DWC;
-            AirflowNetworkCompData(i).TypeNum = n;
-            AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
-        }
-
-        j += DisSysNumOfDucts;
-        for (int i = 1 + j; i <= DisSysNumOfDampers + j; ++i) { // Distribution system effective leakage ratio component
-            n = i - j;
-            AirflowNetworkCompData(i).Name = DisSysCompDamperData(n).name;
-            compnum[AirflowNetworkCompData(i).Name] = i;
-            AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::DMP;
-            AirflowNetworkCompData(i).TypeNum = n;
-            AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
-        }
-
-        j += DisSysNumOfDampers;
-        for (int i = 1 + j; i <= DisSysNumOfCVFs + j; ++i) { // Distribution system constant volume fan component
-            n = i - j;
-            AirflowNetworkCompData(i).Name = DisSysCompCVFData(n).name;
-            compnum[AirflowNetworkCompData(i).Name] = i;
-            AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::CVF;
-            AirflowNetworkCompData(i).TypeNum = n;
-            AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
-            AirflowNetworkCompData(i).EPlusTypeNum = iEPlusComponentType::FAN;
-        }
-
-        j += DisSysNumOfCVFs;
-        for (int i = 1 + j; i <= DisSysNumOfDetFans + j; ++i) { // Distribution system fan component
-            n = i - j;
-            AirflowNetworkCompData(i).Name = DisSysCompDetFanData(n).name;
-            compnum[AirflowNetworkCompData(i).Name] = i;
-            AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::FAN;
-            AirflowNetworkCompData(i).TypeNum = n;
-            AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
-            AirflowNetworkCompData(i).EPlusTypeNum = iEPlusComponentType::FAN;
-        }
-
-        j += DisSysNumOfDetFans;
-        for (int i = 1 + j; i <= DisSysNumOfCPDs + j; ++i) { // Distribution system constant pressure drop component
-            n = i - j;
-            AirflowNetworkCompData(i).Name = DisSysCompCPDData(n).name;
-            compnum[AirflowNetworkCompData(i).Name] = i;
-            AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::CPD;
-            AirflowNetworkCompData(i).TypeNum = n;
-            AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
-        }
-
-        j += DisSysNumOfCPDs;
-        for (int i = 1 + j; i <= DisSysNumOfCoils + j; ++i) { // Distribution system coil component
-            n = i - j;
-            AirflowNetworkCompData(i).Name = DisSysCompCoilData(n).name;
-            compnum[AirflowNetworkCompData(i).Name] = i;
-            AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::COI;
-            AirflowNetworkCompData(i).TypeNum = n;
-            AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
-            AirflowNetworkCompData(i).EPlusTypeNum = iEPlusComponentType::COI;
-        }
-
-        j += DisSysNumOfCoils;
-        for (int i = 1 + j; i <= DisSysNumOfTermUnits + j; ++i) { // Terminal unit component
-            n = i - j;
-            AirflowNetworkCompData(i).Name = DisSysCompTermUnitData(n).name;
-            compnum[AirflowNetworkCompData(i).Name] = i;
-            AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::TMU;
-            AirflowNetworkCompData(i).TypeNum = n;
-            AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
-            AirflowNetworkCompData(i).EPlusTypeNum = iEPlusComponentType::RHT;
-        }
-
-        j += DisSysNumOfTermUnits;
-        for (int i = 1 + j; i <= DisSysNumOfHXs + j; ++i) { // Distribution system heat exchanger component
-            n = i - j;
-            AirflowNetworkCompData(i).Name = DisSysCompHXData(n).name;
-            compnum[AirflowNetworkCompData(i).Name] = i;
-            AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::HEX;
-            AirflowNetworkCompData(i).TypeNum = n;
-            AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
-            AirflowNetworkCompData(i).EPlusTypeNum = iEPlusComponentType::HEX;
-        }
-
-        j += DisSysNumOfHXs;
-        for (int i = 1 + j; i <= NumOfOAFans + j; ++i) { // OA fan component
-            n = i - j;
-            AirflowNetworkCompData(i).Name = DisSysCompOutdoorAirData(n).name;
-            compnum[AirflowNetworkCompData(i).Name] = i;
-            AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::OAF;
-            AirflowNetworkCompData(i).TypeNum = n;
-            AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
-        }
-
-        j += NumOfOAFans;
-        for (int i = 1 + j; i <= NumOfReliefFans + j; ++i) { // OA fan component
-            n = i - j;
-            AirflowNetworkCompData(i).Name = DisSysCompReliefAirData(n).name;
-            compnum[AirflowNetworkCompData(i).Name] = i;
-            AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::REL;
-            AirflowNetworkCompData(i).TypeNum = n;
-            AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
-        }
-
+        int j = 0;
+        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, AirflowNetworkNumOfDetOpenings, iComponentTypeNum::DOP,
+                                  [&](int n) { return MultizoneCompDetOpeningData(n).name; });
+        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, AirflowNetworkNumOfSimOpenings, iComponentTypeNum::SOP,
+                                  [&](int n) { return MultizoneCompSimpleOpeningData(n).name; });
+        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, AirflowNetworkNumOfSurCracks, iComponentTypeNum::SCR,
+                                  [&](int n) { return MultizoneSurfaceCrackData(n).name; });
+        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, AirflowNetworkNumOfSurELA, iComponentTypeNum::SEL,
+                                  [&](int n) { return MultizoneSurfaceELAData(n).name; });
+        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, AirflowNetworkNumOfExhFan, iComponentTypeNum::EXF,
+                                  [&](int n) { return MultizoneCompExhaustFanData(n).name; });
+        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, AirflowNetworkNumOfHorOpenings, iComponentTypeNum::HOP,
+                                  [&](int n) { return MultizoneCompHorOpeningData(n).name; });
+        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, DisSysNumOfLeaks, iComponentTypeNum::PLR,
+                                  [&](int n) { return DisSysCompLeakData(n).name; });
+        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, DisSysNumOfELRs, iComponentTypeNum::ELR,
+                                  [&](int n) { return DisSysCompELRData(n).name; });
+        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, DisSysNumOfDucts, iComponentTypeNum::DWC,
+                                  [&](int n) { return DisSysCompDuctData(n).name; });
+        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, DisSysNumOfDampers, iComponentTypeNum::DMP,
+                                  [&](int n) { return DisSysCompDamperData(n).name; });
+        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, DisSysNumOfCVFs, iComponentTypeNum::CVF,
+                                  [&](int n) { return DisSysCompCVFData(n).name; }, iEPlusComponentType::FAN);
+        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, DisSysNumOfDetFans, iComponentTypeNum::FAN,
+                                  [&](int n) { return DisSysCompDetFanData(n).name; }, iEPlusComponentType::FAN);
+        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, DisSysNumOfCPDs, iComponentTypeNum::CPD,
+                                  [&](int n) { return DisSysCompCPDData(n).name; });
+        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, DisSysNumOfCoils, iComponentTypeNum::COI,
+                                  [&](int n) { return DisSysCompCoilData(n).name; }, iEPlusComponentType::COI);
+        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, DisSysNumOfTermUnits, iComponentTypeNum::TMU,
+                                  [&](int n) { return DisSysCompTermUnitData(n).name; }, iEPlusComponentType::RHT);
+        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, DisSysNumOfHXs, iComponentTypeNum::HEX,
+                                  [&](int n) { return DisSysCompHXData(n).name; }, iEPlusComponentType::HEX);
+        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, NumOfOAFans, iComponentTypeNum::OAF,
+                                  [&](int n) { return DisSysCompOutdoorAirData(n).name; });
+        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, NumOfReliefFans, iComponentTypeNum::REL,
+                                  [&](int n) { return DisSysCompReliefAirData(n).name; });
         // This is also a bit of a hack to keep things working, this needs to be removed ASAP
-        j += NumOfReliefFans;
-        int ii = 1 + j;
-        int type_i = 1;
-        for (auto const &el : SpecifiedMassFlowData) {
-            AirflowNetworkCompData(ii).Name = el.name;
-            compnum[el.name] = ii;
-            AirflowNetworkCompData(ii).CompTypeNum = iComponentTypeNum::SMF;
-            AirflowNetworkCompData(ii).TypeNum = type_i;
-            AirflowNetworkCompData(ii).EPlusName = "";
-            AirflowNetworkCompData(ii).EPlusCompName = "";
-            AirflowNetworkCompData(ii).EPlusType = "";
-            AirflowNetworkCompData(ii).CompNum = ii;
-            ++ii;
-            ++type_i;
-        }
-
-        type_i = 1;
-        for (auto const &el : SpecifiedVolumeFlowData) {
-            AirflowNetworkCompData(ii).Name = el.name;
-            compnum[el.name] = ii;
-            AirflowNetworkCompData(ii).CompTypeNum = iComponentTypeNum::SVF;
-            AirflowNetworkCompData(ii).TypeNum = type_i;
-            AirflowNetworkCompData(ii).EPlusName = "";
-            AirflowNetworkCompData(ii).EPlusCompName = "";
-            AirflowNetworkCompData(ii).EPlusType = "";
-            AirflowNetworkCompData(ii).CompNum = ii;
-            ++ii;
-            ++type_i;
-        }
+        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, static_cast<int>(SpecifiedMassFlowData.size()), iComponentTypeNum::SMF,
+                                  [&](int n) {
+                                      auto it = SpecifiedMassFlowData.begin();
+                                      std::advance(it, n - 1);
+                                      return it->name;
+                                  });
+        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, static_cast<int>(SpecifiedVolumeFlowData.size()), iComponentTypeNum::SVF,
+                                  [&](int n) {
+                                      auto it = SpecifiedVolumeFlowData.begin();
+                                      std::advance(it, n - 1);
+                                      return it->name;
+                                  });
 
         // Assign linkage data
 
