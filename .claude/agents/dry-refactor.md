@@ -84,6 +84,7 @@ Move to the next stage (maximum 4 stages total).
 
 ## Key Rules
 
+- **Prefer static free functions over lambdas.** When extracting a helper, define it as a `static` free function before the target function rather than a lambda inside it. Lambdas are acceptable only for very small helpers (~10 lines or fewer) or when they truly need to capture complex local state that would be unwieldy as parameters. Free functions show up in stack traces, can be tested independently, and — critically — reduce the NLOC of the target function (lizard counts lambda bodies as part of the enclosing function).
 - **Use what exists.** Before writing a new helper function, search the codebase for existing utilities, methods, or patterns that already do what you need. Grep for similar logic, check related headers, and reuse existing infrastructure. Only write new code when nothing suitable already exists.
 - **Never change behavior.** This is purely structural refactoring. The program must produce identical results before and after each change.
 - **One concept per commit.** Each commit should represent a single logical DRY improvement that is easy to review.
