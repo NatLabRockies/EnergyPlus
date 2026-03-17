@@ -311,6 +311,26 @@ void GetSetPointManagerInputs(EnergyPlusData &state)
     }
 } // GetSetPointManagerInputs()
 
+// Helper to look up a single sensor node for a SetPointManager, avoiding 8 lines of
+// boilerplate per call to GetOnlySingleNode.
+static int getSPMSensorNode(EnergyPlusData &state,
+                            std::string const &nodeName,
+                            bool &errorsFound,
+                            SPMType spmType,
+                            std::string const &spmName,
+                            Node::FluidType fluidType = Node::FluidType::Air)
+{
+    return Node::GetOnlySingleNode(state,
+                                               nodeName,
+                                               errorsFound,
+                                               spmNodeObjectTypes[(int)spmType],
+                                               spmName,
+                                               fluidType,
+                                               Node::ConnectionType::Sensor,
+                                               Node::CompFluidStream::Primary,
+                                               Node::ObjectIsNotParent);
+}
+
 void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
 {
 
@@ -803,24 +823,10 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
                 }
                 spmSZR->setPt = 0.0;
 
-                spmSZR->zoneNodeNum = GetOnlySingleNode(state,
-                                                        ip->getAlphaFieldValue(fields, props, "zone_node_name"),
-                                                        ErrorsFound,
-                                                        spmNodeObjectTypes[(int)spm->type],
-                                                        spmSZR->Name,
-                                                        Node::FluidType::Air,
-                                                        Node::ConnectionType::Sensor,
-                                                        Node::CompFluidStream::Primary,
-                                                        Node::ObjectIsNotParent);
-                spmSZR->zoneInletNodeNum = GetOnlySingleNode(state,
-                                                             ip->getAlphaFieldValue(fields, props, "zone_inlet_node_name"),
-                                                             ErrorsFound,
-                                                             spmNodeObjectTypes[(int)spm->type],
-                                                             spmSZR->Name,
-                                                             Node::FluidType::Air,
-                                                             Node::ConnectionType::Sensor,
-                                                             Node::CompFluidStream::Primary,
-                                                             Node::ObjectIsNotParent);
+                spmSZR->zoneNodeNum =
+                    getSPMSensorNode(state, ip->getAlphaFieldValue(fields, props, "zone_node_name"), ErrorsFound, spm->type, spmSZR->Name);
+                spmSZR->zoneInletNodeNum =
+                    getSPMSensorNode(state, ip->getAlphaFieldValue(fields, props, "zone_inlet_node_name"), ErrorsFound, spm->type, spmSZR->Name);
             } break;
 
             // SetpointManager:SingleZone:Heating
@@ -843,24 +849,10 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
                 }
                 spmSZTemp->setPt = 0.0;
 
-                spmSZTemp->zoneNodeNum = GetOnlySingleNode(state,
-                                                           ip->getAlphaFieldValue(fields, props, "zone_node_name"),
-                                                           ErrorsFound,
-                                                           spmNodeObjectTypes[(int)spm->type],
-                                                           spmSZTemp->Name,
-                                                           Node::FluidType::Air,
-                                                           Node::ConnectionType::Sensor,
-                                                           Node::CompFluidStream::Primary,
-                                                           Node::ObjectIsNotParent);
-                spmSZTemp->zoneInletNodeNum = GetOnlySingleNode(state,
-                                                                ip->getAlphaFieldValue(fields, props, "zone_inlet_node_name"),
-                                                                ErrorsFound,
-                                                                spmNodeObjectTypes[(int)spm->type],
-                                                                spmSZTemp->Name,
-                                                                Node::FluidType::Air,
-                                                                Node::ConnectionType::Sensor,
-                                                                Node::CompFluidStream::Primary,
-                                                                Node::ObjectIsNotParent);
+                spmSZTemp->zoneNodeNum =
+                    getSPMSensorNode(state, ip->getAlphaFieldValue(fields, props, "zone_node_name"), ErrorsFound, spm->type, spmSZTemp->Name);
+                spmSZTemp->zoneInletNodeNum = getSPMSensorNode(
+                    state, ip->getAlphaFieldValue(fields, props, "zone_inlet_node_name"), ErrorsFound, spm->type, spmSZTemp->Name);
 
             } break;
 
@@ -913,33 +905,12 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
                     ErrorsFound = true;
                 }
 
-                spmMA->refNodeNum = GetOnlySingleNode(state,
-                                                      ip->getAlphaFieldValue(fields, props, "reference_setpoint_node_name"),
-                                                      ErrorsFound,
-                                                      spmNodeObjectTypes[(int)spm->type],
-                                                      spmMA->Name,
-                                                      Node::FluidType::Air,
-                                                      Node::ConnectionType::Sensor,
-                                                      Node::CompFluidStream::Primary,
-                                                      Node::ObjectIsNotParent);
-                spmMA->fanInNodeNum = GetOnlySingleNode(state,
-                                                        ip->getAlphaFieldValue(fields, props, "fan_inlet_node_name"),
-                                                        ErrorsFound,
-                                                        spmNodeObjectTypes[(int)spm->type],
-                                                        spmMA->Name,
-                                                        Node::FluidType::Air,
-                                                        Node::ConnectionType::Sensor,
-                                                        Node::CompFluidStream::Primary,
-                                                        Node::ObjectIsNotParent);
-                spmMA->fanOutNodeNum = GetOnlySingleNode(state,
-                                                         ip->getAlphaFieldValue(fields, props, "fan_outlet_node_name"),
-                                                         ErrorsFound,
-                                                         spmNodeObjectTypes[(int)spm->type],
-                                                         spmMA->Name,
-                                                         Node::FluidType::Air,
-                                                         Node::ConnectionType::Sensor,
-                                                         Node::CompFluidStream::Primary,
-                                                         Node::ObjectIsNotParent);
+                spmMA->refNodeNum = getSPMSensorNode(
+                    state, ip->getAlphaFieldValue(fields, props, "reference_setpoint_node_name"), ErrorsFound, spm->type, spmMA->Name);
+                spmMA->fanInNodeNum = getSPMSensorNode(
+                    state, ip->getAlphaFieldValue(fields, props, "fan_inlet_node_name"), ErrorsFound, spm->type, spmMA->Name);
+                spmMA->fanOutNodeNum = getSPMSensorNode(
+                    state, ip->getAlphaFieldValue(fields, props, "fan_outlet_node_name"), ErrorsFound, spm->type, spmMA->Name);
             } break;
 
             // SetpointManager:OutdoorAirPretreat
@@ -947,42 +918,14 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
                 auto *spmOAP = dynamic_cast<SPMOutsideAirPretreat *>(spm);
                 assert(spmOAP != nullptr);
 
-                spmOAP->refNodeNum = GetOnlySingleNode(state,
-                                                       ip->getAlphaFieldValue(fields, props, "reference_setpoint_node_name"),
-                                                       ErrorsFound,
-                                                       spmNodeObjectTypes[(int)spm->type],
-                                                       spmOAP->Name,
-                                                       Node::FluidType::Air,
-                                                       Node::ConnectionType::Sensor,
-                                                       Node::CompFluidStream::Primary,
-                                                       Node::ObjectIsNotParent);
-                spmOAP->mixedOutNodeNum = GetOnlySingleNode(state,
-                                                            ip->getAlphaFieldValue(fields, props, "mixed_air_stream_node_name"),
-                                                            ErrorsFound,
-                                                            spmNodeObjectTypes[(int)spm->type],
-                                                            spmOAP->Name,
-                                                            Node::FluidType::Air,
-                                                            Node::ConnectionType::Sensor,
-                                                            Node::CompFluidStream::Primary,
-                                                            Node::ObjectIsNotParent);
-                spmOAP->oaInNodeNum = GetOnlySingleNode(state,
-                                                        ip->getAlphaFieldValue(fields, props, "outdoor_air_stream_node_name"),
-                                                        ErrorsFound,
-                                                        spmNodeObjectTypes[(int)spm->type],
-                                                        spmOAP->Name,
-                                                        Node::FluidType::Air,
-                                                        Node::ConnectionType::Sensor,
-                                                        Node::CompFluidStream::Primary,
-                                                        Node::ObjectIsNotParent);
-                spmOAP->returnInNodeNum = GetOnlySingleNode(state,
-                                                            ip->getAlphaFieldValue(fields, props, "return_air_stream_node_name"),
-                                                            ErrorsFound,
-                                                            spmNodeObjectTypes[(int)spm->type],
-                                                            spmOAP->Name,
-                                                            Node::FluidType::Air,
-                                                            Node::ConnectionType::Sensor,
-                                                            Node::CompFluidStream::Primary,
-                                                            Node::ObjectIsNotParent);
+                spmOAP->refNodeNum = getSPMSensorNode(
+                    state, ip->getAlphaFieldValue(fields, props, "reference_setpoint_node_name"), ErrorsFound, spm->type, spmOAP->Name);
+                spmOAP->mixedOutNodeNum = getSPMSensorNode(
+                    state, ip->getAlphaFieldValue(fields, props, "mixed_air_stream_node_name"), ErrorsFound, spm->type, spmOAP->Name);
+                spmOAP->oaInNodeNum = getSPMSensorNode(
+                    state, ip->getAlphaFieldValue(fields, props, "outdoor_air_stream_node_name"), ErrorsFound, spm->type, spmOAP->Name);
+                spmOAP->returnInNodeNum = getSPMSensorNode(
+                    state, ip->getAlphaFieldValue(fields, props, "return_air_stream_node_name"), ErrorsFound, spm->type, spmOAP->Name);
 
                 if (std::find(spmOAP->ctrlNodeNums.begin(), spmOAP->ctrlNodeNums.end(), spmOAP->refNodeNum) != spmOAP->ctrlNodeNums.end()) {
                     ShowSevereError(state, EnergyPlus::format("{}: {}=\"{}\", reference node.", routineName, cCurrentModuleObject, spmOAP->Name));
@@ -1093,15 +1036,12 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
                     ErrorsFound = true;
                 }
 
-                spmFNT->refNodeNum = GetOnlySingleNode(state,
+                spmFNT->refNodeNum = getSPMSensorNode(state,
                                                        ip->getAlphaFieldValue(fields, props, "reference_node_name"),
                                                        ErrorsFound,
-                                                       spmNodeObjectTypes[(int)spm->type],
+                                                       spm->type,
                                                        spmFNT->Name,
-                                                       Node::FluidType::Blank,
-                                                       Node::ConnectionType::Sensor,
-                                                       Node::CompFluidStream::Primary,
-                                                       Node::ObjectIsNotParent);
+                                                       Node::FluidType::Blank);
 
                 spmFNT->refTempType =
                     static_cast<AirTempType>(getEnumValue(nodeTempTypeNamesUC, ip->getAlphaFieldValue(fields, props, "reference_temperature_type")));
@@ -1338,15 +1278,12 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
                 spmSNRTemp->lowRef = ip->getRealFieldValue(fields, props, "low_reference_temperature");
                 spmSNRTemp->highRef = ip->getRealFieldValue(fields, props, "high_reference_temperature");
 
-                spmSNRTemp->refNodeNum = GetOnlySingleNode(state,
+                spmSNRTemp->refNodeNum = getSPMSensorNode(state,
                                                            ip->getAlphaFieldValue(fields, props, "reference_node_name"),
                                                            ErrorsFound,
-                                                           spmNodeObjectTypes[(int)spm->type],
+                                                           spm->type,
                                                            spmSNRTemp->Name,
-                                                           Node::FluidType::Blank,
-                                                           Node::ConnectionType::Sensor,
-                                                           Node::CompFluidStream::Primary,
-                                                           Node::ObjectIsNotParent);
+                                                           Node::FluidType::Blank);
             } break;
 
             // SetpointManager:SystemNodeReset:Humidity
@@ -1365,15 +1302,12 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
                 spmSNRHum->lowRef = ip->getRealFieldValue(fields, props, "low_reference_humidity_ratio");
                 spmSNRHum->highRef = ip->getRealFieldValue(fields, props, "high_reference_humidity_ratio");
 
-                spmSNRHum->refNodeNum = GetOnlySingleNode(state,
+                spmSNRHum->refNodeNum = getSPMSensorNode(state,
                                                           ip->getAlphaFieldValue(fields, props, "reference_node_name"),
                                                           ErrorsFound,
-                                                          spmNodeObjectTypes[(int)spm->type],
+                                                          spm->type,
                                                           spmSNRHum->Name,
-                                                          Node::FluidType::Blank,
-                                                          Node::ConnectionType::Sensor,
-                                                          Node::CompFluidStream::Primary,
-                                                          Node::ObjectIsNotParent);
+                                                          Node::FluidType::Blank);
             } break;
 
                 // SetpointManager:MultiZone:Cooling:Average
@@ -1421,27 +1355,13 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
                 auto *spmMA = dynamic_cast<SPMMixedAir *>(spm);
                 assert(spmMA != nullptr);
                 if (auto found = fields.find("cooling_coil_inlet_node_name"); found != fields.end()) {
-                    spmMA->coolCoilInNodeNum = GetOnlySingleNode(state,
-                                                                 Util::makeUPPER(found.value().get<std::string>()),
-                                                                 ErrorsFound,
-                                                                 spmNodeObjectTypes[(int)spm->type],
-                                                                 spmMA->Name,
-                                                                 Node::FluidType::Air,
-                                                                 Node::ConnectionType::Sensor,
-                                                                 Node::CompFluidStream::Primary,
-                                                                 Node::ObjectIsNotParent);
+                    spmMA->coolCoilInNodeNum =
+                        getSPMSensorNode(state, Util::makeUPPER(found.value().get<std::string>()), ErrorsFound, spm->type, spmMA->Name);
                 }
 
                 if (auto found = fields.find("cooling_coil_outlet_node_name"); found != fields.end()) {
-                    spmMA->coolCoilOutNodeNum = GetOnlySingleNode(state,
-                                                                  Util::makeUPPER(found.value().get<std::string>()),
-                                                                  ErrorsFound,
-                                                                  spmNodeObjectTypes[(int)spm->type],
-                                                                  spmMA->Name,
-                                                                  Node::FluidType::Air,
-                                                                  Node::ConnectionType::Sensor,
-                                                                  Node::CompFluidStream::Primary,
-                                                                  Node::ObjectIsNotParent);
+                    spmMA->coolCoilOutNodeNum =
+                        getSPMSensorNode(state, Util::makeUPPER(found.value().get<std::string>()), ErrorsFound, spm->type, spmMA->Name);
                 }
 
                 if (auto found = fields.find("minimum_temperature_at_cooling_coil_outlet_node"); found != fields.end()) {
