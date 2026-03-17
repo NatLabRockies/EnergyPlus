@@ -1406,6 +1406,48 @@ void GetVRFInput(EnergyPlusData &state)
     }
 }
 
+// Helper: look up a required quadratic curve and extract its 3 coefficients.
+// Returns true on success, sets ErrorsFound on failure.
+static bool getRequiredQuadraticCurveCoeffs(EnergyPlusData &state,
+                                            bool &ErrorsFound,
+                                            std::string_view routineName,
+                                            std::string_view objectType,
+                                            std::string_view objectName,
+                                            std::string const &curveName,
+                                            std::string_view fieldName,
+                                            bool fieldIsBlank,
+                                            Real64 &C1,
+                                            Real64 &C2,
+                                            Real64 &C3)
+{
+    int idx = Curve::GetCurveIndex(state, curveName);
+    if (idx == 0) {
+        if (fieldIsBlank) {
+            ShowSevereError(state, std::string{routineName} + std::string{objectType} + "=\"" + std::string{objectName} + "\", missing");
+            ShowContinueError(state, "...required " + std::string{fieldName} + " is blank.");
+        } else {
+            ShowSevereError(state, std::string{routineName} + std::string{objectType} + "=\"" + std::string{objectName} + "\", invalid");
+            ShowContinueError(state, "...not found " + std::string{fieldName} + "=\"" + curveName + "\".");
+        }
+        ErrorsFound = true;
+        return false;
+    }
+    if (state.dataCurveManager->curves(idx)->curveType == Curve::CurveType::Quadratic) {
+        C1 = state.dataCurveManager->curves(idx)->coeff[0];
+        C2 = state.dataCurveManager->curves(idx)->coeff[1];
+        C3 = state.dataCurveManager->curves(idx)->coeff[2];
+        return true;
+    }
+    ShowSevereError(state, std::string{routineName} + std::string{objectType} + "=\"" + std::string{objectName} + "\", invalid");
+    ShowContinueError(state,
+                      EnergyPlus::format("...illegal {} type for this object = {}",
+                                         fieldName,
+                                         Curve::objectNames[static_cast<int>(state.dataCurveManager->curves(idx)->curveType)]));
+    ShowContinueError(state, "... Curve type must be Quadratic.");
+    ErrorsFound = true;
+    return false;
+}
+
 // Helper: look up a curve by name and validate its dimensionality.
 // Returns the curve index (0 when the name is blank / not found).
 static int getAndCheckCurve(EnergyPlusData &state,
@@ -2339,68 +2381,14 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         thisVrfFluidCtrl.OUAirFlowRate = thisVrfFluidCtrl.OUAirFlowRatePerCapcity * thisVrfFluidCtrl.RatedEvapCapacity;
 
         // OUEvapTempCurve
-        int indexOUEvapTempCurve = GetCurveIndex(state, cAlphaArgs(6)); // convert curve name to index number
-        // Verify curve name and type
-        if (indexOUEvapTempCurve == 0) {
-            if (lAlphaFieldBlanks(6)) {
-                ShowSevereError(state, std::string{RoutineName} + cCurrentModuleObject + "=\"" + thisVrfFluidCtrl.Name + "\", missing");
-                ShowContinueError(state, "...required " + cAlphaFieldNames(6) + " is blank.");
-            } else {
-                ShowSevereError(state, std::string{RoutineName} + cCurrentModuleObject + "=\"" + thisVrfFluidCtrl.Name + "\", invalid");
-                ShowContinueError(state, "...not found " + cAlphaFieldNames(6) + "=\"" + cAlphaArgs(6) + "\".");
-            }
-            ErrorsFound = true;
-        } else {
-            {
-                if (state.dataCurveManager->curves(indexOUEvapTempCurve)->curveType == Curve::CurveType::Quadratic) {
-                    thisVrfFluidCtrl.C1Te = state.dataCurveManager->curves(indexOUEvapTempCurve)->coeff[0];
-                    thisVrfFluidCtrl.C2Te = state.dataCurveManager->curves(indexOUEvapTempCurve)->coeff[1];
-                    thisVrfFluidCtrl.C3Te = state.dataCurveManager->curves(indexOUEvapTempCurve)->coeff[2];
-
-                } else {
-                    ShowSevereError(state, std::string{RoutineName} + cCurrentModuleObject + "=\"" + thisVrfFluidCtrl.Name + "\", invalid");
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("...illegal {} type for this object = {}",
-                                           cAlphaFieldNames(6),
-                                           Curve::objectNames[static_cast<int>(state.dataCurveManager->curves(indexOUEvapTempCurve)->curveType)]));
-                    ShowContinueError(state, "... Curve type must be Quadratic.");
-                    ErrorsFound = true;
-                }
-            }
-        }
+        getRequiredQuadraticCurveCoeffs(state, ErrorsFound, RoutineName, cCurrentModuleObject, thisVrfFluidCtrl.Name,
+                                        cAlphaArgs(6), cAlphaFieldNames(6), lAlphaFieldBlanks(6),
+                                        thisVrfFluidCtrl.C1Te, thisVrfFluidCtrl.C2Te, thisVrfFluidCtrl.C3Te);
 
         // OUCondTempCurve
-        int indexOUCondTempCurve = GetCurveIndex(state, cAlphaArgs(7)); // convert curve name to index number
-        // Verify curve name and type
-        if (indexOUCondTempCurve == 0) {
-            if (lAlphaFieldBlanks(7)) {
-                ShowSevereError(state, std::string{RoutineName} + cCurrentModuleObject + "=\"" + thisVrfFluidCtrl.Name + "\", missing");
-                ShowContinueError(state, "...required " + cAlphaFieldNames(7) + " is blank.");
-            } else {
-                ShowSevereError(state, std::string{RoutineName} + cCurrentModuleObject + "=\"" + thisVrfFluidCtrl.Name + "\", invalid");
-                ShowContinueError(state, "...not found " + cAlphaFieldNames(7) + "=\"" + cAlphaArgs(7) + "\".");
-            }
-            ErrorsFound = true;
-        } else {
-            {
-                if (state.dataCurveManager->curves(indexOUCondTempCurve)->curveType == Curve::CurveType::Quadratic) {
-                    thisVrfFluidCtrl.C1Tc = state.dataCurveManager->curves(indexOUCondTempCurve)->coeff[0];
-                    thisVrfFluidCtrl.C2Tc = state.dataCurveManager->curves(indexOUCondTempCurve)->coeff[1];
-                    thisVrfFluidCtrl.C3Tc = state.dataCurveManager->curves(indexOUCondTempCurve)->coeff[2];
-
-                } else {
-                    ShowSevereError(state, std::string{RoutineName} + cCurrentModuleObject + "=\"" + thisVrfFluidCtrl.Name + "\", invalid");
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("...illegal {} type for this object = {}",
-                                           cAlphaFieldNames(7),
-                                           Curve::objectNames[static_cast<int>(state.dataCurveManager->curves(indexOUCondTempCurve)->curveType)]));
-                    ShowContinueError(state, "... Curve type must be Quadratic.");
-                    ErrorsFound = true;
-                }
-            }
-        }
+        getRequiredQuadraticCurveCoeffs(state, ErrorsFound, RoutineName, cCurrentModuleObject, thisVrfFluidCtrl.Name,
+                                        cAlphaArgs(7), cAlphaFieldNames(7), lAlphaFieldBlanks(7),
+                                        thisVrfFluidCtrl.C1Tc, thisVrfFluidCtrl.C2Tc, thisVrfFluidCtrl.C3Tc);
 
         // Pipe parameters
         thisVrfFluidCtrl.RefPipDiaSuc = rNumericArgs(17);
@@ -2793,62 +2781,14 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         thisVrfFluidCtrlHR.OUAirFlowRate = thisVrfFluidCtrlHR.OUAirFlowRatePerCapcity * thisVrfFluidCtrlHR.RatedEvapCapacity;
 
         // OUEvapTempCurve
-        int indexOUEvapTempCurve = GetCurveIndex(state, cAlphaArgs(6)); // convert curve name to index number
-        // Verify curve name and type
-        if (indexOUEvapTempCurve == 0) {
-            if (lAlphaFieldBlanks(6)) {
-                ShowSevereError(state, std::string{RoutineName} + cCurrentModuleObject + "=\"" + thisVrfFluidCtrlHR.Name + "\", missing");
-                ShowContinueError(state, "...required " + cAlphaFieldNames(6) + " is blank.");
-            } else {
-                ShowSevereError(state, std::string{RoutineName} + cCurrentModuleObject + "=\"" + thisVrfFluidCtrlHR.Name + "\", invalid");
-                ShowContinueError(state, "...not found " + cAlphaFieldNames(6) + "=\"" + cAlphaArgs(6) + "\".");
-            }
-            ErrorsFound = true;
-        } else {
-            if (state.dataCurveManager->curves(indexOUEvapTempCurve)->curveType == Curve::CurveType::Quadratic) {
-                thisVrfFluidCtrlHR.C1Te = state.dataCurveManager->curves(indexOUEvapTempCurve)->coeff[0];
-                thisVrfFluidCtrlHR.C2Te = state.dataCurveManager->curves(indexOUEvapTempCurve)->coeff[1];
-                thisVrfFluidCtrlHR.C3Te = state.dataCurveManager->curves(indexOUEvapTempCurve)->coeff[2];
-            } else {
-                ShowSevereError(state, std::string{RoutineName} + cCurrentModuleObject + "=\"" + thisVrfFluidCtrlHR.Name + "\", invalid");
-                ShowContinueError(
-                    state,
-                    EnergyPlus::format("...illegal {} type for this object = {}",
-                                       cAlphaFieldNames(6),
-                                       Curve::objectNames[static_cast<int>(state.dataCurveManager->curves(indexOUEvapTempCurve)->curveType)]));
-                ShowContinueError(state, "... Curve type must be Quadratic.");
-                ErrorsFound = true;
-            }
-        }
+        getRequiredQuadraticCurveCoeffs(state, ErrorsFound, RoutineName, cCurrentModuleObject, thisVrfFluidCtrlHR.Name,
+                                        cAlphaArgs(6), cAlphaFieldNames(6), lAlphaFieldBlanks(6),
+                                        thisVrfFluidCtrlHR.C1Te, thisVrfFluidCtrlHR.C2Te, thisVrfFluidCtrlHR.C3Te);
 
         // OUCondTempCurve
-        int indexOUCondTempCurve = GetCurveIndex(state, cAlphaArgs(7)); // convert curve name to index number
-        // Verify curve name and type
-        if (indexOUCondTempCurve == 0) {
-            if (lAlphaFieldBlanks(7)) {
-                ShowSevereError(state, std::string{RoutineName} + cCurrentModuleObject + "=\"" + thisVrfFluidCtrlHR.Name + "\", missing");
-                ShowContinueError(state, "...required " + cAlphaFieldNames(7) + " is blank.");
-            } else {
-                ShowSevereError(state, std::string{RoutineName} + cCurrentModuleObject + "=\"" + thisVrfFluidCtrlHR.Name + "\", invalid");
-                ShowContinueError(state, "...not found " + cAlphaFieldNames(7) + "=\"" + cAlphaArgs(7) + "\".");
-            }
-            ErrorsFound = true;
-        } else {
-            if (state.dataCurveManager->curves(indexOUCondTempCurve)->curveType == Curve::CurveType::Quadratic) {
-                thisVrfFluidCtrlHR.C1Tc = state.dataCurveManager->curves(indexOUCondTempCurve)->coeff[0];
-                thisVrfFluidCtrlHR.C2Tc = state.dataCurveManager->curves(indexOUCondTempCurve)->coeff[1];
-                thisVrfFluidCtrlHR.C3Tc = state.dataCurveManager->curves(indexOUCondTempCurve)->coeff[2];
-            } else {
-                ShowSevereError(state, std::string{RoutineName} + cCurrentModuleObject + "=\"" + thisVrfFluidCtrlHR.Name + "\", invalid");
-                ShowContinueError(
-                    state,
-                    EnergyPlus::format("...illegal {} type for this object = {}",
-                                       cAlphaFieldNames(7),
-                                       Curve::objectNames[static_cast<int>(state.dataCurveManager->curves(indexOUCondTempCurve)->curveType)]));
-                ShowContinueError(state, "... Curve type must be Quadratic.");
-                ErrorsFound = true;
-            }
-        }
+        getRequiredQuadraticCurveCoeffs(state, ErrorsFound, RoutineName, cCurrentModuleObject, thisVrfFluidCtrlHR.Name,
+                                        cAlphaArgs(7), cAlphaFieldNames(7), lAlphaFieldBlanks(7),
+                                        thisVrfFluidCtrlHR.C1Tc, thisVrfFluidCtrlHR.C2Tc, thisVrfFluidCtrlHR.C3Tc);
 
         // Pipe parameters
         thisVrfFluidCtrlHR.RefPipDiaSuc = rNumericArgs(23);
