@@ -385,6 +385,197 @@ void ManageRefrigeratedCaseRacks(EnergyPlusData &state)
     }
 }
 
+// Helper: look up a load name in the Case, WalkIn, CaseAndWalkInList, and optionally
+// WarehouseCoil arrays.  Returns {CaseAndWalkInListNum, CaseNum, WalkInNum, CoilNum} (0 = not found).
+static std::tuple<int, int, int, int> findLoadNames(EnergyPlusData &state, const std::string &loadName, bool includeCoil = true)
+{
+    int listNum = 0, caseNum = 0, walkInNum = 0, coilNum = 0;
+    if (state.dataRefrigCase->NumSimulationCaseAndWalkInLists > 0)
+        listNum = Util::FindItemInList(loadName, state.dataRefrigCase->CaseAndWalkInList);
+    if (state.dataRefrigCase->NumSimulationCases > 0)
+        caseNum = Util::FindItemInList(loadName, state.dataRefrigCase->RefrigCase);
+    if (state.dataRefrigCase->NumSimulationWalkIns > 0)
+        walkInNum = Util::FindItemInList(loadName, state.dataRefrigCase->WalkIn);
+    if (includeCoil && state.dataRefrigCase->NumSimulationRefrigAirChillers > 0)
+        coilNum = Util::FindItemInList(loadName, state.dataRefrigCase->WarehouseCoil);
+    return {listNum, caseNum, walkInNum, coilNum};
+}
+
+// Helper: report the standard "invalid name" / "non-unique name" errors when
+// a load-list name lookup yields NumNameMatches != 1.  Sets ErrorsFound = true.
+static void reportNameMatchError(EnergyPlusData &state,
+                                 bool &ErrorsFound,
+                                 std::string_view RoutineName,
+                                 std::string_view CurrentModuleObject,
+                                 const std::string &objName,
+                                 int numMatches,
+                                 const std::string &alphaFieldName,
+                                 const std::string &alphaValue)
+{
+    ErrorsFound = true;
+    if (numMatches == 0) {
+        ShowSevereError(state,
+                        EnergyPlus::format("{}{}=\"{}\", has an invalid {}: {}",
+                                           RoutineName, CurrentModuleObject, objName, alphaFieldName, alphaValue));
+    } else {
+        ShowSevereError(state,
+                        EnergyPlus::format("{}{}=\"{}\", has a non-unique name that could be either a {}: {}",
+                                           RoutineName, CurrentModuleObject, objName, alphaFieldName, alphaValue));
+    }
+}
+
+namespace {
+
+// Helper: given already-resolved listNum and compNum, populate count variables and
+// the destination compressor-index array.
+template <typename ArrayType>
+void assignCompressors(const Array1D<CompressorListDef> &CompressorLists,
+                       int listNum, int compNum, int &localCount, int &memberCount, ArrayType &destArray)
+{
+    if (listNum != 0) {
+        localCount = memberCount = CompressorLists(listNum).NumCompressors;
+        if (!allocated(destArray)) destArray.allocate(localCount);
+        destArray({1, localCount}) = CompressorLists(listNum).CompItemNum({1, localCount});
+    } else if (compNum != 0) {
+        localCount = memberCount = 1;
+        if (!allocated(destArray)) destArray.allocate(1);
+        destArray(1) = compNum;
+    }
+}
+
+// Helper: look up a compressor-or-list name, validate that it resolves to exactly one item,
+// report errors for missing or non-unique names, and delegate to assignCompressors.
+template <typename ArrayType>
+bool lookupAndAssignCompressors(EnergyPlusData &state,
+                                bool &ErrorsFound,
+                                std::string_view RoutineName,
+                                std::string_view CurrentModuleObject,
+                                const Array1D_string &Alphas,
+                                const Array1D_string &cAlphaFieldNames,
+                                const Array1D<CompressorListDef> &CompressorLists,
+                                const Array1D<RefrigCompressorData> &Compressor,
+                                int alphaNum,
+                                int &numCompressorsSys, int &memberCount, ArrayType &destArray)
+{
+    int ListNum = Util::FindItemInList(Alphas(alphaNum), CompressorLists);
+    int CompNum = Util::FindItemInList(Alphas(alphaNum), Compressor);
+    if ((ListNum == 0) && (CompNum == 0)) {
+        ShowSevereError(state,
+                        EnergyPlus::format(R"({}{}, "{}", has an invalid or undefined value="{}".)",
+                                           RoutineName, CurrentModuleObject, cAlphaFieldNames(alphaNum), Alphas(alphaNum)));
+        ErrorsFound = true;
+        return false;
+    } else if ((ListNum != 0) && (CompNum != 0)) {
+        ShowSevereError(state,
+                        EnergyPlus::format("{}{} {}, has a non-unique name used for both Compressor and CompressorList name: \"{}\".",
+                                           RoutineName, CurrentModuleObject, cAlphaFieldNames(alphaNum), Alphas(alphaNum)));
+        ErrorsFound = true;
+        return false;
+    }
+    assignCompressors(CompressorLists, ListNum, CompNum, numCompressorsSys, memberCount, destArray);
+    return true;
+}
+
+// Helper: resolve a CaseAndWalkInList/Case/WalkIn name (no coils) for one temperature
+// level of a TranscriticalSystem and fill the destination arrays.
+template <typename CaseArrayType, typename WalkInArrayType>
+void resolveTransSysLoads(EnergyPlusData &state,
+                          bool &ErrorsFound,
+                          std::string_view RoutineName,
+                          std::string_view CurrentModuleObject,
+                          const Array1D_string &Alphas,
+                          const Array1D_bool &lAlphaBlanks,
+                          const Array1D_string &cAlphaFieldNames,
+                          int alphaNum, const std::string &sysName,
+                          int &numCasesOut, int &numWalkInsOut,
+                          CaseArrayType &caseNumArray, WalkInArrayType &walkInNumArray)
+{
+    if (lAlphaBlanks(alphaNum)) return;
+    auto [CaseAndWalkInListNum, CaseNum, WalkInNum, CoilNum] = findLoadNames(state, Alphas(alphaNum), /*includeCoil=*/false);
+    int NumNameMatches = (CaseAndWalkInListNum != 0) + (CaseNum != 0) + (WalkInNum != 0);
+    if (NumNameMatches != 1) {
+        reportNameMatchError(state, ErrorsFound, RoutineName, CurrentModuleObject, sysName, NumNameMatches,
+                             cAlphaFieldNames(alphaNum), Alphas(alphaNum));
+    } else if (CaseAndWalkInListNum != 0) {
+        auto &CaseAndWalkInList = state.dataRefrigCase->CaseAndWalkInList;
+        numCasesOut = CaseAndWalkInList(CaseAndWalkInListNum).NumCases;
+        numWalkInsOut = CaseAndWalkInList(CaseAndWalkInListNum).NumWalkIns;
+        if (numCasesOut > 0) {
+            if (!allocated(caseNumArray)) caseNumArray.allocate(numCasesOut);
+            caseNumArray({1, numCasesOut}) = CaseAndWalkInList(CaseAndWalkInListNum).CaseItemNum({1, numCasesOut});
+        }
+        if (numWalkInsOut > 0) {
+            if (!allocated(walkInNumArray)) walkInNumArray.allocate(numWalkInsOut);
+            walkInNumArray({1, numWalkInsOut}) = CaseAndWalkInList(CaseAndWalkInListNum).WalkInItemNum({1, numWalkInsOut});
+        }
+    } else if (CaseNum != 0) {
+        numCasesOut = 1;
+        if (!allocated(caseNumArray)) caseNumArray.allocate(1);
+        caseNumArray(1) = CaseNum;
+    } else if (WalkInNum != 0) {
+        numWalkInsOut = 1;
+        if (!allocated(walkInNumArray)) walkInNumArray.allocate(1);
+        walkInNumArray(1) = WalkInNum;
+    }
+}
+
+// Helper: resolve a CaseAndWalkInList/Case/WalkIn/Coil name (with coil support)
+// for one load-assignment alpha field and populate the destination arrays.
+template <typename CaseArrayType, typename WalkInArrayType, typename CoilArrayType>
+bool resolveLoadsWithCoils(EnergyPlusData &state,
+                           bool &ErrorsFound,
+                           std::string_view RoutineName,
+                           std::string_view CurrentModuleObject,
+                           const Array1D_string &Alphas,
+                           const Array1D_bool &lAlphaBlanks,
+                           const Array1D_string &cAlphaFieldNames,
+                           int alphaNum, const std::string &objName,
+                           int &numCasesOut, int &numWalkInsOut, int &numCoilsOut,
+                           CaseArrayType &caseNumArray, WalkInArrayType &walkInNumArray, CoilArrayType &coilNumArray)
+{
+    if (lAlphaBlanks(alphaNum)) return true; // blank is allowed; caller handles the check
+    auto [CaseAndWalkInListNum, CaseNum, WalkInNum, CoilNum] = findLoadNames(state, Alphas(alphaNum));
+    int NumNameMatches = (CaseAndWalkInListNum != 0) + (CaseNum != 0) + (WalkInNum != 0) + (CoilNum != 0);
+    if (NumNameMatches != 1) {
+        reportNameMatchError(state, ErrorsFound, RoutineName, CurrentModuleObject, objName, NumNameMatches,
+                             cAlphaFieldNames(alphaNum), Alphas(alphaNum));
+        return false;
+    }
+    if (CaseAndWalkInListNum != 0) {
+        auto &CaseAndWalkInList = state.dataRefrigCase->CaseAndWalkInList;
+        numCasesOut   = CaseAndWalkInList(CaseAndWalkInListNum).NumCases;
+        numWalkInsOut = CaseAndWalkInList(CaseAndWalkInListNum).NumWalkIns;
+        numCoilsOut   = CaseAndWalkInList(CaseAndWalkInListNum).NumCoils;
+        if (numCasesOut > 0) {
+            if (!allocated(caseNumArray)) caseNumArray.allocate(numCasesOut);
+            caseNumArray({1, numCasesOut}) = CaseAndWalkInList(CaseAndWalkInListNum).CaseItemNum({1, numCasesOut});
+        }
+        if (numWalkInsOut > 0) {
+            if (!allocated(walkInNumArray)) walkInNumArray.allocate(numWalkInsOut);
+            walkInNumArray({1, numWalkInsOut}) = CaseAndWalkInList(CaseAndWalkInListNum).WalkInItemNum({1, numWalkInsOut});
+        }
+        if (numCoilsOut > 0) {
+            if (!allocated(coilNumArray)) coilNumArray.allocate(numCoilsOut);
+            coilNumArray({1, numCoilsOut}) = CaseAndWalkInList(CaseAndWalkInListNum).CoilItemNum({1, numCoilsOut});
+        }
+    } else if (CaseNum != 0) {
+        numCasesOut = 1;
+        if (!allocated(caseNumArray)) caseNumArray.allocate(1);
+        caseNumArray(1) = CaseNum;
+    } else if (WalkInNum != 0) {
+        numWalkInsOut = 1;
+        if (!allocated(walkInNumArray)) walkInNumArray.allocate(1);
+        walkInNumArray(1) = WalkInNum;
+    } else if (CoilNum != 0) {
+        numCoilsOut = 1;
+        if (!allocated(coilNumArray)) coilNumArray.allocate(1);
+        coilNumArray(1) = CoilNum;
+    }
+    return true;
+}
+
+} // anonymous namespace
+
 void GetRefrigerationInput(EnergyPlusData &state)
 {
 
@@ -723,47 +914,6 @@ void GetRefrigerationInput(EnergyPlusData &state)
                                                                  cNumericFieldNames);
     };
 
-    // Helper lambda that looks up a load name (Alphas(alphaNum)) in the Case, WalkIn,
-    // CaseAndWalkInList, and optionally WarehouseCoil arrays.  Returns a tuple of
-    // {CaseAndWalkInListNum, CaseNum, WalkInNum, CoilNum} (0 = not found).
-    // Pass includeCoil=false for TranscriticalSystem load loops that do not support coils.
-    auto findLoadNames = [&](int alphaNum, bool includeCoil = true) -> std::tuple<int, int, int, int> {
-        int listNum = 0, caseNum = 0, walkInNum = 0, coilNum = 0;
-        if (state.dataRefrigCase->NumSimulationCaseAndWalkInLists > 0)
-            listNum = Util::FindItemInList(Alphas(alphaNum), CaseAndWalkInList);
-        if (state.dataRefrigCase->NumSimulationCases > 0)
-            caseNum = Util::FindItemInList(Alphas(alphaNum), RefrigCase);
-        if (state.dataRefrigCase->NumSimulationWalkIns > 0)
-            walkInNum = Util::FindItemInList(Alphas(alphaNum), WalkIn);
-        if (includeCoil && state.dataRefrigCase->NumSimulationRefrigAirChillers > 0)
-            coilNum = Util::FindItemInList(Alphas(alphaNum), WarehouseCoil);
-        return {listNum, caseNum, walkInNum, coilNum};
-    };
-
-    // Helper lambda to report the standard "invalid name" / "non-unique name" errors when
-    // a load-list name lookup yields NumNameMatches != 1.  Sets ErrorsFound = true.
-    // AlphaNum must already hold the relevant input field index.
-    auto reportNameMatchError = [&](const std::string &objName, int numMatches) {
-        ErrorsFound = true;
-        if (numMatches == 0) {
-            ShowSevereError(state,
-                            EnergyPlus::format("{}{}=\"{}\", has an invalid {}: {}",
-                                               RoutineName,
-                                               CurrentModuleObject,
-                                               objName,
-                                               cAlphaFieldNames(AlphaNum),
-                                               Alphas(AlphaNum)));
-        } else {
-            ShowSevereError(state,
-                            EnergyPlus::format("{}{}=\"{}\", has a non-unique name that could be either a {}: {}",
-                                               RoutineName,
-                                               CurrentModuleObject,
-                                               objName,
-                                               cAlphaFieldNames(AlphaNum),
-                                               Alphas(AlphaNum)));
-        }
-    };
-
     // Helper lambda to initialise the NumSysAttach counter and pre-allocate the SysNum
     // array on each condenser / gas-cooler object.  Uses an abbreviated-function-template
     // (C++20 auto parameter) so it works for both RefrigCondenserData and GasCoolerData
@@ -843,130 +993,6 @@ void GetRefrigerationInput(EnergyPlusData &state)
         } else {
             Subcooler(System(RefrigSysNum).SubcoolerNum(subcoolerSlot)).CoilFlag = System(RefrigSysNum).CoilFlag;
         }
-    };
-
-    // Helper lambda: given already-resolved listNum and compNum (from FindItemInList
-    // calls at the call site), populate both a local count variable and a system member
-    // count, then allocate and fill the destination compressor-index array.
-    // The caller is responsible for the "not found" and "non-unique" error checks before
-    // calling this lambda.  localCount and memberCount are both set to the resolved count.
-    auto assignCompressors = [&](int listNum, int compNum, int &localCount, int &memberCount, auto &destArray) {
-        if (listNum != 0) {
-            localCount = memberCount = CompressorLists(listNum).NumCompressors;
-            if (!allocated(destArray)) destArray.allocate(localCount);
-            destArray({1, localCount}) = CompressorLists(listNum).CompItemNum({1, localCount});
-        } else if (compNum != 0) {
-            localCount = memberCount = 1;
-            if (!allocated(destArray)) destArray.allocate(1);
-            destArray(1) = compNum;
-        }
-    };
-
-    // Helper lambda: look up a compressor-or-list name from Alphas(alphaNum), validate that it
-    // resolves to exactly one item, report errors for missing or non-unique names, and (on success)
-    // delegate to assignCompressors to fill destArray.  Returns false when an error was reported.
-    auto lookupAndAssignCompressors = [&](int alphaNum,
-                                          int &numCompressorsSys, int &memberCount, auto &destArray) -> bool {
-        int ListNum = Util::FindItemInList(Alphas(alphaNum), CompressorLists);
-        int CompNum = Util::FindItemInList(Alphas(alphaNum), Compressor);
-        if ((ListNum == 0) && (CompNum == 0)) {
-            ShowSevereError(state,
-                            EnergyPlus::format(R"({}{}, "{}", has an invalid or undefined value="{}".)",
-                                               RoutineName, CurrentModuleObject, cAlphaFieldNames(alphaNum), Alphas(alphaNum)));
-            ErrorsFound = true;
-            return false;
-        } else if ((ListNum != 0) && (CompNum != 0)) {
-            ShowSevereError(state,
-                            EnergyPlus::format("{}{} {}, has a non-unique name used for both Compressor and CompressorList name: \"{}\".",
-                                               RoutineName, CurrentModuleObject, cAlphaFieldNames(alphaNum), Alphas(alphaNum)));
-            ErrorsFound = true;
-            return false;
-        }
-        assignCompressors(ListNum, CompNum, numCompressorsSys, memberCount, destArray);
-        return true;
-    };
-
-    // Helper lambda: resolve a CaseAndWalkInList/Case/WalkIn name (no coils) for one temperature
-    // level of a TranscriticalSystem and fill the destination arrays.  sysName is used only in
-    // error messages.  numCasesOut and numWalkInsOut are set to the resolved counts.
-    // caseNumArray and walkInNumArray must be allocatable Array1D<int> members of TransSystem.
-    auto resolveTransSysLoads = [&](int alphaNum, const std::string &sysName,
-                                    int &numCasesOut, int &numWalkInsOut,
-                                    auto &caseNumArray, auto &walkInNumArray) {
-        if (lAlphaBlanks(alphaNum)) return;
-        auto [CaseAndWalkInListNum, CaseNum, WalkInNum, CoilNum] = findLoadNames(alphaNum, /*includeCoil=*/false);
-        int NumNameMatches = (CaseAndWalkInListNum != 0) + (CaseNum != 0) + (WalkInNum != 0);
-        if (NumNameMatches != 1) {
-            AlphaNum = alphaNum; // reportNameMatchError reads AlphaNum for the field name
-            reportNameMatchError(sysName, NumNameMatches);
-        } else if (CaseAndWalkInListNum != 0) {
-            numCasesOut = CaseAndWalkInList(CaseAndWalkInListNum).NumCases;
-            numWalkInsOut = CaseAndWalkInList(CaseAndWalkInListNum).NumWalkIns;
-            if (numCasesOut > 0) {
-                if (!allocated(caseNumArray)) caseNumArray.allocate(numCasesOut);
-                caseNumArray({1, numCasesOut}) = CaseAndWalkInList(CaseAndWalkInListNum).CaseItemNum({1, numCasesOut});
-            }
-            if (numWalkInsOut > 0) {
-                if (!allocated(walkInNumArray)) walkInNumArray.allocate(numWalkInsOut);
-                walkInNumArray({1, numWalkInsOut}) = CaseAndWalkInList(CaseAndWalkInListNum).WalkInItemNum({1, numWalkInsOut});
-            }
-        } else if (CaseNum != 0) {
-            numCasesOut = 1;
-            if (!allocated(caseNumArray)) caseNumArray.allocate(1);
-            caseNumArray(1) = CaseNum;
-        } else if (WalkInNum != 0) {
-            numWalkInsOut = 1;
-            if (!allocated(walkInNumArray)) walkInNumArray.allocate(1);
-            walkInNumArray(1) = WalkInNum;
-        }
-    };
-
-    // Helper lambda: resolve a CaseAndWalkInList/Case/WalkIn/Coil name (with coil support)
-    // for one load-assignment alpha field and populate the destination arrays.
-    // objName is used in error messages.  numCasesOut, numWalkInsOut, numCoilsOut are set
-    // to the resolved counts.  caseNumArray, walkInNumArray, coilNumArray are the target
-    // 1-based index arrays.  Returns false when an error was reported.
-    auto resolveLoadsWithCoils = [&](int alphaNum, const std::string &objName,
-                                     int &numCasesOut, int &numWalkInsOut, int &numCoilsOut,
-                                     auto &caseNumArray, auto &walkInNumArray, auto &coilNumArray) -> bool {
-        if (lAlphaBlanks(alphaNum)) return true; // blank is allowed; caller handles the check
-        auto [CaseAndWalkInListNum, CaseNum, WalkInNum, CoilNum] = findLoadNames(alphaNum);
-        int NumNameMatches = (CaseAndWalkInListNum != 0) + (CaseNum != 0) + (WalkInNum != 0) + (CoilNum != 0);
-        if (NumNameMatches != 1) {
-            AlphaNum = alphaNum;
-            reportNameMatchError(objName, NumNameMatches);
-            return false;
-        }
-        if (CaseAndWalkInListNum != 0) {
-            numCasesOut   = CaseAndWalkInList(CaseAndWalkInListNum).NumCases;
-            numWalkInsOut = CaseAndWalkInList(CaseAndWalkInListNum).NumWalkIns;
-            numCoilsOut   = CaseAndWalkInList(CaseAndWalkInListNum).NumCoils;
-            if (numCasesOut > 0) {
-                if (!allocated(caseNumArray)) caseNumArray.allocate(numCasesOut);
-                caseNumArray({1, numCasesOut}) = CaseAndWalkInList(CaseAndWalkInListNum).CaseItemNum({1, numCasesOut});
-            }
-            if (numWalkInsOut > 0) {
-                if (!allocated(walkInNumArray)) walkInNumArray.allocate(numWalkInsOut);
-                walkInNumArray({1, numWalkInsOut}) = CaseAndWalkInList(CaseAndWalkInListNum).WalkInItemNum({1, numWalkInsOut});
-            }
-            if (numCoilsOut > 0) {
-                if (!allocated(coilNumArray)) coilNumArray.allocate(numCoilsOut);
-                coilNumArray({1, numCoilsOut}) = CaseAndWalkInList(CaseAndWalkInListNum).CoilItemNum({1, numCoilsOut});
-            }
-        } else if (CaseNum != 0) {
-            numCasesOut = 1;
-            if (!allocated(caseNumArray)) caseNumArray.allocate(1);
-            caseNumArray(1) = CaseNum;
-        } else if (WalkInNum != 0) {
-            numWalkInsOut = 1;
-            if (!allocated(walkInNumArray)) walkInNumArray.allocate(1);
-            walkInNumArray(1) = WalkInNum;
-        } else if (CoilNum != 0) {
-            numCoilsOut = 1;
-            if (!allocated(coilNumArray)) coilNumArray.allocate(1);
-            coilNumArray(1) = CoilNum;
-        }
-        return true;
     };
 
     // Helper lambda: given an already-computed RatedCapacity (with elevation correction applied),
@@ -2884,7 +2910,8 @@ void GetRefrigerationInput(EnergyPlusData &state)
                                                    cAlphaFieldNames(14)));
                 ErrorsFound = true;
             } else { // (.NOT. lAlphaBlanks(AlphaNum))
-                resolveLoadsWithCoils(AlphaNum, RefrigRack(RackNum).Name,
+                resolveLoadsWithCoils(state, ErrorsFound, RoutineName, CurrentModuleObject, Alphas, lAlphaBlanks, cAlphaFieldNames,
+                                     AlphaNum, RefrigRack(RackNum).Name,
                                      NumCases, NumWalkIns, NumCoils,
                                      RefrigRack(RackNum).CaseNum,
                                      RefrigRack(RackNum).WalkInNum,
@@ -3847,7 +3874,8 @@ void GetRefrigerationInput(EnergyPlusData &state)
                                                        cAlphaFieldNames(AlphaNum)));
                     ErrorsFound = true;
                 } else { // (.NOT. lAlphaBlanks(AlphaNum))
-                    resolveLoadsWithCoils(AlphaNum, Secondary(SecondaryNum).Name,
+                    resolveLoadsWithCoils(state, ErrorsFound, RoutineName, CurrentModuleObject, Alphas, lAlphaBlanks, cAlphaFieldNames,
+                                         AlphaNum, Secondary(SecondaryNum).Name,
                                          NumCases, NumWalkIns, NumCoils,
                                          Secondary(SecondaryNum).CaseNum,
                                          Secondary(SecondaryNum).WalkInNum,
@@ -4748,7 +4776,8 @@ void GetRefrigerationInput(EnergyPlusData &state)
 
             //   Check for case or walkin or CaseAndWalkInList names
             AlphaNum = 2;
-            resolveLoadsWithCoils(AlphaNum, System(RefrigSysNum).Name,
+            resolveLoadsWithCoils(state, ErrorsFound, RoutineName, CurrentModuleObject, Alphas, lAlphaBlanks, cAlphaFieldNames,
+                                  AlphaNum, System(RefrigSysNum).Name,
                                   NumCases, NumWalkIns, NumCoils,
                                   System(RefrigSysNum).CaseNum,
                                   System(RefrigSysNum).WalkInNum,
@@ -4847,7 +4876,9 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 int NumCascadeLoad = 0;
 
                 if (NumNameMatches != 1) { // name must uniquely point to a list or a single transfer load
-                    reportNameMatchError(System(RefrigSysNum).Name, NumNameMatches);
+                    reportNameMatchError(state, ErrorsFound, RoutineName, CurrentModuleObject,
+                                         System(RefrigSysNum).Name, NumNameMatches,
+                                         cAlphaFieldNames(AlphaNum), Alphas(AlphaNum));
                 } else if (TransferLoadListNum != 0) { // Name points to a transferLoad list
                     NumSecondary = TransferLoadList(TransferLoadListNum).NumSecondarys;
                     NumCascadeLoad = TransferLoadList(TransferLoadListNum).NumCascadeLoads;
@@ -5056,7 +5087,8 @@ void GetRefrigerationInput(EnergyPlusData &state)
                                 EnergyPlus::format("{}{} {}\" : must be input.", RoutineName, CurrentModuleObject, cAlphaFieldNames(AlphaNum)));
                 ErrorsFound = true;
             } else {
-                lookupAndAssignCompressors(AlphaNum,
+                lookupAndAssignCompressors(state, ErrorsFound, RoutineName, CurrentModuleObject, Alphas, cAlphaFieldNames,
+                                           CompressorLists, Compressor, AlphaNum,
                                            NumCompressorsSys, System(RefrigSysNum).NumCompressors, System(RefrigSysNum).CompressorNum);
             }
 
@@ -5226,7 +5258,8 @@ void GetRefrigerationInput(EnergyPlusData &state)
                                                        cAlphaFieldNames(AlphaNum)));
                     ErrorsFound = true;
                 } else {
-                    lookupAndAssignCompressors(AlphaNum,
+                    lookupAndAssignCompressors(state, ErrorsFound, RoutineName, CurrentModuleObject, Alphas, cAlphaFieldNames,
+                                               CompressorLists, Compressor, AlphaNum,
                                                NumHiStageCompressorsSys, System(RefrigSysNum).NumHiStageCompressors,
                                                System(RefrigSysNum).HiStageCompressorNum);
                 }
@@ -5526,7 +5559,8 @@ void GetRefrigerationInput(EnergyPlusData &state)
 
             //   Check for Medium Temperature Case or Walk-In or CaseAndWalkInList names
             AlphaNum = 3;
-            resolveTransSysLoads(AlphaNum, TransSystem(TransRefrigSysNum).Name,
+            resolveTransSysLoads(state, ErrorsFound, RoutineName, CurrentModuleObject, Alphas, lAlphaBlanks, cAlphaFieldNames,
+                                 AlphaNum, TransSystem(TransRefrigSysNum).Name,
                                  NumCasesMT, NumWalkInsMT,
                                  TransSystem(TransRefrigSysNum).CaseNumMT,
                                  TransSystem(TransRefrigSysNum).WalkInNumMT);
@@ -5545,7 +5579,8 @@ void GetRefrigerationInput(EnergyPlusData &state)
 
             //   Check for Low Temperature Case or Walk-In or CaseAndWalkInList names
             AlphaNum = 4;
-            resolveTransSysLoads(AlphaNum, TransSystem(TransRefrigSysNum).Name,
+            resolveTransSysLoads(state, ErrorsFound, RoutineName, CurrentModuleObject, Alphas, lAlphaBlanks, cAlphaFieldNames,
+                                 AlphaNum, TransSystem(TransRefrigSysNum).Name,
                                  NumCasesLT, NumWalkInsLT,
                                  TransSystem(TransRefrigSysNum).CaseNumLT,
                                  TransSystem(TransRefrigSysNum).WalkInNumLT);
@@ -5606,7 +5641,8 @@ void GetRefrigerationInput(EnergyPlusData &state)
                                 EnergyPlus::format("{}{} {}\" : must be input.", RoutineName, CurrentModuleObject, cAlphaFieldNames(AlphaNum)));
                 ErrorsFound = true;
             } else { //     Entry for Alphas(AlphaNum) can be either a compressor name or a compressorlist name
-                lookupAndAssignCompressors(AlphaNum,
+                lookupAndAssignCompressors(state, ErrorsFound, RoutineName, CurrentModuleObject, Alphas, cAlphaFieldNames,
+                                           CompressorLists, Compressor, AlphaNum,
                                            NumCompressorsSys, TransSystem(TransRefrigSysNum).NumCompressorsHP,
                                            TransSystem(TransRefrigSysNum).CompressorNumHP);
                 // Sum rated capacity of all HP compressors on system
@@ -5662,7 +5698,8 @@ void GetRefrigerationInput(EnergyPlusData &state)
                                        cAlphaFieldNames(AlphaNum)));
             } else if ((!(lAlphaBlanks(AlphaNum))) && (TransSystem(TransRefrigSysNum).transSysType == TransSysType::TwoStage)) {
                 // TwoStage system with low pressure compressors specified
-                lookupAndAssignCompressors(AlphaNum,
+                lookupAndAssignCompressors(state, ErrorsFound, RoutineName, CurrentModuleObject, Alphas, cAlphaFieldNames,
+                                           CompressorLists, Compressor, AlphaNum,
                                            NumCompressorsSys, TransSystem(TransRefrigSysNum).NumCompressorsLP,
                                            TransSystem(TransRefrigSysNum).CompressorNumLP);
                 // Sum rated capacity of all LP compressors on system
