@@ -443,6 +443,81 @@ static void setupZoneVentilationOutputVars(EnergyPlusData &state, DataHeatBalanc
                         zoneName);
 }
 
+// Helper: set up the 16 standard per-object "Infiltration" output variables.
+static void setupInfiltrationObjOutputVars(EnergyPlusData &state, DataHeatBalance::InfiltrationData &infil)
+{
+    std::string const &name = infil.Name;
+    SetupOutputVariable(state, "Infiltration Sensible Heat Loss Energy", Constant::Units::J, infil.InfilHeatLoss,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, name);
+    SetupOutputVariable(state, "Infiltration Sensible Heat Gain Energy", Constant::Units::J, infil.InfilHeatGain,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, name);
+    SetupOutputVariable(state, "Infiltration Latent Heat Loss Energy", Constant::Units::J, infil.InfilLatentLoss,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, name);
+    SetupOutputVariable(state, "Infiltration Latent Heat Gain Energy", Constant::Units::J, infil.InfilLatentGain,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, name);
+    SetupOutputVariable(state, "Infiltration Total Heat Loss Energy", Constant::Units::J, infil.InfilTotalLoss,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, name);
+    SetupOutputVariable(state, "Infiltration Total Heat Gain Energy", Constant::Units::J, infil.InfilTotalGain,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, name);
+    SetupOutputVariable(state, "Infiltration Current Density Volume Flow Rate", Constant::Units::m3_s, infil.InfilVdotCurDensity,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, name);
+    SetupOutputVariable(state, "Infiltration Standard Density Volume Flow Rate", Constant::Units::m3_s, infil.InfilVdotStdDensity,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, name);
+    SetupOutputVariable(state, "Infiltration Outdoor Density Volume Flow Rate", Constant::Units::m3_s, infil.InfilVdotOutDensity,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, name);
+    SetupOutputVariable(state, "Infiltration Current Density Volume", Constant::Units::m3, infil.InfilVolumeCurDensity,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, name);
+    SetupOutputVariable(state, "Infiltration Standard Density Volume", Constant::Units::m3, infil.InfilVolumeStdDensity,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, name);
+    SetupOutputVariable(state, "Infiltration Mass", Constant::Units::kg, infil.InfilMass,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, name);
+    SetupOutputVariable(state, "Infiltration Mass Flow Rate", Constant::Units::kg_s, infil.InfilMdot,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, name);
+    SetupOutputVariable(state, "Infiltration Current Density Air Change Rate", Constant::Units::ach, infil.InfilAirChangeRateCurDensity,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, name);
+    SetupOutputVariable(state, "Infiltration Standard Density Air Change Rate", Constant::Units::ach, infil.InfilAirChangeRateStdDensity,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, name);
+    SetupOutputVariable(state, "Infiltration Outdoor Density Air Change Rate", Constant::Units::ach, infil.InfilAirChangeRateOutDensity,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, name);
+}
+
+// Helper: set up the 16 standard zone-level "Zone Infiltration" output variables.
+static void setupZoneInfiltrationOutputVars(EnergyPlusData &state, DataHeatBalance::AirReportVars &znAirRpt, std::string const &zoneName)
+{
+    SetupOutputVariable(state, "Zone Infiltration Sensible Heat Loss Energy", Constant::Units::J, znAirRpt.InfilHeatLoss,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, zoneName);
+    SetupOutputVariable(state, "Zone Infiltration Sensible Heat Gain Energy", Constant::Units::J, znAirRpt.InfilHeatGain,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, zoneName);
+    SetupOutputVariable(state, "Zone Infiltration Latent Heat Loss Energy", Constant::Units::J, znAirRpt.InfilLatentLoss,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, zoneName);
+    SetupOutputVariable(state, "Zone Infiltration Latent Heat Gain Energy", Constant::Units::J, znAirRpt.InfilLatentGain,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, zoneName);
+    SetupOutputVariable(state, "Zone Infiltration Total Heat Loss Energy", Constant::Units::J, znAirRpt.InfilTotalLoss,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, zoneName);
+    SetupOutputVariable(state, "Zone Infiltration Total Heat Gain Energy", Constant::Units::J, znAirRpt.InfilTotalGain,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, zoneName);
+    SetupOutputVariable(state, "Zone Infiltration Current Density Volume Flow Rate", Constant::Units::m3_s, znAirRpt.InfilVdotCurDensity,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, zoneName);
+    SetupOutputVariable(state, "Zone Infiltration Standard Density Volume Flow Rate", Constant::Units::m3_s, znAirRpt.InfilVdotStdDensity,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, zoneName);
+    SetupOutputVariable(state, "Zone Infiltration Outdoor Density Volume Flow Rate", Constant::Units::m3_s, znAirRpt.InfilVdotOutDensity,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, zoneName);
+    SetupOutputVariable(state, "Zone Infiltration Current Density Volume", Constant::Units::m3, znAirRpt.InfilVolumeCurDensity,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, zoneName);
+    SetupOutputVariable(state, "Zone Infiltration Standard Density Volume", Constant::Units::m3, znAirRpt.InfilVolumeStdDensity,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, zoneName);
+    SetupOutputVariable(state, "Zone Infiltration Mass", Constant::Units::kg, znAirRpt.InfilMass,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, zoneName);
+    SetupOutputVariable(state, "Zone Infiltration Mass Flow Rate", Constant::Units::kg_s, znAirRpt.InfilMdot,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, zoneName);
+    SetupOutputVariable(state, "Zone Infiltration Current Density Air Change Rate", Constant::Units::ach, znAirRpt.InfilAirChangeRateCurDensity,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, zoneName);
+    SetupOutputVariable(state, "Zone Infiltration Standard Density Air Change Rate", Constant::Units::ach, znAirRpt.InfilAirChangeRateStdDensity,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, zoneName);
+    SetupOutputVariable(state, "Zone Infiltration Outdoor Density Air Change Rate", Constant::Units::ach, znAirRpt.InfilAirChangeRateOutDensity,
+                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, zoneName);
+}
+
 void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF errors found in input
 {
 
@@ -1327,233 +1402,13 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
         if (state.dataHeatBal->Infiltration(Loop).ZonePtr > 0 &&
             !state.dataHeatBal->Zone(state.dataHeatBal->Infiltration(Loop).ZonePtr).zoneOAQuadratureSum) {
             // Object report variables
-            SetupOutputVariable(state,
-                                "Infiltration Sensible Heat Loss Energy",
-                                Constant::Units::J,
-                                state.dataHeatBal->Infiltration(Loop).InfilHeatLoss,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                state.dataHeatBal->Infiltration(Loop).Name);
-            SetupOutputVariable(state,
-                                "Infiltration Sensible Heat Gain Energy",
-                                Constant::Units::J,
-                                state.dataHeatBal->Infiltration(Loop).InfilHeatGain,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                state.dataHeatBal->Infiltration(Loop).Name);
-            SetupOutputVariable(state,
-                                "Infiltration Latent Heat Loss Energy",
-                                Constant::Units::J,
-                                state.dataHeatBal->Infiltration(Loop).InfilLatentLoss,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                state.dataHeatBal->Infiltration(Loop).Name);
-            SetupOutputVariable(state,
-                                "Infiltration Latent Heat Gain Energy",
-                                Constant::Units::J,
-                                state.dataHeatBal->Infiltration(Loop).InfilLatentGain,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                state.dataHeatBal->Infiltration(Loop).Name);
-            SetupOutputVariable(state,
-                                "Infiltration Total Heat Loss Energy",
-                                Constant::Units::J,
-                                state.dataHeatBal->Infiltration(Loop).InfilTotalLoss,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                state.dataHeatBal->Infiltration(Loop).Name);
-            SetupOutputVariable(state,
-                                "Infiltration Total Heat Gain Energy",
-                                Constant::Units::J,
-                                state.dataHeatBal->Infiltration(Loop).InfilTotalGain,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                state.dataHeatBal->Infiltration(Loop).Name);
-            SetupOutputVariable(state,
-                                "Infiltration Current Density Volume Flow Rate",
-                                Constant::Units::m3_s,
-                                state.dataHeatBal->Infiltration(Loop).InfilVdotCurDensity,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                state.dataHeatBal->Infiltration(Loop).Name);
-            SetupOutputVariable(state,
-                                "Infiltration Standard Density Volume Flow Rate",
-                                Constant::Units::m3_s,
-                                state.dataHeatBal->Infiltration(Loop).InfilVdotStdDensity,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                state.dataHeatBal->Infiltration(Loop).Name);
-            SetupOutputVariable(state,
-                                "Infiltration Outdoor Density Volume Flow Rate",
-                                Constant::Units::m3_s,
-                                state.dataHeatBal->Infiltration(Loop).InfilVdotOutDensity,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                state.dataHeatBal->Infiltration(Loop).Name);
-            SetupOutputVariable(state,
-                                "Infiltration Current Density Volume",
-                                Constant::Units::m3,
-                                state.dataHeatBal->Infiltration(Loop).InfilVolumeCurDensity,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                state.dataHeatBal->Infiltration(Loop).Name);
-            SetupOutputVariable(state,
-                                "Infiltration Standard Density Volume",
-                                Constant::Units::m3,
-                                state.dataHeatBal->Infiltration(Loop).InfilVolumeStdDensity,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                state.dataHeatBal->Infiltration(Loop).Name);
-            SetupOutputVariable(state,
-                                "Infiltration Mass",
-                                Constant::Units::kg,
-                                state.dataHeatBal->Infiltration(Loop).InfilMass,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                state.dataHeatBal->Infiltration(Loop).Name);
-            SetupOutputVariable(state,
-                                "Infiltration Mass Flow Rate",
-                                Constant::Units::kg_s,
-                                state.dataHeatBal->Infiltration(Loop).InfilMdot,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                state.dataHeatBal->Infiltration(Loop).Name);
-            SetupOutputVariable(state,
-                                "Infiltration Current Density Air Change Rate",
-                                Constant::Units::ach,
-                                state.dataHeatBal->Infiltration(Loop).InfilAirChangeRateCurDensity,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                state.dataHeatBal->Infiltration(Loop).Name);
-            SetupOutputVariable(state,
-                                "Infiltration Standard Density Air Change Rate",
-                                Constant::Units::ach,
-                                state.dataHeatBal->Infiltration(Loop).InfilAirChangeRateStdDensity,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                state.dataHeatBal->Infiltration(Loop).Name);
-            SetupOutputVariable(state,
-                                "Infiltration Outdoor Density Air Change Rate",
-                                Constant::Units::ach,
-                                state.dataHeatBal->Infiltration(Loop).InfilAirChangeRateOutDensity,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                state.dataHeatBal->Infiltration(Loop).Name);
+            setupInfiltrationObjOutputVars(state, state.dataHeatBal->Infiltration(Loop));
 
             if (RepVarSet(state.dataHeatBal->Infiltration(Loop).ZonePtr)) {
                 RepVarSet(state.dataHeatBal->Infiltration(Loop).ZonePtr) = false;
-                SetupOutputVariable(state,
-                                    "Zone Infiltration Sensible Heat Loss Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZnAirRpt(state.dataHeatBal->Infiltration(Loop).ZonePtr).InfilHeatLoss,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(state.dataHeatBal->Infiltration(Loop).ZonePtr).Name);
-                SetupOutputVariable(state,
-                                    "Zone Infiltration Sensible Heat Gain Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZnAirRpt(state.dataHeatBal->Infiltration(Loop).ZonePtr).InfilHeatGain,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(state.dataHeatBal->Infiltration(Loop).ZonePtr).Name);
-                SetupOutputVariable(state,
-                                    "Zone Infiltration Latent Heat Loss Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZnAirRpt(state.dataHeatBal->Infiltration(Loop).ZonePtr).InfilLatentLoss,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(state.dataHeatBal->Infiltration(Loop).ZonePtr).Name);
-                SetupOutputVariable(state,
-                                    "Zone Infiltration Latent Heat Gain Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZnAirRpt(state.dataHeatBal->Infiltration(Loop).ZonePtr).InfilLatentGain,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(state.dataHeatBal->Infiltration(Loop).ZonePtr).Name);
-                SetupOutputVariable(state,
-                                    "Zone Infiltration Total Heat Loss Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZnAirRpt(state.dataHeatBal->Infiltration(Loop).ZonePtr).InfilTotalLoss,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(state.dataHeatBal->Infiltration(Loop).ZonePtr).Name);
-                SetupOutputVariable(state,
-                                    "Zone Infiltration Total Heat Gain Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZnAirRpt(state.dataHeatBal->Infiltration(Loop).ZonePtr).InfilTotalGain,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(state.dataHeatBal->Infiltration(Loop).ZonePtr).Name);
-                SetupOutputVariable(state,
-                                    "Zone Infiltration Current Density Volume Flow Rate",
-                                    Constant::Units::m3_s,
-                                    state.dataHeatBal->ZnAirRpt(state.dataHeatBal->Infiltration(Loop).ZonePtr).InfilVdotCurDensity,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(state.dataHeatBal->Infiltration(Loop).ZonePtr).Name);
-                SetupOutputVariable(state,
-                                    "Zone Infiltration Standard Density Volume Flow Rate",
-                                    Constant::Units::m3_s,
-                                    state.dataHeatBal->ZnAirRpt(state.dataHeatBal->Infiltration(Loop).ZonePtr).InfilVdotStdDensity,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(state.dataHeatBal->Infiltration(Loop).ZonePtr).Name);
-                SetupOutputVariable(state,
-                                    "Zone Infiltration Outdoor Density Volume Flow Rate",
-                                    Constant::Units::m3_s,
-                                    state.dataHeatBal->ZnAirRpt(state.dataHeatBal->Infiltration(Loop).ZonePtr).InfilVdotOutDensity,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(state.dataHeatBal->Infiltration(Loop).ZonePtr).Name);
-                SetupOutputVariable(state,
-                                    "Zone Infiltration Current Density Volume",
-                                    Constant::Units::m3,
-                                    state.dataHeatBal->ZnAirRpt(state.dataHeatBal->Infiltration(Loop).ZonePtr).InfilVolumeCurDensity,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(state.dataHeatBal->Infiltration(Loop).ZonePtr).Name);
-                SetupOutputVariable(state,
-                                    "Zone Infiltration Standard Density Volume",
-                                    Constant::Units::m3,
-                                    state.dataHeatBal->ZnAirRpt(state.dataHeatBal->Infiltration(Loop).ZonePtr).InfilVolumeStdDensity,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(state.dataHeatBal->Infiltration(Loop).ZonePtr).Name);
-                SetupOutputVariable(state,
-                                    "Zone Infiltration Mass",
-                                    Constant::Units::kg,
-                                    state.dataHeatBal->ZnAirRpt(state.dataHeatBal->Infiltration(Loop).ZonePtr).InfilMass,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(state.dataHeatBal->Infiltration(Loop).ZonePtr).Name);
-                SetupOutputVariable(state,
-                                    "Zone Infiltration Mass Flow Rate",
-                                    Constant::Units::kg_s,
-                                    state.dataHeatBal->ZnAirRpt(state.dataHeatBal->Infiltration(Loop).ZonePtr).InfilMdot,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(state.dataHeatBal->Infiltration(Loop).ZonePtr).Name);
-                SetupOutputVariable(state,
-                                    "Zone Infiltration Current Density Air Change Rate",
-                                    Constant::Units::ach,
-                                    state.dataHeatBal->ZnAirRpt(state.dataHeatBal->Infiltration(Loop).ZonePtr).InfilAirChangeRateCurDensity,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(state.dataHeatBal->Infiltration(Loop).ZonePtr).Name);
-                SetupOutputVariable(state,
-                                    "Zone Infiltration Standard Density Air Change Rate",
-                                    Constant::Units::ach,
-                                    state.dataHeatBal->ZnAirRpt(state.dataHeatBal->Infiltration(Loop).ZonePtr).InfilAirChangeRateStdDensity,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(state.dataHeatBal->Infiltration(Loop).ZonePtr).Name);
-                SetupOutputVariable(state,
-                                    "Zone Infiltration Outdoor Density Air Change Rate",
-                                    Constant::Units::ach,
-                                    state.dataHeatBal->ZnAirRpt(state.dataHeatBal->Infiltration(Loop).ZonePtr).InfilAirChangeRateOutDensity,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(state.dataHeatBal->Infiltration(Loop).ZonePtr).Name);
+                setupZoneInfiltrationOutputVars(state,
+                                                state.dataHeatBal->ZnAirRpt(state.dataHeatBal->Infiltration(Loop).ZonePtr),
+                                                state.dataHeatBal->Zone(state.dataHeatBal->Infiltration(Loop).ZonePtr).Name);
             }
         }
 
