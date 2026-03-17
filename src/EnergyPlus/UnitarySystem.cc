@@ -114,6 +114,33 @@ namespace UnitarySystems {
     static constexpr std::string_view blankString;
     static const std::string blankStdString;
 
+    // Helper: check that a coil air flow rate does not exceed the fan capacity; reset and warn if so.
+    static void checkCoilFlowVsFan(EnergyPlusData &state,
+                                   std::string_view cCurrentModuleObject,
+                                   std::string_view thisObjectName,
+                                   Real64 FanVolFlowRate,
+                                   const std::string &fanName,
+                                   Real64 &designFanVolFlowRate,
+                                   Real64 &maxCoilFlow,
+                                   bool coilExists,
+                                   std::string_view modeLabel)
+    {
+        if (FanVolFlowRate < maxCoilFlow && maxCoilFlow != DataSizing::AutoSize && coilExists) {
+            std::string modeLower{modeLabel};
+            modeLower[0] = static_cast<char>(std::tolower(static_cast<unsigned char>(modeLower[0])));
+            ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
+            ShowContinueError(state,
+                              EnergyPlus::format("... air flow rate = {:.7T} in fan object {} is less than the maximum HVAC system air "
+                                                 "flow rate in {} mode.",
+                                                 FanVolFlowRate, fanName, modeLower));
+            ShowContinueError(state,
+                              EnergyPlus::format(" The {} Supply Air Flow Rate is reset to the fan flow rate and the simulation continues.",
+                                                 modeLabel));
+            maxCoilFlow = FanVolFlowRate;
+            designFanVolFlowRate = FanVolFlowRate;
+        }
+    }
+
     void UnitarySys::simulate(EnergyPlusData &state,
                               std::string_view Name,
                               bool const FirstHVACIteration,
@@ -6769,29 +6796,12 @@ namespace UnitarySystems {
         }
 
         if (FanVolFlowRate != DataSizing::AutoSize && this->m_FanExists) {
-            // Check that coil air flow rates do not exceed fan capacity; reset and warn if so.
-            // modeLabel is title-case ("Cooling" or "Heating") for use in the reset message;
-            // the mode-name in the first message is produced as lowercase.
-            auto checkCoilFlowVsFan = [&](Real64 &maxCoilFlow, bool coilExists, std::string_view modeLabel) {
-                if (FanVolFlowRate < maxCoilFlow && maxCoilFlow != DataSizing::AutoSize && coilExists) {
-                    std::string modeLower{modeLabel};
-                    modeLower[0] = static_cast<char>(std::tolower(static_cast<unsigned char>(modeLower[0])));
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("... air flow rate = {:.7T} in fan object {} is less than the maximum HVAC system air "
-                                                         "flow rate in {} mode.",
-                                                         FanVolFlowRate,
-                                                         this->m_FanName,
-                                                         modeLower));
-                    ShowContinueError(state,
-                                      EnergyPlus::format(" The {} Supply Air Flow Rate is reset to the fan flow rate and the simulation continues.",
-                                                         modeLabel));
-                    maxCoilFlow = FanVolFlowRate;
-                    this->m_DesignFanVolFlowRate = FanVolFlowRate;
-                }
-            };
-            checkCoilFlowVsFan(this->m_MaxCoolAirVolFlow, this->m_CoolCoilExists, "Cooling");
-            checkCoilFlowVsFan(this->m_MaxHeatAirVolFlow, this->m_HeatCoilExists, "Heating");
+            checkCoilFlowVsFan(state, cCurrentModuleObject, thisObjectName, FanVolFlowRate,
+                               this->m_FanName, this->m_DesignFanVolFlowRate,
+                               this->m_MaxCoolAirVolFlow, this->m_CoolCoilExists, "Cooling");
+            checkCoilFlowVsFan(state, cCurrentModuleObject, thisObjectName, FanVolFlowRate,
+                               this->m_FanName, this->m_DesignFanVolFlowRate,
+                               this->m_MaxHeatAirVolFlow, this->m_HeatCoilExists, "Heating");
         }
 
         // Set minimum OAT for heat pump compressor operation in cooling mode
