@@ -49,6 +49,7 @@
 
 // C++ Headers
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <functional>
 #include <set>
@@ -2081,54 +2082,33 @@ namespace AirflowNetwork {
             }
 
             if (multizone_always_simulated) {
-                if (m_state.dataHeatBal->TotInfiltration > 0) {
-                    ShowWarningError(m_state, EnergyPlus::format("{}{} object, ", RoutineName, CurrentModuleObject));
-                    ShowContinueError(
-                        m_state, "..Specified " + cAlphaFields(2) + " = \"" + SimAirNetworkKey + "\" and ZoneInfiltration:* objects are present.");
-                    ShowContinueError(m_state, "..ZoneInfiltration objects will not be simulated.");
-                }
-                if (m_state.dataHeatBal->TotVentilation > 0) {
-                    ShowWarningError(m_state, EnergyPlus::format("{}{} object, ", RoutineName, CurrentModuleObject));
-                    ShowContinueError(
-                        m_state, "..Specified " + cAlphaFields(2) + " = \"" + SimAirNetworkKey + "\" and ZoneVentilation:* objects are present.");
-                    ShowContinueError(m_state, "..ZoneVentilation objects will not be simulated.");
-                }
-                if (m_state.dataHeatBal->TotMixing > 0) {
-                    ShowWarningError(m_state, EnergyPlus::format("{}{} object, ", RoutineName, CurrentModuleObject));
-                    ShowContinueError(m_state,
-                                      "..Specified " + cAlphaFields(2) + " = \"" + SimAirNetworkKey + "\" and ZoneMixing objects are present.");
-                    ShowContinueError(m_state, "..ZoneMixing objects will not be simulated.");
-                }
-                if (m_state.dataHeatBal->TotCrossMixing > 0) {
-                    ShowWarningError(m_state, EnergyPlus::format("{}{} object, ", RoutineName, CurrentModuleObject));
-                    ShowContinueError(m_state,
-                                      "..Specified " + cAlphaFields(2) + " = \"" + SimAirNetworkKey + "\" and ZoneCrossMixing objects are present.");
-                    ShowContinueError(m_state, "..ZoneCrossMixing objects will not be simulated.");
-                }
-                if (m_state.dataHeatBal->TotZoneAirBalance > 0) {
-                    ShowWarningError(m_state, EnergyPlus::format("{}{} object, ", RoutineName, CurrentModuleObject));
-                    ShowContinueError(m_state,
-                                      "..Specified " + cAlphaFields(2) + " = \"" + SimAirNetworkKey +
-                                          "\" and ZoneAirBalance:OutdoorAir objects are present.");
-                    ShowContinueError(m_state, "..ZoneAirBalance:OutdoorAir objects will not be simulated.");
-                }
-                if (m_state.dataInputProcessing->inputProcessor->getNumObjectsFound(m_state, "ZoneEarthtube") > 0) {
-                    ShowWarningError(m_state, EnergyPlus::format("{}{} object, ", RoutineName, CurrentModuleObject));
-                    ShowContinueError(m_state,
-                                      "..Specified " + cAlphaFields(2) + " = \"" + SimAirNetworkKey + "\" and ZoneEarthtube objects are present.");
-                    ShowContinueError(m_state, "..ZoneEarthtube objects will not be simulated.");
-                }
-                if (m_state.dataInputProcessing->inputProcessor->getNumObjectsFound(m_state, "ZoneThermalChimney") > 0) {
-                    ShowWarningError(m_state, EnergyPlus::format("{}{} object, ", RoutineName, CurrentModuleObject));
-                    ShowContinueError(
-                        m_state, "..Specified " + cAlphaFields(2) + " = \"" + SimAirNetworkKey + "\" and ZoneThermalChimney objects are present.");
-                    ShowContinueError(m_state, "..ZoneThermalChimney objects will not be simulated.");
-                }
-                if (m_state.dataInputProcessing->inputProcessor->getNumObjectsFound(m_state, "ZoneCoolTower:Shower") > 0) {
-                    ShowWarningError(m_state, EnergyPlus::format("{}{} object, ", RoutineName, CurrentModuleObject));
-                    ShowContinueError(
-                        m_state, "..Specified " + cAlphaFields(2) + " = \"" + SimAirNetworkKey + "\" and ZoneCoolTower:Shower objects are present.");
-                    ShowContinueError(m_state, "..ZoneCoolTower:Shower objects will not be simulated.");
+                // Warn about zone-level objects that will not be simulated when multizone is active
+                struct OverriddenObject
+                {
+                    int count;
+                    char const *presentMsg;
+                    char const *disabledMsg;
+                };
+                std::array<OverriddenObject, 8> overriddenObjects = {{
+                    {m_state.dataHeatBal->TotInfiltration, "ZoneInfiltration:*", "ZoneInfiltration"},
+                    {m_state.dataHeatBal->TotVentilation, "ZoneVentilation:*", "ZoneVentilation"},
+                    {m_state.dataHeatBal->TotMixing, "ZoneMixing", "ZoneMixing"},
+                    {m_state.dataHeatBal->TotCrossMixing, "ZoneCrossMixing", "ZoneCrossMixing"},
+                    {m_state.dataHeatBal->TotZoneAirBalance, "ZoneAirBalance:OutdoorAir", "ZoneAirBalance:OutdoorAir"},
+                    {m_state.dataInputProcessing->inputProcessor->getNumObjectsFound(m_state, "ZoneEarthtube"), "ZoneEarthtube", "ZoneEarthtube"},
+                    {m_state.dataInputProcessing->inputProcessor->getNumObjectsFound(m_state, "ZoneThermalChimney"), "ZoneThermalChimney",
+                     "ZoneThermalChimney"},
+                    {m_state.dataInputProcessing->inputProcessor->getNumObjectsFound(m_state, "ZoneCoolTower:Shower"), "ZoneCoolTower:Shower",
+                     "ZoneCoolTower:Shower"},
+                }};
+                for (auto const &obj : overriddenObjects) {
+                    if (obj.count > 0) {
+                        ShowWarningError(m_state, EnergyPlus::format("{}{} object, ", RoutineName, CurrentModuleObject));
+                        ShowContinueError(m_state,
+                                          "..Specified " + cAlphaFields(2) + " = \"" + SimAirNetworkKey + "\" and " + obj.presentMsg +
+                                              " objects are present.");
+                        ShowContinueError(m_state, ".." + std::string(obj.disabledMsg) + " objects will not be simulated.");
+                    }
                 }
             }
 
