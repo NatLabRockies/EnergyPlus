@@ -179,6 +179,17 @@ namespace AirflowNetwork {
         return j + count;
     }
 
+    // Compute the minimum and maximum z-coordinates across all vertices of a surface.
+    static void getVertexHeightRange(DataSurfaces::SurfaceData const &surf, Real64 &minHeight, Real64 &maxHeight)
+    {
+        minHeight = surf.Vertex(1).z;
+        maxHeight = surf.Vertex(1).z;
+        for (int j = 2; j <= surf.Sides; ++j) {
+            minHeight = min(minHeight, surf.Vertex(j).z);
+            maxHeight = max(maxHeight, surf.Vertex(j).z);
+        }
+    }
+
     int constexpr NumOfVentCtrTypes(6); // Number of zone level venting control types
 
     void Solver::manage_balance(ObjexxFCL::Optional_bool_const FirstHVACIteration, // True when solution technique on first iteration
@@ -2954,18 +2965,7 @@ namespace AirflowNetwork {
                             }
                         }
                     } else {
-                        minHeight = min(m_state.dataSurface->Surface(MultizoneSurfaceData(i).SurfNum).Vertex(1).z,
-                                        m_state.dataSurface->Surface(MultizoneSurfaceData(i).SurfNum).Vertex(2).z);
-                        maxHeight = max(m_state.dataSurface->Surface(MultizoneSurfaceData(i).SurfNum).Vertex(1).z,
-                                        m_state.dataSurface->Surface(MultizoneSurfaceData(i).SurfNum).Vertex(2).z);
-                        for (j = 3; j <= m_state.dataSurface->Surface(MultizoneSurfaceData(i).SurfNum).Sides; ++j) {
-                            minHeight = min(minHeight,
-                                            min(m_state.dataSurface->Surface(MultizoneSurfaceData(i).SurfNum).Vertex(j - 1).z,
-                                                m_state.dataSurface->Surface(MultizoneSurfaceData(i).SurfNum).Vertex(j).z));
-                            maxHeight = max(maxHeight,
-                                            max(m_state.dataSurface->Surface(MultizoneSurfaceData(i).SurfNum).Vertex(j - 1).z,
-                                                m_state.dataSurface->Surface(MultizoneSurfaceData(i).SurfNum).Vertex(j).z));
-                        }
+                        getVertexHeightRange(m_state.dataSurface->Surface(MultizoneSurfaceData(i).SurfNum), minHeight, maxHeight);
                         if (maxHeight > minHeight) {
                             MultizoneSurfaceData(i).Height = maxHeight - minHeight;
                             MultizoneSurfaceData(i).Width =
@@ -2981,18 +2981,7 @@ namespace AirflowNetwork {
                         MultizoneSurfaceData(i).Height =
                             m_state.dataSurface->Surface(MultizoneSurfaceData(i).SurfNum).Area / MultizoneSurfaceData(i).Width;
                     } else {
-                        minHeight = min(m_state.dataSurface->Surface(MultizoneSurfaceData(i).SurfNum).Vertex(1).z,
-                                        m_state.dataSurface->Surface(MultizoneSurfaceData(i).SurfNum).Vertex(2).z);
-                        maxHeight = max(m_state.dataSurface->Surface(MultizoneSurfaceData(i).SurfNum).Vertex(1).z,
-                                        m_state.dataSurface->Surface(MultizoneSurfaceData(i).SurfNum).Vertex(2).z);
-                        for (j = 3; j <= m_state.dataSurface->Surface(MultizoneSurfaceData(i).SurfNum).Sides; ++j) {
-                            minHeight = min(minHeight,
-                                            min(m_state.dataSurface->Surface(MultizoneSurfaceData(i).SurfNum).Vertex(j - 1).z,
-                                                m_state.dataSurface->Surface(MultizoneSurfaceData(i).SurfNum).Vertex(j).z));
-                            maxHeight = max(maxHeight,
-                                            max(m_state.dataSurface->Surface(MultizoneSurfaceData(i).SurfNum).Vertex(j - 1).z,
-                                                m_state.dataSurface->Surface(MultizoneSurfaceData(i).SurfNum).Vertex(j).z));
-                        }
+                        getVertexHeightRange(m_state.dataSurface->Surface(MultizoneSurfaceData(i).SurfNum), minHeight, maxHeight);
                         if (maxHeight > minHeight) {
                             MultizoneSurfaceData(i).Height = maxHeight - minHeight;
                             MultizoneSurfaceData(i).Width =
