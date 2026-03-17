@@ -1406,6 +1406,39 @@ void GetVRFInput(EnergyPlusData &state)
     }
 }
 
+// Helper: validate an EIR-f-PLR curve's X range against MinPLR and expected max of 1.0.
+static void checkEIRFPLRCurveRange(EnergyPlusData &state,
+                                   bool &ErrorsFound,
+                                   int curveIndex,
+                                   Real64 MinPLR,
+                                   std::string_view routineName,
+                                   std::string_view objectType,
+                                   std::string_view objectName,
+                                   std::string_view fieldName,
+                                   std::string_view curveName)
+{
+    Real64 minX = 0.0;
+    Real64 maxX = 0.0;
+    Curve::GetCurveMinMaxValues(state, curveIndex, minX, maxX);
+    if (minX > MinPLR) {
+        ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", invalid", routineName, objectType, objectName));
+        ShowContinueError(state, EnergyPlus::format("...{} = {} has out of range value.", fieldName, curveName));
+        ShowContinueError(state,
+                          EnergyPlus::format("...Curve minimum value of X = {:.3T} must be <= Minimum Heat Pump Part-Load Ratio = {:.3T}.",
+                                             minX,
+                                             MinPLR));
+        ErrorsFound = true;
+    }
+    if (maxX < 1.0) {
+        ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", suspicious", routineName, objectType, objectName));
+        ShowContinueError(state, EnergyPlus::format("...{} = {} has unexpected value.", fieldName, curveName));
+        ShowContinueError(
+            state,
+            EnergyPlus::format("...Curve maximum value of X = {:.3T} should be 1 and will result in lower energy use than expected.",
+                               maxX));
+    }
+}
+
 // Helper: validate a PLF curve's output range [0.7, 1.0], capping if out of bounds.
 static void checkAndCapPLFCurve(EnergyPlusData &state,
                                 bool &ErrorsFound,
@@ -1845,50 +1878,14 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         }
 
         thisVrfSys.MinPLR = rNumericArgs(10);
-        Real64 minEIRfLowPLRXInput = 0.0;
-        Real64 maxEIRfLowPLRXInput = 0.0;
 
         if (thisVrfSys.CoolEIRFPLR1 > 0) {
-            Curve::GetCurveMinMaxValues(state, thisVrfSys.CoolEIRFPLR1, minEIRfLowPLRXInput, maxEIRfLowPLRXInput);
-            if (minEIRfLowPLRXInput > thisVrfSys.MinPLR) {
-                ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisVrfSys.Name));
-                ShowContinueError(state, EnergyPlus::format("...{} = {} has out of range value.", cAlphaFieldNames(9), cAlphaArgs(9)));
-                ShowContinueError(state,
-                                  EnergyPlus::format("...Curve minimum value of X = {:.3T} must be <= Minimum Heat Pump Part-Load Ratio = {:.3T}.",
-                                                     minEIRfLowPLRXInput,
-                                                     thisVrfSys.MinPLR));
-                ErrorsFound = true;
-            }
-            if (maxEIRfLowPLRXInput < 1.0) {
-                ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", suspicious", RoutineName, cCurrentModuleObject, thisVrfSys.Name));
-                ShowContinueError(state, EnergyPlus::format("...{} = {} has unexpected value.", cAlphaFieldNames(9), cAlphaArgs(9)));
-                ShowContinueError(
-                    state,
-                    EnergyPlus::format("...Curve maximum value of X = {:.3T} should be 1 and will result in lower energy use than expected.",
-                                       maxEIRfLowPLRXInput));
-            }
-            minEIRfLowPLRXInput = 0.0;
-            maxEIRfLowPLRXInput = 0.0;
+            checkEIRFPLRCurveRange(state, ErrorsFound, thisVrfSys.CoolEIRFPLR1, thisVrfSys.MinPLR,
+                                   RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(9), cAlphaArgs(9));
         }
         if (thisVrfSys.HeatEIRFPLR1 > 0) {
-            Curve::GetCurveMinMaxValues(state, thisVrfSys.HeatEIRFPLR1, minEIRfLowPLRXInput, maxEIRfLowPLRXInput);
-            if (minEIRfLowPLRXInput > thisVrfSys.MinPLR) {
-                ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisVrfSys.Name));
-                ShowContinueError(state, EnergyPlus::format("...{} = {} has out of range value.", cAlphaFieldNames(20), cAlphaArgs(20)));
-                ShowContinueError(state,
-                                  EnergyPlus::format("...Curve minimum value of X = {:.3T} must be <= Minimum Heat Pump Part-Load Ratio = {:.3T}.",
-                                                     minEIRfLowPLRXInput,
-                                                     thisVrfSys.MinPLR));
-                ErrorsFound = true;
-            }
-            if (maxEIRfLowPLRXInput < 1.0) {
-                ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", suspicious", RoutineName, cCurrentModuleObject, thisVrfSys.Name));
-                ShowContinueError(state, EnergyPlus::format("...{} = {} has unexpected value.", cAlphaFieldNames(20), cAlphaArgs(20)));
-                ShowContinueError(
-                    state,
-                    EnergyPlus::format("...Curve maximum value of X = {:.3T} should be 1 and will result in lower energy use than expected.",
-                                       maxEIRfLowPLRXInput));
-            }
+            checkEIRFPLRCurveRange(state, ErrorsFound, thisVrfSys.HeatEIRFPLR1, thisVrfSys.MinPLR,
+                                   RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(20), cAlphaArgs(20));
         }
 
         thisVrfSys.MasterZonePtr = Util::FindItemInList(cAlphaArgs(24), state.dataHeatBal->Zone);
