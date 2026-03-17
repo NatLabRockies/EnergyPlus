@@ -576,6 +576,209 @@ bool resolveLoadsWithCoils(EnergyPlusData &state,
 
 } // anonymous namespace
 
+// Helper: compute capacity curve slope and minimum condenser load from rated capacity.
+static void computeCapCurveSlopeAndMin(EnergyPlusData &state,
+                                       bool &ErrorsFound,
+                                       std::string_view RoutineName,
+                                       std::string_view CurrentModuleObject,
+                                       int capCurvePtr, const std::string &objName,
+                                       const Real64 &ratedCapacity,
+                                       Real64 &tempSlopeOut, Real64 &minCondLoadOut)
+{
+    if (ratedCapacity > 0.0) {
+        Real64 DelTempMin, DelTempMax;
+        Curve::GetCurveMinMaxValues(state, capCurvePtr, DelTempMin, DelTempMax);
+        Real64 elevFactor = 1.0 - 7.17e-5 * state.dataEnvrn->Elevation;
+        Real64 Capmin = Curve::CurveValue(state, capCurvePtr, DelTempMin) * elevFactor;
+        Real64 Capmax = Curve::CurveValue(state, capCurvePtr, DelTempMax) * elevFactor;
+        tempSlopeOut = (DelTempMax - DelTempMin) / (Capmax - Capmin);
+        minCondLoadOut = Capmax - DelTempMax / tempSlopeOut;
+    } else {
+        ShowSevereError(state,
+                        EnergyPlus::format("{}{}=\"{}\" Capacity curve must be input and must be greater than 0 Watts.",
+                                           RoutineName, CurrentModuleObject, objName));
+        ErrorsFound = true;
+    }
+}
+
+// Helper: read defrost capacity and optional defrost energy fraction for walk-in and air-chiller coil objects.
+static void readDefrostCapAndEnergyFraction(EnergyPlusData &state,
+                                            bool &ErrorsFound,
+                                            std::string_view RoutineName,
+                                            std::string_view CurrentModuleObject,
+                                            const Array1D<Real64> &Numbers,
+                                            const Array1D_bool &lNumericBlanks,
+                                            const Array1D_string &cNumericFieldNames,
+                                            const Array1D_string &cAlphaFieldNames,
+                                            const Array1D_string &Alphas,
+                                            DefrostType defrostType,
+                                            const std::string &objName,
+                                            int capFieldNum,
+                                            int fracFieldNum,
+                                            int defTypeAlphaNum,
+                                            Real64 &defrostCapacity,
+                                            Real64 &defEnergyFraction)
+{
+    if (defrostType == DefrostType::OffCycle || defrostType == DefrostType::None) {
+        defrostCapacity = 0.0;
+    } else { // have electric or hot gas/brine defrost
+        if ((lNumericBlanks(capFieldNum)) || (Numbers(capFieldNum) <= 0.0)) {
+            ShowSevereError(state,
+                            EnergyPlus::format("{}{}=\"{}\", {} must be input and greater than or equal to 0 W for {} {}",
+                                               RoutineName, CurrentModuleObject, objName,
+                                               cNumericFieldNames(capFieldNum),
+                                               cAlphaFieldNames(defTypeAlphaNum),
+                                               Alphas(defTypeAlphaNum)));
+            ErrorsFound = true;
+        } else {
+            defrostCapacity = Numbers(capFieldNum);
+        }
+        if (defrostType == DefrostType::Elec) {
+            defEnergyFraction = 0.7;
+        }
+        if (defrostType == DefrostType::Fluid) {
+            defEnergyFraction = 0.3;
+        }
+        if (!lNumericBlanks(fracFieldNum)) {
+            if ((Numbers(fracFieldNum) > 1.0) || (Numbers(fracFieldNum) < 0.0)) {
+                ShowWarningError(state,
+                                 EnergyPlus::format("{}{}=\"{}\", {} must be between 0 and 1, default values will be used.",
+                                                    RoutineName, CurrentModuleObject, objName,
+                                                    cNumericFieldNames(fracFieldNum)));
+            } else {
+                defEnergyFraction = Numbers(fracFieldNum);
+            }
+        }
+    }
+}
+
+// Helper: read a walk-in door (glass or stock) for one zone.
+// NStart and AStart are the numeric/alpha field offset for the current zone.
+static bool readWalkInDoor(EnergyPlusData &state,
+                           bool &ErrorsFound,
+                           const ErrorObjectHeader &eoh,
+                           const Array1D<Real64> &Numbers,
+                           const Array1D_bool &lNumericBlanks,
+                           const Array1D_string &Alphas,
+                           const Array1D_bool &lAlphaBlanks,
+                           const Array1D_string &cAlphaFieldNames,
+                           int NStart, int AStart,
+                           int nArea, int nHeight, int nUValue, int aSchedule,
+                           Real64 defaultHeight, Real64 defaultUValue,
+                           Real64 &area, Real64 &height, Real64 &uvalue,
+                           Sched::Schedule *&schedOut)
+{
+    area = 0.0; height = 0.0; uvalue = 0.0;
+    if (lNumericBlanks(NStart + nArea)) return false;
+    area   = Numbers(NStart + nArea);
+    height = defaultHeight;
+    if (!lNumericBlanks(NStart + nHeight)) height = Numbers(NStart + nHeight);
+    uvalue = defaultUValue;
+    if (!lNumericBlanks(NStart + nUValue)) uvalue = Numbers(NStart + nUValue);
+    if (!lAlphaBlanks(AStart + aSchedule)) {
+        if ((schedOut = Sched::GetSchedule(state, Alphas(AStart + aSchedule))) == nullptr) {
+            ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(AStart + aSchedule), Alphas(AStart + aSchedule));
+            ErrorsFound = true;
+        } else if (!schedOut->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
+            Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(AStart + aSchedule), Alphas(AStart + aSchedule), Clusive::In, 0.0, Clusive::In, 1.0);
+            ErrorsFound = true;
+        }
+    }
+    return true;
+}
+
+// Helper: read suction piping UA and zone heat-gain inputs (optional).
+static void readSuctionPiping(EnergyPlusData &state,
+                              bool &ErrorsFound,
+                              std::string_view RoutineName,
+                              std::string_view CurrentModuleObject,
+                              const Array1D<Real64> &Numbers,
+                              const Array1D_bool &lNumericBlanks,
+                              const Array1D_string &Alphas,
+                              const Array1D_bool &lAlphaBlanks,
+                              const Array1D_string &cAlphaFieldNames,
+                              const Array1D_string &cNumericFieldNames,
+                              int alphaFieldNum, int numericFieldNum,
+                              const std::string &objName,
+                              Real64 &sumUASuctionPiping,
+                              int &suctionPipeActualZoneNum,
+                              int &suctionPipeZoneNodeNum,
+                              std::string_view tempLevelLabel = "")
+{
+    sumUASuctionPiping = 0.0;
+    std::string levelPrefix = tempLevelLabel.empty() ? std::string("S") : EnergyPlus::format("  The {} s", tempLevelLabel);
+    if (!lNumericBlanks(numericFieldNum) && !lAlphaBlanks(alphaFieldNum)) {
+        sumUASuctionPiping = Numbers(numericFieldNum);
+        suctionPipeActualZoneNum = Util::FindItemInList(Alphas(alphaFieldNum), state.dataHeatBal->Zone);
+        suctionPipeZoneNodeNum = DataZoneEquipment::GetSystemNodeNumberForZone(state, suctionPipeActualZoneNum);
+        if (suctionPipeZoneNodeNum == 0) {
+            ShowSevereError(
+                state,
+                EnergyPlus::format(
+                    "{}{}=\"{}\", System Node Number not found for {} = {} even though {} is greater than zero.",
+                    RoutineName, CurrentModuleObject, objName,
+                    cAlphaFieldNames(alphaFieldNum), Alphas(alphaFieldNum),
+                    cNumericFieldNames(numericFieldNum)));
+            ShowContinueError(state, EnergyPlus::format("{}uction piping heat gain cannot be calculated unless a Zone is defined to "
+                                                        "determine the environmental temperature surrounding the piping.", levelPrefix));
+            ErrorsFound = true;
+        } else {
+            state.dataRefrigCase->RefrigPresentInZone(suctionPipeActualZoneNum) = true;
+        }
+    } else if (!lNumericBlanks(numericFieldNum) && lAlphaBlanks(alphaFieldNum)) {
+        ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\" {} not found even though {} is greater than zero.",
+                                                   RoutineName, CurrentModuleObject, objName,
+                                                   cAlphaFieldNames(alphaFieldNum), cNumericFieldNames(numericFieldNum)));
+        ShowContinueError(state, EnergyPlus::format("{}uction piping heat gain will not be calculated unless a Zone is defined to "
+                                                    "determine the environmental temperature surrounding the piping.", levelPrefix));
+    } else if (lNumericBlanks(numericFieldNum) && !lAlphaBlanks(alphaFieldNum)) {
+        ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\" {} will not be used and suction piping heat gain will not be calculated because {} was blank.",
+                                                   RoutineName, CurrentModuleObject, objName,
+                                                   cAlphaFieldNames(alphaFieldNum), cNumericFieldNames(numericFieldNum)));
+    }
+}
+
+// Helper: read the optional air-inlet node field for an air-cooled condenser or gas cooler.
+static void readAirInletNodeField(EnergyPlusData &state,
+                                  bool &ErrorsFound,
+                                  const ErrorObjectHeader &eoh,
+                                  const Array1D_string &Alphas,
+                                  const Array1D_bool &lAlphaBlanks,
+                                  const Array1D_string &cAlphaFieldNames,
+                                  int alphaNum,
+                                  Node::ConnectionObjectType connObjType,
+                                  int &inletAirNodeNum,
+                                  int &inletAirZoneNum,
+                                  bool &rejectHeatToZone)
+{
+    rejectHeatToZone = false;
+    if (lAlphaBlanks(alphaNum)) {
+        inletAirNodeNum = 0;
+        return;
+    }
+    inletAirZoneNum = Util::FindItemInList(Alphas(alphaNum), state.dataHeatBal->Zone);
+    if (inletAirZoneNum != 0) {
+        inletAirNodeNum = DataZoneEquipment::GetSystemNodeNumberForZone(state, inletAirZoneNum);
+        rejectHeatToZone = true;
+        state.dataRefrigCase->RefrigPresentInZone(inletAirZoneNum) = true;
+    } else {
+        inletAirNodeNum = Node::GetOnlySingleNode(state,
+                                                               Alphas(alphaNum),
+                                                               ErrorsFound,
+                                                               connObjType,
+                                                               Alphas(1),
+                                                               Node::FluidType::Air,
+                                                               Node::ConnectionType::OutsideAirReference,
+                                                               Node::CompFluidStream::Primary,
+                                                               Node::ObjectIsParent);
+        if (!OutAirNodeManager::CheckOutAirNodeNumber(state, inletAirNodeNum)) {
+            ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(alphaNum), Alphas(alphaNum));
+            ShowContinueError(state, "...does not appear in an OutdoorAir:NodeList or as an OutdoorAir:Node or as a Zone.");
+            ErrorsFound = true;
+        }
+    }
+}
+
 void GetRefrigerationInput(EnergyPlusData &state)
 {
 
@@ -995,29 +1198,6 @@ void GetRefrigerationInput(EnergyPlusData &state)
         }
     };
 
-    // Helper lambda: given an already-computed RatedCapacity (with elevation correction applied),
-    // compute TempSlope and MinCondLoad from the capacity curve's min/max values.  Also applies
-    // the elevation correction factor to Capmin and Capmax.  On success updates tempSlopeOut and
-    // minCondLoadOut; on failure (RatedCapacity <= 0) emits a severe error and sets ErrorsFound.
-    // objName is used in the error message.  ratedCapacity is passed by reference so the
-    // elevation-corrected value can be read.
-    auto computeCapCurveSlopeAndMin = [&](int capCurvePtr, const std::string &objName,
-                                          const Real64 &ratedCapacity,
-                                          Real64 &tempSlopeOut, Real64 &minCondLoadOut) {
-        if (ratedCapacity > 0.0) {
-            Curve::GetCurveMinMaxValues(state, capCurvePtr, DelTempMin, DelTempMax);
-            Real64 elevFactor = 1.0 - 7.17e-5 * state.dataEnvrn->Elevation;
-            Real64 Capmin = Curve::CurveValue(state, capCurvePtr, DelTempMin) * elevFactor;
-            Real64 Capmax = Curve::CurveValue(state, capCurvePtr, DelTempMax) * elevFactor;
-            tempSlopeOut = (DelTempMax - DelTempMin) / (Capmax - Capmin);
-            minCondLoadOut = Capmax - DelTempMax / tempSlopeOut;
-        } else {
-            ShowSevereError(state,
-                            EnergyPlus::format("{}{}=\"{}\" Capacity curve must be input and must be greater than 0 Watts.",
-                                               RoutineName, CurrentModuleObject, objName));
-            ErrorsFound = true;
-        }
-    };
 
     // Helper lambda: if alpha field n is blank assign the always-on schedule, otherwise look up the
     // schedule by name, report a severe error if not found, and validate the 0-1 min/max range.
@@ -1067,57 +1247,6 @@ void GetRefrigerationInput(EnergyPlusData &state)
         }
     };
 
-    // Helper lambda: read the defrost capacity (capFieldNum) and optional defrost energy
-    // fraction (fracFieldNum) for walk-in and air-chiller coil objects.  When the defrost
-    // type is OffCycle or None the capacity is set to 0 and both numeric fields are skipped;
-    // otherwise the capacity field is required and the fraction field is optional (default
-    // 0.7 for Elec, 0.3 for Fluid).  defTypeAlphaNum identifies the alpha field that holds
-    // the defrost-type choice, used only for the error message text.
-    auto readDefrostCapAndEnergyFraction = [&](DefrostType defrostType,
-                                               const std::string &objName,
-                                               int capFieldNum,
-                                               int fracFieldNum,
-                                               int defTypeAlphaNum,
-                                               Real64 &defrostCapacity,
-                                               Real64 &defEnergyFraction) {
-        if (defrostType == DefrostType::OffCycle || defrostType == DefrostType::None) {
-            defrostCapacity = 0.0;
-        } else { // have electric or hot gas/brine defrost
-            if ((lNumericBlanks(capFieldNum)) || (Numbers(capFieldNum) <= 0.0)) {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}{}=\"{}\", {} must be input and greater than or equal to 0 W for {} {}",
-                                                   RoutineName,
-                                                   CurrentModuleObject,
-                                                   objName,
-                                                   cNumericFieldNames(capFieldNum),
-                                                   cAlphaFieldNames(defTypeAlphaNum),
-                                                   Alphas(defTypeAlphaNum)));
-                ErrorsFound = true;
-            } else {
-                defrostCapacity = Numbers(capFieldNum);
-            }
-            // defaults for defrost energy fraction are 0.7 for elec defrost and 0.3 for warm fluid
-            // note this value is only used for temperature terminated defrost control type
-            if (defrostType == DefrostType::Elec) {
-                defEnergyFraction = 0.7;
-            }
-            if (defrostType == DefrostType::Fluid) {
-                defEnergyFraction = 0.3;
-            }
-            if (!lNumericBlanks(fracFieldNum)) {
-                if ((Numbers(fracFieldNum) > 1.0) || (Numbers(fracFieldNum) < 0.0)) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("{}{}=\"{}\", {} must be between 0 and 1, default values will be used.",
-                                                        RoutineName,
-                                                        CurrentModuleObject,
-                                                        objName,
-                                                        cNumericFieldNames(fracFieldNum)));
-                } else {
-                    defEnergyFraction = Numbers(fracFieldNum);
-                }
-            }
-        }
-    };
 
     // bbb stovall note for future - for all curve entries, see if need fail on type or if can allow table input
     if (state.dataRefrigCase->NumSimulationCases > 0) {
@@ -1830,7 +1959,9 @@ void GetRefrigerationInput(EnergyPlusData &state)
             AlphaNum = 8;
             getDripDownScheduleOrDefault(eoh, AlphaNum, WalkIn(WalkInID).defrostSched, WalkIn(WalkInID).defrostDripDownSched);
 
-            readDefrostCapAndEnergyFraction(WalkIn(WalkInID).defrostType, WalkIn(WalkInID).Name,
+            readDefrostCapAndEnergyFraction(state, ErrorsFound, RoutineName, CurrentModuleObject,
+                                             Numbers, lNumericBlanks, cNumericFieldNames, cAlphaFieldNames, Alphas,
+                                             WalkIn(WalkInID).defrostType, WalkIn(WalkInID).Name,
                                              /*capFieldNum=*/8, /*fracFieldNum=*/9,
                                              /*defTypeAlphaNum=*/5,
                                              WalkIn(WalkInID).DefrostCapacity,
@@ -1944,32 +2075,9 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 // per-zone array members to fill.
                 // Returns true if the area field was present (i.e., this door type is present in
                 // this zone), allowing the caller to perform additional door-type-specific checks.
-                auto readWalkInDoor = [&](int nArea, int nHeight, int nUValue, int aSchedule,
-                                          Real64 defaultHeight, Real64 defaultUValue,
-                                          Real64 &area, Real64 &height, Real64 &uvalue,
-                                          Sched::Schedule *&schedOut) -> bool {
-                    area = 0.0; height = 0.0; uvalue = 0.0;
-                    if (lNumericBlanks(NStart + nArea)) return false;
-                    area   = Numbers(NStart + nArea);
-                    height = defaultHeight;
-                    if (!lNumericBlanks(NStart + nHeight)) height = Numbers(NStart + nHeight);
-                    uvalue = defaultUValue;
-                    if (!lNumericBlanks(NStart + nUValue)) uvalue = Numbers(NStart + nUValue);
-                    // convert door opening schedule name to pointer
-                    if (!lAlphaBlanks(AStart + aSchedule)) {
-                        if ((schedOut = Sched::GetSchedule(state, Alphas(AStart + aSchedule))) == nullptr) {
-                            ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(AStart + aSchedule), Alphas(AStart + aSchedule));
-                            ErrorsFound = true;
-                        } else if (!schedOut->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                            Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(AStart + aSchedule), Alphas(AStart + aSchedule), Clusive::In, 0.0, Clusive::In, 1.0);
-                            ErrorsFound = true;
-                        }
-                    }
-                    return true;
-                };
-
                 // Glass doors in this zone
-                readWalkInDoor(2, 3, 4, 1,
+                readWalkInDoor(state, ErrorsFound, eoh, Numbers, lNumericBlanks, Alphas, lAlphaBlanks, cAlphaFieldNames,
+                               NStart, AStart, 2, 3, 4, 1,
                                DefaultWIHeightGlassDr, DefaultWIUValueGlassDr,
                                WalkIn(WalkInID).AreaGlassDr(ZoneID),
                                WalkIn(WalkInID).HeightGlassDr(ZoneID),
@@ -1977,7 +2085,8 @@ void GetRefrigerationInput(EnergyPlusData &state)
                                WalkIn(WalkInID).glassDoorOpenScheds(ZoneID));
 
                 // Stock doors in this zone
-                if (readWalkInDoor(5, 6, 7, 2,
+                if (readWalkInDoor(state, ErrorsFound, eoh, Numbers, lNumericBlanks, Alphas, lAlphaBlanks, cAlphaFieldNames,
+                                   NStart, AStart, 5, 6, 7, 2,
                                    DefaultWIHeightStockDr, DefaultWIUValueStockDr,
                                    WalkIn(WalkInID).AreaStockDr(ZoneID),
                                    WalkIn(WalkInID).HeightStockDr(ZoneID),
@@ -2386,7 +2495,9 @@ void GetRefrigerationInput(EnergyPlusData &state)
             getDripDownScheduleOrDefault(eoh, AlphaNum, WarehouseCoil(CoilID).defrostSched, WarehouseCoil(CoilID).defrostDripDownSched);
 
             ++NumNum; // N14
-            readDefrostCapAndEnergyFraction(WarehouseCoil(CoilID).defrostType, WarehouseCoil(CoilID).Name,
+            readDefrostCapAndEnergyFraction(state, ErrorsFound, RoutineName, CurrentModuleObject,
+                                             Numbers, lNumericBlanks, cNumericFieldNames, cAlphaFieldNames, Alphas,
+                                             WarehouseCoil(CoilID).defrostType, WarehouseCoil(CoilID).Name,
                                              /*capFieldNum=*/NumNum, /*fracFieldNum=*/NumNum + 1,
                                              /*defTypeAlphaNum=*/AlphaNum,
                                              WarehouseCoil(CoilID).DefrostCapacity,
@@ -3029,44 +3140,6 @@ void GetRefrigerationInput(EnergyPlusData &state)
     // sumUASuctionPiping, suctionPipeActualZoneNum, suctionPipeZoneNodeNum are the output members.
     // tempLevelLabel is an optional qualifier ("medium temperature", "low temperature", or "" for
     // single-level systems) used in error/warning messages.
-    auto readSuctionPiping = [&](int alphaFieldNum, int numericFieldNum,
-                                 const std::string &objName,
-                                 Real64 &sumUASuctionPiping,
-                                 int &suctionPipeActualZoneNum,
-                                 int &suctionPipeZoneNodeNum,
-                                 std::string_view tempLevelLabel = "") {
-        sumUASuctionPiping = 0.0;
-        std::string levelPrefix = tempLevelLabel.empty() ? std::string("S") : EnergyPlus::format("  The {} s", tempLevelLabel);
-        if (!lNumericBlanks(numericFieldNum) && !lAlphaBlanks(alphaFieldNum)) {
-            sumUASuctionPiping = Numbers(numericFieldNum);
-            suctionPipeActualZoneNum = Util::FindItemInList(Alphas(alphaFieldNum), state.dataHeatBal->Zone);
-            suctionPipeZoneNodeNum = DataZoneEquipment::GetSystemNodeNumberForZone(state, suctionPipeActualZoneNum);
-            if (suctionPipeZoneNodeNum == 0) {
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format(
-                        "{}{}=\"{}\", System Node Number not found for {} = {} even though {} is greater than zero.",
-                        RoutineName, CurrentModuleObject, objName,
-                        cAlphaFieldNames(alphaFieldNum), Alphas(alphaFieldNum),
-                        cNumericFieldNames(numericFieldNum)));
-                ShowContinueError(state, EnergyPlus::format("{}uction piping heat gain cannot be calculated unless a Zone is defined to "
-                                                            "determine the environmental temperature surrounding the piping.", levelPrefix));
-                ErrorsFound = true;
-            } else {
-                state.dataRefrigCase->RefrigPresentInZone(suctionPipeActualZoneNum) = true;
-            }
-        } else if (!lNumericBlanks(numericFieldNum) && lAlphaBlanks(alphaFieldNum)) {
-            ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\" {} not found even though {} is greater than zero.",
-                                                       RoutineName, CurrentModuleObject, objName,
-                                                       cAlphaFieldNames(alphaFieldNum), cNumericFieldNames(numericFieldNum)));
-            ShowContinueError(state, EnergyPlus::format("{}uction piping heat gain will not be calculated unless a Zone is defined to "
-                                                        "determine the environmental temperature surrounding the piping.", levelPrefix));
-        } else if (lNumericBlanks(numericFieldNum) && !lAlphaBlanks(alphaFieldNum)) {
-            ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\" {} will not be used and suction piping heat gain will not be calculated because {} was blank.",
-                                                       RoutineName, CurrentModuleObject, objName,
-                                                       cAlphaFieldNames(alphaFieldNum), cNumericFieldNames(numericFieldNum)));
-        }
-    };
 
     if (state.dataRefrigCase->NumRefrigSystems > 0 || state.dataRefrigCase->NumTransRefrigSystems > 0) {
 
@@ -3100,44 +3173,6 @@ void GetRefrigerationInput(EnergyPlusData &state)
         // GetOnlySingleNode with the supplied ConnectionObjectType and verifies it is an
         // OutsideAir node; reports a severe error + continue error if not found.
         // The eoh argument is used only for the "not found" error message on the outside-air path.
-        auto readAirInletNodeField = [&](const ErrorObjectHeader &eoh,
-                                         int alphaNum,
-                                         Node::ConnectionObjectType connObjType,
-                                         int &inletAirNodeNum,
-                                         int &inletAirZoneNum,
-                                         bool &rejectHeatToZone) {
-            rejectHeatToZone = false;
-            if (lAlphaBlanks(alphaNum)) {
-                inletAirNodeNum = 0;
-                return;
-            }
-            // see if it's an outside air node name or an indoor zone name;
-            // have to check inside first because outside check automatically generates an error message
-            inletAirZoneNum = Util::FindItemInList(Alphas(alphaNum), state.dataHeatBal->Zone);
-            if (inletAirZoneNum != 0) {
-                // set flag (later used to set system flag) and zone flag
-                inletAirNodeNum = DataZoneEquipment::GetSystemNodeNumberForZone(state, inletAirZoneNum);
-                rejectHeatToZone = true;
-                state.dataRefrigCase->RefrigPresentInZone(inletAirZoneNum) = true;
-            } else { // not in a conditioned zone, so see if it's outside
-                inletAirNodeNum = Node::GetOnlySingleNode(state,
-                                                                       Alphas(alphaNum),
-                                                                       ErrorsFound,
-                                                                       connObjType,
-                                                                       Alphas(1),
-                                                                       Node::FluidType::Air,
-                                                                       Node::ConnectionType::OutsideAirReference,
-                                                                       Node::CompFluidStream::Primary,
-                                                                       Node::ObjectIsParent);
-                if (!OutAirNodeManager::CheckOutAirNodeNumber(state, inletAirNodeNum)) {
-                    // not outside and not a zone
-                    ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(alphaNum), Alphas(alphaNum));
-                    ShowContinueError(state, "...does not appear in an OutdoorAir:NodeList or as an OutdoorAir:Node or as a Zone.");
-                    ErrorsFound = true;
-                }
-            }
-        };
-
         if (state.dataRefrigCase->NumSimulationCondAir > 0) {
             CurrentModuleObject = "Refrigeration:Condenser:AirCooled";
             for (int CondNum = 1; CondNum <= state.dataRefrigCase->NumSimulationCondAir; ++CondNum) {
@@ -3174,7 +3209,8 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 }
                 // elevation capacity correction on air-cooled condensers, Carrier correlation more conservative than Trane
                 Condenser(CondNum).RatedCapacity *= (1.0 - 7.17e-5 * state.dataEnvrn->Elevation);
-                computeCapCurveSlopeAndMin(Condenser(CondNum).CapCurvePtr, Condenser(CondNum).Name,
+                computeCapCurveSlopeAndMin(state, ErrorsFound, RoutineName, CurrentModuleObject,
+                                           Condenser(CondNum).CapCurvePtr, Condenser(CondNum).Name,
                                            Condenser(CondNum).RatedCapacity,
                                            Condenser(CondNum).TempSlope, Condenser(CondNum).MinCondLoad);
 
@@ -3212,7 +3248,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
 
                 // Check condenser air inlet node connection
                 // Jan 2011 - added ability to reject heat to a zone from air-cooled condenser
-                readAirInletNodeField(eoh, 4,
+                readAirInletNodeField(state, ErrorsFound, eoh, Alphas, lAlphaBlanks, cAlphaFieldNames, 4,
                                       Node::ConnectionObjectType::RefrigerationCondenserAirCooled,
                                       Condenser(CondNum).InletAirNodeNum,
                                       Condenser(CondNum).InletAirZoneNum,
@@ -3706,7 +3742,8 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 }
                 // elevation capacity correction on air-cooled condensers, Carrier correlation more conservative than Trane
                 GasCooler(GCNum).RatedCapacity *= (1.0 - 7.17e-5 * state.dataEnvrn->Elevation);
-                computeCapCurveSlopeAndMin(GasCooler(GCNum).CapCurvePtr, GasCooler(GCNum).Name,
+                computeCapCurveSlopeAndMin(state, ErrorsFound, RoutineName, CurrentModuleObject,
+                                           GasCooler(GCNum).CapCurvePtr, GasCooler(GCNum).Name,
                                            GasCooler(GCNum).RatedCapacity,
                                            GasCooler(GCNum).TempSlope, GasCooler(GCNum).MinCondLoad);
 
@@ -3822,7 +3859,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 }
 
                 // Check GasCooler air inlet node connection
-                readAirInletNodeField(eoh, 4,
+                readAirInletNodeField(state, ErrorsFound, eoh, Alphas, lAlphaBlanks, cAlphaFieldNames, 4,
                                       Node::ConnectionObjectType::RefrigerationGasCoolerAirCooled,
                                       GasCooler(GCNum).InletAirNodeNum,
                                       GasCooler(GCNum).InletAirZoneNum,
@@ -5170,7 +5207,8 @@ void GetRefrigerationInput(EnergyPlusData &state)
 
             // Suction piping heat gain - optional
             AlphaNum = 10;
-            readSuctionPiping(AlphaNum, 2, System(RefrigSysNum).Name,
+            readSuctionPiping(state, ErrorsFound, RoutineName, CurrentModuleObject, Numbers, lNumericBlanks, Alphas, lAlphaBlanks, cAlphaFieldNames, cNumericFieldNames,
+                              AlphaNum, 2, System(RefrigSysNum).Name,
                               System(RefrigSysNum).SumUASuctionPiping,
                               System(RefrigSysNum).SuctionPipeActualZoneNum,
                               System(RefrigSysNum).SuctionPipeZoneNodeNum);
@@ -5805,14 +5843,16 @@ void GetRefrigerationInput(EnergyPlusData &state)
             //  Get the Zone and zone node numbers from the zone name entered by the user
 
             AlphaNum = 9; // Medium temperature suction piping
-            readSuctionPiping(AlphaNum, 3, TransSystem(TransRefrigSysNum).Name,
+            readSuctionPiping(state, ErrorsFound, RoutineName, CurrentModuleObject, Numbers, lNumericBlanks, Alphas, lAlphaBlanks, cAlphaFieldNames, cNumericFieldNames,
+                              AlphaNum, 3, TransSystem(TransRefrigSysNum).Name,
                               TransSystem(TransRefrigSysNum).SumUASuctionPipingMT,
                               TransSystem(TransRefrigSysNum).SuctionPipeActualZoneNumMT,
                               TransSystem(TransRefrigSysNum).SuctionPipeZoneNodeNumMT,
                               "medium temperature");
 
             AlphaNum = 10; // Low temperature suction piping
-            readSuctionPiping(AlphaNum, 4, TransSystem(TransRefrigSysNum).Name,
+            readSuctionPiping(state, ErrorsFound, RoutineName, CurrentModuleObject, Numbers, lNumericBlanks, Alphas, lAlphaBlanks, cAlphaFieldNames, cNumericFieldNames,
+                              AlphaNum, 4, TransSystem(TransRefrigSysNum).Name,
                               TransSystem(TransRefrigSysNum).SumUASuctionPipingLT,
                               TransSystem(TransRefrigSysNum).SuctionPipeActualZoneNumLT,
                               TransSystem(TransRefrigSysNum).SuctionPipeZoneNodeNumLT,
