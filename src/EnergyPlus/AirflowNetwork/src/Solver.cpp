@@ -1735,64 +1735,25 @@ namespace AirflowNetwork {
         static constexpr std::string_view Format_120("AirflowNetwork Model:Control,{}\n");
 
         // Set the maximum numbers of input fields
-        m_state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(
-            m_state, "AirflowNetwork:SimulationControl", TotalArgs, NumAlphas, NumNumbers);
-        MaxNums = max(MaxNums, NumNumbers);
-        MaxAlphas = max(MaxAlphas, NumAlphas);
-        m_state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(m_state, "AirflowNetwork:MultiZone:Zone", TotalArgs, NumAlphas, NumNumbers);
-        MaxNums = max(MaxNums, NumNumbers);
-        MaxAlphas = max(MaxAlphas, NumAlphas);
-        m_state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(
-            m_state, "AirflowNetwork:MultiZone:Surface", TotalArgs, NumAlphas, NumNumbers);
-        MaxNums = max(MaxNums, NumNumbers);
-        MaxAlphas = max(MaxAlphas, NumAlphas);
-        m_state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(
-            m_state, "AirflowNetwork:MultiZone:Component:DetailedOpening", TotalArgs, NumAlphas, NumNumbers);
-        MaxNums = max(MaxNums, NumNumbers);
-        MaxAlphas = max(MaxAlphas, NumAlphas);
-        m_state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(
-            m_state, "AirflowNetwork:MultiZone:ExternalNode", TotalArgs, NumAlphas, NumNumbers);
-        MaxNums = max(MaxNums, NumNumbers);
-        MaxAlphas = max(MaxAlphas, NumAlphas);
-        m_state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(
-            m_state, "AirflowNetwork:MultiZone:WindPressureCoefficientArray", TotalArgs, NumAlphas, NumNumbers);
-        MaxNums = max(MaxNums, NumNumbers);
-        MaxAlphas = max(MaxAlphas, NumAlphas);
-        m_state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(
-            m_state, "AirflowNetwork:MultiZone:WindPressureCoefficientValues", TotalArgs, NumAlphas, NumNumbers);
-        MaxNums = max(MaxNums, NumNumbers);
-        MaxAlphas = max(MaxAlphas, NumAlphas);
-        m_state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(
-            m_state, "AirflowNetwork:Distribution:Node", TotalArgs, NumAlphas, NumNumbers);
-        MaxNums = max(MaxNums, NumNumbers);
-        MaxAlphas = max(MaxAlphas, NumAlphas);
-        m_state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(
-            m_state, "AirflowNetwork:Distribution:DuctViewFactors", TotalArgs, NumAlphas, NumNumbers);
-        MaxNums = max(MaxNums, NumNumbers);
-        MaxAlphas = max(MaxAlphas, NumAlphas);
-        m_state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(
-            m_state, "AirflowNetwork:Distribution:Linkage", TotalArgs, NumAlphas, NumNumbers);
-        MaxNums = max(MaxNums, NumNumbers);
-        MaxAlphas = max(MaxAlphas, NumAlphas);
-        m_state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(
-            m_state, "AirflowNetwork:OccupantVentilationControl", TotalArgs, NumAlphas, NumNumbers);
-        MaxNums = max(MaxNums, NumNumbers);
-        MaxAlphas = max(MaxAlphas, NumAlphas);
-        m_state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(m_state, "AirflowNetwork:IntraZone:Node", TotalArgs, NumAlphas, NumNumbers);
-        MaxNums = max(MaxNums, NumNumbers);
-        MaxAlphas = max(MaxAlphas, NumAlphas);
-        m_state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(
-            m_state, "AirflowNetwork:IntraZone:Linkage", TotalArgs, NumAlphas, NumNumbers);
-        MaxNums = max(MaxNums, NumNumbers);
-        MaxAlphas = max(MaxAlphas, NumAlphas);
-        m_state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(
-            m_state, "AirflowNetwork:ZoneControl:PressureController", TotalArgs, NumAlphas, NumNumbers);
-        MaxNums = max(MaxNums, NumNumbers);
-        MaxAlphas = max(MaxAlphas, NumAlphas);
-        m_state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(
-            m_state, "AirflowNetwork:Distribution:DuctSizing", TotalArgs, NumAlphas, NumNumbers);
-        MaxNums = max(MaxNums, NumNumbers);
-        MaxAlphas = max(MaxAlphas, NumAlphas);
+        for (auto const *objName : {"AirflowNetwork:SimulationControl",
+                                     "AirflowNetwork:MultiZone:Zone",
+                                     "AirflowNetwork:MultiZone:Surface",
+                                     "AirflowNetwork:MultiZone:Component:DetailedOpening",
+                                     "AirflowNetwork:MultiZone:ExternalNode",
+                                     "AirflowNetwork:MultiZone:WindPressureCoefficientArray",
+                                     "AirflowNetwork:MultiZone:WindPressureCoefficientValues",
+                                     "AirflowNetwork:Distribution:Node",
+                                     "AirflowNetwork:Distribution:DuctViewFactors",
+                                     "AirflowNetwork:Distribution:Linkage",
+                                     "AirflowNetwork:OccupantVentilationControl",
+                                     "AirflowNetwork:IntraZone:Node",
+                                     "AirflowNetwork:IntraZone:Linkage",
+                                     "AirflowNetwork:ZoneControl:PressureController",
+                                     "AirflowNetwork:Distribution:DuctSizing"}) {
+            m_state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(m_state, objName, TotalArgs, NumAlphas, NumNumbers);
+            MaxNums = max(MaxNums, NumNumbers);
+            MaxAlphas = max(MaxAlphas, NumAlphas);
+        }
 
         Alphas.allocate(MaxAlphas);
         cAlphaFields.allocate(MaxAlphas);
