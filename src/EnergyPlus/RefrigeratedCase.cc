@@ -779,6 +779,126 @@ static void readAirInletNodeField(EnergyPlusData &state,
     }
 }
 
+// Helper: read distribution piping or receiver UA and zone heat-gain inputs (optional) for secondary systems.
+static void readSecondaryPipingOrReceiver(EnergyPlusData &state,
+                                          bool &ErrorsFound,
+                                          std::string_view RoutineName,
+                                          std::string_view CurrentModuleObject,
+                                          const std::string &objName,
+                                          const Array1D<Real64> &Numbers,
+                                          const Array1D_bool &lNumericBlanks,
+                                          const Array1D_string &Alphas,
+                                          const Array1D_bool &lAlphaBlanks,
+                                          const Array1D_string &cAlphaFieldNames,
+                                          const Array1D_string &cNumericFieldNames,
+                                          int alphaFieldNum, int numericFieldNum,
+                                          Real64 &sumUA, int &zoneNum, int &zoneNodeNum,
+                                          std::string_view heatGainLabel,
+                                          std::string_view surroundingLabel)
+{
+    sumUA = 0.0;
+    if (!lNumericBlanks(numericFieldNum) && !lAlphaBlanks(alphaFieldNum)) {
+        sumUA = Numbers(numericFieldNum);
+        zoneNum = Util::FindItemInList(Alphas(alphaFieldNum), state.dataHeatBal->Zone);
+        zoneNodeNum = DataZoneEquipment::GetSystemNodeNumberForZone(state, zoneNum);
+        if (zoneNum == 0) {
+            ShowSevereError(state,
+                            EnergyPlus::format("{}{}=\"{}\", invalid  {} not valid: {}",
+                                               RoutineName, CurrentModuleObject, objName,
+                                               cAlphaFieldNames(alphaFieldNum), Alphas(alphaFieldNum)));
+            ErrorsFound = true;
+        } else {
+            state.dataRefrigCase->RefrigPresentInZone(zoneNum) = true;
+        }
+        if (zoneNodeNum == 0) {
+            ShowSevereError(
+                state,
+                EnergyPlus::format(
+                    "{}{}=\"{}\" System Node Number not found for {} = {} even though {} is greater than zero. {} heat gain "
+                    "cannot be calculated unless a controlled Zone (appear in a ZoneHVAC:EquipmentConnections object.) is "
+                    "defined to determine the environmental temperature surrounding the {}.",
+                    RoutineName, CurrentModuleObject, objName,
+                    cAlphaFieldNames(alphaFieldNum), Alphas(alphaFieldNum),
+                    cNumericFieldNames(numericFieldNum),
+                    heatGainLabel, surroundingLabel));
+            ErrorsFound = true;
+        }
+    } else if (!lNumericBlanks(numericFieldNum) && lAlphaBlanks(alphaFieldNum)) {
+        ShowWarningError(
+            state,
+            EnergyPlus::format(
+                "{}{}=\"{}\", {} not found even though {} is greater than zero. {} heat gain will not be calculated unless "
+                "a Zone is defined to determine the environmental temperature surrounding the {}.",
+                RoutineName, CurrentModuleObject, objName,
+                cAlphaFieldNames(alphaFieldNum), cNumericFieldNames(numericFieldNum),
+                heatGainLabel, surroundingLabel));
+    } else if (lNumericBlanks(numericFieldNum) && !lAlphaBlanks(alphaFieldNum)) {
+        ShowWarningError(
+            state,
+            EnergyPlus::format(
+                "{}{}=\"{}\", {} will not be used and {} heat gain will not be calculated because {} was blank.",
+                RoutineName, CurrentModuleObject, objName,
+                cAlphaFieldNames(alphaFieldNum), heatGainLabel, cNumericFieldNames(numericFieldNum)));
+    }
+}
+
+// Helper: exactly one of two numeric fields must be supplied for compressor rating.
+static void readOneOfTwoRatingFields(EnergyPlusData &state,
+                                     bool &ErrorsFound,
+                                     std::string_view RoutineName,
+                                     std::string_view CurrentModuleObject,
+                                     const std::string &compName,
+                                     const Array1D<Real64> &Numbers,
+                                     const Array1D_bool &lNumericBlanks,
+                                     const Array1D_string &cNumericFieldNames,
+                                     int n1, int n2,
+                                     CompRatingType type1, CompRatingType type2,
+                                     CompRatingType &ratingType, Real64 &ratedValue)
+{
+    if (((!lNumericBlanks(n1)) && (!lNumericBlanks(n2))) || (lNumericBlanks(n1) && lNumericBlanks(n2))) {
+        ShowSevereError(state,
+                        EnergyPlus::format("{}{}=\"{}\"One, and Only One of {} or {}",
+                                           RoutineName, CurrentModuleObject, compName,
+                                           cNumericFieldNames(n1), cNumericFieldNames(n2)));
+        ShowContinueError(state, "Must Be Entered. Check input value choices.");
+        ErrorsFound = true;
+    } else if (!lNumericBlanks(n1)) {
+        ratingType = type1;
+        ratedValue = Numbers(n1);
+    } else {
+        ratingType = type2;
+        ratedValue = Numbers(n2);
+    }
+}
+
+namespace {
+
+// Helper: iterate a 1-based collection checking NumSysAttach, counting unused components.
+template <typename CollectionType, typename OnMultipleFn, typename WarnSummaryFn>
+void checkUnusedComponents(EnergyPlusData &state,
+                           std::string_view RoutineName,
+                           CollectionType &collection, int numItems, int &unusedCount,
+                           std::string_view idfType,
+                           OnMultipleFn onMultiple, WarnSummaryFn warnSummary)
+{
+    unusedCount = 0;
+    for (int i = 1; i <= numItems; ++i) {
+        if (collection(i).NumSysAttach == 1) continue;
+        if (collection(i).NumSysAttach < 1) {
+            ++unusedCount;
+            if (state.dataGlobal->DisplayExtraWarnings)
+                ShowWarningError(state, EnergyPlus::format("{}: {}=\"{}\" unused. ", RoutineName, idfType, collection(i).Name));
+        }
+        if (collection(i).NumSysAttach > 1) {
+            onMultiple(i);
+        }
+    }
+    if (unusedCount > 0 && !state.dataGlobal->DisplayExtraWarnings)
+        warnSummary(unusedCount);
+}
+
+} // anonymous namespace
+
 void GetRefrigerationInput(EnergyPlusData &state)
 {
 
@@ -4289,80 +4409,21 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 // Read distribution piping or receiver UA and zone heat-gain inputs (optional).
                 // The two blocks have identical structure; only field indices, member references,
                 // and message text differ, so they are handled by a single lambda.
-                auto readSecondaryPipingOrReceiver = [&](int alphaFieldNum, int numericFieldNum,
-                                                         Real64 &sumUA, int &zoneNum, int &zoneNodeNum,
-                                                         std::string_view heatGainLabel,
-                                                         std::string_view surroundingLabel) {
-                    sumUA = 0.0;
-                    if (!lNumericBlanks(numericFieldNum) && !lAlphaBlanks(alphaFieldNum)) {
-                        sumUA = Numbers(numericFieldNum);
-                        zoneNum = Util::FindItemInList(Alphas(alphaFieldNum), state.dataHeatBal->Zone);
-                        zoneNodeNum = DataZoneEquipment::GetSystemNodeNumberForZone(state, zoneNum);
-                        if (zoneNum == 0) {
-                            ShowSevereError(state,
-                                            EnergyPlus::format("{}{}=\"{}\", invalid  {} not valid: {}",
-                                                               RoutineName,
-                                                               CurrentModuleObject,
-                                                               Secondary(SecondaryNum).Name,
-                                                               cAlphaFieldNames(alphaFieldNum),
-                                                               Alphas(alphaFieldNum)));
-                            ErrorsFound = true;
-                        } else {
-                            state.dataRefrigCase->RefrigPresentInZone(zoneNum) = true;
-                        }
-                        if (zoneNodeNum == 0) {
-                            ShowSevereError(
-                                state,
-                                EnergyPlus::format(
-                                    "{}{}=\"{}\" System Node Number not found for {} = {} even though {} is greater than zero. {} heat gain "
-                                    "cannot be calculated unless a controlled Zone (appear in a ZoneHVAC:EquipmentConnections object.) is "
-                                    "defined to determine the environmental temperature surrounding the {}.",
-                                    RoutineName,
-                                    CurrentModuleObject,
-                                    Secondary(SecondaryNum).Name,
-                                    cAlphaFieldNames(alphaFieldNum),
-                                    Alphas(alphaFieldNum),
-                                    cNumericFieldNames(numericFieldNum),
-                                    heatGainLabel,
-                                    surroundingLabel));
-                            ErrorsFound = true;
-                        }
-                    } else if (!lNumericBlanks(numericFieldNum) && lAlphaBlanks(alphaFieldNum)) {
-                        ShowWarningError(
-                            state,
-                            EnergyPlus::format(
-                                "{}{}=\"{}\", {} not found even though {} is greater than zero. {} heat gain will not be calculated unless "
-                                "a Zone is defined to determine the environmental temperature surrounding the {}.",
-                                RoutineName,
-                                CurrentModuleObject,
-                                Secondary(SecondaryNum).Name,
-                                cAlphaFieldNames(alphaFieldNum),
-                                cNumericFieldNames(numericFieldNum),
-                                heatGainLabel,
-                                surroundingLabel));
-                    } else if (lNumericBlanks(numericFieldNum) && !lAlphaBlanks(alphaFieldNum)) {
-                        ShowWarningError(
-                            state,
-                            EnergyPlus::format(
-                                "{}{}=\"{}\", {} will not be used and {} heat gain will not be calculated because {} was blank.",
-                                RoutineName,
-                                CurrentModuleObject,
-                                Secondary(SecondaryNum).Name,
-                                cAlphaFieldNames(alphaFieldNum),
-                                heatGainLabel,
-                                cNumericFieldNames(numericFieldNum)));
-                    }
-                };
-
                 // Distribution piping heat gain - optional
-                readSecondaryPipingOrReceiver(7, 12,
+                readSecondaryPipingOrReceiver(state, ErrorsFound, RoutineName, CurrentModuleObject,
+                                              Secondary(SecondaryNum).Name,
+                                              Numbers, lNumericBlanks, Alphas, lAlphaBlanks, cAlphaFieldNames, cNumericFieldNames,
+                                              7, 12,
                                               Secondary(SecondaryNum).SumUADistPiping,
                                               Secondary(SecondaryNum).DistPipeZoneNum,
                                               Secondary(SecondaryNum).DistPipeZoneNodeNum,
                                               "Distribution piping", "piping");
 
                 // Separator/receiver heat gain - optional
-                readSecondaryPipingOrReceiver(8, 13,
+                readSecondaryPipingOrReceiver(state, ErrorsFound, RoutineName, CurrentModuleObject,
+                                              Secondary(SecondaryNum).Name,
+                                              Numbers, lNumericBlanks, Alphas, lAlphaBlanks, cAlphaFieldNames, cNumericFieldNames,
+                                              8, 13,
                                               Secondary(SecondaryNum).SumUAReceiver,
                                               Secondary(SecondaryNum).ReceiverZoneNum,
                                               Secondary(SecondaryNum).ReceiverZoneNodeNum,
@@ -4499,35 +4560,17 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 ErrorsFound = true;
             }
 
-            // Helper lambda: exactly one of the two numeric fields (n1, n2) must be supplied.
-            // On success sets ratingType and ratedValue from the filled field.
-            // On failure (both blank or both filled) reports a severe error.
-            auto readOneOfTwoRatingFields = [&](int n1, int n2,
-                                                CompRatingType type1, CompRatingType type2,
-                                                CompRatingType &ratingType, Real64 &ratedValue) {
-                if (((!lNumericBlanks(n1)) && (!lNumericBlanks(n2))) || (lNumericBlanks(n1) && lNumericBlanks(n2))) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}{}=\"{}\"One, and Only One of {} or {}",
-                                                       RoutineName, CurrentModuleObject, Compressor(CompNum).Name,
-                                                       cNumericFieldNames(n1), cNumericFieldNames(n2)));
-                    ShowContinueError(state, "Must Be Entered. Check input value choices.");
-                    ErrorsFound = true;
-                } else if (!lNumericBlanks(n1)) {
-                    ratingType = type1;
-                    ratedValue = Numbers(n1);
-                } else {
-                    ratingType = type2;
-                    ratedValue = Numbers(n2);
-                }
-            };
-
             // Get superheat rating type (Either N1 or N2 Must be input)
-            readOneOfTwoRatingFields(1, 2,
+            readOneOfTwoRatingFields(state, ErrorsFound, RoutineName, CurrentModuleObject,
+                                     Compressor(CompNum).Name, Numbers, lNumericBlanks, cNumericFieldNames,
+                                     1, 2,
                                      CompRatingType::Superheat, CompRatingType::ReturnGasTemperature,
                                      Compressor(CompNum).SuperheatRatingType, Compressor(CompNum).RatedSuperheat);
 
             // Get subcool rating type (Either N3 or N4 Must be input)
-            readOneOfTwoRatingFields(3, 4,
+            readOneOfTwoRatingFields(state, ErrorsFound, RoutineName, CurrentModuleObject,
+                                     Compressor(CompNum).Name, Numbers, lNumericBlanks, cNumericFieldNames,
+                                     3, 4,
                                      CompRatingType::LiquidTemperature, CompRatingType::Subcooling,
                                      Compressor(CompNum).SubcoolRatingType, Compressor(CompNum).RatedSubcool);
 
@@ -5898,25 +5941,6 @@ void GetRefrigerationInput(EnergyPlusData &state)
     // The caller supplies onMultiple (called with the item index when NumSysAttach > 1)
     // and warnSummary (called with unusedCount when unusedCount > 0 and
     // !DisplayExtraWarnings) so that per-type summary messages are preserved exactly.
-    auto checkUnusedComponents = [&](auto &collection, int numItems, int &unusedCount,
-                                     std::string_view idfType,
-                                     auto onMultiple, auto warnSummary) {
-        unusedCount = 0;
-        for (int i = 1; i <= numItems; ++i) {
-            if (collection(i).NumSysAttach == 1) continue;
-            if (collection(i).NumSysAttach < 1) {
-                ++unusedCount;
-                if (state.dataGlobal->DisplayExtraWarnings)
-                    ShowWarningError(state, EnergyPlus::format("{}: {}=\"{}\" unused. ", RoutineName, idfType, collection(i).Name));
-            }
-            if (collection(i).NumSysAttach > 1) {
-                onMultiple(i);
-            }
-        }
-        if (unusedCount > 0 && !state.dataGlobal->DisplayExtraWarnings)
-            warnSummary(unusedCount);
-    };
-
     if (state.dataRefrigCase->NumSimulationCases > 0) {
         // Find unused and non-unique display case objects to report in eio and err file and sum
         //    all HVAC RA fractions and write error message if greater than 1 for any zone
@@ -5945,7 +5969,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
         // check for cases not connected to systems and cases connected
         // more than once (twice in a system or to more than one system)
 
-        checkUnusedComponents(RefrigCase, state.dataRefrigCase->NumSimulationCases,
+        checkUnusedComponents(state, RoutineName, RefrigCase, state.dataRefrigCase->NumSimulationCases,
                               state.dataRefrigCase->NumUnusedRefrigCases, "Refrigeration:Case",
                               [&](int CaseNum) {
                                   ErrorsFound = true;
@@ -5965,7 +5989,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
     if (state.dataRefrigCase->NumSimulationCompressors > 0) {
         // check for compressors not connected to systems and compressors connected more than once
         // (twice in a system or to more than one system)
-        checkUnusedComponents(Compressor, state.dataRefrigCase->NumSimulationCompressors,
+        checkUnusedComponents(state, RoutineName, Compressor, state.dataRefrigCase->NumSimulationCompressors,
                               state.dataRefrigCase->NumUnusedCompressors, "Refrigeration:Compressor",
                               [&](int CompNum) {
                                   ErrorsFound = true;
@@ -5985,7 +6009,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
     if (state.dataRefrigCase->NumSimulationWalkIns > 0) {
         // check for refrigeration WalkIns not connected to any systems and
         //  refrigeration WalkIns connected more than once
-        checkUnusedComponents(WalkIn, state.dataRefrigCase->NumSimulationWalkIns,
+        checkUnusedComponents(state, RoutineName, WalkIn, state.dataRefrigCase->NumSimulationWalkIns,
                               NumUnusedWalkIns, "Refrigeration:WalkIn",
                               [&](int WalkInNum) {
                                   ErrorsFound = true;
@@ -6005,7 +6029,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
     if (state.dataRefrigCase->NumSimulationRefrigAirChillers > 0) {
         // check for air chillers not connected to any systems and
         //  air chillers connected more than once
-        checkUnusedComponents(WarehouseCoil, state.dataRefrigCase->NumSimulationRefrigAirChillers,
+        checkUnusedComponents(state, RoutineName, WarehouseCoil, state.dataRefrigCase->NumSimulationRefrigAirChillers,
                               state.dataRefrigCase->NumUnusedCoils, "Refrigeration:AirChiller",
                               [&](int CoilNum) {
                                   ErrorsFound = true;
@@ -6026,7 +6050,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
     if (state.dataRefrigCase->NumSimulationSecondarySystems > 0) {
         // check for refrigeration Secondarys not connected to detailed systems and
         //  refrigeration Secondarys connected more than once
-        checkUnusedComponents(Secondary, state.dataRefrigCase->NumSimulationSecondarySystems,
+        checkUnusedComponents(state, RoutineName, Secondary, state.dataRefrigCase->NumSimulationSecondarySystems,
                               state.dataRefrigCase->NumUnusedSecondarys, "Refrigeration:Secondary",
                               [&](int SecondaryNum) {
                                   ErrorsFound = true;
@@ -6047,7 +6071,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
         //     - determines number of loops through refrigeration simulation
         //       because of dependence of performance on total condenser load
         state.dataRefrigCase->NumSimulationSharedCondensers = 0;
-        checkUnusedComponents(Condenser, state.dataRefrigCase->NumRefrigCondensers,
+        checkUnusedComponents(state, RoutineName, Condenser, state.dataRefrigCase->NumRefrigCondensers,
                               state.dataRefrigCase->NumUnusedCondensers, "Refrigeration:Condenser",
                               [&](int /*CondNum*/) { ++state.dataRefrigCase->NumSimulationSharedCondensers; },
                               [&](int n) {
@@ -6061,7 +6085,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
     if (state.dataRefrigCase->NumSimulationGasCooler > 0) {
         // Check for presence of shared gas coolers and for unused gas coolers
         state.dataRefrigCase->NumSimulationSharedGasCoolers = 0;
-        checkUnusedComponents(GasCooler, state.dataRefrigCase->NumSimulationGasCooler,
+        checkUnusedComponents(state, RoutineName, GasCooler, state.dataRefrigCase->NumSimulationGasCooler,
                               state.dataRefrigCase->NumUnusedGasCoolers, "Refrigeration:GasCooler",
                               [&](int /*GCNum*/) { ++state.dataRefrigCase->NumSimulationSharedGasCoolers; },
                               [&](int n) {
