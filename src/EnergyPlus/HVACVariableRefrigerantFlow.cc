@@ -1406,6 +1406,51 @@ void GetVRFInput(EnergyPlusData &state)
     }
 }
 
+// Helper: validate a PLF curve's output range [0.7, 1.0], capping if out of bounds.
+static void checkAndCapPLFCurve(EnergyPlusData &state,
+                                bool &ErrorsFound,
+                                int curveIndex,
+                                std::string_view routineName,
+                                std::string_view objectType,
+                                std::string_view objectName,
+                                std::string_view fieldName,
+                                std::string_view curveName)
+{
+    using Curve::CurveValue;
+    Real64 MinCurveVal = 999.0;
+    Real64 MaxCurveVal = -999.0;
+    Real64 MinCurvePLR = 0.0;
+    Real64 MaxCurvePLR = 1.0;
+    for (int i = 0; i <= 100; ++i) {
+        const Real64 CurveInput = i / 100.0;
+        Real64 CurveVal = CurveValue(state, curveIndex, CurveInput);
+        if (CurveVal < MinCurveVal) {
+            MinCurveVal = CurveVal;
+            MinCurvePLR = CurveInput;
+        }
+        if (CurveVal > MaxCurveVal) {
+            MaxCurveVal = CurveVal;
+            MaxCurvePLR = CurveInput;
+        }
+    }
+    if (MinCurveVal < 0.7) {
+        ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", invalid", routineName, objectType, objectName));
+        ShowContinueError(state, EnergyPlus::format("...{}=\"{}\" has out of range values.", fieldName, curveName));
+        ShowContinueError(
+            state, EnergyPlus::format("...Curve minimum must be >= 0.7, curve min at PLR = {:.2T} is {:.3T}", MinCurvePLR, MinCurveVal));
+        ShowContinueError(state, "...Setting curve minimum to 0.7 and simulation continues.");
+        Curve::SetCurveOutputMinValue(state, curveIndex, ErrorsFound, 0.7);
+    }
+    if (MaxCurveVal > 1.0) {
+        ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", invalid", routineName, objectType, objectName));
+        ShowContinueError(state, EnergyPlus::format("...{}=\"{}\" has out of range values.", fieldName, curveName));
+        ShowContinueError(
+            state, EnergyPlus::format("...Curve maximum must be <= 1.0, curve max at PLR = {:.2T} is {:.3T}", MaxCurvePLR, MaxCurveVal));
+        ShowContinueError(state, "...Setting curve maximum to 1.0 and simulation continues.");
+        Curve::SetCurveOutputMaxValue(state, curveIndex, ErrorsFound, 1.0);
+    }
+}
+
 // Helper: look up a required quadratic curve and extract its 3 coefficients.
 // Returns true on success, sets ErrorsFound on failure.
 static bool getRequiredQuadraticCurveCoeffs(EnergyPlusData &state,
@@ -1668,27 +1713,6 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         }
     }
 
-    auto checkCurveMinMaxOutput = [&state](int CurveIndex) -> std::array<Real64, 4> {
-        Real64 MinCurveVal = 999.0;
-        Real64 MaxCurveVal = -999.0;
-        Real64 MinCurvePLR = 0.0;
-        Real64 MaxCurvePLR = 1.0;
-
-        for (int i = 0; i <= 100; ++i) { // 0 to 1.0 with 0.01 increment
-            const Real64 CurveInput = i / 100.0;
-            Real64 CurveVal = CurveValue(state, CurveIndex, CurveInput);
-            if (CurveVal < MinCurveVal) {
-                MinCurveVal = CurveVal;
-                MinCurvePLR = CurveInput;
-            }
-            if (CurveVal > MaxCurveVal) {
-                MaxCurveVal = CurveVal;
-                MaxCurvePLR = CurveInput;
-            }
-        }
-        return {MinCurvePLR, MinCurveVal, MaxCurvePLR, MaxCurveVal};
-    };
-
     // read all VRF condenser objects: Algorithm Type 1_system curve based model
     cCurrentModuleObject = "AirConditioner:VariableRefrigerantFlow";
     for (int VRFNum = 1; VRFNum <= state.dataHVACVarRefFlow->NumVRFCond_SysCurve; ++VRFNum) {
@@ -1749,26 +1773,7 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
 
         thisVrfSys.CoolPLFFPLR = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(12), {1}, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(12));
         if (thisVrfSys.CoolPLFFPLR > 0 && !ErrorsFound) {
-            //     Test PLF curve minimum and maximum. Cap if less than 0.7 or greater than 1.0.
-            auto [MinCurvePLR, MinCurveVal, MaxCurvePLR, MaxCurveVal] = checkCurveMinMaxOutput(thisVrfSys.CoolPLFFPLR);
-
-            if (MinCurveVal < 0.7) {
-                ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisVrfSys.Name));
-                ShowContinueError(state, EnergyPlus::format("...{}=\"{}\" has out of range values.", cAlphaFieldNames(12), cAlphaArgs(12)));
-                ShowContinueError(
-                    state, EnergyPlus::format("...Curve minimum must be >= 0.7, curve min at PLR = {:.2T} is {:.3T}", MinCurvePLR, MinCurveVal));
-                ShowContinueError(state, "...Setting curve minimum to 0.7 and simulation continues.");
-                Curve::SetCurveOutputMinValue(state, thisVrfSys.CoolPLFFPLR, ErrorsFound, 0.7);
-            }
-
-            if (MaxCurveVal > 1.0) {
-                ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisVrfSys.Name));
-                ShowContinueError(state, EnergyPlus::format("...{}=\"{}\" has out of range values.", cAlphaFieldNames(12), cAlphaArgs(12)));
-                ShowContinueError(
-                    state, EnergyPlus::format("...Curve maximum must be <= 1.0, curve max at PLR = {:.2T} is {:.3T}", MaxCurvePLR, MaxCurveVal));
-                ShowContinueError(state, "...Setting curve maximum to 1.0 and simulation continues.");
-                Curve::SetCurveOutputMaxValue(state, thisVrfSys.CoolPLFFPLR, ErrorsFound, 1.0);
-            }
+            checkAndCapPLFCurve(state, ErrorsFound, thisVrfSys.CoolPLFFPLR, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(12), cAlphaArgs(12));
         }
 
         thisVrfSys.HeatingCapacity = rNumericArgs(5);
@@ -1836,25 +1841,7 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         thisVrfSys.HeatCombRatioPTR = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(22), {1}, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(22));
         thisVrfSys.HeatPLFFPLR = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(23), {1}, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(23));
         if (thisVrfSys.HeatPLFFPLR > 0 && !ErrorsFound) {
-            auto [MinCurvePLR, MinCurveVal, MaxCurvePLR, MaxCurveVal] = checkCurveMinMaxOutput(thisVrfSys.HeatPLFFPLR);
-
-            if (MinCurveVal < 0.7) {
-                ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisVrfSys.Name));
-                ShowContinueError(state, EnergyPlus::format("...{}=\"{}\" has out of range values.", cAlphaFieldNames(23), cAlphaArgs(23)));
-                ShowContinueError(
-                    state, EnergyPlus::format("...Curve minimum must be >= 0.7, curve min at PLR = {:.2T} is {:.3T}", MinCurvePLR, MinCurveVal));
-                ShowContinueError(state, "...Setting curve minimum to 0.7 and simulation continues.");
-                Curve::SetCurveOutputMinValue(state, thisVrfSys.HeatPLFFPLR, ErrorsFound, 0.7);
-            }
-
-            if (MaxCurveVal > 1.0) {
-                ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisVrfSys.Name));
-                ShowContinueError(state, EnergyPlus::format("...{}=\"{}\" has out of range values.", cAlphaFieldNames(23), cAlphaArgs(23)));
-                ShowContinueError(
-                    state, EnergyPlus::format("...Curve maximum must be <= 1.0, curve max at PLR = {:.2T} is {:.3T}", MaxCurvePLR, MaxCurveVal));
-                ShowContinueError(state, "...Setting curve maximum to 1.0 and simulation continues.");
-                Curve::SetCurveOutputMaxValue(state, thisVrfSys.HeatPLFFPLR, ErrorsFound, 1.0);
-            }
+            checkAndCapPLFCurve(state, ErrorsFound, thisVrfSys.HeatPLFFPLR, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(23), cAlphaArgs(23));
         }
 
         thisVrfSys.MinPLR = rNumericArgs(10);
