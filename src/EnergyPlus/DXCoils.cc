@@ -797,6 +797,112 @@ static void validateAndCapPLFCurve(EnergyPlusData &state,
     }
 }
 
+// Helper: look up a 1D flow-based curve, check dims={1}, and verify normalized to 1.0.
+// Assigns the curve index to curveIdx.  On missing/invalid curve, calls reportMissingOrInvalidCurve.
+static void getAndCheckFlowCurve(EnergyPlusData &state,
+                                 bool &ErrorsFound,
+                                 std::string_view const RoutineName,
+                                 std::string_view const CurrentModuleObject,
+                                 int &curveIdx,
+                                 int alphaFieldNum,
+                                 const std::string &coilName,
+                                 const Array1D_string &alphaArr,
+                                 const Array1D_bool &blankArr,
+                                 const Array1D_string &fieldNames)
+{
+    curveIdx = Curve::GetCurveIndex(state, alphaArr(alphaFieldNum));
+    if (curveIdx == 0) {
+        reportMissingOrInvalidCurve(
+            state, blankArr(alphaFieldNum), RoutineName, CurrentModuleObject, coilName, fieldNames(alphaFieldNum), alphaArr(alphaFieldNum), ErrorsFound);
+    } else {
+        ErrorsFound |= Curve::CheckCurveDims(state, curveIdx, {1}, RoutineName, CurrentModuleObject, coilName, fieldNames(alphaFieldNum));
+        if (!ErrorsFound) {
+            Curve::checkCurveIsNormalizedToOne(
+                state, std::string{RoutineName} + std::string{CurrentModuleObject}, coilName, curveIdx, fieldNames(alphaFieldNum), alphaArr(alphaFieldNum), 1.0);
+        }
+    }
+}
+
+// Helper: read an optional outdoor condenser inlet air node field.
+// If blank, sets nodeNum to 0.  Otherwise creates the node and warns if not outdoor.
+static void readOutdoorCondenserNode(EnergyPlusData &state,
+                                     bool &ErrorsFound,
+                                     std::string_view const RoutineName,
+                                     std::string_view const CurrentModuleObject,
+                                     int &nodeNum,
+                                     int alphaFieldNum,
+                                     Node::ConnectionObjectType connObjType,
+                                     const std::string &coilName,
+                                     const Array1D_string &Alphas,
+                                     const Array1D_bool &lAlphaBlanks,
+                                     const Array1D_string &cAlphaFields)
+{
+    if (lAlphaBlanks(alphaFieldNum)) {
+        nodeNum = 0;
+    } else {
+        nodeNum = Node::GetOnlySingleNode(state, Alphas(alphaFieldNum), ErrorsFound, connObjType, coilName,
+                                    Node::FluidType::Air, Node::ConnectionType::OutsideAirReference,
+                                    Node::CompFluidStream::Primary, Node::ObjectIsNotParent);
+        if (!OutAirNodeManager::CheckOutAirNodeNumber(state, nodeNum)) {
+            ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", may be invalid", RoutineName, CurrentModuleObject, coilName));
+            ShowContinueError(state, EnergyPlus::format("{}=\"{}\", node does not appear in an OutdoorAir:NodeList or as an OutdoorAir:Node.",
+                                                         cAlphaFields(alphaFieldNum), Alphas(alphaFieldNum)));
+            ShowContinueError(state, "This node needs to be included in an air system or the coil model will not be valid, and the simulation continues");
+        }
+    }
+}
+
+// Helper: look up a 2D cooling temperature curve, check dims={2}, and verify normalized
+// to 1.0 at RatedInletWetBulbTemp and RatedOutdoorAirTemp.
+static void getAndCheck2DCoolingTempCurve(EnergyPlusData &state,
+                                          bool &ErrorsFound,
+                                          std::string_view const RoutineName,
+                                          std::string_view const CurrentModuleObject,
+                                          int &curveIdx,
+                                          int alphaFieldNum,
+                                          const std::string &coilName,
+                                          const Array1D_string &alphaArr,
+                                          const Array1D_bool &blankArr,
+                                          const Array1D_string &fieldNames)
+{
+    curveIdx = Curve::GetCurveIndex(state, alphaArr(alphaFieldNum));
+    if (curveIdx == 0) {
+        reportMissingOrInvalidCurve(
+            state, blankArr(alphaFieldNum), RoutineName, CurrentModuleObject, coilName, fieldNames(alphaFieldNum), alphaArr(alphaFieldNum), ErrorsFound);
+    } else {
+        ErrorsFound |= Curve::CheckCurveDims(state, curveIdx, {2}, RoutineName, CurrentModuleObject, coilName, fieldNames(alphaFieldNum));
+        if (!ErrorsFound) {
+            Curve::checkCurveIsNormalizedToOne(
+                state, std::string{RoutineName} + std::string{CurrentModuleObject}, coilName, curveIdx, fieldNames(alphaFieldNum), alphaArr(alphaFieldNum),
+                RatedInletWetBulbTemp, RatedOutdoorAirTemp);
+        }
+    }
+}
+
+// Helper: look up a PLF curve, check dims={1}, and validate/cap its range.
+static void getAndCheckPLFCurve(EnergyPlusData &state,
+                                bool &ErrorsFound,
+                                std::string_view const RoutineName,
+                                std::string_view const CurrentModuleObject,
+                                int &curveIdx,
+                                int alphaFieldNum,
+                                const std::string &coilName,
+                                const Array1D_string &alphaArr,
+                                const Array1D_bool &blankArr,
+                                const Array1D_string &fieldNames)
+{
+    curveIdx = Curve::GetCurveIndex(state, alphaArr(alphaFieldNum));
+    if (curveIdx == 0) {
+        reportMissingOrInvalidCurve(
+            state, blankArr(alphaFieldNum), RoutineName, CurrentModuleObject, coilName, fieldNames(alphaFieldNum), alphaArr(alphaFieldNum), ErrorsFound);
+    } else {
+        ErrorsFound |= Curve::CheckCurveDims(state, curveIdx, {1}, RoutineName, CurrentModuleObject, coilName, fieldNames(alphaFieldNum));
+        if (!ErrorsFound) {
+            validateAndCapPLFCurve(state, curveIdx, ErrorsFound, RoutineName, CurrentModuleObject, coilName, fieldNames(alphaFieldNum), alphaArr(alphaFieldNum));
+        }
+    }
+}
+
 // Setup the 8 standard output variables for single-speed and two-speed cooling coils
 // (Total, Sensible, Latent cooling rate/energy + Electricity rate/energy)
 static void setupStdCoolingOutputVars(EnergyPlusData &state, DXCoilData &thisDXCoil)
@@ -1375,82 +1481,6 @@ void GetDXCoils(EnergyPlusData &state)
     // initialize the coil counter
     DXCoilNum = 0;
 
-    // Helper lambda: look up a 1D flow-based curve, check dims={1}, and verify normalized to 1.0.
-    // Assigns the curve index to curveIdx.  On missing/invalid curve, calls reportMissingOrInvalidCurve.
-    auto getAndCheckFlowCurve = [&](int &curveIdx, int alphaFieldNum,
-                                    const std::string &coilName,
-                                    const Array1D_string &alphaArr, const Array1D_bool &blankArr,
-                                    const Array1D_string &fieldNames) {
-        curveIdx = GetCurveIndex(state, alphaArr(alphaFieldNum));
-        if (curveIdx == 0) {
-            reportMissingOrInvalidCurve(
-                state, blankArr(alphaFieldNum), RoutineName, CurrentModuleObject, coilName, fieldNames(alphaFieldNum), alphaArr(alphaFieldNum), ErrorsFound);
-        } else {
-            ErrorsFound |= Curve::CheckCurveDims(state, curveIdx, {1}, RoutineName, CurrentModuleObject, coilName, fieldNames(alphaFieldNum));
-            if (!ErrorsFound) {
-                checkCurveIsNormalizedToOne(
-                    state, std::string{RoutineName} + CurrentModuleObject, coilName, curveIdx, fieldNames(alphaFieldNum), alphaArr(alphaFieldNum), 1.0);
-            }
-        }
-    };
-
-    // Helper lambda: read an optional outdoor condenser inlet air node field.
-    // If blank, sets CondenserInletNodeNum to 0.  Otherwise creates the node and warns if not outdoor.
-    auto readOutdoorCondenserNode = [&](int &nodeNum, int alphaFieldNum,
-                                        Node::ConnectionObjectType connObjType,
-                                        const std::string &coilName) {
-        if (lAlphaBlanks(alphaFieldNum)) {
-            nodeNum = 0;
-        } else {
-            nodeNum = GetOnlySingleNode(state, Alphas(alphaFieldNum), ErrorsFound, connObjType, coilName,
-                                        Node::FluidType::Air, Node::ConnectionType::OutsideAirReference,
-                                        Node::CompFluidStream::Primary, Node::ObjectIsNotParent);
-            if (!CheckOutAirNodeNumber(state, nodeNum)) {
-                ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", may be invalid", RoutineName, CurrentModuleObject, coilName));
-                ShowContinueError(state, EnergyPlus::format("{}=\"{}\", node does not appear in an OutdoorAir:NodeList or as an OutdoorAir:Node.",
-                                                             cAlphaFields(alphaFieldNum), Alphas(alphaFieldNum)));
-                ShowContinueError(state, "This node needs to be included in an air system or the coil model will not be valid, and the simulation continues");
-            }
-        }
-    };
-
-    // Helper lambda: look up a 2D cooling temperature curve, check dims={2}, and verify normalized
-    // to 1.0 at RatedInletWetBulbTemp and RatedOutdoorAirTemp.
-    auto getAndCheck2DCoolingTempCurve = [&](int &curveIdx, int alphaFieldNum,
-                                             const std::string &coilName,
-                                             const Array1D_string &alphaArr, const Array1D_bool &blankArr,
-                                             const Array1D_string &fieldNames) {
-        curveIdx = GetCurveIndex(state, alphaArr(alphaFieldNum));
-        if (curveIdx == 0) {
-            reportMissingOrInvalidCurve(
-                state, blankArr(alphaFieldNum), RoutineName, CurrentModuleObject, coilName, fieldNames(alphaFieldNum), alphaArr(alphaFieldNum), ErrorsFound);
-        } else {
-            ErrorsFound |= Curve::CheckCurveDims(state, curveIdx, {2}, RoutineName, CurrentModuleObject, coilName, fieldNames(alphaFieldNum));
-            if (!ErrorsFound) {
-                checkCurveIsNormalizedToOne(
-                    state, std::string{RoutineName} + CurrentModuleObject, coilName, curveIdx, fieldNames(alphaFieldNum), alphaArr(alphaFieldNum),
-                    RatedInletWetBulbTemp, RatedOutdoorAirTemp);
-            }
-        }
-    };
-
-    // Helper lambda: look up a PLF curve, check dims={1}, and validate/cap its range.
-    auto getAndCheckPLFCurve = [&](int &curveIdx, int alphaFieldNum,
-                                   const std::string &coilName,
-                                   const Array1D_string &alphaArr, const Array1D_bool &blankArr,
-                                   const Array1D_string &fieldNames) {
-        curveIdx = GetCurveIndex(state, alphaArr(alphaFieldNum));
-        if (curveIdx == 0) {
-            reportMissingOrInvalidCurve(
-                state, blankArr(alphaFieldNum), RoutineName, CurrentModuleObject, coilName, fieldNames(alphaFieldNum), alphaArr(alphaFieldNum), ErrorsFound);
-        } else {
-            ErrorsFound |= Curve::CheckCurveDims(state, curveIdx, {1}, RoutineName, CurrentModuleObject, coilName, fieldNames(alphaFieldNum));
-            if (!ErrorsFound) {
-                validateAndCapPLFCurve(state, curveIdx, ErrorsFound, RoutineName, CurrentModuleObject, coilName, fieldNames(alphaFieldNum), alphaArr(alphaFieldNum));
-            }
-        }
-    };
-
     // Loop over the Doe2 DX Coils and get & load the data
     CurrentModuleObject = "Coil:Cooling:DX:SingleSpeed";
     for (DXCoilIndex = 1; DXCoilIndex <= state.dataDXCoils->NumDoe2DXCoils; ++DXCoilIndex) {
@@ -1524,11 +1554,11 @@ void GetDXCoils(EnergyPlusData &state)
 
         TestCompSet(state, CurrentModuleObject, Alphas(1), Alphas(3), Alphas(4), "Air Nodes");
 
-        getAndCheck2DCoolingTempCurve(thisDXCoil.CCapFTemp(1), 5, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
+        getAndCheck2DCoolingTempCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.CCapFTemp(1), 5, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
-        getAndCheckFlowCurve(thisDXCoil.CCapFFlow(1), 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
+        getAndCheckFlowCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.CCapFFlow(1), 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
-        getAndCheck2DCoolingTempCurve(thisDXCoil.EIRFTemp(1), 7, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
+        getAndCheck2DCoolingTempCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.EIRFTemp(1), 7, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
         thisDXCoil.EIRFFlow(1) = GetCurveIndex(state, Alphas(8)); // convert curve name to number
         if (thisDXCoil.EIRFFlow(1) == 0) {
@@ -1550,7 +1580,7 @@ void GetDXCoils(EnergyPlusData &state)
             }
         }
 
-        getAndCheckPLFCurve(thisDXCoil.PLFFPLR(1), 9, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
+        getAndCheckPLFCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.PLFFPLR(1), 9, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
         // Set minimum OAT for compressor operation
         thisDXCoil.MinOATCompressor = Numbers(7);
@@ -1571,8 +1601,8 @@ void GetDXCoils(EnergyPlusData &state)
             ShowContinueError(state, "...is set to zero. Therefore, the latent degradation model will not be used for this simulation.");
         }
 
-        readOutdoorCondenserNode(thisDXCoil.CondenserInletNodeNum(1), 10,
-                                Node::ConnectionObjectType::CoilCoolingDXSingleSpeed, thisDXCoil.Name);
+        readOutdoorCondenserNode(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.CondenserInletNodeNum(1), 10,
+                                Node::ConnectionObjectType::CoilCoolingDXSingleSpeed, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
         parseCondenserType(state, thisDXCoil, RoutineName, CurrentModuleObject, Alphas(11), cAlphaFields(11), lAlphaBlanks(11), ErrorsFound);
 
@@ -2323,7 +2353,7 @@ void GetDXCoils(EnergyPlusData &state)
             }
         }
 
-        getAndCheckFlowCurve(thisDXCoil.CCapFFlow(1), 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
+        getAndCheckFlowCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.CCapFFlow(1), 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
         thisDXCoil.EIRFTemp(1) = GetCurveIndex(state, Alphas(7)); // convert curve name to number
         if (thisDXCoil.EIRFTemp(1) == 0) {
@@ -2361,9 +2391,9 @@ void GetDXCoils(EnergyPlusData &state)
             }
         }
 
-        getAndCheckFlowCurve(thisDXCoil.EIRFFlow(1), 8, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
+        getAndCheckFlowCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.EIRFFlow(1), 8, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
-        getAndCheckPLFCurve(thisDXCoil.PLFFPLR(1), 9, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
+        getAndCheckPLFCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.PLFFPLR(1), 9, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
         // Only required for reverse cycle heat pumps
         thisDXCoil.DefrostEIRFT = GetCurveIndex(state, Alphas(10)); // convert curve name to number
@@ -2493,8 +2523,8 @@ void GetDXCoils(EnergyPlusData &state)
 
         thisDXCoil.RatedEIR(1) = 1.0 / thisDXCoil.RatedCOP(1);
 
-        readOutdoorCondenserNode(thisDXCoil.CondenserInletNodeNum(1), 14,
-                                Node::ConnectionObjectType::CoilHeatingDXSingleSpeed, thisDXCoil.Name);
+        readOutdoorCondenserNode(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.CondenserInletNodeNum(1), 14,
+                                Node::ConnectionObjectType::CoilHeatingDXSingleSpeed, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
         // A14, \field Zone Name for Evaporator Placement
         if (!lAlphaBlanks(15) && NumAlphas > 14) {
@@ -2631,11 +2661,11 @@ void GetDXCoils(EnergyPlusData &state)
 
         TestCompSet(state, CurrentModuleObject, Alphas(1), Alphas(3), Alphas(4), "Air Nodes");
 
-        getAndCheck2DCoolingTempCurve(thisDXCoil.CCapFTemp(1), 5, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
+        getAndCheck2DCoolingTempCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.CCapFTemp(1), 5, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
-        getAndCheckFlowCurve(thisDXCoil.CCapFFlow(1), 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
+        getAndCheckFlowCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.CCapFFlow(1), 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
-        getAndCheck2DCoolingTempCurve(thisDXCoil.EIRFTemp(1), 7, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
+        getAndCheck2DCoolingTempCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.EIRFTemp(1), 7, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
         thisDXCoil.EIRFFlow(1) = GetCurveIndex(state, Alphas(8)); // convert curve name to number
         if (thisDXCoil.EIRFFlow(1) == 0) {
@@ -2657,7 +2687,7 @@ void GetDXCoils(EnergyPlusData &state)
             }
         }
 
-        getAndCheckPLFCurve(thisDXCoil.PLFFPLR(1), 9, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
+        getAndCheckPLFCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.PLFFPLR(1), 9, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
         thisDXCoil.RatedEIR(1) = 1.0 / thisDXCoil.RatedCOP(1);
 
@@ -2675,12 +2705,12 @@ void GetDXCoils(EnergyPlusData &state)
             thisDXCoil.MinOATCompressor = Numbers(14);
         }
 
-        getAndCheck2DCoolingTempCurve(thisDXCoil.CCapFTemp2, 10, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
+        getAndCheck2DCoolingTempCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.CCapFTemp2, 10, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
-        getAndCheck2DCoolingTempCurve(thisDXCoil.EIRFTemp2, 11, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
+        getAndCheck2DCoolingTempCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.EIRFTemp2, 11, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
-        readOutdoorCondenserNode(thisDXCoil.CondenserInletNodeNum(1), 12,
-                                Node::ConnectionObjectType::CoilCoolingDXTwoSpeed, thisDXCoil.Name);
+        readOutdoorCondenserNode(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.CondenserInletNodeNum(1), 12,
+                                Node::ConnectionObjectType::CoilCoolingDXTwoSpeed, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
         parseCondenserType(state, thisDXCoil, RoutineName, CurrentModuleObject, Alphas(13), cAlphaFields(13), lAlphaBlanks(13), ErrorsFound);
 
@@ -3874,8 +3904,8 @@ void GetDXCoils(EnergyPlusData &state)
         TestCompSet(state, CurrentModuleObject, Alphas(1), Alphas(3), Alphas(4), "Air Nodes");
 
         // outdoor condenser node
-        readOutdoorCondenserNode(thisDXCoil.CondenserInletNodeNum(1), 5,
-                                 Node::ConnectionObjectType::CoilCoolingDXMultiSpeed, thisDXCoil.Name);
+        readOutdoorCondenserNode(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.CondenserInletNodeNum(1), 5,
+                                 Node::ConnectionObjectType::CoilCoolingDXMultiSpeed, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
         parseCondenserType(state, thisDXCoil, RoutineName, CurrentModuleObject, Alphas(6), cAlphaFields(6), lAlphaBlanks(6), ErrorsFound);
 
@@ -4001,15 +4031,15 @@ void GetDXCoils(EnergyPlusData &state)
             thisDXCoil.MSFanPowerPerEvapAirFlowRate(I) = Numbers(11 + (I - 1) * 14);
             thisDXCoil.MSFanPowerPerEvapAirFlowRate_2023(I) = Numbers(12 + (I - 1) * 14);
 
-            getAndCheck2DCoolingTempCurve(thisDXCoil.MSCCapFTemp(I), 14 + (I - 1) * 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
+            getAndCheck2DCoolingTempCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.MSCCapFTemp(I), 14 + (I - 1) * 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
-            getAndCheckFlowCurve(thisDXCoil.MSCCapFFlow(I), 15 + (I - 1) * 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
+            getAndCheckFlowCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.MSCCapFFlow(I), 15 + (I - 1) * 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
-            getAndCheck2DCoolingTempCurve(thisDXCoil.MSEIRFTemp(I), 16 + (I - 1) * 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
+            getAndCheck2DCoolingTempCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.MSEIRFTemp(I), 16 + (I - 1) * 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
-            getAndCheckFlowCurve(thisDXCoil.MSEIRFFlow(I), 17 + (I - 1) * 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
+            getAndCheckFlowCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.MSEIRFFlow(I), 17 + (I - 1) * 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
-            getAndCheckPLFCurve(thisDXCoil.MSPLFFPLR(I), 18 + (I - 1) * 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
+            getAndCheckPLFCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.MSPLFFPLR(I), 18 + (I - 1) * 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
             // read data for latent degradation
             thisDXCoil.MSTwet_Rated(I) = Numbers(13 + (I - 1) * 14);
@@ -4383,7 +4413,7 @@ void GetDXCoils(EnergyPlusData &state)
                 }
             }
 
-            getAndCheckFlowCurve(thisDXCoil.MSCCapFFlow(I), 12 + (I - 1) * 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
+            getAndCheckFlowCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.MSCCapFFlow(I), 12 + (I - 1) * 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
             thisDXCoil.MSEIRFTemp(I) = GetCurveIndex(state, Alphas(13 + (I - 1) * 6)); // convert curve name to number
             if (thisDXCoil.MSEIRFTemp(I) == 0) {
@@ -4427,9 +4457,9 @@ void GetDXCoils(EnergyPlusData &state)
                 }
             }
 
-            getAndCheckFlowCurve(thisDXCoil.MSEIRFFlow(I), 14 + (I - 1) * 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
+            getAndCheckFlowCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.MSEIRFFlow(I), 14 + (I - 1) * 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
-            getAndCheckPLFCurve(thisDXCoil.MSPLFFPLR(I), 15 + (I - 1) * 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
+            getAndCheckPLFCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.MSPLFFPLR(I), 15 + (I - 1) * 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
             // Read waste heat modifier curve name
             thisDXCoil.MSWasteHeat(I) = GetCurveIndex(state, Alphas(16 + (I - 1) * 6)); // convert curve name to number
@@ -4715,7 +4745,7 @@ void GetDXCoils(EnergyPlusData &state)
             }
         }
 
-        getAndCheckFlowCurve(thisDXCoil.CCapFFlow(1), 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
+        getAndCheckFlowCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.CCapFFlow(1), 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
     }
 
     if (ErrorsFound) {
