@@ -1406,6 +1406,24 @@ void GetVRFInput(EnergyPlusData &state)
     }
 }
 
+// Helper: look up a curve by name and validate its dimensionality.
+// Returns the curve index (0 when the name is blank / not found).
+static int getAndCheckCurve(EnergyPlusData &state,
+                            bool &ErrorsFound,
+                            std::string const &curveName,
+                            std::vector<int> const &validDims,
+                            std::string_view routineName,
+                            std::string_view objectType,
+                            std::string_view objectName,
+                            std::string_view fieldName)
+{
+    int idx = Curve::GetCurveIndex(state, curveName);
+    if (idx > 0) {
+        ErrorsFound |= Curve::CheckCurveDims(state, idx, validDims, routineName, objectType, objectName, fieldName);
+    }
+    return idx;
+}
+
 void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
 {
 
@@ -1666,156 +1684,48 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         thisVrfSys.MinOATCooling = rNumericArgs(3);
         thisVrfSys.MaxOATCooling = rNumericArgs(4);
 
-        thisVrfSys.CoolCapFT = GetCurveIndex(state, cAlphaArgs(3));
-        if (thisVrfSys.CoolCapFT > 0) {
-            // Verify Curve Object, only legal type is biquadratic
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisVrfSys.CoolCapFT, // Curve index
-                                                 {2},                  // Valid dimensions
-                                                 RoutineName,          // Routine name
-                                                 cCurrentModuleObject, // Object Type
-                                                 thisVrfSys.Name,      // Object Name
-                                                 cAlphaFieldNames(3)); // Field Name
+        thisVrfSys.CoolCapFT = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(3), {2}, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(3));
+        if (thisVrfSys.CoolCapFT > 0 && !ErrorsFound) {
+            checkCurveIsNormalizedToOne(state,
+                                        std::string{RoutineName} + cCurrentModuleObject,
+                                        thisVrfSys.Name,
+                                        thisVrfSys.CoolCapFT,
+                                        cAlphaFieldNames(3),
+                                        cAlphaArgs(3),
+                                        RatedInletWetBulbTemp,
+                                        RatedOutdoorAirTemp);
+        }
 
-            if (!ErrorsFound) {
-                checkCurveIsNormalizedToOne(state,
-                                            std::string{RoutineName} + cCurrentModuleObject,
-                                            thisVrfSys.Name,
-                                            thisVrfSys.CoolCapFT,
-                                            cAlphaFieldNames(3),
-                                            cAlphaArgs(3),
-                                            RatedInletWetBulbTemp,
-                                            RatedOutdoorAirTemp);
+        thisVrfSys.CoolBoundaryCurvePtr = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(4), {1}, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(4));
+        thisVrfSys.CoolCapFTHi = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(5), {2}, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(5));
+        thisVrfSys.CoolEIRFT = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(6), {2}, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(6));
+        thisVrfSys.EIRCoolBoundaryCurvePtr = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(7), {1}, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(7));
+        thisVrfSys.CoolEIRFTHi = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(8), {2}, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(8));
+        thisVrfSys.CoolEIRFPLR1 = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(9), {1}, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(9));
+        thisVrfSys.CoolEIRFPLR2 = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(10), {1}, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(10));
+        thisVrfSys.CoolCombRatioPTR = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(11), {1}, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(11));
+
+        thisVrfSys.CoolPLFFPLR = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(12), {1}, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(12));
+        if (thisVrfSys.CoolPLFFPLR > 0 && !ErrorsFound) {
+            //     Test PLF curve minimum and maximum. Cap if less than 0.7 or greater than 1.0.
+            auto [MinCurvePLR, MinCurveVal, MaxCurvePLR, MaxCurveVal] = checkCurveMinMaxOutput(thisVrfSys.CoolPLFFPLR);
+
+            if (MinCurveVal < 0.7) {
+                ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisVrfSys.Name));
+                ShowContinueError(state, EnergyPlus::format("...{}=\"{}\" has out of range values.", cAlphaFieldNames(12), cAlphaArgs(12)));
+                ShowContinueError(
+                    state, EnergyPlus::format("...Curve minimum must be >= 0.7, curve min at PLR = {:.2T} is {:.3T}", MinCurvePLR, MinCurveVal));
+                ShowContinueError(state, "...Setting curve minimum to 0.7 and simulation continues.");
+                Curve::SetCurveOutputMinValue(state, thisVrfSys.CoolPLFFPLR, ErrorsFound, 0.7);
             }
-        }
 
-        thisVrfSys.CoolBoundaryCurvePtr = GetCurveIndex(state, cAlphaArgs(4));
-        if (thisVrfSys.CoolBoundaryCurvePtr > 0) {
-            // Verify Curve Object, only legal type is linear, quadratic, or cubic
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisVrfSys.CoolBoundaryCurvePtr, // Curve index
-                                                 {1},                             // Valid dimensions
-                                                 RoutineName,                     // Routine name
-                                                 cCurrentModuleObject,            // Object Type
-                                                 thisVrfSys.Name,                 // Object Name
-                                                 cAlphaFieldNames(4));            // Field Name
-        }
-
-        thisVrfSys.CoolCapFTHi = GetCurveIndex(state, cAlphaArgs(5));
-        if (thisVrfSys.CoolCapFTHi > 0) {
-            // Verify Curve Object, only legal type is biquadratic
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisVrfSys.CoolCapFTHi, // Curve index
-                                                 {2},                    // Valid dimensions
-                                                 RoutineName,            // Routine name
-                                                 cCurrentModuleObject,   // Object Type
-                                                 thisVrfSys.Name,        // Object Name
-                                                 cAlphaFieldNames(5));   // Field Name
-        }
-
-        thisVrfSys.CoolEIRFT = GetCurveIndex(state, cAlphaArgs(6));
-        if (thisVrfSys.CoolEIRFT > 0) {
-            // Verify Curve Object, only legal type is biquadratic
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisVrfSys.CoolEIRFT, // Curve index
-                                                 {2},                  // Valid dimensions
-                                                 RoutineName,          // Routine name
-                                                 cCurrentModuleObject, // Object Type
-                                                 thisVrfSys.Name,      // Object Name
-                                                 cAlphaFieldNames(6)); // Field Name
-        }
-
-        thisVrfSys.EIRCoolBoundaryCurvePtr = GetCurveIndex(state, cAlphaArgs(7));
-        if (thisVrfSys.EIRCoolBoundaryCurvePtr > 0) {
-            // Verify Curve Object, only legal type is linear, quadratic, or cubic
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisVrfSys.EIRCoolBoundaryCurvePtr, // Curve index
-                                                 {1},                                // Valid dimensions
-                                                 RoutineName,                        // Routine name
-                                                 cCurrentModuleObject,               // Object Type
-                                                 thisVrfSys.Name,                    // Object Name
-                                                 cAlphaFieldNames(7));               // Field Name
-        }
-
-        thisVrfSys.CoolEIRFTHi = GetCurveIndex(state, cAlphaArgs(8));
-        if (thisVrfSys.CoolEIRFTHi > 0) {
-            // Verify Curve Object, only legal type is biquadratic
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisVrfSys.CoolEIRFTHi, // Curve index
-                                                 {2},                    // Valid dimensions
-                                                 RoutineName,            // Routine name
-                                                 cCurrentModuleObject,   // Object Type
-                                                 thisVrfSys.Name,        // Object Name
-                                                 cAlphaFieldNames(8));   // Field Name
-        }
-
-        thisVrfSys.CoolEIRFPLR1 = GetCurveIndex(state, cAlphaArgs(9));
-        if (thisVrfSys.CoolEIRFPLR1 > 0) {
-            // Verify Curve Object, only legal type is linear, quadratic, or cubic
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisVrfSys.CoolEIRFPLR1, // Curve index
-                                                 {1},                     // Valid dimensions
-                                                 RoutineName,             // Routine name
-                                                 cCurrentModuleObject,    // Object Type
-                                                 thisVrfSys.Name,         // Object Name
-                                                 cAlphaFieldNames(9));    // Field Name
-        }
-
-        thisVrfSys.CoolEIRFPLR2 = GetCurveIndex(state, cAlphaArgs(10));
-        if (thisVrfSys.CoolEIRFPLR2 > 0) {
-            // Verify Curve Object, only legal type is linear, quadratic, or cubic
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisVrfSys.CoolEIRFPLR2, // Curve index
-                                                 {1},                     // Valid dimensions
-                                                 RoutineName,             // Routine name
-                                                 cCurrentModuleObject,    // Object Type
-                                                 thisVrfSys.Name,         // Object Name
-                                                 cAlphaFieldNames(10));   // Field Name
-        }
-
-        thisVrfSys.CoolCombRatioPTR = GetCurveIndex(state, cAlphaArgs(11));
-        if (thisVrfSys.CoolCombRatioPTR > 0) {
-            // Verify Curve Object, only legal type is linear, quadratic, or cubic
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisVrfSys.CoolCombRatioPTR, // Curve index
-                                                 {1},                         // Valid dimensions
-                                                 RoutineName,                 // Routine name
-                                                 cCurrentModuleObject,        // Object Type
-                                                 thisVrfSys.Name,             // Object Name
-                                                 cAlphaFieldNames(11));       // Field Name
-        }
-
-        thisVrfSys.CoolPLFFPLR = GetCurveIndex(state, cAlphaArgs(12));
-        if (thisVrfSys.CoolPLFFPLR > 0) {
-            // Verify Curve Object, only legal type is linear, quadratic, or cubic
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisVrfSys.CoolPLFFPLR, // Curve index
-                                                 {1},                    // Valid dimensions
-                                                 RoutineName,            // Routine name
-                                                 cCurrentModuleObject,   // Object Type
-                                                 thisVrfSys.Name,        // Object Name
-                                                 cAlphaFieldNames(12));  // Field Name
-            if (!ErrorsFound) {
-                //     Test PLF curve minimum and maximum. Cap if less than 0.7 or greater than 1.0.
-                auto [MinCurvePLR, MinCurveVal, MaxCurvePLR, MaxCurveVal] = checkCurveMinMaxOutput(thisVrfSys.CoolPLFFPLR);
-
-                if (MinCurveVal < 0.7) {
-                    ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisVrfSys.Name));
-                    ShowContinueError(state, EnergyPlus::format("...{}=\"{}\" has out of range values.", cAlphaFieldNames(12), cAlphaArgs(12)));
-                    ShowContinueError(
-                        state, EnergyPlus::format("...Curve minimum must be >= 0.7, curve min at PLR = {:.2T} is {:.3T}", MinCurvePLR, MinCurveVal));
-                    ShowContinueError(state, "...Setting curve minimum to 0.7 and simulation continues.");
-                    Curve::SetCurveOutputMinValue(state, thisVrfSys.CoolPLFFPLR, ErrorsFound, 0.7);
-                }
-
-                if (MaxCurveVal > 1.0) {
-                    ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisVrfSys.Name));
-                    ShowContinueError(state, EnergyPlus::format("...{}=\"{}\" has out of range values.", cAlphaFieldNames(12), cAlphaArgs(12)));
-                    ShowContinueError(
-                        state, EnergyPlus::format("...Curve maximum must be <= 1.0, curve max at PLR = {:.2T} is {:.3T}", MaxCurvePLR, MaxCurveVal));
-                    ShowContinueError(state, "...Setting curve maximum to 1.0 and simulation continues.");
-                    Curve::SetCurveOutputMaxValue(state, thisVrfSys.CoolPLFFPLR, ErrorsFound, 1.0);
-                }
+            if (MaxCurveVal > 1.0) {
+                ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisVrfSys.Name));
+                ShowContinueError(state, EnergyPlus::format("...{}=\"{}\" has out of range values.", cAlphaFieldNames(12), cAlphaArgs(12)));
+                ShowContinueError(
+                    state, EnergyPlus::format("...Curve maximum must be <= 1.0, curve max at PLR = {:.2T} is {:.3T}", MaxCurvePLR, MaxCurveVal));
+                ShowContinueError(state, "...Setting curve maximum to 1.0 and simulation continues.");
+                Curve::SetCurveOutputMaxValue(state, thisVrfSys.CoolPLFFPLR, ErrorsFound, 1.0);
             }
         }
 
@@ -1837,99 +1747,34 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
             ErrorsFound = true;
         }
 
-        thisVrfSys.HeatCapFT = GetCurveIndex(state, cAlphaArgs(13));
-        if (thisVrfSys.HeatCapFT > 0) {
-            // Verify Curve Object, only legal type is biquadratic
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisVrfSys.HeatCapFT,  // Curve index
-                                                 {2},                   // Valid dimensions
-                                                 RoutineName,           // Routine name
-                                                 cCurrentModuleObject,  // Object Type
-                                                 thisVrfSys.Name,       // Object Name
-                                                 cAlphaFieldNames(13)); // Field Name
-
-            if (!ErrorsFound) {
-                if (Util::SameString(cAlphaArgs(19), "WETBULBTEMPERATURE")) {
-                    checkCurveIsNormalizedToOne(state,
-                                                std::string{RoutineName} + cCurrentModuleObject,
-                                                thisVrfSys.Name,
-                                                thisVrfSys.HeatCapFT,
-                                                cAlphaFieldNames(13),
-                                                cAlphaArgs(13),
-                                                RatedInletAirTempHeat,
-                                                RatedOutdoorWetBulbTempHeat);
-                } else if (Util::SameString(cAlphaArgs(19), "DRYBULBTEMPERATURE")) {
-                    checkCurveIsNormalizedToOne(state,
-                                                std::string{RoutineName} + cCurrentModuleObject,
-                                                thisVrfSys.Name,
-                                                thisVrfSys.HeatCapFT,
-                                                cAlphaFieldNames(13),
-                                                cAlphaArgs(13),
-                                                RatedInletAirTempHeat,
-                                                RatedOutdoorAirTempHeat);
-                }
+        thisVrfSys.HeatCapFT = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(13), {2}, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(13));
+        if (thisVrfSys.HeatCapFT > 0 && !ErrorsFound) {
+            if (Util::SameString(cAlphaArgs(19), "WETBULBTEMPERATURE")) {
+                checkCurveIsNormalizedToOne(state,
+                                            std::string{RoutineName} + cCurrentModuleObject,
+                                            thisVrfSys.Name,
+                                            thisVrfSys.HeatCapFT,
+                                            cAlphaFieldNames(13),
+                                            cAlphaArgs(13),
+                                            RatedInletAirTempHeat,
+                                            RatedOutdoorWetBulbTempHeat);
+            } else if (Util::SameString(cAlphaArgs(19), "DRYBULBTEMPERATURE")) {
+                checkCurveIsNormalizedToOne(state,
+                                            std::string{RoutineName} + cCurrentModuleObject,
+                                            thisVrfSys.Name,
+                                            thisVrfSys.HeatCapFT,
+                                            cAlphaFieldNames(13),
+                                            cAlphaArgs(13),
+                                            RatedInletAirTempHeat,
+                                            RatedOutdoorAirTempHeat);
             }
         }
 
-        thisVrfSys.HeatBoundaryCurvePtr = GetCurveIndex(state, cAlphaArgs(14));
-        if (thisVrfSys.HeatBoundaryCurvePtr > 0) {
-            // Verify Curve Object, only legal type is linear, quadratic, or cubic
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisVrfSys.HeatBoundaryCurvePtr, // Curve index
-                                                 {1},                             // Valid dimensions
-                                                 RoutineName,                     // Routine name
-                                                 cCurrentModuleObject,            // Object Type
-                                                 thisVrfSys.Name,                 // Object Name
-                                                 cAlphaFieldNames(14));           // Field Name
-        }
-
-        thisVrfSys.HeatCapFTHi = GetCurveIndex(state, cAlphaArgs(15));
-        if (thisVrfSys.HeatCapFTHi > 0) {
-            // Verify Curve Object, only legal type is biquadratic
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisVrfSys.HeatCapFTHi, // Curve index
-                                                 {2},                    // Valid dimensions
-                                                 RoutineName,            // Routine name
-                                                 cCurrentModuleObject,   // Object Type
-                                                 thisVrfSys.Name,        // Object Name
-                                                 cAlphaFieldNames(15));  // Field Name
-        }
-
-        thisVrfSys.HeatEIRFT = GetCurveIndex(state, cAlphaArgs(16));
-        if (thisVrfSys.HeatEIRFT > 0) {
-            // Verify Curve Object, only legal type is biquadratic
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisVrfSys.HeatEIRFT,  // Curve index
-                                                 {2},                   // Valid dimensions
-                                                 RoutineName,           // Routine name
-                                                 cCurrentModuleObject,  // Object Type
-                                                 thisVrfSys.Name,       // Object Name
-                                                 cAlphaFieldNames(16)); // Field Name
-        }
-
-        thisVrfSys.EIRHeatBoundaryCurvePtr = GetCurveIndex(state, cAlphaArgs(17));
-        if (thisVrfSys.EIRHeatBoundaryCurvePtr > 0) {
-            // Verify Curve Object, only legal type is linear, quadratic, or cubic
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisVrfSys.EIRHeatBoundaryCurvePtr, // Curve index
-                                                 {1},                                // Valid dimensions
-                                                 RoutineName,                        // Routine name
-                                                 cCurrentModuleObject,               // Object Type
-                                                 thisVrfSys.Name,                    // Object Name
-                                                 cAlphaFieldNames(17));              // Field Name
-        }
-
-        thisVrfSys.HeatEIRFTHi = GetCurveIndex(state, cAlphaArgs(18));
-        if (thisVrfSys.HeatEIRFTHi > 0) {
-            // Verify Curve Object, only legal type is biquadratic
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisVrfSys.HeatEIRFTHi, // Curve index
-                                                 {2},                    // Valid dimensions
-                                                 RoutineName,            // Routine name
-                                                 cCurrentModuleObject,   // Object Type
-                                                 thisVrfSys.Name,        // Object Name
-                                                 cAlphaFieldNames(18));  // Field Name
-        }
+        thisVrfSys.HeatBoundaryCurvePtr = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(14), {1}, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(14));
+        thisVrfSys.HeatCapFTHi = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(15), {2}, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(15));
+        thisVrfSys.HeatEIRFT = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(16), {2}, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(16));
+        thisVrfSys.EIRHeatBoundaryCurvePtr = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(17), {1}, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(17));
+        thisVrfSys.HeatEIRFTHi = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(18), {2}, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(18));
 
         if (Util::SameString(cAlphaArgs(19), "WETBULBTEMPERATURE")) {
             thisVrfSys.HeatingPerformanceOATType = HVAC::OATType::WetBulb;
@@ -1944,72 +1789,29 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
             ErrorsFound = true;
         }
 
-        thisVrfSys.HeatEIRFPLR1 = GetCurveIndex(state, cAlphaArgs(20));
-        if (thisVrfSys.HeatEIRFPLR1 > 0) {
-            // Verify Curve Object, only legal type is linear, quadratic, or cubic
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisVrfSys.HeatEIRFPLR1, // Curve index
-                                                 {1},                     // Valid dimensions
-                                                 RoutineName,             // Routine name
-                                                 cCurrentModuleObject,    // Object Type
-                                                 thisVrfSys.Name,         // Object Name
-                                                 cAlphaFieldNames(20));   // Field Name
-        }
+        thisVrfSys.HeatEIRFPLR1 = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(20), {1}, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(20));
+        thisVrfSys.HeatEIRFPLR2 = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(21), {1}, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(21));
+        thisVrfSys.HeatCombRatioPTR = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(22), {1}, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(22));
+        thisVrfSys.HeatPLFFPLR = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(23), {1}, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(23));
+        if (thisVrfSys.HeatPLFFPLR > 0 && !ErrorsFound) {
+            auto [MinCurvePLR, MinCurveVal, MaxCurvePLR, MaxCurveVal] = checkCurveMinMaxOutput(thisVrfSys.HeatPLFFPLR);
 
-        thisVrfSys.HeatEIRFPLR2 = GetCurveIndex(state, cAlphaArgs(21));
-        if (thisVrfSys.HeatEIRFPLR2 > 0) {
-            // Verify Curve Object, only legal type is linear, quadratic, or cubic
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisVrfSys.HeatEIRFPLR2, // Curve index
-                                                 {1},                     // Valid dimensions
-                                                 RoutineName,             // Routine name
-                                                 cCurrentModuleObject,    // Object Type
-                                                 thisVrfSys.Name,         // Object Name
-                                                 cAlphaFieldNames(21));   // Field Name
-        }
+            if (MinCurveVal < 0.7) {
+                ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisVrfSys.Name));
+                ShowContinueError(state, EnergyPlus::format("...{}=\"{}\" has out of range values.", cAlphaFieldNames(23), cAlphaArgs(23)));
+                ShowContinueError(
+                    state, EnergyPlus::format("...Curve minimum must be >= 0.7, curve min at PLR = {:.2T} is {:.3T}", MinCurvePLR, MinCurveVal));
+                ShowContinueError(state, "...Setting curve minimum to 0.7 and simulation continues.");
+                Curve::SetCurveOutputMinValue(state, thisVrfSys.HeatPLFFPLR, ErrorsFound, 0.7);
+            }
 
-        thisVrfSys.HeatCombRatioPTR = GetCurveIndex(state, cAlphaArgs(22));
-        if (thisVrfSys.HeatCombRatioPTR > 0) {
-            // Verify Curve Object, only legal type is linear, quadratic, or cubic
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisVrfSys.HeatCombRatioPTR, // Curve index
-                                                 {1},                         // Valid dimensions
-                                                 RoutineName,                 // Routine name
-                                                 cCurrentModuleObject,        // Object Type
-                                                 thisVrfSys.Name,             // Object Name
-                                                 cAlphaFieldNames(22));       // Field Name
-        }
-        thisVrfSys.HeatPLFFPLR = GetCurveIndex(state, cAlphaArgs(23));
-        if (thisVrfSys.HeatPLFFPLR > 0) {
-            // Verify Curve Object, only legal type is linear, quadratic, or cubic
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisVrfSys.HeatPLFFPLR, // Curve index
-                                                 {1},                    // Valid dimensions
-                                                 RoutineName,            // Routine name
-                                                 cCurrentModuleObject,   // Object Type
-                                                 thisVrfSys.Name,        // Object Name
-                                                 cAlphaFieldNames(23));  // Field Name
-
-            if (!ErrorsFound) {
-                auto [MinCurvePLR, MinCurveVal, MaxCurvePLR, MaxCurveVal] = checkCurveMinMaxOutput(thisVrfSys.HeatPLFFPLR);
-
-                if (MinCurveVal < 0.7) {
-                    ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisVrfSys.Name));
-                    ShowContinueError(state, EnergyPlus::format("...{}=\"{}\" has out of range values.", cAlphaFieldNames(23), cAlphaArgs(23)));
-                    ShowContinueError(
-                        state, EnergyPlus::format("...Curve minimum must be >= 0.7, curve min at PLR = {:.2T} is {:.3T}", MinCurvePLR, MinCurveVal));
-                    ShowContinueError(state, "...Setting curve minimum to 0.7 and simulation continues.");
-                    Curve::SetCurveOutputMinValue(state, thisVrfSys.HeatPLFFPLR, ErrorsFound, 0.7);
-                }
-
-                if (MaxCurveVal > 1.0) {
-                    ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisVrfSys.Name));
-                    ShowContinueError(state, EnergyPlus::format("...{}=\"{}\" has out of range values.", cAlphaFieldNames(23), cAlphaArgs(23)));
-                    ShowContinueError(
-                        state, EnergyPlus::format("...Curve maximum must be <= 1.0, curve max at PLR = {:.2T} is {:.3T}", MaxCurvePLR, MaxCurveVal));
-                    ShowContinueError(state, "...Setting curve maximum to 1.0 and simulation continues.");
-                    Curve::SetCurveOutputMaxValue(state, thisVrfSys.HeatPLFFPLR, ErrorsFound, 1.0);
-                }
+            if (MaxCurveVal > 1.0) {
+                ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisVrfSys.Name));
+                ShowContinueError(state, EnergyPlus::format("...{}=\"{}\" has out of range values.", cAlphaFieldNames(23), cAlphaArgs(23)));
+                ShowContinueError(
+                    state, EnergyPlus::format("...Curve maximum must be <= 1.0, curve max at PLR = {:.2T} is {:.3T}", MaxCurvePLR, MaxCurveVal));
+                ShowContinueError(state, "...Setting curve maximum to 1.0 and simulation continues.");
+                Curve::SetCurveOutputMaxValue(state, thisVrfSys.HeatPLFFPLR, ErrorsFound, 1.0);
             }
         }
 
@@ -2108,31 +1910,11 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
 
         thisVrfSys.EquivPipeLngthCool = rNumericArgs(11);
         thisVrfSys.VertPipeLngth = rNumericArgs(12);
-        thisVrfSys.PCFLengthCoolPtr = GetCurveIndex(state, cAlphaArgs(29));
-        if (thisVrfSys.PCFLengthCoolPtr > 0) {
-            // Verify Curve Object, only legal type is linear, quadratic, cubic, or biquadratic
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisVrfSys.PCFLengthCoolPtr, // Curve index
-                                                 {1, 2},                      // Valid dimensions  // MULTIPLECURVEDIMS
-                                                 RoutineName,                 // Routine name
-                                                 cCurrentModuleObject,        // Object Type
-                                                 thisVrfSys.Name,             // Object Name
-                                                 cAlphaFieldNames(29));       // Field Name
-        }
+        thisVrfSys.PCFLengthCoolPtr = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(29), {1, 2}, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(29));
         thisVrfSys.PCFHeightCool = rNumericArgs(13);
 
         thisVrfSys.EquivPipeLngthHeat = rNumericArgs(14);
-        thisVrfSys.PCFLengthHeatPtr = GetCurveIndex(state, cAlphaArgs(30));
-        if (thisVrfSys.PCFLengthHeatPtr > 0) {
-            // Verify Curve Object, only legal type is linear, quadratic, cubic, or biquadratic
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisVrfSys.PCFLengthHeatPtr, // Curve index
-                                                 {1, 2},                      // Valid dimensions  // MULTIPLECURVEDIMS
-                                                 RoutineName,                 // Routine name
-                                                 cCurrentModuleObject,        // Object Type
-                                                 thisVrfSys.Name,             // Object Name
-                                                 cAlphaFieldNames(30));       // Field Name
-        }
+        thisVrfSys.PCFLengthHeatPtr = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(30), {1, 2}, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(30));
 
         thisVrfSys.PCFHeightHeat = rNumericArgs(15);
 
@@ -2169,17 +1951,8 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         }
 
         if (!lAlphaFieldBlanks(33)) {
-            thisVrfSys.DefrostEIRPtr = GetCurveIndex(state, cAlphaArgs(33));
-            if (thisVrfSys.DefrostEIRPtr > 0) {
-                // Verify Curve Object, expected type is BiQuadratic
-                ErrorsFound |= Curve::CheckCurveDims(state,
-                                                     thisVrfSys.DefrostEIRPtr, // Curve index
-                                                     {2},                      // Valid dimensions
-                                                     RoutineName,              // Routine name
-                                                     cCurrentModuleObject,     // Object Type
-                                                     thisVrfSys.Name,          // Object Name
-                                                     cAlphaFieldNames(33));    // Field Name
-            } else {
+            thisVrfSys.DefrostEIRPtr = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(33), {2}, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(33));
+            if (thisVrfSys.DefrostEIRPtr == 0) {
                 if (thisVrfSys.DefrostStrategy == StandardRatings::DefrostStrat::ReverseCycle) {
                     ShowSevereError(state,
                                     EnergyPlus::format(
@@ -2405,32 +2178,12 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
                 }
             }
 
-            thisVrfSys.HRCAPFTCool = GetCurveIndex(state, cAlphaArgs(40));
-            if (thisVrfSys.HRCAPFTCool > 0) {
-                // Verify Curve Object, only legal type is bi-quadratic or linear, quadratic, or cubic
-                ErrorsFound |= Curve::CheckCurveDims(state,
-                                                     thisVrfSys.HRCAPFTCool, // Curve index
-                                                     {1, 2},                 // Valid dimensions  // MULTIPLECURVEDIMS
-                                                     RoutineName,            // Routine name
-                                                     cCurrentModuleObject,   // Object Type
-                                                     thisVrfSys.Name,        // Object Name
-                                                     cAlphaFieldNames(40));  // Field Name
-            }
+            thisVrfSys.HRCAPFTCool = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(40), {1, 2}, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(40));
             if (!lNumericFieldBlanks(31)) {
                 thisVrfSys.HRInitialCoolCapFrac = rNumericArgs(31);
             }
             thisVrfSys.HRCoolCapTC = rNumericArgs(32);
-            thisVrfSys.HREIRFTCool = GetCurveIndex(state, cAlphaArgs(41));
-            if (thisVrfSys.HREIRFTCool > 0) {
-                // Verify Curve Object, only legal type is bi-quadratic or linear, quadratic, or cubic
-                ErrorsFound |= Curve::CheckCurveDims(state,
-                                                     thisVrfSys.HREIRFTCool, // Curve index
-                                                     {1, 2},                 // Valid dimensions  // MULTIPLECURVEDIMS
-                                                     RoutineName,            // Routine name
-                                                     cCurrentModuleObject,   // Object Type
-                                                     thisVrfSys.Name,        // Object Name
-                                                     cAlphaFieldNames(41));  // Field Name
-            }
+            thisVrfSys.HREIRFTCool = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(41), {1, 2}, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(41));
             thisVrfSys.HRInitialCoolEIRFrac = rNumericArgs(33);
             thisVrfSys.HRCoolEIRTC = rNumericArgs(34);
 
@@ -2438,17 +2191,7 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
             //  REAL(r64)    :: HRInitialHeatCapFrac       =0.0d0 ! Fractional heating degradation at the start of heat recovery from heating mode
             //  REAL(r64)    :: HRHeatCapTC                =0.0d0 ! Time constant used to recover from initial degradation in heating heat
             //  recovery
-            thisVrfSys.HRCAPFTHeat = GetCurveIndex(state, cAlphaArgs(42));
-            if (thisVrfSys.HRCAPFTHeat > 0) {
-                // Verify Curve Object, only legal type is bi-quadratic or linear, quadratic, or cubic
-                ErrorsFound |= Curve::CheckCurveDims(state,
-                                                     thisVrfSys.HRCAPFTHeat, // Curve index
-                                                     {1, 2},                 // Valid dimensions  // MULTIPLECURVEDIMS
-                                                     RoutineName,            // Routine name
-                                                     cCurrentModuleObject,   // Object Type
-                                                     thisVrfSys.Name,        // Object Name
-                                                     cAlphaFieldNames(42));  // Field Name
-            }
+            thisVrfSys.HRCAPFTHeat = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(42), {1, 2}, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(42));
             thisVrfSys.HRInitialHeatCapFrac = rNumericArgs(35);
             thisVrfSys.HRHeatCapTC = rNumericArgs(36);
 
@@ -2456,17 +2199,7 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
             //  REAL(r64)    :: HRInitialHeatEIRFrac       =0.0d0 ! Fractional EIR degradation at the start of heat recovery from heating mode
             //  REAL(r64)    :: HRHeatEIRTC                =0.0d0 ! Time constant used to recover from initial degradation in heating heat
             //  recovery
-            thisVrfSys.HREIRFTHeat = GetCurveIndex(state, cAlphaArgs(43));
-            if (thisVrfSys.HREIRFTHeat > 0) {
-                // Verify Curve Object, only legal type is bi-quadratic or linear, quadratic, or cubic
-                ErrorsFound |= Curve::CheckCurveDims(state,
-                                                     thisVrfSys.HREIRFTHeat, // Curve index
-                                                     {1, 2},                 // Valid dimensions  // MULTIPLECURVEDIMS
-                                                     RoutineName,            // Routine name
-                                                     cCurrentModuleObject,   // Object Type
-                                                     thisVrfSys.Name,        // Object Name
-                                                     cAlphaFieldNames(43));  // Field Name
-            }
+            thisVrfSys.HREIRFTHeat = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(43), {1, 2}, RoutineName, cCurrentModuleObject, thisVrfSys.Name, cAlphaFieldNames(43));
             thisVrfSys.HRInitialHeatEIRFrac = rNumericArgs(37);
             thisVrfSys.HRHeatEIRTC = rNumericArgs(38);
         }
@@ -2732,17 +2465,8 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         }
 
         if (!lAlphaFieldBlanks(10)) {
-            thisVrfFluidCtrl.DefrostEIRPtr = GetCurveIndex(state, cAlphaArgs(10));
-            if (thisVrfFluidCtrl.DefrostEIRPtr > 0) {
-                // Verify Curve Object, expected type is BiQuadratic
-                ErrorsFound |= Curve::CheckCurveDims(state,
-                                                     thisVrfFluidCtrl.DefrostEIRPtr, // Curve index
-                                                     {2},                            // Valid dimensions
-                                                     RoutineName,                    // Routine name
-                                                     cCurrentModuleObject,           // Object Type
-                                                     thisVrfFluidCtrl.Name,          // Object Name
-                                                     cAlphaFieldNames(10));          // Field Name
-            } else {
+            thisVrfFluidCtrl.DefrostEIRPtr = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(10), {2}, RoutineName, cCurrentModuleObject, thisVrfFluidCtrl.Name, cAlphaFieldNames(10));
+            if (thisVrfFluidCtrl.DefrostEIRPtr == 0) {
                 if (thisVrfFluidCtrl.DefrostStrategy == StandardRatings::DefrostStrat::ReverseCycle &&
                     thisVrfFluidCtrl.DefrostControl == StandardRatings::HPdefrostControl::OnDemand) {
                     ShowSevereError(
@@ -3190,17 +2914,8 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         }
 
         if (!lAlphaFieldBlanks(10)) {
-            thisVrfFluidCtrlHR.DefrostEIRPtr = GetCurveIndex(state, cAlphaArgs(10));
-            if (thisVrfFluidCtrlHR.DefrostEIRPtr > 0) {
-                // Verify Curve Object, expected type is BiQuadratic
-                ErrorsFound |= Curve::CheckCurveDims(state,
-                                                     thisVrfFluidCtrlHR.DefrostEIRPtr, // Curve index
-                                                     {2},                              // Valid dimensions
-                                                     RoutineName,                      // Routine name
-                                                     cCurrentModuleObject,             // Object Type
-                                                     thisVrfFluidCtrlHR.Name,          // Object Name
-                                                     cAlphaFieldNames(10));            // Field Name
-            } else {
+            thisVrfFluidCtrlHR.DefrostEIRPtr = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(10), {2}, RoutineName, cCurrentModuleObject, thisVrfFluidCtrlHR.Name, cAlphaFieldNames(10));
+            if (thisVrfFluidCtrlHR.DefrostEIRPtr == 0) {
                 if (thisVrfFluidCtrlHR.DefrostStrategy == StandardRatings::DefrostStrat::ReverseCycle &&
                     thisVrfFluidCtrlHR.DefrostControl == StandardRatings::HPdefrostControl::OnDemand) {
                     ShowSevereError(state,
