@@ -2378,6 +2378,17 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         }
     };
 
+    // Lambda: emit a severe error when a minimum value is not less than its corresponding maximum.
+    // Used for OAT operating ranges and IU evap/cond temperature bounds.
+    auto checkMinLessThanMax = [&](const std::string &objName, Real64 minVal, Real64 maxVal, const std::string &minFieldName) {
+        if (minVal >= maxVal) {
+            ShowSevereError(state, cCurrentModuleObject + ", \"" + objName + "\"");
+            ShowContinueError(state,
+                              EnergyPlus::format("... {} ({:.3T}) must be less than maximum ({:.3T}).", minFieldName, minVal, maxVal));
+            ErrorsFound = true;
+        }
+    };
+
     // Read all VRF condenser objects: Algorithm Type 2_physics based model (VRF-FluidTCtrl-HP)
     cCurrentModuleObject = "AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl";
     for (int thisNum = 1; thisNum <= state.dataHVACVarRefFlow->NumVRFCond_FluidTCtrl_HP; ++thisNum) {
@@ -2446,24 +2457,8 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         thisVrfFluidCtrl.MaxOATCooling = rNumericArgs(4);
         thisVrfFluidCtrl.MinOATHeating = rNumericArgs(5);
         thisVrfFluidCtrl.MaxOATHeating = rNumericArgs(6);
-        if (thisVrfFluidCtrl.MinOATCooling >= thisVrfFluidCtrl.MaxOATCooling) {
-            ShowSevereError(state, cCurrentModuleObject + ", \"" + thisVrfFluidCtrl.Name + "\"");
-            ShowContinueError(state,
-                              EnergyPlus::format("... {} ({:.3T}) must be less than maximum ({:.3T}).",
-                                                 cNumericFieldNames(3),
-                                                 thisVrfFluidCtrl.MinOATCooling,
-                                                 thisVrfFluidCtrl.MaxOATCooling));
-            ErrorsFound = true;
-        }
-        if (thisVrfFluidCtrl.MinOATHeating >= thisVrfFluidCtrl.MaxOATHeating) {
-            ShowSevereError(state, cCurrentModuleObject + ", \"" + thisVrfFluidCtrl.Name + "\"");
-            ShowContinueError(state,
-                              EnergyPlus::format("... {} ({:.3T}) must be less than maximum ({:.3T}).",
-                                                 cNumericFieldNames(5),
-                                                 thisVrfFluidCtrl.MinOATHeating,
-                                                 thisVrfFluidCtrl.MaxOATHeating));
-            ErrorsFound = true;
-        }
+        checkMinLessThanMax(thisVrfFluidCtrl.Name, thisVrfFluidCtrl.MinOATCooling, thisVrfFluidCtrl.MaxOATCooling, cNumericFieldNames(3));
+        checkMinLessThanMax(thisVrfFluidCtrl.Name, thisVrfFluidCtrl.MinOATHeating, thisVrfFluidCtrl.MaxOATHeating, cNumericFieldNames(5));
 
         // Reference OU SH/SC
         thisVrfFluidCtrl.SH = rNumericArgs(7);
@@ -2486,24 +2481,8 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         thisVrfFluidCtrl.IUEvapTempHigh = rNumericArgs(12);
         thisVrfFluidCtrl.IUCondTempLow = rNumericArgs(13);
         thisVrfFluidCtrl.IUCondTempHigh = rNumericArgs(14);
-        if (thisVrfFluidCtrl.IUEvapTempLow >= thisVrfFluidCtrl.IUEvapTempHigh) {
-            ShowSevereError(state, cCurrentModuleObject + ", \"" + thisVrfFluidCtrl.Name + "\"");
-            ShowContinueError(state,
-                              EnergyPlus::format("... {} ({:.3T}) must be less than maximum ({:.3T}).",
-                                                 cNumericFieldNames(11),
-                                                 thisVrfFluidCtrl.IUEvapTempLow,
-                                                 thisVrfFluidCtrl.IUEvapTempHigh));
-            ErrorsFound = true;
-        }
-        if (thisVrfFluidCtrl.IUCondTempLow >= thisVrfFluidCtrl.IUCondTempHigh) {
-            ShowSevereError(state, cCurrentModuleObject + ", \"" + thisVrfFluidCtrl.Name + "\"");
-            ShowContinueError(state,
-                              EnergyPlus::format("... {} ({:.3T}) must be less than maximum ({:.3T}).",
-                                                 cNumericFieldNames(13),
-                                                 thisVrfFluidCtrl.IUCondTempLow,
-                                                 thisVrfFluidCtrl.IUCondTempHigh));
-            ErrorsFound = true;
-        }
+        checkMinLessThanMax(thisVrfFluidCtrl.Name, thisVrfFluidCtrl.IUEvapTempLow, thisVrfFluidCtrl.IUEvapTempHigh, cNumericFieldNames(11));
+        checkMinLessThanMax(thisVrfFluidCtrl.Name, thisVrfFluidCtrl.IUCondTempLow, thisVrfFluidCtrl.IUCondTempHigh, cNumericFieldNames(13));
 
         // Get OU fan data
         thisVrfFluidCtrl.RatedOUFanPowerPerCapcity = rNumericArgs(15);
@@ -2661,33 +2640,9 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         thisVrfFluidCtrlHR.MaxOATHeating = rNumericArgs(6);
         thisVrfFluidCtrlHR.MinOATHeatRecovery = rNumericArgs(7);
         thisVrfFluidCtrlHR.MaxOATHeatRecovery = rNumericArgs(8);
-        if (thisVrfFluidCtrlHR.MinOATCooling >= thisVrfFluidCtrlHR.MaxOATCooling) {
-            ShowSevereError(state, cCurrentModuleObject + ", \"" + thisVrfFluidCtrlHR.Name + "\"");
-            ShowContinueError(state,
-                              EnergyPlus::format("... {} ({:.3T}) must be less than maximum ({:.3T}).",
-                                                 cNumericFieldNames(3),
-                                                 thisVrfFluidCtrlHR.MinOATCooling,
-                                                 thisVrfFluidCtrlHR.MaxOATCooling));
-            ErrorsFound = true;
-        }
-        if (thisVrfFluidCtrlHR.MinOATHeating >= thisVrfFluidCtrlHR.MaxOATHeating) {
-            ShowSevereError(state, cCurrentModuleObject + ", \"" + thisVrfFluidCtrlHR.Name + "\"");
-            ShowContinueError(state,
-                              EnergyPlus::format("... {} ({:.3T}) must be less than maximum ({:.3T}).",
-                                                 cNumericFieldNames(5),
-                                                 thisVrfFluidCtrlHR.MinOATHeating,
-                                                 thisVrfFluidCtrlHR.MaxOATHeating));
-            ErrorsFound = true;
-        }
-        if (thisVrfFluidCtrlHR.MinOATHeatRecovery >= thisVrfFluidCtrlHR.MaxOATHeatRecovery) {
-            ShowSevereError(state, cCurrentModuleObject + ", \"" + thisVrfFluidCtrlHR.Name + "\"");
-            ShowContinueError(state,
-                              EnergyPlus::format("... {} ({:.3T}) must be less than maximum ({:.3T}).",
-                                                 cNumericFieldNames(7),
-                                                 thisVrfFluidCtrlHR.MinOATHeating,
-                                                 thisVrfFluidCtrlHR.MaxOATHeating));
-            ErrorsFound = true;
-        }
+        checkMinLessThanMax(thisVrfFluidCtrlHR.Name, thisVrfFluidCtrlHR.MinOATCooling, thisVrfFluidCtrlHR.MaxOATCooling, cNumericFieldNames(3));
+        checkMinLessThanMax(thisVrfFluidCtrlHR.Name, thisVrfFluidCtrlHR.MinOATHeating, thisVrfFluidCtrlHR.MaxOATHeating, cNumericFieldNames(5));
+        checkMinLessThanMax(thisVrfFluidCtrlHR.Name, thisVrfFluidCtrlHR.MinOATHeatRecovery, thisVrfFluidCtrlHR.MaxOATHeatRecovery, cNumericFieldNames(7));
         if (thisVrfFluidCtrlHR.MinOATHeatRecovery < thisVrfFluidCtrlHR.MinOATCooling &&
             thisVrfFluidCtrlHR.MinOATHeatRecovery < thisVrfFluidCtrlHR.MinOATHeating) {
             ShowWarningError(state,
@@ -2739,24 +2694,8 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         thisVrfFluidCtrlHR.IUEvapTempHigh = rNumericArgs(12);
         thisVrfFluidCtrlHR.IUCondTempLow = rNumericArgs(13);
         thisVrfFluidCtrlHR.IUCondTempHigh = rNumericArgs(14);
-        if (thisVrfFluidCtrlHR.IUEvapTempLow >= thisVrfFluidCtrlHR.IUEvapTempHigh) {
-            ShowSevereError(state, cCurrentModuleObject + ", \"" + thisVrfFluidCtrlHR.Name + "\"");
-            ShowContinueError(state,
-                              EnergyPlus::format("... {} ({:.3T}) must be less than maximum ({:.3T}).",
-                                                 cNumericFieldNames(11),
-                                                 thisVrfFluidCtrlHR.IUEvapTempLow,
-                                                 thisVrfFluidCtrlHR.IUEvapTempHigh));
-            ErrorsFound = true;
-        }
-        if (thisVrfFluidCtrlHR.IUCondTempLow >= thisVrfFluidCtrlHR.IUCondTempHigh) {
-            ShowSevereError(state, cCurrentModuleObject + ", \"" + thisVrfFluidCtrlHR.Name + "\"");
-            ShowContinueError(state,
-                              EnergyPlus::format("... {} ({:.3T}) must be less than maximum ({:.3T}).",
-                                                 cNumericFieldNames(13),
-                                                 thisVrfFluidCtrlHR.IUCondTempLow,
-                                                 thisVrfFluidCtrlHR.IUCondTempHigh));
-            ErrorsFound = true;
-        }
+        checkMinLessThanMax(thisVrfFluidCtrlHR.Name, thisVrfFluidCtrlHR.IUEvapTempLow, thisVrfFluidCtrlHR.IUEvapTempHigh, cNumericFieldNames(11));
+        checkMinLessThanMax(thisVrfFluidCtrlHR.Name, thisVrfFluidCtrlHR.IUCondTempLow, thisVrfFluidCtrlHR.IUCondTempHigh, cNumericFieldNames(13));
 
         // Reference OU SH/SC
         thisVrfFluidCtrlHR.SH = rNumericArgs(15);
