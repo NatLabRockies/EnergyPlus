@@ -2859,6 +2859,15 @@ namespace AirflowNetwork {
         }
 
         // ==> Validate AirflowNetwork simulation surface data
+        // Helper: find the AFN zone index (1-based) whose ZoneNum matches adjacentSurfZone, or 0 if not found.
+        auto findAFNZoneForSurface = [&](int adjacentSurfZone) -> int {
+            for (int jz = 1; jz <= AirflowNetworkNumOfZones; ++jz) {
+                if (MultizoneZoneData(jz).ZoneNum == adjacentSurfZone) {
+                    return jz;
+                }
+            }
+            return 0;
+        };
         NumOfExtNodes = 0;
         for (int i = 1; i <= AirflowNetworkNumOfSurfaces; ++i) {
             // Check a valid surface defined earlier
@@ -3065,14 +3074,8 @@ namespace AirflowNetwork {
                     ErrorsFound = true;
                 }
 
-                found = false;
-                for (j = 1; j <= AirflowNetworkNumOfZones; ++j) {
-                    if (MultizoneZoneData(j).ZoneNum == m_state.dataSurface->Surface(n).Zone) {
-                        found = true;
-                        break;
-                    }
-                }
-                if (found) {
+                j = findAFNZoneForSurface(m_state.dataSurface->Surface(n).Zone);
+                if (j != 0) {
                     MultizoneSurfaceData(i).NodeNums[1] = j;
                 } else {
                     ShowSevereError(m_state,
@@ -3089,14 +3092,8 @@ namespace AirflowNetwork {
             if (Util::SameString(simulation_control.WPCCntr, "SurfaceAverageCalculation")) {
                 n = m_state.dataSurface->Surface(MultizoneSurfaceData(i).SurfNum).ExtBoundCond;
                 if (n >= 1) { // exterior boundary condition is a surface
-                    found = false;
-                    for (j = 1; j <= AirflowNetworkNumOfZones; ++j) {
-                        if (MultizoneZoneData(j).ZoneNum == m_state.dataSurface->Surface(n).Zone) {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (found) {
+                    j = findAFNZoneForSurface(m_state.dataSurface->Surface(n).Zone);
+                    if (j != 0) {
                         MultizoneSurfaceData(i).NodeNums[1] = j;
                     } else {
                         ShowSevereError(m_state, EnergyPlus::format(RoutineName) + CurrentModuleObject + " = " + MultizoneSurfaceData(i).SurfName);
