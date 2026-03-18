@@ -1491,6 +1491,21 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
     state.dataHeatBal->TotVentilation = totDesignFlowVentilation + totWindStackVentilation;
     state.dataHeatBal->Ventilation.allocate(state.dataHeatBal->TotVentilation);
 
+    // Helper lambda: register zone-level output vars (first time only) and EMS actuator for a ventilation object.
+    // Called identically at the end of both the DesignFlowRate and WindAndStack ventilation input loops.
+    auto finalizeVentilationObject = [&](DataHeatBalance::VentilationData &vent, const DataHeatBalance::ZoneData &zone) {
+        if (vent.ZonePtr > 0) {
+            if (RepVarSet(vent.ZonePtr) && !zone.zoneOAQuadratureSum) {
+                RepVarSet(vent.ZonePtr) = false;
+                setupZoneVentilationOutputVars(state, state.dataHeatBal->ZnAirRpt(vent.ZonePtr), zone.Name);
+            }
+        }
+        if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
+            SetupEMSActuator(
+                state, "Zone Ventilation", vent.Name, "Air Exchange Flow Rate", "[m3/s]", vent.EMSSimpleVentOn, vent.EMSimpleVentFlowRate);
+        }
+    };
+
     int ventilationNum = 0;
     if (numDesignFlowVentilationObjects > 0) {
         cCurrentModuleObject = "ZoneVentilation:DesignFlowRate";
@@ -1832,22 +1847,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
 
                 // Report variables should be added for individual VENTILATION objects, in addition to zone totals below
 
-                if (thisVentilation.ZonePtr > 0) {
-                    if (RepVarSet(thisVentilation.ZonePtr) && !thisZone.zoneOAQuadratureSum) {
-                        RepVarSet(thisVentilation.ZonePtr) = false;
-                        setupZoneVentilationOutputVars(state, state.dataHeatBal->ZnAirRpt(thisVentilation.ZonePtr), thisZone.Name);
-                    }
-                }
-
-                if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
-                    SetupEMSActuator(state,
-                                     "Zone Ventilation",
-                                     thisVentilation.Name,
-                                     "Air Exchange Flow Rate",
-                                     "[m3/s]",
-                                     thisVentilation.EMSSimpleVentOn,
-                                     thisVentilation.EMSimpleVentFlowRate);
-                }
+                finalizeVentilationObject(thisVentilation, thisZone);
             }
         }
     }
@@ -2132,23 +2132,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                 }
 
                 // Report variables should be added for individual VENTILATION objects, in addition to zone totals below
-
-                if (thisVentilation.ZonePtr > 0) {
-                    if (RepVarSet(thisVentilation.ZonePtr) && !thisZone.zoneOAQuadratureSum) {
-                        RepVarSet(thisVentilation.ZonePtr) = false;
-                        setupZoneVentilationOutputVars(state, state.dataHeatBal->ZnAirRpt(thisVentilation.ZonePtr), thisZone.Name);
-                    }
-                }
-
-                if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
-                    SetupEMSActuator(state,
-                                     "Zone Ventilation",
-                                     thisVentilation.Name,
-                                     "Air Exchange Flow Rate",
-                                     "[m3/s]",
-                                     thisVentilation.EMSSimpleVentOn,
-                                     thisVentilation.EMSimpleVentFlowRate);
-                }
+                finalizeVentilationObject(thisVentilation, thisZone);
             }
         }
     }
