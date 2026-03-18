@@ -3742,6 +3742,14 @@ namespace AirflowNetwork {
                 if (j > 0) {
                     // Revise data in multizone object
                     NumOfLinksIntraZone = NumOfLinksIntraZone - 1;
+                    auto reportInterZoneLinkNotFound = [&]() {
+                        ShowSevereError(m_state,
+                                        EnergyPlus::format(RoutineName) +
+                                            "The InterZone link is not found between AirflowNetwork:IntraZone:Linkage =" +
+                                            IntraZoneLinkageData(i).Name + " and AirflowNetwork:Multizone:Surface = " +
+                                            MultizoneSurfaceData(j).SurfName);
+                        ErrorsFound = true;
+                    };
                     if (m_state.dataSurface->Surface(MultizoneSurfaceData(j).SurfNum).ExtBoundCond == 0) {
                         // Exterior surface NodeNums[1] should be equal
                         if (IntraZoneLinkageData(i).NodeNums[0] > AirflowNetworkNumOfZones + AirflowNetworkNumOfExtNode) {
@@ -3753,11 +3761,7 @@ namespace AirflowNetwork {
                             MultizoneSurfaceData(j).ZonePtr = MultizoneSurfaceData(j).NodeNums[0];
                             MultizoneSurfaceData(j).NodeNums[0] = IntraZoneLinkageData(i).NodeNums[1];
                         } else {
-                            ShowSevereError(
-                                m_state,
-                                EnergyPlus::format(RoutineName) + "The InterZone link is not found between AirflowNetwork:IntraZone:Linkage =" +
-                                    IntraZoneLinkageData(i).Name + " and AirflowNetwork:Multizone:Surface = " + MultizoneSurfaceData(j).SurfName);
-                            ErrorsFound = true;
+                            reportInterZoneLinkNotFound();
                         }
                     } else {
                         // Interior surface
@@ -3784,11 +3788,7 @@ namespace AirflowNetwork {
                                 MultizoneSurfaceData(j).ZonePtr = MultizoneSurfaceData(j).NodeNums[0];
                                 MultizoneSurfaceData(j).NodeNums[0] = IntraZoneLinkageData(i).NodeNums[0];
                             } else {
-                                ShowSevereError(
-                                    m_state,
-                                    EnergyPlus::format(RoutineName) + "The InterZone link is not found between AirflowNetwork:IntraZone:Linkage =" +
-                                        IntraZoneLinkageData(i).Name + " and AirflowNetwork:Multizone:Surface = " + MultizoneSurfaceData(j).SurfName);
-                                ErrorsFound = true;
+                                reportInterZoneLinkNotFound();
                             }
                         } else if (IntraZoneLinkageData(i).NodeNums[1] > AirflowNetworkNumOfZones + AirflowNetworkNumOfExtNode) {
                             MultizoneSurfaceData(j).RAFNflag = true;
@@ -3798,11 +3798,7 @@ namespace AirflowNetwork {
                                 MultizoneSurfaceData(j).ZonePtr = MultizoneSurfaceData(j).NodeNums[0];
                                 MultizoneSurfaceData(j).NodeNums[0] = IntraZoneLinkageData(i).NodeNums[1];
                             } else {
-                                ShowSevereError(
-                                    m_state,
-                                    EnergyPlus::format(RoutineName) + "The InterZone link is not found between AirflowNetwork:IntraZone:Linkage =" +
-                                        IntraZoneLinkageData(i).Name + " and AirflowNetwork:Multizone:Surface = " + MultizoneSurfaceData(j).SurfName);
-                                ErrorsFound = true;
+                                reportInterZoneLinkNotFound();
                             }
                         }
                     }
@@ -3816,7 +3812,7 @@ namespace AirflowNetwork {
                         if (m_state.dataGlobal->DisplayExtraWarnings) {
                             ShowWarningError(m_state,
                                              EnergyPlus::format(RoutineName) + CurrentModuleObject + "='" + IntraZoneLinkageData(link).Name +
-                                                 " is reomoved from the list due to the surface connection from Intrazone to Interzone.");
+                                                 " is removed from the list due to the surface connection from Intrazone to Interzone.");
                         }
                         for (int j = link; j <= IntraZoneNumOfLinks - 1; ++j) {
                             IntraZoneLinkageData(j) = IntraZoneLinkageData(j + 1);
