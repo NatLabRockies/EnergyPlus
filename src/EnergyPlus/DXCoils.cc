@@ -1573,6 +1573,39 @@ void GetDXCoils(EnergyPlusData &state)
         readBasinHeaterSchedule(coil, eohRef, schedAlphaIdx);
     };
 
+    // Helper lambda: parses and validates the DefrostStrategy (ReverseCycle/Resistive) and
+    // DefrostControl (Timed/OnDemand) alpha fields that appear identically in the SingleSpeed
+    // and MultiSpeed heating coil input sections.
+    // stratAlphaIdx - 1-based Alphas() index for DefrostStrategy field
+    // ctrlAlphaIdx  - 1-based Alphas() index for DefrostControl field
+    auto parseDefrostStrategyAndControl = [&](DXCoilData &coil, int stratAlphaIdx, int ctrlAlphaIdx) {
+        if (Util::SameString(Alphas(stratAlphaIdx), "ReverseCycle")) {
+            coil.DefrostStrategy = StandardRatings::DefrostStrat::ReverseCycle;
+        }
+        if (Util::SameString(Alphas(stratAlphaIdx), "Resistive")) {
+            coil.DefrostStrategy = StandardRatings::DefrostStrat::Resistive;
+        }
+        if (coil.DefrostStrategy == StandardRatings::DefrostStrat::Invalid) {
+            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, coil.Name));
+            ShowContinueError(state, EnergyPlus::format("...illegal {}=\"{}\".", cAlphaFields(stratAlphaIdx), Alphas(stratAlphaIdx)));
+            ShowContinueError(state, "...valid values for this field are ReverseCycle or Resistive.");
+            ErrorsFound = true;
+        }
+
+        if (Util::SameString(Alphas(ctrlAlphaIdx), "Timed")) {
+            coil.DefrostControl = StandardRatings::HPdefrostControl::Timed;
+        }
+        if (Util::SameString(Alphas(ctrlAlphaIdx), "OnDemand")) {
+            coil.DefrostControl = StandardRatings::HPdefrostControl::OnDemand;
+        }
+        if (coil.DefrostControl == StandardRatings::HPdefrostControl::Invalid) {
+            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, coil.Name));
+            ShowContinueError(state, EnergyPlus::format("...illegal {}=\"{}\".", cAlphaFields(ctrlAlphaIdx), Alphas(ctrlAlphaIdx)));
+            ShowContinueError(state, "...valid values for this field are Timed or OnDemand.");
+            ErrorsFound = true;
+        }
+    };
+
     // Loop over the Doe2 DX Coils and get & load the data
     CurrentModuleObject = "Coil:Cooling:DX:SingleSpeed";
     for (DXCoilIndex = 1; DXCoilIndex <= state.dataDXCoils->NumDoe2DXCoils; ++DXCoilIndex) {
@@ -2351,32 +2384,7 @@ void GetDXCoils(EnergyPlusData &state)
             }
         }
 
-        if (Util::SameString(Alphas(12), "ReverseCycle")) {
-            thisDXCoil.DefrostStrategy = StandardRatings::DefrostStrat::ReverseCycle;
-        }
-        if (Util::SameString(Alphas(12), "Resistive")) {
-            thisDXCoil.DefrostStrategy = StandardRatings::DefrostStrat::Resistive;
-        }
-
-        if (thisDXCoil.DefrostStrategy == StandardRatings::DefrostStrat::Invalid) {
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-            ShowContinueError(state, EnergyPlus::format("...illegal {}=\"{}\".", cAlphaFields(12), Alphas(12)));
-            ShowContinueError(state, "...valid values for this field are ReverseCycle or Resistive.");
-            ErrorsFound = true;
-        }
-
-        if (Util::SameString(Alphas(13), "Timed")) {
-            thisDXCoil.DefrostControl = StandardRatings::HPdefrostControl::Timed;
-        }
-        if (Util::SameString(Alphas(13), "OnDemand")) {
-            thisDXCoil.DefrostControl = StandardRatings::HPdefrostControl::OnDemand;
-        }
-        if (thisDXCoil.DefrostControl == StandardRatings::HPdefrostControl::Invalid) {
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-            ShowContinueError(state, EnergyPlus::format("...illegal {}=\"{}\".", cAlphaFields(13), Alphas(13)));
-            ShowContinueError(state, "...valid values for this field are Timed or OnDemand.");
-            ErrorsFound = true;
-        }
+        parseDefrostStrategyAndControl(thisDXCoil, 12, 13);
 
         thisDXCoil.RatedSHR(1) = 1.0;
         thisDXCoil.RatedTotCap(1) = Numbers(1);
@@ -4070,31 +4078,7 @@ void GetDXCoils(EnergyPlusData &state)
             }
         }
 
-        if (Util::SameString(Alphas(7), "ReverseCycle")) {
-            thisDXCoil.DefrostStrategy = StandardRatings::DefrostStrat::ReverseCycle;
-        }
-        if (Util::SameString(Alphas(7), "Resistive")) {
-            thisDXCoil.DefrostStrategy = StandardRatings::DefrostStrat::Resistive;
-        }
-        if (thisDXCoil.DefrostStrategy == StandardRatings::DefrostStrat::Invalid) {
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-            ShowContinueError(state, EnergyPlus::format("...illegal {}=\"{}\".", cAlphaFields(7), Alphas(7)));
-            ShowContinueError(state, "...valid values for this field are ReverseCycle or Resistive.");
-            ErrorsFound = true;
-        }
-
-        if (Util::SameString(Alphas(8), "Timed")) {
-            thisDXCoil.DefrostControl = StandardRatings::HPdefrostControl::Timed;
-        }
-        if (Util::SameString(Alphas(8), "OnDemand")) {
-            thisDXCoil.DefrostControl = StandardRatings::HPdefrostControl::OnDemand;
-        }
-        if (thisDXCoil.DefrostControl == StandardRatings::HPdefrostControl::Invalid) {
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-            ShowContinueError(state, EnergyPlus::format("...illegal {}=\"{}\".", cAlphaFields(8), Alphas(8)));
-            ShowContinueError(state, "...valid values for this field are Timed or OnDemand.");
-            ErrorsFound = true;
-        }
+        parseDefrostStrategyAndControl(thisDXCoil, 7, 8);
 
         // Set maximum outdoor temp for defrost to occur
         thisDXCoil.MaxOATDefrost = Numbers(5);
