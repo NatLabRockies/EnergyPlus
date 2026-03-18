@@ -3836,6 +3836,14 @@ namespace AirflowNetwork {
             }
         }
 
+        // Lambda to report a "required but not found" error when distribution is simulated
+        auto requireIfDistributed = [&]() {
+            if (distribution_simulated) {
+                ShowSevereError(m_state, EnergyPlus::format(RoutineName) + "An " + CurrentModuleObject + " object is required but not found.");
+                ErrorsFound = true;
+            }
+        };
+
         // Read AirflowNetwork Distribution system node
         CurrentModuleObject = "AirflowNetwork:Distribution:Node";
         DisSysNumOfNodes = m_state.dataInputProcessing->inputProcessor->getNumObjectsFound(m_state, CurrentModuleObject);
@@ -3878,18 +3886,12 @@ namespace AirflowNetwork {
                 }
             }
         } else {
-            if (distribution_simulated) {
-                ShowSevereError(m_state, EnergyPlus::format(RoutineName) + "An " + CurrentModuleObject + " object is required but not found.");
-                ErrorsFound = true;
-            }
+            requireIfDistributed();
         }
 
         CurrentModuleObject = "AirflowNetwork:Distribution:Component:Duct";
         if (DisSysNumOfDucts == 0) {
-            if (distribution_simulated) {
-                ShowSevereError(m_state, EnergyPlus::format(RoutineName) + "An " + CurrentModuleObject + " object is required but not found.");
-                ErrorsFound = true;
-            }
+            requireIfDistributed();
         }
 
         // Read AirflowNetwork distribution system component: DuctViewFactors
@@ -3978,10 +3980,7 @@ namespace AirflowNetwork {
 
         CurrentModuleObject = "AirflowNetwork:Distribution:Component:Fan";
         if (DisSysNumOfCVFs == 0) {
-            if (distribution_simulated) {
-                ShowSevereError(m_state, EnergyPlus::format(RoutineName) + "An " + CurrentModuleObject + " object is required but not found.");
-                ErrorsFound = true;
-            }
+            requireIfDistributed();
         }
 
         // Read PressureController
@@ -4180,11 +4179,7 @@ namespace AirflowNetwork {
                 }
                 if (Util::SameString(DisSysNodeData(i - NumOfNodesMultiZone).EPlusType, "OutdoorAir:NodeList") ||
                     Util::SameString(DisSysNodeData(i - NumOfNodesMultiZone).EPlusType, "OutdoorAir:Node")) {
-                    if (j > 1 && OAMixerExist) {
-                        AirflowNetworkNodeData(i).EPlusTypeNum = iEPlusNodeType::EXT;
-                        AirflowNetworkNodeData(i).ExtNodeNum = AirflowNetworkNumOfExtNode + 1;
-                        AirflowNetworkNodeData(i).NodeTypeNum = 1;
-                    } else if (j > 0 && !OAMixerExist) {
+                    if ((j > 1 && OAMixerExist) || (j > 0 && !OAMixerExist)) {
                         AirflowNetworkNodeData(i).EPlusTypeNum = iEPlusNodeType::EXT;
                         AirflowNetworkNodeData(i).ExtNodeNum = AirflowNetworkNumOfExtNode + 1;
                         AirflowNetworkNodeData(i).NodeTypeNum = 1;
@@ -4640,11 +4635,7 @@ namespace AirflowNetwork {
                 }
             }
         } else {
-
-            if (distribution_simulated) {
-                ShowSevereError(m_state, EnergyPlus::format(RoutineName) + "An " + CurrentModuleObject + " object is required but not found.");
-                ErrorsFound = true;
-            }
+            requireIfDistributed();
         }
 
         if (simulation_control.DuctLoss) {
