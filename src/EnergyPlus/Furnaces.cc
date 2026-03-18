@@ -1324,6 +1324,43 @@ namespace Furnaces {
             }
         };
 
+        // Lambda: warn and reset MaxCoolAirVolFlow and MaxHeatAirVolFlow when they exceed
+        // the fan's actual flow rate.  coolFieldName/heatFieldName are the numeric-field
+        // description strings used in the error message so callers can pass the correct
+        // cNumericFields entry for each object type.
+        auto checkFanFlowVsHVACFlowRates =
+            [&](FurnaceEquipConditions &furn,
+                std::string_view objName,
+                std::string_view coolFieldName,
+                std::string_view heatFieldName,
+                const std::string &fanName) {
+                if (furn.ActualFanVolFlowRate == DataSizing::AutoSize) return;
+                if (furn.ActualFanVolFlowRate < furn.MaxCoolAirVolFlow && furn.MaxCoolAirVolFlow != DataSizing::AutoSize) {
+                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, objName));
+                    ShowContinueError(state,
+                                      EnergyPlus::format("... air flow rate = {:.7T} in fan object {} is less than the maximum HVAC system air flow "
+                                                         "rate in cooling mode.",
+                                                         furn.ActualFanVolFlowRate,
+                                                         fanName));
+                    ShowContinueError(
+                        state, EnergyPlus::format(" The {} is reset to the fan flow rate and the simulation continues.", coolFieldName));
+                    furn.MaxCoolAirVolFlow = furn.ActualFanVolFlowRate;
+                    furn.DesignFanVolFlowRate = furn.ActualFanVolFlowRate;
+                }
+                if (furn.ActualFanVolFlowRate < furn.MaxHeatAirVolFlow && furn.MaxHeatAirVolFlow != DataSizing::AutoSize) {
+                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, objName));
+                    ShowContinueError(state,
+                                      EnergyPlus::format("... air flow rate = {:.7T} in fan object {} is less than the maximum HVAC system air flow "
+                                                         "rate in heating mode.",
+                                                         furn.ActualFanVolFlowRate,
+                                                         fanName));
+                    ShowContinueError(
+                        state, EnergyPlus::format(" The {} is reset to the fan flow rate and the simulation continues.", heatFieldName));
+                    furn.MaxHeatAirVolFlow = furn.ActualFanVolFlowRate;
+                    furn.DesignFanVolFlowRate = furn.ActualFanVolFlowRate;
+                }
+            };
+
         // Get the data for the HeatOnly Furnace
         for (int HeatOnlyNum = 1; HeatOnlyNum <= NumHeatOnly + NumUnitaryHeatOnly; ++HeatOnlyNum) {
 
@@ -2697,34 +2734,7 @@ namespace Furnaces {
                 }
             }
 
-            if (thisFurnace.ActualFanVolFlowRate != DataSizing::AutoSize) {
-                if (thisFurnace.ActualFanVolFlowRate < thisFurnace.MaxCoolAirVolFlow && thisFurnace.MaxCoolAirVolFlow != DataSizing::AutoSize) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format(
-                            "... air flow rate = {:.7T} in fan object {} is less than the maximum HVAC system air flow rate in cooling mode.",
-                            thisFurnace.ActualFanVolFlowRate,
-                            FanName));
-                    ShowContinueError(state,
-                                      EnergyPlus::format(" The {} is reset to the fan flow rate and the simulation continues.", cNumericFields(2)));
-                    thisFurnace.MaxCoolAirVolFlow = thisFurnace.ActualFanVolFlowRate;
-                    thisFurnace.DesignFanVolFlowRate = thisFurnace.ActualFanVolFlowRate;
-                }
-                if (thisFurnace.ActualFanVolFlowRate < thisFurnace.MaxHeatAirVolFlow && thisFurnace.MaxHeatAirVolFlow != DataSizing::AutoSize) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format(
-                            "... air flow rate = {:.7T} in fan object {} is less than the maximum HVAC system air flow rate in heating mode.",
-                            thisFurnace.ActualFanVolFlowRate,
-                            FanName));
-                    ShowContinueError(state,
-                                      EnergyPlus::format(" The {} is reset to the fan flow rate and the simulation continues.", cNumericFields(3)));
-                    thisFurnace.MaxHeatAirVolFlow = thisFurnace.ActualFanVolFlowRate;
-                    thisFurnace.DesignFanVolFlowRate = thisFurnace.ActualFanVolFlowRate;
-                }
-            }
+            checkFanFlowVsHVACFlowRates(thisFurnace, Alphas(1), cNumericFields(2), cNumericFields(3), FanName);
 
             setAirFlowControl(thisFurnace);
 
@@ -3353,34 +3363,7 @@ namespace Furnaces {
                 }
             }
 
-            if (thisFurnace.ActualFanVolFlowRate != DataSizing::AutoSize) {
-                if (thisFurnace.ActualFanVolFlowRate < thisFurnace.MaxCoolAirVolFlow && thisFurnace.MaxCoolAirVolFlow != DataSizing::AutoSize) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format(
-                            "... air flow rate = {:.7T} in fan object {} is less than the maximum HVAC system air flow rate in cooling mode.",
-                            thisFurnace.ActualFanVolFlowRate,
-                            FanName));
-                    ShowContinueError(state,
-                                      EnergyPlus::format(" The {} is reset to the fan flow rate and the simulation continues.", cNumericFields(1)));
-                    thisFurnace.MaxCoolAirVolFlow = thisFurnace.ActualFanVolFlowRate;
-                    thisFurnace.DesignFanVolFlowRate = thisFurnace.ActualFanVolFlowRate;
-                }
-                if (thisFurnace.ActualFanVolFlowRate < thisFurnace.MaxHeatAirVolFlow && thisFurnace.MaxHeatAirVolFlow != DataSizing::AutoSize) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format(
-                            "... air flow rate = {:.7T} in fan object {} is less than the maximum HVAC system air flow rate in heating mode.",
-                            thisFurnace.ActualFanVolFlowRate,
-                            FanName));
-                    ShowContinueError(state,
-                                      EnergyPlus::format(" The {} is reset to the fan flow rate and the simulation continues.", cNumericFields(2)));
-                    thisFurnace.MaxHeatAirVolFlow = thisFurnace.ActualFanVolFlowRate;
-                    thisFurnace.DesignFanVolFlowRate = thisFurnace.ActualFanVolFlowRate;
-                }
-            }
+            checkFanFlowVsHVACFlowRates(thisFurnace, Alphas(1), cNumericFields(1), cNumericFields(2), FanName);
 
             // Set heating convergence tolerance
             thisFurnace.HeatingConvergenceTolerance = 0.001;
