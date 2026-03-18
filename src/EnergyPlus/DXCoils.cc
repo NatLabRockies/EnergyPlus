@@ -1573,6 +1573,31 @@ void GetDXCoils(EnergyPlusData &state)
         readBasinHeaterSchedule(coil, eohRef, schedAlphaIdx);
     };
 
+    // Helper lambda: allocates the per-speed arrays that are common to both the MultiSpeed
+    // Cooling and MultiSpeed Heating coil input sections.  Coil-type-specific arrays (e.g.
+    // evap-cond arrays for cooling, secondary-coil arrays for heating) are allocated by the
+    // respective calling section after this call.
+    auto allocateCommonMSArrays = [&](DXCoilData &coil) {
+        int n = coil.NumOfSpeeds;
+        coil.MSErrIndex.allocate(n);
+        coil.MSErrIndex = 0;
+        coil.MSRatedTotCap.allocate(n);
+        coil.MSRatedCOP.allocate(n);
+        coil.MSRatedAirVolFlowRate.allocate(n);
+        coil.MSRatedAirMassFlowRate.allocate(n);
+        coil.MSRatedAirMassFlowRate = 1.0; // avoid divide by 0, will get overwritten in InitDXCoil
+        coil.MSCCapFTemp.allocate(n);
+        coil.MSCCapFFlow.allocate(n);
+        coil.MSEIRFTemp.allocate(n);
+        coil.MSEIRFFlow.allocate(n);
+        coil.MSWasteHeat.allocate(n);
+        coil.MSPLFFPLR.allocate(n);
+        coil.MSRatedCBF.allocate(n);
+        coil.MSWasteHeatFrac.allocate(n);
+        coil.MSFanPowerPerEvapAirFlowRate.allocate(n);
+        coil.MSFanPowerPerEvapAirFlowRate_2023.allocate(n);
+    };
+
     // Helper lambda: reads and validates the three evaporative-condenser fields (effectiveness,
     // air-flow rate, pump nominal power) that store into EvapCondEffect(speedIdx),
     // EvapCondAirFlow(speedIdx), and EvapCondPumpElecNomPower(speedIdx).
@@ -3803,32 +3828,17 @@ void GetDXCoils(EnergyPlusData &state)
         }
 
         // Allocate arrays based on the number of speeds
-        thisDXCoil.MSErrIndex.allocate(thisDXCoil.NumOfSpeeds);
-        thisDXCoil.MSErrIndex = 0;
-        thisDXCoil.MSRatedTotCap.allocate(thisDXCoil.NumOfSpeeds);
+        allocateCommonMSArrays(thisDXCoil);
+        // Cooling-specific per-speed arrays
         thisDXCoil.MSRatedTotCapDes.allocate(thisDXCoil.NumOfSpeeds);
         thisDXCoil.MSRatedSHR.allocate(thisDXCoil.NumOfSpeeds);
-        thisDXCoil.MSRatedCOP.allocate(thisDXCoil.NumOfSpeeds);
-        thisDXCoil.MSRatedAirVolFlowRate.allocate(thisDXCoil.NumOfSpeeds);
-        thisDXCoil.MSRatedAirMassFlowRate.allocate(thisDXCoil.NumOfSpeeds);
-        thisDXCoil.MSRatedAirMassFlowRate = 1.0; // avoid divide by 0, will get overwritten in InitDXCoil
-        thisDXCoil.MSCCapFTemp.allocate(thisDXCoil.NumOfSpeeds);
-        thisDXCoil.MSCCapFFlow.allocate(thisDXCoil.NumOfSpeeds);
-        thisDXCoil.MSEIRFTemp.allocate(thisDXCoil.NumOfSpeeds);
-        thisDXCoil.MSEIRFFlow.allocate(thisDXCoil.NumOfSpeeds);
-        thisDXCoil.MSWasteHeat.allocate(thisDXCoil.NumOfSpeeds);
         thisDXCoil.MSEvapCondEffect.allocate(thisDXCoil.NumOfSpeeds);
         thisDXCoil.MSEvapCondAirFlow.allocate(thisDXCoil.NumOfSpeeds);
         thisDXCoil.MSEvapCondPumpElecNomPower.allocate(thisDXCoil.NumOfSpeeds);
-        thisDXCoil.MSRatedCBF.allocate(thisDXCoil.NumOfSpeeds);
-        thisDXCoil.MSWasteHeatFrac.allocate(thisDXCoil.NumOfSpeeds);
-        thisDXCoil.MSPLFFPLR.allocate(thisDXCoil.NumOfSpeeds);
         thisDXCoil.MSTwet_Rated.allocate(thisDXCoil.NumOfSpeeds);
         thisDXCoil.MSGamma_Rated.allocate(thisDXCoil.NumOfSpeeds);
         thisDXCoil.MSMaxONOFFCyclesperHour.allocate(thisDXCoil.NumOfSpeeds);
         thisDXCoil.MSLatentCapacityTimeConstant.allocate(thisDXCoil.NumOfSpeeds);
-        thisDXCoil.MSFanPowerPerEvapAirFlowRate.allocate(thisDXCoil.NumOfSpeeds);
-        thisDXCoil.MSFanPowerPerEvapAirFlowRate_2023.allocate(thisDXCoil.NumOfSpeeds);
 
         for (I = 1; I <= thisDXCoil.NumOfSpeeds; ++I) {
             thisDXCoil.MSRatedTotCap(I) = Numbers(7 + (I - 1) * 14);
@@ -4107,23 +4117,8 @@ void GetDXCoils(EnergyPlusData &state)
         }
 
         // Allocate arrays based on the number of speeds
-        thisDXCoil.MSErrIndex.allocate(thisDXCoil.NumOfSpeeds);
-        thisDXCoil.MSErrIndex = 0;
-        thisDXCoil.MSRatedTotCap.allocate(thisDXCoil.NumOfSpeeds);
-        thisDXCoil.MSRatedCOP.allocate(thisDXCoil.NumOfSpeeds);
-        thisDXCoil.MSRatedAirVolFlowRate.allocate(thisDXCoil.NumOfSpeeds);
-        thisDXCoil.MSRatedAirMassFlowRate.allocate(thisDXCoil.NumOfSpeeds);
-        thisDXCoil.MSRatedAirMassFlowRate = 1.0; // avoid divide by 0, will get overwritten in InitDXCoil
-        thisDXCoil.MSCCapFTemp.allocate(thisDXCoil.NumOfSpeeds);
-        thisDXCoil.MSCCapFFlow.allocate(thisDXCoil.NumOfSpeeds);
-        thisDXCoil.MSEIRFTemp.allocate(thisDXCoil.NumOfSpeeds);
-        thisDXCoil.MSEIRFFlow.allocate(thisDXCoil.NumOfSpeeds);
-        thisDXCoil.MSWasteHeat.allocate(thisDXCoil.NumOfSpeeds);
-        thisDXCoil.MSPLFFPLR.allocate(thisDXCoil.NumOfSpeeds);
-        thisDXCoil.MSRatedCBF.allocate(thisDXCoil.NumOfSpeeds);
-        thisDXCoil.MSWasteHeatFrac.allocate(thisDXCoil.NumOfSpeeds);
-        thisDXCoil.MSFanPowerPerEvapAirFlowRate.allocate(thisDXCoil.NumOfSpeeds);
-        thisDXCoil.MSFanPowerPerEvapAirFlowRate_2023.allocate(thisDXCoil.NumOfSpeeds);
+        allocateCommonMSArrays(thisDXCoil);
+        // Heating-specific per-speed arrays
         thisDXCoil.MSSecCoilSHRFT.allocate(thisDXCoil.NumOfSpeeds);
         thisDXCoil.MSSecCoilSHRFF.allocate(thisDXCoil.NumOfSpeeds);
         thisDXCoil.MSSecCoilAirFlow.allocate(thisDXCoil.NumOfSpeeds);
