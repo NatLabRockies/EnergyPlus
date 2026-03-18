@@ -1778,6 +1778,22 @@ namespace AirflowNetwork {
 
         auto &Zone(m_state.dataHeatBal->Zone);
 
+        // Lambda to reduce boilerplate for repeated getObjectItem calls
+        auto getItem = [&](int idx) {
+            m_state.dataInputProcessing->inputProcessor->getObjectItem(m_state,
+                                                                       CurrentModuleObject,
+                                                                       idx,
+                                                                       Alphas,
+                                                                       NumAlphas,
+                                                                       Numbers,
+                                                                       NumNumbers,
+                                                                       IOStatus,
+                                                                       lNumericBlanks,
+                                                                       lAlphaBlanks,
+                                                                       cAlphaFields,
+                                                                       cNumericFields);
+        };
+
         int NumDuctLossConduction = m_state.dataInputProcessing->inputProcessor->getNumObjectsFound(m_state, "Duct:Loss:Conduction");
         int NumDuctLossLeakage = m_state.dataInputProcessing->inputProcessor->getNumObjectsFound(m_state, "Duct:Loss:Leakage");
         int NumDuctLossMakeupAir = m_state.dataInputProcessing->inputProcessor->getNumObjectsFound(m_state, "Duct:Loss:MakeupAir");
@@ -1792,18 +1808,7 @@ namespace AirflowNetwork {
         if (AirflowNetworkNumOfOccuVentCtrls > 0) {
             OccupantVentilationControl.allocate(AirflowNetworkNumOfOccuVentCtrls);
             for (int i = 1; i <= AirflowNetworkNumOfOccuVentCtrls; ++i) {
-                m_state.dataInputProcessing->inputProcessor->getObjectItem(m_state,
-                                                                           CurrentModuleObject,
-                                                                           i,
-                                                                           Alphas,
-                                                                           NumAlphas,
-                                                                           Numbers,
-                                                                           NumNumbers,
-                                                                           IOStatus,
-                                                                           lNumericBlanks,
-                                                                           lAlphaBlanks,
-                                                                           cAlphaFields,
-                                                                           cNumericFields);
+                getItem(i);
                 OccupantVentilationControl(i).Name = Alphas(1); // Name of object
                 OccupantVentilationControl(i).MinOpeningTime = Numbers(1);
                 if (OccupantVentilationControl(i).MinOpeningTime < 0.0) {
@@ -1994,18 +1999,7 @@ namespace AirflowNetwork {
         }
 
         if (!control_defaulted && !simulation_control.DuctLoss) {
-            m_state.dataInputProcessing->inputProcessor->getObjectItem(m_state,
-                                                                       CurrentModuleObject,
-                                                                       NumAirflowNetwork,
-                                                                       Alphas,
-                                                                       NumAlphas,
-                                                                       Numbers,
-                                                                       NumNumbers,
-                                                                       IOStatus,
-                                                                       lNumericBlanks,
-                                                                       lAlphaBlanks,
-                                                                       cAlphaFields,
-                                                                       cNumericFields);
+            getItem(NumAirflowNetwork);
 
             simulation_control.name = Alphas(1);
             simulation_control.WPCCntr = Alphas(3);
@@ -2278,18 +2272,7 @@ namespace AirflowNetwork {
             simulation_control.autosize_ducts = false;
         }
         if (simulation_control.autosize_ducts && NumDuctSizing == 1) {
-            m_state.dataInputProcessing->inputProcessor->getObjectItem(m_state,
-                                                                       CurrentModuleObject,
-                                                                       NumDuctSizing,
-                                                                       Alphas,
-                                                                       NumAlphas,
-                                                                       Numbers,
-                                                                       NumNumbers,
-                                                                       IOStatus,
-                                                                       lNumericBlanks,
-                                                                       lAlphaBlanks,
-                                                                       cAlphaFields,
-                                                                       cNumericFields);
+            getItem(NumDuctSizing);
 
             simulation_control.ductSizing.name = Alphas(1);
             if (Util::SameString(Alphas(2), Util::makeUPPER("MaximumVelocity"))) {
@@ -2334,18 +2317,7 @@ namespace AirflowNetwork {
             MultizoneZoneData.allocate(AirflowNetworkNumOfZones);
             AirflowNetworkZoneFlag.dimension(m_state.dataGlobal->NumOfZones, false); // AirflowNetwork zone flag
             for (int i = 1; i <= AirflowNetworkNumOfZones; ++i) {
-                m_state.dataInputProcessing->inputProcessor->getObjectItem(m_state,
-                                                                           CurrentModuleObject,
-                                                                           i,
-                                                                           Alphas,
-                                                                           NumAlphas,
-                                                                           Numbers,
-                                                                           NumNumbers,
-                                                                           IOStatus,
-                                                                           lNumericBlanks,
-                                                                           lAlphaBlanks,
-                                                                           cAlphaFields,
-                                                                           cNumericFields);
+                getItem(i);
 
                 ErrorObjectHeader eoh{RoutineName, CurrentModuleObject, Alphas(1)};
 
@@ -2561,18 +2533,7 @@ namespace AirflowNetwork {
                 MultizoneExternalNodeData.allocate(AirflowNetworkNumOfExtNode);
                 CurrentModuleObject = "AirflowNetwork:MultiZone:ExternalNode";
                 for (int i = 1; i <= AirflowNetworkNumOfExtNode - AirflowNetworkNumOfOutAirNode; ++i) {
-                    m_state.dataInputProcessing->inputProcessor->getObjectItem(m_state,
-                                                                               CurrentModuleObject,
-                                                                               i,
-                                                                               Alphas,
-                                                                               NumAlphas,
-                                                                               Numbers,
-                                                                               NumNumbers,
-                                                                               IOStatus,
-                                                                               lNumericBlanks,
-                                                                               lAlphaBlanks,
-                                                                               cAlphaFields,
-                                                                               cNumericFields);
+                    getItem(i);
                     MultizoneExternalNodeData(i).Name = Alphas(1);    // Name of external node
                     MultizoneExternalNodeData(i).height = Numbers(1); // Nodal height
                     if (Util::SameString(simulation_control.HeightOption, "ExternalNode") && lNumericBlanks(1)) {
@@ -2614,18 +2575,7 @@ namespace AirflowNetwork {
 
                     CurrentModuleObject = "OutdoorAir:Node";
                     for (int i = AirflowNetworkNumOfExtNode - AirflowNetworkNumOfOutAirNode + 1; i <= AirflowNetworkNumOfExtNode; ++i) {
-                        m_state.dataInputProcessing->inputProcessor->getObjectItem(m_state,
-                                                                                   CurrentModuleObject,
-                                                                                   i - (AirflowNetworkNumOfExtNode - AirflowNetworkNumOfOutAirNode),
-                                                                                   Alphas,
-                                                                                   NumAlphas,
-                                                                                   Numbers,
-                                                                                   NumNumbers,
-                                                                                   IOStatus,
-                                                                                   lNumericBlanks,
-                                                                                   lAlphaBlanks,
-                                                                                   cAlphaFields,
-                                                                                   cNumericFields);
+                        getItem(i - (AirflowNetworkNumOfExtNode - AirflowNetworkNumOfOutAirNode));
                         // HACK: Need to verify name is unique between "OutdoorAir:Node" and "AirflowNetwork:MultiZone:ExternalNode"
 
                         if (NumAlphas > 5 && !lAlphaBlanks(6)) { // Wind pressure curve
@@ -2691,18 +2641,7 @@ namespace AirflowNetwork {
         if (AirflowNetworkNumOfSurfaces > 0) {
             MultizoneSurfaceData.allocate(AirflowNetworkNumOfSurfaces);
             for (int i = 1; i <= AirflowNetworkNumOfSurfaces; ++i) {
-                m_state.dataInputProcessing->inputProcessor->getObjectItem(m_state,
-                                                                           CurrentModuleObject,
-                                                                           i,
-                                                                           Alphas,
-                                                                           NumAlphas,
-                                                                           Numbers,
-                                                                           NumNumbers,
-                                                                           IOStatus,
-                                                                           lNumericBlanks,
-                                                                           lAlphaBlanks,
-                                                                           cAlphaFields,
-                                                                           cNumericFields);
+                getItem(i);
                 MultizoneSurfaceData(i).SurfName = Alphas(1);    // Name of Associated EnergyPlus surface
                 MultizoneSurfaceData(i).OpeningName = Alphas(2); // Name of crack or opening component,
                 // either simple or detailed large opening, or crack
@@ -3614,18 +3553,7 @@ namespace AirflowNetwork {
         if (IntraZoneNumOfNodes > 0) {
             IntraZoneNodeData.allocate(IntraZoneNumOfNodes);
             for (int i = 1; i <= IntraZoneNumOfNodes; ++i) {
-                m_state.dataInputProcessing->inputProcessor->getObjectItem(m_state,
-                                                                           CurrentModuleObject,
-                                                                           i,
-                                                                           Alphas,
-                                                                           NumAlphas,
-                                                                           Numbers,
-                                                                           NumNumbers,
-                                                                           IOStatus,
-                                                                           lNumericBlanks,
-                                                                           lAlphaBlanks,
-                                                                           cAlphaFields,
-                                                                           cNumericFields);
+                getItem(i);
                 IntraZoneNodeData(i).Name = Alphas(1);         // Name of node
                 IntraZoneNodeData(i).RAFNNodeName = Alphas(2); // Name of RoomAir node
                 IntraZoneNodeData(i).Height = Numbers(1);      // Nodal height
@@ -3693,18 +3621,7 @@ namespace AirflowNetwork {
             IntraZoneLinkageData.allocate(IntraZoneNumOfLinks);
             UniqueAirflowNetworkSurfaceName.reserve(IntraZoneNumOfLinks);
             for (int i = 1; i <= IntraZoneNumOfLinks; ++i) {
-                m_state.dataInputProcessing->inputProcessor->getObjectItem(m_state,
-                                                                           CurrentModuleObject,
-                                                                           i,
-                                                                           Alphas,
-                                                                           NumAlphas,
-                                                                           Numbers,
-                                                                           NumNumbers,
-                                                                           IOStatus,
-                                                                           lNumericBlanks,
-                                                                           lAlphaBlanks,
-                                                                           cAlphaFields,
-                                                                           cNumericFields);
+                getItem(i);
                 IntraZoneLinkageData(i).Name = Alphas(1); // Name of linkage
                 IntraZoneLinkageData(i).NodeNames[0] = Alphas(2);
                 IntraZoneLinkageData(i).NodeHeights[0] = 0.0;
@@ -3925,18 +3842,7 @@ namespace AirflowNetwork {
         if (DisSysNumOfNodes > 0) {
             DisSysNodeData.allocate(DisSysNumOfNodes);
             for (int i = 1; i <= DisSysNumOfNodes; ++i) {
-                m_state.dataInputProcessing->inputProcessor->getObjectItem(m_state,
-                                                                           CurrentModuleObject,
-                                                                           i,
-                                                                           Alphas,
-                                                                           NumAlphas,
-                                                                           Numbers,
-                                                                           NumNumbers,
-                                                                           IOStatus,
-                                                                           lNumericBlanks,
-                                                                           lAlphaBlanks,
-                                                                           cAlphaFields,
-                                                                           cNumericFields);
+                getItem(i);
                 DisSysNodeData(i).Name = Alphas(1);      // Name of node
                 DisSysNodeData(i).EPlusName = Alphas(2); // Name of associated EnergyPlus node
                 DisSysNodeData(i).EPlusType = Alphas(3); // Name of associated EnergyPlus type
@@ -3992,18 +3898,7 @@ namespace AirflowNetwork {
         if (DisSysNumOfDuctViewFactors > 0) {
             AirflowNetworkLinkageViewFactorData.allocate(DisSysNumOfDuctViewFactors);
             for (int i = 1; i <= DisSysNumOfDuctViewFactors; ++i) {
-                m_state.dataInputProcessing->inputProcessor->getObjectItem(m_state,
-                                                                           CurrentModuleObject,
-                                                                           i,
-                                                                           Alphas,
-                                                                           NumAlphas,
-                                                                           Numbers,
-                                                                           NumNumbers,
-                                                                           IOStatus,
-                                                                           lNumericBlanks,
-                                                                           lAlphaBlanks,
-                                                                           cAlphaFields,
-                                                                           cNumericFields);
+                getItem(i);
 
                 auto &this_VF_object(AirflowNetworkLinkageViewFactorData(i));
 
@@ -4104,18 +3999,7 @@ namespace AirflowNetwork {
         if (NumOfPressureControllers > 0) {
             PressureControllerData.allocate(NumOfPressureControllers);
             for (int i = 1; i <= NumOfPressureControllers; ++i) {
-                m_state.dataInputProcessing->inputProcessor->getObjectItem(m_state,
-                                                                           CurrentModuleObject,
-                                                                           i,
-                                                                           Alphas,
-                                                                           NumAlphas,
-                                                                           Numbers,
-                                                                           NumNumbers,
-                                                                           IOStatus,
-                                                                           lNumericBlanks,
-                                                                           lAlphaBlanks,
-                                                                           cAlphaFields,
-                                                                           cNumericFields);
+                getItem(i);
 
                 ErrorObjectHeader eoh{RoutineName, CurrentModuleObject, Alphas(1)};
 
