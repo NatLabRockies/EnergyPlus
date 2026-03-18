@@ -4866,24 +4866,17 @@ namespace AirflowNetwork {
                     }
                 }
 
-                if (DisSysCompHXData(i).CoilParentExists && count != 2) {
+                int const expectedCount = DisSysCompHXData(i).CoilParentExists ? 2 : 1;
+                if (count != expectedCount) {
                     ShowSevereError(m_state,
                                     EnergyPlus::format(RoutineName) + "The inputs of component name field as a heat exchanger in "
                                                                       "AIRFLOWNETWORK:DISTRIBUTION:LINKAGE is not correct");
                     ShowContinueError(m_state,
                                       "The entered name of heat exchanger is " + DisSysCompHXData(i).name +
                                           " in AirflowNetwork:Distribution:Component:HeatExchanger objects");
-                    ShowContinueError(m_state, EnergyPlus::format("The correct appearance number is 2. The entered appearance number is {}", count));
-                    ErrorsFound = true;
-                }
-                if ((!DisSysCompHXData(i).CoilParentExists) && count != 1) {
-                    ShowSevereError(m_state,
-                                    EnergyPlus::format(RoutineName) + "The inputs of component name field as a heat exchanger in "
-                                                                      "AIRFLOWNETWORK:DISTRIBUTION:LINKAGE is not correct");
-                    ShowContinueError(m_state,
-                                      "The entered name of heat exchanger is " + DisSysCompHXData(i).name +
-                                          " in AirflowNetwork:Distribution:Component:HeatExchanger objects");
-                    ShowContinueError(m_state, EnergyPlus::format("The correct appearance number is 1. The entered appearance number is {}", count));
+                    ShowContinueError(
+                        m_state,
+                        EnergyPlus::format("The correct appearance number is {}. The entered appearance number is {}", expectedCount, count));
                     ErrorsFound = true;
                 }
             }
