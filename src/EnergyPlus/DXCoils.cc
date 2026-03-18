@@ -1481,22 +1481,18 @@ void GetDXCoils(EnergyPlusData &state)
     // initialize the coil counter
     DXCoilNum = 0;
 
+    // Helper lambda that wraps the repeated 11-argument getObjectItem call.
+    // CurrentModuleObject is captured by reference so each call site only needs the 1-based item number.
+    auto getItem = [&](int itemNum) {
+        state.dataInputProcessing->inputProcessor->getObjectItem(
+            state, CurrentModuleObject, itemNum, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, lNumericBlanks, lAlphaBlanks, cAlphaFields, cNumericFields);
+    };
+
     // Loop over the Doe2 DX Coils and get & load the data
     CurrentModuleObject = "Coil:Cooling:DX:SingleSpeed";
     for (DXCoilIndex = 1; DXCoilIndex <= state.dataDXCoils->NumDoe2DXCoils; ++DXCoilIndex) {
 
-        state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                 CurrentModuleObject,
-                                                                 DXCoilIndex,
-                                                                 Alphas,
-                                                                 NumAlphas,
-                                                                 Numbers,
-                                                                 NumNumbers,
-                                                                 IOStatus,
-                                                                 lNumericBlanks,
-                                                                 lAlphaBlanks,
-                                                                 cAlphaFields,
-                                                                 cNumericFields);
+        getItem(DXCoilIndex);
 
         ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
 
@@ -1763,18 +1759,7 @@ void GetDXCoils(EnergyPlusData &state)
     CurrentModuleObject = "Coil:Cooling:DX:TwoStageWithHumidityControlMode";
     for (DXCoilIndex = 1; DXCoilIndex <= state.dataDXCoils->NumDXMulModeCoils; ++DXCoilIndex) {
 
-        state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                 CurrentModuleObject,
-                                                                 DXCoilIndex,
-                                                                 Alphas,
-                                                                 NumAlphas,
-                                                                 Numbers,
-                                                                 NumNumbers,
-                                                                 IOStatus,
-                                                                 lNumericBlanks,
-                                                                 lAlphaBlanks,
-                                                                 cAlphaFields,
-                                                                 cNumericFields);
+        getItem(DXCoilIndex);
 
         ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
         ++DXCoilNum;
@@ -2265,18 +2250,7 @@ void GetDXCoils(EnergyPlusData &state)
 
         ++DXCoilNum;
 
-        state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                 CurrentModuleObject,
-                                                                 DXCoilIndex,
-                                                                 Alphas,
-                                                                 NumAlphas,
-                                                                 Numbers,
-                                                                 NumNumbers,
-                                                                 IOStatus,
-                                                                 lNumericBlanks,
-                                                                 lAlphaBlanks,
-                                                                 cAlphaFields,
-                                                                 cNumericFields);
+        getItem(DXCoilIndex);
 
         ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
         // allocate single performance mode for numeric field strings used for sizing routine
@@ -2590,18 +2564,7 @@ void GetDXCoils(EnergyPlusData &state)
 
         ++DXCoilNum;
 
-        state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                 CurrentModuleObject,
-                                                                 DXCoilIndex,
-                                                                 Alphas,
-                                                                 NumAlphas,
-                                                                 Numbers,
-                                                                 NumNumbers,
-                                                                 IOStatus,
-                                                                 lNumericBlanks,
-                                                                 lAlphaBlanks,
-                                                                 cAlphaFields,
-                                                                 cNumericFields);
+        getItem(DXCoilIndex);
 
         ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
 
@@ -3848,18 +3811,7 @@ void GetDXCoils(EnergyPlusData &state)
 
         ++DXCoilNum;
 
-        state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                 CurrentModuleObject,
-                                                                 DXCoilIndex,
-                                                                 Alphas,
-                                                                 NumAlphas,
-                                                                 Numbers,
-                                                                 NumNumbers,
-                                                                 IOStatus,
-                                                                 lNumericBlanks,
-                                                                 lAlphaBlanks,
-                                                                 cAlphaFields,
-                                                                 cNumericFields);
+        getItem(DXCoilIndex);
 
         ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
         // allocate single performance mode for numeric field strings used for sizing routine (all fields are in this object)
@@ -4168,18 +4120,7 @@ void GetDXCoils(EnergyPlusData &state)
 
         ++DXCoilNum;
 
-        state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                 CurrentModuleObject,
-                                                                 DXCoilIndex,
-                                                                 Alphas,
-                                                                 NumAlphas,
-                                                                 Numbers,
-                                                                 NumNumbers,
-                                                                 IOStatus,
-                                                                 lNumericBlanks,
-                                                                 lAlphaBlanks,
-                                                                 cAlphaFields,
-                                                                 cNumericFields);
+        getItem(DXCoilIndex);
 
         ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
 
@@ -4536,18 +4477,7 @@ void GetDXCoils(EnergyPlusData &state)
     CurrentModuleObject = HVAC::cAllCoilTypes(HVAC::CoilVRF_Cooling);
     for (DXCoilIndex = 1; DXCoilIndex <= state.dataDXCoils->NumVRFCoolingCoils; ++DXCoilIndex) {
 
-        state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                 CurrentModuleObject,
-                                                                 DXCoilIndex,
-                                                                 Alphas,
-                                                                 NumAlphas,
-                                                                 Numbers,
-                                                                 NumNumbers,
-                                                                 IOStatus,
-                                                                 lNumericBlanks,
-                                                                 lAlphaBlanks,
-                                                                 cAlphaFields,
-                                                                 cNumericFields);
+        getItem(DXCoilIndex);
 
         ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
 
@@ -4660,18 +4590,7 @@ void GetDXCoils(EnergyPlusData &state)
     CurrentModuleObject = HVAC::cAllCoilTypes(HVAC::CoilVRF_Heating);
     for (DXCoilIndex = 1; DXCoilIndex <= state.dataDXCoils->NumVRFHeatingCoils; ++DXCoilIndex) {
 
-        state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                 CurrentModuleObject,
-                                                                 DXCoilIndex,
-                                                                 Alphas,
-                                                                 NumAlphas,
-                                                                 Numbers,
-                                                                 NumNumbers,
-                                                                 IOStatus,
-                                                                 lNumericBlanks,
-                                                                 lAlphaBlanks,
-                                                                 cAlphaFields,
-                                                                 cNumericFields);
+        getItem(DXCoilIndex);
 
         ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
         ++DXCoilNum;
@@ -4758,18 +4677,7 @@ void GetDXCoils(EnergyPlusData &state)
     CurrentModuleObject = HVAC::cAllCoilTypes(HVAC::CoilVRF_FluidTCtrl_Cooling);
     for (DXCoilIndex = 1; DXCoilIndex <= state.dataDXCoils->NumVRFCoolingFluidTCtrlCoils; ++DXCoilIndex) {
 
-        state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                 CurrentModuleObject,
-                                                                 DXCoilIndex,
-                                                                 Alphas,
-                                                                 NumAlphas,
-                                                                 Numbers,
-                                                                 NumNumbers,
-                                                                 IOStatus,
-                                                                 lNumericBlanks,
-                                                                 lAlphaBlanks,
-                                                                 cAlphaFields,
-                                                                 cNumericFields);
+        getItem(DXCoilIndex);
 
         ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
         ++DXCoilNum;
@@ -4855,18 +4763,7 @@ void GetDXCoils(EnergyPlusData &state)
     CurrentModuleObject = HVAC::cAllCoilTypes(HVAC::CoilVRF_FluidTCtrl_Heating);
     for (DXCoilIndex = 1; DXCoilIndex <= state.dataDXCoils->NumVRFHeatingFluidTCtrlCoils; ++DXCoilIndex) {
 
-        state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                 CurrentModuleObject,
-                                                                 DXCoilIndex,
-                                                                 Alphas,
-                                                                 NumAlphas,
-                                                                 Numbers,
-                                                                 NumNumbers,
-                                                                 IOStatus,
-                                                                 lNumericBlanks,
-                                                                 lAlphaBlanks,
-                                                                 cAlphaFields,
-                                                                 cNumericFields);
+        getItem(DXCoilIndex);
 
         ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
         ++DXCoilNum;
