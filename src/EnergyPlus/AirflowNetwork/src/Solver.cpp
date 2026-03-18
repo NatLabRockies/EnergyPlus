@@ -4154,31 +4154,20 @@ namespace AirflowNetwork {
                     }
                 }
 
-                if (PressureControllerData(i).ControlTypeSet == PressureCtrlExhaust) {
-                    // This is not great
-                    bool is_EXF{false};
-                    auto afe = elements.find(Alphas(4));
-                    if (afe != elements.end()) {
-                        is_EXF = afe->second->type() == ComponentType::EXF;
-                    }
-                    if (!is_EXF) {
-                        ShowSevereError(m_state, EnergyPlus::format(RoutineName) + CurrentModuleObject + " object, an invalid name is given:");
-                        ShowContinueError(m_state, ".. invalid " + cAlphaFields(4) + " = \"" + Alphas(4) + "\".");
-                        ErrorsFound = true;
-                    }
+                // Validate that the control object name refers to the correct component type
+                // (EXF for Exhaust, REL for Relief). This is not great but works for now.
+                ComponentType requiredCompType = (PressureControllerData(i).ControlTypeSet == PressureCtrlExhaust)
+                                                     ? ComponentType::EXF
+                                                     : ComponentType::REL;
+                bool compTypeValid{false};
+                auto afe_ctrl = elements.find(Alphas(4));
+                if (afe_ctrl != elements.end()) {
+                    compTypeValid = afe_ctrl->second->type() == requiredCompType;
                 }
-                if (PressureControllerData(i).ControlTypeSet == PressureCtrlRelief) {
-                    // This is not great
-                    bool is_REL{false};
-                    auto afe = elements.find(Alphas(4));
-                    if (afe != elements.end()) {
-                        is_REL = afe->second->type() == ComponentType::REL;
-                    }
-                    if (!is_REL) {
-                        ShowSevereError(m_state, EnergyPlus::format(RoutineName) + CurrentModuleObject + " object, an invalid name is given:");
-                        ShowContinueError(m_state, ".. invalid " + cAlphaFields(4) + " = \"" + Alphas(4) + "\".");
-                        ErrorsFound = true;
-                    }
+                if (!compTypeValid) {
+                    ShowSevereError(m_state, EnergyPlus::format(RoutineName) + CurrentModuleObject + " object, an invalid name is given:");
+                    ShowContinueError(m_state, ".. invalid " + cAlphaFields(4) + " = \"" + Alphas(4) + "\".");
+                    ErrorsFound = true;
                 }
 
                 if (lAlphaBlanks(5)) {
