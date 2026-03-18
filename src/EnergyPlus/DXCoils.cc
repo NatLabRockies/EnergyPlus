@@ -879,6 +879,39 @@ static void getAndCheck2DCoolingTempCurve(EnergyPlusData &state,
     }
 }
 
+// Helper: look up a 1D-or-2D heating temperature curve (MSCCapFTemp or MSEIRFTemp),
+// validate dimensions, and check normalization at rated heating conditions.
+static void getAndCheck2DHeatingTempCurve(EnergyPlusData &state,
+                                          bool &ErrorsFound,
+                                          std::string_view const RoutineName,
+                                          std::string_view const CurrentModuleObject,
+                                          int &curveIdx,
+                                          int alphaFieldNum,
+                                          const std::string &coilName,
+                                          const Array1D_string &alphaArr,
+                                          const Array1D_bool &blankArr,
+                                          const Array1D_string &fieldNames)
+{
+    curveIdx = Curve::GetCurveIndex(state, alphaArr(alphaFieldNum));
+    if (curveIdx == 0) {
+        reportMissingOrInvalidCurve(
+            state, blankArr(alphaFieldNum), RoutineName, CurrentModuleObject, coilName, fieldNames(alphaFieldNum), alphaArr(alphaFieldNum), ErrorsFound);
+    } else {
+        ErrorsFound |= Curve::CheckCurveDims(state, curveIdx, {1, 2}, RoutineName, CurrentModuleObject, coilName, fieldNames(alphaFieldNum));
+        if (!ErrorsFound) {
+            if (state.dataCurveManager->curves(curveIdx)->numDims == 1) {
+                Curve::checkCurveIsNormalizedToOne(
+                    state, std::string{RoutineName} + std::string{CurrentModuleObject}, coilName, curveIdx, fieldNames(alphaFieldNum), alphaArr(alphaFieldNum),
+                    RatedOutdoorAirTempHeat);
+            } else {
+                Curve::checkCurveIsNormalizedToOne(
+                    state, std::string{RoutineName} + std::string{CurrentModuleObject}, coilName, curveIdx, fieldNames(alphaFieldNum), alphaArr(alphaFieldNum),
+                    RatedInletAirTempHeat, RatedOutdoorAirTempHeat);
+            }
+        }
+    }
+}
+
 // Helper: look up a PLF curve, check dims={1}, and validate/cap its range.
 static void getAndCheckPLFCurve(EnergyPlusData &state,
                                 bool &ErrorsFound,
@@ -2291,79 +2324,11 @@ void GetDXCoils(EnergyPlusData &state)
 
         TestCompSet(state, CurrentModuleObject, Alphas(1), Alphas(3), Alphas(4), "Air Nodes");
 
-        thisDXCoil.CCapFTemp(1) = GetCurveIndex(state, Alphas(5)); // convert curve name to number
-        if (thisDXCoil.CCapFTemp(1) == 0) {
-            reportMissingOrInvalidCurve(
-                state, lAlphaBlanks(5), RoutineName, CurrentModuleObject, thisDXCoil.Name, cAlphaFields(5), Alphas(5), ErrorsFound);
-        } else {
-            // only legal types are Quadratic, BiQuadratic and Cubic
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisDXCoil.CCapFTemp(1), // Curve index
-                                                 {1, 2},                  // Valid dimensions  // MULTIPLECURVEDIMS
-                                                 RoutineName,             // Routine name
-                                                 CurrentModuleObject,     // Object Type
-                                                 thisDXCoil.Name,         // Object Name
-                                                 cAlphaFields(5));        // Field Name
-
-            if (!ErrorsFound) {
-                if (state.dataCurveManager->curves(thisDXCoil.CCapFTemp(1))->numDims == 1) {
-                    checkCurveIsNormalizedToOne(state,
-                                                std::string{RoutineName} + CurrentModuleObject,
-                                                thisDXCoil.Name,
-                                                thisDXCoil.CCapFTemp(1),
-                                                cAlphaFields(5),
-                                                Alphas(5),
-                                                RatedOutdoorAirTempHeat);
-                } else {
-                    checkCurveIsNormalizedToOne(state,
-                                                std::string{RoutineName} + CurrentModuleObject,
-                                                thisDXCoil.Name,
-                                                thisDXCoil.CCapFTemp(1),
-                                                cAlphaFields(5),
-                                                Alphas(5),
-                                                RatedInletAirTempHeat,
-                                                RatedOutdoorAirTempHeat);
-                }
-            }
-        }
+        getAndCheck2DHeatingTempCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.CCapFTemp(1), 5, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
         getAndCheckFlowCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.CCapFFlow(1), 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
-        thisDXCoil.EIRFTemp(1) = GetCurveIndex(state, Alphas(7)); // convert curve name to number
-        if (thisDXCoil.EIRFTemp(1) == 0) {
-            reportMissingOrInvalidCurve(
-                state, lAlphaBlanks(7), RoutineName, CurrentModuleObject, thisDXCoil.Name, cAlphaFields(7), Alphas(7), ErrorsFound);
-        } else {
-            // only legal types are Quadratic, BiQuadratic and Cubic
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisDXCoil.EIRFTemp(1), // Curve index
-                                                 {1, 2},                 // Valid dimensions  // MULTIPLECURVEDIMS
-                                                 RoutineName,            // Routine name
-                                                 CurrentModuleObject,    // Object Type
-                                                 thisDXCoil.Name,        // Object Name
-                                                 cAlphaFields(7));       // Field Name
-
-            if (!ErrorsFound) {
-                if (state.dataCurveManager->curves(thisDXCoil.EIRFTemp(1))->numDims == 1) {
-                    checkCurveIsNormalizedToOne(state,
-                                                std::string{RoutineName} + CurrentModuleObject,
-                                                thisDXCoil.Name,
-                                                thisDXCoil.EIRFTemp(1),
-                                                cAlphaFields(7),
-                                                Alphas(7),
-                                                RatedOutdoorAirTempHeat);
-                } else {
-                    checkCurveIsNormalizedToOne(state,
-                                                std::string{RoutineName} + CurrentModuleObject,
-                                                thisDXCoil.Name,
-                                                thisDXCoil.EIRFTemp(1),
-                                                cAlphaFields(7),
-                                                Alphas(7),
-                                                RatedInletAirTempHeat,
-                                                RatedOutdoorAirTempHeat);
-                }
-            }
-        }
+        getAndCheck2DHeatingTempCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.EIRFTemp(1), 7, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
         getAndCheckFlowCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.EIRFFlow(1), 8, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
@@ -4313,90 +4278,11 @@ void GetDXCoils(EnergyPlusData &state)
             thisDXCoil.MSFanPowerPerEvapAirFlowRate_2023(I) = Numbers(14 + (I - 1) * 6);
             thisDXCoil.MSWasteHeatFrac(I) = Numbers(15 + (I - 1) * 6);
 
-            thisDXCoil.MSCCapFTemp(I) = GetCurveIndex(state, Alphas(11 + (I - 1) * 6)); // convert curve name to number
-            if (thisDXCoil.MSCCapFTemp(I) == 0) {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}, \"{}\" {} not found:{}",
-                                                   CurrentModuleObject,
-                                                   thisDXCoil.Name,
-                                                   cAlphaFields(11 + (I - 1) * 6),
-                                                   Alphas(11 + (I - 1) * 6)));
-                ErrorsFound = true;
-            } else {
-                // only legal types are Quadratic, BiQuadratic and Cubic
-                ErrorsFound |= Curve::CheckCurveDims(state,
-                                                     thisDXCoil.MSCCapFTemp(I),       // Curve index
-                                                     {1, 2},                          // Valid dimensions  // MULTIPLECURVEDIMS
-                                                     RoutineName,                     // Routine name
-                                                     CurrentModuleObject,             // Object Type
-                                                     thisDXCoil.Name,                 // Object Name
-                                                     cAlphaFields(11 + (I - 1) * 6)); // Field Name
-
-                if (!ErrorsFound) {
-                    if (state.dataCurveManager->curves(thisDXCoil.MSCCapFTemp(I))->numDims == 1) {
-                        checkCurveIsNormalizedToOne(state,
-                                                    std::string{RoutineName} + CurrentModuleObject,
-                                                    thisDXCoil.Name,
-                                                    thisDXCoil.MSCCapFTemp(I),
-                                                    cAlphaFields(11 + (I - 1) * 6),
-                                                    Alphas(11 + (I - 1) * 6),
-                                                    RatedOutdoorAirTempHeat);
-                    } else {
-                        checkCurveIsNormalizedToOne(state,
-                                                    std::string{RoutineName} + CurrentModuleObject,
-                                                    thisDXCoil.Name,
-                                                    thisDXCoil.MSCCapFTemp(I),
-                                                    cAlphaFields(11 + (I - 1) * 6),
-                                                    Alphas(11 + (I - 1) * 6),
-                                                    RatedInletAirTempHeat,
-                                                    RatedOutdoorAirTempHeat);
-                    }
-                }
-            }
+            getAndCheck2DHeatingTempCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.MSCCapFTemp(I), 11 + (I - 1) * 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
             getAndCheckFlowCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.MSCCapFFlow(I), 12 + (I - 1) * 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
-            thisDXCoil.MSEIRFTemp(I) = GetCurveIndex(state, Alphas(13 + (I - 1) * 6)); // convert curve name to number
-            if (thisDXCoil.MSEIRFTemp(I) == 0) {
-                reportMissingOrInvalidCurve(state,
-                                            lAlphaBlanks(13 + (I - 1) * 6),
-                                            RoutineName,
-                                            CurrentModuleObject,
-                                            thisDXCoil.Name,
-                                            cAlphaFields(13 + (I - 1) * 6),
-                                            Alphas(13 + (I - 1) * 6),
-                                            ErrorsFound);
-            } else {
-                // only legal types are Quadratic, BiQuadratic and Cubic
-                ErrorsFound |= Curve::CheckCurveDims(state,
-                                                     thisDXCoil.MSEIRFTemp(I),        // Curve index
-                                                     {1, 2},                          // Valid dimensions  // MULTIPLECURVEDIMS
-                                                     RoutineName,                     // Routine name
-                                                     CurrentModuleObject,             // Object Type
-                                                     thisDXCoil.Name,                 // Object Name
-                                                     cAlphaFields(13 + (I - 1) * 6)); // Field Name
-
-                if (!ErrorsFound) {
-                    if (state.dataCurveManager->curves(thisDXCoil.MSEIRFTemp(I))->numDims == 1) {
-                        checkCurveIsNormalizedToOne(state,
-                                                    std::string{RoutineName} + CurrentModuleObject,
-                                                    thisDXCoil.Name,
-                                                    thisDXCoil.MSEIRFTemp(I),
-                                                    cAlphaFields(13 + (I - 1) * 6),
-                                                    Alphas(13 + (I - 1) * 6),
-                                                    RatedOutdoorAirTempHeat);
-                    } else {
-                        checkCurveIsNormalizedToOne(state,
-                                                    std::string{RoutineName} + CurrentModuleObject,
-                                                    thisDXCoil.Name,
-                                                    thisDXCoil.MSEIRFTemp(I),
-                                                    cAlphaFields(13 + (I - 1) * 6),
-                                                    Alphas(13 + (I - 1) * 6),
-                                                    RatedInletAirTempHeat,
-                                                    RatedOutdoorAirTempHeat);
-                    }
-                }
-            }
+            getAndCheck2DHeatingTempCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.MSEIRFTemp(I), 13 + (I - 1) * 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
             getAndCheckFlowCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.MSEIRFFlow(I), 14 + (I - 1) * 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
