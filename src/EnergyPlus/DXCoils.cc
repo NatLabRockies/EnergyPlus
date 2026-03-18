@@ -1573,6 +1573,37 @@ void GetDXCoils(EnergyPlusData &state)
         readBasinHeaterSchedule(coil, eohRef, schedAlphaIdx);
     };
 
+    // Helper lambda: reads and validates the three evaporative-condenser fields (effectiveness,
+    // air-flow rate, pump nominal power) that store into EvapCondEffect(speedIdx),
+    // EvapCondAirFlow(speedIdx), and EvapCondPumpElecNomPower(speedIdx).
+    // All index arguments are 1-based Numbers() indices.
+    auto readEvapCondSpeedInputs = [&](DXCoilData &coil, int speedIdx,
+                                       int effectNumIdx, int airFlowNumIdx, int pumpPowerNumIdx) {
+        coil.EvapCondEffect(speedIdx) = Numbers(effectNumIdx);
+        if (coil.EvapCondEffect(speedIdx) < 0.0 || coil.EvapCondEffect(speedIdx) > 1.0) {
+            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, coil.Name));
+            ShowContinueError(state, EnergyPlus::format("...{} cannot be < 0.0 or > 1.0.", cNumericFields(effectNumIdx)));
+            ShowContinueError(state, EnergyPlus::format("...entered value=[{:.2T}].", Numbers(effectNumIdx)));
+            ErrorsFound = true;
+        }
+
+        coil.EvapCondAirFlow(speedIdx) = Numbers(airFlowNumIdx);
+        if (coil.EvapCondAirFlow(speedIdx) < 0.0 && coil.EvapCondAirFlow(speedIdx) != AutoSize) {
+            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, coil.Name));
+            ShowContinueError(state, EnergyPlus::format("...{} cannot be < 0.0.", cNumericFields(airFlowNumIdx)));
+            ShowContinueError(state, EnergyPlus::format("...entered value=[{:.2T}].", Numbers(airFlowNumIdx)));
+            ErrorsFound = true;
+        }
+
+        coil.EvapCondPumpElecNomPower(speedIdx) = Numbers(pumpPowerNumIdx);
+        if (coil.EvapCondPumpElecNomPower(speedIdx) < 0.0 && coil.EvapCondPumpElecNomPower(speedIdx) != AutoSize) {
+            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, coil.Name));
+            ShowContinueError(state, EnergyPlus::format("...{} cannot be < 0.0.", cNumericFields(pumpPowerNumIdx)));
+            ShowContinueError(state, EnergyPlus::format("...entered value=[{:.2T}].", Numbers(pumpPowerNumIdx)));
+            ErrorsFound = true;
+        }
+    };
+
     // Helper lambda: parses and validates the DefrostStrategy (ReverseCycle/Resistive) and
     // DefrostControl (Timed/OnDemand) alpha fields that appear identically in the SingleSpeed
     // and MultiSpeed heating coil input sections.
@@ -1702,29 +1733,7 @@ void GetDXCoils(EnergyPlusData &state)
 
         parseCondenserType(state, thisDXCoil, RoutineName, CurrentModuleObject, Alphas(11), cAlphaFields(11), lAlphaBlanks(11), ErrorsFound);
 
-        thisDXCoil.EvapCondEffect(1) = Numbers(12);
-        if (thisDXCoil.EvapCondEffect(1) < 0.0 || thisDXCoil.EvapCondEffect(1) > 1.0) {
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-            ShowContinueError(state, EnergyPlus::format("...{} cannot be < 0.0 or > 1.0.", cNumericFields(11)));
-            ShowContinueError(state, EnergyPlus::format("...entered value=[{:.2T}].", Numbers(12)));
-            ErrorsFound = true;
-        }
-
-        thisDXCoil.EvapCondAirFlow(1) = Numbers(13);
-        if (thisDXCoil.EvapCondAirFlow(1) < 0.0 && thisDXCoil.EvapCondAirFlow(1) != AutoSize) {
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-            ShowContinueError(state, EnergyPlus::format("...{} cannot be < 0.0.", cNumericFields(12)));
-            ShowContinueError(state, EnergyPlus::format("...entered value=[{:.2T}].", Numbers(13)));
-            ErrorsFound = true;
-        }
-
-        thisDXCoil.EvapCondPumpElecNomPower(1) = Numbers(14);
-        if (thisDXCoil.EvapCondPumpElecNomPower(1) < 0.0 && thisDXCoil.EvapCondPumpElecNomPower(1) != AutoSize) {
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-            ShowContinueError(state, EnergyPlus::format("...{} cannot be < 0.0.", cNumericFields(13)));
-            ShowContinueError(state, EnergyPlus::format("...entered value=[{:.2T}].", Numbers(14)));
-            ErrorsFound = true;
-        }
+        readEvapCondSpeedInputs(thisDXCoil, 1, 12, 13, 14);
 
         // Set crankcase heater capacity
         thisDXCoil.CrankcaseHeaterCapacity = Numbers(15);
@@ -2604,29 +2613,7 @@ void GetDXCoils(EnergyPlusData &state)
 
         parseCondenserType(state, thisDXCoil, RoutineName, CurrentModuleObject, Alphas(13), cAlphaFields(13), lAlphaBlanks(13), ErrorsFound);
 
-        thisDXCoil.EvapCondEffect(1) = Numbers(15);
-        if (thisDXCoil.EvapCondEffect(1) < 0.0 || thisDXCoil.EvapCondEffect(1) > 1.0) {
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-            ShowContinueError(state, EnergyPlus::format("...{} cannot be < 0.0 or > 1.0.", cNumericFields(15)));
-            ShowContinueError(state, EnergyPlus::format("...entered value=[{:.2T}].", Numbers(15)));
-            ErrorsFound = true;
-        }
-
-        thisDXCoil.EvapCondAirFlow(1) = Numbers(16);
-        if (thisDXCoil.EvapCondAirFlow(1) < 0.0 && thisDXCoil.EvapCondAirFlow(1) != AutoSize) {
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-            ShowContinueError(state, EnergyPlus::format("...{} cannot be < 0.0.", cNumericFields(16)));
-            ShowContinueError(state, EnergyPlus::format("...entered value=[{:.2T}].", Numbers(16)));
-            ErrorsFound = true;
-        }
-
-        thisDXCoil.EvapCondPumpElecNomPower(1) = Numbers(17);
-        if (thisDXCoil.EvapCondPumpElecNomPower(1) < 0.0 && thisDXCoil.EvapCondPumpElecNomPower(1) != AutoSize) {
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-            ShowContinueError(state, EnergyPlus::format("...{} cannot be < 0.0.", cNumericFields(17)));
-            ShowContinueError(state, EnergyPlus::format("...entered value=[{:.2T}].", Numbers(17)));
-            ErrorsFound = true;
-        }
+        readEvapCondSpeedInputs(thisDXCoil, 1, 15, 16, 17);
 
         thisDXCoil.EvapCondEffect2 = Numbers(18);
         if (thisDXCoil.EvapCondEffect2 < 0.0 || thisDXCoil.EvapCondEffect2 > 1.0) {
