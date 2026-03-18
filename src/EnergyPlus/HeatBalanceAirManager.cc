@@ -2655,51 +2655,32 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
             auto &zoneA = state.dataHeatBal->RefDoorMixing(ZoneNumA);
             auto &zoneB = state.dataHeatBal->RefDoorMixing(ZoneNumB);
 
-            if (!allocated(zoneA.openScheds)) {
-                zoneA.DoorMixingObjectName.allocate(state.dataGlobal->NumOfZones);
-                zoneA.openScheds.allocate(state.dataGlobal->NumOfZones);
-                zoneA.DoorHeight.allocate(state.dataGlobal->NumOfZones);
-                zoneA.DoorArea.allocate(state.dataGlobal->NumOfZones);
-                zoneA.Protection.allocate(state.dataGlobal->NumOfZones);
-                zoneA.MateZonePtr.allocate(state.dataGlobal->NumOfZones);
-                zoneA.EMSRefDoorMixingOn.allocate(state.dataGlobal->NumOfZones);
-                zoneA.EMSRefDoorFlowRate.allocate(state.dataGlobal->NumOfZones);
-                zoneA.VolRefDoorFlowRate.allocate(state.dataGlobal->NumOfZones);
-                zoneA.DoorProtTypeName.allocate(state.dataGlobal->NumOfZones);
-                zoneA.DoorMixingObjectName = "";
-                zoneA.openScheds = nullptr;
-                zoneA.DoorHeight = 0.0;
-                zoneA.DoorArea = 0.0;
-                zoneA.Protection = RefDoorNone;
-                zoneA.MateZonePtr = 0;
-                zoneA.EMSRefDoorMixingOn = false;
-                zoneA.EMSRefDoorFlowRate = 0.0;
-                zoneA.VolRefDoorFlowRate = 0.0;
-                zoneA.DoorProtTypeName = "";
-            } // First refrigeration mixing in this zone
-
-            if (!allocated(zoneB.openScheds)) {
-                zoneB.DoorMixingObjectName.allocate(state.dataGlobal->NumOfZones);
-                zoneB.openScheds.allocate(state.dataGlobal->NumOfZones);
-                zoneB.DoorHeight.allocate(state.dataGlobal->NumOfZones);
-                zoneB.DoorArea.allocate(state.dataGlobal->NumOfZones);
-                zoneB.Protection.allocate(state.dataGlobal->NumOfZones);
-                zoneB.MateZonePtr.allocate(state.dataGlobal->NumOfZones);
-                zoneB.EMSRefDoorMixingOn.allocate(state.dataGlobal->NumOfZones);
-                zoneB.EMSRefDoorFlowRate.allocate(state.dataGlobal->NumOfZones);
-                zoneB.VolRefDoorFlowRate.allocate(state.dataGlobal->NumOfZones);
-                zoneB.DoorProtTypeName.allocate(state.dataGlobal->NumOfZones);
-                zoneB.DoorMixingObjectName = "";
-                zoneB.openScheds = nullptr;
-                zoneB.DoorHeight = 0.0;
-                zoneB.DoorArea = 0.0;
-                zoneB.Protection = RefDoorNone;
-                zoneB.MateZonePtr = 0;
-                zoneB.EMSRefDoorMixingOn = false;
-                zoneB.EMSRefDoorFlowRate = 0.0;
-                zoneB.VolRefDoorFlowRate = 0.0;
-                zoneB.DoorProtTypeName = "";
-            } // First refrigeration mixing in this zone
+            // Initialize all per-zone arrays on first use (identical logic for both sides of a door).
+            auto initRefDoorZone = [&](DataHeatBalance::MixingData &zone) {
+                if (allocated(zone.openScheds)) return;
+                zone.DoorMixingObjectName.allocate(state.dataGlobal->NumOfZones);
+                zone.openScheds.allocate(state.dataGlobal->NumOfZones);
+                zone.DoorHeight.allocate(state.dataGlobal->NumOfZones);
+                zone.DoorArea.allocate(state.dataGlobal->NumOfZones);
+                zone.Protection.allocate(state.dataGlobal->NumOfZones);
+                zone.MateZonePtr.allocate(state.dataGlobal->NumOfZones);
+                zone.EMSRefDoorMixingOn.allocate(state.dataGlobal->NumOfZones);
+                zone.EMSRefDoorFlowRate.allocate(state.dataGlobal->NumOfZones);
+                zone.VolRefDoorFlowRate.allocate(state.dataGlobal->NumOfZones);
+                zone.DoorProtTypeName.allocate(state.dataGlobal->NumOfZones);
+                zone.DoorMixingObjectName = "";
+                zone.openScheds = nullptr;
+                zone.DoorHeight = 0.0;
+                zone.DoorArea = 0.0;
+                zone.Protection = RefDoorNone;
+                zone.MateZonePtr = 0;
+                zone.EMSRefDoorMixingOn = false;
+                zone.EMSRefDoorFlowRate = 0.0;
+                zone.VolRefDoorFlowRate = 0.0;
+                zone.DoorProtTypeName = "";
+            };
+            initRefDoorZone(zoneA); // First refrigeration mixing in this zone
+            initRefDoorZone(zoneB); // First refrigeration mixing in this zone
 
             ConnectionNumber = zoneA.NumRefDoorConnections + 1;
             zoneA.NumRefDoorConnections = ConnectionNumber;
