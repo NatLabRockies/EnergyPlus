@@ -4453,6 +4453,18 @@ namespace AirflowNetwork {
 
                 auto const &surf = m_state.dataSurface->Surface(MultizoneSurfaceData(count).SurfNum);
 
+                // Shared check: all opening types require the surface to be a window, door, glassdoor or air boundary.
+                auto checkOpeningSurfaceClass = [&]() {
+                    if (!(surf.OriginalClass == SurfaceClass::Window || surf.OriginalClass == SurfaceClass::GlassDoor ||
+                          surf.OriginalClass == SurfaceClass::Door || surf.IsAirBoundarySurf)) {
+                        ShowSevereError(m_state,
+                                        EnergyPlus::format(RoutineName) +
+                                            "AirflowNetworkComponent: The opening must be assigned to a window, door, glassdoor or air boundary at " +
+                                            AirflowNetworkLinkageData(count).Name);
+                        ErrorsFound = true;
+                    }
+                };
+
                 switch (AirflowNetworkLinkageData(count).element->type()) {
                 case ComponentType::DOP: {
                     // if (AirflowNetworkLinkageData(count).CompName ==
@@ -4469,14 +4481,7 @@ namespace AirflowNetwork {
                         ShowContinueError(m_state, "10 deg of being horizontal. Airflows through large horizontal openings are poorly");
                         ShowContinueError(m_state, "modeled in the AirflowNetwork model resulting in only one-way airflow.");
                     }
-                    if (!(surf.OriginalClass == SurfaceClass::Window || surf.OriginalClass == SurfaceClass::GlassDoor ||
-                          surf.OriginalClass == SurfaceClass::Door || surf.IsAirBoundarySurf)) {
-                        ShowSevereError(m_state,
-                                        EnergyPlus::format(RoutineName) +
-                                            "AirflowNetworkComponent: The opening must be assigned to a window, door, glassdoor or air boundary at " +
-                                            AirflowNetworkLinkageData(count).Name);
-                        ErrorsFound = true;
-                    }
+                    checkOpeningSurfaceClass();
 
                     if (surf.OriginalClass == SurfaceClass::Door || surf.OriginalClass == SurfaceClass::GlassDoor) {
                         if (MultizoneCompDetOpeningData(AirflowNetworkCompData(compnum).TypeNum).LVOType == 2) {
@@ -4499,15 +4504,7 @@ namespace AirflowNetwork {
                         ShowContinueError(m_state, "AirflowNetwork:Multizone:Component:SimpleOpening = " + AirflowNetworkCompData(compnum).Name);
                         ErrorsFound = true;
                     }
-
-                    if (!(surf.OriginalClass == SurfaceClass::Window || surf.OriginalClass == SurfaceClass::GlassDoor ||
-                          surf.OriginalClass == SurfaceClass::Door || surf.IsAirBoundarySurf)) {
-                        ShowSevereError(m_state,
-                                        EnergyPlus::format(RoutineName) +
-                                            "AirflowNetworkComponent: The opening must be assigned to a window, door, glassdoor or air boundary at " +
-                                            AirflowNetworkLinkageData(count).Name);
-                        ErrorsFound = true;
-                    }
+                    checkOpeningSurfaceClass();
                 } break;
                 case ComponentType::HOP: {
                     // if (AirflowNetworkCompData(i).CompTypeNum == iComponentTypeNum::HOP) {
@@ -4548,14 +4545,7 @@ namespace AirflowNetwork {
                                           "with the object of AirflowNetwork:Multizone:Component:HorizontalOpening = " +
                                               AirflowNetworkCompData(compnum).Name);
                     }
-                    if (!(surf.OriginalClass == SurfaceClass::Window || surf.OriginalClass == SurfaceClass::GlassDoor ||
-                          surf.OriginalClass == SurfaceClass::Door || surf.IsAirBoundarySurf)) {
-                        ShowSevereError(m_state,
-                                        EnergyPlus::format(RoutineName) +
-                                            "AirflowNetworkComponent: The opening must be assigned to a window, door, glassdoor or air boundary at " +
-                                            AirflowNetworkLinkageData(count).Name);
-                        ErrorsFound = true;
-                    }
+                    checkOpeningSurfaceClass();
                 } break;
                 default:
                     // Nothing to do here
