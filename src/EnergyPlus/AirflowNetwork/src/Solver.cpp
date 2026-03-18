@@ -3432,31 +3432,19 @@ namespace AirflowNetwork {
             }
         }
 
-        // Assign external node height
-        if (Util::SameString(simulation_control.WPCCntr, "SurfaceAverageCalculation") ||
-            Util::SameString(simulation_control.HeightOption, "OpeningHeight")) {
-            for (int i = 1; i <= AirflowNetworkNumOfExtNode; ++i) {
-                for (int j = 1; j <= AirflowNetworkNumOfSurfaces; ++j) {
-                    if (m_state.dataSurface->Surface(MultizoneSurfaceData(j).SurfNum).ExtBoundCond == ExternalEnvironment ||
-                        (m_state.dataSurface->Surface(MultizoneSurfaceData(j).SurfNum).ExtBoundCond == OtherSideCoefNoCalcExt &&
-                         m_state.dataSurface->Surface(MultizoneSurfaceData(j).SurfNum).ExtWind)) {
-                        if (Util::SameString(MultizoneSurfaceData(j).ExternalNodeName, MultizoneExternalNodeData(i).Name)) {
-                            MultizoneExternalNodeData(i).height = m_state.dataSurface->Surface(MultizoneSurfaceData(j).SurfNum).Centroid.z;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        // Assign external node azimuth, should consider combining this with the above to avoid the repeated search
+        // Assign external node height and azimuth in a single pass over the surface list
+        bool const assignHeight = Util::SameString(simulation_control.WPCCntr, "SurfaceAverageCalculation") ||
+                                  Util::SameString(simulation_control.HeightOption, "OpeningHeight");
         for (int i = 1; i <= AirflowNetworkNumOfExtNode; ++i) {
             for (int j = 1; j <= AirflowNetworkNumOfSurfaces; ++j) {
-                if (m_state.dataSurface->Surface(MultizoneSurfaceData(j).SurfNum).ExtBoundCond == ExternalEnvironment ||
-                    (m_state.dataSurface->Surface(MultizoneSurfaceData(j).SurfNum).ExtBoundCond == OtherSideCoefNoCalcExt &&
-                     m_state.dataSurface->Surface(MultizoneSurfaceData(j).SurfNum).ExtWind)) {
+                auto const &surf = m_state.dataSurface->Surface(MultizoneSurfaceData(j).SurfNum);
+                if (surf.ExtBoundCond == ExternalEnvironment ||
+                    (surf.ExtBoundCond == OtherSideCoefNoCalcExt && surf.ExtWind)) {
                     if (Util::SameString(MultizoneSurfaceData(j).ExternalNodeName, MultizoneExternalNodeData(i).Name)) {
-                        MultizoneExternalNodeData(i).azimuth = m_state.dataSurface->Surface(MultizoneSurfaceData(j).SurfNum).Azimuth;
+                        if (assignHeight) {
+                            MultizoneExternalNodeData(i).height = surf.Centroid.z;
+                        }
+                        MultizoneExternalNodeData(i).azimuth = surf.Azimuth;
                         break;
                     }
                 }
