@@ -3141,21 +3141,16 @@ namespace AirflowNetwork {
 
         // Validate adjacent temperature and Enthalpy control for an interior surface only
         for (int i = 1; i <= AirflowNetworkNumOfSurfaces; ++i) {
-            if (MultizoneSurfaceData(i).VentSurfCtrNum == VentControlType::AdjTemp) {
+            auto const ventCtrl = MultizoneSurfaceData(i).VentSurfCtrNum;
+            if (ventCtrl == VentControlType::AdjTemp || ventCtrl == VentControlType::AdjEnth) {
                 if (!(m_state.dataSurface->Surface(MultizoneSurfaceData(i).SurfNum).ExtBoundCond >= 1)) {
                     ShowSevereError(m_state,
                                     EnergyPlus::format(RoutineName) + CurrentModuleObject + " object, " + cAlphaFields(1) + " = " +
                                         MultizoneSurfaceData(i).SurfName);
-                    ShowContinueError(m_state, "..AdjacentTemperature venting control must be defined for an interzone surface.");
-                    ErrorsFound = true;
-                }
-            }
-            if (MultizoneSurfaceData(i).VentSurfCtrNum == VentControlType::AdjEnth) {
-                if (!(m_state.dataSurface->Surface(MultizoneSurfaceData(i).SurfNum).ExtBoundCond >= 1)) {
-                    ShowSevereError(m_state,
-                                    EnergyPlus::format(RoutineName) + CurrentModuleObject + " object, " + cAlphaFields(1) + " = " +
-                                        MultizoneSurfaceData(i).SurfName);
-                    ShowContinueError(m_state, "..AdjacentEnthalpy venting control must be defined for an interzone surface.");
+                    ShowContinueError(m_state,
+                                      ventCtrl == VentControlType::AdjTemp
+                                          ? "..AdjacentTemperature venting control must be defined for an interzone surface."
+                                          : "..AdjacentEnthalpy venting control must be defined for an interzone surface.");
                     ErrorsFound = true;
                 }
             }
