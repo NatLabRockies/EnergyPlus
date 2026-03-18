@@ -2157,6 +2157,43 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
 
     RepVarSet = true;
 
+    // Helper lambda: handle FlowPerZone fallback when computeAirflowDesignLevel returns false.
+    // Applies a space-volume fraction to rNumericArgs(1) when the object spans multiple spaces.
+    // typeName is used in the warning/error messages (e.g. "Mixing" or "Cross Mixing").
+    auto applyMixingFlowPerZone = [&](Real64 &designLevel,
+                                      const InternalHeatGains::GlobalInternalGainMiscObject &inputObj,
+                                      const DataHeatBalance::SpaceData &thisSpace,
+                                      const DataHeatBalance::ZoneData &thisZone,
+                                      std::string_view typeName) {
+        if (lNumericFieldBlanks(1)) {
+            ShowWarningError(state,
+                             EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 {} will result.",
+                                                RoutineName,
+                                                cCurrentModuleObject,
+                                                inputObj.Name,
+                                                cAlphaFieldNames(4),
+                                                cNumericFieldNames(1),
+                                                typeName));
+        } else {
+            Real64 spaceFrac = 1.0;
+            if (!inputObj.spaceListActive && (inputObj.numOfSpaces > 1)) {
+                Real64 const zoneVolume = thisZone.Volume;
+                if (zoneVolume > 0.0) {
+                    spaceFrac = thisSpace.Volume / zoneVolume;
+                } else {
+                    ShowSevereError(
+                        state,
+                        EnergyPlus::format("{}Zone volume is zero when allocating {} to Spaces.", RoutineName, typeName));
+                    ShowContinueError(
+                        state,
+                        EnergyPlus::format("Occurs for {}=\"{}\" in Zone=\"{}\".", cCurrentModuleObject, inputObj.Name, thisZone.Name));
+                    ErrorsFound = true;
+                }
+            }
+            designLevel = rNumericArgs(1) * spaceFrac;
+        }
+    };
+
     cCurrentModuleObject = "ZoneMixing";
     int numZoneMixingInputObjects = 0;
     EPVector<InternalHeatGains::GlobalInternalGainMiscObject> zoneMixingInputObjects;
@@ -2201,32 +2238,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                                                rNumericArgs, lNumericFieldBlanks, cAlphaFieldNames, cNumericFieldNames,
                                                RoutineName, cCurrentModuleObject, thisMixingInput.Name, "Mixing", ErrorsFound)) {
                     if (flow == AirflowSpec::FlowPerZone) {
-                        thisMixing.DesignLevel = rNumericArgs(1);
-                        if (lNumericFieldBlanks(1)) {
-                            ShowWarningError(state,
-                                             EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Mixing will result.",
-                                                                RoutineName,
-                                                                cCurrentModuleObject,
-                                                                thisMixingInput.Name,
-                                                                cAlphaFieldNames(4),
-                                                                cNumericFieldNames(1)));
-                        } else {
-                            Real64 spaceFrac = 1.0;
-                            if (!thisMixingInput.spaceListActive && (thisMixingInput.numOfSpaces > 1)) {
-                                Real64 const zoneVolume = thisZone.Volume;
-                                if (zoneVolume > 0.0) {
-                                    spaceFrac = thisSpace.Volume / zoneVolume;
-                                } else {
-                                    ShowSevereError(state, EnergyPlus::format("{}Zone volume is zero when allocating Mixing to Spaces.", RoutineName));
-                                    ShowContinueError(
-                                        state,
-                                        EnergyPlus::format(
-                                            "Occurs for {}=\"{}\" in Zone=\"{}\".", cCurrentModuleObject, thisMixingInput.Name, thisZone.Name));
-                                    ErrorsFound = true;
-                                }
-                            }
-                            thisMixing.DesignLevel = rNumericArgs(1) * spaceFrac;
-                        }
+                        applyMixingFlowPerZone(thisMixing.DesignLevel, thisMixingInput, thisSpace, thisZone, "Mixing");
                     } else {
                         ShowSevereError(
                             state,
@@ -2444,33 +2456,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                                                rNumericArgs, lNumericFieldBlanks, cAlphaFieldNames, cNumericFieldNames,
                                                RoutineName, cCurrentModuleObject, thisMixingInput.Name, "Cross Mixing", ErrorsFound)) {
                     if (flow == AirflowSpec::FlowPerZone) {
-                        thisMixing.DesignLevel = rNumericArgs(1);
-                        if (lNumericFieldBlanks(1)) {
-                            ShowWarningError(state,
-                                             EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Cross Mixing will result.",
-                                                                RoutineName,
-                                                                cCurrentModuleObject,
-                                                                thisMixingInput.Name,
-                                                                cAlphaFieldNames(4),
-                                                                cNumericFieldNames(1)));
-                        } else {
-                            Real64 spaceFrac = 1.0;
-                            if (!thisMixingInput.spaceListActive && (thisMixingInput.numOfSpaces > 1)) {
-                                Real64 const zoneVolume = thisZone.Volume;
-                                if (zoneVolume > 0.0) {
-                                    spaceFrac = thisSpace.Volume / zoneVolume;
-                                } else {
-                                    ShowSevereError(state,
-                                                    EnergyPlus::format("{}Zone volume is zero when allocating Cross Mixing to Spaces.", RoutineName));
-                                    ShowContinueError(
-                                        state,
-                                        EnergyPlus::format(
-                                            "Occurs for {}=\"{}\" in Zone=\"{}\".", cCurrentModuleObject, thisMixingInput.Name, thisZone.Name));
-                                    ErrorsFound = true;
-                                }
-                            }
-                            thisMixing.DesignLevel = rNumericArgs(1) * spaceFrac;
-                        }
+                        applyMixingFlowPerZone(thisMixing.DesignLevel, thisMixingInput, thisSpace, thisZone, "Cross Mixing");
                     } else {
                         ShowSevereError(
                             state,
