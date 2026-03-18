@@ -3650,6 +3650,36 @@ namespace InternalHeatGains {
                             name);
     }
 
+    // Register the 12 People zone/space total output variables for a single zone or space.
+    static void setupPeopleZoneSpaceOutputs(EnergyPlusData &state,
+                                            DataHeatBalance::ZoneReportVars &rpt,
+                                            std::string const &name,
+                                            std::string_view prefix)
+    {
+        SetupOutputVariable(
+            state, format("{} People Occupant Count", prefix), Constant::Units::None, rpt.PeopleNumOcc, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+        SetupOutputVariable(
+            state, format("{} People Radiant Heating Energy", prefix), Constant::Units::J, rpt.PeopleRadGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+        SetupOutputVariable(
+            state, format("{} People Radiant Heating Rate", prefix), Constant::Units::W, rpt.PeopleRadGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+        SetupOutputVariable(
+            state, format("{} People Convective Heating Energy", prefix), Constant::Units::J, rpt.PeopleConGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+        SetupOutputVariable(
+            state, format("{} People Convective Heating Rate", prefix), Constant::Units::W, rpt.PeopleConGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+        SetupOutputVariable(
+            state, format("{} People Sensible Heating Energy", prefix), Constant::Units::J, rpt.PeopleSenGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+        SetupOutputVariable(
+            state, format("{} People Sensible Heating Rate", prefix), Constant::Units::W, rpt.PeopleSenGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+        SetupOutputVariable(
+            state, format("{} People Latent Gain Energy", prefix), Constant::Units::J, rpt.PeopleLatGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+        SetupOutputVariable(
+            state, format("{} People Latent Gain Rate", prefix), Constant::Units::W, rpt.PeopleLatGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+        SetupOutputVariable(
+            state, format("{} People Total Heating Energy", prefix), Constant::Units::J, rpt.PeopleTotGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+        SetupOutputVariable(
+            state, format("{} People Total Heating Rate", prefix), Constant::Units::W, rpt.PeopleTotGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+    }
+
     void setupIHGOutputs(EnergyPlusData &state)
     {
         for (int zoneNum = 1; zoneNum <= state.dataGlobal->NumOfZones; ++zoneNum) {
@@ -3766,84 +3796,7 @@ namespace InternalHeatGains {
 
         for (int zoneNum = 1; zoneNum <= state.dataGlobal->NumOfZones; ++zoneNum) {
             if (addZoneOutputs(zoneNum)) {
-                // Zone total report variables
-                SetupOutputVariable(state,
-                                    "Zone People Occupant Count",
-                                    Constant::Units::None,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).PeopleNumOcc,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone People Radiant Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).PeopleRadGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone People Radiant Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).PeopleRadGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone People Convective Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).PeopleConGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone People Convective Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).PeopleConGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone People Sensible Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).PeopleSenGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone People Sensible Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).PeopleSenGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone People Latent Gain Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).PeopleLatGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone People Latent Gain Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).PeopleLatGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone People Total Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).PeopleTotGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone People Total Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).PeopleTotGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
+                setupPeopleZoneSpaceOutputs(state, state.dataHeatBal->ZoneRpt(zoneNum), state.dataHeatBal->Zone(zoneNum).Name, "Zone");
             }
             // Reset zone output flag
             addZoneOutputs(zoneNum) = false;
@@ -3852,83 +3805,7 @@ namespace InternalHeatGains {
         // Space total report variables
         for (int spaceNum = 1; spaceNum <= state.dataGlobal->numSpaces; ++spaceNum) {
             if (addSpaceOutputs(spaceNum)) {
-                SetupOutputVariable(state,
-                                    "Space People Occupant Count",
-                                    Constant::Units::None,
-                                    state.dataHeatBal->spaceRpt(spaceNum).PeopleNumOcc,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space People Radiant Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).PeopleRadGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space People Radiant Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).PeopleRadGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space People Convective Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).PeopleConGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space People Convective Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).PeopleConGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space People Sensible Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).PeopleSenGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space People Sensible Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).PeopleSenGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space People Latent Gain Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).PeopleLatGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space People Latent Gain Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).PeopleLatGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space People Total Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).PeopleTotGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space People Total Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).PeopleTotGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
+                setupPeopleZoneSpaceOutputs(state, state.dataHeatBal->spaceRpt(spaceNum), state.dataHeatBal->space(spaceNum).Name, "Space");
             }
             // Reset space output flag
             addSpaceOutputs(spaceNum) = false;
