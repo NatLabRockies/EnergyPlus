@@ -5067,57 +5067,32 @@ namespace AirflowNetwork {
 
         // Check node assignments using AirflowNetwork:Distribution:Component:OutdoorAirFlow or
         // AirflowNetwork:Distribution:Component:ReliefAirFlow
+        auto checkOANodeType = [&](int nodeNum, std::string_view requiredType, std::string_view position, std::string_view typeWord) {
+            if (!Util::SameString(DisSysNodeData(nodeNum - NumOfNodesMultiZone).EPlusType, std::string(requiredType))) {
+                ShowSevereError(m_state,
+                                EnergyPlus::format(RoutineName) +
+                                    "AirflowNetwork:Distribution:Linkage: When the component type is "
+                                    "AirflowNetwork:Distribution:Component:OutdoorAirFlow at " +
+                                    AirflowNetworkNodeData(nodeNum).Name + ",");
+                ShowContinueError(m_state,
+                                  "the component " + std::string(typeWord) + " in the " + std::string(position) + " node should be " +
+                                      std::string(requiredType) + " at " + AirflowNetworkNodeData(nodeNum).Name);
+                ErrorsFound = true;
+            }
+        };
         for (count = AirflowNetworkNumOfSurfaces + 1; count <= AirflowNetworkNumOfLinks; ++count) {
             int i = AirflowNetworkLinkageData(count).CompNum;
             j = AirflowNetworkLinkageData(count).NodeNums[0];
             k = AirflowNetworkLinkageData(count).NodeNums[1];
 
             if (AirflowNetworkCompData(i).CompTypeNum == iComponentTypeNum::OAF) {
-                if (!Util::SameString(DisSysNodeData(j - NumOfNodesMultiZone).EPlusType, "OAMixerOutdoorAirStreamNode")) {
-                    ShowSevereError(m_state,
-                                    EnergyPlus::format(RoutineName) +
-                                        "AirflowNetwork:Distribution:Linkage: When the component type is "
-                                        "AirflowNetwork:Distribution:Component:OutdoorAirFlow at " +
-                                        AirflowNetworkNodeData(j).Name + ",");
-                    ShowContinueError(
-                        m_state, "the component type in the first node should be OAMixerOutdoorAirStreamNode at " + AirflowNetworkNodeData(j).Name);
-                    ErrorsFound = true;
-                }
-                if (!Util::SameString(DisSysNodeData(k - NumOfNodesMultiZone).EPlusType, "AirLoopHVAC:OutdoorAirSystem")) {
-                    ShowSevereError(m_state,
-                                    EnergyPlus::format(RoutineName) +
-                                        "AirflowNetwork:Distribution:Linkage: When the component type is "
-                                        "AirflowNetwork:Distribution:Component:OutdoorAirFlow at " +
-                                        AirflowNetworkNodeData(k).Name + ",");
-                    ShowContinueError(m_state,
-                                      "the component object type in the second node should be AirLoopHVAC:OutdoorAirSystem at " +
-                                          AirflowNetworkNodeData(k).Name);
-                    ErrorsFound = true;
-                }
+                checkOANodeType(j, "OAMixerOutdoorAirStreamNode", "first", "type");
+                checkOANodeType(k, "AirLoopHVAC:OutdoorAirSystem", "second", "object type");
             }
 
             if (AirflowNetworkCompData(i).CompTypeNum == iComponentTypeNum::REL) {
-                if (!Util::SameString(DisSysNodeData(j - NumOfNodesMultiZone).EPlusType, "AirLoopHVAC:OutdoorAirSystem")) {
-                    ShowSevereError(m_state,
-                                    EnergyPlus::format(RoutineName) +
-                                        "AirflowNetwork:Distribution:Linkage: When the component type is "
-                                        "AirflowNetwork:Distribution:Component:OutdoorAirFlow at " +
-                                        AirflowNetworkNodeData(j).Name + ",");
-                    ShowContinueError(m_state,
-                                      "the component object type in the first node should be AirLoopHVAC:OutdoorAirSystem at " +
-                                          AirflowNetworkNodeData(j).Name);
-                    ErrorsFound = true;
-                }
-                if (!Util::SameString(DisSysNodeData(k - NumOfNodesMultiZone).EPlusType, "OAMixerOutdoorAirStreamNode")) {
-                    ShowSevereError(m_state,
-                                    EnergyPlus::format(RoutineName) +
-                                        "AirflowNetwork:Distribution:Linkage: When the component type is "
-                                        "AirflowNetwork:Distribution:Component:OutdoorAirFlow at " +
-                                        AirflowNetworkNodeData(k).Name + ",");
-                    ShowContinueError(
-                        m_state, "the component type in the second node should be OAMixerOutdoorAirStreamNode at " + AirflowNetworkNodeData(k).Name);
-                    ErrorsFound = true;
-                }
+                checkOANodeType(j, "AirLoopHVAC:OutdoorAirSystem", "first", "object type");
+                checkOANodeType(k, "OAMixerOutdoorAirStreamNode", "second", "type");
             }
         }
 
