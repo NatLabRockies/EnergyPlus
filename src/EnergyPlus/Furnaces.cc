@@ -1311,6 +1311,19 @@ namespace Furnaces {
 
         int IHPCoilIndex = 0;
 
+        // Lambda: set AirFlowControl based on the fan operating mode schedule.
+        // AirFlowControl is only relevant when the fan runs continuously (ContFanCycComp).
+        // If the schedule is always zero the compressor-on flow is used; otherwise the
+        // user-specified no-load flow rate is used.
+        auto setAirFlowControl = [&](FurnaceEquipConditions &furn) {
+            if (furn.fanOpModeSched != nullptr) {
+                if (!furn.fanOpModeSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 0.0)) {
+                    furn.AirFlowControl = (furn.MaxNoCoolHeatAirVolFlow == 0.0) ? AirFlowControlConstFan::UseCompressorOnFlow
+                                                                                : AirFlowControlConstFan::UseCompressorOffFlow;
+                }
+            }
+        };
+
         // Get the data for the HeatOnly Furnace
         for (int HeatOnlyNum = 1; HeatOnlyNum <= NumHeatOnly + NumUnitaryHeatOnly; ++HeatOnlyNum) {
 
@@ -2713,20 +2726,7 @@ namespace Furnaces {
                 }
             }
 
-            if (thisFurnace.fanOpModeSched != nullptr) {
-                // Is this correct? 0.0 for max also?
-                if (!thisFurnace.fanOpModeSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 0.0)) {
-                    //           set air flow control mode:
-                    //             UseCompressorOnFlow = operate at last cooling or heating air flow requested when compressor is off
-                    //             UseCompressorOffFlow = operate at value specified by user
-                    //           AirFlowControl only valid if fan opmode = ContFanCycComp
-                    if (thisFurnace.MaxNoCoolHeatAirVolFlow == 0.0) {
-                        thisFurnace.AirFlowControl = AirFlowControlConstFan::UseCompressorOnFlow;
-                    } else {
-                        thisFurnace.AirFlowControl = AirFlowControlConstFan::UseCompressorOffFlow;
-                    }
-                }
-            }
+            setAirFlowControl(thisFurnace);
 
             if (thisFurnace.CoolingCoilType_Num == HVAC::Coil_CoolingAirToAirVariableSpeed) {
                 errFlag = false;
@@ -3315,19 +3315,7 @@ namespace Furnaces {
                 ErrorsFound = true;
             }
 
-            if (thisFurnace.fanOpModeSched != nullptr) {
-                if (!thisFurnace.fanOpModeSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 0.0)) { // Autodesk:Note Range is 0 to 0?
-                    //           set air flow control mode:
-                    //             UseCompressorOnFlow = operate at last cooling or heating air flow requested when compressor is off
-                    //             UseCompressorOffFlow = operate at value specified by user
-                    //           AirFlowControl only valid if fan opmode = ContFanCycComp
-                    if (thisFurnace.MaxNoCoolHeatAirVolFlow == 0.0) {
-                        thisFurnace.AirFlowControl = AirFlowControlConstFan::UseCompressorOnFlow;
-                    } else {
-                        thisFurnace.AirFlowControl = AirFlowControlConstFan::UseCompressorOffFlow;
-                    }
-                }
-            }
+            setAirFlowControl(thisFurnace);
 
             if (Numbers(1) != DataSizing::AutoSize && Numbers(2) != DataSizing::AutoSize && Numbers(3) != DataSizing::AutoSize) {
                 thisFurnace.DesignFanVolFlowRate = max(Numbers(1), Numbers(2), Numbers(3));
