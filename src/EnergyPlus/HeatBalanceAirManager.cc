@@ -870,15 +870,11 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
     lAlphaFieldBlanks.dimension(maxAlpha, true);
     lNumericFieldBlanks.dimension(maxNumber, true);
 
-    cCurrentModuleObject = "ZoneAirBalance:OutdoorAir";
-    state.dataHeatBal->TotZoneAirBalance = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
-
-    state.dataHeatBal->ZoneAirBalance.allocate(state.dataHeatBal->TotZoneAirBalance);
-
-    for (int Loop = 1; Loop <= state.dataHeatBal->TotZoneAirBalance; ++Loop) {
+    // Helper lambda that wraps the repeated 11-argument getObjectItem call.
+    auto getItem = [&](int itemNum) {
         state.dataInputProcessing->inputProcessor->getObjectItem(state,
                                                                  cCurrentModuleObject,
-                                                                 Loop,
+                                                                 itemNum,
                                                                  cAlphaArgs,
                                                                  NumAlpha,
                                                                  rNumericArgs,
@@ -888,6 +884,15 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                                                                  lAlphaFieldBlanks,
                                                                  cAlphaFieldNames,
                                                                  cNumericFieldNames);
+    };
+
+    cCurrentModuleObject = "ZoneAirBalance:OutdoorAir";
+    state.dataHeatBal->TotZoneAirBalance = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
+
+    state.dataHeatBal->ZoneAirBalance.allocate(state.dataHeatBal->TotZoneAirBalance);
+
+    for (int Loop = 1; Loop <= state.dataHeatBal->TotZoneAirBalance; ++Loop) {
+        getItem(Loop);
 
         ErrorObjectHeader eoh{routineName, cCurrentModuleObject, cAlphaArgs(1)};
         bool IsNotOK = false;
@@ -1125,18 +1130,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
         cCurrentModuleObject = "ZoneInfiltration:DesignFlowRate";
         for (int infilInputNum = 1; infilInputNum <= numDesignFlowInfiltrationObjects; ++infilInputNum) {
 
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     cCurrentModuleObject,
-                                                                     infilInputNum,
-                                                                     cAlphaArgs,
-                                                                     NumAlpha,
-                                                                     rNumericArgs,
-                                                                     NumNumber,
-                                                                     IOStat,
-                                                                     lNumericFieldBlanks,
-                                                                     lAlphaFieldBlanks,
-                                                                     cAlphaFieldNames,
-                                                                     cNumericFieldNames);
+            getItem(infilInputNum);
 
             ErrorObjectHeader eoh{routineName, cCurrentModuleObject, cAlphaArgs(1)};
             // Create one Infiltration instance for every space associated with this input object
@@ -1372,18 +1366,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
     if (totLeakageAreaInfiltration > 0) {
         cCurrentModuleObject = "ZoneInfiltration:EffectiveLeakageArea";
         for (int infilInputNum = 1; infilInputNum <= numLeakageAreaInfiltrationObjects; ++infilInputNum) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     cCurrentModuleObject,
-                                                                     infilInputNum,
-                                                                     cAlphaArgs,
-                                                                     NumAlpha,
-                                                                     rNumericArgs,
-                                                                     NumNumber,
-                                                                     IOStat,
-                                                                     lNumericFieldBlanks,
-                                                                     lAlphaFieldBlanks,
-                                                                     cAlphaFieldNames,
-                                                                     cNumericFieldNames);
+            getItem(infilInputNum);
 
             ErrorObjectHeader eoh{routineName, cCurrentModuleObject, cAlphaArgs(1)};
 
@@ -1420,18 +1403,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
     if (totFlowCoefficientInfiltration > 0) {
         cCurrentModuleObject = "ZoneInfiltration:FlowCoefficient";
         for (int infilInputNum = 1; infilInputNum <= numFlowCoefficientInfiltrationObjects; ++infilInputNum) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     cCurrentModuleObject,
-                                                                     infilInputNum,
-                                                                     cAlphaArgs,
-                                                                     NumAlpha,
-                                                                     rNumericArgs,
-                                                                     NumNumber,
-                                                                     IOStat,
-                                                                     lNumericFieldBlanks,
-                                                                     lAlphaFieldBlanks,
-                                                                     cAlphaFieldNames,
-                                                                     cNumericFieldNames);
+            getItem(infilInputNum);
 
             ErrorObjectHeader eoh{routineName, cCurrentModuleObject, cAlphaArgs(1)};
 
@@ -1524,18 +1496,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
         cCurrentModuleObject = "ZoneVentilation:DesignFlowRate";
         for (int ventInputNum = 1; ventInputNum <= numDesignFlowVentilationObjects; ++ventInputNum) {
 
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     cCurrentModuleObject,
-                                                                     ventInputNum,
-                                                                     cAlphaArgs,
-                                                                     NumAlpha,
-                                                                     rNumericArgs,
-                                                                     NumNumber,
-                                                                     IOStat,
-                                                                     lNumericFieldBlanks,
-                                                                     lAlphaFieldBlanks,
-                                                                     cAlphaFieldNames,
-                                                                     cNumericFieldNames);
+            getItem(ventInputNum);
 
             ErrorObjectHeader eoh{routineName, cCurrentModuleObject, cAlphaArgs(1)};
             auto &thisVentilationInput = ventilationDesignFlowRateObjects(ventInputNum);
@@ -1895,18 +1856,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
         cCurrentModuleObject = "ZoneVentilation:WindandStackOpenArea";
         for (int ventInputNum = 1; ventInputNum <= numWindStackVentilationObjects; ++ventInputNum) {
 
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     cCurrentModuleObject,
-                                                                     ventInputNum,
-                                                                     cAlphaArgs,
-                                                                     NumAlpha,
-                                                                     rNumericArgs,
-                                                                     NumNumber,
-                                                                     IOStat,
-                                                                     lNumericFieldBlanks,
-                                                                     lAlphaFieldBlanks,
-                                                                     cAlphaFieldNames,
-                                                                     cNumericFieldNames);
+            getItem(ventInputNum);
 
             ErrorObjectHeader eoh{routineName, cCurrentModuleObject, cAlphaArgs(1)};
 
@@ -2224,18 +2174,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
         int mixingNum = 0;
         for (int mixingInputNum = 1; mixingInputNum <= numZoneMixingInputObjects; ++mixingInputNum) {
 
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     cCurrentModuleObject,
-                                                                     mixingInputNum,
-                                                                     cAlphaArgs,
-                                                                     NumAlpha,
-                                                                     rNumericArgs,
-                                                                     NumNumber,
-                                                                     IOStat,
-                                                                     lNumericFieldBlanks,
-                                                                     lAlphaFieldBlanks,
-                                                                     cAlphaFieldNames,
-                                                                     cNumericFieldNames);
+            getItem(mixingInputNum);
 
             ErrorObjectHeader eoh{routineName, cCurrentModuleObject, cAlphaArgs(1)};
             // Create one Mixing instance for every space associated with this input object
@@ -2477,18 +2416,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
         int mixingNum = 0;
         for (int mixingInputNum = 1; mixingInputNum <= numZoneCrossMixingInputObjects; ++mixingInputNum) {
 
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     cCurrentModuleObject,
-                                                                     mixingInputNum,
-                                                                     cAlphaArgs,
-                                                                     NumAlpha,
-                                                                     rNumericArgs,
-                                                                     NumNumber,
-                                                                     IOStat,
-                                                                     lNumericFieldBlanks,
-                                                                     lAlphaFieldBlanks,
-                                                                     cAlphaFieldNames,
-                                                                     cNumericFieldNames);
+            getItem(mixingInputNum);
 
             ErrorObjectHeader eoh{routineName, cCurrentModuleObject, cAlphaArgs(1)};
 
@@ -2663,18 +2591,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
 
         for (int Loop = 1; Loop <= state.dataHeatBal->TotRefDoorMixing; ++Loop) {
 
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     cCurrentModuleObject,
-                                                                     Loop,
-                                                                     cAlphaArgs,
-                                                                     NumAlpha,
-                                                                     rNumericArgs,
-                                                                     NumNumber,
-                                                                     IOStat,
-                                                                     lNumericFieldBlanks,
-                                                                     lAlphaFieldBlanks,
-                                                                     cAlphaFieldNames,
-                                                                     cNumericFieldNames);
+            getItem(Loop);
 
             ErrorObjectHeader eoh{routineName, cCurrentModuleObject, cAlphaArgs(1)};
             NameThisObject = cAlphaArgs(1);
