@@ -4014,10 +4014,13 @@ namespace Furnaces {
             ShowFatalError(state, "Errors found in getting Furnace or Unitary System input.");
         }
 
-        for (int HeatOnlyNum = 1; HeatOnlyNum <= NumHeatOnly; ++HeatOnlyNum) {
-            FurnaceNum = HeatOnlyNum;
+        // Single loop over all furnaces registers output variables and EMS actuators.
+        // The "Fan Part Load Ratio" variable is common to every type; additional variables
+        // and actuator object-type strings vary by UnitarySysType.
+        for (FurnaceNum = 1; FurnaceNum <= state.dataFurnaces->NumFurnaces; ++FurnaceNum) {
             auto &thisFurnace = state.dataFurnaces->Furnace(FurnaceNum);
-            // Setup Report variables for the Furnace that are not reported in the components themselves
+
+            // All furnace/unitary types report fan PLR
             SetupOutputVariable(state,
                                 "Unitary System Fan Part Load Ratio",
                                 Constant::Units::None,
@@ -4025,238 +4028,124 @@ namespace Furnaces {
                                 OutputProcessor::TimeStepType::System,
                                 OutputProcessor::StoreType::Average,
                                 thisFurnace.Name);
-            if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
-                SetupEMSActuator(state,
-                                 "AirLoopHVAC:Unitary:Furnace:HeatOnly",
-                                 thisFurnace.Name,
-                                 "Autosized Supply Air Flow Rate",
-                                 "[m3/s]",
-                                 thisFurnace.DesignFanVolFlowRateEMSOverrideOn,
-                                 thisFurnace.DesignFanVolFlowRateEMSOverrideValue);
+
+            switch (thisFurnace.type) {
+            case HVAC::UnitarySysType::Furnace_HeatCool:
+            case HVAC::UnitarySysType::Unitary_HeatCool:
+            case HVAC::UnitarySysType::Unitary_HeatPump_AirToAir:
+            case HVAC::UnitarySysType::Unitary_HeatPump_WaterToAir:
+                SetupOutputVariable(state,
+                                    "Unitary System Compressor Part Load Ratio",
+                                    Constant::Units::None,
+                                    thisFurnace.CompPartLoadRatio,
+                                    OutputProcessor::TimeStepType::System,
+                                    OutputProcessor::StoreType::Average,
+                                    thisFurnace.Name);
+                break;
+            default:
+                break;
             }
-        }
 
-        for (int UnitaryHeatOnlyNum = NumHeatOnly + 1; UnitaryHeatOnlyNum <= NumHeatOnly + NumUnitaryHeatOnly; ++UnitaryHeatOnlyNum) {
-            FurnaceNum = UnitaryHeatOnlyNum;
-            auto &thisFurnace = state.dataFurnaces->Furnace(FurnaceNum);
-            // Setup Report variables for Unitary System that are not reported in the components themselves
-            SetupOutputVariable(state,
-                                "Unitary System Fan Part Load Ratio",
-                                Constant::Units::None,
-                                thisFurnace.FanPartLoadRatio,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisFurnace.Name);
-            if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
-                SetupEMSActuator(state,
-                                 "AirLoopHVAC:UnitaryHeatOnly",
-                                 thisFurnace.Name,
-                                 "Autosized Supply Air Flow Rate",
-                                 "[m3/s]",
-                                 thisFurnace.DesignFanVolFlowRateEMSOverrideOn,
-                                 thisFurnace.DesignFanVolFlowRateEMSOverrideValue);
+            if (thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatPump_AirToAir) {
+                SetupOutputVariable(state,
+                                    "Unitary System Dehumidification Induced Heating Demand Rate",
+                                    Constant::Units::W,
+                                    thisFurnace.DehumidInducedHeatingDemandRate,
+                                    OutputProcessor::TimeStepType::System,
+                                    OutputProcessor::StoreType::Average,
+                                    thisFurnace.Name);
             }
-        }
 
-        for (int HeatCoolNum = NumHeatOnly + NumUnitaryHeatOnly + 1; HeatCoolNum <= NumHeatOnly + NumUnitaryHeatOnly + NumHeatCool; ++HeatCoolNum) {
-            FurnaceNum = HeatCoolNum;
-            auto &thisFurnace = state.dataFurnaces->Furnace(FurnaceNum);
-            // Setup Report variables for the Furnace that are not reported in the components themselves
-            SetupOutputVariable(state,
-                                "Unitary System Fan Part Load Ratio",
-                                Constant::Units::None,
-                                thisFurnace.FanPartLoadRatio,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisFurnace.Name);
-            SetupOutputVariable(state,
-                                "Unitary System Compressor Part Load Ratio",
-                                Constant::Units::None,
-                                thisFurnace.CompPartLoadRatio,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisFurnace.Name);
-
-            if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
-                SetupEMSActuator(state,
-                                 "AirLoopHVAC:Unitary:Furnace:HeatCool",
-                                 thisFurnace.Name,
-                                 "Autosized Supply Air Flow Rate",
-                                 "[m3/s]",
-                                 thisFurnace.DesignFanVolFlowRateEMSOverrideOn,
-                                 thisFurnace.DesignFanVolFlowRateEMSOverrideValue);
-                SetupEMSActuator(state,
-                                 "AirLoopHVAC:Unitary:Furnace:HeatCool",
-                                 thisFurnace.Name,
-                                 "Autosized Supply Air Flow Rate During Cooling Operation",
-                                 "[m3/s]",
-                                 thisFurnace.MaxCoolAirVolFlowEMSOverrideOn,
-                                 thisFurnace.MaxCoolAirVolFlowEMSOverrideValue);
-                SetupEMSActuator(state,
-                                 "AirLoopHVAC:Unitary:Furnace:HeatCool",
-                                 thisFurnace.Name,
-                                 "Autosized Supply Air Flow Rate During Heating Operation",
-                                 "[m3/s]",
-                                 thisFurnace.MaxHeatAirVolFlowEMSOverrideOn,
-                                 thisFurnace.MaxHeatAirVolFlowEMSOverrideValue);
-                SetupEMSActuator(state,
-                                 "AirLoopHVAC:Unitary:Furnace:HeatCool",
-                                 thisFurnace.Name,
-                                 "Autosized Supply Air Flow Rate During No Heating or Cooling Operation",
-                                 "[m3/s]",
-                                 thisFurnace.MaxNoCoolHeatAirVolFlowEMSOverrideOn,
-                                 thisFurnace.MaxNoCoolHeatAirVolFlowEMSOverrideValue);
+            if (thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatPump_WaterToAir) {
+                SetupOutputVariable(state,
+                                    "Unitary System Requested Sensible Cooling Rate",
+                                    Constant::Units::W,
+                                    thisFurnace.CoolingCoilSensDemand,
+                                    OutputProcessor::TimeStepType::System,
+                                    OutputProcessor::StoreType::Average,
+                                    thisFurnace.Name);
+                SetupOutputVariable(state,
+                                    "Unitary System Requested Latent Cooling Rate",
+                                    Constant::Units::W,
+                                    thisFurnace.CoolingCoilLatentDemand,
+                                    OutputProcessor::TimeStepType::System,
+                                    OutputProcessor::StoreType::Average,
+                                    thisFurnace.Name);
+                SetupOutputVariable(state,
+                                    "Unitary System Requested Heating Rate",
+                                    Constant::Units::W,
+                                    thisFurnace.HeatingCoilSensDemand,
+                                    OutputProcessor::TimeStepType::System,
+                                    OutputProcessor::StoreType::Average,
+                                    thisFurnace.Name);
+                SetupOutputVariable(state,
+                                    "Unitary System Dehumidification Induced Heating Demand Rate",
+                                    Constant::Units::W,
+                                    thisFurnace.DehumidInducedHeatingDemandRate,
+                                    OutputProcessor::TimeStepType::System,
+                                    OutputProcessor::StoreType::Average,
+                                    thisFurnace.Name);
             }
-        }
 
-        for (int UnitaryHeatCoolNum = NumHeatOnly + NumHeatCool + NumUnitaryHeatOnly + 1;
-             UnitaryHeatCoolNum <= NumHeatOnly + NumHeatCool + NumUnitaryHeatOnly + NumUnitaryHeatCool;
-             ++UnitaryHeatCoolNum) {
-            FurnaceNum = UnitaryHeatCoolNum;
-            auto &thisFurnace = state.dataFurnaces->Furnace(FurnaceNum);
-            // Setup Report variables for Unitary System that are not reported in the components themselves
-            SetupOutputVariable(state,
-                                "Unitary System Fan Part Load Ratio",
-                                Constant::Units::None,
-                                thisFurnace.FanPartLoadRatio,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisFurnace.Name);
-            SetupOutputVariable(state,
-                                "Unitary System Compressor Part Load Ratio",
-                                Constant::Units::None,
-                                thisFurnace.CompPartLoadRatio,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisFurnace.Name);
             if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
+                // Determine the EMS object-type string for this furnace type
+                std::string_view emsObjType;
+                switch (thisFurnace.type) {
+                case HVAC::UnitarySysType::Furnace_HeatOnly:
+                    emsObjType = "AirLoopHVAC:Unitary:Furnace:HeatOnly";
+                    break;
+                case HVAC::UnitarySysType::Unitary_HeatOnly:
+                    emsObjType = "AirLoopHVAC:UnitaryHeatOnly";
+                    break;
+                case HVAC::UnitarySysType::Furnace_HeatCool:
+                    emsObjType = "AirLoopHVAC:Unitary:Furnace:HeatCool";
+                    break;
+                case HVAC::UnitarySysType::Unitary_HeatCool:
+                    emsObjType = "AirLoopHVAC:UnitaryHeatCool";
+                    break;
+                case HVAC::UnitarySysType::Unitary_HeatPump_AirToAir:
+                    emsObjType = "AirLoopHVAC:UnitaryHeatPump:AirToAir";
+                    break;
+                case HVAC::UnitarySysType::Unitary_HeatPump_WaterToAir:
+                    emsObjType = "AirLoopHVAC:UnitaryHeatPump:WaterToAir";
+                    break;
+                default:
+                    emsObjType = "";
+                    break;
+                }
                 SetupEMSActuator(state,
-                                 "AirLoopHVAC:UnitaryHeatCool",
+                                 emsObjType,
                                  thisFurnace.Name,
                                  "Autosized Supply Air Flow Rate",
                                  "[m3/s]",
                                  thisFurnace.DesignFanVolFlowRateEMSOverrideOn,
                                  thisFurnace.DesignFanVolFlowRateEMSOverrideValue);
-                SetupEMSActuator(state,
-                                 "AirLoopHVAC:UnitaryHeatCool",
-                                 thisFurnace.Name,
-                                 "Autosized Supply Air Flow Rate During Cooling Operation",
-                                 "[m3/s]",
-                                 thisFurnace.MaxCoolAirVolFlowEMSOverrideOn,
-                                 thisFurnace.MaxCoolAirVolFlowEMSOverrideValue);
-                SetupEMSActuator(state,
-                                 "AirLoopHVAC:UnitaryHeatCool",
-                                 thisFurnace.Name,
-                                 "Autosized Supply Air Flow Rate During Heating Operation",
-                                 "[m3/s]",
-                                 thisFurnace.MaxHeatAirVolFlowEMSOverrideOn,
-                                 thisFurnace.MaxHeatAirVolFlowEMSOverrideValue);
-                SetupEMSActuator(state,
-                                 "AirLoopHVAC:UnitaryHeatCool",
-                                 thisFurnace.Name,
-                                 "Autosized Supply Air Flow Rate During No Heating or Cooling Operation",
-                                 "[m3/s]",
-                                 thisFurnace.MaxNoCoolHeatAirVolFlowEMSOverrideOn,
-                                 thisFurnace.MaxNoCoolHeatAirVolFlowEMSOverrideValue);
-            }
-        }
 
-        for (int HeatPumpNum = NumHeatOnly + NumHeatCool + NumUnitaryHeatOnly + NumUnitaryHeatCool + 1;
-             HeatPumpNum <= state.dataFurnaces->NumFurnaces - NumWaterToAirHeatPump;
-             ++HeatPumpNum) {
-            FurnaceNum = HeatPumpNum;
-            auto &thisFurnace = state.dataFurnaces->Furnace(FurnaceNum);
-            // Setup Report variables for Unitary System that are not reported in the components themselves
-            SetupOutputVariable(state,
-                                "Unitary System Fan Part Load Ratio",
-                                Constant::Units::None,
-                                thisFurnace.FanPartLoadRatio,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisFurnace.Name);
-            SetupOutputVariable(state,
-                                "Unitary System Compressor Part Load Ratio",
-                                Constant::Units::None,
-                                thisFurnace.CompPartLoadRatio,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisFurnace.Name);
-            SetupOutputVariable(state,
-                                "Unitary System Dehumidification Induced Heating Demand Rate",
-                                Constant::Units::W,
-                                thisFurnace.DehumidInducedHeatingDemandRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisFurnace.Name);
-
-            if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
-                SetupEMSActuator(state,
-                                 "AirLoopHVAC:UnitaryHeatPump:AirToAir",
-                                 thisFurnace.Name,
-                                 "Autosized Supply Air Flow Rate",
-                                 "[m3/s]",
-                                 thisFurnace.DesignFanVolFlowRateEMSOverrideOn,
-                                 thisFurnace.DesignFanVolFlowRateEMSOverrideValue);
-            }
-        }
-
-        for (int HeatPumpNum = NumHeatOnly + NumHeatCool + NumUnitaryHeatOnly + NumUnitaryHeatCool + NumHeatPump + 1;
-             HeatPumpNum <= state.dataFurnaces->NumFurnaces;
-             ++HeatPumpNum) {
-            FurnaceNum = HeatPumpNum;
-            auto &thisFurnace = state.dataFurnaces->Furnace(FurnaceNum);
-            // Setup Report variables for Unitary System that are not reported in the components themselves
-            SetupOutputVariable(state,
-                                "Unitary System Fan Part Load Ratio",
-                                Constant::Units::None,
-                                thisFurnace.FanPartLoadRatio,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisFurnace.Name);
-            SetupOutputVariable(state,
-                                "Unitary System Compressor Part Load Ratio",
-                                Constant::Units::None,
-                                thisFurnace.CompPartLoadRatio,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisFurnace.Name);
-            SetupOutputVariable(state,
-                                "Unitary System Requested Sensible Cooling Rate",
-                                Constant::Units::W,
-                                thisFurnace.CoolingCoilSensDemand,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisFurnace.Name);
-            SetupOutputVariable(state,
-                                "Unitary System Requested Latent Cooling Rate",
-                                Constant::Units::W,
-                                thisFurnace.CoolingCoilLatentDemand,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisFurnace.Name);
-            SetupOutputVariable(state,
-                                "Unitary System Requested Heating Rate",
-                                Constant::Units::W,
-                                thisFurnace.HeatingCoilSensDemand,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisFurnace.Name);
-            SetupOutputVariable(state,
-                                "Unitary System Dehumidification Induced Heating Demand Rate",
-                                Constant::Units::W,
-                                thisFurnace.DehumidInducedHeatingDemandRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisFurnace.Name);
-
-            if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
-                SetupEMSActuator(state,
-                                 "AirLoopHVAC:UnitaryHeatPump:WaterToAir",
-                                 thisFurnace.Name,
-                                 "Autosized Supply Air Flow Rate",
-                                 "[m3/s]",
-                                 thisFurnace.DesignFanVolFlowRateEMSOverrideOn,
-                                 thisFurnace.DesignFanVolFlowRateEMSOverrideValue);
+                // HeatCool types additionally register per-mode flow-rate actuators
+                if (thisFurnace.type == HVAC::UnitarySysType::Furnace_HeatCool ||
+                    thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatCool) {
+                    SetupEMSActuator(state,
+                                     emsObjType,
+                                     thisFurnace.Name,
+                                     "Autosized Supply Air Flow Rate During Cooling Operation",
+                                     "[m3/s]",
+                                     thisFurnace.MaxCoolAirVolFlowEMSOverrideOn,
+                                     thisFurnace.MaxCoolAirVolFlowEMSOverrideValue);
+                    SetupEMSActuator(state,
+                                     emsObjType,
+                                     thisFurnace.Name,
+                                     "Autosized Supply Air Flow Rate During Heating Operation",
+                                     "[m3/s]",
+                                     thisFurnace.MaxHeatAirVolFlowEMSOverrideOn,
+                                     thisFurnace.MaxHeatAirVolFlowEMSOverrideValue);
+                    SetupEMSActuator(state,
+                                     emsObjType,
+                                     thisFurnace.Name,
+                                     "Autosized Supply Air Flow Rate During No Heating or Cooling Operation",
+                                     "[m3/s]",
+                                     thisFurnace.MaxNoCoolHeatAirVolFlowEMSOverrideOn,
+                                     thisFurnace.MaxNoCoolHeatAirVolFlowEMSOverrideValue);
+                }
             }
         }
 
