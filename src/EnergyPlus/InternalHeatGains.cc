@@ -311,6 +311,27 @@ namespace InternalHeatGains {
 
         auto &ErrorsFound(state.dataInternalHeatGains->ErrorsFound);
 
+        // Compute FractionConvected from the three input fractions, snap near-zero to zero,
+        // and report a "Sum of Fractions > 1.0" severe error when negative.
+        // emitError is false when the caller only wants to report on the first space instance.
+        auto calcFractionConvected = [&](Real64 &fractionConvected,
+                                         Real64 fractionLatent,
+                                         Real64 fractionRadiant,
+                                         Real64 fractionLost,
+                                         std::string_view moduleObject,
+                                         std::string_view itemName,
+                                         bool emitError = true) {
+            fractionConvected = 1.0 - (fractionLatent + fractionRadiant + fractionLost);
+            if (std::abs(fractionConvected) <= 0.001) {
+                fractionConvected = 0.0;
+            }
+            if (fractionConvected < 0.0 && emitError) {
+                ShowSevereError(state,
+                                EnergyPlus::format("{}{}=\"{}\", Sum of Fractions > 1.0", RoutineName, moduleObject, itemName));
+                ErrorsFound = true;
+            }
+        };
+
         // TODO MJW: Punt for now, sometimes unit test need these to be allocated in AllocateZoneHeatBalArrays, but simulations need them here
         if (!state.dataHeatBal->ZoneIntGain.allocated()) {
             DataHeatBalance::AllocateIntGains(state);
@@ -1368,16 +1389,12 @@ namespace InternalHeatGains {
                     thisZoneElectric.FractionRadiant = IHGNumbers(5);
                     thisZoneElectric.FractionLost = IHGNumbers(6);
                     // FractionConvected is a calculated field
-                    thisZoneElectric.FractionConvected =
-                        1.0 - (thisZoneElectric.FractionLatent + thisZoneElectric.FractionRadiant + thisZoneElectric.FractionLost);
-                    if (std::abs(thisZoneElectric.FractionConvected) <= 0.001) {
-                        thisZoneElectric.FractionConvected = 0.0;
-                    }
-                    if (thisZoneElectric.FractionConvected < 0.0) {
-                        ShowSevereError(
-                            state, EnergyPlus::format("{}{}=\"{}\", Sum of Fractions > 1.0", RoutineName, elecEqModuleObject, thisElecEqInput.Name));
-                        ErrorsFound = true;
-                    }
+                    calcFractionConvected(thisZoneElectric.FractionConvected,
+                                          thisZoneElectric.FractionLatent,
+                                          thisZoneElectric.FractionRadiant,
+                                          thisZoneElectric.FractionLost,
+                                          elecEqModuleObject,
+                                          thisElecEqInput.Name);
 
                     if (IHGNumAlphas > 4) {
                         thisZoneElectric.EndUseSubcategory = IHGAlphas(5);
@@ -1515,18 +1532,13 @@ namespace InternalHeatGains {
                         ErrorsFound = true;
                     }
                     // FractionConvected is a calculated field
-                    thisZoneGas.FractionConvected = 1.0 - (thisZoneGas.FractionLatent + thisZoneGas.FractionRadiant + thisZoneGas.FractionLost);
-                    if (std::abs(thisZoneGas.FractionConvected) <= 0.001) {
-                        thisZoneGas.FractionConvected = 0.0;
-                    }
-                    if (thisZoneGas.FractionConvected < 0.0) {
-                        if (Item1 == 1) {
-                            ShowSevereError(
-                                state,
-                                EnergyPlus::format("{}{}=\"{}\", Sum of Fractions > 1.0", RoutineName, gasEqModuleObject, thisGasEqInput.Name));
-                            ErrorsFound = true;
-                        }
-                    }
+                    calcFractionConvected(thisZoneGas.FractionConvected,
+                                          thisZoneGas.FractionLatent,
+                                          thisZoneGas.FractionRadiant,
+                                          thisZoneGas.FractionLost,
+                                          gasEqModuleObject,
+                                          thisGasEqInput.Name,
+                                          Item1 == 1);
 
                     if (IHGNumAlphas > 4) {
                         thisZoneGas.EndUseSubcategory = IHGAlphas(5);
@@ -1644,15 +1656,12 @@ namespace InternalHeatGains {
                     thisZoneHWEq.FractionRadiant = IHGNumbers(5);
                     thisZoneHWEq.FractionLost = IHGNumbers(6);
                     // FractionConvected is a calculated field
-                    thisZoneHWEq.FractionConvected = 1.0 - (thisZoneHWEq.FractionLatent + thisZoneHWEq.FractionRadiant + thisZoneHWEq.FractionLost);
-                    if (std::abs(thisZoneHWEq.FractionConvected) <= 0.001) {
-                        thisZoneHWEq.FractionConvected = 0.0;
-                    }
-                    if (thisZoneHWEq.FractionConvected < 0.0) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", Sum of Fractions > 1.0", RoutineName, hwEqModuleObject, thisHWEqInput.Name));
-                        ErrorsFound = true;
-                    }
+                    calcFractionConvected(thisZoneHWEq.FractionConvected,
+                                          thisZoneHWEq.FractionLatent,
+                                          thisZoneHWEq.FractionRadiant,
+                                          thisZoneHWEq.FractionLost,
+                                          hwEqModuleObject,
+                                          thisHWEqInput.Name);
 
                     if (IHGNumAlphas > 4) {
                         thisZoneHWEq.EndUseSubcategory = IHGAlphas(5);
@@ -1767,16 +1776,12 @@ namespace InternalHeatGains {
                     thisZoneStmEq.FractionRadiant = IHGNumbers(5);
                     thisZoneStmEq.FractionLost = IHGNumbers(6);
                     // FractionConvected is a calculated field
-                    thisZoneStmEq.FractionConvected =
-                        1.0 - (thisZoneStmEq.FractionLatent + thisZoneStmEq.FractionRadiant + thisZoneStmEq.FractionLost);
-                    if (std::abs(thisZoneStmEq.FractionConvected) <= 0.001) {
-                        thisZoneStmEq.FractionConvected = 0.0;
-                    }
-                    if (thisZoneStmEq.FractionConvected < 0.0) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", Sum of Fractions > 1.0", RoutineName, stmEqModuleObject, IHGAlphas(1)));
-                        ErrorsFound = true;
-                    }
+                    calcFractionConvected(thisZoneStmEq.FractionConvected,
+                                          thisZoneStmEq.FractionLatent,
+                                          thisZoneStmEq.FractionRadiant,
+                                          thisZoneStmEq.FractionLost,
+                                          stmEqModuleObject,
+                                          IHGAlphas(1));
 
                     if (IHGNumAlphas > 4) {
                         thisZoneStmEq.EndUseSubcategory = IHGAlphas(5);
@@ -1981,16 +1986,12 @@ namespace InternalHeatGains {
                     }
 
                     // FractionConvected is a calculated field
-                    thisZoneOthEq.FractionConvected =
-                        1.0 - (thisZoneOthEq.FractionLatent + thisZoneOthEq.FractionRadiant + thisZoneOthEq.FractionLost);
-                    if (std::abs(thisZoneOthEq.FractionConvected) <= 0.001) {
-                        thisZoneOthEq.FractionConvected = 0.0;
-                    }
-                    if (thisZoneOthEq.FractionConvected < 0.0) {
-                        ShowSevereError(
-                            state, EnergyPlus::format("{}{}=\"{}\", Sum of Fractions > 1.0", RoutineName, othEqModuleObject, thisOthEqInput.Name));
-                        ErrorsFound = true;
-                    }
+                    calcFractionConvected(thisZoneOthEq.FractionConvected,
+                                          thisZoneOthEq.FractionLatent,
+                                          thisZoneOthEq.FractionRadiant,
+                                          thisZoneOthEq.FractionLost,
+                                          othEqModuleObject,
+                                          thisOthEqInput.Name);
 
                     if (IHGNumAlphas > 5) {
                         thisZoneOthEq.EndUseSubcategory = IHGAlphas(6);
