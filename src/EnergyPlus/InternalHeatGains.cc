@@ -285,6 +285,30 @@ namespace InternalHeatGains {
             }
         };
 
+        // Print four day-type schedule rows (weekday, weekend/holiday, summer DD, winter DD)
+        // for a generic equipment object that shares the ZoneEquipData layout.
+        // Each block prints: min*level, max*level for the day-type group.
+        // The final value ends with "\n" instead of ",".
+        auto printEquipEioScheduleRows = [&](Sched::Schedule *sched, Real64 designLevel) {
+            Real64 SchMin, SchMax;
+            // weekdays
+            std::tie(SchMin, SchMax) = sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::Weekday);
+            print(state.files.eio, "{:.3R},", designLevel * SchMin);
+            print(state.files.eio, "{:.3R},", designLevel * SchMax);
+            // weekends/holidays
+            std::tie(SchMin, SchMax) = sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WeekEndHoliday);
+            print(state.files.eio, "{:.3R},", designLevel * SchMin);
+            print(state.files.eio, "{:.3R},", designLevel * SchMax);
+            // summer design days
+            std::tie(SchMin, SchMax) = sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::SummerDesignDay);
+            print(state.files.eio, "{:.3R},", designLevel * SchMin);
+            print(state.files.eio, "{:.3R},", designLevel * SchMax);
+            // winter design days
+            std::tie(SchMin, SchMax) = sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WinterDesignDay);
+            print(state.files.eio, "{:.3R},", designLevel * SchMin);
+            print(state.files.eio, "{:.3R}\n", designLevel * SchMax);
+        };
+
         auto &ErrorsFound(state.dataInternalHeatGains->ErrorsFound);
 
         // TODO MJW: Punt for now, sometimes unit test need these to be allocated in AllocateZoneHeatBalArrays, but simulations need them here
@@ -2923,27 +2947,7 @@ namespace InternalHeatGains {
             print(state.files.eio, "{:.3R},", elecEq.NomMinDesignLevel);
             print(state.files.eio, "{:.3R},", elecEq.NomMaxDesignLevel);
 
-            Real64 SchMin, SchMax;
-
-            // weekdays
-            std::tie(SchMin, SchMax) = elecEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::Weekday);
-            print(state.files.eio, "{:.3R},", elecEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", elecEq.DesignLevel * SchMax);
-
-            // weekends/holidays
-            std::tie(SchMin, SchMax) = elecEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WeekEndHoliday);
-            print(state.files.eio, "{:.3R},", elecEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", elecEq.DesignLevel * SchMax);
-
-            // summer design days
-            std::tie(SchMin, SchMax) = elecEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::SummerDesignDay);
-            print(state.files.eio, "{:.3R},", elecEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", elecEq.DesignLevel * SchMax);
-
-            // winter design days
-            std::tie(SchMin, SchMax) = elecEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WinterDesignDay);
-            print(state.files.eio, "{:.3R},", elecEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R}\n", elecEq.DesignLevel * SchMax);
+            printEquipEioScheduleRows(elecEq.sched, elecEq.DesignLevel);
         }
 
         for (int Loop = 1; Loop <= state.dataHeatBal->TotGasEquip; ++Loop) {
@@ -2983,26 +2987,7 @@ namespace InternalHeatGains {
             print(state.files.eio, "{:.3R},", gasEq.NomMinDesignLevel);
             print(state.files.eio, "{:.3R},", gasEq.NomMaxDesignLevel);
 
-            Real64 SchMin, SchMax;
-            // weekdays
-            std::tie(SchMin, SchMax) = gasEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::Weekday);
-            print(state.files.eio, "{:.3R},", gasEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", gasEq.DesignLevel * SchMax);
-
-            // weekends/holidays
-            std::tie(SchMin, SchMax) = gasEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WeekEndHoliday);
-            print(state.files.eio, "{:.3R},", gasEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", gasEq.DesignLevel * SchMax);
-
-            // summer design days
-            std::tie(SchMin, SchMax) = gasEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::SummerDesignDay);
-            print(state.files.eio, "{:.3R},", gasEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", gasEq.DesignLevel * SchMax);
-
-            // winter design days
-            std::tie(SchMin, SchMax) = gasEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WinterDesignDay);
-            print(state.files.eio, "{:.3R},", gasEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R}\n", gasEq.DesignLevel * SchMax);
+            printEquipEioScheduleRows(gasEq.sched, gasEq.DesignLevel);
         }
 
         for (int Loop = 1; Loop <= state.dataHeatBal->TotHWEquip; ++Loop) {
@@ -3050,26 +3035,7 @@ namespace InternalHeatGains {
             print(state.files.eio, "{:.3R},", hotWaterEq.NomMinDesignLevel);
             print(state.files.eio, "{:.3R},", hotWaterEq.NomMaxDesignLevel);
 
-            Real64 SchMin, SchMax;
-            // weekdays
-            std::tie(SchMin, SchMax) = hotWaterEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::Weekday);
-            print(state.files.eio, "{:.3R},", hotWaterEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", hotWaterEq.DesignLevel * SchMax);
-
-            // weekends/holidays
-            std::tie(SchMin, SchMax) = hotWaterEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WeekEndHoliday);
-            print(state.files.eio, "{:.3R},", hotWaterEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", hotWaterEq.DesignLevel * SchMax);
-
-            // summer design days
-            std::tie(SchMin, SchMax) = hotWaterEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::SummerDesignDay);
-            print(state.files.eio, "{:.3R},", hotWaterEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", hotWaterEq.DesignLevel * SchMax);
-
-            // winter design days
-            std::tie(SchMin, SchMax) = hotWaterEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WinterDesignDay);
-            print(state.files.eio, "{:.3R},", hotWaterEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R}\n", hotWaterEq.DesignLevel * SchMax);
+            printEquipEioScheduleRows(hotWaterEq.sched, hotWaterEq.DesignLevel);
         }
 
         for (int Loop = 1; Loop <= state.dataHeatBal->TotStmEquip; ++Loop) {
@@ -3109,26 +3075,7 @@ namespace InternalHeatGains {
             print(state.files.eio, "{:.3R},", steamEq.NomMinDesignLevel);
             print(state.files.eio, "{:.3R},", steamEq.NomMaxDesignLevel);
 
-            Real64 SchMin, SchMax;
-            // weekdays
-            std::tie(SchMin, SchMax) = steamEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::Weekday);
-            print(state.files.eio, "{:.3R},", steamEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", steamEq.DesignLevel * SchMax);
-
-            // weekends/holidays
-            std::tie(SchMin, SchMax) = steamEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WeekEndHoliday);
-            print(state.files.eio, "{:.3R},", steamEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", steamEq.DesignLevel * SchMax);
-
-            // summer design days
-            std::tie(SchMin, SchMax) = steamEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::SummerDesignDay);
-            print(state.files.eio, "{:.3R},", steamEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", steamEq.DesignLevel * SchMax);
-
-            // winter design days
-            std::tie(SchMin, SchMax) = steamEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WinterDesignDay);
-            print(state.files.eio, "{:.3R},", steamEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R}\n", steamEq.DesignLevel * SchMax);
+            printEquipEioScheduleRows(steamEq.sched, steamEq.DesignLevel);
         }
 
         for (int Loop = 1; Loop <= state.dataHeatBal->TotOthEquip; ++Loop) {
@@ -3167,27 +3114,7 @@ namespace InternalHeatGains {
             print(state.files.eio, "{:.3R},", otherEq.NomMinDesignLevel);
             print(state.files.eio, "{:.3R},", otherEq.NomMaxDesignLevel);
 
-            Real64 SchMin, SchMax;
-
-            // weekdays
-            std::tie(SchMin, SchMax) = otherEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::Weekday);
-            print(state.files.eio, "{:.3R},", otherEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", otherEq.DesignLevel * SchMax);
-
-            // weekends/holidays
-            std::tie(SchMin, SchMax) = otherEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WeekEndHoliday);
-            print(state.files.eio, "{:.3R},", otherEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", otherEq.DesignLevel * SchMax);
-
-            // summer design days
-            std::tie(SchMin, SchMax) = otherEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::SummerDesignDay);
-            print(state.files.eio, "{:.3R},", otherEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", otherEq.DesignLevel * SchMax);
-
-            // winter design days
-            std::tie(SchMin, SchMax) = otherEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WinterDesignDay);
-            print(state.files.eio, "{:.3R},", otherEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R}\n", otherEq.DesignLevel * SchMax);
+            printEquipEioScheduleRows(otherEq.sched, otherEq.DesignLevel);
         }
 
         for (int Loop = 1; Loop <= state.dataHeatBal->TotITEquip; ++Loop) {
