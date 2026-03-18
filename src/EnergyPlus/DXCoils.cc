@@ -1529,6 +1529,50 @@ void GetDXCoils(EnergyPlusData &state)
         }
     };
 
+    // Helper lambda: reads and validates the basin-heater power and set-point fields that appear in several coil-type sections.
+    // powFTempDiffNumIdx  - 1-based Numbers() index for BasinHeaterPowerFTempDiff
+    // setPointNumIdx      - 1-based Numbers() index for BasinHeaterSetPointTemp
+    auto readBasinHeaterPowerAndSetpoint = [&](DXCoilData &coil, int powFTempDiffNumIdx, int setPointNumIdx) {
+        coil.BasinHeaterPowerFTempDiff = Numbers(powFTempDiffNumIdx);
+        if (Numbers(powFTempDiffNumIdx) < 0.0) {
+            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, coil.Name));
+            ShowContinueError(state, EnergyPlus::format("...{} must be >= 0.0.", cNumericFields(powFTempDiffNumIdx)));
+            ShowContinueError(state, EnergyPlus::format("...entered value=[{:.2T}].", Numbers(powFTempDiffNumIdx)));
+            ErrorsFound = true;
+        }
+
+        coil.BasinHeaterSetPointTemp = Numbers(setPointNumIdx);
+        if (coil.BasinHeaterPowerFTempDiff > 0.0) {
+            if (NumNumbers < setPointNumIdx) {
+                coil.BasinHeaterSetPointTemp = 2.0;
+            }
+            if (coil.BasinHeaterSetPointTemp < 2.0) {
+                ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", freeze possible", RoutineName, CurrentModuleObject, coil.Name));
+                ShowContinueError(state, EnergyPlus::format("...{} is < 2 {{C}}. Freezing could occur.", cNumericFields(setPointNumIdx)));
+                ShowContinueError(state, EnergyPlus::format("...entered value=[{:.2T}].", Numbers(setPointNumIdx)));
+            }
+        }
+    };
+
+    // Helper lambda: reads the optional basin-heater schedule field.
+    // schedAlphaIdx - 1-based Alphas() index for the schedule field
+    auto readBasinHeaterSchedule = [&](DXCoilData &coil, const ErrorObjectHeader &eohRef, int schedAlphaIdx) {
+        if (!lAlphaBlanks(schedAlphaIdx)) {
+            if ((coil.basinHeaterSched = Sched::GetSchedule(state, Alphas(schedAlphaIdx))) == nullptr) {
+                ShowWarningItemNotFound(
+                    state, eohRef, cAlphaFields(schedAlphaIdx), Alphas(schedAlphaIdx), "Basin heater will be available to operate throughout the simulation.");
+            }
+        }
+    };
+
+    // Helper lambda: convenience wrapper calling readBasinHeaterPowerAndSetpoint followed immediately by readBasinHeaterSchedule.
+    // Used in coil-type sections where the three basin-heater fields are adjacent (no intervening inputs).
+    auto readBasinHeaterInputs = [&](DXCoilData &coil, const ErrorObjectHeader &eohRef,
+                                     int powFTempDiffNumIdx, int setPointNumIdx, int schedAlphaIdx) {
+        readBasinHeaterPowerAndSetpoint(coil, powFTempDiffNumIdx, setPointNumIdx);
+        readBasinHeaterSchedule(coil, eohRef, schedAlphaIdx);
+    };
+
     // Loop over the Doe2 DX Coils and get & load the data
     CurrentModuleObject = "Coil:Cooling:DX:SingleSpeed";
     for (DXCoilIndex = 1; DXCoilIndex <= state.dataDXCoils->NumDoe2DXCoils; ++DXCoilIndex) {
@@ -1679,32 +1723,7 @@ void GetDXCoils(EnergyPlusData &state)
         setupCondensateTankSupply(state, thisDXCoil, lAlphaBlanks(14), CurrentModuleObject, ErrorsFound);
 
         //   Basin heater power as a function of temperature must be greater than or equal to 0
-        thisDXCoil.BasinHeaterPowerFTempDiff = Numbers(17);
-        if (Numbers(17) < 0.0) {
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-            ShowContinueError(state, EnergyPlus::format("...{} must be >= 0.0.", cNumericFields(16)));
-            ShowContinueError(state, EnergyPlus::format("...entered value=[{:.2T}].", Numbers(17)));
-            ErrorsFound = true;
-        }
-
-        thisDXCoil.BasinHeaterSetPointTemp = Numbers(18);
-        if (thisDXCoil.BasinHeaterPowerFTempDiff > 0.0) {
-            if (NumNumbers < 18) {
-                thisDXCoil.BasinHeaterSetPointTemp = 2.0;
-            }
-            if (thisDXCoil.BasinHeaterSetPointTemp < 2.0) {
-                ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", freeze possible", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...{} is < 2 {{C}}. Freezing could occur.", cNumericFields(17)));
-                ShowContinueError(state, EnergyPlus::format("...entered value=[{:.2T}].", Numbers(18)));
-            }
-        }
-
-        if (!lAlphaBlanks(15)) {
-            if ((thisDXCoil.basinHeaterSched = Sched::GetSchedule(state, Alphas(15))) == nullptr) {
-                ShowWarningItemNotFound(
-                    state, eoh, cAlphaFields(15), Alphas(15), "Basin heater will be available to operate throughout the simulation.");
-            }
-        }
+        readBasinHeaterInputs(thisDXCoil, eoh, 17, 18, 15);
 
         if (!lAlphaBlanks(16) && NumAlphas > 15) {
             thisDXCoil.SHRFTemp(1) = GetCurveIndex(state, Alphas(16)); // convert curve name to number
@@ -2228,32 +2247,7 @@ void GetDXCoils(EnergyPlusData &state)
         }
 
         // Basin heater power as a function of temperature must be greater than or equal to 0
-        thisDXCoil.BasinHeaterPowerFTempDiff = Numbers(6);
-        if (Numbers(6) < 0.0) {
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-            ShowContinueError(state, EnergyPlus::format("...{} must be >= 0.", cNumericFields(6)));
-            ShowContinueError(state, EnergyPlus::format("...entered value=[{:.2T}].", Numbers(6)));
-            ErrorsFound = true;
-        }
-
-        thisDXCoil.BasinHeaterSetPointTemp = Numbers(7);
-        if (thisDXCoil.BasinHeaterPowerFTempDiff > 0.0) {
-            if (NumNumbers < 7) {
-                thisDXCoil.BasinHeaterSetPointTemp = 2.0;
-            }
-            if (thisDXCoil.BasinHeaterSetPointTemp < 2.0) {
-                ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", freeze possible", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...{} is < 2 {{C}}. Freezing could occur.", cNumericFields(7)));
-                ShowContinueError(state, EnergyPlus::format("...entered value=[{:.2T}].", Numbers(7)));
-            }
-        }
-
-        if (!lAlphaBlanks(16)) {
-            if ((thisDXCoil.basinHeaterSched = Sched::GetSchedule(state, Alphas(16))) == nullptr) {
-                ShowWarningItemNotFound(
-                    state, eoh, cAlphaFields(16), Alphas(16), "Basin heater will be available to operate throughout the simulation.");
-            }
-        }
+        readBasinHeaterInputs(thisDXCoil, eoh, 6, 7, 16);
 
     } // end of the Multimode DX coil loop
 
@@ -2662,32 +2656,7 @@ void GetDXCoils(EnergyPlusData &state)
         setupCondensateTankSupply(state, thisDXCoil, lAlphaBlanks(15), CurrentModuleObject, ErrorsFound);
 
         // Basin heater power as a function of temperature must be greater than or equal to 0
-        thisDXCoil.BasinHeaterPowerFTempDiff = Numbers(21);
-        if (Numbers(21) < 0.0) {
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-            ShowContinueError(state, EnergyPlus::format("...{} must be >= 0.0.", cNumericFields(21)));
-            ShowContinueError(state, EnergyPlus::format("...entered value=[{:.2T}].", Numbers(21)));
-            ErrorsFound = true;
-        }
-
-        thisDXCoil.BasinHeaterSetPointTemp = Numbers(22);
-        if (thisDXCoil.BasinHeaterPowerFTempDiff > 0.0) {
-            if (NumNumbers < 22) {
-                thisDXCoil.BasinHeaterSetPointTemp = 2.0;
-            }
-            if (thisDXCoil.BasinHeaterSetPointTemp < 2.0) {
-                ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", freeze possible", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...{} is < 2 {{C}}. Freezing could occur.", cNumericFields(22)));
-                ShowContinueError(state, EnergyPlus::format("...entered value=[{:.2T}].", Numbers(22)));
-            }
-        }
-
-        if (!lAlphaBlanks(16)) {
-            if ((thisDXCoil.basinHeaterSched = Sched::GetSchedule(state, Alphas(16))) == nullptr) {
-                ShowWarningItemNotFound(
-                    state, eoh, cAlphaFields(16), Alphas(16), "Basin heater will be available to operate throughout the simulation.");
-            }
-        }
+        readBasinHeaterInputs(thisDXCoil, eoh, 21, 22, 16);
 
         if (!lAlphaBlanks(17) && NumAlphas > 16) {
             thisDXCoil.SHRFTemp(1) = GetCurveIndex(state, Alphas(17)); // convert curve name to number
@@ -3821,34 +3790,12 @@ void GetDXCoils(EnergyPlusData &state)
         }
 
         //   Basin heater power as a function of temperature must be greater than or equal to 0
-        thisDXCoil.BasinHeaterPowerFTempDiff = Numbers(4);
-        if (Numbers(4) < 0.0) {
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-            ShowContinueError(state, EnergyPlus::format("...{} must be >= 0.0, entered value=[{:.3T}].", cNumericFields(4), Numbers(4)));
-            ErrorsFound = true;
-        }
-
-        thisDXCoil.BasinHeaterSetPointTemp = Numbers(5);
-        if (thisDXCoil.BasinHeaterPowerFTempDiff > 0.0) {
-            if (NumNumbers < 5) {
-                thisDXCoil.BasinHeaterSetPointTemp = 2.0;
-            }
-            if (thisDXCoil.BasinHeaterSetPointTemp < 2.0) {
-                ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", freeze possible", RoutineName, CurrentModuleObject, thisDXCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("...{} is less than 2 {{C}}. Freezing could occur.", cNumericFields(5)));
-                ShowContinueError(state, EnergyPlus::format("...entered value=[{:.2T}].", Numbers(5)));
-            }
-        }
+        readBasinHeaterPowerAndSetpoint(thisDXCoil, 4, 5);
 
         setupCrankcaseHeaterCapacityCurve(
             state, thisDXCoil, lAlphaBlanks(11), Alphas(11), ErrorsFound, RoutineName, CurrentModuleObject, cAlphaFields(11));
 
-        if (!lAlphaBlanks(12)) {
-            if ((thisDXCoil.basinHeaterSched = Sched::GetSchedule(state, Alphas(12))) == nullptr) {
-                ShowWarningItemNotFound(
-                    state, eoh, cAlphaFields(12), Alphas(12), "Basin heater will be available to operate throughout the simulation.");
-            }
-        }
+        readBasinHeaterSchedule(thisDXCoil, eoh, 12);
 
         // A13; \field Fuel type, Validate fuel type input
         thisDXCoil.FuelType = static_cast<Constant::eFuel>(getEnumValue(Constant::eFuelNamesUC, Alphas(13)));
