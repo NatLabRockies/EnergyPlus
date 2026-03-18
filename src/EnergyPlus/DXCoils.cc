@@ -1521,6 +1521,14 @@ void GetDXCoils(EnergyPlusData &state)
             state, CurrentModuleObject, itemNum, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, lNumericBlanks, lAlphaBlanks, cAlphaFields, cNumericFields);
     };
 
+    // Helper lambda: abort when errors have been found after reading each object type.
+    auto checkAndFatal = [&]() {
+        if (ErrorsFound) {
+            ShowFatalError(state,
+                           EnergyPlus::format("{}Errors found in getting {} input. Preceding condition(s) causes termination.", RoutineName, CurrentModuleObject));
+        }
+    };
+
     // Loop over the Doe2 DX Coils and get & load the data
     CurrentModuleObject = "Coil:Cooling:DX:SingleSpeed";
     for (DXCoilIndex = 1; DXCoilIndex <= state.dataDXCoils->NumDoe2DXCoils; ++DXCoilIndex) {
@@ -1782,11 +1790,7 @@ void GetDXCoils(EnergyPlusData &state)
 
     } // end of the Doe2 DX coil loop
 
-    if (ErrorsFound) {
-        ShowFatalError(
-            state,
-            EnergyPlus::format("{}Errors found in getting {} input. Preceding condition(s) causes termination.", RoutineName, CurrentModuleObject));
-    }
+    checkAndFatal();
 
     // Loop over the Multimode DX Coils and get & load the data
     CurrentModuleObject = "Coil:Cooling:DX:TwoStageWithHumidityControlMode";
@@ -2271,11 +2275,7 @@ void GetDXCoils(EnergyPlusData &state)
 
     } // end of the Multimode DX coil loop
 
-    if (ErrorsFound) {
-        ShowFatalError(
-            state,
-            EnergyPlus::format("{}Errors found in getting {} input.  Preceding condition(s) causes termination.", RoutineName, CurrentModuleObject));
-    }
+    checkAndFatal();
 
     //************* Read Heat Pump (DX Heating Coil) Input **********
     CurrentModuleObject = "Coil:Heating:DX:SingleSpeed";
@@ -2518,11 +2518,7 @@ void GetDXCoils(EnergyPlusData &state)
 
     } // end of the DX heating coil loop
 
-    if (ErrorsFound) {
-        ShowFatalError(
-            state,
-            EnergyPlus::format("{}Errors found in getting {} input. Preceding condition(s) causes termination.", RoutineName, CurrentModuleObject));
-    }
+    checkAndFatal();
 
     CurrentModuleObject = "Coil:Cooling:DX:TwoSpeed";
     for (DXCoilIndex = 1; DXCoilIndex <= state.dataDXCoils->NumDXMulSpeedCoils; ++DXCoilIndex) {
@@ -2820,11 +2816,7 @@ void GetDXCoils(EnergyPlusData &state)
         }
     }
 
-    if (ErrorsFound) {
-        ShowFatalError(
-            state,
-            EnergyPlus::format("{}Errors found in getting {} input.  Preceding condition(s) causes termination.", RoutineName, CurrentModuleObject));
-    }
+    checkAndFatal();
 
     // Loop over the Pumped DX Water Heater Coils and get & load the data
     CurrentModuleObject = HVAC::cAllCoilTypes(HVAC::CoilDX_HeatPumpWaterHeaterPumped);
@@ -3360,11 +3352,7 @@ void GetDXCoils(EnergyPlusData &state)
     }
     //} // end of the DX water heater coil loop
 
-    if (ErrorsFound) {
-        ShowFatalError(
-            state,
-            EnergyPlus::format("{}Errors found in getting {} input. Preceding condition(s) causes termination.", RoutineName, CurrentModuleObject));
-    }
+    checkAndFatal();
     // Loop over the Wrapped DX Water Heater Coils and get & load the data
     CurrentModuleObject = HVAC::cAllCoilTypes(HVAC::CoilDX_HeatPumpWaterHeaterWrapped);
     auto const instances_whWrapped = s_ip->epJSON.find(CurrentModuleObject);
@@ -3764,11 +3752,7 @@ void GetDXCoils(EnergyPlusData &state)
     }
     //} // end of the DX water heater wrapped coil loop
 
-    if (ErrorsFound) {
-        ShowFatalError(
-            state,
-            EnergyPlus::format("{}Errors found in getting {} input. Preceding condition(s) causes termination.", RoutineName, CurrentModuleObject));
-    }
+    checkAndFatal();
 
     // DX Multispeed cooling coil
     CurrentModuleObject = "Coil:Cooling:DX:MultiSpeed";
@@ -4073,11 +4057,7 @@ void GetDXCoils(EnergyPlusData &state)
         }
     }
 
-    if (ErrorsFound) {
-        ShowFatalError(
-            state,
-            EnergyPlus::format("{}Errors found in getting {} input. Preceding condition(s) causes termination.", RoutineName, CurrentModuleObject));
-    }
+    checkAndFatal();
 
     // DX multispeed heating coil
     CurrentModuleObject = "Coil:Heating:DX:MultiSpeed";
@@ -4466,11 +4446,7 @@ void GetDXCoils(EnergyPlusData &state)
         setupCondensateTankSupply(state, thisDXCoil, lAlphaBlanks(7), CurrentModuleObject, ErrorsFound);
     }
 
-    if (ErrorsFound) {
-        ShowFatalError(
-            state,
-            EnergyPlus::format("{}Errors found in getting {} input. Preceding condition(s) causes termination.", RoutineName, CurrentModuleObject));
-    }
+    checkAndFatal();
 
     // Loop over the VRF Heating Coils and get & load the data
     CurrentModuleObject = HVAC::cAllCoilTypes(HVAC::CoilVRF_Heating);
@@ -4553,11 +4529,7 @@ void GetDXCoils(EnergyPlusData &state)
         getAndCheckFlowCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.CCapFFlow(1), 6, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
     }
 
-    if (ErrorsFound) {
-        ShowFatalError(
-            state,
-            EnergyPlus::format("{}Errors found in getting {} input. Preceding condition(s) causes termination.", RoutineName, CurrentModuleObject));
-    }
+    checkAndFatal();
 
     // Loop over the VRF Cooling Coils for VRF FluidTCtrl Model_zrp 2015
     CurrentModuleObject = HVAC::cAllCoilTypes(HVAC::CoilVRF_FluidTCtrl_Cooling);
@@ -4639,11 +4611,7 @@ void GetDXCoils(EnergyPlusData &state)
         setupCondensateTankSupply(state, thisDXCoil, lAlphaBlanks(6), CurrentModuleObject, ErrorsFound);
     }
 
-    if (ErrorsFound) {
-        ShowFatalError(
-            state,
-            EnergyPlus::format("{}Errors found in getting {} input. Preceding condition(s) causes termination.", RoutineName, CurrentModuleObject));
-    }
+    checkAndFatal();
 
     // Loop over the VRF Heating Coils for VRF FluidTCtrl Model_zrp 2015
     CurrentModuleObject = HVAC::cAllCoilTypes(HVAC::CoilVRF_FluidTCtrl_Heating);
@@ -4720,11 +4688,7 @@ void GetDXCoils(EnergyPlusData &state)
         }
     }
 
-    if (ErrorsFound) {
-        ShowFatalError(
-            state,
-            EnergyPlus::format("{}Errors found in getting {} input. Preceding condition(s) causes termination.", RoutineName, CurrentModuleObject));
-    }
+    checkAndFatal();
 
     for (DXCoilNum = 1; DXCoilNum <= state.dataDXCoils->NumDXCoils; ++DXCoilNum) {
 
