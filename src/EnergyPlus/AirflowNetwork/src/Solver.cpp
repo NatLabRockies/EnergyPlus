@@ -4855,47 +4855,29 @@ namespace AirflowNetwork {
         //        }
 
         // Node and component validation
+        // Helper: check that a linkage node number (nodeIdx=0 or 1) resolves to a valid node,
+        // emitting the appropriate diagnostic if not. The MULTIZONE:SURFACE error always reports
+        // NodeNames[0] regardless of which endpoint is checked (preserving original behavior).
+        auto checkLinkageNodeFound = [&](int linkCount, int nodeIdx) {
+            int nodeNum = AirflowNetworkLinkageData(linkCount).NodeNums[nodeIdx];
+            bool isFound = (nodeNum >= 1 && nodeNum <= AirflowNetworkNumOfNodes);
+            if (!isFound) {
+                if (linkCount <= AirflowNetworkNumOfSurfaces) {
+                    ShowSevereError(m_state,
+                                    EnergyPlus::format(RoutineName) + AirflowNetworkLinkageData(linkCount).NodeNames[0] +
+                                        " in AIRFLOWNETWORK:MULTIZONE:SURFACE = " + AirflowNetworkLinkageData(linkCount).Name + " is not found");
+                } else {
+                    ShowSevereError(m_state,
+                                    EnergyPlus::format(RoutineName) + AirflowNetworkLinkageData(linkCount).NodeNames[nodeIdx] +
+                                        " in AIRFLOWNETWORK:DISTRIBUTION:LINKAGE = " + AirflowNetworkLinkageData(linkCount).Name +
+                                        " is not found in AIRFLOWNETWORK:DISTRIBUTION:NODE objects.");
+                }
+                ErrorsFound = true;
+            }
+        };
         for (count = 1; count <= AirflowNetworkNumOfLinks; ++count) {
-            NodeFound = false;
-            for (int i = 1; i <= AirflowNetworkNumOfNodes; ++i) {
-                if (i == AirflowNetworkLinkageData(count).NodeNums[0]) {
-                    NodeFound = true;
-                    break;
-                }
-            }
-            if (!NodeFound) {
-                if (count <= AirflowNetworkNumOfSurfaces) {
-                    ShowSevereError(m_state,
-                                    EnergyPlus::format(RoutineName) + AirflowNetworkLinkageData(count).NodeNames[0] +
-                                        " in AIRFLOWNETWORK:MULTIZONE:SURFACE = " + AirflowNetworkLinkageData(count).Name + " is not found");
-                } else {
-                    ShowSevereError(m_state,
-                                    EnergyPlus::format(RoutineName) + AirflowNetworkLinkageData(count).NodeNames[0] +
-                                        " in AIRFLOWNETWORK:DISTRIBUTION:LINKAGE = " + AirflowNetworkLinkageData(count).Name +
-                                        " is not found in AIRFLOWNETWORK:DISTRIBUTION:NODE objects.");
-                }
-                ErrorsFound = true;
-            }
-            NodeFound = false;
-            for (int i = 1; i <= AirflowNetworkNumOfNodes; ++i) {
-                if (i == AirflowNetworkLinkageData(count).NodeNums[1]) {
-                    NodeFound = true;
-                    break;
-                }
-            }
-            if (!NodeFound) {
-                if (count <= AirflowNetworkNumOfSurfaces) {
-                    ShowSevereError(m_state,
-                                    EnergyPlus::format(RoutineName) + AirflowNetworkLinkageData(count).NodeNames[0] +
-                                        " in AIRFLOWNETWORK:MULTIZONE:SURFACE = " + AirflowNetworkLinkageData(count).Name + " is not found");
-                } else {
-                    ShowSevereError(m_state,
-                                    EnergyPlus::format(RoutineName) + AirflowNetworkLinkageData(count).NodeNames[1] +
-                                        " in AIRFLOWNETWORK:DISTRIBUTION:LINKAGE = " + AirflowNetworkLinkageData(count).Name +
-                                        " is not found in AIRFLOWNETWORK:DISTRIBUTION:NODE objects.");
-                }
-                ErrorsFound = true;
-            }
+            checkLinkageNodeFound(count, 0);
+            checkLinkageNodeFound(count, 1);
             bool CompFound = false;
             for (int i = 1; i <= AirflowNetworkNumOfComps; ++i) {
                 if (i == AirflowNetworkLinkageData(count).CompNum) {
