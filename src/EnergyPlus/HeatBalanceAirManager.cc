@@ -443,6 +443,50 @@ static void setupZoneVentilationOutputVars(EnergyPlusData &state, DataHeatBalanc
                         zoneName);
 }
 
+// Helper: read the primary numeric field for EffectiveLeakageArea and FlowCoefficient
+// infiltration objects, computing the exterior-surface-area space fraction and checking
+// that the space has exterior surfaces.  Returns the space-fractioned value in destValue.
+static void readExteriorAreaInfiltrationInput(EnergyPlusData &state,
+                                              bool &errorsFound,
+                                              std::string_view routineName,
+                                              std::string_view currentModuleObject,
+                                              InternalHeatGains::GlobalInternalGainMiscObject const &inputObj,
+                                              DataHeatBalance::ZoneData const &thisZone,
+                                              DataHeatBalance::SpaceData const &thisSpace,
+                                              int spaceIndex,
+                                              Array1D<Real64> const &rNumericArgs,
+                                              Array1D_bool const &lNumericFieldBlanks,
+                                              Array1D_string const &cNumericFieldNames,
+                                              Real64 &destValue)
+{
+    if (lNumericFieldBlanks(1)) {
+        ShowWarningError(state,
+                         EnergyPlus::format("{}{}=\"{}\", field {} is blank.  0 Infiltration will result.",
+                                            routineName, currentModuleObject, inputObj.Name, cNumericFieldNames(1)));
+    } else {
+        Real64 spaceFrac = 1.0;
+        if (!inputObj.spaceListActive && (inputObj.numOfSpaces > 1)) {
+            Real64 const zoneExteriorTotalSurfArea = thisZone.ExteriorTotalSurfArea;
+            if (zoneExteriorTotalSurfArea > 0.0) {
+                spaceFrac = thisSpace.ExteriorTotalSurfArea / zoneExteriorTotalSurfArea;
+            } else {
+                ShowSevereError(state,
+                                EnergyPlus::format("{}Zone exterior surface area is zero when allocating Infiltration to Spaces.", routineName));
+                ShowContinueError(state,
+                                  EnergyPlus::format("Occurs for {}=\"{}\" in Zone=\"{}\".", currentModuleObject, inputObj.Name, thisZone.Name));
+                errorsFound = true;
+            }
+        }
+        destValue = rNumericArgs(1) * spaceFrac;
+    }
+    if (spaceIndex > 0 && thisSpace.ExteriorTotalSurfArea <= 0.0) {
+        ShowWarningError(state,
+                         EnergyPlus::format(R"({}{}="{}", Space="{}" does not have surfaces exposed to outdoors.)",
+                                            routineName, currentModuleObject, inputObj.Name, thisSpace.Name));
+        ShowContinueError(state, "Infiltration model is appropriate for exterior spaces not interior spaces, simulation continues.");
+    }
+}
+
 // Helper: compute the design-level airflow for FlowPerArea, FlowPerPerson, and AirChanges
 // AirflowSpec cases, which share identical logic across Ventilation, Mixing, and CrossMixing.
 // Returns true if the case was handled; false for FlowPerZone, FlowPerExterior*, or Invalid
@@ -1365,45 +1409,10 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                 thisInfiltration.BasicStackCoefficient = rNumericArgs(2);
                 thisInfiltration.BasicWindCoefficient = rNumericArgs(3);
 
-                if (lNumericFieldBlanks(1)) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("{}{}=\"{}\", field {} is blank.  0 Infiltration will result.",
-                                                        RoutineName,
-                                                        cCurrentModuleObject,
-                                                        thisInfiltrationInput.Name,
-                                                        cNumericFieldNames(1)));
-                } else {
-                    Real64 spaceFrac = 1.0;
-                    if (!thisInfiltrationInput.spaceListActive && (thisInfiltrationInput.numOfSpaces > 1)) {
-                        Real64 const zoneExteriorTotalSurfArea = thisZone.ExteriorTotalSurfArea;
-                        if (zoneExteriorTotalSurfArea > 0.0) {
-                            spaceFrac = thisSpace.ExteriorTotalSurfArea / zoneExteriorTotalSurfArea;
-                        } else {
-                            ShowSevereError(
-                                state,
-                                EnergyPlus::format("{}Zone exterior surface area is zero when allocating Infiltration to Spaces.", RoutineName));
-                            ShowContinueError(
-                                state,
-                                EnergyPlus::format(
-                                    "Occurs for {}=\"{}\" in Zone=\"{}\".", cCurrentModuleObject, thisInfiltrationInput.Name, thisZone.Name));
-                            ErrorsFound = true;
-                        }
-                    }
-
-                    thisInfiltration.LeakageArea = rNumericArgs(1) * spaceFrac;
-                }
-                // check if space has exterior surfaces
-                if (thisInfiltration.spaceIndex > 0) {
-                    if (thisSpace.ExteriorTotalSurfArea <= 0.0) {
-                        ShowWarningError(state,
-                                         EnergyPlus::format(R"({}{}="{}", Space="{}" does not have surfaces exposed to outdoors.)",
-                                                            RoutineName,
-                                                            cCurrentModuleObject,
-                                                            thisInfiltrationInput.Name,
-                                                            thisSpace.Name));
-                        ShowContinueError(state, "Infiltration model is appropriate for exterior spaces not interior spaces, simulation continues.");
-                    }
-                }
+                readExteriorAreaInfiltrationInput(state, ErrorsFound, RoutineName, cCurrentModuleObject,
+                                                 thisInfiltrationInput, thisZone, thisSpace, thisInfiltration.spaceIndex,
+                                                 rNumericArgs, lNumericFieldBlanks, cNumericFieldNames,
+                                                 thisInfiltration.LeakageArea);
             }
         }
     }
@@ -1450,46 +1459,10 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                 thisInfiltration.AIM2WindCoefficient = rNumericArgs(4);
                 thisInfiltration.ShelterFactor = rNumericArgs(5);
 
-                if (lNumericFieldBlanks(1)) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("{}{}=\"{}\", field {} is blank.  0 Infiltration will result.",
-                                                        RoutineName,
-                                                        cCurrentModuleObject,
-                                                        thisInfiltrationInput.Name,
-                                                        cNumericFieldNames(1)));
-                } else {
-                    Real64 spaceFrac = 1.0;
-                    if (!thisInfiltrationInput.spaceListActive && (thisInfiltrationInput.numOfSpaces > 1)) {
-                        Real64 const zoneExteriorTotalSurfArea = thisZone.ExteriorTotalSurfArea;
-                        if (zoneExteriorTotalSurfArea > 0.0) {
-                            spaceFrac = thisSpace.ExteriorTotalSurfArea / zoneExteriorTotalSurfArea;
-                        } else {
-                            ShowSevereError(
-                                state,
-                                EnergyPlus::format("{}Zone exterior surface area is zero when allocating Infiltration to Spaces.", RoutineName));
-                            ShowContinueError(
-                                state,
-                                EnergyPlus::format(
-                                    "Occurs for {}=\"{}\" in Zone=\"{}\".", cCurrentModuleObject, thisInfiltrationInput.Name, thisZone.Name));
-                            ErrorsFound = true;
-                        }
-                    }
-
-                    thisInfiltration.FlowCoefficient = rNumericArgs(1) * spaceFrac;
-                    // check if space has exterior surfaces
-                    if (thisInfiltration.spaceIndex > 0) {
-                        if (thisSpace.ExteriorTotalSurfArea <= 0.0) {
-                            ShowWarningError(state,
-                                             EnergyPlus::format(R"({}{}="{}", Space="{}" does not have surfaces exposed to outdoors.)",
-                                                                RoutineName,
-                                                                cCurrentModuleObject,
-                                                                thisInfiltrationInput.Name,
-                                                                thisSpace.Name));
-                            ShowContinueError(state,
-                                              "Infiltration model is appropriate for exterior spaces not interior spaces, simulation continues.");
-                        }
-                    }
-                }
+                readExteriorAreaInfiltrationInput(state, ErrorsFound, RoutineName, cCurrentModuleObject,
+                                                 thisInfiltrationInput, thisZone, thisSpace, thisInfiltration.spaceIndex,
+                                                 rNumericArgs, lNumericFieldBlanks, cNumericFieldNames,
+                                                 thisInfiltration.FlowCoefficient);
             }
         }
     }
