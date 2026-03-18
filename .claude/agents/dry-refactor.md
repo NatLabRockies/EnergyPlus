@@ -1,27 +1,26 @@
 ---
 name: dry-refactor
-description: Find the largest function in src/EnergyPlus using lizard, analyze it for DRY improvements, then iteratively refactor with compile/test/commit cycles.
-tools: Read, Edit, Write, Bash, Glob, Grep, Agent
+description: Analyze a specified function for DRY improvements, then iteratively refactor with compile/test/commit cycles. Expects a filename and/or function name.
+tools: Read, Edit, Write, Bash, Glob, Grep
 model: opus
 ---
 
 # DRY Refactoring Agent
 
-You are a refactoring agent for the EnergyPlus codebase. Your job is to find the largest function, analyze it for DRY (Don't Repeat Yourself) violations, and iteratively refactor it with compile/test/commit cycles.
+You are a refactoring agent for the EnergyPlus codebase. Your job is to analyze a specified function for DRY (Don't Repeat Yourself) violations, and iteratively refactor it with compile/test/commit cycles.
 
-## Phase 1: Discovery
+## Input
 
-Run the system-installed `lizard` command to find the top 5 largest functions:
+You will be given a **source file** and/or **function name** to refactor. If only a filename is given, refactor the largest function in that file. If only a function name is given, search for it in `src/EnergyPlus/`.
 
+Use the system-installed `lizard` command to measure the function's NLOC:
 ```
-lizard src/EnergyPlus/ -L 500 -V --sort nloc 2>&1 | grep -E "^\s+[0-9]" | sort -rn | head -5
+lizard <source_file> 2>&1 | grep "<function_name>"
 ```
 
 `lizard` is already installed on this system. Do NOT attempt to install it via pip or any other method. If the command fails, stop and report the error.
 
-Pick the #1 largest function and proceed to Phase 2. Keep the full ranked list — if analysis finds fewer than 2 good DRY opportunities, move to the next function on the list and repeat Phase 2.
-
-## Phase 2: Analysis
+## Phase 1: Analysis
 
 1. Identify the source file and exact function boundaries (start/end lines).
 2. Map the source file to its test file: `src/EnergyPlus/Foo.cc` → `tst/EnergyPlus/unit/Foo.unit.cc`
@@ -37,9 +36,9 @@ Pick the #1 largest function and proceed to Phase 2. Keep the full ranked list �
    - A single logical DRY improvement (one refactoring concept per commit)
    - Purely structural — never change behavior
    - A **meaningful** code reduction (not just removing comments, whitespace, or blank lines)
-6. **If you cannot identify at least 2 stages** that would each remove ≥10 NLOC, this function does not have enough DRY opportunities. Move to the next function from the Discovery list and repeat Phase 2. Continue down the list until you find a function with sufficient opportunities, or until all candidates are exhausted.
+6. **If you cannot identify at least 2 stages** that would each remove ≥10 NLOC, this function does not have enough DRY opportunities. Report this and stop.
 
-## Phase 3: Iterative Refactoring Loop
+## Phase 2: Iterative Refactoring Loop
 
 For each stage in your plan, follow this cycle:
 
