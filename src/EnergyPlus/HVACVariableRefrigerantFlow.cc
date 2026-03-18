@@ -2305,6 +2305,79 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         }
     };
 
+    // Lambda: parse defrost strategy, control, EIR curve, fraction/capacity/max-OAT fields for
+    // FluidTCtrl HP and HR objects.  Alpha fields 8/9/10 are the same in both object types;
+    // the numeric field indices for DefrostFraction/Capacity/MaxOATDefrost differ and are passed
+    // in as fracIdx, capIdx, maxOATIdx.
+    auto readFluidCtrlDefrost = [&](VRFCondenserEquipment &thisVrf,
+                                    const std::string &objName,
+                                    int fracIdx,
+                                    int capIdx,
+                                    int maxOATIdx,
+                                    const std::string &capFieldName) {
+        // Defrost strategy
+        if (!lAlphaFieldBlanks(8)) {
+            if (Util::SameString(cAlphaArgs(8), "ReverseCycle")) {
+                thisVrf.DefrostStrategy = StandardRatings::DefrostStrat::ReverseCycle;
+            }
+            if (Util::SameString(cAlphaArgs(8), "Resistive")) {
+                thisVrf.DefrostStrategy = StandardRatings::DefrostStrat::Resistive;
+            }
+            if (thisVrf.DefrostStrategy == StandardRatings::DefrostStrat::Invalid) {
+                ShowSevereError(state,
+                                cCurrentModuleObject + ", \"" + objName + "\" " + cAlphaFieldNames(8) + " not found: " + cAlphaArgs(8));
+                ErrorsFound = true;
+            }
+        } else {
+            thisVrf.DefrostStrategy = StandardRatings::DefrostStrat::ReverseCycle;
+        }
+
+        // Defrost control
+        if (!lAlphaFieldBlanks(9)) {
+            if (Util::SameString(cAlphaArgs(9), "Timed")) {
+                thisVrf.DefrostControl = StandardRatings::HPdefrostControl::Timed;
+            }
+            if (Util::SameString(cAlphaArgs(9), "OnDemand")) {
+                thisVrf.DefrostControl = StandardRatings::HPdefrostControl::OnDemand;
+            }
+            if (thisVrf.DefrostControl == StandardRatings::HPdefrostControl::Invalid) {
+                ShowSevereError(state,
+                                cCurrentModuleObject + ", \"" + objName + "\" " + cAlphaFieldNames(9) + " not found: " + cAlphaArgs(9));
+                ErrorsFound = true;
+            }
+        } else {
+            thisVrf.DefrostControl = StandardRatings::HPdefrostControl::Timed;
+        }
+
+        // Defrost EIR curve
+        if (!lAlphaFieldBlanks(10)) {
+            thisVrf.DefrostEIRPtr = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(10), {2}, RoutineName, cCurrentModuleObject, objName, cAlphaFieldNames(10));
+            if (thisVrf.DefrostEIRPtr == 0) {
+                if (thisVrf.DefrostStrategy == StandardRatings::DefrostStrat::ReverseCycle &&
+                    thisVrf.DefrostControl == StandardRatings::HPdefrostControl::OnDemand) {
+                    ShowSevereError(
+                        state, cCurrentModuleObject + ", \"" + objName + "\" " + cAlphaFieldNames(10) + " not found:" + cAlphaArgs(10));
+                    ErrorsFound = true;
+                }
+            }
+        } else {
+            if (thisVrf.DefrostStrategy == StandardRatings::DefrostStrat::ReverseCycle &&
+                thisVrf.DefrostControl == StandardRatings::HPdefrostControl::OnDemand) {
+                ShowSevereError(
+                    state, cCurrentModuleObject + ", \"" + objName + "\" " + cAlphaFieldNames(10) + " not found:" + cAlphaArgs(10));
+                ErrorsFound = true;
+            }
+        }
+
+        thisVrf.DefrostFraction = rNumericArgs(fracIdx);
+        thisVrf.DefrostCapacity = rNumericArgs(capIdx);
+        thisVrf.MaxOATDefrost = rNumericArgs(maxOATIdx);
+        if (thisVrf.DefrostCapacity == 0.0 && thisVrf.DefrostStrategy == StandardRatings::DefrostStrat::Resistive) {
+            ShowWarningError(state,
+                             cCurrentModuleObject + ", \"" + objName + "\" " + capFieldName + " = 0.0 for defrost strategy = RESISTIVE.");
+        }
+    };
+
     // Read all VRF condenser objects: Algorithm Type 2_physics based model (VRF-FluidTCtrl-HP)
     cCurrentModuleObject = "AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl";
     for (int thisNum = 1; thisNum <= state.dataHVACVarRefFlow->NumVRFCond_FluidTCtrl_HP; ++thisNum) {
@@ -2478,65 +2551,7 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         thisVrfFluidCtrl.MaxOATCCHeater = rNumericArgs(26);
 
         // Defrost
-        if (!lAlphaFieldBlanks(8)) {
-            if (Util::SameString(cAlphaArgs(8), "ReverseCycle")) {
-                thisVrfFluidCtrl.DefrostStrategy = StandardRatings::DefrostStrat::ReverseCycle;
-            }
-            if (Util::SameString(cAlphaArgs(8), "Resistive")) {
-                thisVrfFluidCtrl.DefrostStrategy = StandardRatings::DefrostStrat::Resistive;
-            }
-            if (thisVrfFluidCtrl.DefrostStrategy == StandardRatings::DefrostStrat::Invalid) {
-                ShowSevereError(state,
-                                cCurrentModuleObject + ", \"" + thisVrfFluidCtrl.Name + "\" " + cAlphaFieldNames(8) + " not found: " + cAlphaArgs(8));
-                ErrorsFound = true;
-            }
-        } else {
-            thisVrfFluidCtrl.DefrostStrategy = StandardRatings::DefrostStrat::ReverseCycle;
-        }
-
-        if (!lAlphaFieldBlanks(9)) {
-            if (Util::SameString(cAlphaArgs(9), "Timed")) {
-                thisVrfFluidCtrl.DefrostControl = StandardRatings::HPdefrostControl::Timed;
-            }
-            if (Util::SameString(cAlphaArgs(9), "OnDemand")) {
-                thisVrfFluidCtrl.DefrostControl = StandardRatings::HPdefrostControl::OnDemand;
-            }
-            if (thisVrfFluidCtrl.DefrostControl == StandardRatings::HPdefrostControl::Invalid) {
-                ShowSevereError(state,
-                                cCurrentModuleObject + ", \"" + thisVrfFluidCtrl.Name + "\" " + cAlphaFieldNames(9) + " not found: " + cAlphaArgs(9));
-                ErrorsFound = true;
-            }
-        } else {
-            thisVrfFluidCtrl.DefrostControl = StandardRatings::HPdefrostControl::Timed;
-        }
-
-        if (!lAlphaFieldBlanks(10)) {
-            thisVrfFluidCtrl.DefrostEIRPtr = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(10), {2}, RoutineName, cCurrentModuleObject, thisVrfFluidCtrl.Name, cAlphaFieldNames(10));
-            if (thisVrfFluidCtrl.DefrostEIRPtr == 0) {
-                if (thisVrfFluidCtrl.DefrostStrategy == StandardRatings::DefrostStrat::ReverseCycle &&
-                    thisVrfFluidCtrl.DefrostControl == StandardRatings::HPdefrostControl::OnDemand) {
-                    ShowSevereError(
-                        state, cCurrentModuleObject + ", \"" + thisVrfFluidCtrl.Name + "\" " + cAlphaFieldNames(10) + " not found:" + cAlphaArgs(10));
-                    ErrorsFound = true;
-                }
-            }
-        } else {
-            if (thisVrfFluidCtrl.DefrostStrategy == StandardRatings::DefrostStrat::ReverseCycle &&
-                thisVrfFluidCtrl.DefrostControl == StandardRatings::HPdefrostControl::OnDemand) {
-                ShowSevereError(
-                    state, cCurrentModuleObject + ", \"" + thisVrfFluidCtrl.Name + "\" " + cAlphaFieldNames(10) + " not found:" + cAlphaArgs(10));
-                ErrorsFound = true;
-            }
-        }
-
-        thisVrfFluidCtrl.DefrostFraction = rNumericArgs(27);
-        thisVrfFluidCtrl.DefrostCapacity = rNumericArgs(28);
-        thisVrfFluidCtrl.MaxOATDefrost = rNumericArgs(29);
-        if (thisVrfFluidCtrl.DefrostCapacity == 0.0 && thisVrfFluidCtrl.DefrostStrategy == StandardRatings::DefrostStrat::Resistive) {
-            ShowWarningError(state,
-                             cCurrentModuleObject + ", \"" + thisVrfFluidCtrl.Name + "\" " + cNumericFieldNames(28) +
-                                 " = 0.0 for defrost strategy = RESISTIVE.");
-        }
+        readFluidCtrlDefrost(thisVrfFluidCtrl, thisVrfFluidCtrl.Name, 27, 28, 29, cNumericFieldNames(28));
 
         thisVrfFluidCtrl.CompMaxDeltaP = rNumericArgs(30);
 
@@ -2812,66 +2827,7 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         thisVrfFluidCtrlHR.MaxOATCCHeater = rNumericArgs(33);
 
         // Defrost
-        if (!lAlphaFieldBlanks(8)) {
-            if (Util::SameString(cAlphaArgs(8), "ReverseCycle")) {
-                thisVrfFluidCtrlHR.DefrostStrategy = StandardRatings::DefrostStrat::ReverseCycle;
-            }
-            if (Util::SameString(cAlphaArgs(8), "Resistive")) {
-                thisVrfFluidCtrlHR.DefrostStrategy = StandardRatings::DefrostStrat::Resistive;
-            }
-            if (thisVrfFluidCtrlHR.DefrostStrategy == StandardRatings::DefrostStrat::Invalid) {
-                ShowSevereError(
-                    state, cCurrentModuleObject + ", \"" + thisVrfFluidCtrlHR.Name + "\" " + cAlphaFieldNames(8) + " not found: " + cAlphaArgs(8));
-                ErrorsFound = true;
-            }
-        } else {
-            thisVrfFluidCtrlHR.DefrostStrategy = StandardRatings::DefrostStrat::ReverseCycle;
-        }
-
-        if (!lAlphaFieldBlanks(9)) {
-            if (Util::SameString(cAlphaArgs(9), "Timed")) {
-                thisVrfFluidCtrlHR.DefrostControl = StandardRatings::HPdefrostControl::Timed;
-            }
-            if (Util::SameString(cAlphaArgs(9), "OnDemand")) {
-                thisVrfFluidCtrlHR.DefrostControl = StandardRatings::HPdefrostControl::OnDemand;
-            }
-            if (thisVrfFluidCtrlHR.DefrostControl == StandardRatings::HPdefrostControl::Invalid) {
-                ShowSevereError(
-                    state, cCurrentModuleObject + ", \"" + thisVrfFluidCtrlHR.Name + "\" " + cAlphaFieldNames(9) + " not found: " + cAlphaArgs(9));
-                ErrorsFound = true;
-            }
-        } else {
-            thisVrfFluidCtrlHR.DefrostControl = StandardRatings::HPdefrostControl::Timed;
-        }
-
-        if (!lAlphaFieldBlanks(10)) {
-            thisVrfFluidCtrlHR.DefrostEIRPtr = getAndCheckCurve(state, ErrorsFound, cAlphaArgs(10), {2}, RoutineName, cCurrentModuleObject, thisVrfFluidCtrlHR.Name, cAlphaFieldNames(10));
-            if (thisVrfFluidCtrlHR.DefrostEIRPtr == 0) {
-                if (thisVrfFluidCtrlHR.DefrostStrategy == StandardRatings::DefrostStrat::ReverseCycle &&
-                    thisVrfFluidCtrlHR.DefrostControl == StandardRatings::HPdefrostControl::OnDemand) {
-                    ShowSevereError(state,
-                                    cCurrentModuleObject + ", \"" + thisVrfFluidCtrlHR.Name + "\" " + cAlphaFieldNames(10) +
-                                        " not found:" + cAlphaArgs(10));
-                    ErrorsFound = true;
-                }
-            }
-        } else {
-            if (thisVrfFluidCtrlHR.DefrostStrategy == StandardRatings::DefrostStrat::ReverseCycle &&
-                thisVrfFluidCtrlHR.DefrostControl == StandardRatings::HPdefrostControl::OnDemand) {
-                ShowSevereError(
-                    state, cCurrentModuleObject + ", \"" + thisVrfFluidCtrlHR.Name + "\" " + cAlphaFieldNames(10) + " not found:" + cAlphaArgs(10));
-                ErrorsFound = true;
-            }
-        }
-
-        thisVrfFluidCtrlHR.DefrostFraction = rNumericArgs(34);
-        thisVrfFluidCtrlHR.DefrostCapacity = rNumericArgs(35);
-        thisVrfFluidCtrlHR.MaxOATDefrost = rNumericArgs(36);
-        if (thisVrfFluidCtrlHR.DefrostCapacity == 0.0 && thisVrfFluidCtrlHR.DefrostStrategy == StandardRatings::DefrostStrat::Resistive) {
-            ShowWarningError(state,
-                             cCurrentModuleObject + ", \"" + thisVrfFluidCtrlHR.Name + "\" " + cNumericFieldNames(35) +
-                                 " = 0.0 for defrost strategy = RESISTIVE.");
-        }
+        readFluidCtrlDefrost(thisVrfFluidCtrlHR, thisVrfFluidCtrlHR.Name, 34, 35, 36, cNumericFieldNames(35));
 
         // HR mode transition
         thisVrfFluidCtrlHR.HRInitialCoolCapFrac = rNumericArgs(37);
