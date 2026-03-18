@@ -1361,6 +1361,49 @@ namespace Furnaces {
                 }
             };
 
+        // Lambda: for a Coil:Cooling:DX:VariableSpeed (or IHP) cooling coil, populate
+        // CoolingCoilIndex, IHPCoilName, CoolingCoilInletNode, CoolingCoilOutletNode, and
+        // CondenserNodeNum on thisFurnace.  The caller is responsible for ValidateComponent
+        // before invoking this lambda.  On entry, thisFurnace.bIsIHP must already be set.
+        auto readVSCoolingCoilNodes =
+            [&](FurnaceEquipConditions &furn,
+                std::string_view objName,
+                const std::string &coolCoilType,
+                const std::string &coolCoilName,
+                int &coolInletNode,
+                int &coolOutletNode) {
+                errFlag = false;
+                if (furn.bIsIHP) {
+                    furn.CoolingCoilIndex = IntegratedHeatPump::GetCoilIndexIHP(state, coolCoilType, coolCoilName, errFlag);
+                    IHPCoilName = state.dataIntegratedHP->IntegratedHeatPumps(furn.CoolingCoilIndex).SCCoilName;
+                } else {
+                    furn.CoolingCoilIndex = VariableSpeedCoils::GetCoilIndexVariableSpeed(state, coolCoilType, coolCoilName, errFlag);
+                    IHPCoilName = coolCoilName;
+                }
+
+                if (errFlag) {
+                    ShowContinueError(state, EnergyPlus::format("...specified in {}=\"{}\".", CurrentModuleObject, objName));
+                    ErrorsFound = true;
+                }
+
+                if (furn.bIsIHP) {
+                    coolInletNode =
+                        VariableSpeedCoils::GetCoilInletNodeVariableSpeed(state, "COIL:COOLING:DX:VARIABLESPEED", IHPCoilName, errFlag);
+                    coolOutletNode =
+                        VariableSpeedCoils::GetCoilOutletNodeVariableSpeed(state, "COIL:COOLING:DX:VARIABLESPEED", IHPCoilName, errFlag);
+                    furn.CondenserNodeNum = VariableSpeedCoils::GetVSCoilCondenserInletNode(state, IHPCoilName, errFlag);
+                } else {
+                    coolInletNode = VariableSpeedCoils::GetCoilInletNodeVariableSpeed(state, coolCoilType, coolCoilName, errFlag);
+                    coolOutletNode = VariableSpeedCoils::GetCoilOutletNodeVariableSpeed(state, coolCoilType, coolCoilName, errFlag);
+                    furn.CondenserNodeNum = VariableSpeedCoils::GetVSCoilCondenserInletNode(state, coolCoilName, errFlag);
+                }
+
+                if (errFlag) {
+                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, objName));
+                    ErrorsFound = true;
+                }
+            };
+
         // Get the data for the HeatOnly Furnace
         for (int HeatOnlyNum = 1; HeatOnlyNum <= NumHeatOnly + NumUnitaryHeatOnly; ++HeatOnlyNum) {
 
@@ -2110,37 +2153,8 @@ namespace Furnaces {
                     ShowContinueError(state, EnergyPlus::format("...specified in {}=\"{}\".", CurrentModuleObject, Alphas(1)));
                     ErrorsFound = true;
                 } else {
-                    errFlag = false;
-                    if (thisFurnace.bIsIHP) {
-                        thisFurnace.CoolingCoilIndex = IntegratedHeatPump::GetCoilIndexIHP(state, CoolingCoilType, CoolingCoilName, errFlag);
-                        IHPCoilName = state.dataIntegratedHP->IntegratedHeatPumps(thisFurnace.CoolingCoilIndex).SCCoilName;
-                    } else {
-                        thisFurnace.CoolingCoilIndex =
-                            VariableSpeedCoils::GetCoilIndexVariableSpeed(state, CoolingCoilType, CoolingCoilName, errFlag);
-                        IHPCoilName = CoolingCoilName;
-                    }
-
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("...specified in {}=\"{}\".", CurrentModuleObject, Alphas(1)));
-                        ErrorsFound = true;
-                    }
-
-                    if (thisFurnace.bIsIHP) {
-                        CoolingCoilInletNode =
-                            VariableSpeedCoils::GetCoilInletNodeVariableSpeed(state, "COIL:COOLING:DX:VARIABLESPEED", IHPCoilName, errFlag);
-                        CoolingCoilOutletNode =
-                            VariableSpeedCoils::GetCoilOutletNodeVariableSpeed(state, "COIL:COOLING:DX:VARIABLESPEED", IHPCoilName, errFlag);
-                        thisFurnace.CondenserNodeNum = VariableSpeedCoils::GetVSCoilCondenserInletNode(state, IHPCoilName, errFlag);
-                    } else {
-                        CoolingCoilInletNode = VariableSpeedCoils::GetCoilInletNodeVariableSpeed(state, CoolingCoilType, CoolingCoilName, errFlag);
-                        CoolingCoilOutletNode = VariableSpeedCoils::GetCoilOutletNodeVariableSpeed(state, CoolingCoilType, CoolingCoilName, errFlag);
-                        thisFurnace.CondenserNodeNum = VariableSpeedCoils::GetVSCoilCondenserInletNode(state, CoolingCoilName, errFlag);
-                    }
-
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                        ErrorsFound = true;
-                    }
+                    readVSCoolingCoilNodes(
+                        thisFurnace, Alphas(1), CoolingCoilType, CoolingCoilName, CoolingCoilInletNode, CoolingCoilOutletNode);
                 }
             } else {
                 ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
@@ -3029,39 +3043,8 @@ namespace Furnaces {
                         ShowContinueError(state, EnergyPlus::format("...specified in {}=\"{}\".", CurrentModuleObject, Alphas(1)));
                         ErrorsFound = true;
                     } else {
-                        errFlag = false;
-                        if (thisFurnace.bIsIHP) {
-                            thisFurnace.CoolingCoilIndex = IntegratedHeatPump::GetCoilIndexIHP(state, CoolingCoilType, CoolingCoilName, errFlag);
-                            IHPCoilName = state.dataIntegratedHP->IntegratedHeatPumps(thisFurnace.CoolingCoilIndex).SCCoilName;
-                        } else {
-                            thisFurnace.CoolingCoilIndex =
-                                VariableSpeedCoils::GetCoilIndexVariableSpeed(state, CoolingCoilType, CoolingCoilName, errFlag);
-                            IHPCoilName = CoolingCoilName;
-                        }
-
-                        if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("...specified in {}=\"{}\".", CurrentModuleObject, Alphas(1)));
-                            ErrorsFound = true;
-                        }
-
-                        if (thisFurnace.bIsIHP) {
-                            CoolingCoilInletNode =
-                                VariableSpeedCoils::GetCoilInletNodeVariableSpeed(state, "COIL:COOLING:DX:VARIABLESPEED", IHPCoilName, errFlag);
-                            CoolingCoilOutletNode =
-                                VariableSpeedCoils::GetCoilOutletNodeVariableSpeed(state, "COIL:COOLING:DX:VARIABLESPEED", IHPCoilName, errFlag);
-                            thisFurnace.CondenserNodeNum = VariableSpeedCoils::GetVSCoilCondenserInletNode(state, IHPCoilName, errFlag);
-                        } else {
-                            CoolingCoilInletNode =
-                                VariableSpeedCoils::GetCoilInletNodeVariableSpeed(state, CoolingCoilType, CoolingCoilName, errFlag);
-                            CoolingCoilOutletNode =
-                                VariableSpeedCoils::GetCoilOutletNodeVariableSpeed(state, CoolingCoilType, CoolingCoilName, errFlag);
-                            thisFurnace.CondenserNodeNum = VariableSpeedCoils::GetVSCoilCondenserInletNode(state, CoolingCoilName, errFlag);
-                        }
-
-                        if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                            ErrorsFound = true;
-                        }
+                        readVSCoolingCoilNodes(
+                            thisFurnace, Alphas(1), CoolingCoilType, CoolingCoilName, CoolingCoilInletNode, CoolingCoilOutletNode);
                     }
                 } else {
                     ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
