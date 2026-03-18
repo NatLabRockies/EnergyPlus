@@ -1597,25 +1597,7 @@ void GetDXCoils(EnergyPlusData &state)
 
         getAndCheck2DCoolingTempCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.EIRFTemp(1), 7, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
-        thisDXCoil.EIRFFlow(1) = GetCurveIndex(state, Alphas(8)); // convert curve name to number
-        if (thisDXCoil.EIRFFlow(1) == 0) {
-            reportMissingOrInvalidCurve(
-                state, lAlphaBlanks(8), RoutineName, CurrentModuleObject, thisDXCoil.Name, cAlphaFields(8), Alphas(8), ErrorsFound);
-        } else {
-            // Verify Curve Object, only legal type is Quadratic
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisDXCoil.EIRFFlow(1), // Curve index
-                                                 {1},                    // Valid dimensions
-                                                 RoutineName,            // Routine name
-                                                 CurrentModuleObject,    // Object Type
-                                                 thisDXCoil.Name,        // Object Name
-                                                 cAlphaFields(8));       // Field Name
-
-            if (!ErrorsFound) {
-                checkCurveIsNormalizedToOne(
-                    state, std::string{RoutineName} + CurrentModuleObject, thisDXCoil.Name, thisDXCoil.EIRFFlow(1), cAlphaFields(8), Alphas(8), 1.0);
-            }
-        }
+        getAndCheckFlowCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.EIRFFlow(1), 8, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
         getAndCheckPLFCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.PLFFPLR(1), 9, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
@@ -2591,25 +2573,7 @@ void GetDXCoils(EnergyPlusData &state)
 
         getAndCheck2DCoolingTempCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.EIRFTemp(1), 7, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
-        thisDXCoil.EIRFFlow(1) = GetCurveIndex(state, Alphas(8)); // convert curve name to number
-        if (thisDXCoil.EIRFFlow(1) == 0) {
-            reportMissingOrInvalidCurve(
-                state, lAlphaBlanks(8), RoutineName, CurrentModuleObject, thisDXCoil.Name, cAlphaFields(8), Alphas(8), ErrorsFound);
-        } else {
-            // Verify Curve Object, only legal type is Quadratic
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisDXCoil.EIRFFlow(1), // Curve index
-                                                 {1},                    // Valid dimensions
-                                                 RoutineName,            // Routine name
-                                                 CurrentModuleObject,    // Object Type
-                                                 thisDXCoil.Name,        // Object Name
-                                                 cAlphaFields(8));       // Field Name
-
-            if (!ErrorsFound) {
-                checkCurveIsNormalizedToOne(
-                    state, std::string{RoutineName} + CurrentModuleObject, thisDXCoil.Name, thisDXCoil.EIRFFlow(1), cAlphaFields(8), Alphas(8), 1.0);
-            }
-        }
+        getAndCheckFlowCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.EIRFFlow(1), 8, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
         getAndCheckPLFCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.PLFFPLR(1), 9, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
@@ -4400,25 +4364,7 @@ void GetDXCoils(EnergyPlusData &state)
             }
         }
 
-        thisDXCoil.CCapFFlow(1) = GetCurveIndex(state, Alphas(4)); // convert curve name to number
-        if (thisDXCoil.CCapFFlow(1) == 0) {
-            reportMissingOrInvalidCurve(
-                state, lAlphaBlanks(4), RoutineName, CurrentModuleObject, thisDXCoil.Name, cAlphaFields(4), Alphas(4), ErrorsFound);
-        } else {
-            // Verify Curve Object, only legal type is Linear, Quadratic or Cubic
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisDXCoil.CCapFFlow(1), // Curve index
-                                                 {1},                     // Valid dimensions
-                                                 RoutineName,             // Routine name
-                                                 CurrentModuleObject,     // Object Type
-                                                 thisDXCoil.Name,         // Object Name
-                                                 cAlphaFields(4));        // Field Name
-
-            if (!ErrorsFound) {
-                checkCurveIsNormalizedToOne(
-                    state, std::string{RoutineName} + CurrentModuleObject, thisDXCoil.Name, thisDXCoil.CCapFFlow(1), cAlphaFields(4), Alphas(4), 1.0);
-            }
-        }
+        getAndCheckFlowCurve(state, ErrorsFound, RoutineName, CurrentModuleObject, thisDXCoil.CCapFFlow(1), 4, thisDXCoil.Name, Alphas, lAlphaBlanks, cAlphaFields);
 
         thisDXCoil.AirInNode = GetOnlySingleNode(state,
                                                  Alphas(5),
