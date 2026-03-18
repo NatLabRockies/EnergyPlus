@@ -2231,6 +2231,80 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         }
     }
 
+    // Lambda: load compressor speed, evaporating capacity, and compressor power curves for
+    // FluidTCtrl HP and HR condenser objects.  The two object types share identical loop logic;
+    // only the VRF struct reference and the starting index offsets differ.
+    auto readOUCompressorSpeedCurves = [&](VRFCondenserEquipment &thisVrf,
+                                           const std::string &objName,
+                                           int numericStartIndex,
+                                           int alphaStartIndex) {
+        int NumOfCompSpd = rNumericArgs(numericStartIndex);
+        thisVrf.CompressorSpeed.dimension(NumOfCompSpd);
+        thisVrf.OUCoolingCAPFT.dimension(NumOfCompSpd);
+        thisVrf.OUCoolingPWRFT.dimension(NumOfCompSpd);
+        for (int NumCompSpd = 1; NumCompSpd <= NumOfCompSpd; NumCompSpd++) {
+            thisVrf.CompressorSpeed(NumCompSpd) = rNumericArgs(numericStartIndex + NumCompSpd);
+
+            // Evaporating Capacity Curve
+            if (!lAlphaFieldBlanks(alphaStartIndex + 2 * NumCompSpd)) {
+                int indexOUEvapCapCurve = GetCurveIndex(state, cAlphaArgs(alphaStartIndex + 2 * NumCompSpd));
+                if (indexOUEvapCapCurve == 0) { // Verify curve name and type
+                    if (lAlphaFieldBlanks(alphaStartIndex + 2 * NumCompSpd)) {
+                        ShowSevereError(state, std::string{RoutineName} + cCurrentModuleObject + "=\"" + objName + "\", missing");
+                        ShowContinueError(state, "...required " + cAlphaFieldNames(alphaStartIndex + 2 * NumCompSpd) + " is blank.");
+                    } else {
+                        ShowSevereError(state, std::string{RoutineName} + cCurrentModuleObject + "=\"" + objName + "\", invalid");
+                        ShowContinueError(state,
+                                          EnergyPlus::format("...not found {}=\"{}\".",
+                                                             cAlphaFieldNames(alphaStartIndex + 2 * NumCompSpd),
+                                                             cAlphaArgs(alphaStartIndex + 2 * NumCompSpd)));
+                    }
+                    ErrorsFound = true;
+                } else {
+                    ErrorsFound |= Curve::CheckCurveDims(state,
+                                                         indexOUEvapCapCurve,
+                                                         {2},
+                                                         RoutineName,
+                                                         cCurrentModuleObject,
+                                                         objName,
+                                                         cAlphaFieldNames(alphaStartIndex + 2 * NumCompSpd));
+                    if (!ErrorsFound) {
+                        thisVrf.OUCoolingCAPFT(NumCompSpd) = indexOUEvapCapCurve;
+                    }
+                }
+            }
+
+            // Compressor Power Curve
+            if (!lAlphaFieldBlanks(alphaStartIndex + 2 * NumCompSpd + 1)) {
+                int indexOUCompPwrCurve = GetCurveIndex(state, cAlphaArgs(alphaStartIndex + 2 * NumCompSpd + 1));
+                if (indexOUCompPwrCurve == 0) { // Verify curve name and type
+                    if (lAlphaFieldBlanks(alphaStartIndex + 2 * NumCompSpd + 1)) {
+                        ShowSevereError(state, std::string{RoutineName} + cCurrentModuleObject + "=\"" + objName + "\", missing");
+                        ShowContinueError(state, "...required " + cAlphaFieldNames(alphaStartIndex + 2 * NumCompSpd + 1) + " is blank.");
+                    } else {
+                        ShowSevereError(state, std::string{RoutineName} + cCurrentModuleObject + "=\"" + objName + "\", invalid");
+                        ShowContinueError(state,
+                                          EnergyPlus::format("...not found {}=\"{}\".",
+                                                             cAlphaFieldNames(alphaStartIndex + 2 * NumCompSpd + 1),
+                                                             cAlphaArgs(alphaStartIndex + 2 * NumCompSpd + 1)));
+                    }
+                    ErrorsFound = true;
+                } else {
+                    ErrorsFound |= Curve::CheckCurveDims(state,
+                                                         indexOUCompPwrCurve,
+                                                         {2},
+                                                         RoutineName,
+                                                         cCurrentModuleObject,
+                                                         objName,
+                                                         cAlphaFieldNames(alphaStartIndex + 2 * NumCompSpd + 1));
+                    if (!ErrorsFound) {
+                        thisVrf.OUCoolingPWRFT(NumCompSpd) = indexOUCompPwrCurve;
+                    }
+                }
+            }
+        }
+    };
+
     // Read all VRF condenser objects: Algorithm Type 2_physics based model (VRF-FluidTCtrl-HP)
     cCurrentModuleObject = "AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl";
     for (int thisNum = 1; thisNum <= state.dataHVACVarRefFlow->NumVRFCond_FluidTCtrl_HP; ++thisNum) {
@@ -2495,75 +2569,8 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         thisVrfFluidCtrl.CondenserNodeNum = 0;
 
         // Evaporative Capacity & Compressor Power Curves corresponding to each Loading Index / compressor speed
-        int NumOfCompSpd = rNumericArgs(31);
-        thisVrfFluidCtrl.CompressorSpeed.dimension(NumOfCompSpd);
-        thisVrfFluidCtrl.OUCoolingCAPFT.dimension(NumOfCompSpd);
-        thisVrfFluidCtrl.OUCoolingPWRFT.dimension(NumOfCompSpd);
-        int Count1Index = 31; // the index of the last numeric field before compressor speed entries
-        int Count2Index = 9;  // the index of the last alpha field before capacity/power curves
-        for (int NumCompSpd = 1; NumCompSpd <= NumOfCompSpd; NumCompSpd++) {
-            thisVrfFluidCtrl.CompressorSpeed(NumCompSpd) = rNumericArgs(Count1Index + NumCompSpd);
-
-            // Evaporating Capacity Curve
-            if (!lAlphaFieldBlanks(Count2Index + 2 * NumCompSpd)) {
-                int indexOUEvapCapCurve = GetCurveIndex(state, cAlphaArgs(Count2Index + 2 * NumCompSpd)); // convert curve name to index number
-                if (indexOUEvapCapCurve == 0) {                                                           // Verify curve name and type
-                    if (lAlphaFieldBlanks(Count2Index + 2 * NumCompSpd)) {
-                        ShowSevereError(state, std::string{RoutineName} + cCurrentModuleObject + "=\"" + thisVrfFluidCtrl.Name + "\", missing");
-                        ShowContinueError(state, "...required " + cAlphaFieldNames(Count2Index + 2 * NumCompSpd) + " is blank.");
-                    } else {
-                        ShowSevereError(state, std::string{RoutineName} + cCurrentModuleObject + "=\"" + thisVrfFluidCtrl.Name + "\", invalid");
-                        ShowContinueError(state,
-                                          EnergyPlus::format("...not found {}=\"{}\".",
-                                                             cAlphaFieldNames(Count2Index + 2 * NumCompSpd),
-                                                             cAlphaArgs(Count2Index + 2 * NumCompSpd)));
-                    }
-                    ErrorsFound = true;
-                } else {
-                    ErrorsFound |= Curve::CheckCurveDims(state,
-                                                         indexOUEvapCapCurve,                             // Curve index
-                                                         {2},                                             // Valid dimensions
-                                                         RoutineName,                                     // Routine name
-                                                         cCurrentModuleObject,                            // Object Type
-                                                         thisVrfFluidCtrl.Name,                           // Object Name
-                                                         cAlphaFieldNames(Count2Index + 2 * NumCompSpd)); // Field Name
-
-                    if (!ErrorsFound) {
-                        thisVrfFluidCtrl.OUCoolingCAPFT(NumCompSpd) = indexOUEvapCapCurve;
-                    }
-                }
-            }
-
-            // Compressor Power Curve
-            if (!lAlphaFieldBlanks(Count2Index + 2 * NumCompSpd + 1)) {
-                int indexOUCompPwrCurve = GetCurveIndex(state, cAlphaArgs(Count2Index + 2 * NumCompSpd + 1)); // convert curve name to index number
-                if (indexOUCompPwrCurve == 0) {                                                               // Verify curve name and type
-                    if (lAlphaFieldBlanks(Count2Index + 2 * NumCompSpd + 1)) {
-                        ShowSevereError(state, std::string{RoutineName} + cCurrentModuleObject + "=\"" + thisVrfFluidCtrl.Name + "\", missing");
-                        ShowContinueError(state, "...required " + cAlphaFieldNames(Count2Index + 2 * NumCompSpd + 1) + " is blank.");
-                    } else {
-                        ShowSevereError(state, std::string{RoutineName} + cCurrentModuleObject + "=\"" + thisVrfFluidCtrl.Name + "\", invalid");
-                        ShowContinueError(state,
-                                          EnergyPlus::format("...not found {}=\"{}\".",
-                                                             cAlphaFieldNames(Count2Index + 2 * NumCompSpd + 1),
-                                                             cAlphaArgs(Count2Index + 2 * NumCompSpd + 1)));
-                    }
-                    ErrorsFound = true;
-                } else {
-                    ErrorsFound |= Curve::CheckCurveDims(state,
-                                                         indexOUCompPwrCurve,                                 // Curve index
-                                                         {2},                                                 // Valid dimensions
-                                                         RoutineName,                                         // Routine name
-                                                         cCurrentModuleObject,                                // Object Type
-                                                         thisVrfFluidCtrl.Name,                               // Object Name
-                                                         cAlphaFieldNames(Count2Index + 2 * NumCompSpd + 1)); // Field Name
-
-                    if (!ErrorsFound) {
-                        thisVrfFluidCtrl.OUCoolingPWRFT(NumCompSpd) = indexOUCompPwrCurve;
-                    }
-                }
-            }
-        }
+        // numeric index 31 = last field before compressor speed entries; alpha index 9 = last field before cap/power curves
+        readOUCompressorSpeedCurves(thisVrfFluidCtrl, thisVrfFluidCtrl.Name, 31, 9);
     }
 
     // Read all VRF condenser objects: Algorithm Type 2_physics based model (VRF-FluidTCtrl-HR)
@@ -2886,75 +2893,8 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         thisVrfFluidCtrlHR.CondenserNodeNum = 0;
 
         // Evaporative Capacity & Compressor Power Curves corresponding to each Loading Index / compressor speed
-        int NumOfCompSpd = rNumericArgs(48);
-        thisVrfFluidCtrlHR.CompressorSpeed.dimension(NumOfCompSpd);
-        thisVrfFluidCtrlHR.OUCoolingCAPFT.dimension(NumOfCompSpd);
-        thisVrfFluidCtrlHR.OUCoolingPWRFT.dimension(NumOfCompSpd);
-        int Count1Index = 48; // the index of the last numeric field before compressor speed entries
-        int Count2Index = 9;  // the index of the last alpha field before capacity/power curves
-        for (int NumCompSpd = 1; NumCompSpd <= NumOfCompSpd; NumCompSpd++) {
-            thisVrfFluidCtrlHR.CompressorSpeed(NumCompSpd) = rNumericArgs(Count1Index + NumCompSpd);
-
-            // Evaporating Capacity Curve
-            if (!lAlphaFieldBlanks(Count2Index + 2 * NumCompSpd)) {
-                int indexOUEvapCapCurve = GetCurveIndex(state, cAlphaArgs(Count2Index + 2 * NumCompSpd)); // convert curve name to index number
-                if (indexOUEvapCapCurve == 0) {                                                           // Verify curve name and type
-                    if (lAlphaFieldBlanks(Count2Index + 2 * NumCompSpd)) {
-                        ShowSevereError(state, std::string{RoutineName} + cCurrentModuleObject + "=\"" + thisVrfFluidCtrlHR.Name + "\", missing");
-                        ShowContinueError(state, "...required " + cAlphaFieldNames(Count2Index + 2 * NumCompSpd) + " is blank.");
-                    } else {
-                        ShowSevereError(state, std::string{RoutineName} + cCurrentModuleObject + "=\"" + thisVrfFluidCtrlHR.Name + "\", invalid");
-                        ShowContinueError(state,
-                                          EnergyPlus::format("...not found {}=\"{}\".",
-                                                             cAlphaFieldNames(Count2Index + 2 * NumCompSpd),
-                                                             cAlphaArgs(Count2Index + 2 * NumCompSpd)));
-                    }
-                    ErrorsFound = true;
-                } else {
-                    ErrorsFound |= Curve::CheckCurveDims(state,
-                                                         indexOUEvapCapCurve,                             // Curve index
-                                                         {2},                                             // Valid dimensions
-                                                         RoutineName,                                     // Routine name
-                                                         cCurrentModuleObject,                            // Object Type
-                                                         thisVrfFluidCtrlHR.Name,                         // Object Name
-                                                         cAlphaFieldNames(Count2Index + 2 * NumCompSpd)); // Field Name
-
-                    if (!ErrorsFound) {
-                        thisVrfFluidCtrlHR.OUCoolingCAPFT(NumCompSpd) = indexOUEvapCapCurve;
-                    }
-                }
-            }
-
-            // Compressor Power Curve
-            if (!lAlphaFieldBlanks(Count2Index + 2 * NumCompSpd + 1)) {
-                int indexOUCompPwrCurve = GetCurveIndex(state, cAlphaArgs(Count2Index + 2 * NumCompSpd + 1)); // convert curve name to index number
-                if (indexOUCompPwrCurve == 0) {                                                               // Verify curve name and type
-                    if (lAlphaFieldBlanks(Count2Index + 2 * NumCompSpd + 1)) {
-                        ShowSevereError(state, std::string{RoutineName} + cCurrentModuleObject + "=\"" + thisVrfFluidCtrlHR.Name + "\", missing");
-                        ShowContinueError(state, "...required " + cAlphaFieldNames(Count2Index + 2 * NumCompSpd + 1) + " is blank.");
-                    } else {
-                        ShowSevereError(state, std::string{RoutineName} + cCurrentModuleObject + "=\"" + thisVrfFluidCtrlHR.Name + "\", invalid");
-                        ShowContinueError(state,
-                                          EnergyPlus::format("...not found {}=\"{}\".",
-                                                             cAlphaFieldNames(Count2Index + 2 * NumCompSpd + 1),
-                                                             cAlphaArgs(Count2Index + 2 * NumCompSpd + 1)));
-                    }
-                    ErrorsFound = true;
-                } else {
-                    ErrorsFound |= Curve::CheckCurveDims(state,
-                                                         indexOUCompPwrCurve,                                 // Curve index
-                                                         {2},                                                 // Valid dimensions
-                                                         RoutineName,                                         // Routine name
-                                                         cCurrentModuleObject,                                // Object Type
-                                                         thisVrfFluidCtrlHR.Name,                             // Object Name
-                                                         cAlphaFieldNames(Count2Index + 2 * NumCompSpd + 1)); // Field Name
-
-                    if (!ErrorsFound) {
-                        thisVrfFluidCtrlHR.OUCoolingPWRFT(NumCompSpd) = indexOUCompPwrCurve;
-                    }
-                }
-            }
-        }
+        // numeric index 48 = last field before compressor speed entries; alpha index 9 = last field before cap/power curves
+        readOUCompressorSpeedCurves(thisVrfFluidCtrlHR, thisVrfFluidCtrlHR.Name, 48, 9);
     }
 
     cCurrentModuleObject = "ZoneHVAC:TerminalUnit:VariableRefrigerantFlow";
