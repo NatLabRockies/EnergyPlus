@@ -443,6 +443,103 @@ static void setupZoneVentilationOutputVars(EnergyPlusData &state, DataHeatBalanc
                         zoneName);
 }
 
+// Helper: compute the design-level airflow for FlowPerArea, FlowPerPerson, and AirChanges
+// AirflowSpec cases, which share identical logic across Ventilation, Mixing, and CrossMixing.
+// Returns true if the case was handled; false for FlowPerZone, FlowPerExterior*, or Invalid
+// (which the caller must handle itself).
+static bool computeAirflowDesignLevel(EnergyPlusData &state,
+                                      AirflowSpec flow,
+                                      Real64 &designLevel,
+                                      int spaceIndex,
+                                      DataHeatBalance::SpaceData const &thisSpace,
+                                      Array1D<Real64> const &rNumericArgs,
+                                      Array1D_bool const &lNumericFieldBlanks,
+                                      Array1D_string const &cAlphaFieldNames,
+                                      Array1D_string const &cNumericFieldNames,
+                                      std::string_view routineName,
+                                      std::string_view currentModuleObject,
+                                      std::string_view objName,
+                                      std::string_view flowTypeName,
+                                      bool &errorsFound)
+{
+    switch (flow) {
+    case AirflowSpec::FlowPerArea:
+        if (spaceIndex != 0) {
+            if (rNumericArgs(2) >= 0.0) {
+                designLevel = rNumericArgs(2) * thisSpace.FloorArea;
+                if (thisSpace.FloorArea <= 0.0) {
+                    ShowWarningError(
+                        state,
+                        EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but Space Floor Area = 0.  0 {} will result.",
+                                           routineName, currentModuleObject, objName, cAlphaFieldNames(4), cNumericFieldNames(2), flowTypeName));
+                }
+            } else {
+                ShowSevereError(state,
+                                EnergyPlus::format("{}{}=\"{}\", invalid flow/area specification [<0.0]={:.3R}",
+                                                   routineName, currentModuleObject, objName, rNumericArgs(2)));
+                errorsFound = true;
+            }
+        }
+        if (lNumericFieldBlanks(2)) {
+            ShowWarningError(state,
+                             EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 {} will result.",
+                                                routineName, currentModuleObject, objName, cAlphaFieldNames(4), cNumericFieldNames(2), flowTypeName));
+        }
+        return true;
+
+    case AirflowSpec::FlowPerPerson:
+        if (spaceIndex != 0) {
+            if (rNumericArgs(3) >= 0.0) {
+                designLevel = rNumericArgs(3) * thisSpace.TotOccupants;
+                if (thisSpace.TotOccupants <= 0.0) {
+                    ShowWarningError(
+                        state,
+                        EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but Space Total Occupants = 0.  0 {} will result.",
+                                           routineName, currentModuleObject, objName, cAlphaFieldNames(4), cNumericFieldNames(3), flowTypeName));
+                }
+            } else {
+                ShowSevereError(state,
+                                EnergyPlus::format("{}{}=\"{}\", invalid flow/person specification [<0.0]={:.3R}",
+                                                   routineName, currentModuleObject, objName, rNumericArgs(3)));
+                errorsFound = true;
+            }
+        }
+        if (lNumericFieldBlanks(3)) {
+            ShowWarningError(state,
+                             EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 {} will result.",
+                                                routineName, currentModuleObject, objName, cAlphaFieldNames(4), cNumericFieldNames(3), flowTypeName));
+        }
+        return true;
+
+    case AirflowSpec::AirChanges:
+        if (spaceIndex != 0) {
+            if (rNumericArgs(4) >= 0.0) {
+                designLevel = rNumericArgs(4) * thisSpace.Volume / Constant::rSecsInHour;
+                if (thisSpace.Volume <= 0.0) {
+                    ShowWarningError(
+                        state,
+                        EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but Space Volume = 0.  0 {} will result.",
+                                           routineName, currentModuleObject, objName, cAlphaFieldNames(4), cNumericFieldNames(4), flowTypeName));
+                }
+            } else {
+                ShowSevereError(state,
+                                EnergyPlus::format("{}{}=\"{}\", invalid ACH (air changes per hour) specification [<0.0]={:.3R}",
+                                                   routineName, currentModuleObject, objName, rNumericArgs(4)));
+                errorsFound = true;
+            }
+        }
+        if (lNumericFieldBlanks(4)) {
+            ShowWarningError(state,
+                             EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 {} will result.",
+                                                routineName, currentModuleObject, objName, cAlphaFieldNames(4), cNumericFieldNames(4), flowTypeName));
+        }
+        return true;
+
+    default:
+        return false;
+    }
+}
+
 // Helper: set up the 16 standard per-object "Infiltration" output variables.
 static void setupInfiltrationObjOutputVars(EnergyPlusData &state, DataHeatBalance::InfiltrationData &infil)
 {
@@ -1490,126 +1587,21 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
 
                 // Ventilation equipment design level calculation method
                 AirflowSpec flow = static_cast<AirflowSpec>(getEnumValue(airflowSpecNamesUC, cAlphaArgs(4))); // NOLINT(modernize-use-auto)
-                switch (flow) {
-                case AirflowSpec::FlowPerZone:
-                    thisVentilation.DesignLevel = rNumericArgs(1);
-                    if (lNumericFieldBlanks(1)) {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Ventilation will result.",
-                                                            RoutineName,
-                                                            cCurrentModuleObject,
-                                                            thisVentilation.Name,
-                                                            cAlphaFieldNames(4),
-                                                            cNumericFieldNames(1)));
-                    }
-                    break;
-
-                case AirflowSpec::FlowPerArea:
-                    if (thisVentilation.spaceIndex != 0) {
-                        if (rNumericArgs(2) >= 0.0) {
-                            thisVentilation.DesignLevel = rNumericArgs(2) * thisSpace.FloorArea;
-                            if (thisSpace.FloorArea <= 0.0) {
-                                ShowWarningError(
-                                    state,
-                                    EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but Space Floor Area = 0.  0 Ventilation will result.",
-                                                       RoutineName,
-                                                       cCurrentModuleObject,
-                                                       thisVentilation.Name,
-                                                       cAlphaFieldNames(4),
-                                                       cNumericFieldNames(2)));
-                            }
-                        } else {
-                            ShowSevereError(state,
-                                            EnergyPlus::format("{}{}=\"{}\", invalid flow/area specification [<0.0]={:.3R}",
-                                                               RoutineName,
-                                                               cCurrentModuleObject,
-                                                               thisVentilation.Name,
-                                                               rNumericArgs(2)));
-                            ErrorsFound = true;
+                if (!computeAirflowDesignLevel(state, flow, thisVentilation.DesignLevel, thisVentilation.spaceIndex, thisSpace,
+                                               rNumericArgs, lNumericFieldBlanks, cAlphaFieldNames, cNumericFieldNames,
+                                               RoutineName, cCurrentModuleObject, thisVentilation.Name, "Ventilation", ErrorsFound)) {
+                    if (flow == AirflowSpec::FlowPerZone) {
+                        thisVentilation.DesignLevel = rNumericArgs(1);
+                        if (lNumericFieldBlanks(1)) {
+                            ShowWarningError(state,
+                                             EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Ventilation will result.",
+                                                                RoutineName,
+                                                                cCurrentModuleObject,
+                                                                thisVentilation.Name,
+                                                                cAlphaFieldNames(4),
+                                                                cNumericFieldNames(1)));
                         }
-                    }
-                    if (lNumericFieldBlanks(2)) {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Ventilation will result.",
-                                                            RoutineName,
-                                                            cCurrentModuleObject,
-                                                            thisVentilation.Name,
-                                                            cAlphaFieldNames(4),
-                                                            cNumericFieldNames(2)));
-                    }
-                    break;
-
-                case AirflowSpec::FlowPerPerson:
-                    if (thisVentilation.spaceIndex != 0) {
-                        if (rNumericArgs(3) >= 0.0) {
-                            thisVentilation.DesignLevel = rNumericArgs(3) * thisSpace.TotOccupants;
-                            if (thisSpace.TotOccupants <= 0.0) {
-                                ShowWarningError(
-                                    state,
-                                    EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but Zone Total Occupants = 0.  0 Ventilation will result.",
-                                                       RoutineName,
-                                                       cCurrentModuleObject,
-                                                       thisVentilation.Name,
-                                                       cAlphaFieldNames(4),
-                                                       cNumericFieldNames(3)));
-                            }
-                        } else {
-                            ShowSevereError(state,
-                                            EnergyPlus::format("{}{}=\"{}\", invalid flow/person specification [<0.0]={:.3R}",
-                                                               RoutineName,
-                                                               cCurrentModuleObject,
-                                                               thisVentilation.Name,
-                                                               rNumericArgs(3)));
-                            ErrorsFound = true;
-                        }
-                    }
-                    if (lNumericFieldBlanks(3)) {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("{}{}=\"{}\", {}specifies {}, but that field is blank.  0 Ventilation will result.",
-                                                            RoutineName,
-                                                            cCurrentModuleObject,
-                                                            thisVentilation.Name,
-                                                            cAlphaFieldNames(4),
-                                                            cNumericFieldNames(3)));
-                    }
-                    break;
-
-                case AirflowSpec::AirChanges:
-                    if (thisVentilation.spaceIndex != 0) {
-                        if (rNumericArgs(4) >= 0.0) {
-                            thisVentilation.DesignLevel = rNumericArgs(4) * thisSpace.Volume / Constant::rSecsInHour;
-                            if (thisSpace.Volume <= 0.0) {
-                                ShowWarningError(state,
-                                                 EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but Space Volume = 0.  0 Ventilation will result.",
-                                                                    RoutineName,
-                                                                    cCurrentModuleObject,
-                                                                    thisVentilation.Name,
-                                                                    cAlphaFieldNames(4),
-                                                                    cNumericFieldNames(4)));
-                            }
-                        } else {
-                            ShowSevereError(state,
-                                            EnergyPlus::format("{}{}=\"{}\", invalid ACH (air changes per hour) specification [<0.0]={:.3R}",
-                                                               RoutineName,
-                                                               cCurrentModuleObject,
-                                                               thisVentilation.Name,
-                                                               rNumericArgs(5)));
-                            ErrorsFound = true;
-                        }
-                    }
-                    if (lNumericFieldBlanks(4)) {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Ventilation will result.",
-                                                            RoutineName,
-                                                            cCurrentModuleObject,
-                                                            thisVentilation.Name,
-                                                            cAlphaFieldNames(4),
-                                                            cNumericFieldNames(4)));
-                    }
-                    break;
-
-                default:
-                    if (Item1 == 1) {
+                    } else if (Item1 == 1) {
                         ShowSevereError(
                             state,
                             EnergyPlus::format(
@@ -2293,149 +2285,43 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
 
                 // Mixing equipment design level calculation method
                 AirflowSpec flow = static_cast<AirflowSpec>(getEnumValue(airflowSpecNamesUC, cAlphaArgs(4)));
-                switch (flow) {
-                case AirflowSpec::FlowPerZone:
-                    thisMixing.DesignLevel = rNumericArgs(1);
-                    if (lNumericFieldBlanks(1)) {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Mixing will result.",
-                                                            RoutineName,
-                                                            cCurrentModuleObject,
-                                                            thisMixingInput.Name,
-                                                            cAlphaFieldNames(4),
-                                                            cNumericFieldNames(1)));
-                    } else {
-                        Real64 spaceFrac = 1.0;
-                        if (!thisMixingInput.spaceListActive && (thisMixingInput.numOfSpaces > 1)) {
-                            Real64 const zoneVolume = thisZone.Volume;
-                            if (zoneVolume > 0.0) {
-                                spaceFrac = thisSpace.Volume / zoneVolume;
-                            } else {
-                                ShowSevereError(state, EnergyPlus::format("{}Zone volume is zero when allocating Mixing to Spaces.", RoutineName));
-                                ShowContinueError(
-                                    state,
-                                    EnergyPlus::format(
-                                        "Occurs for {}=\"{}\" in Zone=\"{}\".", cCurrentModuleObject, thisMixingInput.Name, thisZone.Name));
-                                ErrorsFound = true;
-                            }
-                        }
-
-                        thisMixing.DesignLevel = rNumericArgs(1) * spaceFrac;
-                    }
-                    break;
-
-                case AirflowSpec::FlowPerArea:
-                    if (thisMixing.spaceIndex != 0) {
-                        if (rNumericArgs(2) >= 0.0) {
-                            thisMixing.DesignLevel = rNumericArgs(2) * thisSpace.FloorArea;
-                            if (thisMixing.spaceIndex > 0) {
-                                if (thisZone.FloorArea <= 0.0) {
-                                    ShowWarningError(
+                if (!computeAirflowDesignLevel(state, flow, thisMixing.DesignLevel, thisMixing.spaceIndex, thisSpace,
+                                               rNumericArgs, lNumericFieldBlanks, cAlphaFieldNames, cNumericFieldNames,
+                                               RoutineName, cCurrentModuleObject, thisMixingInput.Name, "Mixing", ErrorsFound)) {
+                    if (flow == AirflowSpec::FlowPerZone) {
+                        thisMixing.DesignLevel = rNumericArgs(1);
+                        if (lNumericFieldBlanks(1)) {
+                            ShowWarningError(state,
+                                             EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Mixing will result.",
+                                                                RoutineName,
+                                                                cCurrentModuleObject,
+                                                                thisMixingInput.Name,
+                                                                cAlphaFieldNames(4),
+                                                                cNumericFieldNames(1)));
+                        } else {
+                            Real64 spaceFrac = 1.0;
+                            if (!thisMixingInput.spaceListActive && (thisMixingInput.numOfSpaces > 1)) {
+                                Real64 const zoneVolume = thisZone.Volume;
+                                if (zoneVolume > 0.0) {
+                                    spaceFrac = thisSpace.Volume / zoneVolume;
+                                } else {
+                                    ShowSevereError(state, EnergyPlus::format("{}Zone volume is zero when allocating Mixing to Spaces.", RoutineName));
+                                    ShowContinueError(
                                         state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but Space Floor Area = 0.  0 Mixing will result.",
-                                                           RoutineName,
-                                                           cCurrentModuleObject,
-                                                           thisMixingInput.Name,
-                                                           cAlphaFieldNames(4),
-                                                           cNumericFieldNames(2)));
+                                        EnergyPlus::format(
+                                            "Occurs for {}=\"{}\" in Zone=\"{}\".", cCurrentModuleObject, thisMixingInput.Name, thisZone.Name));
+                                    ErrorsFound = true;
                                 }
                             }
-                        } else {
-                            ShowSevereError(state,
-                                            EnergyPlus::format("{}{}=\"{}\", invalid flow/area specification [<0.0]={:.3R}",
-                                                               RoutineName,
-                                                               cCurrentModuleObject,
-                                                               thisMixingInput.Name,
-                                                               rNumericArgs(2)));
-                            ErrorsFound = true;
+                            thisMixing.DesignLevel = rNumericArgs(1) * spaceFrac;
                         }
+                    } else {
+                        ShowSevereError(
+                            state,
+                            EnergyPlus::format(
+                                "{}{}=\"{}\", invalid calculation method={}", RoutineName, cCurrentModuleObject, cAlphaArgs(1), cAlphaArgs(4)));
+                        ErrorsFound = true;
                     }
-                    if (lNumericFieldBlanks(2)) {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Mixing will result.",
-                                                            RoutineName,
-                                                            cCurrentModuleObject,
-                                                            thisMixingInput.Name,
-                                                            cAlphaFieldNames(4),
-                                                            cNumericFieldNames(2)));
-                    }
-                    break;
-
-                case AirflowSpec::FlowPerPerson:
-                    if (thisMixing.spaceIndex != 0) {
-                        if (rNumericArgs(3) >= 0.0) {
-                            thisMixing.DesignLevel = rNumericArgs(3) * thisSpace.TotOccupants;
-                            if (thisSpace.TotOccupants <= 0.0) {
-                                ShowWarningError(
-                                    state,
-                                    EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but Space Total Occupants = 0.  0 Mixing will result.",
-                                                       RoutineName,
-                                                       cCurrentModuleObject,
-                                                       thisMixingInput.Name,
-                                                       cAlphaFieldNames(4),
-                                                       cNumericFieldNames(3)));
-                            }
-                        } else {
-                            ShowSevereError(state,
-                                            EnergyPlus::format("{}{}=\"{}\", invalid flow/person specification [<0.0]={:.3R}",
-                                                               RoutineName,
-                                                               cCurrentModuleObject,
-                                                               thisMixingInput.Name,
-                                                               rNumericArgs(3)));
-                            ErrorsFound = true;
-                        }
-                    }
-                    if (lNumericFieldBlanks(3)) {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Mixing will result.",
-                                                            RoutineName,
-                                                            cCurrentModuleObject,
-                                                            thisMixingInput.Name,
-                                                            cAlphaFieldNames(4),
-                                                            cNumericFieldNames(3)));
-                    }
-                    break;
-
-                case AirflowSpec::AirChanges:
-                    if (thisMixing.spaceIndex != 0) {
-                        if (rNumericArgs(4) >= 0.0) {
-                            thisMixing.DesignLevel = rNumericArgs(4) * thisSpace.Volume / Constant::rSecsInHour;
-                            if (thisSpace.Volume <= 0.0) {
-                                ShowWarningError(state,
-                                                 EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but Space Volume = 0.  0 Mixing will result.",
-                                                                    RoutineName,
-                                                                    cCurrentModuleObject,
-                                                                    thisMixingInput.Name,
-                                                                    cAlphaFieldNames(4),
-                                                                    cNumericFieldNames(4)));
-                            }
-                        } else {
-                            ShowSevereError(state,
-                                            EnergyPlus::format("{}{}=\"{}\", invalid ACH (air changes per hour) specification [<0.0]={:.3R}",
-                                                               RoutineName,
-                                                               cCurrentModuleObject,
-                                                               thisMixingInput.Name,
-                                                               rNumericArgs(4)));
-                            ErrorsFound = true;
-                        }
-                    }
-                    if (lNumericFieldBlanks(4)) {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Mixing will result.",
-                                                            RoutineName,
-                                                            cCurrentModuleObject,
-                                                            thisMixingInput.Name,
-                                                            cAlphaFieldNames(4),
-                                                            cNumericFieldNames(4)));
-                    }
-                    break;
-
-                default:
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{}{}=\"{}\", invalid calculation method={}", RoutineName, cCurrentModuleObject, cAlphaArgs(1), cAlphaArgs(4)));
-                    ErrorsFound = true;
                 }
 
                 thisMixing.fromSpaceIndex = Util::FindItemInList(cAlphaArgs(5), state.dataHeatBal->space);
@@ -2651,153 +2537,46 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                     ErrorsFound = true;
                 }
 
-                // Mixing equipment design level calculation method.
+                // Cross Mixing equipment design level calculation method.
                 AirflowSpec flow = static_cast<AirflowSpec>(getEnumValue(airflowSpecNamesUC, cAlphaArgs(4))); // NOLINT(modernize-use-auto)
-                switch (flow) {
-                case AirflowSpec::FlowPerZone:
-                    thisMixing.DesignLevel = rNumericArgs(1);
-                    if (lNumericFieldBlanks(1)) {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Cross Mixing will result.",
-                                                            RoutineName,
-                                                            cCurrentModuleObject,
-                                                            thisMixingInput.Name,
-                                                            cAlphaFieldNames(4),
-                                                            cNumericFieldNames(1)));
-                    } else {
-                        Real64 spaceFrac = 1.0;
-                        if (!thisMixingInput.spaceListActive && (thisMixingInput.numOfSpaces > 1)) {
-                            Real64 const zoneVolume = thisZone.Volume;
-                            if (zoneVolume > 0.0) {
-                                spaceFrac = thisSpace.Volume / zoneVolume;
-                            } else {
-                                ShowSevereError(state,
-                                                EnergyPlus::format("{}Zone volume is zero when allocating Cross Mixing to Spaces.", RoutineName));
-                                ShowContinueError(
-                                    state,
-                                    EnergyPlus::format(
-                                        "Occurs for {}=\"{}\" in Zone=\"{}\".", cCurrentModuleObject, thisMixingInput.Name, thisZone.Name));
-                                ErrorsFound = true;
-                            }
-                        }
-
-                        thisMixing.DesignLevel = rNumericArgs(1) * spaceFrac;
-                    }
-                    break;
-
-                case AirflowSpec::FlowPerArea:
-                    if (thisMixing.spaceIndex != 0) {
-                        if (rNumericArgs(2) >= 0.0) {
-                            thisMixing.DesignLevel = rNumericArgs(2) * thisSpace.FloorArea;
-                            if (thisMixing.spaceIndex > 0) {
-                                if (thisZone.FloorArea <= 0.0) {
-                                    ShowWarningError(
+                if (!computeAirflowDesignLevel(state, flow, thisMixing.DesignLevel, thisMixing.spaceIndex, thisSpace,
+                                               rNumericArgs, lNumericFieldBlanks, cAlphaFieldNames, cNumericFieldNames,
+                                               RoutineName, cCurrentModuleObject, thisMixingInput.Name, "Cross Mixing", ErrorsFound)) {
+                    if (flow == AirflowSpec::FlowPerZone) {
+                        thisMixing.DesignLevel = rNumericArgs(1);
+                        if (lNumericFieldBlanks(1)) {
+                            ShowWarningError(state,
+                                             EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Cross Mixing will result.",
+                                                                RoutineName,
+                                                                cCurrentModuleObject,
+                                                                thisMixingInput.Name,
+                                                                cAlphaFieldNames(4),
+                                                                cNumericFieldNames(1)));
+                        } else {
+                            Real64 spaceFrac = 1.0;
+                            if (!thisMixingInput.spaceListActive && (thisMixingInput.numOfSpaces > 1)) {
+                                Real64 const zoneVolume = thisZone.Volume;
+                                if (zoneVolume > 0.0) {
+                                    spaceFrac = thisSpace.Volume / zoneVolume;
+                                } else {
+                                    ShowSevereError(state,
+                                                    EnergyPlus::format("{}Zone volume is zero when allocating Cross Mixing to Spaces.", RoutineName));
+                                    ShowContinueError(
                                         state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but Space Floor Area = 0.  0 Cross Mixing will result.",
-                                                           RoutineName,
-                                                           cCurrentModuleObject,
-                                                           thisMixingInput.Name,
-                                                           cAlphaFieldNames(4),
-                                                           cNumericFieldNames(2)));
+                                        EnergyPlus::format(
+                                            "Occurs for {}=\"{}\" in Zone=\"{}\".", cCurrentModuleObject, thisMixingInput.Name, thisZone.Name));
+                                    ErrorsFound = true;
                                 }
                             }
-                        } else {
-                            ShowSevereError(state,
-                                            EnergyPlus::format("{}{}=\"{}\", invalid flow/area specification [<0.0]={:.3R}",
-                                                               RoutineName,
-                                                               cCurrentModuleObject,
-                                                               thisMixingInput.Name,
-                                                               rNumericArgs(2)));
-                            ErrorsFound = true;
+                            thisMixing.DesignLevel = rNumericArgs(1) * spaceFrac;
                         }
+                    } else {
+                        ShowSevereError(
+                            state,
+                            EnergyPlus::format(
+                                "{}{}=\"{}\", invalid calculation method={}", RoutineName, cCurrentModuleObject, cAlphaArgs(1), cAlphaArgs(4)));
+                        ErrorsFound = true;
                     }
-                    if (lNumericFieldBlanks(2)) {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Cross Mixing will result.",
-                                                            RoutineName,
-                                                            cCurrentModuleObject,
-                                                            thisMixingInput.Name,
-                                                            cAlphaFieldNames(4),
-                                                            cNumericFieldNames(2)));
-                    }
-                    break;
-
-                case AirflowSpec::FlowPerPerson:
-                    if (thisMixing.spaceIndex != 0) {
-                        if (rNumericArgs(3) >= 0.0) {
-                            thisMixing.DesignLevel = rNumericArgs(3) * thisSpace.TotOccupants;
-                            if (thisSpace.TotOccupants <= 0.0) {
-                                ShowWarningError(
-                                    state,
-                                    EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but Space Total Occupants = 0.  0 Cross Mixing will result.",
-                                                       RoutineName,
-                                                       cCurrentModuleObject,
-                                                       thisMixingInput.Name,
-                                                       cAlphaFieldNames(4),
-                                                       cNumericFieldNames(3)));
-                            }
-                        } else {
-                            ShowSevereError(state,
-                                            EnergyPlus::format("{}{}=\"{}\", invalid flow/person specification [<0.0]={:.3R}",
-                                                               RoutineName,
-                                                               cCurrentModuleObject,
-                                                               thisMixingInput.Name,
-                                                               rNumericArgs(3)));
-                            ErrorsFound = true;
-                        }
-                    }
-                    if (lNumericFieldBlanks(3)) {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Cross Mixing will result.",
-                                                            RoutineName,
-                                                            cCurrentModuleObject,
-                                                            thisMixingInput.Name,
-                                                            cAlphaFieldNames(4),
-                                                            cNumericFieldNames(3)));
-                    }
-                    break;
-
-                case AirflowSpec::AirChanges:
-                    if (thisMixing.spaceIndex != 0) {
-                        if (rNumericArgs(4) >= 0.0) {
-                            thisMixing.DesignLevel = rNumericArgs(4) * thisSpace.Volume / Constant::rSecsInHour;
-                            if (thisSpace.Volume <= 0.0) {
-                                ShowWarningError(
-                                    state,
-                                    EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but Space Volume = 0.  0 Cross Mixing will result.",
-                                                       RoutineName,
-                                                       cCurrentModuleObject,
-                                                       thisMixingInput.Name,
-                                                       cAlphaFieldNames(4),
-                                                       cNumericFieldNames(4)));
-                            }
-                        } else {
-                            ShowSevereError(state,
-                                            EnergyPlus::format("{}{}=\"{}\", invalid ACH (air changes per hour) specification [<0.0]={:.3R}",
-                                                               RoutineName,
-                                                               cCurrentModuleObject,
-                                                               thisMixingInput.Name,
-                                                               rNumericArgs(4)));
-                            ErrorsFound = true;
-                        }
-                    }
-                    if (lNumericFieldBlanks(4)) {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Cross Mixing will result.",
-                                                            RoutineName,
-                                                            cCurrentModuleObject,
-                                                            thisMixingInput.Name,
-                                                            cAlphaFieldNames(4),
-                                                            cNumericFieldNames(4)));
-                    }
-                    break;
-
-                default:
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{}{}=\"{}\", invalid calculation method={}", RoutineName, cCurrentModuleObject, cAlphaArgs(1), cAlphaArgs(4)));
-                    ErrorsFound = true;
                 }
 
                 thisMixing.fromSpaceIndex = Util::FindItemInList(cAlphaArgs(5), state.dataHeatBal->space);
