@@ -3572,154 +3572,92 @@ namespace InternalHeatGains {
         return designLevel;
     }
 
+    // Register the 10 overall internal heat gain output variables for a single zone or space.
+    static void setupOverallOutputs(EnergyPlusData &state,
+                                    DataHeatBalance::ZoneReportVars &rpt,
+                                    std::string const &name,
+                                    std::string_view prefix)
+    {
+        SetupOutputVariable(state,
+                            format("{} Total Internal Radiant Heating Energy", prefix),
+                            Constant::Units::J,
+                            rpt.TotRadiantGain,
+                            OutputProcessor::TimeStepType::Zone,
+                            OutputProcessor::StoreType::Sum,
+                            name);
+        SetupOutputVariable(state,
+                            format("{} Total Internal Radiant Heating Rate", prefix),
+                            Constant::Units::W,
+                            rpt.TotRadiantGainRate,
+                            OutputProcessor::TimeStepType::Zone,
+                            OutputProcessor::StoreType::Average,
+                            name);
+        SetupOutputVariable(state,
+                            format("{} Total Internal Visible Radiation Heating Energy", prefix),
+                            Constant::Units::J,
+                            rpt.TotVisHeatGain,
+                            OutputProcessor::TimeStepType::Zone,
+                            OutputProcessor::StoreType::Sum,
+                            name);
+        SetupOutputVariable(state,
+                            format("{} Total Internal Visible Radiation Heating Rate", prefix),
+                            Constant::Units::W,
+                            rpt.TotVisHeatGainRate,
+                            OutputProcessor::TimeStepType::Zone,
+                            OutputProcessor::StoreType::Average,
+                            name);
+        SetupOutputVariable(state,
+                            format("{} Total Internal Convective Heating Energy", prefix),
+                            Constant::Units::J,
+                            rpt.TotConvectiveGain,
+                            OutputProcessor::TimeStepType::Zone,
+                            OutputProcessor::StoreType::Sum,
+                            name);
+        SetupOutputVariable(state,
+                            format("{} Total Internal Convective Heating Rate", prefix),
+                            Constant::Units::W,
+                            rpt.TotConvectiveGainRate,
+                            OutputProcessor::TimeStepType::Zone,
+                            OutputProcessor::StoreType::Average,
+                            name);
+        SetupOutputVariable(state,
+                            format("{} Total Internal Latent Gain Energy", prefix),
+                            Constant::Units::J,
+                            rpt.TotLatentGain,
+                            OutputProcessor::TimeStepType::Zone,
+                            OutputProcessor::StoreType::Sum,
+                            name);
+        SetupOutputVariable(state,
+                            format("{} Total Internal Latent Gain Rate", prefix),
+                            Constant::Units::W,
+                            rpt.TotLatentGainRate,
+                            OutputProcessor::TimeStepType::Zone,
+                            OutputProcessor::StoreType::Average,
+                            name);
+        SetupOutputVariable(state,
+                            format("{} Total Internal Total Heating Energy", prefix),
+                            Constant::Units::J,
+                            rpt.TotTotalHeatGain,
+                            OutputProcessor::TimeStepType::Zone,
+                            OutputProcessor::StoreType::Sum,
+                            name);
+        SetupOutputVariable(state,
+                            format("{} Total Internal Total Heating Rate", prefix),
+                            Constant::Units::W,
+                            rpt.TotTotalHeatGainRate,
+                            OutputProcessor::TimeStepType::Zone,
+                            OutputProcessor::StoreType::Average,
+                            name);
+    }
+
     void setupIHGOutputs(EnergyPlusData &state)
     {
         for (int zoneNum = 1; zoneNum <= state.dataGlobal->NumOfZones; ++zoneNum) {
-            // Overall Zone Variables
-            SetupOutputVariable(state,
-                                "Zone Total Internal Radiant Heating Energy",
-                                Constant::Units::J,
-                                state.dataHeatBal->ZoneRpt(zoneNum).TotRadiantGain,
-                                OutputProcessor::TimeStepType::Zone,
-                                OutputProcessor::StoreType::Sum,
-                                state.dataHeatBal->Zone(zoneNum).Name);
-            SetupOutputVariable(state,
-                                "Zone Total Internal Radiant Heating Rate",
-                                Constant::Units::W,
-                                state.dataHeatBal->ZoneRpt(zoneNum).TotRadiantGainRate,
-                                OutputProcessor::TimeStepType::Zone,
-                                OutputProcessor::StoreType::Average,
-                                state.dataHeatBal->Zone(zoneNum).Name);
-            SetupOutputVariable(state,
-                                "Zone Total Internal Visible Radiation Heating Energy",
-                                Constant::Units::J,
-                                state.dataHeatBal->ZoneRpt(zoneNum).TotVisHeatGain,
-                                OutputProcessor::TimeStepType::Zone,
-                                OutputProcessor::StoreType::Sum,
-                                state.dataHeatBal->Zone(zoneNum).Name);
-            SetupOutputVariable(state,
-                                "Zone Total Internal Visible Radiation Heating Rate",
-                                Constant::Units::W,
-                                state.dataHeatBal->ZoneRpt(zoneNum).TotVisHeatGainRate,
-                                OutputProcessor::TimeStepType::Zone,
-                                OutputProcessor::StoreType::Average,
-                                state.dataHeatBal->Zone(zoneNum).Name);
-            SetupOutputVariable(state,
-                                "Zone Total Internal Convective Heating Energy",
-                                Constant::Units::J,
-                                state.dataHeatBal->ZoneRpt(zoneNum).TotConvectiveGain,
-                                OutputProcessor::TimeStepType::Zone,
-                                OutputProcessor::StoreType::Sum,
-                                state.dataHeatBal->Zone(zoneNum).Name);
-            SetupOutputVariable(state,
-                                "Zone Total Internal Convective Heating Rate",
-                                Constant::Units::W,
-                                state.dataHeatBal->ZoneRpt(zoneNum).TotConvectiveGainRate,
-                                OutputProcessor::TimeStepType::Zone,
-                                OutputProcessor::StoreType::Average,
-                                state.dataHeatBal->Zone(zoneNum).Name);
-            SetupOutputVariable(state,
-                                "Zone Total Internal Latent Gain Energy",
-                                Constant::Units::J,
-                                state.dataHeatBal->ZoneRpt(zoneNum).TotLatentGain,
-                                OutputProcessor::TimeStepType::Zone,
-                                OutputProcessor::StoreType::Sum,
-                                state.dataHeatBal->Zone(zoneNum).Name);
-            SetupOutputVariable(state,
-                                "Zone Total Internal Latent Gain Rate",
-                                Constant::Units::W,
-                                state.dataHeatBal->ZoneRpt(zoneNum).TotLatentGainRate,
-                                OutputProcessor::TimeStepType::Zone,
-                                OutputProcessor::StoreType::Average,
-                                state.dataHeatBal->Zone(zoneNum).Name);
-            SetupOutputVariable(state,
-                                "Zone Total Internal Total Heating Energy",
-                                Constant::Units::J,
-                                state.dataHeatBal->ZoneRpt(zoneNum).TotTotalHeatGain,
-                                OutputProcessor::TimeStepType::Zone,
-                                OutputProcessor::StoreType::Sum,
-                                state.dataHeatBal->Zone(zoneNum).Name);
-            SetupOutputVariable(state,
-                                "Zone Total Internal Total Heating Rate",
-                                Constant::Units::W,
-                                state.dataHeatBal->ZoneRpt(zoneNum).TotTotalHeatGainRate,
-                                OutputProcessor::TimeStepType::Zone,
-                                OutputProcessor::StoreType::Average,
-                                state.dataHeatBal->Zone(zoneNum).Name);
+            setupOverallOutputs(state, state.dataHeatBal->ZoneRpt(zoneNum), state.dataHeatBal->Zone(zoneNum).Name, "Zone");
         }
 
         for (int spaceNum = 1; spaceNum <= state.dataGlobal->numSpaces; ++spaceNum) {
-            // Overall Space Variables
-            SetupOutputVariable(state,
-                                "Space Total Internal Radiant Heating Energy",
-                                Constant::Units::J,
-                                state.dataHeatBal->spaceRpt(spaceNum).TotRadiantGain,
-                                OutputProcessor::TimeStepType::Zone,
-                                OutputProcessor::StoreType::Sum,
-                                state.dataHeatBal->space(spaceNum).Name);
-            SetupOutputVariable(state,
-                                "Space Total Internal Radiant Heating Rate",
-                                Constant::Units::W,
-                                state.dataHeatBal->spaceRpt(spaceNum).TotRadiantGainRate,
-                                OutputProcessor::TimeStepType::Zone,
-                                OutputProcessor::StoreType::Average,
-                                state.dataHeatBal->space(spaceNum).Name);
-            SetupOutputVariable(state,
-                                "Space Total Internal Visible Radiation Heating Energy",
-                                Constant::Units::J,
-                                state.dataHeatBal->spaceRpt(spaceNum).TotVisHeatGain,
-                                OutputProcessor::TimeStepType::Zone,
-                                OutputProcessor::StoreType::Sum,
-                                state.dataHeatBal->space(spaceNum).Name);
-            SetupOutputVariable(state,
-                                "Space Total Internal Visible Radiation Heating Rate",
-                                Constant::Units::W,
-                                state.dataHeatBal->spaceRpt(spaceNum).TotVisHeatGainRate,
-                                OutputProcessor::TimeStepType::Zone,
-                                OutputProcessor::StoreType::Average,
-                                state.dataHeatBal->space(spaceNum).Name);
-            SetupOutputVariable(state,
-                                "Space Total Internal Convective Heating Energy",
-                                Constant::Units::J,
-                                state.dataHeatBal->spaceRpt(spaceNum).TotConvectiveGain,
-                                OutputProcessor::TimeStepType::Zone,
-                                OutputProcessor::StoreType::Sum,
-                                state.dataHeatBal->space(spaceNum).Name);
-            SetupOutputVariable(state,
-                                "Space Total Internal Convective Heating Rate",
-                                Constant::Units::W,
-                                state.dataHeatBal->spaceRpt(spaceNum).TotConvectiveGainRate,
-                                OutputProcessor::TimeStepType::Zone,
-                                OutputProcessor::StoreType::Average,
-                                state.dataHeatBal->space(spaceNum).Name);
-            SetupOutputVariable(state,
-                                "Space Total Internal Latent Gain Energy",
-                                Constant::Units::J,
-                                state.dataHeatBal->spaceRpt(spaceNum).TotLatentGain,
-                                OutputProcessor::TimeStepType::Zone,
-                                OutputProcessor::StoreType::Sum,
-                                state.dataHeatBal->space(spaceNum).Name);
-            SetupOutputVariable(state,
-                                "Space Total Internal Latent Gain Rate",
-                                Constant::Units::W,
-                                state.dataHeatBal->spaceRpt(spaceNum).TotLatentGainRate,
-                                OutputProcessor::TimeStepType::Zone,
-                                OutputProcessor::StoreType::Average,
-                                state.dataHeatBal->space(spaceNum).Name);
-            SetupOutputVariable(state,
-                                "Space Total Internal Total Heating Energy",
-                                Constant::Units::J,
-                                state.dataHeatBal->spaceRpt(spaceNum).TotTotalHeatGain,
-                                OutputProcessor::TimeStepType::Zone,
-                                OutputProcessor::StoreType::Sum,
-                                state.dataHeatBal->space(spaceNum).Name);
-            SetupOutputVariable(state,
-                                "Space Total Internal Total Heating Rate",
-                                Constant::Units::W,
-                                state.dataHeatBal->spaceRpt(spaceNum).TotTotalHeatGainRate,
-                                OutputProcessor::TimeStepType::Zone,
-                                OutputProcessor::StoreType::Average,
-                                state.dataHeatBal->space(spaceNum).Name);
+            setupOverallOutputs(state, state.dataHeatBal->spaceRpt(spaceNum), state.dataHeatBal->space(spaceNum).Name, "Space");
         }
 
         // Add zone and space outputs only where the particular type of equipment is actually present
