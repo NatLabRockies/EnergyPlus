@@ -332,6 +332,24 @@ namespace InternalHeatGains {
             }
         };
 
+        // Map DesignLevelMethod enum to the IHGNumbers field index (1-based) for
+        // Gas/HotWater/Steam/OtherEquipment which all share the same three-method pattern.
+        auto getEquipLevelFieldNum = [](DesignLevelMethod levelMethod) -> int {
+            switch (levelMethod) {
+            case DesignLevelMethod::EquipmentLevel:
+                return 1;
+            case DesignLevelMethod::WattsPerArea:
+            case DesignLevelMethod::PowerPerArea:
+                return 2;
+            case DesignLevelMethod::WattsPerPerson:
+            case DesignLevelMethod::PowerPerPerson:
+                return 3;
+            default:
+                assert(false);
+                return 1;
+            }
+        };
+
         // TODO MJW: Punt for now, sometimes unit test need these to be allocated in AllocateZoneHeatBalArrays, but simulations need them here
         if (!state.dataHeatBal->ZoneIntGain.allocated()) {
             DataHeatBalance::AllocateIntGains(state);
@@ -1465,23 +1483,7 @@ namespace InternalHeatGains {
 
                 auto &thisGasEqInput = zoneGasObjects(gasEqInputNum);
                 DesignLevelMethod const levelMethod = static_cast<DesignLevelMethod>(getEnumValue(DesignLevelMethodNamesUC, IHGAlphas(4)));
-                int fieldNum = 1;
-                switch (levelMethod) {
-                case DesignLevelMethod::EquipmentLevel: {
-                    fieldNum = 1;
-                } break;
-                case DesignLevelMethod::WattsPerArea:
-                case DesignLevelMethod::PowerPerArea: {
-                    fieldNum = 2;
-                } break;
-                case DesignLevelMethod::WattsPerPerson:
-                case DesignLevelMethod::PowerPerPerson: {
-                    fieldNum = 3;
-                } break;
-                default: {
-                    assert(false);
-                } break;
-                }
+                int const fieldNum = getEquipLevelFieldNum(levelMethod);
                 Real64 const levelValue = IHGNumbers(fieldNum);
                 bool const levelBlank = IHGNumericFieldBlanks(fieldNum);
                 std::string_view const levelField = IHGNumericFieldNames(fieldNum);
@@ -1613,23 +1615,7 @@ namespace InternalHeatGains {
 
                 auto &thisHWEqInput = hotWaterEqObjects(hwEqInputNum);
                 DesignLevelMethod const levelMethod = static_cast<DesignLevelMethod>(getEnumValue(DesignLevelMethodNamesUC, IHGAlphas(4)));
-                int fieldNum = 1;
-                switch (levelMethod) {
-                case DesignLevelMethod::EquipmentLevel: {
-                    fieldNum = 1;
-                } break;
-                case DesignLevelMethod::WattsPerArea:
-                case DesignLevelMethod::PowerPerArea: {
-                    fieldNum = 2;
-                } break;
-                case DesignLevelMethod::WattsPerPerson:
-                case DesignLevelMethod::PowerPerPerson: {
-                    fieldNum = 3;
-                } break;
-                default: {
-                    assert(false);
-                } break;
-                }
+                int const fieldNum = getEquipLevelFieldNum(levelMethod);
                 Real64 const levelValue = IHGNumbers(fieldNum);
                 bool const levelBlank = IHGNumericFieldBlanks(fieldNum);
                 std::string_view const levelField = IHGNumericFieldNames(fieldNum);
@@ -1733,23 +1719,7 @@ namespace InternalHeatGains {
 
                 auto &thisStmEqInput = steamEqObjects(stmEqInputNum);
                 DesignLevelMethod const levelMethod = static_cast<DesignLevelMethod>(getEnumValue(DesignLevelMethodNamesUC, IHGAlphas(4)));
-                int fieldNum = 1;
-                switch (levelMethod) {
-                case DesignLevelMethod::EquipmentLevel: {
-                    fieldNum = 1;
-                } break;
-                case DesignLevelMethod::WattsPerArea:
-                case DesignLevelMethod::PowerPerArea: {
-                    fieldNum = 2;
-                } break;
-                case DesignLevelMethod::WattsPerPerson:
-                case DesignLevelMethod::PowerPerPerson: {
-                    fieldNum = 3;
-                } break;
-                default: {
-                    assert(false);
-                } break;
-                }
+                int const fieldNum = getEquipLevelFieldNum(levelMethod);
                 Real64 const levelValue = IHGNumbers(fieldNum);
                 bool const levelBlank = IHGNumericFieldBlanks(fieldNum);
                 std::string_view const levelField = IHGNumericFieldNames(fieldNum);
@@ -1860,23 +1830,7 @@ namespace InternalHeatGains {
 
                 auto &thisOthEqInput = otherEqObjects(othEqInputNum);
                 DesignLevelMethod const levelMethod = static_cast<DesignLevelMethod>(getEnumValue(DesignLevelMethodNamesUC, IHGAlphas(5)));
-                int levelFieldNum = 1;
-                switch (levelMethod) {
-                case DesignLevelMethod::EquipmentLevel: {
-                    levelFieldNum = 1;
-                } break;
-                case DesignLevelMethod::WattsPerArea:
-                case DesignLevelMethod::PowerPerArea: {
-                    levelFieldNum = 2;
-                } break;
-                case DesignLevelMethod::WattsPerPerson:
-                case DesignLevelMethod::PowerPerPerson: {
-                    levelFieldNum = 3;
-                } break;
-                default: {
-                    assert(false);
-                } break;
-                }
+                int const levelFieldNum = getEquipLevelFieldNum(levelMethod);
                 Real64 const levelValue = IHGNumbers(levelFieldNum);
                 bool const levelBlank = IHGNumericFieldBlanks(levelFieldNum);
                 std::string_view const levelField = IHGNumericFieldNames(levelFieldNum);
