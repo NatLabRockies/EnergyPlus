@@ -2389,6 +2389,31 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         }
     };
 
+    // Lambda: read the IU control algorithm type (alpha field 5), fixed Te/Tc (numeric fields 9-10),
+    // and IU evap/cond temp bounds (numeric fields 11-14) — identical in FluidTCtrl-HP and HR objects.
+    auto readFluidCtrlIUConfig = [&](VRFCondenserEquipment &thisVrf) {
+        // IU Control Type
+        if (Util::SameString(cAlphaArgs(5), "VariableTemp")) {
+            thisVrf.AlgorithmIUCtrl = 1;
+        } else if (Util::SameString(cAlphaArgs(5), "ConstantTemp")) {
+            thisVrf.AlgorithmIUCtrl = 2;
+        } else {
+            thisVrf.AlgorithmIUCtrl = 1;
+        }
+
+        // Reference IU Te/Tc for IU Control Algorithm: ConstantTemp
+        thisVrf.EvapTempFixed = rNumericArgs(9);
+        thisVrf.CondTempFixed = rNumericArgs(10);
+
+        // Bounds of Te/Tc for IU Control Algorithm: VariableTemp
+        thisVrf.IUEvapTempLow = rNumericArgs(11);
+        thisVrf.IUEvapTempHigh = rNumericArgs(12);
+        thisVrf.IUCondTempLow = rNumericArgs(13);
+        thisVrf.IUCondTempHigh = rNumericArgs(14);
+        checkMinLessThanMax(thisVrf.Name, thisVrf.IUEvapTempLow, thisVrf.IUEvapTempHigh, cNumericFieldNames(11));
+        checkMinLessThanMax(thisVrf.Name, thisVrf.IUCondTempLow, thisVrf.IUCondTempHigh, cNumericFieldNames(13));
+    };
+
     // Read all VRF condenser objects: Algorithm Type 2_physics based model (VRF-FluidTCtrl-HP)
     cCurrentModuleObject = "AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl";
     for (int thisNum = 1; thisNum <= state.dataHVACVarRefFlow->NumVRFCond_FluidTCtrl_HP; ++thisNum) {
@@ -2464,25 +2489,7 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         thisVrfFluidCtrl.SH = rNumericArgs(7);
         thisVrfFluidCtrl.SC = rNumericArgs(8);
 
-        if (Util::SameString(cAlphaArgs(5), "VariableTemp")) {
-            thisVrfFluidCtrl.AlgorithmIUCtrl = 1;
-        } else if (Util::SameString(cAlphaArgs(5), "ConstantTemp")) {
-            thisVrfFluidCtrl.AlgorithmIUCtrl = 2;
-        } else {
-            thisVrfFluidCtrl.AlgorithmIUCtrl = 1;
-        }
-
-        // Reference IU Te/Tc for IU Control Algorithm: ConstantTemp
-        thisVrfFluidCtrl.EvapTempFixed = rNumericArgs(9);
-        thisVrfFluidCtrl.CondTempFixed = rNumericArgs(10);
-
-        // Bounds of Te/Tc for IU Control Algorithm: VariableTemp
-        thisVrfFluidCtrl.IUEvapTempLow = rNumericArgs(11);
-        thisVrfFluidCtrl.IUEvapTempHigh = rNumericArgs(12);
-        thisVrfFluidCtrl.IUCondTempLow = rNumericArgs(13);
-        thisVrfFluidCtrl.IUCondTempHigh = rNumericArgs(14);
-        checkMinLessThanMax(thisVrfFluidCtrl.Name, thisVrfFluidCtrl.IUEvapTempLow, thisVrfFluidCtrl.IUEvapTempHigh, cNumericFieldNames(11));
-        checkMinLessThanMax(thisVrfFluidCtrl.Name, thisVrfFluidCtrl.IUCondTempLow, thisVrfFluidCtrl.IUCondTempHigh, cNumericFieldNames(13));
+        readFluidCtrlIUConfig(thisVrfFluidCtrl);
 
         // Get OU fan data
         thisVrfFluidCtrl.RatedOUFanPowerPerCapcity = rNumericArgs(15);
@@ -2676,26 +2683,7 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
             ShowContinueError(state, EnergyPlus::format("... adjusted {} = {:.2T} C", cNumericFieldNames(8), thisVrfFluidCtrlHR.MaxOATHeatRecovery));
         }
 
-        // IU Control Type
-        if (Util::SameString(cAlphaArgs(5), "VariableTemp")) {
-            thisVrfFluidCtrlHR.AlgorithmIUCtrl = 1;
-        } else if (Util::SameString(cAlphaArgs(5), "ConstantTemp")) {
-            thisVrfFluidCtrlHR.AlgorithmIUCtrl = 2;
-        } else {
-            thisVrfFluidCtrlHR.AlgorithmIUCtrl = 1;
-        }
-
-        // Reference IU Te/Tc for IU Control Algorithm: ConstantTemp
-        thisVrfFluidCtrlHR.EvapTempFixed = rNumericArgs(9);
-        thisVrfFluidCtrlHR.CondTempFixed = rNumericArgs(10);
-
-        // Bounds of Te/Tc for IU Control Algorithm: VariableTemp
-        thisVrfFluidCtrlHR.IUEvapTempLow = rNumericArgs(11);
-        thisVrfFluidCtrlHR.IUEvapTempHigh = rNumericArgs(12);
-        thisVrfFluidCtrlHR.IUCondTempLow = rNumericArgs(13);
-        thisVrfFluidCtrlHR.IUCondTempHigh = rNumericArgs(14);
-        checkMinLessThanMax(thisVrfFluidCtrlHR.Name, thisVrfFluidCtrlHR.IUEvapTempLow, thisVrfFluidCtrlHR.IUEvapTempHigh, cNumericFieldNames(11));
-        checkMinLessThanMax(thisVrfFluidCtrlHR.Name, thisVrfFluidCtrlHR.IUCondTempLow, thisVrfFluidCtrlHR.IUCondTempHigh, cNumericFieldNames(13));
+        readFluidCtrlIUConfig(thisVrfFluidCtrlHR);
 
         // Reference OU SH/SC
         thisVrfFluidCtrlHR.SH = rNumericArgs(15);
