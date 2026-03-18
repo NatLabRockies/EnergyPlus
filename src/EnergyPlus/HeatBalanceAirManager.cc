@@ -2566,37 +2566,34 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
             ErrorObjectHeader eoh{routineName, cCurrentModuleObject, cAlphaArgs(1)};
             NameThisObject = cAlphaArgs(1);
 
+            // Helper lambda: look up a zone-or-space name from alpha field alphaIdx, resolve to a zone number,
+            // and report an error if neither a zone nor a space is found.
+            auto lookupRefDoorZone = [&](int alphaIdx, int &zoneNum, int &spaceNum) {
+                zoneNum = Util::FindItemInList(cAlphaArgs(alphaIdx), state.dataHeatBal->Zone);
+                spaceNum = Util::FindItemInList(cAlphaArgs(alphaIdx), state.dataHeatBal->space);
+                if ((zoneNum == 0) && (spaceNum == 0)) {
+                    ShowSevereError(state,
+                                    EnergyPlus::format("{}{}=\"{}\", invalid (not found) {}=\"{}\".",
+                                                       RoutineName,
+                                                       cCurrentModuleObject,
+                                                       cAlphaArgs(1),
+                                                       cAlphaFieldNames(alphaIdx),
+                                                       cAlphaArgs(alphaIdx)));
+                    ErrorsFound = true;
+                } else if (zoneNum == 0) {
+                    zoneNum = state.dataHeatBal->space(spaceNum).zoneNum;
+                }
+            };
+
             int AlphaNum = 2;
-            int Zone1Num = Util::FindItemInList(cAlphaArgs(AlphaNum), state.dataHeatBal->Zone);
-            int space1Num = Util::FindItemInList(cAlphaArgs(AlphaNum), state.dataHeatBal->space);
-            if ((Zone1Num == 0) && (space1Num == 0)) {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}{}=\"{}\", invalid (not found) {}=\"{}\".",
-                                                   RoutineName,
-                                                   cCurrentModuleObject,
-                                                   cAlphaArgs(1),
-                                                   cAlphaFieldNames(AlphaNum),
-                                                   cAlphaArgs(AlphaNum)));
-                ErrorsFound = true;
-            } else if (Zone1Num == 0) {
-                Zone1Num = state.dataHeatBal->space(space1Num).zoneNum;
-            }
+            int Zone1Num = 0;
+            int space1Num = 0;
+            lookupRefDoorZone(AlphaNum, Zone1Num, space1Num);
 
             ++AlphaNum; // 3
-            int Zone2Num = Util::FindItemInList(cAlphaArgs(AlphaNum), state.dataHeatBal->Zone);
-            int space2Num = Util::FindItemInList(cAlphaArgs(AlphaNum), state.dataHeatBal->space);
-            if ((Zone2Num == 0) && (space2Num == 0)) {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}{}=\"{}\", invalid (not found) {}=\"{}\".",
-                                                   RoutineName,
-                                                   cCurrentModuleObject,
-                                                   cAlphaArgs(1),
-                                                   cAlphaFieldNames(AlphaNum),
-                                                   cAlphaArgs(AlphaNum)));
-                ErrorsFound = true;
-            } else if (Zone2Num == 0) {
-                Zone2Num = state.dataHeatBal->space(space2Num).zoneNum;
-            }
+            int Zone2Num = 0;
+            int space2Num = 0;
+            lookupRefDoorZone(AlphaNum, Zone2Num, space2Num);
 
             int spaceNumA = 0;
             int spaceNumB = 0;
