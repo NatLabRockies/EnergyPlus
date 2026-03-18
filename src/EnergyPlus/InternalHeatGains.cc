@@ -3712,6 +3712,54 @@ namespace InternalHeatGains {
             state, format("{} Lights Total Heating Rate", prefix), Constant::Units::W, rpt.LtsTotGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
     }
 
+    // Register the 12 standard equipment zone/space output variables (Power, Consump, Rad, Con, Lat, Lost, Tot and their rates).
+    // Used for Electric Equipment, Gas Equipment, Hot Water Equipment, and Steam Equipment.
+    using ZRV = DataHeatBalance::ZoneReportVars;
+    static void setupEquipZoneSpaceOutputs(EnergyPlusData &state,
+                                           ZRV &rpt,
+                                           std::string const &name,
+                                           std::string_view prefix,
+                                           std::string_view equipLabel,
+                                           std::string_view energyLabel,
+                                           Real64 ZRV::*power,
+                                           Real64 ZRV::*consump,
+                                           Real64 ZRV::*radGain,
+                                           Real64 ZRV::*conGain,
+                                           Real64 ZRV::*latGain,
+                                           Real64 ZRV::*lost,
+                                           Real64 ZRV::*totGain,
+                                           Real64 ZRV::*radGainRate,
+                                           Real64 ZRV::*conGainRate,
+                                           Real64 ZRV::*latGainRate,
+                                           Real64 ZRV::*lostRate,
+                                           Real64 ZRV::*totGainRate)
+    {
+        SetupOutputVariable(
+            state, format("{} {} {} Rate", prefix, equipLabel, energyLabel), Constant::Units::W, rpt.*power, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+        SetupOutputVariable(
+            state, format("{} {} {} Energy", prefix, equipLabel, energyLabel), Constant::Units::J, rpt.*consump, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+        SetupOutputVariable(
+            state, format("{} {} Radiant Heating Energy", prefix, equipLabel), Constant::Units::J, rpt.*radGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+        SetupOutputVariable(
+            state, format("{} {} Radiant Heating Rate", prefix, equipLabel), Constant::Units::W, rpt.*radGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+        SetupOutputVariable(
+            state, format("{} {} Convective Heating Energy", prefix, equipLabel), Constant::Units::J, rpt.*conGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+        SetupOutputVariable(
+            state, format("{} {} Convective Heating Rate", prefix, equipLabel), Constant::Units::W, rpt.*conGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+        SetupOutputVariable(
+            state, format("{} {} Latent Gain Energy", prefix, equipLabel), Constant::Units::J, rpt.*latGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+        SetupOutputVariable(
+            state, format("{} {} Latent Gain Rate", prefix, equipLabel), Constant::Units::W, rpt.*latGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+        SetupOutputVariable(
+            state, format("{} {} Lost Heat Energy", prefix, equipLabel), Constant::Units::J, rpt.*lost, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+        SetupOutputVariable(
+            state, format("{} {} Lost Heat Rate", prefix, equipLabel), Constant::Units::W, rpt.*lostRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+        SetupOutputVariable(
+            state, format("{} {} Total Heating Energy", prefix, equipLabel), Constant::Units::J, rpt.*totGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+        SetupOutputVariable(
+            state, format("{} {} Total Heating Rate", prefix, equipLabel), Constant::Units::W, rpt.*totGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+    }
+
     void setupIHGOutputs(EnergyPlusData &state)
     {
         for (int zoneNum = 1; zoneNum <= state.dataGlobal->NumOfZones; ++zoneNum) {
@@ -4062,186 +4110,26 @@ namespace InternalHeatGains {
         }
 
         // Zone total report variables
+
+        // Zone total report variables
         for (int zoneNum = 1; zoneNum <= state.dataGlobal->NumOfZones; ++zoneNum) {
             if (addZoneOutputs(zoneNum)) {
-                SetupOutputVariable(state,
-                                    "Zone Electric Equipment Electricity Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).ElecPower,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Electric Equipment Electricity Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).ElecConsump,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-
-                SetupOutputVariable(state,
-                                    "Zone Electric Equipment Radiant Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).ElecRadGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Electric Equipment Radiant Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).ElecRadGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Electric Equipment Convective Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).ElecConGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Electric Equipment Convective Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).ElecConGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Electric Equipment Latent Gain Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).ElecLatGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Electric Equipment Latent Gain Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).ElecLatGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Electric Equipment Lost Heat Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).ElecLost,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Electric Equipment Lost Heat Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).ElecLostRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Electric Equipment Total Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).ElecTotGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Electric Equipment Total Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).ElecTotGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
+                setupEquipZoneSpaceOutputs(state, state.dataHeatBal->ZoneRpt(zoneNum), state.dataHeatBal->Zone(zoneNum).Name,
+                    "Zone", "Electric Equipment", "Electricity",
+                    &ZRV::ElecPower, &ZRV::ElecConsump, &ZRV::ElecRadGain, &ZRV::ElecConGain, &ZRV::ElecLatGain, &ZRV::ElecLost, &ZRV::ElecTotGain,
+                    &ZRV::ElecRadGainRate, &ZRV::ElecConGainRate, &ZRV::ElecLatGainRate, &ZRV::ElecLostRate, &ZRV::ElecTotGainRate);
             }
             // Reset zone output flag
             addZoneOutputs(zoneNum) = false;
         }
 
-        // space total report variables
+        // Space total report variables
         for (int spaceNum = 1; spaceNum <= state.dataGlobal->numSpaces; ++spaceNum) {
             if (addSpaceOutputs(spaceNum)) {
-                SetupOutputVariable(state,
-                                    "Space Electric Equipment Electricity Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).ElecPower,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Electric Equipment Electricity Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).ElecConsump,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-
-                SetupOutputVariable(state,
-                                    "Space Electric Equipment Radiant Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).ElecRadGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Electric Equipment Radiant Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).ElecRadGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Electric Equipment Convective Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).ElecConGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Electric Equipment Convective Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).ElecConGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Electric Equipment Latent Gain Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).ElecLatGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Electric Equipment Latent Gain Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).ElecLatGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Electric Equipment Lost Heat Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).ElecLost,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Electric Equipment Lost Heat Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).ElecLostRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Electric Equipment Total Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).ElecTotGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Electric Equipment Total Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).ElecTotGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
+                setupEquipZoneSpaceOutputs(state, state.dataHeatBal->spaceRpt(spaceNum), state.dataHeatBal->space(spaceNum).Name,
+                    "Space", "Electric Equipment", "Electricity",
+                    &ZRV::ElecPower, &ZRV::ElecConsump, &ZRV::ElecRadGain, &ZRV::ElecConGain, &ZRV::ElecLatGain, &ZRV::ElecLost, &ZRV::ElecTotGain,
+                    &ZRV::ElecRadGainRate, &ZRV::ElecConGainRate, &ZRV::ElecLatGainRate, &ZRV::ElecLostRate, &ZRV::ElecTotGainRate);
             }
             // Reset space output flag
             addSpaceOutputs(spaceNum) = false;
@@ -4347,94 +4235,14 @@ namespace InternalHeatGains {
         }
 
         // Zone total report variables
+
+        // Zone total report variables
         for (int zoneNum = 1; zoneNum <= state.dataGlobal->NumOfZones; ++zoneNum) {
             if (addZoneOutputs(zoneNum)) {
-
-                SetupOutputVariable(state,
-                                    "Zone Gas Equipment NaturalGas Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).GasPower,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Gas Equipment NaturalGas Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).GasConsump,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-
-                SetupOutputVariable(state,
-                                    "Zone Gas Equipment Radiant Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).GasRadGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Gas Equipment Radiant Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).GasRadGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Gas Equipment Convective Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).GasConGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Gas Equipment Convective Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).GasConGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Gas Equipment Latent Gain Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).GasLatGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Gas Equipment Latent Gain Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).GasLatGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Gas Equipment Lost Heat Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).GasLost,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Gas Equipment Lost Heat Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).GasLostRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Gas Equipment Total Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).GasTotGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Gas Equipment Total Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).GasTotGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
+                setupEquipZoneSpaceOutputs(state, state.dataHeatBal->ZoneRpt(zoneNum), state.dataHeatBal->Zone(zoneNum).Name,
+                    "Zone", "Gas Equipment", "NaturalGas",
+                    &ZRV::GasPower, &ZRV::GasConsump, &ZRV::GasRadGain, &ZRV::GasConGain, &ZRV::GasLatGain, &ZRV::GasLost, &ZRV::GasTotGain,
+                    &ZRV::GasRadGainRate, &ZRV::GasConGainRate, &ZRV::GasLatGainRate, &ZRV::GasLostRate, &ZRV::GasTotGainRate);
             }
             // Reset zone output flag
             addZoneOutputs(zoneNum) = false;
@@ -4443,92 +4251,10 @@ namespace InternalHeatGains {
         // Space total report variables
         for (int spaceNum = 1; spaceNum <= state.dataGlobal->numSpaces; ++spaceNum) {
             if (addSpaceOutputs(spaceNum)) {
-
-                SetupOutputVariable(state,
-                                    "Space Gas Equipment NaturalGas Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).GasPower,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Gas Equipment NaturalGas Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).GasConsump,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-
-                SetupOutputVariable(state,
-                                    "Space Gas Equipment Radiant Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).GasRadGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Gas Equipment Radiant Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).GasRadGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Gas Equipment Convective Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).GasConGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Gas Equipment Convective Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).GasConGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Gas Equipment Latent Gain Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).GasLatGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Gas Equipment Latent Gain Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).GasLatGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Gas Equipment Lost Heat Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).GasLost,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Gas Equipment Lost Heat Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).GasLostRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Gas Equipment Total Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).GasTotGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Gas Equipment Total Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).GasTotGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
+                setupEquipZoneSpaceOutputs(state, state.dataHeatBal->spaceRpt(spaceNum), state.dataHeatBal->space(spaceNum).Name,
+                    "Space", "Gas Equipment", "NaturalGas",
+                    &ZRV::GasPower, &ZRV::GasConsump, &ZRV::GasRadGain, &ZRV::GasConGain, &ZRV::GasLatGain, &ZRV::GasLost, &ZRV::GasTotGain,
+                    &ZRV::GasRadGainRate, &ZRV::GasConGainRate, &ZRV::GasLatGainRate, &ZRV::GasLostRate, &ZRV::GasTotGainRate);
             }
             // Reset space output flag
             addSpaceOutputs(spaceNum) = false;
@@ -4635,93 +4361,14 @@ namespace InternalHeatGains {
         }
 
         // Zone total report variables
+
+        // Zone total report variables
         for (int zoneNum = 1; zoneNum <= state.dataGlobal->NumOfZones; ++zoneNum) {
             if (addZoneOutputs(zoneNum)) {
-                SetupOutputVariable(state,
-                                    "Zone Hot Water Equipment District Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).HWPower,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Hot Water Equipment District Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).HWConsump,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-
-                SetupOutputVariable(state,
-                                    "Zone Hot Water Equipment Radiant Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).HWRadGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Hot Water Equipment Radiant Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).HWRadGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Hot Water Equipment Convective Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).HWConGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Hot Water Equipment Convective Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).HWConGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Hot Water Equipment Latent Gain Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).HWLatGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Hot Water Equipment Latent Gain Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).HWLatGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Hot Water Equipment Lost Heat Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).HWLost,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Hot Water Equipment Lost Heat Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).HWLostRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Hot Water Equipment Total Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).HWTotGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Hot Water Equipment Total Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).HWTotGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
+                setupEquipZoneSpaceOutputs(state, state.dataHeatBal->ZoneRpt(zoneNum), state.dataHeatBal->Zone(zoneNum).Name,
+                    "Zone", "Hot Water Equipment", "District Heating",
+                    &ZRV::HWPower, &ZRV::HWConsump, &ZRV::HWRadGain, &ZRV::HWConGain, &ZRV::HWLatGain, &ZRV::HWLost, &ZRV::HWTotGain,
+                    &ZRV::HWRadGainRate, &ZRV::HWConGainRate, &ZRV::HWLatGainRate, &ZRV::HWLostRate, &ZRV::HWTotGainRate);
             }
             // Reset zone output flag
             addZoneOutputs(zoneNum) = false;
@@ -4730,91 +4377,10 @@ namespace InternalHeatGains {
         // Space total report variables
         for (int spaceNum = 1; spaceNum <= state.dataGlobal->numSpaces; ++spaceNum) {
             if (addSpaceOutputs(spaceNum)) {
-                SetupOutputVariable(state,
-                                    "Space Hot Water Equipment District Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).HWPower,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Hot Water Equipment District Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).HWConsump,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-
-                SetupOutputVariable(state,
-                                    "Space Hot Water Equipment Radiant Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).HWRadGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Hot Water Equipment Radiant Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).HWRadGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Hot Water Equipment Convective Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).HWConGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Hot Water Equipment Convective Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).HWConGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Hot Water Equipment Latent Gain Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).HWLatGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Hot Water Equipment Latent Gain Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).HWLatGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Hot Water Equipment Lost Heat Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).HWLost,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Hot Water Equipment Lost Heat Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).HWLostRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Hot Water Equipment Total Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).HWTotGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Hot Water Equipment Total Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).HWTotGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
+                setupEquipZoneSpaceOutputs(state, state.dataHeatBal->spaceRpt(spaceNum), state.dataHeatBal->space(spaceNum).Name,
+                    "Space", "Hot Water Equipment", "District Heating",
+                    &ZRV::HWPower, &ZRV::HWConsump, &ZRV::HWRadGain, &ZRV::HWConGain, &ZRV::HWLatGain, &ZRV::HWLost, &ZRV::HWTotGain,
+                    &ZRV::HWRadGainRate, &ZRV::HWConGainRate, &ZRV::HWLatGainRate, &ZRV::HWLostRate, &ZRV::HWTotGainRate);
             }
             // Reset space output flag
             addSpaceOutputs(spaceNum) = false;
@@ -4921,93 +4487,14 @@ namespace InternalHeatGains {
         }
 
         // Zone total report variables
+
+        // Zone total report variables
         for (int zoneNum = 1; zoneNum <= state.dataGlobal->NumOfZones; ++zoneNum) {
             if (addZoneOutputs(zoneNum)) {
-                SetupOutputVariable(state,
-                                    "Zone Steam Equipment District Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).SteamPower,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Steam Equipment District Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).SteamConsump,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-
-                SetupOutputVariable(state,
-                                    "Zone Steam Equipment Radiant Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).SteamRadGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Steam Equipment Radiant Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).SteamRadGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Steam Equipment Convective Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).SteamConGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Steam Equipment Convective Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).SteamConGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Steam Equipment Latent Gain Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).SteamLatGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Steam Equipment Latent Gain Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).SteamLatGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Steam Equipment Lost Heat Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).SteamLost,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Steam Equipment Lost Heat Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).SteamLostRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Steam Equipment Total Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).SteamTotGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Steam Equipment Total Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).SteamTotGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
+                setupEquipZoneSpaceOutputs(state, state.dataHeatBal->ZoneRpt(zoneNum), state.dataHeatBal->Zone(zoneNum).Name,
+                    "Zone", "Steam Equipment", "District Heating",
+                    &ZRV::SteamPower, &ZRV::SteamConsump, &ZRV::SteamRadGain, &ZRV::SteamConGain, &ZRV::SteamLatGain, &ZRV::SteamLost, &ZRV::SteamTotGain,
+                    &ZRV::SteamRadGainRate, &ZRV::SteamConGainRate, &ZRV::SteamLatGainRate, &ZRV::SteamLostRate, &ZRV::SteamTotGainRate);
             }
             // Reset zone output flag
             addZoneOutputs(zoneNum) = false;
@@ -5016,91 +4503,10 @@ namespace InternalHeatGains {
         // Space total report variables
         for (int spaceNum = 1; spaceNum <= state.dataGlobal->numSpaces; ++spaceNum) {
             if (addSpaceOutputs(spaceNum)) {
-                SetupOutputVariable(state,
-                                    "Space Steam Equipment District Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).SteamPower,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Steam Equipment District Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).SteamConsump,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-
-                SetupOutputVariable(state,
-                                    "Space Steam Equipment Radiant Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).SteamRadGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Steam Equipment Radiant Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).SteamRadGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Steam Equipment Convective Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).SteamConGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Steam Equipment Convective Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).SteamConGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Steam Equipment Latent Gain Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).SteamLatGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Steam Equipment Latent Gain Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).SteamLatGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Steam Equipment Lost Heat Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).SteamLost,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Steam Equipment Lost Heat Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).SteamLostRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Steam Equipment Total Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).SteamTotGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Steam Equipment Total Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).SteamTotGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
+                setupEquipZoneSpaceOutputs(state, state.dataHeatBal->spaceRpt(spaceNum), state.dataHeatBal->space(spaceNum).Name,
+                    "Space", "Steam Equipment", "District Heating",
+                    &ZRV::SteamPower, &ZRV::SteamConsump, &ZRV::SteamRadGain, &ZRV::SteamConGain, &ZRV::SteamLatGain, &ZRV::SteamLost, &ZRV::SteamTotGain,
+                    &ZRV::SteamRadGainRate, &ZRV::SteamConGainRate, &ZRV::SteamLatGainRate, &ZRV::SteamLostRate, &ZRV::SteamTotGainRate);
             }
             // Reset space output flag
             addSpaceOutputs(spaceNum) = false;
