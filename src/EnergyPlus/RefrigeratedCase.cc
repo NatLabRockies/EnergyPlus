@@ -4042,56 +4042,57 @@ void GetRefrigerationInput(EnergyPlusData &state)
                     Secondary(SecondaryNum).NumCoils = NumCoils;
                 } // blank input for loads on secondary
 
-                if (NumCases > 0) {
-                    // Find lowest design T loop fluid out of secondary chiller
-                    // Sum rated capacity of all cases on Secondary
-                    for (int caseIndex = 1; caseIndex <= NumCases; ++caseIndex) {
-                        // mark all cases on Secondary as used by this Secondary - checking for unused or non-unique cases
-                        int CaseNum = Secondary(SecondaryNum).CaseNum(caseIndex);
-                        ++RefrigCase(CaseNum).NumSysAttach;
-                        NominalTotalCaseCap += RefrigCase(CaseNum).DesignRatedCap * RefrigCase(CaseNum).RatedRTF;
-                        Secondary(SecondaryNum).RefInventory += RefrigCase(CaseNum).DesignRefrigInventory;
-                        if (caseIndex == 1) { // look for lowest case design evap T for Secondary
-                            Secondary(SecondaryNum).TMinNeeded = RefrigCase(CaseNum).EvapTempDesign;
-                        } else {
-                            Secondary(SecondaryNum).TMinNeeded = min(RefrigCase(CaseNum).EvapTempDesign, Secondary(SecondaryNum).TMinNeeded);
+                // Lambda: mark NumSysAttach, accumulate capacity, and track the minimum design
+                // evaporating temperature (TMinNeeded) for cases, coils, and walk-ins on this
+                // secondary loop.  Case capacity uses DesignRatedCap * RatedRTF (secondary loop
+                // sees only the fraction of case time the compressor is actually running).
+                auto accumSecondaryLoads = [&]() {
+                    if (NumCases > 0) {
+                        // Find lowest design T loop fluid; sum rated capacity of all cases on Secondary
+                        for (int caseIndex = 1; caseIndex <= NumCases; ++caseIndex) {
+                            int CaseNum = Secondary(SecondaryNum).CaseNum(caseIndex);
+                            ++RefrigCase(CaseNum).NumSysAttach;
+                            NominalTotalCaseCap += RefrigCase(CaseNum).DesignRatedCap * RefrigCase(CaseNum).RatedRTF;
+                            Secondary(SecondaryNum).RefInventory += RefrigCase(CaseNum).DesignRefrigInventory;
+                            if (caseIndex == 1) {
+                                Secondary(SecondaryNum).TMinNeeded = RefrigCase(CaseNum).EvapTempDesign;
+                            } else {
+                                Secondary(SecondaryNum).TMinNeeded = min(RefrigCase(CaseNum).EvapTempDesign, Secondary(SecondaryNum).TMinNeeded);
+                            }
                         }
-                    } // CaseIndex=1,NumCases
-                } // Numcases > 0
+                    }
 
-                if (NumCoils > 0) {
-                    // Find lowest design T loop fluid out of secondary chiller
-                    // Sum rated capacity of all Coils on Secondary
-                    for (int CoilIndex = 1; CoilIndex <= NumCoils; ++CoilIndex) {
-                        // mark all Coils on Secondary as used by this Secondary - checking for unused or non-unique Coils
-                        int CoilNum = Secondary(SecondaryNum).CoilNum(CoilIndex);
-                        ++WarehouseCoil(CoilNum).NumSysAttach;
-                        NominalTotalCoilCap += WarehouseCoil(CoilNum).RatedSensibleCap;
-                        Secondary(SecondaryNum).RefInventory += WarehouseCoil(CoilNum).DesignRefrigInventory;
-                        if ((CoilIndex == 1) && (NumCases == 0)) { // look for lowest Coil design evap T for Secondary
-                            Secondary(SecondaryNum).TMinNeeded = WarehouseCoil(CoilNum).TEvapDesign;
-                        } else {
-                            Secondary(SecondaryNum).TMinNeeded = min(WarehouseCoil(CoilNum).TEvapDesign, Secondary(SecondaryNum).TMinNeeded);
+                    if (NumCoils > 0) {
+                        // Find lowest design T loop fluid; sum rated capacity of all coils on Secondary
+                        for (int CoilIndex = 1; CoilIndex <= NumCoils; ++CoilIndex) {
+                            int CoilNum = Secondary(SecondaryNum).CoilNum(CoilIndex);
+                            ++WarehouseCoil(CoilNum).NumSysAttach;
+                            NominalTotalCoilCap += WarehouseCoil(CoilNum).RatedSensibleCap;
+                            Secondary(SecondaryNum).RefInventory += WarehouseCoil(CoilNum).DesignRefrigInventory;
+                            if ((CoilIndex == 1) && (NumCases == 0)) {
+                                Secondary(SecondaryNum).TMinNeeded = WarehouseCoil(CoilNum).TEvapDesign;
+                            } else {
+                                Secondary(SecondaryNum).TMinNeeded = min(WarehouseCoil(CoilNum).TEvapDesign, Secondary(SecondaryNum).TMinNeeded);
+                            }
                         }
-                    } // CoilIndex=1,NumCoils
-                } // NumCoils > 0
+                    }
 
-                if (NumWalkIns > 0) {
-                    // Find lowest design T loop fluid out of secondary chiller
-                    // Sum rated capacity of all WalkIns on Secondary
-                    for (int WalkInIndex = 1; WalkInIndex <= NumWalkIns; ++WalkInIndex) {
-                        // mark all WalkIns on Secondary as used by this Secondary - checking for unused or non-unique WalkIns
-                        int WalkInID = Secondary(SecondaryNum).WalkInNum(WalkInIndex);
-                        ++WalkIn(WalkInID).NumSysAttach;
-                        NominalTotalWalkInCap += WalkIn(WalkInID).DesignRatedCap;
-                        Secondary(SecondaryNum).RefInventory += WalkIn(WalkInID).DesignRefrigInventory;
-                        if ((WalkInIndex == 1) && (NumCases == 0) && (NumCoils == 0)) { // look for lowest load design evap T for Secondary
-                            Secondary(SecondaryNum).TMinNeeded = WalkIn(WalkInID).TEvapDesign;
-                        } else {
-                            Secondary(SecondaryNum).TMinNeeded = min(Secondary(SecondaryNum).TMinNeeded, WalkIn(WalkInID).TEvapDesign);
+                    if (NumWalkIns > 0) {
+                        // Find lowest design T loop fluid; sum rated capacity of all walk-ins on Secondary
+                        for (int WalkInIndex = 1; WalkInIndex <= NumWalkIns; ++WalkInIndex) {
+                            int WalkInID = Secondary(SecondaryNum).WalkInNum(WalkInIndex);
+                            ++WalkIn(WalkInID).NumSysAttach;
+                            NominalTotalWalkInCap += WalkIn(WalkInID).DesignRatedCap;
+                            Secondary(SecondaryNum).RefInventory += WalkIn(WalkInID).DesignRefrigInventory;
+                            if ((WalkInIndex == 1) && (NumCases == 0) && (NumCoils == 0)) {
+                                Secondary(SecondaryNum).TMinNeeded = WalkIn(WalkInID).TEvapDesign;
+                            } else {
+                                Secondary(SecondaryNum).TMinNeeded = min(Secondary(SecondaryNum).TMinNeeded, WalkIn(WalkInID).TEvapDesign);
+                            }
                         }
-                    } // WalkInIndex=1,NumWalkIns
-                } // Numwalkins > 0
+                    }
+                };
+                accumSecondaryLoads();
 
                 // Get circulating fluid type
                 AlphaNum = 3;
