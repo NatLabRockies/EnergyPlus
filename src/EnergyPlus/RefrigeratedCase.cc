@@ -12683,25 +12683,31 @@ void RefrigSystemData::CalculateSubcoolers(EnergyPlusData &state)
 
     // HCaseIn has to be recalculated as the starting point for the subcoolers here because
     //  of the multiple number of iterations through this subroutine and because Tcondense is evolving.
+    // HSatLiqCond and CpSatLiqCond are always based on TCondense regardless of stage/intercooler configuration
+    this->HSatLiqCond = this->refrig->getSatEnthalpy(state, this->TCondense, 0.0, RoutineName);
+    this->CpSatLiqCond = this->refrig->getSatSpecificHeat(state, this->TCondense, 0.0, RoutineName);
+
+    // Compute the actual liquid inlet temperature based on stage/intercooler configuration
+    // This helper is used both for HCaseIn initialization and inside the subcooler loop
+    auto calcTLiqInActual = [&]() -> Real64 {
+        if (this->NumStages == 1) { // Single-stage compression system
+            return this->TCondense - Condenser(this->CondenserNum(1)).RatedSubcool;
+        } else if (this->intercoolerType == IntercoolerType::Flash) { // Two-stage with flash intercooler
+            return this->TIntercooler;
+        } else { // Two-stage with shell-and-coil intercooler
+            return this->TCondense - Condenser(this->CondenserNum(1)).RatedSubcool -
+                   this->IntercoolerEffectiveness * (this->TCondense - Condenser(this->CondenserNum(1)).RatedSubcool - this->TIntercooler);
+        }
+    };
+
     if (this->NumStages == 1) { // Single-stage compression system
-        this->HSatLiqCond = this->refrig->getSatEnthalpy(state, this->TCondense, 0.0, RoutineName);
-        this->CpSatLiqCond = this->refrig->getSatSpecificHeat(state, this->TCondense, 0.0, RoutineName);
         this->HCaseIn = this->HSatLiqCond - this->CpSatLiqCond * Condenser(this->CondenserNum(1)).RatedSubcool;
-
-        // Two-stage compression with flash intercooler
-    } else if (this->NumStages == 2 && this->intercoolerType == IntercoolerType::Flash) {
-        this->HSatLiqCond = this->refrig->getSatEnthalpy(state, this->TCondense, 0.0, RoutineName);
-        this->CpSatLiqCond = this->refrig->getSatSpecificHeat(state, this->TCondense, 0.0, RoutineName);
+    } else if (this->intercoolerType == IntercoolerType::Flash) { // Two-stage with flash intercooler
         this->HCaseIn = this->refrig->getSatEnthalpy(state, this->TIntercooler, 0.0, RoutineName);
-
-        // Two-stage compression with shell-and-coil intercooler
-    } else if (this->NumStages == 2 && this->intercoolerType == IntercoolerType::ShellAndCoil) {
-        TLiqInActualLocal = this->TCondense - Condenser(this->CondenserNum(1)).RatedSubcool -
-                            this->IntercoolerEffectiveness * (this->TCondense - Condenser(this->CondenserNum(1)).RatedSubcool - this->TIntercooler);
-        this->HSatLiqCond = this->refrig->getSatEnthalpy(state, this->TCondense, 0.0, RoutineName);
-        this->CpSatLiqCond = this->refrig->getSatSpecificHeat(state, this->TCondense, 0.0, RoutineName);
+    } else { // Two-stage with shell-and-coil intercooler
+        TLiqInActualLocal = calcTLiqInActual();
         this->HCaseIn = this->HSatLiqCond - this->CpSatLiqCond * (this->TCondense - TLiqInActualLocal);
-    } // NumStages and IntercoolerType
+    }
 
     for (int SubcoolerIndex = 1; SubcoolerIndex <= this->NumSubcoolers; ++SubcoolerIndex) {
         int SubcoolerID = this->SubcoolerNum(SubcoolerIndex);
@@ -12713,19 +12719,7 @@ void RefrigSystemData::CalculateSubcoolers(EnergyPlusData &state)
         Real64 ControlTLiqOut = cooler.MechControlTliqOut;
         Real64 CpLiquid = this->CpSatLiqCond;
         Real64 CpVapor = this->CpSatVapEvap;
-        if (this->NumStages == 1) { // Single-stage compression system
-            TLiqInActualLocal = this->TCondense - Condenser(this->CondenserNum(1)).RatedSubcool;
-
-            // Two-stage compression with flash intercooler
-        } else if (this->NumStages == 2 && this->intercoolerType == IntercoolerType::Flash) {
-            TLiqInActualLocal = this->TIntercooler;
-
-            // Two-stage compression with shell-and-coil intercooler
-        } else if (this->NumStages == 2 && this->intercoolerType == IntercoolerType::ShellAndCoil) {
-            TLiqInActualLocal =
-                this->TCondense - Condenser(this->CondenserNum(1)).RatedSubcool -
-                this->IntercoolerEffectiveness * (this->TCondense - Condenser(this->CondenserNum(1)).RatedSubcool - this->TIntercooler);
-        } // NumStages and IntercoolerType
+        TLiqInActualLocal = calcTLiqInActual();
 
         switch (cooler.subcoolerType) {
             // Mechanical subcoolers required to come first in order to take advantage of delT
