@@ -11065,88 +11065,59 @@ void SimulateDetailedTransRefrigSystems(EnergyPlusData &state)
     //  TransCritSysFlag = .TRUE.
     for (auto &thisSys : TransSystem) {
         // Only do those systems appropriate for this analysis, supermarket type on load time step
-        if (thisSys.NumCasesMT > 0) {
-            for (int CaseIndex = 1; CaseIndex <= thisSys.NumCasesMT; ++CaseIndex) {
-                int CaseID = thisSys.CaseNumMT(CaseIndex);
+        // Calculate cases and walk-ins for both MT and LT temperature levels, accumulating loads
+        auto accumulateTransCaseLoads = [&](int numCases, const Array1D_int &caseNums, Real64 &tEvapNeeded,
+                                            Real64 tEvapDesign, Real64 &totalCoolingLoad) {
+            for (int CaseIndex = 1; CaseIndex <= numCases; ++CaseIndex) {
+                int CaseID = caseNums(CaseIndex);
                 RefrigCase(CaseID).CalculateCase(state);
-                //  TEvapDesignMT calc in Get Input to meet lowest evap temp of any MT load on the system.
-                //  TEvapNeededMT is fixed at this design value.
-                thisSys.TEvapNeededMT = thisSys.TEvapDesignMT;
-                // increment TotalCoolingLoad for Compressors/gas cooler on each system and defrost gas cooler credits for heat recovery
-                thisSys.TotalCoolingLoadMT += RefrigCase(CaseID).TotalCoolingLoad;
+                tEvapNeeded = tEvapDesign;
+                totalCoolingLoad += RefrigCase(CaseID).TotalCoolingLoad;
                 thisSys.TotalCondDefrostCredit += RefrigCase(CaseID).HotDefrostCondCredit;
-            } // NumCasesMT
-        } // Num of MT cases > 0
-
-        if (thisSys.NumCasesLT > 0) {
-            for (int CaseIndex = 1; CaseIndex <= thisSys.NumCasesLT; ++CaseIndex) {
-                int CaseID = thisSys.CaseNumLT(CaseIndex);
-                RefrigCase(CaseID).CalculateCase(state);
-                //  TEvapDesignLT calc in Get Input to meet lowest evap temp of any LT load on the system.
-                //  TEvapNeededLT is fixed at this design value.
-                thisSys.TEvapNeededLT = thisSys.TEvapDesignLT;
-                // increment TotalCoolingLoad for Compressors/gas cooler on each system and defrost gas cooler credits for heat recovery
-                thisSys.TotalCoolingLoadLT += RefrigCase(CaseID).TotalCoolingLoad;
-                thisSys.TotalCondDefrostCredit += RefrigCase(CaseID).HotDefrostCondCredit;
-            } // NumCasesLT
-        } // Num of LT cases > 0
-
-        if (thisSys.NumWalkInsMT > 0) {
-            for (int WalkInIndex = 1; WalkInIndex <= thisSys.NumWalkInsMT; ++WalkInIndex) {
-                int WalkInID = thisSys.WalkInNumMT(WalkInIndex);
+            }
+        };
+        auto accumulateTransWalkInLoads = [&](int numWalkIns, const Array1D_int &walkInNums, Real64 &tEvapNeeded,
+                                              Real64 tEvapDesign, Real64 &totalCoolingLoad) {
+            for (int WalkInIndex = 1; WalkInIndex <= numWalkIns; ++WalkInIndex) {
+                int WalkInID = walkInNums(WalkInIndex);
                 WalkIn(WalkInID).CalculateWalkIn(state);
-                //  TEvapDesignMT calc in Get Input to meet lowest evap temp of any MT load on the system.
-                //  TEvapNeededMT is fixed at this design value.
-                thisSys.TEvapNeededMT = thisSys.TEvapDesignMT;
-                // increment TotalCoolingLoad for Compressors/gas cooler on each system
-                thisSys.TotalCoolingLoadMT += WalkIn(WalkInID).TotalCoolingLoad;
+                tEvapNeeded = tEvapDesign;
+                totalCoolingLoad += WalkIn(WalkInID).TotalCoolingLoad;
                 thisSys.TotalCondDefrostCredit += WalkIn(WalkInID).HotDefrostCondCredit;
-            } // NumWalkInsMT systems
-        } // thisSys%NumWalkInsMT > 0
+            }
+        };
 
-        if (thisSys.NumWalkInsLT > 0) {
-            for (int WalkInIndex = 1; WalkInIndex <= thisSys.NumWalkInsLT; ++WalkInIndex) {
-                int WalkInID = thisSys.WalkInNumLT(WalkInIndex);
-                WalkIn(WalkInID).CalculateWalkIn(state);
-                //  TEvapDesignLT calc in Get Input to meet lowest evap temp of any LT load on the system.
-                //  TEvapNeeded is fixed at this design value.
-                thisSys.TEvapNeededLT = thisSys.TEvapDesignLT;
-                // increment TotalCoolingLoad for Compressors/gas cooler on each system
-                thisSys.TotalCoolingLoadLT += WalkIn(WalkInID).TotalCoolingLoad;
-                thisSys.TotalCondDefrostCredit += WalkIn(WalkInID).HotDefrostCondCredit;
-            } // NumWalkInsLT systems
-        } // thisSys%NumWalkInsLT > 0
+        accumulateTransCaseLoads(thisSys.NumCasesMT, thisSys.CaseNumMT, thisSys.TEvapNeededMT,
+                                 thisSys.TEvapDesignMT, thisSys.TotalCoolingLoadMT);
+        accumulateTransCaseLoads(thisSys.NumCasesLT, thisSys.CaseNumLT, thisSys.TEvapNeededLT,
+                                 thisSys.TEvapDesignLT, thisSys.TotalCoolingLoadLT);
+        accumulateTransWalkInLoads(thisSys.NumWalkInsMT, thisSys.WalkInNumMT, thisSys.TEvapNeededMT,
+                                   thisSys.TEvapDesignMT, thisSys.TotalCoolingLoadMT);
+        accumulateTransWalkInLoads(thisSys.NumWalkInsLT, thisSys.WalkInNumLT, thisSys.TEvapNeededLT,
+                                   thisSys.TEvapDesignLT, thisSys.TotalCoolingLoadLT);
 
         // add suction pipe heat gains (W) if input by user
         // Suction pipe heat gains aren't included in the reported total system load, but are heat gains that must be met in
         //  gas cooler and compressor loads.
-        thisSys.PipeHeatLoadMT = 0.0;
-        if (thisSys.SumUASuctionPipingMT > MySmallNumber) {
-            Real64 SuctionPipeZoneTemp = state.dataLoopNodes->Node(thisSys.SuctionPipeZoneNodeNumMT).Temp;
-            thisSys.PipeHeatLoadMT = thisSys.SumUASuctionPipingMT * (SuctionPipeZoneTemp - thisSys.TEvapNeededMT);
-            // pipe heat load is a positive number (ie. heat absorbed by pipe, so needs to be subtracted
-            //   from refrigcasecredit (- for cooling zone, + for heating zone)
-            int SuctionPipeActualZoneNum = thisSys.SuctionPipeActualZoneNumMT;
-            // Can arrive here when load call to refrigeration looks for cases/walkin systems and usetimestep is .FALSE.
-            if ((!state.dataRefrigCase->UseSysTimeStep) &&
-                ((state.dataRefrigCase->NumSimulationCases > 0) || (state.dataRefrigCase->NumSimulationWalkIns > 0))) {
-                state.dataHeatBal->RefrigCaseCredit(SuctionPipeActualZoneNum).SenCaseCreditToZone -= thisSys.PipeHeatLoadMT;
-            } // UseSysTimeStep
-        }
-
-        thisSys.PipeHeatLoadLT = 0.0;
-        if (thisSys.SumUASuctionPipingLT > MySmallNumber) {
-            Real64 SuctionPipeZoneTemp = state.dataLoopNodes->Node(thisSys.SuctionPipeZoneNodeNumLT).Temp;
-            thisSys.PipeHeatLoadLT = thisSys.SumUASuctionPipingLT * (SuctionPipeZoneTemp - thisSys.TEvapNeededLT);
-            // pipe heat load is a positive number (ie. heat absorbed by pipe, so needs to be subtracted
-            //   from refrigcasecredit (- for cooling zone, + for heating zone)
-            int SuctionPipeActualZoneNum = thisSys.SuctionPipeActualZoneNumLT;
-            // Can arrive here when load call to refrigeration looks for cases/walkin systems and usetimestep is .FALSE.
-            if ((!state.dataRefrigCase->UseSysTimeStep) &&
-                ((state.dataRefrigCase->NumSimulationCases > 0) || (state.dataRefrigCase->NumSimulationWalkIns > 0))) {
-                state.dataHeatBal->RefrigCaseCredit(SuctionPipeActualZoneNum).SenCaseCreditToZone -= thisSys.PipeHeatLoadLT;
-            } // UseSysTimeStep
-        }
+        // pipe heat load is a positive number (ie. heat absorbed by pipe, so needs to be subtracted
+        //   from refrigcasecredit (- for cooling zone, + for heating zone)
+        auto calcPipeHeatLoad = [&](Real64 &pipeHeatLoad, Real64 sumUASuctionPiping, int suctionPipeZoneNodeNum,
+                                    Real64 tEvapNeeded, int suctionPipeActualZoneNum) {
+            pipeHeatLoad = 0.0;
+            if (sumUASuctionPiping > MySmallNumber) {
+                Real64 SuctionPipeZoneTemp = state.dataLoopNodes->Node(suctionPipeZoneNodeNum).Temp;
+                pipeHeatLoad = sumUASuctionPiping * (SuctionPipeZoneTemp - tEvapNeeded);
+                // Can arrive here when load call to refrigeration looks for cases/walkin systems and usetimestep is .FALSE.
+                if ((!state.dataRefrigCase->UseSysTimeStep) &&
+                    ((state.dataRefrigCase->NumSimulationCases > 0) || (state.dataRefrigCase->NumSimulationWalkIns > 0))) {
+                    state.dataHeatBal->RefrigCaseCredit(suctionPipeActualZoneNum).SenCaseCreditToZone -= pipeHeatLoad;
+                }
+            }
+        };
+        calcPipeHeatLoad(thisSys.PipeHeatLoadMT, thisSys.SumUASuctionPipingMT, thisSys.SuctionPipeZoneNodeNumMT,
+                         thisSys.TEvapNeededMT, thisSys.SuctionPipeActualZoneNumMT);
+        calcPipeHeatLoad(thisSys.PipeHeatLoadLT, thisSys.SumUASuctionPipingLT, thisSys.SuctionPipeZoneNodeNumLT,
+                         thisSys.TEvapNeededLT, thisSys.SuctionPipeActualZoneNumLT);
 
     } // SysNum
 
