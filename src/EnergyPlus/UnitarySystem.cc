@@ -6093,6 +6093,67 @@ namespace UnitarySystems {
             }
         }
 
+        // Helper lambda for NoCoolHeat FractionOfAutosized* and FlowPerCapacity* branches
+        // which share the same logical structure, differing only in method name, operation,
+        // units label, suspicious-value threshold, coil-existence guard, and warning severity.
+        auto parseNoCoolHeatFracOrFlowBranch = [&](int safEnum,
+                                                    Real64 localValue,
+                                                    std::string_view methodName,
+                                                    std::string_view opName,
+                                                    std::string_view units,
+                                                    Real64 threshold,
+                                                    bool coilExists,
+                                                    bool warnOnly) {
+            this->m_NoCoolHeatSAFMethod = safEnum;
+            if (localValue != -999.0) {
+                this->m_MaxNoCoolHeatAirVolFlow = localValue;
+                if (this->m_MaxNoCoolHeatAirVolFlow != DataSizing::AutoSize) {
+                    if (this->m_MaxNoCoolHeatAirVolFlow <= threshold && coilExists) {
+                        if (warnOnly) {
+                            ShowWarningError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
+                        } else {
+                            ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
+                        }
+                        ShowContinueError(state,
+                                          EnergyPlus::format("Input for No Load Supply Air Flow Rate Method = {}.", methodName));
+                        ShowContinueError(
+                            state,
+                            EnergyPlus::format("Suspicious No Load Supply Air Flow Rate Per Unit of Capacity During {} Operation = {:.7R} {}.",
+                                               opName,
+                                               this->m_MaxNoCoolHeatAirVolFlow,
+                                               units));
+                        if (this->m_MaxNoCoolHeatAirVolFlow < 0.0) {
+                            errorsFound = true;
+                        }
+                    }
+                    this->m_RequestAutoSize = true;
+                } else {
+                    ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
+                    ShowContinueError(state,
+                                      EnergyPlus::format("Input for No Load Supply Air Flow Rate Method = {}", methodName));
+                    if (warnOnly) {
+                        ShowContinueError(
+                            state,
+                            EnergyPlus::format(
+                                "Illegal input for No Load Supply Air Flow Rate Per Unit of Capacity During {} Operation = Autosize", opName));
+                    } else {
+                        ShowContinueError(
+                            state,
+                            EnergyPlus::format("Illegal No Load Supply Air Flow Rate Per Unit of Capacity During {} Operation = Autosize",
+                                               opName));
+                    }
+                    errorsFound = true;
+                }
+            } else {
+                ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
+                ShowContinueError(state, EnergyPlus::format("Input for No Load Supply Air Flow Rate Method = {}.", methodName));
+                ShowContinueError(state,
+                                  EnergyPlus::format("Blank field not allowed for No Load Supply Air Flow Rate Per Unit of Capacity During {} Operation",
+                                                     opName));
+                errorsFound = true;
+            }
+        };
+
         // Determine supply air flow rate sizing method when cooling or heating is not needed
         if (Util::SameString(loc_m_NoCoolHeatSAFMethod, "SupplyAirFlowRate")) {
             this->m_NoCoolHeatSAFMethod = DataSizing::SupplyAirFlowRate;
@@ -6147,131 +6208,41 @@ namespace UnitarySystems {
                 errorsFound = true;
             }
         } else if (Util::SameString(loc_m_NoCoolHeatSAFMethod, "FractionOfAutosizedCoolingValue")) {
-            this->m_NoCoolHeatSAFMethod = DataSizing::FractionOfAutosizedCoolingAirflow;
-            if (loc_m_NoCoolHeatSAFMethod_FracOfAutosizedCoolingSAFlow != -999.0) {
-                this->m_MaxNoCoolHeatAirVolFlow = loc_m_NoCoolHeatSAFMethod_FracOfAutosizedCoolingSAFlow;
-                if (this->m_MaxNoCoolHeatAirVolFlow != DataSizing::AutoSize) {
-                    if (this->m_MaxNoCoolHeatAirVolFlow <= HVAC::SmallAirVolFlow) {
-                        ShowWarningError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                        ShowContinueError(state, "Input for No Load Supply Air Flow Rate Method = FractionOfAutosizedCoolingValue.");
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format(
-                                "Suspicious No Load Supply Air Flow Rate Per Unit of Capacity During Cooling Operation = {:.7R} [m3/s/m3].",
-                                this->m_MaxNoCoolHeatAirVolFlow));
-                        if (this->m_MaxNoCoolHeatAirVolFlow < 0.0) {
-                            errorsFound = true;
-                        }
-                    }
-                    this->m_RequestAutoSize = true;
-                    // AutoSized input is not allowed
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                    ShowContinueError(state, "Input for No Load Supply Air Flow Rate Method = FractionOfAutosizedCoolingValue");
-                    ShowContinueError(state,
-                                      "Illegal input for No Load Supply Air Flow Rate Per Unit of Capacity During Cooling Operation = Autosize");
-                    errorsFound = true;
-                }
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                ShowContinueError(state, "Input for No Load Supply Air Flow Rate Method = FractionOfAutosizedCoolingValue.");
-                ShowContinueError(state, "Blank field not allowed for No Load Supply Air Flow Rate Per Unit of Capacity During Cooling Operation");
-                errorsFound = true;
-            }
+            parseNoCoolHeatFracOrFlowBranch(DataSizing::FractionOfAutosizedCoolingAirflow,
+                                            loc_m_NoCoolHeatSAFMethod_FracOfAutosizedCoolingSAFlow,
+                                            "FractionOfAutosizedCoolingValue",
+                                            "Cooling",
+                                            "[m3/s/m3]",
+                                            HVAC::SmallAirVolFlow,
+                                            true,
+                                            true);
         } else if (Util::SameString(loc_m_NoCoolHeatSAFMethod, "FractionOfAutosizedHeatingValue")) {
-            this->m_NoCoolHeatSAFMethod = DataSizing::FractionOfAutosizedHeatingAirflow;
-            if (loc_m_NoCoolHeatSAFMethod_FracOfAutosizedHeatingSAFlow != -999.0) {
-                this->m_MaxNoCoolHeatAirVolFlow = loc_m_NoCoolHeatSAFMethod_FracOfAutosizedHeatingSAFlow;
-                if (this->m_MaxNoCoolHeatAirVolFlow != DataSizing::AutoSize) {
-                    if (this->m_MaxNoCoolHeatAirVolFlow <= HVAC::SmallAirVolFlow) {
-                        ShowWarningError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                        ShowContinueError(state, "Input for No Load Supply Air Flow Rate Method = FractionOfAutosizedHeatingValue.");
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format(
-                                "Suspicious No Load Supply Air Flow Rate Per Unit of Capacity During Heating Operation = {:.7R} [m3/s/m3].",
-                                this->m_MaxNoCoolHeatAirVolFlow));
-                        if (this->m_MaxNoCoolHeatAirVolFlow < 0.0) {
-                            errorsFound = true;
-                        }
-                    }
-                    this->m_RequestAutoSize = true;
-                    // AutoSized input is not allowed
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                    ShowContinueError(state, "Input for No Load Supply Air Flow Rate Method = FractionOfAutosizedHeatingValue");
-                    ShowContinueError(state,
-                                      "Illegal input for No Load Supply Air Flow Rate Per Unit of Capacity During Heating Operation = Autosize");
-                    errorsFound = true;
-                }
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                ShowContinueError(state, "Input for No Load Supply Air Flow Rate Method = FractionOfAutosizedHeatingValue.");
-                ShowContinueError(state, "Blank field not allowed for No Load Supply Air Flow Rate Per Unit of Capacity During Heating Operation");
-                errorsFound = true;
-            }
+            parseNoCoolHeatFracOrFlowBranch(DataSizing::FractionOfAutosizedHeatingAirflow,
+                                            loc_m_NoCoolHeatSAFMethod_FracOfAutosizedHeatingSAFlow,
+                                            "FractionOfAutosizedHeatingValue",
+                                            "Heating",
+                                            "[m3/s/m3]",
+                                            HVAC::SmallAirVolFlow,
+                                            true,
+                                            true);
         } else if (Util::SameString(loc_m_NoCoolHeatSAFMethod, "FlowPerCoolingCapacity")) {
-            this->m_NoCoolHeatSAFMethod = DataSizing::FlowPerCoolingCapacity;
-            if (loc_m_NoCoolHeatSAFMethod_FlowPerCoolingCapacity != -999.0) {
-                this->m_MaxNoCoolHeatAirVolFlow = loc_m_NoCoolHeatSAFMethod_FlowPerCoolingCapacity;
-                if (this->m_MaxNoCoolHeatAirVolFlow != DataSizing::AutoSize) {
-                    if (this->m_MaxNoCoolHeatAirVolFlow <= 0.00001 && this->m_CoolCoilExists) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                        ShowContinueError(state, "Input for No Load Supply Air Flow Rate Method = FlowPerCoolingCapacity.");
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format(
-                                "Suspicious No Load Supply Air Flow Rate Per Unit of Capacity During Cooling Operation = {:.7R} [m3/s/W].",
-                                this->m_MaxNoCoolHeatAirVolFlow));
-                        if (this->m_MaxNoCoolHeatAirVolFlow < 0.0) {
-                            errorsFound = true;
-                        }
-                    }
-                    this->m_RequestAutoSize = true;
-                    // AutoSized input is not allowed
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                    ShowContinueError(state, "Input for No Load Supply Air Flow Rate Method = FlowPerCoolingCapacity.");
-                    ShowContinueError(state, "Illegal No Load Supply Air Flow Rate Per Unit of Capacity During Cooling Operation = Autosize");
-                    errorsFound = true;
-                }
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                ShowContinueError(state, "Input for No Load Supply Air Flow Rate Method = FlowPerCoolingCapacity.");
-                ShowContinueError(state, "Blank field not allowed for No Load Supply Air Flow Rate Per Unit of Capacity During Cooling Operation");
-                errorsFound = true;
-            }
+            parseNoCoolHeatFracOrFlowBranch(DataSizing::FlowPerCoolingCapacity,
+                                            loc_m_NoCoolHeatSAFMethod_FlowPerCoolingCapacity,
+                                            "FlowPerCoolingCapacity",
+                                            "Cooling",
+                                            "[m3/s/W]",
+                                            0.00001,
+                                            this->m_CoolCoilExists,
+                                            false);
         } else if (Util::SameString(loc_m_NoCoolHeatSAFMethod, "FlowPerHeatingCapacity")) {
-            this->m_NoCoolHeatSAFMethod = DataSizing::FlowPerHeatingCapacity;
-            if (loc_m_NoCoolHeatSAFMethod_FlowPerHeatingCapacity != -999.0) {
-                this->m_MaxNoCoolHeatAirVolFlow = loc_m_NoCoolHeatSAFMethod_FlowPerHeatingCapacity;
-                if (this->m_MaxNoCoolHeatAirVolFlow != DataSizing::AutoSize) {
-                    if (this->m_MaxNoCoolHeatAirVolFlow <= 0.00001 && this->m_HeatCoilExists) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                        ShowContinueError(state, "Input for No Load Supply Air Flow Rate Method = FlowPerHeatingCapacity.");
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format(
-                                "Suspicious No Load Supply Air Flow Rate Per Unit of Capacity During Heating Operation = {:.7R} [m3/s/W].",
-                                this->m_MaxNoCoolHeatAirVolFlow));
-                        if (this->m_MaxNoCoolHeatAirVolFlow < 0.0) {
-                            errorsFound = true;
-                        }
-                    }
-                    this->m_RequestAutoSize = true;
-                    // AutoSized input is not allowed
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                    ShowContinueError(state, "Input for No Load Supply Air Flow Rate Method = FlowPerHeatingCapacity.");
-                    ShowContinueError(state, "Illegal No Load Supply Air Flow Rate Per Unit of Capacity During Heating Operation = Autosize");
-                    errorsFound = true;
-                }
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                ShowContinueError(state, "Input for No Load Supply Air Flow Rate Method = FlowPerHeatingCapacity.");
-                ShowContinueError(state, "Blank field not allowed for No Load Supply Air Flow Rate Per Unit of Capacity During Heating Operation");
-                errorsFound = true;
-            }
+            parseNoCoolHeatFracOrFlowBranch(DataSizing::FlowPerHeatingCapacity,
+                                            loc_m_NoCoolHeatSAFMethod_FlowPerHeatingCapacity,
+                                            "FlowPerHeatingCapacity",
+                                            "Heating",
+                                            "[m3/s/W]",
+                                            0.00001,
+                                            this->m_HeatCoilExists,
+                                            false);
         } else if (Util::SameString(loc_m_NoCoolHeatSAFMethod, "None") || loc_m_NoCoolHeatSAFMethod.empty()) {
             this->m_NoCoolHeatSAFMethod = DataSizing::None;
             if (this->m_ControlType == UnitarySysCtrlType::CCMASHRAE) {
