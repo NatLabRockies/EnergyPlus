@@ -607,14 +607,6 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
             case SPMType::FollowGroundTemp: {
                 spm->minSetTemp = ip->getRealFieldValue(fields, props, "minimum_setpoint_temperature");
                 spm->maxSetTemp = ip->getRealFieldValue(fields, props, "maximum_setpoint_temperature");
-                if (spm->maxSetTemp < spm->minSetTemp) {
-                    ShowWarningError(state, EnergyPlus::format("{}: {}=\"{}\",", routineName, cCurrentModuleObject, spm->Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("...maximum_supply_air_temperature=[{:.1R}] is less than minimum_supply_air_temperature=[{:.1R}].",
-                                           spm->maxSetTemp,
-                                           spm->minSetTemp));
-                }
             } break;
 
             case SPMType::SZReheat:
@@ -622,32 +614,26 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
             case SPMType::SZCooling: {
                 spm->minSetTemp = ip->getRealFieldValue(fields, props, "minimum_supply_air_temperature");
                 spm->maxSetTemp = ip->getRealFieldValue(fields, props, "maximum_supply_air_temperature");
-                if (spm->maxSetTemp < spm->minSetTemp) {
-                    ShowWarningError(state, EnergyPlus::format("{}: {}=\"{}\",", routineName, cCurrentModuleObject, spm->Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("...maximum_supply_air_temperature=[{:.1R}] is less than minimum_supply_air_temperature=[{:.1R}].",
-                                           spm->maxSetTemp,
-                                           spm->minSetTemp));
-                }
             } break;
 
             case SPMType::FollowSystemNodeTemp: {
                 spm->minSetTemp = ip->getRealFieldValue(fields, props, "minimum_limit_setpoint_temperature");
                 spm->maxSetTemp = ip->getRealFieldValue(fields, props, "maximum_limit_setpoint_temperature");
-                if (spm->maxSetTemp < spm->minSetTemp) {
-                    ShowWarningError(state, EnergyPlus::format("{}: {}=\"{}\",", routineName, cCurrentModuleObject, spm->Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("...maximum_supply_air_temperature=[{:.1R}] is less than minimum_supply_air_temperature=[{:.1R}].",
-                                           spm->maxSetTemp,
-                                           spm->minSetTemp));
-                }
             } break;
 
             default:
                 break;
             } // switch (spm->type)
+
+            // Warn once for all three variants that loaded minSetTemp/maxSetTemp above
+            if (spm->maxSetTemp < spm->minSetTemp) {
+                ShowWarningError(state, EnergyPlus::format("{}: {}=\"{}\",", routineName, cCurrentModuleObject, spm->Name));
+                ShowContinueError(
+                    state,
+                    EnergyPlus::format("...maximum_supply_air_temperature=[{:.1R}] is less than minimum_supply_air_temperature=[{:.1R}].",
+                                       spm->maxSetTemp,
+                                       spm->minSetTemp));
+            }
 
             // Read Min and Max HumRat for some SPMs
             switch (spm->type) {
