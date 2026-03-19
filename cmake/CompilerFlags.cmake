@@ -120,6 +120,9 @@ elseif(CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" O
     # depending on the level of overflow check selected, the stringop-overflow can also emit false positives
     # https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wstringop-overflow
     target_compile_options(project_warnings INTERFACE -Wno-stringop-overflow)
+    # GCC 15 emits false positives for alloc-size-larger-than in ObjexxFCL's AlignedAllocator
+    # when aggressive inlining causes the compiler to lose track of size constraints
+    target_compile_options(project_warnings INTERFACE -Wno-alloc-size-larger-than)
     # for RelWithDebInfo builds, lets turn OFF NDEBUG, which will re-enable assert statements
     target_compile_options(project_options INTERFACE $<$<CONFIG:RelWithDebInfo>:-UNDEBUG>)
   elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")

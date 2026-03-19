@@ -993,8 +993,6 @@ void GetRefrigerationInput(EnergyPlusData &state)
     int NumWalkIns(0);                     // Number of walk ins
     int RefrigSysNum(0);
     Real64 DeltaHPhaseChange(0.0);     // Secondary loop enthalpy change in condenser w overfeed system (J/g)
-    Real64 DelTempMin(0.0);            // min temperature for heat rej curve for air cooled condenser (C)
-    Real64 DelTempMax(0.0);            // max temperature for heat rej curve for air cooled condenser (C)
     Real64 DensityBrineRated(0.0);     // density of circ fluid in secondary loop
     Real64 DensityPhaseChange(0.0);    // Secondary loop density at condensing temperature w overfeed system (g/m3)
     Real64 NominalTotalCompCapLP(0.0); // Total of nominal low pressure compressor capacities, used for rough input check (W) (Transcritical CO2)

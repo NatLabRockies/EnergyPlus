@@ -1454,57 +1454,143 @@ namespace VariableSpeedCoils {
             ShowFatalError(state, EnergyPlus::format("{}Errors found getting input. Program terminates.", RoutineName));
         }
 
-        // Helper: register the 9 output variables common to all coil types
-        // (air mass flow, inlet/outlet temp & humidity, part load ratio, runtime fraction, speed level, speed ratio)
-        auto setupCommonOutputVars = [&state](VariableSpeedCoilData &c, std::string_view prefix) {
-            SetupOutputVariable(state, format("{} Air Mass Flow Rate", prefix), Constant::Units::kg_s, c.AirMassFlowRate,
+        // Per-coil-type output variable registration lambdas.
+        // Each preserves the exact original registration order to maintain RDD compatibility.
+
+        auto setupAirSourceCoolingVars = [&state](VariableSpeedCoilData &c) {
+            SetupOutputVariable(state, "Cooling Coil Air Mass Flow Rate", Constant::Units::kg_s, c.AirMassFlowRate,
                                 OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, format("{} Air Inlet Temperature", prefix), Constant::Units::C, c.InletAirDBTemp,
+            SetupOutputVariable(state, "Cooling Coil Air Inlet Temperature", Constant::Units::C, c.InletAirDBTemp,
                                 OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, format("{} Air Inlet Humidity Ratio", prefix), Constant::Units::kgWater_kgDryAir, c.InletAirHumRat,
+            SetupOutputVariable(state, "Cooling Coil Air Inlet Humidity Ratio", Constant::Units::kgWater_kgDryAir, c.InletAirHumRat,
                                 OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, format("{} Air Outlet Temperature", prefix), Constant::Units::C, c.OutletAirDBTemp,
+            SetupOutputVariable(state, "Cooling Coil Latent Cooling Rate", Constant::Units::W, c.QLatent,
                                 OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, format("{} Air Outlet Humidity Ratio", prefix), Constant::Units::kgWater_kgDryAir, c.OutletAirHumRat,
+            SetupOutputVariable(state, "Cooling Coil Air Outlet Temperature", Constant::Units::C, c.OutletAirDBTemp,
                                 OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, format("{} Part Load Ratio", prefix), Constant::Units::None, c.PartLoadRatio,
+            SetupOutputVariable(state, "Cooling Coil Air Outlet Humidity Ratio", Constant::Units::kgWater_kgDryAir, c.OutletAirHumRat,
                                 OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, format("{} Runtime Fraction", prefix), Constant::Units::None, c.RunFrac,
+            SetupOutputVariable(state, "Cooling Coil Sensible Cooling Rate", Constant::Units::W, c.QSensible,
                                 OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, format("{} Upper Speed Level", prefix), Constant::Units::None, c.SpeedNumReport,
+            SetupOutputVariable(state, "Cooling Coil Total Cooling Rate", Constant::Units::W, c.QLoadTotal,
                                 OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, format("{} Neighboring Speed Levels Ratio", prefix), Constant::Units::None, c.SpeedRatioReport,
+            SetupOutputVariable(state, "Cooling Coil Part Load Ratio", Constant::Units::None, c.PartLoadRatio,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Cooling Coil Electricity Rate", Constant::Units::W, c.Power,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Cooling Coil Runtime Fraction", Constant::Units::None, c.RunFrac,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Cooling Coil Source Side Heat Transfer Rate", Constant::Units::W, c.QSource,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Cooling Coil Upper Speed Level", Constant::Units::None, c.SpeedNumReport,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Cooling Coil Neighboring Speed Levels Ratio", Constant::Units::None, c.SpeedRatioReport,
                                 OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
         };
 
-        // Helper: register the rate output variables common to cooling and heating coils
-        // (Electricity Rate, Total Rate, Sensible Rate, Source Side HT Rate, and for cooling: Latent Rate)
-        // When hasWaterSide is true, also registers water-source variables (mass flow, inlet/outlet temps, recoverable heat)
-        auto setupRateOutputVars = [&state](VariableSpeedCoilData &c, std::string_view prefix, bool isCooling, bool hasWaterSide) {
-            SetupOutputVariable(state, format("{} Electricity Rate", prefix), Constant::Units::W, c.Power,
+        auto setupAirSourceHeatingVars = [&state](VariableSpeedCoilData &c) {
+            SetupOutputVariable(state, "Heating Coil Air Mass Flow Rate", Constant::Units::kg_s, c.AirMassFlowRate,
                                 OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            std::string totalName = isCooling ? "Cooling Coil Total Cooling Rate" : "Heating Coil Heating Rate";
-            SetupOutputVariable(state, totalName, Constant::Units::W, c.QLoadTotal,
+            SetupOutputVariable(state, "Heating Coil Air Inlet Temperature", Constant::Units::C, c.InletAirDBTemp,
                                 OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            std::string sensName = isCooling ? "Cooling Coil Sensible Cooling Rate" : "Heating Coil Sensible Heating Rate";
-            SetupOutputVariable(state, sensName, Constant::Units::W, c.QSensible,
+            SetupOutputVariable(state, "Heating Coil Air Inlet Humidity Ratio", Constant::Units::kgWater_kgDryAir, c.InletAirHumRat,
                                 OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            if (isCooling) {
-                SetupOutputVariable(state, "Cooling Coil Latent Cooling Rate", Constant::Units::W, c.QLatent,
-                                    OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            }
-            SetupOutputVariable(state, format("{} Source Side Heat Transfer Rate", prefix), Constant::Units::W, c.QSource,
+            SetupOutputVariable(state, "Heating Coil Air Outlet Temperature", Constant::Units::C, c.OutletAirDBTemp,
                                 OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            if (hasWaterSide) {
-                SetupOutputVariable(state, format("{} Source Side Mass Flow Rate", prefix), Constant::Units::kg_s, c.WaterMassFlowRate,
-                                    OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-                SetupOutputVariable(state, format("{} Source Side Inlet Temperature", prefix), Constant::Units::C, c.InletWaterTemp,
-                                    OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-                SetupOutputVariable(state, format("{} Source Side Outlet Temperature", prefix), Constant::Units::C, c.OutletWaterTemp,
-                                    OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-                SetupOutputVariable(state, format("{} Recoverable Heat Transfer Rate", prefix), Constant::Units::W, c.QWasteHeat,
-                                    OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            }
+            SetupOutputVariable(state, "Heating Coil Air Outlet Humidity Ratio", Constant::Units::kgWater_kgDryAir, c.OutletAirHumRat,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Heating Coil Sensible Heating Rate", Constant::Units::W, c.QSensible,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Heating Coil Heating Rate", Constant::Units::W, c.QLoadTotal,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Heating Coil Part Load Ratio", Constant::Units::None, c.PartLoadRatio,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Heating Coil Electricity Rate", Constant::Units::W, c.Power,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Heating Coil Runtime Fraction", Constant::Units::None, c.RunFrac,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Heating Coil Source Side Heat Transfer Rate", Constant::Units::W, c.QSource,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Heating Coil Upper Speed Level", Constant::Units::None, c.SpeedNumReport,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Heating Coil Neighboring Speed Levels Ratio", Constant::Units::None, c.SpeedRatioReport,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+        };
+
+        auto setupWaterSourceCoolingVars = [&state](VariableSpeedCoilData &c) {
+            SetupOutputVariable(state, "Cooling Coil Electricity Rate", Constant::Units::W, c.Power,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Cooling Coil Total Cooling Rate", Constant::Units::W, c.QLoadTotal,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Cooling Coil Sensible Cooling Rate", Constant::Units::W, c.QSensible,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Cooling Coil Latent Cooling Rate", Constant::Units::W, c.QLatent,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Cooling Coil Source Side Heat Transfer Rate", Constant::Units::W, c.QSource,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Cooling Coil Part Load Ratio", Constant::Units::None, c.PartLoadRatio,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Cooling Coil Runtime Fraction", Constant::Units::None, c.RunFrac,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Cooling Coil Air Mass Flow Rate", Constant::Units::kg_s, c.AirMassFlowRate,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Cooling Coil Air Inlet Temperature", Constant::Units::C, c.InletAirDBTemp,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Cooling Coil Air Inlet Humidity Ratio", Constant::Units::kgWater_kgDryAir, c.InletAirHumRat,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Cooling Coil Air Outlet Temperature", Constant::Units::C, c.OutletAirDBTemp,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Cooling Coil Air Outlet Humidity Ratio", Constant::Units::kgWater_kgDryAir, c.OutletAirHumRat,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Cooling Coil Source Side Mass Flow Rate", Constant::Units::kg_s, c.WaterMassFlowRate,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Cooling Coil Source Side Inlet Temperature", Constant::Units::C, c.InletWaterTemp,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Cooling Coil Source Side Outlet Temperature", Constant::Units::C, c.OutletWaterTemp,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Cooling Coil Upper Speed Level", Constant::Units::None, c.SpeedNumReport,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Cooling Coil Neighboring Speed Levels Ratio", Constant::Units::None, c.SpeedRatioReport,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Cooling Coil Recoverable Heat Transfer Rate", Constant::Units::W, c.QWasteHeat,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+        };
+
+        auto setupWaterSourceHeatingVars = [&state](VariableSpeedCoilData &c) {
+            SetupOutputVariable(state, "Heating Coil Electricity Rate", Constant::Units::W, c.Power,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Heating Coil Heating Rate", Constant::Units::W, c.QLoadTotal,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Heating Coil Sensible Heating Rate", Constant::Units::W, c.QSensible,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Heating Coil Source Side Heat Transfer Rate", Constant::Units::W, c.QSource,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Heating Coil Part Load Ratio", Constant::Units::None, c.PartLoadRatio,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Heating Coil Runtime Fraction", Constant::Units::None, c.RunFrac,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Heating Coil Air Mass Flow Rate", Constant::Units::kg_s, c.AirMassFlowRate,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Heating Coil Air Inlet Temperature", Constant::Units::C, c.InletAirDBTemp,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Heating Coil Air Inlet Humidity Ratio", Constant::Units::kgWater_kgDryAir, c.InletAirHumRat,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Heating Coil Air Outlet Temperature", Constant::Units::C, c.OutletAirDBTemp,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Heating Coil Air Outlet Humidity Ratio", Constant::Units::kgWater_kgDryAir, c.OutletAirHumRat,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Heating Coil Source Side Mass Flow Rate", Constant::Units::kg_s, c.WaterMassFlowRate,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Heating Coil Source Side Inlet Temperature", Constant::Units::C, c.InletWaterTemp,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Heating Coil Source Side Outlet Temperature", Constant::Units::C, c.OutletWaterTemp,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Heating Coil Upper Speed Level", Constant::Units::None, c.SpeedNumReport,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Heating Coil Neighboring Speed Levels Ratio", Constant::Units::None, c.SpeedRatioReport,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state, "Heating Coil Recoverable Heat Transfer Rate", Constant::Units::W, c.QWasteHeat,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
         };
 
         for (DXCoilNum = 1; DXCoilNum <= state.dataVariableSpeedCoils->NumVarSpeedCoils; ++DXCoilNum) {
@@ -1516,8 +1602,7 @@ namespace VariableSpeedCoils {
                 // cooling and heating coils separately
                 if (varSpeedCoil.VSCoilType == HVAC::Coil_CoolingAirToAirVariableSpeed) {
                     // air source cooling coils
-                    setupCommonOutputVars(varSpeedCoil, "Cooling Coil");
-                    setupRateOutputVars(varSpeedCoil, "Cooling Coil", true, false);
+                    setupAirSourceCoolingVars(varSpeedCoil);
 
                     if (varSpeedCoil.CondensateCollectMode == CondensateToTank) {
                         SetupOutputVariable(state,
@@ -1606,8 +1691,7 @@ namespace VariableSpeedCoils {
                     }
                 } else {
                     // air source heating coils
-                    setupCommonOutputVars(varSpeedCoil, "Heating Coil");
-                    setupRateOutputVars(varSpeedCoil, "Heating Coil", false, false);
+                    setupAirSourceHeatingVars(varSpeedCoil);
 
                     SetupOutputVariable(state,
                                         "Heating Coil Defrost Electricity Rate",
@@ -1666,15 +1750,12 @@ namespace VariableSpeedCoils {
 
                 if (varSpeedCoil.VSCoilType == HVAC::Coil_CoolingWaterToAirHPVSEquationFit) { // fix coil type
                     // cooling WAHP coil
-                    setupCommonOutputVars(varSpeedCoil, "Cooling Coil");
-                    setupRateOutputVars(varSpeedCoil, "Cooling Coil", true, true);
+                    setupWaterSourceCoolingVars(varSpeedCoil);
                 } else if (varSpeedCoil.VSCoilType == HVAC::Coil_HeatingWaterToAirHPVSEquationFit) { // fix coil type
                     // heating WAHP coil
-                    setupCommonOutputVars(varSpeedCoil, "Heating Coil");
-                    setupRateOutputVars(varSpeedCoil, "Heating Coil", false, true);
+                    setupWaterSourceHeatingVars(varSpeedCoil);
                 } else if (varSpeedCoil.VSCoilType == HVAC::CoilDX_HeatPumpWaterHeaterVariableSpeed) {
                     // air source water heating coil
-                    setupCommonOutputVars(varSpeedCoil, "Cooling Coil");
                     SetupOutputVariable(state,
                                         "Cooling Coil Water Heating Electricity Rate",
                                         Constant::Units::W,
@@ -1707,6 +1788,55 @@ namespace VariableSpeedCoils {
                                         "Cooling Coil Total Water Heating Rate",
                                         Constant::Units::W,
                                         varSpeedCoil.TotalHeatingEnergyRate,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Average,
+                                        varSpeedCoil.Name);
+                    SetupOutputVariable(state,
+                                        "Cooling Coil Part Load Ratio",
+                                        Constant::Units::None,
+                                        varSpeedCoil.PartLoadRatio,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Average,
+                                        varSpeedCoil.Name);
+                    SetupOutputVariable(state,
+                                        "Cooling Coil Runtime Fraction",
+                                        Constant::Units::None,
+                                        varSpeedCoil.RunFrac,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Average,
+                                        varSpeedCoil.Name);
+                    SetupOutputVariable(state,
+                                        "Cooling Coil Air Mass Flow Rate",
+                                        Constant::Units::kg_s,
+                                        varSpeedCoil.AirMassFlowRate,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Average,
+                                        varSpeedCoil.Name);
+                    SetupOutputVariable(state,
+                                        "Cooling Coil Air Inlet Temperature",
+                                        Constant::Units::C,
+                                        varSpeedCoil.InletAirDBTemp,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Average,
+                                        varSpeedCoil.Name);
+                    SetupOutputVariable(state,
+                                        "Cooling Coil Air Inlet Humidity Ratio",
+                                        Constant::Units::kgWater_kgDryAir,
+                                        varSpeedCoil.InletAirHumRat,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Average,
+                                        varSpeedCoil.Name);
+                    SetupOutputVariable(state,
+                                        "Cooling Coil Air Outlet Temperature",
+                                        Constant::Units::C,
+                                        varSpeedCoil.OutletAirDBTemp,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Average,
+                                        varSpeedCoil.Name);
+                    SetupOutputVariable(state,
+                                        "Cooling Coil Air Outlet Humidity Ratio",
+                                        Constant::Units::kgWater_kgDryAir,
+                                        varSpeedCoil.OutletAirHumRat,
                                         OutputProcessor::TimeStepType::System,
                                         OutputProcessor::StoreType::Average,
                                         varSpeedCoil.Name);
@@ -1748,7 +1878,20 @@ namespace VariableSpeedCoils {
                                         Constant::eResource::Electricity,
                                         OutputProcessor::Group::HVAC,
                                         OutputProcessor::EndUseCat::Heating);
-
+                    SetupOutputVariable(state,
+                                        "Cooling Coil Upper Speed Level",
+                                        Constant::Units::None,
+                                        varSpeedCoil.SpeedNumReport,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Average,
+                                        varSpeedCoil.Name);
+                    SetupOutputVariable(state,
+                                        "Cooling Coil Neighboring Speed Levels Ratio",
+                                        Constant::Units::None,
+                                        varSpeedCoil.SpeedRatioReport,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Average,
+                                        varSpeedCoil.Name);
                     SetupOutputVariable(state,
                                         "Cooling Coil Water Heating Pump Electricity Rate",
                                         Constant::Units::W,
