@@ -344,6 +344,27 @@ namespace VariableSpeedCoils {
             }
         };
 
+        // Helper: register the common energy output variables for cooling or heating coils
+        // (Electricity Energy, Total Cooling/Heating Energy, and for cooling: Sensible + Latent Energy)
+        auto setupEnergyOutputVars = [&state](VariableSpeedCoilData &c, bool isCooling) {
+            std::string_view prefix = isCooling ? "Cooling Coil" : "Heating Coil";
+            auto endUseCat = isCooling ? OutputProcessor::EndUseCat::Cooling : OutputProcessor::EndUseCat::Heating;
+            auto coilsEndUseCat = isCooling ? OutputProcessor::EndUseCat::CoolingCoils : OutputProcessor::EndUseCat::HeatingCoils;
+            SetupOutputVariable(state, format("{} Electricity Energy", prefix), Constant::Units::J, c.Energy,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, c.Name,
+                                Constant::eResource::Electricity, OutputProcessor::Group::HVAC, endUseCat);
+            std::string totalName = isCooling ? "Cooling Coil Total Cooling Energy" : "Heating Coil Heating Energy";
+            SetupOutputVariable(state, totalName, Constant::Units::J, c.EnergyLoadTotal,
+                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, c.Name,
+                                Constant::eResource::EnergyTransfer, OutputProcessor::Group::HVAC, coilsEndUseCat);
+            if (isCooling) {
+                SetupOutputVariable(state, "Cooling Coil Sensible Cooling Energy", Constant::Units::J, c.EnergySensible,
+                                    OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, c.Name);
+                SetupOutputVariable(state, "Cooling Coil Latent Cooling Energy", Constant::Units::J, c.EnergyLatent,
+                                    OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, c.Name);
+            }
+        };
+
         // Helper: read and validate the availability schedule
         auto readAvailSchedule = [&](VariableSpeedCoilData &coil, const ErrorObjectHeader &eoh,
                                      const nlohmann::json &fields, const nlohmann::json &schemaProps) {
@@ -537,40 +558,7 @@ namespace VariableSpeedCoils {
                 }
 
                 // CurrentModuleObject = "Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit"
-                SetupOutputVariable(state,
-                                    "Cooling Coil Electricity Energy",
-                                    Constant::Units::J,
-                                    varSpeedCoil.Energy,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    varSpeedCoil.Name,
-                                    Constant::eResource::Electricity,
-                                    OutputProcessor::Group::HVAC,
-                                    OutputProcessor::EndUseCat::Cooling);
-                SetupOutputVariable(state,
-                                    "Cooling Coil Total Cooling Energy",
-                                    Constant::Units::J,
-                                    varSpeedCoil.EnergyLoadTotal,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    varSpeedCoil.Name,
-                                    Constant::eResource::EnergyTransfer,
-                                    OutputProcessor::Group::HVAC,
-                                    OutputProcessor::EndUseCat::CoolingCoils);
-                SetupOutputVariable(state,
-                                    "Cooling Coil Sensible Cooling Energy",
-                                    Constant::Units::J,
-                                    varSpeedCoil.EnergySensible,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    varSpeedCoil.Name);
-                SetupOutputVariable(state,
-                                    "Cooling Coil Latent Cooling Energy",
-                                    Constant::Units::J,
-                                    varSpeedCoil.EnergyLatent,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    varSpeedCoil.Name);
+                setupEnergyOutputVars(varSpeedCoil, true);
                 SetupOutputVariable(state,
                                     "Cooling Coil Source Side Heat Transfer Energy",
                                     Constant::Units::J,
@@ -863,40 +851,7 @@ namespace VariableSpeedCoils {
                 }
 
                 // CurrentModuleObject = "Coil:Cooling:DX:VariableSpeed"
-                SetupOutputVariable(state,
-                                    "Cooling Coil Electricity Energy",
-                                    Constant::Units::J,
-                                    varSpeedCoil.Energy,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    varSpeedCoil.Name,
-                                    Constant::eResource::Electricity,
-                                    OutputProcessor::Group::HVAC,
-                                    OutputProcessor::EndUseCat::Cooling);
-                SetupOutputVariable(state,
-                                    "Cooling Coil Total Cooling Energy",
-                                    Constant::Units::J,
-                                    varSpeedCoil.EnergyLoadTotal,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    varSpeedCoil.Name,
-                                    Constant::eResource::EnergyTransfer,
-                                    OutputProcessor::Group::HVAC,
-                                    OutputProcessor::EndUseCat::CoolingCoils);
-                SetupOutputVariable(state,
-                                    "Cooling Coil Sensible Cooling Energy",
-                                    Constant::Units::J,
-                                    varSpeedCoil.EnergySensible,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    varSpeedCoil.Name);
-                SetupOutputVariable(state,
-                                    "Cooling Coil Latent Cooling Energy",
-                                    Constant::Units::J,
-                                    varSpeedCoil.EnergyLatent,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    varSpeedCoil.Name);
+                setupEnergyOutputVars(varSpeedCoil, true);
                 SetupOutputVariable(state,
                                     "Cooling Coil Source Side Heat Transfer Energy",
                                     Constant::Units::J,
@@ -1062,26 +1017,7 @@ namespace VariableSpeedCoils {
                 }
 
                 // CurrentModuleObject = "Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit"
-                SetupOutputVariable(state,
-                                    "Heating Coil Electricity Energy",
-                                    Constant::Units::J,
-                                    varSpeedCoil.Energy,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    varSpeedCoil.Name,
-                                    Constant::eResource::Electricity,
-                                    OutputProcessor::Group::HVAC,
-                                    OutputProcessor::EndUseCat::Heating);
-                SetupOutputVariable(state,
-                                    "Heating Coil Heating Energy",
-                                    Constant::Units::J,
-                                    varSpeedCoil.EnergyLoadTotal,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    varSpeedCoil.Name,
-                                    Constant::eResource::EnergyTransfer,
-                                    OutputProcessor::Group::HVAC,
-                                    OutputProcessor::EndUseCat::HeatingCoils);
+                setupEnergyOutputVars(varSpeedCoil, false);
                 SetupOutputVariable(state,
                                     "Heating Coil Source Side Heat Transfer Energy",
                                     Constant::Units::J,
@@ -1318,26 +1254,7 @@ namespace VariableSpeedCoils {
                 }
 
                 // CurrentModuleObject = "Coil:Heating:DX:Variablespeed "
-                SetupOutputVariable(state,
-                                    "Heating Coil Electricity Energy",
-                                    Constant::Units::J,
-                                    varSpeedCoil.Energy,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    varSpeedCoil.Name,
-                                    Constant::eResource::Electricity,
-                                    OutputProcessor::Group::HVAC,
-                                    OutputProcessor::EndUseCat::Heating);
-                SetupOutputVariable(state,
-                                    "Heating Coil Heating Energy",
-                                    Constant::Units::J,
-                                    varSpeedCoil.EnergyLoadTotal,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    varSpeedCoil.Name,
-                                    Constant::eResource::EnergyTransfer,
-                                    OutputProcessor::Group::HVAC,
-                                    OutputProcessor::EndUseCat::HeatingCoils);
+                setupEnergyOutputVars(varSpeedCoil, false);
                 SetupOutputVariable(state,
                                     "Heating Coil Source Side Heat Transfer Energy",
                                     Constant::Units::J,
