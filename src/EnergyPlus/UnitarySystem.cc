@@ -17254,7 +17254,7 @@ namespace UnitarySystems {
         if (numAllSystemTypes == state.dataUnitarySystems->numUnitarySystems) {
             for (int sysNum = 0; sysNum < state.dataUnitarySystems->numUnitarySystems; ++sysNum) {
                 switch (state.dataUnitarySystems->unitarySys[sysNum].m_sysType) {
-                case UnitarySys::SysType::Unitary:
+                case UnitarySys::SysType::Unitary: {
                     // Setup Report variables for the Unitary System that are not reported in the components themselves
                     SetupOutputVariable(state,
                                         "Unitary System Part Load Ratio",
@@ -17509,33 +17509,40 @@ namespace UnitarySystems {
                         break;
                     }
 
+                    // Helper to set up the coil speed triplet (cycling ratio, speed ratio, speed level).
+                    // Used for both DX coil and water coil multi-speed configurations.
+                    auto setupCoilSpeedVars = [&](std::string_view coilKind) {
+                        auto &sys = state.dataUnitarySystems->unitarySys[sysNum];
+                        SetupOutputVariable(state,
+                                            format("Unitary System {} Cycling Ratio", coilKind),
+                                            Constant::Units::None,
+                                            sys.m_CycRatio,
+                                            OutputProcessor::TimeStepType::System,
+                                            OutputProcessor::StoreType::Average,
+                                            sys.Name);
+                        SetupOutputVariable(state,
+                                            format("Unitary System {} Speed Ratio", coilKind),
+                                            Constant::Units::None,
+                                            sys.m_SpeedRatio,
+                                            OutputProcessor::TimeStepType::System,
+                                            OutputProcessor::StoreType::Average,
+                                            sys.Name);
+                        SetupOutputVariable(state,
+                                            format("Unitary System {} Speed Level", coilKind),
+                                            Constant::Units::None,
+                                            sys.m_SpeedNum,
+                                            OutputProcessor::TimeStepType::System,
+                                            OutputProcessor::StoreType::Average,
+                                            sys.Name);
+                    };
+
                     if (state.dataUnitarySystems->unitarySys[sysNum].m_CoolingCoilType_Num == HVAC::CoilDX_MultiSpeedCooling ||
                         state.dataUnitarySystems->unitarySys[sysNum].m_CoolingCoilType_Num == HVAC::CoilDX_CoolingTwoSpeed ||
                         state.dataUnitarySystems->unitarySys[sysNum].m_CoolingCoilType_Num == HVAC::CoilDX_Cooling ||
                         state.dataUnitarySystems->unitarySys[sysNum].m_HeatingCoilType_Num == HVAC::CoilDX_MultiSpeedHeating ||
                         state.dataUnitarySystems->unitarySys[sysNum].m_HeatingCoilType_Num == HVAC::Coil_HeatingElectric_MultiStage ||
                         state.dataUnitarySystems->unitarySys[sysNum].m_HeatingCoilType_Num == HVAC::Coil_HeatingGas_MultiStage) {
-                        SetupOutputVariable(state,
-                                            "Unitary System DX Coil Cycling Ratio",
-                                            Constant::Units::None,
-                                            state.dataUnitarySystems->unitarySys[sysNum].m_CycRatio,
-                                            OutputProcessor::TimeStepType::System,
-                                            OutputProcessor::StoreType::Average,
-                                            state.dataUnitarySystems->unitarySys[sysNum].Name);
-                        SetupOutputVariable(state,
-                                            "Unitary System DX Coil Speed Ratio",
-                                            Constant::Units::None,
-                                            state.dataUnitarySystems->unitarySys[sysNum].m_SpeedRatio,
-                                            OutputProcessor::TimeStepType::System,
-                                            OutputProcessor::StoreType::Average,
-                                            state.dataUnitarySystems->unitarySys[sysNum].Name);
-                        SetupOutputVariable(state,
-                                            "Unitary System DX Coil Speed Level",
-                                            Constant::Units::None,
-                                            state.dataUnitarySystems->unitarySys[sysNum].m_SpeedNum,
-                                            OutputProcessor::TimeStepType::System,
-                                            OutputProcessor::StoreType::Average,
-                                            state.dataUnitarySystems->unitarySys[sysNum].Name);
+                        setupCoilSpeedVars("DX Coil");
                     }
 
                     if (((state.dataUnitarySystems->unitarySys[sysNum].m_CoolingCoilType_Num == HVAC::Coil_CoolingWater ||
@@ -17543,27 +17550,7 @@ namespace UnitarySystems {
                          state.dataUnitarySystems->unitarySys[sysNum].m_DiscreteSpeedCoolingCoil) ||
                         (state.dataUnitarySystems->unitarySys[sysNum].m_HeatingCoilType_Num == HVAC::Coil_HeatingWater &&
                          state.dataUnitarySystems->unitarySys[sysNum].m_MultiSpeedHeatingCoil)) {
-                        SetupOutputVariable(state,
-                                            "Unitary System Water Coil Cycling Ratio",
-                                            Constant::Units::None,
-                                            state.dataUnitarySystems->unitarySys[sysNum].m_CycRatio,
-                                            OutputProcessor::TimeStepType::System,
-                                            OutputProcessor::StoreType::Average,
-                                            state.dataUnitarySystems->unitarySys[sysNum].Name);
-                        SetupOutputVariable(state,
-                                            "Unitary System Water Coil Speed Ratio",
-                                            Constant::Units::None,
-                                            state.dataUnitarySystems->unitarySys[sysNum].m_SpeedRatio,
-                                            OutputProcessor::TimeStepType::System,
-                                            OutputProcessor::StoreType::Average,
-                                            state.dataUnitarySystems->unitarySys[sysNum].Name);
-                        SetupOutputVariable(state,
-                                            "Unitary System Water Coil Speed Level",
-                                            Constant::Units::None,
-                                            state.dataUnitarySystems->unitarySys[sysNum].m_SpeedNum,
-                                            OutputProcessor::TimeStepType::System,
-                                            OutputProcessor::StoreType::Average,
-                                            state.dataUnitarySystems->unitarySys[sysNum].Name);
+                        setupCoilSpeedVars("Water Coil");
                     }
 
                     if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
@@ -17645,7 +17632,7 @@ namespace UnitarySystems {
                     }
                     bool anyEMSRan;
                     EMSManager::ManageEMS(state, EMSManager::EMSCallFrom::ComponentGetInput, anyEMSRan, ObjexxFCL::Optional_int_const());
-                    break;
+                } break;
                 case UnitarySys::SysType::CoilCoolingDX:
                     // Setup Report variables for the DXCoolingSystem that is not reported in the components themselves
                     if (state.dataUnitarySystems->unitarySys[sysNum].m_CoolingCoilType_Num == HVAC::CoilDX_CoolingTwoSpeed ||
