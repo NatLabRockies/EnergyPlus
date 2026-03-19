@@ -166,7 +166,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
       set(PEDANTIC_COMPILE_FLAGS ${PEDANTIC_COMPILE_FLAGS} -Wshift-overflow=2
           -Wnull-dereference -Wduplicated-cond)
   endif ()
-  #  set(WERROR_FLAG -Werror)
+  set(WERROR_FLAG -Werror)
 endif ()
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -178,12 +178,12 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set(PEDANTIC_COMPILE_FLAGS ${PEDANTIC_COMPILE_FLAGS}
         -Wzero-as-null-pointer-constant)
   endif ()
-  #  set(WERROR_FLAG -Werror)
+  set(WERROR_FLAG -Werror)
 endif ()
 
 if (MSVC)
   set(PEDANTIC_COMPILE_FLAGS /W3)
-  #  set(WERROR_FLAG /WX)
+  set(WERROR_FLAG /WX)
 endif ()
 
 if (FMT_MASTER_PROJECT AND CMAKE_GENERATOR MATCHES "Visual Studio")

@@ -1634,7 +1634,16 @@ FMT_CONSTEXPR auto make_arg(const T& value) -> basic_format_arg<Context> {
 template <bool IS_PACKED, typename Context, type, typename T,
           FMT_ENABLE_IF(IS_PACKED)>
 FMT_CONSTEXPR FMT_INLINE auto make_arg(T&& val) -> value<Context> {
+  // Suppress false-positive -Wdangling-reference from GCC 13+; the temporary
+  // arg_mapper is intentional and the mapped reference outlives this expression.
+#if defined(__GNUC__) && !defined(__clang__) && __GNUC__ >= 13
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdangling-reference"
+#endif
   const auto& arg = arg_mapper<Context>().map(std::forward<T>(val));
+#if defined(__GNUC__) && !defined(__clang__) && __GNUC__ >= 13
+#  pragma GCC diagnostic pop
+#endif
 
   constexpr bool formattable_char =
       !std::is_same<decltype(arg), const unformattable_char&>::value;

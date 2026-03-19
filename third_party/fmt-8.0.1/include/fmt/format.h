@@ -1718,6 +1718,12 @@ inline auto write_significand(OutputIt out, T significand, int significand_size,
   return grouping.apply(out, string_view(buffer.data(), buffer.size()));
 }
 
+// Suppress false-positive -Wrestrict from GCC 13+/15+ when this function is
+// deeply inlined through write_float → write_padded → write_significand.
+#if defined(__GNUC__) && !defined(__clang__)
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wrestrict"
+#endif
 template <typename Char, typename UInt,
           FMT_ENABLE_IF(std::is_integral<UInt>::value)>
 inline auto write_significand(Char* out, UInt significand, int significand_size,
@@ -1734,6 +1740,9 @@ inline auto write_significand(Char* out, UInt significand, int significand_size,
   out[integral_size] = decimal_point;
   return end;
 }
+#if defined(__GNUC__) && !defined(__clang__)
+#  pragma GCC diagnostic pop
+#endif
 
 template <typename OutputIt, typename UInt, typename Char,
           FMT_ENABLE_IF(!std::is_pointer<remove_cvref_t<OutputIt>>::value)>
