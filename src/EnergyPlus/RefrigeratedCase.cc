@@ -12069,20 +12069,9 @@ void RefrigSystemData::CalculateCompressors(EnergyPlusData &state)
         this->TotHiStageCompPower = 0.0;
     }
 
-    for (int CompIndex = 1; CompIndex <= this->NumCompressors; ++CompIndex) {
-        int CompID = this->CompressorNum(CompIndex);
-        auto &compressor = Compressor(CompID);
-        compressor.Power = 0.0;
-        compressor.MassFlow = 0.0;
-        compressor.Capacity = 0.0;
-        compressor.ElecConsumption = 0.0;
-        compressor.CoolingEnergy = 0.0;
-        compressor.LoadFactor = 0.0;
-    }
-    if (this->NumStages == 2) {
-        for (int CompIndex = 1; CompIndex <= this->NumHiStageCompressors; ++CompIndex) {
-            int CompID = this->HiStageCompressorNum(CompIndex);
-            auto &compressor = Compressor(CompID);
+    auto zeroCompressors = [&Compressor](const Array1D_int &compNums, int numComps) {
+        for (int CompIndex = 1; CompIndex <= numComps; ++CompIndex) {
+            auto &compressor = Compressor(compNums(CompIndex));
             compressor.Power = 0.0;
             compressor.MassFlow = 0.0;
             compressor.Capacity = 0.0;
@@ -12090,6 +12079,10 @@ void RefrigSystemData::CalculateCompressors(EnergyPlusData &state)
             compressor.CoolingEnergy = 0.0;
             compressor.LoadFactor = 0.0;
         }
+    };
+    zeroCompressors(this->CompressorNum, this->NumCompressors);
+    if (this->NumStages == 2) {
+        zeroCompressors(this->HiStageCompressorNum, this->NumHiStageCompressors);
     }
 
     // Determine properties at case inlet and compressor inlet
@@ -12189,52 +12182,33 @@ void RefrigSystemData::CalculateCompressors(EnergyPlusData &state)
             auto &compressor = Compressor(CompID);
 
             // need to use indiv compressor's rated subcool and superheat to adjust capacity to actual conditions
+            // Determine base enthalpies and temperatures for this stage
+            // For single-stage or two-stage high-stage: base enthalpy for subcool is HSatLiqCond, reference temp is TCondense
+            // For two-stage low-stage: base enthalpy is HCaseInRated_base (sat liquid at intercooler), reference temp is TIntercooler
+            Real64 const HSubcoolBase = (this->NumStages == 2 && StageIndex == 1) ? HCaseInRated_base : this->HSatLiqCond;
+            Real64 const TSubcoolRef = (this->NumStages == 2 && StageIndex == 1) ? this->TIntercooler : this->TCondense;
+            // For superheat: single-stage and low-stage use HsatVaporforTevapneeded/TEvapNeeded; high-stage uses HCompInRated_base/TIntercooler
+            Real64 const HSuperheatBase = (StageIndex == 2) ? HCompInRated_base : HsatVaporforTevapneeded;
+            Real64 const TSuperheatRef = (StageIndex == 2) ? this->TIntercooler : this->TEvapNeeded;
+
             switch (compressor.SubcoolRatingType) {
             case CompRatingType::Subcooling: {
-                if (this->NumStages == 1) { // Single-stage system
-                    HCaseInRated = this->HSatLiqCond - this->CpSatLiqCond * compressor.RatedSubcool;
-                } else if (this->NumStages == 2 && StageIndex == 1) { // Two-stage system, low-stage side
-                    HCaseInRated = HCaseInRated_base - this->CpSatLiqCond * compressor.RatedSubcool;
-                } else if (this->NumStages == 2 && StageIndex == 2) { // Two-stage system, high-stage side
-                    HCaseInRated = this->HSatLiqCond - this->CpSatLiqCond * compressor.RatedSubcool;
-                } // NumStages
+                HCaseInRated = HSubcoolBase - this->CpSatLiqCond * compressor.RatedSubcool;
             } break;
             case CompRatingType::LiquidTemperature: { // have rated liquid temperature stored in "RatedSubcool"
-                if (this->NumStages == 1) {           // Single-stage system
-                    HCaseInRated = this->HSatLiqCond - this->CpSatLiqCond * (this->TCondense - compressor.RatedSubcool);
-                } else if (this->NumStages == 2 && StageIndex == 1) { // Two-stage system, low-stage side
-                    HCaseInRated = HCaseInRated_base - this->CpSatLiqCond * (this->TIntercooler - compressor.RatedSubcool);
-                } else if (this->NumStages == 2 && StageIndex == 2) { // Two-stage system, high-stage side
-                    HCaseInRated = this->HSatLiqCond - this->CpSatLiqCond * (this->TCondense - compressor.RatedSubcool);
-                } // NumStages
+                HCaseInRated = HSubcoolBase - this->CpSatLiqCond * (TSubcoolRef - compressor.RatedSubcool);
             } break;
             default:
                 break;
             } // Compressor SubcoolRatingType
             switch (compressor.SuperheatRatingType) {
             case CompRatingType::Superheat: {
-                if (this->NumStages == 1) { // Single-stage system
-                    HCompInRated = HsatVaporforTevapneeded + this->CpSatVapEvap * compressor.RatedSuperheat;
-                    TempInRated = this->TEvapNeeded + compressor.RatedSuperheat;
-                } else if (this->NumStages == 2 && StageIndex == 1) { // Two-stage system, low-stage side
-                    HCompInRated = HsatVaporforTevapneeded + this->CpSatVapEvap * compressor.RatedSuperheat;
-                    TempInRated = this->TEvapNeeded + compressor.RatedSuperheat;
-                } else if (this->NumStages == 2 && StageIndex == 2) { // Two-stage system, high-stage side
-                    HCompInRated = HCompInRated_base + this->CpSatVapEvap * compressor.RatedSuperheat;
-                    TempInRated = this->TIntercooler + compressor.RatedSuperheat;
-                } // NumStages
+                HCompInRated = HSuperheatBase + this->CpSatVapEvap * compressor.RatedSuperheat;
+                TempInRated = TSuperheatRef + compressor.RatedSuperheat;
             } break;
             case CompRatingType::ReturnGasTemperature: { // have rated compressor inlet temperature stored in "RatedSuperheat"
-                if (this->NumStages == 1) {              // Single-stage system
-                    TempInRated = compressor.RatedSuperheat;
-                    HCompInRated = HsatVaporforTevapneeded + this->CpSatVapEvap * (TempInRated - this->TEvapNeeded);
-                } else if (this->NumStages == 2 && StageIndex == 1) { // Two-stage system, low-stage side
-                    TempInRated = compressor.RatedSuperheat;
-                    HCompInRated = HsatVaporforTevapneeded + this->CpSatVapEvap * (TempInRated - this->TEvapNeeded);
-                } else if (this->NumStages == 2 && StageIndex == 2) { // Two-stage system, high-stage side
-                    TempInRated = compressor.RatedSuperheat;
-                    HCompInRated = HsatVaporforTevapneeded + this->CpSatVapEvap * (TempInRated - this->TIntercooler);
-                } // NumStages
+                TempInRated = compressor.RatedSuperheat;
+                HCompInRated = HSuperheatBase + this->CpSatVapEvap * (TempInRated - TSuperheatRef);
             } break;
             default:
                 break;
@@ -12252,44 +12226,29 @@ void RefrigSystemData::CalculateCompressors(EnergyPlusData &state)
 
             // calculate load factor for last compressor added
             // assumes either cycling or part load eff = full load eff for last compressor
-            if (StageIndex == 1) { // Single-stage or low-stage compressors
-                if ((this->TotCompCapacity + compressor.Capacity) >= NeededCapacity) {
-                    LFLastComp = (NeededCapacity - this->TotCompCapacity) / compressor.Capacity;
-                    compressor.Power *= LFLastComp;
-                    compressor.MassFlow *= LFLastComp;
-                    compressor.Capacity *= LFLastComp;
-                    this->TotCompCapacity += compressor.Capacity;
-                    this->RefMassFlowComps += compressor.MassFlow;
-                    this->TotCompPower += compressor.Power;
-                    compressor.ElecConsumption = compressor.Power * localTimeStepSec;
-                    compressor.CoolingEnergy = compressor.Capacity * localTimeStepSec;
-                    compressor.LoadFactor = LFLastComp;
-                    break; // numcomps do
-                } //>= needed capacity
-                this->TotCompCapacity += compressor.Capacity;
-                this->RefMassFlowComps += compressor.MassFlow;
-                this->TotCompPower += compressor.Power;
-                //>= needed capacity
-            } else { // high-stage compressors (for two-stage systems only)
-                if ((this->TotHiStageCompCapacity + compressor.Capacity) >= NeededCapacity) {
-                    LFLastComp = (NeededCapacity - this->TotHiStageCompCapacity) / compressor.Capacity;
-                    compressor.Power *= LFLastComp;
-                    compressor.MassFlow *= LFLastComp;
-                    compressor.Capacity *= LFLastComp;
-                    this->TotHiStageCompCapacity += compressor.Capacity;
-                    this->RefMassFlowHiStageComps += compressor.MassFlow;
-                    this->TotHiStageCompPower += compressor.Power;
+            Real64 &totCapacity = (StageIndex == 1) ? this->TotCompCapacity : this->TotHiStageCompCapacity;
+            Real64 &refMassFlow = (StageIndex == 1) ? this->RefMassFlowComps : this->RefMassFlowHiStageComps;
+            Real64 &totPower = (StageIndex == 1) ? this->TotCompPower : this->TotHiStageCompPower;
+
+            if ((totCapacity + compressor.Capacity) >= NeededCapacity) {
+                LFLastComp = (NeededCapacity - totCapacity) / compressor.Capacity;
+                compressor.Power *= LFLastComp;
+                compressor.MassFlow *= LFLastComp;
+                compressor.Capacity *= LFLastComp;
+                totCapacity += compressor.Capacity;
+                refMassFlow += compressor.MassFlow;
+                totPower += compressor.Power;
+                if (StageIndex == 2) {
                     this->FlowRatioIntercooler = this->RefMassFlowComps / this->RefMassFlowHiStageComps;
-                    compressor.ElecConsumption = compressor.Power * localTimeStepSec;
-                    compressor.CoolingEnergy = compressor.Capacity * localTimeStepSec;
-                    compressor.LoadFactor = LFLastComp;
-                    break; // numcomps do
-                } //>= needed capacity
-                this->TotHiStageCompCapacity += compressor.Capacity;
-                this->RefMassFlowHiStageComps += compressor.MassFlow;
-                this->TotHiStageCompPower += compressor.Power;
-                //>= needed capacity
-            } // StageIndex
+                }
+                compressor.ElecConsumption = compressor.Power * localTimeStepSec;
+                compressor.CoolingEnergy = compressor.Capacity * localTimeStepSec;
+                compressor.LoadFactor = LFLastComp;
+                break; // numcomps do
+            } //>= needed capacity
+            totCapacity += compressor.Capacity;
+            refMassFlow += compressor.MassFlow;
+            totPower += compressor.Power;
             compressor.ElecConsumption = compressor.Power * localTimeStepSec;
             compressor.CoolingEnergy = compressor.Capacity * localTimeStepSec;
             compressor.LoadFactor = 1.0;
