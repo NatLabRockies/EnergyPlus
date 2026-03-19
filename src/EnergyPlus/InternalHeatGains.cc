@@ -1323,6 +1323,25 @@ namespace InternalHeatGains {
         PreDefTableEntry(state, state.dataOutRptPredefined->pdchInLtArea, "Interior Lighting Total", sumArea);
         PreDefTableEntry(state, state.dataOutRptPredefined->pdchInLtPower, "Interior Lighting Total", sumPower);
 
+        // Validate that IHGAlphas(schedAlphaIdx) is a non-blank schedule name, is found, and has
+        // a minimum value >= 0. Returns the Schedule pointer (nullptr on error). Used by the
+        // ElectricEquipment/GasEquipment/HotWaterEquipment/SteamEquipment input blocks which all
+        // have the schedule at alpha field 3 with a min-zero constraint.
+        auto getAndValidateSchedMinZero = [&](const ErrorObjectHeader &eoh, int schedAlphaIdx) -> Sched::Schedule * {
+            Sched::Schedule *sched = Sched::GetSchedule(state, IHGAlphas(schedAlphaIdx));
+            if (IHGAlphaFieldBlanks(schedAlphaIdx)) {
+                ShowSevereEmptyField(state, eoh, IHGAlphaFieldNames(schedAlphaIdx));
+                ErrorsFound = true;
+            } else if (sched == nullptr) {
+                ShowSevereItemNotFound(state, eoh, IHGAlphaFieldNames(schedAlphaIdx), IHGAlphas(schedAlphaIdx));
+                ErrorsFound = true;
+            } else if (!sched->checkMinVal(state, Clusive::In, 0.0)) {
+                Sched::ShowSevereBadMin(state, eoh, IHGAlphaFieldNames(schedAlphaIdx), IHGAlphas(schedAlphaIdx), Clusive::In, 0.0);
+                ErrorsFound = true;
+            }
+            return sched;
+        };
+
         // ElectricEquipment
         // Declared in state because the lights inputs are needed for demand manager
         int numZoneElectricStatements = 0;
@@ -1352,17 +1371,7 @@ namespace InternalHeatGains {
                                                                          IHGNumericFieldNames);
 
                 ErrorObjectHeader eoh{routineName, elecEqModuleObject, IHGAlphas(1)};
-                Sched::Schedule *schedPtr = Sched::GetSchedule(state, IHGAlphas(3));
-                if (IHGAlphaFieldBlanks(3)) {
-                    ShowSevereEmptyField(state, eoh, IHGAlphaFieldNames(3));
-                    ErrorsFound = true;
-                } else if (schedPtr == nullptr) {
-                    ShowSevereItemNotFound(state, eoh, IHGAlphaFieldNames(3), IHGAlphas(3));
-                    ErrorsFound = true;
-                } else if (!schedPtr->checkMinVal(state, Clusive::In, 0.0)) {
-                    Sched::ShowSevereBadMin(state, eoh, IHGAlphaFieldNames(3), IHGAlphas(3), Clusive::In, 0.0);
-                    ErrorsFound = true;
-                }
+                Sched::Schedule *schedPtr = getAndValidateSchedMinZero(eoh, 3);
 
                 auto &thisElecEqInput = state.dataInternalHeatGains->zoneElectricObjects(elecEqInputNum);
                 DesignLevelMethod const levelMethod = static_cast<DesignLevelMethod>(getEnumValue(DesignLevelMethodNamesUC, IHGAlphas(4)));
@@ -1469,17 +1478,7 @@ namespace InternalHeatGains {
                                                                          IHGNumericFieldNames);
 
                 ErrorObjectHeader eoh{routineName, gasEqModuleObject, IHGAlphas(1)};
-                Sched::Schedule *schedPtr = Sched::GetSchedule(state, IHGAlphas(3));
-                if (IHGAlphaFieldBlanks(3)) {
-                    ShowSevereEmptyField(state, eoh, IHGAlphaFieldNames(3));
-                    ErrorsFound = true;
-                } else if (schedPtr == nullptr) {
-                    ShowSevereItemNotFound(state, eoh, IHGAlphaFieldNames(3), IHGAlphas(3));
-                    ErrorsFound = true;
-                } else if (!schedPtr->checkMinVal(state, Clusive::In, 0.0)) {
-                    Sched::ShowSevereBadMin(state, eoh, IHGAlphaFieldNames(3), IHGAlphas(3), Clusive::In, 0.0);
-                    ErrorsFound = true;
-                }
+                Sched::Schedule *schedPtr = getAndValidateSchedMinZero(eoh, 3);
 
                 auto &thisGasEqInput = zoneGasObjects(gasEqInputNum);
                 DesignLevelMethod const levelMethod = static_cast<DesignLevelMethod>(getEnumValue(DesignLevelMethodNamesUC, IHGAlphas(4)));
@@ -1601,17 +1600,7 @@ namespace InternalHeatGains {
                                                                          IHGNumericFieldNames);
 
                 ErrorObjectHeader eoh{routineName, hwEqModuleObject, IHGAlphas(1)};
-                Sched::Schedule *schedPtr = Sched::GetSchedule(state, IHGAlphas(3));
-                if (IHGAlphaFieldBlanks(3)) {
-                    ShowSevereEmptyField(state, eoh, IHGAlphaFieldNames(3));
-                    ErrorsFound = true;
-                } else if (schedPtr == nullptr) {
-                    ShowSevereItemNotFound(state, eoh, IHGAlphaFieldNames(3), IHGAlphas(3));
-                    ErrorsFound = true;
-                } else if (!schedPtr->checkMinVal(state, Clusive::In, 0.0)) {
-                    Sched::ShowSevereBadMin(state, eoh, IHGAlphaFieldNames(3), IHGAlphas(3), Clusive::In, 0.0);
-                    ErrorsFound = true;
-                }
+                Sched::Schedule *schedPtr = getAndValidateSchedMinZero(eoh, 3);
 
                 auto &thisHWEqInput = hotWaterEqObjects(hwEqInputNum);
                 DesignLevelMethod const levelMethod = static_cast<DesignLevelMethod>(getEnumValue(DesignLevelMethodNamesUC, IHGAlphas(4)));
@@ -1705,17 +1694,7 @@ namespace InternalHeatGains {
                                                                          IHGNumericFieldNames);
 
                 ErrorObjectHeader eoh{routineName, stmEqModuleObject, IHGAlphas(1)};
-                Sched::Schedule *schedPtr = Sched::GetSchedule(state, IHGAlphas(3));
-                if (IHGAlphaFieldBlanks(3)) {
-                    ShowSevereEmptyField(state, eoh, IHGAlphaFieldNames(3));
-                    ErrorsFound = true;
-                } else if (schedPtr == nullptr) {
-                    ShowSevereItemNotFound(state, eoh, IHGAlphaFieldNames(3), IHGAlphas(3));
-                    ErrorsFound = true;
-                } else if (!schedPtr->checkMinVal(state, Clusive::In, 0.0)) {
-                    Sched::ShowSevereBadMin(state, eoh, IHGAlphaFieldNames(3), IHGAlphas(3), Clusive::In, 0.0);
-                    ErrorsFound = true;
-                }
+                Sched::Schedule *schedPtr = getAndValidateSchedMinZero(eoh, 3);
 
                 auto &thisStmEqInput = steamEqObjects(stmEqInputNum);
                 DesignLevelMethod const levelMethod = static_cast<DesignLevelMethod>(getEnumValue(DesignLevelMethodNamesUC, IHGAlphas(4)));
