@@ -1263,51 +1263,41 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
             } break;
 
             // SetpointManager:SystemNodeReset:Temperature
-            case SPMType::SystemNodeTemp: {
-                auto *spmSNRTemp = dynamic_cast<SPMSystemNode *>(spm);
-                assert(spmSNRTemp != nullptr);
-
-                if (spmSNRTemp->ctrlVar != HVAC::CtrlVarType::Temp && spmSNRTemp->ctrlVar != HVAC::CtrlVarType::MaxTemp &&
-                    spmSNRTemp->ctrlVar != HVAC::CtrlVarType::MinTemp) {
-                    ShowSevereInvalidKey(state, eoh, "control_variable", ctrlVarName);
-                    ErrorsFound = true;
-                }
-
-                spmSNRTemp->lowRefSetPt = ip->getRealFieldValue(fields, props, "setpoint_at_low_reference_temperature");
-                spmSNRTemp->highRefSetPt = ip->getRealFieldValue(fields, props, "setpoint_at_high_reference_temperature");
-                spmSNRTemp->lowRef = ip->getRealFieldValue(fields, props, "low_reference_temperature");
-                spmSNRTemp->highRef = ip->getRealFieldValue(fields, props, "high_reference_temperature");
-
-                spmSNRTemp->refNodeNum = getSPMSensorNode(state,
-                                                           ip->getAlphaFieldValue(fields, props, "reference_node_name"),
-                                                           ErrorsFound,
-                                                           spm->type,
-                                                           spmSNRTemp->Name,
-                                                           Node::FluidType::Blank);
-            } break;
-
             // SetpointManager:SystemNodeReset:Humidity
+            case SPMType::SystemNodeTemp:
             case SPMType::SystemNodeHum: {
-                auto *spmSNRHum = dynamic_cast<SPMSystemNode *>(spm);
-                assert(spmSNRHum != nullptr);
+                auto *spmSNR = dynamic_cast<SPMSystemNode *>(spm);
+                assert(spmSNR != nullptr);
 
-                if (spmSNRHum->ctrlVar != HVAC::CtrlVarType::HumRat && spmSNRHum->ctrlVar != HVAC::CtrlVarType::MaxHumRat &&
-                    spmSNRHum->ctrlVar != HVAC::CtrlVarType::MinHumRat) {
-                    ShowSevereInvalidKey(state, eoh, "control_variable", ctrlVarName);
-                    ErrorsFound = true;
+                bool const isTemp = (spm->type == SPMType::SystemNodeTemp);
+                if (isTemp) {
+                    if (spmSNR->ctrlVar != HVAC::CtrlVarType::Temp && spmSNR->ctrlVar != HVAC::CtrlVarType::MaxTemp &&
+                        spmSNR->ctrlVar != HVAC::CtrlVarType::MinTemp) {
+                        ShowSevereInvalidKey(state, eoh, "control_variable", ctrlVarName);
+                        ErrorsFound = true;
+                    }
+                } else {
+                    if (spmSNR->ctrlVar != HVAC::CtrlVarType::HumRat && spmSNR->ctrlVar != HVAC::CtrlVarType::MaxHumRat &&
+                        spmSNR->ctrlVar != HVAC::CtrlVarType::MinHumRat) {
+                        ShowSevereInvalidKey(state, eoh, "control_variable", ctrlVarName);
+                        ErrorsFound = true;
+                    }
                 }
 
-                spmSNRHum->lowRefSetPt = ip->getRealFieldValue(fields, props, "setpoint_at_low_reference_humidity_ratio");
-                spmSNRHum->highRefSetPt = ip->getRealFieldValue(fields, props, "setpoint_at_high_reference_humidity_ratio");
-                spmSNRHum->lowRef = ip->getRealFieldValue(fields, props, "low_reference_humidity_ratio");
-                spmSNRHum->highRef = ip->getRealFieldValue(fields, props, "high_reference_humidity_ratio");
+                std::string_view const suffix = isTemp ? "temperature" : "humidity_ratio";
+                spmSNR->lowRefSetPt =
+                    ip->getRealFieldValue(fields, props, EnergyPlus::format("setpoint_at_low_reference_{}", suffix));
+                spmSNR->highRefSetPt =
+                    ip->getRealFieldValue(fields, props, EnergyPlus::format("setpoint_at_high_reference_{}", suffix));
+                spmSNR->lowRef = ip->getRealFieldValue(fields, props, EnergyPlus::format("low_reference_{}", suffix));
+                spmSNR->highRef = ip->getRealFieldValue(fields, props, EnergyPlus::format("high_reference_{}", suffix));
 
-                spmSNRHum->refNodeNum = getSPMSensorNode(state,
-                                                          ip->getAlphaFieldValue(fields, props, "reference_node_name"),
-                                                          ErrorsFound,
-                                                          spm->type,
-                                                          spmSNRHum->Name,
-                                                          Node::FluidType::Blank);
+                spmSNR->refNodeNum = getSPMSensorNode(state,
+                                                      ip->getAlphaFieldValue(fields, props, "reference_node_name"),
+                                                      ErrorsFound,
+                                                      spm->type,
+                                                      spmSNR->Name,
+                                                      Node::FluidType::Blank);
             } break;
 
                 // SetpointManager:MultiZone:Cooling:Average
