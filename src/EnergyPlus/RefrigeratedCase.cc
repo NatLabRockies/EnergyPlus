@@ -4866,63 +4866,62 @@ void GetRefrigerationInput(EnergyPlusData &state)
             System(RefrigSysNum).NumWalkIns = NumWalkIns;
             System(RefrigSysNum).NumCoils = NumCoils;
 
-            if (NumCases > 0) {
-                // Find lowest design evap T
-                // Sum rated capacity of all cases on system
-                for (int caseIndex = 1; caseIndex <= NumCases; ++caseIndex) {
-                    // mark all cases on system as used by this system - checking for unused or non-unique cases
-                    int CaseNum = System(RefrigSysNum).CaseNum(caseIndex);
-                    ++RefrigCase(CaseNum).NumSysAttach;
-                    NominalTotalCaseCap += RefrigCase(CaseNum).DesignRatedCap;
-                    System(RefrigSysNum).RefInventory += RefrigCase(CaseNum).DesignRefrigInventory;
-                    if (caseIndex == 1) { // look for lowest case design evap T for system
-                        System(RefrigSysNum).TEvapDesign = RefrigCase(CaseNum).EvapTempDesign;
-                    } else {
-                        System(RefrigSysNum).TEvapDesign = min(RefrigCase(CaseNum).EvapTempDesign, System(RefrigSysNum).TEvapDesign);
+            // Lambda: mark attach, accumulate capacity, and track minimum TEvapDesign for cases,
+            // coils, and walk-ins on this detailed refrigeration system.
+            // numCasesAlready / numCoilsAlready track how many case/coil loads were assigned
+            // before walk-ins, so the "first load sets TEvapDesign" logic works correctly.
+            auto accumSysLoads = [&]() {
+                if (NumCases > 0) {
+                    // Find lowest design evap T; sum rated capacity of all cases on system
+                    for (int caseIndex = 1; caseIndex <= NumCases; ++caseIndex) {
+                        int CaseNum = System(RefrigSysNum).CaseNum(caseIndex);
+                        ++RefrigCase(CaseNum).NumSysAttach;
+                        NominalTotalCaseCap += RefrigCase(CaseNum).DesignRatedCap;
+                        System(RefrigSysNum).RefInventory += RefrigCase(CaseNum).DesignRefrigInventory;
+                        if (caseIndex == 1) {
+                            System(RefrigSysNum).TEvapDesign = RefrigCase(CaseNum).EvapTempDesign;
+                        } else {
+                            System(RefrigSysNum).TEvapDesign = min(RefrigCase(CaseNum).EvapTempDesign, System(RefrigSysNum).TEvapDesign);
+                        }
                     }
-                } // CaseIndex=1,NumCases
-                System(RefrigSysNum).NumNonCascadeLoads += System(RefrigSysNum).NumCases;
-            } // Numcases > 0
+                    System(RefrigSysNum).NumNonCascadeLoads += System(RefrigSysNum).NumCases;
+                }
 
-            if (NumCoils > 0) {
-                // Find lowest design evap T
-                // Sum rated capacity of all Coils on system
-                for (int CoilIndex = 1; CoilIndex <= NumCoils; ++CoilIndex) {
-                    // mark all Coils on system as used by this system - checking for unused or non-unique Coils
-                    int CoilNum = System(RefrigSysNum).CoilNum(CoilIndex);
-                    ++WarehouseCoil(CoilNum).NumSysAttach;
-                    NominalTotalCoilCap += WarehouseCoil(CoilNum).RatedSensibleCap;
-                    System(RefrigSysNum).RefInventory += WarehouseCoil(CoilNum).DesignRefrigInventory;
-                    if ((CoilIndex == 1) && (System(RefrigSysNum).NumCases == 0)) { // look for lowest Coil design evap T for system
-                        System(RefrigSysNum).TEvapDesign = WarehouseCoil(CoilNum).TEvapDesign;
-                    } else {
-                        System(RefrigSysNum).TEvapDesign = min(WarehouseCoil(CoilNum).TEvapDesign, System(RefrigSysNum).TEvapDesign);
+                if (NumCoils > 0) {
+                    // Find lowest design evap T; sum rated capacity of all coils on system
+                    for (int CoilIndex = 1; CoilIndex <= NumCoils; ++CoilIndex) {
+                        int CoilNum = System(RefrigSysNum).CoilNum(CoilIndex);
+                        ++WarehouseCoil(CoilNum).NumSysAttach;
+                        NominalTotalCoilCap += WarehouseCoil(CoilNum).RatedSensibleCap;
+                        System(RefrigSysNum).RefInventory += WarehouseCoil(CoilNum).DesignRefrigInventory;
+                        if ((CoilIndex == 1) && (System(RefrigSysNum).NumCases == 0)) {
+                            System(RefrigSysNum).TEvapDesign = WarehouseCoil(CoilNum).TEvapDesign;
+                        } else {
+                            System(RefrigSysNum).TEvapDesign = min(WarehouseCoil(CoilNum).TEvapDesign, System(RefrigSysNum).TEvapDesign);
+                        }
                     }
-                } // CoilIndex=1,NumCoils
-                System(RefrigSysNum).NumNonCascadeLoads += System(RefrigSysNum).NumCoils;
-            } // NumCoils > 0
+                    System(RefrigSysNum).NumNonCascadeLoads += System(RefrigSysNum).NumCoils;
+                }
 
-            if (NumWalkIns > 0) {
-                for (int WalkInIndex = 1; WalkInIndex <= NumWalkIns; ++WalkInIndex) {
-                    int WalkInID = System(RefrigSysNum).WalkInNum(WalkInIndex);
-                    // mark all WalkIns on rack as used by this system (checking for unused or non-unique WalkIns)
-                    ++WalkIn(WalkInID).NumSysAttach;
-                    NominalTotalWalkInCap += WalkIn(WalkInID).DesignRatedCap;
-                    System(RefrigSysNum).RefInventory += WalkIn(WalkInID).DesignRefrigInventory;
-                    // Defrost capacity is treated differently by compressor racks and detailed systems;
-                    // for detailed systems, blank input is an error (flag value <= -98).
-                    checkWalkInDefrostCap(WalkInID);
-                    // Find design evaporating temperature for system by getting min design evap for ALL loads
-                    if ((WalkInIndex == 1) && (System(RefrigSysNum).NumCases == 0) && (System(RefrigSysNum).NumCoils == 0)) {
-                        // note use walk in index, not walkinid here to get
-                        // first walkin on this suction group/system
-                        System(RefrigSysNum).TEvapDesign = WalkIn(WalkInID).TEvapDesign;
-                    } else {
-                        System(RefrigSysNum).TEvapDesign = min(WalkIn(WalkInID).TEvapDesign, System(RefrigSysNum).TEvapDesign);
+                if (NumWalkIns > 0) {
+                    for (int WalkInIndex = 1; WalkInIndex <= NumWalkIns; ++WalkInIndex) {
+                        int WalkInID = System(RefrigSysNum).WalkInNum(WalkInIndex);
+                        ++WalkIn(WalkInID).NumSysAttach;
+                        NominalTotalWalkInCap += WalkIn(WalkInID).DesignRatedCap;
+                        System(RefrigSysNum).RefInventory += WalkIn(WalkInID).DesignRefrigInventory;
+                        // Defrost capacity is treated differently by compressor racks and detailed systems;
+                        // for detailed systems, blank input is an error (flag value <= -98).
+                        checkWalkInDefrostCap(WalkInID);
+                        if ((WalkInIndex == 1) && (System(RefrigSysNum).NumCases == 0) && (System(RefrigSysNum).NumCoils == 0)) {
+                            System(RefrigSysNum).TEvapDesign = WalkIn(WalkInID).TEvapDesign;
+                        } else {
+                            System(RefrigSysNum).TEvapDesign = min(WalkIn(WalkInID).TEvapDesign, System(RefrigSysNum).TEvapDesign);
+                        }
                     }
-                } // WalkInIndex=1,NumWalkIns
-                System(RefrigSysNum).NumNonCascadeLoads += System(RefrigSysNum).NumWalkIns;
-            } // numwalkins > 0
+                    System(RefrigSysNum).NumNonCascadeLoads += System(RefrigSysNum).NumWalkIns;
+                }
+            };
+            accumSysLoads();
 
             AlphaNum = 3;
             // Read Transfer Loads (Secondary and Cascade) assignments for this System ,
