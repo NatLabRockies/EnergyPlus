@@ -283,6 +283,26 @@ namespace VariableSpeedCoils {
 
         auto &s_ip = state.dataInputProcessing->inputProcessor;
 
+        // Helper: validate NumOfSpeeds >= 1 and NormSpedLevel in range, clamping NormSpedLevel if needed
+        auto validateNumSpeedsAndNormLevel = [&](VariableSpeedCoilData &coil, std::string_view modObj) {
+            if (coil.NumOfSpeeds < 1) {
+                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, modObj, coil.Name));
+                ShowContinueError(state,
+                                  EnergyPlus::format("...Number of Speeds must be >= 1. entered number is {:.0T}", coil.NumOfSpeeds));
+                ErrorsFound = true;
+            }
+            if (coil.NormSpedLevel > coil.NumOfSpeeds) {
+                coil.NormSpedLevel = coil.NumOfSpeeds;
+            }
+            if ((coil.NormSpedLevel > coil.NumOfSpeeds) || (coil.NormSpedLevel <= 0)) {
+                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, modObj, coil.Name));
+                ShowContinueError(
+                    state,
+                    EnergyPlus::format("...Nominal Speed Level must be valid speed level entered number is {:.0T}", coil.NormSpedLevel));
+                ErrorsFound = true;
+            }
+        };
+
         int NumCool = s_ip->getNumObjectsFound(state, "COIL:COOLING:WATERTOAIRHEATPUMP:VARIABLESPEEDEQUATIONFIT");
         int NumHeat = s_ip->getNumObjectsFound(state, "COIL:HEATING:WATERTOAIRHEATPUMP:VARIABLESPEEDEQUATIONFIT");
         int NumCoolAS = s_ip->getNumObjectsFound(state, "COIL:COOLING:DX:VARIABLESPEED");
@@ -398,25 +418,7 @@ namespace VariableSpeedCoils {
                 Node::TestCompSet(state, CurrentModuleObject, varSpeedCoil.Name, waterInletNodeName, waterOutletNodeName, "Water Nodes");
                 Node::TestCompSet(state, CurrentModuleObject, varSpeedCoil.Name, airInletNodeName, airOutletNodeName, "Air Nodes");
 
-                cFieldName = "Number of Speeds";
-                if (varSpeedCoil.NumOfSpeeds < 1) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, varSpeedCoil.Name));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("...{} must be >= 1. entered number is {:.0T}", cFieldName, varSpeedCoil.NumOfSpeeds));
-                    ErrorsFound = true;
-                }
-
-                if (varSpeedCoil.NormSpedLevel > varSpeedCoil.NumOfSpeeds) {
-                    varSpeedCoil.NormSpedLevel = varSpeedCoil.NumOfSpeeds;
-                }
-                cFieldName = "Nominal Speed Level";
-                if ((varSpeedCoil.NormSpedLevel > varSpeedCoil.NumOfSpeeds) || (varSpeedCoil.NormSpedLevel <= 0)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, varSpeedCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("...{} must be valid speed level entered number is {:.0T}", cFieldName, varSpeedCoil.NormSpedLevel));
-                    ErrorsFound = true;
-                }
+                validateNumSpeedsAndNormLevel(varSpeedCoil, CurrentModuleObject);
 
                 // part load curve
                 cFieldName = "Energy Part Load Fraction Curve Name"; // cAlphaFields(6)
@@ -627,24 +629,7 @@ namespace VariableSpeedCoils {
 
                 Node::TestCompSet(state, CurrentModuleObject, varSpeedCoil.Name, airInletNodeName, airOutletNodeName, "Air Nodes");
 
-                cFieldName = "Number of Speeds";
-                if (varSpeedCoil.NumOfSpeeds < 1) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, varSpeedCoil.Name));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("...{} must be >= 1. entered number is {:.0T}", cFieldName, varSpeedCoil.NumOfSpeeds));
-                    ErrorsFound = true;
-                }
-                if (varSpeedCoil.NormSpedLevel > varSpeedCoil.NumOfSpeeds) {
-                    varSpeedCoil.NormSpedLevel = varSpeedCoil.NumOfSpeeds;
-                }
-                cFieldName = "Nominal Speed Level";
-                if ((varSpeedCoil.NormSpedLevel > varSpeedCoil.NumOfSpeeds) || (varSpeedCoil.NormSpedLevel <= 0)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, varSpeedCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("...{} must be valid speed level entered number is {:.0T}", cFieldName, varSpeedCoil.NormSpedLevel));
-                    ErrorsFound = true;
-                }
+                validateNumSpeedsAndNormLevel(varSpeedCoil, CurrentModuleObject);
 
                 // part load curve
                 cFieldName = "Energy Part Load Fraction Curve Name"; // cAlphaFields(4)
@@ -1023,26 +1008,7 @@ namespace VariableSpeedCoils {
                 Node::TestCompSet(state, CurrentModuleObject, varSpeedCoil.Name, waterInletNodeName, waterOutletNodeName, "Water Nodes");
                 Node::TestCompSet(state, CurrentModuleObject, varSpeedCoil.Name, airInletNodeName, airOutletNodeName, "Air Nodes");
 
-                cFieldName = "Number of Speeds";
-                //       If (VarSpeedCoil(DXCoilNum)%NumOfSpeeds .LT. 2) Then
-                if (varSpeedCoil.NumOfSpeeds < 1) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, varSpeedCoil.Name));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("...{} must be >= 1. entered number is {:.0T}", cFieldName, varSpeedCoil.NumOfSpeeds));
-                    ErrorsFound = true;
-                }
-
-                if (varSpeedCoil.NormSpedLevel > varSpeedCoil.NumOfSpeeds) {
-                    varSpeedCoil.NormSpedLevel = varSpeedCoil.NumOfSpeeds;
-                }
-                cFieldName = "Nominal Speed Level";
-                if ((varSpeedCoil.NormSpedLevel > varSpeedCoil.NumOfSpeeds) || (varSpeedCoil.NormSpedLevel <= 0)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, varSpeedCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("...{} must be valid speed level entered number is {:.0T}", cFieldName, varSpeedCoil.NormSpedLevel));
-                    ErrorsFound = true;
-                }
+                validateNumSpeedsAndNormLevel(varSpeedCoil, CurrentModuleObject);
                 // part load curve
                 cFieldName = "Energy Part Load Fraction Curve Name"; // cAlphaFields(6)
                 std::string const heatPLFCurveName = s_ip->getAlphaFieldValue(fields, schemaProps, "energy_part_load_fraction_curve_name");
@@ -1237,25 +1203,7 @@ namespace VariableSpeedCoils {
                                                                   Node::ObjectIsNotParent);
 
                 Node::TestCompSet(state, CurrentModuleObject, varSpeedCoil.Name, airInletNodeName, airOutletNodeName, "Air Nodes");
-                cFieldName = "Number of Speeds";
-                if (varSpeedCoil.NumOfSpeeds < 1) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, varSpeedCoil.Name));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("...{} must be >= 1. entered number is {:.0T}", cFieldName, varSpeedCoil.NumOfSpeeds));
-                    ErrorsFound = true;
-                }
-
-                if (varSpeedCoil.NormSpedLevel > varSpeedCoil.NumOfSpeeds) {
-                    varSpeedCoil.NormSpedLevel = varSpeedCoil.NumOfSpeeds;
-                }
-                cFieldName = "Nominal Speed Level";
-                if ((varSpeedCoil.NormSpedLevel > varSpeedCoil.NumOfSpeeds) || (varSpeedCoil.NormSpedLevel <= 0)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, varSpeedCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("...{} must be valid speed level entered number is {:.0T}", cFieldName, varSpeedCoil.NormSpedLevel));
-                    ErrorsFound = true;
-                }
+                validateNumSpeedsAndNormLevel(varSpeedCoil, CurrentModuleObject);
 
                 // part load curve
                 cFieldName = "Energy Part Load Fraction Curve Name"; // cAlphaFields(4)
@@ -1515,24 +1463,7 @@ namespace VariableSpeedCoils {
                 }
                 varSpeedCoil.NumOfSpeeds = s_ip->getIntFieldValue(fields, schemaProps, "number_of_speeds");
                 varSpeedCoil.NormSpedLevel = s_ip->getIntFieldValue(fields, schemaProps, "nominal_speed_level");
-                cFieldName = "Number of Speeds";
-                if (varSpeedCoil.NumOfSpeeds < 1) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, varSpeedCoil.Name));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("...{} must be >= 1. entered number is {:.0T}", cFieldName, varSpeedCoil.NumOfSpeeds));
-                    ErrorsFound = true;
-                }
-                if (varSpeedCoil.NormSpedLevel > varSpeedCoil.NumOfSpeeds) {
-                    varSpeedCoil.NormSpedLevel = varSpeedCoil.NumOfSpeeds;
-                }
-                cFieldName = "Nominal Speed Level";
-                if ((varSpeedCoil.NormSpedLevel > varSpeedCoil.NumOfSpeeds) || (varSpeedCoil.NormSpedLevel <= 0)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, varSpeedCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("...{} must be valid speed level entered number is {:.0T}", cFieldName, varSpeedCoil.NormSpedLevel));
-                    ErrorsFound = true;
-                }
+                validateNumSpeedsAndNormLevel(varSpeedCoil, CurrentModuleObject);
                 cFieldName = "Rated Water Heating Capacity";
                 varSpeedCoil.RatedCapWH = s_ip->getRealFieldValue(fields, schemaProps, "rated_water_heating_capacity"); // NumArray(3);
                 if (varSpeedCoil.RatedCapWH <= 0.0) {
