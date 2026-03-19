@@ -303,6 +303,29 @@ namespace VariableSpeedCoils {
             }
         };
 
+        // Helper: look up a PLF curve by JSON field name, validate it, and assign to varSpeedCoil.PLFFPLR
+        auto validatePLFCurve = [&](VariableSpeedCoilData &coil, const ErrorObjectHeader &eoh,
+                                    std::string_view displayFieldName, const std::string &jsonFieldName,
+                                    const nlohmann::json &fields, const nlohmann::json &schemaProps,
+                                    std::string_view modObj) {
+            std::string const curveName = s_ip->getAlphaFieldValue(fields, schemaProps, jsonFieldName);
+            if (curveName.empty()) {
+                ShowWarningEmptyField(state, eoh, displayFieldName, "Required field is blank.");
+                ErrorsFound = true;
+            } else if ((coil.PLFFPLR = Curve::GetCurveIndex(state, curveName)) == 0) {
+                ShowSevereItemNotFound(state, eoh, displayFieldName, curveName);
+                ErrorsFound = true;
+            } else {
+                Real64 cv = Curve::CurveValue(state, coil.PLFFPLR, 1.0);
+                if (cv > 1.10 || cv < 0.90) {
+                    ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", curve values", RoutineName, modObj, coil.Name));
+                    ShowContinueError(state,
+                                      EnergyPlus::format("...{} output is not equal to 1.0 (+ or - 10%) at rated conditions.", displayFieldName));
+                    ShowContinueError(state, EnergyPlus::format("...Curve output at rated conditions = {:.3T}", cv));
+                }
+            }
+        };
+
         int NumCool = s_ip->getNumObjectsFound(state, "COIL:COOLING:WATERTOAIRHEATPUMP:VARIABLESPEEDEQUATIONFIT");
         int NumHeat = s_ip->getNumObjectsFound(state, "COIL:HEATING:WATERTOAIRHEATPUMP:VARIABLESPEEDEQUATIONFIT");
         int NumCoolAS = s_ip->getNumObjectsFound(state, "COIL:COOLING:DX:VARIABLESPEED");
@@ -421,23 +444,8 @@ namespace VariableSpeedCoils {
                 validateNumSpeedsAndNormLevel(varSpeedCoil, CurrentModuleObject);
 
                 // part load curve
-                cFieldName = "Energy Part Load Fraction Curve Name"; // cAlphaFields(6)
-                std::string const coolPLFCurveName = s_ip->getAlphaFieldValue(fields, schemaProps, "energy_part_load_fraction_curve_name");
-                if (coolPLFCurveName.empty()) {
-                    ShowWarningEmptyField(state, eoh, cFieldName, "Required field is blank.");
-                    ErrorsFound = true;
-                } else if ((varSpeedCoil.PLFFPLR = Curve::GetCurveIndex(state, coolPLFCurveName)) == 0) {
-                    ShowSevereItemNotFound(state, eoh, cFieldName, coolPLFCurveName);
-                    ErrorsFound = true;
-                } else {
-                    CurveVal = Curve::CurveValue(state, varSpeedCoil.PLFFPLR, 1.0);
-                    if (CurveVal > 1.10 || CurveVal < 0.90) {
-                        ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", curve values", RoutineName, CurrentModuleObject, varSpeedCoil.Name));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("...{} output is not equal to 1.0 (+ or - 10%) at rated conditions.", cFieldName));
-                        ShowContinueError(state, EnergyPlus::format("...Curve output at rated conditions = {:.3T}", CurveVal));
-                    }
-                }
+                validatePLFCurve(varSpeedCoil, eoh, "Energy Part Load Fraction Curve Name",
+                                 "energy_part_load_fraction_curve_name", fields, schemaProps, CurrentModuleObject);
 
                 for (int I = 1; I <= varSpeedCoil.NumOfSpeeds; ++I) {
                     std::string fieldName;
@@ -632,23 +640,8 @@ namespace VariableSpeedCoils {
                 validateNumSpeedsAndNormLevel(varSpeedCoil, CurrentModuleObject);
 
                 // part load curve
-                cFieldName = "Energy Part Load Fraction Curve Name"; // cAlphaFields(4)
-                std::string const coolPLFCurveName = s_ip->getAlphaFieldValue(fields, schemaProps, "energy_part_load_fraction_curve_name");
-                if (coolPLFCurveName.empty()) {
-                    ShowWarningEmptyField(state, eoh, cFieldName, "Required field is blank.");
-                    ErrorsFound = true;
-                } else if ((varSpeedCoil.PLFFPLR = Curve::GetCurveIndex(state, coolPLFCurveName)) == 0) {
-                    ShowSevereItemNotFound(state, eoh, cFieldName, coolPLFCurveName);
-                    ErrorsFound = true;
-                } else {
-                    CurveVal = Curve::CurveValue(state, varSpeedCoil.PLFFPLR, 1.0);
-                    if (CurveVal > 1.10 || CurveVal < 0.90) {
-                        ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", curve values", RoutineName, CurrentModuleObject, varSpeedCoil.Name));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("...{} output is not equal to 1.0 (+ or - 10%) at rated conditions.", cFieldName));
-                        ShowContinueError(state, EnergyPlus::format("...Curve output at rated conditions = {:.3T}", CurveVal));
-                    }
-                }
+                validatePLFCurve(varSpeedCoil, eoh, "Energy Part Load Fraction Curve Name",
+                                 "energy_part_load_fraction_curve_name", fields, schemaProps, CurrentModuleObject);
 
                 cFieldName = "Condenser Air Inlet Node Name"; // cAlphaFields(10)
                 std::string condenserAirInletNodeName = s_ip->getAlphaFieldValue(fields, schemaProps, "condenser_air_inlet_node_name");
@@ -1010,23 +1003,8 @@ namespace VariableSpeedCoils {
 
                 validateNumSpeedsAndNormLevel(varSpeedCoil, CurrentModuleObject);
                 // part load curve
-                cFieldName = "Energy Part Load Fraction Curve Name"; // cAlphaFields(6)
-                std::string const heatPLFCurveName = s_ip->getAlphaFieldValue(fields, schemaProps, "energy_part_load_fraction_curve_name");
-                if (heatPLFCurveName.empty()) {
-                    ShowWarningEmptyField(state, eoh, cFieldName, "Required field is blank.");
-                    ErrorsFound = true;
-                } else if ((varSpeedCoil.PLFFPLR = Curve::GetCurveIndex(state, heatPLFCurveName)) == 0) {
-                    ShowSevereItemNotFound(state, eoh, cFieldName, heatPLFCurveName);
-                    ErrorsFound = true;
-                } else {
-                    CurveVal = Curve::CurveValue(state, varSpeedCoil.PLFFPLR, 1.0);
-                    if (CurveVal > 1.10 || CurveVal < 0.90) {
-                        ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", curve values", RoutineName, CurrentModuleObject, varSpeedCoil.Name));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("...{} output is not equal to 1.0 (+ or - 10%) at rated conditions.", cFieldName));
-                        ShowContinueError(state, EnergyPlus::format("...Curve output at rated conditions = {:.3T}", CurveVal));
-                    }
-                }
+                validatePLFCurve(varSpeedCoil, eoh, "Energy Part Load Fraction Curve Name",
+                                 "energy_part_load_fraction_curve_name", fields, schemaProps, CurrentModuleObject);
 
                 for (int I = 1; I <= varSpeedCoil.NumOfSpeeds; ++I) {
                     std::string fieldName;
@@ -1206,23 +1184,8 @@ namespace VariableSpeedCoils {
                 validateNumSpeedsAndNormLevel(varSpeedCoil, CurrentModuleObject);
 
                 // part load curve
-                cFieldName = "Energy Part Load Fraction Curve Name"; // cAlphaFields(4)
-                std::string const heatPLFCurveName = s_ip->getAlphaFieldValue(fields, schemaProps, "energy_part_load_fraction_curve_name");
-                if (heatPLFCurveName.empty()) {
-                    ShowWarningEmptyField(state, eoh, cFieldName, "Required field is blank.");
-                    ErrorsFound = true;
-                } else if ((varSpeedCoil.PLFFPLR = Curve::GetCurveIndex(state, heatPLFCurveName)) == 0) {
-                    ShowSevereItemNotFound(state, eoh, cFieldName, heatPLFCurveName);
-                    ErrorsFound = true;
-                } else {
-                    CurveVal = Curve::CurveValue(state, varSpeedCoil.PLFFPLR, 1.0);
-                    if (CurveVal > 1.10 || CurveVal < 0.90) {
-                        ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", curve values", RoutineName, CurrentModuleObject, varSpeedCoil.Name));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("...{} output is not equal to 1.0 (+ or - 10%) at rated conditions.", cFieldName));
-                        ShowContinueError(state, EnergyPlus::format("...Curve output at rated conditions = {:.3T}", CurveVal));
-                    }
-                }
+                validatePLFCurve(varSpeedCoil, eoh, "Energy Part Load Fraction Curve Name",
+                                 "energy_part_load_fraction_curve_name", fields, schemaProps, CurrentModuleObject);
 
                 std::string const defrostEIRFTFieldName = "Defrost Energy Input Ratio Function of Temperature Curve Name"; // AlphArray(5)
                 std::string defrostEIRFTCurveName =
@@ -1656,23 +1619,8 @@ namespace VariableSpeedCoils {
                 WHInletWaterTemp = varSpeedCoil.WHRatedInletWaterTemp;
 
                 // part load curve
-                cFieldName = "Part Load Fraction Correlation Curve Name";
-                fieldValue = s_ip->getAlphaFieldValue(fields, schemaProps, "part_load_fraction_correlation_curve_name");
-                if (fieldValue.empty()) {
-                    ShowWarningEmptyField(state, eoh, cFieldName, "Required field is blank.");
-                    ErrorsFound = true;
-                } else if ((varSpeedCoil.PLFFPLR = Curve::GetCurveIndex(state, fieldValue)) == 0) {
-                    ShowSevereItemNotFound(state, eoh, cFieldName, fieldValue);
-                    ErrorsFound = true;
-                } else {
-                    CurveVal = Curve::CurveValue(state, varSpeedCoil.PLFFPLR, 1.0);
-                    if (CurveVal > 1.10 || CurveVal < 0.90) {
-                        ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", curve values", RoutineName, CurrentModuleObject, varSpeedCoil.Name));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("...{} output is not equal to 1.0 (+ or - 10%) at rated conditions.", cFieldName));
-                        ShowContinueError(state, EnergyPlus::format("...Curve output at rated conditions = {:.3T}", CurveVal));
-                    }
-                }
+                validatePLFCurve(varSpeedCoil, eoh, "Part Load Fraction Correlation Curve Name",
+                                 "part_load_fraction_correlation_curve_name", fields, schemaProps, CurrentModuleObject);
 
                 for (int I = 1; I <= varSpeedCoil.NumOfSpeeds; ++I) {
                     std::string jfieldName;
