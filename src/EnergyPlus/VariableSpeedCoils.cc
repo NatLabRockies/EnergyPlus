@@ -402,6 +402,36 @@ namespace VariableSpeedCoils {
             }
         };
 
+        // Helper: register air inlet/outlet nodes, call TestCompSet, and return the node names
+        auto registerAirNodes = [&](VariableSpeedCoilData &coil, Node::ConnectionObjectType connType,
+                                    const nlohmann::json &fields, const nlohmann::json &schemaProps,
+                                    std::string_view inletField, std::string_view outletField) {
+            std::string inName = s_ip->getAlphaFieldValue(fields, schemaProps, inletField);
+            std::string outName = s_ip->getAlphaFieldValue(fields, schemaProps, outletField);
+            coil.AirInletNodeNum = GetOnlySingleNode(state, inName, ErrorsFound, connType, coil.Name,
+                                                     Node::FluidType::Air, Node::ConnectionType::Inlet,
+                                                     Node::CompFluidStream::Primary, Node::ObjectIsNotParent);
+            coil.AirOutletNodeNum = GetOnlySingleNode(state, outName, ErrorsFound, connType, coil.Name,
+                                                      Node::FluidType::Air, Node::ConnectionType::Outlet,
+                                                      Node::CompFluidStream::Primary, Node::ObjectIsNotParent);
+            Node::TestCompSet(state, CurrentModuleObject, coil.Name, inName, outName, "Air Nodes");
+        };
+
+        // Helper: register water inlet/outlet nodes and call TestCompSet
+        auto registerWaterNodes = [&](VariableSpeedCoilData &coil, Node::ConnectionObjectType connType,
+                                      const nlohmann::json &fields, const nlohmann::json &schemaProps,
+                                      std::string_view inletField, std::string_view outletField) {
+            std::string inName = s_ip->getAlphaFieldValue(fields, schemaProps, inletField);
+            std::string outName = s_ip->getAlphaFieldValue(fields, schemaProps, outletField);
+            coil.WaterInletNodeNum = GetOnlySingleNode(state, inName, ErrorsFound, connType, coil.Name,
+                                                       Node::FluidType::Water, Node::ConnectionType::Inlet,
+                                                       Node::CompFluidStream::Secondary, Node::ObjectIsNotParent);
+            coil.WaterOutletNodeNum = GetOnlySingleNode(state, outName, ErrorsFound, connType, coil.Name,
+                                                        Node::FluidType::Water, Node::ConnectionType::Outlet,
+                                                        Node::CompFluidStream::Secondary, Node::ObjectIsNotParent);
+            Node::TestCompSet(state, CurrentModuleObject, coil.Name, inName, outName, "Water Nodes");
+        };
+
         int NumCool = s_ip->getNumObjectsFound(state, "COIL:COOLING:WATERTOAIRHEATPUMP:VARIABLESPEEDEQUATIONFIT");
         int NumHeat = s_ip->getNumObjectsFound(state, "COIL:HEATING:WATERTOAIRHEATPUMP:VARIABLESPEEDEQUATIONFIT");
         int NumCoolAS = s_ip->getNumObjectsFound(state, "COIL:COOLING:DX:VARIABLESPEED");
@@ -466,50 +496,10 @@ namespace VariableSpeedCoils {
                 varSpeedCoil.FanDelayTime = s_ip->getRealFieldValue(fields, schemaProps, "fan_delay_time");
                 varSpeedCoil.HOTGASREHEATFLG = s_ip->getIntFieldValue(fields, schemaProps, "flag_for_using_hot_gas_reheat_0_or_1");
                 varSpeedCoil.CondenserType = DataHeatBalance::RefrigCondenserType::Water;
-                std::string waterInletNodeName = s_ip->getAlphaFieldValue(fields, schemaProps, "water_to_refrigerant_hx_water_inlet_node_name");
-                std::string waterOutletNodeName = s_ip->getAlphaFieldValue(fields, schemaProps, "water_to_refrigerant_hx_water_outlet_node_name");
-                std::string airInletNodeName = s_ip->getAlphaFieldValue(fields, schemaProps, "indoor_air_inlet_node_name");
-                std::string airOutletNodeName = s_ip->getAlphaFieldValue(fields, schemaProps, "indoor_air_outlet_node_name");
-
-                varSpeedCoil.WaterInletNodeNum = GetOnlySingleNode(state,
-                                                                   waterInletNodeName,
-                                                                   ErrorsFound,
-                                                                   Node::ConnectionObjectType::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit,
-                                                                   varSpeedCoil.Name,
-                                                                   Node::FluidType::Water,
-                                                                   Node::ConnectionType::Inlet,
-                                                                   Node::CompFluidStream::Secondary,
-                                                                   Node::ObjectIsNotParent);
-                varSpeedCoil.WaterOutletNodeNum = GetOnlySingleNode(state,
-                                                                    waterOutletNodeName,
-                                                                    ErrorsFound,
-                                                                    Node::ConnectionObjectType::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit,
-                                                                    varSpeedCoil.Name,
-                                                                    Node::FluidType::Water,
-                                                                    Node::ConnectionType::Outlet,
-                                                                    Node::CompFluidStream::Secondary,
-                                                                    Node::ObjectIsNotParent);
-                varSpeedCoil.AirInletNodeNum = GetOnlySingleNode(state,
-                                                                 airInletNodeName,
-                                                                 ErrorsFound,
-                                                                 Node::ConnectionObjectType::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit,
-                                                                 varSpeedCoil.Name,
-                                                                 Node::FluidType::Air,
-                                                                 Node::ConnectionType::Inlet,
-                                                                 Node::CompFluidStream::Primary,
-                                                                 Node::ObjectIsNotParent);
-                varSpeedCoil.AirOutletNodeNum = GetOnlySingleNode(state,
-                                                                  airOutletNodeName,
-                                                                  ErrorsFound,
-                                                                  Node::ConnectionObjectType::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit,
-                                                                  varSpeedCoil.Name,
-                                                                  Node::FluidType::Air,
-                                                                  Node::ConnectionType::Outlet,
-                                                                  Node::CompFluidStream::Primary,
-                                                                  Node::ObjectIsNotParent);
-
-                Node::TestCompSet(state, CurrentModuleObject, varSpeedCoil.Name, waterInletNodeName, waterOutletNodeName, "Water Nodes");
-                Node::TestCompSet(state, CurrentModuleObject, varSpeedCoil.Name, airInletNodeName, airOutletNodeName, "Air Nodes");
+                registerWaterNodes(varSpeedCoil, Node::ConnectionObjectType::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit,
+                                   fields, schemaProps, "water_to_refrigerant_hx_water_inlet_node_name", "water_to_refrigerant_hx_water_outlet_node_name");
+                registerAirNodes(varSpeedCoil, Node::ConnectionObjectType::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit,
+                                 fields, schemaProps, "indoor_air_inlet_node_name", "indoor_air_outlet_node_name");
 
                 validateNumSpeedsAndNormLevel(varSpeedCoil, CurrentModuleObject);
 
@@ -641,28 +631,8 @@ namespace VariableSpeedCoils {
                 varSpeedCoil.MaxONOFFCyclesperHour = s_ip->getRealFieldValue(fields, schemaProps, "maximum_cycling_rate");
                 varSpeedCoil.LatentCapacityTimeConstant = s_ip->getRealFieldValue(fields, schemaProps, "latent_capacity_time_constant");
                 varSpeedCoil.FanDelayTime = s_ip->getRealFieldValue(fields, schemaProps, "fan_delay_time");
-                std::string airInletNodeName = s_ip->getAlphaFieldValue(fields, schemaProps, "indoor_air_inlet_node_name");
-                std::string airOutletNodeName = s_ip->getAlphaFieldValue(fields, schemaProps, "indoor_air_outlet_node_name");
-                varSpeedCoil.AirInletNodeNum = GetOnlySingleNode(state,
-                                                                 airInletNodeName,
-                                                                 ErrorsFound,
-                                                                 Node::ConnectionObjectType::CoilCoolingDXVariableSpeed,
-                                                                 varSpeedCoil.Name,
-                                                                 Node::FluidType::Air,
-                                                                 Node::ConnectionType::Inlet,
-                                                                 Node::CompFluidStream::Primary,
-                                                                 Node::ObjectIsNotParent);
-                varSpeedCoil.AirOutletNodeNum = GetOnlySingleNode(state,
-                                                                  airOutletNodeName,
-                                                                  ErrorsFound,
-                                                                  Node::ConnectionObjectType::CoilCoolingDXVariableSpeed,
-                                                                  varSpeedCoil.Name,
-                                                                  Node::FluidType::Air,
-                                                                  Node::ConnectionType::Outlet,
-                                                                  Node::CompFluidStream::Primary,
-                                                                  Node::ObjectIsNotParent);
-
-                Node::TestCompSet(state, CurrentModuleObject, varSpeedCoil.Name, airInletNodeName, airOutletNodeName, "Air Nodes");
+                registerAirNodes(varSpeedCoil, Node::ConnectionObjectType::CoilCoolingDXVariableSpeed,
+                                 fields, schemaProps, "indoor_air_inlet_node_name", "indoor_air_outlet_node_name");
 
                 validateNumSpeedsAndNormLevel(varSpeedCoil, CurrentModuleObject);
 
@@ -912,50 +882,10 @@ namespace VariableSpeedCoils {
                 varSpeedCoil.LatentCapacityTimeConstant = 0.;
                 varSpeedCoil.FanDelayTime = 0.;
 
-                std::string waterInletNodeName = s_ip->getAlphaFieldValue(fields, schemaProps, "water_to_refrigerant_hx_water_inlet_node_name");
-                std::string waterOutletNodeName = s_ip->getAlphaFieldValue(fields, schemaProps, "water_to_refrigerant_hx_water_outlet_node_name");
-                std::string airInletNodeName = s_ip->getAlphaFieldValue(fields, schemaProps, "indoor_air_inlet_node_name");
-                std::string airOutletNodeName = s_ip->getAlphaFieldValue(fields, schemaProps, "indoor_air_outlet_node_name");
-
-                varSpeedCoil.WaterInletNodeNum = GetOnlySingleNode(state,
-                                                                   waterInletNodeName,
-                                                                   ErrorsFound,
-                                                                   Node::ConnectionObjectType::CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit,
-                                                                   varSpeedCoil.Name,
-                                                                   Node::FluidType::Water,
-                                                                   Node::ConnectionType::Inlet,
-                                                                   Node::CompFluidStream::Secondary,
-                                                                   Node::ObjectIsNotParent);
-                varSpeedCoil.WaterOutletNodeNum = GetOnlySingleNode(state,
-                                                                    waterOutletNodeName,
-                                                                    ErrorsFound,
-                                                                    Node::ConnectionObjectType::CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit,
-                                                                    varSpeedCoil.Name,
-                                                                    Node::FluidType::Water,
-                                                                    Node::ConnectionType::Outlet,
-                                                                    Node::CompFluidStream::Secondary,
-                                                                    Node::ObjectIsNotParent);
-                varSpeedCoil.AirInletNodeNum = GetOnlySingleNode(state,
-                                                                 airInletNodeName,
-                                                                 ErrorsFound,
-                                                                 Node::ConnectionObjectType::CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit,
-                                                                 varSpeedCoil.Name,
-                                                                 Node::FluidType::Air,
-                                                                 Node::ConnectionType::Inlet,
-                                                                 Node::CompFluidStream::Primary,
-                                                                 Node::ObjectIsNotParent);
-                varSpeedCoil.AirOutletNodeNum = GetOnlySingleNode(state,
-                                                                  airOutletNodeName,
-                                                                  ErrorsFound,
-                                                                  Node::ConnectionObjectType::CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit,
-                                                                  varSpeedCoil.Name,
-                                                                  Node::FluidType::Air,
-                                                                  Node::ConnectionType::Outlet,
-                                                                  Node::CompFluidStream::Primary,
-                                                                  Node::ObjectIsNotParent);
-
-                Node::TestCompSet(state, CurrentModuleObject, varSpeedCoil.Name, waterInletNodeName, waterOutletNodeName, "Water Nodes");
-                Node::TestCompSet(state, CurrentModuleObject, varSpeedCoil.Name, airInletNodeName, airOutletNodeName, "Air Nodes");
+                registerWaterNodes(varSpeedCoil, Node::ConnectionObjectType::CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit,
+                                   fields, schemaProps, "water_to_refrigerant_hx_water_inlet_node_name", "water_to_refrigerant_hx_water_outlet_node_name");
+                registerAirNodes(varSpeedCoil, Node::ConnectionObjectType::CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit,
+                                 fields, schemaProps, "indoor_air_inlet_node_name", "indoor_air_outlet_node_name");
 
                 validateNumSpeedsAndNormLevel(varSpeedCoil, CurrentModuleObject);
                 // part load curve
@@ -1086,28 +1016,8 @@ namespace VariableSpeedCoils {
                     varSpeedCoil.RatedAirVolFlowRate =
                         s_ip->getRealFieldValue(fields, schemaProps, "rated_air_flow_rate_at_selected_nominal_speed_level");
                 }
-                std::string airInletNodeName = s_ip->getAlphaFieldValue(fields, schemaProps, "indoor_air_inlet_node_name");
-                std::string airOutletNodeName = s_ip->getAlphaFieldValue(fields, schemaProps, "indoor_air_outlet_node_name");
-                varSpeedCoil.AirInletNodeNum = GetOnlySingleNode(state,
-                                                                 airInletNodeName,
-                                                                 ErrorsFound,
-                                                                 Node::ConnectionObjectType::CoilHeatingDXVariableSpeed,
-                                                                 varSpeedCoil.Name,
-                                                                 Node::FluidType::Air,
-                                                                 Node::ConnectionType::Inlet,
-                                                                 Node::CompFluidStream::Primary,
-                                                                 Node::ObjectIsNotParent);
-                varSpeedCoil.AirOutletNodeNum = GetOnlySingleNode(state,
-                                                                  airOutletNodeName,
-                                                                  ErrorsFound,
-                                                                  Node::ConnectionObjectType::CoilHeatingDXVariableSpeed,
-                                                                  varSpeedCoil.Name,
-                                                                  Node::FluidType::Air,
-                                                                  Node::ConnectionType::Outlet,
-                                                                  Node::CompFluidStream::Primary,
-                                                                  Node::ObjectIsNotParent);
-
-                Node::TestCompSet(state, CurrentModuleObject, varSpeedCoil.Name, airInletNodeName, airOutletNodeName, "Air Nodes");
+                registerAirNodes(varSpeedCoil, Node::ConnectionObjectType::CoilHeatingDXVariableSpeed,
+                                 fields, schemaProps, "indoor_air_inlet_node_name", "indoor_air_outlet_node_name");
                 validateNumSpeedsAndNormLevel(varSpeedCoil, CurrentModuleObject);
 
                 // part load curve
@@ -1377,59 +1287,14 @@ namespace VariableSpeedCoils {
                     varSpeedCoil.HPWHCondPumpFracToWater = 0.0;
                 }
 
-                std::string evapAirInletNodeName = s_ip->getAlphaFieldValue(fields, schemaProps, "evaporator_air_inlet_node_name");
-                std::string evapAirOutletNodeName = s_ip->getAlphaFieldValue(fields, schemaProps, "evaporator_air_outlet_node_name");
-
-                // Air nodes
-                varSpeedCoil.AirInletNodeNum = GetOnlySingleNode(state,
-                                                                 evapAirInletNodeName,
-                                                                 ErrorsFound,
-                                                                 Node::ConnectionObjectType::CoilWaterHeatingAirToWaterHeatPumpVariableSpeed,
-                                                                 varSpeedCoil.Name,
-                                                                 Node::FluidType::Air,
-                                                                 Node::ConnectionType::Inlet,
-                                                                 Node::CompFluidStream::Primary,
-                                                                 Node::ObjectIsNotParent);
-
-                varSpeedCoil.AirOutletNodeNum = GetOnlySingleNode(state,
-                                                                  evapAirOutletNodeName,
-                                                                  ErrorsFound,
-                                                                  Node::ConnectionObjectType::CoilWaterHeatingAirToWaterHeatPumpVariableSpeed,
-                                                                  varSpeedCoil.Name,
-                                                                  Node::FluidType::Air,
-                                                                  Node::ConnectionType::Outlet,
-                                                                  Node::CompFluidStream::Primary,
-                                                                  Node::ObjectIsNotParent);
-
-                Node::TestCompSet(state, CurrentModuleObject, varSpeedCoil.Name, evapAirInletNodeName, evapAirOutletNodeName, "Air Nodes");
+                registerAirNodes(varSpeedCoil, Node::ConnectionObjectType::CoilWaterHeatingAirToWaterHeatPumpVariableSpeed,
+                                 fields, schemaProps, "evaporator_air_inlet_node_name", "evaporator_air_outlet_node_name");
 
                 // Check if the air inlet node is OA node, to justify whether the coil is placed in zone or not
                 varSpeedCoil.IsDXCoilInZone = !OutAirNodeManager::CheckOutAirNodeNumber(state, varSpeedCoil.AirInletNodeNum);
 
-                std::string condWaterInletNodeName = s_ip->getAlphaFieldValue(fields, schemaProps, "condenser_water_inlet_node_name");
-                std::string condWaterOutletNodeName = s_ip->getAlphaFieldValue(fields, schemaProps, "condenser_water_outlet_node_name");
-                // Water nodes
-                varSpeedCoil.WaterInletNodeNum = GetOnlySingleNode(state,
-                                                                   condWaterInletNodeName,
-                                                                   ErrorsFound,
-                                                                   Node::ConnectionObjectType::CoilWaterHeatingAirToWaterHeatPumpVariableSpeed,
-                                                                   varSpeedCoil.Name,
-                                                                   Node::FluidType::Water,
-                                                                   Node::ConnectionType::Inlet,
-                                                                   Node::CompFluidStream::Secondary,
-                                                                   Node::ObjectIsNotParent);
-
-                varSpeedCoil.WaterOutletNodeNum = GetOnlySingleNode(state,
-                                                                    condWaterOutletNodeName,
-                                                                    ErrorsFound,
-                                                                    Node::ConnectionObjectType::CoilWaterHeatingAirToWaterHeatPumpVariableSpeed,
-                                                                    varSpeedCoil.Name,
-                                                                    Node::FluidType::Water,
-                                                                    Node::ConnectionType::Outlet,
-                                                                    Node::CompFluidStream::Secondary,
-                                                                    Node::ObjectIsNotParent);
-
-                Node::TestCompSet(state, CurrentModuleObject, varSpeedCoil.Name, condWaterInletNodeName, condWaterOutletNodeName, "Water Nodes");
+                registerWaterNodes(varSpeedCoil, Node::ConnectionObjectType::CoilWaterHeatingAirToWaterHeatPumpVariableSpeed,
+                                   fields, schemaProps, "condenser_water_inlet_node_name", "condenser_water_outlet_node_name");
 
                 readCrankcaseHeaterCapacity(varSpeedCoil, fields, schemaProps, CurrentModuleObject);
 
