@@ -17744,399 +17744,176 @@ namespace UnitarySystems {
                     }
                     break;
                 case UnitarySys::SysType::PackagedAC:
-                    // CurrentModuleObject = 'ZoneHVAC:PackagedTerminalAirConditioner'
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Air Conditioner Total Heating Rate",
-                                        Constant::Units::W,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_TotHeatEnergyRate,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Air Conditioner Total Heating Energy",
-                                        Constant::Units::J,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_TotHeatEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Air Conditioner Total Cooling Rate",
-                                        Constant::Units::W,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_TotCoolEnergyRate,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Air Conditioner Total Cooling Energy",
-                                        Constant::Units::J,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_TotCoolEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Air Conditioner Sensible Heating Rate",
-                                        Constant::Units::W,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_SensHeatEnergyRate,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Air Conditioner Sensible Heating Energy",
-                                        Constant::Units::J,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_SensHeatEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Air Conditioner Sensible Cooling Rate",
-                                        Constant::Units::W,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_SensCoolEnergyRate,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Air Conditioner Sensible Cooling Energy",
-                                        Constant::Units::J,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_SensCoolEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Air Conditioner Latent Heating Rate",
-                                        Constant::Units::W,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_LatHeatEnergyRate,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Air Conditioner Latent Heating Energy",
-                                        Constant::Units::J,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_LatHeatEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Air Conditioner Latent Cooling Rate",
-                                        Constant::Units::W,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_LatCoolEnergyRate,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Air Conditioner Latent Cooling Energy",
-                                        Constant::Units::J,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_LatCoolEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Air Conditioner Electricity Rate",
-                                        Constant::Units::W,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_ElecPower,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Air Conditioner Electricity Energy",
-                                        Constant::Units::J,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_ElecPowerConsumption,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Air Conditioner Fan Part Load Ratio",
-                                        Constant::Units::None,
-                                        state.dataUnitarySystems->unitarySys[sysNum].FanPartLoadRatio,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Air Conditioner Compressor Part Load Ratio",
-                                        Constant::Units::None,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_CompPartLoadRatio,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Air Conditioner Fan Availability Status",
-                                        Constant::Units::None,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_AvailStatus,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    break;
                 case UnitarySys::SysType::PackagedHP:
-                    // CurrentModuleObject = 'ZoneHVAC:PackagedTerminalHeatPump'
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Heat Pump Total Heating Rate",
-                                        Constant::Units::W,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_TotHeatEnergyRate,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Heat Pump Total Heating Energy",
-                                        Constant::Units::J,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_TotHeatEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Heat Pump Total Cooling Rate",
-                                        Constant::Units::W,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_TotCoolEnergyRate,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Heat Pump Total Cooling Energy",
-                                        Constant::Units::J,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_TotCoolEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Heat Pump Sensible Heating Rate",
-                                        Constant::Units::W,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_SensHeatEnergyRate,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Heat Pump Sensible Heating Energy",
-                                        Constant::Units::J,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_SensHeatEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Heat Pump Sensible Cooling Rate",
-                                        Constant::Units::W,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_SensCoolEnergyRate,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Heat Pump Sensible Cooling Energy",
-                                        Constant::Units::J,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_SensCoolEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Heat Pump Latent Heating Rate",
-                                        Constant::Units::W,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_LatHeatEnergyRate,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Heat Pump Latent Heating Energy",
-                                        Constant::Units::J,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_LatHeatEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Heat Pump Latent Cooling Rate",
-                                        Constant::Units::W,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_LatCoolEnergyRate,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Heat Pump Latent Cooling Energy",
-                                        Constant::Units::J,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_LatCoolEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Heat Pump Electricity Rate",
-                                        Constant::Units::W,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_ElecPower,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Heat Pump Electricity Energy",
-                                        Constant::Units::J,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_ElecPowerConsumption,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Heat Pump Fan Part Load Ratio",
-                                        Constant::Units::None,
-                                        state.dataUnitarySystems->unitarySys[sysNum].FanPartLoadRatio,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Heat Pump Compressor Part Load Ratio",
-                                        Constant::Units::None,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_CompPartLoadRatio,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Packaged Terminal Heat Pump Fan Availability Status",
-                                        Constant::Units::None,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_AvailStatus,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    break;
-                case UnitarySys::SysType::PackagedWSHP:
-                    // CurrentModuleObject = 'ZoneHVAC:WaterToAirHeatPump'
-                    SetupOutputVariable(state,
-                                        "Zone Water to Air Heat Pump Total Heating Rate",
-                                        Constant::Units::W,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_TotHeatEnergyRate,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Water to Air Heat Pump Total Heating Energy",
-                                        Constant::Units::J,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_TotHeatEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Water to Air Heat Pump Total Cooling Rate",
-                                        Constant::Units::W,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_TotCoolEnergyRate,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Water to Air Heat Pump Total Cooling Energy",
-                                        Constant::Units::J,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_TotCoolEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Water to Air Heat Pump Sensible Heating Rate",
-                                        Constant::Units::W,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_SensHeatEnergyRate,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Water to Air Heat Pump Sensible Heating Energy",
-                                        Constant::Units::J,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_SensHeatEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Water to Air Heat Pump Sensible Cooling Rate",
-                                        Constant::Units::W,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_SensCoolEnergyRate,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Water to Air Heat Pump Sensible Cooling Energy",
-                                        Constant::Units::J,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_SensCoolEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Water to Air Heat Pump Latent Heating Rate",
-                                        Constant::Units::W,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_LatHeatEnergyRate,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Water to Air Heat Pump Latent Heating Energy",
-                                        Constant::Units::J,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_LatHeatEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Water to Air Heat Pump Latent Cooling Rate",
-                                        Constant::Units::W,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_LatCoolEnergyRate,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Water to Air Heat Pump Latent Cooling Energy",
-                                        Constant::Units::J,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_LatCoolEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Water to Air Heat Pump Electricity Rate",
-                                        Constant::Units::W,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_ElecPower,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Water to Air Heat Pump Electricity Energy",
-                                        Constant::Units::J,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_ElecPowerConsumption,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Water to Air Heat Pump Fan Part Load Ratio",
-                                        Constant::Units::None,
-                                        state.dataUnitarySystems->unitarySys[sysNum].FanPartLoadRatio,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Water to Air Heat Pump Compressor Part Load Ratio",
-                                        Constant::Units::None,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_CompPartLoadRatio,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    SetupOutputVariable(state,
-                                        "Zone Water to Air Heat Pump Fan Availability Status",
-                                        Constant::Units::None,
-                                        state.dataUnitarySystems->unitarySys[sysNum].m_AvailStatus,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    if (((state.dataUnitarySystems->unitarySys[sysNum].m_CoolingCoilType_Num == HVAC::Coil_CoolingWaterToAirHPSimple ||
-                          state.dataUnitarySystems->unitarySys[sysNum].m_CoolingCoilType_Num == HVAC::Coil_CoolingWaterToAirHPVSEquationFit) &&
-                         state.dataUnitarySystems->unitarySys[sysNum].m_NumOfSpeedCooling > 1) ||
-                        ((state.dataUnitarySystems->unitarySys[sysNum].m_HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHPSimple ||
-                          state.dataUnitarySystems->unitarySys[sysNum].m_HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHPVSEquationFit) &&
-                         state.dataUnitarySystems->unitarySys[sysNum].m_NumOfSpeedHeating > 1)) {
-                        SetupOutputVariable(state,
-                                            "Unitary System Water Coil Multispeed Fan Cycling Ratio",
-                                            Constant::Units::None,
-                                            state.dataUnitarySystems->unitarySys[sysNum].m_CycRatio,
-                                            OutputProcessor::TimeStepType::System,
-                                            OutputProcessor::StoreType::Average,
-                                            state.dataUnitarySystems->unitarySys[sysNum].Name);
-                        SetupOutputVariable(state,
-                                            "Unitary System Water Coil Multispeed Fan Speed Ratio",
-                                            Constant::Units::None,
-                                            state.dataUnitarySystems->unitarySys[sysNum].m_SpeedRatio,
-                                            OutputProcessor::TimeStepType::System,
-                                            OutputProcessor::StoreType::Average,
-                                            state.dataUnitarySystems->unitarySys[sysNum].Name);
-                        SetupOutputVariable(state,
-                                            "Unitary System Water Coil Multispeed Fan Speed Level",
-                                            Constant::Units::None,
-                                            state.dataUnitarySystems->unitarySys[sysNum].m_SpeedNum,
-                                            OutputProcessor::TimeStepType::System,
-                                            OutputProcessor::StoreType::Average,
-                                            state.dataUnitarySystems->unitarySys[sysNum].Name);
+                case UnitarySys::SysType::PackagedWSHP: {
+                    // Common output variables for all packaged terminal unit types.
+                    // Only the prefix string differs between PackagedAC, PackagedHP, and PackagedWSHP.
+                    std::string_view prefix;
+                    switch (state.dataUnitarySystems->unitarySys[sysNum].m_sysType) {
+                    case UnitarySys::SysType::PackagedAC:
+                        prefix = "Zone Packaged Terminal Air Conditioner";
+                        break;
+                    case UnitarySys::SysType::PackagedHP:
+                        prefix = "Zone Packaged Terminal Heat Pump";
+                        break;
+                    case UnitarySys::SysType::PackagedWSHP:
+                        prefix = "Zone Water to Air Heat Pump";
+                        break;
+                    default:
+                        break;
                     }
-                    break;
+                    auto &thisSys = state.dataUnitarySystems->unitarySys[sysNum];
+                    SetupOutputVariable(state,
+                                        format("{} Total Heating Rate", prefix),
+                                        Constant::Units::W,
+                                        thisSys.m_TotHeatEnergyRate,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Average,
+                                        thisSys.Name);
+                    SetupOutputVariable(state,
+                                        format("{} Total Heating Energy", prefix),
+                                        Constant::Units::J,
+                                        thisSys.m_TotHeatEnergy,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Sum,
+                                        thisSys.Name);
+                    SetupOutputVariable(state,
+                                        format("{} Total Cooling Rate", prefix),
+                                        Constant::Units::W,
+                                        thisSys.m_TotCoolEnergyRate,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Average,
+                                        thisSys.Name);
+                    SetupOutputVariable(state,
+                                        format("{} Total Cooling Energy", prefix),
+                                        Constant::Units::J,
+                                        thisSys.m_TotCoolEnergy,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Sum,
+                                        thisSys.Name);
+                    SetupOutputVariable(state,
+                                        format("{} Sensible Heating Rate", prefix),
+                                        Constant::Units::W,
+                                        thisSys.m_SensHeatEnergyRate,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Average,
+                                        thisSys.Name);
+                    SetupOutputVariable(state,
+                                        format("{} Sensible Heating Energy", prefix),
+                                        Constant::Units::J,
+                                        thisSys.m_SensHeatEnergy,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Sum,
+                                        thisSys.Name);
+                    SetupOutputVariable(state,
+                                        format("{} Sensible Cooling Rate", prefix),
+                                        Constant::Units::W,
+                                        thisSys.m_SensCoolEnergyRate,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Average,
+                                        thisSys.Name);
+                    SetupOutputVariable(state,
+                                        format("{} Sensible Cooling Energy", prefix),
+                                        Constant::Units::J,
+                                        thisSys.m_SensCoolEnergy,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Sum,
+                                        thisSys.Name);
+                    SetupOutputVariable(state,
+                                        format("{} Latent Heating Rate", prefix),
+                                        Constant::Units::W,
+                                        thisSys.m_LatHeatEnergyRate,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Average,
+                                        thisSys.Name);
+                    SetupOutputVariable(state,
+                                        format("{} Latent Heating Energy", prefix),
+                                        Constant::Units::J,
+                                        thisSys.m_LatHeatEnergy,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Sum,
+                                        thisSys.Name);
+                    SetupOutputVariable(state,
+                                        format("{} Latent Cooling Rate", prefix),
+                                        Constant::Units::W,
+                                        thisSys.m_LatCoolEnergyRate,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Average,
+                                        thisSys.Name);
+                    SetupOutputVariable(state,
+                                        format("{} Latent Cooling Energy", prefix),
+                                        Constant::Units::J,
+                                        thisSys.m_LatCoolEnergy,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Sum,
+                                        thisSys.Name);
+                    SetupOutputVariable(state,
+                                        format("{} Electricity Rate", prefix),
+                                        Constant::Units::W,
+                                        thisSys.m_ElecPower,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Average,
+                                        thisSys.Name);
+                    SetupOutputVariable(state,
+                                        format("{} Electricity Energy", prefix),
+                                        Constant::Units::J,
+                                        thisSys.m_ElecPowerConsumption,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Sum,
+                                        thisSys.Name);
+                    SetupOutputVariable(state,
+                                        format("{} Fan Part Load Ratio", prefix),
+                                        Constant::Units::None,
+                                        thisSys.FanPartLoadRatio,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Average,
+                                        thisSys.Name);
+                    SetupOutputVariable(state,
+                                        format("{} Compressor Part Load Ratio", prefix),
+                                        Constant::Units::None,
+                                        thisSys.m_CompPartLoadRatio,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Average,
+                                        thisSys.Name);
+                    SetupOutputVariable(state,
+                                        format("{} Fan Availability Status", prefix),
+                                        Constant::Units::None,
+                                        thisSys.m_AvailStatus,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Average,
+                                        thisSys.Name);
+                    // PackagedWSHP-specific: multispeed water coil variables
+                    if (state.dataUnitarySystems->unitarySys[sysNum].m_sysType == UnitarySys::SysType::PackagedWSHP) {
+                        if (((thisSys.m_CoolingCoilType_Num == HVAC::Coil_CoolingWaterToAirHPSimple ||
+                              thisSys.m_CoolingCoilType_Num == HVAC::Coil_CoolingWaterToAirHPVSEquationFit) &&
+                             thisSys.m_NumOfSpeedCooling > 1) ||
+                            ((thisSys.m_HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHPSimple ||
+                              thisSys.m_HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHPVSEquationFit) &&
+                             thisSys.m_NumOfSpeedHeating > 1)) {
+                            SetupOutputVariable(state,
+                                                "Unitary System Water Coil Multispeed Fan Cycling Ratio",
+                                                Constant::Units::None,
+                                                thisSys.m_CycRatio,
+                                                OutputProcessor::TimeStepType::System,
+                                                OutputProcessor::StoreType::Average,
+                                                thisSys.Name);
+                            SetupOutputVariable(state,
+                                                "Unitary System Water Coil Multispeed Fan Speed Ratio",
+                                                Constant::Units::None,
+                                                thisSys.m_SpeedRatio,
+                                                OutputProcessor::TimeStepType::System,
+                                                OutputProcessor::StoreType::Average,
+                                                thisSys.Name);
+                            SetupOutputVariable(state,
+                                                "Unitary System Water Coil Multispeed Fan Speed Level",
+                                                Constant::Units::None,
+                                                thisSys.m_SpeedNum,
+                                                OutputProcessor::TimeStepType::System,
+                                                OutputProcessor::StoreType::Average,
+                                                thisSys.Name);
+                        }
+                    }
+                } break;
                 default:
                     ShowFatalError(state,
                                    "setupAllOutputVar: Developer error. All report variables must be set up here after all systems are read in.");
