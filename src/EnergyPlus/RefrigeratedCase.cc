@@ -12805,6 +12805,29 @@ void ReportRefrigerationComponents(EnergyPlusData &state)
         } //(NumSimulationGasCooler > 0)
     } //(NumTransRefrigSystems > 0)
 
+    // Helper to print refrigeration case details - used by racks, detailed systems, trans systems, and secondary loops
+    auto printCaseReport = [&](std::string_view label, int CaseID) {
+        auto const &c = RefrigCase(CaseID);
+        if (c.ZoneNodeNum > 0) {
+            print(state.files.eio,
+                  "   {},{},{},{},{},{},{:.1R},{:.2R},{:.1R},{:.1R},{:.1R},{:.1R},{:.1R},{:.1R}\n",
+                  label,
+                  CaseID,
+                  c.Name,
+                  c.ZoneName,
+                  c.ZoneNodeNum,
+                  state.dataLoopNodes->NodeID(c.ZoneNodeNum),
+                  c.RateTotCapPerLength,
+                  c.RatedLHR,
+                  c.Temperature,
+                  c.Length,
+                  c.OperatingFanPower,
+                  c.LightingPower,
+                  c.AntiSweatPower,
+                  c.DefrostPower);
+        }
+    };
+
     if (state.dataRefrigCase->NumRefrigeratedRacks > 0) {
         print(state.files.eio, "#Refrigeration Compressor Racks, {}\n", state.dataRefrigCase->NumRefrigeratedRacks);
         std::string ChrOut2;
@@ -12837,24 +12860,7 @@ void ReportRefrigerationComponents(EnergyPlusData &state)
                   ChrOut2,
                   RefrigRack(RackNum).RatedCOP);
             for (int CaseNum = 1; CaseNum <= RefrigRack(RackNum).NumCases; ++CaseNum) {
-                int CaseID = RefrigRack(RackNum).CaseNum(CaseNum);
-                if (RefrigCase(CaseID).ZoneNodeNum > 0) {
-                    print(state.files.eio,
-                          "   Refrigeration Case,{},{},{},{},{},{:.1R},{:.2R},{:.1R},{:.1R},{:.1R},{:.1R},{:.1R},{:.1R}\n",
-                          CaseID,
-                          RefrigCase(CaseID).Name,
-                          RefrigCase(CaseID).ZoneName,
-                          RefrigCase(CaseID).ZoneNodeNum,
-                          state.dataLoopNodes->NodeID(RefrigCase(CaseID).ZoneNodeNum),
-                          RefrigCase(CaseID).RateTotCapPerLength,
-                          RefrigCase(CaseID).RatedLHR,
-                          RefrigCase(CaseID).Temperature,
-                          RefrigCase(CaseID).Length,
-                          RefrigCase(CaseID).OperatingFanPower,
-                          RefrigCase(CaseID).LightingPower,
-                          RefrigCase(CaseID).AntiSweatPower,
-                          RefrigCase(CaseID).DefrostPower); // Installed lighting power, may not be rated power
-                }
+                printCaseReport("Refrigeration Case", RefrigRack(RackNum).CaseNum(CaseNum));
             } // numcases
 
             for (int WalkInNum = 1; WalkInNum <= RefrigRack(RackNum).NumWalkIns; ++WalkInNum) {
@@ -12918,24 +12924,7 @@ void ReportRefrigerationComponents(EnergyPlusData &state)
                   System(SystemNum).TCondenseMin);
 
             for (int CaseNum = 1; CaseNum <= System(SystemNum).NumCases; ++CaseNum) {
-                int CaseID = System(SystemNum).CaseNum(CaseNum);
-                if (RefrigCase(CaseID).ZoneNodeNum > 0) {
-                    print(state.files.eio,
-                          "   Refrigeration Case,{},{},{},{},{},{:.1R},{:.2R},{:.1R},{:.1R},{:.1R},{:.1R},{:.1R},{:.1R}\n",
-                          CaseID,
-                          RefrigCase(CaseID).Name,
-                          RefrigCase(CaseID).ZoneName,
-                          RefrigCase(CaseID).ZoneNodeNum,
-                          state.dataLoopNodes->NodeID(RefrigCase(CaseID).ZoneNodeNum),
-                          RefrigCase(CaseID).RateTotCapPerLength,
-                          RefrigCase(CaseID).RatedLHR,
-                          RefrigCase(CaseID).Temperature,
-                          RefrigCase(CaseID).Length,
-                          RefrigCase(CaseID).OperatingFanPower,
-                          RefrigCase(CaseID).LightingPower,
-                          RefrigCase(CaseID).AntiSweatPower,
-                          RefrigCase(CaseID).DefrostPower);
-                }
+                printCaseReport("Refrigeration Case", System(SystemNum).CaseNum(CaseNum));
             } // NumCases on system
             for (int WalkInNum = 1; WalkInNum <= System(SystemNum).NumWalkIns; ++WalkInNum) {
                 int WalkInID = System(SystemNum).WalkInNum(WalkInNum);
@@ -13118,44 +13107,10 @@ void ReportRefrigerationComponents(EnergyPlusData &state)
                   GasCooler(TransSystem(TransSystemNum).GasCoolerNum(1)).MinCondTemp);
 
             for (int CaseNum = 1; CaseNum <= TransSystem(TransSystemNum).NumCasesMT; ++CaseNum) {
-                int CaseID = TransSystem(TransSystemNum).CaseNumMT(CaseNum);
-                if (RefrigCase(CaseID).ZoneNodeNum > 0) {
-                    print(state.files.eio,
-                          "   Medium Temperature Refrigeration Case,{},{},{},{},{},{:.1R},{:.2R},{:.1R},{:.1R},{:.1R},{:.1R},{:.1R},{:.1R}\n",
-                          CaseID,
-                          RefrigCase(CaseID).Name,
-                          RefrigCase(CaseID).ZoneName,
-                          RefrigCase(CaseID).ZoneNodeNum,
-                          state.dataLoopNodes->NodeID(RefrigCase(CaseID).ZoneNodeNum),
-                          RefrigCase(CaseID).RateTotCapPerLength,
-                          RefrigCase(CaseID).RatedLHR,
-                          RefrigCase(CaseID).Temperature,
-                          RefrigCase(CaseID).Length,
-                          RefrigCase(CaseID).OperatingFanPower,
-                          RefrigCase(CaseID).LightingPower,
-                          RefrigCase(CaseID).AntiSweatPower,
-                          RefrigCase(CaseID).DefrostPower);
-                }
+                printCaseReport("Medium Temperature Refrigeration Case", TransSystem(TransSystemNum).CaseNumMT(CaseNum));
             } // NumCasesMT on system
             for (int CaseNum = 1; CaseNum <= TransSystem(TransSystemNum).NumCasesLT; ++CaseNum) {
-                int CaseID = TransSystem(TransSystemNum).CaseNumLT(CaseNum);
-                if (RefrigCase(CaseID).ZoneNodeNum > 0) {
-                    print(state.files.eio,
-                          "   Low Temperature Refrigeration Case,{},{},{},{},{},{:.1R},{:.2R},{:.1R},{:.1R},{:.1R},{:.1R},{:.1R},{:.1R}\n",
-                          CaseID,
-                          RefrigCase(CaseID).Name,
-                          RefrigCase(CaseID).ZoneName,
-                          RefrigCase(CaseID).ZoneNodeNum,
-                          state.dataLoopNodes->NodeID(RefrigCase(CaseID).ZoneNodeNum),
-                          RefrigCase(CaseID).RateTotCapPerLength,
-                          RefrigCase(CaseID).RatedLHR,
-                          RefrigCase(CaseID).Temperature,
-                          RefrigCase(CaseID).Length,
-                          RefrigCase(CaseID).OperatingFanPower,
-                          RefrigCase(CaseID).LightingPower,
-                          RefrigCase(CaseID).AntiSweatPower,
-                          RefrigCase(CaseID).DefrostPower);
-                }
+                printCaseReport("Low Temperature Refrigeration Case", TransSystem(TransSystemNum).CaseNumLT(CaseNum));
             } // NumCasesLT on system
             for (int WalkInNum = 1; WalkInNum <= TransSystem(TransSystemNum).NumWalkInsMT; ++WalkInNum) {
                 int WalkInID = TransSystem(TransSystemNum).WalkInNumMT(WalkInNum);
@@ -13283,24 +13238,7 @@ void ReportRefrigerationComponents(EnergyPlusData &state)
                 break;
             }
             for (int CaseNum = 1; CaseNum <= Secondary(SecondaryID).NumCases; ++CaseNum) {
-                int CaseID = Secondary(SecondaryID).CaseNum(CaseNum);
-                if (RefrigCase(CaseID).ZoneNodeNum > 0) {
-                    print(state.files.eio,
-                          "  Refrigeration Case,{},{},{},{},{},{:.1R},{:.2R},{:.1R},{:.1R},{:.1R},{:.1R},{:.1R},{:.1R}\n",
-                          CaseID,
-                          RefrigCase(CaseID).Name,
-                          RefrigCase(CaseID).ZoneName,
-                          RefrigCase(CaseID).ZoneNodeNum,
-                          state.dataLoopNodes->NodeID(RefrigCase(CaseID).ZoneNodeNum),
-                          RefrigCase(CaseID).RateTotCapPerLength,
-                          RefrigCase(CaseID).RatedLHR,
-                          RefrigCase(CaseID).Temperature,
-                          RefrigCase(CaseID).Length,
-                          RefrigCase(CaseID).OperatingFanPower,
-                          RefrigCase(CaseID).LightingPower,
-                          RefrigCase(CaseID).AntiSweatPower,
-                          RefrigCase(CaseID).DefrostPower);
-                }
+                printCaseReport("Refrigeration Case", Secondary(SecondaryID).CaseNum(CaseNum));
             } // NumCases on secondary on secondary system
 
             for (int WalkInNum = 1; WalkInNum <= Secondary(SecondaryID).NumWalkIns; ++WalkInNum) {
