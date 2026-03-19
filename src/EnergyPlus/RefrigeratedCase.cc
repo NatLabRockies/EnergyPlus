@@ -5820,44 +5820,32 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 ShowContinueError(state, "  The minimum condensing temperature will be set at 5C greater than the receiver temperature.");
                 GasCooler(TransSystem(TransRefrigSysNum).GasCoolerNum(NumGasCoolers)).MinCondTemp = TransSystem(TransRefrigSysNum).TReceiver + 5.0;
             }
-            if (NominalTotalCompCapLP > 0.0) {
-                if (TransSystem(TransRefrigSysNum).TReceiver <= TransSystem(TransRefrigSysNum).TEvapDesignLT) {
+            // Lambda: check that TReceiver is above the design evaporating temperature for a
+            // given temperature level.  Called once for LP (low temperature) and once for HP
+            // (medium temperature) compressor stages when the respective nominal capacity > 0.
+            auto checkTReceiverVsEvapDesign = [&](Real64 nomCompCap, Real64 TEvapDesign, std::string_view tempLevelLabel) {
+                if (nomCompCap <= 0.0) return;
+                if (TransSystem(TransRefrigSysNum).TReceiver <= TEvapDesign) {
                     ShowSevereError(
                         state,
                         EnergyPlus::format("{}{}=\"{}: The receiver temperature ({:.2R}C) is less than the design evaporator temperature for the "
-                                           "low temperature loads ({:.2R}C).",
+                                           "{} loads ({:.2R}C).",
                                            RoutineName,
                                            CurrentModuleObject,
                                            TransSystem(TransRefrigSysNum).Name,
                                            TransSystem(TransRefrigSysNum).TReceiver,
-                                           TransSystem(TransRefrigSysNum).TEvapDesignLT));
+                                           tempLevelLabel,
+                                           TEvapDesign));
                     ShowContinueError(state,
-                                      "  Ensure that the receiver temperature is sufficiently greater than the design evaporator temperature for "
-                                      "the low temperature loads.");
-                    ShowContinueError(state,
-                                      "  A receiver pressure between 3.0 MPa to 4.0 MPa will typically result in an adequate receiver temperature.");
-                    ErrorsFound = true;
-                }
-            }
-            if (NominalTotalCompCapHP > 0.0) {
-                if (TransSystem(TransRefrigSysNum).TReceiver <= TransSystem(TransRefrigSysNum).TEvapDesignMT) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format("{}{}=\"{}: The receiver temperature ({:.2R}C) is less than the design evaporator temperature for the "
-                                           "medium temperature loads ({:.2R}C).",
-                                           RoutineName,
-                                           CurrentModuleObject,
-                                           TransSystem(TransRefrigSysNum).Name,
-                                           TransSystem(TransRefrigSysNum).TReceiver,
-                                           TransSystem(TransRefrigSysNum).TEvapDesignMT));
-                    ShowContinueError(state,
-                                      "  Ensure that the receiver temperature is sufficiently greater than the design evaporator temperature for "
-                                      "the medium temperature loads.");
+                                      EnergyPlus::format("  Ensure that the receiver temperature is sufficiently greater than the design evaporator "
+                                                         "temperature for the {} loads.", tempLevelLabel));
                     ShowContinueError(state,
                                       "  A receiver pressure between 3.0 MPa to 4.0 MPa will typically result in an adequate receiver temperature.");
                     ErrorsFound = true;
                 }
-            }
+            };
+            checkTReceiverVsEvapDesign(NominalTotalCompCapLP, TransSystem(TransRefrigSysNum).TEvapDesignLT, "low temperature");
+            checkTReceiverVsEvapDesign(NominalTotalCompCapHP, TransSystem(TransRefrigSysNum).TEvapDesignMT, "medium temperature");
 
             // Read subcooler effectiveness
             if (!lNumericBlanks(2)) {
