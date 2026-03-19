@@ -190,6 +190,23 @@ namespace AirflowNetwork {
         }
     }
 
+    // Check that an opening surface is a window, door, glassdoor, or air boundary.
+    static void checkOpeningSurfaceClass(EnergyPlusData &state,
+                                         DataSurfaces::SurfaceData const &surf,
+                                         std::string_view routineName,
+                                         std::string const &linkageName,
+                                         bool &errorsFound)
+    {
+        if (!(surf.OriginalClass == DataSurfaces::SurfaceClass::Window || surf.OriginalClass == DataSurfaces::SurfaceClass::GlassDoor ||
+              surf.OriginalClass == DataSurfaces::SurfaceClass::Door || surf.IsAirBoundarySurf)) {
+            ShowSevereError(state,
+                            EnergyPlus::format(routineName) +
+                                "AirflowNetworkComponent: The opening must be assigned to a window, door, glassdoor or air boundary at " +
+                                linkageName);
+            errorsFound = true;
+        }
+    }
+
     int constexpr NumOfVentCtrTypes(6); // Number of zone level venting control types
 
     void Solver::manage_balance(ObjexxFCL::Optional_bool_const FirstHVACIteration, // True when solution technique on first iteration
@@ -2798,15 +2815,6 @@ namespace AirflowNetwork {
         }
 
         // ==> Validate AirflowNetwork simulation surface data
-        // Helper: find the AFN zone index (1-based) whose ZoneNum matches adjacentSurfZone, or 0 if not found.
-        auto findAFNZoneForSurface = [&](int adjacentSurfZone) -> int {
-            for (int jz = 1; jz <= AirflowNetworkNumOfZones; ++jz) {
-                if (MultizoneZoneData(jz).ZoneNum == adjacentSurfZone) {
-                    return jz;
-                }
-            }
-            return 0;
-        };
         NumOfExtNodes = 0;
         for (int i = 1; i <= AirflowNetworkNumOfSurfaces; ++i) {
             // Check a valid surface defined earlier
@@ -3013,7 +3021,13 @@ namespace AirflowNetwork {
                     ErrorsFound = true;
                 }
 
-                j = findAFNZoneForSurface(m_state.dataSurface->Surface(n).Zone);
+                j = 0;
+                for (int jz = 1; jz <= AirflowNetworkNumOfZones; ++jz) {
+                    if (MultizoneZoneData(jz).ZoneNum == m_state.dataSurface->Surface(n).Zone) {
+                        j = jz;
+                        break;
+                    }
+                }
                 if (j != 0) {
                     MultizoneSurfaceData(i).NodeNums[1] = j;
                 } else {
@@ -3031,7 +3045,13 @@ namespace AirflowNetwork {
             if (Util::SameString(simulation_control.WPCCntr, "SurfaceAverageCalculation")) {
                 n = m_state.dataSurface->Surface(MultizoneSurfaceData(i).SurfNum).ExtBoundCond;
                 if (n >= 1) { // exterior boundary condition is a surface
-                    j = findAFNZoneForSurface(m_state.dataSurface->Surface(n).Zone);
+                    j = 0;
+                    for (int jz = 1; jz <= AirflowNetworkNumOfZones; ++jz) {
+                        if (MultizoneZoneData(jz).ZoneNum == m_state.dataSurface->Surface(n).Zone) {
+                            j = jz;
+                            break;
+                        }
+                    }
                     if (j != 0) {
                         MultizoneSurfaceData(i).NodeNums[1] = j;
                     } else {
@@ -3742,14 +3762,6 @@ namespace AirflowNetwork {
                 if (j > 0) {
                     // Revise data in multizone object
                     NumOfLinksIntraZone = NumOfLinksIntraZone - 1;
-                    auto reportInterZoneLinkNotFound = [&]() {
-                        ShowSevereError(m_state,
-                                        EnergyPlus::format(RoutineName) +
-                                            "The InterZone link is not found between AirflowNetwork:IntraZone:Linkage =" +
-                                            IntraZoneLinkageData(i).Name + " and AirflowNetwork:Multizone:Surface = " +
-                                            MultizoneSurfaceData(j).SurfName);
-                        ErrorsFound = true;
-                    };
                     if (m_state.dataSurface->Surface(MultizoneSurfaceData(j).SurfNum).ExtBoundCond == 0) {
                         // Exterior surface NodeNums[1] should be equal
                         if (IntraZoneLinkageData(i).NodeNums[0] > AirflowNetworkNumOfZones + AirflowNetworkNumOfExtNode) {
@@ -3761,7 +3773,12 @@ namespace AirflowNetwork {
                             MultizoneSurfaceData(j).ZonePtr = MultizoneSurfaceData(j).NodeNums[0];
                             MultizoneSurfaceData(j).NodeNums[0] = IntraZoneLinkageData(i).NodeNums[1];
                         } else {
-                            reportInterZoneLinkNotFound();
+                            ShowSevereError(m_state,
+                                            EnergyPlus::format(RoutineName) +
+                                                "The InterZone link is not found between AirflowNetwork:IntraZone:Linkage =" +
+                                                IntraZoneLinkageData(i).Name + " and AirflowNetwork:Multizone:Surface = " +
+                                                MultizoneSurfaceData(j).SurfName);
+                            ErrorsFound = true;
                         }
                     } else {
                         // Interior surface
@@ -3788,7 +3805,12 @@ namespace AirflowNetwork {
                                 MultizoneSurfaceData(j).ZonePtr = MultizoneSurfaceData(j).NodeNums[0];
                                 MultizoneSurfaceData(j).NodeNums[0] = IntraZoneLinkageData(i).NodeNums[0];
                             } else {
-                                reportInterZoneLinkNotFound();
+                                ShowSevereError(m_state,
+                                            EnergyPlus::format(RoutineName) +
+                                                "The InterZone link is not found between AirflowNetwork:IntraZone:Linkage =" +
+                                                IntraZoneLinkageData(i).Name + " and AirflowNetwork:Multizone:Surface = " +
+                                                MultizoneSurfaceData(j).SurfName);
+                            ErrorsFound = true;
                             }
                         } else if (IntraZoneLinkageData(i).NodeNums[1] > AirflowNetworkNumOfZones + AirflowNetworkNumOfExtNode) {
                             MultizoneSurfaceData(j).RAFNflag = true;
@@ -3798,7 +3820,12 @@ namespace AirflowNetwork {
                                 MultizoneSurfaceData(j).ZonePtr = MultizoneSurfaceData(j).NodeNums[0];
                                 MultizoneSurfaceData(j).NodeNums[0] = IntraZoneLinkageData(i).NodeNums[1];
                             } else {
-                                reportInterZoneLinkNotFound();
+                                ShowSevereError(m_state,
+                                            EnergyPlus::format(RoutineName) +
+                                                "The InterZone link is not found between AirflowNetwork:IntraZone:Linkage =" +
+                                                IntraZoneLinkageData(i).Name + " and AirflowNetwork:Multizone:Surface = " +
+                                                MultizoneSurfaceData(j).SurfName);
+                            ErrorsFound = true;
                             }
                         }
                     }
@@ -3831,14 +3858,6 @@ namespace AirflowNetwork {
                 }
             }
         }
-
-        // Lambda to report a "required but not found" error when distribution is simulated
-        auto requireIfDistributed = [&]() {
-            if (distribution_simulated) {
-                ShowSevereError(m_state, EnergyPlus::format(RoutineName) + "An " + CurrentModuleObject + " object is required but not found.");
-                ErrorsFound = true;
-            }
-        };
 
         // Read AirflowNetwork Distribution system node
         CurrentModuleObject = "AirflowNetwork:Distribution:Node";
@@ -3882,12 +3901,18 @@ namespace AirflowNetwork {
                 }
             }
         } else {
-            requireIfDistributed();
+            if (distribution_simulated) {
+                ShowSevereError(m_state, EnergyPlus::format(RoutineName) + "An " + CurrentModuleObject + " object is required but not found.");
+                ErrorsFound = true;
+            }
         }
 
         CurrentModuleObject = "AirflowNetwork:Distribution:Component:Duct";
         if (DisSysNumOfDucts == 0) {
-            requireIfDistributed();
+            if (distribution_simulated) {
+                ShowSevereError(m_state, EnergyPlus::format(RoutineName) + "An " + CurrentModuleObject + " object is required but not found.");
+                ErrorsFound = true;
+            }
         }
 
         // Read AirflowNetwork distribution system component: DuctViewFactors
@@ -3976,7 +4001,10 @@ namespace AirflowNetwork {
 
         CurrentModuleObject = "AirflowNetwork:Distribution:Component:Fan";
         if (DisSysNumOfCVFs == 0) {
-            requireIfDistributed();
+            if (distribution_simulated) {
+                ShowSevereError(m_state, EnergyPlus::format(RoutineName) + "An " + CurrentModuleObject + " object is required but not found.");
+                ErrorsFound = true;
+            }
         }
 
         // Read PressureController
@@ -4317,18 +4345,6 @@ namespace AirflowNetwork {
 
                 auto const &surf = m_state.dataSurface->Surface(MultizoneSurfaceData(count).SurfNum);
 
-                // Shared check: all opening types require the surface to be a window, door, glassdoor or air boundary.
-                auto checkOpeningSurfaceClass = [&]() {
-                    if (!(surf.OriginalClass == SurfaceClass::Window || surf.OriginalClass == SurfaceClass::GlassDoor ||
-                          surf.OriginalClass == SurfaceClass::Door || surf.IsAirBoundarySurf)) {
-                        ShowSevereError(m_state,
-                                        EnergyPlus::format(RoutineName) +
-                                            "AirflowNetworkComponent: The opening must be assigned to a window, door, glassdoor or air boundary at " +
-                                            AirflowNetworkLinkageData(count).Name);
-                        ErrorsFound = true;
-                    }
-                };
-
                 switch (AirflowNetworkLinkageData(count).element->type()) {
                 case ComponentType::DOP: {
                     // if (AirflowNetworkLinkageData(count).CompName ==
@@ -4345,7 +4361,7 @@ namespace AirflowNetwork {
                         ShowContinueError(m_state, "10 deg of being horizontal. Airflows through large horizontal openings are poorly");
                         ShowContinueError(m_state, "modeled in the AirflowNetwork model resulting in only one-way airflow.");
                     }
-                    checkOpeningSurfaceClass();
+                    checkOpeningSurfaceClass(m_state, surf, RoutineName, AirflowNetworkLinkageData(count).Name, ErrorsFound);
 
                     if (surf.OriginalClass == SurfaceClass::Door || surf.OriginalClass == SurfaceClass::GlassDoor) {
                         if (MultizoneCompDetOpeningData(AirflowNetworkCompData(compnum).TypeNum).LVOType == 2) {
@@ -4368,7 +4384,7 @@ namespace AirflowNetwork {
                         ShowContinueError(m_state, "AirflowNetwork:Multizone:Component:SimpleOpening = " + AirflowNetworkCompData(compnum).Name);
                         ErrorsFound = true;
                     }
-                    checkOpeningSurfaceClass();
+                    checkOpeningSurfaceClass(m_state, surf, RoutineName, AirflowNetworkLinkageData(count).Name, ErrorsFound);
                 } break;
                 case ComponentType::HOP: {
                     // if (AirflowNetworkCompData(i).CompTypeNum == iComponentTypeNum::HOP) {
@@ -4409,7 +4425,7 @@ namespace AirflowNetwork {
                                           "with the object of AirflowNetwork:Multizone:Component:HorizontalOpening = " +
                                               AirflowNetworkCompData(compnum).Name);
                     }
-                    checkOpeningSurfaceClass();
+                    checkOpeningSurfaceClass(m_state, surf, RoutineName, AirflowNetworkLinkageData(count).Name, ErrorsFound);
                 } break;
                 default:
                     // Nothing to do here
@@ -4631,7 +4647,10 @@ namespace AirflowNetwork {
                 }
             }
         } else {
-            requireIfDistributed();
+            if (distribution_simulated) {
+                ShowSevereError(m_state, EnergyPlus::format(RoutineName) + "An " + CurrentModuleObject + " object is required but not found.");
+                ErrorsFound = true;
+            }
         }
 
         if (simulation_control.DuctLoss) {
