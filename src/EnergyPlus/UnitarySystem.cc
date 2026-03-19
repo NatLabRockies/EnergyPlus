@@ -5879,131 +5879,176 @@ namespace UnitarySystems {
             }
         }
 
-        // Determine supply air flow rate sizing method for cooling mode
-        if (Util::SameString(loc_m_CoolingSAFMethod, "SupplyAirFlowRate")) {
-            this->m_CoolingSAFMethod = DataSizing::SupplyAirFlowRate;
-
-            if (loc_m_CoolingSAFMethod_SAFlow != -999.0) {
-                this->m_MaxCoolAirVolFlow = loc_m_CoolingSAFMethod_SAFlow;
-                if (this->m_MaxCoolAirVolFlow == DataSizing::AutoSize) {
-                    this->m_RequestAutoSize = true;
-                } else {
-                    if (this->m_MaxCoolAirVolFlow <= HVAC::SmallAirVolFlow && this->m_CoolCoilExists) {
-                        ShowWarningError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                        ShowContinueError(state, "Input for Cooling Supply Air Flow Rate Method = SupplyAirFlowRate.");
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Suspicious Cooling Supply Air Flow Rate = {:.7R} when cooling coil is present.",
-                                                             this->m_MaxCoolAirVolFlow));
+        // Helper lambda: parse Cooling or Heating supply air flow rate method for the four
+        // named branches (SupplyAirFlowRate, FlowPerFloorArea, FractionOfAutosized, FlowPerCapacity).
+        // The None/blank branch differs between Cooling and Heating so it is handled separately below.
+        auto parseCoolHeatSAFMethod = [&](std::string_view methodStr,
+                                          std::string_view modeName, // "Cooling" or "Heating"
+                                          std::string_view fracKey,  // "FractionOfAutosizedCoolingValue" / "...HeatingValue"
+                                          std::string_view capKey,   // "FlowPerCoolingCapacity" / "FlowPerHeatingCapacity"
+                                          int fracEnum,
+                                          int capEnum,
+                                          Real64 localSAFlow,
+                                          Real64 localSAFlowPerFloorArea,
+                                          Real64 localFracOfAutosized,
+                                          Real64 localFlowPerCap,
+                                          int &safMethodOut,
+                                          Real64 &maxAirVolFlowInOut,
+                                          bool ownCoilExists) {
+            if (Util::SameString(methodStr, "SupplyAirFlowRate")) {
+                safMethodOut = DataSizing::SupplyAirFlowRate;
+                if (localSAFlow != -999.0) {
+                    maxAirVolFlowInOut = localSAFlow;
+                    if (maxAirVolFlowInOut == DataSizing::AutoSize) {
+                        this->m_RequestAutoSize = true;
+                    } else {
+                        if (maxAirVolFlowInOut <= HVAC::SmallAirVolFlow && ownCoilExists) {
+                            ShowWarningError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
+                            ShowContinueError(state,
+                                              EnergyPlus::format("Input for {} Supply Air Flow Rate Method = SupplyAirFlowRate.", modeName));
+                            ShowContinueError(state,
+                                              EnergyPlus::format("Suspicious {} Supply Air Flow Rate = {:.7R} when {} coil is present.",
+                                                                 modeName,
+                                                                 maxAirVolFlowInOut,
+                                                                 Util::makeUPPER(modeName)));
+                        }
+                        if (maxAirVolFlowInOut < 0.0) {
+                            errorsFound = true;
+                        }
                     }
-                    if (this->m_MaxCoolAirVolFlow < 0.0) {
+                } else {
+                    ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
+                    ShowContinueError(state, EnergyPlus::format("Input for {} Supply Air Flow Rate Method = SupplyAirFlowRate.", modeName));
+                    ShowContinueError(state, EnergyPlus::format("Blank field not allowed for {} Supply Air Flow Rate.", modeName));
+                    errorsFound = true;
+                }
+            } else if (Util::SameString(methodStr, "FlowPerFloorArea")) {
+                safMethodOut = DataSizing::FlowPerFloorArea;
+                if (localSAFlowPerFloorArea != -999.0) {
+                    maxAirVolFlowInOut = localSAFlowPerFloorArea;
+                    if (maxAirVolFlowInOut != DataSizing::AutoSize) {
+                        if (maxAirVolFlowInOut <= 0.0001 && ownCoilExists) {
+                            ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
+                            ShowContinueError(state,
+                                              EnergyPlus::format("Input for {} Supply Air Flow Rate Method = FlowPerFloorArea.", modeName));
+                            ShowContinueError(state,
+                                              EnergyPlus::format("Suspicious {} Supply Air Flow Rate Per Floor Area = {:.7R} [m3/s/m2] "
+                                                                 "when {} coil is present.",
+                                                                 modeName,
+                                                                 maxAirVolFlowInOut,
+                                                                 Util::makeUPPER(modeName)));
+                            if (maxAirVolFlowInOut < 0.0) {
+                                errorsFound = true;
+                            }
+                        }
+                        maxAirVolFlowInOut *= TotalFloorAreaOnAirLoop;
+                        this->m_RequestAutoSize = true;
+                    } else {
+                        ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
+                        ShowContinueError(state,
+                                          EnergyPlus::format("Input for {} Supply Air Flow Rate Method = FlowPerFloorArea.", modeName));
+                        ShowContinueError(state,
+                                          EnergyPlus::format("Illegal {} Supply Air Flow Rate Per Floor Area = Autosize", modeName));
                         errorsFound = true;
                     }
-                }
-
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                ShowContinueError(state, "Input for Cooling Supply Air Flow Rate Method = SupplyAirFlowRate.");
-                ShowContinueError(state, "Blank field not allowed for Cooling Supply Air Flow Rate.");
-                errorsFound = true;
-            }
-        } else if (Util::SameString(loc_m_CoolingSAFMethod, "FlowPerFloorArea")) {
-
-            this->m_CoolingSAFMethod = DataSizing::FlowPerFloorArea;
-            if (loc_m_CoolingSAFMethod_SAFlowPerFloorArea != -999.0) {
-                this->m_MaxCoolAirVolFlow = loc_m_CoolingSAFMethod_SAFlowPerFloorArea;
-                if (this->m_MaxCoolAirVolFlow != DataSizing::AutoSize) {
-                    if (this->m_MaxCoolAirVolFlow <= 0.0001 && this->m_CoolCoilExists) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                        ShowContinueError(state, "Input for Cooling Supply Air Flow Rate Method = FlowPerFloorArea.");
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format(
-                                "Suspicious Cooling Supply Air Flow Rate Per Floor Area = {:.7R} [m3/s/m2] when cooling coil is present.",
-                                this->m_MaxCoolAirVolFlow));
-                        if (this->m_MaxCoolAirVolFlow < 0.0) {
-                            errorsFound = true;
-                        }
-                    }
-                    this->m_MaxCoolAirVolFlow *= TotalFloorAreaOnAirLoop;
-                    this->m_RequestAutoSize = true;
-                    // AutoSized input is not allowed
                 } else {
                     ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                    ShowContinueError(state, "Input for Cooling Supply Air Flow Rate Method = FlowPerFloorArea.");
-                    ShowContinueError(state, "Illegal Cooling Supply Air Flow Rate Per Floor Area = Autosize");
+                    ShowContinueError(state, EnergyPlus::format("Input for {} Supply Air Flow Rate Method = FlowPerFloorArea.", modeName));
+                    ShowContinueError(state,
+                                      EnergyPlus::format("Blank field not allowed for {} Supply Air Flow Rate Per Floor Area.", modeName));
                     errorsFound = true;
                 }
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                ShowContinueError(state, "Input for Cooling Supply Air Flow Rate Method = FlowPerFloorArea.");
-                ShowContinueError(state, "Blank field not allowed for Cooling Supply Air Flow Rate Per Floor Area.");
-                errorsFound = true;
-            }
-        } else if (Util::SameString(loc_m_CoolingSAFMethod, "FractionOfAutosizedCoolingValue")) {
-
-            this->m_CoolingSAFMethod = DataSizing::FractionOfAutosizedCoolingAirflow;
-            if (loc_m_CoolingSAFMethod_FracOfAutosizedCoolingSAFlow != -999.0) {
-                this->m_MaxCoolAirVolFlow = loc_m_CoolingSAFMethod_FracOfAutosizedCoolingSAFlow;
-                if (this->m_MaxCoolAirVolFlow != DataSizing::AutoSize) {
-                    if (this->m_MaxCoolAirVolFlow <= HVAC::SmallAirVolFlow && this->m_CoolCoilExists) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                        ShowContinueError(state, "Input for Cooling Supply Air Flow Rate Method = FractionOfAutosizedCoolingValue.");
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format("Suspicious Cooling Fraction of Autosized Cooling Supply Air Flow Rate = {:.7R} [m3/s/m3] "
-                                               "when cooling coil is present.",
-                                               this->m_MaxCoolAirVolFlow));
-                        if (this->m_MaxCoolAirVolFlow < 0.0) {
-                            errorsFound = true;
+            } else if (Util::SameString(methodStr, fracKey)) {
+                safMethodOut = static_cast<int>(fracEnum);
+                if (localFracOfAutosized != -999.0) {
+                    maxAirVolFlowInOut = localFracOfAutosized;
+                    if (maxAirVolFlowInOut != DataSizing::AutoSize) {
+                        if (maxAirVolFlowInOut <= HVAC::SmallAirVolFlow && ownCoilExists) {
+                            ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
+                            ShowContinueError(state, EnergyPlus::format("Input for {} Supply Air Flow Rate Method = {}.", modeName, fracKey));
+                            ShowContinueError(
+                                state,
+                                EnergyPlus::format("Suspicious {} Fraction of Autosized {} Supply Air Flow Rate = {:.7R} [m3/s/m3] "
+                                                   "when {} coil is present.",
+                                                   modeName,
+                                                   modeName,
+                                                   maxAirVolFlowInOut,
+                                                   Util::makeUPPER(modeName)));
+                            if (maxAirVolFlowInOut < 0.0) {
+                                errorsFound = true;
+                            }
                         }
-                    }
-                    this->m_RequestAutoSize = true;
-                    // AutoSized input is not allowed
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                    ShowContinueError(state, "Input for Cooling Supply Air Flow Rate Method = FractionOfAutosizedCoolingValue.");
-                    ShowContinueError(state, "Illegal Cooling Fraction of Autosized Cooling Supply Air Flow Rate = Autosize");
-                    errorsFound = true;
-                }
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                ShowContinueError(state, "Input for Cooling Supply Air Flow Rate Method = FractionOfAutosizedCoolingValue.");
-                ShowContinueError(state, "Blank field not allowed for Cooling Fraction of Autosized Cooling Supply Air Flow Rate.");
-                errorsFound = true;
-            }
-        } else if (Util::SameString(loc_m_CoolingSAFMethod, "FlowPerCoolingCapacity")) {
-
-            this->m_CoolingSAFMethod = DataSizing::FlowPerCoolingCapacity;
-            if (loc_m_CoolingSAFMethod_FlowPerCoolingCapacity != -999.0) {
-                this->m_MaxCoolAirVolFlow = loc_m_CoolingSAFMethod_FlowPerCoolingCapacity;
-                if (this->m_MaxCoolAirVolFlow != DataSizing::AutoSize) {
-                    if (this->m_MaxCoolAirVolFlow <= 0.00001 && this->m_CoolCoilExists) {
+                        this->m_RequestAutoSize = true;
+                    } else {
                         ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                        ShowContinueError(state, "Input for Cooling Supply Air Flow Rate Method = FlowPerCoolingCapacity.");
+                        ShowContinueError(state, EnergyPlus::format("Input for {} Supply Air Flow Rate Method = {}.", modeName, fracKey));
                         ShowContinueError(state,
-                                          EnergyPlus::format("Suspicious Cooling Supply Air Flow Rate Per Unit of Capacity = {:.7R} [m3/s/W] when "
-                                                             "cooling coil is present.",
-                                                             this->m_MaxCoolAirVolFlow));
-                        if (this->m_MaxCoolAirVolFlow < 0.0) {
-                            errorsFound = true;
-                        }
+                                          EnergyPlus::format("Illegal {} Fraction of Autosized {} Supply Air Flow Rate = Autosize",
+                                                             modeName,
+                                                             modeName));
+                        errorsFound = true;
                     }
-                    this->m_RequestAutoSize = true;
-                    // AutoSized input is not allowed
                 } else {
                     ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                    ShowContinueError(state, "Input for Cooling Supply Air Flow Rate Method = FlowPerCoolingCapacity.");
-                    ShowContinueError(state, "Illegal Cooling Supply Air Flow Rate Per Unit of Capacity = Autosize");
+                    ShowContinueError(state, EnergyPlus::format("Input for {} Supply Air Flow Rate Method = {}.", modeName, fracKey));
+                    ShowContinueError(state,
+                                      EnergyPlus::format("Blank field not allowed for {} Fraction of Autosized {} Supply Air Flow Rate.",
+                                                         modeName,
+                                                         modeName));
                     errorsFound = true;
                 }
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                ShowContinueError(state, "Input for Cooling Supply Air Flow Rate Method = FlowPerCoolingCapacity.");
-                ShowContinueError(state, "Blank field not allowed for Cooling Supply Air Flow Rate Per Unit of Capacity.");
-                errorsFound = true;
+            } else if (Util::SameString(methodStr, capKey)) {
+                safMethodOut = static_cast<int>(capEnum);
+                if (localFlowPerCap != -999.0) {
+                    maxAirVolFlowInOut = localFlowPerCap;
+                    if (maxAirVolFlowInOut != DataSizing::AutoSize) {
+                        if (maxAirVolFlowInOut <= 0.00001 && ownCoilExists) {
+                            ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
+                            ShowContinueError(state, EnergyPlus::format("Input for {} Supply Air Flow Rate Method = {}.", modeName, capKey));
+                            ShowContinueError(
+                                state,
+                                EnergyPlus::format("Suspicious {} Supply Air Flow Rate Per Unit of Capacity = {:.7R} [m3/s/W] "
+                                                   "when {} coil is present.",
+                                                   modeName,
+                                                   maxAirVolFlowInOut,
+                                                   Util::makeUPPER(modeName)));
+                            if (maxAirVolFlowInOut < 0.0) {
+                                errorsFound = true;
+                            }
+                        }
+                        this->m_RequestAutoSize = true;
+                    } else {
+                        ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
+                        ShowContinueError(state, EnergyPlus::format("Input for {} Supply Air Flow Rate Method = {}.", modeName, capKey));
+                        ShowContinueError(state,
+                                          EnergyPlus::format("Illegal {} Supply Air Flow Rate Per Unit of Capacity = Autosize", modeName));
+                        errorsFound = true;
+                    }
+                } else {
+                    ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
+                    ShowContinueError(state, EnergyPlus::format("Input for {} Supply Air Flow Rate Method = {}.", modeName, capKey));
+                    ShowContinueError(state,
+                                      EnergyPlus::format("Blank field not allowed for {} Supply Air Flow Rate Per Unit of Capacity.", modeName));
+                    errorsFound = true;
+                }
             }
+        };
 
-        } else if (Util::SameString(loc_m_CoolingSAFMethod, "None") || loc_m_CoolingSAFMethod.empty()) {
+        // Determine supply air flow rate sizing method for cooling mode
+        parseCoolHeatSAFMethod(loc_m_CoolingSAFMethod,
+                               "Cooling",
+                               "FractionOfAutosizedCoolingValue",
+                               "FlowPerCoolingCapacity",
+                               DataSizing::FractionOfAutosizedCoolingAirflow,
+                               DataSizing::FlowPerCoolingCapacity,
+                               loc_m_CoolingSAFMethod_SAFlow,
+                               loc_m_CoolingSAFMethod_SAFlowPerFloorArea,
+                               loc_m_CoolingSAFMethod_FracOfAutosizedCoolingSAFlow,
+                               loc_m_CoolingSAFMethod_FlowPerCoolingCapacity,
+                               this->m_CoolingSAFMethod,
+                               this->m_MaxCoolAirVolFlow,
+                               this->m_CoolCoilExists);
+        if (Util::SameString(loc_m_CoolingSAFMethod, "None") || loc_m_CoolingSAFMethod.empty()) {
             this->m_CoolingSAFMethod = DataSizing::None;
             if (this->m_CoolCoilExists && this->m_MaxCoolAirVolFlow == 0) {
                 ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
@@ -6017,124 +6062,20 @@ namespace UnitarySystems {
         }
 
         // Determine supply air flow rate sizing method for heating mode
-        if (Util::SameString(loc_m_HeatingSAFMethod, "SupplyAirFlowRate")) {
-            this->m_HeatingSAFMethod = DataSizing::SupplyAirFlowRate;
-            if (loc_m_HeatingSAFMethod_SAFlow != -999.0) {
-                this->m_MaxHeatAirVolFlow = loc_m_HeatingSAFMethod_SAFlow;
-                if (this->m_MaxHeatAirVolFlow == DataSizing::AutoSize) {
-                    this->m_RequestAutoSize = true;
-                } else {
-                    if (this->m_MaxHeatAirVolFlow <= HVAC::SmallAirVolFlow && this->m_HeatCoilExists) {
-                        ShowWarningError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                        ShowContinueError(state, "Input for Heating Supply Air Flow Rate Method = SupplyAirFlowRate.");
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Suspicious Heating Supply Air Flow Rate = {:.7R} when heating coil is present.",
-                                                             this->m_MaxHeatAirVolFlow));
-                    }
-                    if (this->m_MaxHeatAirVolFlow < 0.0) {
-                        errorsFound = true;
-                    }
-                }
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                ShowContinueError(state, "Input for Heating Supply Air Flow Rate Method = SupplyAirFlowRate.");
-                ShowContinueError(state, "Blank field not allowed for Heating Supply Air Flow Rate.");
-                errorsFound = true;
-            }
-        } else if (Util::SameString(loc_m_HeatingSAFMethod, "FlowPerFloorArea")) {
-            this->m_HeatingSAFMethod = DataSizing::FlowPerFloorArea;
-            if (loc_m_HeatingSAFMethod_SAFlowPerFloorArea != -999.0) {
-                this->m_MaxHeatAirVolFlow = loc_m_HeatingSAFMethod_SAFlowPerFloorArea;
-                if (this->m_MaxHeatAirVolFlow != DataSizing::AutoSize) {
-                    if (this->m_MaxHeatAirVolFlow <= 0.0001 && this->m_HeatCoilExists) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                        ShowContinueError(state, "Input for Heating Supply Air Flow Rate Method = FlowPerFloorArea.");
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format(
-                                "Suspicious Heating Supply Air Flow Rate Per Floor Area = {:.7R} [m3/s/m2] when heating coil is present.",
-                                this->m_MaxHeatAirVolFlow));
-                    }
-                    if (this->m_MaxHeatAirVolFlow < 0.0) {
-                        errorsFound = true;
-                    }
-                    this->m_MaxHeatAirVolFlow *= TotalFloorAreaOnAirLoop;
-                    this->m_RequestAutoSize = true;
-                } else {
-                    // AutoSized input is not allowed
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                    ShowContinueError(state, "Input for Heating Supply Air Flow Rate Method = FlowPerFloorArea.");
-                    ShowContinueError(state, "Illegal Heating Supply Air Flow Rate Per Floor Area = Autosize");
-                    errorsFound = true;
-                }
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                ShowContinueError(state, "Input for Heating Supply Air Flow Rate Method = FlowPerFloorArea.");
-                ShowContinueError(state, "Blank field not allowed for Heating Supply Air Flow Rate Per Floor Area.");
-                errorsFound = true;
-            }
-        } else if (Util::SameString(loc_m_HeatingSAFMethod, "FractionOfAutosizedHeatingValue")) {
-            this->m_HeatingSAFMethod = DataSizing::FractionOfAutosizedHeatingAirflow;
-            if (loc_m_HeatingSAFMethod_FracOfAutosizedHeatingSAFlow != -999.0) {
-                this->m_MaxHeatAirVolFlow = loc_m_HeatingSAFMethod_FracOfAutosizedHeatingSAFlow;
-                if (this->m_MaxHeatAirVolFlow != DataSizing::AutoSize) {
-                    if (this->m_MaxHeatAirVolFlow <= HVAC::SmallAirVolFlow && this->m_HeatCoilExists) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                        ShowContinueError(state, "Input for Heating Supply Air Flow Rate Method = FractionOfAutosizedHeatingValue.");
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format("Suspicious Heating Fraction of Autosized Heating Supply Air Flow Rate = {:.7R} [m3/s/m3] "
-                                               "when heating coil is present.",
-                                               this->m_MaxHeatAirVolFlow));
-                        if (this->m_MaxHeatAirVolFlow < 0.0) {
-                            errorsFound = true;
-                        }
-                    }
-                    this->m_RequestAutoSize = true;
-                    // AutoSized input is not allowed
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                    ShowContinueError(state, "Input for Heating Supply Air Flow Rate Method = FractionOfAutosizedHeatingValue");
-                    ShowContinueError(state, "Illegal input for Heating Fraction of Autosized Heating Supply Air Flow Rate = Autosize");
-                    errorsFound = true;
-                }
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                ShowContinueError(state, "Input for Heating Supply Air Flow Rate Method = FractionOfAutosizedHeatingValue");
-                ShowContinueError(state, "Blank field not allowed for Heating Fraction of Autosized Heating Supply Air Flow Rate");
-                errorsFound = true;
-            }
-        } else if (Util::SameString(loc_m_HeatingSAFMethod, "FlowPerHeatingCapacity")) {
-            this->m_HeatingSAFMethod = DataSizing::FlowPerHeatingCapacity;
-            if (loc_m_HeatingSAFMethod_FlowPerHeatingCapacity != -999.0) {
-                this->m_MaxHeatAirVolFlow = loc_m_HeatingSAFMethod_FlowPerHeatingCapacity;
-                if (this->m_MaxHeatAirVolFlow != DataSizing::AutoSize) {
-                    if (this->m_MaxHeatAirVolFlow <= 0.00001 && this->m_HeatCoilExists) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                        ShowContinueError(state, "Input for Heating Supply Air Flow Rate Method = FlowPerHeatingCapacity.");
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Suspicious Heating Supply Air Flow Rate Per Unit of Capacity = {:.7R} [m3/s/W] when "
-                                                             "heating coil is present.",
-                                                             this->m_MaxHeatAirVolFlow));
-                        if (this->m_MaxHeatAirVolFlow < 0.0) {
-                            errorsFound = true;
-                        }
-                    }
-                    this->m_RequestAutoSize = true;
-                    // AutoSized input is not allowed
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                    ShowContinueError(state, "Input for Heating Supply Air Flow Rate Method = FlowPerHeatingCapacity.");
-                    ShowContinueError(state, "Illegal Heating Supply Air Flow Rate Per Unit of Capacity = Autosize");
-                    errorsFound = true;
-                }
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
-                ShowContinueError(state, "Input for Heating Supply Air Flow Rate Method = FlowPerHeatingCapacity");
-                ShowContinueError(state, "Blank field not allowed for Heating Supply Air Flow Rate Per Unit of Capacity");
-                errorsFound = true;
-            }
-        } else if (Util::SameString(loc_m_HeatingSAFMethod, "None") || loc_m_HeatingSAFMethod.empty()) {
+        parseCoolHeatSAFMethod(loc_m_HeatingSAFMethod,
+                               "Heating",
+                               "FractionOfAutosizedHeatingValue",
+                               "FlowPerHeatingCapacity",
+                               DataSizing::FractionOfAutosizedHeatingAirflow,
+                               DataSizing::FlowPerHeatingCapacity,
+                               loc_m_HeatingSAFMethod_SAFlow,
+                               loc_m_HeatingSAFMethod_SAFlowPerFloorArea,
+                               loc_m_HeatingSAFMethod_FracOfAutosizedHeatingSAFlow,
+                               loc_m_HeatingSAFMethod_FlowPerHeatingCapacity,
+                               this->m_HeatingSAFMethod,
+                               this->m_MaxHeatAirVolFlow,
+                               this->m_HeatCoilExists);
+        if (Util::SameString(loc_m_HeatingSAFMethod, "None") || loc_m_HeatingSAFMethod.empty()) {
             this->m_HeatingSAFMethod = DataSizing::None;
             if (this->m_HeatCoilExists && this->m_MaxHeatAirVolFlow == 0) {
                 ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisObjectName));
