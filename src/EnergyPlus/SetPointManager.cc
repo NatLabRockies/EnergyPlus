@@ -311,6 +311,25 @@ void GetSetPointManagerInputs(EnergyPlusData &state)
     }
 } // GetSetPointManagerInputs()
 
+// Helper: apply a setpoint value to the appropriate node field based on the
+// control variable type.  Covers temperature, humidity ratio, and mass-flow-rate
+// variants so that callers can avoid repeating the same 9-arm switch.
+static void applySetPointToNode(Node::NodeData &node, HVAC::CtrlVarType ctrlVar, Real64 value)
+{
+    switch (ctrlVar) {
+    case HVAC::CtrlVarType::Temp:            node.TempSetPoint          = value; break;
+    case HVAC::CtrlVarType::MaxTemp:         node.TempSetPointHi        = value; break;
+    case HVAC::CtrlVarType::MinTemp:         node.TempSetPointLo        = value; break;
+    case HVAC::CtrlVarType::HumRat:          node.HumRatSetPoint        = value; break;
+    case HVAC::CtrlVarType::MaxHumRat:       node.HumRatMax             = value; break;
+    case HVAC::CtrlVarType::MinHumRat:       node.HumRatMin             = value; break;
+    case HVAC::CtrlVarType::MassFlowRate:    node.MassFlowRateSetPoint  = value; break;
+    case HVAC::CtrlVarType::MaxMassFlowRate: node.MassFlowRateMax       = value; break;
+    case HVAC::CtrlVarType::MinMassFlowRate: node.MassFlowRateMin       = value; break;
+    default: break;
+    }
+}
+
 // Helper: resolve and validate the HVAC air loop for SPMs that require one.
 // Sets spm->airLoopNum and returns true when the loop is found, false otherwise
 // (setting ErrorsFound = true in both failure modes).
@@ -2136,41 +2155,10 @@ void InitSetPointManagers(EnergyPlusData &state)
                 auto *spmS = dynamic_cast<SPMScheduled *>(spm);
                 assert(spmS != nullptr);
 
+                Real64 SchedValue = spmS->sched->getCurrentVal();
                 for (int ctrlNodeNum : spmS->ctrlNodeNums) {
-                    auto &node = state.dataLoopNodes->Node(ctrlNodeNum);
-                    Real64 SchedValue = spmS->sched->getCurrentVal();
                     // Initialize scheduled setpoints
-                    switch (spmS->ctrlVar) {
-                    case HVAC::CtrlVarType::Temp: {
-                        node.TempSetPoint = SchedValue;
-                    } break;
-                    case HVAC::CtrlVarType::MaxTemp: {
-                        node.TempSetPointHi = SchedValue;
-                    } break;
-                    case HVAC::CtrlVarType::MinTemp: {
-                        node.TempSetPointLo = SchedValue;
-                    } break;
-                    case HVAC::CtrlVarType::HumRat: {
-                        node.HumRatSetPoint = SchedValue;
-                    } break;
-                    case HVAC::CtrlVarType::MaxHumRat: {
-                        node.HumRatMax = SchedValue;
-                    } break;
-                    case HVAC::CtrlVarType::MinHumRat: {
-                        node.HumRatMin = SchedValue;
-                    } break;
-                    case HVAC::CtrlVarType::MassFlowRate: {
-                        node.MassFlowRateSetPoint = SchedValue;
-                    } break;
-                    case HVAC::CtrlVarType::MaxMassFlowRate: {
-                        node.MassFlowRateMax = SchedValue;
-                    } break;
-                    case HVAC::CtrlVarType::MinMassFlowRate: {
-                        node.MassFlowRateMin = SchedValue;
-                    } break;
-                    default:
-                        break;
-                    }
+                    applySetPointToNode(state.dataLoopNodes->Node(ctrlNodeNum), spmS->ctrlVar, SchedValue);
                 }
             } break;
 
@@ -2502,31 +2490,9 @@ void InitSetPointManagers(EnergyPlusData &state)
 
             case SPMType::SystemNodeTemp:
             case SPMType::SystemNodeHum: {
+                spm->calculate(state);
                 for (int ctrlNodeNum : spm->ctrlNodeNums) {
-                    auto &node = state.dataLoopNodes->Node(ctrlNodeNum);
-                    spm->calculate(state);
-                    switch (spm->ctrlVar) {
-                    case HVAC::CtrlVarType::Temp: {
-                        node.TempSetPoint = spm->setPt;
-                    } break;
-                    case HVAC::CtrlVarType::MaxTemp: {
-                        node.TempSetPointHi = spm->setPt;
-                    } break;
-                    case HVAC::CtrlVarType::MinTemp: {
-                        node.TempSetPointLo = spm->setPt;
-                    } break;
-                    case HVAC::CtrlVarType::HumRat: {
-                        node.HumRatSetPoint = spm->setPt;
-                    } break;
-                    case HVAC::CtrlVarType::MaxHumRat: {
-                        node.HumRatMax = spm->setPt;
-                    } break;
-                    case HVAC::CtrlVarType::MinHumRat: {
-                        node.HumRatMin = spm->setPt;
-                    } break;
-                    default:
-                        break;
-                    }
+                    applySetPointToNode(state.dataLoopNodes->Node(ctrlNodeNum), spm->ctrlVar, spm->setPt);
                 }
             } break;
 
@@ -4053,39 +4019,8 @@ void UpdateSetPointManagers(EnergyPlusData &state)
         case SPMType::SystemNodeTemp:
         case SPMType::SystemNodeHum: {
             for (int ctrlNodeNum : spm->ctrlNodeNums) {
-                auto &node = state.dataLoopNodes->Node(ctrlNodeNum);
-                switch (spm->ctrlVar) {
                 // set the setpoint depending on the type of variable being controlled
-                case HVAC::CtrlVarType::Temp: {
-                    node.TempSetPoint = spm->setPt;
-                } break;
-                case HVAC::CtrlVarType::MaxTemp: {
-                    node.TempSetPointHi = spm->setPt;
-                } break;
-                case HVAC::CtrlVarType::MinTemp: {
-                    node.TempSetPointLo = spm->setPt;
-                } break;
-                case HVAC::CtrlVarType::HumRat: {
-                    node.HumRatSetPoint = spm->setPt;
-                } break;
-                case HVAC::CtrlVarType::MaxHumRat: {
-                    node.HumRatMax = spm->setPt;
-                } break;
-                case HVAC::CtrlVarType::MinHumRat: {
-                    node.HumRatMin = spm->setPt;
-                } break;
-                case HVAC::CtrlVarType::MassFlowRate: {
-                    node.MassFlowRateSetPoint = spm->setPt;
-                } break;
-                case HVAC::CtrlVarType::MaxMassFlowRate: {
-                    node.MassFlowRateMax = spm->setPt;
-                } break;
-                case HVAC::CtrlVarType::MinMassFlowRate: {
-                    node.MassFlowRateMin = spm->setPt;
-                } break;
-                default:
-                    break;
-                }
+                applySetPointToNode(state.dataLoopNodes->Node(ctrlNodeNum), spm->ctrlVar, spm->setPt);
             } // for (CtrlNodeNum)
         } break;
 
