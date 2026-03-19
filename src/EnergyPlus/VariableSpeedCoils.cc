@@ -390,6 +390,18 @@ namespace VariableSpeedCoils {
             }
         };
 
+        // Helper: read crankcase heater capacity, validate >= 0, set ErrorsFound if invalid
+        auto readCrankcaseHeaterCapacity = [&](VariableSpeedCoilData &coil, const nlohmann::json &fields,
+                                               const nlohmann::json &schemaProps, std::string_view modObj) {
+            coil.CrankcaseHeaterCapacity = s_ip->getRealFieldValue(fields, schemaProps, "crankcase_heater_capacity");
+            if (coil.CrankcaseHeaterCapacity < 0.0) {
+                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, modObj, coil.Name));
+                ShowContinueError(state, "...Crankcase Heater Capacity cannot be < 0.0.");
+                ShowContinueError(state, EnergyPlus::format("...entered value=[{:.2T}].", coil.CrankcaseHeaterCapacity));
+                ErrorsFound = true;
+            }
+        };
+
         int NumCool = s_ip->getNumObjectsFound(state, "COIL:COOLING:WATERTOAIRHEATPUMP:VARIABLESPEEDEQUATIONFIT");
         int NumHeat = s_ip->getNumObjectsFound(state, "COIL:HEATING:WATERTOAIRHEATPUMP:VARIABLESPEEDEQUATIONFIT");
         int NumCoolAS = s_ip->getNumObjectsFound(state, "COIL:COOLING:DX:VARIABLESPEED");
@@ -719,14 +731,7 @@ namespace VariableSpeedCoils {
                 }
 
                 // Set crankcase heater capacity
-                cFieldName = "Crankcase Heater Capacity"; // cNumericFields(11)
-                varSpeedCoil.CrankcaseHeaterCapacity = s_ip->getRealFieldValue(fields, schemaProps, "crankcase_heater_capacity"); // NumArray(11);
-                if (varSpeedCoil.CrankcaseHeaterCapacity < 0.0) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, varSpeedCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("...{} cannot be < 0.0.", cFieldName));
-                    ShowContinueError(state, EnergyPlus::format("...entered value=[{:.2T}].", varSpeedCoil.CrankcaseHeaterCapacity));
-                    ErrorsFound = true;
-                }
+                readCrankcaseHeaterCapacity(varSpeedCoil, fields, schemaProps, CurrentModuleObject);
 
                 // Set crankcase heater cutout temperature
                 varSpeedCoil.MaxOATCrankcaseHeater =
@@ -1166,14 +1171,7 @@ namespace VariableSpeedCoils {
                 varSpeedCoil.MaxOATDefrost =
                     s_ip->getRealFieldValue(fields, schemaProps, "maximum_outdoor_dry_bulb_temperature_for_defrost_operation");
                 // Set crankcase heater capacity
-                cFieldName = "Crankcase Heater Capacity"; // cNumericFields(8)
-                varSpeedCoil.CrankcaseHeaterCapacity = s_ip->getRealFieldValue(fields, schemaProps, "crankcase_heater_capacity");
-                if (varSpeedCoil.CrankcaseHeaterCapacity < 0.0) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, varSpeedCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("...{} cannot be < 0.0.", cFieldName));
-                    ShowContinueError(state, EnergyPlus::format("...entered value=[{:.2T}].", varSpeedCoil.CrankcaseHeaterCapacity));
-                    ErrorsFound = true;
-                }
+                readCrankcaseHeaterCapacity(varSpeedCoil, fields, schemaProps, CurrentModuleObject);
                 // Set crankcase heater cutout temperature
                 varSpeedCoil.MaxOATCrankcaseHeater =
                     s_ip->getRealFieldValue(fields, schemaProps, "maximum_outdoor_dry_bulb_temperature_for_crankcase_heater_operation");
@@ -1433,14 +1431,7 @@ namespace VariableSpeedCoils {
 
                 Node::TestCompSet(state, CurrentModuleObject, varSpeedCoil.Name, condWaterInletNodeName, condWaterOutletNodeName, "Water Nodes");
 
-                cFieldName = "Crankcase Heater Capacity";
-                varSpeedCoil.CrankcaseHeaterCapacity = s_ip->getRealFieldValue(fields, schemaProps, "crankcase_heater_capacity"); // NumArray(10);
-                if (varSpeedCoil.CrankcaseHeaterCapacity < 0.0) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, varSpeedCoil.Name));
-                    ShowContinueError(
-                        state, EnergyPlus::format("...{} must be >= 0.0  entered value=[{:.1T}].", cFieldName, varSpeedCoil.CrankcaseHeaterCapacity));
-                    ErrorsFound = true;
-                }
+                readCrankcaseHeaterCapacity(varSpeedCoil, fields, schemaProps, CurrentModuleObject);
 
                 cFieldName = "Maximum Ambient Temperature for Crankcase Heater Operation";
                 varSpeedCoil.MaxOATCrankcaseHeater =
