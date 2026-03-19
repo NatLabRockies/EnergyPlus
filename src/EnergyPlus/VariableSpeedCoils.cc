@@ -377,6 +377,19 @@ namespace VariableSpeedCoils {
             }
         };
 
+        // Helper: compute per-speed scale values (percent total capacity, air/water/evapCond volume flow per rated total cap, etc.)
+        auto computeScaleValues = [](VariableSpeedCoilData &coil, bool hasWater, bool hasEvapCond, bool hasPumpPower) {
+            Real64 maxCap = coil.MSRatedTotCap(coil.NumOfSpeeds);
+            for (int I = 1; I <= coil.NumOfSpeeds; ++I) {
+                Real64 capI = coil.MSRatedTotCap(I);
+                coil.MSRatedPercentTotCap(I) = capI / maxCap;
+                coil.MSRatedAirVolFlowPerRatedTotCap(I) = coil.MSRatedAirVolFlowRate(I) / capI;
+                if (hasWater) coil.MSRatedWaterVolFlowPerRatedTotCap(I) = coil.MSRatedWaterVolFlowRate(I) / capI;
+                if (hasEvapCond) coil.MSRatedEvapCondVolFlowPerRatedTotCap(I) = coil.EvapCondAirFlow(I) / capI;
+                if (hasPumpPower) coil.MSWHPumpPowerPerRatedTotCap(I) = coil.MSWHPumpPower(I) / capI;
+            }
+        };
+
         int NumCool = s_ip->getNumObjectsFound(state, "COIL:COOLING:WATERTOAIRHEATPUMP:VARIABLESPEEDEQUATIONFIT");
         int NumHeat = s_ip->getNumObjectsFound(state, "COIL:HEATING:WATERTOAIRHEATPUMP:VARIABLESPEEDEQUATIONFIT");
         int NumCoolAS = s_ip->getNumObjectsFound(state, "COIL:COOLING:DX:VARIABLESPEED");
@@ -551,11 +564,7 @@ namespace VariableSpeedCoils {
                         RatedInletWaterTemp, RatedInletAirTemp);
                 }
 
-                for (int I = 1; I <= varSpeedCoil.NumOfSpeeds; ++I) {
-                    varSpeedCoil.MSRatedPercentTotCap(I) = varSpeedCoil.MSRatedTotCap(I) / varSpeedCoil.MSRatedTotCap(varSpeedCoil.NumOfSpeeds);
-                    varSpeedCoil.MSRatedAirVolFlowPerRatedTotCap(I) = varSpeedCoil.MSRatedAirVolFlowRate(I) / varSpeedCoil.MSRatedTotCap(I);
-                    varSpeedCoil.MSRatedWaterVolFlowPerRatedTotCap(I) = varSpeedCoil.MSRatedWaterVolFlowRate(I) / varSpeedCoil.MSRatedTotCap(I);
-                }
+                computeScaleValues(varSpeedCoil, true, false, false);
 
                 // CurrentModuleObject = "Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit"
                 setupEnergyOutputVars(varSpeedCoil, true);
@@ -844,11 +853,7 @@ namespace VariableSpeedCoils {
                         1.0);
                 }
 
-                for (int I = 1; I <= varSpeedCoil.NumOfSpeeds; ++I) {
-                    varSpeedCoil.MSRatedPercentTotCap(I) = varSpeedCoil.MSRatedTotCap(I) / varSpeedCoil.MSRatedTotCap(varSpeedCoil.NumOfSpeeds);
-                    varSpeedCoil.MSRatedAirVolFlowPerRatedTotCap(I) = varSpeedCoil.MSRatedAirVolFlowRate(I) / varSpeedCoil.MSRatedTotCap(I);
-                    varSpeedCoil.MSRatedEvapCondVolFlowPerRatedTotCap(I) = varSpeedCoil.EvapCondAirFlow(I) / varSpeedCoil.MSRatedTotCap(I);
-                }
+                computeScaleValues(varSpeedCoil, false, true, false);
 
                 // CurrentModuleObject = "Coil:Cooling:DX:VariableSpeed"
                 setupEnergyOutputVars(varSpeedCoil, true);
@@ -1010,11 +1015,7 @@ namespace VariableSpeedCoils {
                         RatedInletWaterTemp, RatedInletAirTemp);
                 }
 
-                for (int I = 1; I <= varSpeedCoil.NumOfSpeeds; ++I) {
-                    varSpeedCoil.MSRatedPercentTotCap(I) = varSpeedCoil.MSRatedTotCap(I) / varSpeedCoil.MSRatedTotCap(varSpeedCoil.NumOfSpeeds);
-                    varSpeedCoil.MSRatedAirVolFlowPerRatedTotCap(I) = varSpeedCoil.MSRatedAirVolFlowRate(I) / varSpeedCoil.MSRatedTotCap(I);
-                    varSpeedCoil.MSRatedWaterVolFlowPerRatedTotCap(I) = varSpeedCoil.MSRatedWaterVolFlowRate(I) / varSpeedCoil.MSRatedTotCap(I);
-                }
+                computeScaleValues(varSpeedCoil, true, false, false);
 
                 // CurrentModuleObject = "Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit"
                 setupEnergyOutputVars(varSpeedCoil, false);
@@ -1248,10 +1249,7 @@ namespace VariableSpeedCoils {
                     continue;
                 }
 
-                for (int I = 1; I <= varSpeedCoil.NumOfSpeeds; ++I) {
-                    varSpeedCoil.MSRatedPercentTotCap(I) = varSpeedCoil.MSRatedTotCap(I) / varSpeedCoil.MSRatedTotCap(varSpeedCoil.NumOfSpeeds);
-                    varSpeedCoil.MSRatedAirVolFlowPerRatedTotCap(I) = varSpeedCoil.MSRatedAirVolFlowRate(I) / varSpeedCoil.MSRatedTotCap(I);
-                }
+                computeScaleValues(varSpeedCoil, false, false, false);
 
                 // CurrentModuleObject = "Coil:Heating:DX:Variablespeed "
                 setupEnergyOutputVars(varSpeedCoil, false);
@@ -1533,13 +1531,7 @@ namespace VariableSpeedCoils {
                         1.0);
                 }
 
-                // get scale values
-                for (int I = 1; I <= varSpeedCoil.NumOfSpeeds; ++I) {
-                    varSpeedCoil.MSRatedPercentTotCap(I) = varSpeedCoil.MSRatedTotCap(I) / varSpeedCoil.MSRatedTotCap(varSpeedCoil.NumOfSpeeds);
-                    varSpeedCoil.MSRatedAirVolFlowPerRatedTotCap(I) = varSpeedCoil.MSRatedAirVolFlowRate(I) / varSpeedCoil.MSRatedTotCap(I);
-                    varSpeedCoil.MSRatedWaterVolFlowPerRatedTotCap(I) = varSpeedCoil.MSRatedWaterVolFlowRate(I) / varSpeedCoil.MSRatedTotCap(I);
-                    varSpeedCoil.MSWHPumpPowerPerRatedTotCap(I) = varSpeedCoil.MSWHPumpPower(I) / varSpeedCoil.MSRatedTotCap(I);
-                }
+                computeScaleValues(varSpeedCoil, true, false, true);
 
                 // CurrentModuleObject = "Coil:Waterheating:Airtowaterheatpump:Variablespeed"
                 SetupOutputVariable(state,
