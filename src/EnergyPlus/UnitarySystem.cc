@@ -17648,7 +17648,8 @@ namespace UnitarySystems {
                     break;
                 case UnitarySys::SysType::CoilCoolingDX:
                     // Setup Report variables for the DXCoolingSystem that is not reported in the components themselves
-                    if (state.dataUnitarySystems->unitarySys[sysNum].m_CoolingCoilType_Num == HVAC::CoilDX_CoolingTwoSpeed) {
+                    if (state.dataUnitarySystems->unitarySys[sysNum].m_CoolingCoilType_Num == HVAC::CoilDX_CoolingTwoSpeed ||
+                        state.dataUnitarySystems->unitarySys[sysNum].m_CoolingCoilType_Num == HVAC::Coil_CoolingAirToAirVariableSpeed) {
                         SetupOutputVariable(state,
                                             "Coil System Cycling Ratio",
                                             Constant::Units::None,
@@ -17663,28 +17664,15 @@ namespace UnitarySystems {
                                             OutputProcessor::TimeStepType::System,
                                             OutputProcessor::StoreType::Average,
                                             state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    } else if (state.dataUnitarySystems->unitarySys[sysNum].m_CoolingCoilType_Num == HVAC::Coil_CoolingAirToAirVariableSpeed) {
-                        SetupOutputVariable(state,
-                                            "Coil System Cycling Ratio",
-                                            Constant::Units::None,
-                                            state.dataUnitarySystems->unitarySys[sysNum].m_CoolingCycRatio,
-                                            OutputProcessor::TimeStepType::System,
-                                            OutputProcessor::StoreType::Average,
-                                            state.dataUnitarySystems->unitarySys[sysNum].Name);
-                        SetupOutputVariable(state,
-                                            "Coil System Compressor Speed Ratio",
-                                            Constant::Units::None,
-                                            state.dataUnitarySystems->unitarySys[sysNum].m_CoolingSpeedRatio,
-                                            OutputProcessor::TimeStepType::System,
-                                            OutputProcessor::StoreType::Average,
-                                            state.dataUnitarySystems->unitarySys[sysNum].Name);
-                        SetupOutputVariable(state,
-                                            "Coil System Compressor Speed Number",
-                                            Constant::Units::None,
-                                            state.dataUnitarySystems->unitarySys[sysNum].m_CoolingSpeedNum,
-                                            OutputProcessor::TimeStepType::System,
-                                            OutputProcessor::StoreType::Average,
-                                            state.dataUnitarySystems->unitarySys[sysNum].Name);
+                        if (state.dataUnitarySystems->unitarySys[sysNum].m_CoolingCoilType_Num == HVAC::Coil_CoolingAirToAirVariableSpeed) {
+                            SetupOutputVariable(state,
+                                                "Coil System Compressor Speed Number",
+                                                Constant::Units::None,
+                                                state.dataUnitarySystems->unitarySys[sysNum].m_CoolingSpeedNum,
+                                                OutputProcessor::TimeStepType::System,
+                                                OutputProcessor::StoreType::Average,
+                                                state.dataUnitarySystems->unitarySys[sysNum].Name);
+                        }
                     } else {
                         SetupOutputVariable(state,
                                             "Coil System Part Load Ratio",
