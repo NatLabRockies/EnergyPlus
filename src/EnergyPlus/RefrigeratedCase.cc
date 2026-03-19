@@ -12371,7 +12371,6 @@ void TransRefrigSystemData::CalculateTransCompressors(EnergyPlusData &state)
     Real64 TotalRefMassFlow;            // Total mass flow through high pressure side of system, kg/s
     Real64 Xu;                          // Initial upper guess for iterative search
     Real64 Xl;                          // Initial lower guess for iterative search
-    Real64 Xnew(0.0);                   // New guess for iterative search
 
     auto &Compressor = state.dataRefrigCase->Compressor;
     auto &GasCooler = state.dataRefrigCase->GasCooler;
@@ -12398,6 +12397,18 @@ void TransRefrigSystemData::CalculateTransCompressors(EnergyPlusData &state)
     // Enthalpy at the receiver bypass, J/kg
     Real64 HReceiverBypass = this->refrig->getSatEnthalpy(state, this->TReceiver, 1.0, RoutineName);
 
+    auto zeroCompressors = [&Compressor](const Array1D_int &compNums, int numComps) {
+        for (int CompIndex = 1; CompIndex <= numComps; ++CompIndex) {
+            auto &comp = Compressor(compNums(CompIndex));
+            comp.Power = 0.0;
+            comp.MassFlow = 0.0;
+            comp.Capacity = 0.0;
+            comp.ElecConsumption = 0.0;
+            comp.CoolingEnergy = 0.0;
+            comp.LoadFactor = 0.0;
+        }
+    };
+
     // Determine refrigerant properties at low temperature (LT) loads (if present)
     // Dispatch low pressure (LP) compressors as necessary
     if (this->transSysType == TransSysType::TwoStage) { // LT side of TwoStage transcritical system
@@ -12418,16 +12429,7 @@ void TransRefrigSystemData::CalculateTransCompressors(EnergyPlusData &state)
         this->TotCompCapacityLP = 0.0;
         this->RefMassFlowCompsLP = 0.0;
         this->TotCompPowerLP = 0.0;
-
-        for (int CompIndex = 1; CompIndex <= this->NumCompressorsLP; ++CompIndex) {
-            int CompID = this->CompressorNumLP(CompIndex);
-            Compressor(CompID).Power = 0.0;
-            Compressor(CompID).MassFlow = 0.0;
-            Compressor(CompID).Capacity = 0.0;
-            Compressor(CompID).ElecConsumption = 0.0;
-            Compressor(CompID).CoolingEnergy = 0.0;
-            Compressor(CompID).LoadFactor = 0.0;
-        }
+        zeroCompressors(this->CompressorNumLP, this->NumCompressorsLP);
 
         for (int CompIndex = 1; CompIndex <= this->NumCompressorsLP; ++CompIndex) {
             int CompID = this->CompressorNumLP(CompIndex);
@@ -12540,22 +12542,28 @@ void TransRefrigSystemData::CalculateTransCompressors(EnergyPlusData &state)
     this->HCompInHP = (HCaseOutLTMT * (this->RefMassFlowtoLTLoads + this->RefMassFlowtoMTLoads) + HReceiverBypass * this->RefMassFlowReceiverBypass) /
                       (this->RefMassFlowtoLTLoads + this->RefMassFlowtoMTLoads + this->RefMassFlowReceiverBypass);
 
+    // Bisection search to find temperature from enthalpy at a given suction pressure
+    auto findTempFromEnthalpy = [&](Real64 targetH) -> Real64 {
+        Real64 lo = this->refrig->getSatTemperature(state, PSuctionMT, RoutineName);
+        Real64 hi = lo + 50.0;
+        Real64 result = lo;
+        for (int iter = 1; iter <= 15; ++iter) {
+            result = (hi + lo) / 2.0;
+            Real64 Hnew = this->refrig->getSupHeatEnthalpy(state, result, PSuctionMT, RoutineName);
+            if (Hnew > targetH) {
+                hi = result;
+            } else {
+                lo = result;
+            }
+            if (std::abs((Hnew - targetH) / Hnew) < ErrorTol) {
+                break;
+            }
+        }
+        return result;
+    };
+
     // Iterate to find the suction temperature entering subcooler
-    Xl = this->refrig->getSatTemperature(state, PSuctionMT, RoutineName);
-    Xu = Xl + 50.0;
-    for (Iter = 1; Iter <= 15; ++Iter) { // Maximum of 15 iterations
-        Xnew = (Xu + Xl) / 2.0;
-        Real64 Hnew = this->refrig->getSupHeatEnthalpy(state, Xnew, PSuctionMT, RoutineName);
-        if (Hnew > this->HCompInHP) { // xnew is too high
-            Xu = Xnew;
-        } else { // xnew is too low
-            Xl = Xnew;
-        }
-        if (std::abs((Hnew - this->HCompInHP) / Hnew) < ErrorTol) {
-            break;
-        }
-    }
-    TSubcoolerColdIn = Xnew;
+    TSubcoolerColdIn = findTempFromEnthalpy(this->HCompInHP);
 
     // Modify receiver inlet enthalpy and HP compressor inlet enthalpy to account for subcooler
     HIdeal = this->refrig->getSupHeatEnthalpy(state, GasCooler(this->GasCoolerNum(1)).TGasCoolerOut, PSuctionMT, RoutineName);
@@ -12570,21 +12578,7 @@ void TransRefrigSystemData::CalculateTransCompressors(EnergyPlusData &state)
     this->DelHSubcoolerDis = -this->DelHSubcoolerSuc;
 
     // Iterate to find the temperature at the inlet of the high pressure (HP) compressors
-    Xl = this->refrig->getSatTemperature(state, PSuctionMT, RoutineName);
-    Xu = Xl + 50.0;
-    for (Iter = 1; Iter <= 15; ++Iter) { // Maximum of 15 iterations
-        Xnew = (Xu + Xl) / 2.0;
-        Real64 Hnew = this->refrig->getSupHeatEnthalpy(state, Xnew, PSuctionMT, RoutineName);
-        if (Hnew > this->HCompInHP) { // xnew is too high
-            Xu = Xnew;
-        } else { // xnew is too low
-            Xl = Xnew;
-        }
-        if (std::abs((Hnew - this->HCompInHP) / Hnew) < ErrorTol) {
-            break;
-        }
-    }
-    this->TCompInHP = Xnew;
+    this->TCompInHP = findTempFromEnthalpy(this->HCompInHP);
 
     //  For capacity correction of HP compressors, consider subcooler, receiver, MT loads, LT loads and LP compressors
     //  to constitute the "load".  The actual and rated conditions at the exit of the gas cooler and the inlet of the
@@ -12597,17 +12591,7 @@ void TransRefrigSystemData::CalculateTransCompressors(EnergyPlusData &state)
     this->TotCompCapacityHP = 0.0;
     this->RefMassFlowCompsHP = 0.0;
     this->TotCompPowerHP = 0.0;
-
-    for (int CompIndex = 1; CompIndex <= this->NumCompressorsHP; ++CompIndex) {
-        int CompID = this->CompressorNumHP(CompIndex);
-        auto &compressor = Compressor(CompID);
-        compressor.Power = 0.0;
-        compressor.MassFlow = 0.0;
-        compressor.Capacity = 0.0;
-        compressor.ElecConsumption = 0.0;
-        compressor.CoolingEnergy = 0.0;
-        compressor.LoadFactor = 0.0;
-    }
+    zeroCompressors(this->CompressorNumHP, this->NumCompressorsHP);
 
     // Dispatch High Pressure compressors to meet load, note they were listed in compressor list in dispatch order
     for (int CompIndex = 1; CompIndex <= this->NumCompressorsHP; ++CompIndex) {
