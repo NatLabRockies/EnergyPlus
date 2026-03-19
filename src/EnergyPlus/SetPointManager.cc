@@ -311,6 +311,32 @@ void GetSetPointManagerInputs(EnergyPlusData &state)
     }
 } // GetSetPointManagerInputs()
 
+// Helper: resolve and validate the HVAC air loop for SPMs that require one.
+// Sets spm->airLoopNum and returns true when the loop is found, false otherwise
+// (setting ErrorsFound = true in both failure modes).
+static bool findSPMAirLoop(EnergyPlusData &state,
+                            SPMBase *spm,
+                            std::string_view spmTypeName,
+                            std::string_view spmName,
+                            ErrorObjectHeader const &eoh,
+                            bool &ErrorsFound)
+{
+    if (state.dataHVACGlobal->NumPrimaryAirSys <= 0) {
+        ShowSevereError(state, EnergyPlus::format("{}=\"{}\", no AirLoopHVAC objects found:", spmTypeName, spmName));
+        ShowContinueError(state, "Setpoint Manager needs an AirLoopHVAC to operate.");
+        ErrorsFound = true;
+        return false;
+    }
+    spm->airLoopNum =
+        Util::FindItemInList(spm->airLoopName, state.dataAirLoop->AirToZoneNodeInfo, &AirLoopZoneEquipConnectData::AirLoopName);
+    if (spm->airLoopNum == 0) {
+        ShowSevereItemNotFound(state, eoh, "hvac_air_loop_name", spm->airLoopName);
+        ErrorsFound = true;
+        return false;
+    }
+    return true;
+}
+
 // Helper to look up a single sensor node for a SetPointManager, avoiding 8 lines of
 // boilerplate per call to GetOnlySingleNode.
 static int getSPMSensorNode(EnergyPlusData &state,
@@ -1805,21 +1831,12 @@ void InitSetPointManagers(EnergyPlusData &state)
                 case SPMType::Coldest: {
                     auto *spmT = dynamic_cast<SPMTempest *>(spm);
                     assert(spmT != nullptr);
-                    if (state.dataHVACGlobal->NumPrimaryAirSys > 0) {
-                        spmT->airLoopNum =
-                            Util::FindItemInList(spmT->airLoopName, state.dataAirLoop->AirToZoneNodeInfo, &AirLoopZoneEquipConnectData::AirLoopName);
-                        if (spmT->airLoopNum == 0) {
-                            ShowSevereItemNotFound(state, eoh, "hvac_air_loop_name", spmT->airLoopName);
-                            ErrorsFound = true;
-                        } else if (state.dataAirLoop->AirToZoneNodeInfo(spmT->airLoopNum).NumZonesCooled == 0) {
+                    if (findSPMAirLoop(state, spm, spmTypeName, spmName, eoh, ErrorsFound)) {
+                        if (state.dataAirLoop->AirToZoneNodeInfo(spmT->airLoopNum).NumZonesCooled == 0) {
                             ShowSevereError(state, EnergyPlus::format("{}=\"{}\", no zones with cooling found:", spmTypeName, spmName));
                             ShowContinueError(state, EnergyPlus::format("Air Loop provides no cooling, Air Loop=\"{}\".", spmT->airLoopName));
                             ErrorsFound = true;
                         }
-                    } else {
-                        ShowSevereError(state, EnergyPlus::format("{}=\"{}\", no AirLoopHVAC objects found:", spmTypeName, spmName));
-                        ShowContinueError(state, "Setpoint Manager needs an AirLoopHVAC to operate.");
-                        ErrorsFound = true;
                     }
                 } break;
 
@@ -1827,24 +1844,13 @@ void InitSetPointManagers(EnergyPlusData &state)
                     auto *spmWTF = dynamic_cast<SPMWarmestTempFlow *>(spm);
                     assert(spmWTF != nullptr);
 
-                    if (state.dataHVACGlobal->NumPrimaryAirSys > 0) {
-                        spmWTF->airLoopNum = Util::FindItemInList(
-                            spmWTF->airLoopName, state.dataAirLoop->AirToZoneNodeInfo, &AirLoopZoneEquipConnectData::AirLoopName);
-                        if (spmWTF->airLoopNum == 0) {
-                            ShowSevereItemNotFound(state, eoh, "hvac_air_loop_name", spmWTF->airLoopName);
-                            ErrorsFound = true;
-                        } else {
-                            spmWTF->simReady = true;
-                        }
+                    if (findSPMAirLoop(state, spm, spmTypeName, spmName, eoh, ErrorsFound)) {
+                        spmWTF->simReady = true;
                         if (state.dataAirLoop->AirToZoneNodeInfo(spmWTF->airLoopNum).NumZonesCooled == 0) {
                             ShowSevereError(state, EnergyPlus::format("{}=\"{}\", no zones with cooling found:", spmTypeName, spmName));
                             ShowContinueError(state, EnergyPlus::format("Air Loop provides no cooling, Air Loop=\"{}\".", spmWTF->airLoopName));
                             ErrorsFound = true;
                         }
-                    } else {
-                        ShowSevereError(state, EnergyPlus::format("{}=\"{}\", no AirLoopHVAC objects found:", spmTypeName, spmName));
-                        ShowContinueError(state, "Setpoint Manager needs an AirLoopHVAC to operate.");
-                        ErrorsFound = true;
                     }
                 } break;
 
@@ -1852,14 +1858,7 @@ void InitSetPointManagers(EnergyPlusData &state)
                     auto *spmRAB = dynamic_cast<SPMReturnAirBypassFlow *>(spm);
                     assert(spmRAB != nullptr);
 
-                    if (state.dataHVACGlobal->NumPrimaryAirSys > 0) {
-                        spmRAB->airLoopNum = Util::FindItemInList(
-                            spmRAB->airLoopName, state.dataAirLoop->AirToZoneNodeInfo, &AirLoopZoneEquipConnectData::AirLoopName);
-                        if (spmRAB->airLoopNum == 0) {
-                            ShowSevereItemNotFound(state, eoh, "hvac_air_loop_name", spmRAB->airLoopName);
-                            ErrorsFound = true;
-                        }
-
+                    if (findSPMAirLoop(state, spm, spmTypeName, spmName, eoh, ErrorsFound)) {
                         auto const &primaryAirSystem = state.dataAirSystemsData->PrimaryAirSystems(spmRAB->airLoopNum);
                         if (primaryAirSystem.RABExists) {
                             spmRAB->rabMixInNodeNum = primaryAirSystem.RABMixInNode;
@@ -1873,10 +1872,6 @@ void InitSetPointManagers(EnergyPlusData &state)
                             ShowContinueError(state, EnergyPlus::format("Air Loop=\"{}\".", spmRAB->airLoopName));
                             ErrorsFound = true;
                         }
-                    } else {
-                        ShowSevereError(state, EnergyPlus::format("{}=\"{}\", no AirLoopHVAC objects found:", spmTypeName, spmName));
-                        ShowContinueError(state, "Setpoint Manager needs an AirLoopHVAC to operate.");
-                        ErrorsFound = true;
                     }
                 } break;
 
@@ -1885,23 +1880,12 @@ void InitSetPointManagers(EnergyPlusData &state)
                     auto *spmMZTemp = dynamic_cast<SPMMultiZoneTemp *>(spm);
                     assert(spmMZTemp != nullptr);
 
-                    if (state.dataHVACGlobal->NumPrimaryAirSys > 0) {
-                        spmMZTemp->airLoopNum = Util::FindItemInList(
-                            spmMZTemp->airLoopName, state.dataAirLoop->AirToZoneNodeInfo, &AirLoopZoneEquipConnectData::AirLoopName);
-                        if (spmMZTemp->airLoopNum == 0) {
-                            ShowSevereItemNotFound(state, eoh, "hvac_air_loop_name", spmMZTemp->airLoopName);
-                            ErrorsFound = true;
-                        }
-
+                    if (findSPMAirLoop(state, spm, spmTypeName, spmName, eoh, ErrorsFound)) {
                         if (state.dataAirLoop->AirToZoneNodeInfo(spmMZTemp->airLoopNum).NumZonesCooled == 0) {
                             ShowSevereError(state, EnergyPlus::format("{}=\"{}\", no zones with cooling found:", spmTypeName, spmName));
                             ShowContinueError(state, EnergyPlus::format("Air Loop provides no cooling, Air Loop=\"{}\".", spmMZTemp->airLoopName));
                             ErrorsFound = true;
                         }
-                    } else {
-                        ShowSevereError(state, EnergyPlus::format("{}=\"{}\", no AirLoopHVAC objects found:", spmTypeName, spmName));
-                        ShowContinueError(state, "Setpoint Manager needs an AirLoopHVAC to operate.");
-                        ErrorsFound = true;
                     }
                 } break;
 
@@ -1912,38 +1896,27 @@ void InitSetPointManagers(EnergyPlusData &state)
                     auto *spmMZHum = dynamic_cast<SPMMultiZoneHum *>(spm);
                     assert(spmMZHum != nullptr);
 
-                    if (state.dataHVACGlobal->NumPrimaryAirSys > 0) {
-                        spmMZHum->airLoopNum = Util::FindItemInList(
-                            spmMZHum->airLoopName, state.dataAirLoop->AirToZoneNodeInfo, &AirLoopZoneEquipConnectData::AirLoopName);
-                        if (spmMZHum->airLoopNum == 0) {
-                            ShowSevereItemNotFound(state, eoh, "hvac_air_loop_name", spmMZHum->airLoopName);
-                            ErrorsFound = true;
-                        } else {
-                            // make sure humidity controlled zone
-                            auto const &primaryAirSystem = state.dataAirSystemsData->PrimaryAirSystems(spmMZHum->airLoopNum);
-                            auto const &airToZoneNode = state.dataAirLoop->AirToZoneNodeInfo(spmMZHum->airLoopNum);
-                            bool HstatZoneFound = false;
-                            for (int iZone = 1; iZone <= state.dataZoneCtrls->NumHumidityControlZones; ++iZone) {
-                                for (int jZone = 1; jZone <= airToZoneNode.NumZonesCooled; ++jZone) {
-                                    if (state.dataZoneCtrls->HumidityControlZone(iZone).ActualZoneNum == airToZoneNode.CoolCtrlZoneNums(jZone)) {
-                                        HstatZoneFound = true;
-                                        break;
-                                    }
+                    if (findSPMAirLoop(state, spm, spmTypeName, spmName, eoh, ErrorsFound)) {
+                        // make sure humidity controlled zone
+                        auto const &primaryAirSystem = state.dataAirSystemsData->PrimaryAirSystems(spmMZHum->airLoopNum);
+                        auto const &airToZoneNode = state.dataAirLoop->AirToZoneNodeInfo(spmMZHum->airLoopNum);
+                        bool HstatZoneFound = false;
+                        for (int iZone = 1; iZone <= state.dataZoneCtrls->NumHumidityControlZones; ++iZone) {
+                            for (int jZone = 1; jZone <= airToZoneNode.NumZonesCooled; ++jZone) {
+                                if (state.dataZoneCtrls->HumidityControlZone(iZone).ActualZoneNum == airToZoneNode.CoolCtrlZoneNums(jZone)) {
+                                    HstatZoneFound = true;
+                                    break;
                                 }
                             }
-
-                            if (!HstatZoneFound) {
-                                ShowSevereError(state, EnergyPlus::format("{}=\"{}\", invalid humidistat specification", spmTypeName, spmName));
-                                ShowContinueError(state,
-                                                  EnergyPlus::format("could not locate Humidistat in any of the zones served by the Air loop={}",
-                                                                     primaryAirSystem.Name));
-                                ErrorsFound = true;
-                            }
                         }
-                    } else {
-                        ShowSevereError(state, EnergyPlus::format("{}=\"{}\", no AirLoopHVAC objects found:", spmTypeName, spmName));
-                        ShowContinueError(state, "Setpoint Manager needs an AirLoopHVAC to operate.");
-                        ErrorsFound = true;
+
+                        if (!HstatZoneFound) {
+                            ShowSevereError(state, EnergyPlus::format("{}=\"{}\", invalid humidistat specification", spmTypeName, spmName));
+                            ShowContinueError(state,
+                                              EnergyPlus::format("could not locate Humidistat in any of the zones served by the Air loop={}",
+                                                                 primaryAirSystem.Name));
+                            ErrorsFound = true;
+                        }
                     }
                 } break;
 
