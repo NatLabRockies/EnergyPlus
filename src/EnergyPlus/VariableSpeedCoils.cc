@@ -405,7 +405,7 @@ namespace VariableSpeedCoils {
         // Helper: register air inlet/outlet nodes, call TestCompSet, and return the node names
         auto registerAirNodes = [&](VariableSpeedCoilData &coil, Node::ConnectionObjectType connType,
                                     const nlohmann::json &fields, const nlohmann::json &schemaProps,
-                                    std::string_view inletField, std::string_view outletField) {
+                                    std::string const &inletField, std::string const &outletField) {
             std::string inName = s_ip->getAlphaFieldValue(fields, schemaProps, inletField);
             std::string outName = s_ip->getAlphaFieldValue(fields, schemaProps, outletField);
             coil.AirInletNodeNum = GetOnlySingleNode(state, inName, ErrorsFound, connType, coil.Name,
@@ -420,7 +420,7 @@ namespace VariableSpeedCoils {
         // Helper: register water inlet/outlet nodes and call TestCompSet
         auto registerWaterNodes = [&](VariableSpeedCoilData &coil, Node::ConnectionObjectType connType,
                                       const nlohmann::json &fields, const nlohmann::json &schemaProps,
-                                      std::string_view inletField, std::string_view outletField) {
+                                      std::string const &inletField, std::string const &outletField) {
             std::string inName = s_ip->getAlphaFieldValue(fields, schemaProps, inletField);
             std::string outName = s_ip->getAlphaFieldValue(fields, schemaProps, outletField);
             coil.WaterInletNodeNum = GetOnlySingleNode(state, inName, ErrorsFound, connType, coil.Name,
