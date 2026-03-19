@@ -326,6 +326,25 @@ namespace VariableSpeedCoils {
             }
         };
 
+        // Helper: look up the optional crankcase heater capacity curve and validate dimensions
+        auto lookupCrankcaseHeaterCurve = [&](VariableSpeedCoilData &coil, const ErrorObjectHeader &eoh,
+                                              const nlohmann::json &fields, const nlohmann::json &schemaProps,
+                                              std::string_view modObj) {
+            std::string_view displayField = "Crankcase Heater Capacity Function of Temperature Curve Name";
+            std::string curveName =
+                s_ip->getAlphaFieldValue(fields, schemaProps, "crankcase_heater_capacity_function_of_temperature_curve_name");
+            if (!curveName.empty()) {
+                coil.CrankcaseHeaterCapacityCurveIndex = Curve::GetCurveIndex(state, curveName);
+                if (coil.CrankcaseHeaterCapacityCurveIndex == 0) {
+                    ShowSevereItemNotFound(state, eoh, displayField, curveName);
+                    ErrorsFound = true;
+                } else {
+                    ErrorsFound |= Curve::CheckCurveDims(state, coil.CrankcaseHeaterCapacityCurveIndex, {1},
+                                                         RoutineName, modObj, coil.Name, displayField);
+                }
+            }
+        };
+
         int NumCool = s_ip->getNumObjectsFound(state, "COIL:COOLING:WATERTOAIRHEATPUMP:VARIABLESPEEDEQUATIONFIT");
         int NumHeat = s_ip->getNumObjectsFound(state, "COIL:HEATING:WATERTOAIRHEATPUMP:VARIABLESPEEDEQUATIONFIT");
         int NumCoolAS = s_ip->getNumObjectsFound(state, "COIL:COOLING:DX:VARIABLESPEED");
@@ -719,28 +738,7 @@ namespace VariableSpeedCoils {
                 // Set compressor cutout temperature
                 varSpeedCoil.MinOATCompressor =
                     s_ip->getRealFieldValue(fields, schemaProps, "minimum_outdoor_dry_bulb_temperature_for_compressor_operation");
-                // A7; \field Crankcase Heater Capacity Function of Outdoor Temperature Curve Name
-                cFieldName = "Crankcase Heater Capacity Function of Temperature Curve Name"; // cAlphaFields(7)
-                std::string crankcaseHeaterCapCurveName =
-                    s_ip->getAlphaFieldValue(fields, schemaProps, "crankcase_heater_capacity_function_of_temperature_curve_name");
-                if (!crankcaseHeaterCapCurveName.empty()) {
-                    varSpeedCoil.CrankcaseHeaterCapacityCurveIndex = Curve::GetCurveIndex(state, crankcaseHeaterCapCurveName);
-                    if (varSpeedCoil.CrankcaseHeaterCapacityCurveIndex == 0) { // can't find the curve
-                        ShowSevereError(
-                            state,
-                            EnergyPlus::format(
-                                "{} = {}:  {} not found = {}", CurrentModuleObject, varSpeedCoil.Name, cFieldName, crankcaseHeaterCapCurveName));
-                        ErrorsFound = true;
-                    } else {
-                        ErrorsFound |= Curve::CheckCurveDims(state,
-                                                             varSpeedCoil.CrankcaseHeaterCapacityCurveIndex, // Curve index
-                                                             {1},                                            // Valid dimensions
-                                                             RoutineName,                                    // Routine name
-                                                             CurrentModuleObject,                            // Object Type
-                                                             varSpeedCoil.Name,                              // Object Name
-                                                             cFieldName);                                    // Field Name
-                    }
-                }
+                lookupCrankcaseHeaterCurve(varSpeedCoil, eoh, fields, schemaProps, CurrentModuleObject);
 
                 // Get Water System tank connections
                 //  A8, \field Name of Water Storage Tank for Supply
@@ -1192,28 +1190,7 @@ namespace VariableSpeedCoils {
                     s_ip->getAlphaFieldValue(fields, schemaProps, "defrost_energy_input_ratio_function_of_temperature_curve_name");
                 varSpeedCoil.DefrostEIRFT = Curve::GetCurveIndex(state, defrostEIRFTCurveName); // convert curve name to number
 
-                // A6; \field Crankcase Heater Capacity Function of Outdoor Temperature Curve Name
-                cFieldName = "Crankcase Heater Capacity Function of Temperature Curve Name"; // cAlphaFields(6)
-                std::string crankcaseHeaterCapCurveName =
-                    s_ip->getAlphaFieldValue(fields, schemaProps, "crankcase_heater_capacity_function_of_temperature_curve_name");
-                if (!crankcaseHeaterCapCurveName.empty()) {
-                    varSpeedCoil.CrankcaseHeaterCapacityCurveIndex = Curve::GetCurveIndex(state, crankcaseHeaterCapCurveName);
-                    if (varSpeedCoil.CrankcaseHeaterCapacityCurveIndex == 0) { // can't find the curve
-                        ShowSevereError(
-                            state,
-                            EnergyPlus::format(
-                                "{} = {}:  {} not found = {}", CurrentModuleObject, varSpeedCoil.Name, cFieldName, crankcaseHeaterCapCurveName));
-                        ErrorsFound = true;
-                    } else {
-                        ErrorsFound |= Curve::CheckCurveDims(state,
-                                                             varSpeedCoil.CrankcaseHeaterCapacityCurveIndex, // Curve index
-                                                             {1},                                            // Valid dimensions
-                                                             RoutineName,                                    // Routine name
-                                                             CurrentModuleObject,                            // Object Type
-                                                             varSpeedCoil.Name,                              // Object Name
-                                                             cFieldName);                                    // Field Name
-                    }
-                }
+                lookupCrankcaseHeaterCurve(varSpeedCoil, eoh, fields, schemaProps, CurrentModuleObject);
 
                 cFieldName = "Defrost Strategy"; // cAlphaFields(7)
                 std::string defrostStrategy = s_ip->getAlphaFieldValue(fields, schemaProps, "defrost_strategy");
@@ -1580,23 +1557,7 @@ namespace VariableSpeedCoils {
                     ErrorsFound = true;
                 }
 
-                cFieldName = "Crankcase Heater Capacity Function of Temperature Curve Name";
-                fieldValue = s_ip->getAlphaFieldValue(fields, schemaProps, "crankcase_heater_capacity_function_of_temperature_curve_name");
-                if (!fieldValue.empty()) {
-                    varSpeedCoil.CrankcaseHeaterCapacityCurveIndex = Curve::GetCurveIndex(state, fieldValue);
-                    if (varSpeedCoil.CrankcaseHeaterCapacityCurveIndex == 0) { // can't find the curve
-                        ShowSevereItemNotFound(state, eoh, cFieldName, fieldValue);
-                        ErrorsFound = true;
-                    } else {
-                        ErrorsFound |= Curve::CheckCurveDims(state,
-                                                             varSpeedCoil.CrankcaseHeaterCapacityCurveIndex, // Curve index
-                                                             {1},                                            // Valid dimensions
-                                                             RoutineName,                                    // Routine name
-                                                             CurrentModuleObject,                            // Object Type
-                                                             varSpeedCoil.Name,                              // Object Name
-                                                             cFieldName);                                    // Field Name
-                    }
-                }
+                lookupCrankcaseHeaterCurve(varSpeedCoil, eoh, fields, schemaProps, CurrentModuleObject);
 
                 cFieldName = "Evaporator Air Temperature Type for Curve Objects";
                 fieldValue = s_ip->getAlphaFieldValue(fields, schemaProps, "evaporator_air_temperature_type_for_curve_objects");
