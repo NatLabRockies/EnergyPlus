@@ -5417,31 +5417,22 @@ void GetRefrigerationInput(EnergyPlusData &state)
             if (System(RefrigSysNum).SystemRejectHeatToZone) {
                 NominalCondCap *= 2.0;
             }
-            if (System(RefrigSysNum).NumStages == 1) { // Single-stage system
-                if ((NominalTotalCompCap < (0.7 * NominalTotalCoolingCap)) || (NominalCondCap < (1.3 * NominalTotalCoolingCap))) {
-                    ShowWarningError(
-                        state,
-                        EnergyPlus::format("{}=\"{}\", You may wish to check the system sizing. Total nominal cooling capacity is {:.0R}W. "
-                                           "Condenser capacity is {:.0R}W. Nominal compressor capacity is {:.0R}W.",
-                                           CurrentModuleObject,
-                                           System(RefrigSysNum).Name,
-                                           NominalTotalCoolingCap,
-                                           NominalCondCap,
-                                           NominalTotalCompCap));
-                }
-            } else if (System(RefrigSysNum).NumStages == 2) { // Two-stage system
-                if ((NominalTotalHiStageCompCap < (0.7 * NominalTotalCoolingCap)) || (NominalCondCap < (1.3 * NominalTotalCoolingCap))) {
-                    ShowWarningError(
-                        state,
-                        EnergyPlus::format("{}=\"{}\", You may wish to check the system sizing. Total nominal cooling capacity is {:.0R}W. "
-                                           "Condenser capacity is {:.0R}W. Nominal compressor capacity is {:.0R}W.",
-                                           CurrentModuleObject,
-                                           System(RefrigSysNum).Name,
-                                           NominalTotalCoolingCap,
-                                           NominalCondCap,
-                                           NominalTotalCompCap));
-                }
-            } // NumStages
+            // For single-stage systems check low-stage (only) compressor capacity; for two-stage
+            // systems the high-stage compressor must meet the full cooling load so check that cap.
+            // The warning message always reports NominalTotalCompCap (low-stage / total) for context.
+            Real64 SizingCheckCompCap =
+                (System(RefrigSysNum).NumStages == 2) ? NominalTotalHiStageCompCap : NominalTotalCompCap;
+            if ((SizingCheckCompCap < (0.7 * NominalTotalCoolingCap)) || (NominalCondCap < (1.3 * NominalTotalCoolingCap))) {
+                ShowWarningError(
+                    state,
+                    EnergyPlus::format("{}=\"{}\", You may wish to check the system sizing. Total nominal cooling capacity is {:.0R}W. "
+                                       "Condenser capacity is {:.0R}W. Nominal compressor capacity is {:.0R}W.",
+                                       CurrentModuleObject,
+                                       System(RefrigSysNum).Name,
+                                       NominalTotalCoolingCap,
+                                       NominalCondCap,
+                                       NominalTotalCompCap));
+            }
 
         } // Refrigeration systems
 
