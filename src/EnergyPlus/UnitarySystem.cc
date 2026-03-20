@@ -15558,8 +15558,11 @@ namespace UnitarySystems {
             state.dataCoilCoolingDX->coilCoolingDXs[this->m_CoolingCoilIndex].simulate(
                 state, coilMode, this->m_CoolingSpeedNum, PartLoadFrac, this->m_FanOpMode, singleMode, this->CoilSHR);
 
-        } else if (CoilTypeNum == HVAC::Coil_CoolingAirToAirVariableSpeed) {
+        } else if (CoilTypeNum == HVAC::Coil_CoolingAirToAirVariableSpeed || CoilTypeNum == HVAC::Coil_HeatingAirToAirVariableSpeed ||
+                   CoilTypeNum == HVAC::Coil_CoolingWaterToAirHPVSEquationFit || CoilTypeNum == HVAC::Coil_HeatingWaterToAirHPVSEquationFit) {
 
+            // Variable-speed coils all use the same call; only the speed ratio differs between cooling and heating.
+            Real64 speedRatio = (CoilType == CoolingCoil) ? this->m_CoolingSpeedRatio : this->m_HeatingSpeedRatio;
             VariableSpeedCoils::SimVariableSpeedCoils(state,
                                                       CompName,
                                                       CompIndex,
@@ -15567,49 +15570,7 @@ namespace UnitarySystems {
                                                       CompressorOn,
                                                       PartLoadFrac,
                                                       SpeedNumber,
-                                                      this->m_CoolingSpeedRatio,
-                                                      SensLoad,
-                                                      dummy,
-                                                      OnOffAirFlowRatio);
-
-        } else if (CoilTypeNum == HVAC::Coil_HeatingAirToAirVariableSpeed) {
-
-            VariableSpeedCoils::SimVariableSpeedCoils(state,
-                                                      CompName,
-                                                      CompIndex,
-                                                      this->m_FanOpMode,
-                                                      CompressorOn,
-                                                      PartLoadFrac,
-                                                      SpeedNumber,
-                                                      this->m_HeatingSpeedRatio,
-                                                      SensLoad,
-                                                      dummy,
-                                                      OnOffAirFlowRatio);
-
-        } else if (CoilTypeNum == HVAC::Coil_CoolingWaterToAirHPVSEquationFit) {
-
-            VariableSpeedCoils::SimVariableSpeedCoils(state,
-                                                      CompName,
-                                                      CompIndex,
-                                                      this->m_FanOpMode,
-                                                      CompressorOn,
-                                                      PartLoadFrac,
-                                                      SpeedNumber,
-                                                      this->m_CoolingSpeedRatio,
-                                                      SensLoad,
-                                                      dummy,
-                                                      OnOffAirFlowRatio);
-
-        } else if (CoilTypeNum == HVAC::Coil_HeatingWaterToAirHPVSEquationFit) {
-
-            VariableSpeedCoils::SimVariableSpeedCoils(state,
-                                                      CompName,
-                                                      CompIndex,
-                                                      this->m_FanOpMode,
-                                                      CompressorOn,
-                                                      PartLoadFrac,
-                                                      SpeedNumber,
-                                                      this->m_HeatingSpeedRatio,
+                                                      speedRatio,
                                                       SensLoad,
                                                       dummy,
                                                       OnOffAirFlowRatio);
