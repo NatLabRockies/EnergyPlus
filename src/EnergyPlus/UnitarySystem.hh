@@ -713,6 +713,9 @@ namespace UnitarySystems {
                                        int const ControlMode       // temperature or humidity control mode
         );
 
+        // Returns true for PackagedAC, PackagedHP, or PackagedWSHP system types.
+        bool isPackagedUnit() const;
+
         void setMergedSpeedVars();
 
         void calcAuxElecPower(bool isLoading, bool lastModeMatch, Real64 loadFrac, Real64 &auxConsumption, Real64 reportingConst);

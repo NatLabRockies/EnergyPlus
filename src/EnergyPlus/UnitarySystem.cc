@@ -413,7 +413,7 @@ namespace UnitarySystems {
 
         // only access for zone equipment, UnitaySystem does not yet have input for Availability Manager List Name
         if (this->m_IsZoneEquipment &&
-            (this->m_sysType == SysType::PackagedAC || this->m_sysType == SysType::PackagedHP || this->m_sysType == SysType::PackagedWSHP) &&
+            this->isPackagedUnit() &&
             !state.dataAvail->ZoneComp.empty()) {
             // need to move to better location and save thisObjectIndex and thisObjectType in struct
             // this->m_EquipCompNum is by parent type, not total UnitarySystems
@@ -1180,7 +1180,7 @@ namespace UnitarySystems {
         state.dataUnitarySystems->m_massFlow2 = 0.0;
         state.dataUnitarySystems->m_runTimeFraction1 = 0.0;
         state.dataUnitarySystems->m_runTimeFraction2 = 0.0;
-        if (this->m_sysType == SysType::PackagedAC || this->m_sysType == SysType::PackagedHP || this->m_sysType == SysType::PackagedWSHP) {
+        if (this->isPackagedUnit()) {
             // this should be done in the child. DXElecHeatingPower not reset to 0 if coil is off, ZoneSysAvailManager
             // zero the fan and DX coils electricity consumption
             state.dataHVACGlobal->DXElecCoolingPower = 0.0;
@@ -1559,8 +1559,7 @@ namespace UnitarySystems {
             select_EqSizing = &state.dataSize->ZoneEqSizing(state.dataSize->CurZoneEqNum);
             state.dataSize->ZoneEqUnitarySys = true;
             // UnitarySystem never set this flag. Probably should for zone equipment.
-            if ((this->m_sysType == SysType::PackagedAC || this->m_sysType == SysType::PackagedHP || this->m_sysType == SysType::PackagedWSHP) &&
-                this->m_IsDXCoil) {
+            if (this->isPackagedUnit() && this->m_IsDXCoil) {
                 state.dataSize->ZoneEqDXCoil = true;
             }
 
@@ -2089,7 +2088,7 @@ namespace UnitarySystems {
         }
         // STEP 5: report system parameters (e.g., air flow rates, capacities, etc.)
         if (this->m_FanExists) {
-            if (this->m_sysType == SysType::PackagedAC || this->m_sysType == SysType::PackagedHP || this->m_sysType == SysType::PackagedWSHP) {
+            if (this->isPackagedUnit()) {
                 PrintFlag = false;
             }
 
@@ -2111,7 +2110,7 @@ namespace UnitarySystems {
             state.dataSize->DataEMSOverrideON = false;
             EqSizing.SystemAirFlow = false;
 
-            if (this->m_sysType == SysType::PackagedAC || this->m_sysType == SysType::PackagedHP || this->m_sysType == SysType::PackagedWSHP) {
+            if (this->isPackagedUnit()) {
                 PrintFlag = true;
             }
         }
@@ -2131,7 +2130,7 @@ namespace UnitarySystems {
 
         // PT Units report sizing for cooling then heating, UnitarySystem reverses that order
         // temporarily reverse reporting for PT units so eio diffs are cleaner, remove later
-        if (this->m_sysType == SysType::PackagedAC || this->m_sysType == SysType::PackagedHP || this->m_sysType == SysType::PackagedWSHP) {
+        if (this->isPackagedUnit()) {
             if (this->m_CoolCoilExists) {
                 // allow design size to report
                 if (this->m_MaxCoolAirVolFlow != DataSizing::AutoSize) {
@@ -2629,7 +2628,7 @@ namespace UnitarySystems {
             PrintFlag = false;
         }
 
-        if (this->m_sysType == SysType::PackagedAC || this->m_sysType == SysType::PackagedHP || this->m_sysType == SysType::PackagedWSHP) {
+        if (this->isPackagedUnit()) {
             if (this->m_AirFlowControl == UseCompFlow::On) {
                 this->m_MaxNoCoolHeatAirVolFlow = min(this->m_MaxCoolAirVolFlow, this->m_MaxHeatAirVolFlow);
                 this->m_NoLoadAirFlowRateRatio = 1.0;
@@ -2735,7 +2734,7 @@ namespace UnitarySystems {
 
             for (Iter = 1; Iter <= this->m_NumOfSpeedCooling; ++Iter) {
                 // using only for PTUnit to UnitarySystem conversion for the time being, should use this all the time
-                if (this->m_sysType == SysType::PackagedAC || this->m_sysType == SysType::PackagedHP || this->m_sysType == SysType::PackagedWSHP) {
+                if (this->isPackagedUnit()) {
                     this->m_MSCoolingSpeedRatio[Iter] =
                         state.dataVariableSpeedCoils->VarSpeedCoil(this->m_CoolingCoilIndex).MSRatedAirVolFlowRate(Iter) /
                         state.dataVariableSpeedCoils->VarSpeedCoil(this->m_CoolingCoilIndex).MSRatedAirVolFlowRate(this->m_NumOfSpeedCooling);
@@ -3144,7 +3143,7 @@ namespace UnitarySystems {
 
             for (Iter = this->m_NumOfSpeedHeating; Iter >= 1; --Iter) {
                 // using only for PTUnit to UnitarySystem conversion for the time being, should use this all the time
-                if (this->m_sysType == SysType::PackagedAC || this->m_sysType == SysType::PackagedHP || this->m_sysType == SysType::PackagedWSHP) {
+                if (this->isPackagedUnit()) {
                     // SpeedRatio is only used in OnOff fan and should represent the ratio of flow to fan max flow
                     this->m_MSHeatingSpeedRatio[Iter] =
                         state.dataVariableSpeedCoils->VarSpeedCoil(this->m_HeatingCoilIndex).MSRatedAirVolFlowRate(Iter) /
@@ -3186,8 +3185,7 @@ namespace UnitarySystems {
                     // what the heck is this next line? should be min of min cooling and min heating flow rates?
                     // this is calculated above so likely not even needed here, just have to be sure it's always calculated
                     this->m_MaxNoCoolHeatAirVolFlow = min(this->m_MaxNoCoolHeatAirVolFlow, this->m_MaxNoCoolHeatAirVolFlow);
-                    if (this->m_sysType == SysType::PackagedAC || this->m_sysType == SysType::PackagedHP ||
-                        this->m_sysType == SysType::PackagedWSHP) {
+                    if (this->isPackagedUnit()) {
                         if (!this->m_MultiOrVarSpeedCoolCoil && !this->m_MultiOrVarSpeedHeatCoil) {
                             this->m_MaxNoCoolHeatAirVolFlow = min(this->m_MaxCoolAirVolFlow, this->m_MaxHeatAirVolFlow);
                         }
@@ -8012,8 +8010,7 @@ namespace UnitarySystems {
             this->controlUnitarySystemOutput(
                 state, AirLoopNum, FirstHVACIteration, OnOffAirFlowRatio, ZoneLoad, FullSensibleOutput, HXUnitOn, CompressorOn);
         }
-        if (state.dataLoopNodes->Node(this->AirOutNode).MassFlowRate < HVAC::SmallMassFlow && this->m_sysType != SysType::PackagedAC &&
-            this->m_sysType != SysType::PackagedHP && this->m_sysType != SysType::PackagedWSHP) {
+        if (state.dataLoopNodes->Node(this->AirOutNode).MassFlowRate < HVAC::SmallMassFlow && !this->isPackagedUnit()) {
             state.dataUnitarySystems->CoolingLoad = false;
             state.dataUnitarySystems->HeatingLoad = false;
             state.dataUnitarySystems->MoistureLoad = 0.0;
@@ -8366,8 +8363,7 @@ namespace UnitarySystems {
                         state.dataZoneEnergyDemand->ZoneSysEnergyDemand(this->ControlZoneNum).RemainingOutputReqToHeatSP;
                     state.dataUnitarySystems->MoistureLoad =
                         state.dataZoneEnergyDemand->ZoneSysMoistureDemand(this->ControlZoneNum).RemainingOutputReqToDehumidSP;
-                    if (this->m_sysType == SysType::PackagedAC || this->m_sysType == SysType::PackagedHP ||
-                        this->m_sysType == SysType::PackagedWSHP) {
+                    if (this->isPackagedUnit()) {
                         // ZoneSysAvailManager is turning on sooner than PTUnit in UnitarySystem. Mimic PTUnit logic.
                         if (state.dataUnitarySystems->QToCoolSetPt < 0.0 &&
                             state.dataHeatBalFanSys->TempControlType(this->ControlZoneNum) != HVAC::SetptType::SingleHeat) {
@@ -10541,8 +10537,7 @@ namespace UnitarySystems {
             Real64 TotalOutputDelta = 0.0;    // delta total output rate, {W}
             int ZoneInNode = this->m_ZoneInletNode;
             Real64 MassFlowRate = state.dataLoopNodes->Node(ZoneInNode).MassFlowRate / this->ControlZoneMassFlowFrac;
-            if (state.afn->distribution_simulated && this->m_sysType != SysType::PackagedAC && this->m_sysType != SysType::PackagedHP &&
-                this->m_sysType != SysType::PackagedWSHP) {
+            if (state.afn->distribution_simulated && !this->isPackagedUnit()) {
                 DeltaMassRate = state.dataLoopNodes->Node(this->AirOutNode).MassFlowRate -
                                 state.dataLoopNodes->Node(ZoneInNode).MassFlowRate / this->ControlZoneMassFlowFrac;
                 if (DeltaMassRate < 0.0) {
@@ -10608,7 +10603,7 @@ namespace UnitarySystems {
         state.dataUnitarySystems->CoolingLoad = false;
         state.dataUnitarySystems->HeatingLoad = false;
         Real64 smallLoadTolerance = this->m_SmallLoadTolerance;
-        if (this->m_sysType == SysType::PackagedAC || this->m_sysType == SysType::PackagedHP || this->m_sysType == SysType::PackagedWSHP) {
+        if (this->isPackagedUnit()) {
             smallLoadTolerance = HVAC::SmallLoad;
         }
         if (QZnReq > smallLoadTolerance) { // no need to check deadband flag, QZnReq is correct.
@@ -10625,7 +10620,7 @@ namespace UnitarySystems {
         if (this->m_FanOpMode == HVAC::FanOp::Continuous) {
             bool HXUnitOn = false;
             this->FanPartLoadRatio = 0.0; // sets fan to minimum for ASHRAE model
-            if (this->m_sysType == SysType::PackagedAC || this->m_sysType == SysType::PackagedHP || this->m_sysType == SysType::PackagedWSHP) {
+            if (this->isPackagedUnit()) {
                 // the SpeedNum is set for PTUnits, might need to set this for all multi/var speed coils?
                 if (state.dataUnitarySystems->CoolingLoad && this->m_MultiOrVarSpeedCoolCoil) {
                     m_CoolingSpeedNum = 1;
@@ -10954,8 +10949,7 @@ namespace UnitarySystems {
                         }
                         state.dataUnitarySystems->OACompOnMassFlow = this->m_HeatOutAirMassFlow;
                         // only used for PTUnit to UnitarySystem conversion, should use all the time
-                        if (this->m_sysType == SysType::PackagedAC || this->m_sysType == SysType::PackagedHP ||
-                            this->m_sysType == SysType::PackagedWSHP) {
+                        if (this->isPackagedUnit()) {
                             state.dataUnitarySystems->OACompOffMassFlow = this->m_HeatOutAirMassFlow;
                         }
                     }
@@ -10968,8 +10962,7 @@ namespace UnitarySystems {
                         state.dataUnitarySystems->CompOffFlowRatio = this->m_MSHeatingSpeedRatio[HeatSpeedNum - 1];
                     }
                     // only used for PTUnit to UnitarySystem conversion, should use all the time
-                    if (this->m_sysType == SysType::PackagedAC || this->m_sysType == SysType::PackagedHP ||
-                        this->m_sysType == SysType::PackagedWSHP) {
+                    if (this->isPackagedUnit()) {
                         state.dataUnitarySystems->OACompOnMassFlow = this->m_HeatOutAirMassFlow;
                         // does this assume OA flow <= min speed flow? without this there are SolveRoot failures.
                         if (HeatSpeedNum > 1) {
@@ -11003,8 +10996,7 @@ namespace UnitarySystems {
                     }
                     state.dataUnitarySystems->OACompOnMassFlow = this->m_CoolOutAirMassFlow;
                 } else { // Heating load but no moisture load
-                    if (this->m_sysType == SysType::PackagedAC || this->m_sysType == SysType::PackagedHP ||
-                        this->m_sysType == SysType::PackagedWSHP) {
+                    if (this->isPackagedUnit()) {
                         // this was missing for heating mode where multi speed coils are used
                         if (this->m_MultiOrVarSpeedHeatCoil) {
                             if (HeatSpeedNum == 0) {
@@ -11200,8 +11192,7 @@ namespace UnitarySystems {
                     }
                     // this needs to happen regardless of system except maybe the CoilSystem objects
                     // do this only for PTUnit for the time being to reduce diffs for the PTUnit to UnitarySystem conversion
-                    if (this->m_sysType == SysType::PackagedAC || this->m_sysType == SysType::PackagedHP ||
-                        this->m_sysType == SysType::PackagedWSHP) {
+                    if (this->isPackagedUnit()) {
                         if (this->m_FanOpMode == HVAC::FanOp::Continuous) {
                             if (this->m_AirFlowControl == UseCompFlow::On) {
                                 state.dataUnitarySystems->CompOffMassFlow = this->MaxNoCoolHeatAirMassFlow;
@@ -11280,8 +11271,7 @@ namespace UnitarySystems {
                             } else {
                                 // this is a no load case, added if for PTUnit to correct this for PTUnit to UnitarySystem conversion
                                 // the else is incorrect?
-                                if (this->m_sysType == SysType::PackagedAC || this->m_sysType == SysType::PackagedHP ||
-                                    this->m_sysType == SysType::PackagedWSHP) {
+                                if (this->isPackagedUnit()) {
                                     if (this->m_FanOpMode == HVAC::FanOp::Continuous) {
                                         if (this->m_AirFlowControl == UseCompFlow::On) {
                                             state.dataUnitarySystems->CompOffMassFlow = this->MaxNoCoolHeatAirMassFlow;
@@ -11343,7 +11333,7 @@ namespace UnitarySystems {
 
         if (this->m_FanOpMode == HVAC::FanOp::Continuous) {
             if (this->m_AirFlowControl == UseCompFlow::On &&
-                (this->m_sysType == SysType::PackagedAC || this->m_sysType == SysType::PackagedHP || this->m_sysType == SysType::PackagedWSHP)) {
+                this->isPackagedUnit()) {
                 if (this->m_LastMode == HeatingMode) {
                     state.dataUnitarySystems->OACompOffMassFlow = this->m_HeatOutAirMassFlow;
                 } else {
@@ -12275,7 +12265,7 @@ namespace UnitarySystems {
         case HVAC::Coil_HeatingSteam: {
             // this same CALL is made in the steam coil calc routine
             mdot = min(state.dataLoopNodes->Node(this->HeatCoilFluidOutletNodeNum).MassFlowRateMaxAvail, this->MaxHeatCoilFluidFlow * PartLoadRatio);
-            if (this->m_sysType == SysType::PackagedAC || this->m_sysType == SysType::PackagedHP || this->m_sysType == SysType::PackagedWSHP) {
+            if (this->isPackagedUnit()) {
                 // tried this to resolve the PackagedTerminalAirConditioner steam spike issue, no help, but this is the correct way to do this
                 PlantUtilities::SetComponentFlowRate(
                     state, mdot, this->HeatCoilFluidInletNode, this->HeatCoilFluidOutletNodeNum, this->HeatCoilPlantLoc);
@@ -12297,7 +12287,7 @@ namespace UnitarySystems {
                 HeatPLR = PartLoadRatio;
             } else if (this->m_HeatingSpeedNum > 1) {
                 HeatPLR = 1.0;
-                if (this->m_sysType == SysType::PackagedAC || this->m_sysType == SysType::PackagedHP || this->m_sysType == SysType::PackagedWSHP) {
+                if (this->isPackagedUnit()) {
                     this->m_HeatingSpeedRatio = PartLoadRatio;
                 }
             } else {
@@ -12583,8 +12573,7 @@ namespace UnitarySystems {
         Real64 DesOutHumRat = this->m_DesiredOutletHumRat;
         int CoilType_Num = this->m_CoolingCoilType_Num;
         Real64 LoopDXCoilMaxRTFSave = 0.0;
-        if (state.afn->distribution_simulated && this->m_sysType != SysType::PackagedAC && this->m_sysType != SysType::PackagedHP &&
-            this->m_sysType != SysType::PackagedWSHP) {
+        if (state.afn->distribution_simulated && !this->isPackagedUnit()) {
             LoopDXCoilMaxRTFSave = state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopDXCoilRTF;
             state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopDXCoilRTF = 0.0;
         }
@@ -14379,8 +14368,7 @@ namespace UnitarySystems {
         this->m_CoolingCycRatio = CycRatio;
         this->m_DehumidificationMode = DehumidMode;
 
-        if (state.afn->distribution_simulated && this->m_sysType != SysType::PackagedAC && this->m_sysType != SysType::PackagedHP &&
-            this->m_sysType != SysType::PackagedWSHP) {
+        if (state.afn->distribution_simulated && !this->isPackagedUnit()) {
             state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopDXCoilRTF =
                 max(state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopDXCoilRTF, LoopDXCoilMaxRTFSave);
         }
@@ -14435,8 +14423,7 @@ namespace UnitarySystems {
 
         Real64 LoopHeatingCoilMaxRTFSave = 0.0;
         Real64 LoopDXCoilMaxRTFSave = 0.0;
-        if (state.afn->distribution_simulated && this->m_sysType != SysType::PackagedAC && this->m_sysType != SysType::PackagedHP &&
-            this->m_sysType != SysType::PackagedWSHP) {
+        if (state.afn->distribution_simulated && !this->isPackagedUnit()) {
             LoopHeatingCoilMaxRTFSave = state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopHeatingCoilMaxRTF;
             state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopHeatingCoilMaxRTF = 0.0;
             LoopDXCoilMaxRTFSave = state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopDXCoilRTF;
@@ -15068,8 +15055,7 @@ namespace UnitarySystems {
         this->m_HeatingCycRatio = CycRatio;
         HeatCoilLoad = ReqOutput;
 
-        if (state.afn->distribution_simulated && this->m_sysType != SysType::PackagedAC && this->m_sysType != SysType::PackagedHP &&
-            this->m_sysType != SysType::PackagedWSHP) {
+        if (state.afn->distribution_simulated && !this->isPackagedUnit()) {
             state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopHeatingCoilMaxRTF =
                 max(state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopHeatingCoilMaxRTF, LoopHeatingCoilMaxRTFSave);
             state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopDXCoilRTF =
@@ -15120,8 +15106,7 @@ namespace UnitarySystems {
 
         Real64 LoopHeatingCoilMaxRTFSave = 0.0;
         Real64 LoopDXCoilMaxRTFSave = 0.0;
-        if (state.afn->distribution_simulated && this->m_sysType != SysType::PackagedAC && this->m_sysType != SysType::PackagedHP &&
-            this->m_sysType != SysType::PackagedWSHP) {
+        if (state.afn->distribution_simulated && !this->isPackagedUnit()) {
             auto &afnInfo = state.dataAirLoop->AirLoopAFNInfo(AirLoopNum);
             LoopHeatingCoilMaxRTFSave = afnInfo.AFNLoopHeatingCoilMaxRTF;
             afnInfo.AFNLoopHeatingCoilMaxRTF = 0.0;
@@ -15482,8 +15467,7 @@ namespace UnitarySystems {
         } // IF((GetCurrentScheduleValue(state, UnitarySystem(UnitarySysNum)%m_SysAvailSchedPtr) > 0.0d0) .AND. &
 
         // LoopHeatingCoilMaxRTF used for AirflowNetwork gets set in child components (gas and fuel)
-        if (state.afn->distribution_simulated && this->m_sysType != SysType::PackagedAC && this->m_sysType != SysType::PackagedHP &&
-            this->m_sysType != SysType::PackagedWSHP) {
+        if (state.afn->distribution_simulated && !this->isPackagedUnit()) {
             auto &afnInfo = state.dataAirLoop->AirLoopAFNInfo(AirLoopNum);
             afnInfo.AFNLoopHeatingCoilMaxRTF = max(afnInfo.AFNLoopHeatingCoilMaxRTF, LoopHeatingCoilMaxRTFSave);
             afnInfo.AFNLoopDXCoilRTF = max(afnInfo.AFNLoopDXCoilRTF, LoopDXCoilMaxRTFSave);
@@ -15737,6 +15721,11 @@ namespace UnitarySystems {
         }
     }
 
+    bool UnitarySys::isPackagedUnit() const
+    {
+        return (this->m_sysType == SysType::PackagedAC || this->m_sysType == SysType::PackagedHP || this->m_sysType == SysType::PackagedWSHP);
+    }
+
     // Helper: update the merged speed variables (CycRatio, SpeedRatio, SpeedNum) to
     // the max of the cooling and heating values.  Called from reportUnitarySystem.
     void UnitarySys::setMergedSpeedVars()
@@ -15816,7 +15805,7 @@ namespace UnitarySystems {
             if (this->AirOutNode > 0 && this->NodeNumOfControlledZone > 0) {
                 // PTUnit uses old style method of calculating delivered capacity.
                 // Also PTUnit always uses inlet node data, which is good when inlet is connected to zone return node
-                if (this->m_sysType == SysType::PackagedAC || this->m_sysType == SysType::PackagedHP || this->m_sysType == SysType::PackagedWSHP) {
+                if (this->isPackagedUnit()) {
                     Real64 SpecHumOut = state.dataLoopNodes->Node(this->AirOutNode).HumRat;
                     Real64 SpecHumIn = state.dataLoopNodes->Node(this->AirInNode).HumRat;
                     LatentOutput = AirMassFlow * (SpecHumOut - SpecHumIn); // Latent rate, kg/s (dehumid = negative)
@@ -15849,8 +15838,7 @@ namespace UnitarySystems {
         this->m_CompPartLoadRatio = max(this->m_CoolCompPartLoadRatio, this->m_HeatCompPartLoadRatio);
 
         // logic difference in PTUnit *Rate reporting vs UnitarySystem. Use PTUnit more compact method for 9093.
-        bool const isPTUnit = (this->m_sysType == SysType::PackagedAC || this->m_sysType == SysType::PackagedHP ||
-                               this->m_sysType == SysType::PackagedWSHP);
+        bool const isPTUnit = this->isPackagedUnit();
         if (isPTUnit) {
             // Issue 9093.
             // PTHP reports these differently, seems this is correct. Can't change this now, need an issue to resolve
@@ -16027,8 +16015,7 @@ namespace UnitarySystems {
         this->m_ElecPower = locFanElecPower + elecCoolingPower + elecHeatingPower + suppHeatingPower + defrostElecPower + this->m_TotalAuxElecPower;
         this->m_ElecPowerConsumption = this->m_ElecPower * ReportingConstant;
 
-        if (state.afn->distribution_simulated && this->m_sysType != SysType::PackagedAC && this->m_sysType != SysType::PackagedHP &&
-            this->m_sysType != SysType::PackagedWSHP) {
+        if (state.afn->distribution_simulated && !this->isPackagedUnit()) {
             state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).LoopSystemOnMassFlowrate = state.dataUnitarySystems->CompOnMassFlow;
             state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).LoopSystemOffMassFlowrate = state.dataUnitarySystems->CompOffMassFlow;
             state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).LoopFanOperationMode = this->m_FanOpMode;
@@ -17123,8 +17110,7 @@ namespace UnitarySystems {
                 noUnitarySysOutdoorAir = true;
             }
 
-            if (unitarySys.m_sysType == UnitarySys::SysType::PackagedWSHP || unitarySys.m_sysType == UnitarySys::SysType::PackagedAC ||
-                unitarySys.m_sysType == UnitarySys::SysType::PackagedHP) {
+            if (unitarySys.isPackagedUnit()) {
                 if ((noUnitarySysOutdoorAir && (nodeNumber == FanInletNodeIndex || nodeNumber == FanOutletNodeIndex ||
                                                 nodeNumber == unitarySys.AirInNode || nodeNumber == unitarySys.m_OAMixerNodes[0] ||
                                                 nodeNumber == unitarySys.m_OAMixerNodes[1] || nodeNumber == unitarySys.m_OAMixerNodes[2])) ||
