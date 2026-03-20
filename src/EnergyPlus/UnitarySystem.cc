@@ -15737,6 +15737,34 @@ namespace UnitarySystems {
         }
     }
 
+    // Helper: update the merged speed variables (CycRatio, SpeedRatio, SpeedNum) to
+    // the max of the cooling and heating values.  Called from reportUnitarySystem.
+    void UnitarySys::setMergedSpeedVars()
+    {
+        this->m_CycRatio = max(this->m_CoolingCycRatio, this->m_HeatingCycRatio);
+        this->m_SpeedRatio = max(this->m_CoolingSpeedRatio, this->m_HeatingSpeedRatio);
+        this->m_SpeedNum = max(this->m_CoolingSpeedNum, this->m_HeatingSpeedNum);
+    }
+
+    // Helper: compute ancillary electric power and accumulate ancillary electric
+    // consumption for one coil during reporting.  The pattern is identical for
+    // cooling and heating coils -- only the load-fraction variable differs.
+    //   isLoading      -- true when the corresponding load (cooling or heating) is active
+    //   lastModeMatch  -- true when the system was last in this mode (Cooling / Heating)
+    //   loadFrac       -- the load-fraction variable (CycRatio, CompPartLoadRatio, or PartLoadFrac)
+    //   auxConsumption -- reference to either m_CoolingAuxElecConsumption or m_HeatingAuxElecConsumption
+    //   reportingConst -- TimeStepSysSec
+    void UnitarySys::calcAuxElecPower(bool isLoading, bool lastModeMatch, Real64 loadFrac, Real64 &auxConsumption, Real64 reportingConst)
+    {
+        if (isLoading) {
+            this->m_TotalAuxElecPower = this->m_AncillaryOnPower * loadFrac + this->m_AncillaryOffPower * (1.0 - loadFrac);
+            auxConsumption = this->m_AncillaryOnPower * loadFrac * reportingConst;
+        }
+        if (lastModeMatch) {
+            auxConsumption += this->m_AncillaryOffPower * (1.0 - loadFrac) * reportingConst;
+        }
+    }
+
     void UnitarySys::reportUnitarySystem(EnergyPlusData &state, int const AirLoopNum)
     {
 
@@ -15893,155 +15921,73 @@ namespace UnitarySystems {
         Real64 suppHeatingPower = 0.0;
         Real64 defrostElecPower = 0.0;
 
+        bool const isCooling = state.dataUnitarySystems->CoolingLoad;
+        bool const isHeating = state.dataUnitarySystems->HeatingLoad;
+        bool const lastCooling = (this->m_LastMode == CoolingMode);
+        bool const lastHeating = (this->m_LastMode == HeatingMode);
+
         switch (this->m_CoolingCoilType_Num) {
         case HVAC::CoilDX_CoolingTwoSpeed: {
             // need to make sure these are 0 for non-variable speed coils (or not report these variables)
-            this->m_CycRatio = max(this->m_CoolingCycRatio, this->m_HeatingCycRatio);
-            this->m_SpeedRatio = max(this->m_CoolingSpeedRatio, this->m_HeatingSpeedRatio);
-            this->m_SpeedNum = max(this->m_CoolingSpeedNum, this->m_HeatingSpeedNum);
+            this->setMergedSpeedVars();
             // see :setSpeedVariables
-            if (state.dataUnitarySystems->CoolingLoad && this->m_SpeedNum <= 1) {
-                this->m_TotalAuxElecPower = this->m_AncillaryOnPower * this->m_CycRatio + this->m_AncillaryOffPower * (1.0 - this->m_CycRatio);
-                this->m_CoolingAuxElecConsumption = this->m_AncillaryOnPower * this->m_CycRatio * ReportingConstant;
-            }
-            if (this->m_LastMode == CoolingMode) {
-                this->m_CoolingAuxElecConsumption += this->m_AncillaryOffPower * (1.0 - this->m_CycRatio) * ReportingConstant;
-            }
+            this->calcAuxElecPower(isCooling && this->m_SpeedNum <= 1, lastCooling, this->m_CycRatio, this->m_CoolingAuxElecConsumption, ReportingConstant);
             elecCoolingPower = state.dataHVACGlobal->DXElecCoolingPower;
         } break;
         case HVAC::CoilDX_MultiSpeedCooling: {
-            this->m_CycRatio = max(this->m_CoolingCycRatio, this->m_HeatingCycRatio);
-            this->m_SpeedRatio = max(this->m_CoolingSpeedRatio, this->m_HeatingSpeedRatio);
-            this->m_SpeedNum = max(this->m_CoolingSpeedNum, this->m_HeatingSpeedNum);
-
-            Real64 CompPartLoadFrac = this->m_CompPartLoadRatio;
-            if (state.dataUnitarySystems->CoolingLoad) {
-                this->m_TotalAuxElecPower = this->m_AncillaryOnPower * CompPartLoadFrac + this->m_AncillaryOffPower * (1.0 - CompPartLoadFrac);
-                this->m_CoolingAuxElecConsumption = this->m_AncillaryOnPower * CompPartLoadFrac * ReportingConstant;
-            }
-            if (this->m_LastMode == CoolingMode) {
-                this->m_CoolingAuxElecConsumption += this->m_AncillaryOffPower * (1.0 - CompPartLoadFrac) * ReportingConstant;
-            }
+            this->setMergedSpeedVars();
+            this->calcAuxElecPower(isCooling, lastCooling, this->m_CompPartLoadRatio, this->m_CoolingAuxElecConsumption, ReportingConstant);
             elecCoolingPower = state.dataHVACGlobal->DXElecCoolingPower;
         } break;
         case HVAC::Coil_CoolingWater:
         case HVAC::Coil_CoolingWaterDetailed: {
             if (this->m_DiscreteSpeedCoolingCoil) {
-                this->m_CycRatio = max(this->m_CoolingCycRatio, this->m_HeatingCycRatio);
-                this->m_SpeedRatio = max(this->m_CoolingSpeedRatio, this->m_HeatingSpeedRatio);
-                this->m_SpeedNum = max(this->m_CoolingSpeedNum, this->m_HeatingSpeedNum);
-                if (state.dataUnitarySystems->CoolingLoad) {
-                    // if discrete, the coil cycles on and off
-                    this->m_TotalAuxElecPower = this->m_AncillaryOnPower * this->m_CycRatio + this->m_AncillaryOffPower * (1.0 - this->m_CycRatio);
-                    this->m_CoolingAuxElecConsumption = this->m_AncillaryOnPower * this->m_CycRatio * ReportingConstant;
-                }
-                if (this->m_LastMode == CoolingMode) {
-                    this->m_CoolingAuxElecConsumption += this->m_AncillaryOffPower * (1.0 - this->m_CycRatio) * ReportingConstant;
-                }
+                this->setMergedSpeedVars();
+                this->calcAuxElecPower(isCooling, lastCooling, this->m_CycRatio, this->m_CoolingAuxElecConsumption, ReportingConstant);
             } else {
-                if (state.dataUnitarySystems->CoolingLoad) {
-                    // if not discrete, the coil runs the entire time step.
-                    this->m_TotalAuxElecPower =
-                        this->m_AncillaryOnPower * this->m_PartLoadFrac + this->m_AncillaryOffPower * (1.0 - this->m_PartLoadFrac);
-                    this->m_CoolingAuxElecConsumption = this->m_AncillaryOnPower * this->m_PartLoadFrac * ReportingConstant;
-                }
-                if (this->m_LastMode == CoolingMode) {
-                    this->m_CoolingAuxElecConsumption += this->m_AncillaryOffPower * (1.0 - this->m_PartLoadFrac) * ReportingConstant;
-                }
+                this->calcAuxElecPower(isCooling, lastCooling, this->m_PartLoadFrac, this->m_CoolingAuxElecConsumption, ReportingConstant);
             }
             this->m_ElecPower = locFanElecPower;
             this->m_ElecPowerConsumption = this->m_ElecPower * ReportingConstant;
         } break;
-            // May not need
         case HVAC::Coil_CoolingWaterToAirHPSimple: {
             if (this->m_NumOfSpeedCooling > 1) {
-                this->m_CycRatio = max(this->m_CoolingCycRatio, this->m_HeatingCycRatio);
-                this->m_SpeedRatio = max(this->m_CoolingSpeedRatio, this->m_HeatingSpeedRatio);
-                this->m_SpeedNum = max(this->m_CoolingSpeedNum, this->m_HeatingSpeedNum);
+                this->setMergedSpeedVars();
             }
-            if (state.dataUnitarySystems->CoolingLoad) {
-                this->m_TotalAuxElecPower =
-                    this->m_AncillaryOnPower * this->m_PartLoadFrac + this->m_AncillaryOffPower * (1.0 - this->m_PartLoadFrac);
-                this->m_CoolingAuxElecConsumption = this->m_AncillaryOnPower * this->m_PartLoadFrac * ReportingConstant;
-            }
-            if (this->m_LastMode == CoolingMode) {
-                this->m_CoolingAuxElecConsumption += this->m_AncillaryOffPower * (1.0 - this->m_PartLoadFrac) * ReportingConstant;
-            }
+            this->calcAuxElecPower(isCooling, lastCooling, this->m_PartLoadFrac, this->m_CoolingAuxElecConsumption, ReportingConstant);
             elecCoolingPower = state.dataHVACGlobal->DXElecCoolingPower;
         } break;
         case HVAC::CoilDX_Cooling: {
             if (this->m_NumOfSpeedCooling > 1) {
-                this->m_CycRatio = max(this->m_CoolingCycRatio, this->m_HeatingCycRatio);
-                this->m_SpeedRatio = max(this->m_CoolingSpeedRatio, this->m_HeatingSpeedRatio);
-                this->m_SpeedNum = max(this->m_CoolingSpeedNum, this->m_HeatingSpeedNum);
-
-                Real64 CompPartLoadFrac = this->m_CompPartLoadRatio;
-                if (state.dataUnitarySystems->CoolingLoad) {
-                    this->m_TotalAuxElecPower = this->m_AncillaryOnPower * CompPartLoadFrac + this->m_AncillaryOffPower * (1.0 - CompPartLoadFrac);
-                    this->m_CoolingAuxElecConsumption = this->m_AncillaryOnPower * CompPartLoadFrac * ReportingConstant;
-                }
-                if (this->m_LastMode == CoolingMode) {
-                    this->m_CoolingAuxElecConsumption += this->m_AncillaryOffPower * (1.0 - CompPartLoadFrac) * ReportingConstant;
-                }
-                elecCoolingPower = state.dataHVACGlobal->DXElecCoolingPower;
+                this->setMergedSpeedVars();
+                this->calcAuxElecPower(isCooling, lastCooling, this->m_CompPartLoadRatio, this->m_CoolingAuxElecConsumption, ReportingConstant);
             } else {
                 if (state.dataCoilCoolingDX->coilCoolingDXs[this->m_CoolingCoilIndex].subcoolReheatFlag) {
-                    if (state.dataUnitarySystems->CoolingLoad && this->LoadSHR == 0.0) {
+                    if (isCooling && this->LoadSHR == 0.0) {
                         this->LoadSHR = 1.0;
                         this->CoilSHR = state.dataCoilCoolingDX->coilCoolingDXs[this->m_CoolingCoilIndex].performance->NormalSHR;
                     }
                 }
-                Real64 CompPartLoadFrac = this->m_CompPartLoadRatio;
-                if (state.dataUnitarySystems->CoolingLoad) {
-                    this->m_TotalAuxElecPower = this->m_AncillaryOnPower * CompPartLoadFrac + this->m_AncillaryOffPower * (1.0 - CompPartLoadFrac);
-                    this->m_CoolingAuxElecConsumption = this->m_AncillaryOnPower * CompPartLoadFrac * ReportingConstant;
-                }
-                if (this->m_LastMode == CoolingMode) {
-                    this->m_CoolingAuxElecConsumption += this->m_AncillaryOffPower * (1.0 - CompPartLoadFrac) * ReportingConstant;
-                }
-                elecCoolingPower = state.dataHVACGlobal->DXElecCoolingPower;
+                this->calcAuxElecPower(isCooling, lastCooling, this->m_CompPartLoadRatio, this->m_CoolingAuxElecConsumption, ReportingConstant);
             }
+            elecCoolingPower = state.dataHVACGlobal->DXElecCoolingPower;
         } break;
         case HVAC::Coil_UserDefined:
         case HVAC::CoilWater_CoolingHXAssisted:
         case HVAC::CoilDX_PackagedThermalStorageCooling: {
-            if (state.dataUnitarySystems->CoolingLoad) {
-                this->m_TotalAuxElecPower =
-                    this->m_AncillaryOnPower * this->m_PartLoadFrac + this->m_AncillaryOffPower * (1.0 - this->m_PartLoadFrac);
-                this->m_CoolingAuxElecConsumption = this->m_AncillaryOnPower * this->m_PartLoadFrac * ReportingConstant;
-            }
-            if (this->m_LastMode == CoolingMode) {
-                this->m_CoolingAuxElecConsumption += this->m_AncillaryOffPower * (1.0 - this->m_PartLoadFrac) * ReportingConstant;
-            }
+            this->calcAuxElecPower(isCooling, lastCooling, this->m_PartLoadFrac, this->m_CoolingAuxElecConsumption, ReportingConstant);
             // these coil types do not consume electricity or report electricity at the plant
         } break;
         default: { // all other DX cooling coils
-            Real64 CompPartLoadFrac = this->m_CompPartLoadRatio;
-            if (state.dataUnitarySystems->CoolingLoad) {
-                this->m_TotalAuxElecPower = this->m_AncillaryOnPower * CompPartLoadFrac + this->m_AncillaryOffPower * (1.0 - CompPartLoadFrac);
-                this->m_CoolingAuxElecConsumption = this->m_AncillaryOnPower * CompPartLoadFrac * ReportingConstant;
-            }
-            if (this->m_LastMode == CoolingMode) {
-                this->m_CoolingAuxElecConsumption += this->m_AncillaryOffPower * (1.0 - CompPartLoadFrac) * ReportingConstant;
-            }
+            this->calcAuxElecPower(isCooling, lastCooling, this->m_CompPartLoadRatio, this->m_CoolingAuxElecConsumption, ReportingConstant);
             elecCoolingPower = state.dataHVACGlobal->DXElecCoolingPower;
         } break;
         }
 
         switch (this->m_HeatingCoilType_Num) {
         case HVAC::CoilDX_MultiSpeedHeating: {
-            this->m_CycRatio = max(this->m_CoolingCycRatio, this->m_HeatingCycRatio);
-            this->m_SpeedRatio = max(this->m_CoolingSpeedRatio, this->m_HeatingSpeedRatio);
-            this->m_SpeedNum = max(this->m_CoolingSpeedNum, this->m_HeatingSpeedNum);
-
-            Real64 CompPartLoadFrac = this->m_CompPartLoadRatio;
-            if (state.dataUnitarySystems->HeatingLoad) {
-                this->m_TotalAuxElecPower = this->m_AncillaryOnPower * CompPartLoadFrac + this->m_AncillaryOffPower * (1.0 - CompPartLoadFrac);
-                this->m_HeatingAuxElecConsumption = this->m_AncillaryOnPower * CompPartLoadFrac * ReportingConstant;
-            }
-            if (this->m_LastMode == HeatingMode) {
-                this->m_HeatingAuxElecConsumption += this->m_AncillaryOffPower * (1.0 - CompPartLoadFrac) * ReportingConstant;
-            }
+            this->setMergedSpeedVars();
+            this->calcAuxElecPower(isHeating, lastHeating, this->m_CompPartLoadRatio, this->m_HeatingAuxElecConsumption, ReportingConstant);
             elecHeatingPower = state.dataHVACGlobal->DXElecHeatingPower;
             defrostElecPower = state.dataHVACGlobal->DefrostElecPower;
         } break;
@@ -16049,16 +15995,7 @@ namespace UnitarySystems {
         case HVAC::Coil_HeatingElectric_MultiStage: {
             this->m_CycRatio = max(this->m_CoolingCycRatio, this->m_HeatingCycRatio);
             this->m_SpeedRatio = max(this->m_CoolingSpeedRatio, this->m_HeatingSpeedRatio);
-
-            if (state.dataUnitarySystems->HeatingLoad) {
-                this->m_TotalAuxElecPower =
-                    this->m_AncillaryOnPower * this->m_PartLoadFrac + this->m_AncillaryOffPower * (1.0 - this->m_PartLoadFrac);
-                this->m_HeatingAuxElecConsumption = this->m_AncillaryOnPower * this->m_PartLoadFrac * ReportingConstant;
-            }
-            if (this->m_LastMode == HeatingMode) {
-                this->m_HeatingAuxElecConsumption += this->m_AncillaryOffPower * (1.0 - this->m_PartLoadFrac) * ReportingConstant;
-            }
-
+            this->calcAuxElecPower(isHeating, lastHeating, this->m_PartLoadFrac, this->m_HeatingAuxElecConsumption, ReportingConstant);
             elecHeatingPower = state.dataHVACGlobal->ElecHeatingCoilPower;
         } break;
         case HVAC::CoilDX_HeatingEmpirical:
@@ -16066,31 +16003,14 @@ namespace UnitarySystems {
         case HVAC::Coil_HeatingWaterToAirHPSimple:
         case HVAC::Coil_HeatingWaterToAirHPVSEquationFit: {
             if (this->m_NumOfSpeedHeating > 1) {
-                this->m_CycRatio = max(this->m_CoolingCycRatio, this->m_HeatingCycRatio);
-                this->m_SpeedRatio = max(this->m_CoolingSpeedRatio, this->m_HeatingSpeedRatio);
-                this->m_SpeedNum = max(this->m_CoolingSpeedNum, this->m_HeatingSpeedNum);
+                this->setMergedSpeedVars();
             }
-            if (state.dataUnitarySystems->HeatingLoad) {
-                this->m_TotalAuxElecPower =
-                    this->m_AncillaryOnPower * this->m_PartLoadFrac + this->m_AncillaryOffPower * (1.0 - this->m_PartLoadFrac);
-                this->m_HeatingAuxElecConsumption = this->m_AncillaryOnPower * this->m_PartLoadFrac * ReportingConstant;
-            }
-            if (this->m_LastMode == HeatingMode) {
-                this->m_HeatingAuxElecConsumption += this->m_AncillaryOffPower * (1.0 - this->m_PartLoadFrac) * ReportingConstant;
-            }
+            this->calcAuxElecPower(isHeating, lastHeating, this->m_PartLoadFrac, this->m_HeatingAuxElecConsumption, ReportingConstant);
             elecHeatingPower = state.dataHVACGlobal->DXElecHeatingPower;
             defrostElecPower = state.dataHVACGlobal->DefrostElecPower;
         } break;
         case HVAC::Coil_HeatingAirToAirVariableSpeed: {
-            if (state.dataUnitarySystems->HeatingLoad) {
-                this->m_TotalAuxElecPower =
-                    this->m_AncillaryOnPower * this->m_PartLoadFrac + this->m_AncillaryOffPower * (1.0 - this->m_PartLoadFrac);
-                this->m_HeatingAuxElecConsumption = this->m_AncillaryOnPower * this->m_PartLoadFrac * ReportingConstant;
-            }
-            if (this->m_LastMode == HeatingMode) {
-                this->m_HeatingAuxElecConsumption += this->m_AncillaryOffPower * (1.0 - this->m_PartLoadFrac) * ReportingConstant;
-            }
-
+            this->calcAuxElecPower(isHeating, lastHeating, this->m_PartLoadFrac, this->m_HeatingAuxElecConsumption, ReportingConstant);
             elecHeatingPower = state.dataHVACGlobal->DXElecHeatingPower;
             defrostElecPower = state.dataHVACGlobal->DefrostElecPower;
         } break;
@@ -16098,32 +16018,17 @@ namespace UnitarySystems {
         case HVAC::Coil_HeatingWater:
         case HVAC::Coil_HeatingSteam:
         case HVAC::Coil_HeatingDesuperheater: {
-            if (state.dataUnitarySystems->HeatingLoad) {
-                this->m_TotalAuxElecPower =
-                    this->m_AncillaryOnPower * this->m_PartLoadFrac + this->m_AncillaryOffPower * (1.0 - this->m_PartLoadFrac);
-                this->m_HeatingAuxElecConsumption = this->m_AncillaryOnPower * this->m_PartLoadFrac * ReportingConstant;
-            }
-            if (this->m_LastMode == HeatingMode) {
-                this->m_HeatingAuxElecConsumption += this->m_AncillaryOffPower * (1.0 - this->m_PartLoadFrac) * ReportingConstant;
-            }
+            this->calcAuxElecPower(isHeating, lastHeating, this->m_PartLoadFrac, this->m_HeatingAuxElecConsumption, ReportingConstant);
         } break;
         default: {
             if (this->m_HeatCoilExists) {
-                if (state.dataUnitarySystems->HeatingLoad) {
-                    // if discrete, the coil cycles on and off
-                    this->m_TotalAuxElecPower =
-                        this->m_AncillaryOnPower * this->m_PartLoadFrac + this->m_AncillaryOffPower * (1.0 - this->m_PartLoadFrac);
-                    this->m_HeatingAuxElecConsumption = this->m_AncillaryOnPower * this->m_PartLoadFrac * ReportingConstant;
-                }
-                if (this->m_LastMode == HeatingMode) {
-                    this->m_HeatingAuxElecConsumption += this->m_AncillaryOffPower * (1.0 - this->m_PartLoadFrac) * ReportingConstant;
-                }
+                this->calcAuxElecPower(isHeating, lastHeating, this->m_PartLoadFrac, this->m_HeatingAuxElecConsumption, ReportingConstant);
                 elecHeatingPower = state.dataHVACGlobal->ElecHeatingCoilPower;
             }
         } break;
         }
 
-        if (!state.dataUnitarySystems->HeatingLoad && !state.dataUnitarySystems->CoolingLoad) {
+        if (!isHeating && !isCooling) {
             this->m_TotalAuxElecPower = this->m_AncillaryOffPower;
         }
 
