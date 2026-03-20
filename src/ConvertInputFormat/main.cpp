@@ -294,7 +294,8 @@ bool processInput(fs::path const &inputFilePath,
                   OutputTypes outputType,
                   fs::path outputDirPath,
                   std::string &outputTypeStr,
-                  bool convertHVACTemplate)
+                  bool convertHVACTemplate,
+                  bool orderJSON)
 {
     auto validation(std::make_unique<Validation>(&schema));
     auto idf_parser(std::make_unique<IdfParser>());
@@ -502,6 +503,9 @@ Select one (case insensitive):
     bool noConvertHVACTemplate = false;
     app.add_flag("-n,--noHVACTemplate", noConvertHVACTemplate, "Do not convert HVACTemplate objects");
 
+    bool orderJSON = false;
+    app.add_flag("-k,--orderJSON", orderJSON, "Order epJSON objects");
+
     std::vector<fs::path> files;
     app.add_option("input_file", files, "Multiple input files to be translated")->required(false)->check(CLI::ExistingFile);
 
@@ -554,7 +558,7 @@ Select one (case insensitive):
     {
 #    pragma omp for
         for (int i = 0; i < number_files; ++i) {
-            const bool successful = processInput(files[i], schema, outputType, outputDirectoryPath, outputTypeStr, convertHVACTemplate);
+            const bool successful = processInput(files[i], schema, outputType, outputDirectoryPath, outputTypeStr, convertHVACTemplate, orderJSON);
 #    pragma omp atomic
             ++fileCount;
             if (successful) {
@@ -573,7 +577,7 @@ Select one (case insensitive):
     }
 
     for (auto const &file : files) {
-        bool successful = processInput(file, schema, outputType, outputDirectoryPath, outputTypeStr, convertHVACTemplate);
+        bool successful = processInput(file, schema, outputType, outputDirectoryPath, outputTypeStr, convertHVACTemplate, orderJSON);
         ++fileCount;
         if (successful) {
             displayMessage("Input file converted to {} successfully | {}/{} | {}", outputTypeStr, fileCount, number_files, file.generic_string());
