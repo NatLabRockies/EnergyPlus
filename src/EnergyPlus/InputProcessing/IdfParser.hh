@@ -61,7 +61,7 @@ class IdfParser
 {
 public:
     friend class EnergyPlus::InputProcessorFixture;
-    using json = nlohmann::json;
+    using json = nlohmann::ordered_json;
 
     IdfParser() = default;
 

@@ -57,7 +57,7 @@
 #include <valijson/utils/nlohmann_json_utils.hpp>
 #include <valijson/validator.hpp>
 
-using json = nlohmann::json;
+using json = nlohmann::ordered_json;
 
 Validation::Validation(json const *parsed_schema)
 {

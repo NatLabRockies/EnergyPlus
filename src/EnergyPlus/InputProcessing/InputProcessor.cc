@@ -102,7 +102,7 @@ namespace EnergyPlus {
 
 static std::string const BlankString;
 
-using json = nlohmann::json;
+using json = nlohmann::ordered_json;
 
 const json &InputProcessor::schema()
 {

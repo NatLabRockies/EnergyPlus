@@ -58,7 +58,7 @@
 class Validation
 {
 public:
-    using json = nlohmann::json;
+    using json = nlohmann::ordered_json;
 
     explicit Validation(json const *parsed_schema);
 

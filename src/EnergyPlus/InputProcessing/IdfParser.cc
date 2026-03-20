@@ -53,7 +53,7 @@
 #include <milo/dtoa.h>
 #include <milo/itoa.h>
 
-using json = nlohmann::json;
+using json = nlohmann::ordered_json;
 
 auto const icompare = [](std::string_view a, std::string_view b) { // (AUTO_OK)
     return (a.length() == b.length()

@@ -81,7 +81,7 @@ void cleanEPJSON(nlohmann::json &epjson);
 class InputProcessor
 {
 public:
-    using json = nlohmann::json;
+    using json = nlohmann::ordered_json;
 
     json::parser_callback_t callback;
 

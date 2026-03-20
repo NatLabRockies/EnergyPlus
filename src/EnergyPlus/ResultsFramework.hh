@@ -73,7 +73,7 @@ struct JsonOutputFilePaths;
 
 namespace ResultsFramework {
 
-    using json = nlohmann::json;
+    using json = nlohmann::ordered_json;
 
     using OutputProcessor::ReportFreq;
     using OutputProcessor::TimeStepType;
