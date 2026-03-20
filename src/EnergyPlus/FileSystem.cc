@@ -366,7 +366,7 @@ namespace FileSystem {
         return result;
     }
 
-    nlohmann::json readJSON(fs::path const &filePath, std::ios_base::openmode mode)
+    nlohmann::ordered_json readJSON(fs::path const &filePath, std::ios_base::openmode mode)
     {
 
         // Shenanigans would not be needed with fmt 10+ (maybe earlier), because fmt has native fs::path support
@@ -389,15 +389,15 @@ namespace FileSystem {
         case FileTypes::EpJSON:
         case FileTypes::JSON:
         case FileTypes::GLHE:
-            return nlohmann::json::parse(file, nullptr, true, true);
+            return nlohmann::ordered_json::parse(file, nullptr, true, true);
         case FileTypes::CBOR:
-            return nlohmann::json::from_cbor(file);
+            return nlohmann::ordered_json::from_cbor(file);
         case FileTypes::MsgPack:
-            return nlohmann::json::from_msgpack(file);
+            return nlohmann::ordered_json::from_msgpack(file);
         case FileTypes::UBJSON:
-            return nlohmann::json::from_ubjson(file);
+            return nlohmann::ordered_json::from_ubjson(file);
         case FileTypes::BSON:
-            return nlohmann::json::from_bson(file);
+            return nlohmann::ordered_json::from_bson(file);
         default:
             throw FatalError("Invalid file extension. Must be epJSON, JSON, or other experimental extensions");
         }

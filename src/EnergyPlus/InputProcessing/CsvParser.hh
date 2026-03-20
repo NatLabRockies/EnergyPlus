@@ -62,7 +62,7 @@ class CsvParser
 {
 public:
     friend class EnergyPlus::InputProcessorFixture;
-    using json = nlohmann::ordered_json;
+    using json = nlohmann::json;
 
     CsvParser() = default;
 

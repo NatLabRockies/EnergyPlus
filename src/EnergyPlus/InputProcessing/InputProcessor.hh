@@ -76,7 +76,7 @@ struct EnergyPlusData;
 
 namespace EnergyPlus {
 
-void cleanEPJSON(nlohmann::json &epjson);
+void cleanEPJSON(nlohmann::ordered_json &epjson);
 
 class InputProcessor
 {

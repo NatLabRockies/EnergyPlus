@@ -69,7 +69,7 @@
 #include <thread>
 #include <vector>
 
-using json = nlohmann::json;
+using json = nlohmann::ordered_json;
 
 enum class OutputTypes
 {

@@ -58,7 +58,7 @@
 class DataStorage
 {
 public:
-    using json = nlohmann::ordered_json;
+    using json = nlohmann::json;
 
     template <typename T> T *addObject(std::string const &name, json const &fields)
     {

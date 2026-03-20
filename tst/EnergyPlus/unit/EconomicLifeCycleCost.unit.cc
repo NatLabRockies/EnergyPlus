@@ -591,7 +591,7 @@ TEST_F(EnergyPlusFixture, EconomicLifeCycleCost_ExpressAsCashFlows)
 
 TEST_F(EnergyPlusFixture, EconomicLifeCycleCost_GetInput_EnsureFuelTypesAllRecognized)
 {
-    using json = nlohmann::ordered_json;
+    using json = nlohmann::json;
     const json &lcc_useprice_props = state->dataInputProcessing->inputProcessor->getObjectSchemaProps(*state, "LifeCycleCost:UsePriceEscalation");
     const json &resource_field = lcc_useprice_props.at("resource");
     const json &enum_values = resource_field.at("enum");

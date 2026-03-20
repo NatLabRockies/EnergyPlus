@@ -192,22 +192,22 @@ namespace FileSystem {
     std::string readFile(fs::path const &filePath, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::binary);
 
     // Reads the full json file if it exists
-    nlohmann::json readJSON(fs::path const &filePath, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::binary);
+    nlohmann::ordered_json readJSON(fs::path const &filePath, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::binary);
 
-    template <FileTypes fileType> std::string getJSON(const nlohmann::json &data, int const indent = 4)
+    template <FileTypes fileType> std::string getJSON(const nlohmann::ordered_json &data, int const indent = 4)
     {
         if constexpr (is_json_type(fileType)) {
-            return data.dump(indent, ' ', false, nlohmann::json::error_handler_t::replace);
+            return data.dump(indent, ' ', false, nlohmann::ordered_json::error_handler_t::replace);
         } else if constexpr (is_binary_json_type(fileType)) {
             std::string binary_data;
             if constexpr (fileType == FileTypes::CBOR) {
-                nlohmann::json::to_cbor(data, binary_data);
+                nlohmann::ordered_json::to_cbor(data, binary_data);
             } else if constexpr (fileType == FileTypes::MsgPack) {
-                nlohmann::json::to_msgpack(data, binary_data);
+                nlohmann::ordered_json::to_msgpack(data, binary_data);
             } else if constexpr (fileType == FileTypes::BSON) {
-                nlohmann::json::to_bson(data, binary_data);
+                nlohmann::ordered_json::to_bson(data, binary_data);
             } else if constexpr (fileType == FileTypes::UBJSON) {
-                nlohmann::json::to_ubjson(data, binary_data);
+                nlohmann::ordered_json::to_ubjson(data, binary_data);
             }
             return binary_data;
         } else {
@@ -225,7 +225,7 @@ namespace FileSystem {
 
     template <class T, FileTypes fileType>
     inline constexpr bool enable_json_v =
-        is_all_json_type(fileType) && is_any<T, nlohmann::json>::value && !is_any<T, std::string_view, std::string, char *>::value;
+        is_all_json_type(fileType) && is_any<T, nlohmann::ordered_json>::value && !is_any<T, std::string_view, std::string, char *>::value;
 
     template <FileTypes fileType> void writeFile(fs::path const &filePath, const std::string_view data)
     {

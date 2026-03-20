@@ -52,7 +52,7 @@
 #include <milo/dtoa.h>
 #include <milo/itoa.h>
 
-using json = nlohmann::ordered_json;
+using json = nlohmann::json;
 
 std::vector<std::pair<std::string, bool>> const &CsvParser::errors()
 {
