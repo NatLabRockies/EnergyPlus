@@ -15849,7 +15849,9 @@ namespace UnitarySystems {
         this->m_CompPartLoadRatio = max(this->m_CoolCompPartLoadRatio, this->m_HeatCompPartLoadRatio);
 
         // logic difference in PTUnit *Rate reporting vs UnitarySystem. Use PTUnit more compact method for 9093.
-        if (this->m_sysType == SysType::PackagedAC || this->m_sysType == SysType::PackagedHP || this->m_sysType == SysType::PackagedWSHP) {
+        bool const isPTUnit = (this->m_sysType == SysType::PackagedAC || this->m_sysType == SysType::PackagedHP ||
+                               this->m_sysType == SysType::PackagedWSHP);
+        if (isPTUnit) {
             // Issue 9093.
             // PTHP reports these differently, seems this is correct. Can't change this now, need an issue to resolve
             this->m_TotCoolEnergyRate = std::abs(min(0.0, QTotUnitOut));
@@ -15859,38 +15861,22 @@ namespace UnitarySystems {
             this->m_LatCoolEnergyRate = std::abs(min(0.0, (QTotUnitOut - QSensUnitOut)));
             this->m_LatHeatEnergyRate = std::abs(max(0.0, (QTotUnitOut - QSensUnitOut)));
         } else {
-            if (state.dataUnitarySystems->HeatingLoad) {
-                if (QTotUnitOut > 0.0) { // heating
-                    this->m_TotCoolEnergyRate = 0.0;
-                    this->m_SensCoolEnergyRate = 0.0;
-                    this->m_LatCoolEnergyRate = 0.0;
-                    this->m_TotHeatEnergyRate = QTotUnitOut;
-                    this->m_SensHeatEnergyRate = std::abs(max(0.0, QSensUnitOut));
-                    this->m_LatHeatEnergyRate = std::abs(max(0.0, (QTotUnitOut - QSensUnitOut)));
-                } else {
-                    this->m_TotCoolEnergyRate = std::abs(QTotUnitOut);
-                    this->m_SensCoolEnergyRate = std::abs(min(0.0, QSensUnitOut));
-                    this->m_LatCoolEnergyRate = std::abs(min(0.0, (QTotUnitOut - QSensUnitOut)));
-                    this->m_TotHeatEnergyRate = 0.0;
-                    this->m_SensHeatEnergyRate = 0.0;
-                    this->m_LatHeatEnergyRate = 0.0;
-                }
+            // When QTotUnitOut > 0, report as heating output; when <= 0, report as cooling output.
+            bool const isHeatingOutput = (QTotUnitOut > 0.0);
+            if (isHeatingOutput) {
+                this->m_TotCoolEnergyRate = 0.0;
+                this->m_SensCoolEnergyRate = 0.0;
+                this->m_LatCoolEnergyRate = 0.0;
+                this->m_TotHeatEnergyRate = QTotUnitOut;
+                this->m_SensHeatEnergyRate = std::abs(max(0.0, QSensUnitOut));
+                this->m_LatHeatEnergyRate = std::abs(max(0.0, (QTotUnitOut - QSensUnitOut)));
             } else {
-                if (QTotUnitOut <= 0.0) { // cooling
-                    this->m_TotCoolEnergyRate = std::abs(min(0.0, QTotUnitOut));
-                    this->m_SensCoolEnergyRate = std::abs(min(0.0, QSensUnitOut));
-                    this->m_LatCoolEnergyRate = std::abs(min(0.0, (QTotUnitOut - QSensUnitOut)));
-                    this->m_TotHeatEnergyRate = 0.0;
-                    this->m_SensHeatEnergyRate = 0.0;
-                    this->m_LatHeatEnergyRate = 0.0;
-                } else {
-                    this->m_TotCoolEnergyRate = 0.0;
-                    this->m_SensCoolEnergyRate = 0.0;
-                    this->m_LatCoolEnergyRate = 0.0;
-                    this->m_TotHeatEnergyRate = QTotUnitOut;
-                    this->m_SensHeatEnergyRate = std::abs(max(0.0, QSensUnitOut));
-                    this->m_LatHeatEnergyRate = std::abs(max(0.0, (QTotUnitOut - QSensUnitOut)));
-                }
+                this->m_TotCoolEnergyRate = std::abs(min(0.0, QTotUnitOut));
+                this->m_SensCoolEnergyRate = std::abs(min(0.0, QSensUnitOut));
+                this->m_LatCoolEnergyRate = std::abs(min(0.0, (QTotUnitOut - QSensUnitOut)));
+                this->m_TotHeatEnergyRate = 0.0;
+                this->m_SensHeatEnergyRate = 0.0;
+                this->m_LatHeatEnergyRate = 0.0;
             }
         }
 
