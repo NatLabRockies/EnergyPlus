@@ -60,7 +60,7 @@ namespace EnergyPlus {
 class ResultsFrameworkFixture : public EnergyPlusFixture
 {
 protected:
-    using json = nlohmann::json;
+    using json = nlohmann::ordered_json;
 
     //    static void SetUpTestCase()
     //    {

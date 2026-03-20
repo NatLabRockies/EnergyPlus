@@ -70,7 +70,7 @@
 #include <nlohmann/json.hpp>
 #include <regex>
 
-using json = nlohmann::json;
+using json = nlohmann::ordered_json;
 
 namespace EnergyPlus {
 
