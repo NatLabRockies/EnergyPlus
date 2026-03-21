@@ -540,46 +540,22 @@ namespace DesiccantDehumidifiers {
 
             if (Util::SameString(Alphas(12), "UserCurves")) {
                 desicDehum.PerformanceModel_Num = PerformanceModel::UserCurves;
-                desicDehum.ProcDryBulbCurvefTW = Curve::GetCurveIndex(state, Alphas(13));
-                if (desicDehum.ProcDryBulbCurvefTW == 0) {
-                    ShowSevereError(state, EnergyPlus::format("{}Curve object={} not found.", RoutineName, Alphas(13)));
-                    ErrorsFound2 = true;
-                }
-                desicDehum.ProcDryBulbCurvefV = Curve::GetCurveIndex(state, Alphas(14));
-                if (desicDehum.ProcDryBulbCurvefV == 0) {
-                    ShowSevereError(state, EnergyPlus::format("{}Curve object={} not found.", RoutineName, Alphas(14)));
-                    ErrorsFound2 = true;
-                }
-                desicDehum.ProcHumRatCurvefTW = Curve::GetCurveIndex(state, Alphas(15));
-                if (desicDehum.ProcHumRatCurvefTW == 0) {
-                    ShowSevereError(state, EnergyPlus::format("{}Curve object={} not found.", RoutineName, Alphas(15)));
-                    ErrorsFound2 = true;
-                }
-                desicDehum.ProcHumRatCurvefV = Curve::GetCurveIndex(state, Alphas(16));
-                if (desicDehum.ProcHumRatCurvefV == 0) {
-                    ShowSevereError(state, EnergyPlus::format("{}Curve object={} not found.", RoutineName, Alphas(16)));
-                    ErrorsFound2 = true;
-                }
-                desicDehum.RegenEnergyCurvefTW = Curve::GetCurveIndex(state, Alphas(17));
-                if (desicDehum.RegenEnergyCurvefTW == 0) {
-                    ShowSevereError(state, EnergyPlus::format("{}Curve object={} not found.", RoutineName, Alphas(17)));
-                    ErrorsFound2 = true;
-                }
-                desicDehum.RegenEnergyCurvefV = Curve::GetCurveIndex(state, Alphas(18));
-                if (desicDehum.RegenEnergyCurvefV == 0) {
-                    ShowSevereError(state, EnergyPlus::format("{}Curve object={} not found.", RoutineName, Alphas(18)));
-                    ErrorsFound2 = true;
-                }
-                desicDehum.RegenVelCurvefTW = Curve::GetCurveIndex(state, Alphas(19));
-                if (desicDehum.RegenVelCurvefTW == 0) {
-                    ShowSevereError(state, EnergyPlus::format("{}Curve object={} not found.", RoutineName, Alphas(19)));
-                    ErrorsFound2 = true;
-                }
-                desicDehum.RegenVelCurvefV = Curve::GetCurveIndex(state, Alphas(20));
-                if (desicDehum.RegenVelCurvefV == 0) {
-                    ShowSevereError(state, EnergyPlus::format("{}Curve object={} not found.", RoutineName, Alphas(20)));
-                    ErrorsFound2 = true;
-                }
+                // Look up a required performance curve; set ErrorsFound2 if not found.
+                auto lookupCurve = [&](int &curveIndex, int alphaIdx) {
+                    curveIndex = Curve::GetCurveIndex(state, Alphas(alphaIdx));
+                    if (curveIndex == 0) {
+                        ShowSevereError(state, EnergyPlus::format("{}Curve object={} not found.", RoutineName, Alphas(alphaIdx)));
+                        ErrorsFound2 = true;
+                    }
+                };
+                lookupCurve(desicDehum.ProcDryBulbCurvefTW, 13);
+                lookupCurve(desicDehum.ProcDryBulbCurvefV, 14);
+                lookupCurve(desicDehum.ProcHumRatCurvefTW, 15);
+                lookupCurve(desicDehum.ProcHumRatCurvefV, 16);
+                lookupCurve(desicDehum.RegenEnergyCurvefTW, 17);
+                lookupCurve(desicDehum.RegenEnergyCurvefV, 18);
+                lookupCurve(desicDehum.RegenVelCurvefTW, 19);
+                lookupCurve(desicDehum.RegenVelCurvefV, 20);
                 if (ErrorsFound2) {
                     ShowSevereError(state, EnergyPlus::format("{}{} = {}", RoutineName, CurrentModuleObject, Alphas(1)));
                     ShowContinueError(state, "Errors found in getting performance curves.");
