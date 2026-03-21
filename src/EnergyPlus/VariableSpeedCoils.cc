@@ -3158,49 +3158,28 @@ namespace VariableSpeedCoils {
             // HPWH, the mass flow rate will be updated by a revised entering air density
 
             if (varSpeedCoil.MSHPDesignSpecIndex > -1 && !state.dataUnitarySystems->designSpecMSHP.empty()) {
-                if (varSpeedCoil.VSCoilType == HVAC::Coil_CoolingWaterToAirHPVSEquationFit ||
-                    varSpeedCoil.VSCoilType == HVAC::Coil_CoolingAirToAirVariableSpeed) {
-                    if (state.dataUnitarySystems->designSpecMSHP[varSpeedCoil.MSHPDesignSpecIndex].numOfSpeedCooling != varSpeedCoil.NumOfSpeeds) {
-                        ShowFatalError(state,
-                                       EnergyPlus::format("COIL:{} = {}{} number of speeds not equal to number of speed specified in "
-                                                          "UnitarySystemPerformance:Multispeed object.",
-                                                          varSpeedCoil.CoolHeatType,
-                                                          CurrentObjSubfix,
-                                                          varSpeedCoil.Name));
-                    } else {
-                        for (Mode = varSpeedCoil.NumOfSpeeds; Mode >= 1; --Mode) {
-                            varSpeedCoil.MSRatedAirVolFlowRate(Mode) =
-                                varSpeedCoil.RatedAirVolFlowRate *
-                                state.dataUnitarySystems->designSpecMSHP[varSpeedCoil.MSHPDesignSpecIndex].coolingVolFlowRatio[Mode - 1];
-                            varSpeedCoil.MSRatedTotCap(Mode) =
-                                varSpeedCoil.MSRatedAirVolFlowRate(Mode) / varSpeedCoil.MSRatedAirVolFlowPerRatedTotCap(Mode);
-                            varSpeedCoil.MSRatedAirMassFlowRate(Mode) = varSpeedCoil.MSRatedAirVolFlowRate(Mode) * rhoair;
-                            // EVAPORATIVE PRECOOLING CONDENSER AIR FLOW RATE
-                            varSpeedCoil.EvapCondAirFlow(Mode) =
-                                varSpeedCoil.MSRatedTotCap(Mode) * varSpeedCoil.MSRatedEvapCondVolFlowPerRatedTotCap(Mode);
-                        }
-                    }
-                } else if (varSpeedCoil.VSCoilType == HVAC::Coil_HeatingWaterToAirHPVSEquationFit ||
-                           varSpeedCoil.VSCoilType == HVAC::Coil_HeatingAirToAirVariableSpeed) {
-                    if (state.dataUnitarySystems->designSpecMSHP[varSpeedCoil.MSHPDesignSpecIndex].numOfSpeedHeating != varSpeedCoil.NumOfSpeeds) {
-                        ShowFatalError(state,
-                                       EnergyPlus::format("COIL:{}{} = \"{}\" number of speeds not equal to number of speed specified in "
-                                                          "UnitarySystemPerformance:Multispeed object.",
-                                                          varSpeedCoil.CoolHeatType,
-                                                          CurrentObjSubfix,
-                                                          varSpeedCoil.Name));
-                    } else {
-                        for (Mode = varSpeedCoil.NumOfSpeeds; Mode >= 1; --Mode) {
-                            varSpeedCoil.MSRatedAirVolFlowRate(Mode) =
-                                varSpeedCoil.RatedAirVolFlowRate *
-                                state.dataUnitarySystems->designSpecMSHP[varSpeedCoil.MSHPDesignSpecIndex].heatingVolFlowRatio[Mode - 1];
-                            varSpeedCoil.MSRatedTotCap(Mode) =
-                                varSpeedCoil.MSRatedAirVolFlowRate(Mode) / varSpeedCoil.MSRatedAirVolFlowPerRatedTotCap(Mode);
-                            varSpeedCoil.MSRatedAirMassFlowRate(Mode) = varSpeedCoil.MSRatedAirVolFlowRate(Mode) * rhoair;
-                            // EVAPORATIVE PRECOOLING CONDENSER AIR FLOW RATE
-                            varSpeedCoil.EvapCondAirFlow(Mode) =
-                                varSpeedCoil.MSRatedTotCap(Mode) * varSpeedCoil.MSRatedEvapCondVolFlowPerRatedTotCap(Mode);
-                        }
+                auto const &designSpec = state.dataUnitarySystems->designSpecMSHP[varSpeedCoil.MSHPDesignSpecIndex];
+                bool const isCooling = (varSpeedCoil.VSCoilType == HVAC::Coil_CoolingWaterToAirHPVSEquationFit ||
+                                        varSpeedCoil.VSCoilType == HVAC::Coil_CoolingAirToAirVariableSpeed);
+                int const specNumSpeeds = isCooling ? designSpec.numOfSpeedCooling : designSpec.numOfSpeedHeating;
+                auto const &volFlowRatios = isCooling ? designSpec.coolingVolFlowRatio : designSpec.heatingVolFlowRatio;
+
+                if (specNumSpeeds != varSpeedCoil.NumOfSpeeds) {
+                    ShowFatalError(state,
+                                   EnergyPlus::format("COIL:{}{} = \"{}\" number of speeds not equal to number of speed specified in "
+                                                      "UnitarySystemPerformance:Multispeed object.",
+                                                      varSpeedCoil.CoolHeatType,
+                                                      CurrentObjSubfix,
+                                                      varSpeedCoil.Name));
+                } else {
+                    for (Mode = varSpeedCoil.NumOfSpeeds; Mode >= 1; --Mode) {
+                        varSpeedCoil.MSRatedAirVolFlowRate(Mode) = varSpeedCoil.RatedAirVolFlowRate * volFlowRatios[Mode - 1];
+                        varSpeedCoil.MSRatedTotCap(Mode) =
+                            varSpeedCoil.MSRatedAirVolFlowRate(Mode) / varSpeedCoil.MSRatedAirVolFlowPerRatedTotCap(Mode);
+                        varSpeedCoil.MSRatedAirMassFlowRate(Mode) = varSpeedCoil.MSRatedAirVolFlowRate(Mode) * rhoair;
+                        // EVAPORATIVE PRECOOLING CONDENSER AIR FLOW RATE
+                        varSpeedCoil.EvapCondAirFlow(Mode) =
+                            varSpeedCoil.MSRatedTotCap(Mode) * varSpeedCoil.MSRatedEvapCondVolFlowPerRatedTotCap(Mode);
                     }
                 }
             } else {
