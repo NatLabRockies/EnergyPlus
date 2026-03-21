@@ -38,3 +38,4 @@ src/EnergyPlus/PackagedThermalStorageCoil.cc:GetTESCoilInput
 src/EnergyPlus/SolarShading.cc:AllocateModuleArrays
 src/EnergyPlus/CondenserLoopTowers.cc:GetTowerInput
 src/EnergyPlus/UnitarySystem.cc:controlCoolingSystemToSP
+src/EnergyPlus/ScheduleManager.cc:ProcessScheduleInput
