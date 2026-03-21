@@ -181,6 +181,57 @@ namespace LowTempRadiantSystem {
     [[maybe_unused]] constexpr std::array<std::string_view, (int)CircuitCalc::Num> circuitCalcNames = {"OnePerSurface", "CalculateFromCircuitLength"};
     constexpr std::array<std::string_view, (int)CircuitCalc::Num> circuitCalcNamesUC = {"ONEPERSURFACE", "CALCULATEFROMCIRCUITLENGTH"};
 
+    // Helper: parse surface list or single surface name for a radiant system.
+    // Populates the base-class surface arrays (NumOfSurfaces, SurfacePtr, SurfaceName, SurfaceFrac).
+    // Returns the SurfListNum (>0 if a surface list was found, 0 if single surface).
+    static int parseSurfaceListOrSingleSurface(EnergyPlusData &state,
+                                               RadiantSystemBaseData &sys,
+                                               std::string_view routineName,
+                                               std::string const &currentModuleObject,
+                                               std::string const &surfAlphaFieldName,
+                                               std::string const &surfAlphaValue,
+                                               std::string const &objectName,
+                                               bool &ErrorsFound)
+    {
+        auto &Surface = state.dataSurface->Surface;
+        int SurfListNum = 0;
+        if (state.dataSurfLists->NumOfSurfaceLists > 0) {
+            SurfListNum = Util::FindItemInList(sys.SurfListName, state.dataSurfLists->SurfList);
+        }
+        if (SurfListNum > 0) { // Found a valid surface list
+            sys.NumOfSurfaces = state.dataSurfLists->SurfList(SurfListNum).NumOfSurfaces;
+            sys.SurfacePtr.allocate(sys.NumOfSurfaces);
+            sys.SurfaceName.allocate(sys.NumOfSurfaces);
+            sys.SurfaceFrac.allocate(sys.NumOfSurfaces);
+            for (int SurfNum = 1; SurfNum <= state.dataSurfLists->SurfList(SurfListNum).NumOfSurfaces; ++SurfNum) {
+                sys.SurfacePtr(SurfNum) = state.dataSurfLists->SurfList(SurfListNum).SurfPtr(SurfNum);
+                sys.SurfaceName(SurfNum) = state.dataSurfLists->SurfList(SurfListNum).SurfName(SurfNum);
+                sys.SurfaceFrac(SurfNum) = state.dataSurfLists->SurfList(SurfListNum).SurfFlowFrac(SurfNum);
+            }
+        } else { // User entered a single surface name rather than a surface list
+            sys.NumOfSurfaces = 1;
+            sys.SurfacePtr.allocate(1);
+            sys.SurfaceName.allocate(1);
+            sys.SurfaceFrac.allocate(1);
+            sys.SurfaceName(1) = sys.SurfListName;
+            sys.SurfacePtr(1) = Util::FindItemInList(sys.SurfaceName(1), Surface);
+            sys.SurfaceFrac(1) = 1.0;
+            // Error checking for single surfaces
+            if (sys.SurfacePtr(1) == 0) {
+                ShowSevereError(state, EnergyPlus::format("{}Invalid {} = {}", routineName, surfAlphaFieldName, surfAlphaValue));
+                ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", currentModuleObject, objectName));
+                ErrorsFound = true;
+            } else if (state.dataSurface->SurfIsRadSurfOrVentSlabOrPool(sys.SurfacePtr(1))) {
+                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", Invalid Surface", routineName, currentModuleObject, objectName));
+                ShowContinueError(
+                    state,
+                    EnergyPlus::format("{}=\"{}\" has been used in another radiant system or ventilated slab.", surfAlphaFieldName, surfAlphaValue));
+                ErrorsFound = true;
+            }
+        }
+        return SurfListNum;
+    }
+
     // Helper: validate and parse a design capacity sizing method for VariableFlow:Design objects.
     // Handles "XDesignCapacity", "CapacityPerFloorArea", and "FractionOfAutosizedXCapacity" patterns.
     static void parseDesignCapacitySizingMethod(EnergyPlusData &state,
@@ -739,49 +790,19 @@ namespace LowTempRadiantSystem {
             }
 
             thisRadSys.SurfListName = Alphas(5);
-            SurfListNum = 0;
-            if (state.dataSurfLists->NumOfSurfaceLists > 0) {
-                SurfListNum = Util::FindItemInList(thisRadSys.SurfListName, state.dataSurfLists->SurfList);
-            }
-            if (SurfListNum > 0) { // Found a valid surface list
-                thisRadSys.NumOfSurfaces = state.dataSurfLists->SurfList(SurfListNum).NumOfSurfaces;
-                thisRadSys.SurfacePtr.allocate(thisRadSys.NumOfSurfaces);
-                thisRadSys.SurfaceName.allocate(thisRadSys.NumOfSurfaces);
-                thisRadSys.SurfaceFrac.allocate(thisRadSys.NumOfSurfaces);
-                thisRadSys.NumCircuits.allocate(thisRadSys.NumOfSurfaces);
-                for (SurfNum = 1; SurfNum <= state.dataSurfLists->SurfList(SurfListNum).NumOfSurfaces; ++SurfNum) {
-                    thisRadSys.SurfacePtr(SurfNum) = state.dataSurfLists->SurfList(SurfListNum).SurfPtr(SurfNum);
-                    thisRadSys.SurfaceName(SurfNum) = state.dataSurfLists->SurfList(SurfListNum).SurfName(SurfNum);
-                    thisRadSys.SurfaceFrac(SurfNum) = state.dataSurfLists->SurfList(SurfListNum).SurfFlowFrac(SurfNum);
+            SurfListNum = parseSurfaceListOrSingleSurface(
+                state, thisRadSys, RoutineName, CurrentModuleObject, cAlphaFields(5), Alphas(5), Alphas(1), ErrorsFound);
+            thisRadSys.NumCircuits.allocate(thisRadSys.NumOfSurfaces);
+            if (SurfListNum > 0) {
+                for (SurfNum = 1; SurfNum <= thisRadSys.NumOfSurfaces; ++SurfNum) {
                     if (thisRadSys.SurfacePtr(SurfNum) > 0) {
                         state.dataSurface->surfIntConv(thisRadSys.SurfacePtr(SurfNum)).hasActiveInIt = true;
                     }
                 }
-            } else { // User entered a single surface name rather than a surface list
-                thisRadSys.NumOfSurfaces = 1;
-                thisRadSys.SurfacePtr.allocate(thisRadSys.NumOfSurfaces);
-                thisRadSys.SurfaceName.allocate(thisRadSys.NumOfSurfaces);
-                thisRadSys.SurfaceFrac.allocate(thisRadSys.NumOfSurfaces);
-                thisRadSys.NumCircuits.allocate(thisRadSys.NumOfSurfaces);
-                thisRadSys.SurfaceName(1) = thisRadSys.SurfListName;
-                thisRadSys.SurfacePtr(1) = Util::FindItemInList(thisRadSys.SurfaceName(1), Surface);
-                thisRadSys.SurfaceFrac(1) = 1.0;
+            } else {
                 thisRadSys.NumCircuits(1) = 0.0;
-                // Error checking for single surfaces
-                if (thisRadSys.SurfacePtr(1) == 0) {
-                    ShowSevereError(state, EnergyPlus::format("{}Invalid {} = {}", RoutineName, cAlphaFields(5), Alphas(5)));
-                    ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                } else if (state.dataSurface->SurfIsRadSurfOrVentSlabOrPool(thisRadSys.SurfacePtr(1))) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", Invalid Surface", RoutineName, CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("{}=\"{}\" has been used in another radiant system or ventilated slab.", cAlphaFields(5), Alphas(5)));
-                    ErrorsFound = true;
-                }
                 if (thisRadSys.SurfacePtr(1) != 0) {
                     state.dataSurface->surfIntConv(thisRadSys.SurfacePtr(1)).hasActiveInIt = true;
-                    state.dataSurface->surfIntConv(thisRadSys.SurfacePtr(1)).hasActiveInIt = true; // Ummmm ... what?
                 }
             }
 
@@ -1058,49 +1079,19 @@ namespace LowTempRadiantSystem {
             }
 
             thisCFloSys.SurfListName = Alphas(5);
-            SurfListNum = 0;
-            if (state.dataSurfLists->NumOfSurfaceLists > 0) {
-                SurfListNum = Util::FindItemInList(thisCFloSys.SurfListName, state.dataSurfLists->SurfList);
-            }
-            if (SurfListNum > 0) { // Found a valid surface list
-                thisCFloSys.NumOfSurfaces = state.dataSurfLists->SurfList(SurfListNum).NumOfSurfaces;
-                thisCFloSys.SurfacePtr.allocate(thisCFloSys.NumOfSurfaces);
-                thisCFloSys.SurfaceName.allocate(thisCFloSys.NumOfSurfaces);
-                thisCFloSys.SurfaceFrac.allocate(thisCFloSys.NumOfSurfaces);
-                thisCFloSys.NumCircuits.allocate(thisCFloSys.NumOfSurfaces);
-                state.dataLowTempRadSys->MaxCloNumOfSurfaces = max(state.dataLowTempRadSys->MaxCloNumOfSurfaces, thisCFloSys.NumOfSurfaces);
-                for (SurfNum = 1; SurfNum <= state.dataSurfLists->SurfList(SurfListNum).NumOfSurfaces; ++SurfNum) {
-                    thisCFloSys.SurfacePtr(SurfNum) = state.dataSurfLists->SurfList(SurfListNum).SurfPtr(SurfNum);
-                    thisCFloSys.SurfaceName(SurfNum) = state.dataSurfLists->SurfList(SurfListNum).SurfName(SurfNum);
-                    thisCFloSys.SurfaceFrac(SurfNum) = state.dataSurfLists->SurfList(SurfListNum).SurfFlowFrac(SurfNum);
+            SurfListNum = parseSurfaceListOrSingleSurface(
+                state, thisCFloSys, RoutineName, CurrentModuleObject, cAlphaFields(5), Alphas(5), Alphas(1), ErrorsFound);
+            thisCFloSys.NumCircuits.allocate(thisCFloSys.NumOfSurfaces);
+            state.dataLowTempRadSys->MaxCloNumOfSurfaces = max(state.dataLowTempRadSys->MaxCloNumOfSurfaces, thisCFloSys.NumOfSurfaces);
+            if (SurfListNum > 0) {
+                for (SurfNum = 1; SurfNum <= thisCFloSys.NumOfSurfaces; ++SurfNum) {
                     thisCFloSys.NumCircuits(SurfNum) = 0.0;
                     if (thisCFloSys.SurfacePtr(SurfNum) != 0) {
                         state.dataSurface->surfIntConv(thisCFloSys.SurfacePtr(SurfNum)).hasActiveInIt = true;
                     }
                 }
-            } else { // User entered a single surface name rather than a surface list
-                thisCFloSys.NumOfSurfaces = 1;
-                thisCFloSys.SurfacePtr.allocate(thisCFloSys.NumOfSurfaces);
-                thisCFloSys.SurfaceName.allocate(thisCFloSys.NumOfSurfaces);
-                thisCFloSys.SurfaceFrac.allocate(thisCFloSys.NumOfSurfaces);
-                thisCFloSys.NumCircuits.allocate(thisCFloSys.NumOfSurfaces);
-                state.dataLowTempRadSys->MaxCloNumOfSurfaces = max(state.dataLowTempRadSys->MaxCloNumOfSurfaces, thisCFloSys.NumOfSurfaces);
-                thisCFloSys.SurfaceName(1) = thisCFloSys.SurfListName;
-                thisCFloSys.SurfacePtr(1) = Util::FindItemInList(thisCFloSys.SurfaceName(1), Surface);
-                thisCFloSys.SurfaceFrac(1) = 1.0;
+            } else {
                 thisCFloSys.NumCircuits(1) = 0.0;
-                // Error checking for single surfaces
-                if (thisCFloSys.SurfacePtr(1) == 0) {
-                    ShowSevereError(state, EnergyPlus::format("{}Invalid {} = {}", RoutineName, cAlphaFields(4), Alphas(4)));
-                    ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                } else if (state.dataSurface->SurfIsRadSurfOrVentSlabOrPool(thisCFloSys.SurfacePtr(1))) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", Invalid Surface", RoutineName, CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("{}=\"{}\" has been used in another radiant system or ventilated slab.", cAlphaFields(5), Alphas(5)));
-                    ErrorsFound = true;
-                }
                 if (thisCFloSys.SurfacePtr(1) != 0) {
                     state.dataSurface->surfIntConv(thisCFloSys.SurfacePtr(1)).hasActiveInIt = true;
                     state.dataSurface->SurfIsRadSurfOrVentSlabOrPool(thisCFloSys.SurfacePtr(1)) = true;
@@ -1286,43 +1277,10 @@ namespace LowTempRadiantSystem {
             }
 
             thisElecSys.SurfListName = Alphas(4);
-            SurfListNum = 0;
-            if (state.dataSurfLists->NumOfSurfaceLists > 0) {
-                SurfListNum = Util::FindItemInList(thisElecSys.SurfListName, state.dataSurfLists->SurfList);
-            }
-            if (SurfListNum > 0) { // Found a valid surface list
-                thisElecSys.NumOfSurfaces = state.dataSurfLists->SurfList(SurfListNum).NumOfSurfaces;
-                thisElecSys.SurfacePtr.allocate(thisElecSys.NumOfSurfaces);
-                thisElecSys.SurfaceName.allocate(thisElecSys.NumOfSurfaces);
-                thisElecSys.SurfaceFrac.allocate(thisElecSys.NumOfSurfaces);
-                for (SurfNum = 1; SurfNum <= state.dataSurfLists->SurfList(SurfListNum).NumOfSurfaces; ++SurfNum) {
-                    thisElecSys.SurfacePtr(SurfNum) = state.dataSurfLists->SurfList(SurfListNum).SurfPtr(SurfNum);
-                    thisElecSys.SurfaceName(SurfNum) = state.dataSurfLists->SurfList(SurfListNum).SurfName(SurfNum);
-                    thisElecSys.SurfaceFrac(SurfNum) = state.dataSurfLists->SurfList(SurfListNum).SurfFlowFrac(SurfNum);
-                }
-            } else { // User entered a single surface name rather than a surface list
-                thisElecSys.NumOfSurfaces = 1;
-                thisElecSys.SurfacePtr.allocate(thisElecSys.NumOfSurfaces);
-                thisElecSys.SurfaceName.allocate(thisElecSys.NumOfSurfaces);
-                thisElecSys.SurfaceFrac.allocate(thisElecSys.NumOfSurfaces);
-                thisElecSys.SurfaceName(1) = thisElecSys.SurfListName;
-                thisElecSys.SurfacePtr(1) = Util::FindItemInList(thisElecSys.SurfaceName(1), Surface);
-                thisElecSys.SurfaceFrac(1) = 1.0;
-                // Error checking for single surfaces
-                if (thisElecSys.SurfacePtr(1) == 0) {
-                    ShowSevereError(state, EnergyPlus::format("{}Invalid {} = {}", RoutineName, cAlphaFields(4), Alphas(4)));
-                    ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                } else if (state.dataSurface->SurfIsRadSurfOrVentSlabOrPool(thisElecSys.SurfacePtr(1))) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", Invalid Surface", RoutineName, CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("{}=\"{}\" has been used in another radiant system or ventilated slab.", cAlphaFields(4), Alphas(4)));
-                    ErrorsFound = true;
-                }
-                if (thisElecSys.SurfacePtr(1) != 0) {
-                    state.dataSurface->SurfIsRadSurfOrVentSlabOrPool(state.dataLowTempRadSys->ElecRadSys(Item).SurfacePtr(1)) = true;
-                }
+            SurfListNum = parseSurfaceListOrSingleSurface(
+                state, thisElecSys, RoutineName, CurrentModuleObject, cAlphaFields(4), Alphas(4), Alphas(1), ErrorsFound);
+            if (SurfListNum <= 0 && thisElecSys.SurfacePtr(1) != 0) {
+                state.dataSurface->SurfIsRadSurfOrVentSlabOrPool(thisElecSys.SurfacePtr(1)) = true;
             }
 
             // Error checking for zones and construction information
