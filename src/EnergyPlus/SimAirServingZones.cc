@@ -5222,6 +5222,46 @@ static void saveDuringDayCoolPeak(EnergyPlusData &state,
     sysSizing.MassFlowAtCoolPeak = sysSizing.CoolFlowSeq(TimeStepInDay);
 }
 
+// Save DuringDay heating peak conditions when the current time step heating capacity exceeds the previous peak.
+// Parameterised by the zone list used for coincident space sensible load summation.
+static void saveDuringDayHeatPeak(EnergyPlusData &state,
+                                  DataSizing::SystemSizingData &sysSizing,
+                                  int AirLoopNum,
+                                  int TimeStepInDay,
+                                  Real64 SysHeatCap,
+                                  Real64 SysHeatMixTemp,
+                                  Real64 SysHeatMixHumRat,
+                                  Real64 SysHeatRetTemp,
+                                  Real64 SysHeatRetHumRat,
+                                  int numCoinZones,
+                                  Array1D_int const &coinCtrlZoneNums)
+{
+    if (SysHeatCap > sysSizing.HeatCap) {
+        state.dataSize->SysSizPeakDDNum(AirLoopNum).TimeStepAtHeatPk(state.dataSize->CurOverallSimDay) = TimeStepInDay;
+        sysSizing.HeatCap = SysHeatCap;
+        sysSizing.HeatMixTemp = SysHeatMixTemp;
+        sysSizing.HeatMixHumRat = SysHeatMixHumRat;
+        sysSizing.HeatRetTemp = SysHeatRetTemp;
+        sysSizing.HeatRetHumRat = SysHeatRetHumRat;
+        sysSizing.HeatOutTemp = state.dataEnvrn->OutDryBulbTemp;
+        sysSizing.HeatOutHumRat = state.dataEnvrn->OutHumRat;
+        // save time of system coincident heating coil peak
+        sysSizing.SysHeatCoilTimeStepPk = TimeStepInDay;
+        sysSizing.SysHeatCoinSpaceSens = 0.0;
+        for (int zoneLoop = 1; zoneLoop <= numCoinZones; ++zoneLoop) {
+            int zoneNum = coinCtrlZoneNums(zoneLoop);
+            sysSizing.SysHeatCoinSpaceSens +=
+                state.dataSize->CalcZoneSizing(state.dataSize->CurOverallSimDay, zoneNum).HeatLoadSeq(TimeStepInDay);
+        }
+    }
+    //! save time of system coincident heating airflow peak
+    if (sysSizing.HeatFlowSeq(TimeStepInDay) > sysSizing.CoinHeatMassFlow) {
+        sysSizing.SysHeatAirTimeStepPk = TimeStepInDay;
+    }
+    // Get the maximum system heating flow rate
+    sysSizing.CoinHeatMassFlow = max(sysSizing.CoinHeatMassFlow, sysSizing.HeatFlowSeq(TimeStepInDay));
+}
+
 // Complete DuringDay heating return/mix/capacity computation when system flow is nonzero.
 // Called after the zone accumulation loop for both heated-zone and cooled-zone-for-heating paths.
 static void computeHeatRetMixCap(EnergyPlusData &state,
@@ -5679,35 +5719,10 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
                                      SysHeatRetTemp, SysHeatRetHumRat, SysHeatZoneAvgTemp,
                                      SysHeatMixTemp, SysHeatMixHumRat, SysHeatCap);
 
-                // Get the maximum system heating capacity
-                if (SysHeatCap > sysSizing.HeatCap) {
-                    state.dataSize->SysSizPeakDDNum(AirLoopNum).TimeStepAtHeatPk(state.dataSize->CurOverallSimDay) = TimeStepInDay;
-                    sysSizing.HeatCap = SysHeatCap;
-                    sysSizing.HeatMixTemp = SysHeatMixTemp;
-                    sysSizing.HeatMixHumRat = SysHeatMixHumRat;
-                    sysSizing.HeatRetTemp = SysHeatRetTemp;
-                    sysSizing.HeatRetHumRat = SysHeatRetHumRat;
-                    sysSizing.HeatOutTemp = state.dataEnvrn->OutDryBulbTemp;
-                    sysSizing.HeatOutHumRat = state.dataEnvrn->OutHumRat;
-                    // save time of system coincident heating coil peak
-                    sysSizing.SysHeatCoilTimeStepPk = TimeStepInDay;
-                    sysSizing.SysHeatCoinSpaceSens = 0.0;
-                    if (state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).NumZonesHeated > 0) {
-                        for (int zonesHeatLoop = 1; zonesHeatLoop <= state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).NumZonesHeated;
-                             ++zonesHeatLoop) {
-                            int zoneNum = state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).HeatCtrlZoneNums(zonesHeatLoop);
-                            sysSizing.SysHeatCoinSpaceSens +=
-                                state.dataSize->CalcZoneSizing(state.dataSize->CurOverallSimDay, zoneNum).HeatLoadSeq(TimeStepInDay);
-                        }
-                    }
-                }
-                //! save time of system coincident heating airflow peak
-                if (sysSizing.HeatFlowSeq(TimeStepInDay) > sysSizing.CoinHeatMassFlow) {
-                    sysSizing.SysHeatAirTimeStepPk = TimeStepInDay;
-                }
-
-                // Get the maximum system heating flow rate
-                sysSizing.CoinHeatMassFlow = max(sysSizing.CoinHeatMassFlow, sysSizing.HeatFlowSeq(TimeStepInDay));
+                saveDuringDayHeatPeak(state, sysSizing, AirLoopNum, TimeStepInDay,
+                                     SysHeatCap, SysHeatMixTemp, SysHeatMixHumRat, SysHeatRetTemp, SysHeatRetHumRat,
+                                     state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).NumZonesHeated,
+                                     state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).HeatCtrlZoneNums);
 
             } else { // No centrally heated zones: use cooled zones
 
@@ -5725,32 +5740,10 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
                                      SysHeatRetTemp, SysHeatRetHumRat, SysHeatZoneAvgTemp,
                                      SysHeatMixTemp, SysHeatMixHumRat, SysHeatCap);
 
-                // Get the maximum system heating capacity
-                if (SysHeatCap > sysSizing.HeatCap) {
-                    state.dataSize->SysSizPeakDDNum(AirLoopNum).TimeStepAtHeatPk(state.dataSize->CurOverallSimDay) = TimeStepInDay;
-                    sysSizing.HeatCap = SysHeatCap;
-                    sysSizing.HeatMixTemp = SysHeatMixTemp;
-                    sysSizing.HeatMixHumRat = SysHeatMixHumRat;
-                    sysSizing.HeatRetTemp = SysHeatRetTemp;
-                    sysSizing.HeatRetHumRat = SysHeatRetHumRat;
-                    sysSizing.HeatOutTemp = state.dataEnvrn->OutDryBulbTemp;
-                    sysSizing.HeatOutHumRat = state.dataEnvrn->OutHumRat;
-                    // save time of system coincident heating coil peak
-                    sysSizing.SysHeatCoilTimeStepPk = TimeStepInDay;
-
-                    sysSizing.SysHeatCoinSpaceSens = 0.0;
-                    for (int zonesCoolLoop = 1; zonesCoolLoop <= state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).NumZonesCooled; ++zonesCoolLoop) {
-                        int zoneNum = state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).CoolCtrlZoneNums(zonesCoolLoop);
-                        sysSizing.SysHeatCoinSpaceSens +=
-                            state.dataSize->CalcZoneSizing(state.dataSize->CurOverallSimDay, zoneNum).HeatLoadSeq(TimeStepInDay);
-                    }
-                } // Get the maximum system heating flow rate
-                // save time of system coincident heating airflow peak
-                if (sysSizing.HeatFlowSeq(TimeStepInDay) > sysSizing.CoinHeatMassFlow) {
-                    sysSizing.SysHeatAirTimeStepPk = TimeStepInDay;
-                }
-
-                sysSizing.CoinHeatMassFlow = max(sysSizing.CoinHeatMassFlow, sysSizing.HeatFlowSeq(TimeStepInDay));
+                saveDuringDayHeatPeak(state, sysSizing, AirLoopNum, TimeStepInDay,
+                                     SysHeatCap, SysHeatMixTemp, SysHeatMixHumRat, SysHeatRetTemp, SysHeatRetHumRat,
+                                     state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).NumZonesCooled,
+                                     state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).CoolCtrlZoneNums);
             }
 
         } // end of loop over primary air systems
