@@ -377,55 +377,18 @@ void GetSysInput(EnergyPlusData &state)
     state.dataSingleDuct->SysUniqueNames.reserve(static_cast<unsigned>(state.dataSingleDuct->NumSDAirTerminal));
     state.dataSingleDuct->CheckEquipName.dimension(state.dataSingleDuct->NumSDAirTerminal, true);
 
-    state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state,
-                                                                   "AirTerminal:SingleDuct:VAV:Reheat",
-                                                                   state.dataSingleDuct->TotalArgsGSI,
-                                                                   state.dataSingleDuct->NumAlphasGSI,
-                                                                   state.dataSingleDuct->NumNumsGSI);
-    state.dataSingleDuct->MaxNumsGSI = max(state.dataSingleDuct->MaxNumsGSI, state.dataSingleDuct->NumNumsGSI);
-    state.dataSingleDuct->MaxAlphasGSI = max(state.dataSingleDuct->MaxAlphasGSI, state.dataSingleDuct->NumAlphasGSI);
-    state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state,
-                                                                   "AirTerminal:SingleDuct:VAV:NoReheat",
-                                                                   state.dataSingleDuct->TotalArgsGSI,
-                                                                   state.dataSingleDuct->NumAlphasGSI,
-                                                                   state.dataSingleDuct->NumNumsGSI);
-    state.dataSingleDuct->MaxNumsGSI = max(state.dataSingleDuct->MaxNumsGSI, state.dataSingleDuct->NumNumsGSI);
-    state.dataSingleDuct->MaxAlphasGSI = max(state.dataSingleDuct->MaxAlphasGSI, state.dataSingleDuct->NumAlphasGSI);
-    state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state,
-                                                                   "AirTerminal:SingleDuct:ConstantVolume:Reheat",
-                                                                   state.dataSingleDuct->TotalArgsGSI,
-                                                                   state.dataSingleDuct->NumAlphasGSI,
-                                                                   state.dataSingleDuct->NumNumsGSI);
-    state.dataSingleDuct->MaxNumsGSI = max(state.dataSingleDuct->MaxNumsGSI, state.dataSingleDuct->NumNumsGSI);
-    state.dataSingleDuct->MaxAlphasGSI = max(state.dataSingleDuct->MaxAlphasGSI, state.dataSingleDuct->NumAlphasGSI);
-    state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state,
-                                                                   "AirTerminal:SingleDuct:ConstantVolume:NoReheat",
-                                                                   state.dataSingleDuct->TotalArgsGSI,
-                                                                   state.dataSingleDuct->NumAlphasGSI,
-                                                                   state.dataSingleDuct->NumNumsGSI);
-    state.dataSingleDuct->MaxNumsGSI = max(state.dataSingleDuct->MaxNumsGSI, state.dataSingleDuct->NumNumsGSI);
-    state.dataSingleDuct->MaxAlphasGSI = max(state.dataSingleDuct->MaxAlphasGSI, state.dataSingleDuct->NumAlphasGSI);
-    state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state,
-                                                                   "AirTerminal:SingleDuct:VAV:Reheat:VariableSpeedFan",
-                                                                   state.dataSingleDuct->TotalArgsGSI,
-                                                                   state.dataSingleDuct->NumAlphasGSI,
-                                                                   state.dataSingleDuct->NumNumsGSI);
-    state.dataSingleDuct->MaxNumsGSI = max(state.dataSingleDuct->MaxNumsGSI, state.dataSingleDuct->NumNumsGSI);
-    state.dataSingleDuct->MaxAlphasGSI = max(state.dataSingleDuct->MaxAlphasGSI, state.dataSingleDuct->NumAlphasGSI);
-    state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state,
-                                                                   "AirTerminal:SingleDuct:VAV:HeatAndCool:Reheat",
-                                                                   state.dataSingleDuct->TotalArgsGSI,
-                                                                   state.dataSingleDuct->NumAlphasGSI,
-                                                                   state.dataSingleDuct->NumNumsGSI);
-    state.dataSingleDuct->MaxNumsGSI = max(state.dataSingleDuct->MaxNumsGSI, state.dataSingleDuct->NumNumsGSI);
-    state.dataSingleDuct->MaxAlphasGSI = max(state.dataSingleDuct->MaxAlphasGSI, state.dataSingleDuct->NumAlphasGSI);
-    state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state,
-                                                                   "AirTerminal:SingleDuct:VAV:HeatAndCool:NoReheat",
-                                                                   state.dataSingleDuct->TotalArgsGSI,
-                                                                   state.dataSingleDuct->NumAlphasGSI,
-                                                                   state.dataSingleDuct->NumNumsGSI);
-    state.dataSingleDuct->MaxNumsGSI = max(state.dataSingleDuct->MaxNumsGSI, state.dataSingleDuct->NumNumsGSI);
-    state.dataSingleDuct->MaxAlphasGSI = max(state.dataSingleDuct->MaxAlphasGSI, state.dataSingleDuct->NumAlphasGSI);
+    for (auto const *objName : {"AirTerminal:SingleDuct:VAV:Reheat",
+                                "AirTerminal:SingleDuct:VAV:NoReheat",
+                                "AirTerminal:SingleDuct:ConstantVolume:Reheat",
+                                "AirTerminal:SingleDuct:ConstantVolume:NoReheat",
+                                "AirTerminal:SingleDuct:VAV:Reheat:VariableSpeedFan",
+                                "AirTerminal:SingleDuct:VAV:HeatAndCool:Reheat",
+                                "AirTerminal:SingleDuct:VAV:HeatAndCool:NoReheat"}) {
+        state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(
+            state, objName, state.dataSingleDuct->TotalArgsGSI, state.dataSingleDuct->NumAlphasGSI, state.dataSingleDuct->NumNumsGSI);
+        state.dataSingleDuct->MaxNumsGSI = max(state.dataSingleDuct->MaxNumsGSI, state.dataSingleDuct->NumNumsGSI);
+        state.dataSingleDuct->MaxAlphasGSI = max(state.dataSingleDuct->MaxAlphasGSI, state.dataSingleDuct->NumAlphasGSI);
+    }
 
     Alphas.allocate(state.dataSingleDuct->MaxAlphasGSI);
     cAlphaFields.allocate(state.dataSingleDuct->MaxAlphasGSI);
