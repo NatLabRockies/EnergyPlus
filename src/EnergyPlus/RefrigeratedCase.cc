@@ -7168,19 +7168,87 @@ void SetupReportInput(EnergyPlusData &state)
         auto &RefrigRack = state.dataRefrigCase->RefrigRack;
         for (int rackNum = 1; rackNum <= state.dataRefrigCase->NumRefrigeratedRacks; ++rackNum) {
             auto &rack = RefrigRack(rackNum);
-            if (rack.CoilFlag) { // rack serves chillers and is solved on HVAC time step
+            // CoilFlag: serves chillers on HVAC (System) time step; otherwise cases/walkins on Zone time step
+            const std::string rackPrefix =
+                rack.CoilFlag ? "Refrigeration Air Chiller Compressor Rack" : "Refrigeration Compressor Rack";
+            const auto rackTsType =
+                rack.CoilFlag ? OutputProcessor::TimeStepType::System : OutputProcessor::TimeStepType::Zone;
+
+            SetupOutputVariable(state,
+                                rackPrefix + " Electricity Rate",
+                                Constant::Units::W,
+                                rack.RackCompressorPower,
+                                rackTsType,
+                                OutputProcessor::StoreType::Average,
+                                rack.Name);
+            SetupOutputVariable(state,
+                                rackPrefix + " Electricity Energy",
+                                Constant::Units::J,
+                                rack.RackElecConsumption,
+                                rackTsType,
+                                OutputProcessor::StoreType::Sum,
+                                rack.Name,
+                                Constant::eResource::Electricity,
+                                OutputProcessor::Group::Plant,
+                                OutputProcessor::EndUseCat::Refrigeration,
+                                rack.EndUseSubcategory);
+            SetupOutputVariable(state,
+                                rackPrefix + " Condenser Fan Electricity Rate",
+                                Constant::Units::W,
+                                rack.ActualCondenserFanPower,
+                                rackTsType,
+                                OutputProcessor::StoreType::Average,
+                                rack.Name);
+            SetupOutputVariable(state,
+                                rackPrefix + " Condenser Fan Electricity Energy",
+                                Constant::Units::J,
+                                rack.CondenserFanConsumption,
+                                rackTsType,
+                                OutputProcessor::StoreType::Sum,
+                                rack.Name,
+                                Constant::eResource::Electricity,
+                                OutputProcessor::Group::Plant,
+                                OutputProcessor::EndUseCat::Refrigeration,
+                                rack.EndUseSubcategory);
+            SetupOutputVariable(state,
+                                rackPrefix + " Total Heat Transfer Rate",
+                                Constant::Units::W,
+                                rack.RackCapacity,
+                                rackTsType,
+                                OutputProcessor::StoreType::Average,
+                                rack.Name);
+            SetupOutputVariable(state,
+                                rackPrefix + " Total Heat Transfer Energy",
+                                Constant::Units::J,
+                                rack.RackCoolingEnergy,
+                                rackTsType,
+                                OutputProcessor::StoreType::Sum,
+                                rack.Name,
+                                Constant::eResource::EnergyTransfer,
+                                OutputProcessor::Group::Plant,
+                                OutputProcessor::EndUseCat::Refrigeration,
+                                rack.EndUseSubcategory);
+            SetupOutputVariable(state,
+                                rackPrefix + " COP",
+                                Constant::Units::W_W,
+                                rack.RackCompressorCOP,
+                                rackTsType,
+                                OutputProcessor::StoreType::Average,
+                                rack.Name);
+
+            if (rack.CondenserType == DataHeatBalance::RefrigCondenserType::Evap) {
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller Compressor Rack Electricity Rate",
+                                    rackPrefix + " Evaporative Condenser Pump Electricity Rate",
                                     Constant::Units::W,
-                                    rack.RackCompressorPower,
-                                    OutputProcessor::TimeStepType::System,
+                                    rack.ActualEvapPumpPower,
+                                    rackTsType,
                                     OutputProcessor::StoreType::Average,
                                     rack.Name);
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller Compressor Rack Electricity Energy",
+                                    rackPrefix + " Evaporative Condenser Pump Electricity Energy",
                                     Constant::Units::J,
-                                    rack.RackElecConsumption,
-                                    OutputProcessor::TimeStepType::System,
+                                    rack.EvapPumpConsumption,
+                                    rackTsType,
                                     OutputProcessor::StoreType::Sum,
                                     rack.Name,
                                     Constant::eResource::Electricity,
@@ -7188,17 +7256,17 @@ void SetupReportInput(EnergyPlusData &state)
                                     OutputProcessor::EndUseCat::Refrigeration,
                                     rack.EndUseSubcategory);
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller Compressor Rack Condenser Fan Electricity Rate",
+                                    rackPrefix + " Evaporative Condenser Basin Heater Electricity Rate",
                                     Constant::Units::W,
-                                    rack.ActualCondenserFanPower,
-                                    OutputProcessor::TimeStepType::System,
+                                    rack.BasinHeaterPower,
+                                    rackTsType,
                                     OutputProcessor::StoreType::Average,
                                     rack.Name);
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller Compressor Rack Condenser Fan Electricity Energy",
+                                    rackPrefix + " Evaporative Condenser Basin Heater Electricity Energy",
                                     Constant::Units::J,
-                                    rack.CondenserFanConsumption,
-                                    OutputProcessor::TimeStepType::System,
+                                    rack.BasinHeaterConsumption,
+                                    rackTsType,
                                     OutputProcessor::StoreType::Sum,
                                     rack.Name,
                                     Constant::eResource::Electricity,
@@ -7206,299 +7274,69 @@ void SetupReportInput(EnergyPlusData &state)
                                     OutputProcessor::EndUseCat::Refrigeration,
                                     rack.EndUseSubcategory);
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller Compressor Rack Total Heat Transfer Rate",
-                                    Constant::Units::W,
-                                    rack.RackCapacity,
-                                    OutputProcessor::TimeStepType::System,
+                                    rackPrefix + " Evaporative Condenser Water Volume Flow Rate",
+                                    Constant::Units::m3_s,
+                                    rack.EvapWaterConsumpRate,
+                                    rackTsType,
                                     OutputProcessor::StoreType::Average,
                                     rack.Name);
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller Compressor Rack Total Heat Transfer Energy",
-                                    Constant::Units::J,
-                                    rack.RackCoolingEnergy,
-                                    OutputProcessor::TimeStepType::System,
+                                    rackPrefix + " Evaporative Condenser Water Volume",
+                                    Constant::Units::m3,
+                                    rack.EvapWaterConsumption,
+                                    rackTsType,
                                     OutputProcessor::StoreType::Sum,
                                     rack.Name,
-                                    Constant::eResource::EnergyTransfer,
+                                    Constant::eResource::Water,
                                     OutputProcessor::Group::Plant,
                                     OutputProcessor::EndUseCat::Refrigeration,
                                     rack.EndUseSubcategory);
+            } // Evap condenser
+
+            if (rack.HeatRejectionLocation == HeatRejLocation::Zone) {
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller Compressor Rack COP",
-                                    Constant::Units::W_W,
-                                    rack.RackCompressorCOP,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    rack.Name);
-
-                if (rack.CondenserType == DataHeatBalance::RefrigCondenserType::Evap) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Compressor Rack Evaporative Condenser Pump Electricity Rate",
-                                        Constant::Units::W,
-                                        rack.ActualEvapPumpPower,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        rack.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Compressor Rack Evaporative Condenser Pump Electricity Energy",
-                                        Constant::Units::J,
-                                        rack.EvapPumpConsumption,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        rack.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        rack.EndUseSubcategory);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Compressor Rack Evaporative Condenser Basin Heater Electricity Rate",
-                                        Constant::Units::W,
-                                        rack.BasinHeaterPower,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        rack.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Compressor Rack Evaporative Condenser Basin Heater Electricity Energy",
-                                        Constant::Units::J,
-                                        rack.BasinHeaterConsumption,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        rack.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        rack.EndUseSubcategory);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Compressor Rack Evaporative Condenser Water Volume Flow Rate",
-                                        Constant::Units::m3_s,
-                                        rack.EvapWaterConsumpRate,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        rack.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Compressor Rack Evaporative Condenser Water Volume",
-                                        Constant::Units::m3,
-                                        rack.EvapWaterConsumption,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        rack.Name,
-                                        Constant::eResource::Water,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        rack.EndUseSubcategory);
-                } // Evap condenser
-
-                if (rack.HeatRejectionLocation == HeatRejLocation::Zone) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Compressor Rack Zone Sensible Heating Rate",
-                                        Constant::Units::W,
-                                        rack.SensZoneCreditHeatRate,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        rack.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Compressor Rack Zone Sensible Heating Energy",
-                                        Constant::Units::J,
-                                        rack.SensZoneCreditHeat,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        rack.Name);
-
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Compressor Rack Return Air Sensible Heating Rate",
-                                        Constant::Units::W,
-                                        rack.SensHVACCreditHeatRate,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        rack.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Compressor Rack Return Air Sensible Heating Energy",
-                                        Constant::Units::J,
-                                        rack.SensHVACCreditHeat,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        rack.Name);
-
-                    // If CoilFlag is true and Location is Zone, GetRefrigerationInput ensures you must have a Heat Rejection Zone provided already
-                    SetupZoneInternalGain(state,
-                                          rack.HeatRejectionZoneNum,
-                                          rack.Name,
-                                          DataHeatBalance::IntGainType::RefrigerationCompressorRack,
-                                          &rack.SensZoneCreditHeatRate,
-                                          &rack.SensHVACCreditHeatRate);
-
-                } // LocationZone
-
-            } else { // Rack serves cases and walkins on zone (load) time step
-
-                SetupOutputVariable(state,
-                                    "Refrigeration Compressor Rack Electricity Rate",
+                                    rackPrefix + " Zone Sensible Heating Rate",
                                     Constant::Units::W,
-                                    rack.RackCompressorPower,
-                                    OutputProcessor::TimeStepType::Zone,
+                                    rack.SensZoneCreditHeatRate,
+                                    rackTsType,
                                     OutputProcessor::StoreType::Average,
                                     rack.Name);
                 SetupOutputVariable(state,
-                                    "Refrigeration Compressor Rack Electricity Energy",
+                                    rackPrefix + " Zone Sensible Heating Energy",
                                     Constant::Units::J,
-                                    rack.RackElecConsumption,
-                                    OutputProcessor::TimeStepType::Zone,
+                                    rack.SensZoneCreditHeat,
+                                    rackTsType,
                                     OutputProcessor::StoreType::Sum,
-                                    rack.Name,
-                                    Constant::eResource::Electricity,
-                                    OutputProcessor::Group::Plant,
-                                    OutputProcessor::EndUseCat::Refrigeration,
-                                    rack.EndUseSubcategory);
+                                    rack.Name);
+
                 SetupOutputVariable(state,
-                                    "Refrigeration Compressor Rack Condenser Fan Electricity Rate",
+                                    rackPrefix + " Return Air Sensible Heating Rate",
                                     Constant::Units::W,
-                                    rack.ActualCondenserFanPower,
-                                    OutputProcessor::TimeStepType::Zone,
+                                    rack.SensHVACCreditHeatRate,
+                                    rackTsType,
                                     OutputProcessor::StoreType::Average,
                                     rack.Name);
                 SetupOutputVariable(state,
-                                    "Refrigeration Compressor Rack Condenser Fan Electricity Energy",
+                                    rackPrefix + " Return Air Sensible Heating Energy",
                                     Constant::Units::J,
-                                    rack.CondenserFanConsumption,
-                                    OutputProcessor::TimeStepType::Zone,
+                                    rack.SensHVACCreditHeat,
+                                    rackTsType,
                                     OutputProcessor::StoreType::Sum,
-                                    rack.Name,
-                                    Constant::eResource::Electricity,
-                                    OutputProcessor::Group::Plant,
-                                    OutputProcessor::EndUseCat::Refrigeration,
-                                    rack.EndUseSubcategory);
-                SetupOutputVariable(state,
-                                    "Refrigeration Compressor Rack Total Heat Transfer Rate",
-                                    Constant::Units::W,
-                                    rack.RackCapacity,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    rack.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration Compressor Rack Total Heat Transfer Energy",
-                                    Constant::Units::J,
-                                    rack.RackCoolingEnergy,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    rack.Name,
-                                    Constant::eResource::EnergyTransfer,
-                                    OutputProcessor::Group::Plant,
-                                    OutputProcessor::EndUseCat::Refrigeration,
-                                    rack.EndUseSubcategory);
-                SetupOutputVariable(state,
-                                    "Refrigeration Compressor Rack COP",
-                                    Constant::Units::W_W,
-                                    rack.RackCompressorCOP,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
                                     rack.Name);
 
-                if (rack.CondenserType == DataHeatBalance::RefrigCondenserType::Evap) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Rack Evaporative Condenser Pump Electricity Rate",
-                                        Constant::Units::W,
-                                        rack.ActualEvapPumpPower,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        rack.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Rack Evaporative Condenser Pump Electricity Energy",
-                                        Constant::Units::J,
-                                        rack.EvapPumpConsumption,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        rack.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        rack.EndUseSubcategory);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Rack Evaporative Condenser Basin Heater Electricity Rate",
-                                        Constant::Units::W,
-                                        rack.BasinHeaterPower,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        rack.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Rack Evaporative Condenser Basin Heater Electricity Energy",
-                                        Constant::Units::J,
-                                        rack.BasinHeaterConsumption,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        rack.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        rack.EndUseSubcategory);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Rack Evaporative Condenser Water Volume Flow Rate",
-                                        Constant::Units::m3_s,
-                                        rack.EvapWaterConsumpRate,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        rack.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Rack Evaporative Condenser Water Volume",
-                                        Constant::Units::m3,
-                                        rack.EvapWaterConsumption,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        rack.Name,
-                                        Constant::eResource::Water,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        rack.EndUseSubcategory);
-                } // condenser evap
-
-                if (rack.HeatRejectionLocation == HeatRejLocation::Zone) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Rack Zone Sensible Heating Rate",
-                                        Constant::Units::W,
-                                        rack.SensZoneCreditHeatRate,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        rack.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Rack Zone Sensible Heating Energy",
-                                        Constant::Units::J,
-                                        rack.SensZoneCreditHeat,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        rack.Name);
-
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Rack Return Air Sensible Heating Rate",
-                                        Constant::Units::W,
-                                        rack.SensHVACCreditHeatRate,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        rack.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Rack Return Air Sensible Heating Energy",
-                                        Constant::Units::J,
-                                        rack.SensHVACCreditHeat,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        rack.Name);
-
-                    // if Location is Zone, GetRefrigerationInputEither checks that you have at least one load and that either:
-                    // * You have only cases, and they must be all in the same zone
-                    // * Or you must have a Heat Rejection Zone provided
-                    int rackZoneNum = -1;
-                    if (rack.HeatRejectionZoneNum > 0) {
-                        rackZoneNum = rack.HeatRejectionZoneNum;
-                    } else {
-                        rackZoneNum = RefrigCase(rack.CaseNum(1)).ActualZoneNum;
-                    }
-                    SetupZoneInternalGain(state,
-                                          rackZoneNum,
-                                          rack.Name,
-                                          DataHeatBalance::IntGainType::RefrigerationCompressorRack,
-                                          &rack.SensZoneCreditHeatRate,
-                                          &rack.SensHVACCreditHeatRate);
-
-                } // location zone
-            } // Serves coils or case/walkin loads
+                // When CoilFlag is true, GetRefrigerationInput ensures HeatRejectionZoneNum is provided.
+                // Otherwise, fall back to zone of first case if no explicit rejection zone.
+                int rackZoneNum = rack.HeatRejectionZoneNum;
+                if (!rack.CoilFlag && rackZoneNum <= 0) {
+                    rackZoneNum = RefrigCase(rack.CaseNum(1)).ActualZoneNum;
+                }
+                SetupZoneInternalGain(state,
+                                      rackZoneNum,
+                                      rack.Name,
+                                      DataHeatBalance::IntGainType::RefrigerationCompressorRack,
+                                      &rack.SensZoneCreditHeatRate,
+                                      &rack.SensHVACCreditHeatRate);
+            } // LocationZone
 
             if (rack.CondenserType == DataHeatBalance::RefrigCondenserType::Water) { // on HVAC time step no matter what
                 SetupOutputVariable(state,
@@ -7538,507 +7376,269 @@ void SetupReportInput(EnergyPlusData &state)
         auto &System = state.dataRefrigCase->System;
         for (int refrigSysNum = 1; refrigSysNum <= state.dataRefrigCase->NumRefrigSystems; ++refrigSysNum) {
             auto &sys = System(refrigSysNum);
-            if (sys.CoilFlag) { // system serves chillers and is solved on HVAC time step
-                if (sys.NumStages == 1) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Total Compressor Electricity Rate",
-                                        Constant::Units::W,
-                                        sys.TotCompPower,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Total Compressor Electricity Energy",
-                                        Constant::Units::J,
-                                        sys.TotCompElecConsump,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        sys.Name);
-                } else if (sys.NumStages == 2) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Total Low Stage Compressor Electricity Rate",
-                                        Constant::Units::W,
-                                        sys.TotCompPower,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Total Low Stage Compressor Electricity Energy",
-                                        Constant::Units::J,
-                                        sys.TotCompElecConsump,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Total High Stage Compressor Electricity Rate",
-                                        Constant::Units::W,
-                                        sys.TotHiStageCompPower,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Total High Stage Compressor Electricity Energy",
-                                        Constant::Units::J,
-                                        sys.TotHiStageCompElecConsump,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Total Low and High Stage Compressor Electricity Energy",
-                                        Constant::Units::J,
-                                        sys.TotCompElecConsumpTwoStage,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        sys.Name);
-                } // NumStages
+            // CoilFlag: system serves chillers on HVAC (System) time step; otherwise cases/walkins on Zone time step
+            const std::string sysPrefix = sys.CoilFlag ? "Refrigeration Air Chiller System" : "Refrigeration System";
+            const auto sysTsType =
+                sys.CoilFlag ? OutputProcessor::TimeStepType::System : OutputProcessor::TimeStepType::Zone;
+            // A few output variable name suffixes differ between CoilFlag branches
+            const std::string_view coolingRateSuffix =
+                sys.CoilFlag ? "Total Air Chiller Heat Transfer Rate" : "Total Cases and Walk Ins Heat Transfer Rate";
+            const std::string_view coolingEnergySuffix =
+                sys.CoilFlag ? "Total Case and Walk In Heat Transfer Energy" : "Total Cases and Walk Ins Heat Transfer Energy";
+            const std::string_view suctionTempSuffix =
+                sys.CoilFlag ? "Suction Temperature" : "Suction Pipe Suction Temperature";
+            const std::string_view txvTempSuffix =
+                sys.CoilFlag ? "TXV Liquid Temperature" : "Thermostatic Expansion Valve Liquid Temperature";
+
+            if (sys.NumStages == 1) {
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Average Compressor COP",
-                                    Constant::Units::W_W,
-                                    sys.AverageCompressorCOP,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Total Air Chiller Heat Transfer Rate",
+                                    sysPrefix + " Total Compressor Electricity Rate",
                                     Constant::Units::W,
-                                    sys.TotalCoolingLoad,
-                                    OutputProcessor::TimeStepType::System,
+                                    sys.TotCompPower,
+                                    sysTsType,
                                     OutputProcessor::StoreType::Average,
                                     sys.Name);
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Total Case and Walk In Heat Transfer Energy",
+                                    sysPrefix + " Total Compressor Electricity Energy",
                                     Constant::Units::J,
-                                    sys.TotalCoolingEnergy,
-                                    OutputProcessor::TimeStepType::System,
+                                    sys.TotCompElecConsump,
+                                    sysTsType,
+                                    OutputProcessor::StoreType::Sum,
+                                    sys.Name);
+            } else if (sys.NumStages == 2) {
+                SetupOutputVariable(state,
+                                    sysPrefix + " Total Low Stage Compressor Electricity Rate",
+                                    Constant::Units::W,
+                                    sys.TotCompPower,
+                                    sysTsType,
+                                    OutputProcessor::StoreType::Average,
+                                    sys.Name);
+                SetupOutputVariable(state,
+                                    sysPrefix + " Total Low Stage Compressor Electricity Energy",
+                                    Constant::Units::J,
+                                    sys.TotCompElecConsump,
+                                    sysTsType,
                                     OutputProcessor::StoreType::Sum,
                                     sys.Name);
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Total Transferred Load Heat Transfer Rate",
+                                    sysPrefix + " Total High Stage Compressor Electricity Rate",
                                     Constant::Units::W,
-                                    sys.TotTransferLoad,
-                                    OutputProcessor::TimeStepType::System,
+                                    sys.TotHiStageCompPower,
+                                    sysTsType,
                                     OutputProcessor::StoreType::Average,
                                     sys.Name);
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Total Transferred Load Heat Transfer Energy",
+                                    sysPrefix + " Total High Stage Compressor Electricity Energy",
                                     Constant::Units::J,
-                                    sys.TotTransferEnergy,
-                                    OutputProcessor::TimeStepType::System,
+                                    sys.TotHiStageCompElecConsump,
+                                    sysTsType,
                                     OutputProcessor::StoreType::Sum,
                                     sys.Name);
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Total Suction Pipe Heat Gain Rate",
-                                    Constant::Units::W,
-                                    sys.PipeHeatLoad,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Total Suction Pipe Heat Gain Energy",
+                                    sysPrefix + " Total Low and High Stage Compressor Electricity Energy",
                                     Constant::Units::J,
-                                    sys.PipeHeatEnergy,
-                                    OutputProcessor::TimeStepType::System,
+                                    sys.TotCompElecConsumpTwoStage,
+                                    sysTsType,
                                     OutputProcessor::StoreType::Sum,
                                     sys.Name);
-                if (sys.NumStages == 1) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Total Compressor Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        sys.TotCompCapacity,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Total Compressor Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        sys.TotCompCoolingEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        sys.Name); // indiv compressors go to meter, not system sum
-                } else if (sys.NumStages == 2) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Total Low Stage Compressor Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        sys.TotCompCapacity,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Total Low Stage Compressor Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        sys.TotCompCoolingEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        sys.Name); // indiv compressors go to meter, not system sum
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Total High Stage Compressor Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        sys.TotHiStageCompCapacity,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Total High Stage Compressor Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        sys.TotHiStageCompCoolingEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        sys.Name); // indiv compressors go to meter, not system sum
-                } // NumStages
+            } // NumStages
+            SetupOutputVariable(state,
+                                sysPrefix + " Average Compressor COP",
+                                Constant::Units::W_W,
+                                sys.AverageCompressorCOP,
+                                sysTsType,
+                                OutputProcessor::StoreType::Average,
+                                sys.Name);
+            SetupOutputVariable(state,
+                                format("{} {}", sysPrefix, coolingRateSuffix),
+                                Constant::Units::W,
+                                sys.TotalCoolingLoad,
+                                sysTsType,
+                                OutputProcessor::StoreType::Average,
+                                sys.Name);
+            SetupOutputVariable(state,
+                                format("{} {}", sysPrefix, coolingEnergySuffix),
+                                Constant::Units::J,
+                                sys.TotalCoolingEnergy,
+                                sysTsType,
+                                OutputProcessor::StoreType::Sum,
+                                sys.Name);
+            SetupOutputVariable(state,
+                                sysPrefix + " Total Transferred Load Heat Transfer Rate",
+                                Constant::Units::W,
+                                sys.TotTransferLoad,
+                                sysTsType,
+                                OutputProcessor::StoreType::Average,
+                                sys.Name);
+            SetupOutputVariable(state,
+                                sysPrefix + " Total Transferred Load Heat Transfer Energy",
+                                Constant::Units::J,
+                                sys.TotTransferEnergy,
+                                sysTsType,
+                                OutputProcessor::StoreType::Sum,
+                                sys.Name);
+            SetupOutputVariable(state,
+                                sysPrefix + " Total Suction Pipe Heat Gain Rate",
+                                Constant::Units::W,
+                                sys.PipeHeatLoad,
+                                sysTsType,
+                                OutputProcessor::StoreType::Average,
+                                sys.Name);
+            SetupOutputVariable(state,
+                                sysPrefix + " Total Suction Pipe Heat Gain Energy",
+                                Constant::Units::J,
+                                sys.PipeHeatEnergy,
+                                sysTsType,
+                                OutputProcessor::StoreType::Sum,
+                                sys.Name);
+            if (sys.NumStages == 1) {
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Net Rejected Heat Transfer Rate",
+                                    sysPrefix + " Total Compressor Heat Transfer Rate",
                                     Constant::Units::W,
-                                    sys.NetHeatRejectLoad,
-                                    OutputProcessor::TimeStepType::System,
+                                    sys.TotCompCapacity,
+                                    sysTsType,
                                     OutputProcessor::StoreType::Average,
                                     sys.Name);
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Net Rejected Heat Transfer Energy",
+                                    sysPrefix + " Total Compressor Heat Transfer Energy",
                                     Constant::Units::J,
-                                    sys.NetHeatRejectEnergy,
-                                    OutputProcessor::TimeStepType::System,
+                                    sys.TotCompCoolingEnergy,
+                                    sysTsType,
                                     OutputProcessor::StoreType::Sum,
-                                    sys.Name);
+                                    sys.Name); // indiv compressors go to meter, not system sum
+            } else if (sys.NumStages == 2) {
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Estimated Refrigerant Inventory Mass",
-                                    Constant::Units::kg,
-                                    sys.RefInventory,
-                                    OutputProcessor::TimeStepType::System,
+                                    sysPrefix + " Total Low Stage Compressor Heat Transfer Rate",
+                                    Constant::Units::W,
+                                    sys.TotCompCapacity,
+                                    sysTsType,
                                     OutputProcessor::StoreType::Average,
                                     sys.Name);
-                if (sys.NumStages == 1) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Estimated Refrigerant Mass Flow Rate",
-                                        Constant::Units::kg_s,
-                                        sys.RefMassFlowComps,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                } else if (sys.NumStages == 2) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Estimated Low Stage Refrigerant Mass Flow Rate",
-                                        Constant::Units::kg_s,
-                                        sys.RefMassFlowComps,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Estimated High Stage Refrigerant Mass Flow Rate",
-                                        Constant::Units::kg_s,
-                                        sys.RefMassFlowHiStageComps,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                } // NumStages
-                if (sys.NumStages == 2) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Intercooler Temperature",
-                                        Constant::Units::C,
-                                        sys.TIntercooler,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Intercooler Pressure",
-                                        Constant::Units::Pa,
-                                        sys.PIntercooler,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                }
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Condensing Temperature",
+                                    sysPrefix + " Total Low Stage Compressor Heat Transfer Energy",
+                                    Constant::Units::J,
+                                    sys.TotCompCoolingEnergy,
+                                    sysTsType,
+                                    OutputProcessor::StoreType::Sum,
+                                    sys.Name); // indiv compressors go to meter, not system sum
+                SetupOutputVariable(state,
+                                    sysPrefix + " Total High Stage Compressor Heat Transfer Rate",
+                                    Constant::Units::W,
+                                    sys.TotHiStageCompCapacity,
+                                    sysTsType,
+                                    OutputProcessor::StoreType::Average,
+                                    sys.Name);
+                SetupOutputVariable(state,
+                                    sysPrefix + " Total High Stage Compressor Heat Transfer Energy",
+                                    Constant::Units::J,
+                                    sys.TotHiStageCompCoolingEnergy,
+                                    sysTsType,
+                                    OutputProcessor::StoreType::Sum,
+                                    sys.Name); // indiv compressors go to meter, not system sum
+            } // NumStages
+            SetupOutputVariable(state,
+                                sysPrefix + " Net Rejected Heat Transfer Rate",
+                                Constant::Units::W,
+                                sys.NetHeatRejectLoad,
+                                sysTsType,
+                                OutputProcessor::StoreType::Average,
+                                sys.Name);
+            SetupOutputVariable(state,
+                                sysPrefix + " Net Rejected Heat Transfer Energy",
+                                Constant::Units::J,
+                                sys.NetHeatRejectEnergy,
+                                sysTsType,
+                                OutputProcessor::StoreType::Sum,
+                                sys.Name);
+            SetupOutputVariable(state,
+                                sysPrefix + " Estimated Refrigerant Inventory Mass",
+                                Constant::Units::kg,
+                                sys.RefInventory,
+                                sysTsType,
+                                OutputProcessor::StoreType::Average,
+                                sys.Name);
+            if (sys.NumStages == 1) {
+                SetupOutputVariable(state,
+                                    sysPrefix + " Estimated Refrigerant Mass Flow Rate",
+                                    Constant::Units::kg_s,
+                                    sys.RefMassFlowComps,
+                                    sysTsType,
+                                    OutputProcessor::StoreType::Average,
+                                    sys.Name);
+            } else if (sys.NumStages == 2) {
+                SetupOutputVariable(state,
+                                    sysPrefix + " Estimated Low Stage Refrigerant Mass Flow Rate",
+                                    Constant::Units::kg_s,
+                                    sys.RefMassFlowComps,
+                                    sysTsType,
+                                    OutputProcessor::StoreType::Average,
+                                    sys.Name);
+                SetupOutputVariable(state,
+                                    sysPrefix + " Estimated High Stage Refrigerant Mass Flow Rate",
+                                    Constant::Units::kg_s,
+                                    sys.RefMassFlowHiStageComps,
+                                    sysTsType,
+                                    OutputProcessor::StoreType::Average,
+                                    sys.Name);
+            } // NumStages
+            if (sys.NumStages == 2) {
+                SetupOutputVariable(state,
+                                    sysPrefix + " Intercooler Temperature",
                                     Constant::Units::C,
-                                    sys.TCondense,
-                                    OutputProcessor::TimeStepType::System,
+                                    sys.TIntercooler,
+                                    sysTsType,
                                     OutputProcessor::StoreType::Average,
                                     sys.Name);
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Evaporating Temperature",
-                                    Constant::Units::C,
-                                    sys.TEvapNeeded,
-                                    OutputProcessor::TimeStepType::System,
+                                    sysPrefix + " Intercooler Pressure",
+                                    Constant::Units::Pa,
+                                    sys.PIntercooler,
+                                    sysTsType,
                                     OutputProcessor::StoreType::Average,
                                     sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Suction Temperature",
-                                    Constant::Units::C,
-                                    sys.TCompIn,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System TXV Liquid Temperature",
-                                    Constant::Units::C,
-                                    sys.TLiqInActual,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Liquid Suction Subcooler Heat Transfer Rate",
-                                    Constant::Units::W,
-                                    sys.LSHXTrans,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Liquid Suction Subcooler Heat Transfer Energy",
-                                    Constant::Units::J,
-                                    sys.LSHXTransEnergy,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    sys.Name);
-            } else { // NOT System(SysNum)%CoilFlag, so serving loads on zone timestep
-                if (sys.NumStages == 1) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Total Compressor Electricity Rate",
-                                        Constant::Units::W,
-                                        sys.TotCompPower,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Total Compressor Electricity Energy",
-                                        Constant::Units::J,
-                                        sys.TotCompElecConsump,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        sys.Name);
-                } else if (sys.NumStages == 2) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Total Low Stage Compressor Electricity Rate",
-                                        Constant::Units::W,
-                                        sys.TotCompPower,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Total Low Stage Compressor Electricity Energy",
-                                        Constant::Units::J,
-                                        sys.TotCompElecConsump,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Total High Stage Compressor Electricity Rate",
-                                        Constant::Units::W,
-                                        sys.TotHiStageCompPower,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Total High Stage Compressor Electricity Energy",
-                                        Constant::Units::J,
-                                        sys.TotHiStageCompElecConsump,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Total Low and High Stage Compressor Electricity Energy",
-                                        Constant::Units::J,
-                                        sys.TotCompElecConsumpTwoStage,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        sys.Name);
-                } // NumStages
-                SetupOutputVariable(state,
-                                    "Refrigeration System Average Compressor COP",
-                                    Constant::Units::W_W,
-                                    sys.AverageCompressorCOP,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration System Total Cases and Walk Ins Heat Transfer Rate",
-                                    Constant::Units::W,
-                                    sys.TotalCoolingLoad,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration System Total Cases and Walk Ins Heat Transfer Energy",
-                                    Constant::Units::J,
-                                    sys.TotalCoolingEnergy,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration System Total Transferred Load Heat Transfer Rate",
-                                    Constant::Units::W,
-                                    sys.TotTransferLoad,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration System Total Transferred Load Heat Transfer Energy",
-                                    Constant::Units::J,
-                                    sys.TotTransferEnergy,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration System Total Suction Pipe Heat Gain Rate",
-                                    Constant::Units::W,
-                                    sys.PipeHeatLoad,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration System Total Suction Pipe Heat Gain Energy",
-                                    Constant::Units::J,
-                                    sys.PipeHeatEnergy,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    sys.Name);
-                if (sys.NumStages == 1) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Total Compressor Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        sys.TotCompCapacity,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Total Compressor Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        sys.TotCompCoolingEnergy,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        sys.Name); // indiv compressors go to meter, not system sum
-                } else if (sys.NumStages == 2) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Total Low Stage Compressor Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        sys.TotCompCapacity,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Total Low Stage Compressor Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        sys.TotCompCoolingEnergy,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        sys.Name); // indiv compressors go to meter, not system sum
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Total High Stage Compressor Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        sys.TotHiStageCompCapacity,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Total High Stage Compressor Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        sys.TotHiStageCompCoolingEnergy,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        sys.Name); // indiv compressors go to meter, not system sum
-                } // NumStages
-                SetupOutputVariable(state,
-                                    "Refrigeration System Net Rejected Heat Transfer Rate",
-                                    Constant::Units::W,
-                                    sys.NetHeatRejectLoad,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration System Net Rejected Heat Transfer Energy",
-                                    Constant::Units::J,
-                                    sys.NetHeatRejectEnergy,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration System Estimated Refrigerant Inventory Mass",
-                                    Constant::Units::kg,
-                                    sys.RefInventory,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                if (sys.NumStages == 1) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Estimated Refrigerant Mass Flow Rate",
-                                        Constant::Units::kg_s,
-                                        sys.RefMassFlowComps,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                } else if (sys.NumStages == 2) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Estimated Low Stage Refrigerant Mass Flow Rate",
-                                        Constant::Units::kg_s,
-                                        sys.RefMassFlowComps,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Estimated High Stage Refrigerant Mass Flow Rate",
-                                        Constant::Units::kg_s,
-                                        sys.RefMassFlowHiStageComps,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                } // NumStages
-                if (sys.NumStages == 2) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Intercooler Temperature",
-                                        Constant::Units::C,
-                                        sys.TIntercooler,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Intercooler Pressure",
-                                        Constant::Units::Pa,
-                                        sys.PIntercooler,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                }
-                SetupOutputVariable(state,
-                                    "Refrigeration System Condensing Temperature",
-                                    Constant::Units::C,
-                                    sys.TCondense,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration System Evaporating Temperature",
-                                    Constant::Units::C,
-                                    sys.TEvapNeeded,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration System Suction Pipe Suction Temperature",
-                                    Constant::Units::C,
-                                    sys.TCompIn,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration System Thermostatic Expansion Valve Liquid Temperature",
-                                    Constant::Units::C,
-                                    sys.TLiqInActual,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration System Liquid Suction Subcooler Heat Transfer Rate",
-                                    Constant::Units::W,
-                                    sys.LSHXTrans,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration System Liquid Suction Subcooler Heat Transfer Energy",
-                                    Constant::Units::J,
-                                    sys.LSHXTransEnergy,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    sys.Name);
-            } // System(coilflag)
+            }
+            SetupOutputVariable(state,
+                                sysPrefix + " Condensing Temperature",
+                                Constant::Units::C,
+                                sys.TCondense,
+                                sysTsType,
+                                OutputProcessor::StoreType::Average,
+                                sys.Name);
+            SetupOutputVariable(state,
+                                sysPrefix + " Evaporating Temperature",
+                                Constant::Units::C,
+                                sys.TEvapNeeded,
+                                sysTsType,
+                                OutputProcessor::StoreType::Average,
+                                sys.Name);
+            SetupOutputVariable(state,
+                                format("{} {}", sysPrefix, suctionTempSuffix),
+                                Constant::Units::C,
+                                sys.TCompIn,
+                                sysTsType,
+                                OutputProcessor::StoreType::Average,
+                                sys.Name);
+            SetupOutputVariable(state,
+                                format("{} {}", sysPrefix, txvTempSuffix),
+                                Constant::Units::C,
+                                sys.TLiqInActual,
+                                sysTsType,
+                                OutputProcessor::StoreType::Average,
+                                sys.Name);
+            SetupOutputVariable(state,
+                                sysPrefix + " Liquid Suction Subcooler Heat Transfer Rate",
+                                Constant::Units::W,
+                                sys.LSHXTrans,
+                                sysTsType,
+                                OutputProcessor::StoreType::Average,
+                                sys.Name);
+            SetupOutputVariable(state,
+                                sysPrefix + " Liquid Suction Subcooler Heat Transfer Energy",
+                                Constant::Units::J,
+                                sys.LSHXTransEnergy,
+                                sysTsType,
+                                OutputProcessor::StoreType::Sum,
+                                sys.Name);
 
             if (sys.SystemRejectHeatToZone) {
                 if (Condenser(sys.CondenserNum(1)).InletAirZoneNum > 0) {
@@ -8064,87 +7664,51 @@ void SetupReportInput(EnergyPlusData &state)
             auto &comp = Compressor(compNum);
             // CurrentModuleObject='Refrigeration:Compressor'
             if (comp.NumSysAttach == 1) { // only set up reports for compressors that are used once and only once
-                if (comp.CoilFlag) {      // Compressor serving system with chillers on HVAC time step
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Compressor Electricity Rate",
-                                        Constant::Units::W,
-                                        comp.Power,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        comp.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Compressor Electricity Energy",
-                                        Constant::Units::J,
-                                        comp.ElecConsumption,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        comp.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        comp.EndUseSubcategory);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Compressor Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        comp.Capacity,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        comp.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Compressor Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        comp.CoolingEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        comp.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Compressor Runtime Fraction",
-                                        Constant::Units::None,
-                                        comp.LoadFactor,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        comp.Name);
-                } else { // serve cases/walkins on zone time step
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Electricity Rate",
-                                        Constant::Units::W,
-                                        comp.Power,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        comp.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Electricity Energy",
-                                        Constant::Units::J,
-                                        comp.ElecConsumption,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        comp.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        comp.EndUseSubcategory);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        comp.Capacity,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        comp.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        comp.CoolingEnergy,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        comp.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Runtime Fraction",
-                                        Constant::Units::None,
-                                        comp.LoadFactor,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        comp.Name);
-                } // Serve coils on HVAC time step or cases/walkins on Zone time step
+                // CoilFlag: serves chillers on HVAC (System) time step; otherwise cases/walkins on Zone time step
+                const std::string compPrefix =
+                    comp.CoilFlag ? "Refrigeration Air Chiller System Compressor" : "Refrigeration Compressor";
+                const auto compTsType =
+                    comp.CoilFlag ? OutputProcessor::TimeStepType::System : OutputProcessor::TimeStepType::Zone;
+
+                SetupOutputVariable(state,
+                                    compPrefix + " Electricity Rate",
+                                    Constant::Units::W,
+                                    comp.Power,
+                                    compTsType,
+                                    OutputProcessor::StoreType::Average,
+                                    comp.Name);
+                SetupOutputVariable(state,
+                                    compPrefix + " Electricity Energy",
+                                    Constant::Units::J,
+                                    comp.ElecConsumption,
+                                    compTsType,
+                                    OutputProcessor::StoreType::Sum,
+                                    comp.Name,
+                                    Constant::eResource::Electricity,
+                                    OutputProcessor::Group::Plant,
+                                    OutputProcessor::EndUseCat::Refrigeration,
+                                    comp.EndUseSubcategory);
+                SetupOutputVariable(state,
+                                    compPrefix + " Heat Transfer Rate",
+                                    Constant::Units::W,
+                                    comp.Capacity,
+                                    compTsType,
+                                    OutputProcessor::StoreType::Average,
+                                    comp.Name);
+                SetupOutputVariable(state,
+                                    compPrefix + " Heat Transfer Energy",
+                                    Constant::Units::J,
+                                    comp.CoolingEnergy,
+                                    compTsType,
+                                    OutputProcessor::StoreType::Sum,
+                                    comp.Name);
+                SetupOutputVariable(state,
+                                    compPrefix + " Runtime Fraction",
+                                    Constant::Units::None,
+                                    comp.LoadFactor,
+                                    compTsType,
+                                    OutputProcessor::StoreType::Average,
+                                    comp.Name);
             } // NumSysAttach
         } // CompNum on NumSimulationCompressors
 
@@ -8152,343 +7716,180 @@ void SetupReportInput(EnergyPlusData &state)
         for (int condNum = 1; condNum <= state.dataRefrigCase->NumRefrigCondensers; ++condNum) {
             auto &cond = Condenser(condNum);
             // CurrentModuleObject='Refrigeration:Condenser:*'
-            if (cond.CoilFlag) { // Condenser serving system with chillers on HVAC time step
+            // CoilFlag: serves chillers on HVAC (System) time step; otherwise cases/walkins on Zone time step
+            const std::string condPrefix =
+                cond.CoilFlag ? "Refrigeration Air Chiller System Condenser" : "Refrigeration System Condenser";
+            const auto condTsType =
+                cond.CoilFlag ? OutputProcessor::TimeStepType::System : OutputProcessor::TimeStepType::Zone;
+
+            SetupOutputVariable(state,
+                                condPrefix + " Heat Transfer Rate",
+                                Constant::Units::W,
+                                cond.CondLoad,
+                                condTsType,
+                                OutputProcessor::StoreType::Average,
+                                cond.Name);
+            SetupOutputVariable(state,
+                                condPrefix + " Heat Transfer Energy",
+                                Constant::Units::J,
+                                cond.CondEnergy,
+                                condTsType,
+                                OutputProcessor::StoreType::Sum,
+                                cond.Name);
+
+            if (cond.CondenserType != DataHeatBalance::RefrigCondenserType::Cascade) {
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Condenser Heat Transfer Rate",
+                                    condPrefix + " Total Recovered Heat Transfer Rate",
                                     Constant::Units::W,
-                                    cond.CondLoad,
-                                    OutputProcessor::TimeStepType::System,
+                                    cond.TotalHeatRecoveredLoad,
+                                    condTsType,
                                     OutputProcessor::StoreType::Average,
                                     cond.Name);
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Condenser Heat Transfer Energy",
+                                    condPrefix + " Total Recovered Heat Transfer Energy",
                                     Constant::Units::J,
-                                    cond.CondEnergy,
-                                    OutputProcessor::TimeStepType::System,
+                                    cond.TotalHeatRecoveredEnergy,
+                                    condTsType,
                                     OutputProcessor::StoreType::Sum,
                                     cond.Name);
-
-                if (cond.CondenserType != DataHeatBalance::RefrigCondenserType::Cascade) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Total Recovered Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        cond.TotalHeatRecoveredLoad,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Total Recovered Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        cond.TotalHeatRecoveredEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Non Refrigeration Recovered Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        cond.ExternalHeatRecoveredLoad,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Non Refrigeration Recovered Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        cond.ExternalEnergyRecovered,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Defrost Recovered Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        cond.InternalHeatRecoveredLoad,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Defrost Recovered Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        cond.InternalEnergyRecovered,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name);
-                } // not cascade because recovered energy on cascade systems passed up to higher temperature system
-
-                if (cond.CondenserType == DataHeatBalance::RefrigCondenserType::Air) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Fan Electricity Rate",
-                                        Constant::Units::W,
-                                        cond.ActualFanPower,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Fan Electricity Energy",
-                                        Constant::Units::J,
-                                        cond.FanElecEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        cond.EndUseSubcategory);
-                } // Air cooled
-
-                if (cond.CondenserType == DataHeatBalance::RefrigCondenserType::Evap) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Fan Electricity Rate",
-                                        Constant::Units::W,
-                                        cond.ActualFanPower,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Fan Electricity Energy",
-                                        Constant::Units::J,
-                                        cond.FanElecEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        cond.EndUseSubcategory);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Pump Electricity Rate",
-                                        Constant::Units::W,
-                                        cond.ActualEvapPumpPower,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Pump Electricity Energy",
-                                        Constant::Units::J,
-                                        cond.EvapPumpConsumption,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        cond.EndUseSubcategory);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Basin Heater Electricity Rate",
-                                        Constant::Units::W,
-                                        cond.BasinHeaterPower,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Basin Heater Electricity Energy",
-                                        Constant::Units::J,
-                                        cond.BasinHeaterConsumption,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        cond.EndUseSubcategory);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Evaporated Water Volume Flow Rate",
-                                        Constant::Units::m3_s,
-                                        cond.EvapWaterConsumpRate,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Evaporated Water Volume",
-                                        Constant::Units::m3,
-                                        cond.EvapWaterConsumption,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name,
-                                        Constant::eResource::Water,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        cond.EndUseSubcategory);
-                } // Evaporative Condenser Variables
-
-                if (cond.CondenserType == DataHeatBalance::RefrigCondenserType::Water) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Fluid Mass Flow Rate",
-                                        Constant::Units::kg_s,
-                                        cond.MassFlowRate,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-
-                } // Water-cooled Condenser variables
-
-            } else { // Serving loads/systems with cases and walkins on zone time step
-
                 SetupOutputVariable(state,
-                                    "Refrigeration System Condenser Heat Transfer Rate",
+                                    condPrefix + " Non Refrigeration Recovered Heat Transfer Rate",
                                     Constant::Units::W,
-                                    cond.CondLoad,
-                                    OutputProcessor::TimeStepType::Zone,
+                                    cond.ExternalHeatRecoveredLoad,
+                                    condTsType,
                                     OutputProcessor::StoreType::Average,
                                     cond.Name);
                 SetupOutputVariable(state,
-                                    "Refrigeration System Condenser Heat Transfer Energy",
+                                    condPrefix + " Non Refrigeration Recovered Heat Transfer Energy",
                                     Constant::Units::J,
-                                    cond.CondEnergy,
-                                    OutputProcessor::TimeStepType::Zone,
+                                    cond.ExternalEnergyRecovered,
+                                    condTsType,
                                     OutputProcessor::StoreType::Sum,
                                     cond.Name);
+                SetupOutputVariable(state,
+                                    condPrefix + " Defrost Recovered Heat Transfer Rate",
+                                    Constant::Units::W,
+                                    cond.InternalHeatRecoveredLoad,
+                                    condTsType,
+                                    OutputProcessor::StoreType::Average,
+                                    cond.Name);
+                SetupOutputVariable(state,
+                                    condPrefix + " Defrost Recovered Heat Transfer Energy",
+                                    Constant::Units::J,
+                                    cond.InternalEnergyRecovered,
+                                    condTsType,
+                                    OutputProcessor::StoreType::Sum,
+                                    cond.Name);
+            } // not cascade because recovered energy on cascade systems passed up to higher temperature system
 
-                if (cond.CondenserType != DataHeatBalance::RefrigCondenserType::Cascade) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Total Recovered Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        cond.TotalHeatRecoveredLoad,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Total Recovered Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        cond.TotalHeatRecoveredEnergy,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Non Refrigeration Recovered Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        cond.ExternalHeatRecoveredLoad,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Non Refrigeration Recovered Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        cond.ExternalEnergyRecovered,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Defrost Recovered Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        cond.InternalHeatRecoveredLoad,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Defrost Recovered Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        cond.InternalEnergyRecovered,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name);
-                } // not cascade because recovered energy on cascade systems passed up to higher temperature system
+            if (cond.CondenserType == DataHeatBalance::RefrigCondenserType::Air) {
+                SetupOutputVariable(state,
+                                    condPrefix + " Fan Electricity Rate",
+                                    Constant::Units::W,
+                                    cond.ActualFanPower,
+                                    condTsType,
+                                    OutputProcessor::StoreType::Average,
+                                    cond.Name);
+                SetupOutputVariable(state,
+                                    condPrefix + " Fan Electricity Energy",
+                                    Constant::Units::J,
+                                    cond.FanElecEnergy,
+                                    condTsType,
+                                    OutputProcessor::StoreType::Sum,
+                                    cond.Name,
+                                    Constant::eResource::Electricity,
+                                    OutputProcessor::Group::Plant,
+                                    OutputProcessor::EndUseCat::Refrigeration,
+                                    cond.EndUseSubcategory);
+            } // Air cooled
 
-                if (cond.CondenserType == DataHeatBalance::RefrigCondenserType::Air) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Fan Electricity Rate",
-                                        Constant::Units::W,
-                                        cond.ActualFanPower,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Fan Electricity Energy",
-                                        Constant::Units::J,
-                                        cond.FanElecEnergy,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        cond.EndUseSubcategory);
-                } // Air cooled
+            if (cond.CondenserType == DataHeatBalance::RefrigCondenserType::Evap) {
+                SetupOutputVariable(state,
+                                    condPrefix + " Fan Electricity Rate",
+                                    Constant::Units::W,
+                                    cond.ActualFanPower,
+                                    condTsType,
+                                    OutputProcessor::StoreType::Average,
+                                    cond.Name);
+                SetupOutputVariable(state,
+                                    condPrefix + " Fan Electricity Energy",
+                                    Constant::Units::J,
+                                    cond.FanElecEnergy,
+                                    condTsType,
+                                    OutputProcessor::StoreType::Sum,
+                                    cond.Name,
+                                    Constant::eResource::Electricity,
+                                    OutputProcessor::Group::Plant,
+                                    OutputProcessor::EndUseCat::Refrigeration,
+                                    cond.EndUseSubcategory);
+                SetupOutputVariable(state,
+                                    condPrefix + " Pump Electricity Rate",
+                                    Constant::Units::W,
+                                    cond.ActualEvapPumpPower,
+                                    condTsType,
+                                    OutputProcessor::StoreType::Average,
+                                    cond.Name);
+                SetupOutputVariable(state,
+                                    condPrefix + " Pump Electricity Energy",
+                                    Constant::Units::J,
+                                    cond.EvapPumpConsumption,
+                                    condTsType,
+                                    OutputProcessor::StoreType::Sum,
+                                    cond.Name,
+                                    Constant::eResource::Electricity,
+                                    OutputProcessor::Group::Plant,
+                                    OutputProcessor::EndUseCat::Refrigeration,
+                                    cond.EndUseSubcategory);
+                SetupOutputVariable(state,
+                                    condPrefix + " Basin Heater Electricity Rate",
+                                    Constant::Units::W,
+                                    cond.BasinHeaterPower,
+                                    condTsType,
+                                    OutputProcessor::StoreType::Average,
+                                    cond.Name);
+                SetupOutputVariable(state,
+                                    condPrefix + " Basin Heater Electricity Energy",
+                                    Constant::Units::J,
+                                    cond.BasinHeaterConsumption,
+                                    condTsType,
+                                    OutputProcessor::StoreType::Sum,
+                                    cond.Name,
+                                    Constant::eResource::Electricity,
+                                    OutputProcessor::Group::Plant,
+                                    OutputProcessor::EndUseCat::Refrigeration,
+                                    cond.EndUseSubcategory);
+                SetupOutputVariable(state,
+                                    condPrefix + " Evaporated Water Volume Flow Rate",
+                                    Constant::Units::m3_s,
+                                    cond.EvapWaterConsumpRate,
+                                    condTsType,
+                                    OutputProcessor::StoreType::Average,
+                                    cond.Name);
+                SetupOutputVariable(state,
+                                    condPrefix + " Evaporated Water Volume",
+                                    Constant::Units::m3,
+                                    cond.EvapWaterConsumption,
+                                    condTsType,
+                                    OutputProcessor::StoreType::Sum,
+                                    cond.Name,
+                                    Constant::eResource::Water,
+                                    OutputProcessor::Group::Plant,
+                                    OutputProcessor::EndUseCat::Refrigeration,
+                                    cond.EndUseSubcategory);
+            } // Evaporative Condenser Variables
 
-                if (cond.CondenserType == DataHeatBalance::RefrigCondenserType::Evap) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Fan Electricity Rate",
-                                        Constant::Units::W,
-                                        cond.ActualFanPower,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Fan Electricity Energy",
-                                        Constant::Units::J,
-                                        cond.FanElecEnergy,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        cond.EndUseSubcategory);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Pump Electricity Rate",
-                                        Constant::Units::W,
-                                        cond.ActualEvapPumpPower,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Pump Electricity Energy",
-                                        Constant::Units::J,
-                                        cond.EvapPumpConsumption,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        cond.EndUseSubcategory);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Basin Heater Electricity Rate",
-                                        Constant::Units::W,
-                                        cond.BasinHeaterPower,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Basin Heater Electricity Energy",
-                                        Constant::Units::J,
-                                        cond.BasinHeaterConsumption,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        cond.EndUseSubcategory);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Evaporated Water Volume Flow Rate",
-                                        Constant::Units::m3_s,
-                                        cond.EvapWaterConsumpRate,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Evaporated Water Volume",
-                                        Constant::Units::m3,
-                                        cond.EvapWaterConsumption,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name,
-                                        Constant::eResource::Water,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        cond.EndUseSubcategory);
-                } // Evaporative Condenser Variables
-
-                if (cond.CondenserType == DataHeatBalance::RefrigCondenserType::Water) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Water Mass Flow Rate",
-                                        Constant::Units::kg_s,
-                                        cond.MassFlowRate,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-
-                } // Water-cooled Condenser variables
-            } // Condenser%CoilFlag to distinguish HVAC vs Zone time steps
+            if (cond.CondenserType == DataHeatBalance::RefrigCondenserType::Water) {
+                // Water-cooled condensers always report on System time step; variable name differs by CoilFlag
+                const std::string waterCondVarName =
+                    cond.CoilFlag ? (condPrefix + " Fluid Mass Flow Rate") : (condPrefix + " Water Mass Flow Rate");
+                SetupOutputVariable(state,
+                                    waterCondVarName,
+                                    Constant::Units::kg_s,
+                                    cond.MassFlowRate,
+                                    OutputProcessor::TimeStepType::System,
+                                    OutputProcessor::StoreType::Average,
+                                    cond.Name);
+            } // Water-cooled Condenser variables
         } // CondNum on DataHeatBalance::NumRefrigCondensers
 
         if (state.dataRefrigCase->NumSimulationSubcoolers > 0) {
@@ -8496,41 +7897,28 @@ void SetupReportInput(EnergyPlusData &state)
             for (int subcoolNum = 1; subcoolNum <= state.dataRefrigCase->NumSimulationSubcoolers; ++subcoolNum) {
                 auto &cooler = Subcooler(subcoolNum);
                 // CurrentModuleObject='Refrigeration:Subcooler'
-                if (cooler.CoilFlag) { // Subcooler serving system with chillers on HVAC time step
-                    if (cooler.subcoolerType == SubcoolerType::Mechanical) {
-                        SetupOutputVariable(state,
-                                            "Refrigeration Air Chiller System Mechanical Subcooler Heat Transfer Rate",
-                                            Constant::Units::W,
-                                            cooler.MechSCTransLoad,
-                                            OutputProcessor::TimeStepType::Zone,
-                                            OutputProcessor::StoreType::Average,
-                                            cooler.Name);
-                        SetupOutputVariable(state,
-                                            "Refrigeration Air Chiller System Mechanical Subcooler Heat Transfer Energy",
-                                            Constant::Units::J,
-                                            cooler.MechSCTransEnergy,
-                                            OutputProcessor::TimeStepType::Zone,
-                                            OutputProcessor::StoreType::Sum,
-                                            cooler.Name);
-                    }
-                } else { // Subcooler on system serving cases and/or walkins
-                    if (cooler.subcoolerType == SubcoolerType::Mechanical) {
-                        SetupOutputVariable(state,
-                                            "Refrigeration System Mechanical Subcooler Heat Transfer Rate",
-                                            Constant::Units::W,
-                                            cooler.MechSCTransLoad,
-                                            OutputProcessor::TimeStepType::System,
-                                            OutputProcessor::StoreType::Average,
-                                            cooler.Name);
-                        SetupOutputVariable(state,
-                                            "Refrigeration System Mechanical Subcooler Heat Transfer Energy",
-                                            Constant::Units::J,
-                                            cooler.MechSCTransEnergy,
-                                            OutputProcessor::TimeStepType::System,
-                                            OutputProcessor::StoreType::Sum,
-                                            cooler.Name);
-                    }
-                } // Subcoolers on system serving chillers
+                if (cooler.subcoolerType == SubcoolerType::Mechanical) {
+                    // Note: timestep types here are as in the original code (CoilFlag->Zone, !CoilFlag->System)
+                    const std::string scPrefix =
+                        cooler.CoilFlag ? "Refrigeration Air Chiller System" : "Refrigeration System";
+                    const auto scTsType =
+                        cooler.CoilFlag ? OutputProcessor::TimeStepType::Zone : OutputProcessor::TimeStepType::System;
+
+                    SetupOutputVariable(state,
+                                        scPrefix + " Mechanical Subcooler Heat Transfer Rate",
+                                        Constant::Units::W,
+                                        cooler.MechSCTransLoad,
+                                        scTsType,
+                                        OutputProcessor::StoreType::Average,
+                                        cooler.Name);
+                    SetupOutputVariable(state,
+                                        scPrefix + " Mechanical Subcooler Heat Transfer Energy",
+                                        Constant::Units::J,
+                                        cooler.MechSCTransEnergy,
+                                        scTsType,
+                                        OutputProcessor::StoreType::Sum,
+                                        cooler.Name);
+                }
             } // Subcoolnum on NumSimulationSubcoolers
         } // NumSimulationSubcoolers > 0
 
