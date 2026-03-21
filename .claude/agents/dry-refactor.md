@@ -46,8 +46,11 @@ For each stage in your plan, follow this cycle:
 Make the refactoring changes (extract helper, deduplicate block, consolidate repeated patterns, etc.).
 
 ### Step 2: Compile
+
+The build directory is `build-normal` and uses Ninja. Do NOT search for or create other build directories.
+
 ```bash
-cmake --build build-normal --target energyplus_tests -j8 2>&1 | tail -30
+ninja -C build-normal energyplus_tests -j8 2>&1 | tail -30
 ```
 - If compilation fails, read the errors, fix them, and retry.
 - Maximum 3 compile attempts per stage. If still failing after 3, skip this stage.

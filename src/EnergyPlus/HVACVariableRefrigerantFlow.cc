@@ -1544,6 +1544,92 @@ static int getAndCheckCurve(EnergyPlusData &state,
     return idx;
 }
 
+// Helper: report "terminal unit not connected to condenser" error
+static void showTUNotConnectedError(EnergyPlusData &state,
+                                    bool &ErrorsFound,
+                                    std::string const &objectType,
+                                    std::string const &tuName,
+                                    std::string const &coilType,
+                                    std::string const &coilName)
+{
+    ShowSevereError(state, objectType + " \"" + tuName + "\"");
+    ShowContinueError(state, "... when checking " + coilType + " \"" + coilName + "\"");
+    ShowContinueError(state, "... terminal unit not connected to condenser.");
+    ShowContinueError(state, "... check that terminal unit is specified in a terminal unit list object.");
+    ShowContinueError(state,
+                      "... also check that the terminal unit list name is specified in an "
+                      "AirConditioner:VariableRefrigerantFlow object.");
+    ErrorsFound = true;
+}
+
+// Helper: set VRF condenser data on a cooling DX coil (cooling-mode parameters)
+static void setVRFCoolingCoilData(EnergyPlusData &state, int coilIndex, bool &ErrorsFound, VRFCondenserEquipment const &vrfCond)
+{
+    using DXCoils::SetDXCoolingCoilData;
+    SetDXCoolingCoilData(state, coilIndex, ErrorsFound, _, vrfCond.CondenserType);
+    SetDXCoolingCoilData(state, coilIndex, ErrorsFound, _, _, vrfCond.CondenserNodeNum);
+    SetDXCoolingCoilData(state, coilIndex, ErrorsFound, _, _, _, vrfCond.MaxOATCCHeater);
+    SetDXCoolingCoilData(state, coilIndex, ErrorsFound, _, _, _, _, vrfCond.MinOATCooling);
+    SetDXCoolingCoilData(state, coilIndex, ErrorsFound, _, _, _, _, _, vrfCond.MaxOATCooling);
+}
+
+// Helper: set VRF condenser data on a heating DX coil (heating-mode + defrost parameters)
+static void setVRFHeatingCoilData(EnergyPlusData &state, int coilIndex, bool &ErrorsFound, VRFCondenserEquipment const &vrfCond)
+{
+    using DXCoils::SetDXCoolingCoilData;
+    SetDXCoolingCoilData(state, coilIndex, ErrorsFound, _, vrfCond.CondenserType);
+    SetDXCoolingCoilData(state, coilIndex, ErrorsFound, _, _, vrfCond.CondenserNodeNum);
+    SetDXCoolingCoilData(state, coilIndex, ErrorsFound, _, _, _, vrfCond.MaxOATCCHeater);
+    SetDXCoolingCoilData(state, coilIndex, ErrorsFound, _, _, _, _, _, _, vrfCond.MinOATHeating);
+    SetDXCoolingCoilData(state, coilIndex, ErrorsFound, _, _, _, _, _, _, _, vrfCond.MaxOATHeating);
+    SetDXCoolingCoilData(state, coilIndex, ErrorsFound, _, _, _, _, _, _, _, _, vrfCond.HeatingPerformanceOATType);
+    // Set defrost controls in child object to trip child object defrost calculations
+    SetDXCoolingCoilData(state, coilIndex, ErrorsFound, _, _, _, _, _, _, _, _, _, vrfCond.DefrostStrategy);
+    SetDXCoolingCoilData(state, coilIndex, ErrorsFound, _, _, _, _, _, _, _, _, _, _, vrfCond.DefrostControl);
+    SetDXCoolingCoilData(state, coilIndex, ErrorsFound, _, _, _, _, _, _, _, _, _, _, _, vrfCond.DefrostEIRPtr);
+    SetDXCoolingCoilData(state, coilIndex, ErrorsFound, _, _, _, _, _, _, _, _, _, _, _, _, vrfCond.DefrostFraction);
+    SetDXCoolingCoilData(state, coilIndex, ErrorsFound, _, _, _, _, _, _, _, _, _, _, _, _, _, _, vrfCond.MaxOATDefrost);
+    // If defrost is disabled in the VRF condenser, it must be disabled in the DX coil
+    // Defrost primarily handled in parent object, set defrost capacity to 1 to avoid autosizing.
+    // Defrost capacity is used for nothing more than setting defrost power/consumption report
+    // variables which are not reported. The coil's defrost algorithm IS used to derate the coil
+    SetDXCoolingCoilData(state, coilIndex, ErrorsFound, _, _, _, _, _, _, _, _, _, _, _, _, _, 1.0); // DefrostCapacity=1.0
+}
+
+// Helper: set heating-to-cooling sizing ratio on a heating DX coil
+static void setVRFHeatSizeRatio(EnergyPlusData &state,
+                                int coilIndex,
+                                bool &ErrorsFound,
+                                Real64 tuRatio,
+                                Real64 vrfRatio)
+{
+    using DXCoils::SetDXCoolingCoilData;
+    // Terminal unit heating to cooling sizing ratio has precedence over VRF system sizing ratio
+    if (tuRatio > 1.0) {
+        SetDXCoolingCoilData(state, coilIndex, ErrorsFound, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, tuRatio);
+    } else if (vrfRatio > 1.0) {
+        SetDXCoolingCoilData(state, coilIndex, ErrorsFound, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, vrfRatio);
+    }
+}
+
+// Helper: set FluidTCtrl-specific DXCoil member data (VRF pointers, fan, flow rate)
+static void setFluidTCtrlCoilMembers(EnergyPlusData &state,
+                                     int coilIndex,
+                                     int vrfTUNum,
+                                     int vrfSysNum,
+                                     int fanIndex)
+{
+    auto &dxCoil = state.dataDXCoils->DXCoil(coilIndex);
+    dxCoil.VRFIUPtr = vrfTUNum;
+    dxCoil.VRFOUPtr = vrfSysNum;
+    dxCoil.SupplyFanIndex = fanIndex;
+    if (fanIndex > 0) {
+        dxCoil.RatedAirVolFlowRate(1) = state.dataFans->fans(fanIndex)->maxAirFlowRate;
+    } else {
+        dxCoil.RatedAirVolFlowRate(1) = DataSizing::AutoSize;
+    }
+}
+
 void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
 {
 
@@ -2962,60 +3048,12 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
                         }
 
                         if (thisVrfTU.VRFSysNum > 0) {
-                            SetDXCoolingCoilData(
-                                state, thisVrfTU.CoolCoilIndex, ErrorsFound, _, state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).CondenserType);
-                            SetDXCoolingCoilData(state,
-                                                 thisVrfTU.CoolCoilIndex,
-                                                 ErrorsFound,
-                                                 _,
-                                                 _,
-                                                 state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).CondenserNodeNum);
-                            SetDXCoolingCoilData(state,
-                                                 thisVrfTU.CoolCoilIndex,
-                                                 ErrorsFound,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).MaxOATCCHeater);
-                            SetDXCoolingCoilData(state,
-                                                 thisVrfTU.CoolCoilIndex,
-                                                 ErrorsFound,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).MinOATCooling);
-                            SetDXCoolingCoilData(state,
-                                                 thisVrfTU.CoolCoilIndex,
-                                                 ErrorsFound,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).MaxOATCooling);
-
-                            state.dataDXCoils->DXCoil(thisVrfTU.CoolCoilIndex).VRFIUPtr = VRFTUNum;
-                            state.dataDXCoils->DXCoil(thisVrfTU.CoolCoilIndex).VRFOUPtr = thisVrfTU.VRFSysNum;
-                            state.dataDXCoils->DXCoil(thisVrfTU.CoolCoilIndex).SupplyFanIndex = thisVrfTU.FanIndex;
-
-                            if (thisVrfTU.FanIndex > 0) {
-                                state.dataDXCoils->DXCoil(thisVrfTU.CoolCoilIndex).RatedAirVolFlowRate(1) =
-                                    state.dataFans->fans(thisVrfTU.FanIndex)->maxAirFlowRate;
-                            } else {
-                                state.dataDXCoils->DXCoil(thisVrfTU.CoolCoilIndex).RatedAirVolFlowRate(1) = AutoSize;
-                            }
-
+                            auto const &vrfCond = state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum);
+                            setVRFCoolingCoilData(state, thisVrfTU.CoolCoilIndex, ErrorsFound, vrfCond);
+                            setFluidTCtrlCoilMembers(state, thisVrfTU.CoolCoilIndex, VRFTUNum, thisVrfTU.VRFSysNum, thisVrfTU.FanIndex);
                         } else {
-                            ShowSevereError(state, cCurrentModuleObject + " \"" + thisVrfTU.Name + "\"");
-                            ShowContinueError(
-                                state, "... when checking " + HVAC::cAllCoilTypes(thisVrfTU.DXCoolCoilType_Num) + " \"" + cAlphaArgs(12) + "\"");
-                            ShowContinueError(state, "... terminal unit not connected to condenser.");
-                            ShowContinueError(state, "... check that terminal unit is specified in a terminal unit list object.");
-                            ShowContinueError(state,
-                                              "... also check that the terminal unit list name is specified in an "
-                                              "AirConditioner:VariableRefrigerantFlow object.");
-                            ErrorsFound = true;
+                            showTUNotConnectedError(state, ErrorsFound, cCurrentModuleObject, thisVrfTU.Name,
+                                                    HVAC::cAllCoilTypes(thisVrfTU.DXCoolCoilType_Num), cAlphaArgs(12));
                         }
                     } else {
                         ShowSevereError(state, cCurrentModuleObject + " \"" + thisVrfTU.Name + "\"");
@@ -3044,29 +3082,7 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
                             ShowContinueError(state, "...occurs in " + cCurrentModuleObject + " \"" + thisVrfTU.Name + "\"");
                         }
 
-                        SetDXCoolingCoilData(
-                            state, thisVrfTU.CoolCoilIndex, ErrorsFound, _, state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).CondenserType);
-                        SetDXCoolingCoilData(
-                            state, thisVrfTU.CoolCoilIndex, ErrorsFound, _, _, state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).CondenserNodeNum);
-                        SetDXCoolingCoilData(
-                            state, thisVrfTU.CoolCoilIndex, ErrorsFound, _, _, _, state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).MaxOATCCHeater);
-                        SetDXCoolingCoilData(state,
-                                             thisVrfTU.CoolCoilIndex,
-                                             ErrorsFound,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).MinOATCooling);
-                        SetDXCoolingCoilData(state,
-                                             thisVrfTU.CoolCoilIndex,
-                                             ErrorsFound,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).MaxOATCooling);
+                        setVRFCoolingCoilData(state, thisVrfTU.CoolCoilIndex, ErrorsFound, state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum));
 
                     } else {
                         ShowSevereError(state, cCurrentModuleObject + " \"" + thisVrfTU.Name + "\"");
@@ -3075,13 +3091,8 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
                     }
                 }
             } else {
-                ShowSevereError(state, cCurrentModuleObject + " \"" + thisVrfTU.Name + "\"");
-                ShowContinueError(state, "... when checking " + HVAC::cAllCoilTypes(thisVrfTU.DXCoolCoilType_Num) + " \"" + cAlphaArgs(12) + "\"");
-                ShowContinueError(state, "... terminal unit not connected to condenser.");
-                ShowContinueError(state, "... check that terminal unit is specified in a terminal unit list object.");
-                ShowContinueError(
-                    state, "... also check that the terminal unit list name is specified in an AirConditioner:VariableRefrigerantFlow object.");
-                ErrorsFound = true;
+                showTUNotConnectedError(state, ErrorsFound, cCurrentModuleObject, thisVrfTU.Name,
+                                        HVAC::cAllCoilTypes(thisVrfTU.DXCoolCoilType_Num), cAlphaArgs(12));
             }
         }
 
@@ -3125,220 +3136,14 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
                         }
 
                         if (thisVrfTU.VRFSysNum > 0) {
-                            SetDXCoolingCoilData(
-                                state, thisVrfTU.HeatCoilIndex, ErrorsFound, _, state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).CondenserType);
-                            SetDXCoolingCoilData(state,
-                                                 thisVrfTU.HeatCoilIndex,
-                                                 ErrorsFound,
-                                                 _,
-                                                 _,
-                                                 state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).CondenserNodeNum);
-                            SetDXCoolingCoilData(state,
-                                                 thisVrfTU.HeatCoilIndex,
-                                                 ErrorsFound,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).MaxOATCCHeater);
-                            SetDXCoolingCoilData(state,
-                                                 thisVrfTU.HeatCoilIndex,
-                                                 ErrorsFound,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).MinOATHeating);
-                            SetDXCoolingCoilData(state,
-                                                 thisVrfTU.HeatCoilIndex,
-                                                 ErrorsFound,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).MaxOATHeating);
-                            SetDXCoolingCoilData(state,
-                                                 thisVrfTU.HeatCoilIndex,
-                                                 ErrorsFound,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).HeatingPerformanceOATType);
-                            // Set defrost controls in child object to trip child object defrost calculations
-                            SetDXCoolingCoilData(state,
-                                                 thisVrfTU.HeatCoilIndex,
-                                                 ErrorsFound,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).DefrostStrategy);
-                            SetDXCoolingCoilData(state,
-                                                 thisVrfTU.HeatCoilIndex,
-                                                 ErrorsFound,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).DefrostControl);
-                            SetDXCoolingCoilData(state,
-                                                 thisVrfTU.HeatCoilIndex,
-                                                 ErrorsFound,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).DefrostEIRPtr);
-                            SetDXCoolingCoilData(state,
-                                                 thisVrfTU.HeatCoilIndex,
-                                                 ErrorsFound,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).DefrostFraction);
-                            SetDXCoolingCoilData(state,
-                                                 thisVrfTU.HeatCoilIndex,
-                                                 ErrorsFound,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).MaxOATDefrost);
-                            // If defrost is disabled in the VRF condenser, it must be disabled in the DX coil
-                            // Defrost primarily handled in parent object, set defrost capacity to 1 to avoid autosizing.
-                            // Defrost capacity is used for nothing more than setting defrost power/consumption report
-                            // variables which are not reported. The coil's defrost algorithm IS used to derate the coil
-                            SetDXCoolingCoilData(state,
-                                                 thisVrfTU.HeatCoilIndex,
-                                                 ErrorsFound,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 1.0); // DefrostCapacity=1.0
-
-                            state.dataDXCoils->DXCoil(thisVrfTU.HeatCoilIndex).VRFIUPtr = VRFTUNum;
-                            state.dataDXCoils->DXCoil(thisVrfTU.HeatCoilIndex).VRFOUPtr = thisVrfTU.VRFSysNum;
-                            state.dataDXCoils->DXCoil(thisVrfTU.HeatCoilIndex).SupplyFanIndex = thisVrfTU.FanIndex;
-
-                            if (thisVrfTU.FanIndex > 0) {
-                                state.dataDXCoils->DXCoil(thisVrfTU.HeatCoilIndex).RatedAirVolFlowRate(1) =
-                                    state.dataFans->fans(thisVrfTU.FanIndex)->maxAirFlowRate;
-                            } else {
-                                state.dataDXCoils->DXCoil(thisVrfTU.HeatCoilIndex).RatedAirVolFlowRate(1) = AutoSize;
-                            }
-
-                            // Terminal unit heating to cooling sizing ratio has precedence over VRF system sizing ratio
-                            if (thisVrfTU.HeatingCapacitySizeRatio > 1.0) {
-                                SetDXCoolingCoilData(state,
-                                                     thisVrfTU.HeatCoilIndex,
-                                                     ErrorsFound,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     thisVrfTU.HeatingCapacitySizeRatio);
-                            } else if (state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).HeatingCapacitySizeRatio > 1.0) {
-                                SetDXCoolingCoilData(state,
-                                                     thisVrfTU.HeatCoilIndex,
-                                                     ErrorsFound,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).HeatingCapacitySizeRatio);
-                            }
+                            auto const &vrfCond = state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum);
+                            setVRFHeatingCoilData(state, thisVrfTU.HeatCoilIndex, ErrorsFound, vrfCond);
+                            setFluidTCtrlCoilMembers(state, thisVrfTU.HeatCoilIndex, VRFTUNum, thisVrfTU.VRFSysNum, thisVrfTU.FanIndex);
+                            setVRFHeatSizeRatio(state, thisVrfTU.HeatCoilIndex, ErrorsFound,
+                                                thisVrfTU.HeatingCapacitySizeRatio, vrfCond.HeatingCapacitySizeRatio);
                         } else {
-                            ShowSevereError(state, cCurrentModuleObject + " \"" + thisVrfTU.Name + "\"");
-                            ShowContinueError(
-                                state, "... when checking " + HVAC::cAllCoilTypes(thisVrfTU.DXHeatCoilType_Num) + " \"" + cAlphaArgs(14) + "\"");
-                            ShowContinueError(state, "... terminal unit not connected to condenser.");
-                            ShowContinueError(state, "... check that terminal unit is specified in a terminal unit list object.");
-                            ShowContinueError(state,
-                                              "... also check that the terminal unit list name is specified in an "
-                                              "AirConditioner:VariableRefrigerantFlow object.");
-                            ErrorsFound = true;
+                            showTUNotConnectedError(state, ErrorsFound, cCurrentModuleObject, thisVrfTU.Name,
+                                                    HVAC::cAllCoilTypes(thisVrfTU.DXHeatCoilType_Num), cAlphaArgs(14));
                         }
                     } else {
                         ShowSevereError(state, cCurrentModuleObject + " \"" + thisVrfTU.Name + "\"");
@@ -3366,177 +3171,11 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
                             ShowContinueError(state, "...occurs in " + cCurrentModuleObject + " \"" + thisVrfTU.Name + "\"");
                         }
 
-                        SetDXCoolingCoilData(
-                            state, thisVrfTU.HeatCoilIndex, ErrorsFound, _, state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).CondenserType);
-                        SetDXCoolingCoilData(
-                            state, thisVrfTU.HeatCoilIndex, ErrorsFound, _, _, state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).CondenserNodeNum);
-                        SetDXCoolingCoilData(
-                            state, thisVrfTU.HeatCoilIndex, ErrorsFound, _, _, _, state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).MaxOATCCHeater);
-                        SetDXCoolingCoilData(state,
-                                             thisVrfTU.HeatCoilIndex,
-                                             ErrorsFound,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).MinOATHeating);
-                        SetDXCoolingCoilData(state,
-                                             thisVrfTU.HeatCoilIndex,
-                                             ErrorsFound,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).HeatingPerformanceOATType);
-                        // Set defrost controls in child object to trip child object defrost calculations
-                        SetDXCoolingCoilData(state,
-                                             thisVrfTU.HeatCoilIndex,
-                                             ErrorsFound,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).DefrostStrategy);
-                        SetDXCoolingCoilData(state,
-                                             thisVrfTU.HeatCoilIndex,
-                                             ErrorsFound,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).DefrostControl);
-                        SetDXCoolingCoilData(state,
-                                             thisVrfTU.HeatCoilIndex,
-                                             ErrorsFound,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).DefrostEIRPtr);
-                        SetDXCoolingCoilData(state,
-                                             thisVrfTU.HeatCoilIndex,
-                                             ErrorsFound,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).DefrostFraction);
-                        SetDXCoolingCoilData(state,
-                                             thisVrfTU.HeatCoilIndex,
-                                             ErrorsFound,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).MaxOATDefrost);
-                        // If defrost is disabled in the VRF condenser, it must be disabled in the DX coil
-                        // Defrost primarily handled in parent object, set defrost capacity to 1 to avoid autosizing.
-                        // Defrost capacity is used for nothing more than setting defrost power/consumption report
-                        // variables which are not reported. The coil's defrost algorithm IS used to derate the coil
-                        SetDXCoolingCoilData(state,
-                                             thisVrfTU.HeatCoilIndex,
-                                             ErrorsFound,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             _,
-                                             1.0); // DefrostCapacity=1.0
-                        // Terminal unit heating to cooling sizing ratio has precedence over VRF system sizing ratio
-                        if (thisVrfTU.HeatingCapacitySizeRatio > 1.0) {
-                            SetDXCoolingCoilData(state,
-                                                 thisVrfTU.HeatCoilIndex,
-                                                 ErrorsFound,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 thisVrfTU.HeatingCapacitySizeRatio);
-                        } else if (state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).HeatingCapacitySizeRatio > 1.0) {
-                            SetDXCoolingCoilData(state,
-                                                 thisVrfTU.HeatCoilIndex,
-                                                 ErrorsFound,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).HeatingCapacitySizeRatio);
+                        {
+                            auto const &vrfCond = state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum);
+                            setVRFHeatingCoilData(state, thisVrfTU.HeatCoilIndex, ErrorsFound, vrfCond);
+                            setVRFHeatSizeRatio(state, thisVrfTU.HeatCoilIndex, ErrorsFound,
+                                                thisVrfTU.HeatingCapacitySizeRatio, vrfCond.HeatingCapacitySizeRatio);
                         }
                         // Check VRF DX heating coil heating capacity as a function of temperature performance curve. Only report here for
                         // biquadratic curve type.
@@ -3574,13 +3213,8 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
                     }
                 }
             } else {
-                ShowSevereError(state, cCurrentModuleObject + " \"" + thisVrfTU.Name + "\"");
-                ShowContinueError(state, "... when checking " + HVAC::cAllCoilTypes(thisVrfTU.DXHeatCoilType_Num) + " \"" + cAlphaArgs(14) + "\"");
-                ShowContinueError(state, "... terminal unit not connected to condenser.");
-                ShowContinueError(state, "... check that terminal unit is specified in a terminal unit list object.");
-                ShowContinueError(
-                    state, "... also check that the terminal unit list name is specified in an AirConditioner:VariableRefrigerantFlow object.");
-                ErrorsFound = true;
+                showTUNotConnectedError(state, ErrorsFound, cCurrentModuleObject, thisVrfTU.Name,
+                                        HVAC::cAllCoilTypes(thisVrfTU.DXHeatCoilType_Num), cAlphaArgs(14));
             }
         }
 
