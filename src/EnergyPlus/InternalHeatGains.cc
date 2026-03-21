@@ -3725,6 +3725,44 @@ namespace InternalHeatGains {
                             equip.Name);
     }
 
+    // Dispatch zone and space total output variables for equipment types that use setupEquipZoneSpaceOutputs,
+    // then reset the addZoneOutputs/addSpaceOutputs flags.  Used for Electric, Gas, Hot Water, and Steam equipment.
+    static void dispatchEquipZoneSpaceOutputs(EnergyPlusData &state,
+                                              Array1D_bool &addZoneOutputs,
+                                              Array1D_bool &addSpaceOutputs,
+                                              std::string_view equipLabel,
+                                              std::string_view energyLabel,
+                                              Real64 ZRV::*power,
+                                              Real64 ZRV::*consump,
+                                              Real64 ZRV::*radGain,
+                                              Real64 ZRV::*conGain,
+                                              Real64 ZRV::*latGain,
+                                              Real64 ZRV::*lost,
+                                              Real64 ZRV::*totGain,
+                                              Real64 ZRV::*radGainRate,
+                                              Real64 ZRV::*conGainRate,
+                                              Real64 ZRV::*latGainRate,
+                                              Real64 ZRV::*lostRate,
+                                              Real64 ZRV::*totGainRate)
+    {
+        for (int zoneNum = 1; zoneNum <= state.dataGlobal->NumOfZones; ++zoneNum) {
+            if (addZoneOutputs(zoneNum)) {
+                setupEquipZoneSpaceOutputs(state, state.dataHeatBal->ZoneRpt(zoneNum), state.dataHeatBal->Zone(zoneNum).Name,
+                    "Zone", equipLabel, energyLabel, power, consump, radGain, conGain, latGain, lost, totGain,
+                    radGainRate, conGainRate, latGainRate, lostRate, totGainRate);
+            }
+            addZoneOutputs(zoneNum) = false;
+        }
+        for (int spaceNum = 1; spaceNum <= state.dataGlobal->numSpaces; ++spaceNum) {
+            if (addSpaceOutputs(spaceNum)) {
+                setupEquipZoneSpaceOutputs(state, state.dataHeatBal->spaceRpt(spaceNum), state.dataHeatBal->space(spaceNum).Name,
+                    "Space", equipLabel, energyLabel, power, consump, radGain, conGain, latGain, lost, totGain,
+                    radGainRate, conGainRate, latGainRate, lostRate, totGainRate);
+            }
+            addSpaceOutputs(spaceNum) = false;
+        }
+    }
+
     void setupIHGOutputs(EnergyPlusData &state)
     {
         for (int zoneNum = 1; zoneNum <= state.dataGlobal->NumOfZones; ++zoneNum) {
@@ -3983,31 +4021,10 @@ namespace InternalHeatGains {
                                     "Electric Equipment", "Electricity", Constant::eResource::Electricity);
         }
 
-        // Zone total report variables
-
-        // Zone total report variables
-        for (int zoneNum = 1; zoneNum <= state.dataGlobal->NumOfZones; ++zoneNum) {
-            if (addZoneOutputs(zoneNum)) {
-                setupEquipZoneSpaceOutputs(state, state.dataHeatBal->ZoneRpt(zoneNum), state.dataHeatBal->Zone(zoneNum).Name,
-                    "Zone", "Electric Equipment", "Electricity",
-                    &ZRV::ElecPower, &ZRV::ElecConsump, &ZRV::ElecRadGain, &ZRV::ElecConGain, &ZRV::ElecLatGain, &ZRV::ElecLost, &ZRV::ElecTotGain,
-                    &ZRV::ElecRadGainRate, &ZRV::ElecConGainRate, &ZRV::ElecLatGainRate, &ZRV::ElecLostRate, &ZRV::ElecTotGainRate);
-            }
-            // Reset zone output flag
-            addZoneOutputs(zoneNum) = false;
-        }
-
-        // Space total report variables
-        for (int spaceNum = 1; spaceNum <= state.dataGlobal->numSpaces; ++spaceNum) {
-            if (addSpaceOutputs(spaceNum)) {
-                setupEquipZoneSpaceOutputs(state, state.dataHeatBal->spaceRpt(spaceNum), state.dataHeatBal->space(spaceNum).Name,
-                    "Space", "Electric Equipment", "Electricity",
-                    &ZRV::ElecPower, &ZRV::ElecConsump, &ZRV::ElecRadGain, &ZRV::ElecConGain, &ZRV::ElecLatGain, &ZRV::ElecLost, &ZRV::ElecTotGain,
-                    &ZRV::ElecRadGainRate, &ZRV::ElecConGainRate, &ZRV::ElecLatGainRate, &ZRV::ElecLostRate, &ZRV::ElecTotGainRate);
-            }
-            // Reset space output flag
-            addSpaceOutputs(spaceNum) = false;
-        }
+        dispatchEquipZoneSpaceOutputs(state, addZoneOutputs, addSpaceOutputs,
+            "Electric Equipment", "Electricity",
+            &ZRV::ElecPower, &ZRV::ElecConsump, &ZRV::ElecRadGain, &ZRV::ElecConGain, &ZRV::ElecLatGain, &ZRV::ElecLost, &ZRV::ElecTotGain,
+            &ZRV::ElecRadGainRate, &ZRV::ElecConGainRate, &ZRV::ElecLatGainRate, &ZRV::ElecLostRate, &ZRV::ElecTotGainRate);
         // Object report variables
         for (int gasEqNum = 1; gasEqNum <= state.dataHeatBal->TotGasEquip; ++gasEqNum) {
             // Set flags for zone and space total report variables
@@ -4017,31 +4034,10 @@ namespace InternalHeatGains {
                                     "Gas Equipment", "NaturalGas", Constant::eResource::NaturalGas);
         }
 
-        // Zone total report variables
-
-        // Zone total report variables
-        for (int zoneNum = 1; zoneNum <= state.dataGlobal->NumOfZones; ++zoneNum) {
-            if (addZoneOutputs(zoneNum)) {
-                setupEquipZoneSpaceOutputs(state, state.dataHeatBal->ZoneRpt(zoneNum), state.dataHeatBal->Zone(zoneNum).Name,
-                    "Zone", "Gas Equipment", "NaturalGas",
-                    &ZRV::GasPower, &ZRV::GasConsump, &ZRV::GasRadGain, &ZRV::GasConGain, &ZRV::GasLatGain, &ZRV::GasLost, &ZRV::GasTotGain,
-                    &ZRV::GasRadGainRate, &ZRV::GasConGainRate, &ZRV::GasLatGainRate, &ZRV::GasLostRate, &ZRV::GasTotGainRate);
-            }
-            // Reset zone output flag
-            addZoneOutputs(zoneNum) = false;
-        }
-
-        // Space total report variables
-        for (int spaceNum = 1; spaceNum <= state.dataGlobal->numSpaces; ++spaceNum) {
-            if (addSpaceOutputs(spaceNum)) {
-                setupEquipZoneSpaceOutputs(state, state.dataHeatBal->spaceRpt(spaceNum), state.dataHeatBal->space(spaceNum).Name,
-                    "Space", "Gas Equipment", "NaturalGas",
-                    &ZRV::GasPower, &ZRV::GasConsump, &ZRV::GasRadGain, &ZRV::GasConGain, &ZRV::GasLatGain, &ZRV::GasLost, &ZRV::GasTotGain,
-                    &ZRV::GasRadGainRate, &ZRV::GasConGainRate, &ZRV::GasLatGainRate, &ZRV::GasLostRate, &ZRV::GasTotGainRate);
-            }
-            // Reset space output flag
-            addSpaceOutputs(spaceNum) = false;
-        }
+        dispatchEquipZoneSpaceOutputs(state, addZoneOutputs, addSpaceOutputs,
+            "Gas Equipment", "NaturalGas",
+            &ZRV::GasPower, &ZRV::GasConsump, &ZRV::GasRadGain, &ZRV::GasConGain, &ZRV::GasLatGain, &ZRV::GasLost, &ZRV::GasTotGain,
+            &ZRV::GasRadGainRate, &ZRV::GasConGainRate, &ZRV::GasLatGainRate, &ZRV::GasLostRate, &ZRV::GasTotGainRate);
 
         // Object report variables
         for (int hwEqNum = 1; hwEqNum <= state.dataHeatBal->TotHWEquip; ++hwEqNum) {
@@ -4052,31 +4048,10 @@ namespace InternalHeatGains {
                                     "Hot Water Equipment", "District Heating", Constant::eResource::DistrictHeatingWater);
         }
 
-        // Zone total report variables
-
-        // Zone total report variables
-        for (int zoneNum = 1; zoneNum <= state.dataGlobal->NumOfZones; ++zoneNum) {
-            if (addZoneOutputs(zoneNum)) {
-                setupEquipZoneSpaceOutputs(state, state.dataHeatBal->ZoneRpt(zoneNum), state.dataHeatBal->Zone(zoneNum).Name,
-                    "Zone", "Hot Water Equipment", "District Heating",
-                    &ZRV::HWPower, &ZRV::HWConsump, &ZRV::HWRadGain, &ZRV::HWConGain, &ZRV::HWLatGain, &ZRV::HWLost, &ZRV::HWTotGain,
-                    &ZRV::HWRadGainRate, &ZRV::HWConGainRate, &ZRV::HWLatGainRate, &ZRV::HWLostRate, &ZRV::HWTotGainRate);
-            }
-            // Reset zone output flag
-            addZoneOutputs(zoneNum) = false;
-        }
-
-        // Space total report variables
-        for (int spaceNum = 1; spaceNum <= state.dataGlobal->numSpaces; ++spaceNum) {
-            if (addSpaceOutputs(spaceNum)) {
-                setupEquipZoneSpaceOutputs(state, state.dataHeatBal->spaceRpt(spaceNum), state.dataHeatBal->space(spaceNum).Name,
-                    "Space", "Hot Water Equipment", "District Heating",
-                    &ZRV::HWPower, &ZRV::HWConsump, &ZRV::HWRadGain, &ZRV::HWConGain, &ZRV::HWLatGain, &ZRV::HWLost, &ZRV::HWTotGain,
-                    &ZRV::HWRadGainRate, &ZRV::HWConGainRate, &ZRV::HWLatGainRate, &ZRV::HWLostRate, &ZRV::HWTotGainRate);
-            }
-            // Reset space output flag
-            addSpaceOutputs(spaceNum) = false;
-        }
+        dispatchEquipZoneSpaceOutputs(state, addZoneOutputs, addSpaceOutputs,
+            "Hot Water Equipment", "District Heating",
+            &ZRV::HWPower, &ZRV::HWConsump, &ZRV::HWRadGain, &ZRV::HWConGain, &ZRV::HWLatGain, &ZRV::HWLost, &ZRV::HWTotGain,
+            &ZRV::HWRadGainRate, &ZRV::HWConGainRate, &ZRV::HWLatGainRate, &ZRV::HWLostRate, &ZRV::HWTotGainRate);
 
         // Object report variables
         for (int stmEqNum = 1; stmEqNum <= state.dataHeatBal->TotStmEquip; ++stmEqNum) {
@@ -4087,31 +4062,10 @@ namespace InternalHeatGains {
                                     "Steam Equipment", "District Heating", Constant::eResource::DistrictHeatingSteam);
         }
 
-        // Zone total report variables
-
-        // Zone total report variables
-        for (int zoneNum = 1; zoneNum <= state.dataGlobal->NumOfZones; ++zoneNum) {
-            if (addZoneOutputs(zoneNum)) {
-                setupEquipZoneSpaceOutputs(state, state.dataHeatBal->ZoneRpt(zoneNum), state.dataHeatBal->Zone(zoneNum).Name,
-                    "Zone", "Steam Equipment", "District Heating",
-                    &ZRV::SteamPower, &ZRV::SteamConsump, &ZRV::SteamRadGain, &ZRV::SteamConGain, &ZRV::SteamLatGain, &ZRV::SteamLost, &ZRV::SteamTotGain,
-                    &ZRV::SteamRadGainRate, &ZRV::SteamConGainRate, &ZRV::SteamLatGainRate, &ZRV::SteamLostRate, &ZRV::SteamTotGainRate);
-            }
-            // Reset zone output flag
-            addZoneOutputs(zoneNum) = false;
-        }
-
-        // Space total report variables
-        for (int spaceNum = 1; spaceNum <= state.dataGlobal->numSpaces; ++spaceNum) {
-            if (addSpaceOutputs(spaceNum)) {
-                setupEquipZoneSpaceOutputs(state, state.dataHeatBal->spaceRpt(spaceNum), state.dataHeatBal->space(spaceNum).Name,
-                    "Space", "Steam Equipment", "District Heating",
-                    &ZRV::SteamPower, &ZRV::SteamConsump, &ZRV::SteamRadGain, &ZRV::SteamConGain, &ZRV::SteamLatGain, &ZRV::SteamLost, &ZRV::SteamTotGain,
-                    &ZRV::SteamRadGainRate, &ZRV::SteamConGainRate, &ZRV::SteamLatGainRate, &ZRV::SteamLostRate, &ZRV::SteamTotGainRate);
-            }
-            // Reset space output flag
-            addSpaceOutputs(spaceNum) = false;
-        }
+        dispatchEquipZoneSpaceOutputs(state, addZoneOutputs, addSpaceOutputs,
+            "Steam Equipment", "District Heating",
+            &ZRV::SteamPower, &ZRV::SteamConsump, &ZRV::SteamRadGain, &ZRV::SteamConGain, &ZRV::SteamLatGain, &ZRV::SteamLost, &ZRV::SteamTotGain,
+            &ZRV::SteamRadGainRate, &ZRV::SteamConGainRate, &ZRV::SteamLatGainRate, &ZRV::SteamLostRate, &ZRV::SteamTotGainRate);
 
         // Object report variables
         for (int othEqNum = 1; othEqNum <= state.dataHeatBal->TotOthEquip; ++othEqNum) {
