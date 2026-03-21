@@ -33,3 +33,4 @@ src/EnergyPlus/InternalHeatGains.cc:setupIHGOutputs
 src/EnergyPlus/OutputReportTabular.cc:WriteBEPSTable
 src/EnergyPlus/WaterToAirHeatPumpSimple.cc:SizeHVACWaterToAir
 src/EnergyPlus/ZoneTempPredictorCorrector.cc:GetZoneAirSetPoints
+src/EnergyPlus/SingleDuct.cc:GetSysInput
