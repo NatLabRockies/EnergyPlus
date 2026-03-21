@@ -905,26 +905,7 @@ namespace Curve {
         // Loop over quadrinomial curves and load data
         CurrentModuleObject = "Curve:Quartic";
         for (int CurveIndex = 1; CurveIndex <= NumQuartic; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
+            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
 
             thisCurve->curveType = CurveType::Quartic;
             thisCurve->numDims = 1;
@@ -942,26 +923,7 @@ namespace Curve {
         // Loop over quadratic curves and load data
         CurrentModuleObject = "Curve:Quadratic";
         for (int CurveIndex = 1; CurveIndex <= NumQuad; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
+            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
 
             thisCurve->curveType = CurveType::Quadratic;
             thisCurve->numDims = 1;
@@ -979,26 +941,7 @@ namespace Curve {
         // Loop over quadratic-linear curves and load data
         CurrentModuleObject = "Curve:QuadraticLinear";
         for (int CurveIndex = 1; CurveIndex <= NumQuadLinear; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
+            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
 
             thisCurve->curveType = CurveType::QuadraticLinear;
             thisCurve->numDims = 2;
@@ -1019,26 +962,7 @@ namespace Curve {
         // Loop over cubic-linear curves and load data
         CurrentModuleObject = "Curve:CubicLinear";
         for (int CurveIndex = 1; CurveIndex <= NumCubicLinear; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
+            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
 
             thisCurve->curveType = CurveType::CubicLinear;
             thisCurve->numDims = 2;
@@ -1059,26 +983,7 @@ namespace Curve {
         // Loop over linear curves and load data
         CurrentModuleObject = "Curve:Linear";
         for (int CurveIndex = 1; CurveIndex <= NumLinear; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
+            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
 
             thisCurve->curveType = CurveType::Linear;
             thisCurve->numDims = 1;
@@ -1096,26 +1001,7 @@ namespace Curve {
         // Loop over bicubic curves and load data
         CurrentModuleObject = "Curve:Bicubic";
         for (int CurveIndex = 1; CurveIndex <= NumBicubic; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
+            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
 
             thisCurve->curveType = CurveType::BiCubic;
             thisCurve->numDims = 2;
@@ -1136,26 +1022,7 @@ namespace Curve {
         // Loop over Triquadratic curves and load data
         CurrentModuleObject = "Curve:Triquadratic";
         for (int CurveIndex = 1; CurveIndex <= NumTriQuad; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
+            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
 
             thisCurve->curveType = CurveType::TriQuadratic;
             thisCurve->numDims = 3;
@@ -1179,26 +1046,7 @@ namespace Curve {
         // Loop over quad linear curves and load data
         CurrentModuleObject = "Curve:QuadLinear";
         for (int CurveIndex = 1; CurveIndex <= NumQLinear; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
+            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
 
             thisCurve->curveType = CurveType::QuadLinear;
             thisCurve->numDims = 4;
@@ -1241,26 +1089,7 @@ namespace Curve {
         // Loop over quint linear curves and load data
         CurrentModuleObject = "Curve:QuintLinear";
         for (int CurveIndex = 1; CurveIndex <= NumQuintLinear; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
+            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
 
             thisCurve->curveType = CurveType::QuintLinear;
             thisCurve->numDims = 5;
@@ -1304,26 +1133,7 @@ namespace Curve {
         // Loop over Exponent curves and load data
         CurrentModuleObject = "Curve:Exponent";
         for (int CurveIndex = 1; CurveIndex <= NumExponent; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
+            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
 
             thisCurve->curveType = CurveType::Exponent;
             thisCurve->numDims = 1;
@@ -1342,26 +1152,7 @@ namespace Curve {
         // Loop over Fan Pressure Rise curves and load data
         CurrentModuleObject = "Curve:FanPressureRise";
         for (int CurveIndex = 1; CurveIndex <= NumFanPressRise; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            Curve *thisCurve = AddCurve(state, Alphas(1));
+            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
 
             thisCurve->curveType = CurveType::FanPressureRise;
             thisCurve->numDims = 2;
@@ -1383,26 +1174,7 @@ namespace Curve {
         // Loop over Exponential Skew Normal curves and load data
         CurrentModuleObject = "Curve:ExponentialSkewNormal";
         for (int CurveIndex = 1; CurveIndex <= NumExpSkewNorm; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
+            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
 
             thisCurve->curveType = CurveType::ExponentialSkewNormal;
             thisCurve->numDims = 1;
@@ -1422,26 +1194,7 @@ namespace Curve {
         // Loop over Sigmoid curves and load data
         CurrentModuleObject = "Curve:Sigmoid";
         for (int CurveIndex = 1; CurveIndex <= NumSigmoid; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
+            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
 
             thisCurve->curveType = CurveType::Sigmoid;
             thisCurve->numDims = 1;
@@ -1461,26 +1214,7 @@ namespace Curve {
         // Loop over Rectangular Hyperbola Type 1 curves and load data
         CurrentModuleObject = "Curve:RectangularHyperbola1";
         for (int CurveIndex = 1; CurveIndex <= NumRectHyper1; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
+            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
 
             thisCurve->curveType = CurveType::RectangularHyperbola1;
             thisCurve->numDims = 1;
@@ -1500,26 +1234,7 @@ namespace Curve {
         // Loop over Rectangular Hyperbola Type 2 curves and load data
         CurrentModuleObject = "Curve:RectangularHyperbola2";
         for (int CurveIndex = 1; CurveIndex <= NumRectHyper2; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
+            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
 
             thisCurve->curveType = CurveType::RectangularHyperbola2;
             thisCurve->numDims = 1;
@@ -1539,26 +1254,7 @@ namespace Curve {
         // Loop over Exponential Decay curves and load data
         CurrentModuleObject = "Curve:ExponentialDecay";
         for (int CurveIndex = 1; CurveIndex <= NumExpDecay; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
+            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
 
             thisCurve->curveType = CurveType::ExponentialDecay;
             thisCurve->numDims = 1;
@@ -1577,26 +1273,7 @@ namespace Curve {
         // ykt July,2011 Loop over DoubleExponential Decay curves and load data
         CurrentModuleObject = "Curve:DoubleExponentialDecay";
         for (int CurveIndex = 1; CurveIndex <= NumDoubleExpDecay; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
+            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
 
             thisCurve->curveType = CurveType::DoubleExponentialDecay;
             thisCurve->numDims = 1;
