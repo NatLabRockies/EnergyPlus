@@ -2041,6 +2041,53 @@ namespace HVACUnitaryBypassVAV {
         }
     }
 
+    // Report SolveRoot iteration-exceeded or solver-failed errors for DX coil PLR calculations.
+    // Estimates PLR from inlet/outlet temperatures on solver failure (SolFla == -2).
+    // Checks WarmupFlag when checkWarmup is true (used by HX-Assisted and SingleSpeed coils).
+    static void reportDXCoilPLRSolverError(EnergyPlusData &state,
+                                            CBVAVData const &cBVAV,
+                                            int const SolFla,
+                                            Real64 &PartLoadFrac,
+                                            bool const checkWarmup,
+                                            int &iterExceededCounter,
+                                            int &iterExceededIndex,
+                                            std::string const &iterExceededMsg,
+                                            std::string const &iterExceededRecurMsg,
+                                            int &iterFailedCounter,
+                                            int &iterFailedIndex,
+                                            std::string const &iterFailedMsg,
+                                            std::string const &iterFailedRecurMsg)
+    {
+        if (checkWarmup && state.dataGlobal->WarmupFlag) return;
+
+        if (SolFla == -1) {
+            if (iterExceededCounter < 1) {
+                ++iterExceededCounter;
+                ShowWarningError(state, iterExceededMsg);
+                ShowContinueError(state, EnergyPlus::format("Calculated part-load ratio = {:.3R}", PartLoadFrac));
+                ShowContinueErrorTimeStamp(
+                    state, "The calculated part-load ratio will be used and the simulation continues. Occurrence info:");
+            } else {
+                ShowRecurringWarningErrorAtEnd(state, iterExceededRecurMsg, iterExceededIndex, PartLoadFrac, PartLoadFrac);
+            }
+        } else if (SolFla == -2) {
+            PartLoadFrac = max(0.0,
+                               min(1.0,
+                                   (state.dataLoopNodes->Node(cBVAV.DXCoilInletNode).Temp - cBVAV.CoilTempSetPoint) /
+                                       (state.dataLoopNodes->Node(cBVAV.DXCoilInletNode).Temp -
+                                        state.dataLoopNodes->Node(cBVAV.DXCoilOutletNode).Temp)));
+            if (iterFailedCounter < 1) {
+                ++iterFailedCounter;
+                ShowSevereError(state, iterFailedMsg);
+                ShowContinueError(state, EnergyPlus::format("Estimated part-load ratio = {:.3R}", PartLoadFrac));
+                ShowContinueErrorTimeStamp(
+                    state, "The estimated part-load ratio will be used and the simulation continues. Occurrence info:");
+            } else {
+                ShowRecurringWarningErrorAtEnd(state, iterFailedRecurMsg, iterFailedIndex, PartLoadFrac, PartLoadFrac);
+            }
+        }
+    }
+
     // Find the part-load ratio for a DX MultiMode coil to meet the coil temp setpoint.
     // Handles full-load sim, inlet/outlet temp checks, SolveRoot, and error reporting.
     static void findMultiModeDXCoilPLR(EnergyPlusData &state,
@@ -2315,51 +2362,14 @@ namespace HVACUnitaryBypassVAV {
                                                                             cBVAV.CoolCoilCompIndex,
                                                                             HVAC::FanOp::Continuous,
                                                                             HXUnitOn);
-                        if (SolFla == -1 && !state.dataGlobal->WarmupFlag) {
-                            if (cBVAV.HXDXIterationExceeded < 1) {
-                                ++cBVAV.HXDXIterationExceeded;
-                                ShowWarningError(
-                                    state,
-                                    EnergyPlus::format("Iteration limit exceeded calculating HX assisted DX unit part-load ratio, for unit = {}",
-                                                       cBVAV.DXCoolCoilName));
-                                ShowContinueError(state, EnergyPlus::format("Calculated part-load ratio = {:.3R}", PartLoadFrac));
-                                ShowContinueErrorTimeStamp(
-                                    state, "The calculated part-load ratio will be used and the simulation continues. Occurrence info:");
-                            } else {
-                                ShowRecurringWarningErrorAtEnd(
-                                    state,
-                                    cBVAV.Name + ", Iteration limit exceeded for HX assisted DX unit part-load ratio error continues.",
-                                    cBVAV.HXDXIterationExceededIndex,
-                                    PartLoadFrac,
-                                    PartLoadFrac);
-                            }
-                        } else if (SolFla == -2 && !state.dataGlobal->WarmupFlag) {
-                            PartLoadFrac = max(0.0,
-                                               min(1.0,
-                                                   (state.dataLoopNodes->Node(cBVAV.DXCoilInletNode).Temp - cBVAV.CoilTempSetPoint) /
-                                                       (state.dataLoopNodes->Node(cBVAV.DXCoilInletNode).Temp -
-                                                        state.dataLoopNodes->Node(cBVAV.DXCoilOutletNode).Temp)));
-                            if (cBVAV.HXDXIterationFailed < 1) {
-                                ++cBVAV.HXDXIterationFailed;
-                                ShowSevereError(
-                                    state,
-                                    EnergyPlus::format(
-                                        "HX assisted DX unit part-load ratio calculation failed: part-load ratio limits exceeded, for unit = {}",
-                                        cBVAV.DXCoolCoilName));
-                                ShowContinueErrorTimeStamp(
-                                    state,
-                                    EnergyPlus::format(
-                                        "An estimated part-load ratio of {:.3R}will be used and the simulation continues. Occurrence info:",
-                                        PartLoadFrac));
-                            } else {
-                                ShowRecurringWarningErrorAtEnd(state,
-                                                               cBVAV.Name +
-                                                                   ", Part-load ratio calculation failed for HX assisted DX unit error continues.",
-                                                               cBVAV.HXDXIterationFailedIndex,
-                                                               PartLoadFrac,
-                                                               PartLoadFrac);
-                            }
-                        }
+                        reportDXCoilPLRSolverError(
+                            state, cBVAV, SolFla, PartLoadFrac, /*checkWarmup=*/true,
+                            cBVAV.HXDXIterationExceeded, cBVAV.HXDXIterationExceededIndex,
+                            EnergyPlus::format("Iteration limit exceeded calculating HX assisted DX unit part-load ratio, for unit = {}", cBVAV.DXCoolCoilName),
+                            cBVAV.Name + ", Iteration limit exceeded for HX assisted DX unit part-load ratio error continues.",
+                            cBVAV.HXDXIterationFailed, cBVAV.HXDXIterationFailedIndex,
+                            EnergyPlus::format("HX assisted DX unit part-load ratio calculation failed: part-load ratio limits exceeded, for unit = {}", cBVAV.DXCoolCoilName),
+                            cBVAV.Name + ", Part-load ratio calculation failed for HX assisted DX unit error continues.");
                     }
                 } break;
                 case HVAC::CoilType::DXCoolingSingleSpeed: {
@@ -2405,48 +2415,14 @@ namespace HVACUnitaryBypassVAV {
                                            HVAC::FanOp::Continuous,
                                            PartLoadFrac,
                                            OnOffAirFlowRatio);
-                        if (SolFla == -1 && !state.dataGlobal->WarmupFlag) {
-                            if (cBVAV.DXIterationExceeded < 1) {
-                                ++cBVAV.DXIterationExceeded;
-                                ShowWarningError(state,
-                                                 EnergyPlus::format("Iteration limit exceeded calculating DX unit part-load ratio, for unit = {}",
-                                                                    cBVAV.DXCoolCoilName));
-                                ShowContinueError(state, EnergyPlus::format("Calculated part-load ratio = {:.3R}", PartLoadFrac));
-                                ShowContinueErrorTimeStamp(
-                                    state, "The calculated part-load ratio will be used and the simulation continues. Occurrence info:");
-                            } else {
-                                ShowRecurringWarningErrorAtEnd(
-                                    state,
-                                    cBVAV.Name + ", Iteration limit exceeded for DX unit part-load ratio calculation error continues.",
-                                    cBVAV.DXIterationExceededIndex,
-                                    PartLoadFrac,
-                                    PartLoadFrac);
-                            }
-                        } else if (SolFla == -2 && !state.dataGlobal->WarmupFlag) {
-                            PartLoadFrac = max(0.0,
-                                               min(1.0,
-                                                   (state.dataLoopNodes->Node(cBVAV.DXCoilInletNode).Temp - cBVAV.CoilTempSetPoint) /
-                                                       (state.dataLoopNodes->Node(cBVAV.DXCoilInletNode).Temp -
-                                                        state.dataLoopNodes->Node(cBVAV.DXCoilOutletNode).Temp)));
-                            if (cBVAV.DXIterationFailed < 1) {
-                                ++cBVAV.DXIterationFailed;
-                                ShowSevereError(
-                                    state,
-                                    EnergyPlus::format("DX unit part-load ratio calculation failed: part-load ratio limits exceeded, for unit = {}",
-                                                       cBVAV.DXCoolCoilName));
-                                ShowContinueErrorTimeStamp(
-                                    state,
-                                    EnergyPlus::format(
-                                        "An estimated part-load ratio of {:.3R}will be used and the simulation continues. Occurrence info:",
-                                        PartLoadFrac));
-                            } else {
-                                ShowRecurringWarningErrorAtEnd(state,
-                                                               cBVAV.Name + ", Part-load ratio calculation failed for DX unit error continues.",
-                                                               cBVAV.DXIterationFailedIndex,
-                                                               PartLoadFrac,
-                                                               PartLoadFrac);
-                            }
-                        }
+                        reportDXCoilPLRSolverError(
+                            state, cBVAV, SolFla, PartLoadFrac, /*checkWarmup=*/true,
+                            cBVAV.DXIterationExceeded, cBVAV.DXIterationExceededIndex,
+                            EnergyPlus::format("Iteration limit exceeded calculating DX unit part-load ratio, for unit = {}", cBVAV.DXCoolCoilName),
+                            cBVAV.Name + ", Iteration limit exceeded for DX unit part-load ratio calculation error continues.",
+                            cBVAV.DXIterationFailed, cBVAV.DXIterationFailedIndex,
+                            EnergyPlus::format("DX unit part-load ratio calculation failed: part-load ratio limits exceeded, for unit = {}", cBVAV.DXCoolCoilName),
+                            cBVAV.Name + ", Part-load ratio calculation failed for DX unit error continues.");
                     }
                     state.dataHVACUnitaryBypassVAV->SaveCompressorPLR = state.dataDXCoils->DXCoilPartLoadRatio(cBVAV.DXCoolCoilIndexNum);
                 } break;
