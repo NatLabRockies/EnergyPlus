@@ -157,6 +157,33 @@ namespace UnitarySystems {
             loadValue);
     }
 
+    // Helper: report "iteration limit exceeded" warning for sensible or latent PLR solver failures.
+    static void warnPLRMaxIterExceeded(EnergyPlusData &state,
+                                       std::string_view unitType,
+                                       std::string_view unitName,
+                                       std::string_view loadLabel, // "sensible" or "Latent"
+                                       std::string_view LoadLabel, // "Sensible" or "Latent"
+                                       int &maxIterIndex,
+                                       Real64 loadValue,
+                                       Real64 outputValue)
+    {
+        if (maxIterIndex == 0) {
+            ShowWarningMessage(state, EnergyPlus::format("Coil control failed to converge for {}:{}", unitType, unitName));
+            ShowContinueError(state, EnergyPlus::format("  Iteration limit exceeded in calculating system {} part-load ratio.", loadLabel));
+            ShowContinueErrorTimeStamp(
+                state,
+                EnergyPlus::format("{} load to be met = {:.2T} (watts), {} output = {:.2T} (watts), and the simulation continues.",
+                                   LoadLabel, loadValue, loadLabel, outputValue));
+        }
+        ShowRecurringWarningErrorAtEnd(
+            state,
+            std::string(unitType) + " \"" + std::string(unitName) + "\" - Iteration limit exceeded in calculating " +
+                std::string(loadLabel) + " part-load ratio error continues. " + std::string(LoadLabel) + " load statistics:",
+            maxIterIndex,
+            loadValue,
+            loadValue);
+    }
+
     static const std::string blankStdString;
 
     // Helper: set DataTotCapCurveIndex and DataIsDXCoil for a cooling coil based on its type.
@@ -9571,24 +9598,8 @@ namespace UnitarySystems {
                             } // IF(HeatingLoad)THEN
                             if (SolFlag == -1) {
                                 if (std::abs(ZoneLoad - TempSensOutput) > HVAC::SmallLoad) {
-                                    if (this->MaxIterIndex == 0) {
-                                        ShowWarningMessage(
-                                            state, EnergyPlus::format("Coil control failed to converge for {}:{}", this->UnitType, this->Name));
-                                        ShowContinueError(state, "  Iteration limit exceeded in calculating system sensible part-load ratio.");
-                                        ShowContinueErrorTimeStamp(
-                                            state,
-                                            EnergyPlus::format("Sensible load to be met = {:.2T} (watts), sensible output = {:.2T} "
-                                                               "(watts), and the simulation continues.",
-                                                               ZoneLoad,
-                                                               TempSensOutput));
-                                    }
-                                    ShowRecurringWarningErrorAtEnd(state,
-                                                                   this->UnitType + " \"" + this->Name +
-                                                                       "\" - Iteration limit exceeded in calculating sensible part-load ratio error "
-                                                                       "continues. Sensible load statistics:",
-                                                                   this->MaxIterIndex,
-                                                                   ZoneLoad,
-                                                                   ZoneLoad);
+                                    warnPLRMaxIterExceeded(
+                                        state, this->UnitType, this->Name, "sensible", "Sensible", this->MaxIterIndex, ZoneLoad, TempSensOutput);
                                 }
                             } else if (SolFlag == -2) {
                                 warnPLROutOfRange(state, this->UnitType, this->Name, "sensible", "Sensible", this->RegulaFalsiFailedIndex, ZoneLoad);
@@ -9989,23 +10000,8 @@ namespace UnitarySystems {
                                           CompressorONFlag);
             if (SolFlagLat == -1) {
                 if (std::abs(state.dataUnitarySystems->MoistureLoad - TempLatOutput) > HVAC::SmallLoad) {
-                    if (this->warnIndex.m_LatMaxIterIndex == 0) {
-                        ShowWarningMessage(state, EnergyPlus::format("Coil control failed to converge for {}:{}", this->UnitType, this->Name));
-                        ShowContinueError(state, "  Iteration limit exceeded in calculating system Latent part-load ratio.");
-                        ShowContinueErrorTimeStamp(
-                            state,
-                            EnergyPlus::format(
-                                "Latent load to be met = {:.2T} (watts), Latent output = {:.2T} (watts), and the simulation continues.",
-                                state.dataUnitarySystems->MoistureLoad,
-                                TempLatOutput));
-                    }
-                    ShowRecurringWarningErrorAtEnd(
-                        state,
-                        this->UnitType + " \"" + this->Name +
-                            "\" - Iteration limit exceeded in calculating Latent part-load ratio error continues. Latent load statistics:",
-                        this->warnIndex.m_LatMaxIterIndex,
-                        state.dataUnitarySystems->MoistureLoad,
-                        state.dataUnitarySystems->MoistureLoad);
+                    warnPLRMaxIterExceeded(state, this->UnitType, this->Name, "Latent", "Latent",
+                                           this->warnIndex.m_LatMaxIterIndex, state.dataUnitarySystems->MoistureLoad, TempLatOutput);
                 }
             } else if (SolFlagLat == -2) {
                 warnPLROutOfRange(state, this->UnitType, this->Name, "Latent", "Latent",
