@@ -27,3 +27,4 @@ src/EnergyPlus/SolarShading.cc:SHADOW
 src/EnergyPlus/Material.cc:GetMaterialData
 src/EnergyPlus/SimAirServingZones.cc:UpdateSysSizing
 src/EnergyPlus/CurveManager.cc:GetCurveInputData
+src/EnergyPlus/HVACVariableRefrigerantFlow.cc:InitVRF
