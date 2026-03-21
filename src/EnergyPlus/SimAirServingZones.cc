@@ -5222,6 +5222,38 @@ static void saveDuringDayCoolPeak(EnergyPlusData &state,
     sysSizing.MassFlowAtCoolPeak = sysSizing.CoolFlowSeq(TimeStepInDay);
 }
 
+// Accumulate heating zone flows, loads, and weighted return-air conditions for the DuringDay time step.
+// Used for both the centrally-heated-zones path and the cooled-zones-used-for-heating path.
+static void accumulateHeatZoneFlowsDuringDay(EnergyPlusData &state,
+                                             DataSizing::SystemSizingData &sysSizing,
+                                             int numZones,
+                                             Array1D_int const &ctrlZoneNums,
+                                             Array1D_int const &termUnitSizingIndices,
+                                             int TimeStepInDay,
+                                             Real64 &SysHeatRetTemp,
+                                             Real64 &SysHeatRetHumRat,
+                                             Real64 &SysHeatZoneAvgTemp)
+{
+    for (int zoneIdx = 1; zoneIdx <= numZones; ++zoneIdx) {
+        int CtrlZoneNum = ctrlZoneNums(zoneIdx);
+        int TermUnitSizingIndex = termUnitSizingIndices(zoneIdx);
+        auto &termUnitSizing = state.dataSize->TermUnitSizing(TermUnitSizingIndex);
+        auto &zoneSizing = state.dataSize->ZoneSizing(state.dataSize->CurOverallSimDay, CtrlZoneNum);
+        // sum up the heating mass flow rate for this time step
+        Real64 adjHeatFlowSeq =
+            termUnitSizing.applyTermUnitSizingHeatFlow(zoneSizing.HeatFlowSeq(TimeStepInDay), zoneSizing.HeatFlowSeqNoOA(TimeStepInDay));
+        Real64 adjustedFlow = adjHeatFlowSeq / (1.0 + termUnitSizing.InducRat);
+        sysSizing.HeatFlowSeq(TimeStepInDay) += adjustedFlow;
+        // sum up the zone heating load to be met by this system for this time step
+        sysSizing.SumZoneHeatLoadSeq(TimeStepInDay) +=
+            termUnitSizing.applyTermUnitSizingHeatLoad(zoneSizing.HeatLoadSeq(TimeStepInDay) / (1.0 + termUnitSizing.InducRat));
+        // calculate the return air temperature for this time step
+        SysHeatRetTemp += zoneSizing.HeatZoneRetTempSeq(TimeStepInDay) * adjustedFlow;
+        SysHeatRetHumRat += zoneSizing.HeatZoneHumRatSeq(TimeStepInDay) * adjustedFlow;
+        SysHeatZoneAvgTemp += zoneSizing.HeatZoneTempSeq(TimeStepInDay) * adjustedFlow;
+    }
+}
+
 void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIndicator)
 {
 
@@ -5590,24 +5622,10 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
 
             if (NumZonesHeated > 0) { // IF there are centrally heated zones
 
-                for (int ZonesHeatedNum = 1; ZonesHeatedNum <= NumZonesHeated; ++ZonesHeatedNum) { // loop over the heated zones
-                    int CtrlZoneNum = state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).HeatCtrlZoneNums(ZonesHeatedNum);
-                    int TermUnitSizingIndex = state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitHeatSizingIndex(ZonesHeatedNum);
-                    auto &termUnitSizing = state.dataSize->TermUnitSizing(TermUnitSizingIndex);
-                    auto &zoneSizing = state.dataSize->ZoneSizing(state.dataSize->CurOverallSimDay, CtrlZoneNum);
-                    // sum up the heating mass flow rate for this time step
-                    Real64 adjHeatFlowSeq =
-                        termUnitSizing.applyTermUnitSizingHeatFlow(zoneSizing.HeatFlowSeq(TimeStepInDay), zoneSizing.HeatFlowSeqNoOA(TimeStepInDay));
-                    Real64 adjustedFlow = adjHeatFlowSeq / (1.0 + termUnitSizing.InducRat);
-                    sysSizing.HeatFlowSeq(TimeStepInDay) += adjustedFlow;
-                    // sum up the zone heating load to be met by this system for this time step
-                    sysSizing.SumZoneHeatLoadSeq(TimeStepInDay) +=
-                        termUnitSizing.applyTermUnitSizingHeatLoad(zoneSizing.HeatLoadSeq(TimeStepInDay) / (1.0 + termUnitSizing.InducRat));
-                    // calculate the return air temperature for this time step
-                    SysHeatRetTemp += zoneSizing.HeatZoneRetTempSeq(TimeStepInDay) * adjustedFlow;
-                    SysHeatRetHumRat += zoneSizing.HeatZoneHumRatSeq(TimeStepInDay) * adjustedFlow;
-                    SysHeatZoneAvgTemp += zoneSizing.HeatZoneTempSeq(TimeStepInDay) * adjustedFlow;
-                } // end heated zones loop
+                accumulateHeatZoneFlowsDuringDay(state, sysSizing, NumZonesHeated,
+                                                 state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).HeatCtrlZoneNums,
+                                                 state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitHeatSizingIndex,
+                                                 TimeStepInDay, SysHeatRetTemp, SysHeatRetHumRat, SysHeatZoneAvgTemp);
                 // Get peak system heating load with coincident
                 if (std::abs(sysSizing.SysDesHeatLoad) > std::abs(sysSizing.SumZoneHeatLoadSeq(TimeStepInDay))) {
                     sysSizing.SysDesHeatLoad = sysSizing.SumZoneHeatLoadSeq(TimeStepInDay);
@@ -5675,24 +5693,10 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
 
             } else { // No centrally heated zones: use cooled zones
 
-                for (int ZonesCooledNum = 1; ZonesCooledNum <= NumZonesCooled; ++ZonesCooledNum) { // loop over the cooled zones
-                    int CtrlZoneNum = state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).CoolCtrlZoneNums(ZonesCooledNum);
-                    auto &termUnitSizing =
-                        state.dataSize->TermUnitSizing(state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex(ZonesCooledNum));
-                    auto &zoneSizing = state.dataSize->ZoneSizing(state.dataSize->CurOverallSimDay, CtrlZoneNum);
-                    // sum up the heating mass flow rate for this time step
-                    Real64 adjHeatFlowSeq =
-                        termUnitSizing.applyTermUnitSizingHeatFlow(zoneSizing.HeatFlowSeq(TimeStepInDay), zoneSizing.HeatFlowSeqNoOA(TimeStepInDay));
-                    Real64 adjustedFlow = adjHeatFlowSeq / (1.0 + termUnitSizing.InducRat);
-                    sysSizing.HeatFlowSeq(TimeStepInDay) += adjustedFlow;
-                    // sum up the zone heating load to be met by this system for this time step
-                    sysSizing.SumZoneHeatLoadSeq(TimeStepInDay) +=
-                        termUnitSizing.applyTermUnitSizingHeatLoad(zoneSizing.HeatLoadSeq(TimeStepInDay) / (1.0 + termUnitSizing.InducRat));
-                    // calculate the return air temperature for this time step
-                    SysHeatRetTemp += zoneSizing.HeatZoneRetTempSeq(TimeStepInDay) * adjustedFlow;
-                    SysHeatRetHumRat += zoneSizing.HeatZoneHumRatSeq(TimeStepInDay) * adjustedFlow;
-                    SysHeatZoneAvgTemp += zoneSizing.HeatZoneTempSeq(TimeStepInDay) * adjustedFlow;
-                } // end of cooled zones loop
+                accumulateHeatZoneFlowsDuringDay(state, sysSizing, NumZonesCooled,
+                                                 state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).CoolCtrlZoneNums,
+                                                 state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex,
+                                                 TimeStepInDay, SysHeatRetTemp, SysHeatRetHumRat, SysHeatZoneAvgTemp);
                 // Get peak system heating load with coincident
                 if (fabs(sysSizing.SysDesHeatLoad) < fabs(sysSizing.SumZoneHeatLoadSeq(TimeStepInDay))) {
                     sysSizing.SysDesHeatLoad = sysSizing.SumZoneHeatLoadSeq(TimeStepInDay);
