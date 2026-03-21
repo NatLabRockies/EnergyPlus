@@ -181,6 +181,42 @@ namespace LowTempRadiantSystem {
     [[maybe_unused]] constexpr std::array<std::string_view, (int)CircuitCalc::Num> circuitCalcNames = {"OnePerSurface", "CalculateFromCircuitLength"};
     constexpr std::array<std::string_view, (int)CircuitCalc::Num> circuitCalcNamesUC = {"ONEPERSURFACE", "CALCULATEFROMCIRCUITLENGTH"};
 
+    // Helper: check that no surface is assigned to more than one radiant system.
+    // Marks each surface (and its interzone partner) in AssignedAsRadiantSurface.
+    static void checkRadiantSurfaceAssignment(EnergyPlusData &state,
+                                              Array1D_bool &AssignedAsRadiantSurface,
+                                              int numSurfaces,
+                                              const Array1D_int &SurfacePtr,
+                                              bool &ErrorsFound)
+    {
+        auto &Surface = state.dataSurface->Surface;
+        for (int SurfNum = 1; SurfNum <= numSurfaces; ++SurfNum) {
+            int CheckSurfNum = SurfacePtr(SurfNum);
+            if (CheckSurfNum == 0) {
+                continue;
+            }
+            if (AssignedAsRadiantSurface(CheckSurfNum)) {
+                ShowSevereError(state,
+                                EnergyPlus::format("Surface {} is referenced by more than one radiant system--this is not allowed",
+                                                   Surface(CheckSurfNum).Name));
+                ErrorsFound = true;
+            } else {
+                AssignedAsRadiantSurface(CheckSurfNum) = true;
+            }
+            // Also check the other side of interzone partitions
+            if ((Surface(CheckSurfNum).ExtBoundCond > 0) && (Surface(CheckSurfNum).ExtBoundCond != CheckSurfNum)) {
+                if (AssignedAsRadiantSurface(Surface(CheckSurfNum).ExtBoundCond)) {
+                    ShowSevereError(state,
+                                    EnergyPlus::format("Interzone surface {} is referenced by more than one radiant system--this is not allowed",
+                                                       Surface(Surface(CheckSurfNum).ExtBoundCond).Name));
+                    ErrorsFound = true;
+                } else {
+                    AssignedAsRadiantSurface(Surface(CheckSurfNum).ExtBoundCond) = true;
+                }
+            }
+        }
+    }
+
     void SimLowTempRadiantSystem(EnergyPlusData &state,
                                  std::string_view CompName,     // name of the low temperature radiant system
                                  bool const FirstHVACIteration, // TRUE if 1st HVAC simulation of system timestep
@@ -1388,87 +1424,18 @@ namespace LowTempRadiantSystem {
         AssignedAsRadiantSurface.dimension(state.dataSurface->TotSurfaces, false);
 
         for (Item = 1; Item <= state.dataLowTempRadSys->NumOfHydrLowTempRadSys; ++Item) {
-            for (SurfNum = 1; SurfNum <= state.dataLowTempRadSys->HydrRadSys(Item).NumOfSurfaces; ++SurfNum) {
-                CheckSurfNum = state.dataLowTempRadSys->HydrRadSys(Item).SurfacePtr(SurfNum);
-                if (CheckSurfNum == 0) {
-                    continue;
-                }
-                if (AssignedAsRadiantSurface(CheckSurfNum)) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("Surface {} is referenced by more than one radiant system--this is not allowed",
-                                                       Surface(CheckSurfNum).Name));
-                    ErrorsFound = true;
-                } else {
-                    AssignedAsRadiantSurface(CheckSurfNum) = true;
-                }
-                // Also check the other side of interzone partitions
-                if ((Surface(CheckSurfNum).ExtBoundCond > 0) && (Surface(CheckSurfNum).ExtBoundCond != CheckSurfNum)) {
-                    if (AssignedAsRadiantSurface(Surface(CheckSurfNum).ExtBoundCond)) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("Interzone surface {} is referenced by more than one radiant system--this is not allowed",
-                                                           Surface(Surface(CheckSurfNum).ExtBoundCond).Name));
-                        ErrorsFound = true;
-                    } else {
-                        AssignedAsRadiantSurface(Surface(CheckSurfNum).ExtBoundCond) = true;
-                    }
-                }
-            }
+            auto &sys = state.dataLowTempRadSys->HydrRadSys(Item);
+            checkRadiantSurfaceAssignment(state, AssignedAsRadiantSurface, sys.NumOfSurfaces, sys.SurfacePtr, ErrorsFound);
         }
 
         for (Item = 1; Item <= state.dataLowTempRadSys->NumOfCFloLowTempRadSys; ++Item) {
-            for (SurfNum = 1; SurfNum <= state.dataLowTempRadSys->CFloRadSys(Item).NumOfSurfaces; ++SurfNum) {
-                CheckSurfNum = state.dataLowTempRadSys->CFloRadSys(Item).SurfacePtr(SurfNum);
-                if (CheckSurfNum == 0) {
-                    continue;
-                }
-                if (AssignedAsRadiantSurface(CheckSurfNum)) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("Surface {} is referenced by more than one radiant system--this is not allowed",
-                                                       Surface(CheckSurfNum).Name));
-                    ErrorsFound = true;
-                } else {
-                    AssignedAsRadiantSurface(CheckSurfNum) = true;
-                }
-                // Also check the other side of interzone partitions
-                if ((Surface(CheckSurfNum).ExtBoundCond > 0) && (Surface(CheckSurfNum).ExtBoundCond != CheckSurfNum)) {
-                    if (AssignedAsRadiantSurface(Surface(CheckSurfNum).ExtBoundCond)) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("Interzone surface {} is referenced by more than one radiant system--this is not allowed",
-                                                           Surface(Surface(CheckSurfNum).ExtBoundCond).Name));
-                        ErrorsFound = true;
-                    } else {
-                        AssignedAsRadiantSurface(Surface(CheckSurfNum).ExtBoundCond) = true;
-                    }
-                }
-            }
+            auto &sys = state.dataLowTempRadSys->CFloRadSys(Item);
+            checkRadiantSurfaceAssignment(state, AssignedAsRadiantSurface, sys.NumOfSurfaces, sys.SurfacePtr, ErrorsFound);
         }
 
         for (Item = 1; Item <= state.dataLowTempRadSys->NumOfElecLowTempRadSys; ++Item) {
-            for (SurfNum = 1; SurfNum <= state.dataLowTempRadSys->ElecRadSys(Item).NumOfSurfaces; ++SurfNum) {
-                CheckSurfNum = state.dataLowTempRadSys->ElecRadSys(Item).SurfacePtr(SurfNum);
-                if (CheckSurfNum == 0) {
-                    continue;
-                }
-                if (AssignedAsRadiantSurface(CheckSurfNum)) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("Surface {} is referenced by more than one radiant system--this is not allowed",
-                                                       Surface(CheckSurfNum).Name));
-                    ErrorsFound = true;
-                } else {
-                    AssignedAsRadiantSurface(CheckSurfNum) = true;
-                }
-                // Also check the other side of interzone partitions
-                if ((Surface(CheckSurfNum).ExtBoundCond > 0) && (Surface(CheckSurfNum).ExtBoundCond != CheckSurfNum)) {
-                    if (AssignedAsRadiantSurface(Surface(CheckSurfNum).ExtBoundCond)) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("Interzone surface {} is referenced by more than one radiant system--this is not allowed",
-                                                           Surface(Surface(CheckSurfNum).ExtBoundCond).Name));
-                        ErrorsFound = true;
-                    } else {
-                        AssignedAsRadiantSurface(Surface(CheckSurfNum).ExtBoundCond) = true;
-                    }
-                }
-            }
+            auto &sys = state.dataLowTempRadSys->ElecRadSys(Item);
+            checkRadiantSurfaceAssignment(state, AssignedAsRadiantSurface, sys.NumOfSurfaces, sys.SurfacePtr, ErrorsFound);
         }
 
         AssignedAsRadiantSurface.deallocate();
