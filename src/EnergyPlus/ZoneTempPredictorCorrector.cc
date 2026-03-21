@@ -191,6 +191,28 @@ Array1D_string const AdaptiveComfortModelTypes(8,
                                                 "AdaptiveCEN15251CategoryIIUpperLine",
                                                 "AdaptiveCEN15251CategoryIIIUpperLine"});
 
+// Helper: emit a "control type not valid for this zone" error for a missing setpoint schedule.
+// Used by both TStat and ComfortTStat schedule validation.
+static void showMissingSetptSchedError(EnergyPlusData &state,
+                                       Sched::Schedule const *setptTypeSched,
+                                       HVAC::SetptType setptType,
+                                       std::string_view controlTypeName,
+                                       std::string_view zoneName,
+                                       std::string_view zoneRealName,
+                                       bool &ErrorsFound)
+{
+    if (setptTypeSched->hasVal(state, (int)setptType)) {
+        ShowSevereError(state, EnergyPlus::format("Control Type Schedule={}", setptTypeSched->Name));
+        ShowContinueError(state,
+                          EnergyPlus::format("..specifies {} ({}) as the control type. Not valid for this zone.",
+                                             (int)setptType,
+                                             setptTypeNames[(int)setptType]));
+        ShowContinueError(state, EnergyPlus::format("..reference {}={}", controlTypeName, zoneName));
+        ShowContinueError(state, EnergyPlus::format("..reference ZONE={}", zoneRealName));
+        ErrorsFound = true;
+    }
+}
+
 // Helper: read a single schedule field, look it up, and optionally validate min/max range.
 // Assigns the result to *target. Returns true if an error was found.
 static bool readSetptSchedField(EnergyPlusData &state,
@@ -703,45 +725,24 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
 
             if (!setpt.isUsed) {
                 // Catch early issues
-                if (tempZone.setptTypeSched->hasVal(state, (int)setptType)) {
-                    ShowSevereError(state, EnergyPlus::format("Control Type Schedule={}", tempZone.setptTypeSched->Name));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("..specifies {} ({}) as the control type. Not valid for this zone.",
-                                                         (int)setptType,
-                                                         setptTypeNames[(int)setptType]));
-                    ShowContinueError(state, EnergyPlus::format("..reference {}={}", cZControlTypes((int)ZoneControlTypes::TStat), tempZone.Name));
-                    ShowContinueError(state, EnergyPlus::format("..reference ZONE={}", tempZone.ZoneName));
-                    ErrorsFound = true;
-                }
+                showMissingSetptSchedError(state, tempZone.setptTypeSched, setptType,
+                                           cZControlTypes((int)ZoneControlTypes::TStat), tempZone.Name, tempZone.ZoneName, ErrorsFound);
                 continue;
             }
 
-            if (setpt.heatSetptSched == nullptr &&
-                (setptType == HVAC::SetptType::SingleHeat || setptType == HVAC::SetptType::SingleHeatCool ||
-                 setptType == HVAC::SetptType::DualHeatCool) &&
-                tempZone.setptTypeSched->hasVal(state, (int)setptType)) {
-                ShowSevereError(state, EnergyPlus::format("Control Type Schedule={}", tempZone.setptTypeSched->Name));
-                ShowContinueError(state,
-                                  EnergyPlus::format("..specifies {} ({}) as the control type. Not valid for this zone.",
-                                                     (int)setptType,
-                                                     setptTypeNames[(int)setptType]));
-                ShowContinueError(state, EnergyPlus::format("..reference {}={}", cZControlTypes((int)ZoneControlTypes::TStat), tempZone.Name));
-                ShowContinueError(state, EnergyPlus::format("..reference ZONE={}", tempZone.ZoneName));
-                ErrorsFound = true;
+            bool needsHeat = (setptType == HVAC::SetptType::SingleHeat || setptType == HVAC::SetptType::SingleHeatCool ||
+                              setptType == HVAC::SetptType::DualHeatCool);
+            bool needsCool = (setptType == HVAC::SetptType::SingleCool || setptType == HVAC::SetptType::SingleHeatCool ||
+                              setptType == HVAC::SetptType::DualHeatCool);
+
+            if (needsHeat && setpt.heatSetptSched == nullptr) {
+                showMissingSetptSchedError(state, tempZone.setptTypeSched, setptType,
+                                           cZControlTypes((int)ZoneControlTypes::TStat), tempZone.Name, tempZone.ZoneName, ErrorsFound);
             }
 
-            if (setpt.coolSetptSched == nullptr &&
-                (setptType == HVAC::SetptType::SingleCool || setptType == HVAC::SetptType::SingleHeatCool ||
-                 setptType == HVAC::SetptType::DualHeatCool) &&
-                tempZone.setptTypeSched->hasVal(state, (int)setptType)) {
-                ShowSevereError(state, EnergyPlus::format("Control Type Schedule={}", tempZone.setptTypeSched->Name));
-                ShowContinueError(state,
-                                  EnergyPlus::format("..specifies {} ({}) as the control type. Not valid for this zone.",
-                                                     (int)setptType,
-                                                     setptTypeNames[(int)setptType]));
-                ShowContinueError(state, EnergyPlus::format("..reference {}={}", cZControlTypes((int)ZoneControlTypes::TStat), tempZone.Name));
-                ShowContinueError(state, EnergyPlus::format("..reference ZONE={}", tempZone.ZoneName));
-                ErrorsFound = true;
+            if (needsCool && setpt.coolSetptSched == nullptr) {
+                showMissingSetptSchedError(state, tempZone.setptTypeSched, setptType,
+                                           cZControlTypes((int)ZoneControlTypes::TStat), tempZone.Name, tempZone.ZoneName, ErrorsFound);
             }
         } // for (setptType)
     }
@@ -1193,32 +1194,19 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
 
             TComfortControlTypes(ComfortControlledZoneNum).DidHave[(int)setptType] = true;
 
-            if (setpt.heatSetptSched == nullptr &&
-                (setptType == HVAC::SetptType::SingleHeat || setptType == HVAC::SetptType::SingleHeatCool ||
-                 setptType == HVAC::SetptType::DualHeatCool) &&
-                comfortZone.setptTypeSched->hasVal(state, (int)setptType)) {
-                ShowSevereError(state, EnergyPlus::format("Control Type Schedule={}", comfortZone.setptTypeSched->Name));
-                ShowContinueError(state,
-                                  EnergyPlus::format("..specifies {} ({}) as the control type. Not valid for this zone.",
-                                                     (int)setptType,
-                                                     setptTypeNames[(int)setptType]));
-                ShowContinueError(state, EnergyPlus::format("..reference {}={}", cZControlTypes((int)ZoneControlTypes::TStat), comfortZone.Name));
-                ShowContinueError(state, EnergyPlus::format("..reference ZONE={}", comfortZone.ZoneName));
-                ErrorsFound = true;
+            bool needsHeat = (setptType == HVAC::SetptType::SingleHeat || setptType == HVAC::SetptType::SingleHeatCool ||
+                              setptType == HVAC::SetptType::DualHeatCool);
+            bool needsCool = (setptType == HVAC::SetptType::SingleCool || setptType == HVAC::SetptType::SingleHeatCool ||
+                              setptType == HVAC::SetptType::DualHeatCool);
+
+            if (needsHeat && setpt.heatSetptSched == nullptr) {
+                showMissingSetptSchedError(state, comfortZone.setptTypeSched, setptType,
+                                           cZControlTypes((int)ZoneControlTypes::TStat), comfortZone.Name, comfortZone.ZoneName, ErrorsFound);
             }
 
-            if (setpt.coolSetptSched == nullptr &&
-                (setptType == HVAC::SetptType::SingleCool || setptType == HVAC::SetptType::SingleHeatCool ||
-                 setptType == HVAC::SetptType::DualHeatCool) &&
-                comfortZone.setptTypeSched->hasVal(state, (int)setptType)) {
-                ShowSevereError(state, EnergyPlus::format("Control Type Schedule={}", comfortZone.setptTypeSched->Name));
-                ShowContinueError(state,
-                                  EnergyPlus::format("..specifies {} ({}) as the control type. Not valid for this zone.",
-                                                     (int)setptType,
-                                                     setptTypeNames[(int)setptType]));
-                ShowContinueError(state, EnergyPlus::format("..reference {}={}", cZControlTypes((int)ZoneControlTypes::TStat), comfortZone.Name));
-                ShowContinueError(state, EnergyPlus::format("..reference ZONE={}", comfortZone.ZoneName));
-                ErrorsFound = true;
+            if (needsCool && setpt.coolSetptSched == nullptr) {
+                showMissingSetptSchedError(state, comfortZone.setptTypeSched, setptType,
+                                           cZControlTypes((int)ZoneControlTypes::TStat), comfortZone.Name, comfortZone.ZoneName, ErrorsFound);
             }
         } // for (setptType)
     } // for (ComfortControlledZoneNum)
