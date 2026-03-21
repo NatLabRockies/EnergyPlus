@@ -524,7 +524,6 @@ namespace LowTempRadiantSystem {
         Array1D_string cAlphaFields;           // Alpha field names
         Array1D_string cNumericFields;         // Numeric field names
         Array1D_bool AssignedAsRadiantSurface; // Set to true when a surface is part of a radiant system
-        int CheckSurfNum;                      // Surface number to check to see if it has already been used by a radiant system
         bool ErrorsFound(false);               // Set to true if errors in input, fatal at end of routine
         int IOStatus;                          // Used in GetObjectItem
         int Item;                              // Item to be "gotten"
@@ -541,7 +540,6 @@ namespace LowTempRadiantSystem {
         Array1D_bool lNumericBlanks;           // Logical array, numeric field input BLANK = .TRUE.
 
         auto &Zone = state.dataHeatBal->Zone;
-        auto &Surface = state.dataSurface->Surface;
 
         Array1D_string VarFlowRadDesignNames;
         Array1D_string CFlowRadDesignNames;
