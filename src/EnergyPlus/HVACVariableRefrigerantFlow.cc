@@ -4584,6 +4584,46 @@ void CheckVRFTUNodeConnections(EnergyPlusData &state, int const VRFTUNum, bool &
     }
 }
 
+// Helper: warn when OAT exceeds VRF cooling/heating mode limits
+static void warnOATLimitExceeded(EnergyPlusData &state,
+                                 int const VRFCond,
+                                 Real64 const OutsideDryBulbTemp,
+                                 std::string_view modeLabel,
+                                 Real64 const minOAT,
+                                 Real64 const maxOAT,
+                                 int &tempLimitIndex,
+                                 Array1D_bool const &coilAvailable)
+{
+    if (!any(coilAvailable)) return;
+
+    if (tempLimitIndex == 0) {
+        ShowWarningMessage(state,
+                           EnergyPlus::format("{} \"{}\".",
+                                              cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum),
+                                              state.dataHVACVarRefFlow->VRF(VRFCond).Name));
+        ShowContinueError(state,
+                          EnergyPlus::format("...InitVRF: VRF Heat Pump Min/Max Operating Temperature in {} Mode Limits have been exceeded "
+                                             "and VRF system is disabled.",
+                                             modeLabel));
+        if (state.dataHVACVarRefFlow->VRF(VRFCond).CondenserType == DataHeatBalance::RefrigCondenserType::Water) {
+            ShowContinueError(state, EnergyPlus::format("... Outdoor Unit Inlet Water Temperature           = {:.3T}", OutsideDryBulbTemp));
+        } else {
+            ShowContinueError(state, EnergyPlus::format("... Outdoor Unit Inlet Air Temperature             = {:.3T}", OutsideDryBulbTemp));
+        }
+        ShowContinueError(state, EnergyPlus::format("... {} Minimum Outdoor Unit Inlet Temperature = {:.3T}", modeLabel, minOAT));
+        ShowContinueError(state, EnergyPlus::format("... {} Maximum Outdoor Unit Inlet Temperature = {:.3T}", modeLabel, maxOAT));
+        ShowContinueErrorTimeStamp(state, EnergyPlus::format("... Check VRF Heat Pump Min/Max Outdoor Temperature in {} Mode limits.", modeLabel));
+    }
+    ShowRecurringWarningErrorAtEnd(state,
+                                   std::string(cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum)) + " \"" +
+                                       state.dataHVACVarRefFlow->VRF(VRFCond).Name +
+                                       "\" -- Exceeded VRF Heat Pump min/max " + std::string(modeLabel) +
+                                       " temperature limit error continues...",
+                                   tempLimitIndex,
+                                   OutsideDryBulbTemp,
+                                   OutsideDryBulbTemp);
+}
+
 // Helper: dispatch CalcVRF or CalcVRF_FluidTCtrl with zero load (coil-off capacity test)
 static void calcVRFCoilOff(EnergyPlusData &state,
                            int const VRFTUNum,
@@ -5774,73 +5814,18 @@ void InitVRF(EnergyPlusData &state, int const VRFTUNum, int const ZoneNum, bool 
                         any(state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HeatingCoilPresent)) {
                         state.dataHVACVarRefFlow->HeatingLoad(VRFCond) = true;
                     } else {
-                        if (any(state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).CoolingCoilAvailable)) {
-                            if (state.dataHVACVarRefFlow->VRF(VRFCond).CoolingMaxTempLimitIndex == 0) {
-                                ShowWarningMessage(state,
-                                                   EnergyPlus::format("{} \"{}\".",
-                                                                      cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum),
-                                                                      state.dataHVACVarRefFlow->VRF(VRFCond).Name));
-                                ShowContinueError(state,
-                                                  "...InitVRF: VRF Heat Pump Min/Max Operating Temperature in Cooling Mode Limits have been "
-                                                  "exceeded and VRF system is disabled.");
-                                if (state.dataHVACVarRefFlow->VRF(VRFCond).CondenserType == DataHeatBalance::RefrigCondenserType::Water) {
-                                    ShowContinueError(
-                                        state, EnergyPlus::format("... Outdoor Unit Inlet Water Temperature           = {:.3T}", OutsideDryBulbTemp));
-                                } else {
-                                    ShowContinueError(
-                                        state,
-                                        EnergyPlus::format("... Outdoor Unit Inlet Air Temperature                 = {:.3T}", OutsideDryBulbTemp));
-                                }
-                                ShowContinueError(state,
-                                                  EnergyPlus::format("... Cooling Minimum Outdoor Unit Inlet Temperature = {:.3T}",
-                                                                     state.dataHVACVarRefFlow->VRF(VRFCond).MinOATCooling));
-                                ShowContinueError(state,
-                                                  EnergyPlus::format("... Cooling Maximum Outdoor Unit Inlet Temperature = {:.3T}",
-                                                                     state.dataHVACVarRefFlow->VRF(VRFCond).MaxOATCooling));
-                                ShowContinueErrorTimeStamp(state, "... Check VRF Heat Pump Min/Max Outdoor Temperature in Cooling Mode limits.");
-                            }
-                            ShowRecurringWarningErrorAtEnd(state,
-                                                           std::string(cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum)) + " \"" +
-                                                               state.dataHVACVarRefFlow->VRF(VRFCond).Name +
-                                                               "\" -- Exceeded VRF Heat Pump min/max cooling temperature limit error continues...",
-                                                           state.dataHVACVarRefFlow->VRF(VRFCond).CoolingMaxTempLimitIndex,
-                                                           OutsideDryBulbTemp,
-                                                           OutsideDryBulbTemp);
-                        }
+                        warnOATLimitExceeded(state, VRFCond, OutsideDryBulbTemp, "Cooling",
+                            state.dataHVACVarRefFlow->VRF(VRFCond).MinOATCooling,
+                            state.dataHVACVarRefFlow->VRF(VRFCond).MaxOATCooling,
+                            state.dataHVACVarRefFlow->VRF(VRFCond).CoolingMaxTempLimitIndex,
+                            state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).CoolingCoilAvailable);
                     }
                 } else {
-                    if (any(state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).CoolingCoilAvailable)) {
-                        if (state.dataHVACVarRefFlow->VRF(VRFCond).CoolingMaxTempLimitIndex == 0) {
-                            ShowWarningMessage(state,
-                                               EnergyPlus::format("{} \"{}\".",
-                                                                  cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum),
-                                                                  state.dataHVACVarRefFlow->VRF(VRFCond).Name));
-                            ShowContinueError(state,
-                                              "...InitVRF: VRF Heat Pump Min/Max Operating Temperature in Cooling Mode Limits have been exceeded "
-                                              "and VRF system is disabled.");
-                            if (state.dataHVACVarRefFlow->VRF(VRFCond).CondenserType == DataHeatBalance::RefrigCondenserType::Water) {
-                                ShowContinueError(
-                                    state, EnergyPlus::format("... Outdoor Unit Inlet Water Temperature           = {:.3T}", OutsideDryBulbTemp));
-                            } else {
-                                ShowContinueError(
-                                    state, EnergyPlus::format("... Outdoor Unit Inlet Air Temperature                 = {:.3T}", OutsideDryBulbTemp));
-                            }
-                            ShowContinueError(state,
-                                              EnergyPlus::format("... Cooling Minimum Outdoor Unit Inlet Temperature = {:.3T}",
-                                                                 state.dataHVACVarRefFlow->VRF(VRFCond).MinOATCooling));
-                            ShowContinueError(state,
-                                              EnergyPlus::format("... Cooling Maximum Outdoor Unit Inlet Temperature = {:.3T}",
-                                                                 state.dataHVACVarRefFlow->VRF(VRFCond).MaxOATCooling));
-                            ShowContinueErrorTimeStamp(state, "... Check VRF Heat Pump Min/Max Outdoor Temperature in Cooling Mode limits.");
-                        }
-                        ShowRecurringWarningErrorAtEnd(state,
-                                                       std::string(cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum)) + " \"" +
-                                                           state.dataHVACVarRefFlow->VRF(VRFCond).Name +
-                                                           "\" -- Exceeded VRF Heat Pump min/max cooling temperature limit error continues...",
-                                                       state.dataHVACVarRefFlow->VRF(VRFCond).CoolingMaxTempLimitIndex,
-                                                       OutsideDryBulbTemp,
-                                                       OutsideDryBulbTemp);
-                    }
+                    warnOATLimitExceeded(state, VRFCond, OutsideDryBulbTemp, "Cooling",
+                        state.dataHVACVarRefFlow->VRF(VRFCond).MinOATCooling,
+                        state.dataHVACVarRefFlow->VRF(VRFCond).MaxOATCooling,
+                        state.dataHVACVarRefFlow->VRF(VRFCond).CoolingMaxTempLimitIndex,
+                        state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).CoolingCoilAvailable);
                 }
             }
         } else if (state.dataHVACVarRefFlow->HeatingLoad(VRFCond)) {
@@ -5873,72 +5858,18 @@ void InitVRF(EnergyPlusData &state, int const VRFTUNum, int const ZoneNum, bool 
                         any(state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).CoolingCoilPresent)) {
                         state.dataHVACVarRefFlow->CoolingLoad(VRFCond) = true;
                     } else {
-                        if (any(state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HeatingCoilAvailable)) {
-                            if (state.dataHVACVarRefFlow->VRF(VRFCond).HeatingMaxTempLimitIndex == 0) {
-                                ShowWarningMessage(state,
-                                                   EnergyPlus::format("{} \"{}\".",
-                                                                      cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum),
-                                                                      state.dataHVACVarRefFlow->VRF(VRFCond).Name));
-                                ShowContinueError(state,
-                                                  "...InitVRF: VRF Heat Pump Min/Max Operating Temperature in Heating Mode Limits have been "
-                                                  "exceeded and VRF system is disabled.");
-                                if (state.dataHVACVarRefFlow->VRF(VRFCond).CondenserType == DataHeatBalance::RefrigCondenserType::Water) {
-                                    ShowContinueError(
-                                        state, EnergyPlus::format("... Outdoor Unit Inlet Water Temperature           = {:.3T}", OutsideDryBulbTemp));
-                                } else {
-                                    ShowContinueError(
-                                        state, EnergyPlus::format("... Outdoor Unit Inlet Air Temperature             = {:.3T}", OutsideDryBulbTemp));
-                                }
-                                ShowContinueError(state,
-                                                  EnergyPlus::format("... Heating Minimum Outdoor Unit Inlet Temperature = {:.3T}",
-                                                                     state.dataHVACVarRefFlow->VRF(VRFCond).MinOATHeating));
-                                ShowContinueError(state,
-                                                  EnergyPlus::format("... Heating Maximum Outdoor Unit Inlet Temperature = {:.3T}",
-                                                                     state.dataHVACVarRefFlow->VRF(VRFCond).MaxOATHeating));
-                                ShowContinueErrorTimeStamp(state, "... Check VRF Heat Pump Min/Max Outdoor Temperature in Heating Mode limits.");
-                            }
-                            ShowRecurringWarningErrorAtEnd(state,
-                                                           std::string(cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum)) + " \"" +
-                                                               state.dataHVACVarRefFlow->VRF(VRFCond).Name +
-                                                               "\" -- Exceeded VRF Heat Pump min/max heating temperature limit error continues...",
-                                                           state.dataHVACVarRefFlow->VRF(VRFCond).HeatingMaxTempLimitIndex,
-                                                           OutsideDryBulbTemp,
-                                                           OutsideDryBulbTemp);
-                        }
+                        warnOATLimitExceeded(state, VRFCond, OutsideDryBulbTemp, "Heating",
+                            state.dataHVACVarRefFlow->VRF(VRFCond).MinOATHeating,
+                            state.dataHVACVarRefFlow->VRF(VRFCond).MaxOATHeating,
+                            state.dataHVACVarRefFlow->VRF(VRFCond).HeatingMaxTempLimitIndex,
+                            state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HeatingCoilAvailable);
                     }
                 } else {
-                    if (any(state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HeatingCoilAvailable)) {
-                        if (state.dataHVACVarRefFlow->VRF(VRFCond).HeatingMaxTempLimitIndex == 0) {
-                            ShowWarningMessage(state,
-                                               EnergyPlus::format("{} \"{}\".",
-                                                                  cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum),
-                                                                  state.dataHVACVarRefFlow->VRF(VRFCond).Name));
-                            ShowContinueError(state,
-                                              "...InitVRF: VRF Heat Pump Min/Max Operating Temperature in Heating Mode Limits have been exceeded "
-                                              "and VRF system is disabled.");
-                            if (state.dataHVACVarRefFlow->VRF(VRFCond).CondenserType == DataHeatBalance::RefrigCondenserType::Water) {
-                                ShowContinueError(
-                                    state, EnergyPlus::format("... Outdoor Unit Inlet Water Temperature           = {:.3T}", OutsideDryBulbTemp));
-                            } else {
-                                ShowContinueError(
-                                    state, EnergyPlus::format("... Outdoor Unit Inlet Air Temperature             = {:.3T}", OutsideDryBulbTemp));
-                            }
-                            ShowContinueError(state,
-                                              EnergyPlus::format("... Heating Minimum Outdoor Unit Inlet Temperature = {:.3T}",
-                                                                 state.dataHVACVarRefFlow->VRF(VRFCond).MinOATHeating));
-                            ShowContinueError(state,
-                                              EnergyPlus::format("... Heating Maximum Outdoor Unit Inlet Temperature = {:.3T}",
-                                                                 state.dataHVACVarRefFlow->VRF(VRFCond).MaxOATHeating));
-                            ShowContinueErrorTimeStamp(state, "... Check VRF Heat Pump Min/Max Outdoor Temperature in Heating Mode limits.");
-                        }
-                        ShowRecurringWarningErrorAtEnd(state,
-                                                       std::string(cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum)) + " \"" +
-                                                           state.dataHVACVarRefFlow->VRF(VRFCond).Name +
-                                                           "\" -- Exceeded VRF Heat Pump min/max heating temperature limit error continues...",
-                                                       state.dataHVACVarRefFlow->VRF(VRFCond).HeatingMaxTempLimitIndex,
-                                                       OutsideDryBulbTemp,
-                                                       OutsideDryBulbTemp);
-                    }
+                    warnOATLimitExceeded(state, VRFCond, OutsideDryBulbTemp, "Heating",
+                        state.dataHVACVarRefFlow->VRF(VRFCond).MinOATHeating,
+                        state.dataHVACVarRefFlow->VRF(VRFCond).MaxOATHeating,
+                        state.dataHVACVarRefFlow->VRF(VRFCond).HeatingMaxTempLimitIndex,
+                        state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HeatingCoilAvailable);
                 }
             }
         }
