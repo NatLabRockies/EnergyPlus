@@ -6509,6 +6509,28 @@ static void sizeMultispeedFanFlowRates(EnergyPlusData &state,
     }
 }
 
+// Helper: compute piping correction factor for cooling or heating.
+static Real64 calcVRFPipingCorrectionFactor(EnergyPlusData &state,
+                                            int pcfLengthCurvePtr,
+                                            Real64 equivPipeLngth,
+                                            Real64 combinationRatio,
+                                            Real64 vertPipeLngth,
+                                            Real64 pcfHeight)
+{
+    using Curve::CurveValue;
+    if (pcfLengthCurvePtr > 0) {
+        Real64 curveVal;
+        if (state.dataCurveManager->curves(pcfLengthCurvePtr)->numDims == 2) {
+            curveVal = CurveValue(state, pcfLengthCurvePtr, equivPipeLngth, combinationRatio);
+        } else {
+            curveVal = CurveValue(state, pcfLengthCurvePtr, equivPipeLngth);
+        }
+        return min(1.0, max(0.5, curveVal + vertPipeLngth * pcfHeight));
+    } else {
+        return min(1.0, max(0.5, 1.0 + vertPipeLngth * pcfHeight));
+    }
+}
+
 // Helper: report autosize-vs-hardsize for a VRF condenser field, with optional sizing-mismatch warning.
 // fieldRef is updated to desSizeValue when autosized; desLabel / userLabel are the report strings.
 // fmtPrecision selects the format width for warnings (2 => {:.2R}, 5 => {:.5R}).
@@ -7478,59 +7500,21 @@ void SizeVRF(EnergyPlusData &state, int const VRFTUNum)
             }
 
             // calculate the piping correction factors only once
-            if (state.dataHVACVarRefFlow->VRF(VRFCond).PCFLengthCoolPtr > 0) {
-                {
-                    if (state.dataCurveManager->curves(state.dataHVACVarRefFlow->VRF(VRFCond).PCFLengthCoolPtr)->numDims == 2) {
-                        state.dataHVACVarRefFlow->VRF(VRFCond).PipingCorrectionCooling =
-                            min(1.0,
-                                max(0.5,
-                                    CurveValue(state,
-                                               state.dataHVACVarRefFlow->VRF(VRFCond).PCFLengthCoolPtr,
-                                               state.dataHVACVarRefFlow->VRF(VRFCond).EquivPipeLngthCool,
-                                               state.dataHVACVarRefFlow->VRF(VRFCond).CoolingCombinationRatio) +
-                                        state.dataHVACVarRefFlow->VRF(VRFCond).VertPipeLngth * state.dataHVACVarRefFlow->VRF(VRFCond).PCFHeightCool));
-                    } else {
-                        state.dataHVACVarRefFlow->VRF(VRFCond).PipingCorrectionCooling =
-                            min(1.0,
-                                max(0.5,
-                                    CurveValue(state,
-                                               state.dataHVACVarRefFlow->VRF(VRFCond).PCFLengthCoolPtr,
-                                               state.dataHVACVarRefFlow->VRF(VRFCond).EquivPipeLngthCool) +
-                                        state.dataHVACVarRefFlow->VRF(VRFCond).VertPipeLngth * state.dataHVACVarRefFlow->VRF(VRFCond).PCFHeightCool));
-                    }
-                }
-            } else {
-                state.dataHVACVarRefFlow->VRF(VRFCond).PipingCorrectionCooling = min(
-                    1.0,
-                    max(0.5, (1.0 + state.dataHVACVarRefFlow->VRF(VRFCond).VertPipeLngth * state.dataHVACVarRefFlow->VRF(VRFCond).PCFHeightCool)));
-            }
+            state.dataHVACVarRefFlow->VRF(VRFCond).PipingCorrectionCooling = calcVRFPipingCorrectionFactor(
+                state,
+                state.dataHVACVarRefFlow->VRF(VRFCond).PCFLengthCoolPtr,
+                state.dataHVACVarRefFlow->VRF(VRFCond).EquivPipeLngthCool,
+                state.dataHVACVarRefFlow->VRF(VRFCond).CoolingCombinationRatio,
+                state.dataHVACVarRefFlow->VRF(VRFCond).VertPipeLngth,
+                state.dataHVACVarRefFlow->VRF(VRFCond).PCFHeightCool);
 
-            if (state.dataHVACVarRefFlow->VRF(VRFCond).PCFLengthHeatPtr > 0) {
-                {
-                    if (state.dataCurveManager->curves(state.dataHVACVarRefFlow->VRF(VRFCond).PCFLengthHeatPtr)->numDims == 2) {
-                        state.dataHVACVarRefFlow->VRF(VRFCond).PipingCorrectionHeating =
-                            min(1.0,
-                                max(0.5,
-                                    CurveValue(state,
-                                               state.dataHVACVarRefFlow->VRF(VRFCond).PCFLengthHeatPtr,
-                                               state.dataHVACVarRefFlow->VRF(VRFCond).EquivPipeLngthHeat,
-                                               state.dataHVACVarRefFlow->VRF(VRFCond).HeatingCombinationRatio) +
-                                        state.dataHVACVarRefFlow->VRF(VRFCond).VertPipeLngth * state.dataHVACVarRefFlow->VRF(VRFCond).PCFHeightHeat));
-                    } else {
-                        state.dataHVACVarRefFlow->VRF(VRFCond).PipingCorrectionHeating =
-                            min(1.0,
-                                max(0.5,
-                                    CurveValue(state,
-                                               state.dataHVACVarRefFlow->VRF(VRFCond).PCFLengthHeatPtr,
-                                               state.dataHVACVarRefFlow->VRF(VRFCond).EquivPipeLngthHeat) +
-                                        state.dataHVACVarRefFlow->VRF(VRFCond).VertPipeLngth * state.dataHVACVarRefFlow->VRF(VRFCond).PCFHeightHeat));
-                    }
-                }
-            } else {
-                state.dataHVACVarRefFlow->VRF(VRFCond).PipingCorrectionHeating = min(
-                    1.0,
-                    max(0.5, (1.0 + state.dataHVACVarRefFlow->VRF(VRFCond).VertPipeLngth * state.dataHVACVarRefFlow->VRF(VRFCond).PCFHeightHeat)));
-            }
+            state.dataHVACVarRefFlow->VRF(VRFCond).PipingCorrectionHeating = calcVRFPipingCorrectionFactor(
+                state,
+                state.dataHVACVarRefFlow->VRF(VRFCond).PCFLengthHeatPtr,
+                state.dataHVACVarRefFlow->VRF(VRFCond).EquivPipeLngthHeat,
+                state.dataHVACVarRefFlow->VRF(VRFCond).HeatingCombinationRatio,
+                state.dataHVACVarRefFlow->VRF(VRFCond).VertPipeLngth,
+                state.dataHVACVarRefFlow->VRF(VRFCond).PCFHeightHeat);
 
             state.dataHVACVarRefFlow->VRF(VRFCond).RatedCoolingPower =
                 state.dataHVACVarRefFlow->VRF(VRFCond).CoolingCapacity / state.dataHVACVarRefFlow->VRF(VRFCond).CoolingCOP;
