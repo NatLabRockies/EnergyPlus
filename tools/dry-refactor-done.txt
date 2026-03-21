@@ -47,3 +47,4 @@ src/EnergyPlus/DesiccantDehumidifiers.cc:GetDesiccantDehumidifierInput
 src/EnergyPlus/UnitarySystem.cc:controlUnitarySystemOutput
 src/EnergyPlus/DXCoils.cc:SizeDXCoil
 src/EnergyPlus/HVACUnitaryBypassVAV.cc:CalcCBVAV
+src/EnergyPlus/VariableSpeedCoils.cc:SizeVarSpeedCoil
