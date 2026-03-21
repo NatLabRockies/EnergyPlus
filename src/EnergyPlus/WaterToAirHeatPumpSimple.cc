@@ -1183,6 +1183,48 @@ namespace WaterToAirHeatPumpSimple {
         state.dataHeatBal->HeatReclaimSimple_WAHPCoil(HPNum).AvailCapacity = 0.0;
     }
 
+    // Helper: emit common "sizing statistics" warning lines for sensible > total capacity diagnosis.
+    static void showCapacitySizingStats(EnergyPlusData &state,
+                                        Real64 RatedMixWetBulb,
+                                        Real64 MixWetBulb,
+                                        Real64 RatedEntWaterTemp,
+                                        Real64 RatedratioTWB,
+                                        Real64 RatedratioTS,
+                                        Real64 ratioTWB,
+                                        Real64 ratioTS,
+                                        Real64 RatedTotCapTempModFac,
+                                        Real64 PeakTotCapTempModFac)
+    {
+        ShowContinueError(state, "See eio file for further details.");
+        ShowContinueError(state, "Check Total and Sensible Cooling Capacity coefficients in curves to ensure they are accurate.");
+        ShowContinueError(state, "Check Zone and System Sizing objects to verify sizing inputs.");
+        ShowContinueError(state, "Sizing statistics:");
+        ShowContinueError(state, EnergyPlus::format("Rated entering Air Wet-Bulb Temperature = {:.3T} C", RatedMixWetBulb));
+        ShowContinueError(state, EnergyPlus::format("Peak entering Air Wet-Bulb Temperature = {:.3T} C", MixWetBulb));
+        ShowContinueError(state, EnergyPlus::format("Entering Water Temperature used = {:.3T} C", RatedEntWaterTemp));
+        ShowContinueError(state, "Design air and water flow rates = 1.0");
+        ShowContinueError(
+            state, EnergyPlus::format("Rated ratio of load-side air wet-bulb temperature to 283.15 C (Rated ratioTWB) = {:.3T}", RatedratioTWB));
+        ShowContinueError(
+            state, EnergyPlus::format("Rated ratio of source-side inlet water temperature to 283.15 C (Rated ratioTS)  = {:.3T}", RatedratioTS));
+        ShowContinueError(
+            state, EnergyPlus::format("Peak ratio of load-side air wet-bulb temperature to 283.15 C (Peak ratioTWB) = {:.3T}", ratioTWB));
+        ShowContinueError(
+            state, EnergyPlus::format("Peak ratio of source-side inlet water temperature to 283.15 C (Peak ratioTS)  = {:.3T}", ratioTS));
+        ShowContinueError(state, EnergyPlus::format("Rated Total Cooling Capacity Modifier = {:.5T}", RatedTotCapTempModFac));
+        ShowContinueError(state, EnergyPlus::format("Peak Design Total Cooling Capacity Modifier = {:.5T}", PeakTotCapTempModFac));
+        ShowContinueError(state,
+                          "...Rated Total Cooling Capacity at Rated Conditions = Total Peak Design Load * Rated Total "
+                          "Cooling Capacity Modifier  / "
+                          "Peak Design Total Cooling Capacity Modifier");
+        ShowContinueError(state,
+                          "...Rated Sensible Cooling Capacity at Rated Conditions = Peak Design Sensible Load * Rated "
+                          "Sensible Cooling "
+                          "Capacity Modifier  / Peak Design Sensible Cooling Capacity Modifier");
+        ShowContinueError(state, "Carefully review the Load Side Total, Sensible, and Latent heat transfer rates");
+        ShowContinueError(state, "... to ensure they meet the expected manufacturers performance specifications.");
+    }
+
     // Helper: look up plant sizing index and compute water temperature ratio.
     // Returns the plant sizing index (> 0 on success). On failure, shows errors and sets ErrorsFound.
     static int getPlantSizingIndexAndRatioTS(EnergyPlusData &state,
@@ -2122,38 +2164,18 @@ namespace WaterToAirHeatPumpSimple {
                     ShowContinueError(state,
                                       EnergyPlus::format("Rated Total Cooling Capacity at Rated Conditions    = {:.2T} W",
                                                          simpleWatertoAirHP.RatedCapCoolAtRatedCdts));
-                    ShowContinueError(state, "See eio file for further details.");
-                    ShowContinueError(state, "Check Total and Sensible Cooling Capacity coefficients in curves to ensure they are accurate.");
-                    ShowContinueError(state, "Check Zone and System Sizing objects to verify sizing inputs.");
-                    ShowContinueError(state, "Sizing statistics:");
-                    ShowContinueError(state, EnergyPlus::format("Rated entering Air Wet-Bulb Temperature = {:.3T} C", RatedMixWetBulb));
-                    ShowContinueError(state, EnergyPlus::format("Peak entering Air Wet-Bulb Temperature = {:.3T} C", MixWetBulb));
-                    ShowContinueError(state, EnergyPlus::format("Entering Water Temperature used = {:.3T} C", simpleWatertoAirHP.RatedEntWaterTemp));
-                    ShowContinueError(state, "Design air and water flow rates = 1.0");
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Rated ratio of load-side air wet-bulb temperature to 283.15 C (Rated ratioTWB) = {:.3T}", RatedratioTWB));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Rated ratio of source-side inlet water temperature to 283.15 C (Rated ratioTS)  = {:.3T}", RatedratioTS));
-                    ShowContinueError(
-                        state, EnergyPlus::format("Peak ratio of load-side air wet-bulb temperature to 283.15 C (Peak ratioTWB) = {:.3T}", ratioTWB));
-                    ShowContinueError(
-                        state, EnergyPlus::format("Peak ratio of source-side inlet water temperature to 283.15 C (Peak ratioTS)  = {:.3T}", ratioTS));
-                    ShowContinueError(state, EnergyPlus::format("Rated Total Cooling Capacity Modifier = {:.5T}", RatedTotCapTempModFac));
-                    ShowContinueError(state, EnergyPlus::format("Peak Design Total Cooling Capacity Modifier = {:.5T}", PeakTotCapTempModFac));
+                    showCapacitySizingStats(state,
+                                           RatedMixWetBulb,
+                                           MixWetBulb,
+                                           simpleWatertoAirHP.RatedEntWaterTemp,
+                                           RatedratioTWB,
+                                           RatedratioTS,
+                                           ratioTWB,
+                                           ratioTS,
+                                           RatedTotCapTempModFac,
+                                           PeakTotCapTempModFac);
                     ShowContinueError(state, EnergyPlus::format("Rated Sensible Cooling Capacity Modifier = {:.5T}", RatedSensCapTempModFac));
                     ShowContinueError(state, EnergyPlus::format("Peak Design Sensible Cooling Capacity Modifier = {:.5T}", PeakSensCapTempModFac));
-                    ShowContinueError(state,
-                                      "...Rated Total Cooling Capacity at Rated Conditions = Total Peak Design Load * Rated Total "
-                                      "Cooling Capacity Modifier  / "
-                                      "Peak Design Total Cooling Capacity Modifier");
-                    ShowContinueError(state,
-                                      "...Rated Sensible Cooling Capacity at Rated Conditions = Peak Design Sensible Load * Rated "
-                                      "Sensible Cooling "
-                                      "Capacity Modifier  / Peak Design Sensible Cooling Capacity Modifier");
-                    ShowContinueError(state, "Carefully review the Load Side Total, Sensible, and Latent heat transfer rates");
-                    ShowContinueError(state, "... to ensure they meet the expected manufacturers performance specifications.");
                 }
             } else if (RatedCapCoolTotalAutoSized) {
                 if (simpleWatertoAirHP.RatedCapCoolSensDesAtRatedCdts > simpleWatertoAirHP.RatedCapCoolAtRatedCdts) {
@@ -2167,36 +2189,16 @@ namespace WaterToAirHeatPumpSimple {
                         state, EnergyPlus::format("Rated Sensible Cooling Capacity = {:.2T} W", simpleWatertoAirHP.RatedCapCoolSensDesAtRatedCdts));
                     ShowContinueError(state,
                                       EnergyPlus::format("Rated Total Cooling Capacity    = {:.2T} W", simpleWatertoAirHP.RatedCapCoolAtRatedCdts));
-                    ShowContinueError(state, "See eio file for further details.");
-                    ShowContinueError(state, "Check Total and Sensible Cooling Capacity coefficients in curves to ensure they are accurate.");
-                    ShowContinueError(state, "Check Zone and System Sizing objects to verify sizing inputs.");
-                    ShowContinueError(state, "Sizing statistics for Total Cooling Capacity:");
-                    ShowContinueError(state, EnergyPlus::format("Rated entering Air Wet-Bulb Temperature = {:.3T} C", RatedMixWetBulb));
-                    ShowContinueError(state, EnergyPlus::format("Peak entering Air Wet-Bulb Temperature = {:.3T} C", MixWetBulb));
-                    ShowContinueError(state, EnergyPlus::format("Entering Water Temperature used = {:.3T} C", simpleWatertoAirHP.RatedEntWaterTemp));
-                    ShowContinueError(state, "Design air and water flow rates = 1.0");
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Rated ratio of load-side air wet-bulb temperature to 283.15 C (Rated ratioTWB) = {:.3T}", RatedratioTWB));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Rated ratio of source-side inlet water temperature to 283.15 C (Rated ratioTS)  = {:.3T}", RatedratioTS));
-                    ShowContinueError(
-                        state, EnergyPlus::format("Peak ratio of load-side air wet-bulb temperature to 283.15 C (Peak ratioTWB) = {:.3T}", ratioTWB));
-                    ShowContinueError(
-                        state, EnergyPlus::format("Peak ratio of source-side inlet water temperature to 283.15 C (Peak ratioTS)  = {:.3T}", ratioTS));
-                    ShowContinueError(state, EnergyPlus::format("Rated Total Cooling Capacity Modifier = {:.5T}", RatedTotCapTempModFac));
-                    ShowContinueError(state, EnergyPlus::format("Peak Design Total Cooling Capacity Modifier = {:.5T}", PeakTotCapTempModFac));
-                    ShowContinueError(state,
-                                      "...Rated Total Cooling Capacity at Rated Conditions = Total Peak Design Load * Rated Total "
-                                      "Cooling Capacity Modifier  / "
-                                      "Peak Design Total Cooling Capacity Modifier");
-                    ShowContinueError(state,
-                                      "...Rated Sensible Cooling Capacity at Rated Conditions = Peak Design Sensible Load * Rated "
-                                      "Sensible Cooling "
-                                      "Capacity Modifier  / Peak Design Sensible Cooling Capacity Modifier");
-                    ShowContinueError(state, "Carefully review the Load Side Total, Sensible, and Latent heat transfer rates");
-                    ShowContinueError(state, "... to ensure they meet the expected manufacturers performance specifications.");
+                    showCapacitySizingStats(state,
+                                           RatedMixWetBulb,
+                                           MixWetBulb,
+                                           simpleWatertoAirHP.RatedEntWaterTemp,
+                                           RatedratioTWB,
+                                           RatedratioTS,
+                                           ratioTWB,
+                                           ratioTS,
+                                           RatedTotCapTempModFac,
+                                           PeakTotCapTempModFac);
                 }
             }
 
