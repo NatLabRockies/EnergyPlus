@@ -4681,6 +4681,56 @@ static void warnAndCapFlowRate(EnergyPlusData &state,
     }
 }
 
+// Helper: When a VRF TU coil-off output overshoots the zone setpoint,
+// switch air flow rates to the target mode, re-evaluate coil-off output,
+// and set the zone load request and heat-recovery flags accordingly.
+static void adjustVRFOvershootFlowAndLoad(EnergyPlusData &state,
+                                           int const VRFTUNum,
+                                           int const VRFCond,
+                                           int const InNode,
+                                           int const TUListIndex,
+                                           int const IndexToTUInTUList,
+                                           bool const FirstHVACIteration,
+                                           bool const overshootIsHeating,
+                                           Real64 const LoadSP,
+                                           Real64 &TempOutput,
+                                           Real64 &OnOffAirFlowRatio,
+                                           Real64 &QZnReq)
+{
+    auto &vrfTU = state.dataHVACVarRefFlow->VRFTU(VRFTUNum);
+    auto &tuList = state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex);
+
+    Real64 targetRetFlow = overshootIsHeating ? vrfTU.MaxHeatAirMassFlow : vrfTU.MaxCoolAirMassFlow;
+    Real64 targetOAFlow = overshootIsHeating ? vrfTU.HeatOutAirMassFlow : vrfTU.CoolOutAirMassFlow;
+    bool lastModeWasTarget = overshootIsHeating ? state.dataHVACVarRefFlow->LastModeHeating(VRFCond)
+                                                : state.dataHVACVarRefFlow->LastModeCooling(VRFCond);
+
+    Real64 SuppHeatCoilLoad = 0.0;
+
+    if (!lastModeWasTarget) {
+        if (vrfTU.OAMixerUsed) {
+            state.dataLoopNodes->Node(vrfTU.VRFTUOAMixerRetNodeNum).MassFlowRate = targetRetFlow;
+            state.dataLoopNodes->Node(vrfTU.VRFTUOAMixerOANodeNum).MassFlowRate = targetOAFlow;
+            MixedAir::SimOAMixer(state, vrfTU.OAMixerName, vrfTU.OAMixerIndex);
+        } else {
+            state.dataLoopNodes->Node(InNode).MassFlowRate = targetRetFlow;
+        }
+
+        calcVRFCoilOff(state, VRFTUNum, VRFCond, FirstHVACIteration, TempOutput, OnOffAirFlowRatio, SuppHeatCoilLoad);
+
+        bool stillOvershoots = overshootIsHeating ? (TempOutput < LoadSP) : (TempOutput > LoadSP);
+        if (stillOvershoots) {
+            QZnReq = LoadSP;
+            tuList.HRHeatRequest(IndexToTUInTUList) = overshootIsHeating;
+            tuList.HRCoolRequest(IndexToTUInTUList) = !overshootIsHeating;
+        }
+    } else {
+        QZnReq = LoadSP;
+        tuList.HRHeatRequest(IndexToTUInTUList) = overshootIsHeating;
+        tuList.HRCoolRequest(IndexToTUInTUList) = !overshootIsHeating;
+    }
+}
+
 void InitVRF(EnergyPlusData &state, int const VRFTUNum, int const ZoneNum, bool const FirstHVACIteration, Real64 &OnOffAirFlowRatio, Real64 &QZnReq)
 {
 
@@ -6002,36 +6052,11 @@ void InitVRF(EnergyPlusData &state, int const VRFTUNum, int const ZoneNum, bool 
         if (TempOutput < 0.0 && LoadToHeatingSP < 0.0) {
             // If the net cooling capacity overshoots the heating setpoint count as heating load
             if (TempOutput < LoadToHeatingSP) {
-                // Don't count as heating load unless mode is allowed. Also check for floating zone.
                 if (state.dataHeatBalFanSys->TempControlType(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ZoneNum) != HVAC::SetptType::SingleCool &&
                     state.dataHeatBalFanSys->TempControlType(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ZoneNum) != HVAC::SetptType::Uncontrolled) {
-                    if (!state.dataHVACVarRefFlow->LastModeHeating(VRFCond)) {
-                        // system last operated in cooling mode, change air flows and repeat coil off capacity test
-                        if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).OAMixerUsed) {
-                            state.dataLoopNodes->Node(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUOAMixerRetNodeNum).MassFlowRate =
-                                state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxHeatAirMassFlow;
-                            state.dataLoopNodes->Node(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUOAMixerOANodeNum).MassFlowRate =
-                                state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatOutAirMassFlow;
-                            MixedAir::SimOAMixer(
-                                state, state.dataHVACVarRefFlow->VRFTU(VRFTUNum).OAMixerName, state.dataHVACVarRefFlow->VRFTU(VRFTUNum).OAMixerIndex);
-                        } else {
-                            state.dataLoopNodes->Node(InNode).MassFlowRate = state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxHeatAirMassFlow;
-                        }
-
-                        calcVRFCoilOff(state, VRFTUNum, VRFCond, FirstHVACIteration, TempOutput, OnOffAirFlowRatio, SuppHeatCoilLoad);
-
-                        // if zone temp will overshoot, pass the LoadToHeatingSP as the load to meet
-                        if (TempOutput < LoadToHeatingSP) {
-                            QZnReq = LoadToHeatingSP;
-                            state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HRHeatRequest(IndexToTUInTUList) = true;
-                            state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HRCoolRequest(IndexToTUInTUList) = false;
-                        }
-                    } else {
-                        // last mode was heating, zone temp will overshoot heating setpoint, reset QznReq to LoadtoHeatingSP
-                        QZnReq = LoadToHeatingSP;
-                        state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HRHeatRequest(IndexToTUInTUList) = true;
-                        state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HRCoolRequest(IndexToTUInTUList) = false;
-                    }
+                    adjustVRFOvershootFlowAndLoad(
+                        state, VRFTUNum, VRFCond, InNode, TUListIndex, IndexToTUInTUList,
+                        FirstHVACIteration, true, LoadToHeatingSP, TempOutput, OnOffAirFlowRatio, QZnReq);
                 }
             } else if (TempOutput > LoadToCoolingSP && LoadToCoolingSP < 0.0) {
                 //       If the net cooling capacity does not meet the zone cooling load enable cooling
@@ -6049,66 +6074,18 @@ void InitVRF(EnergyPlusData &state, int const VRFTUNum, int const ZoneNum, bool 
         } else if (TempOutput > 0.0 && LoadToCoolingSP > 0.0) {
             //       If the net heating capacity overshoots the cooling setpoint count as cooling load
             if (TempOutput > LoadToCoolingSP) {
-                //         Don't count as cooling load unless mode is allowed. Also check for floating zone.
                 if (state.dataHeatBalFanSys->TempControlType(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ZoneNum) != HVAC::SetptType::SingleHeat &&
                     state.dataHeatBalFanSys->TempControlType(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ZoneNum) != HVAC::SetptType::Uncontrolled) {
-                    if (!state.dataHVACVarRefFlow->LastModeCooling(VRFCond)) {
-                        if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).OAMixerUsed) {
-                            state.dataLoopNodes->Node(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUOAMixerRetNodeNum).MassFlowRate =
-                                state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxCoolAirMassFlow;
-                            state.dataLoopNodes->Node(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUOAMixerOANodeNum).MassFlowRate =
-                                state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolOutAirMassFlow;
-                            MixedAir::SimOAMixer(
-                                state, state.dataHVACVarRefFlow->VRFTU(VRFTUNum).OAMixerName, state.dataHVACVarRefFlow->VRFTU(VRFTUNum).OAMixerIndex);
-                        } else {
-                            state.dataLoopNodes->Node(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUInletNodeNum).MassFlowRate =
-                                state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxCoolAirMassFlow;
-                        }
-
-                        calcVRFCoilOff(state, VRFTUNum, VRFCond, FirstHVACIteration, TempOutput, OnOffAirFlowRatio, SuppHeatCoilLoad);
-
-                        // if zone temp will overshoot, pass the LoadToCoolingSP as the load to meet
-                        if (TempOutput > LoadToCoolingSP) {
-                            QZnReq = LoadToCoolingSP;
-                            state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HRCoolRequest(IndexToTUInTUList) = true;
-                            state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HRHeatRequest(IndexToTUInTUList) = false;
-                        }
-                    } else {
-                        QZnReq = LoadToCoolingSP;
-                        state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HRCoolRequest(IndexToTUInTUList) = true;
-                        state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HRHeatRequest(IndexToTUInTUList) = false;
-                    }
+                    adjustVRFOvershootFlowAndLoad(
+                        state, VRFTUNum, VRFCond, InNode, TUListIndex, IndexToTUInTUList,
+                        FirstHVACIteration, false, LoadToCoolingSP, TempOutput, OnOffAirFlowRatio, QZnReq);
                 }
             } else if (TempOutput < LoadToHeatingSP) {
-                //         Don't count as heating load unless mode is allowed. Also check for floating zone.
                 if (state.dataHeatBalFanSys->TempControlType(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ZoneNum) != HVAC::SetptType::SingleCool &&
                     state.dataHeatBalFanSys->TempControlType(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ZoneNum) != HVAC::SetptType::Uncontrolled) {
-                    if (!state.dataHVACVarRefFlow->LastModeHeating(VRFCond)) {
-                        if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).OAMixerUsed) {
-                            state.dataLoopNodes->Node(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUOAMixerRetNodeNum).MassFlowRate =
-                                state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxHeatAirMassFlow;
-                            state.dataLoopNodes->Node(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUOAMixerOANodeNum).MassFlowRate =
-                                state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatOutAirMassFlow;
-                            MixedAir::SimOAMixer(
-                                state, state.dataHVACVarRefFlow->VRFTU(VRFTUNum).OAMixerName, state.dataHVACVarRefFlow->VRFTU(VRFTUNum).OAMixerIndex);
-                        } else {
-                            state.dataLoopNodes->Node(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUInletNodeNum).MassFlowRate =
-                                state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxHeatAirMassFlow;
-                        }
-
-                        calcVRFCoilOff(state, VRFTUNum, VRFCond, FirstHVACIteration, TempOutput, OnOffAirFlowRatio, SuppHeatCoilLoad);
-
-                        // if zone temp will overshoot, pass the LoadToHeatingSP as the load to meet
-                        if (TempOutput < LoadToHeatingSP) {
-                            QZnReq = LoadToHeatingSP;
-                            state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HRHeatRequest(IndexToTUInTUList) = true;
-                            state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HRCoolRequest(IndexToTUInTUList) = false;
-                        }
-                    } else {
-                        QZnReq = LoadToHeatingSP;
-                        state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HRHeatRequest(IndexToTUInTUList) = true;
-                        state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HRCoolRequest(IndexToTUInTUList) = false;
-                    }
+                    adjustVRFOvershootFlowAndLoad(
+                        state, VRFTUNum, VRFCond, InNode, TUListIndex, IndexToTUInTUList,
+                        FirstHVACIteration, true, LoadToHeatingSP, TempOutput, OnOffAirFlowRatio, QZnReq);
                 }
             } else if (TempOutput > LoadToHeatingSP && TempOutput < LoadToCoolingSP) {
                 //         If the net capacity does not overshoot either setpoint
@@ -6128,33 +6105,9 @@ void InitVRF(EnergyPlusData &state, int const VRFTUNum, int const ZoneNum, bool 
             //       Don't count as cooling load unless mode is allowed. Also check for floating zone.
             if (state.dataHeatBalFanSys->TempControlType(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ZoneNum) != HVAC::SetptType::SingleHeat &&
                 state.dataHeatBalFanSys->TempControlType(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ZoneNum) != HVAC::SetptType::Uncontrolled) {
-                if (!state.dataHVACVarRefFlow->LastModeCooling(VRFCond)) {
-                    if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).OAMixerUsed) {
-                        state.dataLoopNodes->Node(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUOAMixerRetNodeNum).MassFlowRate =
-                            state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxCoolAirMassFlow;
-                        state.dataLoopNodes->Node(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUOAMixerOANodeNum).MassFlowRate =
-                            state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolOutAirMassFlow;
-                        MixedAir::SimOAMixer(
-                            state, state.dataHVACVarRefFlow->VRFTU(VRFTUNum).OAMixerName, state.dataHVACVarRefFlow->VRFTU(VRFTUNum).OAMixerIndex);
-                    } else {
-                        state.dataLoopNodes->Node(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUInletNodeNum).MassFlowRate =
-                            state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxCoolAirMassFlow;
-                    }
-
-                    calcVRFCoilOff(state, VRFTUNum, VRFCond, FirstHVACIteration, TempOutput, OnOffAirFlowRatio, SuppHeatCoilLoad);
-
-                    // if zone temp will overshoot, pass the LoadToCoolingSP as the load to meet
-                    if (TempOutput > LoadToCoolingSP) {
-                        QZnReq = LoadToCoolingSP;
-                        state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HRCoolRequest(IndexToTUInTUList) = true;
-                        state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HRHeatRequest(IndexToTUInTUList) = false;
-                    }
-                    // last mode was cooling, zone temp will overshoot cooling setpoint, reset QznReq to LoadtoCoolingSP
-                } else {
-                    QZnReq = LoadToCoolingSP;
-                    state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HRCoolRequest(IndexToTUInTUList) = true;
-                    state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HRHeatRequest(IndexToTUInTUList) = false;
-                }
+                adjustVRFOvershootFlowAndLoad(
+                    state, VRFTUNum, VRFCond, InNode, TUListIndex, IndexToTUInTUList,
+                    FirstHVACIteration, false, LoadToCoolingSP, TempOutput, OnOffAirFlowRatio, QZnReq);
             }
             // If the Terminal Unit has a net cooling capacity (TempOutput < 0) and
             // the zone temp is below the Tstat heating setpoint (QToHeatSetPt > 0)
@@ -6163,33 +6116,9 @@ void InitVRF(EnergyPlusData &state, int const VRFTUNum, int const ZoneNum, bool 
             // Don't count as heating load unless mode is allowed. Also check for floating zone.
             if (state.dataHeatBalFanSys->TempControlType(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ZoneNum) != HVAC::SetptType::SingleCool &&
                 state.dataHeatBalFanSys->TempControlType(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ZoneNum) != HVAC::SetptType::Uncontrolled) {
-                if (!state.dataHVACVarRefFlow->LastModeHeating(VRFCond)) {
-                    // system last operated in cooling mode, change air flows and repeat coil off capacity test
-                    if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).OAMixerUsed) {
-                        state.dataLoopNodes->Node(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUOAMixerRetNodeNum).MassFlowRate =
-                            state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxHeatAirMassFlow;
-                        state.dataLoopNodes->Node(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUOAMixerOANodeNum).MassFlowRate =
-                            state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatOutAirMassFlow;
-                        MixedAir::SimOAMixer(
-                            state, state.dataHVACVarRefFlow->VRFTU(VRFTUNum).OAMixerName, state.dataHVACVarRefFlow->VRFTU(VRFTUNum).OAMixerIndex);
-                    } else {
-                        state.dataLoopNodes->Node(InNode).MassFlowRate = state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxHeatAirMassFlow;
-                    }
-
-                    calcVRFCoilOff(state, VRFTUNum, VRFCond, FirstHVACIteration, TempOutput, OnOffAirFlowRatio, SuppHeatCoilLoad);
-
-                    // if zone temp will overshoot, pass the LoadToHeatingSP as the load to meet
-                    if (TempOutput < LoadToHeatingSP) {
-                        QZnReq = LoadToHeatingSP;
-                        state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HRHeatRequest(IndexToTUInTUList) = true;
-                        state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HRCoolRequest(IndexToTUInTUList) = false;
-                    }
-                } else {
-                    // last mode was heating, zone temp will overshoot heating setpoint, reset QznReq to LoadtoHeatingSP
-                    QZnReq = LoadToHeatingSP;
-                    state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HRHeatRequest(IndexToTUInTUList) = true;
-                    state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HRCoolRequest(IndexToTUInTUList) = false;
-                }
+                adjustVRFOvershootFlowAndLoad(
+                    state, VRFTUNum, VRFCond, InNode, TUListIndex, IndexToTUInTUList,
+                    FirstHVACIteration, true, LoadToHeatingSP, TempOutput, OnOffAirFlowRatio, QZnReq);
             }
         }
         // test that the system is active if constant fan logic enables system when thermostat control logic did not
