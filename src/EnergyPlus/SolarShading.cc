@@ -864,6 +864,54 @@ void checkScheduledSurfacePresent(EnergyPlusData &state)
     }
 }
 
+// Helper: set up window glazing transmittance and profile angle output variables (used by both ExtSolar and non-ExtSolar paths)
+static void setupWindowGlazingOutputVars(EnergyPlusData &state, int SurfLoop, std::string const &surfName)
+{
+    auto &s_surf = state.dataSurface;
+    SetupOutputVariable(state,
+                        "Surface Window Solar Horizontal Profile Angle",
+                        Constant::Units::deg,
+                        s_surf->SurfWinProfileAngHor(SurfLoop),
+                        OutputProcessor::TimeStepType::Zone,
+                        OutputProcessor::StoreType::Average,
+                        surfName);
+    SetupOutputVariable(state,
+                        "Surface Window Solar Vertical Profile Angle",
+                        Constant::Units::deg,
+                        s_surf->SurfWinProfileAngVert(SurfLoop),
+                        OutputProcessor::TimeStepType::Zone,
+                        OutputProcessor::StoreType::Average,
+                        surfName);
+    SetupOutputVariable(state,
+                        "Surface Window Glazing Beam to Beam Solar Transmittance",
+                        Constant::Units::None,
+                        s_surf->SurfWinGlTsolBmBm(SurfLoop),
+                        OutputProcessor::TimeStepType::Zone,
+                        OutputProcessor::StoreType::Average,
+                        surfName);
+    SetupOutputVariable(state,
+                        "Surface Window Glazing Beam to Diffuse Solar Transmittance",
+                        Constant::Units::None,
+                        s_surf->SurfWinGlTsolBmDif(SurfLoop),
+                        OutputProcessor::TimeStepType::Zone,
+                        OutputProcessor::StoreType::Average,
+                        surfName);
+    SetupOutputVariable(state,
+                        "Surface Window Glazing Diffuse to Diffuse Solar Transmittance",
+                        Constant::Units::None,
+                        s_surf->SurfWinGlTsolDifDif(SurfLoop),
+                        OutputProcessor::TimeStepType::Zone,
+                        OutputProcessor::StoreType::Average,
+                        surfName);
+    SetupOutputVariable(state,
+                        "Surface Window Model Solver Iteration Count",
+                        Constant::Units::None,
+                        s_surf->SurfWinWindowCalcIterationsRep(SurfLoop),
+                        OutputProcessor::TimeStepType::Zone,
+                        OutputProcessor::StoreType::Average,
+                        surfName);
+}
+
 // Helper: set up frame and divider output variables for a window surface (used by both ExtSolar and non-ExtSolar paths)
 static void setupFrameDividerOutputVars(EnergyPlusData &state, int SurfLoop, std::string const &surfName)
 {
@@ -1982,49 +2030,7 @@ void AllocateModuleArrays(EnergyPlusData &state)
 
                 setupScreenOutputVars(state, SurfLoop, surf.Name);
 
-                // CurrentModuleObject='Windows'
-                SetupOutputVariable(state,
-                                    "Surface Window Solar Horizontal Profile Angle",
-                                    Constant::Units::deg,
-                                    s_surf->SurfWinProfileAngHor(SurfLoop),
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    surf.Name);
-                SetupOutputVariable(state,
-                                    "Surface Window Solar Vertical Profile Angle",
-                                    Constant::Units::deg,
-                                    s_surf->SurfWinProfileAngVert(SurfLoop),
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    surf.Name);
-                SetupOutputVariable(state,
-                                    "Surface Window Glazing Beam to Beam Solar Transmittance",
-                                    Constant::Units::None,
-                                    s_surf->SurfWinGlTsolBmBm(SurfLoop),
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    surf.Name);
-                SetupOutputVariable(state,
-                                    "Surface Window Glazing Beam to Diffuse Solar Transmittance",
-                                    Constant::Units::None,
-                                    s_surf->SurfWinGlTsolBmDif(SurfLoop),
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    surf.Name);
-                SetupOutputVariable(state,
-                                    "Surface Window Glazing Diffuse to Diffuse Solar Transmittance",
-                                    Constant::Units::None,
-                                    s_surf->SurfWinGlTsolDifDif(SurfLoop),
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    surf.Name);
-                SetupOutputVariable(state,
-                                    "Surface Window Model Solver Iteration Count",
-                                    Constant::Units::None,
-                                    s_surf->SurfWinWindowCalcIterationsRep(SurfLoop),
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    surf.Name);
+                setupWindowGlazingOutputVars(state, SurfLoop, surf.Name);
             } else { // Not ExtSolar
                 if (state.dataGlobal->DisplayAdvancedReportVariables) {
                     // CurrentModuleObject='InteriorWindows(Advanced)'
@@ -2270,48 +2276,7 @@ void AllocateModuleArrays(EnergyPlusData &state)
 
                     setupScreenOutputVars(state, SurfLoop, surf.Name);
 
-                    SetupOutputVariable(state,
-                                        "Surface Window Solar Horizontal Profile Angle",
-                                        Constant::Units::deg,
-                                        s_surf->SurfWinProfileAngHor(SurfLoop),
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        surf.Name);
-                    SetupOutputVariable(state,
-                                        "Surface Window Solar Vertical Profile Angle",
-                                        Constant::Units::deg,
-                                        s_surf->SurfWinProfileAngVert(SurfLoop),
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        surf.Name);
-                    SetupOutputVariable(state,
-                                        "Surface Window Glazing Beam to Beam Solar Transmittance",
-                                        Constant::Units::None,
-                                        s_surf->SurfWinGlTsolBmBm(SurfLoop),
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        surf.Name);
-                    SetupOutputVariable(state,
-                                        "Surface Window Glazing Beam to Diffuse Solar Transmittance",
-                                        Constant::Units::None,
-                                        s_surf->SurfWinGlTsolBmDif(SurfLoop),
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        surf.Name);
-                    SetupOutputVariable(state,
-                                        "Surface Window Glazing Diffuse to Diffuse Solar Transmittance",
-                                        Constant::Units::None,
-                                        s_surf->SurfWinGlTsolDifDif(SurfLoop),
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        surf.Name);
-                    SetupOutputVariable(state,
-                                        "Surface Window Model Solver Iteration Count",
-                                        Constant::Units::None,
-                                        s_surf->SurfWinWindowCalcIterationsRep(SurfLoop),
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        surf.Name);
+                    setupWindowGlazingOutputVars(state, SurfLoop, surf.Name);
                 }
             } // end non extsolar reporting as advanced variables
         } // Window Reporting
