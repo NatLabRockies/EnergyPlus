@@ -200,6 +200,22 @@ namespace FaultsManager {
 
     constexpr std::array<std::string_view, static_cast<int>(FouledCoil::Num)> FouledCoilNamesUC{"FOULEDUARATED", "FOULINGFACTOR"};
 
+    // Helper: emit a warning that a chiller is not water-cooled and the fault model won't apply.
+    static void showChillerNotWaterCooledWarning(EnergyPlusData &state,
+                                                 std::string const &faultObjType,
+                                                 std::string const &faultName,
+                                                 std::string const &fieldName,
+                                                 std::string const &fieldValue)
+    {
+        ShowWarningError(state,
+                         EnergyPlus::format("{} = \"{}\" invalid {} = \"{}\". The specified chiller is not water cooled. The chiller fouling "
+                                            "fault model will not be applied.",
+                                            faultObjType,
+                                            faultName,
+                                            fieldName,
+                                            fieldValue));
+    }
+
     // Helper: emit a "not found" severe error for a fault equipment lookup failure.
     static void showFaultEquipNotFoundError(EnergyPlusData &state,
                                             std::string const &faultObjType,
@@ -509,14 +525,7 @@ namespace FaultsManager {
 
                     if (state.dataPlantChillers->ElectricChiller(ChillerNum).CondenserType != DataPlant::CondenserType::WaterCooled) {
                         // The fault model is only applicable to the chillers with water based condensers
-                        ShowWarningError(
-                            state,
-                            EnergyPlus::format("{} = \"{}\" invalid {} = \"{}\". The specified chiller is not water cooled. The chiller fouling "
-                                               "fault model will not be applied.",
-                                               cFaultCurrentObject,
-                                               cAlphaArgs(1),
-                                               cAlphaFieldNames(5),
-                                               cAlphaArgs(5)));
+                        showChillerNotWaterCooledWarning(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5));
 
                     } else {
                         // Link the chiller with the fault model
@@ -540,14 +549,7 @@ namespace FaultsManager {
 
                     if (state.dataChillerElectricEIR->ElectricEIRChiller(ChillerNum).CondenserType != DataPlant::CondenserType::WaterCooled) {
                         // The fault model is only applicable to the chillers with water based condensers
-                        ShowWarningError(
-                            state,
-                            EnergyPlus::format("{} = \"{}\" invalid {} = \"{}\". The specified chiller is not water cooled. The chiller fouling "
-                                               "fault model will not be applied.",
-                                               cFaultCurrentObject,
-                                               cAlphaArgs(1),
-                                               cAlphaFieldNames(5),
-                                               cAlphaArgs(5)));
+                        showChillerNotWaterCooledWarning(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5));
 
                     } else {
                         // Link the chiller with the fault model
@@ -571,14 +573,7 @@ namespace FaultsManager {
 
                     if (state.dataChillerReformulatedEIR->ElecReformEIRChiller(ChillerNum).CondenserType != DataPlant::CondenserType::WaterCooled) {
                         // The fault model is only applicable to the chillers with water based condensers
-                        ShowWarningError(
-                            state,
-                            EnergyPlus::format("{} = \"{}\" invalid {} = \"{}\". The specified chiller is not water cooled. The chiller fouling "
-                                               "fault model will not be applied.",
-                                               cFaultCurrentObject,
-                                               cAlphaArgs(1),
-                                               cAlphaFieldNames(5),
-                                               cAlphaArgs(5)));
+                        showChillerNotWaterCooledWarning(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5));
 
                     } else {
                         // Link the chiller with the fault model
@@ -603,14 +598,7 @@ namespace FaultsManager {
 
                     if (state.dataPlantChillers->ConstCOPChiller(ChillerNum).CondenserType != DataPlant::CondenserType::WaterCooled) {
                         // The fault model is only applicable to the chillers with water based condensers
-                        ShowWarningError(
-                            state,
-                            EnergyPlus::format("{} = \"{}\" invalid {} = \"{}\". The specified chiller is not water cooled. The chiller fouling "
-                                               "fault model will not be applied.",
-                                               cFaultCurrentObject,
-                                               cAlphaArgs(1),
-                                               cAlphaFieldNames(5),
-                                               cAlphaArgs(5)));
+                        showChillerNotWaterCooledWarning(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5));
 
                     } else {
                         // Link the chiller with the fault model
@@ -635,14 +623,7 @@ namespace FaultsManager {
 
                     if (state.dataPlantChillers->EngineDrivenChiller(ChillerNum).CondenserType != DataPlant::CondenserType::WaterCooled) {
                         // The fault model is only applicable to the chillers with water based condensers
-                        ShowWarningError(
-                            state,
-                            EnergyPlus::format("{} = \"{}\" invalid {} = \"{}\". The specified chiller is not water cooled. The chiller fouling "
-                                               "fault model will not be applied.",
-                                               cFaultCurrentObject,
-                                               cAlphaArgs(1),
-                                               cAlphaFieldNames(5),
-                                               cAlphaArgs(5)));
+                        showChillerNotWaterCooledWarning(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5));
 
                     } else {
                         // Link the fault model with the water cooled chiller
@@ -666,14 +647,7 @@ namespace FaultsManager {
                 } else {
                     if (state.dataPlantChillers->GTChiller(ChillerNum).CondenserType != DataPlant::CondenserType::WaterCooled) {
                         // The fault model is only applicable to the chillers with water based condensers
-                        ShowWarningError(
-                            state,
-                            EnergyPlus::format("{} = \"{}\" invalid {} = \"{}\". The specified chiller is not water cooled. The chiller fouling "
-                                               "fault model will not be applied.",
-                                               cFaultCurrentObject,
-                                               cAlphaArgs(1),
-                                               cAlphaFieldNames(5),
-                                               cAlphaArgs(5)));
+                        showChillerNotWaterCooledWarning(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5));
 
                     } else {
                         // Link the fault model with the water cooled chiller
