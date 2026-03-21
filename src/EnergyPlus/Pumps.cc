@@ -132,6 +132,40 @@ static void parsePumpZoneSkinLosses(EnergyPlusData &state,
     }
 }
 
+
+// Parse power sizing method and scaling factors common to all pump types.
+static void parsePumpPowerSizing(EnergyPlusData &state,
+                                 PumpSpecs &thisPump,
+                                 std::string_view cCurrentModuleObject,
+                                 int alphaSizingIdx,
+                                 int numFlowIdx,
+                                 int numFlowPressIdx,
+                                 bool &ErrorsFound)
+{
+    static constexpr std::string_view RoutineName("GetPumpInput: ");
+    static constexpr std::array<std::string_view, static_cast<int>(PowerSizingMethod::Num)> powerSizingMethodNamesUC{"POWERPERFLOW",
+                                                                                                                     "POWERPERFLOWPERPRESSURE"};
+    auto &thisInput = state.dataIPShortCut;
+    if (!thisInput->lAlphaFieldBlanks(alphaSizingIdx)) {
+        thisPump.powerSizingMethod =
+            static_cast<PowerSizingMethod>(getEnumValue(powerSizingMethodNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(alphaSizingIdx))));
+        if (thisPump.powerSizingMethod == PowerSizingMethod::Invalid) {
+            ShowSevereError(state,
+                            EnergyPlus::format("{}{}=\"{}\", sizing method type entered is invalid.  Use one of the key choice entries.",
+                                               RoutineName,
+                                               cCurrentModuleObject,
+                                               thisPump.Name));
+            ErrorsFound = true;
+        }
+    }
+    if (!thisInput->lNumericFieldBlanks(numFlowIdx)) {
+        thisPump.powerPerFlowScalingFactor = thisInput->rNumericArgs(numFlowIdx);
+    }
+    if (!thisInput->lNumericFieldBlanks(numFlowPressIdx)) {
+        thisPump.powerPerFlowPerPressureScalingFactor = thisInput->rNumericArgs(numFlowPressIdx);
+    }
+}
+
 static constexpr std::array<std::string_view, static_cast<int>(PumpType::Num)> pumpTypeIDFNames = {
     "Pump:VariableSpeed", "Pump:ConstantSpeed", "Pump:VariableSpeed:Condensate", "HeaderedPumps:VariableSpeed", "HeaderedPumps:ConstantSpeed"};
 
@@ -252,8 +286,6 @@ void GetPumpInput(EnergyPlusData &state)
     static constexpr std::array<std::string_view, static_cast<int>(PumpControlType::Num)> pumpCtrlTypeNamesUC{"CONTINUOUS", "INTERMITTENT"};
     static constexpr std::array<std::string_view, static_cast<int>(ControlTypeVFD::Num)> controlTypeVFDNamesUC{"MANUALCONTROL",
                                                                                                                "PRESSURESETPOINTCONTROL"};
-    static constexpr std::array<std::string_view, static_cast<int>(PowerSizingMethod::Num)> powerSizingMethodNamesUC{"POWERPERFLOW",
-                                                                                                                     "POWERPERFLOWPERPRESSURE"};
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     int PumpNum;
@@ -495,26 +527,7 @@ void GetPumpInput(EnergyPlusData &state)
 
         parsePumpZoneSkinLosses(state, thisPump, cCurrentModuleObject, 13, 12, ErrorsFound);
 
-        if (!thisInput->lAlphaFieldBlanks(14)) {
-            thisPump.powerSizingMethod =
-                static_cast<PowerSizingMethod>(getEnumValue(powerSizingMethodNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(14))));
-            if (thisPump.powerSizingMethod == PowerSizingMethod::Invalid) {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}{}=\"{}\", sizing method type entered is invalid.  Use one of the key choice entries.",
-                                                   RoutineName,
-                                                   cCurrentModuleObject,
-                                                   thisPump.Name));
-                ErrorsFound = true;
-            }
-        }
-
-        if (!thisInput->lNumericFieldBlanks(13)) {
-            thisPump.powerPerFlowScalingFactor = thisInput->rNumericArgs(13);
-        }
-
-        if (!thisInput->lNumericFieldBlanks(14)) {
-            thisPump.powerPerFlowPerPressureScalingFactor = thisInput->rNumericArgs(14);
-        }
+        parsePumpPowerSizing(state, thisPump, cCurrentModuleObject, 14, 13, 14, ErrorsFound);
 
         if (!thisInput->lNumericFieldBlanks(15)) {
             thisPump.MinVolFlowRateFrac = thisInput->rNumericArgs(15);
@@ -649,26 +662,7 @@ void GetPumpInput(EnergyPlusData &state)
 
         parsePumpZoneSkinLosses(state, thisPump, cCurrentModuleObject, 7, 8, ErrorsFound);
 
-        if (!thisInput->lAlphaFieldBlanks(8)) {
-            thisPump.powerSizingMethod =
-                static_cast<PowerSizingMethod>(getEnumValue(powerSizingMethodNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(8))));
-            if (thisPump.powerSizingMethod == PowerSizingMethod::Invalid) {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}{}=\"{}\", sizing method type entered is invalid.  Use one of the key choice entries.",
-                                                   RoutineName,
-                                                   cCurrentModuleObject,
-                                                   thisPump.Name));
-                ErrorsFound = true;
-            }
-        }
-
-        if (!thisInput->lNumericFieldBlanks(9)) {
-            thisPump.powerPerFlowScalingFactor = thisInput->rNumericArgs(9);
-        }
-
-        if (!thisInput->lNumericFieldBlanks(10)) {
-            thisPump.powerPerFlowPerPressureScalingFactor = thisInput->rNumericArgs(10);
-        }
+        parsePumpPowerSizing(state, thisPump, cCurrentModuleObject, 8, 9, 10, ErrorsFound);
 
         if (NumAlphas > 8) {
             thisPump.EndUseSubcategoryName = thisInput->cAlphaArgs(9);
@@ -765,26 +759,7 @@ void GetPumpInput(EnergyPlusData &state)
             thisPump.NomVolFlowRate = (thisPump.NomSteamVolFlowRate * SteamDensity) / TempWaterDensity;
         }
 
-        if (!thisInput->lAlphaFieldBlanks(6)) {
-            thisPump.powerSizingMethod =
-                static_cast<PowerSizingMethod>(getEnumValue(powerSizingMethodNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(6))));
-            if (thisPump.powerSizingMethod == PowerSizingMethod::Invalid) {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}{}=\"{}\", sizing method type entered is invalid.  Use one of the key choice entries.",
-                                                   RoutineName,
-                                                   cCurrentModuleObject,
-                                                   thisPump.Name));
-                ErrorsFound = true;
-            }
-        }
-
-        if (!thisInput->lNumericFieldBlanks(11)) {
-            thisPump.powerPerFlowScalingFactor = thisInput->rNumericArgs(11);
-        }
-
-        if (!thisInput->lNumericFieldBlanks(12)) {
-            thisPump.powerPerFlowPerPressureScalingFactor = thisInput->rNumericArgs(12);
-        }
+        parsePumpPowerSizing(state, thisPump, cCurrentModuleObject, 6, 11, 12, ErrorsFound);
 
         if (NumAlphas > 6) {
             thisPump.EndUseSubcategoryName = thisInput->cAlphaArgs(7);
@@ -897,26 +872,7 @@ void GetPumpInput(EnergyPlusData &state)
 
         parsePumpZoneSkinLosses(state, thisPump, cCurrentModuleObject, 7, 12, ErrorsFound);
 
-        if (!thisInput->lAlphaFieldBlanks(8)) {
-            thisPump.powerSizingMethod =
-                static_cast<PowerSizingMethod>(getEnumValue(powerSizingMethodNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(8))));
-            if (thisPump.powerSizingMethod == PowerSizingMethod::Invalid) {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}{}=\"{}\", sizing method type entered is invalid.  Use one of the key choice entries.",
-                                                   RoutineName,
-                                                   cCurrentModuleObject,
-                                                   thisPump.Name));
-                ErrorsFound = true;
-            }
-        }
-
-        if (!thisInput->lNumericFieldBlanks(13)) {
-            thisPump.powerPerFlowScalingFactor = thisInput->rNumericArgs(13);
-        }
-
-        if (!thisInput->lNumericFieldBlanks(14)) {
-            thisPump.powerPerFlowPerPressureScalingFactor = thisInput->rNumericArgs(14);
-        }
+        parsePumpPowerSizing(state, thisPump, cCurrentModuleObject, 8, 13, 14, ErrorsFound);
 
         if (NumAlphas > 8) {
             thisPump.EndUseSubcategoryName = thisInput->cAlphaArgs(9);
@@ -1027,26 +983,7 @@ void GetPumpInput(EnergyPlusData &state)
         thisPump.PartLoadCoef[3] = 0.0;
 
         parsePumpZoneSkinLosses(state, thisPump, cCurrentModuleObject, 7, 7, ErrorsFound);
-        if (!thisInput->lAlphaFieldBlanks(8)) {
-            thisPump.powerSizingMethod =
-                static_cast<PowerSizingMethod>(getEnumValue(powerSizingMethodNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(8))));
-            if (thisPump.powerSizingMethod == PowerSizingMethod::Invalid) {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}{}=\"{}\", sizing method type entered is invalid.  Use one of the key choice entries.",
-                                                   RoutineName,
-                                                   cCurrentModuleObject,
-                                                   thisPump.Name));
-                ErrorsFound = true;
-            }
-        }
-
-        if (!thisInput->lNumericFieldBlanks(8)) {
-            thisPump.powerPerFlowScalingFactor = thisInput->rNumericArgs(8);
-        }
-
-        if (!thisInput->lNumericFieldBlanks(9)) {
-            thisPump.powerPerFlowPerPressureScalingFactor = thisInput->rNumericArgs(9);
-        }
+        parsePumpPowerSizing(state, thisPump, cCurrentModuleObject, 8, 8, 9, ErrorsFound);
 
         if (NumAlphas > 8) {
             thisPump.EndUseSubcategoryName = thisInput->cAlphaArgs(9);
