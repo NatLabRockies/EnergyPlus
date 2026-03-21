@@ -166,6 +166,38 @@ static void parsePumpPowerSizing(EnergyPlusData &state,
     }
 }
 
+
+// Parse pressure curve input for VarSpeed and ConSpeed pumps.
+static void parsePumpPressureCurve(EnergyPlusData &state,
+                                   PumpSpecs &thisPump,
+                                   std::string_view cCurrentModuleObject,
+                                   int alphaCurveIdx,
+                                   bool &ErrorsFound)
+{
+    static constexpr std::string_view RoutineName("GetPumpInput: ");
+    auto &thisInput = state.dataIPShortCut;
+    if (thisInput->cAlphaArgs(alphaCurveIdx).empty()) {
+        thisPump.PressureCurve_Index = -1;
+    } else {
+        int TempCurveIndex = Curve::GetCurveIndex(state, thisInput->cAlphaArgs(alphaCurveIdx));
+        if (TempCurveIndex == 0) {
+            thisPump.PressureCurve_Index = -1;
+        } else {
+            ErrorsFound |= Curve::CheckCurveDims(state,
+                                                 TempCurveIndex,                            // Curve index
+                                                 {1},                                       // Valid dimensions
+                                                 RoutineName,                               // Routine name
+                                                 cCurrentModuleObject,                      // Object Type
+                                                 thisPump.Name,                             // Object Name
+                                                 thisInput->cAlphaFieldNames(alphaCurveIdx)); // Field Name
+
+            if (!ErrorsFound) {
+                thisPump.PressureCurve_Index = TempCurveIndex;
+                Curve::GetCurveMinMaxValues(state, TempCurveIndex, thisPump.MinPhiValue, thisPump.MaxPhiValue);
+            }
+        }
+    }
+}
 static constexpr std::array<std::string_view, static_cast<int>(PumpType::Num)> pumpTypeIDFNames = {
     "Pump:VariableSpeed", "Pump:ConstantSpeed", "Pump:VariableSpeed:Condensate", "HeaderedPumps:VariableSpeed", "HeaderedPumps:ConstantSpeed"};
 
@@ -293,7 +325,6 @@ void GetPumpInput(EnergyPlusData &state)
     int NumNums;   // Number of elements in the numeric array
     int IOStat;    // IO Status when calling get input subroutine
     bool ErrorsFound;
-    int TempCurveIndex;
     int NumVarSpeedPumps = 0;
     int NumConstSpeedPumps = 0;
     int NumCondensatePumps = 0;
@@ -428,28 +459,7 @@ void GetPumpInput(EnergyPlusData &state)
         // Probably the following two lines will be used if the team agrees on changing the F10 value from min flow rate to
         // minimum flow as a fraction of nominal flow.
 
-        // Input pressure related data such as pressure curve and impeller size/rotational speed
-        if (thisInput->cAlphaArgs(6).empty()) {
-            thisPump.PressureCurve_Index = -1;
-        } else {
-            TempCurveIndex = GetCurveIndex(state, thisInput->cAlphaArgs(6));
-            if (TempCurveIndex == 0) {
-                thisPump.PressureCurve_Index = -1;
-            } else {
-                ErrorsFound |= Curve::CheckCurveDims(state,
-                                                     TempCurveIndex,                  // Curve index
-                                                     {1},                             // Valid dimensions
-                                                     RoutineName,                     // Routine name
-                                                     cCurrentModuleObject,            // Object Type
-                                                     thisPump.Name,                   // Object Name
-                                                     thisInput->cAlphaFieldNames(6)); // Field Name
-
-                if (!ErrorsFound) {
-                    thisPump.PressureCurve_Index = TempCurveIndex;
-                    GetCurveMinMaxValues(state, TempCurveIndex, thisPump.MinPhiValue, thisPump.MaxPhiValue);
-                }
-            }
-        }
+        parsePumpPressureCurve(state, thisPump, cCurrentModuleObject, 6, ErrorsFound);
 
         // read in the rest of the pump pressure characteristics
         thisPump.ImpellerDiameter = thisInput->rNumericArgs(11);
@@ -632,28 +642,7 @@ void GetPumpInput(EnergyPlusData &state)
             ShowWarningItemNotFound(state, eoh, thisInput->cAlphaFieldNames(5), thisInput->cAlphaArgs(5), "");
         }
 
-        // Input pressure related data such as pressure curve and impeller size/rotational speed
-        if (thisInput->cAlphaArgs(6).empty()) {
-            thisPump.PressureCurve_Index = -1;
-        } else {
-            TempCurveIndex = GetCurveIndex(state, thisInput->cAlphaArgs(6));
-            if (TempCurveIndex == 0) {
-                thisPump.PressureCurve_Index = -1;
-            } else {
-                ErrorsFound |= Curve::CheckCurveDims(state,
-                                                     TempCurveIndex,                  // Curve index
-                                                     {1},                             // Valid dimensions
-                                                     RoutineName,                     // Routine name
-                                                     cCurrentModuleObject,            // Object Type
-                                                     thisPump.Name,                   // Object Name
-                                                     thisInput->cAlphaFieldNames(6)); // Field Name
-
-                if (!ErrorsFound) {
-                    thisPump.PressureCurve_Index = TempCurveIndex;
-                    GetCurveMinMaxValues(state, TempCurveIndex, thisPump.MinPhiValue, thisPump.MaxPhiValue);
-                }
-            }
-        }
+        parsePumpPressureCurve(state, thisPump, cCurrentModuleObject, 6, ErrorsFound);
 
         // read in the rest of the pump pressure characteristics
         thisPump.ImpellerDiameter = thisInput->rNumericArgs(6);
