@@ -5736,6 +5736,27 @@ void InitDXCoil(EnergyPlusData &state, int const DXCoilNum) // number of the cur
     }
 }
 
+// Validate that multispeed values are monotonically non-decreasing with speed.
+// Issues a warning + fatal if value at any speed exceeds the next higher speed.
+static void validateMultispeedMonotonicity(EnergyPlusData &state,
+                                           std::string_view coilType,
+                                           std::string_view coilName,
+                                           int numSpeeds,
+                                           const Array1D<Real64> &values,
+                                           std::string_view fieldDescription)
+{
+    for (int Mode = 1; Mode <= numSpeeds - 1; ++Mode) {
+        if (values(Mode) > values(Mode + 1)) {
+            ShowWarningError(
+                state,
+                EnergyPlus::format("SizeDXCoil: {} {}, Speed {} {} must be less than or equal to Speed {} {}.",
+                                   coilType, coilName, Mode, fieldDescription, Mode + 1, fieldDescription));
+            ShowContinueError(state, EnergyPlus::format("Instead, {:.2R} > {:.2R}", values(Mode), values(Mode + 1)));
+            ShowFatalError(state, "Preceding conditions cause termination.");
+        }
+    }
+}
+
 void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
 {
 
@@ -6465,22 +6486,8 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
         }
 
         // Ensure flow rate at lower speed must be lower or equal to the flow rate at higher speed. Otherwise, a severe error is issued.
-        for (Mode = 1; Mode <= thisDXCoil.NumOfSpeeds - 1; ++Mode) {
-            if (thisDXCoil.MSRatedAirVolFlowRate(Mode) > thisDXCoil.MSRatedAirVolFlowRate(Mode + 1)) {
-                ShowWarningError(
-                    state,
-                    EnergyPlus::format("SizeDXCoil: {} {}, Speed {} Rated Air Flow Rate must be less than or equal to Speed {} Rated Air Flow Rate.",
-                                       thisDXCoil.DXCoilType,
-                                       thisDXCoil.Name,
-                                       Mode,
-                                       Mode + 1));
-                ShowContinueError(state,
-                                  EnergyPlus::format("Instead, {:.2R} > {:.2R}",
-                                                     thisDXCoil.MSRatedAirVolFlowRate(Mode),
-                                                     thisDXCoil.MSRatedAirVolFlowRate(Mode + 1)));
-                ShowFatalError(state, "Preceding conditions cause termination.");
-            }
-        }
+        validateMultispeedMonotonicity(
+            state, thisDXCoil.DXCoilType, thisDXCoil.Name, thisDXCoil.NumOfSpeeds, thisDXCoil.MSRatedAirVolFlowRate, "Rated Air Flow Rate");
 
         // Sizing multispeed rated total cooling capacity
         for (Mode = thisDXCoil.NumOfSpeeds; Mode >= 1; --Mode) {
@@ -6557,21 +6564,8 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
         }
 
         // Ensure capacity at lower speed must be lower or equal to the capacity at higher speed.
-        for (Mode = 1; Mode <= thisDXCoil.NumOfSpeeds - 1; ++Mode) {
-            if (thisDXCoil.MSRatedTotCap(Mode) > thisDXCoil.MSRatedTotCap(Mode + 1)) {
-                ShowWarningError(
-                    state,
-                    EnergyPlus::format("SizeDXCoil: {} {}, Speed {} Rated Total Cooling Capacity must be less than or equal to Speed {} Rated "
-                                       "Total Cooling Capacity.",
-                                       thisDXCoil.DXCoilType,
-                                       thisDXCoil.Name,
-                                       Mode,
-                                       Mode + 1));
-                ShowContinueError(state,
-                                  EnergyPlus::format("Instead, {:.2R} > {:.2R}", thisDXCoil.MSRatedTotCap(Mode), thisDXCoil.MSRatedTotCap(Mode + 1)));
-                ShowFatalError(state, "Preceding conditions cause termination.");
-            }
-        }
+        validateMultispeedMonotonicity(
+            state, thisDXCoil.DXCoilType, thisDXCoil.Name, thisDXCoil.NumOfSpeeds, thisDXCoil.MSRatedTotCap, "Rated Total Cooling Capacity");
 
         // Rated SHR
         for (Mode = thisDXCoil.NumOfSpeeds; Mode >= 1; --Mode) {
@@ -6664,22 +6658,8 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
         }
 
         // Ensure evaporative condenser airflow rate at lower speed must be lower or equal to one at higher speed.
-        for (Mode = 1; Mode <= thisDXCoil.NumOfSpeeds - 1; ++Mode) {
-            if (thisDXCoil.MSEvapCondAirFlow(Mode) > thisDXCoil.MSEvapCondAirFlow(Mode + 1)) {
-                ShowWarningError(
-                    state,
-                    EnergyPlus::format("SizeDXCoil: {} {}, Speed {} Evaporative Condenser Air Flow Rate must be less than or equal to Speed {} "
-                                       "Evaporative Condenser Air Flow Rate.",
-                                       thisDXCoil.DXCoilType,
-                                       thisDXCoil.Name,
-                                       Mode,
-                                       Mode + 1));
-                ShowContinueError(
-                    state,
-                    EnergyPlus::format("Instead, {:.2R} > {:.2R}", thisDXCoil.MSEvapCondAirFlow(Mode), thisDXCoil.MSEvapCondAirFlow(Mode + 1)));
-                ShowFatalError(state, "Preceding conditions cause termination.");
-            }
-        }
+        validateMultispeedMonotonicity(
+            state, thisDXCoil.DXCoilType, thisDXCoil.Name, thisDXCoil.NumOfSpeeds, thisDXCoil.MSEvapCondAirFlow, "Evaporative Condenser Air Flow Rate");
 
         // Sizing multispeed rated evaporative condenser pump power
         for (Mode = 1; Mode <= thisDXCoil.NumOfSpeeds; ++Mode) {
@@ -6736,23 +6716,12 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
         }
 
         // Ensure evaporative condenser pump power at lower speed must be lower or equal to one at higher speed.
-        for (Mode = 1; Mode <= thisDXCoil.NumOfSpeeds - 1; ++Mode) {
-            if (thisDXCoil.MSEvapCondPumpElecNomPower(Mode) > thisDXCoil.MSEvapCondPumpElecNomPower(Mode + 1)) {
-                ShowWarningError(
-                    state,
-                    EnergyPlus::format("SizeDXCoil: {} {}, Speed {} Rated Evaporative Condenser Pump Power Consumption must be less than or "
-                                       "equal to Speed {} Rated Evaporative Condenser Pump Power Consumption.",
+        validateMultispeedMonotonicity(state,
                                        thisDXCoil.DXCoilType,
                                        thisDXCoil.Name,
-                                       Mode,
-                                       Mode + 1));
-                ShowContinueError(state,
-                                  EnergyPlus::format("Instead, {:.2R} > {:.2R}",
-                                                     thisDXCoil.MSEvapCondPumpElecNomPower(Mode),
-                                                     thisDXCoil.MSEvapCondPumpElecNomPower(Mode + 1)));
-                ShowFatalError(state, "Preceding conditions cause termination.");
-            }
-        }
+                                       thisDXCoil.NumOfSpeeds,
+                                       thisDXCoil.MSEvapCondPumpElecNomPower,
+                                       "Rated Evaporative Condenser Pump Power Consumption");
     }
 
     // Autosizing for multispeed heating coil
@@ -6818,22 +6787,8 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
         }
 
         // Ensure flow rate at lower speed must be lower or equal to the flow rate at higher speed. Otherwise, a severe error is issued.
-        for (Mode = 1; Mode <= thisDXCoil.NumOfSpeeds - 1; ++Mode) {
-            if (thisDXCoil.MSRatedAirVolFlowRate(Mode) > thisDXCoil.MSRatedAirVolFlowRate(Mode + 1)) {
-                ShowWarningError(
-                    state,
-                    EnergyPlus::format("SizeDXCoil: {} {}, Speed {} Rated Air Flow Rate must be less than or equal to Speed {} Rated Air Flow Rate.",
-                                       thisDXCoil.DXCoilType,
-                                       thisDXCoil.Name,
-                                       Mode,
-                                       Mode + 1));
-                ShowContinueError(state,
-                                  EnergyPlus::format("Instead, {:.2R} > {:.2R}",
-                                                     thisDXCoil.MSRatedAirVolFlowRate(Mode),
-                                                     thisDXCoil.MSRatedAirVolFlowRate(Mode + 1)));
-                ShowFatalError(state, "Preceding conditions cause termination.");
-            }
-        }
+        validateMultispeedMonotonicity(
+            state, thisDXCoil.DXCoilType, thisDXCoil.Name, thisDXCoil.NumOfSpeeds, thisDXCoil.MSRatedAirVolFlowRate, "Rated Air Flow Rate");
         // Rated Secondary Coil Airflow Rates for AirCooled condenser type
         if (thisDXCoil.IsSecondaryDXCoilInZone) {
             for (Mode = thisDXCoil.NumOfSpeeds; Mode >= 1; --Mode) {
@@ -6961,21 +6916,8 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
             state.dataSize->DataFractionUsedForSizing = 0.0;
         }
         // Ensure capacity at lower speed must be lower or equal to the capacity at higher speed.
-        for (Mode = 1; Mode <= thisDXCoil.NumOfSpeeds - 1; ++Mode) {
-            if (thisDXCoil.MSRatedTotCap(Mode) > thisDXCoil.MSRatedTotCap(Mode + 1)) {
-                ShowWarningError(
-                    state,
-                    EnergyPlus::format("SizeDXCoil: {} {}, Speed {} Rated Total Heating Capacity must be less than or equal to Speed {} Rated "
-                                       "Total Heating Capacity.",
-                                       thisDXCoil.DXCoilType,
-                                       thisDXCoil.Name,
-                                       Mode,
-                                       Mode + 1));
-                ShowContinueError(state,
-                                  EnergyPlus::format("Instead, {:.2R} > {:.2R}", thisDXCoil.MSRatedTotCap(Mode), thisDXCoil.MSRatedTotCap(Mode + 1)));
-                ShowFatalError(state, "Preceding conditions cause termination.");
-            }
-        }
+        validateMultispeedMonotonicity(
+            state, thisDXCoil.DXCoilType, thisDXCoil.Name, thisDXCoil.NumOfSpeeds, thisDXCoil.MSRatedTotCap, "Rated Total Heating Capacity");
 
         // Resistive Defrost Heater Capacity = capacity at the first stage
         // Sizing defrost heater capacity
