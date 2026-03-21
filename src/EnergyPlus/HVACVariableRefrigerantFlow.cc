@@ -6509,6 +6509,31 @@ static void sizeMultispeedFanFlowRates(EnergyPlusData &state,
     }
 }
 
+// Helper: emit sizing-mismatch warning for a VRF field (used when the standard reportVRFCondFieldSize
+// pattern does not apply because reportSizerOutput was already called separately).
+static void warnVRFSizingMismatch(EnergyPlusData &state,
+                                  Real64 desValue,
+                                  Real64 userValue,
+                                  std::string_view compType,
+                                  std::string_view warningCompName,
+                                  std::string_view desLabel,
+                                  std::string_view userLabel,
+                                  int fmtPrecision = 2)
+{
+    if (!state.dataGlobal->DisplayExtraWarnings) return;
+    if ((std::abs(desValue - userValue) / userValue) <= state.dataSize->AutoVsHardSizingThreshold) return;
+    ShowMessage(state, EnergyPlus::format("SizeVRF: Potential issue with equipment sizing for {} {}", compType, warningCompName));
+    if (fmtPrecision == 5) {
+        ShowContinueError(state, EnergyPlus::format("{} of {:.5R}", userLabel, userValue));
+        ShowContinueError(state, EnergyPlus::format("differs from {} of {:.5R}", desLabel, desValue));
+    } else {
+        ShowContinueError(state, EnergyPlus::format("{} of {:.2R}", userLabel, userValue));
+        ShowContinueError(state, EnergyPlus::format("differs from {} of {:.2R}", desLabel, desValue));
+    }
+    ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
+    ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
+}
+
 // Helper: compute piping correction factor for cooling or heating.
 static Real64 calcVRFPipingCorrectionFactor(EnergyPlusData &state,
                                             int pcfLengthCurvePtr,
@@ -6552,20 +6577,7 @@ static void reportVRFCondFieldSize(EnergyPlusData &state,
         if (fieldRef > 0.0 && desSizeValue > 0.0) {
             Real64 const userValue = fieldRef;
             BaseSizer::reportSizerOutput(state, compType, compName, desLabel, desSizeValue, userLabel, userValue);
-            if (state.dataGlobal->DisplayExtraWarnings) {
-                if ((std::abs(desSizeValue - userValue) / userValue) > state.dataSize->AutoVsHardSizingThreshold) {
-                    ShowMessage(state, EnergyPlus::format("SizeVRF: Potential issue with equipment sizing for {} {}", compType, warningCompName));
-                    if (fmtPrecision == 5) {
-                        ShowContinueError(state, EnergyPlus::format("{} of {:.5R}", userLabel, userValue));
-                        ShowContinueError(state, EnergyPlus::format("differs from {} of {:.5R}", desLabel, desSizeValue));
-                    } else {
-                        ShowContinueError(state, EnergyPlus::format("{} of {:.2R}", userLabel, userValue));
-                        ShowContinueError(state, EnergyPlus::format("differs from {} of {:.2R}", desLabel, desSizeValue));
-                    }
-                    ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
-                    ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
-                }
-            }
+            warnVRFSizingMismatch(state, desSizeValue, userValue, compType, warningCompName, desLabel, userLabel, fmtPrecision);
         }
     }
 }
@@ -7512,34 +7524,16 @@ void SizeVRF(EnergyPlusData &state, int const VRFTUNum)
                                              "User-Specified Rated Total Heating Capacity [W]",
                                              HeatingCapacityUser);
 
-                if (state.dataGlobal->DisplayExtraWarnings) {
-                    if ((std::abs(CoolingCapacityDes - CoolingCapacityUser) / CoolingCapacityUser) > state.dataSize->AutoVsHardSizingThreshold) {
-                        ShowMessage(state,
-                                    EnergyPlus::format("SizeVRF: Potential issue with equipment sizing for {} {}",
-                                                       cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum),
-                                                       state.dataHVACVarRefFlow->VRFTU(VRFCond).Name));
-                        ShowContinueError(
-                            state, EnergyPlus::format("User-Specified Rated Total Cooling Capacity (gross) of {:.2R} [W]", CoolingCapacityUser));
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format("differs from Design Size Rated Total Cooling Capacity (gross) of {:.2R} [W]", CoolingCapacityDes));
-                        ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
-                        ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
-                    }
-
-                    if ((std::abs(HeatingCapacityDes - HeatingCapacityUser) / HeatingCapacityUser) > state.dataSize->AutoVsHardSizingThreshold) {
-                        ShowMessage(state,
-                                    EnergyPlus::format("SizeVRF: Potential issue with equipment sizing for {} {}",
-                                                       cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum),
-                                                       state.dataHVACVarRefFlow->VRFTU(VRFCond).Name));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("User-Specified Rated Total Heating Capacity of {:.2R} [W]", HeatingCapacityUser));
-                        ShowContinueError(
-                            state, EnergyPlus::format("differs from Design Size Rated Total Heating Capacity of {:.2R} [W]", HeatingCapacityDes));
-                        ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
-                        ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
-                    }
-                }
+                warnVRFSizingMismatch(state, CoolingCapacityDes, CoolingCapacityUser,
+                                      cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum),
+                                      state.dataHVACVarRefFlow->VRFTU(VRFCond).Name,
+                                      "Design Size Rated Total Cooling Capacity (gross) [W]",
+                                      "User-Specified Rated Total Cooling Capacity (gross) [W]");
+                warnVRFSizingMismatch(state, HeatingCapacityDes, HeatingCapacityUser,
+                                      cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum),
+                                      state.dataHVACVarRefFlow->VRFTU(VRFCond).Name,
+                                      "Design Size Rated Total Heating Capacity [W]",
+                                      "User-Specified Rated Total Heating Capacity [W]");
             }
         }
 
