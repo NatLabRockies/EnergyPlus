@@ -5315,6 +5315,40 @@ static void copyCoolPeakToCalcSysSizing(DataSizing::SystemSizingData &calcSS,
     calcSS.SysCoolLoadTimeStepPk = srcSS.SysCoolLoadTimeStepPk;
 }
 
+// Copy heating peak fields from a per-design-day SysSizing record into CalcSysSizing.
+// Mirrors copyCoolPeakToCalcSysSizing but for the heating side.
+static void copyHeatPeakToCalcSysSizing(DataSizing::SystemSizingData &calcSS,
+                                         DataSizing::SystemSizingData const &srcSS,
+                                         int DDNum)
+{
+    calcSS.DesHeatVolFlow = srcSS.DesHeatVolFlow;
+    calcSS.HeatDesDay = srcSS.HeatDesDay;
+    calcSS.CoinHeatMassFlow = srcSS.CoinHeatMassFlow;
+    calcSS.HeatCap = srcSS.HeatCap;
+    calcSS.PreheatCap = srcSS.PreheatCap;
+    calcSS.HeatFlowSeq = srcSS.HeatFlowSeq;
+    calcSS.SumZoneHeatLoadSeq = srcSS.SumZoneHeatLoadSeq;
+    calcSS.HeatCapSeq = srcSS.HeatCapSeq;
+    calcSS.HeatZoneAvgTempSeq = srcSS.HeatZoneAvgTempSeq;
+    calcSS.PreheatCapSeq = srcSS.PreheatCapSeq;
+    calcSS.HeatMixTemp = srcSS.HeatMixTemp;
+    calcSS.HeatRetTemp = srcSS.HeatRetTemp;
+    calcSS.HeatMixHumRat = srcSS.HeatMixHumRat;
+    calcSS.HeatRetHumRat = srcSS.HeatRetHumRat;
+    calcSS.HeatOutTemp = srcSS.HeatOutTemp;
+    calcSS.HeatOutHumRat = srcSS.HeatOutHumRat;
+    calcSS.SysHeatRetTempSeq = srcSS.SysHeatRetTempSeq;
+    calcSS.SysHeatRetHumRatSeq = srcSS.SysHeatRetHumRatSeq;
+    calcSS.SysHeatOutTempSeq = srcSS.SysHeatOutTempSeq;
+    calcSS.SysHeatOutHumRatSeq = srcSS.SysHeatOutHumRatSeq;
+    calcSS.SysHeatCoilTimeStepPk = srcSS.SysHeatCoilTimeStepPk;
+    calcSS.SysHeatAirTimeStepPk = srcSS.SysHeatAirTimeStepPk;
+    calcSS.HeatDDNum = DDNum;
+    calcSS.SysHeatCoinSpaceSens = srcSS.SysHeatCoinSpaceSens;
+    calcSS.SysDesHeatLoad = srcSS.SysDesHeatLoad;
+    calcSS.SysHeatLoadTimeStepPk = srcSS.SysHeatLoadTimeStepPk;
+}
+
 // Save cooling peak conditions into the per-design-day SysSizing record during DuringDay processing.
 static void saveDuringDayCoolPeak(EnergyPlusData &state,
                                   DataSizing::SystemSizingData &sysSizing,
@@ -6277,34 +6311,7 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
                 if (sysSizing.HeatCap > state.dataSize->CalcSysSizing(AirLoopNum).HeatCap) {
                     state.dataSize->SysSizPeakDDNum(AirLoopNum).HeatPeakDD = DDNum;
                     state.dataSize->SysSizPeakDDNum(AirLoopNum).cHeatPeakDDDate = state.dataSize->DesDayWeath(DDNum).DateString;
-                    state.dataSize->CalcSysSizing(AirLoopNum).DesHeatVolFlow = sysSizing.DesHeatVolFlow;
-                    state.dataSize->CalcSysSizing(AirLoopNum).HeatDesDay = sysSizing.HeatDesDay;
-                    state.dataSize->CalcSysSizing(AirLoopNum).CoinHeatMassFlow = sysSizing.CoinHeatMassFlow;
-                    state.dataSize->CalcSysSizing(AirLoopNum).HeatCap = sysSizing.HeatCap;
-                    state.dataSize->CalcSysSizing(AirLoopNum).PreheatCap = sysSizing.PreheatCap;
-                    state.dataSize->CalcSysSizing(AirLoopNum).HeatFlowSeq = sysSizing.HeatFlowSeq;
-                    state.dataSize->CalcSysSizing(AirLoopNum).SumZoneHeatLoadSeq = sysSizing.SumZoneHeatLoadSeq;
-                    state.dataSize->CalcSysSizing(AirLoopNum).HeatCapSeq = sysSizing.HeatCapSeq;
-                    state.dataSize->CalcSysSizing(AirLoopNum).HeatZoneAvgTempSeq = sysSizing.HeatZoneAvgTempSeq;
-                    state.dataSize->CalcSysSizing(AirLoopNum).PreheatCapSeq = sysSizing.PreheatCapSeq;
-                    state.dataSize->CalcSysSizing(AirLoopNum).HeatMixTemp = sysSizing.HeatMixTemp;
-                    state.dataSize->CalcSysSizing(AirLoopNum).HeatRetTemp = sysSizing.HeatRetTemp;
-                    state.dataSize->CalcSysSizing(AirLoopNum).HeatMixHumRat = sysSizing.HeatMixHumRat;
-                    state.dataSize->CalcSysSizing(AirLoopNum).HeatRetHumRat = sysSizing.HeatRetHumRat;
-                    state.dataSize->CalcSysSizing(AirLoopNum).HeatOutTemp = sysSizing.HeatOutTemp;
-                    state.dataSize->CalcSysSizing(AirLoopNum).HeatOutHumRat = sysSizing.HeatOutHumRat;
-                    state.dataSize->CalcSysSizing(AirLoopNum).SysHeatRetTempSeq = sysSizing.SysHeatRetTempSeq;
-                    state.dataSize->CalcSysSizing(AirLoopNum).SysHeatRetHumRatSeq = sysSizing.SysHeatRetHumRatSeq;
-                    state.dataSize->CalcSysSizing(AirLoopNum).SysHeatOutTempSeq = sysSizing.SysHeatOutTempSeq;
-                    state.dataSize->CalcSysSizing(AirLoopNum).SysHeatOutHumRatSeq = sysSizing.SysHeatOutHumRatSeq;
-
-                    state.dataSize->CalcSysSizing(AirLoopNum).SysHeatCoilTimeStepPk = sysSizing.SysHeatCoilTimeStepPk;
-
-                    state.dataSize->CalcSysSizing(AirLoopNum).SysHeatAirTimeStepPk = sysSizing.SysHeatAirTimeStepPk;
-                    state.dataSize->CalcSysSizing(AirLoopNum).HeatDDNum = DDNum;
-                    state.dataSize->CalcSysSizing(AirLoopNum).SysHeatCoinSpaceSens = sysSizing.SysHeatCoinSpaceSens;
-                    state.dataSize->CalcSysSizing(AirLoopNum).SysDesHeatLoad = sysSizing.SysDesHeatLoad;
-                    state.dataSize->CalcSysSizing(AirLoopNum).SysHeatLoadTimeStepPk = sysSizing.SysHeatLoadTimeStepPk;
+                    copyHeatPeakToCalcSysSizing(state.dataSize->CalcSysSizing(AirLoopNum), sysSizing, DDNum);
                 }
             }
 
