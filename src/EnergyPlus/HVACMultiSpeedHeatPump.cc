@@ -576,8 +576,6 @@ namespace HVACMultiSpeedHeatPump {
         bool AirNodeFound;             // True when an air node is found
         bool AirLoopFound;             // True when an air loop is found
         int i;                         // Index to speeds
-        int j;                         // Index to speeds
-        bool Found;                    // Flag to find autosize
         bool LocalError;               // Local error flag
         Array1D_string Alphas;         // Alpha input items for object
         Array1D_string cAlphaFields;   // Alpha field names

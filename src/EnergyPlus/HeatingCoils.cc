@@ -241,6 +241,46 @@ namespace HeatingCoils {
         }
     }
 
+    // Setup the common output variables shared by all heating coil types:
+    // Heating Energy/Rate and Electricity Energy/Rate.
+    static void setupCommonHeatingCoilOutputVars(EnergyPlusData &state, HeatingCoilEquipConditions &heatingCoil)
+    {
+        SetupOutputVariable(state,
+                            "Heating Coil Heating Energy",
+                            Constant::Units::J,
+                            heatingCoil.HeatingCoilLoad,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Sum,
+                            heatingCoil.Name,
+                            Constant::eResource::EnergyTransfer,
+                            OutputProcessor::Group::HVAC,
+                            OutputProcessor::EndUseCat::HeatingCoils);
+        SetupOutputVariable(state,
+                            "Heating Coil Heating Rate",
+                            Constant::Units::W,
+                            heatingCoil.HeatingCoilRate,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Average,
+                            heatingCoil.Name);
+        SetupOutputVariable(state,
+                            "Heating Coil Electricity Energy",
+                            Constant::Units::J,
+                            heatingCoil.ElecUseLoad,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Sum,
+                            heatingCoil.Name,
+                            Constant::eResource::Electricity,
+                            OutputProcessor::Group::HVAC,
+                            OutputProcessor::EndUseCat::Heating);
+        SetupOutputVariable(state,
+                            "Heating Coil Electricity Rate",
+                            Constant::Units::W,
+                            heatingCoil.ElecUseRate,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Average,
+                            heatingCoil.Name);
+    }
+
     void GetHeatingCoilInput(EnergyPlusData &state)
     {
 
@@ -401,41 +441,7 @@ namespace HeatingCoils {
             state.dataHeatingCoils->InputErrorsFound = errFlag || state.dataHeatingCoils->InputErrorsFound;
 
             // Setup Report variables for the Electric Coils
-            // CurrentModuleObject = "Coil:Heating:Electric"
-            SetupOutputVariable(state,
-                                "Heating Coil Heating Energy",
-                                Constant::Units::J,
-                                heatingCoil.HeatingCoilLoad,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                heatingCoil.Name,
-                                Constant::eResource::EnergyTransfer,
-                                OutputProcessor::Group::HVAC,
-                                OutputProcessor::EndUseCat::HeatingCoils);
-            SetupOutputVariable(state,
-                                "Heating Coil Heating Rate",
-                                Constant::Units::W,
-                                heatingCoil.HeatingCoilRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                heatingCoil.Name);
-            SetupOutputVariable(state,
-                                "Heating Coil Electricity Energy",
-                                Constant::Units::J,
-                                heatingCoil.ElecUseLoad,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                heatingCoil.Name,
-                                Constant::eResource::Electricity,
-                                OutputProcessor::Group::HVAC,
-                                OutputProcessor::EndUseCat::Heating);
-            SetupOutputVariable(state,
-                                "Heating Coil Electricity Rate",
-                                Constant::Units::W,
-                                heatingCoil.ElecUseRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                heatingCoil.Name);
+            setupCommonHeatingCoilOutputVars(state, heatingCoil);
         }
 
         // Get the data for electric heating coils
@@ -529,41 +535,7 @@ namespace HeatingCoils {
             state.dataHeatingCoils->InputErrorsFound = errFlag || state.dataHeatingCoils->InputErrorsFound;
 
             // Setup Report variables for the Electric Coils
-            // CurrentModuleObject = "Coil:Heating:Electric:MultiStage"
-            SetupOutputVariable(state,
-                                "Heating Coil Heating Energy",
-                                Constant::Units::J,
-                                heatingCoil.HeatingCoilLoad,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                heatingCoil.Name,
-                                Constant::eResource::EnergyTransfer,
-                                OutputProcessor::Group::HVAC,
-                                OutputProcessor::EndUseCat::HeatingCoils);
-            SetupOutputVariable(state,
-                                "Heating Coil Heating Rate",
-                                Constant::Units::W,
-                                heatingCoil.HeatingCoilRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                heatingCoil.Name);
-            SetupOutputVariable(state,
-                                "Heating Coil Electricity Energy",
-                                Constant::Units::J,
-                                heatingCoil.ElecUseLoad,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                heatingCoil.Name,
-                                Constant::eResource::Electricity,
-                                OutputProcessor::Group::HVAC,
-                                OutputProcessor::EndUseCat::Heating);
-            SetupOutputVariable(state,
-                                "Heating Coil Electricity Rate",
-                                Constant::Units::W,
-                                heatingCoil.ElecUseRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                heatingCoil.Name);
+            setupCommonHeatingCoilOutputVars(state, heatingCoil);
         }
 
         // Get the data for for fuel heating coils
@@ -673,25 +645,7 @@ namespace HeatingCoils {
             heatingCoil.ParasiticFuelCapacity = Numbers(4);
 
             // Setup Report variables for the Fuel Coils
-            // CurrentModuleObject = "Coil:Heating:OtherFuel"
-
-            SetupOutputVariable(state,
-                                "Heating Coil Heating Energy",
-                                Constant::Units::J,
-                                heatingCoil.HeatingCoilLoad,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                heatingCoil.Name,
-                                Constant::eResource::EnergyTransfer,
-                                OutputProcessor::Group::HVAC,
-                                OutputProcessor::EndUseCat::HeatingCoils);
-            SetupOutputVariable(state,
-                                "Heating Coil Heating Rate",
-                                Constant::Units::W,
-                                heatingCoil.HeatingCoilRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                heatingCoil.Name);
+            setupCommonHeatingCoilOutputVars(state, heatingCoil);
             SetupOutputVariable(state,
                                 EnergyPlus::format("Heating Coil {} Energy", sFuelType),
                                 Constant::Units::J,
@@ -706,23 +660,6 @@ namespace HeatingCoils {
                                 EnergyPlus::format("Heating Coil {} Rate", sFuelType),
                                 Constant::Units::W,
                                 heatingCoil.FuelUseRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                heatingCoil.Name);
-            SetupOutputVariable(state,
-                                "Heating Coil Electricity Energy",
-                                Constant::Units::J,
-                                heatingCoil.ElecUseLoad,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                heatingCoil.Name,
-                                Constant::eResource::Electricity,
-                                OutputProcessor::Group::HVAC,
-                                OutputProcessor::EndUseCat::Heating);
-            SetupOutputVariable(state,
-                                "Heating Coil Electricity Rate",
-                                Constant::Units::W,
-                                heatingCoil.ElecUseRate,
                                 OutputProcessor::TimeStepType::System,
                                 OutputProcessor::StoreType::Average,
                                 heatingCoil.Name);
@@ -856,24 +793,7 @@ namespace HeatingCoils {
             // parasitic gas load associated with the gas heating coil (standing pilot light)
 
             // Setup Report variables for the Gas Coils
-            // CurrentModuleObject = "Coil:Heating:Gas:MultiStage"
-            SetupOutputVariable(state,
-                                "Heating Coil Heating Energy",
-                                Constant::Units::J,
-                                heatingCoil.HeatingCoilLoad,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                heatingCoil.Name,
-                                Constant::eResource::EnergyTransfer,
-                                OutputProcessor::Group::HVAC,
-                                OutputProcessor::EndUseCat::HeatingCoils);
-            SetupOutputVariable(state,
-                                "Heating Coil Heating Rate",
-                                Constant::Units::W,
-                                heatingCoil.HeatingCoilRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                heatingCoil.Name);
+            setupCommonHeatingCoilOutputVars(state, heatingCoil);
             SetupOutputVariable(state,
                                 "Heating Coil NaturalGas Energy",
                                 Constant::Units::J,
@@ -888,23 +808,6 @@ namespace HeatingCoils {
                                 "Heating Coil NaturalGas Rate",
                                 Constant::Units::W,
                                 heatingCoil.FuelUseRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                heatingCoil.Name);
-            SetupOutputVariable(state,
-                                "Heating Coil Electricity Energy",
-                                Constant::Units::J,
-                                heatingCoil.ElecUseLoad,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                heatingCoil.Name,
-                                Constant::eResource::Electricity,
-                                OutputProcessor::Group::HVAC,
-                                OutputProcessor::EndUseCat::Heating);
-            SetupOutputVariable(state,
-                                "Heating Coil Electricity Rate",
-                                Constant::Units::W,
-                                heatingCoil.ElecUseRate,
                                 OutputProcessor::TimeStepType::System,
                                 OutputProcessor::StoreType::Average,
                                 heatingCoil.Name);
@@ -1210,41 +1113,7 @@ namespace HeatingCoils {
             }
 
             // Setup Report variables for the Desuperheater Heating Coils
-            // CurrentModuleObject = "Coil:Heating:Desuperheater"
-            SetupOutputVariable(state,
-                                "Heating Coil Heating Energy",
-                                Constant::Units::J,
-                                heatingCoil.HeatingCoilLoad,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                heatingCoil.Name,
-                                Constant::eResource::EnergyTransfer,
-                                OutputProcessor::Group::HVAC,
-                                OutputProcessor::EndUseCat::HeatingCoils);
-            SetupOutputVariable(state,
-                                "Heating Coil Heating Rate",
-                                Constant::Units::W,
-                                heatingCoil.HeatingCoilRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                heatingCoil.Name);
-            SetupOutputVariable(state,
-                                "Heating Coil Electricity Energy",
-                                Constant::Units::J,
-                                heatingCoil.ElecUseLoad,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
-                                heatingCoil.Name,
-                                Constant::eResource::Electricity,
-                                OutputProcessor::Group::HVAC,
-                                OutputProcessor::EndUseCat::Heating);
-            SetupOutputVariable(state,
-                                "Heating Coil Electricity Rate",
-                                Constant::Units::W,
-                                heatingCoil.ElecUseRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                heatingCoil.Name);
+            setupCommonHeatingCoilOutputVars(state, heatingCoil);
             SetupOutputVariable(state,
                                 "Heating Coil Runtime Fraction",
                                 Constant::Units::None,
