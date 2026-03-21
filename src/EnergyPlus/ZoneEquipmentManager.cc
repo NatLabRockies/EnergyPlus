@@ -6179,59 +6179,8 @@ void CalcAirFlowSimple(EnergyPlusData &state,
         //    for mixing conditions if user input delta temp > 0, then from zone temp (TZM)
         //    must be td degrees warmer than zone temp (TZN).  If user input delta temp < 0,
         //    then from zone temp (TZM) must be TD degrees cooler than zone temp (TZN).
-        if (TD < 0.0) {
-            if (TZM < TZN + TD) {
-
-                thisMixing.DesiredAirFlowRate = thisMixing.DesiredAirFlowRateSaved;
-                if (state.dataHeatBalFanSys->ZoneMassBalanceFlag(thisZoneNum) && AdjustZoneMixingFlowFlag) {
-                    if (thisMixing.MixingMassFlowRate > 0.0) {
-                        thisMixing.DesiredAirFlowRate = thisMixing.MixingMassFlowRate / AirDensity;
-                    }
-                }
-                thisMixing.MixingMassFlowRate = thisMixing.DesiredAirFlowRate * AirDensity;
-
-                thisMCPM = thisMixing.MixingMassFlowRate * CpAir;
-                thisMCPTM = thisMCPM * TZN;
-
-                // Now to determine the moisture conditions
-                thisMixingMassFlow = thisMixing.DesiredAirFlowRate * AirDensity;
-                thisMixingMassFlowXHumRat = thisMixing.DesiredAirFlowRate * AirDensity * HumRatZM;
-                if (state.dataContaminantBalance->Contaminant.CO2Simulation) {
-                    state.dataContaminantBalance->MixingMassFlowCO2(thisZoneNum) +=
-                        thisMixing.DesiredAirFlowRate * AirDensity * state.dataContaminantBalance->ZoneAirCO2(fromZoneNum);
-                }
-                if (state.dataContaminantBalance->Contaminant.GenericContamSimulation) {
-                    state.dataContaminantBalance->MixingMassFlowGC(thisZoneNum) +=
-                        thisMixing.DesiredAirFlowRate * AirDensity * state.dataContaminantBalance->ZoneAirGC(fromZoneNum);
-                }
-                thisMixing.ReportFlag = true;
-            }
-        } else if (TD > 0.0) {
-            if (TZM > TZN + TD) {
-                thisMixing.DesiredAirFlowRate = thisMixing.DesiredAirFlowRateSaved;
-                if (state.dataHeatBalFanSys->ZoneMassBalanceFlag(thisZoneNum) && AdjustZoneMixingFlowFlag) {
-                    if (thisMixing.MixingMassFlowRate > 0.0) {
-                        thisMixing.DesiredAirFlowRate = thisMixing.MixingMassFlowRate / AirDensity;
-                    }
-                }
-                thisMixing.MixingMassFlowRate = thisMixing.DesiredAirFlowRate * AirDensity;
-
-                thisMCPM = thisMixing.MixingMassFlowRate * CpAir;
-                thisMCPTM = thisMCPM * TZM;
-                // Now to determine the moisture conditions
-                thisMixingMassFlow = thisMixing.MixingMassFlowRate;
-                thisMixingMassFlowXHumRat = thisMixing.MixingMassFlowRate * HumRatZM;
-                if (state.dataContaminantBalance->Contaminant.CO2Simulation) {
-                    state.dataContaminantBalance->MixingMassFlowCO2(thisZoneNum) +=
-                        thisMixing.MixingMassFlowRate * state.dataContaminantBalance->ZoneAirCO2(fromZoneNum);
-                }
-                if (state.dataContaminantBalance->Contaminant.GenericContamSimulation) {
-                    state.dataContaminantBalance->MixingMassFlowGC(thisZoneNum) +=
-                        thisMixing.MixingMassFlowRate * state.dataContaminantBalance->ZoneAirGC(fromZoneNum);
-                }
-                thisMixing.ReportFlag = true;
-            }
-        } else if (TD == 0.0) {
+        bool doMixing = (TD < 0.0) ? (TZM < TZN + TD) : (TD > 0.0) ? (TZM > TZN + TD) : true;
+        if (doMixing) {
             thisMixing.DesiredAirFlowRate = thisMixing.DesiredAirFlowRateSaved;
             if (state.dataHeatBalFanSys->ZoneMassBalanceFlag(thisZoneNum) && AdjustZoneMixingFlowFlag) {
                 if (thisMixing.MixingMassFlowRate > 0.0) {
@@ -6241,7 +6190,8 @@ void CalcAirFlowSimple(EnergyPlusData &state,
             thisMixing.MixingMassFlowRate = thisMixing.DesiredAirFlowRate * AirDensity;
 
             thisMCPM = thisMixing.MixingMassFlowRate * CpAir;
-            thisMCPTM = thisMCPM * TZM;
+            // For TD < 0, use TZN (this zone temp); otherwise use TZM (from zone temp)
+            thisMCPTM = thisMCPM * ((TD < 0.0) ? TZN : TZM);
             // Now to determine the moisture conditions
             thisMixingMassFlow = thisMixing.MixingMassFlowRate;
             thisMixingMassFlowXHumRat = thisMixing.MixingMassFlowRate * HumRatZM;
