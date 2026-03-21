@@ -40,3 +40,4 @@ src/EnergyPlus/CondenserLoopTowers.cc:GetTowerInput
 src/EnergyPlus/UnitarySystem.cc:controlCoolingSystemToSP
 src/EnergyPlus/ScheduleManager.cc:ProcessScheduleInput
 src/EnergyPlus/LowTempRadiantSystem.cc:GetLowTempRadiantSystem
+src/EnergyPlus/RefrigeratedCase.cc:SetupReportInput
