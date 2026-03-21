@@ -864,6 +864,50 @@ void checkScheduledSurfacePresent(EnergyPlusData &state)
     }
 }
 
+// Helper: set up blind output variables for a window surface (used by both ExtSolar and non-ExtSolar paths)
+static void setupBlindOutputVars(EnergyPlusData &state, int SurfLoop, std::string const &surfName)
+{
+    auto &s_surf = state.dataSurface;
+    auto &surfShade = s_surf->surfShades(SurfLoop);
+    if (surfShade.blind.matNum > 0) {
+        SetupOutputVariable(state,
+                            "Surface Window Blind Beam to Beam Solar Transmittance",
+                            Constant::Units::None,
+                            s_surf->SurfWinBlTsolBmBm(SurfLoop),
+                            OutputProcessor::TimeStepType::Zone,
+                            OutputProcessor::StoreType::Average,
+                            surfName);
+        SetupOutputVariable(state,
+                            "Surface Window Blind Beam to Diffuse Solar Transmittance",
+                            Constant::Units::None,
+                            s_surf->SurfWinBlTsolBmDif(SurfLoop),
+                            OutputProcessor::TimeStepType::Zone,
+                            OutputProcessor::StoreType::Average,
+                            surfName);
+        SetupOutputVariable(state,
+                            "Surface Window Blind Diffuse to Diffuse Solar Transmittance",
+                            Constant::Units::None,
+                            s_surf->SurfWinBlTsolDifDif(SurfLoop),
+                            OutputProcessor::TimeStepType::Zone,
+                            OutputProcessor::StoreType::Average,
+                            surfName);
+        SetupOutputVariable(state,
+                            "Surface Window Blind and Glazing System Beam Solar Transmittance",
+                            Constant::Units::None,
+                            s_surf->SurfWinBlGlSysTsolBmBm(SurfLoop),
+                            OutputProcessor::TimeStepType::Zone,
+                            OutputProcessor::StoreType::Average,
+                            surfName);
+        SetupOutputVariable(state,
+                            "Surface Window Blind and Glazing System Diffuse Solar Transmittance",
+                            Constant::Units::None,
+                            s_surf->SurfWinBlGlSysTsolDifDif(SurfLoop),
+                            OutputProcessor::TimeStepType::Zone,
+                            OutputProcessor::StoreType::Average,
+                            surfName);
+    }
+}
+
 void AllocateModuleArrays(EnergyPlusData &state)
 {
 
@@ -1886,46 +1930,7 @@ void AllocateModuleArrays(EnergyPlusData &state)
                                         surf.Name);
                 }
 
-                //     Output blind report variables only when blinds are used
-                auto &surfShade = s_surf->surfShades(SurfLoop);
-                if (surfShade.blind.matNum > 0) {
-                    // CurrentModuleObject='Window Blinds'
-                    SetupOutputVariable(state,
-                                        "Surface Window Blind Beam to Beam Solar Transmittance",
-                                        Constant::Units::None,
-                                        s_surf->SurfWinBlTsolBmBm(SurfLoop),
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        surf.Name);
-                    SetupOutputVariable(state,
-                                        "Surface Window Blind Beam to Diffuse Solar Transmittance",
-                                        Constant::Units::None,
-                                        s_surf->SurfWinBlTsolBmDif(SurfLoop),
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        surf.Name);
-                    SetupOutputVariable(state,
-                                        "Surface Window Blind Diffuse to Diffuse Solar Transmittance",
-                                        Constant::Units::None,
-                                        s_surf->SurfWinBlTsolDifDif(SurfLoop),
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        surf.Name);
-                    SetupOutputVariable(state,
-                                        "Surface Window Blind and Glazing System Beam Solar Transmittance",
-                                        Constant::Units::None,
-                                        s_surf->SurfWinBlGlSysTsolBmBm(SurfLoop),
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        surf.Name);
-                    SetupOutputVariable(state,
-                                        "Surface Window Blind and Glazing System Diffuse Solar Transmittance",
-                                        Constant::Units::None,
-                                        s_surf->SurfWinBlGlSysTsolDifDif(SurfLoop),
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        surf.Name);
-                }
+                setupBlindOutputVars(state, SurfLoop, surf.Name);
 
                 //     Output screen report variables only when screens are used
                 if (s_surf->SurfaceWindow(SurfLoop).screenNum > 0) {
@@ -2310,45 +2315,7 @@ void AllocateModuleArrays(EnergyPlusData &state)
                                         OutputProcessor::StoreType::Sum,
                                         surf.Name);
 
-                    //     Output blind report variables only when blinds are used
-                    auto &surfShade = s_surf->surfShades(SurfLoop);
-                    if (surfShade.blind.matNum > 0) {
-                        SetupOutputVariable(state,
-                                            "Surface Window Blind Beam to Beam Solar Transmittance",
-                                            Constant::Units::None,
-                                            s_surf->SurfWinBlTsolBmBm(SurfLoop),
-                                            OutputProcessor::TimeStepType::Zone,
-                                            OutputProcessor::StoreType::Average,
-                                            surf.Name);
-                        SetupOutputVariable(state,
-                                            "Surface Window Blind Beam to Diffuse Solar Transmittance",
-                                            Constant::Units::None,
-                                            s_surf->SurfWinBlTsolBmDif(SurfLoop),
-                                            OutputProcessor::TimeStepType::Zone,
-                                            OutputProcessor::StoreType::Average,
-                                            surf.Name);
-                        SetupOutputVariable(state,
-                                            "Surface Window Blind Diffuse to Diffuse Solar Transmittance",
-                                            Constant::Units::None,
-                                            s_surf->SurfWinBlTsolDifDif(SurfLoop),
-                                            OutputProcessor::TimeStepType::Zone,
-                                            OutputProcessor::StoreType::Average,
-                                            surf.Name);
-                        SetupOutputVariable(state,
-                                            "Surface Window Blind and Glazing System Beam Solar Transmittance",
-                                            Constant::Units::None,
-                                            s_surf->SurfWinBlGlSysTsolBmBm(SurfLoop),
-                                            OutputProcessor::TimeStepType::Zone,
-                                            OutputProcessor::StoreType::Average,
-                                            surf.Name);
-                        SetupOutputVariable(state,
-                                            "Surface Window Blind and Glazing System Diffuse Solar Transmittance",
-                                            Constant::Units::None,
-                                            s_surf->SurfWinBlGlSysTsolDifDif(SurfLoop),
-                                            OutputProcessor::TimeStepType::Zone,
-                                            OutputProcessor::StoreType::Average,
-                                            surf.Name);
-                    }
+                    setupBlindOutputVars(state, SurfLoop, surf.Name);
 
                     //     Output screen report variables only when screens are used
                     if (s_surf->SurfaceWindow(SurfLoop).screenNum > 0) {
