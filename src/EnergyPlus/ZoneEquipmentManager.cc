@@ -5613,6 +5613,26 @@ static bool checkMixingTempLimits(EnergyPlusData &state,
     return false;
 }
 
+// Zero the mixing-related heat balance fields for a single ZoneHeatBalanceData object.
+static void zeroMixingHeatBalanceFields(ZoneTempPredictorCorrector::ZoneSpaceHeatBalanceData &hb)
+{
+    hb.MCPM = 0.0;
+    hb.MCPTM = 0.0;
+    hb.MCPTI = 0.0;
+    hb.MCPI = 0.0;
+    hb.OAMFL = 0.0;
+    hb.MCPTV = 0.0;
+    hb.MCPV = 0.0;
+    hb.VAMFL = 0.0;
+    hb.MDotCPOA = 0.0;
+    hb.MDotOA = 0.0;
+    hb.MCPThermChim = 0.0;
+    hb.ThermChimAMFL = 0.0;
+    hb.MCPTThermChim = 0.0;
+    hb.MixingMassFlowZone = 0.0;
+    hb.MixingMassFlowXHumRat = 0.0;
+}
+
 void CalcAirFlowSimple(EnergyPlusData &state,
                        int const SysTimestepLoop,                // System time step index
                        bool const AdjustZoneMixingFlowFlag,      // holds zone mixing air flow calc status
@@ -5642,39 +5662,11 @@ void CalcAirFlowSimple(EnergyPlusData &state,
     static constexpr std::string_view RoutineNameZoneAirBalance("CalcAirFlowSimple:ZoneAirBalance");
 
     for (auto &thisZoneHB : state.dataZoneTempPredictorCorrector->zoneHeatBalance) {
-        thisZoneHB.MCPM = 0.0;
-        thisZoneHB.MCPTM = 0.0;
-        thisZoneHB.MCPTI = 0.0;
-        thisZoneHB.MCPI = 0.0;
-        thisZoneHB.OAMFL = 0.0;
-        thisZoneHB.MCPTV = 0.0;
-        thisZoneHB.MCPV = 0.0;
-        thisZoneHB.VAMFL = 0.0;
-        thisZoneHB.MDotCPOA = 0.0;
-        thisZoneHB.MDotOA = 0.0;
-        thisZoneHB.MCPThermChim = 0.0;
-        thisZoneHB.ThermChimAMFL = 0.0;
-        thisZoneHB.MCPTThermChim = 0.0;
-        thisZoneHB.MixingMassFlowZone = 0.0;
-        thisZoneHB.MixingMassFlowXHumRat = 0.0;
+        zeroMixingHeatBalanceFields(thisZoneHB);
     }
     if (state.dataHeatBal->doSpaceHeatBalance) {
         for (auto &thisSpaceHB : state.dataZoneTempPredictorCorrector->spaceHeatBalance) {
-            thisSpaceHB.MCPM = 0.0;
-            thisSpaceHB.MCPTM = 0.0;
-            thisSpaceHB.MCPTI = 0.0;
-            thisSpaceHB.MCPI = 0.0;
-            thisSpaceHB.OAMFL = 0.0;
-            thisSpaceHB.MCPTV = 0.0;
-            thisSpaceHB.MCPV = 0.0;
-            thisSpaceHB.VAMFL = 0.0;
-            thisSpaceHB.MDotCPOA = 0.0;
-            thisSpaceHB.MDotOA = 0.0;
-            thisSpaceHB.MCPThermChim = 0.0;
-            thisSpaceHB.ThermChimAMFL = 0.0;
-            thisSpaceHB.MCPTThermChim = 0.0;
-            thisSpaceHB.MixingMassFlowZone = 0.0;
-            thisSpaceHB.MixingMassFlowXHumRat = 0.0;
+            zeroMixingHeatBalanceFields(thisSpaceHB);
         }
     }
     if (state.dataContaminantBalance->Contaminant.CO2Simulation &&
