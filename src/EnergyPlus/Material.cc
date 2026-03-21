@@ -138,14 +138,12 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
     int NumGas;                         // Index for loop over gap gases in a mixture
     int NumGases;                       // Number of gasses in a mixture
     GasType gasType = GasType::Invalid; // Gas type index: 1=air, 2=argon, 3=krypton, 4=xenon
-    int ICoeff;                         // Gas property coefficient index
     Real64 MinSlatAngGeom;              // Minimum and maximum slat angle allowed by slat geometry (deg)
     Real64 MaxSlatAngGeom;
     Real64 ReflectivitySol;   // Glass reflectivity, solar
     Real64 ReflectivityVis;   // Glass reflectivity, visible
     Real64 TransmittivitySol; // Glass transmittivity, solar
     Real64 TransmittivityVis; // Glass transmittivity, visible
-    Real64 DenomRGas;         // Denominator for WindowGas calculations of NominalR
     Real64 Openness;          // insect screen openness fraction = (1-d/s)^2
 
     // Added TH 1/9/2009 to read the thermochromic glazings
@@ -611,154 +609,64 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         }
 
         // Get SpectralAndAngle table names
+        // Helper lambda to validate a SpectralAndAngle curve: checks that the curve
+        // exists, is 2-D, and has the required angle (0-90) and wavelength (0.1-4.0) ranges.
+        auto validateSpecAngCurve = [&](int alphaFieldIdx, Curve::Curve *&curvePtr) {
+            if (s_ipsc->lAlphaFieldBlanks(alphaFieldIdx)) {
+                ErrorsFound = true;
+                ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(alphaFieldIdx), s_ipsc->cAlphaFieldNames(2), "SpectralAndAngle");
+            } else if ((curvePtr = Curve::GetCurve(state, s_ipsc->cAlphaArgs(alphaFieldIdx))) == nullptr) {
+                ErrorsFound = true;
+                ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(alphaFieldIdx), s_ipsc->cAlphaArgs(alphaFieldIdx));
+            } else if (curvePtr->numDims != 2) {
+                Curve::ShowSevereCurveDims(
+                    state, eoh, s_ipsc->cAlphaFieldNames(alphaFieldIdx), s_ipsc->cAlphaArgs(alphaFieldIdx), "2", curvePtr->numDims);
+                ErrorsFound = true;
+            } else {
+                Real64 minAng = curvePtr->inputLimits[0].min;
+                Real64 maxAng = curvePtr->inputLimits[0].max;
+                Real64 minLam = curvePtr->inputLimits[1].min;
+                Real64 maxLam = curvePtr->inputLimits[1].max;
+
+                if (minAng > 1.0e-6) {
+                    ErrorsFound = true;
+                    ShowSevereCustom(state,
+                                     eoh,
+                                     EnergyPlus::format("{} requires the minimum value = 0.0 in the entered table name={}",
+                                                        s_ipsc->cAlphaFieldNames(alphaFieldIdx),
+                                                        s_ipsc->cAlphaArgs(alphaFieldIdx)));
+                }
+                if (std::abs(maxAng - 90.0) > 1.0e-6) {
+                    ErrorsFound = true;
+                    ShowSevereCustom(state,
+                                     eoh,
+                                     EnergyPlus::format("{} requires the maximum value = 90.0 in the entered table name={}",
+                                                        s_ipsc->cAlphaFieldNames(alphaFieldIdx),
+                                                        s_ipsc->cAlphaArgs(alphaFieldIdx)));
+                }
+                if (minLam < 0.1) {
+                    ErrorsFound = true;
+                    ShowSevereCustom(state,
+                                     eoh,
+                                     EnergyPlus::format("{} requires the minimum value = 0.1 micron in the entered table name={}",
+                                                        s_ipsc->cAlphaFieldNames(alphaFieldIdx),
+                                                        s_ipsc->cAlphaArgs(alphaFieldIdx)));
+                }
+                if (maxLam > 4.0) {
+                    ErrorsFound = true;
+                    ShowSevereCustom(state,
+                                     eoh,
+                                     EnergyPlus::format("{} requires the maximum value = 4.0 microns in the entered table name={}",
+                                                        s_ipsc->cAlphaFieldNames(alphaFieldIdx),
+                                                        s_ipsc->cAlphaArgs(alphaFieldIdx)));
+                }
+            }
+        };
+
         if (mat->windowOpticalData == Window::OpticalDataModel::SpectralAndAngle) {
-            if (s_ipsc->lAlphaFieldBlanks(5)) {
-                ErrorsFound = true;
-                ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(5), s_ipsc->cAlphaFieldNames(2), "SpectralAndAngle");
-            } else if ((mat->GlassSpecAngTransCurve = Curve::GetCurve(state, s_ipsc->cAlphaArgs(5))) == nullptr) {
-                ErrorsFound = true;
-                ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(5), s_ipsc->cAlphaArgs(5));
-            } else if (mat->GlassSpecAngTransCurve->numDims != 2) {
-                Curve::ShowSevereCurveDims(state, eoh, s_ipsc->cAlphaFieldNames(5), s_ipsc->cAlphaArgs(5), "2", mat->GlassSpecAngTransCurve->numDims);
-                ErrorsFound = true;
-            } else {
-                Real64 minAng = mat->GlassSpecAngTransCurve->inputLimits[0].min;
-                Real64 maxAng = mat->GlassSpecAngTransCurve->inputLimits[0].max;
-                Real64 minLam = mat->GlassSpecAngTransCurve->inputLimits[1].min;
-                Real64 maxLam = mat->GlassSpecAngTransCurve->inputLimits[1].max;
-
-                if (minAng > 1.0e-6) {
-                    ErrorsFound = true;
-                    ShowSevereCustom(state,
-                                     eoh,
-                                     EnergyPlus::format("{} requires the minimum value = 0.0 in the entered table name={}",
-                                                        s_ipsc->cAlphaFieldNames(5),
-                                                        s_ipsc->cAlphaArgs(5)));
-                }
-
-                if (std::abs(maxAng - 90.0) > 1.0e-6) {
-                    ErrorsFound = true;
-                    ShowSevereCustom(state,
-                                     eoh,
-                                     EnergyPlus::format("{} requires the maximum value = 90.0 in the entered table name={}",
-                                                        s_ipsc->cAlphaFieldNames(5),
-                                                        s_ipsc->cAlphaArgs(5)));
-                }
-
-                if (minLam < 0.1) {
-                    ErrorsFound = true;
-                    ShowSevereCustom(state,
-                                     eoh,
-                                     EnergyPlus::format("{} requires the minimum value = 0.1 micron in the entered table name={}",
-                                                        s_ipsc->cAlphaFieldNames(5),
-                                                        s_ipsc->cAlphaArgs(5)));
-                }
-
-                if (maxLam > 4.0) {
-                    ErrorsFound = true;
-                    ShowSevereCustom(state,
-                                     eoh,
-                                     EnergyPlus::format("{} requires the maximum value = 4.0 microns in the entered table name={}",
-                                                        s_ipsc->cAlphaFieldNames(5),
-                                                        s_ipsc->cAlphaArgs(5)));
-                }
-            }
-
-            if (s_ipsc->lAlphaFieldBlanks(6)) {
-                ErrorsFound = true;
-                ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(6), s_ipsc->cAlphaFieldNames(2), "SpectralAndAngle");
-            } else if ((mat->GlassSpecAngFReflCurve = Curve::GetCurve(state, s_ipsc->cAlphaArgs(6))) == nullptr) {
-                ErrorsFound = true;
-                ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(6), s_ipsc->cAlphaArgs(6));
-            } else if (mat->GlassSpecAngFReflCurve->numDims != 2) {
-                Curve::ShowSevereCurveDims(state, eoh, s_ipsc->cAlphaFieldNames(6), s_ipsc->cAlphaArgs(6), "2", mat->GlassSpecAngFReflCurve->numDims);
-                ErrorsFound = true;
-            } else {
-                Real64 minAng = mat->GlassSpecAngFReflCurve->inputLimits[0].min;
-                Real64 maxAng = mat->GlassSpecAngFReflCurve->inputLimits[0].max;
-                Real64 minLam = mat->GlassSpecAngFReflCurve->inputLimits[1].min;
-                Real64 maxLam = mat->GlassSpecAngFReflCurve->inputLimits[1].max;
-                if (minAng > 1.0e-6) {
-                    ErrorsFound = true;
-                    ShowSevereCustom(state,
-                                     eoh,
-                                     EnergyPlus::format("{} requires the minimum value = 0.0 in the entered table name={}",
-                                                        s_ipsc->cAlphaFieldNames(5),
-                                                        s_ipsc->cAlphaArgs(5)));
-                }
-                if (std::abs(maxAng - 90.0) > 1.0e-6) {
-                    ErrorsFound = true;
-                    ShowSevereCustom(state,
-                                     eoh,
-                                     EnergyPlus::format("{} requires the maximum value = 90.0 in the entered table name={}",
-                                                        s_ipsc->cAlphaFieldNames(5),
-                                                        s_ipsc->cAlphaArgs(5)));
-                }
-                if (minLam < 0.1) {
-                    ErrorsFound = true;
-                    ShowSevereCustom(state,
-                                     eoh,
-                                     EnergyPlus::format("{} requires the minimum value = 0.1 micron in the entered table name={}",
-                                                        s_ipsc->cAlphaFieldNames(5),
-                                                        s_ipsc->cAlphaArgs(5)));
-                }
-                if (maxLam > 4.0) {
-                    ErrorsFound = true;
-                    ShowSevereCustom(state,
-                                     eoh,
-                                     EnergyPlus::format("{} requires the maximum value = 4.0 microns in the entered table name={}",
-                                                        s_ipsc->cAlphaFieldNames(5),
-                                                        s_ipsc->cAlphaArgs(5)));
-                }
-            }
-
-            if (s_ipsc->lAlphaFieldBlanks(7)) {
-                ErrorsFound = true;
-                ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(7), s_ipsc->cAlphaFieldNames(2), "SpectralAndAngle");
-            } else if ((mat->GlassSpecAngBReflCurve = Curve::GetCurve(state, s_ipsc->cAlphaArgs(7))) == nullptr) {
-                ErrorsFound = true;
-                ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(7), s_ipsc->cAlphaArgs(7));
-            } else if (mat->GlassSpecAngBReflCurve->numDims != 2) {
-                Curve::ShowSevereCurveDims(state, eoh, s_ipsc->cAlphaFieldNames(7), s_ipsc->cAlphaArgs(7), "2", mat->GlassSpecAngBReflCurve->numDims);
-                ErrorsFound = true;
-            } else {
-                Real64 minAng = mat->GlassSpecAngFReflCurve->inputLimits[0].min;
-                Real64 maxAng = mat->GlassSpecAngFReflCurve->inputLimits[0].max;
-                Real64 minLam = mat->GlassSpecAngFReflCurve->inputLimits[1].min;
-                Real64 maxLam = mat->GlassSpecAngFReflCurve->inputLimits[1].max;
-                if (minAng > 1.0e-6) {
-                    ErrorsFound = true;
-                    ShowSevereCustom(state,
-                                     eoh,
-                                     EnergyPlus::format("{} requires the minimum value = 0.0 in the entered table name={}",
-                                                        s_ipsc->cAlphaFieldNames(5),
-                                                        s_ipsc->cAlphaArgs(5)));
-                }
-                if (std::abs(maxAng - 90.0) > 1.0e-6) {
-                    ErrorsFound = true;
-                    ShowSevereCustom(state,
-                                     eoh,
-                                     EnergyPlus::format("{} requires the maximum value = 90.0 in the entered table name={}",
-                                                        s_ipsc->cAlphaFieldNames(5),
-                                                        s_ipsc->cAlphaArgs(5)));
-                }
-                if (minLam < 0.1) {
-                    ErrorsFound = true;
-                    ShowSevereCustom(state,
-                                     eoh,
-                                     EnergyPlus::format("{} requires the minimum value = 0.1 micron in the entered table name={}",
-                                                        s_ipsc->cAlphaFieldNames(5),
-                                                        s_ipsc->cAlphaArgs(5)));
-                }
-                if (maxLam > 4.0) {
-                    ErrorsFound = true;
-                    ShowSevereCustom(state,
-                                     eoh,
-                                     EnergyPlus::format("{} requires the maximum value = 4.0 microns in the entered table name={}",
-                                                        s_ipsc->cAlphaFieldNames(5),
-                                                        s_ipsc->cAlphaArgs(5)));
-                }
-            }
+            validateSpecAngCurve(5, mat->GlassSpecAngTransCurve);
+            validateSpecAngCurve(6, mat->GlassSpecAngFReflCurve);
+            validateSpecAngCurve(7, mat->GlassSpecAngBReflCurve);
         }
     }
 
@@ -947,6 +855,52 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
     } // W5GlsMatEQL loop
 
+    // Helper lambda to load custom gas properties from input fields and validate them.
+    // Loads conductivity, viscosity, specific heat coefficients (c0/c1/c2), molecular weight,
+    // and specific heat ratio from rNumericArgs(2..12), then checks vis.c0, cp.c0, wght > 0.
+    auto loadCustomGasProps = [&](MaterialGasMix *matGas, ErrorObjectHeader const &eoh) {
+        matGas->gases[0].con.c0 = s_ipsc->rNumericArgs(2);
+        matGas->gases[0].con.c1 = s_ipsc->rNumericArgs(3);
+        matGas->gases[0].con.c2 = s_ipsc->rNumericArgs(4);
+        matGas->gases[0].vis.c0 = s_ipsc->rNumericArgs(5);
+        matGas->gases[0].vis.c1 = s_ipsc->rNumericArgs(6);
+        matGas->gases[0].vis.c2 = s_ipsc->rNumericArgs(7);
+        matGas->gases[0].cp.c0 = s_ipsc->rNumericArgs(8);
+        matGas->gases[0].cp.c1 = s_ipsc->rNumericArgs(9);
+        matGas->gases[0].cp.c2 = s_ipsc->rNumericArgs(10);
+        matGas->gases[0].wght = s_ipsc->rNumericArgs(11);
+        matGas->gases[0].specHeatRatio = s_ipsc->rNumericArgs(12);
+
+        if (matGas->gases[0].vis.c0 <= 0.0) {
+            ErrorsFound = true;
+            ShowSevereCustom(state, eoh, EnergyPlus::format("{} not > 0.0", s_ipsc->cNumericFieldNames(5)));
+        }
+        if (matGas->gases[0].cp.c0 <= 0.0) {
+            ErrorsFound = true;
+            ShowSevereCustom(state, eoh, EnergyPlus::format("{} not > 0.0", s_ipsc->cNumericFieldNames(8)));
+        }
+        if (matGas->gases[0].wght <= 0.0) {
+            ErrorsFound = true;
+            ShowSevereCustom(state, eoh, EnergyPlus::format("{} not > 0.0", s_ipsc->cNumericFieldNames(11)));
+        }
+    };
+
+    // Helper lambda to compute the nominal resistance of a gas gap at room temperature.
+    auto calcGasNominalR = [&](MaterialGasMix *matGas, ErrorObjectHeader const &eoh) {
+        if (!ErrorsFound) {
+            Real64 DenomRGas = (matGas->gases[0].con.c0 + matGas->gases[0].con.c1 * 300.0 + matGas->gases[0].con.c2 * 90000.0);
+            if (DenomRGas > 0.0) {
+                matGas->NominalR = matGas->Thickness / DenomRGas;
+            } else {
+                ShowSevereCustom(
+                    state,
+                    eoh,
+                    EnergyPlus::format("Nominal resistance of gap at room temperature calculated at a negative Conductivity=[{:.3R}].", DenomRGas));
+                ErrorsFound = true;
+            }
+        }
+    };
+
     // Window gas materials (for gaps with a single gas)
 
     s_ipsc->cCurrentModuleObject = "WindowMaterial:Gas";
@@ -1000,57 +954,14 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         }
 
         // Custom gas
-
         if (gasType == GasType::Custom) {
-            matGas->gases[0].con.c0 = s_ipsc->rNumericArgs(2);
-            matGas->gases[0].con.c1 = s_ipsc->rNumericArgs(3);
-            matGas->gases[0].con.c2 = s_ipsc->rNumericArgs(4);
-            matGas->gases[0].vis.c0 = s_ipsc->rNumericArgs(5);
-            matGas->gases[0].vis.c1 = s_ipsc->rNumericArgs(6);
-            matGas->gases[0].vis.c2 = s_ipsc->rNumericArgs(7);
-            matGas->gases[0].cp.c0 = s_ipsc->rNumericArgs(8);
-            matGas->gases[0].cp.c1 = s_ipsc->rNumericArgs(9);
-            matGas->gases[0].cp.c2 = s_ipsc->rNumericArgs(10);
-            matGas->gases[0].wght = s_ipsc->rNumericArgs(11);
-            matGas->gases[0].specHeatRatio = s_ipsc->rNumericArgs(12);
-
-            // Check for errors in custom gas properties
-            //      IF(dataMaterial.Material(MaterNum)%GasCon(1,1) <= 0.0) THEN
-            //        ErrorsFound = .TRUE.
-            //        CALL ShowSevereError(state, 'Conductivity Coefficient A for custom window gas='&
-            //                 //TRIM(s_ipsc->cAlphaArgs(1))//' should be > 0.')
-            //      END IF
-
-            if (matGas->gases[0].vis.c0 <= 0.0) {
-                ErrorsFound = true;
-                ShowSevereCustom(state, eoh, EnergyPlus::format("{} not > 0.0", s_ipsc->cNumericFieldNames(5)));
-            }
-            if (matGas->gases[0].cp.c0 <= 0.0) {
-                ErrorsFound = true;
-                ShowSevereCustom(state, eoh, EnergyPlus::format("{} not > 0.0", s_ipsc->cNumericFieldNames(8)));
-            }
-            if (matGas->gases[0].wght <= 0.0) {
-                ErrorsFound = true;
-                ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value.");
-                ShowContinueError(state, s_ipsc->cNumericFieldNames(11) + " not > 0.0");
-            }
+            loadCustomGasProps(matGas, eoh);
         }
 
         // Nominal resistance of gap at room temperature
-        if (!ErrorsFound) {
-            DenomRGas = (matGas->gases[0].con.c0 + matGas->gases[0].con.c1 * 300.0 + matGas->gases[0].con.c2 * 90000.0);
-            if (DenomRGas > 0.0) {
-                matGas->NominalR = matGas->Thickness / DenomRGas;
-            } else {
-                ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value.");
-                ShowContinueError(
-                    state,
-                    EnergyPlus::format("Nominal resistance of gap at room temperature calculated at a negative Conductivity=[{:.3R}].", DenomRGas));
-                ErrorsFound = true;
-            }
-        }
-    }
+        calcGasNominalR(matGas, eoh);
 
+    }
     // Window gap materials (for gaps with a single gas for EquivalentLayer)
 
     s_ipsc->cCurrentModuleObject = "WindowMaterial:Gap:EquivalentLayer";
@@ -1110,52 +1021,13 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         }
 
         if (gasType == GasType::Custom) {
-            for (ICoeff = 1; ICoeff <= 3; ++ICoeff) {
-                matGas->gases[0].con.c0 = s_ipsc->rNumericArgs(2);
-                matGas->gases[0].con.c1 = s_ipsc->rNumericArgs(3);
-                matGas->gases[0].con.c2 = s_ipsc->rNumericArgs(4);
-                matGas->gases[0].vis.c0 = s_ipsc->rNumericArgs(5);
-                matGas->gases[0].vis.c1 = s_ipsc->rNumericArgs(6);
-                matGas->gases[0].vis.c2 = s_ipsc->rNumericArgs(7);
-                matGas->gases[0].cp.c0 = s_ipsc->rNumericArgs(8);
-                matGas->gases[0].cp.c1 = s_ipsc->rNumericArgs(9);
-                matGas->gases[0].cp.c2 = s_ipsc->rNumericArgs(10);
-            }
-            matGas->gases[0].wght = s_ipsc->rNumericArgs(11);
-            matGas->gases[0].specHeatRatio = s_ipsc->rNumericArgs(12);
-
-            if (matGas->gases[0].vis.c0 <= 0.0) {
-                ErrorsFound = true;
-                ShowSevereError(state, EnergyPlus::format("{}=\"{}\", Illegal value.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-                ShowContinueError(state, EnergyPlus::format("{} not > 0.0", s_ipsc->cNumericFieldNames(5)));
-            }
-            if (matGas->gases[0].cp.c0 <= 0.0) {
-                ErrorsFound = true;
-                ShowSevereError(state, EnergyPlus::format("{}=\"{}\", Illegal value.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-                ShowContinueError(state, EnergyPlus::format("{} not > 0.0", s_ipsc->cNumericFieldNames(8)));
-            }
-            if (matGas->gases[0].wght <= 0.0) {
-                ErrorsFound = true;
-                ShowSevereError(state, EnergyPlus::format("{}=\"{}\", Illegal value.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-                ShowContinueError(state, EnergyPlus::format("{} not > 0.0", s_ipsc->cNumericFieldNames(11)));
-            }
+            loadCustomGasProps(matGas, eoh);
         }
 
         // Nominal resistance of gap at room temperature
-        if (!ErrorsFound) {
-            DenomRGas = (matGas->gases[0].con.c0 + matGas->gases[0].con.c1 * 300.0 + matGas->gases[0].con.c2 * 90000.0);
-            if (DenomRGas > 0.0) {
-                matGas->NominalR = matGas->Thickness / DenomRGas;
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{}=\"{}\", Illegal value.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-                ShowContinueError(
-                    state,
-                    EnergyPlus::format("Nominal resistance of gap at room temperature calculated at a negative Conductivity=[{:.3R}].", DenomRGas));
-                ErrorsFound = true;
-            }
-        }
-    } // for (Loop : W5MatEQL)
+        calcGasNominalR(matGas, eoh);
 
+    } // for (Loop : W5MatEQL)
     // Window gas mixtures (for gaps with two or more gases)
 
     s_ipsc->cCurrentModuleObject = "WindowMaterial:GasMixture";
