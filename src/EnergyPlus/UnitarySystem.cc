@@ -132,6 +132,31 @@ namespace UnitarySystems {
                 state, PartLoadRatio, unitarySysNum, FirstHVACIteration, compressorOp, loadToBeMet, coolHeatFlag, sensibleLoad, OnOffAirFlowRatio, HXUnitOn, AirLoopNum);
         };
     }
+    // Helper: report "PLR out of range" warning for either sensible or latent solver failures.
+    // Consolidates identical warning blocks used in controlUnitarySystemOutput.
+    static void warnPLROutOfRange(EnergyPlusData &state,
+                                  std::string_view unitType,
+                                  std::string_view unitName,
+                                  std::string_view loadLabel, // "sensible" or "Latent"
+                                  std::string_view LoadLabel, // "Sensible" or "Latent"
+                                  int &failedIndex,
+                                  Real64 loadValue)
+    {
+        if (failedIndex == 0) {
+            ShowWarningMessage(state, EnergyPlus::format("Coil control failed for {}:{}", unitType, unitName));
+            ShowContinueError(state, EnergyPlus::format("  {} part-load ratio determined to be outside the range of 0-1.", loadLabel));
+            ShowContinueErrorTimeStamp(
+                state, EnergyPlus::format("{} load to be met = {:.2T} (watts), and the simulation continues.", LoadLabel, loadValue));
+        }
+        ShowRecurringWarningErrorAtEnd(
+            state,
+            std::string(unitType) + " \"" + std::string(unitName) + "\" - " + std::string(loadLabel) +
+                " part-load ratio out of range error continues. " + std::string(LoadLabel) + " load statistics:",
+            failedIndex,
+            loadValue,
+            loadValue);
+    }
+
     static const std::string blankStdString;
 
     // Helper: set DataTotCapCurveIndex and DataIsDXCoil for a cooling coil based on its type.
@@ -9566,20 +9591,7 @@ namespace UnitarySystems {
                                                                    ZoneLoad);
                                 }
                             } else if (SolFlag == -2) {
-                                if (this->RegulaFalsiFailedIndex == 0) {
-                                    ShowWarningMessage(state, EnergyPlus::format("Coil control failed for {}:{}", this->UnitType, this->Name));
-                                    ShowContinueError(state, "  sensible part-load ratio determined to be outside the range of 0-1.");
-                                    ShowContinueErrorTimeStamp(
-                                        state,
-                                        EnergyPlus::format("Sensible load to be met = {:.2T} (watts), and the simulation continues.", ZoneLoad));
-                                }
-                                ShowRecurringWarningErrorAtEnd(
-                                    state,
-                                    this->UnitType + " \"" + this->Name +
-                                        "\" - sensible part-load ratio out of range error continues. Sensible load statistics:",
-                                    this->RegulaFalsiFailedIndex,
-                                    ZoneLoad,
-                                    ZoneLoad);
+                                warnPLROutOfRange(state, this->UnitType, this->Name, "sensible", "Sensible", this->RegulaFalsiFailedIndex, ZoneLoad);
                             }
                         } else if (SolFlag == -2) {
                             if (this->m_MultiOrVarSpeedCoolCoil) {
@@ -9603,20 +9615,7 @@ namespace UnitarySystems {
                             if ((state.dataUnitarySystems->HeatingLoad && ZoneLoad > SensOutputOff) ||
                                 (state.dataUnitarySystems->CoolingLoad && ZoneLoad < SensOutputOff)) {
                                 // if this is still true then print valid warnings
-                                if (this->RegulaFalsiFailedIndex == 0) {
-                                    ShowWarningMessage(state, EnergyPlus::format("Coil control failed for {}:{}", this->UnitType, this->Name));
-                                    ShowContinueError(state, "  sensible part-load ratio determined to be outside the range of 0-1.");
-                                    ShowContinueErrorTimeStamp(
-                                        state,
-                                        EnergyPlus::format("Sensible load to be met = {:.2T} (watts), and the simulation continues.", ZoneLoad));
-                                }
-                                ShowRecurringWarningErrorAtEnd(
-                                    state,
-                                    this->UnitType + " \"" + this->Name +
-                                        "\" - sensible part-load ratio out of range error continues. Sensible load statistics:",
-                                    this->RegulaFalsiFailedIndex,
-                                    ZoneLoad,
-                                    ZoneLoad);
+                                warnPLROutOfRange(state, this->UnitType, this->Name, "sensible", "Sensible", this->RegulaFalsiFailedIndex, ZoneLoad);
                             }
                         } // IF (SolFlag == -1) THEN
                     }
@@ -10009,34 +10008,12 @@ namespace UnitarySystems {
                         state.dataUnitarySystems->MoistureLoad);
                 }
             } else if (SolFlagLat == -2) {
-                if (this->warnIndex.m_LatRegulaFalsiFailedIndex == 0) {
-                    ShowWarningMessage(state, EnergyPlus::format("Coil control failed for {}:{}", this->UnitType, this->Name));
-                    ShowContinueError(state, "  Latent part-load ratio determined to be outside the range of 0-1.");
-                    ShowContinueErrorTimeStamp(state,
-                                               EnergyPlus::format("Latent load to be met = {:.2T} (watts), and the simulation continues.",
-                                                                  state.dataUnitarySystems->MoistureLoad));
-                }
-                ShowRecurringWarningErrorAtEnd(state,
-                                               this->UnitType + " \"" + this->Name +
-                                                   "\" - Latent part-load ratio out of range error continues. Latent load statistics:",
-                                               this->warnIndex.m_LatRegulaFalsiFailedIndex,
-                                               state.dataUnitarySystems->MoistureLoad,
-                                               state.dataUnitarySystems->MoistureLoad);
+                warnPLROutOfRange(state, this->UnitType, this->Name, "Latent", "Latent",
+                                  this->warnIndex.m_LatRegulaFalsiFailedIndex, state.dataUnitarySystems->MoistureLoad);
             }
         } else if (SolFlagLat == -2) {
-            if (this->warnIndex.m_LatRegulaFalsiFailedIndex == 0) {
-                ShowWarningMessage(state, EnergyPlus::format("Coil control failed for {}:{}", this->UnitType, this->Name));
-                ShowContinueError(state, "  Latent part-load ratio determined to be outside the range of 0-1.");
-                ShowContinueErrorTimeStamp(state,
-                                           EnergyPlus::format("Latent load to be met = {:.2T} (watts), and the simulation continues.",
-                                                              state.dataUnitarySystems->MoistureLoad));
-            }
-            ShowRecurringWarningErrorAtEnd(state,
-                                           this->UnitType + " \"" + this->Name +
-                                               "\" - Latent part-load ratio out of range error continues. Latent load statistics:",
-                                           this->warnIndex.m_LatRegulaFalsiFailedIndex,
-                                           state.dataUnitarySystems->MoistureLoad,
-                                           state.dataUnitarySystems->MoistureLoad);
+            warnPLROutOfRange(state, this->UnitType, this->Name, "Latent", "Latent",
+                              this->warnIndex.m_LatRegulaFalsiFailedIndex, state.dataUnitarySystems->MoistureLoad);
         }
 
         FullSensibleOutput = TempSensOutput;
