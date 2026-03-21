@@ -1404,6 +1404,124 @@ namespace Furnaces {
                 }
             };
 
+        // Function-pointer type shared by WaterToAirHeatPump, WaterToAirHeatPumpSimple,
+        // and VariableSpeedCoils for GetCoilIndex / GetCoilInletNode / GetCoilOutletNode.
+        using CoilNodeFn = int (*)(EnergyPlusData &, std::string const &, std::string const &, bool &);
+        using CoilCapFn = Real64 (*)(EnergyPlusData &, std::string const &, std::string const &, bool &);
+
+        // Descriptor for a single WaterToAir coil variant.  The three supported
+        // coil types (ParameterEstimation, EquationFit, VariableSpeedEquationFit)
+        // differ only in the HVAC constant and the namespace of the getter functions.
+        struct WAHPCoilDesc {
+            std::string_view typeString; // upper-case IDF object name to match
+            int coilTypeNum;             // HVAC::Coil_* constant
+            CoilNodeFn getIndex;
+            CoilNodeFn getInletNode;
+            CoilNodeFn getOutletNode;
+            CoilCapFn getCapacity;
+        };
+
+        static constexpr int numWAHPVariants = 3;
+
+        // Heating coil dispatch table.
+        const std::array<WAHPCoilDesc, numWAHPVariants> wahpHeatingCoils = {{
+            {"COIL:HEATING:WATERTOAIRHEATPUMP:PARAMETERESTIMATION",
+             HVAC::Coil_HeatingWaterToAirHP,
+             WaterToAirHeatPump::GetCoilIndex,
+             WaterToAirHeatPump::GetCoilInletNode,
+             WaterToAirHeatPump::GetCoilOutletNode,
+             WaterToAirHeatPump::GetCoilCapacity},
+            {"COIL:HEATING:WATERTOAIRHEATPUMP:EQUATIONFIT",
+             HVAC::Coil_HeatingWaterToAirHPSimple,
+             WaterToAirHeatPumpSimple::GetCoilIndex,
+             WaterToAirHeatPumpSimple::GetCoilInletNode,
+             WaterToAirHeatPumpSimple::GetCoilOutletNode,
+             WaterToAirHeatPumpSimple::GetCoilCapacity},
+            {"COIL:HEATING:WATERTOAIRHEATPUMP:VARIABLESPEEDEQUATIONFIT",
+             HVAC::Coil_HeatingWaterToAirHPVSEquationFit,
+             VariableSpeedCoils::GetCoilIndexVariableSpeed,
+             VariableSpeedCoils::GetCoilInletNodeVariableSpeed,
+             VariableSpeedCoils::GetCoilOutletNodeVariableSpeed,
+             VariableSpeedCoils::GetCoilCapacityVariableSpeed},
+        }};
+
+        // Cooling coil dispatch table.
+        const std::array<WAHPCoilDesc, numWAHPVariants> wahpCoolingCoils = {{
+            {"COIL:COOLING:WATERTOAIRHEATPUMP:PARAMETERESTIMATION",
+             HVAC::Coil_CoolingWaterToAirHP,
+             WaterToAirHeatPump::GetCoilIndex,
+             WaterToAirHeatPump::GetCoilInletNode,
+             WaterToAirHeatPump::GetCoilOutletNode,
+             WaterToAirHeatPump::GetCoilCapacity},
+            {"COIL:COOLING:WATERTOAIRHEATPUMP:EQUATIONFIT",
+             HVAC::Coil_CoolingWaterToAirHPSimple,
+             WaterToAirHeatPumpSimple::GetCoilIndex,
+             WaterToAirHeatPumpSimple::GetCoilInletNode,
+             WaterToAirHeatPumpSimple::GetCoilOutletNode,
+             WaterToAirHeatPumpSimple::GetCoilCapacity},
+            {"COIL:COOLING:WATERTOAIRHEATPUMP:VARIABLESPEEDEQUATIONFIT",
+             HVAC::Coil_CoolingWaterToAirHPVSEquationFit,
+             VariableSpeedCoils::GetCoilIndexVariableSpeed,
+             VariableSpeedCoils::GetCoilInletNodeVariableSpeed,
+             VariableSpeedCoils::GetCoilOutletNodeVariableSpeed,
+             VariableSpeedCoils::GetCoilCapacityVariableSpeed},
+        }};
+
+        // Lambda: look up a WaterToAir coil by type string, populate the furnace
+        // coil index and node numbers via the matching dispatch-table entry.
+        // Returns true if a matching coil type was found (even if validation fails).
+        auto readWaterToAirCoil =
+            [&](const std::array<WAHPCoilDesc, numWAHPVariants> &table,
+                std::string_view alphaType,
+                std::string_view alphaName,
+                std::string_view alphaFieldType,
+                int &coilIndex,
+                int &coilTypeNum,
+                std::string &coilType,
+                std::string &coilName,
+                int &inletNode,
+                int &outletNode) -> bool {
+            for (auto const &desc : table) {
+                if (alphaType != desc.typeString) continue;
+
+                coilType = std::string(alphaType);
+                coilTypeNum = desc.coilTypeNum;
+                coilName = std::string(alphaName);
+                ValidateComponent(state, coilType, coilName, IsNotOK, CurrentModuleObject);
+                if (IsNotOK) {
+                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
+                    ErrorsFound = true;
+                } else {
+                    coilIndex = desc.getIndex(state, coilType, coilName, errFlag);
+                    inletNode = desc.getInletNode(state, coilType, coilName, errFlag);
+                    outletNode = desc.getOutletNode(state, coilType, coilName, errFlag);
+                }
+                return true;
+            }
+            return false;
+        };
+
+        // Lambda: retrieve design capacity for a WaterToAir coil whose type has
+        // already been identified.  Dispatches through the same table used by
+        // readWaterToAirCoil.
+        auto getWaterToAirCoilCapacity =
+            [&](const std::array<WAHPCoilDesc, numWAHPVariants> &table,
+                int coilTypeNum,
+                const std::string &coilType,
+                const std::string &coilName) -> Real64 {
+            for (auto const &desc : table) {
+                if (coilTypeNum != desc.coilTypeNum) continue;
+                errFlag = false;
+                Real64 cap = desc.getCapacity(state, coilType, coilName, errFlag);
+                if (errFlag) {
+                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
+                    ErrorsFound = true;
+                }
+                return cap;
+            }
+            return 0.0;
+        };
+
         // Get the data for the HeatOnly Furnace
         for (int HeatOnlyNum = 1; HeatOnlyNum <= NumHeatOnly + NumUnitaryHeatOnly; ++HeatOnlyNum) {
 
@@ -3524,92 +3642,18 @@ namespace Furnaces {
             }
 
             // Get heating coil type and name data
-            if (Alphas(8) == "COIL:HEATING:WATERTOAIRHEATPUMP:PARAMETERESTIMATION") {
-                HeatingCoilType = Alphas(8);
-                thisFurnace.HeatingCoilType_Num = HVAC::Coil_HeatingWaterToAirHP;
-                HeatingCoilName = Alphas(9);
-                ValidateComponent(state, HeatingCoilType, HeatingCoilName, IsNotOK, CurrentModuleObject);
-                if (IsNotOK) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                } else {
-                    thisFurnace.HeatingCoilIndex = WaterToAirHeatPump::GetCoilIndex(state, HeatingCoilType, HeatingCoilName, errFlag);
-                    HeatingCoilInletNode = WaterToAirHeatPump::GetCoilInletNode(state, HeatingCoilType, HeatingCoilName, errFlag);
-                    HeatingCoilOutletNode = WaterToAirHeatPump::GetCoilOutletNode(state, HeatingCoilType, HeatingCoilName, errFlag);
-                }
-            } else if (Alphas(8) == "COIL:HEATING:WATERTOAIRHEATPUMP:EQUATIONFIT") {
-                HeatingCoilType = Alphas(8);
-                thisFurnace.HeatingCoilType_Num = HVAC::Coil_HeatingWaterToAirHPSimple;
-                HeatingCoilName = Alphas(9);
-                ValidateComponent(state, HeatingCoilType, HeatingCoilName, IsNotOK, CurrentModuleObject);
-                if (IsNotOK) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                } else {
-                    thisFurnace.HeatingCoilIndex = WaterToAirHeatPumpSimple::GetCoilIndex(state, HeatingCoilType, HeatingCoilName, errFlag);
-                    HeatingCoilInletNode = WaterToAirHeatPumpSimple::GetCoilInletNode(state, HeatingCoilType, HeatingCoilName, errFlag);
-                    HeatingCoilOutletNode = WaterToAirHeatPumpSimple::GetCoilOutletNode(state, HeatingCoilType, HeatingCoilName, errFlag);
-                }
-            } else if (Alphas(8) == "COIL:HEATING:WATERTOAIRHEATPUMP:VARIABLESPEEDEQUATIONFIT") {
-                HeatingCoilType = Alphas(8);
-                thisFurnace.HeatingCoilType_Num = HVAC::Coil_HeatingWaterToAirHPVSEquationFit;
-                HeatingCoilName = Alphas(9);
-                ValidateComponent(state, HeatingCoilType, HeatingCoilName, IsNotOK, CurrentModuleObject);
-                if (IsNotOK) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                } else {
-                    thisFurnace.HeatingCoilIndex = VariableSpeedCoils::GetCoilIndexVariableSpeed(state, HeatingCoilType, HeatingCoilName, errFlag);
-                    HeatingCoilInletNode = VariableSpeedCoils::GetCoilInletNodeVariableSpeed(state, HeatingCoilType, HeatingCoilName, errFlag);
-                    HeatingCoilOutletNode = VariableSpeedCoils::GetCoilOutletNodeVariableSpeed(state, HeatingCoilType, HeatingCoilName, errFlag);
-                }
-            } else {
+            if (!readWaterToAirCoil(wahpHeatingCoils, Alphas(8), Alphas(9), cAlphaFields(8),
+                                    thisFurnace.HeatingCoilIndex, thisFurnace.HeatingCoilType_Num,
+                                    HeatingCoilType, HeatingCoilName, HeatingCoilInletNode, HeatingCoilOutletNode)) {
                 ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
                 ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(8), Alphas(8)));
                 ErrorsFound = true;
             }
 
             // Get Cooling Coil Information if available
-            if (Alphas(10) == "COIL:COOLING:WATERTOAIRHEATPUMP:PARAMETERESTIMATION") {
-                CoolingCoilType = Alphas(10);
-                thisFurnace.CoolingCoilType_Num = HVAC::Coil_CoolingWaterToAirHP;
-                CoolingCoilName = Alphas(11);
-                ValidateComponent(state, CoolingCoilType, CoolingCoilName, IsNotOK, CurrentModuleObject);
-                if (IsNotOK) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                } else {
-                    thisFurnace.CoolingCoilIndex = WaterToAirHeatPump::GetCoilIndex(state, CoolingCoilType, CoolingCoilName, errFlag);
-                    CoolingCoilInletNode = WaterToAirHeatPump::GetCoilInletNode(state, CoolingCoilType, CoolingCoilName, errFlag);
-                    CoolingCoilOutletNode = WaterToAirHeatPump::GetCoilOutletNode(state, CoolingCoilType, CoolingCoilName, errFlag);
-                }
-            } else if (Alphas(10) == "COIL:COOLING:WATERTOAIRHEATPUMP:EQUATIONFIT") {
-                CoolingCoilType = Alphas(10);
-                thisFurnace.CoolingCoilType_Num = HVAC::Coil_CoolingWaterToAirHPSimple;
-                CoolingCoilName = Alphas(11);
-                ValidateComponent(state, CoolingCoilType, CoolingCoilName, IsNotOK, CurrentModuleObject);
-                if (IsNotOK) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                } else {
-                    thisFurnace.CoolingCoilIndex = WaterToAirHeatPumpSimple::GetCoilIndex(state, CoolingCoilType, CoolingCoilName, errFlag);
-                    CoolingCoilInletNode = WaterToAirHeatPumpSimple::GetCoilInletNode(state, CoolingCoilType, CoolingCoilName, errFlag);
-                    CoolingCoilOutletNode = WaterToAirHeatPumpSimple::GetCoilOutletNode(state, CoolingCoilType, CoolingCoilName, errFlag);
-                }
-            } else if (Alphas(10) == "COIL:COOLING:WATERTOAIRHEATPUMP:VARIABLESPEEDEQUATIONFIT") {
-                CoolingCoilType = Alphas(10);
-                thisFurnace.CoolingCoilType_Num = HVAC::Coil_CoolingWaterToAirHPVSEquationFit;
-                CoolingCoilName = Alphas(11);
-                ValidateComponent(state, CoolingCoilType, CoolingCoilName, IsNotOK, CurrentModuleObject);
-                if (IsNotOK) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                } else {
-                    thisFurnace.CoolingCoilIndex = VariableSpeedCoils::GetCoilIndexVariableSpeed(state, CoolingCoilType, CoolingCoilName, errFlag);
-                    CoolingCoilInletNode = VariableSpeedCoils::GetCoilInletNodeVariableSpeed(state, CoolingCoilType, CoolingCoilName, errFlag);
-                    CoolingCoilOutletNode = VariableSpeedCoils::GetCoilOutletNodeVariableSpeed(state, CoolingCoilType, CoolingCoilName, errFlag);
-                }
-            } else {
+            if (!readWaterToAirCoil(wahpCoolingCoils, Alphas(10), Alphas(11), cAlphaFields(10),
+                                    thisFurnace.CoolingCoilIndex, thisFurnace.CoolingCoilType_Num,
+                                    CoolingCoilType, CoolingCoilName, CoolingCoilInletNode, CoolingCoilOutletNode)) {
                 ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
                 ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(10), Alphas(10)));
                 ErrorsFound = true;
@@ -3933,58 +3977,14 @@ namespace Furnaces {
                 }
             }
 
-            // Set the heat pump heating coil capacity
-            //  Get from coil module.
-            if (thisFurnace.HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHP) {
-                errFlag = false;
-                thisFurnace.DesignHeatingCapacity = WaterToAirHeatPump::GetCoilCapacity(state, HeatingCoilType, HeatingCoilName, errFlag);
-                if (errFlag) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                }
-            } else if (thisFurnace.HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHPSimple) {
-                errFlag = false;
-                thisFurnace.DesignHeatingCapacity = WaterToAirHeatPumpSimple::GetCoilCapacity(state, HeatingCoilType, HeatingCoilName, errFlag);
-                if (errFlag) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                }
-            } else if (thisFurnace.HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHPVSEquationFit) {
-                errFlag = false;
-                thisFurnace.DesignHeatingCapacity =
-                    VariableSpeedCoils::GetCoilCapacityVariableSpeed(state, HeatingCoilType, HeatingCoilName, errFlag);
-                if (errFlag) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                }
-            }
+            // Set the heat pump heating coil capacity via dispatch table
+            thisFurnace.DesignHeatingCapacity =
+                getWaterToAirCoilCapacity(wahpHeatingCoils, thisFurnace.HeatingCoilType_Num, HeatingCoilType, HeatingCoilName);
             // Set the heat pump heating coil convergence
             thisFurnace.HeatingConvergenceTolerance = Numbers(2);
-            // Set the heat pump cooling coil capacity (Total capacity)
-            //  Get from coil module.
-            if (thisFurnace.CoolingCoilType_Num == HVAC::Coil_CoolingWaterToAirHP) {
-                errFlag = false;
-                thisFurnace.DesignCoolingCapacity = WaterToAirHeatPump::GetCoilCapacity(state, CoolingCoilType, CoolingCoilName, errFlag);
-                if (errFlag) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                }
-            } else if (thisFurnace.CoolingCoilType_Num == HVAC::Coil_CoolingWaterToAirHPSimple) {
-                errFlag = false;
-                thisFurnace.DesignCoolingCapacity = WaterToAirHeatPumpSimple::GetCoilCapacity(state, CoolingCoilType, CoolingCoilName, errFlag);
-                if (errFlag) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                }
-            } else if (thisFurnace.CoolingCoilType_Num == HVAC::Coil_CoolingWaterToAirHPVSEquationFit) {
-                errFlag = false;
-                thisFurnace.DesignCoolingCapacity =
-                    VariableSpeedCoils::GetCoilCapacityVariableSpeed(state, CoolingCoilType, CoolingCoilName, errFlag);
-                if (errFlag) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                }
-            }
+            // Set the heat pump cooling coil capacity (Total capacity) via dispatch table
+            thisFurnace.DesignCoolingCapacity =
+                getWaterToAirCoilCapacity(wahpCoolingCoils, thisFurnace.CoolingCoilType_Num, CoolingCoilType, CoolingCoilName);
             // Set the heat pump cooling coil convergence
             thisFurnace.CoolingConvergenceTolerance = Numbers(3);
 
