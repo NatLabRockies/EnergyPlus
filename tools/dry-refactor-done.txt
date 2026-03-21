@@ -24,3 +24,5 @@ src/EnergyPlus/UnitarySystem.cc:setupAllOutputVars
 src/EnergyPlus/UnitarySystem.cc:sizeSystem
 src/EnergyPlus/SurfaceGeometry.cc:GetSurfaceData
 src/EnergyPlus/SolarShading.cc:SHADOW
+src/EnergyPlus/Material.cc:GetMaterialData
+src/EnergyPlus/SimAirServingZones.cc:UpdateSysSizing
