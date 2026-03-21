@@ -241,6 +241,30 @@ namespace HeatingCoils {
         }
     }
 
+    // Allocate and validate heat reclaim efficiency for desuperheater heating coils.
+    // Returns true if the source was validated successfully.
+    static bool validateHeatReclaimEfficiency(EnergyPlusData &state,
+                                              DataHeatBalance::HeatReclaimDataBase &HeatReclaim,
+                                              HeatingCoilEquipConditions const &heatingCoil,
+                                              int CoilNum)
+    {
+        if (!allocated(HeatReclaim.HVACDesuperheaterReclaimedHeat)) {
+            HeatReclaim.HVACDesuperheaterReclaimedHeat.allocate(state.dataHeatingCoils->NumDesuperheaterCoil);
+            std::fill(HeatReclaim.HVACDesuperheaterReclaimedHeat.begin(), HeatReclaim.HVACDesuperheaterReclaimedHeat.end(), 0.0);
+        }
+        HeatReclaim.ReclaimEfficiencyTotal += heatingCoil.Efficiency;
+        if (HeatReclaim.ReclaimEfficiencyTotal > 0.3) {
+            ShowSevereError(state,
+                            EnergyPlus::format(
+                                "{}, \"{}\" sum of heat reclaim recovery efficiencies from the same source coil: \"{}\" cannot be over 0.3",
+                                HVAC::cAllCoilTypes(heatingCoil.HCoilType_Num),
+                                heatingCoil.Name,
+                                heatingCoil.ReclaimHeatingCoilName));
+        }
+        state.dataHeatingCoils->ValidSourceType(CoilNum) = true;
+        return true;
+    }
+
     // Parse air inlet/outlet nodes, validate the component set, and optionally parse
     // a temperature setpoint sensor node. Shared by all heating coil types.
     static void setupCoilAirNodes(EnergyPlusData &state,
@@ -843,26 +867,9 @@ namespace HeatingCoils {
             } else if (Util::SameString(Alphas(5), "Coil:Cooling:DX:SingleSpeed")) {
                 heatingCoil.ReclaimHeatingSource = HeatObjTypes::COIL_DX_COOLING;
                 DXCoils::GetDXCoilIndex(state, Alphas(6), heatingCoil.ReclaimHeatingSourceIndexNum, DXCoilErrFlag, Alphas(5));
-                if (heatingCoil.ReclaimHeatingSourceIndexNum > 0) {
-                    if (allocated(state.dataHeatBal->HeatReclaimDXCoil)) {
-                        DataHeatBalance::HeatReclaimDataBase &HeatReclaim =
-                            state.dataHeatBal->HeatReclaimDXCoil(heatingCoil.ReclaimHeatingSourceIndexNum);
-                        if (!allocated(HeatReclaim.HVACDesuperheaterReclaimedHeat)) {
-                            HeatReclaim.HVACDesuperheaterReclaimedHeat.allocate(state.dataHeatingCoils->NumDesuperheaterCoil);
-                            std::fill(HeatReclaim.HVACDesuperheaterReclaimedHeat.begin(), HeatReclaim.HVACDesuperheaterReclaimedHeat.end(), 0.0);
-                        }
-                        HeatReclaim.ReclaimEfficiencyTotal += heatingCoil.Efficiency;
-                        if (HeatReclaim.ReclaimEfficiencyTotal > 0.3) {
-                            ShowSevereError(
-                                state,
-                                EnergyPlus::format(
-                                    "{}, \"{}\" sum of heat reclaim recovery efficiencies from the same source coil: \"{} \" cannot be over 0.3",
-                                    HVAC::cAllCoilTypes(heatingCoil.HCoilType_Num),
-                                    heatingCoil.Name,
-                                    heatingCoil.ReclaimHeatingCoilName));
-                        }
-                        state.dataHeatingCoils->ValidSourceType(CoilNum) = true;
-                    }
+                if (heatingCoil.ReclaimHeatingSourceIndexNum > 0 && allocated(state.dataHeatBal->HeatReclaimDXCoil)) {
+                    validateHeatReclaimEfficiency(
+                        state, state.dataHeatBal->HeatReclaimDXCoil(heatingCoil.ReclaimHeatingSourceIndexNum), heatingCoil, CoilNum);
                 }
                 if (heatingCoil.ReclaimHeatingSourceIndexNum > 0) {
                     state.dataHeatingCoils->ValidSourceType(CoilNum) = true;
@@ -870,74 +877,23 @@ namespace HeatingCoils {
             } else if (Util::SameString(Alphas(5), "Coil:Cooling:DX:VariableSpeed")) {
                 heatingCoil.ReclaimHeatingSource = HeatObjTypes::COIL_DX_VARIABLE_COOLING;
                 heatingCoil.ReclaimHeatingSourceIndexNum = VariableSpeedCoils::GetCoilIndexVariableSpeed(state, Alphas(5), Alphas(6), DXCoilErrFlag);
-                if (heatingCoil.ReclaimHeatingSourceIndexNum > 0) {
-                    if (allocated(state.dataHeatBal->HeatReclaimVS_Coil)) {
-                        DataHeatBalance::HeatReclaimDataBase &HeatReclaim =
-                            state.dataHeatBal->HeatReclaimVS_Coil(heatingCoil.ReclaimHeatingSourceIndexNum);
-                        if (!allocated(HeatReclaim.HVACDesuperheaterReclaimedHeat)) {
-                            HeatReclaim.HVACDesuperheaterReclaimedHeat.allocate(state.dataHeatingCoils->NumDesuperheaterCoil);
-                            std::fill(HeatReclaim.HVACDesuperheaterReclaimedHeat.begin(), HeatReclaim.HVACDesuperheaterReclaimedHeat.end(), 0.0);
-                        }
-                        HeatReclaim.ReclaimEfficiencyTotal += heatingCoil.Efficiency;
-                        if (HeatReclaim.ReclaimEfficiencyTotal > 0.3) {
-                            ShowSevereError(
-                                state,
-                                EnergyPlus::format(
-                                    "{}, \"{}\" sum of heat reclaim recovery efficiencies from the same source coil: \"{} \" cannot be over 0.3",
-                                    HVAC::cAllCoilTypes(heatingCoil.HCoilType_Num),
-                                    heatingCoil.Name,
-                                    heatingCoil.ReclaimHeatingCoilName));
-                        }
-                        state.dataHeatingCoils->ValidSourceType(CoilNum) = true;
-                    }
+                if (heatingCoil.ReclaimHeatingSourceIndexNum > 0 && allocated(state.dataHeatBal->HeatReclaimVS_Coil)) {
+                    validateHeatReclaimEfficiency(
+                        state, state.dataHeatBal->HeatReclaimVS_Coil(heatingCoil.ReclaimHeatingSourceIndexNum), heatingCoil, CoilNum);
                 }
             } else if (Util::SameString(Alphas(5), "Coil:Cooling:DX:TwoSpeed")) {
                 heatingCoil.ReclaimHeatingSource = HeatObjTypes::COIL_DX_MULTISPEED;
                 DXCoils::GetDXCoilIndex(state, Alphas(6), heatingCoil.ReclaimHeatingSourceIndexNum, DXCoilErrFlag, Alphas(5));
-                if (heatingCoil.ReclaimHeatingSourceIndexNum > 0) {
-                    if (allocated(state.dataHeatBal->HeatReclaimDXCoil)) {
-                        DataHeatBalance::HeatReclaimDataBase &HeatReclaim =
-                            state.dataHeatBal->HeatReclaimDXCoil(heatingCoil.ReclaimHeatingSourceIndexNum);
-                        if (!allocated(HeatReclaim.HVACDesuperheaterReclaimedHeat)) {
-                            HeatReclaim.HVACDesuperheaterReclaimedHeat.allocate(state.dataHeatingCoils->NumDesuperheaterCoil);
-                            std::fill(HeatReclaim.HVACDesuperheaterReclaimedHeat.begin(), HeatReclaim.HVACDesuperheaterReclaimedHeat.end(), 0.0);
-                        }
-                        HeatReclaim.ReclaimEfficiencyTotal += heatingCoil.Efficiency;
-                        if (HeatReclaim.ReclaimEfficiencyTotal > 0.3) {
-                            ShowSevereError(
-                                state,
-                                EnergyPlus::format(
-                                    "{}, \"{}\" sum of heat reclaim recovery efficiencies from the same source coil: \"{} \" cannot be over 0.3",
-                                    HVAC::cAllCoilTypes(heatingCoil.HCoilType_Num),
-                                    heatingCoil.Name,
-                                    heatingCoil.ReclaimHeatingCoilName));
-                        }
-                        state.dataHeatingCoils->ValidSourceType(CoilNum) = true;
-                    }
+                if (heatingCoil.ReclaimHeatingSourceIndexNum > 0 && allocated(state.dataHeatBal->HeatReclaimDXCoil)) {
+                    validateHeatReclaimEfficiency(
+                        state, state.dataHeatBal->HeatReclaimDXCoil(heatingCoil.ReclaimHeatingSourceIndexNum), heatingCoil, CoilNum);
                 }
             } else if (Util::SameString(Alphas(5), "Coil:Cooling:DX:TwoStageWithHumidityControlMode")) {
                 heatingCoil.ReclaimHeatingSource = HeatObjTypes::COIL_DX_MULTIMODE;
                 DXCoils::GetDXCoilIndex(state, Alphas(6), heatingCoil.ReclaimHeatingSourceIndexNum, DXCoilErrFlag, Alphas(5));
-                if (heatingCoil.ReclaimHeatingSourceIndexNum > 0) {
-                    if (allocated(state.dataHeatBal->HeatReclaimDXCoil)) {
-                        DataHeatBalance::HeatReclaimDataBase &HeatReclaim =
-                            state.dataHeatBal->HeatReclaimDXCoil(heatingCoil.ReclaimHeatingSourceIndexNum);
-                        if (!allocated(HeatReclaim.HVACDesuperheaterReclaimedHeat)) {
-                            HeatReclaim.HVACDesuperheaterReclaimedHeat.allocate(state.dataHeatingCoils->NumDesuperheaterCoil);
-                            std::fill(HeatReclaim.HVACDesuperheaterReclaimedHeat.begin(), HeatReclaim.HVACDesuperheaterReclaimedHeat.end(), 0.0);
-                        }
-                        HeatReclaim.ReclaimEfficiencyTotal += heatingCoil.Efficiency;
-                        if (HeatReclaim.ReclaimEfficiencyTotal > 0.3) {
-                            ShowSevereError(
-                                state,
-                                EnergyPlus::format(
-                                    R"({}, "{}" sum of heat reclaim recovery efficiencies from the same source coil: "{} " cannot be over 0.3)",
-                                    HVAC::cAllCoilTypes(heatingCoil.HCoilType_Num),
-                                    heatingCoil.Name,
-                                    heatingCoil.ReclaimHeatingCoilName));
-                        }
-                        state.dataHeatingCoils->ValidSourceType(CoilNum) = true;
-                    }
+                if (heatingCoil.ReclaimHeatingSourceIndexNum > 0 && allocated(state.dataHeatBal->HeatReclaimDXCoil)) {
+                    validateHeatReclaimEfficiency(
+                        state, state.dataHeatBal->HeatReclaimDXCoil(heatingCoil.ReclaimHeatingSourceIndexNum), heatingCoil, CoilNum);
                 }
             } else if (Util::SameString(Alphas(5), "Coil:Cooling:DX")) {
                 heatingCoil.ReclaimHeatingSource = HeatObjTypes::COIL_COOLING_DX_NEW;
@@ -949,22 +905,8 @@ namespace HeatingCoils {
                             "{}={}, could not find desuperheater coil {}={}", CurrentModuleObject, heatingCoil.Name, Alphas(5), Alphas(6)));
                     state.dataHeatingCoils->InputErrorsFound = true;
                 }
-                DataHeatBalance::HeatReclaimDataBase &HeatReclaim =
-                    state.dataCoilCoolingDX->coilCoolingDXs[heatingCoil.ReclaimHeatingSourceIndexNum].reclaimHeat;
-                if (!allocated(HeatReclaim.HVACDesuperheaterReclaimedHeat)) {
-                    HeatReclaim.HVACDesuperheaterReclaimedHeat.allocate(state.dataHeatingCoils->NumDesuperheaterCoil);
-                    std::fill(HeatReclaim.HVACDesuperheaterReclaimedHeat.begin(), HeatReclaim.HVACDesuperheaterReclaimedHeat.end(), 0.0);
-                }
-                HeatReclaim.ReclaimEfficiencyTotal += heatingCoil.Efficiency;
-                if (HeatReclaim.ReclaimEfficiencyTotal > 0.3) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format(
-                                        "{}, \"{}\" sum of heat reclaim recovery efficiencies from the same source coil: \"{}\" cannot be over 0.3",
-                                        HVAC::cAllCoilTypes(heatingCoil.HCoilType_Num),
-                                        heatingCoil.Name,
-                                        heatingCoil.ReclaimHeatingCoilName));
-                }
-                state.dataHeatingCoils->ValidSourceType(CoilNum) = true;
+                validateHeatReclaimEfficiency(
+                    state, state.dataCoilCoolingDX->coilCoolingDXs[heatingCoil.ReclaimHeatingSourceIndexNum].reclaimHeat, heatingCoil, CoilNum);
             } else {
                 ShowSevereError(
                     state,
