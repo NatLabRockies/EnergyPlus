@@ -7767,6 +7767,42 @@ void WriteTimeBinTables(EnergyPlusData &state)
     }
 }
 
+// Helper: emit a BEPS sub-table to all active output targets (tabular, SQLite, JSON).
+// When subtitle is non-empty WriteSubtitle is called before WriteTable.
+static void writeBEPSSubtable(EnergyPlusData &state,
+                               Array2D_string &tableBody,
+                               Array1D_string &rowHead,
+                               Array1D_string &columnHead,
+                               Array1D_int &columnWidth,
+                               tabularReportStyle const &currentStyle,
+                               std::string const &subtitle,
+                               bool transposeXML = false,
+                               std::string_view footnote = {})
+{
+    auto const &ort = state.dataOutRptTab;
+    if (!ort->displayTabularBEPS) {
+        return;
+    }
+    if (currentStyle.produceTabular) {
+        if (!subtitle.empty()) {
+            WriteSubtitle(state, subtitle);
+        }
+        WriteTable(state, tableBody, rowHead, columnHead, columnWidth, transposeXML, footnote);
+    }
+    if (currentStyle.produceSQLite) {
+        if (state.dataSQLiteProcedures->sqlite) {
+            state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
+                tableBody, rowHead, columnHead, "AnnualBuildingUtilityPerformanceSummary", "Entire Facility", subtitle);
+        }
+    }
+    if (currentStyle.produceJSON) {
+        if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
+            state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
+                tableBody, rowHead, columnHead, "AnnualBuildingUtilityPerformanceSummary", "Entire Facility", subtitle);
+        }
+    }
+}
+
 void WriteBEPSTable(EnergyPlusData &state)
 {
     // SUBROUTINE INFORMATION:
@@ -8301,24 +8337,7 @@ void WriteBEPSTable(EnergyPlusData &state)
         }
 
         // heading for the entire sub-table
-        if (ort->displayTabularBEPS) {
-            if (currentStyle.produceTabular) {
-                WriteSubtitle(state, "Site and Source Energy");
-                WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-            }
-            if (currentStyle.produceSQLite) {
-                if (state.dataSQLiteProcedures->sqlite) {
-                    state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
-                        tableBody, rowHead, columnHead, "AnnualBuildingUtilityPerformanceSummary", "Entire Facility", "Site and Source Energy");
-                }
-            }
-            if (currentStyle.produceJSON) {
-                if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-                    state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-                        tableBody, rowHead, columnHead, "AnnualBuildingUtilityPerformanceSummary", "Entire Facility", "Site and Source Energy");
-                }
-            }
-        }
+        writeBEPSSubtable(state, tableBody, rowHead, columnHead, columnWidth, currentStyle, "Site and Source Energy");
 
         //---- Source and Site Energy Sub-Table
         rowHead.allocate(13);
@@ -8467,32 +8486,7 @@ void WriteBEPSTable(EnergyPlusData &state)
         }
 
         // heading for the entire sub-table
-        if (ort->displayTabularBEPS) {
-            if (currentStyle.produceTabular) {
-                WriteSubtitle(state, "Site to Source Energy Conversion Factors");
-                WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-            }
-            if (currentStyle.produceSQLite) {
-                if (state.dataSQLiteProcedures->sqlite) {
-                    state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(tableBody,
-                                                                                       rowHead,
-                                                                                       columnHead,
-                                                                                       "AnnualBuildingUtilityPerformanceSummary",
-                                                                                       "Entire Facility",
-                                                                                       "Site to Source Energy Conversion Factors");
-                }
-            }
-            if (currentStyle.produceJSON) {
-                if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-                    state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(tableBody,
-                                                                                                          rowHead,
-                                                                                                          columnHead,
-                                                                                                          "AnnualBuildingUtilityPerformanceSummary",
-                                                                                                          "Entire Facility",
-                                                                                                          "Site to Source Energy Conversion Factors");
-                }
-            }
-        }
+        writeBEPSSubtable(state, tableBody, rowHead, columnHead, columnWidth, currentStyle, "Site to Source Energy Conversion Factors");
 
         //---- Building Area Sub-Table
         rowHead.allocate(3);
@@ -8544,24 +8538,7 @@ void WriteBEPSTable(EnergyPlusData &state)
         tableBody(1, 3) = RealToStr(currentStyle.formatReals, convBldgGrossFloorArea - convBldgCondFloorArea, 2);
 
         // heading for the entire sub-table
-        if (ort->displayTabularBEPS) {
-            if (currentStyle.produceTabular) {
-                WriteSubtitle(state, "Building Area");
-                WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-            }
-            if (currentStyle.produceSQLite) {
-                if (state.dataSQLiteProcedures->sqlite) {
-                    state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
-                        tableBody, rowHead, columnHead, "AnnualBuildingUtilityPerformanceSummary", "Entire Facility", "Building Area");
-                }
-            }
-            if (currentStyle.produceJSON) {
-                if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-                    state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-                        tableBody, rowHead, columnHead, "AnnualBuildingUtilityPerformanceSummary", "Entire Facility", "Building Area");
-                }
-            }
-        }
+        writeBEPSSubtable(state, tableBody, rowHead, columnHead, columnWidth, currentStyle, "Building Area");
 
         //---- End Use Sub-Table
         rowHead.allocate(16);
@@ -8957,24 +8934,7 @@ void WriteBEPSTable(EnergyPlusData &state)
         } break;
         }
         // heading for the entire sub-table
-        if (ort->displayTabularBEPS) {
-            if (currentStyle.produceTabular) {
-                WriteSubtitle(state, "End Uses");
-                WriteTable(state, tableBody, rowHead, columnHead, columnWidth, false, footnote);
-            }
-            if (currentStyle.produceSQLite) {
-                if (state.dataSQLiteProcedures->sqlite) {
-                    state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
-                        tableBody, rowHead, columnHead, "AnnualBuildingUtilityPerformanceSummary", "Entire Facility", "End Uses");
-                }
-            }
-            if (currentStyle.produceJSON) {
-                if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-                    state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-                        tableBody, rowHead, columnHead, "AnnualBuildingUtilityPerformanceSummary", "Entire Facility", "End Uses");
-                }
-            }
-        }
+        writeBEPSSubtable(state, tableBody, rowHead, columnHead, columnWidth, currentStyle, "End Uses", false, footnote);
 
         //---- End Uses By Subcategory Sub-Table
         writeBEPSEndUseBySubCatOrSpaceType(
@@ -9163,32 +9123,7 @@ void WriteBEPSTable(EnergyPlusData &state)
             }
         }
         // heading for the entire sub-table
-        if (ort->displayTabularBEPS) {
-            if (currentStyle.produceTabular) {
-                WriteSubtitle(state, "Utility Use Per Conditioned Floor Area");
-                WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-            }
-            if (currentStyle.produceSQLite) {
-                if (state.dataSQLiteProcedures->sqlite) {
-                    state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(tableBody,
-                                                                                       rowHead,
-                                                                                       columnHead,
-                                                                                       "AnnualBuildingUtilityPerformanceSummary",
-                                                                                       "Entire Facility",
-                                                                                       "Utility Use Per Conditioned Floor Area");
-                }
-            }
-            if (currentStyle.produceJSON) {
-                if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-                    state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(tableBody,
-                                                                                                          rowHead,
-                                                                                                          columnHead,
-                                                                                                          "AnnualBuildingUtilityPerformanceSummary",
-                                                                                                          "Entire Facility",
-                                                                                                          "Utility Use Per Conditioned Floor Area");
-                }
-            }
-        }
+        writeBEPSSubtable(state, tableBody, rowHead, columnHead, columnWidth, currentStyle, "Utility Use Per Conditioned Floor Area");
         //---- Normalized by Total Area Sub-Table
         tableBody = "";
         if (convBldgGrossFloorArea > 0) {
@@ -9199,32 +9134,7 @@ void WriteBEPSTable(EnergyPlusData &state)
             }
         }
         // heading for the entire sub-table
-        if (ort->displayTabularBEPS) {
-            if (currentStyle.produceTabular) {
-                WriteSubtitle(state, "Utility Use Per Total Floor Area");
-                WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-            }
-            if (currentStyle.produceSQLite) {
-                if (state.dataSQLiteProcedures->sqlite) {
-                    state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(tableBody,
-                                                                                       rowHead,
-                                                                                       columnHead,
-                                                                                       "AnnualBuildingUtilityPerformanceSummary",
-                                                                                       "Entire Facility",
-                                                                                       "Utility Use Per Total Floor Area");
-                }
-            }
-            if (currentStyle.produceJSON) {
-                if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-                    state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(tableBody,
-                                                                                                          rowHead,
-                                                                                                          columnHead,
-                                                                                                          "AnnualBuildingUtilityPerformanceSummary",
-                                                                                                          "Entire Facility",
-                                                                                                          "Utility Use Per Total Floor Area");
-                }
-            }
-        }
+        writeBEPSSubtable(state, tableBody, rowHead, columnHead, columnWidth, currentStyle, "Utility Use Per Total Floor Area");
 
         //---- Electric Loads Satisfied Sub-Table
         rowHead.allocate(14);
@@ -9307,24 +9217,7 @@ void WriteBEPSTable(EnergyPlusData &state)
         }
 
         // heading for the entire sub-table
-        if (ort->displayTabularBEPS) {
-            if (currentStyle.produceTabular) {
-                WriteSubtitle(state, "Electric Loads Satisfied");
-                WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-            }
-            if (currentStyle.produceSQLite) {
-                if (state.dataSQLiteProcedures->sqlite) {
-                    state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
-                        tableBody, rowHead, columnHead, "AnnualBuildingUtilityPerformanceSummary", "Entire Facility", "Electric Loads Satisfied");
-                }
-            }
-            if (currentStyle.produceJSON) {
-                if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-                    state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-                        tableBody, rowHead, columnHead, "AnnualBuildingUtilityPerformanceSummary", "Entire Facility", "Electric Loads Satisfied");
-                }
-            }
-        }
+        writeBEPSSubtable(state, tableBody, rowHead, columnHead, columnWidth, currentStyle, "Electric Loads Satisfied");
 
         //---- On-Site Thermal Sources Sub-Table
         rowHead.allocate(7);
@@ -9408,24 +9301,7 @@ void WriteBEPSTable(EnergyPlusData &state)
         }
 
         // heading for the entire sub-table
-        if (ort->displayTabularBEPS) {
-            if (currentStyle.produceTabular) {
-                WriteSubtitle(state, "On-Site Thermal Sources");
-                WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-            }
-            if (currentStyle.produceSQLite) {
-                if (state.dataSQLiteProcedures->sqlite) {
-                    state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
-                        tableBody, rowHead, columnHead, "AnnualBuildingUtilityPerformanceSummary", "Entire Facility", "On-Site Thermal Sources");
-                }
-            }
-            if (currentStyle.produceJSON) {
-                if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-                    state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-                        tableBody, rowHead, columnHead, "AnnualBuildingUtilityPerformanceSummary", "Entire Facility", "On-Site Thermal Sources");
-                }
-            }
-        }
+        writeBEPSSubtable(state, tableBody, rowHead, columnHead, columnWidth, currentStyle, "On-Site Thermal Sources");
 
         //---- Water Loads Sub-Table
         // As of 12/8/2003 decided to not include this sub-table to wait
@@ -9513,24 +9389,9 @@ void WriteBEPSTable(EnergyPlusData &state)
         }
 
         //  ! heading for the entire sub-table
-        if (ort->displayTabularBEPS) {
-            if (currentStyle.produceTabular) {
-                WriteSubtitle(state, "Water Source Summary");
-                WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-            }
-            if (currentStyle.produceSQLite) {
-                if (state.dataSQLiteProcedures->sqlite) {
-                    state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
-                        tableBody, rowHead, columnHead, "AnnualBuildingUtilityPerformanceSummary", "Entire Facility", "Water Source Summary");
-                }
-            }
-            if (currentStyle.produceJSON) {
-                if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-                    state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-                        tableBody, rowHead, columnHead, "AnnualBuildingUtilityPerformanceSummary", "Entire Facility", "Water Source Summary");
-                }
-            }
+        writeBEPSSubtable(state, tableBody, rowHead, columnHead, columnWidth, currentStyle, "Water Source Summary");
 
+        if (ort->displayTabularBEPS) {
             //---- Comfort and Setpoint Not Met Sub-Table
             rowHead.allocate(2);
             columnHead.allocate(1);
@@ -9571,6 +9432,7 @@ void WriteBEPSTable(EnergyPlusData &state)
                     currentStyle.formatReals, ConvertIPdelta(state, indexUnitConv, state.dataHVACGlobal->deviationFromSetPtThresholdClg), 2);
             }
 
+            // subtitle already written above; pass empty to skip, but use proper name for SQLite/JSON
             if (currentStyle.produceTabular) {
                 WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
             }
