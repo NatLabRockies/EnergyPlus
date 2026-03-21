@@ -446,6 +446,56 @@ namespace HVACMultiSpeedHeatPump {
 
     //******************************************************************************
 
+    // Helper: validate that speed-level volume flow rates are positive and in ascending order.
+    // Used for both heating and cooling flow rate arrays.
+    static void validateSpeedFlowRates(EnergyPlusData &state,
+                                       std::string_view objName,
+                                       Array1D<Real64> const &flowRates,
+                                       int numSpeeds,
+                                       int numericOffset,
+                                       Array1D_string const &cNumericFields,
+                                       bool alwaysValidatePositive,
+                                       bool &ErrorsFound)
+    {
+        // Validate positive flow rates
+        for (int i = 1; i <= numSpeeds; ++i) {
+            if (alwaysValidatePositive) {
+                if (flowRates(i) <= 0.0 && flowRates(i) != DataSizing::AutoSize) {
+                    ShowSevereError(state,
+                                    EnergyPlus::format("{}, \"{}\", {} must be greater than zero.",
+                                                       state.dataHVACMultiSpdHP->CurrentModuleObject,
+                                                       objName,
+                                                       cNumericFields(numericOffset + i)));
+                    ErrorsFound = true;
+                }
+            }
+        }
+        // Ensure flow rate at high speed is >= flow rate at low speed
+        for (int i = 2; i <= numSpeeds; ++i) {
+            if (flowRates(i) == DataSizing::AutoSize) {
+                continue;
+            }
+            bool Found = false;
+            int j = 0;
+            for (j = i - 1; j >= 1; --j) {
+                if (flowRates(i) != DataSizing::AutoSize) {
+                    Found = true;
+                    break;
+                }
+            }
+            if (Found) {
+                if (flowRates(i) < flowRates(j)) {
+                    ShowSevereError(
+                        state,
+                        EnergyPlus::format(
+                            "{}, \"{}\", {}", state.dataHVACMultiSpdHP->CurrentModuleObject, objName, cNumericFields(numericOffset + i)));
+                    ShowContinueError(state, EnergyPlus::format(" cannot be less than {}", cNumericFields(numericOffset + j)));
+                    ErrorsFound = true;
+                }
+            }
+        }
+    }
+
     // Helper: read supplemental heating coil data for Fuel or Electric coil types.
     // Both branches share the same logic differing only in the HVAC type constant and coil type string.
     static void readSuppHeatingCoilFuelOrElectric(EnergyPlusData &state,
@@ -1385,40 +1435,10 @@ namespace HVACMultiSpeedHeatPump {
                 thisMSHP.HeatingSpeedRatio = 1.0;
                 for (i = 1; i <= thisMSHP.NumOfSpeedHeating; ++i) {
                     thisMSHP.HeatVolumeFlowRate(i) = Numbers(10 + i);
-                    if (thisMSHP.HeatCoilType == HVAC::CoilDX_MultiSpeedHeating) {
-                        if (thisMSHP.HeatVolumeFlowRate(i) <= 0.0 && thisMSHP.HeatVolumeFlowRate(i) != DataSizing::AutoSize) {
-                            ShowSevereError(state,
-                                            EnergyPlus::format("{}, \"{}\", {} must be greater than zero.",
-                                                               state.dataHVACMultiSpdHP->CurrentModuleObject,
-                                                               thisMSHP.Name,
-                                                               cNumericFields(10 + i)));
-                            ErrorsFound = true;
-                        }
-                    }
                 }
-                // Ensure flow rate at high speed should be greater or equal to the flow rate at low speed
-                for (i = 2; i <= thisMSHP.NumOfSpeedHeating; ++i) {
-                    if (thisMSHP.HeatVolumeFlowRate(i) == DataSizing::AutoSize) {
-                        continue;
-                    }
-                    Found = false;
-                    for (j = i - 1; j >= 1; --j) {
-                        if (thisMSHP.HeatVolumeFlowRate(i) != DataSizing::AutoSize) {
-                            Found = true;
-                            break;
-                        }
-                    }
-                    if (Found) {
-                        if (thisMSHP.HeatVolumeFlowRate(i) < thisMSHP.HeatVolumeFlowRate(j)) {
-                            ShowSevereError(
-                                state,
-                                EnergyPlus::format(
-                                    "{}, \"{}\", {}", state.dataHVACMultiSpdHP->CurrentModuleObject, thisMSHP.Name, cNumericFields(10 + i)));
-                            ShowContinueError(state, EnergyPlus::format(" cannot be less than {}", cNumericFields(10 + j)));
-                            ErrorsFound = true;
-                        }
-                    }
-                }
+                bool alwaysValidatePositive = (thisMSHP.HeatCoilType == HVAC::CoilDX_MultiSpeedHeating);
+                validateSpeedFlowRates(
+                    state, thisMSHP.Name, thisMSHP.HeatVolumeFlowRate, thisMSHP.NumOfSpeedHeating, 10, cNumericFields, alwaysValidatePositive, ErrorsFound);
             }
 
             if (state.dataGlobal->DoCoilDirectSolutions) {
@@ -1434,38 +1454,9 @@ namespace HVACMultiSpeedHeatPump {
                 thisMSHP.CoolingSpeedRatio = 1.0;
                 for (i = 1; i <= thisMSHP.NumOfSpeedCooling; ++i) {
                     thisMSHP.CoolVolumeFlowRate(i) = Numbers(14 + i);
-                    if (thisMSHP.CoolVolumeFlowRate(i) <= 0.0 && thisMSHP.CoolVolumeFlowRate(i) != DataSizing::AutoSize) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}, \"{}\", {} must be greater than zero.",
-                                                           state.dataHVACMultiSpdHP->CurrentModuleObject,
-                                                           thisMSHP.Name,
-                                                           cNumericFields(14 + i)));
-                        ErrorsFound = true;
-                    }
                 }
-                // Ensure flow rate at high speed should be greater or equal to the flow rate at low speed
-                for (i = 2; i <= thisMSHP.NumOfSpeedCooling; ++i) {
-                    if (thisMSHP.CoolVolumeFlowRate(i) == DataSizing::AutoSize) {
-                        continue;
-                    }
-                    Found = false;
-                    for (j = i - 1; j >= 1; --j) {
-                        if (thisMSHP.CoolVolumeFlowRate(i) != DataSizing::AutoSize) {
-                            Found = true;
-                            break;
-                        }
-                    }
-                    if (Found) {
-                        if (thisMSHP.CoolVolumeFlowRate(i) < thisMSHP.CoolVolumeFlowRate(j)) {
-                            ShowSevereError(
-                                state,
-                                EnergyPlus::format(
-                                    "{}, \"{}\", {}", state.dataHVACMultiSpdHP->CurrentModuleObject, thisMSHP.Name, cNumericFields(14 + i)));
-                            ShowContinueError(state, EnergyPlus::format(" cannot be less than {}", cNumericFields(14 + j)));
-                            ErrorsFound = true;
-                        }
-                    }
-                }
+                validateSpeedFlowRates(
+                    state, thisMSHP.Name, thisMSHP.CoolVolumeFlowRate, thisMSHP.NumOfSpeedCooling, 14, cNumericFields, true, ErrorsFound);
             }
 
             // Check node integrity
