@@ -767,6 +767,42 @@ namespace Curve {
         }
     }
 
+    // Helper: populate a simple polynomial/exponential curve from numeric fields.
+    // The layout is: numCoeffs coefficients starting at field 1, then numDims pairs of (min, max) input limits,
+    // then optional output min/max. Validates input limits and optionally validates unit-type alphas.
+    static void readSimpleCurveFields(EnergyPlusData &state,
+                                      Curve *thisCurve,
+                                      std::string const &CurrentModuleObject,
+                                      Array1D_string const &Alphas,
+                                      int NumAlphas,
+                                      Array1D<Real64> const &Numbers,
+                                      int NumNumbers,
+                                      CurveType curveType,
+                                      int numDims,
+                                      int numCoeffs,
+                                      bool &ErrorsFound,
+                                      bool validateUnitTypes = true)
+    {
+        thisCurve->curveType = curveType;
+        thisCurve->numDims = numDims;
+        for (int in = 0; in < numCoeffs; ++in) {
+            thisCurve->coeff[in] = Numbers(in + 1);
+        }
+        int limBase = numCoeffs + 1; // 1-based index where input limits start
+        for (int d = 0; d < numDims; ++d) {
+            int minIdx = limBase + 2 * d;
+            int maxIdx = minIdx + 1;
+            thisCurve->inputLimits[d].min = Numbers(minIdx);
+            thisCurve->inputLimits[d].max = Numbers(maxIdx);
+            checkCurveInputLimits(state, CurrentModuleObject, Numbers, minIdx, maxIdx, ErrorsFound);
+        }
+        int outLimIdx = limBase + 2 * numDims;
+        readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, outLimIdx);
+        if (validateUnitTypes) {
+            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, numDims, 2);
+        }
+    }
+
     void GetCurveInputData(EnergyPlusData &state, bool &ErrorsFound)
     {
 
@@ -837,210 +873,70 @@ namespace Curve {
         CurrentModuleObject = "Curve:Biquadratic";
         for (int CurveIndex = 1; CurveIndex <= NumBiQuad; ++CurveIndex) {
             auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-
-            // could add checks for blank numeric fields, and use field names for errors.
-            thisCurve->curveType = CurveType::BiQuadratic;
-            thisCurve->numDims = 2;
-            for (int in = 0; in < 6; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(7);
-            thisCurve->inputLimits[0].max = Numbers(8);
-            thisCurve->inputLimits[1].min = Numbers(9);
-            thisCurve->inputLimits[1].max = Numbers(10);
-            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 11);
-
-            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 7, 8, ErrorsFound);
-            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 9, 10, ErrorsFound);
-            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 2, 2);
+            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::BiQuadratic, 2, 6, ErrorsFound);
         }
 
         // Loop over ChillerPartLoadWithLift curves and load data //zrp_Aug2014
         CurrentModuleObject = "Curve:ChillerPartLoadWithLift";
         for (int CurveIndex = 1; CurveIndex <= NumChillerPartLoadWithLift; ++CurveIndex) {
             auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-
-            thisCurve->curveType = CurveType::ChillerPartLoadWithLift;
-            thisCurve->numDims = 3;
-
-            for (int in = 0; in < 12; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-
-            thisCurve->inputLimits[0].min = Numbers(13);
-            thisCurve->inputLimits[0].max = Numbers(14);
-            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 13, 14, ErrorsFound);
-
-            thisCurve->inputLimits[1].min = Numbers(15);
-            thisCurve->inputLimits[1].max = Numbers(16);
-            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 15, 16, ErrorsFound);
-
-            thisCurve->inputLimits[2].min = Numbers(17);
-            thisCurve->inputLimits[2].max = Numbers(18);
-            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 17, 18, ErrorsFound);
-
-            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 19);
-
-            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 3, 2);
+            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::ChillerPartLoadWithLift, 3, 12, ErrorsFound);
         }
 
         // Loop over cubic curves and load data
         CurrentModuleObject = "Curve:Cubic";
         for (int CurveIndex = 1; CurveIndex <= NumCubic; ++CurveIndex) {
             auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-
-            thisCurve->curveType = CurveType::Cubic;
-            thisCurve->numDims = 1;
-            for (int in = 0; in < 4; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(5);
-            thisCurve->inputLimits[0].max = Numbers(6);
-            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 7);
-
-            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 5, 6, ErrorsFound);
-            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 1, 2);
+            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::Cubic, 1, 4, ErrorsFound);
         }
 
         // Loop over quadrinomial curves and load data
         CurrentModuleObject = "Curve:Quartic";
         for (int CurveIndex = 1; CurveIndex <= NumQuartic; ++CurveIndex) {
             auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-
-            thisCurve->curveType = CurveType::Quartic;
-            thisCurve->numDims = 1;
-            for (int in = 0; in < 5; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(6);
-            thisCurve->inputLimits[0].max = Numbers(7);
-            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 8);
-
-            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 6, 7, ErrorsFound);
-            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 1, 2);
+            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::Quartic, 1, 5, ErrorsFound);
         }
 
         // Loop over quadratic curves and load data
         CurrentModuleObject = "Curve:Quadratic";
         for (int CurveIndex = 1; CurveIndex <= NumQuad; ++CurveIndex) {
             auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-
-            thisCurve->curveType = CurveType::Quadratic;
-            thisCurve->numDims = 1;
-            for (int in = 0; in < 3; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(4);
-            thisCurve->inputLimits[0].max = Numbers(5);
-            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 6);
-
-            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 4, 5, ErrorsFound);
-            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 1, 2);
+            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::Quadratic, 1, 3, ErrorsFound);
         }
 
         // Loop over quadratic-linear curves and load data
         CurrentModuleObject = "Curve:QuadraticLinear";
         for (int CurveIndex = 1; CurveIndex <= NumQuadLinear; ++CurveIndex) {
             auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-
-            thisCurve->curveType = CurveType::QuadraticLinear;
-            thisCurve->numDims = 2;
-            for (int in = 0; in < 6; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(7);
-            thisCurve->inputLimits[0].max = Numbers(8);
-            thisCurve->inputLimits[1].min = Numbers(9);
-            thisCurve->inputLimits[1].max = Numbers(10);
-            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 11);
-
-            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 7, 8, ErrorsFound);
-            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 9, 10, ErrorsFound);
-            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 2, 2);
+            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::QuadraticLinear, 2, 6, ErrorsFound);
         }
 
         // Loop over cubic-linear curves and load data
         CurrentModuleObject = "Curve:CubicLinear";
         for (int CurveIndex = 1; CurveIndex <= NumCubicLinear; ++CurveIndex) {
             auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-
-            thisCurve->curveType = CurveType::CubicLinear;
-            thisCurve->numDims = 2;
-            for (int in = 0; in < 6; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(7);
-            thisCurve->inputLimits[0].max = Numbers(8);
-            thisCurve->inputLimits[1].min = Numbers(9);
-            thisCurve->inputLimits[1].max = Numbers(10);
-            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 11);
-
-            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 7, 8, ErrorsFound);
-            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 9, 10, ErrorsFound);
-            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 2, 2);
+            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::CubicLinear, 2, 6, ErrorsFound);
         }
 
         // Loop over linear curves and load data
         CurrentModuleObject = "Curve:Linear";
         for (int CurveIndex = 1; CurveIndex <= NumLinear; ++CurveIndex) {
             auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-
-            thisCurve->curveType = CurveType::Linear;
-            thisCurve->numDims = 1;
-            for (int in = 0; in < 2; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(3);
-            thisCurve->inputLimits[0].max = Numbers(4);
-            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 5);
-
-            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 3, 4, ErrorsFound);
-            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 1, 2);
+            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::Linear, 1, 2, ErrorsFound);
         }
 
         // Loop over bicubic curves and load data
         CurrentModuleObject = "Curve:Bicubic";
         for (int CurveIndex = 1; CurveIndex <= NumBicubic; ++CurveIndex) {
             auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-
-            thisCurve->curveType = CurveType::BiCubic;
-            thisCurve->numDims = 2;
-            for (int in = 0; in < 10; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(11);
-            thisCurve->inputLimits[0].max = Numbers(12);
-            thisCurve->inputLimits[1].min = Numbers(13);
-            thisCurve->inputLimits[1].max = Numbers(14);
-            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 15);
-
-            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 11, 12, ErrorsFound);
-            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 13, 14, ErrorsFound);
-            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 2, 2);
+            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::BiCubic, 2, 10, ErrorsFound);
         }
 
         // Loop over Triquadratic curves and load data
         CurrentModuleObject = "Curve:Triquadratic";
         for (int CurveIndex = 1; CurveIndex <= NumTriQuad; ++CurveIndex) {
             auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-
-            thisCurve->curveType = CurveType::TriQuadratic;
-            thisCurve->numDims = 3;
-            for (int in = 0; in < 27; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(28);
-            thisCurve->inputLimits[0].max = Numbers(29);
-            thisCurve->inputLimits[1].min = Numbers(30);
-            thisCurve->inputLimits[1].max = Numbers(31);
-            thisCurve->inputLimits[2].min = Numbers(32);
-            thisCurve->inputLimits[2].max = Numbers(33);
-            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 34);
-
-            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 28, 29, ErrorsFound);
-            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 30, 31, ErrorsFound);
-            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 32, 33, ErrorsFound);
-            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 3, 2);
+            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::TriQuadratic, 3, 27, ErrorsFound);
         }
 
         // Loop over quad linear curves and load data
@@ -1134,160 +1030,57 @@ namespace Curve {
         CurrentModuleObject = "Curve:Exponent";
         for (int CurveIndex = 1; CurveIndex <= NumExponent; ++CurveIndex) {
             auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-
-            thisCurve->curveType = CurveType::Exponent;
-            thisCurve->numDims = 1;
-            for (int in = 0; in < 3; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(4);
-            thisCurve->inputLimits[0].max = Numbers(5);
-
-            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 4, 5, ErrorsFound);
-
-            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 6);
-            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 1, 2);
+            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::Exponent, 1, 3, ErrorsFound);
         }
 
-        // Loop over Fan Pressure Rise curves and load data
+        // Loop over Fan Pressure Rise curves and load data (no unit type validation)
         CurrentModuleObject = "Curve:FanPressureRise";
         for (int CurveIndex = 1; CurveIndex <= NumFanPressRise; ++CurveIndex) {
             auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-
-            thisCurve->curveType = CurveType::FanPressureRise;
-            thisCurve->numDims = 2;
-            for (int in = 0; in < 4; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(5);
-            thisCurve->inputLimits[0].max = Numbers(6);
-            thisCurve->inputLimits[1].min = Numbers(7);
-            thisCurve->inputLimits[1].max = Numbers(8);
-
-            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 9);
-
-            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 5, 6, ErrorsFound);
-            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 7, 8, ErrorsFound);
-
-        } // Fan Pressure Rise
+            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::FanPressureRise, 2, 4, ErrorsFound, false);
+        }
 
         // Loop over Exponential Skew Normal curves and load data
         CurrentModuleObject = "Curve:ExponentialSkewNormal";
         for (int CurveIndex = 1; CurveIndex <= NumExpSkewNorm; ++CurveIndex) {
             auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-
-            thisCurve->curveType = CurveType::ExponentialSkewNormal;
-            thisCurve->numDims = 1;
-            for (int in = 0; in < 4; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(5);
-            thisCurve->inputLimits[0].max = Numbers(6);
-
-            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 7);
-
-            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 5, 6, ErrorsFound);
-
-            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 1, 2);
-        } // Exponential Skew Normal
+            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::ExponentialSkewNormal, 1, 4, ErrorsFound);
+        }
 
         // Loop over Sigmoid curves and load data
         CurrentModuleObject = "Curve:Sigmoid";
         for (int CurveIndex = 1; CurveIndex <= NumSigmoid; ++CurveIndex) {
             auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-
-            thisCurve->curveType = CurveType::Sigmoid;
-            thisCurve->numDims = 1;
-            for (int in = 0; in < 5; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(6);
-            thisCurve->inputLimits[0].max = Numbers(7);
-
-            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 8);
-
-            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 6, 7, ErrorsFound);
-
-            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 1, 2);
-        } // Sigmoid
+            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::Sigmoid, 1, 5, ErrorsFound);
+        }
 
         // Loop over Rectangular Hyperbola Type 1 curves and load data
         CurrentModuleObject = "Curve:RectangularHyperbola1";
         for (int CurveIndex = 1; CurveIndex <= NumRectHyper1; ++CurveIndex) {
             auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-
-            thisCurve->curveType = CurveType::RectangularHyperbola1;
-            thisCurve->numDims = 1;
-            for (int in = 0; in < 3; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(4);
-            thisCurve->inputLimits[0].max = Numbers(5);
-
-            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 6);
-
-            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 4, 5, ErrorsFound);
-
-            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 1, 2);
-        } // Rectangular Hyperbola Type 1
+            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::RectangularHyperbola1, 1, 3, ErrorsFound);
+        }
 
         // Loop over Rectangular Hyperbola Type 2 curves and load data
         CurrentModuleObject = "Curve:RectangularHyperbola2";
         for (int CurveIndex = 1; CurveIndex <= NumRectHyper2; ++CurveIndex) {
             auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-
-            thisCurve->curveType = CurveType::RectangularHyperbola2;
-            thisCurve->numDims = 1;
-            for (int in = 0; in < 3; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(4);
-            thisCurve->inputLimits[0].max = Numbers(5);
-
-            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 6);
-
-            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 4, 5, ErrorsFound);
-
-            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 1, 2);
-        } // Rectangular Hyperbola Type 2
+            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::RectangularHyperbola2, 1, 3, ErrorsFound);
+        }
 
         // Loop over Exponential Decay curves and load data
         CurrentModuleObject = "Curve:ExponentialDecay";
         for (int CurveIndex = 1; CurveIndex <= NumExpDecay; ++CurveIndex) {
             auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::ExponentialDecay, 1, 3, ErrorsFound);
+        }
 
-            thisCurve->curveType = CurveType::ExponentialDecay;
-            thisCurve->numDims = 1;
-            for (int in = 0; in < 3; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(4);
-            thisCurve->inputLimits[0].max = Numbers(5);
-
-            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 6);
-
-            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 4, 5, ErrorsFound);
-            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 1, 2);
-        } // Exponential Decay
-
-        // ykt July,2011 Loop over DoubleExponential Decay curves and load data
+        // Loop over DoubleExponential Decay curves and load data
         CurrentModuleObject = "Curve:DoubleExponentialDecay";
         for (int CurveIndex = 1; CurveIndex <= NumDoubleExpDecay; ++CurveIndex) {
             auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-
-            thisCurve->curveType = CurveType::DoubleExponentialDecay;
-            thisCurve->numDims = 1;
-            for (int in = 0; in < 5; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(6);
-            thisCurve->inputLimits[0].max = Numbers(7);
-
-            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 6, 7, ErrorsFound);
-
-            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 8);
-            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 1, 2);
-        } // Exponential Decay
+            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::DoubleExponentialDecay, 1, 5, ErrorsFound);
+        }
 
         // Loop over wind pressure coefficient tables and load data
         if (NumWPCValTab > 0) {
