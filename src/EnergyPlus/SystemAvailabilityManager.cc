@@ -2300,6 +2300,50 @@ namespace Avail {
         }
     }
 
+    // Update adaptive temperature gradient tracking for heating or cooling.
+    // timeOffset is 0.0 for daytime cases and 24.0 for overnight cases.
+    static void updateAdaptiveTempGrad(EnergyPlusData &state,
+                                       int const zoneIndex,
+                                       bool const isHeating,
+                                       Real64 const timeOffset,
+                                       int const NumPreDays,
+                                       Real64 &ATGUpdateTime1,
+                                       Real64 &ATGUpdateTime2,
+                                       Real64 &ATGUpdateTemp1,
+                                       Real64 &ATGUpdateTemp2,
+                                       bool &ATGUpdateFlag1,
+                                       bool &ATGUpdateFlag2)
+    {
+        if (state.dataGlobal->WarmupFlag) {
+            return;
+        }
+        Real64 const zoneTemp = state.dataHeatBalFanSys->TempTstatAir(zoneIndex);
+        if (ATGUpdateFlag1) {
+            ATGUpdateTime1 = state.dataGlobal->CurrentTime;
+            ATGUpdateTemp1 = zoneTemp;
+            ATGUpdateFlag1 = false;
+        }
+        bool setpointReached;
+        if (isHeating) {
+            setpointReached = (zoneTemp >= state.dataZoneCtrls->OccRoomTSetPointHeat(zoneIndex));
+        } else {
+            setpointReached = (zoneTemp <= state.dataZoneCtrls->OccRoomTSetPointCool(zoneIndex));
+        }
+        if (setpointReached && ATGUpdateFlag2) {
+            ATGUpdateTime2 = state.dataGlobal->CurrentTime;
+            ATGUpdateTemp2 = zoneTemp;
+            ATGUpdateFlag2 = false;
+            Real64 const tempDelta = isHeating ? (ATGUpdateTemp2 - ATGUpdateTemp1) : (ATGUpdateTemp1 - ATGUpdateTemp2);
+            Real64 const timeDelta = ATGUpdateTime2 - ATGUpdateTime1 + timeOffset;
+            auto &gradArray = isHeating ? state.dataAvail->OptStart_AdaTempGradTrdHeat : state.dataAvail->OptStart_AdaTempGradTrdCool;
+            if (std::abs(timeDelta) > 1.e-10) {
+                gradArray(NumPreDays) = tempDelta / timeDelta;
+            } else {
+                gradArray(NumPreDays) = tempDelta * state.dataGlobal->TimeStepsInHour;
+            }
+        }
+    }
+
     Status CalcOptStartSysAvailMgr(EnergyPlusData &state,
                                    int const SysAvailNum,  // number of the current scheduled system availability manager
                                    int const PriAirSysNum, // number of the primary air system affected by this Avail. Manager
@@ -2856,28 +2900,9 @@ namespace Avail {
                                     if (state.dataGlobal->CurrentTime > FanStartTime) {
                                         CycleOnFlag = false;
                                     }
-                                    // Calculate the current day actual temperature gradient --------------------------
-                                    if (!state.dataGlobal->WarmupFlag) {
-                                        if (ATGUpdateFlag1) {
-                                            ATGUpdateTime1 = state.dataGlobal->CurrentTime;
-                                            ATGUpdateTemp1 = state.dataHeatBalFanSys->TempTstatAir(ZoneNum);
-                                            ATGUpdateFlag1 = false;
-                                        }
-                                        if (state.dataHeatBalFanSys->TempTstatAir(ZoneNum) >= state.dataZoneCtrls->OccRoomTSetPointHeat(ZoneNum) &&
-                                            ATGUpdateFlag2) {
-                                            ATGUpdateTime2 = state.dataGlobal->CurrentTime;
-                                            ATGUpdateTemp2 = state.dataHeatBalFanSys->TempTstatAir(ZoneNum);
-                                            ATGUpdateFlag2 = false;
-                                            if (std::abs(ATGUpdateTime2 - ATGUpdateTime1) > 1.e-10) {
-                                                state.dataAvail->OptStart_AdaTempGradTrdHeat(NumPreDays) =
-                                                    (ATGUpdateTemp2 - ATGUpdateTemp1) / (ATGUpdateTime2 - ATGUpdateTime1);
-                                            } else {
-                                                state.dataAvail->OptStart_AdaTempGradTrdHeat(NumPreDays) =
-                                                    (ATGUpdateTemp2 - ATGUpdateTemp1) * state.dataGlobal->TimeStepsInHour;
-                                            }
-                                        }
-                                    }
-                                    //---------------------------------------------------------------------------------
+                                    updateAdaptiveTempGrad(state, ZoneNum, true, 0.0, NumPreDays,
+
+                                                           ATGUpdateTime1, ATGUpdateTime2, ATGUpdateTemp1, ATGUpdateTemp2, ATGUpdateFlag1, ATGUpdateFlag2);
                                 } else if (PreStartTime < state.dataGlobal->CurrentTime) {
                                     if (OSReportVarFlag) {
                                         NumHoursBeforeOccupancy = DeltaTime;
@@ -2905,28 +2930,9 @@ namespace Avail {
                                     if (state.dataGlobal->CurrentTime > FanStartTime && state.dataGlobal->CurrentTime < PreStartTimeTmr) {
                                         CycleOnFlag = false;
                                     }
-                                    // Calculate the current day actual temperature gradient --------------------------
-                                    if (!state.dataGlobal->WarmupFlag) {
-                                        if (ATGUpdateFlag1) {
-                                            ATGUpdateTime1 = state.dataGlobal->CurrentTime;
-                                            ATGUpdateTemp1 = state.dataHeatBalFanSys->TempTstatAir(ZoneNum);
-                                            ATGUpdateFlag1 = false;
-                                        }
-                                        if (state.dataHeatBalFanSys->TempTstatAir(ZoneNum) >= state.dataZoneCtrls->OccRoomTSetPointHeat(ZoneNum) &&
-                                            ATGUpdateFlag2) {
-                                            ATGUpdateTime2 = state.dataGlobal->CurrentTime;
-                                            ATGUpdateTemp2 = state.dataHeatBalFanSys->TempTstatAir(ZoneNum);
-                                            ATGUpdateFlag2 = false;
-                                            if (std::abs(ATGUpdateTime2 - ATGUpdateTime1 + 24.0) > 1.e-10) {
-                                                state.dataAvail->OptStart_AdaTempGradTrdHeat(NumPreDays) =
-                                                    (ATGUpdateTemp2 - ATGUpdateTemp1) / (ATGUpdateTime2 - ATGUpdateTime1 + 24.0);
-                                            } else {
-                                                state.dataAvail->OptStart_AdaTempGradTrdHeat(NumPreDays) =
-                                                    (ATGUpdateTemp2 - ATGUpdateTemp1) * state.dataGlobal->TimeStepsInHour;
-                                            }
-                                        }
-                                    }
-                                    //---------------------------------------------------------------------------------
+                                    updateAdaptiveTempGrad(state, ZoneNum, true, 24.0, NumPreDays,
+
+                                                           ATGUpdateTime1, ATGUpdateTime2, ATGUpdateTemp1, ATGUpdateTemp2, ATGUpdateFlag1, ATGUpdateFlag2);
                                 } else if (PreStartTime < state.dataGlobal->CurrentTime || PreStartTimeTmr < state.dataGlobal->CurrentTime) {
                                     if (OSReportVarFlag) {
                                         NumHoursBeforeOccupancy = DeltaTime;
@@ -3133,29 +3139,9 @@ namespace Avail {
                                 if (state.dataGlobal->CurrentTime > FanStartTime) {
                                     CycleOnFlag = false;
                                 }
-                                // Calculate the current day actual temperature gradient --------------------------
-                                if (!state.dataGlobal->WarmupFlag) {
-                                    if (ATGUpdateFlag1) {
-                                        ATGUpdateTime1 = state.dataGlobal->CurrentTime;
-                                        ATGUpdateTemp1 = state.dataHeatBalFanSys->TempTstatAir(ATGWCZoneNumLo);
-                                        ATGUpdateFlag1 = false;
-                                    }
-                                    if (state.dataHeatBalFanSys->TempTstatAir(ATGWCZoneNumLo) >=
-                                            state.dataZoneCtrls->OccRoomTSetPointHeat(ATGWCZoneNumLo) &&
-                                        ATGUpdateFlag2) {
-                                        ATGUpdateTime2 = state.dataGlobal->CurrentTime;
-                                        ATGUpdateTemp2 = state.dataHeatBalFanSys->TempTstatAir(ATGWCZoneNumLo);
-                                        ATGUpdateFlag2 = false;
-                                        if (std::abs(ATGUpdateTime2 - ATGUpdateTime1) > 1.e-10) {
-                                            state.dataAvail->OptStart_AdaTempGradTrdHeat(NumPreDays) =
-                                                (ATGUpdateTemp2 - ATGUpdateTemp1) / (ATGUpdateTime2 - ATGUpdateTime1);
-                                        } else {
-                                            state.dataAvail->OptStart_AdaTempGradTrdHeat(NumPreDays) =
-                                                (ATGUpdateTemp2 - ATGUpdateTemp1) * state.dataGlobal->TimeStepsInHour;
-                                        }
-                                    }
-                                }
-                                //---------------------------------------------------------------------------------
+                                updateAdaptiveTempGrad(state, ATGWCZoneNumLo, true, 0.0, NumPreDays,
+
+                                                       ATGUpdateTime1, ATGUpdateTime2, ATGUpdateTemp1, ATGUpdateTemp2, ATGUpdateFlag1, ATGUpdateFlag2);
                             } else if (PreStartTime < state.dataGlobal->CurrentTime) {
                                 if (OSReportVarFlag) {
                                     NumHoursBeforeOccupancy = DeltaTime;
@@ -3179,29 +3165,9 @@ namespace Avail {
                                 OSReportVarFlag = true;
                             } else if (CycleOnFlag) {
                                 availStatus = Status::CycleOn;
-                                // Calculate the current day actual temperature gradient --------------------------
-                                if (!state.dataGlobal->WarmupFlag) {
-                                    if (ATGUpdateFlag1) {
-                                        ATGUpdateTime1 = state.dataGlobal->CurrentTime;
-                                        ATGUpdateTemp1 = state.dataHeatBalFanSys->TempTstatAir(ATGWCZoneNumLo);
-                                        ATGUpdateFlag1 = false;
-                                    }
-                                    if (state.dataHeatBalFanSys->TempTstatAir(ATGWCZoneNumLo) >=
-                                            state.dataZoneCtrls->OccRoomTSetPointHeat(ATGWCZoneNumLo) &&
-                                        ATGUpdateFlag2) {
-                                        ATGUpdateTime2 = state.dataGlobal->CurrentTime;
-                                        ATGUpdateTemp2 = state.dataHeatBalFanSys->TempTstatAir(ATGWCZoneNumLo);
-                                        ATGUpdateFlag2 = false;
-                                        if (std::abs(ATGUpdateTime2 - ATGUpdateTime1 + 24.0) > 1.e-10) {
-                                            state.dataAvail->OptStart_AdaTempGradTrdHeat(NumPreDays) =
-                                                (ATGUpdateTemp2 - ATGUpdateTemp1) / (ATGUpdateTime2 - ATGUpdateTime1 + 24.0);
-                                        } else {
-                                            state.dataAvail->OptStart_AdaTempGradTrdHeat(NumPreDays) =
-                                                (ATGUpdateTemp2 - ATGUpdateTemp1) * state.dataGlobal->TimeStepsInHour;
-                                        }
-                                    }
-                                }
-                                //---------------------------------------------------------------------------------
+                                updateAdaptiveTempGrad(state, ATGWCZoneNumLo, true, 24.0, NumPreDays,
+
+                                                       ATGUpdateTime1, ATGUpdateTime2, ATGUpdateTemp1, ATGUpdateTemp2, ATGUpdateFlag1, ATGUpdateFlag2);
                                 OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                                 if (state.dataGlobal->CurrentTime > FanStartTime && state.dataGlobal->CurrentTime < PreStartTimeTmr) {
                                     CycleOnFlag = false;
@@ -3241,29 +3207,9 @@ namespace Avail {
                                 OSReportVarFlag = true;
                             } else if (CycleOnFlag) {
                                 availStatus = Status::CycleOn;
-                                // Calculate the current day actual temperature gradient --------------------------
-                                if (!state.dataGlobal->WarmupFlag) {
-                                    if (ATGUpdateFlag1) {
-                                        ATGUpdateTime1 = state.dataGlobal->CurrentTime;
-                                        ATGUpdateTemp1 = state.dataHeatBalFanSys->TempTstatAir(ATGWCZoneNumHi);
-                                        ATGUpdateFlag1 = false;
-                                    }
-                                    if (state.dataHeatBalFanSys->TempTstatAir(ATGWCZoneNumHi) <=
-                                            state.dataZoneCtrls->OccRoomTSetPointCool(ATGWCZoneNumHi) &&
-                                        ATGUpdateFlag2) {
-                                        ATGUpdateTime2 = state.dataGlobal->CurrentTime;
-                                        ATGUpdateTemp2 = state.dataHeatBalFanSys->TempTstatAir(ATGWCZoneNumHi);
-                                        ATGUpdateFlag2 = false;
-                                        if (std::abs(ATGUpdateTime2 - ATGUpdateTime1) > 1.e-10) {
-                                            state.dataAvail->OptStart_AdaTempGradTrdCool(NumPreDays) =
-                                                (ATGUpdateTemp1 - ATGUpdateTemp2) / (ATGUpdateTime2 - ATGUpdateTime1);
-                                        } else {
-                                            state.dataAvail->OptStart_AdaTempGradTrdCool(NumPreDays) =
-                                                (ATGUpdateTemp1 - ATGUpdateTemp2) * state.dataGlobal->TimeStepsInHour;
-                                        }
-                                    }
-                                }
-                                //---------------------------------------------------------------------------------
+                                updateAdaptiveTempGrad(state, ATGWCZoneNumHi, false, 0.0, NumPreDays,
+
+                                                       ATGUpdateTime1, ATGUpdateTime2, ATGUpdateTemp1, ATGUpdateTemp2, ATGUpdateFlag1, ATGUpdateFlag2);
                                 OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                             } else if (PreStartTime < state.dataGlobal->CurrentTime) {
                                 if (OSReportVarFlag) {
@@ -3288,29 +3234,9 @@ namespace Avail {
                                 OSReportVarFlag = true;
                             } else if (CycleOnFlag) {
                                 availStatus = Status::CycleOn;
-                                // Calculate the current day actual temperature gradient --------------------------
-                                if (!state.dataGlobal->WarmupFlag) {
-                                    if (ATGUpdateFlag1) {
-                                        ATGUpdateTime1 = state.dataGlobal->CurrentTime;
-                                        ATGUpdateTemp1 = state.dataHeatBalFanSys->TempTstatAir(ATGWCZoneNumHi);
-                                        ATGUpdateFlag1 = false;
-                                    }
-                                    if (state.dataHeatBalFanSys->TempTstatAir(ATGWCZoneNumHi) <=
-                                            state.dataZoneCtrls->OccRoomTSetPointCool(ATGWCZoneNumHi) &&
-                                        ATGUpdateFlag2) {
-                                        ATGUpdateTime2 = state.dataGlobal->CurrentTime;
-                                        ATGUpdateTemp2 = state.dataHeatBalFanSys->TempTstatAir(ATGWCZoneNumHi);
-                                        ATGUpdateFlag2 = false;
-                                        if (std::abs(ATGUpdateTime2 - ATGUpdateTime1 + 24.0) > 1.e-10) {
-                                            state.dataAvail->OptStart_AdaTempGradTrdCool(NumPreDays) =
-                                                (ATGUpdateTemp1 - ATGUpdateTemp2) / (ATGUpdateTime2 - ATGUpdateTime1 + 24.0);
-                                        } else {
-                                            state.dataAvail->OptStart_AdaTempGradTrdCool(NumPreDays) =
-                                                (ATGUpdateTemp1 - ATGUpdateTemp2) * state.dataGlobal->TimeStepsInHour;
-                                        }
-                                    }
-                                }
-                                //---------------------------------------------------------------------------------
+                                updateAdaptiveTempGrad(state, ATGWCZoneNumHi, false, 24.0, NumPreDays,
+
+                                                       ATGUpdateTime1, ATGUpdateTime2, ATGUpdateTemp1, ATGUpdateTemp2, ATGUpdateFlag1, ATGUpdateFlag2);
                                 OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                             } else if (PreStartTime < state.dataGlobal->CurrentTime || PreStartTimeTmr < state.dataGlobal->CurrentTime) {
                                 if (OSReportVarFlag) {
