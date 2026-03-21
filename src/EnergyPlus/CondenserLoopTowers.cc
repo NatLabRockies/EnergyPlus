@@ -186,6 +186,23 @@ namespace CondenserLoopTowers {
 
     static constexpr std::string_view routineName = "GetTowerInput";
 
+    // Helper: parse water inlet/outlet node connections and test component set.
+    static void parseWaterNodes(EnergyPlusData &state,
+                                CoolingTower &tower,
+                                Array1D_string const &AlphArray,
+                                Node::ConnectionObjectType connType,
+                                bool &ErrorsFound)
+    {
+        auto &s_ipsc = state.dataIPShortCut;
+        tower.WaterInletNodeNum = Node::GetOnlySingleNode(state, AlphArray(2), ErrorsFound, connType, tower.Name,
+                                                          Node::FluidType::Water, Node::ConnectionType::Inlet,
+                                                          Node::CompFluidStream::Primary, Node::ObjectIsNotParent);
+        tower.WaterOutletNodeNum = Node::GetOnlySingleNode(state, AlphArray(3), ErrorsFound, connType, tower.Name,
+                                                           Node::FluidType::Water, Node::ConnectionType::Outlet,
+                                                           Node::CompFluidStream::Primary, Node::ObjectIsNotParent);
+        Node::TestCompSet(state, s_ipsc->cCurrentModuleObject, tower.Name, AlphArray(2), AlphArray(3), "Chilled Water Nodes");
+    }
+
     // Helper: parse design inlet conditions (DB temp, WB temp, approach, range) and derived water temps.
     static void parseDesignConditions(CoolingTower &tower,
                                       Array1D<Real64> const &NumArray,
@@ -431,25 +448,7 @@ namespace CondenserLoopTowers {
             tower.Name = AlphArray(1);
             tower.TowerType = DataPlant::PlantEquipmentType::CoolingTower_SingleSpd;
             tower.TowerMassFlowRateMultiplier = 2.5;
-            tower.WaterInletNodeNum = Node::GetOnlySingleNode(state,
-                                                              AlphArray(2),
-                                                              ErrorsFound,
-                                                              Node::ConnectionObjectType::CoolingTowerSingleSpeed,
-                                                              tower.Name,
-                                                              Node::FluidType::Water,
-                                                              Node::ConnectionType::Inlet,
-                                                              Node::CompFluidStream::Primary,
-                                                              Node::ObjectIsNotParent);
-            tower.WaterOutletNodeNum = Node::GetOnlySingleNode(state,
-                                                               AlphArray(3),
-                                                               ErrorsFound,
-                                                               Node::ConnectionObjectType::CoolingTowerSingleSpeed,
-                                                               tower.Name,
-                                                               Node::FluidType::Water,
-                                                               Node::ConnectionType::Outlet,
-                                                               Node::CompFluidStream::Primary,
-                                                               Node::ObjectIsNotParent);
-            Node::TestCompSet(state, s_ipsc->cCurrentModuleObject, tower.Name, AlphArray(2), AlphArray(3), "Chilled Water Nodes");
+            parseWaterNodes(state, tower, AlphArray, Node::ConnectionObjectType::CoolingTowerSingleSpeed, ErrorsFound);
             tower.DesignWaterFlowRate = NumArray(1);
             if (tower.DesignWaterFlowRate == DataSizing::AutoSize) {
                 tower.DesignWaterFlowRateWasAutoSized = true;
@@ -605,25 +604,7 @@ namespace CondenserLoopTowers {
             tower.Name = AlphArray(1);
             tower.TowerType = DataPlant::PlantEquipmentType::CoolingTower_TwoSpd;
             tower.TowerMassFlowRateMultiplier = 2.5;
-            tower.WaterInletNodeNum = Node::GetOnlySingleNode(state,
-                                                              AlphArray(2),
-                                                              ErrorsFound,
-                                                              Node::ConnectionObjectType::CoolingTowerTwoSpeed,
-                                                              tower.Name,
-                                                              Node::FluidType::Water,
-                                                              Node::ConnectionType::Inlet,
-                                                              Node::CompFluidStream::Primary,
-                                                              Node::ObjectIsNotParent);
-            tower.WaterOutletNodeNum = Node::GetOnlySingleNode(state,
-                                                               AlphArray(3),
-                                                               ErrorsFound,
-                                                               Node::ConnectionObjectType::CoolingTowerTwoSpeed,
-                                                               tower.Name,
-                                                               Node::FluidType::Water,
-                                                               Node::ConnectionType::Outlet,
-                                                               Node::CompFluidStream::Primary,
-                                                               Node::ObjectIsNotParent);
-            Node::TestCompSet(state, s_ipsc->cCurrentModuleObject, AlphArray(1), AlphArray(2), AlphArray(3), "Chilled Water Nodes");
+            parseWaterNodes(state, tower, AlphArray, Node::ConnectionObjectType::CoolingTowerTwoSpeed, ErrorsFound);
 
             if (NumAlphas >= 4) {
                 tower.PerformanceInputMethod_Num = static_cast<PIM>(getEnumValue(PIMNamesUC, Util::makeUPPER(AlphArray(4))));
@@ -882,25 +863,7 @@ namespace CondenserLoopTowers {
             auto &tower = state.dataCondenserLoopTowers->towers(TowerNum);
             tower.Name = AlphArray(1);
             tower.TowerType = DataPlant::PlantEquipmentType::CoolingTower_VarSpd;
-            tower.WaterInletNodeNum = Node::GetOnlySingleNode(state,
-                                                              AlphArray(2),
-                                                              ErrorsFound,
-                                                              Node::ConnectionObjectType::CoolingTowerVariableSpeed,
-                                                              AlphArray(1),
-                                                              Node::FluidType::Water,
-                                                              Node::ConnectionType::Inlet,
-                                                              Node::CompFluidStream::Primary,
-                                                              Node::ObjectIsNotParent);
-            tower.WaterOutletNodeNum = Node::GetOnlySingleNode(state,
-                                                               AlphArray(3),
-                                                               ErrorsFound,
-                                                               Node::ConnectionObjectType::CoolingTowerVariableSpeed,
-                                                               AlphArray(1),
-                                                               Node::FluidType::Water,
-                                                               Node::ConnectionType::Outlet,
-                                                               Node::CompFluidStream::Primary,
-                                                               Node::ObjectIsNotParent);
-            Node::TestCompSet(state, s_ipsc->cCurrentModuleObject, AlphArray(1), AlphArray(2), AlphArray(3), "Chilled Water Nodes");
+            parseWaterNodes(state, tower, AlphArray, Node::ConnectionObjectType::CoolingTowerVariableSpeed, ErrorsFound);
 
             if ((Util::SameString(AlphArray(4), "CoolToolsUserDefined") || Util::SameString(AlphArray(4), "YorkCalcUserDefined")) &&
                 s_ipsc->lAlphaFieldBlanks(5)) {
@@ -1271,25 +1234,7 @@ namespace CondenserLoopTowers {
             auto &tower = state.dataCondenserLoopTowers->towers(TowerNum);
             tower.Name = AlphArray(1);
             tower.TowerType = DataPlant::PlantEquipmentType::CoolingTower_VarSpdMerkel;
-            tower.WaterInletNodeNum = Node::GetOnlySingleNode(state,
-                                                              AlphArray(2),
-                                                              ErrorsFound,
-                                                              Node::ConnectionObjectType::CoolingTowerVariableSpeedMerkel,
-                                                              AlphArray(1),
-                                                              Node::FluidType::Water,
-                                                              Node::ConnectionType::Inlet,
-                                                              Node::CompFluidStream::Primary,
-                                                              Node::ObjectIsNotParent);
-            tower.WaterOutletNodeNum = Node::GetOnlySingleNode(state,
-                                                               AlphArray(3),
-                                                               ErrorsFound,
-                                                               Node::ConnectionObjectType::CoolingTowerVariableSpeedMerkel,
-                                                               AlphArray(1),
-                                                               Node::FluidType::Water,
-                                                               Node::ConnectionType::Outlet,
-                                                               Node::CompFluidStream::Primary,
-                                                               Node::ObjectIsNotParent);
-            Node::TestCompSet(state, s_ipsc->cCurrentModuleObject, AlphArray(1), AlphArray(2), AlphArray(3), "Chilled Water Nodes");
+            parseWaterNodes(state, tower, AlphArray, Node::ConnectionObjectType::CoolingTowerVariableSpeedMerkel, ErrorsFound);
 
             if (Util::SameString(AlphArray(4), "UFactorTimesAreaAndDesignWaterFlowRate")) {
                 tower.PerformanceInputMethod_Num = PIM::UFactor;
