@@ -6161,6 +6161,38 @@ namespace Furnaces {
         furnaceInNode.MassFlowRate = thisFurnace.MdotFurnace;
     }
 
+    // Helper: create a CalcFurnaceResidual lambda and solve for PLR via RegulaFalsi.
+    // Returns SolFlag (>0 = converged iterations, -1 = max-iter, -2 = bounds error).
+    // On return, resultPLR holds the solved part-load ratio and OnOffAirFlowRatio is
+    // restored from the saved value.
+    static int solveFurnaceResidual(EnergyPlusData &state,
+                                    Real64 const errorToler,
+                                    int const maxIter,
+                                    Real64 &resultPLR,
+                                    int const FurnaceNum,
+                                    bool const FirstHVACIteration,
+                                    HVAC::FanOp const fanOp,
+                                    HVAC::CompressorOp const compressorOp,
+                                    Real64 const loadToBeMet,
+                                    Real64 const par6_loadFlag,
+                                    Real64 const par7_sensLatentFlag,
+                                    Real64 const par9_HXOnFlag,
+                                    Real64 const par10_HeatingCoilPLR,
+                                    Real64 const plrMin,
+                                    Real64 const plrMax,
+                                    Real64 &OnOffAirFlowRatio)
+    {
+        int SolFlag = 0;
+        auto f = [&state, FurnaceNum, FirstHVACIteration, fanOp, compressorOp, loadToBeMet, par6_loadFlag, par7_sensLatentFlag, par9_HXOnFlag,
+                  par10_HeatingCoilPLR](Real64 const PartLoadRatio) {
+            return CalcFurnaceResidual(
+                state, PartLoadRatio, FurnaceNum, FirstHVACIteration, fanOp, compressorOp, loadToBeMet, par6_loadFlag, par7_sensLatentFlag, par9_HXOnFlag, par10_HeatingCoilPLR);
+        };
+        General::SolveRoot(state, errorToler, maxIter, SolFlag, resultPLR, f, plrMin, plrMax);
+        OnOffAirFlowRatio = state.dataFurnaces->OnOffAirFlowRatioSave;
+        return SolFlag;
+    }
+
     void CalcNewZoneHeatCoolFlowRates(EnergyPlusData &state,
                                       int const FurnaceNum,
                                       bool const FirstHVACIteration,
@@ -6454,24 +6486,8 @@ namespace Furnaces {
                         // Calculate the part load ratio through iteration
                         HeatErrorToler = thisFurnace.HeatingConvergenceTolerance; // Error tolerance for convergence from input deck
 
-                        int SolFlag = 0; // # of iterations if positive, -1 means failed to converge, -2 means bounds are incorrect
-                        // HeatErrorToler is in fraction of load, MaxIter = 30, SolFalg = # of iterations or error as appropriate
-                        auto f = [&state, FurnaceNum, FirstHVACIteration, fanOp, compressorOp, SystemSensibleLoad](Real64 const PartLoadRatio) {
-                            return CalcFurnaceResidual(state,
-                                                       PartLoadRatio,
-                                                       FurnaceNum,
-                                                       FirstHVACIteration,
-                                                       fanOp,
-                                                       compressorOp,
-                                                       SystemSensibleLoad,
-                                                       0.0,  // par6_loadFlag,
-                                                       1.0,  // par7_sensLatentFlag,
-                                                       0.0,  // par9_HXOnFlag,
-                                                       0.0); // par10_HeatingCoilPLR);
-                        };
-                        General::SolveRoot(state, HeatErrorToler, MaxIter, SolFlag, PartLoadRatio, f, 0.0, 1.0);
-                        //         OnOffAirFlowRatio is updated during the above iteration. Reset to correct value based on PLR.
-                        OnOffAirFlowRatio = state.dataFurnaces->OnOffAirFlowRatioSave;
+                        int SolFlag = solveFurnaceResidual(state, HeatErrorToler, MaxIter, PartLoadRatio, FurnaceNum,
+                            FirstHVACIteration, fanOp, compressorOp, SystemSensibleLoad, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, OnOffAirFlowRatio);
                         if (SolFlag < 0) {
                             if (SolFlag == -1) {
                                 CalcFurnaceOutput(state,
@@ -6679,24 +6695,8 @@ namespace Furnaces {
                             // Calculate the part load ratio through iteration
                             HeatErrorToler = thisFurnace.HeatingConvergenceTolerance; // Error tolerance for convergence from input deck
 
-                            int SolFlag = 0; // # of iterations if positive, -1 means failed to converge, -2 means bounds are incorrect
-                            // HeatErrorToler is in fraction load, MaxIter = 30, SolFalg = # of iterations or error as appropriate
-                            auto f = [&state, FurnaceNum, FirstHVACIteration, fanOp, compressorOp, SystemSensibleLoad](Real64 const PartLoadRatio) {
-                                return CalcFurnaceResidual(state,
-                                                           PartLoadRatio,
-                                                           FurnaceNum,
-                                                           FirstHVACIteration,
-                                                           fanOp,
-                                                           compressorOp,
-                                                           SystemSensibleLoad,
-                                                           0.0,  // par6_loadFlag,
-                                                           1.0,  // par7_sensLatentFlag,
-                                                           0.0,  // par9_HXOnFlag,
-                                                           0.0); // par10_HeatingCoilPLR);
-                            };
-                            General::SolveRoot(state, HeatErrorToler, MaxIter, SolFlag, PartLoadRatio, f, 0.0, 1.0);
-                            //         OnOffAirFlowRatio is updated during the above iteration. Reset to correct value based on PLR.
-                            OnOffAirFlowRatio = state.dataFurnaces->OnOffAirFlowRatioSave;
+                            int SolFlag = solveFurnaceResidual(state, HeatErrorToler, MaxIter, PartLoadRatio, FurnaceNum,
+                                FirstHVACIteration, fanOp, compressorOp, SystemSensibleLoad, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, OnOffAirFlowRatio);
                             //         Reset HeatCoilLoad calculated in CalcFurnaceResidual (in case it was reset because output temp >
                             //         DesignMaxOutletTemp)
                             if (state.dataFurnaces->ModifiedHeatCoilLoad > 0.0) {
@@ -6752,21 +6752,8 @@ namespace Furnaces {
                                                       false);
                                 }
                                 //           Now solve again with tighter PLR limits
-                                auto f2 = // (AUTO_OK_LAMBDA)
-                                    [&state, FurnaceNum, FirstHVACIteration, fanOp, compressorOp, SystemSensibleLoad](Real64 const PartLoadRatio) {
-                                        return CalcFurnaceResidual(state,
-                                                                   PartLoadRatio,
-                                                                   FurnaceNum,
-                                                                   FirstHVACIteration,
-                                                                   fanOp,
-                                                                   compressorOp,
-                                                                   SystemSensibleLoad,
-                                                                   0.0,  // par6_loadFlag,
-                                                                   1.0,  // par7_sensLatentFlag,
-                                                                   0.0,  // par9_HXOnFlag,
-                                                                   0.0); // par10_HeatingCoilPLR);
-                                    };
-                                General::SolveRoot(state, HeatErrorToler, MaxIter, SolFlag, PartLoadRatio, f2, TempMinPLR, TempMaxPLR);
+                                SolFlag = solveFurnaceResidual(state, HeatErrorToler, MaxIter, PartLoadRatio, FurnaceNum,
+                                    FirstHVACIteration, fanOp, compressorOp, SystemSensibleLoad, 0.0, 1.0, 0.0, 0.0, TempMinPLR, TempMaxPLR, OnOffAirFlowRatio);
                                 if (state.dataFurnaces->ModifiedHeatCoilLoad > 0.0) {
                                     HeatCoilLoad = state.dataFurnaces->ModifiedHeatCoilLoad;
                                 } else {
@@ -6979,26 +6966,9 @@ namespace Furnaces {
 
                             // Calculate the sensible part load ratio through iteration
                             CoolErrorToler = thisFurnace.CoolingConvergenceTolerance; // Error tolerance for convergence from input deck
-                            int SolFlag = 0; // # of iterations if positive, -1 means failed to converge, -2 means bounds are incorrect
                             Real64 par8_HXFlag = HXUnitOn ? 1.0 : 0.0;
-                            // CoolErrorToler is in fraction of load, MaxIter = 30, SolFalg = # of iterations or error as appropriate
-                            auto f =
-                                [&state, FurnaceNum, FirstHVACIteration, fanOp, compressorOp, CoolCoilLoad, par8_HXFlag](Real64 const PartLoadRatio) {
-                                    return CalcFurnaceResidual(state,
-                                                               PartLoadRatio,
-                                                               FurnaceNum,
-                                                               FirstHVACIteration,
-                                                               fanOp,
-                                                               compressorOp,
-                                                               CoolCoilLoad,
-                                                               1.0,         // par6_loadFlag,
-                                                               1.0,         // par7_sensLatentFlag,
-                                                               par8_HXFlag, // par9_HXOnFlag,
-                                                               0.0);        // par10_HeatingCoilPLR);
-                                };
-                            General::SolveRoot(state, CoolErrorToler, MaxIter, SolFlag, PartLoadRatio, f, 0.0, 1.0);
-                            //             OnOffAirFlowRatio is updated during the above iteration. Reset to correct value based on PLR.
-                            OnOffAirFlowRatio = state.dataFurnaces->OnOffAirFlowRatioSave;
+                            int SolFlag = solveFurnaceResidual(state, CoolErrorToler, MaxIter, PartLoadRatio, FurnaceNum,
+                                FirstHVACIteration, fanOp, compressorOp, CoolCoilLoad, 1.0, 1.0, par8_HXFlag, 0.0, 0.0, 1.0, OnOffAirFlowRatio);
                             if (SolFlag < 0) {
                                 if (SolFlag == -1) {
                                     CalcFurnaceOutput(state,
@@ -7182,31 +7152,8 @@ namespace Furnaces {
                             } else {
                                 par9_HtgCoilPLR = 0.0;
                             }
-                            auto f = [&state,
-                                      FurnaceNum,
-                                      FirstHVACIteration,
-                                      fanOp,
-                                      compressorOp,
-                                      par4_load,
-                                      par6_LatentSens,
-                                      par8_HXUnit,
-                                      par9_HtgCoilPLR](Real64 const PartLoadRatio) {
-                                return CalcFurnaceResidual(state,
-                                                           PartLoadRatio,
-                                                           FurnaceNum,
-                                                           FirstHVACIteration,
-                                                           fanOp,
-                                                           compressorOp,
-                                                           par4_load,
-                                                           1.0,              // par6_loadFlag,
-                                                           par6_LatentSens,  // par7_sensLatentFlag,
-                                                           par8_HXUnit,      // par9_HXOnFlag,
-                                                           par9_HtgCoilPLR); // par10_HeatingCoilPLR);
-                            };
-                            //           CoolErrorToler is in fraction of load, MaxIter = 30, SolFalg = # of iterations or error as appropriate
-                            General::SolveRoot(state, CoolErrorToler, MaxIter, SolFlag, LatentPartLoadRatio, f, 0.0, 1.0);
-                            //           OnOffAirFlowRatio is updated during the above iteration. Reset to correct value based on PLR.
-                            OnOffAirFlowRatio = state.dataFurnaces->OnOffAirFlowRatioSave;
+                            SolFlag = solveFurnaceResidual(state, CoolErrorToler, MaxIter, LatentPartLoadRatio, FurnaceNum,
+                                FirstHVACIteration, fanOp, compressorOp, par4_load, 1.0, par6_LatentSens, par8_HXUnit, par9_HtgCoilPLR, 0.0, 1.0, OnOffAirFlowRatio);
                             if (SolFlag == -1) {
                                 //             RegulaFalsi may not find latent PLR when the latent degradation model is used.
                                 //             If iteration limit is exceeded, find tighter boundary of solution and repeat RegulaFalsi
@@ -7282,30 +7229,8 @@ namespace Furnaces {
                                                       CoolingHeatingPLRRatio);
                                 }
                                 //             tighter boundary of solution has been found, call RegulaFalsi a second time
-                                auto f2 = [&state,
-                                           FurnaceNum,
-                                           FirstHVACIteration,
-                                           fanOp,
-                                           compressorOp,
-                                           par4_load,
-                                           par6_LatentSens,
-                                           par8_HXUnit,
-                                           par9_HtgCoilPLR](Real64 const PartLoadRatio) {
-                                    return CalcFurnaceResidual(state,
-                                                               PartLoadRatio,
-                                                               FurnaceNum,
-                                                               FirstHVACIteration,
-                                                               fanOp,
-                                                               compressorOp,
-                                                               par4_load,
-                                                               1.0,              // par6_loadFlag,
-                                                               par6_LatentSens,  // par7_sensLatentFlag,
-                                                               par8_HXUnit,      // par9_HXOnFlag,
-                                                               par9_HtgCoilPLR); // par10_HeatingCoilPLR);
-                                };
-                                General::SolveRoot(state, CoolErrorToler, MaxIter, SolFlag, LatentPartLoadRatio, f2, TempMinPLR2, TempMaxPLR);
-                                //             OnOffAirFlowRatio is updated during the above iteration. Reset to correct value based on PLR.
-                                OnOffAirFlowRatio = state.dataFurnaces->OnOffAirFlowRatioSave;
+                                SolFlag = solveFurnaceResidual(state, CoolErrorToler, MaxIter, LatentPartLoadRatio, FurnaceNum,
+                                    FirstHVACIteration, fanOp, compressorOp, par4_load, 1.0, par6_LatentSens, par8_HXUnit, par9_HtgCoilPLR, TempMinPLR2, TempMaxPLR, OnOffAirFlowRatio);
                                 if (SolFlag == -1) {
 
                                     //               Set cooling to heating PLR for use with Subroutine CalcFurnaceOutput.
