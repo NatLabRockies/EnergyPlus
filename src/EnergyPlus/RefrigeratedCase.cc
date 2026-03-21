@@ -7676,7 +7676,9 @@ void SetupReportInput(EnergyPlusData &state)
                                     cond.Name);
             } // not cascade because recovered energy on cascade systems passed up to higher temperature system
 
-            if (cond.CondenserType == DataHeatBalance::RefrigCondenserType::Air) {
+            if (cond.CondenserType == DataHeatBalance::RefrigCondenserType::Air ||
+                cond.CondenserType == DataHeatBalance::RefrigCondenserType::Evap) {
+                // Fan electricity variables are common to both Air and Evap condensers
                 SetupOutputVariable(state,
                                     condPrefix + " Fan Electricity Rate",
                                     Constant::Units::W,
@@ -7695,27 +7697,9 @@ void SetupReportInput(EnergyPlusData &state)
                                     OutputProcessor::Group::Plant,
                                     OutputProcessor::EndUseCat::Refrigeration,
                                     cond.EndUseSubcategory);
-            } // Air cooled
+            } // Air or Evap cooled fan variables
 
             if (cond.CondenserType == DataHeatBalance::RefrigCondenserType::Evap) {
-                SetupOutputVariable(state,
-                                    condPrefix + " Fan Electricity Rate",
-                                    Constant::Units::W,
-                                    cond.ActualFanPower,
-                                    condTsType,
-                                    OutputProcessor::StoreType::Average,
-                                    cond.Name);
-                SetupOutputVariable(state,
-                                    condPrefix + " Fan Electricity Energy",
-                                    Constant::Units::J,
-                                    cond.FanElecEnergy,
-                                    condTsType,
-                                    OutputProcessor::StoreType::Sum,
-                                    cond.Name,
-                                    Constant::eResource::Electricity,
-                                    OutputProcessor::Group::Plant,
-                                    OutputProcessor::EndUseCat::Refrigeration,
-                                    cond.EndUseSubcategory);
                 SetupOutputVariable(state,
                                     condPrefix + " Pump Electricity Rate",
                                     Constant::Units::W,
