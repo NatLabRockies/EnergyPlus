@@ -1367,6 +1367,77 @@ namespace EvaporativeFluidCoolers {
         }
     }
 
+
+    // Helper: emit detailed diagnostic output when the UA solver fails to converge (SolFla == -2).
+    // Reports the design inputs and calculated outlet water temperatures at the UA bounds.
+    static void reportUASolverFailure(EnergyPlusData &state,
+                                       std::string const &name,
+                                       Real64 desLoad,
+                                       Real64 desWaterFlowRate,
+                                       Real64 airFlowRate,
+                                       Real64 airWetBulb,
+                                       Real64 waterInletTemp,
+                                       Real64 exitWaterTemp,
+                                       Real64 UA0,
+                                       Real64 UA1,
+                                       Real64 outWaterTempAtUA0,
+                                       Real64 outWaterTempAtUA1,
+                                       int PltSizCondNum,
+                                       EnergyPlusData const &stateForPlantSiz)
+    {
+        std::string const CalledFrom("SizeEvapFluidCooler");
+        ShowSevereError(state,
+                        EnergyPlus::format("{}: The combination of design input values did not allow the calculation of a ", CalledFrom));
+        ShowContinueError(state, "reasonable UA value. Review and revise design input values as appropriate. Specifying hard");
+        ShowContinueError(state,
+                          "sizes for some \"autosizable\" fields while autosizing other \"autosizable\" fields may be contributing "
+                          "to this problem.");
+        ShowContinueError(state, "This model iterates on UA to find the heat transfer required to provide the design outlet ");
+        ShowContinueError(state, "water temperature. Initially, the outlet water temperatures at high and low UA values are ");
+        ShowContinueError(state, "calculated. The Design Exit Water Temperature should be between the outlet water ");
+        ShowContinueError(state, "temperatures calculated at high and low UA values. If the Design Exit Water Temperature is ");
+        ShowContinueError(state, "out of this range, the solution will not converge and UA will not be calculated. ");
+        ShowContinueError(state, "The possible solutions could be to manually input adjusted water and/or air flow rates ");
+        ShowContinueError(
+            state,
+            "based on the autosized values shown below or to adjust design evaporative fluid cooler air inlet wet-bulb temperature.");
+        ShowContinueError(state, "Plant:Sizing object inputs also influence these results (e.g. DeltaT and ExitTemp).");
+        ShowContinueError(state, "Inputs to the evaporative fluid cooler object:");
+        ShowContinueError(
+            state, EnergyPlus::format("Design Evaporative Fluid Cooler Load [W]                      = {:.2R}", desLoad));
+        ShowContinueError(
+            state,
+            EnergyPlus::format("Design Evaporative Fluid Cooler Water Volume Flow Rate [m3/s] = {:.6R}", desWaterFlowRate));
+        ShowContinueError(state, EnergyPlus::format("Design Evaporative Fluid Cooler Air Volume Flow Rate [m3/s]   = {:.2R}", airFlowRate));
+        ShowContinueError(state,
+                          EnergyPlus::format("Design Evaporative Fluid Cooler Air Inlet Wet-bulb Temp [C]   = {:.2R}", airWetBulb));
+        ShowContinueError(
+            state,
+            EnergyPlus::format("Design Evaporative Fluid Cooler Water Inlet Temp [C]          = {:.2R}", waterInletTemp));
+        ShowContinueError(state, "Inputs to the plant sizing object:");
+        ShowContinueError(
+            state,
+            EnergyPlus::format("Design Exit Water Temp [C]                                    = {:.2R}", exitWaterTemp));
+        if (PltSizCondNum > 0) {
+            ShowContinueError(state,
+                              EnergyPlus::format("Loop Design Temperature Difference [C]                        = {:.2R}",
+                                                 stateForPlantSiz.dataSize->PlantSizData(PltSizCondNum).DeltaT));
+        }
+        ShowContinueError(
+            state,
+            EnergyPlus::format("Design Evaporative Fluid Cooler Water Inlet Temp [C]          = {:.2R}", waterInletTemp));
+        ShowContinueError(state,
+                          EnergyPlus::format("Calculated water outlet temperature at low UA [C](UA = {:.2R} W/C)  = {:.2R}",
+                                             UA0,
+                                             outWaterTempAtUA0));
+        ShowContinueError(state,
+                          EnergyPlus::format("Calculated water outlet temperature at high UA [C](UA = {:.2R} W/C)  = {:.2R}",
+                                             UA1,
+                                             outWaterTempAtUA1));
+        ShowFatalError(
+            state, EnergyPlus::format("Autosizing of Evaporative Fluid Cooler UA failed for Evaporative Fluid Cooler = {}", name));
+    }
+
     void EvapFluidCoolerSpecs::SizeEvapFluidCooler(EnergyPlusData &state)
     {
 
@@ -1645,57 +1716,11 @@ namespace EvaporativeFluidCoolers {
                     } else if (SolFla == -2) {
                         this->SimSimpleEvapFluidCooler(state, par1, par2, UA0, OutWaterTempAtUA0);
                         this->SimSimpleEvapFluidCooler(state, par1, par2, UA1, OutWaterTempAtUA1);
-                        ShowSevereError(
-                            state, EnergyPlus::format("{}: The combination of design input values did not allow the calculation of a ", CalledFrom));
-                        ShowContinueError(state, "reasonable UA value. Review and revise design input values as appropriate. Specifying hard");
-                        ShowContinueError(state,
-                                          "sizes for some \"autosizable\" fields while autosizing other \"autosizable\" fields may be contributing "
-                                          "to this problem.");
-                        ShowContinueError(state, "This model iterates on UA to find the heat transfer required to provide the design outlet ");
-                        ShowContinueError(state, "water temperature. Initially, the outlet water temperatures at high and low UA values are ");
-                        ShowContinueError(state, "calculated. The Design Exit Water Temperature should be between the outlet water ");
-                        ShowContinueError(state, "temperatures calculated at high and low UA values. If the Design Exit Water Temperature is ");
-                        ShowContinueError(state, "out of this range, the solution will not converge and UA will not be calculated. ");
-                        ShowContinueError(state, "The possible solutions could be to manually input adjusted water and/or air flow rates ");
-                        ShowContinueError(
-                            state,
-                            "based on the autosized values shown below or to adjust design evaporative fluid cooler air inlet wet-bulb temperature.");
-                        ShowContinueError(state, "Plant:Sizing object inputs also influence these results (e.g. DeltaT and ExitTemp).");
-                        ShowContinueError(state, "Inputs to the evaporative fluid cooler object:");
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format("Design Evaporative Fluid Cooler Load [W]                      = {:.2R}", DesEvapFluidCoolerLoad));
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format("Design Evaporative Fluid Cooler Water Volume Flow Rate [m3/s] = {:.6R}", this->DesignWaterFlowRate));
-                        ShowContinueError(state, EnergyPlus::format("Design Evaporative Fluid Cooler Air Volume Flow Rate [m3/s]   = {:.2R}", par2));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Design Evaporative Fluid Cooler Air Inlet Wet-bulb Temp [C]   = {:.2R}",
-                                                             this->inletConds.AirWetBulb));
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format("Design Evaporative Fluid Cooler Water Inlet Temp [C]          = {:.2R}", this->inletConds.WaterTemp));
-                        ShowContinueError(state, "Inputs to the plant sizing object:");
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format("Design Exit Water Temp [C]                                    = {:.2R}", this->DesignExitWaterTemp));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Loop Design Temperature Difference [C]                        = {:.2R}",
-                                                             state.dataSize->PlantSizData(PltSizCondNum).DeltaT));
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format("Design Evaporative Fluid Cooler Water Inlet Temp [C]          = {:.2R}", this->inletConds.WaterTemp));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Calculated water outlet temperature at low UA [C](UA = {:.2R} W/C)  = {:.2R}",
-                                                             UA0,
-                                                             OutWaterTempAtUA0));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Calculated water outlet temperature at high UA [C](UA = {:.2R} W/C)  = {:.2R}",
-                                                             UA1,
-                                                             OutWaterTempAtUA1));
-                        ShowFatalError(
-                            state,
-                            EnergyPlus::format("Autosizing of Evaporative Fluid Cooler UA failed for Evaporative Fluid Cooler = {}", this->Name));
+                        reportUASolverFailure(state, this->Name, DesEvapFluidCoolerLoad,
+                                              this->DesignWaterFlowRate, par2, this->inletConds.AirWetBulb,
+                                              this->inletConds.WaterTemp, this->DesignExitWaterTemp,
+                                              UA0, UA1, OutWaterTempAtUA0, OutWaterTempAtUA1,
+                                              PltSizCondNum, state);
                     }
                     if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                         this->HighSpeedEvapFluidCoolerUA = UA;
@@ -1803,55 +1828,11 @@ namespace EvaporativeFluidCoolers {
                 } else if (SolFla == -2) {
                     this->SimSimpleEvapFluidCooler(state, par1, par2, UA0, OutWaterTempAtUA0);
                     this->SimSimpleEvapFluidCooler(state, par1, par2, UA1, OutWaterTempAtUA1);
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}: The combination of design input values did not allow the calculation of a ", CalledFrom));
-                    ShowContinueError(state, "reasonable UA value. Review and revise design input values as appropriate. Specifying hard");
-                    ShowContinueError(
-                        state,
-                        R"(sizes for some "autosizable" fields while autosizing other "autosizable" fields may be contributing to this problem.)");
-                    ShowContinueError(state, "This model iterates on UA to find the heat transfer required to provide the design outlet ");
-                    ShowContinueError(state, "water temperature. Initially, the outlet water temperatures at high and low UA values are ");
-                    ShowContinueError(state, "calculated. The Design Exit Water Temperature should be between the outlet water ");
-                    ShowContinueError(state, "temperatures calculated at high and low UA values. If the Design Exit Water Temperature is ");
-                    ShowContinueError(state, "out of this range, the solution will not converge and UA will not be calculated. ");
-                    ShowContinueError(state, "The possible solutions could be to manually input adjusted water and/or air flow rates ");
-                    ShowContinueError(
-                        state,
-                        "based on the autosized values shown below or to adjust design evaporative fluid cooler air inlet wet-bulb temperature.");
-                    ShowContinueError(state, "Plant:Sizing object inputs also influence these results (e.g. DeltaT and ExitTemp).");
-                    ShowContinueError(state, "Inputs to the evaporative fluid cooler object:");
-                    ShowContinueError(
-                        state, EnergyPlus::format("Design Evaporative Fluid Cooler Load [W]                      = {:.2R}", DesEvapFluidCoolerLoad));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Design Evaporative Fluid Cooler Water Volume Flow Rate [m3/s] = {:.6R}", this->DesignWaterFlowRate));
-                    ShowContinueError(state, EnergyPlus::format("Design Evaporative Fluid Cooler Air Volume Flow Rate [m3/s]   = {:.2R}", par2));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Design Evaporative Fluid Cooler Air Inlet Wet-bulb Temp [C]   = {:.2R}", this->inletConds.AirWetBulb));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Design Evaporative Fluid Cooler Water Inlet Temp [C]          = {:.2R}", this->inletConds.WaterTemp));
-                    ShowContinueError(state, "Inputs to the plant sizing object:");
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Design Exit Water Temp [C]                                    = {:.2R}", this->DesignExitWaterTemp));
-                    if (PltSizCondNum > 0) {
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Loop Design Temperature Difference [C]                        = {:.2R}",
-                                                             state.dataSize->PlantSizData(PltSizCondNum).DeltaT));
-                    }
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Design Evaporative Fluid Cooler Water Inlet Temp [C]          = {:.2R}", this->inletConds.WaterTemp));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Calculated water outlet temperature at low UA [C](UA = {:.2R} W/C)  = {:.2R}", UA0, OutWaterTempAtUA0));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Calculated water outlet temperature at high UA [C](UA = {:.2R} W/C)  = {:.2R}", UA1, OutWaterTempAtUA1));
-                    ShowFatalError(
-                        state, EnergyPlus::format("Autosizing of Evaporative Fluid Cooler UA failed for Evaporative Fluid Cooler = {}", this->Name));
+                    reportUASolverFailure(state, this->Name, DesEvapFluidCoolerLoad,
+                                          this->DesignWaterFlowRate, par2, this->inletConds.AirWetBulb,
+                                          this->inletConds.WaterTemp, this->DesignExitWaterTemp,
+                                          UA0, UA1, OutWaterTempAtUA0, OutWaterTempAtUA1,
+                                          PltSizCondNum, state);
                 }
                 this->HighSpeedEvapFluidCoolerUA = UA;
             } else {
@@ -1957,36 +1938,11 @@ namespace EvaporativeFluidCoolers {
                 } else if (SolFla == -2) {
                     this->SimSimpleEvapFluidCooler(state, par1, par2, UA0, OutWaterTempAtUA0);
                     this->SimSimpleEvapFluidCooler(state, par1, par2, UA1, OutWaterTempAtUA1);
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}: The combination of design input values did not allow the calculation of a ", CalledFrom));
-                    ShowContinueError(state, "reasonable UA value. Review and revise design input values as appropriate. Specifying hard");
-                    ShowContinueError(
-                        state,
-                        R"(sizes for some "autosizable" fields while autosizing other "autosizable" fields may be contributing to this problem.)");
-                    ShowContinueError(state, "This model iterates on UA to find the heat transfer required to provide the design outlet ");
-                    ShowContinueError(state, "water temperature. Initially, the outlet water temperatures at high and low UA values are ");
-                    ShowContinueError(state, "calculated. The Design Exit Water Temperature should be between the outlet water ");
-                    ShowContinueError(state, "temperatures calculated at high and low UA values. If the Design Exit Water Temperature is ");
-                    ShowContinueError(state, "out of this range, the solution will not converge and UA will not be calculated. ");
-                    ShowContinueError(state, "Inputs to the Evaporative Fluid Cooler model are:");
-                    ShowContinueError(state,
-                                      EnergyPlus::format("Design Evaporative Fluid Cooler Load                    = {:.2R}", DesEvapFluidCoolerLoad));
-                    ShowContinueError(state, EnergyPlus::format("Design Evaporative Fluid Cooler Water Volume Flow Rate  = {:.2R}", par1));
-                    ShowContinueError(state, EnergyPlus::format("Design Evaporative Fluid Cooler Air Volume Flow Rate    = {:.2R}", par2));
-                    ShowContinueError(
-                        state, EnergyPlus::format("Design Evaporative Fluid Cooler Air Inlet Wet-bulb Temp = {:.2R}", this->inletConds.AirWetBulb));
-                    ShowContinueError(
-                        state, EnergyPlus::format("Design Evaporative Fluid Cooler Water Inlet Temp        = {:.2R}", this->inletConds.WaterTemp));
-                    ShowContinueError(
-                        state, EnergyPlus::format("Design Exit Water Temp                                  = {:.2R}", this->DesignExitWaterTemp));
-                    ShowContinueError(
-                        state, EnergyPlus::format("Design Evaporative Fluid Cooler Water Inlet Temp [C]    = {:.2R}", this->inletConds.WaterTemp));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("Calculated water outlet temperature at low UA({:.2R})  = {:.2R}", UA0, OutWaterTempAtUA0));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("Calculated water outlet temperature at high UA({:.2R})  = {:.2R}", UA1, OutWaterTempAtUA1));
-                    ShowFatalError(
-                        state, EnergyPlus::format("Autosizing of Evaporative Fluid Cooler UA failed for Evaporative Fluid Cooler = {}", this->Name));
+                    reportUASolverFailure(state, this->Name, DesEvapFluidCoolerLoad,
+                                          this->DesignWaterFlowRate, par2, this->inletConds.AirWetBulb,
+                                          this->inletConds.WaterTemp, this->DesignExitWaterTemp,
+                                          UA0, UA1, OutWaterTempAtUA0, OutWaterTempAtUA1,
+                                          PltSizCondNum, state);
                 }
                 this->LowSpeedEvapFluidCoolerUA = UA;
             } else {
