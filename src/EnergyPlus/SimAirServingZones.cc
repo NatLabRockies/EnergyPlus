@@ -5524,6 +5524,34 @@ static void accumulateHeatZoneFlowsDuringDay(EnergyPlusData &state,
     }
 }
 
+// Find the induction ratio temperature fraction for a zone's terminal unit.
+// Returns the fraction 1/(1+InducRat) if a terminal unit with non-zero sizing index
+// is found, or 0 if no terminal unit exists (caller should skip the zone).
+// Optionally returns the TermUnitSizingIndex via the output parameter.
+static Real64 getInducRatTempFrac(EnergyPlusData &state, int CtrlZoneNum, int &termUnitSizingIndexOut)
+{
+    termUnitSizingIndexOut = 0;
+    auto const &zoneEquipConfig = state.dataZoneEquip->ZoneEquipConfig(CtrlZoneNum);
+    if (!zoneEquipConfig.IsControlled) {
+        return 0.0;
+    }
+    for (int InletNode = 1; InletNode <= zoneEquipConfig.NumInletNodes; ++InletNode) {
+        int idx = zoneEquipConfig.AirDistUnitCool(InletNode).TermUnitSizingIndex;
+        if (idx == 0) {
+            continue;
+        }
+        termUnitSizingIndexOut = idx;
+        return 1.0 / (1.0 + state.dataSize->TermUnitSizing(idx).InducRat);
+    }
+    return 0.0; // no terminal unit found
+}
+
+static Real64 getInducRatTempFrac(EnergyPlusData &state, int CtrlZoneNum)
+{
+    int unused = 0;
+    return getInducRatTempFrac(state, CtrlZoneNum, unused);
+}
+
 void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIndicator)
 {
 
@@ -5584,8 +5612,6 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
     Real64 SysCoolingEv;           // System level ventilation effectiveness for cooling mode
     Real64 SysHeatingEv;           // System level ventilation effectiveness for heating mode
     Real64 SysHtgPeakAirflow;      // Peak heating airflow
-    Real64 termunitsizingtempfrac; // 1.0/(1.0+termunitsizing(ctrlzone)%inducrat)
-    Real64 termunitsizingtemp;     // (1.0+termunitsizing(ctrlzone)%inducrat)
     numOfTimeStepInDay = state.dataGlobal->TimeStepsInHour * Constant::iHoursInDay;
 
     // allocate scratch arrays
@@ -5623,34 +5649,18 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
         // Correct the zone return temperature in ZoneSizing for the case of induction units. The calc in
         // ZoneEquipmentManager assumes all the air entering the zone goes into the return node.
         for (int CtrlZoneNum = 1; CtrlZoneNum <= state.dataGlobal->NumOfZones; ++CtrlZoneNum) {
-            auto &zoneEquipConfig = state.dataZoneEquip->ZoneEquipConfig(CtrlZoneNum);
-            auto &zoneSizing = state.dataSize->ZoneSizing(state.dataSize->CurOverallSimDay, CtrlZoneNum);
-            if (!zoneEquipConfig.IsControlled) {
+            Real64 inducFrac = getInducRatTempFrac(state, CtrlZoneNum);
+            if (inducFrac == 0.0) {
                 continue;
             }
-            // Use first non-zero airdistunit for now
-            int TermUnitSizingIndex = 0;
-            for (int InletNode = 1; InletNode <= zoneEquipConfig.NumInletNodes; ++InletNode) {
-                TermUnitSizingIndex = zoneEquipConfig.AirDistUnitCool(InletNode).TermUnitSizingIndex;
-                if (TermUnitSizingIndex == 0) {
-                    continue;
-                }
-                termunitsizingtemp = (1.0 + state.dataSize->TermUnitSizing(TermUnitSizingIndex).InducRat);
-                termunitsizingtempfrac = (1.0 / termunitsizingtemp);
-                if (TermUnitSizingIndex > 0) {
-                    break;
-                }
-            }
-            if (TermUnitSizingIndex == 0) {
-                continue; // Skip this if there are no terminal units
-            }
+            auto &zoneSizing = state.dataSize->ZoneSizing(state.dataSize->CurOverallSimDay, CtrlZoneNum);
             RetTempRise = zoneSizing.ZoneRetTempAtCoolPeak - zoneSizing.ZoneTempAtCoolPeak;
             if (RetTempRise > 0.01) {
-                zoneSizing.ZoneRetTempAtCoolPeak = zoneSizing.ZoneTempAtCoolPeak + RetTempRise * termunitsizingtempfrac;
+                zoneSizing.ZoneRetTempAtCoolPeak = zoneSizing.ZoneTempAtCoolPeak + RetTempRise * inducFrac;
             }
             RetTempRise = zoneSizing.ZoneRetTempAtHeatPeak - zoneSizing.ZoneTempAtHeatPeak;
             if (RetTempRise > 0.01) {
-                zoneSizing.ZoneRetTempAtHeatPeak = zoneSizing.ZoneTempAtHeatPeak + RetTempRise * termunitsizingtempfrac;
+                zoneSizing.ZoneRetTempAtHeatPeak = zoneSizing.ZoneTempAtHeatPeak + RetTempRise * inducFrac;
             }
         }
 
@@ -5726,34 +5736,18 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
         // Correct the zone return temperature in ZoneSizing for the case of induction units. The calc in
         // ZoneEquipmentManager assumes all the air entering the zone goes into the return node.
         for (int CtrlZoneNum = 1; CtrlZoneNum <= state.dataGlobal->NumOfZones; ++CtrlZoneNum) {
-            if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZoneNum).IsControlled) {
+            Real64 inducFrac = getInducRatTempFrac(state, CtrlZoneNum);
+            if (inducFrac == 0.0) {
                 continue;
-            }
-            // Use first non-zero airdistunit for now, if there is one
-            termunitsizingtempfrac = 1.0;
-            int TermUnitSizingIndex = 0;
-            for (int InletNode = 1; InletNode <= state.dataZoneEquip->ZoneEquipConfig(CtrlZoneNum).NumInletNodes; ++InletNode) {
-                TermUnitSizingIndex = state.dataZoneEquip->ZoneEquipConfig(CtrlZoneNum).AirDistUnitCool(InletNode).TermUnitSizingIndex;
-                if (TermUnitSizingIndex == 0) {
-                    continue;
-                }
-                termunitsizingtemp = (1.0 + state.dataSize->TermUnitSizing(TermUnitSizingIndex).InducRat);
-                termunitsizingtempfrac = (1.0 / termunitsizingtemp);
-                if (TermUnitSizingIndex > 0) {
-                    break;
-                }
-            }
-            if (TermUnitSizingIndex == 0) {
-                continue; // Skip this if there are no terminal units
             }
             auto &zoneSizing = state.dataSize->ZoneSizing(state.dataSize->CurOverallSimDay, CtrlZoneNum);
             RetTempRise = zoneSizing.CoolZoneRetTempSeq(TimeStepInDay) - zoneSizing.CoolZoneTempSeq(TimeStepInDay);
             if (RetTempRise > 0.01) {
-                zoneSizing.CoolZoneRetTempSeq(TimeStepInDay) = zoneSizing.CoolZoneTempSeq(TimeStepInDay) + RetTempRise * termunitsizingtempfrac;
+                zoneSizing.CoolZoneRetTempSeq(TimeStepInDay) = zoneSizing.CoolZoneTempSeq(TimeStepInDay) + RetTempRise * inducFrac;
             }
             RetTempRise = zoneSizing.HeatZoneRetTempSeq(TimeStepInDay) - zoneSizing.HeatZoneTempSeq(TimeStepInDay);
             if (RetTempRise > 0.01) {
-                zoneSizing.HeatZoneRetTempSeq(TimeStepInDay) = zoneSizing.HeatZoneTempSeq(TimeStepInDay) + RetTempRise * termunitsizingtempfrac;
+                zoneSizing.HeatZoneRetTempSeq(TimeStepInDay) = zoneSizing.HeatZoneTempSeq(TimeStepInDay) + RetTempRise * inducFrac;
             }
         }
         // start of zone time step loop over primary air systems
@@ -6219,68 +6213,28 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
         // ZoneEquipmentManager assumes all the air entering the zone goes into the return node.
         int TimeStepIndex; // zone time step index
         for (int CtrlZoneNum = 1; CtrlZoneNum <= state.dataGlobal->NumOfZones; ++CtrlZoneNum) {
-            if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZoneNum).IsControlled) {
+            int TermUnitSizingIndex = 0;
+            Real64 inducFrac = getInducRatTempFrac(state, CtrlZoneNum, TermUnitSizingIndex);
+            if (inducFrac == 0.0) {
                 continue;
             }
-            // Use first non-zero airdistunit for now, if there is one
-            termunitsizingtempfrac = 1.0;
-            int TermUnitSizingIndex = 0;
-            for (int InletNode = 1; InletNode <= state.dataZoneEquip->ZoneEquipConfig(CtrlZoneNum).NumInletNodes; ++InletNode) {
-                TermUnitSizingIndex = state.dataZoneEquip->ZoneEquipConfig(CtrlZoneNum).AirDistUnitCool(InletNode).TermUnitSizingIndex;
-                if (TermUnitSizingIndex == 0) {
-                    continue;
-                }
-                termunitsizingtemp = (1.0 + state.dataSize->TermUnitSizing(TermUnitSizingIndex).InducRat);
-                termunitsizingtempfrac = (1.0 / termunitsizingtemp);
-                if (TermUnitSizingIndex > 0) {
-                    break;
-                }
-            }
-            if (TermUnitSizingIndex == 0) {
-                continue; // Skip this if there are no terminal units
-            }
-            RetTempRise = state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).ZoneRetTempAtCoolPeak -
-                          state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).ZoneTempAtCoolPeak;
+            auto &tzFinal = state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex);
+            RetTempRise = tzFinal.ZoneRetTempAtCoolPeak - tzFinal.ZoneTempAtCoolPeak;
             if (RetTempRise > 0.01) {
-                // avoid possible compiler bug
-                //          FinalZoneSizing(CtrlZoneNum)%ZoneRetTempAtCoolPeak = &
-                //            FinalZoneSizing(CtrlZoneNum)%ZoneTempAtCoolPeak + RetTempRise * &
-                //           (1.0d0/(1.0d0+TermUnitSizing(CtrlZoneNum)%InducRat))
-                state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).ZoneRetTempAtCoolPeak =
-                    state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).ZoneTempAtCoolPeak + RetTempRise * termunitsizingtempfrac;
+                tzFinal.ZoneRetTempAtCoolPeak = tzFinal.ZoneTempAtCoolPeak + RetTempRise * inducFrac;
             }
-            RetTempRise = state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).ZoneRetTempAtHeatPeak -
-                          state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).ZoneTempAtHeatPeak;
+            RetTempRise = tzFinal.ZoneRetTempAtHeatPeak - tzFinal.ZoneTempAtHeatPeak;
             if (RetTempRise > 0.01) {
-                // avoid possible compiler bug
-                //          FinalZoneSizing(CtrlZoneNum)%ZoneRetTempAtHeatPeak = &
-                //            FinalZoneSizing(CtrlZoneNum)%ZoneTempAtHeatPeak + RetTempRise * &
-                //            (1.0d0/(1.0d0+TermUnitSizing(CtrlZoneNum)%InducRat))
-                state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).ZoneRetTempAtHeatPeak =
-                    state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).ZoneTempAtHeatPeak + RetTempRise * termunitsizingtempfrac;
+                tzFinal.ZoneRetTempAtHeatPeak = tzFinal.ZoneTempAtHeatPeak + RetTempRise * inducFrac;
             }
             for (TimeStepIndex = 1; TimeStepIndex <= numOfTimeStepInDay; ++TimeStepIndex) {
-                RetTempRise = state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).CoolZoneRetTempSeq(TimeStepIndex) -
-                              state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).CoolZoneTempSeq(TimeStepIndex);
+                RetTempRise = tzFinal.CoolZoneRetTempSeq(TimeStepIndex) - tzFinal.CoolZoneTempSeq(TimeStepIndex);
                 if (RetTempRise > 0.01) {
-                    // avoid possible compiler bug
-                    //            FinalZoneSizing(CtrlZoneNum)%CoolZoneRetTempSeq(TimeStepIndex) = &
-                    //              FinalZoneSizing(CtrlZoneNum)%CoolZoneTempSeq(TimeStepIndex) + RetTempRise * &
-                    //             (1.0d0/(1.0d0+TermUnitSizing(CtrlZoneNum)%InducRat))
-                    state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).CoolZoneRetTempSeq(TimeStepIndex) =
-                        state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).CoolZoneTempSeq(TimeStepIndex) +
-                        RetTempRise * termunitsizingtempfrac;
+                    tzFinal.CoolZoneRetTempSeq(TimeStepIndex) = tzFinal.CoolZoneTempSeq(TimeStepIndex) + RetTempRise * inducFrac;
                 }
-                RetTempRise = state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).HeatZoneRetTempSeq(TimeStepIndex) -
-                              state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).HeatZoneTempSeq(TimeStepIndex);
+                RetTempRise = tzFinal.HeatZoneRetTempSeq(TimeStepIndex) - tzFinal.HeatZoneTempSeq(TimeStepIndex);
                 if (RetTempRise > 0.01) {
-                    // avoid possible compiler bug
-                    //            FinalZoneSizing(CtrlZoneNum)%HeatZoneRetTempSeq(TimeStepIndex) = &
-                    //              FinalZoneSizing(CtrlZoneNum)%HeatZoneTempSeq(TimeStepIndex) + RetTempRise * &
-                    //             (1.0d0/(1.0d0+TermUnitSizing(CtrlZoneNum)%InducRat))
-                    state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).HeatZoneRetTempSeq(TimeStepIndex) =
-                        state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).HeatZoneTempSeq(TimeStepIndex) +
-                        RetTempRise * termunitsizingtempfrac;
+                    tzFinal.HeatZoneRetTempSeq(TimeStepIndex) = tzFinal.HeatZoneTempSeq(TimeStepIndex) + RetTempRise * inducFrac;
                 }
             }
         }
