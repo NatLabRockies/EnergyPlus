@@ -6477,6 +6477,38 @@ void SetCompFlowRate(EnergyPlusData &state, int const VRFTUNum, int const VRFCon
     }
 }
 
+// Helper: size multispeed fan flow rates for one mode (cooling or heating).
+// volumeFlowRates and massFlowRates are the per-speed vectors to populate.
+// flowRatios contains the design-spec per-speed ratios (may be AutoSize).
+// numSpeeds is the total number of speeds; maxAirVolFlow is the rated flow.
+static void sizeMultispeedFanFlowRates(EnergyPlusData &state,
+                                       int VRFTUNum,
+                                       int numSpeeds,
+                                       Real64 maxAirVolFlow,
+                                       std::vector<Real64> const &flowRatios,
+                                       std::vector<Real64> &volumeFlowRates,
+                                       std::vector<Real64> &massFlowRates)
+{
+    auto &vrfTU = state.dataHVACVarRefFlow->VRFTU(VRFTUNum);
+    for (int i = 1; i <= numSpeeds; ++i) {
+        if (vrfTU.DesignSpecMSHPIndex > -1) {
+            if (flowRatios[i] == DataSizing::AutoSize) {
+                volumeFlowRates[i] = double(i) / double(numSpeeds) * maxAirVolFlow;
+            } else {
+                volumeFlowRates[i] = flowRatios[i] * maxAirVolFlow;
+            }
+            massFlowRates[i] = volumeFlowRates[i] * state.dataEnvrn->StdRhoAir;
+        } else {
+            auto *fanSystem = dynamic_cast<Fans::FanSystem *>(state.dataFans->fans(vrfTU.FanIndex));
+            assert(fanSystem != nullptr);
+            if (massFlowRates[i] == 0.0 && !fanSystem->massFlowAtSpeed.empty()) {
+                massFlowRates[i] = fanSystem->massFlowAtSpeed[i - 1];
+                volumeFlowRates[i] = massFlowRates[i] / state.dataEnvrn->StdRhoAir;
+            }
+        }
+    }
+}
+
 void SizeVRF(EnergyPlusData &state, int const VRFTUNum)
 {
 
@@ -6723,31 +6755,12 @@ void SizeVRF(EnergyPlusData &state, int const VRFTUNum)
         }
         // Multispeed Fan cooling flow sizing
         if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).NumOfSpeedCooling > 0) {
-            Real64 AirFlowRate = state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxCoolAirVolFlow;
-            for (int i = 1; i <= state.dataHVACVarRefFlow->VRFTU(VRFTUNum).NumOfSpeedCooling; ++i) {
-                if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).DesignSpecMSHPIndex > -1) {
-                    if (state.dataUnitarySystems->designSpecMSHP[state.dataHVACVarRefFlow->VRFTU(VRFTUNum).DesignSpecMSHPIndex]
-                            .coolingVolFlowRatio[i] == DataSizing::AutoSize) {
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolVolumeFlowRate[i] =
-                            double(i) / double(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).NumOfSpeedCooling) * AirFlowRate;
-                    } else {
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolVolumeFlowRate[i] =
-                            state.dataUnitarySystems->designSpecMSHP[state.dataHVACVarRefFlow->VRFTU(VRFTUNum).DesignSpecMSHPIndex]
-                                .coolingVolFlowRatio[i] *
-                            AirFlowRate;
-                    }
-                    state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolMassFlowRate[i] =
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolVolumeFlowRate[i] * state.dataEnvrn->StdRhoAir;
-                } else {
-                    auto *fanSystem = dynamic_cast<Fans::FanSystem *>(state.dataFans->fans(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).FanIndex));
-                    assert(fanSystem != nullptr);
-                    if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolMassFlowRate[i] == 0.0 && !fanSystem->massFlowAtSpeed.empty()) {
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolMassFlowRate[i] = fanSystem->massFlowAtSpeed[i - 1];
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolVolumeFlowRate[i] =
-                            state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolMassFlowRate[i] / state.dataEnvrn->StdRhoAir;
-                    }
-                }
-            }
+            auto &vrfTU = state.dataHVACVarRefFlow->VRFTU(VRFTUNum);
+            auto const &flowRatios = (vrfTU.DesignSpecMSHPIndex > -1)
+                                         ? state.dataUnitarySystems->designSpecMSHP[vrfTU.DesignSpecMSHPIndex].coolingVolFlowRatio
+                                         : vrfTU.CoolVolumeFlowRate; // dummy, won't be read when DesignSpecMSHPIndex == -1
+            sizeMultispeedFanFlowRates(
+                state, VRFTUNum, vrfTU.NumOfSpeedCooling, vrfTU.MaxCoolAirVolFlow, flowRatios, vrfTU.CoolVolumeFlowRate, vrfTU.CoolMassFlowRate);
         }
 
         SizingMethod = HeatingAirflowSizing;
@@ -6808,31 +6821,12 @@ void SizeVRF(EnergyPlusData &state, int const VRFTUNum)
         }
         // Multispeed Fan heating flow sizing
         if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).NumOfSpeedHeating > 0) {
-            Real64 AirFlowRate = state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxHeatAirVolFlow;
-            for (int i = 1; i <= state.dataHVACVarRefFlow->VRFTU(VRFTUNum).NumOfSpeedHeating; ++i) {
-                if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).DesignSpecMSHPIndex > -1) {
-                    if (state.dataUnitarySystems->designSpecMSHP[state.dataHVACVarRefFlow->VRFTU(VRFTUNum).DesignSpecMSHPIndex]
-                            .heatingVolFlowRatio[i] == DataSizing::AutoSize) {
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatVolumeFlowRate[i] =
-                            double(i) / double(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).NumOfSpeedHeating) * AirFlowRate;
-                    } else {
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatVolumeFlowRate[i] =
-                            state.dataUnitarySystems->designSpecMSHP[state.dataHVACVarRefFlow->VRFTU(VRFTUNum).DesignSpecMSHPIndex]
-                                .heatingVolFlowRatio[i] *
-                            AirFlowRate;
-                    }
-                    state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatMassFlowRate[i] =
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatVolumeFlowRate[i] * state.dataEnvrn->StdRhoAir;
-                } else {
-                    auto *fanSystem = dynamic_cast<Fans::FanSystem *>(state.dataFans->fans(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).FanIndex));
-                    assert(fanSystem != nullptr);
-                    if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatMassFlowRate[i] == 0.0 && !fanSystem->massFlowAtSpeed.empty()) {
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatMassFlowRate[i] = fanSystem->massFlowAtSpeed[i - 1];
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatVolumeFlowRate[i] =
-                            state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatMassFlowRate[i] / state.dataEnvrn->StdRhoAir;
-                    }
-                }
-            }
+            auto &vrfTU = state.dataHVACVarRefFlow->VRFTU(VRFTUNum);
+            auto const &flowRatios = (vrfTU.DesignSpecMSHPIndex > -1)
+                                         ? state.dataUnitarySystems->designSpecMSHP[vrfTU.DesignSpecMSHPIndex].heatingVolFlowRatio
+                                         : vrfTU.HeatVolumeFlowRate;
+            sizeMultispeedFanFlowRates(
+                state, VRFTUNum, vrfTU.NumOfSpeedHeating, vrfTU.MaxHeatAirVolFlow, flowRatios, vrfTU.HeatVolumeFlowRate, vrfTU.HeatMassFlowRate);
         }
 
         PrintFlag = true;
@@ -6976,31 +6970,12 @@ void SizeVRF(EnergyPlusData &state, int const VRFTUNum)
         state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxCoolAirVolFlow = sizingCoolingAirFlow.size(state, TempSize, errorsFound);
         // Multispeed Fan cooling flow sizing
         if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).NumOfSpeedCooling > 0) {
-            Real64 AirFlowRate = state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxCoolAirVolFlow;
-            for (int i = 1; i <= state.dataHVACVarRefFlow->VRFTU(VRFTUNum).NumOfSpeedCooling; ++i) {
-                if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).DesignSpecMSHPIndex > -1) {
-                    if (state.dataUnitarySystems->designSpecMSHP[state.dataHVACVarRefFlow->VRFTU(VRFTUNum).DesignSpecMSHPIndex]
-                            .coolingVolFlowRatio[i] == DataSizing::AutoSize) {
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolVolumeFlowRate[i] =
-                            double(i) / double(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).NumOfSpeedCooling) * AirFlowRate;
-                    } else {
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolVolumeFlowRate[i] =
-                            state.dataUnitarySystems->designSpecMSHP[state.dataHVACVarRefFlow->VRFTU(VRFTUNum).DesignSpecMSHPIndex]
-                                .coolingVolFlowRatio[i] *
-                            AirFlowRate;
-                    }
-                    state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolMassFlowRate[i] =
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolVolumeFlowRate[i] * state.dataEnvrn->StdRhoAir;
-                } else {
-                    auto *fanSystem = dynamic_cast<Fans::FanSystem *>(state.dataFans->fans(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).FanIndex));
-                    assert(fanSystem != nullptr);
-                    if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolMassFlowRate[i] == 0.0 && !fanSystem->massFlowAtSpeed.empty()) {
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolMassFlowRate[i] = fanSystem->massFlowAtSpeed[i - 1];
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolVolumeFlowRate[i] =
-                            state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolMassFlowRate[i] / state.dataEnvrn->StdRhoAir;
-                    }
-                }
-            }
+            auto &vrfTU = state.dataHVACVarRefFlow->VRFTU(VRFTUNum);
+            auto const &flowRatios = (vrfTU.DesignSpecMSHPIndex > -1)
+                                         ? state.dataUnitarySystems->designSpecMSHP[vrfTU.DesignSpecMSHPIndex].coolingVolFlowRatio
+                                         : vrfTU.CoolVolumeFlowRate;
+            sizeMultispeedFanFlowRates(
+                state, VRFTUNum, vrfTU.NumOfSpeedCooling, vrfTU.MaxCoolAirVolFlow, flowRatios, vrfTU.CoolVolumeFlowRate, vrfTU.CoolMassFlowRate);
         }
 
         FieldNum = 3; // N3, \field Supply Air Flow Rate During Heating Operation
@@ -7014,31 +6989,12 @@ void SizeVRF(EnergyPlusData &state, int const VRFTUNum)
         state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxHeatAirVolFlow = sizingHeatingAirFlow.size(state, TempSize, errorsFound);
         // Multispeed Fan heating flow sizing
         if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).NumOfSpeedHeating > 0) {
-            Real64 AirFlowRate = state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxHeatAirVolFlow;
-            for (int i = 1; i <= state.dataHVACVarRefFlow->VRFTU(VRFTUNum).NumOfSpeedHeating; ++i) {
-                if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).DesignSpecMSHPIndex > -1) {
-                    if (state.dataUnitarySystems->designSpecMSHP[state.dataHVACVarRefFlow->VRFTU(VRFTUNum).DesignSpecMSHPIndex]
-                            .heatingVolFlowRatio[i] == DataSizing::AutoSize) {
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatVolumeFlowRate[i] =
-                            double(i) / double(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).NumOfSpeedHeating) * AirFlowRate;
-                    } else {
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatVolumeFlowRate[i] =
-                            state.dataUnitarySystems->designSpecMSHP[state.dataHVACVarRefFlow->VRFTU(VRFTUNum).DesignSpecMSHPIndex]
-                                .heatingVolFlowRatio[i] *
-                            AirFlowRate;
-                    }
-                    state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatMassFlowRate[i] =
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatVolumeFlowRate[i] * state.dataEnvrn->StdRhoAir;
-                } else {
-                    auto *fanSystem = dynamic_cast<Fans::FanSystem *>(state.dataFans->fans(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).FanIndex));
-                    assert(fanSystem != nullptr);
-                    if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatMassFlowRate[i] == 0.0 && !fanSystem->massFlowAtSpeed.empty()) {
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatMassFlowRate[i] = fanSystem->massFlowAtSpeed[i - 1];
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatVolumeFlowRate[i] =
-                            state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatMassFlowRate[i] / state.dataEnvrn->StdRhoAir;
-                    }
-                }
-            }
+            auto &vrfTU = state.dataHVACVarRefFlow->VRFTU(VRFTUNum);
+            auto const &flowRatios = (vrfTU.DesignSpecMSHPIndex > -1)
+                                         ? state.dataUnitarySystems->designSpecMSHP[vrfTU.DesignSpecMSHPIndex].heatingVolFlowRatio
+                                         : vrfTU.HeatVolumeFlowRate;
+            sizeMultispeedFanFlowRates(
+                state, VRFTUNum, vrfTU.NumOfSpeedHeating, vrfTU.MaxHeatAirVolFlow, flowRatios, vrfTU.HeatVolumeFlowRate, vrfTU.HeatMassFlowRate);
         }
 
         errorsFound = false;
