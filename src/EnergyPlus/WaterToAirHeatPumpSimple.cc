@@ -1183,6 +1183,32 @@ namespace WaterToAirHeatPumpSimple {
         state.dataHeatBal->HeatReclaimSimple_WAHPCoil(HPNum).AvailCapacity = 0.0;
     }
 
+    // Helper: look up plant sizing index and compute water temperature ratio.
+    // Returns the plant sizing index (> 0 on success). On failure, shows errors and sets ErrorsFound.
+    static int getPlantSizingIndexAndRatioTS(EnergyPlusData &state,
+                                             std::string_view compType,
+                                             std::string_view compName,
+                                             int waterInletNode,
+                                             int waterOutletNode,
+                                             std::string_view capacityType,
+                                             Real64 Tref,
+                                             Real64 &ratioTS,
+                                             bool &ErrorsFound)
+    {
+        int PltSizNum = PlantUtilities::MyPlantSizingIndex(state, compType, compName, waterInletNode, waterOutletNode, ErrorsFound, false);
+        if (PltSizNum > 0) {
+            Real64 DesignEntWaterTemp = state.dataSize->PlantSizData(PltSizNum).ExitTemp;
+            ratioTS = (DesignEntWaterTemp + Constant::Kelvin) / Tref;
+        } else {
+            ShowSevereError(state, EnergyPlus::format("Autosizing of {} requires a loop Sizing:Plant object", capacityType));
+            ShowContinueError(state, "Autosizing also requires physical connection to a plant or condenser loop.");
+            ShowContinueError(state, EnergyPlus::format("Occurs in {} Object={}", compType, compName));
+            ratioTS = 0.0;
+            ErrorsFound = true;
+        }
+        return PltSizNum;
+    }
+
     // Helper: report user-specified vs design-size comparison and optional extra warnings.
     // Used by SizeHVACWaterToAir to deduplicate the recurring hardsize-vs-autosize reporting pattern.
     static void reportSizingComparison(EnergyPlusData &state,
@@ -1272,7 +1298,6 @@ namespace WaterToAirHeatPumpSimple {
         Real64 PeakTotCapTempModFac = 1.0;     // Peak total cooling capacity curve modifier
         Real64 RatedTotCapTempModFac = 1.0;    // Rated total cooling capacity curve modifier
         Real64 PeakHeatCapTempModFac = 1.0;    // Peak heating capacity curve modifier
-        Real64 DesignEntWaterTemp;             // Design entering coil water temperature
         Real64 SensCapAtPeak;                  // Sensible load on the cooling coil at cooling design conditions
         Real64 PeakSensCapTempModFac = 1.0;    // Peak sensible cooling capacity curve modifier
         Real64 RatedSensCapTempModFac = 1.0;   // Rated sensible cooling capacity curve modifier
@@ -1523,28 +1548,15 @@ namespace WaterToAirHeatPumpSimple {
                         RatedMixWetBulb = simpleWatertoAirHP.RatedEntAirWetbulbTemp;
                         // calculate temperatue ratio at design day peak conditions
                         ratioTWB = (MixWetBulb + Constant::Kelvin) / Tref;
-                        PltSizNum =
-                            PlantUtilities::MyPlantSizingIndex(state,
-                                                               EnergyPlus::format("COIL:{}:WATERTOAIRHEATPUMP:EQUATIONFIT",
-                                                                                  WatertoAirHPNamesUC[static_cast<int>(simpleWatertoAirHP.WAHPType)]),
-                                                               simpleWatertoAirHP.Name,
-                                                               simpleWatertoAirHP.WaterInletNodeNum,
-                                                               simpleWatertoAirHP.WaterOutletNodeNum,
-                                                               ErrorsFound,
-                                                               false);
-                        if (PltSizNum > 0) {
-                            DesignEntWaterTemp = state.dataSize->PlantSizData(PltSizNum).ExitTemp;
-                            ratioTS = (DesignEntWaterTemp + Constant::Kelvin) / Tref;
-                        } else {
-                            ShowSevereError(state, "Autosizing of total cooling capacity requires a loop Sizing:Plant object");
-                            ShowContinueError(state, "Autosizing also requires physical connection to a plant or condenser loop.");
-                            ShowContinueError(state,
-                                              EnergyPlus::format("Occurs in COIL:{}:WATERTOAIRHEATPUMP:EQUATIONFIT Object={}",
-                                                                 WatertoAirHPNamesUC[static_cast<int>(simpleWatertoAirHP.WAHPType)],
-                                                                 simpleWatertoAirHP.Name));
-                            ratioTS = 0.0; // Clang complains it is used uninitialized if you don't give it a value
-                            ErrorsFound = true;
-                        }
+                        PltSizNum = getPlantSizingIndexAndRatioTS(state,
+                                                                 CompType,
+                                                                 simpleWatertoAirHP.Name,
+                                                                 simpleWatertoAirHP.WaterInletNodeNum,
+                                                                 simpleWatertoAirHP.WaterOutletNodeNum,
+                                                                 "total cooling capacity",
+                                                                 Tref,
+                                                                 ratioTS,
+                                                                 ErrorsFound);
                         // calculate temperatue ratio at rated conditions
                         RatedratioTWB = (RatedMixWetBulb + Constant::Kelvin) / Tref;
                         RatedratioTS = (simpleWatertoAirHP.RatedEntWaterTemp + Constant::Kelvin) / Tref;
@@ -1654,28 +1666,15 @@ namespace WaterToAirHeatPumpSimple {
                         RatedMixWetBulb = simpleWatertoAirHP.RatedEntAirWetbulbTemp;
                         // calculate temperatue ratio at design day peak conditions
                         ratioTWB = (MixWetBulb + Constant::Kelvin) / Tref;
-                        PltSizNum =
-                            PlantUtilities::MyPlantSizingIndex(state,
-                                                               EnergyPlus::format("COIL:{}:WATERTOAIRHEATPUMP:EQUATIONFIT",
-                                                                                  WatertoAirHPNamesUC[static_cast<int>(simpleWatertoAirHP.WAHPType)]),
-                                                               simpleWatertoAirHP.Name,
-                                                               simpleWatertoAirHP.WaterInletNodeNum,
-                                                               simpleWatertoAirHP.WaterOutletNodeNum,
-                                                               ErrorsFound,
-                                                               false);
-                        if (PltSizNum > 0) {
-                            DesignEntWaterTemp = state.dataSize->PlantSizData(PltSizNum).ExitTemp;
-                            ratioTS = (DesignEntWaterTemp + Constant::Kelvin) / Tref;
-                        } else {
-                            ShowSevereError(state, "Autosizing of total cooling capacity requires a loop Sizing:Plant object");
-                            ShowContinueError(state, "Autosizing also requires physical connection to a plant or condenser loop.");
-                            ShowContinueError(state,
-                                              EnergyPlus::format("Occurs in COIL:{}:WATERTOAIRHEATPUMP:EQUATIONFIT Object={}",
-                                                                 WatertoAirHPNamesUC[static_cast<int>(simpleWatertoAirHP.WAHPType)],
-                                                                 simpleWatertoAirHP.Name));
-                            ratioTS = 0.0; // Clang complains it is used uninitialized if you don't give it a value
-                            ErrorsFound = true;
-                        }
+                        PltSizNum = getPlantSizingIndexAndRatioTS(state,
+                                                                 CompType,
+                                                                 simpleWatertoAirHP.Name,
+                                                                 simpleWatertoAirHP.WaterInletNodeNum,
+                                                                 simpleWatertoAirHP.WaterOutletNodeNum,
+                                                                 "total cooling capacity",
+                                                                 Tref,
+                                                                 ratioTS,
+                                                                 ErrorsFound);
                         // calculate temperatue ratio at rated conditions
                         RatedratioTWB = (RatedMixWetBulb + Constant::Kelvin) / Tref;
                         RatedratioTS = (simpleWatertoAirHP.RatedEntWaterTemp + Constant::Kelvin) / Tref;
@@ -1785,27 +1784,15 @@ namespace WaterToAirHeatPumpSimple {
                         // calculate temperature ratios at design day peak conditions
                         ratioTDB = (MixTemp + Constant::Kelvin) / Tref;
                         ratioTWB = (MixWetBulb + Constant::Kelvin) / Tref;
-                        PltSizNum =
-                            PlantUtilities::MyPlantSizingIndex(state,
-                                                               EnergyPlus::format("COIL:{}:WATERTOAIRHEATPUMP:EQUATIONFIT",
-                                                                                  WatertoAirHPNamesUC[static_cast<int>(simpleWatertoAirHP.WAHPType)]),
-                                                               simpleWatertoAirHP.Name,
-                                                               simpleWatertoAirHP.WaterInletNodeNum,
-                                                               simpleWatertoAirHP.WaterOutletNodeNum,
-                                                               ErrorsFound,
-                                                               false);
-                        if (PltSizNum > 0) {
-                            DesignEntWaterTemp = state.dataSize->PlantSizData(PltSizNum).ExitTemp;
-                            ratioTS = (DesignEntWaterTemp + Constant::Kelvin) / Tref;
-                        } else {
-                            ShowSevereError(state, "Autosizing of sensible cooling capacity requires a loop Sizing:Plant object");
-                            ShowContinueError(state, "Autosizing also requires physical connection to a plant or condenser loop.");
-                            ShowContinueError(state,
-                                              EnergyPlus::format("Occurs in COIL:{}:WATERTOAIRHEATPUMP:EQUATIONFIT Object={}",
-                                                                 WatertoAirHPNamesUC[static_cast<int>(simpleWatertoAirHP.WAHPType)],
-                                                                 simpleWatertoAirHP.Name));
-                            ErrorsFound = true;
-                        }
+                        PltSizNum = getPlantSizingIndexAndRatioTS(state,
+                                                                 CompType,
+                                                                 simpleWatertoAirHP.Name,
+                                                                 simpleWatertoAirHP.WaterInletNodeNum,
+                                                                 simpleWatertoAirHP.WaterOutletNodeNum,
+                                                                 "sensible cooling capacity",
+                                                                 Tref,
+                                                                 ratioTS,
+                                                                 ErrorsFound);
                         // calculate temperatue ratio at rated conditions
                         RatedratioTDB = (RatedMixDryBulb + Constant::Kelvin) / Tref;
                         RatedratioTWB = (RatedMixWetBulb + Constant::Kelvin) / Tref;
@@ -1894,27 +1881,15 @@ namespace WaterToAirHeatPumpSimple {
                         // calculate temperature ratios at design day peak conditions
                         ratioTDB = (MixTemp + Constant::Kelvin) / Tref;
                         ratioTWB = (MixWetBulb + Constant::Kelvin) / Tref;
-                        PltSizNum =
-                            PlantUtilities::MyPlantSizingIndex(state,
-                                                               EnergyPlus::format("COIL:{}:WATERTOAIRHEATPUMP:EQUATIONFIT",
-                                                                                  WatertoAirHPNamesUC[static_cast<int>(simpleWatertoAirHP.WAHPType)]),
-                                                               simpleWatertoAirHP.Name,
-                                                               simpleWatertoAirHP.WaterInletNodeNum,
-                                                               simpleWatertoAirHP.WaterOutletNodeNum,
-                                                               ErrorsFound,
-                                                               false);
-                        if (PltSizNum > 0) {
-                            DesignEntWaterTemp = state.dataSize->PlantSizData(PltSizNum).ExitTemp;
-                            ratioTS = (DesignEntWaterTemp + Constant::Kelvin) / Tref;
-                        } else {
-                            ShowSevereError(state, "Autosizing of sensible cooling capacity requires a loop Sizing:Plant object");
-                            ShowContinueError(state, "Autosizing also requires physical connection to a plant or condenser loop.");
-                            ShowContinueError(state,
-                                              EnergyPlus::format("Occurs in COIL:{}:WATERTOAIRHEATPUMP:EQUATIONFIT Object={}",
-                                                                 WatertoAirHPNamesUC[static_cast<int>(simpleWatertoAirHP.WAHPType)],
-                                                                 simpleWatertoAirHP.Name));
-                            ErrorsFound = true;
-                        }
+                        PltSizNum = getPlantSizingIndexAndRatioTS(state,
+                                                                 CompType,
+                                                                 simpleWatertoAirHP.Name,
+                                                                 simpleWatertoAirHP.WaterInletNodeNum,
+                                                                 simpleWatertoAirHP.WaterOutletNodeNum,
+                                                                 "sensible cooling capacity",
+                                                                 Tref,
+                                                                 ratioTS,
+                                                                 ErrorsFound);
                         // calculate temperatue ratio at rated conditions
                         RatedratioTDB = (RatedMixDryBulb + Constant::Kelvin) / Tref;
                         RatedratioTWB = (RatedMixWetBulb + Constant::Kelvin) / Tref;
@@ -2319,28 +2294,15 @@ namespace WaterToAirHeatPumpSimple {
                         RatedHeatMixDryBulb = simpleWatertoAirHP.RatedEntAirDrybulbTemp;
                         // calculate temperatue ratio at design day peak conditions
                         HeatratioTDB = (HeatMixTemp + Constant::Kelvin) / Tref;
-                        PltSizNum =
-                            PlantUtilities::MyPlantSizingIndex(state,
-                                                               EnergyPlus::format("COIL:{}:WATERTOAIRHEATPUMP:EQUATIONFIT",
-                                                                                  WatertoAirHPNamesUC[static_cast<int>(simpleWatertoAirHP.WAHPType)]),
-                                                               simpleWatertoAirHP.Name,
-                                                               simpleWatertoAirHP.WaterInletNodeNum,
-                                                               simpleWatertoAirHP.WaterOutletNodeNum,
-                                                               ErrorsFound,
-                                                               false);
-                        if (PltSizNum > 0) {
-                            DesignEntWaterTemp = state.dataSize->PlantSizData(PltSizNum).ExitTemp;
-                            HeatratioTS = (DesignEntWaterTemp + Constant::Kelvin) / Tref;
-                        } else {
-                            ShowSevereError(state, "Autosizing of heating capacity requires a loop Sizing:Plant object");
-                            ShowContinueError(state, "Autosizing also requires physical connection to a plant or condenser loop.");
-                            ShowContinueError(state,
-                                              EnergyPlus::format("Occurs in COIL:{}:WATERTOAIRHEATPUMP:EQUATIONFIT Object={}",
-                                                                 WatertoAirHPNamesUC[static_cast<int>(simpleWatertoAirHP.WAHPType)],
-                                                                 simpleWatertoAirHP.Name));
-                            HeatratioTS = 0.0; // Clang complains it is used uninitialized if you don't give it a value
-                            ErrorsFound = true;
-                        }
+                        PltSizNum = getPlantSizingIndexAndRatioTS(state,
+                                                                 CompType,
+                                                                 simpleWatertoAirHP.Name,
+                                                                 simpleWatertoAirHP.WaterInletNodeNum,
+                                                                 simpleWatertoAirHP.WaterOutletNodeNum,
+                                                                 "heating capacity",
+                                                                 Tref,
+                                                                 HeatratioTS,
+                                                                 ErrorsFound);
 
                         // calculate temperatue ratio at refrence conditions
                         RatedHeatratioTDB = (RatedHeatMixDryBulb + Constant::Kelvin) / Tref;
@@ -2427,28 +2389,15 @@ namespace WaterToAirHeatPumpSimple {
                         RatedHeatMixDryBulb = simpleWatertoAirHP.RatedEntAirDrybulbTemp;
                         // calculate temperatue ratio at design day peak conditions
                         HeatratioTDB = (HeatMixTemp + Constant::Kelvin) / Tref;
-                        PltSizNum =
-                            PlantUtilities::MyPlantSizingIndex(state,
-                                                               EnergyPlus::format("COIL:{}:WATERTOAIRHEATPUMP:EQUATIONFIT",
-                                                                                  WatertoAirHPNamesUC[static_cast<int>(simpleWatertoAirHP.WAHPType)]),
-                                                               simpleWatertoAirHP.Name,
-                                                               simpleWatertoAirHP.WaterInletNodeNum,
-                                                               simpleWatertoAirHP.WaterOutletNodeNum,
-                                                               ErrorsFound,
-                                                               false);
-                        if (PltSizNum > 0) {
-                            DesignEntWaterTemp = state.dataSize->PlantSizData(PltSizNum).ExitTemp;
-                            HeatratioTS = (DesignEntWaterTemp + Constant::Kelvin) / Tref;
-                        } else {
-                            ShowSevereError(state, "Autosizing of heating capacity requires a loop Sizing:Plant object");
-                            ShowContinueError(state, "Autosizing also requires physical connection to a plant or condenser loop.");
-                            ShowContinueError(state,
-                                              EnergyPlus::format("Occurs in COIL:{}:WATERTOAIRHEATPUMP:EQUATIONFIT Object={}",
-                                                                 WatertoAirHPNamesUC[static_cast<int>(simpleWatertoAirHP.WAHPType)],
-                                                                 simpleWatertoAirHP.Name));
-                            HeatratioTS = 0.0; // Clang complains it is used uninitialized if you don't give it a value
-                            ErrorsFound = true;
-                        }
+                        PltSizNum = getPlantSizingIndexAndRatioTS(state,
+                                                                 CompType,
+                                                                 simpleWatertoAirHP.Name,
+                                                                 simpleWatertoAirHP.WaterInletNodeNum,
+                                                                 simpleWatertoAirHP.WaterOutletNodeNum,
+                                                                 "heating capacity",
+                                                                 Tref,
+                                                                 HeatratioTS,
+                                                                 ErrorsFound);
 
                         // calculate temperatue ratio at refrence conditions
                         RatedHeatratioTDB = (RatedHeatMixDryBulb + Constant::Kelvin) / Tref;
