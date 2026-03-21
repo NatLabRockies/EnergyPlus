@@ -1172,55 +1172,19 @@ void GetPumpInput(EnergyPlusData &state)
                                 thisPump.Name);
 
             // setup internal gains
-            switch (thisPump.pumpType) {
-            case PumpType::VarSpeed: {
-                SetupZoneInternalGain(state,
-                                      thisPump.ZoneNum,
-                                      thisPump.Name,
-                                      DataHeatBalance::IntGainType::Pump_VarSpeed,
-                                      &thisPumpRep.ZoneConvGainRate,
-                                      nullptr,
-                                      &thisPumpRep.ZoneRadGainRate);
-            } break;
-            case PumpType::ConSpeed: {
-                SetupZoneInternalGain(state,
-                                      thisPump.ZoneNum,
-                                      thisPump.Name,
-                                      DataHeatBalance::IntGainType::Pump_ConSpeed,
-                                      &thisPumpRep.ZoneConvGainRate,
-                                      nullptr,
-                                      &thisPumpRep.ZoneRadGainRate);
-            } break;
-            case PumpType::Cond: {
-                SetupZoneInternalGain(state,
-                                      thisPump.ZoneNum,
-                                      thisPump.Name,
-                                      DataHeatBalance::IntGainType::Pump_Cond,
-                                      &thisPumpRep.ZoneConvGainRate,
-                                      nullptr,
-                                      &thisPumpRep.ZoneRadGainRate);
-            } break;
-            case PumpType::Bank_VarSpeed: {
-                SetupZoneInternalGain(state,
-                                      thisPump.ZoneNum,
-                                      thisPump.Name,
-                                      DataHeatBalance::IntGainType::PumpBank_VarSpeed,
-                                      &thisPumpRep.ZoneConvGainRate,
-                                      nullptr,
-                                      &thisPumpRep.ZoneRadGainRate);
-            } break;
-            case PumpType::Bank_ConSpeed: {
-                SetupZoneInternalGain(state,
-                                      thisPump.ZoneNum,
-                                      thisPump.Name,
-                                      DataHeatBalance::IntGainType::PumpBank_ConSpeed,
-                                      &thisPumpRep.ZoneConvGainRate,
-                                      nullptr,
-                                      &thisPumpRep.ZoneRadGainRate);
-            } break;
-            default:
-                break;
-            }
+            static constexpr std::array<DataHeatBalance::IntGainType, static_cast<int>(PumpType::Num)> pumpIntGainTypes = {
+                DataHeatBalance::IntGainType::Pump_VarSpeed,
+                DataHeatBalance::IntGainType::Pump_ConSpeed,
+                DataHeatBalance::IntGainType::Pump_Cond,
+                DataHeatBalance::IntGainType::PumpBank_VarSpeed,
+                DataHeatBalance::IntGainType::PumpBank_ConSpeed};
+            SetupZoneInternalGain(state,
+                                  thisPump.ZoneNum,
+                                  thisPump.Name,
+                                  pumpIntGainTypes[static_cast<int>(thisPump.pumpType)],
+                                  &thisPumpRep.ZoneConvGainRate,
+                                  nullptr,
+                                  &thisPumpRep.ZoneRadGainRate);
         }
     }
 }
