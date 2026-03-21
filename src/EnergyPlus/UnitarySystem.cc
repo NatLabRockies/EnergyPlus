@@ -112,6 +112,26 @@ namespace UnitarySystems {
     int constexpr SuppHeatCoil = 2;
 
     static constexpr std::string_view blankString;
+
+    // Helper: build the residual functor used by SolveRoot throughout controlUnitarySystemOutput.
+    // Captures the common arguments and returns a callable matching std::function<Real64(Real64)>.
+    static std::function<Real64(Real64)> makeLoadResidualFunc(EnergyPlusData &state,
+                                                              int unitarySysNum,
+                                                              bool FirstHVACIteration,
+                                                              HVAC::CompressorOp compressorOp,
+                                                              Real64 loadToBeMet,
+                                                              Real64 coolHeatFlag,
+                                                              Real64 sensibleLoad,
+                                                              Real64 OnOffAirFlowRatio,
+                                                              bool HXUnitOn,
+                                                              int AirLoopNum)
+    {
+        return [&state, unitarySysNum, FirstHVACIteration, compressorOp, loadToBeMet, coolHeatFlag, sensibleLoad, OnOffAirFlowRatio, HXUnitOn, AirLoopNum](
+                   Real64 const PartLoadRatio) {
+            return UnitarySys::calcUnitarySystemLoadResidual(
+                state, PartLoadRatio, unitarySysNum, FirstHVACIteration, compressorOp, loadToBeMet, coolHeatFlag, sensibleLoad, OnOffAirFlowRatio, HXUnitOn, AirLoopNum);
+        };
+    }
     static const std::string blankStdString;
 
     // Helper: set DataTotCapCurveIndex and DataIsDXCoil for a cooling coil based on its type.
@@ -9390,22 +9410,8 @@ namespace UnitarySystems {
                     } else {
 
                         Real64 par6 = state.dataUnitarySystems->CoolingLoad ? 1.0 : 0.0;
-                        auto f = [&state, this, FirstHVACIteration, CompressorONFlag, ZoneLoad, par6, OnOffAirFlowRatio, HXUnitOn, AirLoopNum](
-                                     Real64 const PartLoadRatio) {
-                            return UnitarySys::calcUnitarySystemLoadResidual(state,
-                                                                             PartLoadRatio,
-                                                                             this->m_UnitarySysNum,
-                                                                             FirstHVACIteration,
-                                                                             // par 3 not used?
-                                                                             CompressorONFlag,
-                                                                             ZoneLoad,
-                                                                             par6,
-                                                                             1.0,
-                                                                             OnOffAirFlowRatio,
-                                                                             HXUnitOn,
-                                                                             // par 10 not used
-                                                                             AirLoopNum);
-                        };
+                        auto f = makeLoadResidualFunc(
+                            state, this->m_UnitarySysNum, FirstHVACIteration, CompressorONFlag, ZoneLoad, par6, 1.0, OnOffAirFlowRatio, HXUnitOn, AirLoopNum);
                         //     Tolerance is in fraction of load, MaxIter = 30, SolFalg = # of iterations or error as appropriate
                         General::SolveRoot(state, this->m_CoolConvTol, MaxIter, SolFlag, PartLoadRatio, f, 0.0, 1.0);
 
@@ -9456,23 +9462,8 @@ namespace UnitarySystems {
                                                                   CompressorONFlag);
                                 }
                                 // Now solve again with tighter PLR limits
-                                auto f2 = // (AUTO_OK_LAMBDA)
-                                    [&state, this, FirstHVACIteration, CompressorONFlag, ZoneLoad, par6, OnOffAirFlowRatio, HXUnitOn, AirLoopNum](
-                                        Real64 const PartLoadRatio) {
-                                        return UnitarySys::calcUnitarySystemLoadResidual(state,
-                                                                                         PartLoadRatio,
-                                                                                         this->m_UnitarySysNum,
-                                                                                         FirstHVACIteration,
-                                                                                         // par 3 not used?
-                                                                                         CompressorONFlag,
-                                                                                         ZoneLoad,
-                                                                                         par6,
-                                                                                         1.0,
-                                                                                         OnOffAirFlowRatio,
-                                                                                         HXUnitOn,
-                                                                                         // par 10 not used
-                                                                                         AirLoopNum);
-                                    };
+                                auto f2 = makeLoadResidualFunc(
+                                    state, this->m_UnitarySysNum, FirstHVACIteration, CompressorONFlag, ZoneLoad, par6, 1.0, OnOffAirFlowRatio, HXUnitOn, AirLoopNum);
                                 General::SolveRoot(state, this->m_HeatConvTol, MaxIter, SolFlag, HeatPLR, f2, TempMinPLR, TempMaxPLR);
                                 this->calcUnitarySystemToLoad(state,
                                                               AirLoopNum,
@@ -9537,23 +9528,8 @@ namespace UnitarySystems {
                                     TempSysOutput = TempSensOutput;
                                 }
                                 // Now solve again with tighter PLR limits
-                                auto f2 = // (AUTO_OK_LAMBDA)
-                                    [&state, this, FirstHVACIteration, CompressorONFlag, ZoneLoad, par6, OnOffAirFlowRatio, HXUnitOn, AirLoopNum](
-                                        Real64 const PartLoadRatio) {
-                                        return UnitarySys::calcUnitarySystemLoadResidual(state,
-                                                                                         PartLoadRatio,
-                                                                                         this->m_UnitarySysNum,
-                                                                                         FirstHVACIteration,
-                                                                                         // par 3 not used?
-                                                                                         CompressorONFlag,
-                                                                                         ZoneLoad,
-                                                                                         par6,
-                                                                                         1.0,
-                                                                                         OnOffAirFlowRatio,
-                                                                                         HXUnitOn,
-                                                                                         // par 10 not used
-                                                                                         AirLoopNum);
-                                    };
+                                auto f2 = makeLoadResidualFunc(
+                                    state, this->m_UnitarySysNum, FirstHVACIteration, CompressorONFlag, ZoneLoad, par6, 1.0, OnOffAirFlowRatio, HXUnitOn, AirLoopNum);
                                 General::SolveRoot(state, this->m_CoolConvTol, MaxIter, SolFlag, CoolPLR, f2, TempMinPLR, TempMaxPLR);
                                 this->calcUnitarySystemToLoad(state,
                                                               AirLoopNum,
@@ -9916,22 +9892,8 @@ namespace UnitarySystems {
                     par7 = 0.0;
                 }
                 // Tolerance is fraction of load, MaxIter = 30, SolFalg = # of iterations or error as appropriate
-                auto f = [&state, this, FirstHVACIteration, CompressorONFlag, par5, par7, OnOffAirFlowRatio, HXUnitOn, AirLoopNum](
-                             Real64 const PartLoadRatio) {
-                    return UnitarySys::calcUnitarySystemLoadResidual(state,
-                                                                     PartLoadRatio,
-                                                                     this->m_UnitarySysNum,
-                                                                     FirstHVACIteration,
-                                                                     // par 3 not used?
-                                                                     CompressorONFlag,
-                                                                     par5,
-                                                                     1.0,
-                                                                     par7,
-                                                                     OnOffAirFlowRatio,
-                                                                     HXUnitOn,
-                                                                     // par 10 not used
-                                                                     AirLoopNum);
-                };
+                auto f = makeLoadResidualFunc(
+                    state, this->m_UnitarySysNum, FirstHVACIteration, CompressorONFlag, par5, 1.0, par7, OnOffAirFlowRatio, HXUnitOn, AirLoopNum);
                 General::SolveRoot(state, 0.001, MaxIter, SolFlagLat, PartLoadRatio, f, 0.0, 1.0);
                 this->m_CoolingPartLoadFrac = PartLoadRatio;
                 this->m_HeatingPartLoadFrac = HeatPLR;
@@ -10011,27 +9973,8 @@ namespace UnitarySystems {
                 par5 = state.dataUnitarySystems->MoistureLoad;
                 par7 = 0.0;
             }
-            //            // Tolerance is fraction of load, M
-            auto f = [&state, this, FirstHVACIteration, CompressorONFlag, OnOffAirFlowRatio, HXUnitOn, AirLoopNum, par5, par7](
-                         Real64 const PartLoadRatio) {
-                // TODO: The actual Par array being used here may have been altered through any of the sections above, and this line is not covered by
-                // a unit or integration test
-                // TODO: So I made some assumptions about the arguments.  I'm not sure if ultimately this is even accessible, so maybe it doesn't
-                // matter.
-                return UnitarySys::calcUnitarySystemLoadResidual(state,
-                                                                 PartLoadRatio,
-                                                                 this->m_UnitarySysNum,
-                                                                 FirstHVACIteration,
-                                                                 // par 3 not used?
-                                                                 CompressorONFlag,
-                                                                 par5,
-                                                                 1.0,
-                                                                 par7,
-                                                                 OnOffAirFlowRatio,
-                                                                 HXUnitOn,
-                                                                 // par 10 not used
-                                                                 AirLoopNum);
-            };
+            auto f = makeLoadResidualFunc(
+                state, this->m_UnitarySysNum, FirstHVACIteration, CompressorONFlag, par5, 1.0, par7, OnOffAirFlowRatio, HXUnitOn, AirLoopNum);
             General::SolveRoot(state, 0.001, MaxIter, SolFlagLat, CoolPLR, f, TempMinPLR, TempMaxPLR);
             this->calcUnitarySystemToLoad(state,
                                           AirLoopNum,
