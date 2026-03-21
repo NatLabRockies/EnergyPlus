@@ -7800,6 +7800,29 @@ static Real64 accumulateSourceEnergy(OutputReportTabularData const &ort,
     return total;
 }
 
+// Helper: populate a site-to-source conversion factor cell in the tableBody.
+// Uses the schedule-based effective factor when a fuel factor schedule is in use,
+// the default source factor otherwise, or "N/A" when the BEPS total is negligible.
+static void fillSourceConversionCell(OutputReportTabularData const &ort,
+                                     Array2D_string &tableBody,
+                                     bool formatReals,
+                                     int ffSchedIdx,
+                                     int bepsIdx,
+                                     int tableRow,
+                                     Real64 defaultFactor,
+                                     Real64 SmallValue)
+{
+    if (!ort.ffSchedUsed(ffSchedIdx)) {
+        tableBody(1, tableRow) = RealToStr(formatReals, defaultFactor, 3);
+    } else if (ort.gatherTotalsBEPS(bepsIdx) > SmallValue) {
+        tableBody(1, tableRow) =
+            "Effective Factor = " + RealToStr(formatReals, ort.gatherTotalsBySourceBEPS(bepsIdx) / ort.gatherTotalsBEPS(bepsIdx), 3) +
+            " (calculated using schedule \"" + ort.ffScheds(bepsIdx)->Name + "\")";
+    } else {
+        tableBody(1, tableRow) = "N/A";
+    }
+}
+
 // Helper: emit a BEPS sub-table to all active output targets (tabular, SQLite, JSON).
 // When subtitle is non-empty WriteSubtitle is called before WriteTable.
 static void writeBEPSSubtable(EnergyPlusData &state,
@@ -8269,112 +8292,22 @@ void WriteBEPSTable(EnergyPlusData &state)
         //  tableBody(10,1) = TRIM(RealToStr(currentStyle.formatReals, sourceFactorFuelOil2 ,3))
         //  tableBody(11,1) = TRIM(RealToStr(currentStyle.formatReals, sourceFactorPropane ,3))
 
-        if (!ort->ffSchedUsed(1)) {
-            tableBody(1, 1) = RealToStr(currentStyle.formatReals, ort->sourceFactorElectric, 3);
-        } else if (ort->gatherTotalsBEPS(1) > SmallValue) {
-            tableBody(1, 1) =
-                "Effective Factor = " + RealToStr(currentStyle.formatReals, ort->gatherTotalsBySourceBEPS(1) / ort->gatherTotalsBEPS(1), 3) +
-                " (calculated using schedule \"" + ort->ffScheds(1)->Name + "\")";
-        } else {
-            tableBody(1, 1) = "N/A";
-        }
-
-        if (!ort->ffSchedUsed(2)) {
-            tableBody(1, 2) = RealToStr(currentStyle.formatReals, ort->sourceFactorNaturalGas, 3);
-        } else if (ort->gatherTotalsBEPS(2) > SmallValue) {
-            tableBody(1, 2) =
-                "Effective Factor = " + RealToStr(currentStyle.formatReals, ort->gatherTotalsBySourceBEPS(2) / ort->gatherTotalsBEPS(2), 3) +
-                " (calculated using schedule \"" + ort->ffScheds(2)->Name + "\")";
-        } else {
-            tableBody(1, 2) = "N/A";
-        }
+        fillSourceConversionCell(*ort, tableBody, currentStyle.formatReals, 1, 1, 1, ort->sourceFactorElectric, SmallValue);
+        fillSourceConversionCell(*ort, tableBody, currentStyle.formatReals, 2, 2, 2, ort->sourceFactorNaturalGas, SmallValue);
 
         tableBody(1, 3) = RealToStr(currentStyle.formatReals, ort->sourceFactorElectric / ort->efficiencyDistrictCooling, 3); // District Cooling
-
         tableBody(1, 4) =
             RealToStr(currentStyle.formatReals, ort->sourceFactorNaturalGas / ort->efficiencyDistrictHeatingWater, 3); // District Heating Water
-
         tableBody(1, 5) = RealToStr(currentStyle.formatReals, ort->sourceFactorDistrictHeatingSteam, 3); // District Heating Steam
 
-        if (!ort->ffSchedUsed(6)) {
-            tableBody(1, 6) = RealToStr(currentStyle.formatReals, ort->sourceFactorGasoline, 3);
-        } else if (ort->gatherTotalsBEPS(6) > SmallValue) {
-            tableBody(1, 6) =
-                "Effective Factor = " + RealToStr(currentStyle.formatReals, ort->gatherTotalsBySourceBEPS(6) / ort->gatherTotalsBEPS(6), 3) +
-                " (calculated using schedule \"" + ort->ffScheds(6)->Name + "\")";
-        } else {
-            tableBody(1, 6) = "N/A";
-        }
-
-        if (!ort->ffSchedUsed(8)) {
-            tableBody(1, 7) = RealToStr(currentStyle.formatReals, ort->sourceFactorDiesel, 3);
-        } else if (ort->gatherTotalsBEPS(8) > SmallValue) {
-            tableBody(1, 7) =
-                "Effective Factor = " + RealToStr(currentStyle.formatReals, ort->gatherTotalsBySourceBEPS(8) / ort->gatherTotalsBEPS(8), 3) +
-                " (calculated using schedule \"" + ort->ffScheds(8)->Name + "\")";
-        } else {
-            tableBody(1, 7) = "N/A";
-        }
-
-        if (!ort->ffSchedUsed(9)) {
-            tableBody(1, 8) = RealToStr(currentStyle.formatReals, ort->sourceFactorCoal, 3);
-        } else if (ort->gatherTotalsBEPS(9) > SmallValue) {
-            tableBody(1, 8) =
-                "Effective Factor = " + RealToStr(currentStyle.formatReals, ort->gatherTotalsBySourceBEPS(9) / ort->gatherTotalsBEPS(9), 3) +
-                " (calculated using schedule \"" + ort->ffScheds(9)->Name + "\")";
-        } else {
-            tableBody(1, 8) = "N/A";
-        }
-
-        if (!ort->ffSchedUsed(10)) {
-            tableBody(1, 9) = RealToStr(currentStyle.formatReals, ort->sourceFactorFuelOil1, 3);
-        } else if (ort->gatherTotalsBEPS(10) > SmallValue) {
-            tableBody(1, 9) =
-                "Effective Factor = " + RealToStr(currentStyle.formatReals, ort->gatherTotalsBySourceBEPS(10) / ort->gatherTotalsBEPS(10), 3) +
-                " (calculated using schedule \"" + ort->ffScheds(10)->Name + "\")";
-        } else {
-            tableBody(1, 9) = "N/A";
-        }
-
-        if (!ort->ffSchedUsed(11)) {
-            tableBody(1, 10) = RealToStr(currentStyle.formatReals, ort->sourceFactorFuelOil2, 3);
-        } else if (ort->gatherTotalsBEPS(11) > SmallValue) {
-            tableBody(1, 10) =
-                "Effective Factor = " + RealToStr(currentStyle.formatReals, ort->gatherTotalsBySourceBEPS(11) / ort->gatherTotalsBEPS(11), 3) +
-                " (calculated using schedule \"" + ort->ffScheds(11)->Name + "\")";
-        } else {
-            tableBody(1, 10) = "N/A";
-        }
-
-        if (!ort->ffSchedUsed(12)) {
-            tableBody(1, 11) = RealToStr(currentStyle.formatReals, ort->sourceFactorPropane, 3);
-        } else if (ort->gatherTotalsBEPS(12) > SmallValue) {
-            tableBody(1, 11) =
-                "Effective Factor = " + RealToStr(currentStyle.formatReals, ort->gatherTotalsBySourceBEPS(12) / ort->gatherTotalsBEPS(12), 3) +
-                " (calculated using schedule \"" + ort->ffScheds(12)->Name + "\")";
-        } else {
-            tableBody(1, 11) = "N/A";
-        }
-
-        if (!ort->ffSchedUsed(13)) {
-            tableBody(1, 12) = RealToStr(currentStyle.formatReals, ort->sourceFactorOtherFuel1, 3);
-        } else if (ort->gatherTotalsBEPS(13) > SmallValue) {
-            tableBody(1, 12) =
-                "Effective Factor = " + RealToStr(currentStyle.formatReals, ort->gatherTotalsBySourceBEPS(13) / ort->gatherTotalsBEPS(13), 3) +
-                " (calculated using schedule \"" + ort->ffScheds(13)->Name + "\")";
-        } else {
-            tableBody(1, 12) = "N/A";
-        }
-
-        if (!ort->ffSchedUsed(14)) {
-            tableBody(1, 13) = RealToStr(currentStyle.formatReals, ort->sourceFactorOtherFuel2, 3);
-        } else if (ort->gatherTotalsBEPS(14) > SmallValue) {
-            tableBody(1, 13) =
-                "Effective Factor = " + RealToStr(currentStyle.formatReals, ort->gatherTotalsBySourceBEPS(14) / ort->gatherTotalsBEPS(14), 3) +
-                " (calculated using schedule \"" + ort->ffScheds(14)->Name + "\")";
-        } else {
-            tableBody(1, 13) = "N/A";
-        }
+        fillSourceConversionCell(*ort, tableBody, currentStyle.formatReals, 6, 6, 6, ort->sourceFactorGasoline, SmallValue);
+        fillSourceConversionCell(*ort, tableBody, currentStyle.formatReals, 8, 8, 7, ort->sourceFactorDiesel, SmallValue);
+        fillSourceConversionCell(*ort, tableBody, currentStyle.formatReals, 9, 9, 8, ort->sourceFactorCoal, SmallValue);
+        fillSourceConversionCell(*ort, tableBody, currentStyle.formatReals, 10, 10, 9, ort->sourceFactorFuelOil1, SmallValue);
+        fillSourceConversionCell(*ort, tableBody, currentStyle.formatReals, 11, 11, 10, ort->sourceFactorFuelOil2, SmallValue);
+        fillSourceConversionCell(*ort, tableBody, currentStyle.formatReals, 12, 12, 11, ort->sourceFactorPropane, SmallValue);
+        fillSourceConversionCell(*ort, tableBody, currentStyle.formatReals, 13, 13, 12, ort->sourceFactorOtherFuel1, SmallValue);
+        fillSourceConversionCell(*ort, tableBody, currentStyle.formatReals, 14, 14, 13, ort->sourceFactorOtherFuel2, SmallValue);
 
         // heading for the entire sub-table
         writeBEPSSubtable(state, tableBody, rowHead, columnHead, columnWidth, currentStyle, "Site to Source Energy Conversion Factors");
