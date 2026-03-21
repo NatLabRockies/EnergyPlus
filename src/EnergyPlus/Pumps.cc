@@ -104,6 +104,34 @@ namespace EnergyPlus::Pumps {
 using HVAC::SmallWaterVolFlow;
 using Node::ObjectIsNotParent;
 
+// Parse zone skin loss fields common to all pump types.
+static void parsePumpZoneSkinLosses(EnergyPlusData &state,
+                                    PumpSpecs &thisPump,
+                                    std::string_view cCurrentModuleObject,
+                                    int alphaZoneIdx,
+                                    int numSkinLossIdx,
+                                    bool &ErrorsFound)
+{
+    auto &thisInput = state.dataIPShortCut;
+    if (!thisInput->lAlphaFieldBlanks(alphaZoneIdx)) {
+        thisPump.ZoneNum = Util::FindItemInList(thisInput->cAlphaArgs(alphaZoneIdx), state.dataHeatBal->Zone);
+        if (thisPump.ZoneNum > 0) {
+            thisPump.HeatLossesToZone = true;
+            if (!thisInput->lNumericFieldBlanks(numSkinLossIdx)) {
+                thisPump.SkinLossRadFraction = thisInput->rNumericArgs(numSkinLossIdx);
+            }
+        } else {
+            ShowSevereError(state,
+                            EnergyPlus::format("{}=\"{}\" invalid {}=\"{}\" not found.",
+                                               cCurrentModuleObject,
+                                               thisPump.Name,
+                                               thisInput->cAlphaFieldNames(alphaZoneIdx),
+                                               thisInput->cAlphaArgs(alphaZoneIdx)));
+            ErrorsFound = true;
+        }
+    }
+}
+
 static constexpr std::array<std::string_view, static_cast<int>(PumpType::Num)> pumpTypeIDFNames = {
     "Pump:VariableSpeed", "Pump:ConstantSpeed", "Pump:VariableSpeed:Condensate", "HeaderedPumps:VariableSpeed", "HeaderedPumps:ConstantSpeed"};
 
@@ -465,23 +493,7 @@ void GetPumpInput(EnergyPlusData &state)
             }
         }
 
-        if (!thisInput->lAlphaFieldBlanks(13)) { // zone named for pump skin losses
-            thisPump.ZoneNum = Util::FindItemInList(thisInput->cAlphaArgs(13), state.dataHeatBal->Zone);
-            if (thisPump.ZoneNum > 0) {
-                thisPump.HeatLossesToZone = true;
-                if (!thisInput->lNumericFieldBlanks(12)) {
-                    thisPump.SkinLossRadFraction = thisInput->rNumericArgs(12);
-                }
-            } else {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}=\"{}\" invalid {}=\"{}\" not found.",
-                                                   cCurrentModuleObject,
-                                                   thisPump.Name,
-                                                   thisInput->cAlphaFieldNames(13),
-                                                   thisInput->cAlphaArgs(13)));
-                ErrorsFound = true;
-            }
-        }
+        parsePumpZoneSkinLosses(state, thisPump, cCurrentModuleObject, 13, 12, ErrorsFound);
 
         if (!thisInput->lAlphaFieldBlanks(14)) {
             thisPump.powerSizingMethod =
@@ -635,23 +647,7 @@ void GetPumpInput(EnergyPlusData &state)
         thisPump.RotSpeed_RPM = thisInput->rNumericArgs(7); // retrieve the input rotational speed, in revs/min
         thisPump.RotSpeed = thisPump.RotSpeed_RPM / 60.0;   // convert input[rpm] to calculation units[rps]
 
-        if (!thisInput->lAlphaFieldBlanks(7)) { // zone named for pump skin losses
-            thisPump.ZoneNum = Util::FindItemInList(thisInput->cAlphaArgs(7), state.dataHeatBal->Zone);
-            if (thisPump.ZoneNum > 0) {
-                thisPump.HeatLossesToZone = true;
-                if (!thisInput->lNumericFieldBlanks(8)) {
-                    thisPump.SkinLossRadFraction = thisInput->rNumericArgs(8);
-                }
-            } else {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}=\"{}\" invalid {}=\"{}\" not found.",
-                                                   cCurrentModuleObject,
-                                                   thisPump.Name,
-                                                   thisInput->cAlphaFieldNames(7),
-                                                   thisInput->cAlphaArgs(7)));
-                ErrorsFound = true;
-            }
-        }
+        parsePumpZoneSkinLosses(state, thisPump, cCurrentModuleObject, 7, 8, ErrorsFound);
 
         if (!thisInput->lAlphaFieldBlanks(8)) {
             thisPump.powerSizingMethod =
@@ -753,23 +749,7 @@ void GetPumpInput(EnergyPlusData &state)
         thisPump.PartLoadCoef[2] = thisInput->rNumericArgs(8);
         thisPump.PartLoadCoef[3] = thisInput->rNumericArgs(9);
 
-        if (!thisInput->lAlphaFieldBlanks(5)) { // zone named for pump skin losses
-            thisPump.ZoneNum = Util::FindItemInList(thisInput->cAlphaArgs(5), state.dataHeatBal->Zone);
-            if (thisPump.ZoneNum > 0) {
-                thisPump.HeatLossesToZone = true;
-                if (!thisInput->lNumericFieldBlanks(10)) {
-                    thisPump.SkinLossRadFraction = thisInput->rNumericArgs(10);
-                }
-            } else {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}=\"{}\" invalid {}=\"{}\" not found.",
-                                                   cCurrentModuleObject,
-                                                   thisPump.Name,
-                                                   thisInput->cAlphaFieldNames(5),
-                                                   thisInput->cAlphaArgs(5)));
-                ErrorsFound = true;
-            }
-        }
+        parsePumpZoneSkinLosses(state, thisPump, cCurrentModuleObject, 5, 10, ErrorsFound);
 
         thisPump.MinVolFlowRate = 0.0;
         thisPump.Energy = 0.0;
@@ -915,23 +895,7 @@ void GetPumpInput(EnergyPlusData &state)
         thisPump.MinVolFlowRateFrac = thisInput->rNumericArgs(11);
         thisPump.MinVolFlowRate = thisPump.NomVolFlowRate * thisPump.MinVolFlowRateFrac;
 
-        if (!thisInput->lAlphaFieldBlanks(7)) { // zone named for pump skin losses
-            thisPump.ZoneNum = Util::FindItemInList(thisInput->cAlphaArgs(7), state.dataHeatBal->Zone);
-            if (thisPump.ZoneNum > 0) {
-                thisPump.HeatLossesToZone = true;
-                if (!thisInput->lNumericFieldBlanks(12)) {
-                    thisPump.SkinLossRadFraction = thisInput->rNumericArgs(12);
-                }
-            } else {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}=\"{}\" invalid {}=\"{}\" not found.",
-                                                   cCurrentModuleObject,
-                                                   thisPump.Name,
-                                                   thisInput->cAlphaFieldNames(7),
-                                                   thisInput->cAlphaArgs(7)));
-                ErrorsFound = true;
-            }
-        }
+        parsePumpZoneSkinLosses(state, thisPump, cCurrentModuleObject, 7, 12, ErrorsFound);
 
         if (!thisInput->lAlphaFieldBlanks(8)) {
             thisPump.powerSizingMethod =
@@ -1062,23 +1026,7 @@ void GetPumpInput(EnergyPlusData &state)
         thisPump.PartLoadCoef[2] = 0.0;
         thisPump.PartLoadCoef[3] = 0.0;
 
-        if (!thisInput->lAlphaFieldBlanks(7)) { // zone named for pump skin losses
-            thisPump.ZoneNum = Util::FindItemInList(thisInput->cAlphaArgs(7), state.dataHeatBal->Zone);
-            if (thisPump.ZoneNum > 0) {
-                thisPump.HeatLossesToZone = true;
-                if (!thisInput->lNumericFieldBlanks(7)) {
-                    thisPump.SkinLossRadFraction = thisInput->rNumericArgs(7);
-                }
-            } else {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}=\"{}\" invalid {}=\"{}\" not found.",
-                                                   cCurrentModuleObject,
-                                                   thisPump.Name,
-                                                   thisInput->cAlphaFieldNames(7),
-                                                   thisInput->cAlphaArgs(7)));
-                ErrorsFound = true;
-            }
-        }
+        parsePumpZoneSkinLosses(state, thisPump, cCurrentModuleObject, 7, 7, ErrorsFound);
         if (!thisInput->lAlphaFieldBlanks(8)) {
             thisPump.powerSizingMethod =
                 static_cast<PowerSizingMethod>(getEnumValue(powerSizingMethodNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(8))));
