@@ -6509,6 +6509,45 @@ static void sizeMultispeedFanFlowRates(EnergyPlusData &state,
     }
 }
 
+// Helper: report autosize-vs-hardsize for a VRF condenser field, with optional sizing-mismatch warning.
+// fieldRef is updated to desSizeValue when autosized; desLabel / userLabel are the report strings.
+// fmtPrecision selects the format width for warnings (2 => {:.2R}, 5 => {:.5R}).
+static void reportVRFCondFieldSize(EnergyPlusData &state,
+                                   Real64 &fieldRef,
+                                   Real64 desSizeValue,
+                                   std::string_view compType,
+                                   std::string_view compName,
+                                   std::string_view warningCompName,
+                                   std::string_view desLabel,
+                                   std::string_view userLabel,
+                                   int fmtPrecision = 2)
+{
+    bool const isAutoSize = (fieldRef == DataSizing::AutoSize);
+    if (isAutoSize) {
+        fieldRef = desSizeValue;
+        BaseSizer::reportSizerOutput(state, compType, compName, desLabel, desSizeValue);
+    } else {
+        if (fieldRef > 0.0 && desSizeValue > 0.0) {
+            Real64 const userValue = fieldRef;
+            BaseSizer::reportSizerOutput(state, compType, compName, desLabel, desSizeValue, userLabel, userValue);
+            if (state.dataGlobal->DisplayExtraWarnings) {
+                if ((std::abs(desSizeValue - userValue) / userValue) > state.dataSize->AutoVsHardSizingThreshold) {
+                    ShowMessage(state, EnergyPlus::format("SizeVRF: Potential issue with equipment sizing for {} {}", compType, warningCompName));
+                    if (fmtPrecision == 5) {
+                        ShowContinueError(state, EnergyPlus::format("{} of {:.5R}", userLabel, userValue));
+                        ShowContinueError(state, EnergyPlus::format("differs from {} of {:.5R}", desLabel, desSizeValue));
+                    } else {
+                        ShowContinueError(state, EnergyPlus::format("{} of {:.2R}", userLabel, userValue));
+                        ShowContinueError(state, EnergyPlus::format("differs from {} of {:.2R}", desLabel, desSizeValue));
+                    }
+                    ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
+                    ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
+                }
+            }
+        }
+    }
+}
+
 void SizeVRF(EnergyPlusData &state, int const VRFTUNum)
 {
 
@@ -7402,45 +7441,15 @@ void SizeVRF(EnergyPlusData &state, int const VRFTUNum)
             // Size VRF rated cooling/heating capacity (VRF-SysCurve Model)
 
             // Size VRF( VRFCond ).CoolingCapacity
-            IsAutoSize = false;
-            if (state.dataHVACVarRefFlow->VRF(VRFCond).CoolingCapacity == AutoSize) {
-                IsAutoSize = true;
-            }
             CoolingCapacityDes = TUCoolingCapacity;
-            if (IsAutoSize) {
-                state.dataHVACVarRefFlow->VRF(VRFCond).CoolingCapacity = CoolingCapacityDes;
-                BaseSizer::reportSizerOutput(state,
-                                             std::string(cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum)),
-                                             state.dataHVACVarRefFlow->VRF(VRFCond).Name,
-                                             "Design Size Rated Total Cooling Capacity (gross) [W]",
-                                             CoolingCapacityDes);
-            } else {
-                if (state.dataHVACVarRefFlow->VRF(VRFCond).CoolingCapacity > 0.0 && CoolingCapacityDes > 0.0) {
-                    CoolingCapacityUser = state.dataHVACVarRefFlow->VRF(VRFCond).CoolingCapacity;
-                    BaseSizer::reportSizerOutput(state,
-                                                 std::string(cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum)),
-                                                 state.dataHVACVarRefFlow->VRF(VRFCond).Name,
-                                                 "Design Size Rated Total Cooling Capacity (gross) [W]",
-                                                 CoolingCapacityDes,
-                                                 "User-Specified Rated Total Cooling Capacity (gross) [W]",
-                                                 CoolingCapacityUser);
-                    if (state.dataGlobal->DisplayExtraWarnings) {
-                        if ((std::abs(CoolingCapacityDes - CoolingCapacityUser) / CoolingCapacityUser) > state.dataSize->AutoVsHardSizingThreshold) {
-                            ShowMessage(state,
-                                        EnergyPlus::format("SizeVRF: Potential issue with equipment sizing for {} {}",
-                                                           cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum),
-                                                           state.dataHVACVarRefFlow->VRFTU(VRFCond).Name));
-                            ShowContinueError(
-                                state, EnergyPlus::format("User-Specified Rated Total Cooling Capacity (gross) of {:.2R} [W]", CoolingCapacityUser));
-                            ShowContinueError(state,
-                                              EnergyPlus::format("differs from Design Size Rated Total Cooling Capacity (gross) of {:.2R} [W]",
-                                                                 CoolingCapacityDes));
-                            ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
-                            ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
-                        }
-                    }
-                }
-            }
+            reportVRFCondFieldSize(state,
+                                   state.dataHVACVarRefFlow->VRF(VRFCond).CoolingCapacity,
+                                   CoolingCapacityDes,
+                                   std::string(cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum)),
+                                   state.dataHVACVarRefFlow->VRF(VRFCond).Name,
+                                   state.dataHVACVarRefFlow->VRFTU(VRFCond).Name,
+                                   "Design Size Rated Total Cooling Capacity (gross) [W]",
+                                   "User-Specified Rated Total Cooling Capacity (gross) [W]");
 
             if (state.dataHVACVarRefFlow->VRF(VRFCond).CoolingCapacity > 0.0) {
                 state.dataHVACVarRefFlow->VRF(VRFCond).CoolingCombinationRatio =
@@ -7448,49 +7457,20 @@ void SizeVRF(EnergyPlusData &state, int const VRFTUNum)
             }
 
             // Size VRF( VRFCond ).HeatingCapacity
-            IsAutoSize = false;
-            if (state.dataHVACVarRefFlow->VRF(VRFCond).HeatingCapacity == AutoSize) {
-                IsAutoSize = true;
-            }
             if (state.dataHVACVarRefFlow->VRF(VRFCond).LockHeatingCapacity) {
                 HeatingCapacityDes =
                     state.dataHVACVarRefFlow->VRF(VRFCond).CoolingCapacity * state.dataHVACVarRefFlow->VRF(VRFCond).HeatingCapacitySizeRatio;
             } else {
                 HeatingCapacityDes = TUHeatingCapacity;
             }
-            if (IsAutoSize) {
-                state.dataHVACVarRefFlow->VRF(VRFCond).HeatingCapacity = HeatingCapacityDes;
-                BaseSizer::reportSizerOutput(state,
-                                             std::string(cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum)),
-                                             state.dataHVACVarRefFlow->VRF(VRFCond).Name,
-                                             "Design Size Rated Total Heating Capacity [W]",
-                                             HeatingCapacityDes);
-            } else {
-                if (state.dataHVACVarRefFlow->VRF(VRFCond).HeatingCapacity > 0.0 && HeatingCapacityDes > 0.0) {
-                    HeatingCapacityUser = state.dataHVACVarRefFlow->VRF(VRFCond).HeatingCapacity;
-                    BaseSizer::reportSizerOutput(state,
-                                                 std::string(cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum)),
-                                                 state.dataHVACVarRefFlow->VRF(VRFCond).Name,
-                                                 "Design Size Rated Total Heating Capacity [W]",
-                                                 HeatingCapacityDes,
-                                                 "User-Specified Rated Total Heating Capacity [W]",
-                                                 HeatingCapacityUser);
-                    if (state.dataGlobal->DisplayExtraWarnings) {
-                        if ((std::abs(HeatingCapacityDes - HeatingCapacityUser) / HeatingCapacityUser) > state.dataSize->AutoVsHardSizingThreshold) {
-                            ShowMessage(state,
-                                        EnergyPlus::format("SizeVRF: Potential issue with equipment sizing for {} {}",
-                                                           cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum),
-                                                           state.dataHVACVarRefFlow->VRFTU(VRFCond).Name));
-                            ShowContinueError(state,
-                                              EnergyPlus::format("User-Specified Rated Total Heating Capacity of {:.2R} [W]", HeatingCapacityUser));
-                            ShowContinueError(
-                                state, EnergyPlus::format("differs from Design Size Rated Total Heating Capacity of {:.2R} [W]", HeatingCapacityDes));
-                            ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
-                            ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
-                        }
-                    }
-                }
-            }
+            reportVRFCondFieldSize(state,
+                                   state.dataHVACVarRefFlow->VRF(VRFCond).HeatingCapacity,
+                                   HeatingCapacityDes,
+                                   std::string(cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum)),
+                                   state.dataHVACVarRefFlow->VRF(VRFCond).Name,
+                                   state.dataHVACVarRefFlow->VRFTU(VRFCond).Name,
+                                   "Design Size Rated Total Heating Capacity [W]",
+                                   "User-Specified Rated Total Heating Capacity [W]");
 
             if (state.dataHVACVarRefFlow->VRF(VRFCond).HeatingCapacity > 0.0) {
                 state.dataHVACVarRefFlow->VRF(VRFCond).HeatingCombinationRatio =
@@ -7667,137 +7647,42 @@ void SizeVRF(EnergyPlusData &state, int const VRFTUNum)
 
         if (FoundAll) {
             // autosize resistive defrost heater capacity
-            IsAutoSize = false;
-            if (state.dataHVACVarRefFlow->VRF(VRFCond).DefrostCapacity == AutoSize) {
-                IsAutoSize = true;
-            }
             if (state.dataHVACVarRefFlow->VRF(VRFCond).DefrostStrategy == StandardRatings::DefrostStrat::Resistive) {
                 DefrostCapacityDes = state.dataHVACVarRefFlow->VRF(VRFCond).CoolingCapacity;
             } else {
                 DefrostCapacityDes = 0.0;
             }
-            if (IsAutoSize) {
-                state.dataHVACVarRefFlow->VRF(VRFCond).DefrostCapacity = DefrostCapacityDes;
-                BaseSizer::reportSizerOutput(state,
-                                             std::string(cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum)),
-                                             state.dataHVACVarRefFlow->VRF(VRFCond).Name,
-                                             "Design Size Resistive Defrost Heater Capacity [W]",
-                                             DefrostCapacityDes);
-            } else {
-                if (state.dataHVACVarRefFlow->VRF(VRFCond).DefrostCapacity > 0.0 && DefrostCapacityDes > 0.0) {
-                    DefrostCapacityUser = state.dataHVACVarRefFlow->VRF(VRFCond).DefrostCapacity;
-                    BaseSizer::reportSizerOutput(state,
-                                                 std::string(cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum)),
-                                                 state.dataHVACVarRefFlow->VRF(VRFCond).Name,
-                                                 "Design Size Resistive Defrost Heater Capacity [W]",
-                                                 DefrostCapacityDes,
-                                                 "User-Specified Resistive Defrost Heater Capacity",
-                                                 DefrostCapacityUser);
-                    if (state.dataGlobal->DisplayExtraWarnings) {
-                        if ((std::abs(DefrostCapacityDes - DefrostCapacityUser) / DefrostCapacityUser) > state.dataSize->AutoVsHardSizingThreshold) {
-                            ShowMessage(state,
-                                        EnergyPlus::format("SizeVRF: Potential issue with equipment sizing for {} {}",
-                                                           cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum),
-                                                           state.dataHVACVarRefFlow->VRFTU(VRFCond).Name));
-                            ShowContinueError(
-                                state, EnergyPlus::format("User-Specified Resistive Defrost Heater Capacity of {:.2R} [W]", DefrostCapacityUser));
-                            ShowContinueError(
-                                state,
-                                EnergyPlus::format("differs from Design Size Resistive Defrost Heater Capacity of {:.2R} [W]", DefrostCapacityDes));
-                            ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
-                            ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
-                        }
-                    }
-                }
-            }
+            reportVRFCondFieldSize(state,
+                                   state.dataHVACVarRefFlow->VRF(VRFCond).DefrostCapacity,
+                                   DefrostCapacityDes,
+                                   std::string(cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum)),
+                                   state.dataHVACVarRefFlow->VRF(VRFCond).Name,
+                                   state.dataHVACVarRefFlow->VRFTU(VRFCond).Name,
+                                   "Design Size Resistive Defrost Heater Capacity [W]",
+                                   "User-Specified Resistive Defrost Heater Capacity");
 
-            IsAutoSize = false;
-            if (state.dataHVACVarRefFlow->VRF(VRFCond).EvapCondAirVolFlowRate == AutoSize) {
-                IsAutoSize = true;
-            }
             // Auto-size condenser air flow to Total Capacity * 0.000114 m3/s/w (850 cfm/ton)
             EvapCondAirVolFlowRateDes = state.dataHVACVarRefFlow->VRF(VRFCond).CoolingCapacity * 0.000114;
-            if (IsAutoSize) {
-                state.dataHVACVarRefFlow->VRF(VRFCond).EvapCondAirVolFlowRate = EvapCondAirVolFlowRateDes;
-                BaseSizer::reportSizerOutput(state,
-                                             std::string(cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum)),
-                                             state.dataHVACVarRefFlow->VRF(VRFCond).Name,
-                                             "Design Size Evaporative Condenser Air Flow Rate [m3/s]",
-                                             EvapCondAirVolFlowRateDes);
-            } else {
-                if (state.dataHVACVarRefFlow->VRF(VRFCond).EvapCondAirVolFlowRate > 0.0 && EvapCondAirVolFlowRateDes > 0.0) {
-                    EvapCondAirVolFlowRateUser = state.dataHVACVarRefFlow->VRF(VRFCond).EvapCondAirVolFlowRate;
-                    BaseSizer::reportSizerOutput(state,
-                                                 std::string(cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum)),
-                                                 state.dataHVACVarRefFlow->VRF(VRFCond).Name,
-                                                 "Design Size Evaporative Condenser Air Flow Rate [m3/s]",
-                                                 EvapCondAirVolFlowRateDes,
-                                                 "User-Specified Evaporative Condenser Air Flow Rate [m3/s]",
-                                                 EvapCondAirVolFlowRateUser);
-                    if (state.dataGlobal->DisplayExtraWarnings) {
-                        if ((std::abs(EvapCondAirVolFlowRateDes - EvapCondAirVolFlowRateUser) / EvapCondAirVolFlowRateUser) >
-                            state.dataSize->AutoVsHardSizingThreshold) {
-                            ShowMessage(state,
-                                        EnergyPlus::format("SizeVRF: Potential issue with equipment sizing for {} {}",
-                                                           cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum),
-                                                           state.dataHVACVarRefFlow->VRFTU(VRFCond).Name));
-                            ShowContinueError(state,
-                                              EnergyPlus::format("User-Specified Evaporative Condenser Air Flow Rate of {:.5R} [m3/s]",
-                                                                 EvapCondAirVolFlowRateUser));
-                            ShowContinueError(state,
-                                              EnergyPlus::format("differs from Design Size Evaporative Condenser Air Flow Rate of {:.5R} [m3/s]",
-                                                                 EvapCondAirVolFlowRateDes));
-                            ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
-                            ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
-                        }
-                    }
-                }
-            }
+            reportVRFCondFieldSize(state,
+                                   state.dataHVACVarRefFlow->VRF(VRFCond).EvapCondAirVolFlowRate,
+                                   EvapCondAirVolFlowRateDes,
+                                   std::string(cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum)),
+                                   state.dataHVACVarRefFlow->VRF(VRFCond).Name,
+                                   state.dataHVACVarRefFlow->VRFTU(VRFCond).Name,
+                                   "Design Size Evaporative Condenser Air Flow Rate [m3/s]",
+                                   "User-Specified Evaporative Condenser Air Flow Rate [m3/s]",
+                                   5);
 
-            IsAutoSize = false;
-            if (state.dataHVACVarRefFlow->VRF(VRFCond).EvapCondPumpPower == AutoSize) {
-                IsAutoSize = true;
-            }
             // Auto-size evap condenser pump power to Total Capacity * 0.004266 w/w (15 w/ton)
             EvapCondPumpPowerDes = state.dataHVACVarRefFlow->VRF(VRFCond).CoolingCapacity * 0.004266;
-            if (IsAutoSize) {
-                state.dataHVACVarRefFlow->VRF(VRFCond).EvapCondPumpPower = EvapCondPumpPowerDes;
-                BaseSizer::reportSizerOutput(state,
-                                             std::string(cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum)),
-                                             state.dataHVACVarRefFlow->VRF(VRFCond).Name,
-                                             "Design Size Evaporative Condenser Pump Rated Power Consumption [W]",
-                                             EvapCondPumpPowerDes);
-
-            } else {
-                if (state.dataHVACVarRefFlow->VRF(VRFCond).EvapCondPumpPower > 0.0 && EvapCondPumpPowerDes > 0.0) {
-                    EvapCondPumpPowerUser = state.dataHVACVarRefFlow->VRF(VRFCond).EvapCondPumpPower;
-                    BaseSizer::reportSizerOutput(state,
-                                                 std::string(cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum)),
-                                                 state.dataHVACVarRefFlow->VRF(VRFCond).Name,
-                                                 "Design Size Evaporative Condenser Pump Rated Power Consumption [W]",
-                                                 EvapCondPumpPowerDes,
-                                                 "User-Specified Evaporative Condenser Pump Rated Power Consumption [W]",
-                                                 EvapCondPumpPowerUser);
-                    if (state.dataGlobal->DisplayExtraWarnings) {
-                        if ((std::abs(EvapCondPumpPowerDes - EvapCondPumpPowerUser) / EvapCondPumpPowerUser) >
-                            state.dataSize->AutoVsHardSizingThreshold) {
-                            ShowMessage(state,
-                                        EnergyPlus::format("SizeVRF: Potential issue with equipment sizing for {} {}",
-                                                           cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum),
-                                                           state.dataHVACVarRefFlow->VRFTU(VRFCond).Name));
-                            ShowContinueError(state,
-                                              EnergyPlus::format("User-Specified Evaporative Condenser Pump Rated Power Consumption of {:.2R} [W]",
-                                                                 EvapCondPumpPowerUser));
-                            ShowContinueError(
-                                state,
-                                EnergyPlus::format("differs from Design Size Evaporative Condenser Pump Rated Power Consumption of {:.2R} [W]",
-                                                   EvapCondPumpPowerDes));
-                            ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
-                            ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
-                        }
-                    }
-                }
-            }
+            reportVRFCondFieldSize(state,
+                                   state.dataHVACVarRefFlow->VRF(VRFCond).EvapCondPumpPower,
+                                   EvapCondPumpPowerDes,
+                                   std::string(cVRFTypes(state.dataHVACVarRefFlow->VRF(VRFCond).VRFSystemTypeNum)),
+                                   state.dataHVACVarRefFlow->VRF(VRFCond).Name,
+                                   state.dataHVACVarRefFlow->VRFTU(VRFCond).Name,
+                                   "Design Size Evaporative Condenser Pump Rated Power Consumption [W]",
+                                   "User-Specified Evaporative Condenser Pump Rated Power Consumption [W]");
 
             // Report to eio other information not related to autosizing
             if (state.dataHVACVarRefFlow->MyOneTimeEIOFlag) {
