@@ -693,6 +693,25 @@ namespace Curve {
         }
     }
 
+    // Helper: read optional output min/max limits from numeric fields.
+    // minIdx is the 1-based index of the output-min field; maxIdx = minIdx+1 for the output-max field.
+    static void readOptionalOutputLimits(EnergyPlusData &state,
+                                         Curve *thisCurve,
+                                         int NumNumbers,
+                                         Array1D<Real64> const &Numbers,
+                                         int minIdx)
+    {
+        int maxIdx = minIdx + 1;
+        if (NumNumbers > (minIdx - 1) && !state.dataIPShortCut->lNumericFieldBlanks(minIdx)) {
+            thisCurve->outputLimits.min = Numbers(minIdx);
+            thisCurve->outputLimits.minPresent = true;
+        }
+        if (NumNumbers > (maxIdx - 1) && !state.dataIPShortCut->lNumericFieldBlanks(maxIdx)) {
+            thisCurve->outputLimits.max = Numbers(maxIdx);
+            thisCurve->outputLimits.maxPresent = true;
+        }
+    }
+
     // Helper: validate that input-limit min <= max for a given numeric field pair, report error if not.
     static void checkCurveInputLimits(EnergyPlusData &state,
                                       std::string const &CurrentModuleObject,
@@ -814,34 +833,11 @@ namespace Curve {
             thisCurve->inputLimits[0].max = Numbers(8);
             thisCurve->inputLimits[1].min = Numbers(9);
             thisCurve->inputLimits[1].max = Numbers(10);
-            if (NumNumbers > 10 && !state.dataIPShortCut->lNumericFieldBlanks(11)) {
-                thisCurve->outputLimits.min = Numbers(11);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 11 && !state.dataIPShortCut->lNumericFieldBlanks(12)) {
-                thisCurve->outputLimits.max = Numbers(12);
-                thisCurve->outputLimits.maxPresent = true;
-            }
+            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 11);
 
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 7, 8, ErrorsFound);
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 9, 10, ErrorsFound);
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveInputTypeValid(Alphas(3))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for Y is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 4) {
-                if (!IsCurveOutputTypeValid(Alphas(4))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
+            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 2, 2);
         }
 
         // Loop over ChillerPartLoadWithLift curves and load data //zrp_Aug2014
@@ -888,38 +884,9 @@ namespace Curve {
             thisCurve->inputLimits[2].max = Numbers(18);
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 17, 18, ErrorsFound);
 
-            if (NumNumbers > 18 && !state.dataIPShortCut->lNumericFieldBlanks(19)) {
-                thisCurve->outputLimits.min = Numbers(19);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 19 && !state.dataIPShortCut->lNumericFieldBlanks(20)) {
-                thisCurve->outputLimits.max = Numbers(20);
-                thisCurve->outputLimits.maxPresent = true;
-            }
+            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 19);
 
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveInputTypeValid(Alphas(3))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for Y is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 4) {
-                if (!IsCurveInputTypeValid(Alphas(4))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for Z is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 5) {
-                if (!IsCurveOutputTypeValid(Alphas(5))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
+            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 3, 2);
         }
 
         // Loop over cubic curves and load data
@@ -954,27 +921,10 @@ namespace Curve {
             }
             thisCurve->inputLimits[0].min = Numbers(5);
             thisCurve->inputLimits[0].max = Numbers(6);
-            if (NumNumbers > 6 && !state.dataIPShortCut->lNumericFieldBlanks(7)) {
-                thisCurve->outputLimits.min = Numbers(7);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 7 && !state.dataIPShortCut->lNumericFieldBlanks(8)) {
-                thisCurve->outputLimits.max = Numbers(8);
-                thisCurve->outputLimits.maxPresent = true;
-            }
+            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 7);
 
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 5, 6, ErrorsFound);
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
+            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 1, 2);
         }
 
         // Loop over quadrinomial curves and load data
@@ -1008,27 +958,10 @@ namespace Curve {
             }
             thisCurve->inputLimits[0].min = Numbers(6);
             thisCurve->inputLimits[0].max = Numbers(7);
-            if (NumNumbers > 7 && !state.dataIPShortCut->lNumericFieldBlanks(8)) {
-                thisCurve->outputLimits.min = Numbers(8);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 8 && !state.dataIPShortCut->lNumericFieldBlanks(9)) {
-                thisCurve->outputLimits.max = Numbers(9);
-                thisCurve->outputLimits.maxPresent = true;
-            }
+            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 8);
 
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 6, 7, ErrorsFound);
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
+            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 1, 2);
         }
 
         // Loop over quadratic curves and load data
@@ -1062,14 +995,7 @@ namespace Curve {
             }
             thisCurve->inputLimits[0].min = Numbers(4);
             thisCurve->inputLimits[0].max = Numbers(5);
-            if (NumNumbers > 5 && !state.dataIPShortCut->lNumericFieldBlanks(6)) {
-                thisCurve->outputLimits.min = Numbers(6);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 6 && !state.dataIPShortCut->lNumericFieldBlanks(7)) {
-                thisCurve->outputLimits.max = Numbers(7);
-                thisCurve->outputLimits.maxPresent = true;
-            }
+            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 6);
 
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 4, 5, ErrorsFound);
             if (NumAlphas >= 2) {
@@ -1118,14 +1044,7 @@ namespace Curve {
             thisCurve->inputLimits[0].max = Numbers(8);
             thisCurve->inputLimits[1].min = Numbers(9);
             thisCurve->inputLimits[1].max = Numbers(10);
-            if (NumNumbers > 10 && !state.dataIPShortCut->lNumericFieldBlanks(11)) {
-                thisCurve->outputLimits.min = Numbers(11);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 11 && !state.dataIPShortCut->lNumericFieldBlanks(12)) {
-                thisCurve->outputLimits.max = Numbers(12);
-                thisCurve->outputLimits.maxPresent = true;
-            }
+            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 11);
 
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 7, 8, ErrorsFound);
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 9, 10, ErrorsFound);
@@ -1181,14 +1100,7 @@ namespace Curve {
             thisCurve->inputLimits[0].max = Numbers(8);
             thisCurve->inputLimits[1].min = Numbers(9);
             thisCurve->inputLimits[1].max = Numbers(10);
-            if (NumNumbers > 10 && !state.dataIPShortCut->lNumericFieldBlanks(11)) {
-                thisCurve->outputLimits.min = Numbers(11);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 11 && !state.dataIPShortCut->lNumericFieldBlanks(12)) {
-                thisCurve->outputLimits.max = Numbers(12);
-                thisCurve->outputLimits.maxPresent = true;
-            }
+            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 11);
 
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 7, 8, ErrorsFound);
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 9, 10, ErrorsFound);
@@ -1242,14 +1154,7 @@ namespace Curve {
             }
             thisCurve->inputLimits[0].min = Numbers(3);
             thisCurve->inputLimits[0].max = Numbers(4);
-            if (NumNumbers > 4 && !state.dataIPShortCut->lNumericFieldBlanks(5)) {
-                thisCurve->outputLimits.min = Numbers(5);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 5 && !state.dataIPShortCut->lNumericFieldBlanks(6)) {
-                thisCurve->outputLimits.max = Numbers(6);
-                thisCurve->outputLimits.maxPresent = true;
-            }
+            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 5);
 
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 3, 4, ErrorsFound);
             if (NumAlphas >= 2) {
@@ -1298,14 +1203,7 @@ namespace Curve {
             thisCurve->inputLimits[0].max = Numbers(12);
             thisCurve->inputLimits[1].min = Numbers(13);
             thisCurve->inputLimits[1].max = Numbers(14);
-            if (NumNumbers > 14 && !state.dataIPShortCut->lNumericFieldBlanks(15)) {
-                thisCurve->outputLimits.min = Numbers(15);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 15 && !state.dataIPShortCut->lNumericFieldBlanks(16)) {
-                thisCurve->outputLimits.max = Numbers(16);
-                thisCurve->outputLimits.maxPresent = true;
-            }
+            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 15);
 
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 11, 12, ErrorsFound);
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 13, 14, ErrorsFound);
@@ -1387,14 +1285,7 @@ namespace Curve {
             thisCurve->inputLimits[1].max = Numbers(31);
             thisCurve->inputLimits[2].min = Numbers(32);
             thisCurve->inputLimits[2].max = Numbers(33);
-            if (NumNumbers > 33 && !state.dataIPShortCut->lNumericFieldBlanks(34)) {
-                thisCurve->outputLimits.min = Numbers(34);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 34 && !state.dataIPShortCut->lNumericFieldBlanks(35)) {
-                thisCurve->outputLimits.max = Numbers(35);
-                thisCurve->outputLimits.maxPresent = true;
-            }
+            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 34);
 
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 28, 29, ErrorsFound);
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 30, 31, ErrorsFound);
@@ -1462,14 +1353,7 @@ namespace Curve {
             thisCurve->inputLimits[3].min = Numbers(12);
             thisCurve->inputLimits[3].max = Numbers(13);
 
-            if (NumNumbers > 13 && !state.dataIPShortCut->lNumericFieldBlanks(14)) {
-                thisCurve->outputLimits.min = Numbers(14);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 14 && !state.dataIPShortCut->lNumericFieldBlanks(15)) {
-                thisCurve->outputLimits.max = Numbers(15);
-                thisCurve->outputLimits.maxPresent = true;
-            }
+            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 14);
 
             constexpr int NumVar = 4;
             constexpr std::array<std::string_view, NumVar> VarNames{"w", "x", "y", "z"};
@@ -1532,14 +1416,7 @@ namespace Curve {
             thisCurve->inputLimits[3].max = Numbers(14);
             thisCurve->inputLimits[4].min = Numbers(15);
             thisCurve->inputLimits[4].max = Numbers(16);
-            if (NumNumbers > 16 && !state.dataIPShortCut->lNumericFieldBlanks(17)) {
-                thisCurve->outputLimits.min = Numbers(17);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 17 && !state.dataIPShortCut->lNumericFieldBlanks(18)) {
-                thisCurve->outputLimits.max = Numbers(18);
-                thisCurve->outputLimits.maxPresent = true;
-            }
+            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 17);
 
             constexpr int NumVar = 5;
             constexpr std::array<std::string_view, NumVar> VarNames{"v", "w", "x", "y", "z"};
@@ -1597,14 +1474,7 @@ namespace Curve {
 
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 4, 5, ErrorsFound);
 
-            if (NumNumbers > 5 && !state.dataIPShortCut->lNumericFieldBlanks(6)) {
-                thisCurve->outputLimits.min = Numbers(6);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 6 && !state.dataIPShortCut->lNumericFieldBlanks(7)) {
-                thisCurve->outputLimits.max = Numbers(7);
-                thisCurve->outputLimits.maxPresent = true;
-            }
+            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 6);
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
                     ShowWarningError(state,
@@ -1652,14 +1522,7 @@ namespace Curve {
             thisCurve->inputLimits[1].min = Numbers(7);
             thisCurve->inputLimits[1].max = Numbers(8);
 
-            if (NumNumbers > 8 && !state.dataIPShortCut->lNumericFieldBlanks(9)) {
-                thisCurve->outputLimits.min = Numbers(9);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 9 && !state.dataIPShortCut->lNumericFieldBlanks(10)) {
-                thisCurve->outputLimits.max = Numbers(10);
-                thisCurve->outputLimits.maxPresent = true;
-            }
+            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 9);
 
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 5, 6, ErrorsFound);
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 7, 8, ErrorsFound);
@@ -1698,14 +1561,7 @@ namespace Curve {
             thisCurve->inputLimits[0].min = Numbers(5);
             thisCurve->inputLimits[0].max = Numbers(6);
 
-            if (NumNumbers > 6 && !state.dataIPShortCut->lNumericFieldBlanks(7)) {
-                thisCurve->outputLimits.min = Numbers(7);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 7 && !state.dataIPShortCut->lNumericFieldBlanks(8)) {
-                thisCurve->outputLimits.max = Numbers(8);
-                thisCurve->outputLimits.maxPresent = true;
-            }
+            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 7);
 
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 5, 6, ErrorsFound);
 
@@ -1754,14 +1610,7 @@ namespace Curve {
             thisCurve->inputLimits[0].min = Numbers(6);
             thisCurve->inputLimits[0].max = Numbers(7);
 
-            if (NumNumbers > 7 && !state.dataIPShortCut->lNumericFieldBlanks(8)) {
-                thisCurve->outputLimits.min = Numbers(8);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 8 && !state.dataIPShortCut->lNumericFieldBlanks(9)) {
-                thisCurve->outputLimits.max = Numbers(9);
-                thisCurve->outputLimits.maxPresent = true;
-            }
+            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 8);
 
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 6, 7, ErrorsFound);
 
@@ -1810,14 +1659,7 @@ namespace Curve {
             thisCurve->inputLimits[0].min = Numbers(4);
             thisCurve->inputLimits[0].max = Numbers(5);
 
-            if (NumNumbers > 5 && !state.dataIPShortCut->lNumericFieldBlanks(6)) {
-                thisCurve->outputLimits.min = Numbers(6);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 6 && !state.dataIPShortCut->lNumericFieldBlanks(7)) {
-                thisCurve->outputLimits.max = Numbers(7);
-                thisCurve->outputLimits.maxPresent = true;
-            }
+            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 6);
 
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 4, 5, ErrorsFound);
 
@@ -1866,14 +1708,7 @@ namespace Curve {
             thisCurve->inputLimits[0].min = Numbers(4);
             thisCurve->inputLimits[0].max = Numbers(5);
 
-            if (NumNumbers > 5 && !state.dataIPShortCut->lNumericFieldBlanks(6)) {
-                thisCurve->outputLimits.min = Numbers(6);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 6 && !state.dataIPShortCut->lNumericFieldBlanks(7)) {
-                thisCurve->outputLimits.max = Numbers(7);
-                thisCurve->outputLimits.maxPresent = true;
-            }
+            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 6);
 
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 4, 5, ErrorsFound);
 
@@ -1922,14 +1757,7 @@ namespace Curve {
             thisCurve->inputLimits[0].min = Numbers(4);
             thisCurve->inputLimits[0].max = Numbers(5);
 
-            if (NumNumbers > 5 && !state.dataIPShortCut->lNumericFieldBlanks(6)) {
-                thisCurve->outputLimits.min = Numbers(6);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 6 && !state.dataIPShortCut->lNumericFieldBlanks(7)) {
-                thisCurve->outputLimits.max = Numbers(7);
-                thisCurve->outputLimits.maxPresent = true;
-            }
+            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 6);
 
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 4, 5, ErrorsFound);
 
@@ -1980,14 +1808,7 @@ namespace Curve {
 
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 6, 7, ErrorsFound);
 
-            if (NumNumbers > 7 && !state.dataIPShortCut->lNumericFieldBlanks(8)) {
-                thisCurve->outputLimits.min = Numbers(8);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 8 && !state.dataIPShortCut->lNumericFieldBlanks(9)) {
-                thisCurve->outputLimits.max = Numbers(9);
-                thisCurve->outputLimits.maxPresent = true;
-            }
+            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 8);
 
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
