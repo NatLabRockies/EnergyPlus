@@ -454,6 +454,33 @@ namespace InternalHeatGains {
             IHGNumNumbers = 0;
         }
 
+        // Read optional CO2 rate factor from field 7 and validate range [0, 4.0e-7].
+        auto readAndValidateCO2RateFactor = [&](Real64 &co2RateFactor, std::string_view moduleObject, std::string_view objectName) {
+            if ((IHGNumNumbers == 7) || (!IHGNumericFieldBlanks(7))) {
+                co2RateFactor = IHGNumbers(7);
+            }
+            if (co2RateFactor < 0.0) {
+                ShowSevereError(state,
+                                EnergyPlus::format("{}{}=\"{}\", {} < 0.0, value ={:.2R}",
+                                                   RoutineName,
+                                                   moduleObject,
+                                                   objectName,
+                                                   IHGNumericFieldNames(7),
+                                                   IHGNumbers(7)));
+                ErrorsFound = true;
+            }
+            if (co2RateFactor > 4.0e-7) {
+                ShowSevereError(state,
+                                EnergyPlus::format("{}{}=\"{}\", {} > 4.0E-7, value ={:.2R}",
+                                                   RoutineName,
+                                                   moduleObject,
+                                                   objectName,
+                                                   IHGNumericFieldNames(7),
+                                                   IHGNumbers(7)));
+                ErrorsFound = true;
+            }
+        };
+
         // PEOPLE: Includes both information related to the heat balance and thermal comfort
         EPVector<InternalHeatGains::GlobalInternalGainMiscObject> peopleObjects;
         int numPeopleStatements = 0;
@@ -1547,29 +1574,7 @@ namespace InternalHeatGains {
                     thisZoneGas.FractionRadiant = IHGNumbers(5);
                     thisZoneGas.FractionLost = IHGNumbers(6);
 
-                    if ((IHGNumNumbers == 7) || (!IHGNumericFieldBlanks(7))) {
-                        thisZoneGas.CO2RateFactor = IHGNumbers(7);
-                    }
-                    if (thisZoneGas.CO2RateFactor < 0.0) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} < 0.0, value ={:.2R}",
-                                                           RoutineName,
-                                                           gasEqModuleObject,
-                                                           thisGasEqInput.Name,
-                                                           IHGNumericFieldNames(7),
-                                                           IHGNumbers(7)));
-                        ErrorsFound = true;
-                    }
-                    if (thisZoneGas.CO2RateFactor > 4.0e-7) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} > 4.0E-7, value ={:.2R}",
-                                                           RoutineName,
-                                                           gasEqModuleObject,
-                                                           thisGasEqInput.Name,
-                                                           IHGNumericFieldNames(7),
-                                                           IHGNumbers(7)));
-                        ErrorsFound = true;
-                    }
+                    readAndValidateCO2RateFactor(thisZoneGas.CO2RateFactor, gasEqModuleObject, thisGasEqInput.Name);
                     // FractionConvected is a calculated field
                     calcFractionConvected(thisZoneGas.FractionConvected,
                                           thisZoneGas.FractionLatent,
@@ -1932,29 +1937,7 @@ namespace InternalHeatGains {
                     thisZoneOthEq.FractionRadiant = IHGNumbers(5);
                     thisZoneOthEq.FractionLost = IHGNumbers(6);
 
-                    if ((IHGNumNumbers == 7) || (!IHGNumericFieldBlanks(7))) {
-                        thisZoneOthEq.CO2RateFactor = IHGNumbers(7);
-                    }
-                    if (thisZoneOthEq.CO2RateFactor < 0.0) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} < 0.0, value ={:.2R}",
-                                                           RoutineName,
-                                                           othEqModuleObject,
-                                                           thisOthEqInput.Name,
-                                                           IHGNumericFieldNames(7),
-                                                           IHGNumbers(7)));
-                        ErrorsFound = true;
-                    }
-                    if (thisZoneOthEq.CO2RateFactor > 4.0e-7) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} > 4.0E-7, value ={:.2R}",
-                                                           RoutineName,
-                                                           othEqModuleObject,
-                                                           thisOthEqInput.Name,
-                                                           IHGNumericFieldNames(7),
-                                                           IHGNumbers(7)));
-                        ErrorsFound = true;
-                    }
+                    readAndValidateCO2RateFactor(thisZoneOthEq.CO2RateFactor, othEqModuleObject, thisOthEqInput.Name);
 
                     // FractionConvected is a calculated field
                     calcFractionConvected(thisZoneOthEq.FractionConvected,
