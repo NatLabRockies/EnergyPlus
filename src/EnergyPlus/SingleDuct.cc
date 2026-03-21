@@ -92,6 +92,54 @@
 
 namespace EnergyPlus::SingleDuct {
 
+// Helper: parse reheat coil type string, set enum + plant type, look up coil index.
+// Extracted from GetSysInput where this block was repeated for every reheat terminal type.
+static void parseReheatCoilTypeAndIndex(EnergyPlusData &state,
+                                        SingleDuctAirTerminal &airTerm,
+                                        ErrorObjectHeader const &eoh,
+                                        std::string_view coilTypeFieldName,
+                                        std::string_view coilNameFieldName,
+                                        std::string const &coilNameAlpha,
+                                        bool &ErrorsFound)
+{
+    if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Fuel")) {
+        airTerm.ReheatComp_Num = HeatingCoilType::Gas;
+    } else if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Electric")) {
+        airTerm.ReheatComp_Num = HeatingCoilType::Electric;
+    } else if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Water")) {
+        airTerm.ReheatComp_Num = HeatingCoilType::SimpleHeating;
+        airTerm.ReheatComp_PlantType = DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
+    } else if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Steam")) {
+        airTerm.ReheatComp_Num = HeatingCoilType::SteamAirHeating;
+        airTerm.ReheatComp_PlantType = DataPlant::PlantEquipmentType::CoilSteamAirHeating;
+    } else if (!airTerm.ReheatComp.empty()) {
+        ShowSevereError(state, EnergyPlus::format("Illegal {} = {}.", coilTypeFieldName, airTerm.ReheatComp));
+        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", airTerm.sysType, airTerm.SysName));
+        ErrorsFound = true;
+    }
+
+    airTerm.ReheatName = coilNameAlpha;
+    if (airTerm.ReheatComp_Num == HeatingCoilType::Gas || airTerm.ReheatComp_Num == HeatingCoilType::Electric) {
+        HeatingCoils::GetCoilIndex(state, airTerm.ReheatName, airTerm.ReheatComp_Index, ErrorsFound);
+        if (airTerm.ReheatComp_Index == 0) {
+            ShowSevereItemNotFound(state, eoh, coilNameFieldName, coilNameAlpha);
+            ErrorsFound = true;
+        }
+    } else if (airTerm.ReheatComp_Num == HeatingCoilType::SimpleHeating) {
+        airTerm.ReheatComp_Index = WaterCoils::GetWaterCoilIndex(state, airTerm.ReheatComp, airTerm.ReheatName, ErrorsFound);
+        if (airTerm.ReheatComp_Index == 0) {
+            ShowSevereItemNotFound(state, eoh, coilNameFieldName, coilNameAlpha);
+            ErrorsFound = true;
+        }
+    } else if (airTerm.ReheatComp_Num == HeatingCoilType::SteamAirHeating) {
+        airTerm.ReheatComp_Index = SteamCoils::GetSteamCoilIndex(state, airTerm.ReheatComp, airTerm.ReheatName, ErrorsFound);
+        if (airTerm.ReheatComp_Index == 0) {
+            ShowSevereItemNotFound(state, eoh, coilNameFieldName, coilNameAlpha);
+            ErrorsFound = true;
+        }
+    }
+}
+
 // Helper: look up the Air Distribution Unit for an air terminal, connect it to
 // the zone equipment config, and populate CtrlZoneNum / ZoneFloorArea.
 // Extracted from GetSysInput where this block was repeated for every terminal type.
@@ -421,42 +469,7 @@ void GetSysInput(EnergyPlusData &state)
         airTerm.SysType_Num = SysType::SingleDuctVAVReheat;
 
         airTerm.ReheatComp = Alphas(7);
-        if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Fuel")) {
-            airTerm.ReheatComp_Num = HeatingCoilType::Gas;
-        } else if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Electric")) {
-            airTerm.ReheatComp_Num = HeatingCoilType::Electric;
-        } else if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Water")) {
-            airTerm.ReheatComp_Num = HeatingCoilType::SimpleHeating;
-            airTerm.ReheatComp_PlantType = DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
-        } else if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Steam")) {
-            airTerm.ReheatComp_Num = HeatingCoilType::SteamAirHeating;
-            airTerm.ReheatComp_PlantType = DataPlant::PlantEquipmentType::CoilSteamAirHeating;
-        } else if (!airTerm.ReheatComp.empty()) {
-            ShowSevereError(state, EnergyPlus::format("Illegal {} = {}.", cAlphaFields(8), airTerm.ReheatComp));
-            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", airTerm.sysType, airTerm.SysName));
-            ErrorsFound = true;
-        }
-
-        airTerm.ReheatName = Alphas(8);
-        if (airTerm.ReheatComp_Num == HeatingCoilType::Gas || airTerm.ReheatComp_Num == HeatingCoilType::Electric) {
-            HeatingCoils::GetCoilIndex(state, airTerm.ReheatName, airTerm.ReheatComp_Index, ErrorsFound);
-            if (airTerm.ReheatComp_Index == 0) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFields(8), Alphas(8));
-                ErrorsFound = true;
-            }
-        } else if (airTerm.ReheatComp_Num == HeatingCoilType::SimpleHeating) {
-            airTerm.ReheatComp_Index = WaterCoils::GetWaterCoilIndex(state, airTerm.ReheatComp, airTerm.ReheatName, ErrorsFound);
-            if (airTerm.ReheatComp_Index == 0) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFields(8), Alphas(8));
-                ErrorsFound = true;
-            }
-        } else if (airTerm.ReheatComp_Num == HeatingCoilType::SteamAirHeating) {
-            airTerm.ReheatComp_Index = SteamCoils::GetSteamCoilIndex(state, airTerm.ReheatComp, airTerm.ReheatName, ErrorsFound);
-            if (airTerm.ReheatComp_Index == 0) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFields(8), Alphas(8));
-                ErrorsFound = true;
-            }
-        }
+        parseReheatCoilTypeAndIndex(state, airTerm, eoh, cAlphaFields(8), cAlphaFields(8), Alphas(8), ErrorsFound);
 
         if (lAlphaBlanks(2)) {
             airTerm.availSched = Sched::GetScheduleAlwaysOn(state);
@@ -711,41 +724,7 @@ void GetSysInput(EnergyPlusData &state)
         airTerm.sysType = CurrentModuleObject;
         airTerm.SysType_Num = SysType::SingleDuctCBVAVReheat;
         airTerm.ReheatComp = Alphas(5);
-        if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Fuel")) {
-            airTerm.ReheatComp_Num = HeatingCoilType::Gas;
-        } else if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Electric")) {
-            airTerm.ReheatComp_Num = HeatingCoilType::Electric;
-        } else if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Water")) {
-            airTerm.ReheatComp_Num = HeatingCoilType::SimpleHeating;
-            airTerm.ReheatComp_PlantType = DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
-        } else if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Steam")) {
-            airTerm.ReheatComp_Num = HeatingCoilType::SteamAirHeating;
-            airTerm.ReheatComp_PlantType = DataPlant::PlantEquipmentType::CoilSteamAirHeating;
-        } else if (!airTerm.ReheatComp.empty()) {
-            ShowSevereError(state, EnergyPlus::format("Illegal {} = {}.", cAlphaFields(5), airTerm.ReheatComp));
-            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", airTerm.sysType, airTerm.SysName));
-            ErrorsFound = true;
-        }
-        airTerm.ReheatName = Alphas(6);
-        if (airTerm.ReheatComp_Num == HeatingCoilType::Gas || airTerm.ReheatComp_Num == HeatingCoilType::Electric) {
-            HeatingCoils::GetCoilIndex(state, airTerm.ReheatName, airTerm.ReheatComp_Index, ErrorsFound);
-            if (airTerm.ReheatComp_Index == 0) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFields(6), Alphas(6));
-                ErrorsFound = true;
-            }
-        } else if (airTerm.ReheatComp_Num == HeatingCoilType::SimpleHeating) {
-            airTerm.ReheatComp_Index = WaterCoils::GetWaterCoilIndex(state, airTerm.ReheatComp, airTerm.ReheatName, ErrorsFound);
-            if (airTerm.ReheatComp_Index == 0) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFields(6), Alphas(6));
-                ErrorsFound = true;
-            }
-        } else if (airTerm.ReheatComp_Num == HeatingCoilType::SteamAirHeating) {
-            airTerm.ReheatComp_Index = SteamCoils::GetSteamCoilIndex(state, airTerm.ReheatComp, airTerm.ReheatName, ErrorsFound);
-            if (airTerm.ReheatComp_Index == 0) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFields(6), Alphas(6));
-                ErrorsFound = true;
-            }
-        }
+        parseReheatCoilTypeAndIndex(state, airTerm, eoh, cAlphaFields(5), cAlphaFields(6), Alphas(6), ErrorsFound);
 
         if (lAlphaBlanks(2)) {
             airTerm.availSched = Sched::GetScheduleAlwaysOn(state);
@@ -913,41 +892,7 @@ void GetSysInput(EnergyPlusData &state)
         airTerm.sysType = CurrentModuleObject;
         airTerm.SysType_Num = SysType::SingleDuctConstVolReheat;
         airTerm.ReheatComp = Alphas(5);
-        if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Fuel")) {
-            airTerm.ReheatComp_Num = HeatingCoilType::Gas;
-        } else if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Electric")) {
-            airTerm.ReheatComp_Num = HeatingCoilType::Electric;
-        } else if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Water")) {
-            airTerm.ReheatComp_Num = HeatingCoilType::SimpleHeating;
-            airTerm.ReheatComp_PlantType = DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
-        } else if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Steam")) {
-            airTerm.ReheatComp_Num = HeatingCoilType::SteamAirHeating;
-            airTerm.ReheatComp_PlantType = DataPlant::PlantEquipmentType::CoilSteamAirHeating;
-        } else {
-            ShowSevereError(state, EnergyPlus::format("Illegal {} = {}.", cAlphaFields(5), airTerm.ReheatComp));
-            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", airTerm.sysType, airTerm.SysName));
-            ErrorsFound = true;
-        }
-        airTerm.ReheatName = Alphas(6);
-        if (airTerm.ReheatComp_Num == HeatingCoilType::Gas || airTerm.ReheatComp_Num == HeatingCoilType::Electric) {
-            HeatingCoils::GetCoilIndex(state, airTerm.ReheatName, airTerm.ReheatComp_Index, ErrorsFound);
-            if (airTerm.ReheatComp_Index == 0) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFields(6), Alphas(6));
-                ErrorsFound = true;
-            }
-        } else if (airTerm.ReheatComp_Num == HeatingCoilType::SimpleHeating) {
-            airTerm.ReheatComp_Index = WaterCoils::GetWaterCoilIndex(state, airTerm.ReheatComp, airTerm.ReheatName, ErrorsFound);
-            if (airTerm.ReheatComp_Index == 0) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFields(6), Alphas(6));
-                ErrorsFound = true;
-            }
-        } else if (airTerm.ReheatComp_Num == HeatingCoilType::SteamAirHeating) {
-            airTerm.ReheatComp_Index = SteamCoils::GetSteamCoilIndex(state, airTerm.ReheatComp, airTerm.ReheatName, ErrorsFound);
-            if (airTerm.ReheatComp_Index == 0) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFields(6), Alphas(6));
-                ErrorsFound = true;
-            }
-        }
+        parseReheatCoilTypeAndIndex(state, airTerm, eoh, cAlphaFields(5), cAlphaFields(6), Alphas(6), ErrorsFound);
 
         if (lAlphaBlanks(2)) {
             airTerm.availSched = Sched::GetScheduleAlwaysOn(state);
