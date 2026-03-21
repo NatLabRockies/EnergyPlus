@@ -200,6 +200,25 @@ namespace FaultsManager {
 
     constexpr std::array<std::string_view, static_cast<int>(FouledCoil::Num)> FouledCoilNamesUC{"FOULEDUARATED", "FOULINGFACTOR"};
 
+    // Helper: validate that a required alpha field is not blank; if blank, emit a severe error.
+    static void validateRequiredAlphaField(EnergyPlusData &state,
+                                           std::string const &faultObjType,
+                                           std::string const &faultName,
+                                           Array1D_string const &alphaFieldNames,
+                                           Array1D_string const &alphaArgs,
+                                           Array1D_bool const &alphaFieldBlanks,
+                                           int fieldIdx,
+                                           bool &errorsFound)
+    {
+        if (alphaFieldBlanks(fieldIdx)) {
+            ShowSevereError(
+                state,
+                EnergyPlus::format(
+                    "{} = \"{}\" invalid {} = \"{}\" blank.", faultObjType, faultName, alphaFieldNames(fieldIdx), alphaArgs(fieldIdx)));
+            errorsFound = true;
+        }
+    }
+
     // Helper: read the availability and severity schedule fields that are common to most fault objects.
     // alphaFieldBlanks / alphaArgs / alphaFieldNames are 1-based arrays; availIdx and severityIdx
     // give the positions of the two schedule fields within them.
@@ -394,23 +413,11 @@ namespace FaultsManager {
 
             // Evaporative cooler type
             faultsECFouling.EvapCoolerType = cAlphaArgs(4);
-            if (lAlphaFieldBlanks(4)) {
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format(
-                        "{} = \"{}\" invalid {} = \"{}\" blank.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(4), cAlphaArgs(4)));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
+            validateRequiredAlphaField(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames, cAlphaArgs, lAlphaFieldBlanks, 4, state.dataFaultsMgr->ErrorsFound);
 
             // Evaporative cooler name
             faultsECFouling.EvapCoolerName = cAlphaArgs(5);
-            if (lAlphaFieldBlanks(5)) {
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format(
-                        "{} = \"{}\" invalid {} = \"{}\" blank.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5)));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
+            validateRequiredAlphaField(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames, cAlphaArgs, lAlphaFieldBlanks, 5, state.dataFaultsMgr->ErrorsFound);
 
             // Evaporative cooler check
             if (Util::SameString(faultsECFouling.EvapCoolerType, "EvaporativeCooler:Indirect:WetCoil")) {
@@ -466,23 +473,11 @@ namespace FaultsManager {
 
             // Chiller type
             faultsChillerFouling.ChillerType = cAlphaArgs(4);
-            if (lAlphaFieldBlanks(4)) {
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format(
-                        "{} = \"{}\" invalid {} = \"{}\" blank.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(4), cAlphaArgs(4)));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
+            validateRequiredAlphaField(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames, cAlphaArgs, lAlphaFieldBlanks, 4, state.dataFaultsMgr->ErrorsFound);
 
             // Chiller name
             faultsChillerFouling.ChillerName = cAlphaArgs(5);
-            if (lAlphaFieldBlanks(5)) {
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format(
-                        "{} = \"{}\" invalid {} = \"{}\" blank.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5)));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
+            validateRequiredAlphaField(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames, cAlphaArgs, lAlphaFieldBlanks, 5, state.dataFaultsMgr->ErrorsFound);
 
             // Chiller check
             int ChillerNum;
@@ -736,23 +731,11 @@ namespace FaultsManager {
 
             // Boiler type
             faultsBoilerFouling.BoilerType = cAlphaArgs(4);
-            if (lAlphaFieldBlanks(4)) {
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format(
-                        "{} = \"{}\" invalid {} = \"{}\" blank.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(4), cAlphaArgs(4)));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
+            validateRequiredAlphaField(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames, cAlphaArgs, lAlphaFieldBlanks, 4, state.dataFaultsMgr->ErrorsFound);
 
             // Boiler name
             faultsBoilerFouling.BoilerName = cAlphaArgs(5);
-            if (lAlphaFieldBlanks(5)) {
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format(
-                        "{} = \"{}\" invalid {} = \"{}\" blank.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5)));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
+            validateRequiredAlphaField(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames, cAlphaArgs, lAlphaFieldBlanks, 5, state.dataFaultsMgr->ErrorsFound);
 
             // Boiler check and link
             {
@@ -807,23 +790,11 @@ namespace FaultsManager {
 
             // Coil type
             faultsCoilSATFouling.CoilType = cAlphaArgs(4);
-            if (lAlphaFieldBlanks(4)) {
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format(
-                        "{} = \"{}\" invalid {} = \"{}\" blank.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(4), cAlphaArgs(4)));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
+            validateRequiredAlphaField(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames, cAlphaArgs, lAlphaFieldBlanks, 4, state.dataFaultsMgr->ErrorsFound);
 
             // Coil name
             faultsCoilSATFouling.CoilName = cAlphaArgs(5);
-            if (lAlphaFieldBlanks(5)) {
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format(
-                        "{} = \"{}\" invalid {} = \"{}\" blank.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5)));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
+            validateRequiredAlphaField(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames, cAlphaArgs, lAlphaFieldBlanks, 5, state.dataFaultsMgr->ErrorsFound);
 
             // Coil check and link
             CoilType CoilTypeCheck = static_cast<CoilType>(getEnumValue(CoilTypeNamesUC, Util::makeUPPER(faultsCoilSATFouling.CoilType)));
@@ -903,13 +874,7 @@ namespace FaultsManager {
 
                 // Read in Water Coil Controller Name
                 faultsCoilSATFouling.WaterCoilControllerName = cAlphaArgs(6);
-                if (lAlphaFieldBlanks(6)) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{} = \"{}\" invalid {} = \"{}\" blank.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(6), cAlphaArgs(6)));
-                    state.dataFaultsMgr->ErrorsFound = true;
-                }
+                validateRequiredAlphaField(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames, cAlphaArgs, lAlphaFieldBlanks, 6, state.dataFaultsMgr->ErrorsFound);
                 // Read in controller input if not done yet
                 if (state.dataHVACControllers->GetControllerInputFlag) {
                     HVACControllers::GetControllerInput(state);
@@ -1024,23 +989,11 @@ namespace FaultsManager {
 
             // Cooling tower type
             faultsTowerFouling.TowerType = cAlphaArgs(4);
-            if (lAlphaFieldBlanks(4)) {
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format(
-                        "{} = \"{}\" invalid {} = \"{}\" blank.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(4), cAlphaArgs(4)));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
+            validateRequiredAlphaField(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames, cAlphaArgs, lAlphaFieldBlanks, 4, state.dataFaultsMgr->ErrorsFound);
 
             // Cooling tower name
             faultsTowerFouling.TowerName = cAlphaArgs(5);
-            if (lAlphaFieldBlanks(5)) {
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format(
-                        "{} = \"{}\" invalid {} = \"{}\" blank.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5)));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
+            validateRequiredAlphaField(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames, cAlphaArgs, lAlphaFieldBlanks, 5, state.dataFaultsMgr->ErrorsFound);
 
             // Tower check and link
             {
@@ -1124,23 +1077,11 @@ namespace FaultsManager {
 
             // Cooling tower type
             faultsCondSWTFouling.TowerType = cAlphaArgs(4);
-            if (lAlphaFieldBlanks(4)) {
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format(
-                        "{} = \"{}\" invalid {} = \"{}\" blank.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(4), cAlphaArgs(4)));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
+            validateRequiredAlphaField(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames, cAlphaArgs, lAlphaFieldBlanks, 4, state.dataFaultsMgr->ErrorsFound);
 
             // Cooling tower name
             faultsCondSWTFouling.TowerName = cAlphaArgs(5);
-            if (lAlphaFieldBlanks(5)) {
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format(
-                        "{} = \"{}\" invalid {} = \"{}\" blank.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5)));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
+            validateRequiredAlphaField(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames, cAlphaArgs, lAlphaFieldBlanks, 5, state.dataFaultsMgr->ErrorsFound);
 
             // Tower check and link
             {
@@ -1208,23 +1149,11 @@ namespace FaultsManager {
 
             // Chiller type
             faultsChillerSWT.ChillerType = cAlphaArgs(4);
-            if (lAlphaFieldBlanks(4)) {
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format(
-                        "{} = \"{}\" invalid {} = \"{}\" blank.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(4), cAlphaArgs(4)));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
+            validateRequiredAlphaField(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames, cAlphaArgs, lAlphaFieldBlanks, 4, state.dataFaultsMgr->ErrorsFound);
 
             // Chiller name
             faultsChillerSWT.ChillerName = cAlphaArgs(5);
-            if (lAlphaFieldBlanks(5)) {
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format(
-                        "{} = \"{}\" invalid {} = \"{}\" blank.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5)));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
+            validateRequiredAlphaField(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames, cAlphaArgs, lAlphaFieldBlanks, 5, state.dataFaultsMgr->ErrorsFound);
 
             // Chiller check
             int ChillerNum;
@@ -1746,13 +1675,8 @@ namespace FaultsManager {
 
                 fault.ControllerType = cAlphaArgs(4);
                 // check controller type
-                if (lAlphaFieldBlanks(4)) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{} = \"{}\" invalid {} = \"{}\" blank.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(4), cAlphaArgs(4)));
-                    state.dataFaultsMgr->ErrorsFound = true;
-                } else {
+                validateRequiredAlphaField(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames, cAlphaArgs, lAlphaFieldBlanks, 4, state.dataFaultsMgr->ErrorsFound);
+                if (!lAlphaFieldBlanks(4)) {
                     if (Util::makeUPPER(cAlphaArgs(4)) == "CONTROLLER:OUTDOORAIR") {
                         fault.ControllerTypeEnum = iController_AirEconomizer;
 
@@ -1764,13 +1688,7 @@ namespace FaultsManager {
 
                 state.dataFaultsMgr->FaultsEconomizer(j).ControllerName = cAlphaArgs(5);
                 // check controller name
-                if (lAlphaFieldBlanks(5)) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{} = \"{}\" invalid {} = \"{}\" blank.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5)));
-                    state.dataFaultsMgr->ErrorsFound = true;
-                }
+                validateRequiredAlphaField(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames, cAlphaArgs, lAlphaFieldBlanks, 5, state.dataFaultsMgr->ErrorsFound);
 
                 // offset - degree of fault
                 state.dataFaultsMgr->FaultsEconomizer(j).Offset = rNumericArgs(1);
