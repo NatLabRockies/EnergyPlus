@@ -5200,6 +5200,28 @@ static void copyCoolPeakToCalcSysSizing(DataSizing::SystemSizingData &calcSS,
     calcSS.SysCoolLoadTimeStepPk = srcSS.SysCoolLoadTimeStepPk;
 }
 
+// Save cooling peak conditions into the per-design-day SysSizing record during DuringDay processing.
+static void saveDuringDayCoolPeak(EnergyPlusData &state,
+                                  DataSizing::SystemSizingData &sysSizing,
+                                  Real64 SysSensCoolCap,
+                                  Real64 SysTotCoolCap,
+                                  Real64 SysCoolMixTemp,
+                                  Real64 SysCoolMixHumRat,
+                                  Real64 SysCoolRetTemp,
+                                  Real64 SysCoolRetHumRat,
+                                  int TimeStepInDay)
+{
+    sysSizing.SensCoolCap = SysSensCoolCap;
+    sysSizing.TotCoolCap = SysTotCoolCap;
+    sysSizing.MixTempAtCoolPeak = SysCoolMixTemp;
+    sysSizing.MixHumRatAtCoolPeak = SysCoolMixHumRat;
+    sysSizing.RetTempAtCoolPeak = SysCoolRetTemp;
+    sysSizing.RetHumRatAtCoolPeak = SysCoolRetHumRat;
+    sysSizing.OutTempAtCoolPeak = state.dataEnvrn->OutDryBulbTemp;
+    sysSizing.OutHumRatAtCoolPeak = state.dataEnvrn->OutHumRat;
+    sysSizing.MassFlowAtCoolPeak = sysSizing.CoolFlowSeq(TimeStepInDay);
+}
+
 void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIndicator)
 {
 
@@ -5535,15 +5557,8 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
                 state.dataSize->SysSizPeakDDNum(AirLoopNum).TimeStepAtSensCoolPk(state.dataSize->CurOverallSimDay) = TimeStepInDay;
                 state.dataSize->SensCoolCapTemp(AirLoopNum) = SysSensCoolCap;
                 if (sysSizing.coolingPeakLoad == DataSizing::PeakLoad::SensibleCooling) {
-                    sysSizing.SensCoolCap = SysSensCoolCap;
-                    sysSizing.TotCoolCap = SysTotCoolCap;
-                    sysSizing.MixTempAtCoolPeak = SysCoolMixTemp;
-                    sysSizing.MixHumRatAtCoolPeak = SysCoolMixHumRat;
-                    sysSizing.RetTempAtCoolPeak = SysCoolRetTemp;
-                    sysSizing.RetHumRatAtCoolPeak = SysCoolRetHumRat;
-                    sysSizing.OutTempAtCoolPeak = state.dataEnvrn->OutDryBulbTemp;
-                    sysSizing.OutHumRatAtCoolPeak = state.dataEnvrn->OutHumRat;
-                    sysSizing.MassFlowAtCoolPeak = sysSizing.CoolFlowSeq(TimeStepInDay);
+                    saveDuringDayCoolPeak(state, sysSizing, SysSensCoolCap, SysTotCoolCap,
+                                          SysCoolMixTemp, SysCoolMixHumRat, SysCoolRetTemp, SysCoolRetHumRat, TimeStepInDay);
                 }
             }
             // get the maximum system total cooling capacity
@@ -5551,15 +5566,8 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
                 state.dataSize->SysSizPeakDDNum(AirLoopNum).TimeStepAtTotCoolPk(state.dataSize->CurOverallSimDay) = TimeStepInDay;
                 state.dataSize->TotCoolCapTemp(AirLoopNum) = SysTotCoolCap;
                 if (sysSizing.coolingPeakLoad == DataSizing::PeakLoad::TotalCooling) {
-                    sysSizing.SensCoolCap = SysSensCoolCap;
-                    sysSizing.TotCoolCap = SysTotCoolCap;
-                    sysSizing.MixTempAtCoolPeak = SysCoolMixTemp;
-                    sysSizing.MixHumRatAtCoolPeak = SysCoolMixHumRat;
-                    sysSizing.RetTempAtCoolPeak = SysCoolRetTemp;
-                    sysSizing.RetHumRatAtCoolPeak = SysCoolRetHumRat;
-                    sysSizing.OutTempAtCoolPeak = state.dataEnvrn->OutDryBulbTemp;
-                    sysSizing.OutHumRatAtCoolPeak = state.dataEnvrn->OutHumRat;
-                    sysSizing.MassFlowAtCoolPeak = sysSizing.CoolFlowSeq(TimeStepInDay);
+                    saveDuringDayCoolPeak(state, sysSizing, SysSensCoolCap, SysTotCoolCap,
+                                          SysCoolMixTemp, SysCoolMixHumRat, SysCoolRetTemp, SysCoolRetHumRat, TimeStepInDay);
                 }
                 sysSizing.SysCoolCoinSpaceSens = 0.0;
                 for (int zonesCoolLoop = 1; zonesCoolLoop <= state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).NumZonesCooled; ++zonesCoolLoop) {
