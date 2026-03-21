@@ -343,9 +343,6 @@ void GetSysInput(EnergyPlusData &state)
     int IOStat;
     bool ErrorsFound(false);         // If errors detected in input
     bool IsNotOK;                    // Flag to verify name
-    int CtrlZone;                    // controlled zone do loop index
-    int SupAirIn;                    // controlled zone supply air inlet index
-    int ADUNum;                      // air distribution unit index
     std::string CurrentModuleObject; // for ease in getting objects
     Array1D_string Alphas;           // Alpha input items for object
     Array1D_string cAlphaFields;     // Alpha field names
@@ -769,27 +766,8 @@ void GetSysInput(EnergyPlusData &state)
                 state, EnergyPlus::format("{} must be less than or equal to 1. Resetting to 1 and the simulation continues.", cNumericFields(2)));
             airTerm.ZoneMinAirFracDes = 1.0;
         }
-        // The reheat coil control node is necessary for hot water and steam reheat, but not necessary for
-        // electric or gas reheat.
-        if (airTerm.ReheatComp_Num == HeatingCoilType::Gas || airTerm.ReheatComp_Num == HeatingCoilType::Electric) {
-        } else {
-            if (airTerm.ReheatComp_Num == HeatingCoilType::SteamAirHeating) {
-                IsNotOK = false;
-                airTerm.ReheatControlNode = GetCoilSteamInletNode(state, airTerm.ReheatComp, airTerm.ReheatName, IsNotOK);
-                if (IsNotOK) {
-                    ShowContinueError(state, EnergyPlus::format("..Occurs in {} = {}", airTerm.sysType, airTerm.SysName));
-                    ErrorsFound = true;
-                }
-            } else {
-                IsNotOK = false;
-                airTerm.ReheatControlNode = GetCoilWaterInletNode(state, airTerm.ReheatComp, airTerm.ReheatName, IsNotOK);
-                if (IsNotOK) {
-                    ShowContinueError(state, EnergyPlus::format("..Occurs in {} = {}", airTerm.sysType, airTerm.SysName));
-                    ErrorsFound = true;
-                }
-            }
-            //  END IF
-        }
+        lookupReheatControlNode(state, airTerm, ErrorsFound);
+
         airTerm.ReheatAirOutletNode = GetOnlySingleNode(state,
                                                         Alphas(7),
                                                         ErrorsFound,
@@ -921,26 +899,8 @@ void GetSysInput(EnergyPlusData &state)
                                                  Node::CompFluidStream::Primary,
                                                  Node::ObjectIsParent,
                                                  cAlphaFields(4));
-        // The reheat coil control node is necessary for hot water reheat, but not necessary for
-        // electric or gas reheat.
-        if (airTerm.ReheatComp_Num == HeatingCoilType::Gas || airTerm.ReheatComp_Num == HeatingCoilType::Electric) {
-        } else {
-            if (airTerm.ReheatComp_Num == HeatingCoilType::SteamAirHeating) {
-                IsNotOK = false;
-                airTerm.ReheatControlNode = GetCoilSteamInletNode(state, airTerm.ReheatComp, airTerm.ReheatName, IsNotOK);
-                if (IsNotOK) {
-                    ShowContinueError(state, EnergyPlus::format("..Occurs in {} = {}", airTerm.sysType, airTerm.SysName));
-                    ErrorsFound = true;
-                }
-            } else {
-                IsNotOK = false;
-                airTerm.ReheatControlNode = GetCoilWaterInletNode(state, airTerm.ReheatComp, airTerm.ReheatName, IsNotOK);
-                if (IsNotOK) {
-                    ShowContinueError(state, EnergyPlus::format("..Occurs in {} = {}", airTerm.sysType, airTerm.SysName));
-                    ErrorsFound = true;
-                }
-            }
-        }
+        lookupReheatControlNode(state, airTerm, ErrorsFound);
+
         airTerm.ReheatAirOutletNode = airTerm.OutletNodeNum;
         airTerm.MaxAirVolFlowRate = Numbers(1);
         airTerm.ZoneMinAirFracDes = 0.0;
