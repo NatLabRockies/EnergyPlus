@@ -36,3 +36,5 @@ src/EnergyPlus/ZoneTempPredictorCorrector.cc:GetZoneAirSetPoints
 src/EnergyPlus/SingleDuct.cc:GetSysInput
 src/EnergyPlus/PackagedThermalStorageCoil.cc:GetTESCoilInput
 src/EnergyPlus/SolarShading.cc:AllocateModuleArrays
+src/EnergyPlus/CondenserLoopTowers.cc:GetTowerInput
+src/EnergyPlus/UnitarySystem.cc:controlCoolingSystemToSP
