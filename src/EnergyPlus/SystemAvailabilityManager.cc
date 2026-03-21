@@ -2344,6 +2344,47 @@ namespace Avail {
         }
     }
 
+
+    // Update adaptive temperature gradient history: initialize during warmup/day1,
+    // shift the trailing average on subsequent days.
+    static void updateAdaptiveTempGradHistory(EnergyPlusData &state,
+                                              SysAvailManagerOptimumStart const &OptStartMgr,
+                                              int const NumPreDays,
+                                              Real64 const FanStartTime,
+                                              Real64 &AdaTempGradHeat,
+                                              Real64 &AdaTempGradCool,
+                                              bool &FirstTimeATGFlag)
+    {
+        if (state.dataGlobal->WarmupFlag) {
+            AdaTempGradHeat = OptStartMgr.InitTGradHeat;
+            AdaTempGradCool = OptStartMgr.InitTGradCool;
+        } else if (state.dataGlobal->DayOfSim == 1 && state.dataGlobal->BeginDayFlag) {
+            state.dataAvail->OptStart_AdaTempGradTrdHeat = OptStartMgr.InitTGradHeat;
+            AdaTempGradHeat = OptStartMgr.InitTGradHeat;
+            state.dataAvail->OptStart_AdaTempGradTrdCool = OptStartMgr.InitTGradCool;
+            AdaTempGradCool = OptStartMgr.InitTGradCool;
+        } else {
+            if (state.dataGlobal->BeginDayFlag && FirstTimeATGFlag) {
+                FirstTimeATGFlag = false;
+                AdaTempGradHeat += state.dataAvail->OptStart_AdaTempGradTrdHeat(NumPreDays) / NumPreDays -
+                                   state.dataAvail->OptStart_AdaTempGradTrdHeat(1) / NumPreDays;
+                AdaTempGradCool += state.dataAvail->OptStart_AdaTempGradTrdCool(NumPreDays) / NumPreDays -
+                                   state.dataAvail->OptStart_AdaTempGradTrdCool(1) / NumPreDays;
+                if (FanStartTime > 0) {
+                    for (int ATGCounter = 1; ATGCounter <= NumPreDays - 1; ++ATGCounter) {
+                        state.dataAvail->OptStart_AdaTempGradTrdHeat(ATGCounter) =
+                            state.dataAvail->OptStart_AdaTempGradTrdHeat(ATGCounter + 1);
+                        state.dataAvail->OptStart_AdaTempGradTrdCool(ATGCounter) =
+                            state.dataAvail->OptStart_AdaTempGradTrdCool(ATGCounter + 1);
+                    }
+                }
+            }
+        }
+        if (state.dataGlobal->CurrentTime >= 1.0) {
+            FirstTimeATGFlag = true;
+        }
+    }
+
     Status CalcOptStartSysAvailMgr(EnergyPlusData &state,
                                    int const SysAvailNum,  // number of the current scheduled system availability manager
                                    int const PriAirSysNum, // number of the primary air system affected by this Avail. Manager
@@ -2831,7 +2872,6 @@ namespace Avail {
             } break;
 
             case ControlAlgorithm::AdaptiveTemperatureGradient: {
-                int ATGCounter;
                 if (OptStartMgr.optimumStartControlType == OptimumStartControlType::ControlZone) {
                     ZoneNum = OptStartMgr.ZoneNum;
                     if (!allocated(state.dataHeatBalFanSys->TempTstatAir) || !allocated(state.dataHeatBalFanSys->zoneTstatSetpts)) {
@@ -2847,38 +2887,8 @@ namespace Avail {
                             }
                         }
                     }
-                    // Store adaptive temperature gradients for previous days and calculate the adaptive temp gradients
-                    //-----------------------------------------------------------------------------
-                    if (state.dataGlobal->WarmupFlag) {
-                        AdaTempGradHeat = OptStartMgr.InitTGradHeat;
-                        AdaTempGradCool = OptStartMgr.InitTGradCool;
-                    } else if (state.dataGlobal->DayOfSim == 1 && state.dataGlobal->BeginDayFlag) {
-                        state.dataAvail->OptStart_AdaTempGradTrdHeat = OptStartMgr.InitTGradHeat;
-                        AdaTempGradHeat = OptStartMgr.InitTGradHeat;
-                        state.dataAvail->OptStart_AdaTempGradTrdCool = OptStartMgr.InitTGradCool;
-                        AdaTempGradCool = OptStartMgr.InitTGradCool;
-                    } else {
-                        if (state.dataGlobal->BeginDayFlag && FirstTimeATGFlag) {
-                            FirstTimeATGFlag = false;
-                            AdaTempGradHeat += state.dataAvail->OptStart_AdaTempGradTrdHeat(NumPreDays) / NumPreDays -
-                                               state.dataAvail->OptStart_AdaTempGradTrdHeat(1) / NumPreDays;
-                            AdaTempGradCool += state.dataAvail->OptStart_AdaTempGradTrdCool(NumPreDays) / NumPreDays -
-                                               state.dataAvail->OptStart_AdaTempGradTrdCool(1) / NumPreDays;
-                            if (FanStartTime > 0) {
-                                for (ATGCounter = 1; ATGCounter <= NumPreDays - 1; ++ATGCounter) {
-                                    state.dataAvail->OptStart_AdaTempGradTrdHeat(ATGCounter) =
-                                        state.dataAvail->OptStart_AdaTempGradTrdHeat(ATGCounter + 1);
-                                    state.dataAvail->OptStart_AdaTempGradTrdCool(ATGCounter) =
-                                        state.dataAvail->OptStart_AdaTempGradTrdCool(ATGCounter + 1);
-                                }
-                            }
-                        }
-                    }
-
-                    if (state.dataGlobal->CurrentTime >= 1.0) {
-                        FirstTimeATGFlag = true;
-                    }
-                    //------------------------------------------------------------------------------
+                    updateAdaptiveTempGradHistory(state, OptStartMgr, NumPreDays, FanStartTime,
+                                                 AdaTempGradHeat, AdaTempGradCool, FirstTimeATGFlag);
 
                     if (TempDiffHi < 0.0) {
                         TempDiff = TempDiffLo;
@@ -3087,38 +3097,8 @@ namespace Avail {
                             }
                         }
                     }
-                    // Store adaptive temperature gradients for previous days and calculate the adaptive temp gradients
-                    //-----------------------------------------------------------------------------
-                    if (state.dataGlobal->WarmupFlag) {
-                        AdaTempGradHeat = OptStartMgr.InitTGradHeat;
-                        AdaTempGradCool = OptStartMgr.InitTGradCool;
-                    } else if (state.dataGlobal->DayOfSim == 1 && state.dataGlobal->BeginDayFlag) {
-                        state.dataAvail->OptStart_AdaTempGradTrdHeat = OptStartMgr.InitTGradHeat;
-                        AdaTempGradHeat = OptStartMgr.InitTGradHeat;
-                        state.dataAvail->OptStart_AdaTempGradTrdCool = OptStartMgr.InitTGradCool;
-                        AdaTempGradCool = OptStartMgr.InitTGradCool;
-                    } else {
-                        if (state.dataGlobal->BeginDayFlag && FirstTimeATGFlag) {
-                            FirstTimeATGFlag = false;
-                            AdaTempGradHeat += state.dataAvail->OptStart_AdaTempGradTrdHeat(NumPreDays) / NumPreDays -
-                                               state.dataAvail->OptStart_AdaTempGradTrdHeat(1) / NumPreDays;
-                            AdaTempGradCool += state.dataAvail->OptStart_AdaTempGradTrdCool(NumPreDays) / NumPreDays -
-                                               state.dataAvail->OptStart_AdaTempGradTrdCool(1) / NumPreDays;
-                            if (FanStartTime > 0) {
-                                for (ATGCounter = 1; ATGCounter <= NumPreDays - 1; ++ATGCounter) {
-                                    state.dataAvail->OptStart_AdaTempGradTrdHeat(ATGCounter) =
-                                        state.dataAvail->OptStart_AdaTempGradTrdHeat(ATGCounter + 1);
-                                    state.dataAvail->OptStart_AdaTempGradTrdCool(ATGCounter) =
-                                        state.dataAvail->OptStart_AdaTempGradTrdCool(ATGCounter + 1);
-                                }
-                            }
-                        }
-                    }
-
-                    if (state.dataGlobal->CurrentTime >= 1.0) {
-                        FirstTimeATGFlag = true;
-                    }
-                    //------------------------------------------------------------------------------
+                    updateAdaptiveTempGradHistory(state, OptStartMgr, NumPreDays, FanStartTime,
+                                                 AdaTempGradHeat, AdaTempGradCool, FirstTimeATGFlag);
 
                     if ((TempDiffHi < 0.0 && TempDiffLo < 0.0) || (std::abs(TempDiffLo) > std::abs(TempDiffHi) && TempDiffLo < 0.0)) { // Heating Mode
                         TempDiff = TempDiffLo;
