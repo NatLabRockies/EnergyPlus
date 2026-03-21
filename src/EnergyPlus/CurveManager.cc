@@ -712,6 +712,41 @@ namespace Curve {
         }
     }
 
+    // Helper: read one curve object from input, check for duplicate name, and create/return a new Curve.
+    static Curve *readCurveObject(EnergyPlusData &state,
+                                  std::string_view routineName,
+                                  std::string const &CurrentModuleObject,
+                                  int CurveIndex,
+                                  Array1D_string &Alphas,
+                                  int &NumAlphas,
+                                  Array1D<Real64> &Numbers,
+                                  int &NumNumbers,
+                                  int &IOStatus,
+                                  bool &ErrorsFound)
+    {
+        state.dataInputProcessing->inputProcessor->getObjectItem(state,
+                                                                 CurrentModuleObject,
+                                                                 CurveIndex,
+                                                                 Alphas,
+                                                                 NumAlphas,
+                                                                 Numbers,
+                                                                 NumNumbers,
+                                                                 IOStatus,
+                                                                 state.dataIPShortCut->lNumericFieldBlanks,
+                                                                 _,
+                                                                 state.dataIPShortCut->cAlphaFieldNames,
+                                                                 state.dataIPShortCut->cNumericFieldNames);
+
+        ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
+
+        if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
+            ShowSevereDuplicateName(state, eoh);
+            ErrorsFound = true;
+        }
+
+        return AddCurve(state, Alphas(1));
+    }
+
     // Helper: validate that input-limit min <= max for a given numeric field pair, report error if not.
     static void checkCurveInputLimits(EnergyPlusData &state,
                                       std::string const &CurrentModuleObject,
@@ -801,27 +836,7 @@ namespace Curve {
         // Loop over biquadratic curves and load data
         CurrentModuleObject = "Curve:Biquadratic";
         for (int CurveIndex = 1; CurveIndex <= NumBiQuad; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
+            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
 
             // could add checks for blank numeric fields, and use field names for errors.
             thisCurve->curveType = CurveType::BiQuadratic;
@@ -843,27 +858,7 @@ namespace Curve {
         // Loop over ChillerPartLoadWithLift curves and load data //zrp_Aug2014
         CurrentModuleObject = "Curve:ChillerPartLoadWithLift";
         for (int CurveIndex = 1; CurveIndex <= NumChillerPartLoadWithLift; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
+            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
 
             thisCurve->curveType = CurveType::ChillerPartLoadWithLift;
             thisCurve->numDims = 3;
@@ -892,27 +887,7 @@ namespace Curve {
         // Loop over cubic curves and load data
         CurrentModuleObject = "Curve:Cubic";
         for (int CurveIndex = 1; CurveIndex <= NumCubic; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
+            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
 
             thisCurve->curveType = CurveType::Cubic;
             thisCurve->numDims = 1;
@@ -1184,33 +1159,9 @@ namespace Curve {
 
             thisCurve->curveType = CurveType::TriQuadratic;
             thisCurve->numDims = 3;
-            thisCurve->coeff[0] = Numbers(1);
-            thisCurve->coeff[1] = Numbers(2);
-            thisCurve->coeff[2] = Numbers(3);
-            thisCurve->coeff[3] = Numbers(4);
-            thisCurve->coeff[4] = Numbers(5);
-            thisCurve->coeff[5] = Numbers(6);
-            thisCurve->coeff[6] = Numbers(7);
-            thisCurve->coeff[7] = Numbers(8);
-            thisCurve->coeff[8] = Numbers(9);
-            thisCurve->coeff[9] = Numbers(10);
-            thisCurve->coeff[10] = Numbers(11);
-            thisCurve->coeff[11] = Numbers(12);
-            thisCurve->coeff[12] = Numbers(13);
-            thisCurve->coeff[13] = Numbers(14);
-            thisCurve->coeff[14] = Numbers(15);
-            thisCurve->coeff[15] = Numbers(16);
-            thisCurve->coeff[16] = Numbers(17);
-            thisCurve->coeff[17] = Numbers(18);
-            thisCurve->coeff[18] = Numbers(19);
-            thisCurve->coeff[19] = Numbers(20);
-            thisCurve->coeff[20] = Numbers(21);
-            thisCurve->coeff[21] = Numbers(22);
-            thisCurve->coeff[22] = Numbers(23);
-            thisCurve->coeff[23] = Numbers(24);
-            thisCurve->coeff[24] = Numbers(25);
-            thisCurve->coeff[25] = Numbers(26);
-            thisCurve->coeff[26] = Numbers(27);
+            for (int in = 0; in < 27; ++in) {
+                thisCurve->coeff[in] = Numbers(in + 1);
+            }
             thisCurve->inputLimits[0].min = Numbers(28);
             thisCurve->inputLimits[0].max = Numbers(29);
             thisCurve->inputLimits[1].min = Numbers(30);
@@ -2010,28 +1961,10 @@ namespace Curve {
                 int numDims = state.dataCurveManager->btwxtManager.getNumGridDims(gridIndex);
                 thisCurve->numDims = numDims;
 
-                for (int i = 1; i <= std::min(6, numDims); ++i) {
-                    double vMin, vMax;
-                    std::tie(vMin, vMax) = varListLimits.at(indVarListName)[i - 1];
-                    if (i == 1) {
-                        thisCurve->inputLimits[0].min = vMin;
-                        thisCurve->inputLimits[0].max = vMax;
-                    } else if (i == 2) {
-                        thisCurve->inputLimits[1].min = vMin;
-                        thisCurve->inputLimits[1].max = vMax;
-                    } else if (i == 3) {
-                        thisCurve->inputLimits[2].min = vMin;
-                        thisCurve->inputLimits[2].max = vMax;
-                    } else if (i == 4) {
-                        thisCurve->inputLimits[3].min = vMin;
-                        thisCurve->inputLimits[3].max = vMax;
-                    } else if (i == 5) {
-                        thisCurve->inputLimits[4].min = vMin;
-                        thisCurve->inputLimits[4].max = vMax;
-                    } else if (i == 6) {
-                        thisCurve->inputLimits[5].min = vMin;
-                        thisCurve->inputLimits[5].max = vMax;
-                    }
+                for (int i = 0; i < std::min(6, numDims); ++i) {
+                    auto const &[vMin, vMax] = varListLimits.at(indVarListName)[i];
+                    thisCurve->inputLimits[i].min = vMin;
+                    thisCurve->inputLimits[i].max = vMax;
                 }
 
                 if (fields.count("minimum_output") != 0u) {
