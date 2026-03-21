@@ -184,6 +184,128 @@ namespace CondenserLoopTowers {
         }
     }
 
+    static constexpr std::string_view routineName = "GetTowerInput";
+
+    // Helper: parse basin heater power, setpoint temperature, and schedule fields common to all tower types.
+    static void parseBasinHeaterFields(EnergyPlusData &state,
+                                       CoolingTower &tower,
+                                       ErrorObjectHeader const &eoh,
+                                       Array1D<Real64> const &NumArray,
+                                       int const NumNums,
+                                       Array1D_string const &AlphArray,
+                                       int const powerIdx,
+                                       int const setptIdx,
+                                       int const schedAlpIdx,
+                                       bool &ErrorsFound)
+    {
+        auto &s_ipsc = state.dataIPShortCut;
+        tower.BasinHeaterPowerFTempDiff = NumArray(powerIdx);
+        if (NumArray(powerIdx) < 0.0) {
+            ShowSevereCustom(state, eoh, "Basin heater power as a function of temperature difference must be >= 0");
+            ErrorsFound = true;
+        }
+        tower.BasinHeaterSetPointTemp = NumArray(setptIdx);
+        if (tower.BasinHeaterPowerFTempDiff > 0.0) {
+            if (NumNums < setptIdx) {
+                tower.BasinHeaterSetPointTemp = 2.0;
+            }
+            if (tower.BasinHeaterSetPointTemp < 2.0) {
+                ShowWarningCustom(
+                    state, eoh, EnergyPlus::format("{} is less than 2 deg C. Freezing could occur.", s_ipsc->cNumericFieldNames(setptIdx)));
+            }
+        }
+        if (!AlphArray(schedAlpIdx).empty()) {
+            if ((tower.basinHeaterSched = Sched::GetSchedule(state, AlphArray(schedAlpIdx))) == nullptr) {
+                ShowWarningItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(schedAlpIdx), AlphArray(schedAlpIdx),
+                                        "Basin heater operation will not be modeled and the simulation continues");
+            }
+        }
+    }
+
+    // Helper: parse evap loss, drift loss, blowdown, and sizing factor fields common to all tower types.
+    static void parseEvapAndBlowdownFields(EnergyPlusData &state,
+                                           CoolingTower &tower,
+                                           ErrorObjectHeader const &eoh,
+                                           Array1D<Real64> const &NumArray,
+                                           Array1D_string const &AlphArray,
+                                           int const evapAlpIdx, int const evapFactIdx, int const driftIdx,
+                                           int const concIdx, int const sizIdx, int const bdModeAlpIdx, int const bdSchedAlpIdx,
+                                           bool &ErrorsFound)
+    {
+        constexpr std::array<std::string_view, static_cast<int>(EvapLoss::Num)> EvapLossNamesUC{"LOSSFACTOR", "SATURATEDEXIT"};
+        constexpr std::array<std::string_view, static_cast<int>(Blowdown::Num)> BlowDownNamesUC = {"CONCENTRATIONRATIO", "SCHEDULEDRATE"};
+        auto &s_ipsc = state.dataIPShortCut;
+        tower.EvapLossMode = static_cast<EvapLoss>(getEnumValue(EvapLossNamesUC, Util::makeUPPER(AlphArray(evapAlpIdx))));
+        tower.UserEvapLossFactor = NumArray(evapFactIdx);
+        tower.DriftLossFraction = NumArray(driftIdx) / 100.0;
+        tower.ConcentrationRatio = NumArray(concIdx);
+        tower.SizFac = NumArray(sizIdx);
+        if (tower.SizFac <= 0.0) tower.SizFac = 1.0;
+        tower.BlowdownMode = static_cast<Blowdown>(getEnumValue(BlowDownNamesUC, Util::makeUPPER(AlphArray(bdModeAlpIdx))));
+        if (tower.BlowdownMode == Blowdown::Schedule) {
+            if ((tower.blowdownSched = Sched::GetSchedule(state, AlphArray(bdSchedAlpIdx))) == nullptr) {
+                ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(bdSchedAlpIdx), AlphArray(bdSchedAlpIdx));
+                ErrorsFound = true;
+            }
+        }
+    }
+
+    // Helper: parse multi-cell fields common to all tower types.
+    static void parseMultiCellFields(EnergyPlusData &state,
+                                     CoolingTower &tower,
+                                     Array1D<Real64> const &NumArray, int const NumNums,
+                                     Array1D_string const &AlphArray,
+                                     int const cellIdx, int const minIdx, int const maxIdx, int const ctrlAlpIdx)
+    {
+        constexpr std::array<std::string_view, static_cast<int>(CellCtrl::Num)> CellCtrlNamesUC = {"MINIMALCELL", "MAXIMALCELL"};
+        auto &s_ipsc = state.dataIPShortCut;
+        tower.NumCell = NumArray(cellIdx);
+        if ((NumNums < cellIdx) && (tower.NumCell == 0)) tower.NumCell = 1;
+        tower.MinFracFlowRate = NumArray(minIdx);
+        if ((NumNums < minIdx) && (tower.MinFracFlowRate == 0.0)) tower.MinFracFlowRate = 0.33;
+        tower.MaxFracFlowRate = NumArray(maxIdx);
+        if ((NumNums < maxIdx) && (tower.MaxFracFlowRate == 0.0)) tower.MaxFracFlowRate = 2.5;
+        if (!s_ipsc->lAlphaFieldBlanks(ctrlAlpIdx)) {
+            tower.cellCtrl = static_cast<CellCtrl>(getEnumValue(CellCtrlNamesUC, Util::makeUPPER(AlphArray(ctrlAlpIdx))));
+        }
+    }
+
+    // Helper: parse water supply tank, outdoor air inlet node, and end-use subcategory fields.
+    static void parseWaterSupplyAndOAFields(EnergyPlusData &state,
+                                            CoolingTower &tower,
+                                            Array1D_string const &AlphArray, int const NumAlphas,
+                                            int const waterAlpIdx, int const oaAlpIdx,
+                                            Node::ConnectionObjectType connType,
+                                            int const endUseAlpIdx,
+                                            bool &ErrorsFound)
+    {
+        auto &s_ipsc = state.dataIPShortCut;
+        if (s_ipsc->lAlphaFieldBlanks(waterAlpIdx) || AlphArray(waterAlpIdx).empty()) {
+            tower.SuppliedByWaterSystem = false;
+        } else {
+            WaterManager::SetupTankDemandComponent(state, AlphArray(1), s_ipsc->cCurrentModuleObject,
+                                                   AlphArray(waterAlpIdx), ErrorsFound, tower.WaterTankID, tower.WaterTankDemandARRID);
+            tower.SuppliedByWaterSystem = true;
+        }
+        if (s_ipsc->lAlphaFieldBlanks(oaAlpIdx)) {
+            tower.OutdoorAirInletNodeNum = 0;
+        } else {
+            tower.OutdoorAirInletNodeNum = Node::GetOnlySingleNode(state, AlphArray(oaAlpIdx), ErrorsFound, connType, tower.Name,
+                                                                   Node::FluidType::Air, Node::ConnectionType::OutsideAirReference,
+                                                                   Node::CompFluidStream::Primary, Node::ObjectIsNotParent);
+            if (!OutAirNodeManager::CheckOutAirNodeNumber(state, tower.OutdoorAirInletNodeNum)) {
+                ShowSevereItemNotFound(state, ErrorObjectHeader{routineName, s_ipsc->cCurrentModuleObject, tower.Name},
+                                       s_ipsc->cAlphaFieldNames(oaAlpIdx), AlphArray(oaAlpIdx));
+                ErrorsFound = true;
+            }
+        }
+        if (NumAlphas >= endUseAlpIdx) {
+            tower.EndUseSubcategory = AlphArray(endUseAlpIdx);
+        } else {
+            tower.EndUseSubcategory = "General";
+        }
+    }
+
     void GetTowerInput(EnergyPlusData &state)
     {
 
@@ -201,8 +323,6 @@ namespace CondenserLoopTowers {
 
         // METHODOLOGY EMPLOYED:
         // Uses "Get" routines to read in the data.
-
-        static constexpr std::string_view routineName = "GetTowerInput";
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         int TowerNum;                      // Tower number, reference counter for towers data array
@@ -223,10 +343,7 @@ namespace CondenserLoopTowers {
 
         std::unordered_map<std::string, std::string> UniqueSimpleTowerNames;
 
-        constexpr std::array<std::string_view, static_cast<int>(EvapLoss::Num)> EvapLossNamesUC{"LOSSFACTOR", "SATURATEDEXIT"};
         constexpr std::array<std::string_view, static_cast<int>(PIM::Num)> PIMNamesUC{"NOMINALCAPACITY", "UFACTORTIMESAREAANDDESIGNWATERFLOWRATE"};
-        constexpr std::array<std::string_view, static_cast<int>(Blowdown::Num)> BlowDownNamesUC = {"CONCENTRATIONRATIO", "SCHEDULEDRATE"};
-        constexpr std::array<std::string_view, static_cast<int>(CellCtrl::Num)> CellCtrlNamesUC = {"MINIMALCELL", "MAXIMALCELL"};
 
         auto const &s_ip = state.dataInputProcessing->inputProcessor;
         auto &s_ipsc = state.dataIPShortCut;
@@ -374,85 +491,9 @@ namespace CondenserLoopTowers {
             // set tower design water outlet and inlet temperatures
             tower.DesOutletWaterTemp = tower.DesignInletWB + tower.DesignApproach;
             tower.DesInletWaterTemp = tower.DesOutletWaterTemp + tower.DesignRange;
-            //   Basin heater power as a function of temperature must be greater than or equal to 0
-            tower.BasinHeaterPowerFTempDiff = NumArray(17);
-            if (NumArray(17) < 0.0) {
-                ShowSevereCustom(state, eoh, "Basin heater power as a function of temperature difference must be >= 0");
-                ErrorsFound = true;
-            }
-
-            tower.BasinHeaterSetPointTemp = NumArray(18);
-
-            if (tower.BasinHeaterPowerFTempDiff > 0.0) {
-                if (NumNums < 18) {
-                    tower.BasinHeaterSetPointTemp = 2.0;
-                }
-                if (tower.BasinHeaterSetPointTemp < 2.0) {
-                    ShowWarningCustom(
-                        state, eoh, EnergyPlus::format("{} is less than 2 deg C. Freezing could occur.", s_ipsc->cNumericFieldNames(18)));
-                }
-            }
-
-            if (!AlphArray(5).empty()) {
-                if ((tower.basinHeaterSched = Sched::GetSchedule(state, AlphArray(5))) == nullptr) {
-                    ShowWarningItemNotFound(state,
-                                            eoh,
-                                            s_ipsc->cAlphaFieldNames(5),
-                                            AlphArray(5),
-                                            "Basin heater operation will not be modeled and the simulation continues");
-                }
-            }
-
-            // begin water use and systems get input
-            tower.EvapLossMode = static_cast<EvapLoss>(getEnumValue(EvapLossNamesUC, Util::makeUPPER(AlphArray(6))));
-
-            tower.UserEvapLossFactor = NumArray(19);        //  N11 , \field Evaporation Loss Factor
-            tower.DriftLossFraction = NumArray(20) / 100.0; //  N12, \field Drift Loss Percent
-            tower.ConcentrationRatio = NumArray(21);        //  N13, \field Blowdown Concentration Ratio
-            tower.SizFac = NumArray(25);                    //  N17  \field Sizing Factor
-            if (tower.SizFac <= 0.0) {
-                tower.SizFac = 1.0;
-            }
-
-            tower.BlowdownMode = static_cast<Blowdown>(getEnumValue(BlowDownNamesUC, Util::makeUPPER(AlphArray(7))));
-            if (tower.BlowdownMode == Blowdown::Schedule) {
-                if ((tower.blowdownSched = Sched::GetSchedule(state, AlphArray(8))) == nullptr) {
-                    ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(8), AlphArray(8));
-                    ErrorsFound = true;
-                }
-            }
-
-            if (AlphArray(9).empty()) {
-                tower.SuppliedByWaterSystem = false;
-            } else { // water from storage tank
-                WaterManager::SetupTankDemandComponent(
-                    state, AlphArray(1), s_ipsc->cCurrentModuleObject, AlphArray(9), ErrorsFound, tower.WaterTankID, tower.WaterTankDemandARRID);
-                tower.SuppliedByWaterSystem = true;
-            }
-
-            //   outdoor air inlet node
-
-            if (s_ipsc->lAlphaFieldBlanks(10)) {
-                tower.OutdoorAirInletNodeNum = 0;
-            } else {
-                tower.OutdoorAirInletNodeNum = Node::GetOnlySingleNode(state,
-                                                                       AlphArray(10),
-                                                                       ErrorsFound,
-                                                                       Node::ConnectionObjectType::CoolingTowerSingleSpeed,
-                                                                       tower.Name,
-                                                                       Node::FluidType::Air,
-                                                                       Node::ConnectionType::OutsideAirReference,
-                                                                       Node::CompFluidStream::Primary,
-                                                                       Node::ObjectIsNotParent);
-                if (!OutAirNodeManager::CheckOutAirNodeNumber(state, tower.OutdoorAirInletNodeNum)) {
-                    ShowSevereCustom(state,
-                                     eoh,
-                                     EnergyPlus::format("Outdoor Air Inlet Node Name not valid Outdoor Air Node= {}"
-                                                        "does not appear in an OutdoorAir:NodeList or as an OutdoorAir:Node.",
-                                                        AlphArray(10)));
-                    ErrorsFound = true;
-                }
-            }
+            parseBasinHeaterFields(state, tower, eoh, NumArray, NumNums, AlphArray, 17, 18, 5, ErrorsFound);
+            parseEvapAndBlowdownFields(state, tower, eoh, NumArray, AlphArray, 6, 19, 20, 21, 25, 7, 8, ErrorsFound);
+            parseWaterSupplyAndOAFields(state, tower, AlphArray, NumAlphas, 9, 10, Node::ConnectionObjectType::CoolingTowerSingleSpeed, 13, ErrorsFound);
 
             //   fluid bypass for single speed tower
             if (s_ipsc->lAlphaFieldBlanks(11) || AlphArray(11).empty()) {
@@ -463,27 +504,7 @@ namespace CondenserLoopTowers {
                 ShowWarningInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(11), AlphArray(11), "The default Fan Cycling is used.");
             }
 
-            // added for multi-cell
-            tower.NumCell = NumArray(22);
-            if ((NumNums < 22) && (tower.NumCell == 0)) {
-                // assume Number of Cells not entered and should be defaulted
-                tower.NumCell = 1;
-            }
-            tower.MinFracFlowRate = NumArray(23);
-            if ((NumNums < 23) && (tower.MinFracFlowRate == 0.0)) {
-                // assume Cell Minimum Water Flow Rate Fraction not entered and should be defaulted
-                tower.MinFracFlowRate = 0.33;
-            }
-            tower.MaxFracFlowRate = NumArray(24);
-            if ((NumNums < 24) && (tower.MaxFracFlowRate == 0.0)) {
-                // assume Cell Maximum Water Flow Rate Fraction not entered and should be defaulted
-                tower.MaxFracFlowRate = 2.5;
-            }
-
-            //   cell control for single speed tower
-            if (!s_ipsc->lAlphaFieldBlanks(12)) {
-                tower.cellCtrl = static_cast<CellCtrl>(getEnumValue(CellCtrlNamesUC, Util::makeUPPER(AlphArray(12))));
-            }
+            parseMultiCellFields(state, tower, NumArray, NumNums, AlphArray, 22, 23, 24, 12);
 
             //   High speed air flow rate must be greater than free convection air flow rate.
             //   Can't tell yet if autosized, check later in initialize.
@@ -551,11 +572,6 @@ namespace CondenserLoopTowers {
                 ErrorsFound = true;
             }
 
-            if (NumAlphas > 12) {
-                tower.EndUseSubcategory = AlphArray(13);
-            } else {
-                tower.EndUseSubcategory = "General";
-            }
         } // End Single-Speed Tower Loop
 
         s_ipsc->cCurrentModuleObject = cCoolingTower_TwoSpeed;
@@ -688,100 +704,10 @@ namespace CondenserLoopTowers {
             // set tower design water outlet and inlet temperatures
             tower.DesOutletWaterTemp = tower.DesignInletWB + tower.DesignApproach;
             tower.DesInletWaterTemp = tower.DesOutletWaterTemp + tower.DesignRange;
-            //   Basin heater power as a function of temperature must be greater than or equal to 0
-            tower.BasinHeaterPowerFTempDiff = NumArray(25);
-            if (NumArray(25) < 0.0) {
-                ShowSevereCustom(state, eoh, "Basin heater power as a function of temperature difference must be >= 0");
-                ErrorsFound = true;
-            }
-
-            tower.BasinHeaterSetPointTemp = NumArray(26);
-            if (tower.BasinHeaterPowerFTempDiff > 0.0) {
-                if (NumNums < 26) {
-                    tower.BasinHeaterSetPointTemp = 2.0;
-                }
-                if (tower.BasinHeaterSetPointTemp < 2.0) {
-                    ShowWarningCustom(
-                        state, eoh, EnergyPlus::format("{} is less than 2 deg C. Freezing could occur.", s_ipsc->cNumericFieldNames(26)));
-                }
-            }
-
-            if (!AlphArray(5).empty()) {
-                if ((tower.basinHeaterSched = Sched::GetSchedule(state, AlphArray(5))) == nullptr) {
-                    ShowWarningItemNotFound(state,
-                                            eoh,
-                                            s_ipsc->cAlphaFieldNames(5),
-                                            AlphArray(5),
-                                            "Basin heater operation will not be modeled and the simulation continues");
-                }
-            }
-
-            // begin water use and systems get input
-            tower.EvapLossMode = static_cast<EvapLoss>(getEnumValue(EvapLossNamesUC, Util::makeUPPER(AlphArray(6))));
-            tower.UserEvapLossFactor = NumArray(27);        //  N23 , \field Evaporation Loss Factor
-            tower.DriftLossFraction = NumArray(28) / 100.0; //  N24, \field Drift Loss Percent
-            tower.ConcentrationRatio = NumArray(29);        //  N17, \field Blowdown Concentration Ratio
-            tower.SizFac = NumArray(33);                    //  N21  \field Sizing Factor
-            if (tower.SizFac <= 0.0) {
-                tower.SizFac = 1.0;
-            }
-
-            tower.BlowdownMode = static_cast<Blowdown>(getEnumValue(BlowDownNamesUC, Util::makeUPPER(AlphArray(7))));
-            if (tower.BlowdownMode == Blowdown::Schedule) {
-                if ((tower.blowdownSched = Sched::GetSchedule(state, AlphArray(8))) == nullptr) {
-                    ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(8), AlphArray(8));
-                    ErrorsFound = true;
-                }
-            }
-
-            // added for multi-cell
-            tower.NumCell = NumArray(30);
-            if ((NumNums < 30) && (tower.NumCell == 0)) {
-                // assume Number of Cells not entered and should be defaulted
-                tower.NumCell = 1;
-            }
-            tower.MinFracFlowRate = NumArray(31);
-            if ((NumNums < 31) && (tower.MinFracFlowRate == 0.0)) {
-                // assume Cell Minimum Water Flow Rate Fraction not entered and should be defaulted
-                tower.MinFracFlowRate = 0.33;
-            }
-            tower.MaxFracFlowRate = NumArray(32);
-            if ((NumNums < 32) && (tower.MaxFracFlowRate == 0.0)) {
-                // assume Cell Maximum Water Flow Rate Fraction not entered and should be defaulted
-                tower.MaxFracFlowRate = 2.5;
-            }
-
-            //   cell control for two speed tower
-            if (!s_ipsc->lAlphaFieldBlanks(11)) {
-                tower.cellCtrl = static_cast<CellCtrl>(getEnumValue(CellCtrlNamesUC, Util::makeUPPER(AlphArray(11))));
-            }
-
-            if (s_ipsc->lAlphaFieldBlanks(9)) {
-                tower.SuppliedByWaterSystem = false;
-            } else { // water from storage tank
-                WaterManager::SetupTankDemandComponent(
-                    state, AlphArray(1), s_ipsc->cCurrentModuleObject, AlphArray(9), ErrorsFound, tower.WaterTankID, tower.WaterTankDemandARRID);
-                tower.SuppliedByWaterSystem = true;
-            }
-
-            //   outdoor air inlet node
-            if (s_ipsc->lAlphaFieldBlanks(10)) {
-                tower.OutdoorAirInletNodeNum = 0;
-            } else {
-                tower.OutdoorAirInletNodeNum = Node::GetOnlySingleNode(state,
-                                                                       AlphArray(10),
-                                                                       ErrorsFound,
-                                                                       Node::ConnectionObjectType::CoolingTowerTwoSpeed,
-                                                                       tower.Name,
-                                                                       Node::FluidType::Air,
-                                                                       Node::ConnectionType::OutsideAirReference,
-                                                                       Node::CompFluidStream::Primary,
-                                                                       Node::ObjectIsNotParent);
-                if (!OutAirNodeManager::CheckOutAirNodeNumber(state, tower.OutdoorAirInletNodeNum)) {
-                    ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(10), AlphArray(10));
-                    ErrorsFound = true;
-                }
-            }
+            parseBasinHeaterFields(state, tower, eoh, NumArray, NumNums, AlphArray, 25, 26, 5, ErrorsFound);
+            parseEvapAndBlowdownFields(state, tower, eoh, NumArray, AlphArray, 6, 27, 28, 29, 33, 7, 8, ErrorsFound);
+            parseMultiCellFields(state, tower, NumArray, NumNums, AlphArray, 30, 31, 32, 11);
+            parseWaterSupplyAndOAFields(state, tower, AlphArray, NumAlphas, 9, 10, Node::ConnectionObjectType::CoolingTowerTwoSpeed, 12, ErrorsFound);
 
             //   High speed air flow rate must be greater than low speed air flow rate.
             //   Can't tell yet if autosized, check later in initialize.
@@ -1328,109 +1254,15 @@ namespace CondenserLoopTowers {
                 ErrorsFound = true;
             }
 
-            //   Basin heater power as a function of temperature must be greater than or equal to 0
-            tower.BasinHeaterPowerFTempDiff = NumArray(9);
-            if (NumArray(9) < 0.0) {
-                ShowSevereCustom(state, eoh, "Basin heater power as a function of temperature difference must be >= 0");
-                ErrorsFound = true;
-            }
-
-            tower.BasinHeaterSetPointTemp = NumArray(10);
-            if (tower.BasinHeaterPowerFTempDiff > 0.0) {
-                if (NumNums < 10) {
-                    tower.BasinHeaterSetPointTemp = 2.0;
-                }
-                if (tower.BasinHeaterSetPointTemp < 2.0) {
-                    ShowWarningCustom(
-                        state, eoh, EnergyPlus::format("{} is less than 2 deg C. Freezing could occur.", s_ipsc->cNumericFieldNames(10)));
-                }
-            }
+            parseBasinHeaterFields(state, tower, eoh, NumArray, NumNums, AlphArray, 9, 10, 7, ErrorsFound);
 
             // Performance Input Method for Variable Speed Towers is assigned to be UA AND DESIGN WATER FLOW RATE
             // for autosizing calculations (see SizeTower)
             tower.PerformanceInputMethod_Num = PIM::UFactor;
 
-            if (!AlphArray(7).empty()) {
-                if ((tower.basinHeaterSched = Sched::GetSchedule(state, AlphArray(7))) == nullptr) {
-                    ShowWarningItemNotFound(state,
-                                            eoh,
-                                            s_ipsc->cAlphaFieldNames(7),
-                                            AlphArray(7),
-                                            "Basin heater operation will not be modeled and the simulation continues.");
-                }
-            }
-
-            // begin water use and systems get input
-            tower.EvapLossMode = static_cast<EvapLoss>(getEnumValue(EvapLossNamesUC, Util::makeUPPER(AlphArray(8))));
-            tower.UserEvapLossFactor = NumArray(11);        //  N11 , \field Evaporation Loss Factor
-            tower.DriftLossFraction = NumArray(12) / 100.0; //  N12, \field Drift Loss Percent
-            tower.ConcentrationRatio = NumArray(13);        //  N13, \field Blowdown Concentration Ratio
-            tower.SizFac = NumArray(17);                    //  N14  \field Sizing Factor
-            if (tower.SizFac <= 0.0) {
-                tower.SizFac = 1.0;
-            }
-
-            tower.BlowdownMode = static_cast<Blowdown>(getEnumValue(BlowDownNamesUC, Util::makeUPPER(AlphArray(9))));
-            if (tower.BlowdownMode == Blowdown::Schedule) {
-                if ((tower.blowdownSched = Sched::GetSchedule(state, AlphArray(10))) == nullptr) {
-                    ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(10), AlphArray(10));
-                    ErrorsFound = true;
-                }
-            }
-
-            // added for multi-cell
-            tower.NumCell = NumArray(14);
-            if ((NumNums < 14) && (tower.NumCell == 0)) {
-                // assume Number of Cells not entered and should be defaulted
-                tower.NumCell = 1;
-            }
-            tower.MinFracFlowRate = NumArray(15);
-            if ((NumNums < 15) && (tower.MinFracFlowRate == 0.0)) {
-                // assume Cell Minimum Water Flow Rate Fraction not entered and should be defaulted
-                tower.MinFracFlowRate = 0.33;
-            }
-            tower.MaxFracFlowRate = NumArray(16);
-            if ((NumNums < 16) && (tower.MaxFracFlowRate == 0.0)) {
-                // assume Cell Maximum Water Flow Rate Fraction not entered and should be defaulted
-                tower.MaxFracFlowRate = 2.5;
-            }
-
-            //   cell control for variable speed tower
-            if (!s_ipsc->lAlphaFieldBlanks(13)) {
-                tower.cellCtrl = static_cast<CellCtrl>(getEnumValue(CellCtrlNamesUC, Util::makeUPPER(AlphArray(13))));
-            }
-
-            if (s_ipsc->lAlphaFieldBlanks(11)) {
-                tower.SuppliedByWaterSystem = false;
-            } else { // water from storage tank
-                WaterManager::SetupTankDemandComponent(
-                    state, AlphArray(1), s_ipsc->cCurrentModuleObject, AlphArray(11), ErrorsFound, tower.WaterTankID, tower.WaterTankDemandARRID);
-                tower.SuppliedByWaterSystem = true;
-            }
-
-            //   outdoor air inlet node
-            if (s_ipsc->lAlphaFieldBlanks(12)) {
-                tower.OutdoorAirInletNodeNum = 0;
-            } else {
-                tower.OutdoorAirInletNodeNum = Node::GetOnlySingleNode(state,
-                                                                       AlphArray(12),
-                                                                       ErrorsFound,
-                                                                       Node::ConnectionObjectType::CoolingTowerVariableSpeed,
-                                                                       tower.Name,
-                                                                       Node::FluidType::Air,
-                                                                       Node::ConnectionType::OutsideAirReference,
-                                                                       Node::CompFluidStream::Primary,
-                                                                       Node::ObjectIsNotParent);
-                if (!OutAirNodeManager::CheckOutAirNodeNumber(state, tower.OutdoorAirInletNodeNum)) {
-                    ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(12), AlphArray(12));
-                    ErrorsFound = true;
-                }
-            }
-            if (NumAlphas > 13) {
-                tower.EndUseSubcategory = AlphArray(14);
-            } else {
-                tower.EndUseSubcategory = "General";
-            }
+            parseEvapAndBlowdownFields(state, tower, eoh, NumArray, AlphArray, 8, 11, 12, 13, 17, 9, 10, ErrorsFound);
+            parseMultiCellFields(state, tower, NumArray, NumNums, AlphArray, 14, 15, 16, 13);
+            parseWaterSupplyAndOAFields(state, tower, AlphArray, NumAlphas, 11, 12, Node::ConnectionObjectType::CoolingTowerVariableSpeed, 14, ErrorsFound);
 
         } // End Variable-Speed Tower Loop
 
@@ -1574,105 +1406,11 @@ namespace CondenserLoopTowers {
             // set tower design water outlet and inlet temperatures
             tower.DesOutletWaterTemp = tower.DesignInletWB + tower.DesignApproach;
             tower.DesInletWaterTemp = tower.DesOutletWaterTemp + tower.DesignRange;
-            //   Basin heater power as a function of temperature must be greater than or equal to 0
-            tower.BasinHeaterPowerFTempDiff = NumArray(21);
-            if (NumArray(21) < 0.0) {
-                ShowSevereCustom(state, eoh, "Basin heater power as a function of temperature difference must be >= 0");
-                ErrorsFound = true;
-            }
-
-            tower.BasinHeaterSetPointTemp = NumArray(22);
-            if (tower.BasinHeaterPowerFTempDiff > 0.0) {
-                if (NumNums < 22) {
-                    tower.BasinHeaterSetPointTemp = 2.0;
-                }
-                if (tower.BasinHeaterSetPointTemp < 2.0) {
-                    ShowWarningCustom(
-                        state, eoh, EnergyPlus::format("{} is less than 2 deg C. Freezing could occur.", s_ipsc->cNumericFieldNames(22)));
-                }
-            }
-
-            if (!AlphArray(9).empty()) {
-                if ((tower.basinHeaterSched = Sched::GetSchedule(state, AlphArray(9))) == nullptr) {
-                    ShowWarningItemNotFound(state,
-                                            eoh,
-                                            s_ipsc->cAlphaFieldNames(9),
-                                            AlphArray(9),
-                                            "Basin heater operation will not be modeled and the simulation continues");
-                }
-            }
-
-            // begin water use and systems get input
-            tower.EvapLossMode = static_cast<EvapLoss>(getEnumValue(EvapLossNamesUC, Util::makeUPPER(AlphArray(10))));
-            tower.UserEvapLossFactor = NumArray(23);        //  N23 , \field Evaporation Loss Factor
-            tower.DriftLossFraction = NumArray(24) / 100.0; //  N24, \field Drift Loss Percent
-            tower.ConcentrationRatio = NumArray(25);        //  N25, \field Blowdown Concentration Ratio
-            tower.SizFac = NumArray(29);                    //  N29  \field Sizing Factor
-            if (tower.SizFac <= 0.0) {
-                tower.SizFac = 1.0;
-            }
-
-            tower.BlowdownMode = static_cast<Blowdown>(getEnumValue(BlowDownNamesUC, Util::makeUPPER(AlphArray(11))));
-            if (tower.BlowdownMode == Blowdown::Schedule) {
-                if ((tower.blowdownSched = Sched::GetSchedule(state, AlphArray(12))) == nullptr) {
-                    ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(12), AlphArray(12));
-                    ErrorsFound = true;
-                }
-            }
-
-            // added for multi-cell
-            tower.NumCell = NumArray(26);
-            if ((NumNums < 26) && (tower.NumCell == 0)) {
-                // assume Number of Cells not entered and should be defaulted
-                tower.NumCell = 1;
-            }
-            tower.MinFracFlowRate = NumArray(27);
-            if ((NumNums < 27) && (tower.MinFracFlowRate == 0.0)) {
-                // assume Cell Minimum Water Flow Rate Fraction not entered and should be defaulted
-                tower.MinFracFlowRate = 0.33;
-            }
-            tower.MaxFracFlowRate = NumArray(28);
-            if ((NumNums < 28) && (tower.MaxFracFlowRate == 0.0)) {
-                // assume Cell Maximum Water Flow Rate Fraction not entered and should be defaulted
-                tower.MaxFracFlowRate = 2.5;
-            }
+            parseBasinHeaterFields(state, tower, eoh, NumArray, NumNums, AlphArray, 21, 22, 9, ErrorsFound);
+            parseEvapAndBlowdownFields(state, tower, eoh, NumArray, AlphArray, 10, 23, 24, 25, 29, 11, 12, ErrorsFound);
+            parseMultiCellFields(state, tower, NumArray, NumNums, AlphArray, 26, 27, 28, 15);
             tower.TowerMassFlowRateMultiplier = tower.MaxFracFlowRate;
-            //   cell control for variable speed Merkel tower
-            if (!s_ipsc->lAlphaFieldBlanks(15)) {
-                tower.cellCtrl = static_cast<CellCtrl>(getEnumValue(CellCtrlNamesUC, Util::makeUPPER(AlphArray(15))));
-            }
-
-            if (s_ipsc->lAlphaFieldBlanks(13)) {
-                tower.SuppliedByWaterSystem = false;
-            } else { // water from storage tank
-                WaterManager::SetupTankDemandComponent(
-                    state, AlphArray(1), s_ipsc->cCurrentModuleObject, AlphArray(13), ErrorsFound, tower.WaterTankID, tower.WaterTankDemandARRID);
-                tower.SuppliedByWaterSystem = true;
-            }
-
-            //   outdoor air inlet node
-            if (s_ipsc->lAlphaFieldBlanks(14)) {
-                tower.OutdoorAirInletNodeNum = 0;
-            } else {
-                tower.OutdoorAirInletNodeNum = Node::GetOnlySingleNode(state,
-                                                                       AlphArray(14),
-                                                                       ErrorsFound,
-                                                                       Node::ConnectionObjectType::CoolingTowerVariableSpeedMerkel,
-                                                                       tower.Name,
-                                                                       Node::FluidType::Air,
-                                                                       Node::ConnectionType::OutsideAirReference,
-                                                                       Node::CompFluidStream::Primary,
-                                                                       Node::ObjectIsNotParent);
-                if (!OutAirNodeManager::CheckOutAirNodeNumber(state, tower.OutdoorAirInletNodeNum)) {
-                    ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(14), AlphArray(14));
-                    ErrorsFound = true;
-                }
-            }
-            if (NumAlphas > 15) {
-                tower.EndUseSubcategory = AlphArray(16);
-            } else {
-                tower.EndUseSubcategory = "General";
-            }
+            parseWaterSupplyAndOAFields(state, tower, AlphArray, NumAlphas, 13, 14, Node::ConnectionObjectType::CoolingTowerVariableSpeedMerkel, 16, ErrorsFound);
 
         } // end merkel vs tower loop
 
