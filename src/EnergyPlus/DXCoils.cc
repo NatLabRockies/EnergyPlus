@@ -5736,6 +5736,43 @@ void InitDXCoil(EnergyPlusData &state, int const DXCoilNum) // number of the cur
     }
 }
 
+// Apply autosize result or compare user-specified vs design-size value with mismatch warning.
+// If isAutoSize, assigns designValue to actualValue and reports. Otherwise, reports both values
+// and warns if they differ by more than the hard-sizing threshold.
+// The warningUserMsg and warningDesMsg are pre-formatted strings for the ShowContinueError calls.
+static void applySizeResultOrReport(EnergyPlusData &state,
+                                    std::string_view coilType,
+                                    std::string_view coilName,
+                                    bool isAutoSize,
+                                    bool hardSizeNoDesRun,
+                                    Real64 designValue,
+                                    Real64 &actualValue,
+                                    std::string const &designSizeDesc,
+                                    std::string const &userSpecDesc,
+                                    std::string const &warningUserMsg,
+                                    std::string const &warningDesMsg)
+{
+    if (isAutoSize) {
+        actualValue = designValue;
+        BaseSizer::reportSizerOutput(state, coilType, coilName, designSizeDesc, designValue);
+    } else {
+        if (actualValue > 0.0 && designValue > 0.0 && !hardSizeNoDesRun) {
+            Real64 userValue = actualValue;
+            BaseSizer::reportSizerOutput(state, coilType, coilName, designSizeDesc, designValue, userSpecDesc, userValue);
+            if (state.dataGlobal->DisplayExtraWarnings) {
+                if ((std::abs(designValue - userValue) / userValue) > state.dataSize->AutoVsHardSizingThreshold) {
+                    ShowMessage(state,
+                                EnergyPlus::format("SizeDxCoil: Potential issue with equipment sizing for {} {}", coilType, coilName));
+                    ShowContinueError(state, warningUserMsg);
+                    ShowContinueError(state, warningDesMsg);
+                    ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
+                    ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
+                }
+            }
+        }
+    }
+}
+
 // Validate that multispeed values are monotonically non-decreasing with speed.
 // Issues a warning + fatal if value at any speed exceeds the next higher speed.
 static void validateMultispeedMonotonicity(EnergyPlusData &state,
@@ -6177,37 +6214,13 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
                 }
                 // Autosize Primary Coil Air Flow * Secondary Coil Scaling Factor
                 SecCoilAirFlowDes = thisDXCoil.RatedAirVolFlowRate(1) * thisDXCoil.SecCoilAirFlowScalingFactor;
-                if (IsAutoSize) {
-                    thisDXCoil.SecCoilAirFlow = SecCoilAirFlowDes;
-                    BaseSizer::reportSizerOutput(
-                        state, thisDXCoil.DXCoilType, thisDXCoil.Name, "Design Size Secondary Coil Air Flow Rate [m3/s]", SecCoilAirFlowDes);
-                } else {
-                    if (thisDXCoil.SecCoilAirFlow > 0.0 && SecCoilAirFlowDes > 0.0 && !HardSizeNoDesRun) {
-                        SecCoilAirFlowUser = thisDXCoil.SecCoilAirFlow;
-                        BaseSizer::reportSizerOutput(state,
-                                                     thisDXCoil.DXCoilType,
-                                                     thisDXCoil.Name,
-                                                     "Design Size Secondary Coil Air Flow Rate [m3/s]",
-                                                     SecCoilAirFlowDes,
-                                                     "User-Specified Secondary Coil Air Flow Rate [m3/s]",
-                                                     SecCoilAirFlowUser);
-                        if (state.dataGlobal->DisplayExtraWarnings) {
-                            if ((std::abs(SecCoilAirFlowDes - SecCoilAirFlowUser) / SecCoilAirFlowUser) > state.dataSize->AutoVsHardSizingThreshold) {
-                                ShowMessage(state,
-                                            EnergyPlus::format("SizeDxCoil: Potential issue with equipment sizing for {} {}",
-                                                               thisDXCoil.DXCoilType,
-                                                               thisDXCoil.Name));
-                                ShowContinueError(
-                                    state, EnergyPlus::format("User-Specified Secondary Coil Air Flow Rate of {:.5R} [m3/s]", SecCoilAirFlowUser));
-                                ShowContinueError(
-                                    state,
-                                    EnergyPlus::format("differs from Design Size Secondary Coil Air Flow Rate of {:.5R} [m3/s]", SecCoilAirFlowDes));
-                                ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
-                                ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
-                            }
-                        }
-                    }
-                }
+                applySizeResultOrReport(
+                    state, thisDXCoil.DXCoilType, thisDXCoil.Name, IsAutoSize, HardSizeNoDesRun,
+                    SecCoilAirFlowDes, thisDXCoil.SecCoilAirFlow,
+                    "Design Size Secondary Coil Air Flow Rate [m3/s]",
+                    "User-Specified Secondary Coil Air Flow Rate [m3/s]",
+                    EnergyPlus::format("User-Specified Secondary Coil Air Flow Rate of {:.5R} [m3/s]", thisDXCoil.SecCoilAirFlow),
+                    EnergyPlus::format("differs from Design Size Secondary Coil Air Flow Rate of {:.5R} [m3/s]", SecCoilAirFlowDes));
             }
 
             // Sizing evaporative condenser air flow 2
@@ -6620,41 +6633,13 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
                 // this is done to duplicate any existing calc method
                 MSEvapCondAirFlowDes = thisDXCoil.MSRatedTotCap(Mode) * 0.000114;
             }
-            if (IsAutoSize) {
-                thisDXCoil.MSEvapCondAirFlow(Mode) = MSEvapCondAirFlowDes;
-                BaseSizer::reportSizerOutput(state,
-                                             thisDXCoil.DXCoilType,
-                                             thisDXCoil.Name,
-                                             EnergyPlus::format("Design Size Speed {} Evaporative Condenser Air Flow Rate [m3/s]", Mode),
-                                             MSEvapCondAirFlowDes);
-            } else {
-                if (thisDXCoil.MSEvapCondAirFlow(Mode) > 0.0 && MSEvapCondAirFlowDes > 0.0 && !HardSizeNoDesRun) {
-                    MSEvapCondAirFlowUser = thisDXCoil.MSEvapCondAirFlow(Mode);
-                    BaseSizer::reportSizerOutput(state,
-                                                 thisDXCoil.DXCoilType,
-                                                 thisDXCoil.Name,
-                                                 EnergyPlus::format("Design Size Speed {} Evaporative Condenser Air Flow Rate [m3/s]", Mode),
-                                                 MSEvapCondAirFlowDes,
-                                                 EnergyPlus::format("User-Specified Speed {} Evaporative Condenser Air Flow Rate [m3/s]", Mode),
-                                                 MSEvapCondAirFlowUser);
-                    if (state.dataGlobal->DisplayExtraWarnings) {
-                        if ((std::abs(MSEvapCondAirFlowDes - MSEvapCondAirFlowUser) / MSEvapCondAirFlowUser) >
-                            state.dataSize->AutoVsHardSizingThreshold) {
-                            ShowMessage(state,
-                                        EnergyPlus::format(
-                                            "SizeDxCoil: Potential issue with equipment sizing for {} {}", thisDXCoil.DXCoilType, thisDXCoil.Name));
-                            ShowContinueError(
-                                state,
-                                EnergyPlus::format("User-Specified Evaporative Condenser Air Flow Rate of {:.5R} [m3/s]", MSEvapCondAirFlowUser));
-                            ShowContinueError(state,
-                                              EnergyPlus::format("differs from Design Size Evaporative Condenser Air Flow Rate of {:.5R} [m3/s]",
-                                                                 MSEvapCondAirFlowDes));
-                            ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
-                            ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
-                        }
-                    }
-                }
-            }
+            applySizeResultOrReport(
+                state, thisDXCoil.DXCoilType, thisDXCoil.Name, IsAutoSize, HardSizeNoDesRun,
+                MSEvapCondAirFlowDes, thisDXCoil.MSEvapCondAirFlow(Mode),
+                EnergyPlus::format("Design Size Speed {} Evaporative Condenser Air Flow Rate [m3/s]", Mode),
+                EnergyPlus::format("User-Specified Speed {} Evaporative Condenser Air Flow Rate [m3/s]", Mode),
+                EnergyPlus::format("User-Specified Evaporative Condenser Air Flow Rate of {:.5R} [m3/s]", thisDXCoil.MSEvapCondAirFlow(Mode)),
+                EnergyPlus::format("differs from Design Size Evaporative Condenser Air Flow Rate of {:.5R} [m3/s]", MSEvapCondAirFlowDes));
         }
 
         // Ensure evaporative condenser airflow rate at lower speed must be lower or equal to one at higher speed.
@@ -6676,43 +6661,13 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
                 MSEvapCondPumpElecNomPowerDes = thisDXCoil.MSRatedTotCap(Mode) * 0.004266;
             }
             // Design Size data is always available
-            if (IsAutoSize) {
-                thisDXCoil.MSEvapCondPumpElecNomPower(Mode) = MSEvapCondPumpElecNomPowerDes;
-                BaseSizer::reportSizerOutput(state,
-                                             thisDXCoil.DXCoilType,
-                                             thisDXCoil.Name,
-                                             EnergyPlus::format("Design Size Speed {} Rated Evaporative Condenser Pump Power Consumption [W]", Mode),
-                                             MSEvapCondPumpElecNomPowerDes);
-            } else {
-                if (thisDXCoil.MSEvapCondPumpElecNomPower(Mode) > 0.0 && MSEvapCondPumpElecNomPowerDes > 0.0 && !HardSizeNoDesRun) {
-                    MSEvapCondPumpElecNomPowerUser = thisDXCoil.MSEvapCondPumpElecNomPower(Mode);
-                    BaseSizer::reportSizerOutput(
-                        state,
-                        thisDXCoil.DXCoilType,
-                        thisDXCoil.Name,
-                        EnergyPlus::format("Design Size Speed {} Rated Evaporative Condenser Pump Power Consumption [W]", Mode),
-                        MSEvapCondPumpElecNomPowerDes,
-                        EnergyPlus::format("User-Specified Speed {} Rated Evaporative Condenser Pump Power Consumption [W]", Mode),
-                        MSEvapCondPumpElecNomPowerUser);
-                    if (state.dataGlobal->DisplayExtraWarnings) {
-                        if ((std::abs(MSEvapCondPumpElecNomPowerDes - MSEvapCondPumpElecNomPowerUser) / MSEvapCondPumpElecNomPowerUser) >
-                            state.dataSize->AutoVsHardSizingThreshold) {
-                            ShowMessage(state,
-                                        EnergyPlus::format(
-                                            "SizeDxCoil: Potential issue with equipment sizing for {} {}", thisDXCoil.DXCoilType, thisDXCoil.Name));
-                            ShowContinueError(state,
-                                              EnergyPlus::format("User-Specified Evaporative Condenser Pump Rated Power Consumption of {:.2R} [W]",
-                                                                 MSEvapCondPumpElecNomPowerUser));
-                            ShowContinueError(
-                                state,
-                                EnergyPlus::format("differs from Design Size Evaporative Condenser Pump Rated Power Consumption of {:.2R} [W]",
-                                                   MSEvapCondPumpElecNomPowerDes));
-                            ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
-                            ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
-                        }
-                    }
-                }
-            }
+            applySizeResultOrReport(
+                state, thisDXCoil.DXCoilType, thisDXCoil.Name, IsAutoSize, HardSizeNoDesRun,
+                MSEvapCondPumpElecNomPowerDes, thisDXCoil.MSEvapCondPumpElecNomPower(Mode),
+                EnergyPlus::format("Design Size Speed {} Rated Evaporative Condenser Pump Power Consumption [W]", Mode),
+                EnergyPlus::format("User-Specified Speed {} Rated Evaporative Condenser Pump Power Consumption [W]", Mode),
+                EnergyPlus::format("User-Specified Evaporative Condenser Pump Rated Power Consumption of {:.2R} [W]", thisDXCoil.MSEvapCondPumpElecNomPower(Mode)),
+                EnergyPlus::format("differs from Design Size Evaporative Condenser Pump Rated Power Consumption of {:.2R} [W]", MSEvapCondPumpElecNomPowerDes));
         }
 
         // Ensure evaporative condenser pump power at lower speed must be lower or equal to one at higher speed.
@@ -6798,40 +6753,13 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
                 }
                 // Autosize Primary Coil air flow * Secondary Coil Scaling Factor
                 SecCoilAirFlowDes = thisDXCoil.MSRatedAirVolFlowRate(Mode) * thisDXCoil.MSSecCoilAirFlowScalingFactor(Mode);
-                if (IsAutoSize) {
-                    thisDXCoil.MSSecCoilAirFlow(Mode) = SecCoilAirFlowDes;
-                    BaseSizer::reportSizerOutput(state,
-                                                 thisDXCoil.DXCoilType,
-                                                 thisDXCoil.Name,
-                                                 EnergyPlus::format("Design Size Speed {} Secondary Coil Air Flow Rate [m3/s]", Mode),
-                                                 SecCoilAirFlowDes);
-                } else {
-                    if (thisDXCoil.MSSecCoilAirFlow(Mode) > 0.0 && SecCoilAirFlowDes > 0.0 && !HardSizeNoDesRun) {
-                        SecCoilAirFlowUser = thisDXCoil.MSSecCoilAirFlow(Mode);
-                        BaseSizer::reportSizerOutput(state,
-                                                     thisDXCoil.DXCoilType,
-                                                     thisDXCoil.Name,
-                                                     EnergyPlus::format("Design Size Speed {} Secondary Coil Air Flow Rate [m3/s]", Mode),
-                                                     SecCoilAirFlowDes,
-                                                     EnergyPlus::format("User-Specified Speed {} Secondary Coil Air Flow Rate [m3/s]", Mode),
-                                                     SecCoilAirFlowUser);
-                        if (state.dataGlobal->DisplayExtraWarnings) {
-                            if ((std::abs(SecCoilAirFlowDes - SecCoilAirFlowUser) / SecCoilAirFlowUser) > state.dataSize->AutoVsHardSizingThreshold) {
-                                ShowMessage(state,
-                                            EnergyPlus::format("SizeDxCoil: Potential issue with equipment sizing for {} {}",
-                                                               thisDXCoil.DXCoilType,
-                                                               thisDXCoil.Name));
-                                ShowContinueError(
-                                    state, EnergyPlus::format("User-Specified Secondary Coil Air Flow Rate of {:.5R} [m3/s]", SecCoilAirFlowUser));
-                                ShowContinueError(
-                                    state,
-                                    EnergyPlus::format("differs from Design Size Secondary Coil Air Flow Rate of {:.5R} [m3/s]", SecCoilAirFlowDes));
-                                ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
-                                ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
-                            }
-                        }
-                    }
-                }
+                applySizeResultOrReport(
+                    state, thisDXCoil.DXCoilType, thisDXCoil.Name, IsAutoSize, HardSizeNoDesRun,
+                    SecCoilAirFlowDes, thisDXCoil.MSSecCoilAirFlow(Mode),
+                    EnergyPlus::format("Design Size Speed {} Secondary Coil Air Flow Rate [m3/s]", Mode),
+                    EnergyPlus::format("User-Specified Speed {} Secondary Coil Air Flow Rate [m3/s]", Mode),
+                    EnergyPlus::format("User-Specified Secondary Coil Air Flow Rate of {:.5R} [m3/s]", thisDXCoil.MSSecCoilAirFlow(Mode)),
+                    EnergyPlus::format("differs from Design Size Secondary Coil Air Flow Rate of {:.5R} [m3/s]", SecCoilAirFlowDes));
             }
         }
 
