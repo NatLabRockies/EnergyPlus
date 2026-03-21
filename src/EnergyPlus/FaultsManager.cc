@@ -200,6 +200,36 @@ namespace FaultsManager {
 
     constexpr std::array<std::string_view, static_cast<int>(FouledCoil::Num)> FouledCoilNamesUC{"FOULEDUARATED", "FOULINGFACTOR"};
 
+    // Helper: read the availability and severity schedule fields that are common to most fault objects.
+    // alphaFieldBlanks / alphaArgs / alphaFieldNames are 1-based arrays; availIdx and severityIdx
+    // give the positions of the two schedule fields within them.
+    static void readFaultSchedules(EnergyPlusData &state,
+                                   FaultProperties &fault,
+                                   ErrorObjectHeader const &eoh,
+                                   Array1D_string const &alphaArgs,
+                                   Array1D_bool const &alphaFieldBlanks,
+                                   Array1D_string const &alphaFieldNames,
+                                   int availIdx,
+                                   int severityIdx,
+                                   bool &errorsFound)
+    {
+        // Availability schedule
+        if (alphaFieldBlanks(availIdx)) {
+            fault.availSched = Sched::GetScheduleAlwaysOn(state);
+        } else if ((fault.availSched = Sched::GetSchedule(state, alphaArgs(availIdx))) == nullptr) {
+            ShowSevereItemNotFound(state, eoh, alphaFieldNames(availIdx), alphaArgs(availIdx));
+            errorsFound = true;
+        }
+
+        // Severity schedule
+        if (alphaFieldBlanks(severityIdx)) {
+            fault.severitySched = Sched::GetScheduleAlwaysOn(state);
+        } else if ((fault.severitySched = Sched::GetSchedule(state, alphaArgs(severityIdx))) == nullptr) {
+            ShowSevereItemNotFound(state, eoh, alphaFieldNames(severityIdx), alphaArgs(severityIdx));
+            errorsFound = true;
+        }
+    }
+
     void CheckAndReadFaults(EnergyPlusData &state)
     {
 
@@ -357,21 +387,7 @@ namespace FaultsManager {
             faultsECFouling.type = FaultType::Fouling_EvapCooler;
             faultsECFouling.Name = cAlphaArgs(1);
 
-            // Fault availability schedule
-            if (lAlphaFieldBlanks(2)) {
-                faultsECFouling.availSched = Sched::GetScheduleAlwaysOn(state); // returns schedule value of 1
-            } else if ((faultsECFouling.availSched = Sched::GetSchedule(state, cAlphaArgs(2))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(2), cAlphaArgs(2));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
-
-            // Fault severity schedule
-            if (lAlphaFieldBlanks(3)) {
-                faultsECFouling.severitySched = Sched::GetScheduleAlwaysOn(state); // not an availability schedule, but defaults to constant-1.0
-            } else if ((faultsECFouling.severitySched = Sched::GetSchedule(state, cAlphaArgs(3))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(3), cAlphaArgs(3));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
+            readFaultSchedules(state, faultsECFouling, eoh, cAlphaArgs, lAlphaFieldBlanks, cAlphaFieldNames, 2, 3, state.dataFaultsMgr->ErrorsFound);
 
             // CapReductionFactor - degree of fault
             faultsECFouling.FoulingFactor = rNumericArgs(1);
@@ -443,21 +459,7 @@ namespace FaultsManager {
             faultsChillerFouling.type = FaultType::Fouling_Chiller;
             faultsChillerFouling.Name = cAlphaArgs(1);
 
-            // Fault availability schedule
-            if (lAlphaFieldBlanks(2)) {
-                faultsChillerFouling.availSched = Sched::GetScheduleAlwaysOn(state); // returns schedule value of 1
-            } else if ((faultsChillerFouling.availSched = Sched::GetSchedule(state, cAlphaArgs(2))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(2), cAlphaArgs(2));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
-
-            // Fault severity schedule
-            if (lAlphaFieldBlanks(3)) {
-                faultsChillerFouling.severitySched = Sched::GetScheduleAlwaysOn(state); // not an availability schedule, but defaults to constant-1.0
-            } else if ((faultsChillerFouling.severitySched = Sched::GetSchedule(state, cAlphaArgs(3))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(3), cAlphaArgs(3));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
+            readFaultSchedules(state, faultsChillerFouling, eoh, cAlphaArgs, lAlphaFieldBlanks, cAlphaFieldNames, 2, 3, state.dataFaultsMgr->ErrorsFound);
 
             // CapReductionFactor - degree of fault
             faultsChillerFouling.FoulingFactor = rNumericArgs(1);
@@ -727,21 +729,7 @@ namespace FaultsManager {
             faultsBoilerFouling.type = FaultType::Fouling_Boiler;
             faultsBoilerFouling.Name = cAlphaArgs(1);
 
-            // Fault availability schedule
-            if (lAlphaFieldBlanks(2)) {
-                faultsBoilerFouling.availSched = Sched::GetScheduleAlwaysOn(state); // returns schedule value of 1
-            } else if ((faultsBoilerFouling.availSched = Sched::GetSchedule(state, cAlphaArgs(2))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(2), cAlphaArgs(2));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
-
-            // Fault severity schedule
-            if (lAlphaFieldBlanks(3)) {
-                faultsBoilerFouling.severitySched = Sched::GetScheduleAlwaysOn(state); // not an availability schedule, but defaults to constant-1.0
-            } else if ((faultsBoilerFouling.severitySched = Sched::GetSchedule(state, cAlphaArgs(3))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(3), cAlphaArgs(3));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
+            readFaultSchedules(state, faultsBoilerFouling, eoh, cAlphaArgs, lAlphaFieldBlanks, cAlphaFieldNames, 2, 3, state.dataFaultsMgr->ErrorsFound);
 
             // CapReductionFactor - degree of fault
             faultsBoilerFouling.FoulingFactor = rNumericArgs(1);
@@ -812,21 +800,7 @@ namespace FaultsManager {
             faultsCoilSATFouling.type = FaultType::TemperatureSensorOffset_CoilSupplyAir;
             faultsCoilSATFouling.Name = cAlphaArgs(1);
 
-            // Fault availability schedule
-            if (lAlphaFieldBlanks(2)) {
-                faultsCoilSATFouling.availSched = Sched::GetScheduleAlwaysOn(state); // returns schedule value of 1
-            } else if ((faultsCoilSATFouling.availSched = Sched::GetSchedule(state, cAlphaArgs(2))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(2), cAlphaArgs(2));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
-
-            // Fault severity schedule
-            if (lAlphaFieldBlanks(3)) {
-                faultsCoilSATFouling.severitySched = Sched::GetScheduleAlwaysOn(state); // not an availability schedule, but defaults to constant-1.0
-            } else if ((faultsCoilSATFouling.severitySched = Sched::GetSchedule(state, cAlphaArgs(3))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(3), cAlphaArgs(3));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
+            readFaultSchedules(state, faultsCoilSATFouling, eoh, cAlphaArgs, lAlphaFieldBlanks, cAlphaFieldNames, 2, 3, state.dataFaultsMgr->ErrorsFound);
 
             // offset - degree of fault
             faultsCoilSATFouling.Offset = rNumericArgs(1);
@@ -1043,21 +1017,7 @@ namespace FaultsManager {
             faultsTowerFouling.type = FaultType::Fouling_Tower;
             faultsTowerFouling.Name = cAlphaArgs(1);
 
-            // Fault availability schedule
-            if (lAlphaFieldBlanks(2)) {
-                faultsTowerFouling.availSched = Sched::GetScheduleAlwaysOn(state); // returns schedule value of 1
-            } else if ((faultsTowerFouling.availSched = Sched::GetSchedule(state, cAlphaArgs(2))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(2), cAlphaArgs(2));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
-
-            // Fault severity schedule
-            if (lAlphaFieldBlanks(3)) {
-                faultsTowerFouling.severitySched = Sched::GetScheduleAlwaysOn(state); // not an availability schedule, but defaults to constant-1.0
-            } else if ((faultsTowerFouling.severitySched = Sched::GetSchedule(state, cAlphaArgs(3))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(3), cAlphaArgs(3));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
+            readFaultSchedules(state, faultsTowerFouling, eoh, cAlphaArgs, lAlphaFieldBlanks, cAlphaFieldNames, 2, 3, state.dataFaultsMgr->ErrorsFound);
 
             // UAReductionFactor - degree of fault
             faultsTowerFouling.UAReductionFactor = rNumericArgs(1);
@@ -1157,21 +1117,7 @@ namespace FaultsManager {
             faultsCondSWTFouling.type = FaultType::TemperatureSensorOffset_CondenserSupplyWater;
             faultsCondSWTFouling.Name = cAlphaArgs(1);
 
-            // Fault availability schedule
-            if (lAlphaFieldBlanks(2)) {
-                faultsCondSWTFouling.availSched = Sched::GetScheduleAlwaysOn(state); // returns schedule value of 1
-            } else if ((faultsCondSWTFouling.availSched = Sched::GetSchedule(state, cAlphaArgs(2))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(2), cAlphaArgs(2));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
-
-            // Fault severity schedule
-            if (lAlphaFieldBlanks(3)) {
-                faultsCondSWTFouling.severitySched = Sched::GetScheduleAlwaysOn(state); // not an availability schedule, but defaults to constant-1.0
-            } else if ((faultsCondSWTFouling.severitySched = Sched::GetSchedule(state, cAlphaArgs(3))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(3), cAlphaArgs(3));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
+            readFaultSchedules(state, faultsCondSWTFouling, eoh, cAlphaArgs, lAlphaFieldBlanks, cAlphaFieldNames, 2, 3, state.dataFaultsMgr->ErrorsFound);
 
             // offset - degree of fault
             faultsCondSWTFouling.Offset = rNumericArgs(1);
@@ -1255,21 +1201,7 @@ namespace FaultsManager {
             faultsChillerSWT.type = FaultType::TemperatureSensorOffset_ChillerSupplyWater;
             faultsChillerSWT.Name = cAlphaArgs(1);
 
-            // Fault availability schedule
-            if (lAlphaFieldBlanks(2)) {
-                faultsChillerSWT.availSched = Sched::GetScheduleAlwaysOn(state); // returns schedule value of 1
-            } else if ((faultsChillerSWT.availSched = Sched::GetSchedule(state, cAlphaArgs(2))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(2), cAlphaArgs(2));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
-
-            // Fault severity schedule
-            if (lAlphaFieldBlanks(3)) {
-                faultsChillerSWT.severitySched = Sched::GetScheduleAlwaysOn(state); // not an availability schedule, but defaults to constant-1.0
-            } else if ((faultsChillerSWT.severitySched = Sched::GetSchedule(state, cAlphaArgs(3))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(3), cAlphaArgs(3));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
+            readFaultSchedules(state, faultsChillerSWT, eoh, cAlphaArgs, lAlphaFieldBlanks, cAlphaFieldNames, 2, 3, state.dataFaultsMgr->ErrorsFound);
 
             // offset - degree of fault
             faultsChillerSWT.Offset = rNumericArgs(1);
@@ -1587,21 +1519,7 @@ namespace FaultsManager {
             } else {
                 // For Humidistat Offset Type: ThermostatOffsetIndependent
 
-                // Availability schedule
-                if (lAlphaFieldBlanks(4)) {
-                    faultsHStat.availSched = Sched::GetScheduleAlwaysOn(state); // returns schedule value of 1
-                } else if ((faultsHStat.availSched = Sched::GetSchedule(state, cAlphaArgs(4))) == nullptr) {
-                    ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(4), cAlphaArgs(4));
-                    state.dataFaultsMgr->ErrorsFound = true;
-                }
-
-                // Severity schedule
-                if (lAlphaFieldBlanks(5)) {
-                    faultsHStat.severitySched = Sched::GetScheduleAlwaysOn(state); // not an availability schedule, but defaults to constant-1.0
-                } else if ((faultsHStat.severitySched = Sched::GetSchedule(state, cAlphaArgs(5))) == nullptr) {
-                    ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(5), cAlphaArgs(5));
-                    state.dataFaultsMgr->ErrorsFound = true;
-                }
+                readFaultSchedules(state, faultsHStat, eoh, cAlphaArgs, lAlphaFieldBlanks, cAlphaFieldNames, 4, 5, state.dataFaultsMgr->ErrorsFound);
 
                 // Reference offset value is required for Humidistat Offset Type: ThermostatOffsetIndependent
                 if (lAlphaFieldBlanks(1)) {
@@ -1641,21 +1559,7 @@ namespace FaultsManager {
             faultsTStat.Name = cAlphaArgs(1);
             faultsTStat.FaultyThermostatName = cAlphaArgs(2);
 
-            // Availability schedule
-            if (lAlphaFieldBlanks(3)) {
-                faultsTStat.availSched = Sched::GetScheduleAlwaysOn(state); // returns schedule value of 1
-            } else if ((faultsTStat.availSched = Sched::GetSchedule(state, cAlphaArgs(3))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(3), cAlphaArgs(3));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
-
-            // Severity schedule
-            if (lAlphaFieldBlanks(4)) {
-                faultsTStat.severitySched = Sched::GetScheduleAlwaysOn(state); // not an availability schedule, but defaults to constant-1.0
-            } else if ((faultsTStat.severitySched = Sched::GetSchedule(state, cAlphaArgs(4))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(4), cAlphaArgs(4));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
+            readFaultSchedules(state, faultsTStat, eoh, cAlphaArgs, lAlphaFieldBlanks, cAlphaFieldNames, 3, 4, state.dataFaultsMgr->ErrorsFound);
 
             // Reference offset value is required
             if (lAlphaFieldBlanks(1)) {
@@ -1689,21 +1593,7 @@ namespace FaultsManager {
             faultsFoulCoil.Name = cAlphaArgs(1);
             faultsFoulCoil.FouledCoilName = cAlphaArgs(2);
 
-            // Availability schedule
-            if (lAlphaFieldBlanks(3)) {
-                faultsFoulCoil.availSched = Sched::GetScheduleAlwaysOn(state); // returns schedule value of 1
-            } else if ((faultsFoulCoil.availSched = Sched::GetSchedule(state, cAlphaArgs(3))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(3), cAlphaArgs(3));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
-
-            // Severity schedule
-            if (lAlphaFieldBlanks(4)) {
-                faultsFoulCoil.severitySched = Sched::GetScheduleAlwaysOn(state); // not an availability schedule, but defaults to constant-1.0
-            } else if ((faultsFoulCoil.severitySched = Sched::GetSchedule(state, cAlphaArgs(4))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(4), cAlphaArgs(4));
-                state.dataFaultsMgr->ErrorsFound = true;
-            }
+            readFaultSchedules(state, faultsFoulCoil, eoh, cAlphaArgs, lAlphaFieldBlanks, cAlphaFieldNames, 3, 4, state.dataFaultsMgr->ErrorsFound);
 
             faultsFoulCoil.FoulingInputMethod = static_cast<FouledCoil>(getEnumValue(FouledCoilNamesUC, Util::makeUPPER(cAlphaArgs(5))));
             if (faultsFoulCoil.FoulingInputMethod == FouledCoil::Invalid) {
@@ -1852,21 +1742,7 @@ namespace FaultsManager {
 
                 fault.Name = cAlphaArgs(1);
 
-                // check availability schedule
-                if (lAlphaFieldBlanks(2)) {
-                    fault.availSched = Sched::GetScheduleAlwaysOn(state); // returns schedule value of 1
-                } else if ((fault.availSched = Sched::GetSchedule(state, cAlphaArgs(2))) == nullptr) {
-                    ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(2), cAlphaArgs(2));
-                    state.dataFaultsMgr->ErrorsFound = true;
-                }
-
-                // check severity schedule
-                if (lAlphaFieldBlanks(3)) {
-                    fault.severitySched = Sched::GetScheduleAlwaysOn(state); // not an availability schedule, but defaults to constant-1.0
-                } else if ((fault.severitySched = Sched::GetSchedule(state, cAlphaArgs(3))) == nullptr) {
-                    ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(3), cAlphaArgs(3));
-                    state.dataFaultsMgr->ErrorsFound = true;
-                }
+                readFaultSchedules(state, fault, eoh, cAlphaArgs, lAlphaFieldBlanks, cAlphaFieldNames, 2, 3, state.dataFaultsMgr->ErrorsFound);
 
                 fault.ControllerType = cAlphaArgs(4);
                 // check controller type
