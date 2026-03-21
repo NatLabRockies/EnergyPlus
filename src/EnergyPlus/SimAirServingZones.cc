@@ -5169,6 +5169,37 @@ static void updateMinADEffBySys(EnergyPlusData &state,
     }
 }
 
+// Copy cooling peak design data from a per-design-day SysSizing record into CalcSysSizing.
+// Used in EndSysSizingCalc to pick the peak across all design days for both sensible and total cooling.
+static void copyCoolPeakToCalcSysSizing(DataSizing::SystemSizingData &calcSS,
+                                         DataSizing::SystemSizingData const &srcSS)
+{
+    calcSS.DesCoolVolFlow = srcSS.DesCoolVolFlow;
+    calcSS.CoolDesDay = srcSS.CoolDesDay;
+    calcSS.MassFlowAtCoolPeak = srcSS.MassFlowAtCoolPeak;
+    calcSS.SensCoolCap = srcSS.SensCoolCap;
+    calcSS.TotCoolCap = srcSS.TotCoolCap;
+    calcSS.CoolFlowSeq = srcSS.CoolFlowSeq;
+    calcSS.SumZoneCoolLoadSeq = srcSS.SumZoneCoolLoadSeq;
+    calcSS.CoolZoneAvgTempSeq = srcSS.CoolZoneAvgTempSeq;
+    calcSS.SensCoolCapSeq = srcSS.SensCoolCapSeq;
+    calcSS.TotCoolCapSeq = srcSS.TotCoolCapSeq;
+    calcSS.MixTempAtCoolPeak = srcSS.MixTempAtCoolPeak;
+    calcSS.RetTempAtCoolPeak = srcSS.RetTempAtCoolPeak;
+    calcSS.MixHumRatAtCoolPeak = srcSS.MixHumRatAtCoolPeak;
+    calcSS.RetHumRatAtCoolPeak = srcSS.RetHumRatAtCoolPeak;
+    calcSS.OutTempAtCoolPeak = srcSS.OutTempAtCoolPeak;
+    calcSS.OutHumRatAtCoolPeak = srcSS.OutHumRatAtCoolPeak;
+    calcSS.SysCoolRetTempSeq = srcSS.SysCoolRetTempSeq;
+    calcSS.SysCoolRetHumRatSeq = srcSS.SysCoolRetHumRatSeq;
+    calcSS.SysCoolOutTempSeq = srcSS.SysCoolOutTempSeq;
+    calcSS.SysCoolOutHumRatSeq = srcSS.SysCoolOutHumRatSeq;
+    calcSS.SysDOASHeatAddSeq = srcSS.SysDOASHeatAddSeq;
+    calcSS.SysDOASLatAddSeq = srcSS.SysDOASLatAddSeq;
+    calcSS.SysDesCoolLoad = srcSS.SysDesCoolLoad;
+    calcSS.SysCoolLoadTimeStepPk = srcSS.SysCoolLoadTimeStepPk;
+}
+
 void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIndicator)
 {
 
@@ -6255,32 +6286,8 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
                     state.dataSize->SysSizPeakDDNum(AirLoopNum).cSensCoolPeakDDDate = state.dataSize->DesDayWeath(DDNum).DateString;
                     state.dataSize->SensCoolCapTemp(AirLoopNum) = sysSizing.SensCoolCap;
                     if (sysSizing.coolingPeakLoad == DataSizing::PeakLoad::SensibleCooling) {
-                        state.dataSize->CalcSysSizing(AirLoopNum).DesCoolVolFlow = sysSizing.DesCoolVolFlow;
-                        state.dataSize->CalcSysSizing(AirLoopNum).CoolDesDay = sysSizing.CoolDesDay;
-                        // state.dataSize->CalcSysSizing( AirLoopNum ).CoinCoolMassFlow = SysSizing( DDNum, AirLoopNum ).CoinCoolMassFlow;
-                        state.dataSize->CalcSysSizing(AirLoopNum).MassFlowAtCoolPeak = sysSizing.MassFlowAtCoolPeak;
-                        state.dataSize->CalcSysSizing(AirLoopNum).SensCoolCap = sysSizing.SensCoolCap;
-                        state.dataSize->CalcSysSizing(AirLoopNum).TotCoolCap = sysSizing.TotCoolCap;
-                        state.dataSize->CalcSysSizing(AirLoopNum).CoolFlowSeq = sysSizing.CoolFlowSeq;
-                        state.dataSize->CalcSysSizing(AirLoopNum).SumZoneCoolLoadSeq = sysSizing.SumZoneCoolLoadSeq;
-                        state.dataSize->CalcSysSizing(AirLoopNum).CoolZoneAvgTempSeq = sysSizing.CoolZoneAvgTempSeq;
-                        state.dataSize->CalcSysSizing(AirLoopNum).SensCoolCapSeq = sysSizing.SensCoolCapSeq;
-                        state.dataSize->CalcSysSizing(AirLoopNum).TotCoolCapSeq = sysSizing.TotCoolCapSeq;
-                        state.dataSize->CalcSysSizing(AirLoopNum).MixTempAtCoolPeak = sysSizing.MixTempAtCoolPeak;
-                        state.dataSize->CalcSysSizing(AirLoopNum).RetTempAtCoolPeak = sysSizing.RetTempAtCoolPeak;
-                        state.dataSize->CalcSysSizing(AirLoopNum).MixHumRatAtCoolPeak = sysSizing.MixHumRatAtCoolPeak;
-                        state.dataSize->CalcSysSizing(AirLoopNum).RetHumRatAtCoolPeak = sysSizing.RetHumRatAtCoolPeak;
-                        state.dataSize->CalcSysSizing(AirLoopNum).OutTempAtCoolPeak = sysSizing.OutTempAtCoolPeak;
-                        state.dataSize->CalcSysSizing(AirLoopNum).OutHumRatAtCoolPeak = sysSizing.OutHumRatAtCoolPeak;
-                        state.dataSize->CalcSysSizing(AirLoopNum).SysCoolRetTempSeq = sysSizing.SysCoolRetTempSeq;
-                        state.dataSize->CalcSysSizing(AirLoopNum).SysCoolRetHumRatSeq = sysSizing.SysCoolRetHumRatSeq;
-                        state.dataSize->CalcSysSizing(AirLoopNum).SysCoolOutTempSeq = sysSizing.SysCoolOutTempSeq;
-                        state.dataSize->CalcSysSizing(AirLoopNum).SysCoolOutHumRatSeq = sysSizing.SysCoolOutHumRatSeq;
-                        state.dataSize->CalcSysSizing(AirLoopNum).SysDOASHeatAddSeq = sysSizing.SysDOASHeatAddSeq;
-                        state.dataSize->CalcSysSizing(AirLoopNum).SysDOASLatAddSeq = sysSizing.SysDOASLatAddSeq;
+                        copyCoolPeakToCalcSysSizing(state.dataSize->CalcSysSizing(AirLoopNum), sysSizing);
                         state.dataSize->CalcSysSizing(AirLoopNum).SysCoolCoinSpaceSens = sysSizing.SysCoolCoinSpaceSens;
-                        state.dataSize->CalcSysSizing(AirLoopNum).SysDesCoolLoad = sysSizing.SysDesCoolLoad;
-                        state.dataSize->CalcSysSizing(AirLoopNum).SysCoolLoadTimeStepPk = sysSizing.SysCoolLoadTimeStepPk;
                     }
                 }
 
@@ -6289,31 +6296,7 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
                     state.dataSize->SysSizPeakDDNum(AirLoopNum).cTotCoolPeakDDDate = state.dataSize->DesDayWeath(DDNum).DateString;
                     state.dataSize->TotCoolCapTemp(AirLoopNum) = sysSizing.TotCoolCap;
                     if (sysSizing.coolingPeakLoad == DataSizing::PeakLoad::TotalCooling) {
-                        state.dataSize->CalcSysSizing(AirLoopNum).DesCoolVolFlow = sysSizing.DesCoolVolFlow;
-                        state.dataSize->CalcSysSizing(AirLoopNum).CoolDesDay = sysSizing.CoolDesDay;
-                        // state.dataSize->CalcSysSizing( AirLoopNum ).CoinCoolMassFlow = SysSizing( DDNum, AirLoopNum ).CoinCoolMassFlow;
-                        state.dataSize->CalcSysSizing(AirLoopNum).MassFlowAtCoolPeak = sysSizing.MassFlowAtCoolPeak;
-                        state.dataSize->CalcSysSizing(AirLoopNum).SensCoolCap = sysSizing.SensCoolCap;
-                        state.dataSize->CalcSysSizing(AirLoopNum).TotCoolCap = sysSizing.TotCoolCap;
-                        state.dataSize->CalcSysSizing(AirLoopNum).CoolFlowSeq = sysSizing.CoolFlowSeq;
-                        state.dataSize->CalcSysSizing(AirLoopNum).SumZoneCoolLoadSeq = sysSizing.SumZoneCoolLoadSeq;
-                        state.dataSize->CalcSysSizing(AirLoopNum).CoolZoneAvgTempSeq = sysSizing.CoolZoneAvgTempSeq;
-                        state.dataSize->CalcSysSizing(AirLoopNum).SensCoolCapSeq = sysSizing.SensCoolCapSeq;
-                        state.dataSize->CalcSysSizing(AirLoopNum).TotCoolCapSeq = sysSizing.TotCoolCapSeq;
-                        state.dataSize->CalcSysSizing(AirLoopNum).MixTempAtCoolPeak = sysSizing.MixTempAtCoolPeak;
-                        state.dataSize->CalcSysSizing(AirLoopNum).RetTempAtCoolPeak = sysSizing.RetTempAtCoolPeak;
-                        state.dataSize->CalcSysSizing(AirLoopNum).MixHumRatAtCoolPeak = sysSizing.MixHumRatAtCoolPeak;
-                        state.dataSize->CalcSysSizing(AirLoopNum).RetHumRatAtCoolPeak = sysSizing.RetHumRatAtCoolPeak;
-                        state.dataSize->CalcSysSizing(AirLoopNum).OutTempAtCoolPeak = sysSizing.OutTempAtCoolPeak;
-                        state.dataSize->CalcSysSizing(AirLoopNum).OutHumRatAtCoolPeak = sysSizing.OutHumRatAtCoolPeak;
-                        state.dataSize->CalcSysSizing(AirLoopNum).SysCoolRetTempSeq = sysSizing.SysCoolRetTempSeq;
-                        state.dataSize->CalcSysSizing(AirLoopNum).SysCoolRetHumRatSeq = sysSizing.SysCoolRetHumRatSeq;
-                        state.dataSize->CalcSysSizing(AirLoopNum).SysCoolOutTempSeq = sysSizing.SysCoolOutTempSeq;
-                        state.dataSize->CalcSysSizing(AirLoopNum).SysCoolOutHumRatSeq = sysSizing.SysCoolOutHumRatSeq;
-                        state.dataSize->CalcSysSizing(AirLoopNum).SysDOASHeatAddSeq = sysSizing.SysDOASHeatAddSeq;
-                        state.dataSize->CalcSysSizing(AirLoopNum).SysDOASLatAddSeq = sysSizing.SysDOASLatAddSeq;
-                        state.dataSize->CalcSysSizing(AirLoopNum).SysDesCoolLoad = sysSizing.SysDesCoolLoad;
-                        state.dataSize->CalcSysSizing(AirLoopNum).SysCoolLoadTimeStepPk = sysSizing.SysCoolLoadTimeStepPk;
+                        copyCoolPeakToCalcSysSizing(state.dataSize->CalcSysSizing(AirLoopNum), sysSizing);
                     }
                     state.dataSize->CalcSysSizing(AirLoopNum).SysCoolCoinSpaceSens = sysSizing.SysCoolCoinSpaceSens;
                 }
