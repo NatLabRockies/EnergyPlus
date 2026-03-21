@@ -326,6 +326,92 @@ namespace Sched {
         missingDaySchedule->isUsed = true;
     }
 
+    // Helper: process one ExternalInterface schedule object within ProcessScheduleInput.
+    // All three ExternalInterface schedule types (basic, FMU-Import, FMU-Export) share
+    // identical logic for creating the schedule, day-schedule, week-schedule, and
+    // filling weekScheds for all 366 days.
+    static void processExternalInterfaceSchedule(EnergyPlusData &state,
+                                                 std::string_view routineName,
+                                                 std::string const &CurrentModuleObject,
+                                                 int numItems,
+                                                 bool showDuplicateDetail, // true for FMU Import/Export types
+                                                 int NumExternalInterfaceSchedules,
+                                                 Array1D_string &Alphas,
+                                                 Array1D_string &cAlphaFields,
+                                                 Array1D_string &cNumericFields,
+                                                 Array1D<Real64> &Numbers,
+                                                 Array1D_bool &lAlphaBlanks,
+                                                 Array1D_bool &lNumericBlanks,
+                                                 bool &ErrorsFound,
+                                                 bool &NumErrorFlag)
+    {
+        auto const &s_ip = state.dataInputProcessing->inputProcessor;
+        auto const &s_sched = state.dataSched;
+        int NumAlphas;
+        int NumNumbers;
+        int Status;
+
+        for (int Loop = 1; Loop <= numItems; ++Loop) {
+            s_ip->getObjectItem(state,
+                                CurrentModuleObject,
+                                Loop,
+                                Alphas,
+                                NumAlphas,
+                                Numbers,
+                                NumNumbers,
+                                Status,
+                                lNumericBlanks,
+                                lAlphaBlanks,
+                                cAlphaFields,
+                                cNumericFields);
+
+            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
+
+            if (s_sched->scheduleMap.find(Alphas(1)) != s_sched->scheduleMap.end()) {
+                ShowSevereDuplicateName(state, eoh);
+                if (showDuplicateDetail && NumExternalInterfaceSchedules >= 1) {
+                    ShowContinueError(
+                        state,
+                        EnergyPlus::format("{} defined as an ExternalInterface:Schedule and ExternalInterface:FunctionalMockupUnitImport:To:Schedule."
+                                           "This will cause the schedule to be overwritten by PtolemyServer and FunctionalMockUpUnitImport)",
+                                           cAlphaFields(1)));
+                }
+                ErrorsFound = true;
+                continue;
+            }
+
+            auto *sched = AddScheduleDetailed(state, Alphas(1));
+            sched->type = SchedType::External;
+
+            // Validate ScheduleType
+            if (lAlphaBlanks(2)) {
+                ShowWarningEmptyField(state, eoh, cAlphaFields(2));
+                ShowContinueError(state, "Schedule will not be validated.");
+            } else if ((sched->schedTypeNum = GetScheduleTypeNum(state, Alphas(2))) == SchedNum_Invalid) {
+                ShowWarningItemNotFound(state, eoh, cAlphaFields(2), Alphas(2));
+                ShowContinueError(state, "Schedule will not be validated.");
+            }
+
+            auto *daySched = AddDaySchedule(state, EnergyPlus::format("{}_xi_dy_", Alphas(1)));
+            daySched->isUsed = true;
+            daySched->schedTypeNum = sched->schedTypeNum;
+
+            if (NumNumbers < 1) {
+                ShowWarningCustom(state, eoh, "Initial value is not numeric or is missing. Fix idf file.");
+                NumErrorFlag = true;
+            }
+            ExternalInterfaceSetSchedule(state, daySched->Num, Numbers(1));
+
+            auto *weekSched = AddWeekSchedule(state, EnergyPlus::format("{}_xi_wk_", Alphas(1)));
+            weekSched->isUsed = true;
+            for (int iDayType = 1; iDayType < (int)DayType::Num; ++iDayType) {
+                weekSched->dayScheds[iDayType] = daySched;
+            }
+
+            std::fill(sched->weekScheds.begin() + 1, sched->weekScheds.end(), weekSched);
+        } // for (Loop)
+    }
+
     void ProcessScheduleInput(EnergyPlusData &state)
     {
         // SUBROUTINE INFORMATION:
@@ -2001,199 +2087,20 @@ namespace Sched {
         static_cast<ScheduleConstant *>(s_sched->schedules[SchedNum_AlwaysOff])->tsVals.assign(Constant::iHoursInDay * s_glob->TimeStepsInHour, 0.0);
         static_cast<ScheduleConstant *>(s_sched->schedules[SchedNum_AlwaysOn])->tsVals.assign(Constant::iHoursInDay * s_glob->TimeStepsInHour, 1.0);
 
-        CurrentModuleObject = "ExternalInterface:Schedule";
-        for (int Loop = 1; Loop <= NumExternalInterfaceSchedules; ++Loop) {
-            s_ip->getObjectItem(state,
-                                CurrentModuleObject,
-                                Loop,
-                                Alphas,
-                                NumAlphas,
-                                Numbers,
-                                NumNumbers,
-                                Status,
-                                lNumericBlanks,
-                                lAlphaBlanks,
-                                cAlphaFields,
-                                cNumericFields);
+        processExternalInterfaceSchedule(state, routineName, "ExternalInterface:Schedule",
+                                          NumExternalInterfaceSchedules, false, NumExternalInterfaceSchedules,
+                                          Alphas, cAlphaFields, cNumericFields, Numbers, lAlphaBlanks, lNumericBlanks,
+                                          ErrorsFound, NumErrorFlag);
 
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
+        processExternalInterfaceSchedule(state, routineName, "ExternalInterface:FunctionalMockupUnitImport:To:Schedule",
+                                          NumExternalInterfaceFunctionalMockupUnitImportSchedules, true, NumExternalInterfaceSchedules,
+                                          Alphas, cAlphaFields, cNumericFields, Numbers, lAlphaBlanks, lNumericBlanks,
+                                          ErrorsFound, NumErrorFlag);
 
-            if (s_sched->scheduleMap.find(Alphas(1)) != s_sched->scheduleMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-                continue;
-            }
-
-            auto *sched = AddScheduleDetailed(state, Alphas(1));
-            sched->type = SchedType::External;
-
-            // Validate ScheduleType
-            if (lAlphaBlanks(2)) {
-                ShowWarningEmptyField(state, eoh, cAlphaFields(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            } else if ((sched->schedTypeNum = GetScheduleTypeNum(state, Alphas(2))) == SchedNum_Invalid) {
-                ShowWarningItemNotFound(state, eoh, cAlphaFields(2), Alphas(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            }
-
-            // TODO: I'm not sure this Jazz is necessary
-            // Add day schedule
-            auto *daySched = AddDaySchedule(state, EnergyPlus::format("{}_xi_dy_", Alphas(1)));
-            daySched->isUsed = true;
-            daySched->schedTypeNum = sched->schedTypeNum;
-
-            //   Initialize the ExternalInterface day schedule for the ExternalInterface compact schedule.
-            //   It will be overwritten during run time stepping after the warm up period
-            if (NumNumbers < 1) {
-                ShowWarningCustom(state, eoh, "Initial value is not numeric or is missing. Fix idf file.");
-                NumErrorFlag = true;
-            }
-            ExternalInterfaceSetSchedule(state, daySched->Num, Numbers(1));
-
-            auto *weekSched = AddWeekSchedule(state, EnergyPlus::format("{}_xi_wk_", Alphas(1)));
-            weekSched->isUsed = true;
-            for (int iDayType = 1; iDayType < (int)DayType::Num; ++iDayType) {
-                weekSched->dayScheds[iDayType] = daySched;
-            }
-
-            for (int iDay = 1; iDay <= 366; ++iDay) {
-                sched->weekScheds[iDay] = weekSched;
-            }
-        } // for (Loop)
-
-        // added for FMU Import
-        CurrentModuleObject = "ExternalInterface:FunctionalMockupUnitImport:To:Schedule";
-        for (int Loop = 1; Loop <= NumExternalInterfaceFunctionalMockupUnitImportSchedules; ++Loop) {
-            s_ip->getObjectItem(state,
-                                CurrentModuleObject,
-                                Loop,
-                                Alphas,
-                                NumAlphas,
-                                Numbers,
-                                NumNumbers,
-                                Status,
-                                lNumericBlanks,
-                                lAlphaBlanks,
-                                cAlphaFields,
-                                cNumericFields);
-
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (s_sched->scheduleMap.find(Alphas(1)) != s_sched->scheduleMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                if (NumExternalInterfaceSchedules >= 1) {
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("{} defined as an ExternalInterface:Schedule and ExternalInterface:FunctionalMockupUnitImport:To:Schedule."
-                                           "This will cause the schedule to be overwritten by PtolemyServer and FunctionalMockUpUnitImport)",
-                                           cAlphaFields(1)));
-                }
-                ErrorsFound = true;
-                continue;
-            }
-
-            auto *sched = AddScheduleDetailed(state, Alphas(1));
-            sched->type = SchedType::External;
-
-            // Validate ScheduleType
-            if (lAlphaBlanks(2)) {
-                ShowWarningEmptyField(state, eoh, cAlphaFields(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            } else if ((sched->schedTypeNum = GetScheduleTypeNum(state, Alphas(2))) == SchedNum_Invalid) {
-                ShowWarningItemNotFound(state, eoh, cAlphaFields(2), Alphas(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            }
-
-            // TODO: I'm not sure this Jazz is necessary
-            // Add day schedule
-            auto *daySched = AddDaySchedule(state, EnergyPlus::format("{}_xi_dy_", Alphas(1)));
-            daySched->isUsed = true;
-            daySched->schedTypeNum = sched->schedTypeNum;
-
-            //   Initialize the ExternalInterface day schedule for the ExternalInterface compact schedule.
-            //   It will be overwritten during run time stepping after the warm up period
-            if (NumNumbers < 1) {
-                ShowWarningCustom(state, eoh, "Initial value is not numeric or is missing. Fix idf file.");
-                NumErrorFlag = true;
-            }
-            ExternalInterfaceSetSchedule(state, daySched->Num, Numbers(1));
-
-            auto *weekSched = AddWeekSchedule(state, EnergyPlus::format("{}_xi_wk_", Alphas(1)));
-            weekSched->isUsed = true;
-            for (int iDayType = 1; iDayType < (int)DayType::Num; ++iDayType) {
-                weekSched->dayScheds[iDayType] = daySched;
-            }
-
-            for (int iDay = 1; iDay <= 366; ++iDay) {
-                sched->weekScheds[iDay] = weekSched;
-            }
-        }
-
-        // added for FMU Export
-        CurrentModuleObject = "ExternalInterface:FunctionalMockupUnitExport:To:Schedule";
-        for (int Loop = 1; Loop <= NumExternalInterfaceFunctionalMockupUnitExportSchedules; ++Loop) {
-            s_ip->getObjectItem(state,
-                                CurrentModuleObject,
-                                Loop,
-                                Alphas,
-                                NumAlphas,
-                                Numbers,
-                                NumNumbers,
-                                Status,
-                                lNumericBlanks,
-                                lAlphaBlanks,
-                                cAlphaFields,
-                                cNumericFields);
-
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (s_sched->scheduleMap.find(Alphas(1)) != s_sched->scheduleMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                if (NumExternalInterfaceSchedules >= 1) {
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("{} defined as an ExternalInterface:Schedule and ExternalInterface:FunctionalMockupUnitImport:To:Schedule."
-                                           "This will cause the schedule to be overwritten by PtolemyServer and FunctionalMockUpUnitImport)",
-                                           cAlphaFields(1)));
-                }
-                ErrorsFound = true;
-                continue;
-            }
-
-            auto *sched = AddScheduleDetailed(state, Alphas(1));
-            sched->type = SchedType::External;
-
-            // Validate ScheduleType
-            if (lAlphaBlanks(2)) {
-                ShowWarningEmptyField(state, eoh, cAlphaFields(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            } else if ((sched->schedTypeNum = GetScheduleTypeNum(state, Alphas(2))) == SchedNum_Invalid) {
-                ShowWarningItemNotFound(state, eoh, cAlphaFields(2), Alphas(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            }
-
-            // TODO: I'm not sure this Jazz is necessary
-            // Add day schedule
-            auto *daySched = AddDaySchedule(state, EnergyPlus::format("{}_xi_dy_", Alphas(1)));
-            daySched->isUsed = true;
-            daySched->schedTypeNum = sched->schedTypeNum;
-
-            //   Initialize the ExternalInterface day schedule for the ExternalInterface compact schedule.
-            //   It will be overwritten during run time stepping after the warm up period
-            if (NumNumbers < 1) {
-                ShowWarningCustom(state, eoh, "Initial value is not numeric or is missing. Fix idf file.");
-                NumErrorFlag = true;
-            }
-            ExternalInterfaceSetSchedule(state, daySched->Num, Numbers(1));
-
-            auto *weekSched = AddWeekSchedule(state, EnergyPlus::format("{}_xi_wk_", Alphas(1)));
-            weekSched->isUsed = true;
-            for (int iDayType = 1; iDayType < (int)DayType::Num; ++iDayType) {
-                weekSched->dayScheds[iDayType] = daySched;
-            }
-
-            std::fill(sched->weekScheds.begin() + 1, sched->weekScheds.end(), weekSched);
-        } // for (Loop)
+        processExternalInterfaceSchedule(state, routineName, "ExternalInterface:FunctionalMockupUnitExport:To:Schedule",
+                                          NumExternalInterfaceFunctionalMockupUnitExportSchedules, true, NumExternalInterfaceSchedules,
+                                          Alphas, cAlphaFields, cNumericFields, Numbers, lAlphaBlanks, lNumericBlanks,
+                                          ErrorsFound, NumErrorFlag);
 
         // Validate by ScheduleLimitsType
         for (auto *sched : s_sched->schedules) {
