@@ -4584,6 +4584,22 @@ void CheckVRFTUNodeConnections(EnergyPlusData &state, int const VRFTUNum, bool &
     }
 }
 
+// Helper: warn and reset OA flow to zero when VRF TU connected to DOAS
+static void warnAndResetDOASOutdoorAirFlow(EnergyPlusData &state,
+                                           std::string_view cCurrentModuleObject,
+                                           std::string_view tuName,
+                                           Real64 &flowRate,
+                                           std::string_view flowLabel)
+{
+    if (flowRate != 0) {
+        ShowWarningError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, tuName));
+        ShowContinueError(state, EnergyPlus::format(".. {} must be zero when {}", flowLabel, cCurrentModuleObject));
+        ShowContinueError(state, "..object is connected to central dedicated outdoor air system via AirTerminal:SingleDuct:Mixer");
+        ShowContinueError(state, EnergyPlus::format(".. {} is set to 0 and simulation continues.", flowLabel));
+        flowRate = 0;
+    }
+}
+
 // Helper: warn when OAT exceeds VRF cooling/heating mode limits
 static void warnOATLimitExceeded(EnergyPlusData &state,
                                  int const VRFCond,
@@ -5394,30 +5410,12 @@ void InitVRF(EnergyPlusData &state, int const VRFTUNum, int const ZoneNum, bool 
         }
 
         if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).isInZone && state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ATMixerExists) {
-            //   check that OA flow in cooling must be set to zero when connected to DOAS
-            if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolOutAirVolFlow != 0) {
-                ShowWarningError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, state.dataHVACVarRefFlow->VRFTU(VRFTUNum).Name));
-                ShowContinueError(state, EnergyPlus::format(".. Cooling Outdoor Air Flow Rate must be zero when {}", cCurrentModuleObject));
-                ShowContinueError(state, "..object is connected to central dedicated outdoor air system via AirTerminal:SingleDuct:Mixer");
-                ShowContinueError(state, ".. Cooling Outdoor Air Flow Rate is set to 0 and simulation continues.");
-                state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolOutAirVolFlow = 0;
-            }
-            //   check that OA flow in heating must be set to zero when connected to DOAS
-            if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatOutAirVolFlow != 0) {
-                ShowWarningError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, state.dataHVACVarRefFlow->VRFTU(VRFTUNum).Name));
-                ShowContinueError(state, EnergyPlus::format(".. Heating Outdoor Air Flow Rate must be zero when {}", cCurrentModuleObject));
-                ShowContinueError(state, "..object is connected to central dedicated outdoor air system via AirTerminal:SingleDuct:Mixer");
-                ShowContinueError(state, ".. Heating Outdoor Air Flow Rate is set to 0 and simulation continues.");
-                state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatOutAirVolFlow = 0;
-            }
-            //   check that OA flow in no cooling and no heating must be set to zero when connected to DOAS
-            if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).NoCoolHeatOutAirVolFlow != 0) {
-                ShowWarningError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, state.dataHVACVarRefFlow->VRFTU(VRFTUNum).Name));
-                ShowContinueError(state, EnergyPlus::format(".. No Load Outdoor Air Flow Rate must be zero when {}", cCurrentModuleObject));
-                ShowContinueError(state, "..object is connected to central dedicated outdoor air system via AirTerminal:SingleDuct:Mixer");
-                ShowContinueError(state, ".. No Load Outdoor Air Flow Rate is set to 0 and simulation continues.");
-                state.dataHVACVarRefFlow->VRFTU(VRFTUNum).NoCoolHeatOutAirVolFlow = 0;
-            }
+            warnAndResetDOASOutdoorAirFlow(state, cCurrentModuleObject, state.dataHVACVarRefFlow->VRFTU(VRFTUNum).Name,
+                state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolOutAirVolFlow, "Cooling Outdoor Air Flow Rate");
+            warnAndResetDOASOutdoorAirFlow(state, cCurrentModuleObject, state.dataHVACVarRefFlow->VRFTU(VRFTUNum).Name,
+                state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatOutAirVolFlow, "Heating Outdoor Air Flow Rate");
+            warnAndResetDOASOutdoorAirFlow(state, cCurrentModuleObject, state.dataHVACVarRefFlow->VRFTU(VRFTUNum).Name,
+                state.dataHVACVarRefFlow->VRFTU(VRFTUNum).NoCoolHeatOutAirVolFlow, "No Load Outdoor Air Flow Rate");
         }
     } // IF(ZoneEquipmentListNotChecked)THEN
 
