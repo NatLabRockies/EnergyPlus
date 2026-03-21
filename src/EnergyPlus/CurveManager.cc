@@ -659,6 +659,60 @@ namespace Curve {
         }
     }
 
+    // Helper: validate input/output unit type alphas for a curve with 1-3 input dimensions.
+    // inputTypeStartAlpha is the 1-based alpha index where the first input unit type begins (typically 2).
+    // The output unit type alpha follows the last input unit type alpha.
+    // For numDims==1: checks X input type at inputTypeStartAlpha, output type at inputTypeStartAlpha+1
+    // For numDims==2: checks X,Y input types, output type at inputTypeStartAlpha+2
+    // For numDims==3: checks X,Y,Z input types, output type at inputTypeStartAlpha+3
+    static void checkCurveUnitTypes(EnergyPlusData &state,
+                                    std::string const &CurrentModuleObject,
+                                    std::string const &curveName,
+                                    int NumAlphas,
+                                    Array1D_string const &Alphas,
+                                    int numDims,
+                                    int inputTypeStartAlpha)
+    {
+        constexpr std::array<std::string_view, 3> dimLabels = {"X", "Y", "Z"};
+        int const dimsToCheck = std::min(numDims, 3);
+        for (int d = 0; d < dimsToCheck; ++d) {
+            int alphaIdx = inputTypeStartAlpha + d;
+            if (NumAlphas >= alphaIdx) {
+                if (!IsCurveInputTypeValid(Alphas(alphaIdx))) {
+                    ShowWarningError(
+                        state,
+                        EnergyPlus::format("In {} named {} the Input Unit Type for {} is invalid.", CurrentModuleObject, curveName, dimLabels[d]));
+                }
+            }
+        }
+        int outputAlphaIdx = inputTypeStartAlpha + dimsToCheck;
+        if (NumAlphas >= outputAlphaIdx) {
+            if (!IsCurveOutputTypeValid(Alphas(outputAlphaIdx))) {
+                ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, curveName));
+            }
+        }
+    }
+
+    // Helper: validate that input-limit min <= max for a given numeric field pair, report error if not.
+    static void checkCurveInputLimits(EnergyPlusData &state,
+                                      std::string const &CurrentModuleObject,
+                                      Array1D<Real64> const &Numbers,
+                                      int minIdx,
+                                      int maxIdx,
+                                      bool &ErrorsFound)
+    {
+        if (Numbers(minIdx) > Numbers(maxIdx)) {
+            ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+            ShowContinueError(state,
+                              EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
+                                                 state.dataIPShortCut->cNumericFieldNames(minIdx),
+                                                 Numbers(minIdx),
+                                                 state.dataIPShortCut->cNumericFieldNames(maxIdx),
+                                                 Numbers(maxIdx)));
+            ErrorsFound = true;
+        }
+    }
+
     void GetCurveInputData(EnergyPlusData &state, bool &ErrorsFound)
     {
 
@@ -769,26 +823,8 @@ namespace Curve {
                 thisCurve->outputLimits.maxPresent = true;
             }
 
-            if (Numbers(7) > Numbers(8)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(7),
-                                                     Numbers(7),
-                                                     state.dataIPShortCut->cNumericFieldNames(8),
-                                                     Numbers(8)));
-                ErrorsFound = true;
-            }
-            if (Numbers(9) > Numbers(10)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(9),
-                                                     Numbers(9),
-                                                     state.dataIPShortCut->cNumericFieldNames(10),
-                                                     Numbers(10)));
-                ErrorsFound = true;
-            }
+            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 7, 8, ErrorsFound);
+            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 9, 10, ErrorsFound);
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
                     ShowWarningError(state,
@@ -842,42 +878,15 @@ namespace Curve {
 
             thisCurve->inputLimits[0].min = Numbers(13);
             thisCurve->inputLimits[0].max = Numbers(14);
-            if (Numbers(13) > Numbers(14)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(13),
-                                                     Numbers(13),
-                                                     state.dataIPShortCut->cNumericFieldNames(14),
-                                                     Numbers(14)));
-                ErrorsFound = true;
-            }
+            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 13, 14, ErrorsFound);
 
             thisCurve->inputLimits[1].min = Numbers(15);
             thisCurve->inputLimits[1].max = Numbers(16);
-            if (Numbers(15) > Numbers(16)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(15),
-                                                     Numbers(15),
-                                                     state.dataIPShortCut->cNumericFieldNames(16),
-                                                     Numbers(16)));
-                ErrorsFound = true;
-            }
+            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 15, 16, ErrorsFound);
 
             thisCurve->inputLimits[2].min = Numbers(17);
             thisCurve->inputLimits[2].max = Numbers(18);
-            if (Numbers(17) > Numbers(18)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(17),
-                                                     Numbers(17),
-                                                     state.dataIPShortCut->cNumericFieldNames(18),
-                                                     Numbers(18)));
-                ErrorsFound = true;
-            }
+            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 17, 18, ErrorsFound);
 
             if (NumNumbers > 18 && !state.dataIPShortCut->lNumericFieldBlanks(19)) {
                 thisCurve->outputLimits.min = Numbers(19);
@@ -954,16 +963,7 @@ namespace Curve {
                 thisCurve->outputLimits.maxPresent = true;
             }
 
-            if (Numbers(5) > Numbers(6)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(5),
-                                                     Numbers(5),
-                                                     state.dataIPShortCut->cNumericFieldNames(6),
-                                                     Numbers(6)));
-                ErrorsFound = true;
-            }
+            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 5, 6, ErrorsFound);
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
                     ShowWarningError(state,
@@ -1017,16 +1017,7 @@ namespace Curve {
                 thisCurve->outputLimits.maxPresent = true;
             }
 
-            if (Numbers(6) > Numbers(7)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(6),
-                                                     Numbers(6),
-                                                     state.dataIPShortCut->cNumericFieldNames(7),
-                                                     Numbers(7)));
-                ErrorsFound = true;
-            }
+            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 6, 7, ErrorsFound);
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
                     ShowWarningError(state,
@@ -1080,16 +1071,7 @@ namespace Curve {
                 thisCurve->outputLimits.maxPresent = true;
             }
 
-            if (Numbers(4) > Numbers(5)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(4),
-                                                     Numbers(4),
-                                                     state.dataIPShortCut->cNumericFieldNames(5),
-                                                     Numbers(5)));
-                ErrorsFound = true;
-            }
+            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 4, 5, ErrorsFound);
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
                     ShowWarningError(state,
@@ -1145,26 +1127,8 @@ namespace Curve {
                 thisCurve->outputLimits.maxPresent = true;
             }
 
-            if (Numbers(7) > Numbers(8)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(7),
-                                                     Numbers(7),
-                                                     state.dataIPShortCut->cNumericFieldNames(8),
-                                                     Numbers(8)));
-                ErrorsFound = true;
-            }
-            if (Numbers(9) > Numbers(10)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(9),
-                                                     Numbers(9),
-                                                     state.dataIPShortCut->cNumericFieldNames(10),
-                                                     Numbers(10)));
-                ErrorsFound = true;
-            }
+            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 7, 8, ErrorsFound);
+            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 9, 10, ErrorsFound);
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
                     ShowWarningError(state,
@@ -1226,26 +1190,8 @@ namespace Curve {
                 thisCurve->outputLimits.maxPresent = true;
             }
 
-            if (Numbers(7) > Numbers(8)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(7),
-                                                     Numbers(7),
-                                                     state.dataIPShortCut->cNumericFieldNames(8),
-                                                     Numbers(8)));
-                ErrorsFound = true;
-            }
-            if (Numbers(9) > Numbers(10)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(9),
-                                                     Numbers(9),
-                                                     state.dataIPShortCut->cNumericFieldNames(10),
-                                                     Numbers(10)));
-                ErrorsFound = true;
-            }
+            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 7, 8, ErrorsFound);
+            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 9, 10, ErrorsFound);
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
                     ShowWarningError(state,
@@ -1305,16 +1251,7 @@ namespace Curve {
                 thisCurve->outputLimits.maxPresent = true;
             }
 
-            if (Numbers(3) > Numbers(4)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(3),
-                                                     Numbers(3),
-                                                     state.dataIPShortCut->cNumericFieldNames(4),
-                                                     Numbers(4)));
-                ErrorsFound = true;
-            }
+            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 3, 4, ErrorsFound);
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
                     ShowWarningError(state,
@@ -1370,26 +1307,8 @@ namespace Curve {
                 thisCurve->outputLimits.maxPresent = true;
             }
 
-            if (Numbers(11) > Numbers(12)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(11),
-                                                     Numbers(11),
-                                                     state.dataIPShortCut->cNumericFieldNames(12),
-                                                     Numbers(12)));
-                ErrorsFound = true;
-            }
-            if (Numbers(13) > Numbers(14)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(13),
-                                                     Numbers(13),
-                                                     state.dataIPShortCut->cNumericFieldNames(14),
-                                                     Numbers(14)));
-                ErrorsFound = true;
-            }
+            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 11, 12, ErrorsFound);
+            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 13, 14, ErrorsFound);
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
                     ShowWarningError(state,
@@ -1477,36 +1396,9 @@ namespace Curve {
                 thisCurve->outputLimits.maxPresent = true;
             }
 
-            if (Numbers(28) > Numbers(29)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(28),
-                                                     Numbers(28),
-                                                     state.dataIPShortCut->cNumericFieldNames(29),
-                                                     Numbers(29)));
-                ErrorsFound = true;
-            }
-            if (Numbers(30) > Numbers(31)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(30),
-                                                     Numbers(30),
-                                                     state.dataIPShortCut->cNumericFieldNames(31),
-                                                     Numbers(31)));
-                ErrorsFound = true;
-            }
-            if (Numbers(32) > Numbers(33)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(32),
-                                                     Numbers(32),
-                                                     state.dataIPShortCut->cNumericFieldNames(33),
-                                                     Numbers(33)));
-                ErrorsFound = true;
-            }
+            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 28, 29, ErrorsFound);
+            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 30, 31, ErrorsFound);
+            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 32, 33, ErrorsFound);
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
                     ShowWarningError(state,
@@ -1584,16 +1476,7 @@ namespace Curve {
             for (int i = 1; i <= NumVar; ++i) {
                 int MinIndex = 2 * i + 4;
                 int MaxIndex = MinIndex + 1;
-                if (Numbers(MinIndex) > Numbers(MaxIndex)) { // error
-                    ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                         state.dataIPShortCut->cNumericFieldNames(MinIndex),
-                                                         Numbers(MinIndex),
-                                                         state.dataIPShortCut->cNumericFieldNames(MaxIndex),
-                                                         Numbers(MaxIndex)));
-                    ErrorsFound = true;
-                }
+                checkCurveInputLimits(state, CurrentModuleObject, Numbers, MinIndex, MaxIndex, ErrorsFound);
                 int InputTypeIndex = i + 1;
                 if (NumAlphas >= InputTypeIndex) {
                     if (!IsCurveInputTypeValid(Alphas(InputTypeIndex))) {
@@ -1663,16 +1546,7 @@ namespace Curve {
             for (int i = 1; i <= NumVar; ++i) {
                 int MinIndex = 2 * i + 5;
                 int MaxIndex = MinIndex + 1;
-                if (Numbers(MinIndex) > Numbers(MaxIndex)) { // error
-                    ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                         state.dataIPShortCut->cNumericFieldNames(MinIndex),
-                                                         Numbers(MinIndex),
-                                                         state.dataIPShortCut->cNumericFieldNames(MaxIndex),
-                                                         Numbers(MaxIndex)));
-                    ErrorsFound = true;
-                }
+                checkCurveInputLimits(state, CurrentModuleObject, Numbers, MinIndex, MaxIndex, ErrorsFound);
                 int InputTypeIndex = i + 1;
                 if (NumAlphas >= InputTypeIndex) {
                     if (!IsCurveInputTypeValid(Alphas(InputTypeIndex))) {
@@ -1721,16 +1595,7 @@ namespace Curve {
             thisCurve->inputLimits[0].min = Numbers(4);
             thisCurve->inputLimits[0].max = Numbers(5);
 
-            if (Numbers(4) > Numbers(5)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(4),
-                                                     Numbers(4),
-                                                     state.dataIPShortCut->cNumericFieldNames(5),
-                                                     Numbers(5)));
-                ErrorsFound = true;
-            }
+            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 4, 5, ErrorsFound);
 
             if (NumNumbers > 5 && !state.dataIPShortCut->lNumericFieldBlanks(6)) {
                 thisCurve->outputLimits.min = Numbers(6);
@@ -1796,26 +1661,8 @@ namespace Curve {
                 thisCurve->outputLimits.maxPresent = true;
             }
 
-            if (Numbers(5) > Numbers(6)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(5),
-                                                     Numbers(5),
-                                                     state.dataIPShortCut->cNumericFieldNames(6),
-                                                     Numbers(6)));
-                ErrorsFound = true;
-            }
-            if (Numbers(7) > Numbers(8)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(7),
-                                                     Numbers(7),
-                                                     state.dataIPShortCut->cNumericFieldNames(8),
-                                                     Numbers(8)));
-                ErrorsFound = true;
-            }
+            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 5, 6, ErrorsFound);
+            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 7, 8, ErrorsFound);
 
         } // Fan Pressure Rise
 
@@ -1860,16 +1707,7 @@ namespace Curve {
                 thisCurve->outputLimits.maxPresent = true;
             }
 
-            if (Numbers(5) > Numbers(6)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(5),
-                                                     Numbers(5),
-                                                     state.dataIPShortCut->cNumericFieldNames(6),
-                                                     Numbers(6)));
-                ErrorsFound = true;
-            }
+            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 5, 6, ErrorsFound);
 
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
@@ -1925,16 +1763,7 @@ namespace Curve {
                 thisCurve->outputLimits.maxPresent = true;
             }
 
-            if (Numbers(6) > Numbers(7)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(6),
-                                                     Numbers(6),
-                                                     state.dataIPShortCut->cNumericFieldNames(7),
-                                                     Numbers(7)));
-                ErrorsFound = true;
-            }
+            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 6, 7, ErrorsFound);
 
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
@@ -1990,16 +1819,7 @@ namespace Curve {
                 thisCurve->outputLimits.maxPresent = true;
             }
 
-            if (Numbers(4) > Numbers(5)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(4),
-                                                     Numbers(4),
-                                                     state.dataIPShortCut->cNumericFieldNames(5),
-                                                     Numbers(5)));
-                ErrorsFound = true;
-            }
+            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 4, 5, ErrorsFound);
 
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
@@ -2055,16 +1875,7 @@ namespace Curve {
                 thisCurve->outputLimits.maxPresent = true;
             }
 
-            if (Numbers(4) > Numbers(5)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(4),
-                                                     Numbers(4),
-                                                     state.dataIPShortCut->cNumericFieldNames(5),
-                                                     Numbers(5)));
-                ErrorsFound = true;
-            }
+            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 4, 5, ErrorsFound);
 
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
@@ -2120,16 +1931,7 @@ namespace Curve {
                 thisCurve->outputLimits.maxPresent = true;
             }
 
-            if (Numbers(4) > Numbers(5)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(4),
-                                                     Numbers(4),
-                                                     state.dataIPShortCut->cNumericFieldNames(5),
-                                                     Numbers(5)));
-                ErrorsFound = true;
-            }
+            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 4, 5, ErrorsFound);
 
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
@@ -2176,16 +1978,7 @@ namespace Curve {
             thisCurve->inputLimits[0].min = Numbers(6);
             thisCurve->inputLimits[0].max = Numbers(7);
 
-            if (Numbers(6) > Numbers(7)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(6),
-                                                     Numbers(6),
-                                                     state.dataIPShortCut->cNumericFieldNames(7),
-                                                     Numbers(7)));
-                ErrorsFound = true;
-            }
+            checkCurveInputLimits(state, CurrentModuleObject, Numbers, 6, 7, ErrorsFound);
 
             if (NumNumbers > 7 && !state.dataIPShortCut->lNumericFieldBlanks(8)) {
                 thisCurve->outputLimits.min = Numbers(8);
