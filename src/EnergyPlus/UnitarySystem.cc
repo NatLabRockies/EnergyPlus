@@ -12287,6 +12287,32 @@ namespace UnitarySystems {
         }
     }
 
+    // Helper: wraps the repeated SimHXAssistedCoolingCoil call pattern used throughout controlCoolingSystemToSP.
+    // All calls share the same argument list except for the part-load ratio.
+    static void simHXAssistedCooling(EnergyPlusData &state,
+                                     std::string const &CompName,
+                                     bool const FirstHVACIteration,
+                                     Real64 const PartLoadFrac,
+                                     int &CoolingCoilIndex,
+                                     HVAC::FanOp const fanOp,
+                                     bool const HXUnitOn,
+                                     HVAC::CoilMode const DehumidificationMode)
+    {
+        HVACHXAssistedCoolingCoil::SimHXAssistedCoolingCoil(state,
+                                                            CompName,
+                                                            FirstHVACIteration,
+                                                            HVAC::CompressorOp::On,
+                                                            PartLoadFrac,
+                                                            CoolingCoilIndex,
+                                                            fanOp,
+                                                            HXUnitOn,
+                                                            _,
+                                                            state.dataUnitarySystems->economizerFlag,
+                                                            _,
+                                                            DehumidificationMode,
+                                                            0.0);
+    }
+
     void UnitarySys::controlCoolingSystemToSP(EnergyPlusData &state,
                                               int const AirLoopNum,            // index to air loop
                                               bool const FirstHVACIteration,   // First HVAC iteration flag
@@ -12575,19 +12601,8 @@ namespace UnitarySystems {
                         state.dataLoopNodes->Node(this->CoolCoilFluidInletNode).MassFlowRate = 0.0;
                     }
 
-                    HVACHXAssistedCoolingCoil::SimHXAssistedCoolingCoil(state,
-                                                                        CompName,
-                                                                        FirstHVACIteration,
-                                                                        HVAC::CompressorOp::On,
-                                                                        PartLoadFrac,
-                                                                        this->m_CoolingCoilIndex,
-                                                                        fanOp,
-                                                                        HXUnitOn,
-                                                                        _,
-                                                                        state.dataUnitarySystems->economizerFlag,
-                                                                        _,
-                                                                        this->m_DehumidificationMode,
-                                                                        0.0); // this->CoilSHR);
+                    simHXAssistedCooling(
+                        state, CompName, FirstHVACIteration, PartLoadFrac, this->m_CoolingCoilIndex, fanOp, HXUnitOn, this->m_DehumidificationMode);
                     if (CoilType_Num == HVAC::CoilDX_CoolingHXAssisted) {
                         this->m_CompPartLoadRatio = PartLoadFrac;
                     }
@@ -12733,19 +12748,14 @@ namespace UnitarySystems {
                         if (this->CoolCoilFluidInletNode > 0) {
                             state.dataLoopNodes->Node(this->CoolCoilFluidInletNode).MassFlowRate = max(0.0, this->MaxCoolCoilFluidFlow);
                         }
-                        HVACHXAssistedCoolingCoil::SimHXAssistedCoolingCoil(state,
-                                                                            CompName,
-                                                                            FirstHVACIteration,
-                                                                            HVAC::CompressorOp::On,
-                                                                            PartLoadFrac,
-                                                                            this->m_CoolingCoilIndex,
-                                                                            fanOp,
-                                                                            HXUnitOn,
-                                                                            _,
-                                                                            state.dataUnitarySystems->economizerFlag,
-                                                                            _,
-                                                                            this->m_DehumidificationMode,
-                                                                            0.0); // this->CoilSHR);
+                        simHXAssistedCooling(state,
+                                             CompName,
+                                             FirstHVACIteration,
+                                             PartLoadFrac,
+                                             this->m_CoolingCoilIndex,
+                                             fanOp,
+                                             HXUnitOn,
+                                             this->m_DehumidificationMode);
 
                         if (CoilType_Num == HVAC::CoilDX_CoolingHXAssisted) {
                             this->m_CompPartLoadRatio = PartLoadFrac;
@@ -13008,19 +13018,14 @@ namespace UnitarySystems {
                                 while ((TempOutletTempDXCoil - DesOutTemp) > 0.0 && TempMaxPLR <= 1.0) {
                                     //                   find upper limit of PLR
                                     TempMaxPLR += 0.1;
-                                    HVACHXAssistedCoolingCoil::SimHXAssistedCoolingCoil(state,
-                                                                                        CompName,
-                                                                                        FirstHVACIteration,
-                                                                                        HVAC::CompressorOp::On,
-                                                                                        TempMaxPLR,
-                                                                                        this->m_CoolingCoilIndex,
-                                                                                        fanOp,
-                                                                                        HXUnitOn,
-                                                                                        _,
-                                                                                        state.dataUnitarySystems->economizerFlag,
-                                                                                        _,
-                                                                                        this->m_DehumidificationMode,
-                                                                                        0.0); // this->CoilSHR);
+                                    simHXAssistedCooling(state,
+                                                         CompName,
+                                                         FirstHVACIteration,
+                                                         TempMaxPLR,
+                                                         this->m_CoolingCoilIndex,
+                                                         fanOp,
+                                                         HXUnitOn,
+                                                         this->m_DehumidificationMode);
                                     TempOutletTempDXCoil = state.dataHVACAssistedCC->HXAssistedCoilOutletTemp(this->m_CoolingCoilIndex);
                                 }
                                 TempMinPLR = TempMaxPLR;
@@ -13029,19 +13034,14 @@ namespace UnitarySystems {
                                     TempMaxPLR = TempMinPLR;
                                     // find minimum limit of PLR
                                     TempMinPLR -= 0.01;
-                                    HVACHXAssistedCoolingCoil::SimHXAssistedCoolingCoil(state,
-                                                                                        CompName,
-                                                                                        FirstHVACIteration,
-                                                                                        HVAC::CompressorOp::On,
-                                                                                        TempMinPLR,
-                                                                                        this->m_CoolingCoilIndex,
-                                                                                        fanOp,
-                                                                                        HXUnitOn,
-                                                                                        _,
-                                                                                        state.dataUnitarySystems->economizerFlag,
-                                                                                        _,
-                                                                                        this->m_DehumidificationMode,
-                                                                                        0.0); // this->CoilSHR);
+                                    simHXAssistedCooling(state,
+                                                         CompName,
+                                                         FirstHVACIteration,
+                                                         TempMinPLR,
+                                                         this->m_CoolingCoilIndex,
+                                                         fanOp,
+                                                         HXUnitOn,
+                                                         this->m_DehumidificationMode);
                                     TempOutletTempDXCoil = state.dataHVACAssistedCC->HXAssistedCoilOutletTemp(this->m_CoolingCoilIndex);
                                 }
                                 // Relax boundary slightly to assure a solution can be found using RegulaFalsi (i.e. one boundary may
@@ -13349,19 +13349,8 @@ namespace UnitarySystems {
                     // Determine required part load when heat exchanger is ON
                     HXUnitOn = true;
                     PartLoadFrac = 1.0;
-                    HVACHXAssistedCoolingCoil::SimHXAssistedCoolingCoil(state,
-                                                                        CompName,
-                                                                        FirstHVACIteration,
-                                                                        HVAC::CompressorOp::On,
-                                                                        PartLoadFrac,
-                                                                        this->m_CoolingCoilIndex,
-                                                                        fanOp,
-                                                                        HXUnitOn,
-                                                                        _,
-                                                                        state.dataUnitarySystems->economizerFlag,
-                                                                        _,
-                                                                        this->m_DehumidificationMode,
-                                                                        0.0); // this->CoilSHR);
+                    simHXAssistedCooling(
+                        state, CompName, FirstHVACIteration, PartLoadFrac, this->m_CoolingCoilIndex, fanOp, HXUnitOn, this->m_DehumidificationMode);
 
                     OutletTempDXCoil = state.dataHVACAssistedCC->HXAssistedCoilOutletTemp(this->m_CoolingCoilIndex);
 
@@ -13577,19 +13566,14 @@ namespace UnitarySystems {
                                 while ((OutletHumRatDXCoil - DesOutHumRat) >= 0.0 && TempMaxPLR <= 1.0) {
                                     //                     find upper limit of LatentPLR
                                     TempMaxPLR += 0.1;
-                                    HVACHXAssistedCoolingCoil::SimHXAssistedCoolingCoil(state,
-                                                                                        CompName,
-                                                                                        FirstHVACIteration,
-                                                                                        HVAC::CompressorOp::On,
-                                                                                        TempMaxPLR,
-                                                                                        this->m_CoolingCoilIndex,
-                                                                                        fanOp,
-                                                                                        HXUnitOn,
-                                                                                        _,
-                                                                                        state.dataUnitarySystems->economizerFlag,
-                                                                                        _,
-                                                                                        this->m_DehumidificationMode,
-                                                                                        0.0); // this->CoilSHR);
+                                    simHXAssistedCooling(state,
+                                                         CompName,
+                                                         FirstHVACIteration,
+                                                         TempMaxPLR,
+                                                         this->m_CoolingCoilIndex,
+                                                         fanOp,
+                                                         HXUnitOn,
+                                                         this->m_DehumidificationMode);
                                     OutletHumRatDXCoil = state.dataHVACAssistedCC->HXAssistedCoilOutletHumRat(this->m_CoolingCoilIndex);
                                 }
                                 TempMaxPLR = min(1.0, TempMaxPLR + 0.1);
@@ -13599,19 +13583,14 @@ namespace UnitarySystems {
                                     //                     exceeds SystemMoisuterLoad)
                                     //                     find minimum limit of Latent PLR
                                     TempMinPLR -= 0.02;
-                                    HVACHXAssistedCoolingCoil::SimHXAssistedCoolingCoil(state,
-                                                                                        CompName,
-                                                                                        FirstHVACIteration,
-                                                                                        HVAC::CompressorOp::On,
-                                                                                        TempMinPLR,
-                                                                                        this->m_CoolingCoilIndex,
-                                                                                        fanOp,
-                                                                                        HXUnitOn,
-                                                                                        _,
-                                                                                        state.dataUnitarySystems->economizerFlag,
-                                                                                        _,
-                                                                                        this->m_DehumidificationMode,
-                                                                                        0.0); // this->CoilSHR);
+                                    simHXAssistedCooling(state,
+                                                         CompName,
+                                                         FirstHVACIteration,
+                                                         TempMinPLR,
+                                                         this->m_CoolingCoilIndex,
+                                                         fanOp,
+                                                         HXUnitOn,
+                                                         this->m_DehumidificationMode);
                                     OutletHumRatDXCoil = state.dataHVACAssistedCC->HXAssistedCoilOutletHumRat(this->m_CoolingCoilIndex);
                                 }
                                 TempMinPLR = max(0.0, TempMinPLR - 0.1);
