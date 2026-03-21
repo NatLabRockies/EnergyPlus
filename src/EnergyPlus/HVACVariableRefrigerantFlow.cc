@@ -2414,6 +2414,129 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         checkMinLessThanMax(thisVrf.Name, thisVrf.IUCondTempLow, thisVrf.IUCondTempHigh, cNumericFieldNames(13));
     };
 
+    // Lambda: read common FluidTCtrl fields shared by both HP and HR condenser objects.
+    // Handles availability schedule, zone TU list, refrigerant, rated capacity/COP,
+    // OA temperature ranges, SH/SC, IU config, OU fan data, OUEvap/OUCond temp curves,
+    // pipe parameters (with RefPipEquLen validation), and crank case parameters.
+    // Field indices that differ between HP and HR are passed as parameters.
+    auto readFluidCtrlCommonFields = [&](VRFCondenserEquipment &thisVrf,
+                                         ErrorObjectHeader const &eoh,
+                                         int shIdx,         // numeric index for SH field
+                                         int scIdx,         // numeric index for SC field
+                                         int ouFanPwrIdx,   // numeric index for OU fan power per capacity
+                                         int ouAirFlowIdx,  // numeric index for OU air flow per capacity
+                                         int pipDiaSucIdx,  // numeric index for suction pipe diameter
+                                         int pipDiaDisIdx,  // numeric index for discharge pipe diameter
+                                         int pipLenIdx,     // numeric index for pipe length
+                                         int pipEquLenIdx,  // numeric index for equivalent pipe length
+                                         int pipHeiIdx,     // numeric index for pipe height
+                                         int pipInsThiIdx,  // numeric index for pipe insulation thickness
+                                         int pipInsConIdx,  // numeric index for pipe insulation conductivity
+                                         int ccHeatPwrIdx,  // numeric index for crank case heater power
+                                         int numCompIdx,    // numeric index for number of compressors
+                                         int compSzRatIdx,  // numeric index for compressor size ratio
+                                         int maxOATccIdx)   // numeric index for max OAT for crank case heater
+    {
+        // Availability schedule
+        if (lAlphaFieldBlanks(2)) {
+            thisVrf.availSched = Sched::GetScheduleAlwaysOn(state);
+        } else if ((thisVrf.availSched = Sched::GetSchedule(state, cAlphaArgs(2))) == nullptr) {
+            ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(2), cAlphaArgs(2));
+            ErrorsFound = true;
+        }
+
+        // Zone terminal unit list
+        thisVrf.ZoneTUListPtr =
+            Util::FindItemInList(cAlphaArgs(3), state.dataHVACVarRefFlow->TerminalUnitList, state.dataHVACVarRefFlow->NumVRFTULists);
+        if (thisVrf.ZoneTUListPtr == 0) {
+            ShowSevereError(state, cCurrentModuleObject + " = \"" + thisVrf.Name + "\"");
+            ShowContinueError(state, cAlphaFieldNames(3) + " = " + cAlphaArgs(3) + " not found.");
+            ErrorsFound = true;
+        }
+
+        // Refrigerant type
+        thisVrf.refrigName = cAlphaArgs(4);
+        if ((thisVrf.refrig = Fluid::GetRefrig(state, thisVrf.refrigName)) == nullptr) {
+            ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(4), cAlphaArgs(4));
+            ErrorsFound = true;
+        }
+
+        // Rated capacity and COP
+        thisVrf.RatedEvapCapacity = rNumericArgs(1);
+        thisVrf.RatedCompPowerPerCapcity = rNumericArgs(2);
+        thisVrf.RatedCompPower = thisVrf.RatedCompPowerPerCapcity * thisVrf.RatedEvapCapacity;
+        thisVrf.CoolingCapacity = thisVrf.RatedEvapCapacity;
+        thisVrf.RatedHeatCapacity = thisVrf.RatedEvapCapacity * (1 + thisVrf.RatedCompPowerPerCapcity);
+        thisVrf.HeatingCapacity = thisVrf.RatedHeatCapacity;
+        thisVrf.CoolingCOP = 1 / thisVrf.RatedCompPowerPerCapcity;
+        thisVrf.HeatingCOP = 1 / thisVrf.RatedCompPowerPerCapcity + 1;
+
+        // OA temperature range (cooling and heating -- common to HP and HR)
+        thisVrf.MinOATCooling = rNumericArgs(3);
+        thisVrf.MaxOATCooling = rNumericArgs(4);
+        thisVrf.MinOATHeating = rNumericArgs(5);
+        thisVrf.MaxOATHeating = rNumericArgs(6);
+        checkMinLessThanMax(thisVrf.Name, thisVrf.MinOATCooling, thisVrf.MaxOATCooling, cNumericFieldNames(3));
+        checkMinLessThanMax(thisVrf.Name, thisVrf.MinOATHeating, thisVrf.MaxOATHeating, cNumericFieldNames(5));
+
+        // Reference OU SH/SC
+        thisVrf.SH = rNumericArgs(shIdx);
+        thisVrf.SC = rNumericArgs(scIdx);
+
+        // IU configuration (alpha field 5 + numeric fields 9-14)
+        readFluidCtrlIUConfig(thisVrf);
+
+        // OU fan data
+        thisVrf.RatedOUFanPowerPerCapcity = rNumericArgs(ouFanPwrIdx);
+        thisVrf.OUAirFlowRatePerCapcity = rNumericArgs(ouAirFlowIdx);
+        thisVrf.RatedOUFanPower = thisVrf.RatedOUFanPowerPerCapcity * thisVrf.RatedEvapCapacity;
+        thisVrf.OUAirFlowRate = thisVrf.OUAirFlowRatePerCapcity * thisVrf.RatedEvapCapacity;
+
+        // OUEvapTempCurve
+        getRequiredQuadraticCurveCoeffs(state, ErrorsFound, RoutineName, cCurrentModuleObject, thisVrf.Name,
+                                        cAlphaArgs(6), cAlphaFieldNames(6), lAlphaFieldBlanks(6),
+                                        thisVrf.C1Te, thisVrf.C2Te, thisVrf.C3Te);
+
+        // OUCondTempCurve
+        getRequiredQuadraticCurveCoeffs(state, ErrorsFound, RoutineName, cCurrentModuleObject, thisVrf.Name,
+                                        cAlphaArgs(7), cAlphaFieldNames(7), lAlphaFieldBlanks(7),
+                                        thisVrf.C1Tc, thisVrf.C2Tc, thisVrf.C3Tc);
+
+        // Pipe parameters
+        thisVrf.RefPipDiaSuc = rNumericArgs(pipDiaSucIdx);
+        thisVrf.RefPipDiaDis = rNumericArgs(pipDiaDisIdx);
+        thisVrf.RefPipLen = rNumericArgs(pipLenIdx);
+        thisVrf.RefPipEquLen = rNumericArgs(pipEquLenIdx);
+        thisVrf.RefPipHei = rNumericArgs(pipHeiIdx);
+        thisVrf.RefPipInsThi = rNumericArgs(pipInsThiIdx);
+        thisVrf.RefPipInsCon = rNumericArgs(pipInsConIdx);
+
+        // Check the RefPipEquLen
+        if (lNumericFieldBlanks(pipEquLenIdx) && !lNumericFieldBlanks(pipLenIdx)) {
+            thisVrf.RefPipEquLen = 1.2 * thisVrf.RefPipLen;
+            ShowWarningError(
+                state, cCurrentModuleObject + ", \"" + thisVrf.Name + "\", \" " + cNumericFieldNames(pipEquLenIdx) + "\" is calculated based on");
+            ShowContinueError(state, "...the provided \"" + cNumericFieldNames(pipLenIdx) + "\" value.");
+        }
+        if (thisVrf.RefPipEquLen < thisVrf.RefPipLen) {
+            thisVrf.RefPipEquLen = 1.2 * thisVrf.RefPipLen;
+            ShowWarningError(state,
+                             cCurrentModuleObject + ", \"" + thisVrf.Name + "\", invalid \" " + cNumericFieldNames(pipEquLenIdx) + "\" value.");
+            ShowContinueError(state, "...Equivalent length of main pipe should be greater than or equal to the actual length.");
+            ShowContinueError(state, EnergyPlus::format("...The value is recalculated based on the provided \"{}\" value.", cNumericFieldNames(pipLenIdx)));
+        }
+
+        // Crank case
+        thisVrf.CCHeaterPower = rNumericArgs(ccHeatPwrIdx);
+        thisVrf.NumCompressors = rNumericArgs(numCompIdx);
+        thisVrf.CompressorSizeRatio = rNumericArgs(compSzRatIdx);
+        thisVrf.MaxOATCCHeater = rNumericArgs(maxOATccIdx);
+
+        // The FluidTCtrl VRF model is Air cooled
+        thisVrf.CondenserType = DataHeatBalance::RefrigCondenserType::Air;
+        thisVrf.CondenserNodeNum = 0;
+    };
+
     // Read all VRF condenser objects: Algorithm Type 2_physics based model (VRF-FluidTCtrl-HP)
     cCurrentModuleObject = "AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl";
     for (int thisNum = 1; thisNum <= state.dataHVACVarRefFlow->NumVRFCond_FluidTCtrl_HP; ++thisNum) {
@@ -2442,132 +2565,21 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         thisVrfFluidCtrl.VRFSystemTypeNum = VRF_HeatPump;
         thisVrfFluidCtrl.VRFAlgorithmType = AlgorithmType::FluidTCtrl;
         thisVrfFluidCtrl.fuel = Constant::eFuel::Electricity;
+        thisVrfFluidCtrl.ThermostatPriority = ThermostatCtrlType::LoadPriority;
 
-        if (lAlphaFieldBlanks(2)) {
-            thisVrfFluidCtrl.availSched = Sched::GetScheduleAlwaysOn(state);
-        } else if ((thisVrfFluidCtrl.availSched = Sched::GetSchedule(state, cAlphaArgs(2))) == nullptr) {
-            ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(2), cAlphaArgs(2));
-            ErrorsFound = true;
-        }
-
-        thisVrfFluidCtrl.ZoneTUListPtr =
-            Util::FindItemInList(cAlphaArgs(3), state.dataHVACVarRefFlow->TerminalUnitList, state.dataHVACVarRefFlow->NumVRFTULists);
-        if (thisVrfFluidCtrl.ZoneTUListPtr == 0) {
-            ShowSevereError(state, cCurrentModuleObject + " = \"" + thisVrfFluidCtrl.Name + "\"");
-            ShowContinueError(state, cAlphaFieldNames(3) + " = " + cAlphaArgs(3) + " not found.");
-            ErrorsFound = true;
-        }
-
-        // Refrigerant type
-        thisVrfFluidCtrl.refrigName = cAlphaArgs(4);
-        thisVrfFluidCtrl.refrig = Fluid::GetRefrig(state, thisVrfFluidCtrl.refrigName);
-        if (thisVrfFluidCtrl.refrig == nullptr) {
-            ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(4), cAlphaArgs(4));
-            ErrorsFound = true;
-        }
-
-        thisVrfFluidCtrl.RatedEvapCapacity = rNumericArgs(1);
-        thisVrfFluidCtrl.RatedCompPowerPerCapcity = rNumericArgs(2);
-        thisVrfFluidCtrl.RatedCompPower = thisVrfFluidCtrl.RatedCompPowerPerCapcity * thisVrfFluidCtrl.RatedEvapCapacity;
-        thisVrfFluidCtrl.CoolingCapacity = thisVrfFluidCtrl.RatedEvapCapacity;
-        thisVrfFluidCtrl.RatedHeatCapacity = thisVrfFluidCtrl.RatedEvapCapacity * (1 + thisVrfFluidCtrl.RatedCompPowerPerCapcity);
-        thisVrfFluidCtrl.HeatingCapacity = thisVrfFluidCtrl.RatedHeatCapacity;
-
-        // Reference system COP
-        thisVrfFluidCtrl.CoolingCOP = 1 / thisVrfFluidCtrl.RatedCompPowerPerCapcity;
-        thisVrfFluidCtrl.HeatingCOP = 1 / thisVrfFluidCtrl.RatedCompPowerPerCapcity + 1;
-
-        // OA temperature range for VRF-HP operations
-        thisVrfFluidCtrl.MinOATCooling = rNumericArgs(3);
-        thisVrfFluidCtrl.MaxOATCooling = rNumericArgs(4);
-        thisVrfFluidCtrl.MinOATHeating = rNumericArgs(5);
-        thisVrfFluidCtrl.MaxOATHeating = rNumericArgs(6);
-        checkMinLessThanMax(thisVrfFluidCtrl.Name, thisVrfFluidCtrl.MinOATCooling, thisVrfFluidCtrl.MaxOATCooling, cNumericFieldNames(3));
-        checkMinLessThanMax(thisVrfFluidCtrl.Name, thisVrfFluidCtrl.MinOATHeating, thisVrfFluidCtrl.MaxOATHeating, cNumericFieldNames(5));
-
-        // Reference OU SH/SC
-        thisVrfFluidCtrl.SH = rNumericArgs(7);
-        thisVrfFluidCtrl.SC = rNumericArgs(8);
-
-        readFluidCtrlIUConfig(thisVrfFluidCtrl);
-
-        // Get OU fan data
-        thisVrfFluidCtrl.RatedOUFanPowerPerCapcity = rNumericArgs(15);
-        thisVrfFluidCtrl.OUAirFlowRatePerCapcity = rNumericArgs(16);
-        thisVrfFluidCtrl.RatedOUFanPower = thisVrfFluidCtrl.RatedOUFanPowerPerCapcity * thisVrfFluidCtrl.RatedEvapCapacity;
-        thisVrfFluidCtrl.OUAirFlowRate = thisVrfFluidCtrl.OUAirFlowRatePerCapcity * thisVrfFluidCtrl.RatedEvapCapacity;
-
-        // OUEvapTempCurve
-        getRequiredQuadraticCurveCoeffs(state, ErrorsFound, RoutineName, cCurrentModuleObject, thisVrfFluidCtrl.Name,
-                                        cAlphaArgs(6), cAlphaFieldNames(6), lAlphaFieldBlanks(6),
-                                        thisVrfFluidCtrl.C1Te, thisVrfFluidCtrl.C2Te, thisVrfFluidCtrl.C3Te);
-
-        // OUCondTempCurve
-        getRequiredQuadraticCurveCoeffs(state, ErrorsFound, RoutineName, cCurrentModuleObject, thisVrfFluidCtrl.Name,
-                                        cAlphaArgs(7), cAlphaFieldNames(7), lAlphaFieldBlanks(7),
-                                        thisVrfFluidCtrl.C1Tc, thisVrfFluidCtrl.C2Tc, thisVrfFluidCtrl.C3Tc);
-
-        // Pipe parameters
-        thisVrfFluidCtrl.RefPipDiaSuc = rNumericArgs(17);
-        thisVrfFluidCtrl.RefPipDiaDis = rNumericArgs(17);
-        thisVrfFluidCtrl.RefPipLen = rNumericArgs(18);
-        thisVrfFluidCtrl.RefPipEquLen = rNumericArgs(19);
-        thisVrfFluidCtrl.RefPipHei = rNumericArgs(20);
-        thisVrfFluidCtrl.RefPipInsThi = rNumericArgs(21);
-        thisVrfFluidCtrl.RefPipInsCon = rNumericArgs(22);
-
-        // Check the RefPipEquLen
-        if (lNumericFieldBlanks(19) && !lNumericFieldBlanks(18)) {
-            thisVrfFluidCtrl.RefPipEquLen = 1.2 * thisVrfFluidCtrl.RefPipLen;
-            ShowWarningError(
-                state, cCurrentModuleObject + ", \"" + thisVrfFluidCtrl.Name + "\", \" " + cNumericFieldNames(19) + "\" is calculated based on");
-            ShowContinueError(state, "...the provided \"" + cNumericFieldNames(18) + "\" value.");
-        }
-        if (thisVrfFluidCtrl.RefPipEquLen < thisVrfFluidCtrl.RefPipLen) {
-            thisVrfFluidCtrl.RefPipEquLen = 1.2 * thisVrfFluidCtrl.RefPipLen;
-            ShowWarningError(state, cCurrentModuleObject + ", \"" + thisVrfFluidCtrl.Name + "\", invalid \" " + cNumericFieldNames(19) + "\" value.");
-            ShowContinueError(state, "...Equivalent length of main pipe should be greater than or equal to the actual length.");
-            ShowContinueError(state, EnergyPlus::format("...The value is recalculated based on the provided \"{}\" value.", cNumericFieldNames(18)));
-        }
-
-        // Crank case
-        thisVrfFluidCtrl.CCHeaterPower = rNumericArgs(23);
-        thisVrfFluidCtrl.NumCompressors = rNumericArgs(24);
-        thisVrfFluidCtrl.CompressorSizeRatio = rNumericArgs(25);
-        thisVrfFluidCtrl.MaxOATCCHeater = rNumericArgs(26);
+        // Read common FluidTCtrl fields (avail sched, TU list, refrigerant, capacity/COP,
+        // OAT ranges, SH/SC, IU config, OU fan, curves, pipes, crank case, condenser type)
+        readFluidCtrlCommonFields(thisVrfFluidCtrl, eoh,
+                                  /*shIdx=*/7, /*scIdx=*/8,
+                                  /*ouFanPwrIdx=*/15, /*ouAirFlowIdx=*/16,
+                                  /*pipDiaSucIdx=*/17, /*pipDiaDisIdx=*/17,
+                                  /*pipLenIdx=*/18, /*pipEquLenIdx=*/19, /*pipHeiIdx=*/20, /*pipInsThiIdx=*/21, /*pipInsConIdx=*/22,
+                                  /*ccHeatPwrIdx=*/23, /*numCompIdx=*/24, /*compSzRatIdx=*/25, /*maxOATccIdx=*/26);
 
         // Defrost
         readFluidCtrlDefrost(thisVrfFluidCtrl, thisVrfFluidCtrl.Name, 27, 28, 29, cNumericFieldNames(28));
 
         thisVrfFluidCtrl.CompMaxDeltaP = rNumericArgs(30);
-
-        //@@ The control type
-        std::string ThermostatPriorityType = "LoadPriority"; // cAlphaArgs( 25 )
-        if (Util::SameString(ThermostatPriorityType, "LoadPriority")) {
-            thisVrfFluidCtrl.ThermostatPriority = ThermostatCtrlType::LoadPriority;
-        } else if (Util::SameString(ThermostatPriorityType, "ZonePriority")) {
-            thisVrfFluidCtrl.ThermostatPriority = ThermostatCtrlType::ZonePriority;
-        } else if (Util::SameString(ThermostatPriorityType, "ThermostatOffsetPriority")) {
-            thisVrfFluidCtrl.ThermostatPriority = ThermostatCtrlType::ThermostatOffsetPriority;
-        } else if (Util::SameString(ThermostatPriorityType, "Scheduled")) {
-            thisVrfFluidCtrl.ThermostatPriority = ThermostatCtrlType::ScheduledPriority;
-        } else if (Util::SameString(ThermostatPriorityType, "MasterThermostatPriority")) {
-            thisVrfFluidCtrl.ThermostatPriority = ThermostatCtrlType::MasterThermostatPriority;
-            if (thisVrfFluidCtrl.MasterZonePtr == 0) {
-                ShowSevereError(state, cCurrentModuleObject + " = \"" + thisVrfFluidCtrl.Name + "\"");
-                //** ShowContinueError(state,  cAlphaFieldNames( 24 ) + " must be entered when " + cAlphaFieldNames( 25 ) + " = " + cAlphaArgs( 25 )
-                //);
-                ErrorsFound = true;
-            }
-        } else {
-            ShowSevereError(state, cCurrentModuleObject + " = " + thisVrfFluidCtrl.Name);
-            // ShowContinueError(state,  "Illegal " + cAlphaFieldNames( 25 ) + " = " + cAlphaArgs( 25 ) );
-            ErrorsFound = true;
-        }
-
-        // The new VRF model is Air cooled
-        thisVrfFluidCtrl.CondenserType = DataHeatBalance::RefrigCondenserType::Air;
-        thisVrfFluidCtrl.CondenserNodeNum = 0;
 
         // Evaporative Capacity & Compressor Power Curves corresponding to each Loading Index / compressor speed
         // numeric index 31 = last field before compressor speed entries; alpha index 9 = last field before cap/power curves
@@ -2598,57 +2610,25 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
 
         int VRFNum = state.dataHVACVarRefFlow->NumVRFCond_SysCurve + state.dataHVACVarRefFlow->NumVRFCond_FluidTCtrl_HP + thisNum;
         auto &thisVrfFluidCtrlHR = state.dataHVACVarRefFlow->VRF(VRFNum);
-
         thisVrfFluidCtrlHR.Name = cAlphaArgs(1);
-
         thisVrfFluidCtrlHR.ThermostatPriority = ThermostatCtrlType::LoadPriority;
         thisVrfFluidCtrlHR.HeatRecoveryUsed = true;
         thisVrfFluidCtrlHR.VRFSystemTypeNum = VRF_HeatPump;
         thisVrfFluidCtrlHR.VRFAlgorithmType = AlgorithmType::FluidTCtrl;
         thisVrfFluidCtrlHR.fuel = Constant::eFuel::Electricity;
 
-        if (lAlphaFieldBlanks(2)) {
-            thisVrfFluidCtrlHR.availSched = Sched::GetScheduleAlwaysOn(state);
-        } else if ((thisVrfFluidCtrlHR.availSched = Sched::GetSchedule(state, cAlphaArgs(2))) == nullptr) {
-            ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(2), cAlphaArgs(2));
-            ErrorsFound = true;
-        }
+        // Read common FluidTCtrl fields (avail sched, TU list, refrigerant, capacity/COP,
+        // OAT ranges, SH/SC, IU config, OU fan, curves, pipes, crank case, condenser type)
+        readFluidCtrlCommonFields(thisVrfFluidCtrlHR, eoh,
+                                  /*shIdx=*/15, /*scIdx=*/16,
+                                  /*ouFanPwrIdx=*/21, /*ouAirFlowIdx=*/22,
+                                  /*pipDiaSucIdx=*/23, /*pipDiaDisIdx=*/24,
+                                  /*pipLenIdx=*/25, /*pipEquLenIdx=*/26, /*pipHeiIdx=*/27, /*pipInsThiIdx=*/28, /*pipInsConIdx=*/29,
+                                  /*ccHeatPwrIdx=*/30, /*numCompIdx=*/31, /*compSzRatIdx=*/32, /*maxOATccIdx=*/33);
 
-        thisVrfFluidCtrlHR.ZoneTUListPtr =
-            Util::FindItemInList(cAlphaArgs(3), state.dataHVACVarRefFlow->TerminalUnitList, state.dataHVACVarRefFlow->NumVRFTULists);
-        if (thisVrfFluidCtrlHR.ZoneTUListPtr == 0) {
-            ShowSevereError(state, cCurrentModuleObject + " = \"" + thisVrfFluidCtrlHR.Name + "\"");
-            ShowContinueError(state, cAlphaFieldNames(3) + " = " + cAlphaArgs(3) + " not found.");
-            ErrorsFound = true;
-        }
-
-        // Refrigerant type
-        thisVrfFluidCtrlHR.refrigName = cAlphaArgs(4);
-        if ((thisVrfFluidCtrlHR.refrig = Fluid::GetRefrig(state, thisVrfFluidCtrlHR.refrigName)) == nullptr) {
-            ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(4), cAlphaArgs(4));
-            ErrorsFound = true;
-        }
-
-        thisVrfFluidCtrlHR.RatedEvapCapacity = rNumericArgs(1);
-        thisVrfFluidCtrlHR.RatedCompPowerPerCapcity = rNumericArgs(2);
-        thisVrfFluidCtrlHR.RatedCompPower = thisVrfFluidCtrlHR.RatedCompPowerPerCapcity * thisVrfFluidCtrlHR.RatedEvapCapacity;
-        thisVrfFluidCtrlHR.CoolingCapacity = thisVrfFluidCtrlHR.RatedEvapCapacity;
-        thisVrfFluidCtrlHR.HeatingCapacity = thisVrfFluidCtrlHR.RatedEvapCapacity * (1 + thisVrfFluidCtrlHR.RatedCompPowerPerCapcity);
-        thisVrfFluidCtrlHR.RatedHeatCapacity = thisVrfFluidCtrlHR.HeatingCapacity;
-
-        // Reference system COP
-        thisVrfFluidCtrlHR.CoolingCOP = 1 / thisVrfFluidCtrlHR.RatedCompPowerPerCapcity;
-        thisVrfFluidCtrlHR.HeatingCOP = 1 / thisVrfFluidCtrlHR.RatedCompPowerPerCapcity + 1;
-
-        // OA temperature range for VRF-HP operations
-        thisVrfFluidCtrlHR.MinOATCooling = rNumericArgs(3);
-        thisVrfFluidCtrlHR.MaxOATCooling = rNumericArgs(4);
-        thisVrfFluidCtrlHR.MinOATHeating = rNumericArgs(5);
-        thisVrfFluidCtrlHR.MaxOATHeating = rNumericArgs(6);
+        // HR-specific OA temperature range for heat recovery mode
         thisVrfFluidCtrlHR.MinOATHeatRecovery = rNumericArgs(7);
         thisVrfFluidCtrlHR.MaxOATHeatRecovery = rNumericArgs(8);
-        checkMinLessThanMax(thisVrfFluidCtrlHR.Name, thisVrfFluidCtrlHR.MinOATCooling, thisVrfFluidCtrlHR.MaxOATCooling, cNumericFieldNames(3));
-        checkMinLessThanMax(thisVrfFluidCtrlHR.Name, thisVrfFluidCtrlHR.MinOATHeating, thisVrfFluidCtrlHR.MaxOATHeating, cNumericFieldNames(5));
         checkMinLessThanMax(thisVrfFluidCtrlHR.Name, thisVrfFluidCtrlHR.MinOATHeatRecovery, thisVrfFluidCtrlHR.MaxOATHeatRecovery, cNumericFieldNames(7));
         if (thisVrfFluidCtrlHR.MinOATHeatRecovery < thisVrfFluidCtrlHR.MinOATCooling &&
             thisVrfFluidCtrlHR.MinOATHeatRecovery < thisVrfFluidCtrlHR.MinOATHeating) {
@@ -2683,11 +2663,7 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
             ShowContinueError(state, EnergyPlus::format("... adjusted {} = {:.2T} C", cNumericFieldNames(8), thisVrfFluidCtrlHR.MaxOATHeatRecovery));
         }
 
-        readFluidCtrlIUConfig(thisVrfFluidCtrlHR);
-
-        // Reference OU SH/SC
-        thisVrfFluidCtrlHR.SH = rNumericArgs(15);
-        thisVrfFluidCtrlHR.SC = rNumericArgs(16);
+        // HR-specific SH/SC warnings
         if (thisVrfFluidCtrlHR.SH > 20) {
             ShowWarningError(state, cCurrentModuleObject + ", \"" + thisVrfFluidCtrlHR.Name + "\", \" " + cNumericFieldNames(15));
             ShowContinueError(state, "...is higher than 20C, which is usually the maximum of normal range.");
@@ -2697,7 +2673,7 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
             ShowContinueError(state, "...is higher than 20C, which is usually the maximum of normal range.");
         }
 
-        // OU Heat Exchanger Rated Bypass Factor
+        // HR-specific OU Heat Exchanger Rated Bypass Factor
         thisVrfFluidCtrlHR.RateBFOUEvap = rNumericArgs(17);
         thisVrfFluidCtrlHR.RateBFOUCond = rNumericArgs(18);
 
@@ -2706,52 +2682,6 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
 
         // HR OU Heat Exchanger Capacity Ratio
         thisVrfFluidCtrlHR.HROUHexRatio = rNumericArgs(20);
-
-        // Get OU fan data
-        thisVrfFluidCtrlHR.RatedOUFanPowerPerCapcity = rNumericArgs(21);
-        thisVrfFluidCtrlHR.OUAirFlowRatePerCapcity = rNumericArgs(22);
-        thisVrfFluidCtrlHR.RatedOUFanPower = thisVrfFluidCtrlHR.RatedOUFanPowerPerCapcity * thisVrfFluidCtrlHR.RatedEvapCapacity;
-        thisVrfFluidCtrlHR.OUAirFlowRate = thisVrfFluidCtrlHR.OUAirFlowRatePerCapcity * thisVrfFluidCtrlHR.RatedEvapCapacity;
-
-        // OUEvapTempCurve
-        getRequiredQuadraticCurveCoeffs(state, ErrorsFound, RoutineName, cCurrentModuleObject, thisVrfFluidCtrlHR.Name,
-                                        cAlphaArgs(6), cAlphaFieldNames(6), lAlphaFieldBlanks(6),
-                                        thisVrfFluidCtrlHR.C1Te, thisVrfFluidCtrlHR.C2Te, thisVrfFluidCtrlHR.C3Te);
-
-        // OUCondTempCurve
-        getRequiredQuadraticCurveCoeffs(state, ErrorsFound, RoutineName, cCurrentModuleObject, thisVrfFluidCtrlHR.Name,
-                                        cAlphaArgs(7), cAlphaFieldNames(7), lAlphaFieldBlanks(7),
-                                        thisVrfFluidCtrlHR.C1Tc, thisVrfFluidCtrlHR.C2Tc, thisVrfFluidCtrlHR.C3Tc);
-
-        // Pipe parameters
-        thisVrfFluidCtrlHR.RefPipDiaSuc = rNumericArgs(23);
-        thisVrfFluidCtrlHR.RefPipDiaDis = rNumericArgs(24);
-        thisVrfFluidCtrlHR.RefPipLen = rNumericArgs(25);
-        thisVrfFluidCtrlHR.RefPipEquLen = rNumericArgs(26);
-        thisVrfFluidCtrlHR.RefPipHei = rNumericArgs(27);
-        thisVrfFluidCtrlHR.RefPipInsThi = rNumericArgs(28);
-        thisVrfFluidCtrlHR.RefPipInsCon = rNumericArgs(29);
-
-        // Check the RefPipEquLen
-        if (lNumericFieldBlanks(26) && !lNumericFieldBlanks(25)) {
-            thisVrfFluidCtrlHR.RefPipEquLen = 1.2 * thisVrfFluidCtrlHR.RefPipLen;
-            ShowWarningError(
-                state, cCurrentModuleObject + ", \"" + thisVrfFluidCtrlHR.Name + "\", \" " + cNumericFieldNames(26) + "\" is calculated based on");
-            ShowContinueError(state, "...the provided \"" + cNumericFieldNames(25) + "\" value.");
-        }
-        if (thisVrfFluidCtrlHR.RefPipEquLen < thisVrfFluidCtrlHR.RefPipLen) {
-            thisVrfFluidCtrlHR.RefPipEquLen = 1.2 * thisVrfFluidCtrlHR.RefPipLen;
-            ShowWarningError(state,
-                             cCurrentModuleObject + ", \"" + thisVrfFluidCtrlHR.Name + "\", invalid \" " + cNumericFieldNames(26) + "\" value.");
-            ShowContinueError(state, "...Equivalent length of main pipe should be greater than or equal to the actual length.");
-            ShowContinueError(state, EnergyPlus::format("...The value is recalculated based on the provided \"{}\" value.", cNumericFieldNames(25)));
-        }
-
-        // Crank case
-        thisVrfFluidCtrlHR.CCHeaterPower = rNumericArgs(30);
-        thisVrfFluidCtrlHR.NumCompressors = rNumericArgs(31);
-        thisVrfFluidCtrlHR.CompressorSizeRatio = rNumericArgs(32);
-        thisVrfFluidCtrlHR.MaxOATCCHeater = rNumericArgs(33);
 
         // Defrost
         readFluidCtrlDefrost(thisVrfFluidCtrlHR, thisVrfFluidCtrlHR.Name, 34, 35, 36, cNumericFieldNames(35));
@@ -2770,10 +2700,6 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         thisVrfFluidCtrlHR.CompMaxDeltaP = rNumericArgs(45);
         thisVrfFluidCtrlHR.EffCompInverter = rNumericArgs(46);
         thisVrfFluidCtrlHR.CoffEvapCap = rNumericArgs(47);
-
-        // The new VRF model is Air cooled
-        thisVrfFluidCtrlHR.CondenserType = DataHeatBalance::RefrigCondenserType::Air;
-        thisVrfFluidCtrlHR.CondenserNodeNum = 0;
 
         // Evaporative Capacity & Compressor Power Curves corresponding to each Loading Index / compressor speed
         // numeric index 48 = last field before compressor speed entries; alpha index 9 = last field before cap/power curves
