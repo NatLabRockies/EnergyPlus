@@ -7767,6 +7767,39 @@ void WriteTimeBinTables(EnergyPlusData &state)
     }
 }
 
+// Fuel-source mapping entry: fuelFactorIndex into fuelfactorsused/gatherTotalsSource,
+// bepsIndex into gatherTotalsBEPS, and the corresponding default source factor.
+struct FuelSourceEntry
+{
+    int fuelFactorIdx; // index into fuelfactorsused / gatherTotalsSource
+    int bepsIdx;       // index into gatherTotalsBEPS
+    Real64 OutputReportTabularData::*sourceFactor; // pointer-to-member for the default source factor
+};
+
+// Table of fuel-to-source mappings used by totalSourceEnergyUse / netSourceEnergyUse.
+// Electricity is first so callers that skip it can start at index 1.
+static constexpr int kNumFuelSourceEntries = 10;
+
+// Helper: accumulate source energy for fuels in the fuelSourceMap from startIdx..end.
+// For each fuel, uses gatherTotalsSource when a fuel-factor schedule was used,
+// otherwise falls back to gatherTotalsBEPS * default source factor.
+static Real64 accumulateSourceEnergy(OutputReportTabularData const &ort,
+                                     FuelSourceEntry const *map,
+                                     int startIdx,
+                                     int endIdx)
+{
+    Real64 total = 0.0;
+    for (int i = startIdx; i < endIdx; ++i) {
+        auto const &e = map[i];
+        if (ort.fuelfactorsused(e.fuelFactorIdx)) {
+            total += ort.gatherTotalsSource(e.fuelFactorIdx);
+        } else {
+            total += ort.gatherTotalsBEPS(e.bepsIdx) * (ort.*(e.sourceFactor));
+        }
+    }
+    return total;
+}
+
 // Helper: emit a BEPS sub-table to all active output targets (tabular, SQLite, JSON).
 // When subtitle is non-empty WriteSubtitle is called before WriteTable.
 static void writeBEPSSubtable(EnergyPlusData &state,
@@ -8172,67 +8205,22 @@ void WriteBEPSTable(EnergyPlusData &state)
         }
 
         // source emissions already have the source factors included in the calcs.
-        Real64 totalSourceEnergyUse = 0.0;
-        //  electricity
-        if (ort->fuelfactorsused(1)) {
-            totalSourceEnergyUse += ort->gatherTotalsSource(1);
-        } else {
-            totalSourceEnergyUse += ort->gatherTotalsBEPS(1) * ort->sourceFactorElectric;
-        }
-        //  natural gas
-        if (ort->fuelfactorsused(2)) {
-            totalSourceEnergyUse += ort->gatherTotalsSource(2);
-        } else {
-            totalSourceEnergyUse += ort->gatherTotalsBEPS(2) * ort->sourceFactorNaturalGas;
-        }
-        // gasoline
-        if (ort->fuelfactorsused(3)) {
-            totalSourceEnergyUse += ort->gatherTotalsSource(3);
-        } else {
-            totalSourceEnergyUse += ort->gatherTotalsBEPS(6) * ort->sourceFactorGasoline;
-        }
-        // diesel
-        if (ort->fuelfactorsused(4)) {
-            totalSourceEnergyUse += ort->gatherTotalsSource(4);
-        } else {
-            totalSourceEnergyUse += ort->gatherTotalsBEPS(8) * ort->sourceFactorDiesel;
-        }
-        // coal
-        if (ort->fuelfactorsused(5)) {
-            totalSourceEnergyUse += ort->gatherTotalsSource(5);
-        } else {
-            totalSourceEnergyUse += ort->gatherTotalsBEPS(9) * ort->sourceFactorCoal;
-        }
-        // Fuel Oil No1
-        if (ort->fuelfactorsused(6)) {
-            totalSourceEnergyUse += ort->gatherTotalsSource(6);
-        } else {
-            totalSourceEnergyUse += ort->gatherTotalsBEPS(10) * ort->sourceFactorFuelOil1;
-        }
-        // Fuel Oil No2
-        if (ort->fuelfactorsused(7)) {
-            totalSourceEnergyUse += ort->gatherTotalsSource(7);
-        } else {
-            totalSourceEnergyUse += ort->gatherTotalsBEPS(11) * ort->sourceFactorFuelOil2;
-        }
-        // propane
-        if (ort->fuelfactorsused(8)) {
-            totalSourceEnergyUse += ort->gatherTotalsSource(8);
-        } else {
-            totalSourceEnergyUse += ort->gatherTotalsBEPS(12) * ort->sourceFactorPropane;
-        }
-        // otherfuel1
-        if (ort->fuelfactorsused(11)) {
-            totalSourceEnergyUse += ort->gatherTotalsSource(11);
-        } else {
-            totalSourceEnergyUse += ort->gatherTotalsBEPS(13) * ort->sourceFactorOtherFuel1;
-        }
-        // otherfuel2
-        if (ort->fuelfactorsused(12)) {
-            totalSourceEnergyUse += ort->gatherTotalsSource(12);
-        } else {
-            totalSourceEnergyUse += ort->gatherTotalsBEPS(14) * ort->sourceFactorOtherFuel2;
-        }
+        // Fuel-source mapping: {fuelFactorIdx, bepsIdx, &sourceFactor}.
+        // Electricity is index 0; callers that skip it start at index 1.
+        static const FuelSourceEntry fuelSourceMap[kNumFuelSourceEntries] = {
+            {1, 1, &OutputReportTabularData::sourceFactorElectric},
+            {2, 2, &OutputReportTabularData::sourceFactorNaturalGas},
+            {3, 6, &OutputReportTabularData::sourceFactorGasoline},
+            {4, 8, &OutputReportTabularData::sourceFactorDiesel},
+            {5, 9, &OutputReportTabularData::sourceFactorCoal},
+            {6, 10, &OutputReportTabularData::sourceFactorFuelOil1},
+            {7, 11, &OutputReportTabularData::sourceFactorFuelOil2},
+            {8, 12, &OutputReportTabularData::sourceFactorPropane},
+            {11, 13, &OutputReportTabularData::sourceFactorOtherFuel1},
+            {12, 14, &OutputReportTabularData::sourceFactorOtherFuel2},
+        };
+        // totalSourceEnergyUse: all 10 fuels (electricity through otherfuel2)
+        Real64 totalSourceEnergyUse = accumulateSourceEnergy(*ort, fuelSourceMap, 0, kNumFuelSourceEntries);
 
         totalSourceEnergyUse = (totalSourceEnergyUse + ort->gatherTotalsBEPS(3) * ort->sourceFactorElectric / ort->efficiencyDistrictCooling +
                                 ort->gatherTotalsBEPS(4) * ort->sourceFactorNaturalGas / ort->efficiencyDistrictHeatingWater +
@@ -8248,61 +8236,8 @@ void WriteBEPSTable(EnergyPlusData &state)
             netSourceElecPurchasedSold = netElecPurchasedSold * ort->sourceFactorElectric * largeConversionFactor; // back to J
         }
 
-        Real64 netSourceEnergyUse = 0.0;
-        //  natural gas
-        if (ort->fuelfactorsused(2)) {
-            netSourceEnergyUse += ort->gatherTotalsSource(2);
-        } else {
-            netSourceEnergyUse += ort->gatherTotalsBEPS(2) * ort->sourceFactorNaturalGas;
-        }
-        // gasoline
-        if (ort->fuelfactorsused(3)) {
-            netSourceEnergyUse += ort->gatherTotalsSource(3);
-        } else {
-            netSourceEnergyUse += ort->gatherTotalsBEPS(6) * ort->sourceFactorGasoline;
-        }
-        // diesel
-        if (ort->fuelfactorsused(4)) {
-            netSourceEnergyUse += ort->gatherTotalsSource(4);
-        } else {
-            netSourceEnergyUse += ort->gatherTotalsBEPS(8) * ort->sourceFactorDiesel;
-        }
-        // coal
-        if (ort->fuelfactorsused(5)) {
-            netSourceEnergyUse += ort->gatherTotalsSource(5);
-        } else {
-            netSourceEnergyUse += ort->gatherTotalsBEPS(9) * ort->sourceFactorCoal;
-        }
-        // Fuel Oil No1
-        if (ort->fuelfactorsused(6)) {
-            netSourceEnergyUse += ort->gatherTotalsSource(6);
-        } else {
-            netSourceEnergyUse += ort->gatherTotalsBEPS(10) * ort->sourceFactorFuelOil1;
-        }
-        // Fuel Oil No2
-        if (ort->fuelfactorsused(7)) {
-            netSourceEnergyUse += ort->gatherTotalsSource(7);
-        } else {
-            netSourceEnergyUse += ort->gatherTotalsBEPS(11) * ort->sourceFactorFuelOil2;
-        }
-        // propane
-        if (ort->fuelfactorsused(8)) {
-            netSourceEnergyUse += ort->gatherTotalsSource(8);
-        } else {
-            netSourceEnergyUse += ort->gatherTotalsBEPS(12) * ort->sourceFactorPropane;
-        }
-        // otherfuel1
-        if (ort->fuelfactorsused(11)) {
-            netSourceEnergyUse += ort->gatherTotalsSource(11);
-        } else {
-            netSourceEnergyUse += ort->gatherTotalsBEPS(13) * ort->sourceFactorOtherFuel1;
-        }
-        // otherfuel2
-        if (ort->fuelfactorsused(12)) {
-            netSourceEnergyUse += ort->gatherTotalsSource(12);
-        } else {
-            netSourceEnergyUse += ort->gatherTotalsBEPS(14) * ort->sourceFactorOtherFuel2;
-        }
+        // netSourceEnergyUse: fuels 2-10 (skip electricity, which is handled via netSourceElecPurchasedSold)
+        Real64 netSourceEnergyUse = accumulateSourceEnergy(*ort, fuelSourceMap, 1, kNumFuelSourceEntries);
 
         netSourceEnergyUse =
             (netSourceEnergyUse + netSourceElecPurchasedSold + ort->gatherTotalsBEPS(3) * ort->sourceFactorElectric / ort->efficiencyDistrictCooling +
