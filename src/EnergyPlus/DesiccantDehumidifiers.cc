@@ -813,6 +813,24 @@ namespace DesiccantDehumidifiers {
             RegenCoilName = Alphas(10);
             desicDehum.RegenSetPointTemp = Numbers(1);
 
+            // Warn if a regen heating coil has a temperature setpoint node (should be blank).
+            auto warnIfCoilHasSetpointNode = [&](int controlNodeNum) {
+                if (controlNodeNum > 0) {
+                    ShowSevereError(state, EnergyPlus::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                    ShowContinueError(
+                        state,
+                        EnergyPlus::format("{} is specified as {:.3R} C in this object.", cNumericFields(1), desicDehum.RegenSetPointTemp));
+                    ShowContinueError(state, " Do not specify a coil temperature setpoint node name in the regeneration air heater object.");
+                    ShowContinueError(state, EnergyPlus::format("...{} = {}", cAlphaFields(9), desicDehum.RegenCoilType));
+                    ShowContinueError(state, EnergyPlus::format("...{} = {}", cAlphaFields(10), desicDehum.RegenCoilName));
+                    ShowContinueError(state,
+                                      EnergyPlus::format("...heating coil temperature setpoint node = {}",
+                                                         state.dataLoopNodes->NodeID(controlNodeNum)));
+                    ShowContinueError(state, "...leave the heating coil temperature setpoint node name blank in the regen heater object.");
+                    ErrorsFoundGeneric = true;
+                }
+            };
+
             if (!lAlphaBlanks(10)) {
                 if (Util::SameString(desicDehum.RegenCoilType, "Coil:Heating:Electric") ||
                     Util::SameString(desicDehum.RegenCoilType, "Coil:Heating:Fuel")) {
@@ -862,20 +880,7 @@ namespace DesiccantDehumidifiers {
                         ErrorsFoundGeneric = true;
                     }
 
-                    if (RegenCoilControlNodeNum > 0) {
-                        ShowSevereError(state, EnergyPlus::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format("{} is specified as {:.3R} C in this object.", cNumericFields(1), desicDehum.RegenSetPointTemp));
-                        ShowContinueError(state, " Do not specify a coil temperature setpoint node name in the regeneration air heater object.");
-                        ShowContinueError(state, EnergyPlus::format("...{} = {}", cAlphaFields(9), desicDehum.RegenCoilType));
-                        ShowContinueError(state, EnergyPlus::format("...{} = {}", cAlphaFields(10), desicDehum.RegenCoilName));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("...heating coil temperature setpoint node = {}",
-                                                             state.dataLoopNodes->NodeID(RegenCoilControlNodeNum)));
-                        ShowContinueError(state, "...leave the heating coil temperature setpoint node name blank in the regen heater object.");
-                        ErrorsFoundGeneric = true;
-                    }
+                    warnIfCoilHasSetpointNode(RegenCoilControlNodeNum);
 
                     RegairHeatingCoilFlag = true;
                     HeatingCoils::SetHeatingCoilData(state, desicDehum.RegenCoilIndex, ErrorsFound2, RegairHeatingCoilFlag, DesicDehumNum);
@@ -934,20 +939,7 @@ namespace DesiccantDehumidifiers {
                         ErrorsFoundGeneric = true;
                     }
 
-                    if (RegenCoilControlNodeNum > 0) {
-                        ShowSevereError(state, EnergyPlus::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format("{} is specified as {:.3R} C in this object.", cNumericFields(1), desicDehum.RegenSetPointTemp));
-                        ShowContinueError(state, " Do not specify a coil temperature setpoint node name in the regeneration air heater object.");
-                        ShowContinueError(state, EnergyPlus::format("...{} = {}", cAlphaFields(9), desicDehum.RegenCoilType));
-                        ShowContinueError(state, EnergyPlus::format("...{} = {}", cAlphaFields(10), desicDehum.RegenCoilName));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("...heating coil temperature setpoint node = {}",
-                                                             state.dataLoopNodes->NodeID(RegenCoilControlNodeNum)));
-                        ShowContinueError(state, "...leave the heating coil temperature setpoint node name blank in the regen heater object.");
-                        ErrorsFoundGeneric = true;
-                    }
+                    warnIfCoilHasSetpointNode(RegenCoilControlNodeNum);
 
                     RegairHeatingCoilFlag = true;
                     SteamCoils::SetSteamCoilData(state, desicDehum.RegenCoilIndex, ErrorsFound2, RegairHeatingCoilFlag, DesicDehumNum);
