@@ -998,17 +998,7 @@ namespace Curve {
             readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 6);
 
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 4, 5, ErrorsFound);
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
+            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 1, 2);
         }
 
         // Loop over quadratic-linear curves and load data
@@ -1048,23 +1038,7 @@ namespace Curve {
 
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 7, 8, ErrorsFound);
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 9, 10, ErrorsFound);
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveInputTypeValid(Alphas(3))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for Y is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 4) {
-                if (!IsCurveOutputTypeValid(Alphas(4))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
+            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 2, 2);
         }
 
         // Loop over cubic-linear curves and load data
@@ -1104,23 +1078,7 @@ namespace Curve {
 
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 7, 8, ErrorsFound);
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 9, 10, ErrorsFound);
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveInputTypeValid(Alphas(3))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for Y is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 4) {
-                if (!IsCurveOutputTypeValid(Alphas(4))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
+            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 2, 2);
         }
 
         // Loop over linear curves and load data
@@ -1157,17 +1115,7 @@ namespace Curve {
             readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 5);
 
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 3, 4, ErrorsFound);
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
+            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 1, 2);
         }
 
         // Loop over bicubic curves and load data
@@ -1207,23 +1155,7 @@ namespace Curve {
 
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 11, 12, ErrorsFound);
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 13, 14, ErrorsFound);
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveInputTypeValid(Alphas(3))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for Y is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 4) {
-                if (!IsCurveOutputTypeValid(Alphas(4))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
+            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 2, 2);
         }
 
         // Loop over Triquadratic curves and load data
@@ -1290,29 +1222,7 @@ namespace Curve {
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 28, 29, ErrorsFound);
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 30, 31, ErrorsFound);
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 32, 33, ErrorsFound);
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveInputTypeValid(Alphas(3))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for Y is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 4) {
-                if (!IsCurveInputTypeValid(Alphas(4))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for Z is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 5) {
-                if (!IsCurveOutputTypeValid(Alphas(5))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
+            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 3, 2);
         }
 
         // Loop over quad linear curves and load data
@@ -1475,17 +1385,7 @@ namespace Curve {
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 4, 5, ErrorsFound);
 
             readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 6);
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
+            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 1, 2);
         }
 
         // Loop over Fan Pressure Rise curves and load data
@@ -1565,17 +1465,7 @@ namespace Curve {
 
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 5, 6, ErrorsFound);
 
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
+            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 1, 2);
         } // Exponential Skew Normal
 
         // Loop over Sigmoid curves and load data
@@ -1614,17 +1504,7 @@ namespace Curve {
 
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 6, 7, ErrorsFound);
 
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
+            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 1, 2);
         } // Sigmoid
 
         // Loop over Rectangular Hyperbola Type 1 curves and load data
@@ -1663,17 +1543,7 @@ namespace Curve {
 
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 4, 5, ErrorsFound);
 
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
+            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 1, 2);
         } // Rectangular Hyperbola Type 1
 
         // Loop over Rectangular Hyperbola Type 2 curves and load data
@@ -1712,17 +1582,7 @@ namespace Curve {
 
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 4, 5, ErrorsFound);
 
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
+            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 1, 2);
         } // Rectangular Hyperbola Type 2
 
         // Loop over Exponential Decay curves and load data
@@ -1760,18 +1620,7 @@ namespace Curve {
             readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 6);
 
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 4, 5, ErrorsFound);
-
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
+            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 1, 2);
         } // Exponential Decay
 
         // ykt July,2011 Loop over DoubleExponential Decay curves and load data
@@ -1809,18 +1658,7 @@ namespace Curve {
             checkCurveInputLimits(state, CurrentModuleObject, Numbers, 6, 7, ErrorsFound);
 
             readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 8);
-
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
+            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, 1, 2);
         } // Exponential Decay
 
         // Loop over wind pressure coefficient tables and load data
