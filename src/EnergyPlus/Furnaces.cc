@@ -1474,7 +1474,7 @@ namespace Furnaces {
             [&](const std::array<WAHPCoilDesc, numWAHPVariants> &table,
                 std::string_view alphaType,
                 std::string_view alphaName,
-                std::string_view alphaFieldType,
+                std::string_view /* alphaFieldType */,
                 int &coilIndex,
                 int &coilTypeNum,
                 std::string &coilType,
