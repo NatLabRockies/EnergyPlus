@@ -6102,6 +6102,26 @@ void GetRefrigerationInput(EnergyPlusData &state)
     }
 }
 
+// Helper: set up the 5 standard output variables for a single refrigeration compressor.
+static void setupCompressorOutputVars(EnergyPlusData &state,
+                                      RefrigCompressorData &comp,
+                                      const std::string &prefix,
+                                      OutputProcessor::TimeStepType tsType)
+{
+    SetupOutputVariable(state, prefix + " Electricity Rate", Constant::Units::W, comp.Power, tsType,
+                        OutputProcessor::StoreType::Average, comp.Name);
+    SetupOutputVariable(state, prefix + " Electricity Energy", Constant::Units::J, comp.ElecConsumption, tsType,
+                        OutputProcessor::StoreType::Sum, comp.Name, Constant::eResource::Electricity,
+                        OutputProcessor::Group::Plant, OutputProcessor::EndUseCat::Refrigeration,
+                        comp.EndUseSubcategory);
+    SetupOutputVariable(state, prefix + " Heat Transfer Rate", Constant::Units::W, comp.Capacity, tsType,
+                        OutputProcessor::StoreType::Average, comp.Name);
+    SetupOutputVariable(state, prefix + " Heat Transfer Energy", Constant::Units::J, comp.CoolingEnergy, tsType,
+                        OutputProcessor::StoreType::Sum, comp.Name);
+    SetupOutputVariable(state, prefix + " Runtime Fraction", Constant::Units::None, comp.LoadFactor, tsType,
+                        OutputProcessor::StoreType::Average, comp.Name);
+}
+
 void SetupReportInput(EnergyPlusData &state)
 {
     // SUBROUTINE INFORMATION:
@@ -7577,54 +7597,13 @@ void SetupReportInput(EnergyPlusData &state)
         // Report Compressor ENERGY here, not on system level for meters.
         for (int compNum = 1; compNum <= state.dataRefrigCase->NumSimulationCompressors; ++compNum) {
             auto &comp = Compressor(compNum);
-            // CurrentModuleObject='Refrigeration:Compressor'
-            if (comp.NumSysAttach == 1) { // only set up reports for compressors that are used once and only once
-                // CoilFlag: serves chillers on HVAC (System) time step; otherwise cases/walkins on Zone time step
+            if (comp.NumSysAttach == 1) {
                 const std::string compPrefix =
                     comp.CoilFlag ? "Refrigeration Air Chiller System Compressor" : "Refrigeration Compressor";
                 const auto compTsType =
                     comp.CoilFlag ? OutputProcessor::TimeStepType::System : OutputProcessor::TimeStepType::Zone;
-
-                SetupOutputVariable(state,
-                                    compPrefix + " Electricity Rate",
-                                    Constant::Units::W,
-                                    comp.Power,
-                                    compTsType,
-                                    OutputProcessor::StoreType::Average,
-                                    comp.Name);
-                SetupOutputVariable(state,
-                                    compPrefix + " Electricity Energy",
-                                    Constant::Units::J,
-                                    comp.ElecConsumption,
-                                    compTsType,
-                                    OutputProcessor::StoreType::Sum,
-                                    comp.Name,
-                                    Constant::eResource::Electricity,
-                                    OutputProcessor::Group::Plant,
-                                    OutputProcessor::EndUseCat::Refrigeration,
-                                    comp.EndUseSubcategory);
-                SetupOutputVariable(state,
-                                    compPrefix + " Heat Transfer Rate",
-                                    Constant::Units::W,
-                                    comp.Capacity,
-                                    compTsType,
-                                    OutputProcessor::StoreType::Average,
-                                    comp.Name);
-                SetupOutputVariable(state,
-                                    compPrefix + " Heat Transfer Energy",
-                                    Constant::Units::J,
-                                    comp.CoolingEnergy,
-                                    compTsType,
-                                    OutputProcessor::StoreType::Sum,
-                                    comp.Name);
-                SetupOutputVariable(state,
-                                    compPrefix + " Runtime Fraction",
-                                    Constant::Units::None,
-                                    comp.LoadFactor,
-                                    compTsType,
-                                    OutputProcessor::StoreType::Average,
-                                    comp.Name);
-            } // NumSysAttach
+                setupCompressorOutputVars(state, comp, compPrefix, compTsType);
+            }
         } // CompNum on NumSimulationCompressors
 
         // Report Variables for Refrigeration Condensers
@@ -8065,95 +8044,19 @@ void SetupReportInput(EnergyPlusData &state)
             // LP compressors
             for (int compIndex = 1; compIndex <= sys.NumCompressorsLP; ++compIndex) {
                 int compNum = sys.CompressorNumLP(compIndex);
-                // CurrentModuleObject='Refrigeration:Compressor'
-                if (Compressor(compNum).NumSysAttach == 1) { // only set up reports for compressors that are used once and only once
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Electricity Rate",
-                                        Constant::Units::W,
-                                        Compressor(compNum).Power,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        Compressor(compNum).Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Electricity Energy",
-                                        Constant::Units::J,
-                                        Compressor(compNum).ElecConsumption,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        Compressor(compNum).Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        Compressor(compNum).EndUseSubcategory);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        Compressor(compNum).Capacity,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        Compressor(compNum).Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        Compressor(compNum).CoolingEnergy,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        Compressor(compNum).Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Runtime Fraction",
-                                        Constant::Units::None,
-                                        Compressor(compNum).LoadFactor,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        Compressor(compNum).Name);
-                } // NumSysAttach
+                if (Compressor(compNum).NumSysAttach == 1) {
+                    setupCompressorOutputVars(state, Compressor(compNum), "Refrigeration Compressor",
+                                              OutputProcessor::TimeStepType::Zone);
+                }
             } // sys%NumCompressorsLP
 
             // HP compressors
             for (int compIndex = 1; compIndex <= sys.NumCompressorsHP; ++compIndex) {
                 int compNum = sys.CompressorNumHP(compIndex);
-                // CurrentModuleObject='Refrigeration:Compressor'
-                if (Compressor(compNum).NumSysAttach == 1) { // only set up reports for compressors that are used once and only once
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Electricity Rate",
-                                        Constant::Units::W,
-                                        Compressor(compNum).Power,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        Compressor(compNum).Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Electricity Energy",
-                                        Constant::Units::J,
-                                        Compressor(compNum).ElecConsumption,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        Compressor(compNum).Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        Compressor(compNum).EndUseSubcategory);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        Compressor(compNum).Capacity,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        Compressor(compNum).Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        Compressor(compNum).CoolingEnergy,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        Compressor(compNum).Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Runtime Fraction",
-                                        Constant::Units::None,
-                                        Compressor(compNum).LoadFactor,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        Compressor(compNum).Name);
-                } // NumSysAttach
+                if (Compressor(compNum).NumSysAttach == 1) {
+                    setupCompressorOutputVars(state, Compressor(compNum), "Refrigeration Compressor",
+                                              OutputProcessor::TimeStepType::Zone);
+                }
             } // sys%NumCompressorsHP
 
         } // NumTransRefrigSystems
