@@ -2476,6 +2476,28 @@ namespace VariableSpeedCoils {
         state.dataHeatBal->HeatReclaimVS_Coil(DXCoilNum).AvailCapacity = 0.0;
     }
 
+    // Helper: warn when user-specified sizing value differs significantly from design size
+    static void reportSizingMismatchWarning(EnergyPlusData &state,
+                                            std::string_view coolHeatType,
+                                            std::string_view objSubfix,
+                                            std::string_view coilName,
+                                            std::string_view userDesc,
+                                            Real64 userValue,
+                                            std::string_view desDesc,
+                                            Real64 desValue)
+    {
+        if (!state.dataGlobal->DisplayExtraWarnings) return;
+        if (userValue == 0.0) return;
+        if ((std::abs(desValue - userValue) / userValue) <= state.dataSize->AutoVsHardSizingThreshold) return;
+
+        ShowMessage(state, EnergyPlus::format("SizeVarSpeedCoil: Potential issue with equipment sizing for {} {}", coolHeatType, objSubfix));
+        ShowContinueError(state, EnergyPlus::format("Coil Name = {}", coilName));
+        ShowContinueError(state, EnergyPlus::format("User-Specified {} of {:.5R}", userDesc, userValue));
+        ShowContinueError(state, EnergyPlus::format("differs from Design Size {} of {:.5R}", desDesc, desValue));
+        ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
+        ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
+    }
+
     void SizeVarSpeedCoil(EnergyPlusData &state, int const DXCoilNum, bool &ErrorsFound)
     {
 
@@ -2916,23 +2938,9 @@ namespace VariableSpeedCoils {
                                                  RatedCapCoolTotalDes,
                                                  "User-Specified Rated Total Cooling Capacity [W]",
                                                  RatedCapCoolTotalUser);
-                    if (state.dataGlobal->DisplayExtraWarnings) {
-                        if ((std::abs(RatedCapCoolTotalDes - RatedCapCoolTotalUser) / RatedCapCoolTotalUser) >
-                            state.dataSize->AutoVsHardSizingThreshold) {
-                            ShowMessage(state,
-                                        EnergyPlus::format("SizeVarSpeedCoil: Potential issue with equipment sizing for {} {}",
-                                                           varSpeedCoil.CoolHeatType,
-                                                           CurrentObjSubfix));
-                            ShowContinueError(state, EnergyPlus::format("Coil Name = {}", varSpeedCoil.Name));
-                            ShowContinueError(state,
-                                              EnergyPlus::format("User-Specified Rated Total Cooling Capacity of {:.2R} [W]", RatedCapCoolTotalUser));
-                            ShowContinueError(
-                                state,
-                                EnergyPlus::format("differs from Design Size Rated Total Cooling Capacity of {:.2R} [W]", RatedCapCoolTotalDes));
-                            ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
-                            ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
-                        }
-                    }
+                    reportSizingMismatchWarning(state, varSpeedCoil.CoolHeatType, CurrentObjSubfix, varSpeedCoil.Name,
+                                               "Rated Total Cooling Capacity [W]", RatedCapCoolTotalUser,
+                                               "Rated Total Cooling Capacity [W]", RatedCapCoolTotalDes);
                 }
             }
 
@@ -3049,20 +3057,9 @@ namespace VariableSpeedCoils {
                                              RatedCapHeatDes,
                                              "User-Specified Nominal Heating Capacity [W]",
                                              RatedCapHeatUser);
-                if (state.dataGlobal->DisplayExtraWarnings) {
-                    if ((std::abs(RatedCapHeatDes - RatedCapHeatUser) / RatedCapHeatUser) > state.dataSize->AutoVsHardSizingThreshold) {
-                        ShowMessage(state,
-                                    EnergyPlus::format("SizeVarSpeedCoil: Potential issue with equipment sizing for {} {}",
-                                                       varSpeedCoil.CoolHeatType,
-                                                       CurrentObjSubfix));
-                        ShowContinueError(state, EnergyPlus::format("Coil Name = {}", varSpeedCoil.Name));
-                        ShowContinueError(state, EnergyPlus::format("User-Specified Rated Total Heating Capacity of {:.2R} [W]", RatedCapHeatUser));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("differs from Design Size Rated Total Heating Capacity of {:.2R} [W]", RatedCapHeatDes));
-                        ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
-                        ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
-                    }
-                }
+                reportSizingMismatchWarning(state, varSpeedCoil.CoolHeatType, CurrentObjSubfix, varSpeedCoil.Name,
+                                           "Rated Total Heating Capacity [W]", RatedCapHeatUser,
+                                           "Rated Total Heating Capacity [W]", RatedCapHeatDes);
             }
         }
 
@@ -3092,22 +3089,9 @@ namespace VariableSpeedCoils {
                                                  RatedAirVolFlowRateDes,
                                                  "User-Specified Rated Air Flow Rate [m3/s]",
                                                  RatedAirVolFlowRateUser);
-                    if (state.dataGlobal->DisplayExtraWarnings) {
-                        if ((std::abs(RatedAirVolFlowRateDes - RatedAirVolFlowRateUser) / RatedAirVolFlowRateUser) >
-                            state.dataSize->AutoVsHardSizingThreshold) {
-                            ShowMessage(state,
-                                        EnergyPlus::format("SizeVarSpeedCoil: Potential issue with equipment sizing for {} {}",
-                                                           varSpeedCoil.CoolHeatType,
-                                                           CurrentObjSubfix));
-                            ShowContinueError(state, EnergyPlus::format("Coil Name = {}", varSpeedCoil.Name));
-                            ShowContinueError(state,
-                                              EnergyPlus::format("User-Specified Rated Air Flow Rate of {:.5R} [m3/s]", RatedAirVolFlowRateUser));
-                            ShowContinueError(
-                                state, EnergyPlus::format("differs from Design Size Rated Air Flow Rate of {:.5R} [m3/s]", RatedAirVolFlowRateDes));
-                            ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
-                            ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
-                        }
-                    }
+                    reportSizingMismatchWarning(state, varSpeedCoil.CoolHeatType, CurrentObjSubfix, varSpeedCoil.Name,
+                                               "Rated Air Flow Rate [m3/s]", RatedAirVolFlowRateUser,
+                                               "Rated Air Flow Rate [m3/s]", RatedAirVolFlowRateDes);
                 }
             }
             state.dataRptCoilSelection->coilSelectionReportObj->setCoilAirFlow(
@@ -3375,22 +3359,9 @@ namespace VariableSpeedCoils {
                                              RatedWaterVolFlowRateDes,
                                              "User-Specified Rated Water Flow Rate [m3/s]",
                                              RatedWaterVolFlowRateUser);
-                if (state.dataGlobal->DisplayExtraWarnings) {
-                    if ((std::abs(RatedWaterVolFlowRateDes - RatedWaterVolFlowRateUser) / RatedWaterVolFlowRateUser) >
-                        state.dataSize->AutoVsHardSizingThreshold) {
-                        ShowMessage(state,
-                                    EnergyPlus::format("SizeVarSpeedCoil: Potential issue with equipment sizing for {} {}",
-                                                       varSpeedCoil.CoolHeatType,
-                                                       CurrentObjSubfix));
-                        ShowContinueError(state, EnergyPlus::format("Coil Name = {}", varSpeedCoil.Name));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("User-Specified Rated Water Flow Rate of {:.5R} [m3/s]", RatedWaterVolFlowRateUser));
-                        ShowContinueError(
-                            state, EnergyPlus::format("differs from Design Size Rated Water Flow Rate of {:.5R} [m3/s]", RatedWaterVolFlowRateDes));
-                        ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
-                        ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
-                    }
-                }
+                reportSizingMismatchWarning(state, varSpeedCoil.CoolHeatType, CurrentObjSubfix, varSpeedCoil.Name,
+                                           "Rated Water Flow Rate [m3/s]", RatedWaterVolFlowRateUser,
+                                           "Rated Water Flow Rate [m3/s]", RatedWaterVolFlowRateDes);
             }
         }
 
@@ -3665,25 +3636,9 @@ namespace VariableSpeedCoils {
                                                  EvapCondPumpElecNomPowerDes,
                                                  "User-Specified Evaporative Condenser Pump Rated Power Consumption [W]",
                                                  EvapCondPumpElecNomPowerUser);
-                    if (state.dataGlobal->DisplayExtraWarnings) {
-                        if ((std::abs(EvapCondPumpElecNomPowerDes - EvapCondPumpElecNomPowerUser) / EvapCondPumpElecNomPowerUser) >
-                            state.dataSize->AutoVsHardSizingThreshold) {
-                            ShowMessage(state,
-                                        EnergyPlus::format("SizeVarSpeedCoil: Potential issue with equipment sizing for {} {}",
-                                                           varSpeedCoil.CoolHeatType,
-                                                           CurrentObjSubfix));
-                            ShowContinueError(state, EnergyPlus::format("Coil Name = {}", varSpeedCoil.Name));
-                            ShowContinueError(state,
-                                              EnergyPlus::format("User-Specified Evaporative Condenser Pump Rated Power Consumption of {:.2R} [W]",
-                                                                 EvapCondPumpElecNomPowerUser));
-                            ShowContinueError(
-                                state,
-                                EnergyPlus::format("differs from Design Size Evaporative Condenser Pump Rated Power Consumption of {:.2R} [W]",
-                                                   EvapCondPumpElecNomPowerDes));
-                            ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
-                            ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
-                        }
-                    }
+                    reportSizingMismatchWarning(state, varSpeedCoil.CoolHeatType, CurrentObjSubfix, varSpeedCoil.Name,
+                                               "Evaporative Condenser Pump Rated Power Consumption [W]", EvapCondPumpElecNomPowerUser,
+                                               "Evaporative Condenser Pump Rated Power Consumption [W]", EvapCondPumpElecNomPowerDes);
                 }
             }
         }
@@ -3716,22 +3671,9 @@ namespace VariableSpeedCoils {
                                                  DefrostCapacityDes,
                                                  "User-Specified Resistive Defrost Heater Capacity [W]",
                                                  DefrostCapacityUser);
-                    if (state.dataGlobal->DisplayExtraWarnings) {
-                        if ((std::abs(DefrostCapacityDes - DefrostCapacityUser) / DefrostCapacityUser) > state.dataSize->AutoVsHardSizingThreshold) {
-                            ShowMessage(state,
-                                        EnergyPlus::format("SizeVarSpeedCoil: Potential issue with equipment sizing for {} {}",
-                                                           varSpeedCoil.CoolHeatType,
-                                                           CurrentObjSubfix));
-                            ShowContinueError(state, EnergyPlus::format("Coil Name = {}", varSpeedCoil.Name));
-                            ShowContinueError(
-                                state, EnergyPlus::format("User-Specified Resistive Defrost Heater Capacity of {:.2R} [W]", DefrostCapacityUser));
-                            ShowContinueError(
-                                state,
-                                EnergyPlus::format("differs from Design Size Resistive Defrost Heater Capacity of {:.2R} [W]", DefrostCapacityDes));
-                            ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
-                            ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
-                        }
-                    }
+                    reportSizingMismatchWarning(state, varSpeedCoil.CoolHeatType, CurrentObjSubfix, varSpeedCoil.Name,
+                                               "Resistive Defrost Heater Capacity [W]", DefrostCapacityUser,
+                                               "Resistive Defrost Heater Capacity [W]", DefrostCapacityDes);
                 }
             }
         }
