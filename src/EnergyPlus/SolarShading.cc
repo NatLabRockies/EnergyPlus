@@ -864,6 +864,72 @@ void checkScheduledSurfacePresent(EnergyPlusData &state)
     }
 }
 
+// Helper: set up frame and divider output variables for a window surface (used by both ExtSolar and non-ExtSolar paths)
+static void setupFrameDividerOutputVars(EnergyPlusData &state, int SurfLoop, std::string const &surfName)
+{
+    auto &s_surf = state.dataSurface;
+    if (s_surf->SurfWinFrameArea(SurfLoop) > 0.0) {
+        SetupOutputVariable(state,
+                            "Surface Window Frame Heat Gain Rate",
+                            Constant::Units::W,
+                            s_surf->SurfWinFrameHeatGain(SurfLoop),
+                            OutputProcessor::TimeStepType::Zone,
+                            OutputProcessor::StoreType::Average,
+                            surfName);
+        SetupOutputVariable(state,
+                            "Surface Window Frame Heat Loss Rate",
+                            Constant::Units::W,
+                            s_surf->SurfWinFrameHeatLoss(SurfLoop),
+                            OutputProcessor::TimeStepType::Zone,
+                            OutputProcessor::StoreType::Average,
+                            surfName);
+        SetupOutputVariable(state,
+                            "Surface Window Frame Inside Temperature",
+                            Constant::Units::C,
+                            s_surf->SurfWinFrameTempIn(SurfLoop),
+                            OutputProcessor::TimeStepType::Zone,
+                            OutputProcessor::StoreType::Average,
+                            surfName);
+        SetupOutputVariable(state,
+                            "Surface Window Frame Outside Temperature",
+                            Constant::Units::C,
+                            s_surf->SurfWinFrameTempSurfOut(SurfLoop),
+                            OutputProcessor::TimeStepType::Zone,
+                            OutputProcessor::StoreType::Average,
+                            surfName);
+    }
+    if (s_surf->SurfWinDividerArea(SurfLoop) > 0.0) {
+        SetupOutputVariable(state,
+                            "Surface Window Divider Heat Gain Rate",
+                            Constant::Units::W,
+                            s_surf->SurfWinDividerHeatGain(SurfLoop),
+                            OutputProcessor::TimeStepType::Zone,
+                            OutputProcessor::StoreType::Average,
+                            surfName);
+        SetupOutputVariable(state,
+                            "Surface Window Divider Heat Loss Rate",
+                            Constant::Units::W,
+                            s_surf->SurfWinDividerHeatLoss(SurfLoop),
+                            OutputProcessor::TimeStepType::Zone,
+                            OutputProcessor::StoreType::Average,
+                            surfName);
+        SetupOutputVariable(state,
+                            "Surface Window Divider Inside Temperature",
+                            Constant::Units::C,
+                            s_surf->SurfWinDividerTempIn(SurfLoop),
+                            OutputProcessor::TimeStepType::Zone,
+                            OutputProcessor::StoreType::Average,
+                            surfName);
+        SetupOutputVariable(state,
+                            "Surface Window Divider Outside Temperature",
+                            Constant::Units::C,
+                            s_surf->SurfWinDividerTempSurfOut(SurfLoop),
+                            OutputProcessor::TimeStepType::Zone,
+                            OutputProcessor::StoreType::Average,
+                            surfName);
+    }
+}
+
 // Helper: set up screen output variables for a window surface (used by both ExtSolar and non-ExtSolar paths)
 static void setupScreenOutputVars(EnergyPlusData &state, int SurfLoop, std::string const &surfName)
 {
@@ -1715,68 +1781,7 @@ void AllocateModuleArrays(EnergyPlusData &state)
                     }
                 }
 
-                if (s_surf->SurfWinFrameArea(SurfLoop) > 0.0) {
-                    // CurrentModuleObject='Window Frames'
-                    SetupOutputVariable(state,
-                                        "Surface Window Frame Heat Gain Rate",
-                                        Constant::Units::W,
-                                        s_surf->SurfWinFrameHeatGain(SurfLoop),
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        surf.Name);
-                    SetupOutputVariable(state,
-                                        "Surface Window Frame Heat Loss Rate",
-                                        Constant::Units::W,
-                                        s_surf->SurfWinFrameHeatLoss(SurfLoop),
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        surf.Name);
-                    SetupOutputVariable(state,
-                                        "Surface Window Frame Inside Temperature",
-                                        Constant::Units::C,
-                                        s_surf->SurfWinFrameTempIn(SurfLoop),
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        surf.Name);
-                    SetupOutputVariable(state,
-                                        "Surface Window Frame Outside Temperature",
-                                        Constant::Units::C,
-                                        s_surf->SurfWinFrameTempSurfOut(SurfLoop),
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        surf.Name);
-                }
-                if (s_surf->SurfWinDividerArea(SurfLoop) > 0.0) {
-                    // CurrentModuleObject='Window Dividers'
-                    SetupOutputVariable(state,
-                                        "Surface Window Divider Heat Gain Rate",
-                                        Constant::Units::W,
-                                        s_surf->SurfWinDividerHeatGain(SurfLoop),
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        surf.Name);
-                    SetupOutputVariable(state,
-                                        "Surface Window Divider Heat Loss Rate",
-                                        Constant::Units::W,
-                                        s_surf->SurfWinDividerHeatLoss(SurfLoop),
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        surf.Name);
-                    SetupOutputVariable(state,
-                                        "Surface Window Divider Inside Temperature",
-                                        Constant::Units::C,
-                                        s_surf->SurfWinDividerTempIn(SurfLoop),
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        surf.Name);
-                    SetupOutputVariable(state,
-                                        "Surface Window Divider Outside Temperature",
-                                        Constant::Units::C,
-                                        s_surf->SurfWinDividerTempSurfOut(SurfLoop),
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        surf.Name);
-                }
+                setupFrameDividerOutputVars(state, SurfLoop, surf.Name);
 
                 // CurrentModuleObject='Windows'
                 // Energy
@@ -2108,66 +2113,7 @@ void AllocateModuleArrays(EnergyPlusData &state)
                                         OutputProcessor::TimeStepType::Zone,
                                         OutputProcessor::StoreType::Average,
                                         surf.Name);
-                    if (s_surf->SurfWinFrameArea(SurfLoop) > 0.0) {
-                        SetupOutputVariable(state,
-                                            "Surface Window Frame Heat Gain Rate",
-                                            Constant::Units::W,
-                                            s_surf->SurfWinFrameHeatGain(SurfLoop),
-                                            OutputProcessor::TimeStepType::Zone,
-                                            OutputProcessor::StoreType::Average,
-                                            surf.Name);
-                        SetupOutputVariable(state,
-                                            "Surface Window Frame Heat Loss Rate",
-                                            Constant::Units::W,
-                                            s_surf->SurfWinFrameHeatLoss(SurfLoop),
-                                            OutputProcessor::TimeStepType::Zone,
-                                            OutputProcessor::StoreType::Average,
-                                            surf.Name);
-                        SetupOutputVariable(state,
-                                            "Surface Window Frame Inside Temperature",
-                                            Constant::Units::C,
-                                            s_surf->SurfWinFrameTempIn(SurfLoop),
-                                            OutputProcessor::TimeStepType::Zone,
-                                            OutputProcessor::StoreType::Average,
-                                            surf.Name);
-                        SetupOutputVariable(state,
-                                            "Surface Window Frame Outside Temperature",
-                                            Constant::Units::C,
-                                            s_surf->SurfWinFrameTempSurfOut(SurfLoop),
-                                            OutputProcessor::TimeStepType::Zone,
-                                            OutputProcessor::StoreType::Average,
-                                            surf.Name);
-                    }
-                    if (s_surf->SurfWinDividerArea(SurfLoop) > 0.0) {
-                        SetupOutputVariable(state,
-                                            "Surface Window Divider Heat Gain Rate",
-                                            Constant::Units::W,
-                                            s_surf->SurfWinDividerHeatGain(SurfLoop),
-                                            OutputProcessor::TimeStepType::Zone,
-                                            OutputProcessor::StoreType::Average,
-                                            surf.Name);
-                        SetupOutputVariable(state,
-                                            "Surface Window Divider Heat Loss Rate",
-                                            Constant::Units::W,
-                                            s_surf->SurfWinDividerHeatLoss(SurfLoop),
-                                            OutputProcessor::TimeStepType::Zone,
-                                            OutputProcessor::StoreType::Average,
-                                            surf.Name);
-                        SetupOutputVariable(state,
-                                            "Surface Window Divider Inside Temperature",
-                                            Constant::Units::C,
-                                            s_surf->SurfWinDividerTempIn(SurfLoop),
-                                            OutputProcessor::TimeStepType::Zone,
-                                            OutputProcessor::StoreType::Average,
-                                            surf.Name);
-                        SetupOutputVariable(state,
-                                            "Surface Window Divider Outside Temperature",
-                                            Constant::Units::C,
-                                            s_surf->SurfWinDividerTempSurfOut(SurfLoop),
-                                            OutputProcessor::TimeStepType::Zone,
-                                            OutputProcessor::StoreType::Average,
-                                            surf.Name);
-                    }
+                    setupFrameDividerOutputVars(state, SurfLoop, surf.Name);
                     // Energy
 
                     if (surf.OriginalClass != SurfaceClass::TDD_Diffuser) {
