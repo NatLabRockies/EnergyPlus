@@ -7050,27 +7050,16 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
     case HVAC::CoilDX_MultiSpeedCooling: {
         PreDefTableEntry(state, state.dataOutRptPredefined->pdchCoolCoilType, equipName, thisDXCoil.DXCoilType);
         if (thisDXCoil.NumOfSpeeds == 0) {
-            if (thisDXCoil.NumCapacityStages == 1) {
-                PreDefTableEntry(state, state.dataOutRptPredefined->pdchCoolCoilTotCap, equipName, thisDXCoil.RatedTotCap(1));
-                PreDefTableEntry(
-                    state, state.dataOutRptPredefined->pdchCoolCoilSensCap, equipName, thisDXCoil.RatedTotCap(1) * thisDXCoil.RatedSHR(1));
-                PreDefTableEntry(state,
-                                 state.dataOutRptPredefined->pdchCoolCoilLatCap,
-                                 equipName,
-                                 thisDXCoil.RatedTotCap(1) - thisDXCoil.RatedTotCap(1) * thisDXCoil.RatedSHR(1));
-                PreDefTableEntry(state, state.dataOutRptPredefined->pdchCoolCoilSHR, equipName, thisDXCoil.RatedSHR(1));
-                PreDefTableEntry(state, state.dataOutRptPredefined->pdchCoolCoilNomEff, equipName, thisDXCoil.RatedCOP(1));
-            } else {
-                PreDefTableEntry(state, state.dataOutRptPredefined->pdchCoolCoilTotCap, equipName, thisDXCoil.RatedTotCap(2));
-                PreDefTableEntry(
-                    state, state.dataOutRptPredefined->pdchCoolCoilSensCap, equipName, thisDXCoil.RatedTotCap(2) * thisDXCoil.RatedSHR(2));
-                PreDefTableEntry(state,
-                                 state.dataOutRptPredefined->pdchCoolCoilLatCap,
-                                 equipName,
-                                 thisDXCoil.RatedTotCap(2) - thisDXCoil.RatedTotCap(2) * thisDXCoil.RatedSHR(2));
-                PreDefTableEntry(state, state.dataOutRptPredefined->pdchCoolCoilSHR, equipName, thisDXCoil.RatedSHR(2));
-                PreDefTableEntry(state, state.dataOutRptPredefined->pdchCoolCoilNomEff, equipName, thisDXCoil.RatedCOP(2));
-            }
+            int const idx = (thisDXCoil.NumCapacityStages == 1) ? 1 : 2;
+            PreDefTableEntry(state, state.dataOutRptPredefined->pdchCoolCoilTotCap, equipName, thisDXCoil.RatedTotCap(idx));
+            PreDefTableEntry(
+                state, state.dataOutRptPredefined->pdchCoolCoilSensCap, equipName, thisDXCoil.RatedTotCap(idx) * thisDXCoil.RatedSHR(idx));
+            PreDefTableEntry(state,
+                             state.dataOutRptPredefined->pdchCoolCoilLatCap,
+                             equipName,
+                             thisDXCoil.RatedTotCap(idx) - thisDXCoil.RatedTotCap(idx) * thisDXCoil.RatedSHR(idx));
+            PreDefTableEntry(state, state.dataOutRptPredefined->pdchCoolCoilSHR, equipName, thisDXCoil.RatedSHR(idx));
+            PreDefTableEntry(state, state.dataOutRptPredefined->pdchCoolCoilNomEff, equipName, thisDXCoil.RatedCOP(idx));
         } else {
             for (Mode = 1; Mode <= thisDXCoil.NumOfSpeeds; ++Mode) {
                 PreDefTableEntry(state, state.dataOutRptPredefined->pdchCoolCoilTotCap, equipName, thisDXCoil.MSRatedTotCap(Mode));
@@ -7094,13 +7083,9 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
     case HVAC::CoilDX_HeatPumpWaterHeaterWrapped: {
         PreDefTableEntry(state, state.dataOutRptPredefined->pdchHeatCoilType, equipName, thisDXCoil.DXCoilType);
         if (thisDXCoil.NumOfSpeeds == 0) {
-            if (thisDXCoil.NumCapacityStages == 1) {
-                PreDefTableEntry(state, state.dataOutRptPredefined->pdchHeatCoilNomCap, equipName, thisDXCoil.RatedTotCap(1));
-                PreDefTableEntry(state, state.dataOutRptPredefined->pdchHeatCoilNomEff, equipName, thisDXCoil.RatedCOP(1));
-            } else {
-                PreDefTableEntry(state, state.dataOutRptPredefined->pdchHeatCoilNomCap, equipName, thisDXCoil.RatedTotCap(2));
-                PreDefTableEntry(state, state.dataOutRptPredefined->pdchHeatCoilNomEff, equipName, thisDXCoil.RatedCOP(2));
-            }
+            int const idx = (thisDXCoil.NumCapacityStages == 1) ? 1 : 2;
+            PreDefTableEntry(state, state.dataOutRptPredefined->pdchHeatCoilNomCap, equipName, thisDXCoil.RatedTotCap(idx));
+            PreDefTableEntry(state, state.dataOutRptPredefined->pdchHeatCoilNomEff, equipName, thisDXCoil.RatedCOP(idx));
         } else {
             for (Mode = 1; Mode <= thisDXCoil.NumOfSpeeds; ++Mode) {
                 PreDefTableEntry(state, state.dataOutRptPredefined->pdchHeatCoilNomCap, equipName, thisDXCoil.MSRatedTotCap(Mode));
