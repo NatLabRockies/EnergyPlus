@@ -43,3 +43,4 @@ src/EnergyPlus/LowTempRadiantSystem.cc:GetLowTempRadiantSystem
 src/EnergyPlus/RefrigeratedCase.cc:SetupReportInput
 src/EnergyPlus/HVACMultiSpeedHeatPump.cc:GetMSHeatPumpInput
 src/EnergyPlus/HeatingCoils.cc:GetHeatingCoilInput
+src/EnergyPlus/DesiccantDehumidifiers.cc:GetDesiccantDehumidifierInput
