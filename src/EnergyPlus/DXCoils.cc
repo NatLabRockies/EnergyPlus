@@ -5736,6 +5736,24 @@ void InitDXCoil(EnergyPlusData &state, int const DXCoilNum) // number of the cur
     }
 }
 
+// Run AutoCalculateSizer with isEpJSON-aware string override.
+static Real64 runAutoCalcSizer(EnergyPlusData &state,
+                               std::string_view compType,
+                               std::string_view compName,
+                               bool printFlag,
+                               std::string_view routineName,
+                               Real64 tempSize,
+                               bool &errorsFound,
+                               std::string_view normalLabel,
+                               std::string_view epjsonLabel)
+{
+    AutoCalculateSizer sizer;
+    std::string label(state.dataGlobal->isEpJSON ? epjsonLabel : normalLabel);
+    sizer.overrideSizingString(label);
+    sizer.initializeWithinEP(state, compType, compName, printFlag, routineName);
+    return sizer.size(state, tempSize, errorsFound);
+}
+
 // Apply autosize result or compare user-specified vs design-size value with mismatch warning.
 // If isAutoSize, assigns designValue to actualValue and reports. Otherwise, reports both values
 // and warns if they differ by more than the hard-sizing threshold.
@@ -5911,14 +5929,9 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
                     state.dataSize->DataConstantUsedForSizing = thisDXCoil.RatedTotCap2;
                     state.dataSize->DataFractionUsedForSizing = 0.00005035;
                     TempSize = AutoSize;
-                    AutoCalculateSizer sizerHPRatedAirVolFlow;
-                    std::string stringOverride = "Rated Evaporator Air Flow Rate [m3/s]";
-                    if (state.dataGlobal->isEpJSON) {
-                        stringOverride = "rated_evaporator_air_flow_rate [m3/s]";
-                    }
-                    sizerHPRatedAirVolFlow.overrideSizingString(stringOverride);
-                    sizerHPRatedAirVolFlow.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
-                    thisDXCoil.RatedAirVolFlowRate(1) = sizerHPRatedAirVolFlow.size(state, TempSize, ErrorsFound);
+                    thisDXCoil.RatedAirVolFlowRate(1) = runAutoCalcSizer(
+                        state, CompType, CompName, PrintFlag, RoutineName, TempSize, ErrorsFound,
+                        "Rated Evaporator Air Flow Rate [m3/s]", "rated_evaporator_air_flow_rate [m3/s]");
                     PrintFlag = false;
                 }
 
@@ -5931,14 +5944,9 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
                     state.dataSize->DataConstantUsedForSizing = thisDXCoil.RatedTotCap2;
                     state.dataSize->DataFractionUsedForSizing = 0.00000004487;
                     TempSize = AutoSize;
-                    AutoCalculateSizer sizerHPWHCondWaterFlow;
-                    std::string stringOverride = "Rated Condenser Water Flow Rate [m3/s]";
-                    if (state.dataGlobal->isEpJSON) {
-                        stringOverride = "rated_condenser_water_flow_rate [m3/s]";
-                    }
-                    sizerHPWHCondWaterFlow.overrideSizingString(stringOverride);
-                    sizerHPWHCondWaterFlow.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
-                    thisDXCoil.RatedHPWHCondWaterFlow = sizerHPWHCondWaterFlow.size(state, TempSize, ErrorsFound);
+                    thisDXCoil.RatedHPWHCondWaterFlow = runAutoCalcSizer(
+                        state, CompType, CompName, PrintFlag, RoutineName, TempSize, ErrorsFound,
+                        "Rated Condenser Water Flow Rate [m3/s]", "rated_condenser_water_flow_rate [m3/s]");
                     PrintFlag = false;
                 }
             } else {
@@ -6235,14 +6243,9 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
                 state.dataSize->DataConstantUsedForSizing = thisDXCoil.RatedTotCap(Mode);
                 state.dataSize->DataFractionUsedForSizing = 0.000114 * 0.3333;
                 TempSize = thisDXCoil.EvapCondAirFlow2;
-                AutoCalculateSizer sizerEvapCondAirFlow2;
-                std::string stringOverride = "Low Speed Evaporative Condenser Air Flow Rate [m3/s]";
-                if (state.dataGlobal->isEpJSON) {
-                    stringOverride = "low_speed_evaporative_condenser_air_flow_rate [m3/s]";
-                }
-                sizerEvapCondAirFlow2.overrideSizingString(stringOverride);
-                sizerEvapCondAirFlow2.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
-                thisDXCoil.EvapCondAirFlow2 = sizerEvapCondAirFlow2.size(state, TempSize, ErrorsFound);
+                thisDXCoil.EvapCondAirFlow2 = runAutoCalcSizer(
+                    state, CompType, CompName, PrintFlag, RoutineName, TempSize, ErrorsFound,
+                    "Low Speed Evaporative Condenser Air Flow Rate [m3/s]", "low_speed_evaporative_condenser_air_flow_rate [m3/s]");
             }
 
             // Sizing evaporative condenser pump electric nominal power
@@ -6290,14 +6293,10 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
                 state.dataSize->DataConstantUsedForSizing = thisDXCoil.RatedTotCap(Mode);
                 state.dataSize->DataFractionUsedForSizing = 0.004266 * 0.3333;
                 TempSize = thisDXCoil.EvapCondPumpElecNomPower2;
-                AutoCalculateSizer sizerEvapCondPumpPower2;
-                std::string stringOverride = "Low Speed Evaporative Condenser Pump Rated Power Consumption [W]";
-                if (state.dataGlobal->isEpJSON) {
-                    stringOverride = "low_speed_evaporative_condenser_pump_rated_power_consumption [W]";
-                }
-                sizerEvapCondPumpPower2.overrideSizingString(stringOverride);
-                sizerEvapCondPumpPower2.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
-                thisDXCoil.EvapCondPumpElecNomPower2 = sizerEvapCondPumpPower2.size(state, TempSize, ErrorsFound);
+                thisDXCoil.EvapCondPumpElecNomPower2 = runAutoCalcSizer(
+                    state, CompType, CompName, PrintFlag, RoutineName, TempSize, ErrorsFound,
+                    "Low Speed Evaporative Condenser Pump Rated Power Consumption [W]",
+                    "low_speed_evaporative_condenser_pump_rated_power_consumption [W]");
             }
 
             //                // Sizing rated low speed air flow rate
@@ -6308,14 +6307,9 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
                 state.dataSize->DataConstantUsedForSizing = thisDXCoil.RatedAirVolFlowRate(Mode);
                 state.dataSize->DataFractionUsedForSizing = 0.3333;
                 TempSize = thisDXCoil.RatedAirVolFlowRate2;
-                AutoCalculateSizer sizerLowSpdAirFlow;
-                std::string stringOverride = "Low Speed Rated Air Flow Rate [m3/s]";
-                if (state.dataGlobal->isEpJSON) {
-                    stringOverride = "low_speed_rated_air_flow_rate [m3/s]";
-                }
-                sizerLowSpdAirFlow.overrideSizingString(stringOverride);
-                sizerLowSpdAirFlow.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
-                thisDXCoil.RatedAirVolFlowRate2 = sizerLowSpdAirFlow.size(state, TempSize, ErrorsFound);
+                thisDXCoil.RatedAirVolFlowRate2 = runAutoCalcSizer(
+                    state, CompType, CompName, PrintFlag, RoutineName, TempSize, ErrorsFound,
+                    "Low Speed Rated Air Flow Rate [m3/s]", "low_speed_rated_air_flow_rate [m3/s]");
             }
 
             //                // Sizing rated low speed total cooling capacity
@@ -6326,14 +6320,9 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
                 state.dataSize->DataConstantUsedForSizing = thisDXCoil.RatedTotCap(Mode);
                 state.dataSize->DataFractionUsedForSizing = 0.3333;
                 TempSize = thisDXCoil.RatedTotCap2;
-                AutoCalculateSizer sizerLowSpdCap;
-                std::string stringOverride = "Low Speed Gross Rated Total Cooling Capacity [W]";
-                if (state.dataGlobal->isEpJSON) {
-                    stringOverride = "low_speed_gross_rated_total_cooling_capacity [W]";
-                }
-                sizerLowSpdCap.overrideSizingString(stringOverride);
-                sizerLowSpdCap.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
-                thisDXCoil.RatedTotCap2 = sizerLowSpdCap.size(state, TempSize, ErrorsFound);
+                thisDXCoil.RatedTotCap2 = runAutoCalcSizer(
+                    state, CompType, CompName, PrintFlag, RoutineName, TempSize, ErrorsFound,
+                    "Low Speed Gross Rated Total Cooling Capacity [W]", "low_speed_gross_rated_total_cooling_capacity [W]");
             }
 
             if (thisDXCoil.DXCoilType_Num == HVAC::CoilDX_CoolingTwoSpeed) {
@@ -6417,14 +6406,9 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
                     state.dataSize->DataConstantUsedForSizing = state.dataSize->DXCoolCap;
                     state.dataSize->DataFractionUsedForSizing = 1.0;
                     TempSize = thisDXCoil.DefrostCapacity;
-                    AutoCalculateSizer sizerResDefCap;
-                    std::string stringOverride = "Resistive Defrost Heater Capacity [W]";
-                    if (state.dataGlobal->isEpJSON) {
-                        stringOverride = "resistive_defrost_heater_capacity [W]";
-                    }
-                    sizerResDefCap.overrideSizingString(stringOverride);
-                    sizerResDefCap.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
-                    thisDXCoil.DefrostCapacity = sizerResDefCap.size(state, TempSize, ErrorsFound);
+                    thisDXCoil.DefrostCapacity = runAutoCalcSizer(
+                        state, CompType, CompName, PrintFlag, RoutineName, TempSize, ErrorsFound,
+                        "Resistive Defrost Heater Capacity [W]", "resistive_defrost_heater_capacity [W]");
                 } else {
                     thisDXCoil.DefrostCapacity = 0.0;
                 }
