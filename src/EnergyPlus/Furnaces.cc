@@ -6290,6 +6290,8 @@ namespace Furnaces {
 
         Real64 &SystemSensibleLoad = state.dataFurnaces->SystemSensibleLoad;
         auto &thisFurnace = state.dataFurnaces->Furnace(FurnaceNum);
+        bool const isHP = thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatPump_AirToAir ||
+                          (thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatPump_WaterToAir && thisFurnace.WatertoAirHPType == WAHPCoilType::Simple);
         // Set local variables
         int FurnaceOutletNode = thisFurnace.FurnaceOutletNodeNum;
         int FurnaceInletNode = thisFurnace.FurnaceInletNodeNum;
@@ -6328,8 +6330,7 @@ namespace Furnaces {
 
             // Init for heating
             if (state.dataFurnaces->HeatingLoad) {
-                if (thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatPump_AirToAir ||
-                    (thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatPump_WaterToAir && thisFurnace.WatertoAirHPType == WAHPCoilType::Simple)) {
+                if (isHP) {
                     thisFurnace.HeatPartLoadRatio = 1.0;
                     HeatCoilLoad = 0.0;
                     thisFurnace.HeatingCoilSensDemand = 0.0;
@@ -6375,8 +6376,7 @@ namespace Furnaces {
             Real64 &CoolCoilLoad = state.dataFurnaces->CoolCoilLoad;
             if (state.dataFurnaces->HeatingLoad) {
                 CoolCoilLoad = 0.0;
-                if (thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatPump_AirToAir ||
-                    (thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatPump_WaterToAir && thisFurnace.WatertoAirHPType == WAHPCoilType::Simple)) {
+                if (isHP) {
                     SystemSensibleLoad = ZoneLoad;
                     SystemMoistureLoad = 0.0;
                     HeatCoilLoad = 0.0;
@@ -6423,8 +6423,7 @@ namespace Furnaces {
             if ((thisFurnace.availSched->getCurrentVal() > 0.0) && (state.dataFurnaces->HeatingLoad)) {
 
                 //    Heat pumps only calculate a single PLR each time step (i.e. only cooling or heating allowed in a single time step)
-                if (thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatPump_AirToAir ||
-                    (thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatPump_WaterToAir && thisFurnace.WatertoAirHPType == WAHPCoilType::Simple)) {
+                if (isHP) {
 
                     state.dataLoopNodes->Node(FurnaceInletNode).MassFlowRate = thisFurnace.MdotFurnace;
 
@@ -7445,9 +7444,7 @@ namespace Furnaces {
                         //         the heating coil pick up the load due to outdoor air.
                         ReheatCoilLoad = max(0.0, (ActualSensibleOutput - NoCoolOutput) * (-1.0));
                         //         Dehumidification is not required
-                        if (thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatPump_AirToAir ||
-                            (thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatPump_WaterToAir &&
-                             thisFurnace.WatertoAirHPType == WAHPCoilType::Simple)) {
+                        if (isHP) {
                             ReheatCoilLoad = max(QToHeatSetPt, QToHeatSetPt - ActualSensibleOutput);
                         }
                         thisFurnace.DehumidInducedHeatingDemandRate = max(0.0, ActualSensibleOutput * (-1.0));
@@ -7479,8 +7476,7 @@ namespace Furnaces {
             }
             thisFurnace.MdotFurnace = state.dataLoopNodes->Node(FurnaceInletNode).MassFlowRate;
 
-            if (thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatPump_AirToAir ||
-                (thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatPump_WaterToAir && thisFurnace.WatertoAirHPType == WAHPCoilType::Simple)) {
+            if (isHP) {
             } else {
                 // Non-HeatPump (non-DX) heating coils do not set PLR, reset to 0 here. This variable was set for non-DX
                 // coils to allow the SetAverageAirFlow CALL above to set the correct air mass flow rate. See this
