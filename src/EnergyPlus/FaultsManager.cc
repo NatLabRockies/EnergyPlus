@@ -200,6 +200,19 @@ namespace FaultsManager {
 
     constexpr std::array<std::string_view, static_cast<int>(FouledCoil::Num)> FouledCoilNamesUC{"FOULEDUARATED", "FOULINGFACTOR"};
 
+    // Helper: emit a "not found" severe error for a fault equipment lookup failure.
+    static void showFaultEquipNotFoundError(EnergyPlusData &state,
+                                            std::string const &faultObjType,
+                                            std::string const &faultName,
+                                            std::string const &fieldName,
+                                            std::string const &fieldValue,
+                                            bool &errorsFound)
+    {
+        ShowSevereError(state,
+                        EnergyPlus::format("{} = \"{}\" invalid {} = \"{}\" not found.", faultObjType, faultName, fieldName, fieldValue));
+        errorsFound = true;
+    }
+
     // Helper: validate that a required alpha field is not blank; if blank, emit a severe error.
     static void validateRequiredAlphaField(EnergyPlusData &state,
                                            std::string const &faultObjType,
@@ -431,11 +444,7 @@ namespace FaultsManager {
                 int EvapCoolerNum =
                     Util::FindItemInList(faultsECFouling.EvapCoolerName, state.dataEvapCoolers->EvapCond, &EvaporativeCoolers::EvapConditions::Name);
                 if (EvapCoolerNum <= 0) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{} = \"{}\" invalid {} = \"{}\" not found.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5)));
-                    state.dataFaultsMgr->ErrorsFound = true;
+                    showFaultEquipNotFoundError(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5), state.dataFaultsMgr->ErrorsFound);
                 } else {
                     // Link the boiler with the fault model
                     state.dataEvapCoolers->EvapCond(EvapCoolerNum).FaultyEvapCoolerFoulingFlag = true;
@@ -495,11 +504,7 @@ namespace FaultsManager {
                     }
                 }
                 if (ChillerNum <= 0) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{} = \"{}\" invalid {} = \"{}\" not found.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5)));
-                    state.dataFaultsMgr->ErrorsFound = true;
+                    showFaultEquipNotFoundError(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5), state.dataFaultsMgr->ErrorsFound);
                 } else {
 
                     if (state.dataPlantChillers->ElectricChiller(ChillerNum).CondenserType != DataPlant::CondenserType::WaterCooled) {
@@ -530,11 +535,7 @@ namespace FaultsManager {
                 // Check whether the chiller name and chiller type match each other
                 ChillerNum = Util::FindItemInList(faultsChillerFouling.ChillerName, state.dataChillerElectricEIR->ElectricEIRChiller);
                 if (ChillerNum <= 0) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{} = \"{}\" invalid {} = \"{}\" not found.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5)));
-                    state.dataFaultsMgr->ErrorsFound = true;
+                    showFaultEquipNotFoundError(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5), state.dataFaultsMgr->ErrorsFound);
                 } else {
 
                     if (state.dataChillerElectricEIR->ElectricEIRChiller(ChillerNum).CondenserType != DataPlant::CondenserType::WaterCooled) {
@@ -565,11 +566,7 @@ namespace FaultsManager {
                 // Check whether the chiller name and chiller type match each other
                 ChillerNum = Util::FindItemInList(faultsChillerFouling.ChillerName, state.dataChillerReformulatedEIR->ElecReformEIRChiller);
                 if (ChillerNum <= 0) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{} = \"{}\" invalid {} = \"{}\" not found.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5)));
-                    state.dataFaultsMgr->ErrorsFound = true;
+                    showFaultEquipNotFoundError(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5), state.dataFaultsMgr->ErrorsFound);
                 } else {
 
                     if (state.dataChillerReformulatedEIR->ElecReformEIRChiller(ChillerNum).CondenserType != DataPlant::CondenserType::WaterCooled) {
@@ -601,11 +598,7 @@ namespace FaultsManager {
                     }
                 }
                 if (ChillerNum <= 0) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{} = \"{}\" invalid {} = \"{}\" not found.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5)));
-                    state.dataFaultsMgr->ErrorsFound = true;
+                    showFaultEquipNotFoundError(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5), state.dataFaultsMgr->ErrorsFound);
                 } else {
 
                     if (state.dataPlantChillers->ConstCOPChiller(ChillerNum).CondenserType != DataPlant::CondenserType::WaterCooled) {
@@ -637,11 +630,7 @@ namespace FaultsManager {
                     }
                 }
                 if (ChillerNum <= 0) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{} = \"{}\" invalid {} = \"{}\" not found.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5)));
-                    state.dataFaultsMgr->ErrorsFound = true;
+                    showFaultEquipNotFoundError(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5), state.dataFaultsMgr->ErrorsFound);
                 } else {
 
                     if (state.dataPlantChillers->EngineDrivenChiller(ChillerNum).CondenserType != DataPlant::CondenserType::WaterCooled) {
@@ -673,11 +662,7 @@ namespace FaultsManager {
                     }
                 }
                 if (ChillerNum <= 0) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{} = \"{}\" invalid {} = \"{}\" not found.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5)));
-                    state.dataFaultsMgr->ErrorsFound = true;
+                    showFaultEquipNotFoundError(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5), state.dataFaultsMgr->ErrorsFound);
                 } else {
                     if (state.dataPlantChillers->GTChiller(ChillerNum).CondenserType != DataPlant::CondenserType::WaterCooled) {
                         // The fault model is only applicable to the chillers with water based condensers
@@ -748,11 +733,7 @@ namespace FaultsManager {
                     return b.Name == faultsBoilerFouling.BoilerName;
                 });
                 if (boiler_it == state.dataBoilers->Boiler.end()) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{} = \"{}\" invalid {} = \"{}\" not found.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5)));
-                    state.dataFaultsMgr->ErrorsFound = true;
+                    showFaultEquipNotFoundError(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5), state.dataFaultsMgr->ErrorsFound);
                 } else {
                     // Link the boiler with the fault model
                     boiler_it->FaultyBoilerFoulingFlag = true;
@@ -810,11 +791,7 @@ namespace FaultsManager {
                 // Check the coil name and coil type
                 int CoilNum = Util::FindItemInList(faultsCoilSATFouling.CoilName, state.dataHeatingCoils->HeatingCoil);
                 if (CoilNum <= 0) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{} = \"{}\" invalid {} = \"{}\" not found.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5)));
-                    state.dataFaultsMgr->ErrorsFound = true;
+                    showFaultEquipNotFoundError(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5), state.dataFaultsMgr->ErrorsFound);
                 } else {
                     // Link the coil with the fault model
                     state.dataHeatingCoils->HeatingCoil(CoilNum).FaultyCoilSATFlag = true;
@@ -830,11 +807,7 @@ namespace FaultsManager {
                 // Check the coil name and coil type
                 int CoilNum = Util::FindItemInList(faultsCoilSATFouling.CoilName, state.dataSteamCoils->SteamCoil);
                 if (CoilNum <= 0) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{} = \"{}\" invalid {} = \"{}\" not found.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5)));
-                    state.dataFaultsMgr->ErrorsFound = true;
+                    showFaultEquipNotFoundError(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5), state.dataFaultsMgr->ErrorsFound);
                 } else {
 
                     if (state.dataSteamCoils->SteamCoil(CoilNum).TypeOfCoil != SteamCoils::CoilControlType::TemperatureSetPoint) {
@@ -865,11 +838,7 @@ namespace FaultsManager {
                 // Check the coil name and coil type
                 int CoilNum = Util::FindItemInList(faultsCoilSATFouling.CoilName, state.dataWaterCoils->WaterCoil);
                 if (CoilNum <= 0) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{} = \"{}\" invalid {} = \"{}\" not found.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5)));
-                    state.dataFaultsMgr->ErrorsFound = true;
+                    showFaultEquipNotFoundError(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5), state.dataFaultsMgr->ErrorsFound);
                 }
 
                 // Read in Water Coil Controller Name
@@ -885,11 +854,7 @@ namespace FaultsManager {
                                                       state.dataHVACControllers->ControllerProps,
                                                       &HVACControllers::ControllerPropsType::ControllerName);
                 if (ControlNum <= 0) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{} = \"{}\" invalid {} = \"{}\" not found.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(6), cAlphaArgs(6)));
-                    state.dataFaultsMgr->ErrorsFound = true;
+                    showFaultEquipNotFoundError(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(6), cAlphaArgs(6), state.dataFaultsMgr->ErrorsFound);
                 } else {
                     // Link the controller with the fault model
                     state.dataHVACControllers->ControllerProps(ControlNum).FaultyCoilSATFlag = true;
@@ -941,11 +906,7 @@ namespace FaultsManager {
                 // Check the coil name and coil type
                 int CoilSysNum = Util::FindItemInList(faultsCoilSATFouling.CoilName, state.dataHVACDXHeatPumpSys->DXHeatPumpSystem);
                 if (CoilSysNum <= 0) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{} = \"{}\" invalid {} = \"{}\" not found.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5)));
-                    state.dataFaultsMgr->ErrorsFound = true;
+                    showFaultEquipNotFoundError(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5), state.dataFaultsMgr->ErrorsFound);
                 } else {
                     // Link the coil system with the fault model
                     state.dataHVACDXHeatPumpSys->DXHeatPumpSystem(CoilSysNum).FaultyCoilSATFlag = true;
@@ -1005,11 +966,7 @@ namespace FaultsManager {
                 // Check the tower name and tower type
                 int TowerNum = Util::FindItemInList(faultsTowerFouling.TowerName, state.dataCondenserLoopTowers->towers);
                 if (TowerNum <= 0) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{} = \"{}\" invalid {} = \"{}\" not found.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5)));
-                    state.dataFaultsMgr->ErrorsFound = true;
+                    showFaultEquipNotFoundError(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5), state.dataFaultsMgr->ErrorsFound);
                 } else {
                     // Link the tower with the fault model
                     state.dataCondenserLoopTowers->towers(TowerNum).FaultyTowerFoulingFlag = true;
@@ -1093,11 +1050,7 @@ namespace FaultsManager {
                 // Check the tower name and tower type
                 int TowerNum = Util::FindItemInList(faultsCondSWTFouling.TowerName, state.dataCondenserLoopTowers->towers);
                 if (TowerNum <= 0) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{} = \"{}\" invalid {} = \"{}\" not found.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5)));
-                    state.dataFaultsMgr->ErrorsFound = true;
+                    showFaultEquipNotFoundError(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5), state.dataFaultsMgr->ErrorsFound);
                 } else {
                     // Link the tower with the fault model
                     state.dataCondenserLoopTowers->towers(TowerNum).FaultyCondenserSWTFlag = true;
@@ -1170,11 +1123,7 @@ namespace FaultsManager {
                     }
                 }
                 if (ChillerNum <= 0) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{} = \"{}\" invalid {} = \"{}\" not found.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5)));
-                    state.dataFaultsMgr->ErrorsFound = true;
+                    showFaultEquipNotFoundError(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5), state.dataFaultsMgr->ErrorsFound);
                 } else {
                     // Link the chiller with the fault model
                     state.dataPlantChillers->ElectricChiller(ChillerNum).FaultyChillerSWTFlag = true;
@@ -1190,11 +1139,7 @@ namespace FaultsManager {
                 // Check whether the chiller name and chiller type match each other
                 ChillerNum = Util::FindItemInList(faultsChillerSWT.ChillerName, state.dataChillerElectricEIR->ElectricEIRChiller);
                 if (ChillerNum <= 0) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{} = \"{}\" invalid {} = \"{}\" not found.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5)));
-                    state.dataFaultsMgr->ErrorsFound = true;
+                    showFaultEquipNotFoundError(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5), state.dataFaultsMgr->ErrorsFound);
                 } else {
                     // Link the chiller with the fault model
                     state.dataChillerElectricEIR->ElectricEIRChiller(ChillerNum).FaultyChillerSWTFlag = true;
@@ -1210,11 +1155,7 @@ namespace FaultsManager {
                 // Check whether the chiller name and chiller type match each other
                 ChillerNum = Util::FindItemInList(faultsChillerSWT.ChillerName, state.dataChillerReformulatedEIR->ElecReformEIRChiller);
                 if (ChillerNum <= 0) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{} = \"{}\" invalid {} = \"{}\" not found.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5)));
-                    state.dataFaultsMgr->ErrorsFound = true;
+                    showFaultEquipNotFoundError(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5), state.dataFaultsMgr->ErrorsFound);
                 } else {
                     // Link the chiller with the fault model
                     state.dataChillerReformulatedEIR->ElecReformEIRChiller(ChillerNum).FaultyChillerSWTFlag = true;
@@ -1232,11 +1173,7 @@ namespace FaultsManager {
                     }
                 }
                 if (ChillerNum <= 0) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{} = \"{}\" invalid {} = \"{}\" not found.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5)));
-                    state.dataFaultsMgr->ErrorsFound = true;
+                    showFaultEquipNotFoundError(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5), state.dataFaultsMgr->ErrorsFound);
                 } else {
                     // Link the chiller with the fault model
                     state.dataPlantChillers->EngineDrivenChiller(ChillerNum).FaultyChillerSWTFlag = true;
@@ -1253,11 +1190,7 @@ namespace FaultsManager {
                     }
                 }
                 if (ChillerNum <= 0) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{} = \"{}\" invalid {} = \"{}\" not found.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5)));
-                    state.dataFaultsMgr->ErrorsFound = true;
+                    showFaultEquipNotFoundError(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5), state.dataFaultsMgr->ErrorsFound);
                 } else {
                     // Link the chiller with the fault model
                     state.dataPlantChillers->GTChiller(ChillerNum).FaultyChillerSWTFlag = true;
@@ -1274,11 +1207,7 @@ namespace FaultsManager {
                     }
                 }
                 if (ChillerNum <= 0) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{} = \"{}\" invalid {} = \"{}\" not found.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5)));
-                    state.dataFaultsMgr->ErrorsFound = true;
+                    showFaultEquipNotFoundError(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5), state.dataFaultsMgr->ErrorsFound);
                 } else {
                     // Link the chiller with the fault model
                     state.dataPlantChillers->ConstCOPChiller(ChillerNum).FaultyChillerSWTFlag = true;
@@ -1294,11 +1223,7 @@ namespace FaultsManager {
                 // Check whether the chiller name and chiller type match each other
                 ChillerNum = Util::FindItemInList(faultsChillerSWT.ChillerName, state.dataChillerAbsorber->absorptionChillers);
                 if (ChillerNum <= 0) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{} = \"{}\" invalid {} = \"{}\" not found.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5)));
-                    state.dataFaultsMgr->ErrorsFound = true;
+                    showFaultEquipNotFoundError(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5), state.dataFaultsMgr->ErrorsFound);
                 } else {
                     // Link the chiller with the fault model
                     state.dataChillerAbsorber->absorptionChillers(ChillerNum).FaultyChillerSWTFlag = true;
@@ -1314,11 +1239,7 @@ namespace FaultsManager {
                 // Check whether the chiller name and chiller type match each other
                 ChillerNum = Util::FindItemInList(faultsChillerSWT.ChillerName, state.dataChillerIndirectAbsorption->IndirectAbsorber);
                 if (ChillerNum <= 0) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{} = \"{}\" invalid {} = \"{}\" not found.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5)));
-                    state.dataFaultsMgr->ErrorsFound = true;
+                    showFaultEquipNotFoundError(state, cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5), state.dataFaultsMgr->ErrorsFound);
                 } else {
                     state.dataChillerIndirectAbsorption->IndirectAbsorber(ChillerNum).FaultyChillerSWTFlag = true;
                     state.dataChillerIndirectAbsorption->IndirectAbsorber(ChillerNum).FaultyChillerSWTIndex = jFault_ChillerSWT;
