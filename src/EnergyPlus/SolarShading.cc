@@ -864,6 +864,49 @@ void checkScheduledSurfacePresent(EnergyPlusData &state)
     }
 }
 
+// Helper: set up screen output variables for a window surface (used by both ExtSolar and non-ExtSolar paths)
+static void setupScreenOutputVars(EnergyPlusData &state, int SurfLoop, std::string const &surfName)
+{
+    auto &s_surf = state.dataSurface;
+    if (s_surf->SurfaceWindow(SurfLoop).screenNum > 0) {
+        SetupOutputVariable(state,
+                            "Surface Window Screen Beam to Beam Solar Transmittance",
+                            Constant::Units::None,
+                            s_surf->SurfWinScTsolBmBm(SurfLoop),
+                            OutputProcessor::TimeStepType::Zone,
+                            OutputProcessor::StoreType::Average,
+                            surfName);
+        SetupOutputVariable(state,
+                            "Surface Window Screen Beam to Diffuse Solar Transmittance",
+                            Constant::Units::None,
+                            s_surf->SurfWinScTsolBmDif(SurfLoop),
+                            OutputProcessor::TimeStepType::Zone,
+                            OutputProcessor::StoreType::Average,
+                            surfName);
+        SetupOutputVariable(state,
+                            "Surface Window Screen Diffuse to Diffuse Solar Transmittance",
+                            Constant::Units::None,
+                            s_surf->SurfWinScTsolDifDif(SurfLoop),
+                            OutputProcessor::TimeStepType::Zone,
+                            OutputProcessor::StoreType::Average,
+                            surfName);
+        SetupOutputVariable(state,
+                            "Surface Window Screen and Glazing System Beam Solar Transmittance",
+                            Constant::Units::None,
+                            s_surf->SurfWinScGlSysTsolBmBm(SurfLoop),
+                            OutputProcessor::TimeStepType::Zone,
+                            OutputProcessor::StoreType::Average,
+                            surfName);
+        SetupOutputVariable(state,
+                            "Surface Window Screen and Glazing System Diffuse Solar Transmittance",
+                            Constant::Units::None,
+                            s_surf->SurfWinScGlSysTsolDifDif(SurfLoop),
+                            OutputProcessor::TimeStepType::Zone,
+                            OutputProcessor::StoreType::Average,
+                            surfName);
+    }
+}
+
 // Helper: set up blind output variables for a window surface (used by both ExtSolar and non-ExtSolar paths)
 static void setupBlindOutputVars(EnergyPlusData &state, int SurfLoop, std::string const &surfName)
 {
@@ -1932,45 +1975,7 @@ void AllocateModuleArrays(EnergyPlusData &state)
 
                 setupBlindOutputVars(state, SurfLoop, surf.Name);
 
-                //     Output screen report variables only when screens are used
-                if (s_surf->SurfaceWindow(SurfLoop).screenNum > 0) {
-                    // CurrentModuleObject='Window Screens'
-                    SetupOutputVariable(state,
-                                        "Surface Window Screen Beam to Beam Solar Transmittance",
-                                        Constant::Units::None,
-                                        s_surf->SurfWinScTsolBmBm(SurfLoop),
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        surf.Name);
-                    SetupOutputVariable(state,
-                                        "Surface Window Screen Beam to Diffuse Solar Transmittance",
-                                        Constant::Units::None,
-                                        s_surf->SurfWinScTsolBmDif(SurfLoop),
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        surf.Name);
-                    SetupOutputVariable(state,
-                                        "Surface Window Screen Diffuse to Diffuse Solar Transmittance",
-                                        Constant::Units::None,
-                                        s_surf->SurfWinScTsolDifDif(SurfLoop),
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        surf.Name);
-                    SetupOutputVariable(state,
-                                        "Surface Window Screen and Glazing System Beam Solar Transmittance",
-                                        Constant::Units::None,
-                                        s_surf->SurfWinScGlSysTsolBmBm(SurfLoop),
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        surf.Name);
-                    SetupOutputVariable(state,
-                                        "Surface Window Screen and Glazing System Diffuse Solar Transmittance",
-                                        Constant::Units::None,
-                                        s_surf->SurfWinScGlSysTsolDifDif(SurfLoop),
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        surf.Name);
-                }
+                setupScreenOutputVars(state, SurfLoop, surf.Name);
 
                 // CurrentModuleObject='Windows'
                 SetupOutputVariable(state,
@@ -2317,44 +2322,7 @@ void AllocateModuleArrays(EnergyPlusData &state)
 
                     setupBlindOutputVars(state, SurfLoop, surf.Name);
 
-                    //     Output screen report variables only when screens are used
-                    if (s_surf->SurfaceWindow(SurfLoop).screenNum > 0) {
-                        SetupOutputVariable(state,
-                                            "Surface Window Screen Beam to Beam Solar Transmittance",
-                                            Constant::Units::None,
-                                            s_surf->SurfWinScTsolBmBm(SurfLoop),
-                                            OutputProcessor::TimeStepType::Zone,
-                                            OutputProcessor::StoreType::Average,
-                                            surf.Name);
-                        SetupOutputVariable(state,
-                                            "Surface Window Screen Beam to Diffuse Solar Transmittance",
-                                            Constant::Units::None,
-                                            s_surf->SurfWinScTsolBmDif(SurfLoop),
-                                            OutputProcessor::TimeStepType::Zone,
-                                            OutputProcessor::StoreType::Average,
-                                            surf.Name);
-                        SetupOutputVariable(state,
-                                            "Surface Window Screen Diffuse to Diffuse Solar Transmittance",
-                                            Constant::Units::None,
-                                            s_surf->SurfWinScTsolDifDif(SurfLoop),
-                                            OutputProcessor::TimeStepType::Zone,
-                                            OutputProcessor::StoreType::Average,
-                                            surf.Name);
-                        SetupOutputVariable(state,
-                                            "Surface Window Screen and Glazing System Beam Solar Transmittance",
-                                            Constant::Units::None,
-                                            s_surf->SurfWinScGlSysTsolBmBm(SurfLoop),
-                                            OutputProcessor::TimeStepType::Zone,
-                                            OutputProcessor::StoreType::Average,
-                                            surf.Name);
-                        SetupOutputVariable(state,
-                                            "Surface Window Screen and Glazing System Diffuse Solar Transmittance",
-                                            Constant::Units::None,
-                                            s_surf->SurfWinScGlSysTsolDifDif(SurfLoop),
-                                            OutputProcessor::TimeStepType::Zone,
-                                            OutputProcessor::StoreType::Average,
-                                            surf.Name);
-                    }
+                    setupScreenOutputVars(state, SurfLoop, surf.Name);
 
                     SetupOutputVariable(state,
                                         "Surface Window Solar Horizontal Profile Angle",
