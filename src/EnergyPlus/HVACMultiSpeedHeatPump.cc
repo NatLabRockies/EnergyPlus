@@ -869,36 +869,21 @@ namespace HVACMultiSpeedHeatPump {
             } else if (Util::SameString(Alphas(10), "Coil:Heating:Electric:MultiStage") ||
                        Util::SameString(Alphas(10), "Coil:Heating:Gas:MultiStage")) {
 
-                if (Util::SameString(Alphas(10), "Coil:Heating:Electric:MultiStage")) {
-                    thisMSHP.HeatCoilType = HVAC::Coil_HeatingElectric_MultiStage;
-                    thisMSHP.HeatCoilNum =
-                        state.dataInputProcessing->inputProcessor->getObjectItemNum(state, "Coil:Heating:Electric:MultiStage", Alphas(11));
-                    if (thisMSHP.HeatCoilNum <= 0) {
-                        ShowSevereError(
-                            state, EnergyPlus::format("Configuration error in {} \"{}\"", state.dataHVACMultiSpdHP->CurrentModuleObject, Alphas(1)));
-                        ShowContinueError(state, EnergyPlus::format("{} \"{}\" not found.", cAlphaFields(11), Alphas(11)));
-                        ShowContinueError(state, EnergyPlus::format("{} must be Coil:Heating:Electric:MultiStage ", cAlphaFields(10)));
-                        ShowFatalError(state,
-                                       EnergyPlus::format("{}Errors found in getting {} input. Preceding condition(s) causes termination.",
-                                                          RoutineName,
-                                                          state.dataHVACMultiSpdHP->CurrentModuleObject));
-                        ErrorsFound = true;
-                    }
-                } else {
-                    thisMSHP.HeatCoilType = HVAC::Coil_HeatingGas_MultiStage;
-                    thisMSHP.HeatCoilNum =
-                        state.dataInputProcessing->inputProcessor->getObjectItemNum(state, "Coil:Heating:Gas:MultiStage", Alphas(11));
-                    if (thisMSHP.HeatCoilNum <= 0) {
-                        ShowSevereError(
-                            state, EnergyPlus::format("Configuration error in {} \"{}\"", state.dataHVACMultiSpdHP->CurrentModuleObject, Alphas(1)));
-                        ShowContinueError(state, EnergyPlus::format("{} \"{}\" not found.", cAlphaFields(11), Alphas(11)));
-                        ShowContinueError(state, EnergyPlus::format("{} must be Coil:Heating:Gas:MultiStage ", cAlphaFields(10)));
-                        ShowFatalError(state,
-                                       EnergyPlus::format("{}Errors found in getting {} input. Preceding condition(s) causes termination.",
-                                                          RoutineName,
-                                                          state.dataHVACMultiSpdHP->CurrentModuleObject));
-                        ErrorsFound = true;
-                    }
+                thisMSHP.HeatCoilType = Util::SameString(Alphas(10), "Coil:Heating:Electric:MultiStage")
+                                           ? HVAC::Coil_HeatingElectric_MultiStage
+                                           : HVAC::Coil_HeatingGas_MultiStage;
+                thisMSHP.HeatCoilNum =
+                    state.dataInputProcessing->inputProcessor->getObjectItemNum(state, Alphas(10), Alphas(11));
+                if (thisMSHP.HeatCoilNum <= 0) {
+                    ShowSevereError(
+                        state, EnergyPlus::format("Configuration error in {} \"{}\"", state.dataHVACMultiSpdHP->CurrentModuleObject, Alphas(1)));
+                    ShowContinueError(state, EnergyPlus::format("{} \"{}\" not found.", cAlphaFields(11), Alphas(11)));
+                    ShowContinueError(state, EnergyPlus::format("{} must be {} ", cAlphaFields(10), Alphas(10)));
+                    ShowFatalError(state,
+                                   EnergyPlus::format("{}Errors found in getting {} input. Preceding condition(s) causes termination.",
+                                                      RoutineName,
+                                                      state.dataHVACMultiSpdHP->CurrentModuleObject));
+                    ErrorsFound = true;
                 }
                 thisMSHP.HeatCoilName = Alphas(11);
                 LocalError = false;
