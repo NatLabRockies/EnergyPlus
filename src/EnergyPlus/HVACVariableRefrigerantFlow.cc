@@ -4584,6 +4584,29 @@ void CheckVRFTUNodeConnections(EnergyPlusData &state, int const VRFTUNum, bool &
     }
 }
 
+// Helper: warn and cap when a VRF TU flow rate exceeds its limit
+static void warnAndCapFlowRate(EnergyPlusData &state,
+                               std::string_view tuType,
+                               std::string_view tuName,
+                               Real64 &flowRate,
+                               Real64 const limitRate,
+                               std::string_view comparisonMsg,
+                               std::string_view flowLabel,
+                               Real64 const flowVal,
+                               std::string_view limitLabel,
+                               Real64 const limitVal,
+                               std::string_view reductionMsg)
+{
+    if (flowRate > limitRate) {
+        ShowWarningError(state, EnergyPlus::format("InitVRF: VRF Terminal Unit = [{}, \"{}\"]", tuType, tuName));
+        ShowContinueError(state, std::string(comparisonMsg));
+        ShowContinueError(state, EnergyPlus::format("... {} = {:.4R} m3/s", flowLabel, flowVal));
+        ShowContinueError(state, EnergyPlus::format("... {} = {:.4R} m3/s", limitLabel, limitVal));
+        ShowContinueError(state, std::string(reductionMsg));
+        flowRate = limitRate;
+    }
+}
+
 void InitVRF(EnergyPlusData &state, int const VRFTUNum, int const ZoneNum, bool const FirstHVACIteration, Real64 &OnOffAirFlowRatio, Real64 &QZnReq)
 {
 
@@ -5570,136 +5593,60 @@ void InitVRF(EnergyPlusData &state, int const VRFTUNum, int const ZoneNum, bool 
                         }
                     }
 
-                    if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxCoolAirVolFlow >
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ActualFanVolFlowRate) {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("InitVRF: VRF Terminal Unit = [{}, \"{}\"]",
-                                                            tuTypeNames[(int)state.dataHVACVarRefFlow->VRFTU(VRFTUNum).type],
-                                                            state.dataHVACVarRefFlow->VRFTU(VRFTUNum).Name));
-                        ShowContinueError(state, "... has Supply Air Flow Rate During Cooling Operation > Max Fan Volume Flow Rate, should be <=");
-                        ShowContinueError(state,
-                                          EnergyPlus::format("... Supply Air Flow Rate During Cooling Operation = {:.4R} m3/s",
-                                                             state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxCoolAirVolFlow));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("... Max Fan Volume Flow Rate                      = {:.4R} m3/s",
-                                                             state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ActualFanVolFlowRate));
-                        ShowContinueError(
-                            state, "...the supply air flow rate during cooling operation will be reduced to match and the simulation continues.");
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxCoolAirVolFlow = state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ActualFanVolFlowRate;
-                    }
+                    auto const &tuTypeName = tuTypeNames[(int)state.dataHVACVarRefFlow->VRFTU(VRFTUNum).type];
+                    auto const &tuName = state.dataHVACVarRefFlow->VRFTU(VRFTUNum).Name;
+                    Real64 const fanFlow = state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ActualFanVolFlowRate;
 
-                    if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxNoCoolAirVolFlow >
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ActualFanVolFlowRate) {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("InitVRF: VRF Terminal Unit = [{}, \"{}\"]",
-                                                            tuTypeNames[(int)state.dataHVACVarRefFlow->VRFTU(VRFTUNum).type],
-                                                            state.dataHVACVarRefFlow->VRFTU(VRFTUNum).Name));
-                        ShowContinueError(state, "... has Supply Air Flow Rate When No Cooling is Needed > Max Fan Volume Flow Rate, should be <=");
-                        ShowContinueError(state,
-                                          EnergyPlus::format("... Supply Air Flow Rate When No Cooling is Needed = {:.4R} m3/s",
-                                                             state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxNoCoolAirVolFlow));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("... Max Fan Volume Flow Rate                       = {:.4R} m3/s",
-                                                             state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ActualFanVolFlowRate));
-                        ShowContinueError(
-                            state, "...the supply air flow rate when no cooling is needed will be reduced to match and the simulation continues.");
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxNoCoolAirVolFlow =
-                            state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ActualFanVolFlowRate;
-                    }
+                    warnAndCapFlowRate(state, tuTypeName, tuName,
+                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxCoolAirVolFlow, fanFlow,
+                        "... has Supply Air Flow Rate During Cooling Operation > Max Fan Volume Flow Rate, should be <=",
+                        "Supply Air Flow Rate During Cooling Operation", state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxCoolAirVolFlow,
+                        "Max Fan Volume Flow Rate                     ", fanFlow,
+                        "...the supply air flow rate during cooling operation will be reduced to match and the simulation continues.");
 
-                    if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolOutAirVolFlow > state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxCoolAirVolFlow) {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("InitVRF: VRF Terminal Unit = [{}, \"{}\"]",
-                                                            tuTypeNames[(int)state.dataHVACVarRefFlow->VRFTU(VRFTUNum).type],
-                                                            state.dataHVACVarRefFlow->VRFTU(VRFTUNum).Name));
-                        ShowContinueError(
-                            state,
-                            "...The Outdoor Air Flow Rate During Cooling Operation exceeds the Supply Air Flow Rate During Cooling Operation.");
-                        ShowContinueError(state,
-                                          EnergyPlus::format("...Outdoor Air Flow Rate During Cooling Operation = {:.4R} m3/s",
-                                                             state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolOutAirVolFlow));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("... Supply Air Flow Rate During Cooling Operation = {:.4R} m3/s",
-                                                             state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxCoolAirVolFlow));
-                        ShowContinueError(state, "...the outdoor air flow rate will be reduced to match and the simulation continues.");
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolOutAirVolFlow = state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxCoolAirVolFlow;
-                    }
+                    warnAndCapFlowRate(state, tuTypeName, tuName,
+                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxNoCoolAirVolFlow, fanFlow,
+                        "... has Supply Air Flow Rate When No Cooling is Needed > Max Fan Volume Flow Rate, should be <=",
+                        "Supply Air Flow Rate When No Cooling is Needed", state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxNoCoolAirVolFlow,
+                        "Max Fan Volume Flow Rate                      ", fanFlow,
+                        "...the supply air flow rate when no cooling is needed will be reduced to match and the simulation continues.");
 
-                    if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxHeatAirVolFlow >
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ActualFanVolFlowRate) {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("InitVRF: VRF Terminal Unit = [{}, \"{}\"]",
-                                                            tuTypeNames[(int)state.dataHVACVarRefFlow->VRFTU(VRFTUNum).type],
-                                                            state.dataHVACVarRefFlow->VRFTU(VRFTUNum).Name));
-                        ShowContinueError(state, "... has Supply Air Flow Rate During Heating Operation > Max Fan Volume Flow Rate, should be <=");
-                        ShowContinueError(state,
-                                          EnergyPlus::format("... Supply Air Flow Rate During Heating Operation = {:.4R} m3/s",
-                                                             state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxHeatAirVolFlow));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("... Max Fan Volume Flow Rate                      = {:.4R} m3/s",
-                                                             state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ActualFanVolFlowRate));
-                        ShowContinueError(
-                            state, "...the supply air flow rate during cooling operation will be reduced to match and the simulation continues.");
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxHeatAirVolFlow = state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ActualFanVolFlowRate;
-                    }
+                    warnAndCapFlowRate(state, tuTypeName, tuName,
+                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolOutAirVolFlow,
+                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxCoolAirVolFlow,
+                        "...The Outdoor Air Flow Rate During Cooling Operation exceeds the Supply Air Flow Rate During Cooling Operation.",
+                        "Outdoor Air Flow Rate During Cooling Operation", state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolOutAirVolFlow,
+                        "Supply Air Flow Rate During Cooling Operation ", state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxCoolAirVolFlow,
+                        "...the outdoor air flow rate will be reduced to match and the simulation continues.");
 
-                    if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxNoHeatAirVolFlow >
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ActualFanVolFlowRate) {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("InitVRF: VRF Terminal Unit = [{}, \"{}\"]",
-                                                            tuTypeNames[(int)state.dataHVACVarRefFlow->VRFTU(VRFTUNum).type],
-                                                            state.dataHVACVarRefFlow->VRFTU(VRFTUNum).Name));
-                        ShowContinueError(state, "... has Supply Air Flow Rate When No Heating is Needed > Max Fan Volume Flow Rate, should be <=");
-                        ShowContinueError(state,
-                                          EnergyPlus::format("... Supply Air Flow Rate When No Heating is Needed = {:.4R} m3/s",
-                                                             state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxNoHeatAirVolFlow));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("... Max Fan Volume Flow Rate                       = {:.4R} m3/s",
-                                                             state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ActualFanVolFlowRate));
-                        ShowContinueError(
-                            state, "...the supply air flow rate when no cooling is needed will be reduced to match and the simulation continues.");
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxNoHeatAirVolFlow =
-                            state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ActualFanVolFlowRate;
-                    }
+                    warnAndCapFlowRate(state, tuTypeName, tuName,
+                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxHeatAirVolFlow, fanFlow,
+                        "... has Supply Air Flow Rate During Heating Operation > Max Fan Volume Flow Rate, should be <=",
+                        "Supply Air Flow Rate During Heating Operation", state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxHeatAirVolFlow,
+                        "Max Fan Volume Flow Rate                     ", fanFlow,
+                        "...the supply air flow rate during cooling operation will be reduced to match and the simulation continues.");
 
-                    if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatOutAirVolFlow > state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxHeatAirVolFlow) {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("InitVRF: VRF Terminal Unit = [{}, \"{}\"]",
-                                                            tuTypeNames[(int)state.dataHVACVarRefFlow->VRFTU(VRFTUNum).type],
-                                                            state.dataHVACVarRefFlow->VRFTU(VRFTUNum).Name));
-                        ShowContinueError(
-                            state,
-                            "...The Outdoor Air Flow Rate During Heating Operation exceeds the Supply Air Flow Rate During Heating Operation.");
-                        ShowContinueError(state,
-                                          EnergyPlus::format("...Outdoor Air Flow Rate During Heating Operation = {:.4R} m3/s",
-                                                             state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatOutAirVolFlow));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("... Supply Air Flow Rate During Heating Operation = {:.4R} m3/s",
-                                                             state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxHeatAirVolFlow));
-                        ShowContinueError(state, "...the outdoor air flow rate will be reduced to match and the simulation continues.");
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatOutAirVolFlow = state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxHeatAirVolFlow;
-                    }
+                    warnAndCapFlowRate(state, tuTypeName, tuName,
+                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxNoHeatAirVolFlow, fanFlow,
+                        "... has Supply Air Flow Rate When No Heating is Needed > Max Fan Volume Flow Rate, should be <=",
+                        "Supply Air Flow Rate When No Heating is Needed", state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxNoHeatAirVolFlow,
+                        "Max Fan Volume Flow Rate                      ", fanFlow,
+                        "...the supply air flow rate when no cooling is needed will be reduced to match and the simulation continues.");
 
-                    if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).NoCoolHeatOutAirVolFlow >
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ActualFanVolFlowRate) {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("InitVRF: VRF Terminal Unit = [{}, \"{}\"]",
-                                                            tuTypeNames[(int)state.dataHVACVarRefFlow->VRFTU(VRFTUNum).type],
-                                                            state.dataHVACVarRefFlow->VRFTU(VRFTUNum).Name));
-                        ShowContinueError(
-                            state, "... has a Outdoor Air Flow Rate When No Cooling or Heating is Needed > Max Fan Volume Flow Rate, should be <=");
-                        ShowContinueError(state,
-                                          EnergyPlus::format("... Outdoor Air Flow Rate When No Cooling or Heating is Needed = {:.4R} m3/s",
-                                                             state.dataHVACVarRefFlow->VRFTU(VRFTUNum).NoCoolHeatOutAirVolFlow));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("... Max Fan Volume Flow Rate                                   = {:.4R} m3/s",
-                                                             state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ActualFanVolFlowRate));
-                        ShowContinueError(state,
-                                          "...the outdoor air flow rate when no cooling or heating is needed will be reduced to match and the "
-                                          "simulation continues.");
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).NoCoolHeatOutAirVolFlow =
-                            state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ActualFanVolFlowRate;
-                    }
+                    warnAndCapFlowRate(state, tuTypeName, tuName,
+                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatOutAirVolFlow,
+                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxHeatAirVolFlow,
+                        "...The Outdoor Air Flow Rate During Heating Operation exceeds the Supply Air Flow Rate During Heating Operation.",
+                        "Outdoor Air Flow Rate During Heating Operation", state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatOutAirVolFlow,
+                        "Supply Air Flow Rate During Heating Operation ", state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxHeatAirVolFlow,
+                        "...the outdoor air flow rate will be reduced to match and the simulation continues.");
+
+                    warnAndCapFlowRate(state, tuTypeName, tuName,
+                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).NoCoolHeatOutAirVolFlow, fanFlow,
+                        "... has a Outdoor Air Flow Rate When No Cooling or Heating is Needed > Max Fan Volume Flow Rate, should be <=",
+                        "Outdoor Air Flow Rate When No Cooling or Heating is Needed", state.dataHVACVarRefFlow->VRFTU(VRFTUNum).NoCoolHeatOutAirVolFlow,
+                        "Max Fan Volume Flow Rate                                  ", fanFlow,
+                        "...the outdoor air flow rate when no cooling or heating is needed will be reduced to match and the simulation continues.");
 
                     if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ActualFanVolFlowRate > 0.0) {
                         state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatingSpeedRatio = state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxHeatAirVolFlow /
