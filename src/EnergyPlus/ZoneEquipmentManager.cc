@@ -5567,6 +5567,52 @@ void UpdateZoneEquipment(EnergyPlusData &state, bool &SimAir)
     }
 }
 
+// Check a min/max temperature schedule pair for a mixing object.
+// Returns true if the temperature is outside the [min, max] range (i.e. mixing should be skipped).
+// Also validates that min <= max and issues warnings/recurring errors when violated.
+static bool checkMixingTempLimits(EnergyPlusData &state,
+                                  Sched::Schedule *minTempSched,
+                                  Sched::Schedule *maxTempSched,
+                                  Real64 tempToCheck,
+                                  int &errCount,
+                                  int &errIndex,
+                                  std::string_view const objectName,
+                                  std::string_view const contextMsg,
+                                  std::string_view const minLabel,
+                                  std::string_view const maxLabel)
+{
+    Real64 tMin = 0.0;
+    Real64 tMax = 0.0;
+    if (minTempSched != nullptr) {
+        tMin = minTempSched->getCurrentVal();
+    }
+    if (maxTempSched != nullptr) {
+        tMax = maxTempSched->getCurrentVal();
+    }
+    if (minTempSched != nullptr && maxTempSched != nullptr) {
+        if (tMin > tMax) {
+            ++errCount;
+            if (errCount < 2) {
+                ShowWarningError(state,
+                                 EnergyPlus::format("{}: The {} is above the {} in {}", contextMsg, minLabel, maxLabel, objectName));
+                ShowContinueError(state, EnergyPlus::format("The {} is set to the {}. Simulation continues.", minLabel, maxLabel));
+                ShowContinueErrorTimeStamp(state, " Occurrence info:");
+            } else {
+                ShowRecurringWarningErrorAtEnd(
+                    state, EnergyPlus::format("The {} is still above the {}", minLabel, maxLabel), errIndex, tMin, tMin);
+            }
+            tMin = tMax;
+        }
+    }
+    if (minTempSched != nullptr && tempToCheck < tMin) {
+        return true;
+    }
+    if (maxTempSched != nullptr && tempToCheck > tMax) {
+        return true;
+    }
+    return false;
+}
+
 void CalcAirFlowSimple(EnergyPlusData &state,
                        int const SysTimestepLoop,                // System time step index
                        bool const AdjustZoneMixingFlowFlag,      // holds zone mixing air flow calc status
@@ -6103,122 +6149,17 @@ void CalcAirFlowSimple(EnergyPlusData &state,
                 continue;
             }
         } else {
-            // Ensure the minimum indoor temperature <= the maximum indoor temperature
-            Real64 MixingTmin = 0.0;
-            Real64 MixingTmax = 0.0;
-            if (thisMixing.minIndoorTempSched != nullptr) {
-                MixingTmin = thisMixing.minIndoorTempSched->getCurrentVal();
-            }
-            if (thisMixing.maxIndoorTempSched != nullptr) {
-                MixingTmax = thisMixing.maxIndoorTempSched->getCurrentVal();
-            }
-            if (thisMixing.minIndoorTempSched != nullptr && thisMixing.maxIndoorTempSched != nullptr) {
-                if (MixingTmin > MixingTmax) {
-                    ++thisMixing.IndoorTempErrCount;
-                    if (thisMixing.IndoorTempErrCount < 2) {
-                        ShowWarningError(
-                            state,
-                            EnergyPlus::format(
-                                "Mixing zone temperature control: The minimum zone temperature is above the maximum zone temperature in {}",
-                                thisMixing.Name));
-                        ShowContinueError(state, "The minimum zone temperature is set to the maximum zone temperature. Simulation continues.");
-                        ShowContinueErrorTimeStamp(state, " Occurrence info:");
-                    } else {
-                        ShowRecurringWarningErrorAtEnd(state,
-                                                       "The minimum zone temperature is still above the maximum zone temperature",
-                                                       thisMixing.IndoorTempErrIndex,
-                                                       MixingTmin,
-                                                       MixingTmin);
-                    }
-                    MixingTmin = MixingTmax;
-                }
-            }
-            if (thisMixing.minIndoorTempSched != nullptr) {
-                if (TZN < MixingTmin) {
-                    MixingLimitFlag = true;
-                }
-            }
-            if (thisMixing.maxIndoorTempSched != nullptr) {
-                if (TZN > MixingTmax) {
-                    MixingLimitFlag = true;
-                }
-            }
-            // Ensure the minimum source temperature <= the maximum source temperature
-            if (thisMixing.minSourceTempSched != nullptr) {
-                MixingTmin = thisMixing.minSourceTempSched->getCurrentVal();
-            }
-            if (thisMixing.maxSourceTempSched != nullptr) {
-                MixingTmax = thisMixing.maxSourceTempSched->getCurrentVal();
-            }
-            if (thisMixing.minSourceTempSched != nullptr && thisMixing.maxSourceTempSched != nullptr) {
-                if (MixingTmin > MixingTmax) {
-                    ++thisMixing.SourceTempErrCount;
-                    if (thisMixing.SourceTempErrCount < 2) {
-                        ShowWarningError(
-                            state,
-                            EnergyPlus::format(
-                                "Mixing source temperature control: The minimum source temperature is above the maximum source temperature in {}",
-                                thisMixing.Name));
-                        ShowContinueError(state, "The minimum source temperature is set to the maximum source temperature. Simulation continues.");
-                        ShowContinueErrorTimeStamp(state, " Occurrence info:");
-                    } else {
-                        ShowRecurringWarningErrorAtEnd(state,
-                                                       "The minimum source temperature is still above the maximum source temperature",
-                                                       thisMixing.SourceTempErrIndex,
-                                                       MixingTmin,
-                                                       MixingTmin);
-                    }
-                    MixingTmin = MixingTmax;
-                }
-            }
-            if (thisMixing.minSourceTempSched != nullptr) {
-                if (TZM < MixingTmin) {
-                    MixingLimitFlag = true;
-                }
-            }
-            if (thisMixing.maxSourceTempSched != nullptr) {
-                if (TZM > MixingTmax) {
-                    MixingLimitFlag = true;
-                }
-            }
-            // Ensure the minimum outdoor temperature <= the maximum outdoor temperature
             Real64 TempExt = state.dataHeatBal->Zone(thisZoneNum).OutDryBulbTemp;
-            if (thisMixing.minOutdoorTempSched != nullptr) {
-                MixingTmin = thisMixing.minOutdoorTempSched->getCurrentVal();
-            }
-            if (thisMixing.maxOutdoorTempSched != nullptr) {
-                MixingTmax = thisMixing.maxOutdoorTempSched->getCurrentVal();
-            }
-            if (thisMixing.minOutdoorTempSched != nullptr && thisMixing.maxOutdoorTempSched != nullptr) {
-                if (MixingTmin > MixingTmax) {
-                    ++thisMixing.OutdoorTempErrCount;
-                    if (thisMixing.OutdoorTempErrCount < 2) {
-                        ShowWarningError(
-                            state,
-                            EnergyPlus::format("Mixing outdoor temperature control: The minimum outdoor temperature is above the maximum "
-                                               "outdoor temperature in {}",
-                                               thisMixing.Name));
-                        ShowContinueError(state, "The minimum outdoor temperature is set to the maximum source temperature. Simulation continues.");
-                        ShowContinueErrorTimeStamp(state, " Occurrence info:");
-                    } else {
-                        ShowRecurringWarningErrorAtEnd(state,
-                                                       "The minimum outdoor temperature is still above the maximum outdoor temperature",
-                                                       thisMixing.OutdoorTempErrIndex,
-                                                       MixingTmin,
-                                                       MixingTmin);
-                    }
-                    MixingTmin = MixingTmax;
-                }
-            }
-            if (thisMixing.minOutdoorTempSched != nullptr) {
-                if (TempExt < MixingTmin) {
-                    MixingLimitFlag = true;
-                }
-            }
-            if (thisMixing.maxOutdoorTempSched != nullptr) {
-                if (TempExt > MixingTmax) {
-                    MixingLimitFlag = true;
-                }
+            if (checkMixingTempLimits(state, thisMixing.minIndoorTempSched, thisMixing.maxIndoorTempSched, TZN,
+                                      thisMixing.IndoorTempErrCount, thisMixing.IndoorTempErrIndex, thisMixing.Name,
+                                      "Mixing zone temperature control", "minimum zone temperature", "maximum zone temperature") ||
+                checkMixingTempLimits(state, thisMixing.minSourceTempSched, thisMixing.maxSourceTempSched, TZM,
+                                      thisMixing.SourceTempErrCount, thisMixing.SourceTempErrIndex, thisMixing.Name,
+                                      "Mixing source temperature control", "minimum source temperature", "maximum source temperature") ||
+                checkMixingTempLimits(state, thisMixing.minOutdoorTempSched, thisMixing.maxOutdoorTempSched, TempExt,
+                                      thisMixing.OutdoorTempErrCount, thisMixing.OutdoorTempErrIndex, thisMixing.Name,
+                                      "Mixing outdoor temperature control", "minimum outdoor temperature", "maximum outdoor temperature")) {
+                MixingLimitFlag = true;
             }
         }
 
@@ -6373,125 +6314,18 @@ void CalcAirFlowSimple(EnergyPlusData &state,
                 HumRatZN = thisZoneHB.MixingHumRat; // HumRat of this zone
                 HumRatZM = fromZoneHB.MixingHumRat; // HumRat of From Zone
             }
-            // Check temperature limit
-            bool MixingLimitFlag = false;
-            // Ensure the minimum indoor temperature <= the maximum indoor temperature
-            Real64 MixingTmin = 0.0;
-            Real64 MixingTmax = 0.0;
-            if (thisCrossMixing.minIndoorTempSched != nullptr) {
-                MixingTmin = thisCrossMixing.minIndoorTempSched->getCurrentVal();
-            }
-            if (thisCrossMixing.maxIndoorTempSched != nullptr) {
-                MixingTmax = thisCrossMixing.maxIndoorTempSched->getCurrentVal();
-            }
-            if (thisCrossMixing.minIndoorTempSched != nullptr && thisCrossMixing.maxIndoorTempSched != nullptr) {
-                if (MixingTmin > MixingTmax) {
-                    ++thisCrossMixing.IndoorTempErrCount;
-                    if (thisCrossMixing.IndoorTempErrCount < 2) {
-                        ShowWarningError(
-                            state,
-                            EnergyPlus::format(
-                                "CrossMixing zone temperature control: The minimum zone temperature is above the maximum zone temperature in {}",
-                                thisCrossMixing.Name));
-                        ShowContinueError(state, "The minimum zone temperature is set to the maximum zone temperature. Simulation continues.");
-                        ShowContinueErrorTimeStamp(state, " Occurrence info:");
-                    } else {
-                        ShowRecurringWarningErrorAtEnd(state,
-                                                       "The minimum zone temperature is still above the maximum zone temperature",
-                                                       thisCrossMixing.IndoorTempErrIndex,
-                                                       MixingTmin,
-                                                       MixingTmin);
-                    }
-                    MixingTmin = MixingTmax;
-                }
-            }
-            if (thisCrossMixing.minIndoorTempSched != nullptr) {
-                if (TZN < MixingTmin) {
-                    MixingLimitFlag = true;
-                }
-            }
-            if (thisCrossMixing.maxIndoorTempSched != nullptr) {
-                if (TZN > MixingTmax) {
-                    MixingLimitFlag = true;
-                }
-            }
-            // Ensure the minimum source temperature <= the maximum source temperature
-            if (thisCrossMixing.minSourceTempSched != nullptr) {
-                MixingTmin = thisCrossMixing.minSourceTempSched->getCurrentVal();
-            }
-            if (thisCrossMixing.maxSourceTempSched != nullptr) {
-                MixingTmax = thisCrossMixing.maxSourceTempSched->getCurrentVal();
-            }
-            if (thisCrossMixing.minSourceTempSched != nullptr && thisCrossMixing.maxSourceTempSched != nullptr) {
-                if (MixingTmin > MixingTmax) {
-                    ++thisCrossMixing.SourceTempErrCount;
-                    if (thisCrossMixing.SourceTempErrCount < 2) {
-                        ShowWarningError(
-                            state,
-                            EnergyPlus::format("CrossMixing source temperature control: The minimum source temperature is above the maximum source "
-                                               "temperature in {}",
-                                               thisCrossMixing.Name));
-                        ShowContinueError(state, "The minimum source temperature is set to the maximum source temperature. Simulation continues.");
-                        ShowContinueErrorTimeStamp(state, " Occurrence info:");
-                    } else {
-                        ShowRecurringWarningErrorAtEnd(state,
-                                                       "The minimum source temperature is still above the maximum source temperature",
-                                                       thisCrossMixing.SourceTempErrIndex,
-                                                       MixingTmin,
-                                                       MixingTmin);
-                    }
-                    MixingTmin = MixingTmax;
-                }
-            }
-            if (thisCrossMixing.minSourceTempSched != nullptr) {
-                if (TZM < MixingTmin) {
-                    MixingLimitFlag = true;
-                }
-            }
-            if (thisCrossMixing.maxSourceTempSched != nullptr) {
-                if (TZM > MixingTmax) {
-                    MixingLimitFlag = true;
-                }
-            }
-            // Ensure the minimum outdoor temperature <= the maximum outdoor temperature
+            // Check temperature limits
             Real64 TempExt = state.dataHeatBal->Zone(thisZoneNum).OutDryBulbTemp;
-            if (thisCrossMixing.minOutdoorTempSched != nullptr) {
-                MixingTmin = thisCrossMixing.minOutdoorTempSched->getCurrentVal();
-            }
-            if (thisCrossMixing.maxOutdoorTempSched != nullptr) {
-                MixingTmax = thisCrossMixing.maxOutdoorTempSched->getCurrentVal();
-            }
-            if (thisCrossMixing.minOutdoorTempSched != nullptr && thisCrossMixing.maxOutdoorTempSched != nullptr) {
-                if (MixingTmin > MixingTmax) {
-                    ++thisCrossMixing.OutdoorTempErrCount;
-                    if (thisCrossMixing.OutdoorTempErrCount < 2) {
-                        ShowWarningError(
-                            state,
-                            EnergyPlus::format("CrossMixing outdoor temperature control: The minimum outdoor temperature is above the maximum "
-                                               "outdoor temperature in {}",
-                                               state.dataHeatBal->Mixing(j).Name));
-                        ShowContinueError(state, "The minimum outdoor temperature is set to the maximum source temperature. Simulation continues.");
-                        ShowContinueErrorTimeStamp(state, " Occurrence info:");
-                    } else {
-                        ShowRecurringWarningErrorAtEnd(state,
-                                                       "The minimum outdoor temperature is still above the maximum outdoor temperature",
-                                                       thisCrossMixing.OutdoorTempErrIndex,
-                                                       MixingTmin,
-                                                       MixingTmin);
-                    }
-                    MixingTmin = MixingTmax;
-                }
-            }
-            if (thisCrossMixing.minOutdoorTempSched != nullptr) {
-                if (TempExt < MixingTmin) {
-                    MixingLimitFlag = true;
-                }
-            }
-            if (thisCrossMixing.maxOutdoorTempSched != nullptr) {
-                if (TempExt > MixingTmax) {
-                    MixingLimitFlag = true;
-                }
-            }
+            bool MixingLimitFlag =
+                checkMixingTempLimits(state, thisCrossMixing.minIndoorTempSched, thisCrossMixing.maxIndoorTempSched, TZN,
+                                      thisCrossMixing.IndoorTempErrCount, thisCrossMixing.IndoorTempErrIndex, thisCrossMixing.Name,
+                                      "CrossMixing zone temperature control", "minimum zone temperature", "maximum zone temperature") ||
+                checkMixingTempLimits(state, thisCrossMixing.minSourceTempSched, thisCrossMixing.maxSourceTempSched, TZM,
+                                      thisCrossMixing.SourceTempErrCount, thisCrossMixing.SourceTempErrIndex, thisCrossMixing.Name,
+                                      "CrossMixing source temperature control", "minimum source temperature", "maximum source temperature") ||
+                checkMixingTempLimits(state, thisCrossMixing.minOutdoorTempSched, thisCrossMixing.maxOutdoorTempSched, TempExt,
+                                      thisCrossMixing.OutdoorTempErrCount, thisCrossMixing.OutdoorTempErrIndex, thisCrossMixing.Name,
+                                      "CrossMixing outdoor temperature control", "minimum outdoor temperature", "maximum outdoor temperature");
             if (MixingLimitFlag) {
                 continue;
             }
