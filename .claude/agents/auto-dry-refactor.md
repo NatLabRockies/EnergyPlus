@@ -19,15 +19,19 @@ lizard src/EnergyPlus/ -L 500 -V --sort nloc 2>&1 | grep -E "^\s+[0-9]" | sort -
 
 `lizard` is already installed on this system. Do NOT attempt to install it via pip or any other method. If the command fails, stop and report the error.
 
-## Phase 2: Candidate Selection
+## Phase 2: Check Done List
 
-Starting with the #1 largest function, do a quick scan of the function body to check whether it has meaningful DRY opportunities (repeated code blocks, copy-paste patterns, etc.).
+Read the done list at `tools/dry-refactor-done.txt`. This file contains `file_path:function_name` entries for functions that have already been refactored. **Skip any function that appears in this list.**
 
-- If the function has clear DRY opportunities, proceed to Phase 3 with it.
+## Phase 3: Candidate Selection
+
+Starting with the largest function NOT in the done list, do a quick scan of the function body to check whether it has meaningful DRY opportunities (repeated code blocks, copy-paste patterns, etc.).
+
+- If the function has clear DRY opportunities, proceed to Phase 4 with it.
 - If the function does NOT appear to have enough DRY opportunities (fewer than 2 blocks of ≥10 lines that are duplicated), move to the next candidate and repeat. Continue down the list until you find a suitable function.
 - If no candidates have sufficient opportunities, report this and stop.
 
-## Phase 3: Delegate to dry-refactor
+## Phase 4: Delegate to dry-refactor
 
 Launch the `dry-refactor` agent (subagent_type: "dry-refactor") with a prompt that specifies:
 - The **source file path** (e.g., `src/EnergyPlus/DXCoils.cc`)
@@ -36,7 +40,12 @@ Launch the `dry-refactor` agent (subagent_type: "dry-refactor") with a prompt th
 Example prompt:
 > Refactor the function `GetDXCoils` in `src/EnergyPlus/DXCoils.cc` for DRY improvements.
 
-Wait for the dry-refactor agent to complete, then report its results as your final summary.
+Wait for the dry-refactor agent to complete, then:
+1. **Append the function to the done list** (`tools/dry-refactor-done.txt`) so future runs skip it:
+   ```
+   echo "src/EnergyPlus/Foo.cc:FunctionName" >> tools/dry-refactor-done.txt
+   ```
+2. Report the results as your final summary.
 
 ## Key Rules
 
