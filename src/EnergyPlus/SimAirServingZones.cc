@@ -5200,6 +5200,41 @@ static void updateCoolVRPEvzVot(EnergyPlusData &state,
     }
 }
 
+// Update the heating system-level Vot based on MinHeatingEvz, and restore EvzByZoneHeat
+// if the current design day did not produce the highest Vot.
+// Shared between Coincident and NonCoincident sizing in the EndDay block of UpdateSysSizing.
+static void updateHeatVRPVot(EnergyPlusData &state,
+                             DataSizing::SystemSizingData const &finalSysSizing,
+                             int AirLoopNum,
+                             int numZonesHeated,
+                             int NumZonesCooled)
+{
+    if (state.dataSimAirServingZones->MinHeatingEvz > 0) {
+        state.dataSimAirServingZones->Vou = finalSysSizing.SysUncOA;
+        state.dataSimAirServingZones->Vot = state.dataSimAirServingZones->Vou / state.dataSimAirServingZones->MinHeatingEvz;
+        if (state.dataSimAirServingZones->Vot > state.dataSize->VotHtgBySys(AirLoopNum)) {
+            state.dataSize->VotHtgBySys(AirLoopNum) = state.dataSimAirServingZones->Vot;
+            state.dataSize->XsBySysHeat(AirLoopNum) = state.dataSimAirServingZones->Xs;
+            state.dataSize->EvzMinBySysHeat(AirLoopNum) = state.dataSimAirServingZones->MinHeatingEvz;
+        } else {
+            // Restore EvzByZoneHeat() since it was reset by the current (but not highest Vot) design day
+            if (numZonesHeated > 0) {
+                for (int ZonesHeatedNum = 1; ZonesHeatedNum <= numZonesHeated; ++ZonesHeatedNum) {
+                    int TermUnitSizingIndex =
+                        state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitHeatSizingIndex(ZonesHeatedNum);
+                    state.dataSize->EvzByZoneHeat(TermUnitSizingIndex) = state.dataSize->EvzByZoneHeatPrev(TermUnitSizingIndex);
+                }
+            } else {
+                for (int ZonesHeatedNum = 1; ZonesHeatedNum <= NumZonesCooled; ++ZonesHeatedNum) {
+                    int TermUnitSizingIndex =
+                        state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex(ZonesHeatedNum);
+                    state.dataSize->EvzByZoneHeat(TermUnitSizingIndex) = state.dataSize->EvzByZoneHeatPrev(TermUnitSizingIndex);
+                }
+            }
+        }
+    }
+}
+
 // Update EvzMinBySysCool and EvzMinBySysHeat by scanning zone AD efficiencies
 // for the given set of terminal unit sizing indices. Used in the ZoneSum branches
 // of both Coincident and NonCoincident sizing in UpdateSysSizing EndDay.
@@ -5972,36 +6007,7 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
                             }
                         }
 
-                        if (state.dataSimAirServingZones->MinHeatingEvz > 0) {
-                            // Std 62.1-2010, section 6.2.5.4: Eq. 6.6
-                            // (However, I don't think people diversity can be done correctly in E+ Sizing so assuming D=1 in this
-                            // equation
-                            // Vou = Diversity*(Rp*Pz) + Ra*Az
-                            state.dataSimAirServingZones->Vou = finalSysSizing.SysUncOA;
-                            state.dataSimAirServingZones->Vot = state.dataSimAirServingZones->Vou / state.dataSimAirServingZones->MinHeatingEvz;
-                            if (state.dataSimAirServingZones->Vot > state.dataSize->VotHtgBySys(AirLoopNum)) {
-                                // This might be the cooling design day so only update if Vot is larger than the previous
-                                state.dataSize->VotHtgBySys(AirLoopNum) = state.dataSimAirServingZones->Vot;
-                                state.dataSize->XsBySysHeat(AirLoopNum) = state.dataSimAirServingZones->Xs;
-                                state.dataSize->EvzMinBySysHeat(AirLoopNum) = state.dataSimAirServingZones->MinHeatingEvz;
-                            } else {
-                                // Restore EvzByZoneHeat() since it was reset by the current (but not highest Vot) design day
-                                // This kludge is probably because inside EndDay block and code gets called for each design day.
-                                if (numZonesHeated > 0) {
-                                    for (int ZonesHeatedNum = 1; ZonesHeatedNum <= numZonesHeated; ++ZonesHeatedNum) {
-                                        int TermUnitSizingIndex =
-                                            state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitHeatSizingIndex(ZonesHeatedNum);
-                                        state.dataSize->EvzByZoneHeat(TermUnitSizingIndex) = state.dataSize->EvzByZoneHeatPrev(TermUnitSizingIndex);
-                                    }
-                                } else {
-                                    for (int ZonesHeatedNum = 1; ZonesHeatedNum <= NumZonesCooled; ++ZonesHeatedNum) {
-                                        int TermUnitSizingIndex =
-                                            state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex(ZonesHeatedNum);
-                                        state.dataSize->EvzByZoneHeat(TermUnitSizingIndex) = state.dataSize->EvzByZoneHeatPrev(TermUnitSizingIndex);
-                                    }
-                                }
-                            }
-                        }
+                        updateHeatVRPVot(state, finalSysSizing, AirLoopNum, numZonesHeated, NumZonesCooled);
                     }
                 } else { // error
                 }
@@ -6168,36 +6174,7 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
                             }
                         }
 
-                        if (state.dataSimAirServingZones->MinHeatingEvz > 0) {
-                            // Std 62.1-2010, section 6.2.5.4: Eq. 6.6
-                            // (However, I don't think people diversity can be done correctly in E+ Sizing so assuming D=1 in this
-                            // equation
-                            // Vou = Diversity*(Rp*Pz) + Ra*Az
-                            state.dataSimAirServingZones->Vou = finalSysSizing.SysUncOA;
-                            state.dataSimAirServingZones->Vot = state.dataSimAirServingZones->Vou / state.dataSimAirServingZones->MinHeatingEvz;
-                            if (state.dataSimAirServingZones->Vot > state.dataSize->VotHtgBySys(AirLoopNum)) {
-                                // This might be the cooling design day so only update if Vot is larger than the previous
-                                state.dataSize->VotHtgBySys(AirLoopNum) = state.dataSimAirServingZones->Vot;
-                                state.dataSize->XsBySysHeat(AirLoopNum) = state.dataSimAirServingZones->Xs;
-                                state.dataSize->EvzMinBySysHeat(AirLoopNum) = state.dataSimAirServingZones->MinHeatingEvz;
-                            } else {
-                                // Restore EvzByZoneHeat() since it was just reset by the current (but not highest Vot) design day
-                                // This kludge is probably because inside EndDay block and code gets called for each design day.
-                                if (numZonesHeated > 0) {
-                                    for (int ZonesHeatedNum = 1; ZonesHeatedNum <= numZonesHeated; ++ZonesHeatedNum) {
-                                        int TermUnitSizingIndex =
-                                            state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitHeatSizingIndex(ZonesHeatedNum);
-                                        state.dataSize->EvzByZoneHeat(TermUnitSizingIndex) = state.dataSize->EvzByZoneHeatPrev(TermUnitSizingIndex);
-                                    }
-                                } else {
-                                    for (int ZonesHeatedNum = 1; ZonesHeatedNum <= NumZonesCooled; ++ZonesHeatedNum) {
-                                        int TermUnitSizingIndex =
-                                            state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex(ZonesHeatedNum);
-                                        state.dataSize->EvzByZoneHeat(TermUnitSizingIndex) = state.dataSize->EvzByZoneHeatPrev(TermUnitSizingIndex);
-                                    }
-                                }
-                            }
-                        }
+                        updateHeatVRPVot(state, finalSysSizing, AirLoopNum, numZonesHeated, NumZonesCooled);
                     }
                 } else { // error
                 }
