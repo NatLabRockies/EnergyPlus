@@ -191,6 +191,90 @@ Array1D_string const AdaptiveComfortModelTypes(8,
                                                 "AdaptiveCEN15251CategoryIIUpperLine",
                                                 "AdaptiveCEN15251CategoryIIIUpperLine"});
 
+// Helper: apply Operative Temperature control settings to a single TempControlledZone.
+// showErrors controls whether validation errors are emitted (false when processing
+// zones after the first in a zone-list, where errors were already reported for item 1).
+static void applyOpTempCtrlToZone(EnergyPlusData &state,
+                                  DataZoneControls::ZoneTempControls &tempZone,
+                                  ErrorObjectHeader const &eoh,
+                                  int NumAlphas,
+                                  bool showErrors,
+                                  bool &ErrorsFound)
+{
+    auto &s_ipsc = state.dataIPShortCut;
+    auto &s_ztpc = state.dataZoneTempPredictorCorrector;
+
+    tempZone.OpTempCtrl = static_cast<DataZoneControls::TempCtrl>(getEnumValue(DataZoneControls::tempCtrlNamesUC, s_ipsc->cAlphaArgs(2)));
+
+    if (showErrors) {
+        if (tempZone.OpTempCtrl != DataZoneControls::TempCtrl::Constant && tempZone.OpTempCtrl != DataZoneControls::TempCtrl::Scheduled) {
+            ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2));
+            ErrorsFound = true;
+        }
+    }
+
+    tempZone.FixedRadiativeFraction = s_ipsc->rNumericArgs(1);
+
+    if (tempZone.OpTempCtrl == DataZoneControls::TempCtrl::Scheduled) {
+        if (s_ipsc->lAlphaFieldBlanks(3)) {
+            if (showErrors) {
+                ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(3));
+                ErrorsFound = true;
+            }
+        } else if ((tempZone.opTempRadiativeFractionSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(3))) == nullptr) {
+            if (showErrors) {
+                ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3));
+                ErrorsFound = true;
+            }
+        } else if (!tempZone.opTempRadiativeFractionSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::Ex, 0.9)) {
+            if (showErrors) {
+                Sched::ShowSevereBadMinMax(state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3), Clusive::In, 0.0, Clusive::Ex, 0.9);
+                ErrorsFound = true;
+            }
+        }
+    } else {
+        if (showErrors) {
+            if (tempZone.FixedRadiativeFraction < 0.0) {
+                ShowSevereBadMin(state, eoh, s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1), Clusive::In, 0.0);
+                ErrorsFound = true;
+            } else if (tempZone.FixedRadiativeFraction >= 0.9) {
+                ShowSevereBadMax(state, eoh, s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1), Clusive::Ex, 0.9);
+                ErrorsFound = true;
+            }
+        }
+    }
+
+    // Adaptive comfort model
+    if (tempZone.OpTempCtrl == DataZoneControls::TempCtrl::Constant || tempZone.OpTempCtrl == DataZoneControls::TempCtrl::Scheduled) {
+        if (NumAlphas >= 4 && !s_ipsc->lAlphaFieldBlanks(4)) {
+            int adaptiveComfortModelTypeIndex =
+                Util::FindItem(s_ipsc->cAlphaArgs(4), AdaptiveComfortModelTypes, AdaptiveComfortModelTypes.isize());
+            if (adaptiveComfortModelTypeIndex == 0) {
+                ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4));
+                ErrorsFound = true;
+            } else if (adaptiveComfortModelTypeIndex != static_cast<int>(AdaptiveComfortModel::ADAP_NONE)) {
+                tempZone.AdaptiveComfortTempControl = true;
+                tempZone.AdaptiveComfortModelTypeIndex = adaptiveComfortModelTypeIndex;
+                if (!s_ztpc->AdapComfortDailySetPointSchedule.initialized) {
+                    Array1D<Real64> runningAverageASH(state.dataWeather->NumDaysInYear, 0.0);
+                    Array1D<Real64> runningAverageCEN(state.dataWeather->NumDaysInYear, 0.0);
+                    CalculateMonthlyRunningAverageDryBulb(state, runningAverageASH, runningAverageCEN);
+                    CalculateAdaptiveComfortSetPointSchl(state, runningAverageASH, runningAverageCEN);
+                }
+            }
+        }
+
+        auto &Zone = state.dataHeatBal->Zone;
+        SetupOutputVariable(state,
+                            "Zone Thermostat Operative Temperature",
+                            Constant::Units::C,
+                            state.dataHeatBal->ZnAirRpt(tempZone.ActualZoneNum).ThermOperativeTemp,
+                            OutputProcessor::TimeStepType::Zone,
+                            OutputProcessor::StoreType::Average,
+                            Zone(tempZone.ActualZoneNum).Name);
+    }
+}
+
 // Helper: emit a "control type not valid for this zone" error for a missing setpoint schedule.
 // Used by both TStat and ComfortTStat schedule validation.
 static void showMissingSetptSchedError(EnergyPlusData &state,
@@ -1392,83 +1476,7 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
                         continue;
                     }
                     auto &tempZone = state.dataZoneCtrls->TempControlledZone(TempControlledZoneNum);
-                    tempZone.OpTempCtrl =
-                        static_cast<DataZoneControls::TempCtrl>(getEnumValue(DataZoneControls::tempCtrlNamesUC, s_ipsc->cAlphaArgs(2)));
-
-                    if (Item == 1) {
-                        if (tempZone.OpTempCtrl != DataZoneControls::TempCtrl::Constant &&
-                            tempZone.OpTempCtrl != DataZoneControls::TempCtrl::Scheduled) {
-                            ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2));
-                            ErrorsFound = true;
-                        }
-                    }
-
-                    tempZone.FixedRadiativeFraction = s_ipsc->rNumericArgs(1);
-
-                    if (tempZone.OpTempCtrl == DataZoneControls::TempCtrl::Scheduled) {
-                        if (s_ipsc->lAlphaFieldBlanks(3)) {
-                            if (Item == 1) {
-                                ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(3));
-                                ErrorsFound = true;
-                            }
-                        } else if ((tempZone.opTempRadiativeFractionSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(3))) == nullptr) {
-                            if (Item == 1) {
-                                ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3));
-                                ErrorsFound = true;
-                            }
-                        } else if (!tempZone.opTempRadiativeFractionSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::Ex, 0.9)) {
-                            if (Item == 1) {
-                                Sched::ShowSevereBadMinMax(
-                                    state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3), Clusive::In, 0.0, Clusive::Ex, 0.9);
-                                ErrorsFound = true;
-                            }
-                        }
-
-                    } else { // !tempZone.OpTempCntrlModeScheduled
-
-                        // check validity of fixed radiative fraction
-                        if (Item == 1) {
-                            if (tempZone.FixedRadiativeFraction < 0.0) {
-                                ShowSevereBadMin(state, eoh, s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1), Clusive::In, 0.0);
-                                ErrorsFound = true;
-                            } else if (tempZone.FixedRadiativeFraction >= 0.9) {
-                                ShowSevereBadMax(state, eoh, s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1), Clusive::Ex, 0.9);
-                                ErrorsFound = true;
-                            }
-                        }
-                    }
-
-                    // added Jan, 2017 - Xuan Luo
-                    // read adaptive comfort model and calculate adaptive thermal comfort setpoint
-                    if (tempZone.OpTempCtrl == DataZoneControls::TempCtrl::Constant || tempZone.OpTempCtrl == DataZoneControls::TempCtrl::Scheduled) {
-                        if (NumAlphas >= 4 && !s_ipsc->lAlphaFieldBlanks(4)) {
-                            int adaptiveComfortModelTypeIndex =
-                                Util::FindItem(s_ipsc->cAlphaArgs(4), AdaptiveComfortModelTypes, AdaptiveComfortModelTypes.isize());
-                            if (adaptiveComfortModelTypeIndex == 0) {
-                                ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4));
-                                ErrorsFound = true;
-                            } else if (adaptiveComfortModelTypeIndex != static_cast<int>(AdaptiveComfortModel::ADAP_NONE)) {
-                                tempZone.AdaptiveComfortTempControl = true;
-                                tempZone.AdaptiveComfortModelTypeIndex =
-                                    Util::FindItem(s_ipsc->cAlphaArgs(4), AdaptiveComfortModelTypes, AdaptiveComfortModelTypes.isize());
-                                if (!s_ztpc->AdapComfortDailySetPointSchedule.initialized) {
-                                    Array1D<Real64> runningAverageASH(state.dataWeather->NumDaysInYear, 0.0);
-                                    Array1D<Real64> runningAverageCEN(state.dataWeather->NumDaysInYear, 0.0);
-                                    CalculateMonthlyRunningAverageDryBulb(state, runningAverageASH, runningAverageCEN);
-                                    CalculateAdaptiveComfortSetPointSchl(state, runningAverageASH, runningAverageCEN);
-                                }
-                            }
-                        }
-                    }
-
-                    // CurrentModuleObject='ZoneControl:Thermostat:OperativeTemperature'
-                    SetupOutputVariable(state,
-                                        "Zone Thermostat Operative Temperature",
-                                        Constant::Units::C,
-                                        state.dataHeatBal->ZnAirRpt(tempZone.ActualZoneNum).ThermOperativeTemp,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        Zone(tempZone.ActualZoneNum).Name);
+                    applyOpTempCtrlToZone(state, tempZone, eoh, NumAlphas, /*showErrors=*/Item == 1, ErrorsFound);
                 } // TStat Objects Loop
 
                 // It might be in the TempControlledZones
@@ -1476,69 +1484,7 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
 
                 TempControlledZoneNum = found;
                 auto &tempZone = state.dataZoneCtrls->TempControlledZone(TempControlledZoneNum);
-                tempZone.OpTempCtrl = static_cast<DataZoneControls::TempCtrl>(getEnumValue(DataZoneControls::tempCtrlNamesUC, s_ipsc->cAlphaArgs(2)));
-                if (tempZone.OpTempCtrl == DataZoneControls::TempCtrl::Invalid || tempZone.OpTempCtrl == DataZoneControls::TempCtrl::None) {
-                    ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2));
-                    ErrorsFound = true;
-                }
-
-                tempZone.FixedRadiativeFraction = s_ipsc->rNumericArgs(1);
-
-                if (tempZone.OpTempCtrl == DataZoneControls::TempCtrl::Scheduled) {
-                    if (s_ipsc->lAlphaFieldBlanks(3)) {
-                        ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(3));
-                        ErrorsFound = true;
-                    } else if ((tempZone.opTempRadiativeFractionSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(3))) == nullptr) {
-                        ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3));
-                        ErrorsFound = true;
-                    } else if (!tempZone.opTempRadiativeFractionSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::Ex, 0.9)) {
-                        Sched::ShowSevereBadMinMax(
-                            state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3), Clusive::In, 0.0, Clusive::Ex, 0.9);
-                        ErrorsFound = true;
-                    }
-
-                } else { // !tempZone.OpTempCntrlModeScheduled
-
-                    if (tempZone.FixedRadiativeFraction < 0.0) {
-                        ShowSevereBadMin(state, eoh, s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1), Clusive::In, 0.0);
-                        ErrorsFound = true;
-                    } else if (tempZone.FixedRadiativeFraction >= 0.9) {
-                        ShowSevereBadMax(state, eoh, s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1), Clusive::Ex, 0.9);
-                        ErrorsFound = true;
-                    }
-                }
-
-                // added Jan, 2017 - Xuan Luo
-                // read adaptive comfort model and calculate adaptive thermal comfort setpoint
-                if (tempZone.OpTempCtrl == DataZoneControls::TempCtrl::Constant || tempZone.OpTempCtrl == DataZoneControls::TempCtrl::Scheduled) {
-                    if (NumAlphas >= 4 && !s_ipsc->lAlphaFieldBlanks(4)) {
-                        int adaptiveComfortModelTypeIndex =
-                            Util::FindItem(s_ipsc->cAlphaArgs(4), AdaptiveComfortModelTypes, AdaptiveComfortModelTypes.isize());
-                        if (adaptiveComfortModelTypeIndex == 0) {
-                            ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4));
-                            ErrorsFound = true;
-                        } else if (adaptiveComfortModelTypeIndex != static_cast<int>(AdaptiveComfortModel::ADAP_NONE)) {
-                            tempZone.AdaptiveComfortTempControl = true;
-                            tempZone.AdaptiveComfortModelTypeIndex = adaptiveComfortModelTypeIndex;
-                            if (!s_ztpc->AdapComfortDailySetPointSchedule.initialized) {
-                                Array1D<Real64> runningAverageASH(state.dataWeather->NumDaysInYear, 0.0);
-                                Array1D<Real64> runningAverageCEN(state.dataWeather->NumDaysInYear, 0.0);
-                                // What does this accomplish?
-                                CalculateMonthlyRunningAverageDryBulb(state, runningAverageASH, runningAverageCEN);
-                                CalculateAdaptiveComfortSetPointSchl(state, runningAverageASH, runningAverageCEN);
-                            }
-                        }
-                    }
-
-                    // CurrentModuleObject='ZoneControl:Thermostat:OperativeTemperature'
-                    SetupOutputVariable(state,
-                                        "Zone Thermostat Operative Temperature",
-                                        Constant::Units::C,
-                                        state.dataHeatBal->ZnAirRpt(tempZone.ActualZoneNum).ThermOperativeTemp,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        Zone(tempZone.ActualZoneNum).Name);
-                }
+                applyOpTempCtrlToZone(state, tempZone, eoh, NumAlphas, /*showErrors=*/true, ErrorsFound);
                 // throw error
             } else {
                 ShowSevereError(state,
