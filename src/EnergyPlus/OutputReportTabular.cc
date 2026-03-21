@@ -7925,38 +7925,21 @@ void WriteBEPSTable(EnergyPlusData &state)
 
         // determine building floor areas
         DetermineBuildingFloorArea(state);
+        // Resource index mapping: collapsed display index (1-14) -> gather BEPS source index.
+        // Order: electricity, natural gas, gasoline, diesel, coal, fuel oil 1, fuel oil 2,
+        //        propane, otherfuel1, otherfuel2, dist cooling, dist heat water, dist heat steam, water
+        static constexpr std::array<int, 14> gatherIdx = {1, 2, 6, 8, 9, 10, 11, 12, 13, 14, 3, 4, 5, 7};
+
         // collapse the gatherEndUseBEPS array to the resource groups displayed
         for (int jEndUse = 1; jEndUse <= static_cast<int>(Constant::EndUse::Num); ++jEndUse) {
-            collapsedEndUse(1, jEndUse) = ort->gatherEndUseBEPS(1, jEndUse);   // electricity
-            collapsedEndUse(2, jEndUse) = ort->gatherEndUseBEPS(2, jEndUse);   // natural gas
-            collapsedEndUse(3, jEndUse) = ort->gatherEndUseBEPS(6, jEndUse);   // gasoline
-            collapsedEndUse(4, jEndUse) = ort->gatherEndUseBEPS(8, jEndUse);   // diesel
-            collapsedEndUse(5, jEndUse) = ort->gatherEndUseBEPS(9, jEndUse);   // coal
-            collapsedEndUse(6, jEndUse) = ort->gatherEndUseBEPS(10, jEndUse);  // Fuel Oil No1
-            collapsedEndUse(7, jEndUse) = ort->gatherEndUseBEPS(11, jEndUse);  // Fuel Oil No2
-            collapsedEndUse(8, jEndUse) = ort->gatherEndUseBEPS(12, jEndUse);  // propane
-            collapsedEndUse(9, jEndUse) = ort->gatherEndUseBEPS(13, jEndUse);  // otherfuel1
-            collapsedEndUse(10, jEndUse) = ort->gatherEndUseBEPS(14, jEndUse); // otherfuel2
-            collapsedEndUse(11, jEndUse) = ort->gatherEndUseBEPS(3, jEndUse);  // district cooling <- purchased cooling
-            collapsedEndUse(12, jEndUse) = ort->gatherEndUseBEPS(4, jEndUse);  // district heating water <- purchased heating
-            collapsedEndUse(13, jEndUse) = ort->gatherEndUseBEPS(5, jEndUse);  // district heating steam  <- purchased heating
-            collapsedEndUse(14, jEndUse) = ort->gatherEndUseBEPS(7, jEndUse);  // water
+            for (int iRes = 0; iRes < 14; ++iRes) {
+                collapsedEndUse(iRes + 1, jEndUse) = ort->gatherEndUseBEPS(gatherIdx[iRes], jEndUse);
+            }
         }
         // repeat with totals
-        collapsedTotal(1) = ort->gatherTotalsBEPS(1);   // electricity
-        collapsedTotal(2) = ort->gatherTotalsBEPS(2);   // natural gas
-        collapsedTotal(3) = ort->gatherTotalsBEPS(6);   // gasoline
-        collapsedTotal(4) = ort->gatherTotalsBEPS(8);   // diesel
-        collapsedTotal(5) = ort->gatherTotalsBEPS(9);   // coal
-        collapsedTotal(6) = ort->gatherTotalsBEPS(10);  // Fuel Oil No1
-        collapsedTotal(7) = ort->gatherTotalsBEPS(11);  // Fuel Oil No2
-        collapsedTotal(8) = ort->gatherTotalsBEPS(12);  // propane
-        collapsedTotal(9) = ort->gatherTotalsBEPS(13);  // other fuel 1
-        collapsedTotal(10) = ort->gatherTotalsBEPS(14); // other fuel 2
-        collapsedTotal(11) = ort->gatherTotalsBEPS(3);  // district cooling <- purchased cooling
-        collapsedTotal(12) = ort->gatherTotalsBEPS(4);  // district heating water <- purchased heating
-        collapsedTotal(13) = ort->gatherTotalsBEPS(5);  // district heating steam  <- purchased heating
-        collapsedTotal(14) = ort->gatherTotalsBEPS(7);  // water
+        for (int iRes = 0; iRes < 14; ++iRes) {
+            collapsedTotal(iRes + 1) = ort->gatherTotalsBEPS(gatherIdx[iRes]);
+        }
 
         if (currentStyle.produceTabular) {
             if (state.dataGlobal->createPerfLog) {
@@ -7988,42 +7971,15 @@ void WriteBEPSTable(EnergyPlusData &state)
         }
         for (int jEndUse = 1; jEndUse <= static_cast<int>(Constant::EndUse::Num); ++jEndUse) {
             for (int kEndUseSub = 1; kEndUseSub <= op->EndUseCategory(jEndUse).NumSubcategories; ++kEndUseSub) {
-                collapsedEndUseSub(kEndUseSub, jEndUse, 1) = ort->gatherEndUseSubBEPS(kEndUseSub, jEndUse, 1);   // electricity
-                collapsedEndUseSub(kEndUseSub, jEndUse, 2) = ort->gatherEndUseSubBEPS(kEndUseSub, jEndUse, 2);   // natural gas
-                collapsedEndUseSub(kEndUseSub, jEndUse, 3) = ort->gatherEndUseSubBEPS(kEndUseSub, jEndUse, 6);   // gasoline
-                collapsedEndUseSub(kEndUseSub, jEndUse, 4) = ort->gatherEndUseSubBEPS(kEndUseSub, jEndUse, 8);   // diesel
-                collapsedEndUseSub(kEndUseSub, jEndUse, 5) = ort->gatherEndUseSubBEPS(kEndUseSub, jEndUse, 9);   // coal
-                collapsedEndUseSub(kEndUseSub, jEndUse, 6) = ort->gatherEndUseSubBEPS(kEndUseSub, jEndUse, 10);  // Fuel Oil No1
-                collapsedEndUseSub(kEndUseSub, jEndUse, 7) = ort->gatherEndUseSubBEPS(kEndUseSub, jEndUse, 11);  // Fuel Oil No2
-                collapsedEndUseSub(kEndUseSub, jEndUse, 8) = ort->gatherEndUseSubBEPS(kEndUseSub, jEndUse, 12);  // propane
-                collapsedEndUseSub(kEndUseSub, jEndUse, 9) = ort->gatherEndUseSubBEPS(kEndUseSub, jEndUse, 13);  // otherfuel1
-                collapsedEndUseSub(kEndUseSub, jEndUse, 10) = ort->gatherEndUseSubBEPS(kEndUseSub, jEndUse, 14); // otherfuel2
-                collapsedEndUseSub(kEndUseSub, jEndUse, 11) = ort->gatherEndUseSubBEPS(kEndUseSub, jEndUse, 3);  // district cooling <- purch cooling
-                collapsedEndUseSub(kEndUseSub, jEndUse, 12) =
-                    ort->gatherEndUseSubBEPS(kEndUseSub, jEndUse, 4); // district heating water <- purch heating
-                collapsedEndUseSub(kEndUseSub, jEndUse, 13) =
-                    ort->gatherEndUseSubBEPS(kEndUseSub, jEndUse, 5); // district heating steam <- purch heating
-                collapsedEndUseSub(kEndUseSub, jEndUse, 14) = ort->gatherEndUseSubBEPS(kEndUseSub, jEndUse, 7); // water
+                for (int iRes = 0; iRes < 14; ++iRes) {
+                    collapsedEndUseSub(kEndUseSub, jEndUse, iRes + 1) = ort->gatherEndUseSubBEPS(kEndUseSub, jEndUse, gatherIdx[iRes]);
+                }
             }
 
             for (int kEndUseSpType = 1; kEndUseSpType <= op->EndUseCategory(jEndUse).numSpaceTypes; ++kEndUseSpType) {
-                collapsedEndUseSpType(kEndUseSpType, jEndUse, 1) = ort->gatherEndUseSpTypeBEPS(kEndUseSpType, jEndUse, 1);   // electricity
-                collapsedEndUseSpType(kEndUseSpType, jEndUse, 2) = ort->gatherEndUseSpTypeBEPS(kEndUseSpType, jEndUse, 2);   // natural gas
-                collapsedEndUseSpType(kEndUseSpType, jEndUse, 3) = ort->gatherEndUseSpTypeBEPS(kEndUseSpType, jEndUse, 6);   // gasoline
-                collapsedEndUseSpType(kEndUseSpType, jEndUse, 4) = ort->gatherEndUseSpTypeBEPS(kEndUseSpType, jEndUse, 8);   // diesel
-                collapsedEndUseSpType(kEndUseSpType, jEndUse, 5) = ort->gatherEndUseSpTypeBEPS(kEndUseSpType, jEndUse, 9);   // coal
-                collapsedEndUseSpType(kEndUseSpType, jEndUse, 6) = ort->gatherEndUseSpTypeBEPS(kEndUseSpType, jEndUse, 10);  // Fuel Oil No1
-                collapsedEndUseSpType(kEndUseSpType, jEndUse, 7) = ort->gatherEndUseSpTypeBEPS(kEndUseSpType, jEndUse, 11);  // Fuel Oil No2
-                collapsedEndUseSpType(kEndUseSpType, jEndUse, 8) = ort->gatherEndUseSpTypeBEPS(kEndUseSpType, jEndUse, 12);  // propane
-                collapsedEndUseSpType(kEndUseSpType, jEndUse, 9) = ort->gatherEndUseSpTypeBEPS(kEndUseSpType, jEndUse, 13);  // otherfuel1
-                collapsedEndUseSpType(kEndUseSpType, jEndUse, 10) = ort->gatherEndUseSpTypeBEPS(kEndUseSpType, jEndUse, 14); // otherfuel2
-                collapsedEndUseSpType(kEndUseSpType, jEndUse, 11) =
-                    ort->gatherEndUseSpTypeBEPS(kEndUseSpType, jEndUse, 3); // district cooling <- purch cooling
-                collapsedEndUseSpType(kEndUseSpType, jEndUse, 12) =
-                    ort->gatherEndUseSpTypeBEPS(kEndUseSpType, jEndUse, 4); // district heating water <- purch heating
-                collapsedEndUseSpType(kEndUseSpType, jEndUse, 13) =
-                    ort->gatherEndUseSpTypeBEPS(kEndUseSpType, jEndUse, 5); // district heating steam <- purch heating
-                collapsedEndUseSpType(kEndUseSpType, jEndUse, 14) = ort->gatherEndUseSpTypeBEPS(kEndUseSpType, jEndUse, 7); // water
+                for (int iRes = 0; iRes < 14; ++iRes) {
+                    collapsedEndUseSpType(kEndUseSpType, jEndUse, iRes + 1) = ort->gatherEndUseSpTypeBEPS(kEndUseSpType, jEndUse, gatherIdx[iRes]);
+                }
             }
         }
         // unit conversion - all values are used as divisors
