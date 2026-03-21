@@ -326,6 +326,25 @@ namespace Sched {
         missingDaySchedule->isUsed = true;
     }
 
+    // Helper: validate ScheduleType for a schedule or day-schedule object.
+    // Sets schedTypeNumOut to the type index if valid, or leaves it unchanged if blank/invalid.
+    // Returns true if valid, false if blank or not found (warnings are issued either way).
+    static void validateScheduleType(EnergyPlusData &state,
+                                     ErrorObjectHeader const &eoh,
+                                     Array1D_string const &Alphas,
+                                     Array1D_string const &cAlphaFields,
+                                     Array1D_bool const &lAlphaBlanks,
+                                     int &schedTypeNumOut)
+    {
+        if (lAlphaBlanks(2)) {
+            ShowWarningEmptyField(state, eoh, cAlphaFields(2));
+            ShowContinueError(state, "Schedule will not be validated.");
+        } else if ((schedTypeNumOut = GetScheduleTypeNum(state, Alphas(2))) == SchedNum_Invalid) {
+            ShowWarningItemNotFound(state, eoh, cAlphaFields(2), Alphas(2));
+            ShowContinueError(state, "Schedule will not be validated.");
+        }
+    }
+
     // Helper: process one ExternalInterface schedule object within ProcessScheduleInput.
     // All three ExternalInterface schedule types (basic, FMU-Import, FMU-Export) share
     // identical logic for creating the schedule, day-schedule, week-schedule, and
@@ -383,14 +402,7 @@ namespace Sched {
             auto *sched = AddScheduleDetailed(state, Alphas(1));
             sched->type = SchedType::External;
 
-            // Validate ScheduleType
-            if (lAlphaBlanks(2)) {
-                ShowWarningEmptyField(state, eoh, cAlphaFields(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            } else if ((sched->schedTypeNum = GetScheduleTypeNum(state, Alphas(2))) == SchedNum_Invalid) {
-                ShowWarningItemNotFound(state, eoh, cAlphaFields(2), Alphas(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            }
+            validateScheduleType(state, eoh, Alphas, cAlphaFields, lAlphaBlanks, sched->schedTypeNum);
 
             auto *daySched = AddDaySchedule(state, EnergyPlus::format("{}_xi_dy_", Alphas(1)));
             daySched->isUsed = true;
@@ -863,14 +875,7 @@ namespace Sched {
 
             auto *daySched = AddDaySchedule(state, Alphas(1));
 
-            // Validate ScheduleType
-            if (lAlphaBlanks(2)) {
-                ShowWarningEmptyField(state, eoh, cAlphaFields(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            } else if ((daySched->schedTypeNum = GetScheduleTypeNum(state, Alphas(2))) == SchedNum_Invalid) {
-                ShowWarningItemNotFound(state, eoh, cAlphaFields(2), Alphas(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            }
+            validateScheduleType(state, eoh, Alphas, cAlphaFields, lAlphaBlanks, daySched->schedTypeNum);
 
             daySched->interpolation = Interpolation::No;
 
@@ -918,14 +923,7 @@ namespace Sched {
 
             auto *daySched = AddDaySchedule(state, Alphas(1));
 
-            // Validate ScheduleType
-            if (lAlphaBlanks(2)) {
-                ShowWarningEmptyField(state, eoh, cAlphaFields(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            } else if ((daySched->schedTypeNum = GetScheduleTypeNum(state, Alphas(2))) == SchedNum_Invalid) {
-                ShowWarningItemNotFound(state, eoh, cAlphaFields(2), Alphas(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            }
+            validateScheduleType(state, eoh, Alphas, cAlphaFields, lAlphaBlanks, daySched->schedTypeNum);
 
             NumFields = NumAlphas - 3;
             // check to see if numfield=0
@@ -996,14 +994,7 @@ namespace Sched {
 
             auto *daySched = AddDaySchedule(state, Alphas(1));
 
-            // Validate ScheduleType
-            if (lAlphaBlanks(2)) {
-                ShowWarningEmptyField(state, eoh, cAlphaFields(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            } else if ((daySched->schedTypeNum = GetScheduleTypeNum(state, Alphas(2))) == SchedNum_Invalid) {
-                ShowWarningItemNotFound(state, eoh, cAlphaFields(2), Alphas(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            }
+            validateScheduleType(state, eoh, Alphas, cAlphaFields, lAlphaBlanks, daySched->schedTypeNum);
 
             // Depending on value of "Interpolate" field, the value for each time step in each hour gets processed:
             daySched->interpolation = static_cast<Interpolation>(getEnumValue(interpolationNamesUC, Alphas(3)));
@@ -1210,13 +1201,7 @@ namespace Sched {
             auto *sched = AddScheduleDetailed(state, Alphas(1));
 
             // Validate ScheduleType
-            if (lAlphaBlanks(2)) {
-                ShowWarningEmptyField(state, eoh, cAlphaFields(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            } else if ((sched->schedTypeNum = GetScheduleTypeNum(state, Alphas(2))) == SchedNum_Invalid) {
-                ShowWarningItemNotFound(state, eoh, cAlphaFields(2), Alphas(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            }
+            validateScheduleType(state, eoh, Alphas, cAlphaFields, lAlphaBlanks, sched->schedTypeNum);
 
             int NumPointer = 0;
 
@@ -1333,14 +1318,7 @@ namespace Sched {
             auto *sched = AddScheduleDetailed(state, Alphas(1));
             sched->type = SchedType::Compact;
 
-            // Validate ScheduleType
-            if (lAlphaBlanks(2)) {
-                ShowWarningEmptyField(state, eoh, cAlphaFields(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            } else if ((sched->schedTypeNum = GetScheduleTypeNum(state, Alphas(2))) == SchedNum_Invalid) {
-                ShowWarningItemNotFound(state, eoh, cAlphaFields(2), Alphas(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            }
+            validateScheduleType(state, eoh, Alphas, cAlphaFields, lAlphaBlanks, sched->schedTypeNum);
 
             std::array<int, 367> daysInYear;
             std::fill(daysInYear.begin() + 1, daysInYear.end(), 0);
@@ -1634,14 +1612,7 @@ namespace Sched {
             auto *sched = AddScheduleDetailed(state, Alphas(1));
             sched->type = SchedType::File;
 
-            // Validate ScheduleType
-            if (lAlphaBlanks(2)) {
-                ShowWarningEmptyField(state, eoh, cAlphaFields(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            } else if ((sched->schedTypeNum = GetScheduleTypeNum(state, Alphas(2))) == SchedNum_Invalid) {
-                ShowWarningItemNotFound(state, eoh, cAlphaFields(2), Alphas(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            }
+            validateScheduleType(state, eoh, Alphas, cAlphaFields, lAlphaBlanks, sched->schedTypeNum);
 
             // Numbers(1) - which column
             curcolCount = Numbers(1);
@@ -2023,13 +1994,7 @@ namespace Sched {
             auto *sched = AddScheduleConstant(state, Alphas(1), Numbers(1));
 
             // Validate ScheduleType
-            if (lAlphaBlanks(2)) { // No warning here for constant schedules
-                ShowWarningEmptyField(state, eoh, cAlphaFields(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            } else if ((sched->schedTypeNum = GetScheduleTypeNum(state, Alphas(2))) == SchedNum_Invalid) {
-                ShowWarningItemNotFound(state, eoh, cAlphaFields(2), Alphas(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            }
+            validateScheduleType(state, eoh, Alphas, cAlphaFields, lAlphaBlanks, sched->schedTypeNum);
 
             if (s_glob->AnyEnergyManagementSystemInModel) { // setup constant schedules as actuators
                 SetupEMSActuator(state, "Schedule:Constant", sched->Name, "Schedule Value", "[ ]", sched->EMSActuatedOn, sched->EMSVal);
