@@ -7112,43 +7112,15 @@ void SizeVRF(EnergyPlusData &state, int const VRFTUNum)
                 CoolOutAirVolFlowDes = 0.0;
             }
 
-            if (IsAutoSize) {
-                state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolOutAirVolFlow = CoolOutAirVolFlowDes;
-                BaseSizer::reportSizerOutput(state,
-                                             tuTypeNames[(int)state.dataHVACVarRefFlow->VRFTU(VRFTUNum).type],
-                                             state.dataHVACVarRefFlow->VRFTU(VRFTUNum).Name,
-                                             "Design Size Outdoor Air Flow Rate During Cooling Operation [m3/s]",
-                                             CoolOutAirVolFlowDes);
-            } else {
-                if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolOutAirVolFlow > 0.0 && CoolOutAirVolFlowDes > 0.0) {
-                    CoolOutAirVolFlowUser = state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolOutAirVolFlow;
-                    BaseSizer::reportSizerOutput(state,
-                                                 tuTypeNames[(int)state.dataHVACVarRefFlow->VRFTU(VRFTUNum).type],
-                                                 state.dataHVACVarRefFlow->VRFTU(VRFTUNum).Name,
-                                                 "Design Size Outdoor Air Flow Rate During Cooling Operation [m3/s]",
-                                                 CoolOutAirVolFlowDes,
-                                                 "User-Specified Outdoor Air Flow Rate During Cooling Operation [m3/s]",
-                                                 CoolOutAirVolFlowUser);
-                    if (state.dataGlobal->DisplayExtraWarnings) {
-                        if ((std::abs(CoolOutAirVolFlowDes - CoolOutAirVolFlowUser) / CoolOutAirVolFlowUser) >
-                            state.dataSize->AutoVsHardSizingThreshold) {
-                            ShowMessage(state,
-                                        EnergyPlus::format("SizeVRF: Potential issue with equipment sizing for {} {}",
-                                                           tuTypeNames[(int)state.dataHVACVarRefFlow->VRFTU(VRFTUNum).type],
-                                                           state.dataHVACVarRefFlow->VRFTU(VRFTUNum).Name));
-                            ShowContinueError(state,
-                                              EnergyPlus::format("User-Specified Outdoor Air Flow Rate During Cooling Operation of {:.5R} [m3/s]",
-                                                                 CoolOutAirVolFlowUser));
-                            ShowContinueError(
-                                state,
-                                EnergyPlus::format("differs from Design Size Outdoor Air Flow Rate During Cooling Operation of {:.5R} [m3/s]",
-                                                   CoolOutAirVolFlowDes));
-                            ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
-                            ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
-                        }
-                    }
-                }
-            }
+            reportVRFCondFieldSize(state,
+                                   state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolOutAirVolFlow,
+                                   CoolOutAirVolFlowDes,
+                                   tuTypeNames[(int)state.dataHVACVarRefFlow->VRFTU(VRFTUNum).type],
+                                   state.dataHVACVarRefFlow->VRFTU(VRFTUNum).Name,
+                                   state.dataHVACVarRefFlow->VRFTU(VRFTUNum).Name,
+                                   "Design Size Outdoor Air Flow Rate During Cooling Operation [m3/s]",
+                                   "User-Specified Outdoor Air Flow Rate During Cooling Operation [m3/s]",
+                                   5);
         }
     } else {
         if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolOutAirVolFlow == DataSizing::AutoSize) {
@@ -7188,43 +7160,15 @@ void SizeVRF(EnergyPlusData &state, int const VRFTUNum)
                 HeatOutAirVolFlowDes = 0.0;
             }
 
-            if (IsAutoSize) {
-                state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatOutAirVolFlow = HeatOutAirVolFlowDes;
-                BaseSizer::reportSizerOutput(state,
-                                             tuTypeNames[(int)state.dataHVACVarRefFlow->VRFTU(VRFTUNum).type],
-                                             state.dataHVACVarRefFlow->VRFTU(VRFTUNum).Name,
-                                             "Design Size Outdoor Air Flow Rate During Heating Operation [m3/s]",
-                                             HeatOutAirVolFlowDes);
-            } else {
-                if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatOutAirVolFlow > 0.0 && HeatOutAirVolFlowDes > 0.0) {
-                    HeatOutAirVolFlowUser = state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatOutAirVolFlow;
-                    BaseSizer::reportSizerOutput(state,
-                                                 tuTypeNames[(int)state.dataHVACVarRefFlow->VRFTU(VRFTUNum).type],
-                                                 state.dataHVACVarRefFlow->VRFTU(VRFTUNum).Name,
-                                                 "Design Size Outdoor Air Flow Rate During Heating Operation [m3/s]",
-                                                 HeatOutAirVolFlowDes,
-                                                 "User-Specified Outdoor Air Flow Rate During Heating Operation [m3/s]",
-                                                 HeatOutAirVolFlowUser);
-                    if (state.dataGlobal->DisplayExtraWarnings) {
-                        if ((std::abs(HeatOutAirVolFlowDes - HeatOutAirVolFlowUser) / HeatOutAirVolFlowUser) >
-                            state.dataSize->AutoVsHardSizingThreshold) {
-                            ShowMessage(state,
-                                        EnergyPlus::format("SizeVRF: Potential issue with equipment sizing for {} {}",
-                                                           tuTypeNames[(int)state.dataHVACVarRefFlow->VRFTU(VRFTUNum).type],
-                                                           state.dataHVACVarRefFlow->VRFTU(VRFTUNum).Name));
-                            ShowContinueError(state,
-                                              EnergyPlus::format("User-Specified Outdoor Air Flow Rate During Heating Operation of {:.5R} [m3/s]",
-                                                                 HeatOutAirVolFlowUser));
-                            ShowContinueError(
-                                state,
-                                EnergyPlus::format("differs from Design Size Outdoor Air Flow Rate During Heating Operation of {:.5R} [m3/s]",
-                                                   HeatOutAirVolFlowDes));
-                            ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
-                            ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
-                        }
-                    }
-                }
-            }
+            reportVRFCondFieldSize(state,
+                                   state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatOutAirVolFlow,
+                                   HeatOutAirVolFlowDes,
+                                   tuTypeNames[(int)state.dataHVACVarRefFlow->VRFTU(VRFTUNum).type],
+                                   state.dataHVACVarRefFlow->VRFTU(VRFTUNum).Name,
+                                   state.dataHVACVarRefFlow->VRFTU(VRFTUNum).Name,
+                                   "Design Size Outdoor Air Flow Rate During Heating Operation [m3/s]",
+                                   "User-Specified Outdoor Air Flow Rate During Heating Operation [m3/s]",
+                                   5);
         }
     } else {
         if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatOutAirVolFlow == DataSizing::AutoSize) {
@@ -7276,45 +7220,15 @@ void SizeVRF(EnergyPlusData &state, int const VRFTUNum)
                 NoCoolHeatOutAirVolFlowDes = 0.0;
             }
 
-            if (IsAutoSize) {
-                state.dataHVACVarRefFlow->VRFTU(VRFTUNum).NoCoolHeatOutAirVolFlow = NoCoolHeatOutAirVolFlowDes;
-                BaseSizer::reportSizerOutput(state,
-                                             tuTypeNames[(int)state.dataHVACVarRefFlow->VRFTU(VRFTUNum).type],
-                                             state.dataHVACVarRefFlow->VRFTU(VRFTUNum).Name,
-                                             "Design Size Outdoor Air Flow Rate When No Cooling or Heating is Needed [m3/s]",
-                                             NoCoolHeatOutAirVolFlowDes);
-            } else {
-                if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).NoCoolHeatOutAirVolFlow > 0.0 && NoCoolHeatOutAirVolFlowDes > 0.0) {
-                    NoCoolHeatOutAirVolFlowUser = state.dataHVACVarRefFlow->VRFTU(VRFTUNum).NoCoolHeatOutAirVolFlow;
-                    BaseSizer::reportSizerOutput(state,
-                                                 tuTypeNames[(int)state.dataHVACVarRefFlow->VRFTU(VRFTUNum).type],
-                                                 state.dataHVACVarRefFlow->VRFTU(VRFTUNum).Name,
-                                                 "Design Size Outdoor Air Flow Rate When No Cooling or Heating is Needed [m3/s]",
-                                                 NoCoolHeatOutAirVolFlowDes,
-                                                 "User-Specified Outdoor Air Flow Rate When No Cooling or Heating is Needed [m3/s]",
-                                                 NoCoolHeatOutAirVolFlowUser);
-                    if (state.dataGlobal->DisplayExtraWarnings) {
-                        if ((std::abs(NoCoolHeatOutAirVolFlowDes - NoCoolHeatOutAirVolFlowUser) / NoCoolHeatOutAirVolFlowUser) >
-                            state.dataSize->AutoVsHardSizingThreshold) {
-                            ShowMessage(state,
-                                        EnergyPlus::format("SizeVRF: Potential issue with equipment sizing for {} {}",
-                                                           tuTypeNames[(int)state.dataHVACVarRefFlow->VRFTU(VRFTUNum).type],
-                                                           state.dataHVACVarRefFlow->VRFTU(VRFTUNum).Name));
-                            ShowContinueError(
-                                state,
-                                EnergyPlus::format("User-Specified Outdoor Air Flow Rate When No Cooling or Heating is Needed of {:.5R} [m3/s]",
-                                                   NoCoolHeatOutAirVolFlowUser));
-                            ShowContinueError(
-                                state,
-                                EnergyPlus::format(
-                                    "differs from Design Size Outdoor Air Flow Rate When No Cooling or Heating is Needed of {:.5R} [m3/s]",
-                                    NoCoolHeatOutAirVolFlowDes));
-                            ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
-                            ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
-                        }
-                    }
-                }
-            }
+            reportVRFCondFieldSize(state,
+                                   state.dataHVACVarRefFlow->VRFTU(VRFTUNum).NoCoolHeatOutAirVolFlow,
+                                   NoCoolHeatOutAirVolFlowDes,
+                                   tuTypeNames[(int)state.dataHVACVarRefFlow->VRFTU(VRFTUNum).type],
+                                   state.dataHVACVarRefFlow->VRFTU(VRFTUNum).Name,
+                                   state.dataHVACVarRefFlow->VRFTU(VRFTUNum).Name,
+                                   "Design Size Outdoor Air Flow Rate When No Cooling or Heating is Needed [m3/s]",
+                                   "User-Specified Outdoor Air Flow Rate When No Cooling or Heating is Needed [m3/s]",
+                                   5);
         }
     } else {
         if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).NoCoolHeatOutAirVolFlow == DataSizing::AutoSize) {
