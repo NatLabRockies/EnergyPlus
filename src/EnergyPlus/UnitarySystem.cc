@@ -114,10 +114,41 @@ namespace UnitarySystems {
     static constexpr std::string_view blankString;
     static const std::string blankStdString;
 
+    // Helper: set DataTotCapCurveIndex and DataIsDXCoil for a cooling coil based on its type.
+    // Returns true if DataIsDXCoil was set.
+    static void setCoolingCapCurveIndex(EnergyPlusData &state, int coilTypeNum, int coilIndex, bool &errFound)
+    {
+        switch (coilTypeNum) {
+        case HVAC::CoilDX_Cooling:
+            state.dataSize->DataTotCapCurveIndex =
+                state.dataCoilCoolingDX->coilCoolingDXs[coilIndex].getOpModeCapFTIndex(HVAC::CoilMode::Normal);
+            state.dataSize->DataIsDXCoil = true;
+            break;
+        case HVAC::CoilDX_CoolingSingleSpeed:
+        case HVAC::CoilDX_MultiSpeedCooling:
+        case HVAC::CoilDX_CoolingTwoSpeed:
+        case HVAC::CoilDX_CoolingTwoStageWHumControl:
+            state.dataSize->DataTotCapCurveIndex = DXCoils::GetDXCoilCapFTCurveIndex(state, coilIndex, errFound);
+            state.dataSize->DataIsDXCoil = true;
+            break;
+        case HVAC::Coil_CoolingAirToAirVariableSpeed:
+            state.dataSize->DataTotCapCurveIndex = VariableSpeedCoils::GetVSCoilCapFTCurveIndex(state, coilIndex, errFound);
+            state.dataSize->DataIsDXCoil = true;
+            break;
+        case HVAC::Coil_CoolingWaterToAirHPVSEquationFit:
+            state.dataSize->DataTotCapCurveIndex = VariableSpeedCoils::GetVSCoilCapFTCurveIndex(state, coilIndex, errFound);
+            // VS coil model does not check for flow/capacity ratio, this will disable that test in Capacity sizer
+            // state.dataSize->DataIsDXCoil = true;
+            break;
+        default:
+            break;
+        }
+    }
+
     // Helper: size an outdoor air volume flow rate field (auto-size or hard-size with reporting).
     // flowRate is the member variable to size; desFlowRate is the design value;
     // opDescription is the operation mode string (e.g., "During Cooling Operation").
-    static void sizeOutdoorAirFlow(EnergyPlusData &state,
+    [[maybe_unused]] static void sizeOutdoorAirFlow(EnergyPlusData &state,
                                    Real64 &flowRate,
                                    Real64 desFlowRate,
                                    bool sizingDesRunThisZone,
@@ -1801,17 +1832,7 @@ namespace UnitarySystems {
                     sizingCoolingAirFlow.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
                     state.dataSize->DataFlowUsedForSizing = sizingCoolingAirFlow.size(state, TempSize, errorsFound);
                     SizingMethod = HVAC::CoolingCapacitySizing;
-                    if (this->m_CoolingCoilType_Num == HVAC::CoilDX_Cooling) {
-                        state.dataSize->DataTotCapCurveIndex =
-                            state.dataCoilCoolingDX->coilCoolingDXs[this->m_CoolingCoilIndex].getOpModeCapFTIndex(HVAC::CoilMode::Normal);
-                        state.dataSize->DataIsDXCoil = true;
-                    } else if (this->m_CoolingCoilType_Num == HVAC::CoilDX_CoolingSingleSpeed ||
-                               this->m_CoolingCoilType_Num == HVAC::CoilDX_MultiSpeedCooling ||
-                               this->m_CoolingCoilType_Num == HVAC::CoilDX_CoolingTwoSpeed ||
-                               this->m_CoolingCoilType_Num == HVAC::CoilDX_CoolingTwoStageWHumControl) {
-                        state.dataSize->DataTotCapCurveIndex = DXCoils::GetDXCoilCapFTCurveIndex(state, this->m_CoolingCoilIndex, ErrFound);
-                        state.dataSize->DataIsDXCoil = true;
-                    }
+                    setCoolingCapCurveIndex(state, this->m_CoolingCoilType_Num, this->m_CoolingCoilIndex, ErrFound);
                     CoolingCapacitySizer sizerCoolingCapacity;
                     sizerCoolingCapacity.overrideSizingString(SizingString);
                     sizerCoolingCapacity.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
@@ -1841,32 +1862,7 @@ namespace UnitarySystems {
                 SizingMethod = HVAC::CoolingCapacitySizing;
                 state.dataSize->DataFlowUsedForSizing = EqSizing.CoolingAirVolFlow;
                 TempSize = DataSizing::AutoSize;
-                // could probably move this up outside the IF and delete then next group below in the else
-                switch (this->m_CoolingCoilType_Num) {
-                case HVAC::CoilDX_Cooling: {
-                    state.dataSize->DataTotCapCurveIndex =
-                        state.dataCoilCoolingDX->coilCoolingDXs[this->m_CoolingCoilIndex].getOpModeCapFTIndex(HVAC::CoilMode::Normal);
-                    state.dataSize->DataIsDXCoil = true;
-                } break;
-                case HVAC::CoilDX_CoolingSingleSpeed:
-                case HVAC::CoilDX_MultiSpeedCooling:
-                case HVAC::CoilDX_CoolingTwoSpeed:
-                case HVAC::CoilDX_CoolingTwoStageWHumControl: {
-                    state.dataSize->DataTotCapCurveIndex = DXCoils::GetDXCoilCapFTCurveIndex(state, this->m_CoolingCoilIndex, ErrFound);
-                    state.dataSize->DataIsDXCoil = true;
-                } break;
-                case HVAC::Coil_CoolingAirToAirVariableSpeed: {
-                    state.dataSize->DataTotCapCurveIndex = VariableSpeedCoils::GetVSCoilCapFTCurveIndex(state, this->m_CoolingCoilIndex, ErrFound);
-                    state.dataSize->DataIsDXCoil = true;
-                } break;
-                case HVAC::Coil_CoolingWaterToAirHPVSEquationFit: {
-                    state.dataSize->DataTotCapCurveIndex = VariableSpeedCoils::GetVSCoilCapFTCurveIndex(state, this->m_CoolingCoilIndex, ErrFound);
-                    // VS coil model does not check for flow/capacity ratio, this will disable that test in Capacity sizer
-                    // state.dataSize->DataIsDXCoil = true;
-                } break;
-                default: {
-                } break;
-                }
+                setCoolingCapCurveIndex(state, this->m_CoolingCoilType_Num, this->m_CoolingCoilIndex, ErrFound);
                 CoolingCapacitySizer sizerCoolingCapacity;
                 sizerCoolingCapacity.overrideSizingString(SizingString);
                 state.dataSize->DataFracOfAutosizedCoolingCapacity = coolingCapacityMultiplier;
@@ -1884,21 +1880,7 @@ namespace UnitarySystems {
                 }
             } else if (!HardSizeNoDesRun && (CoolingSAFlowMethod != DataSizing::FlowPerCoolingCapacity && this->m_DesignCoolingCapacity > 0.0)) {
                 // corrected code for #8756
-                if (this->m_CoolingCoilType_Num == HVAC::CoilDX_CoolingSingleSpeed || this->m_CoolingCoilType_Num == HVAC::CoilDX_MultiSpeedCooling ||
-                    this->m_CoolingCoilType_Num == HVAC::CoilDX_CoolingTwoSpeed ||
-                    this->m_CoolingCoilType_Num == HVAC::CoilDX_CoolingTwoStageWHumControl) {
-                    state.dataSize->DataTotCapCurveIndex = DXCoils::GetDXCoilCapFTCurveIndex(state, this->m_CoolingCoilIndex, ErrFound);
-                    state.dataSize->DataIsDXCoil = true;
-                }
-                if (this->m_CoolingCoilType_Num == HVAC::Coil_CoolingAirToAirVariableSpeed) {
-                    state.dataSize->DataTotCapCurveIndex = VariableSpeedCoils::GetVSCoilCapFTCurveIndex(state, this->m_CoolingCoilIndex, ErrFound);
-                    state.dataSize->DataIsDXCoil = true;
-                }
-                if (this->m_CoolingCoilType_Num == HVAC::Coil_CoolingWaterToAirHPVSEquationFit) {
-                    state.dataSize->DataTotCapCurveIndex = VariableSpeedCoils::GetVSCoilCapFTCurveIndex(state, this->m_CoolingCoilIndex, ErrFound);
-                    // VS coil model does not check for flow/capacity ratio, this will disable that test in Capacity sizer
-                    // state.dataSize->DataIsDXCoil = true;
-                }
+                setCoolingCapCurveIndex(state, this->m_CoolingCoilType_Num, this->m_CoolingCoilIndex, ErrFound);
                 // PTUnit does not call CapacitySizer and adjust capacity based on flow per capacity limits
                 if (this->m_sysType == SysType::PackagedAC || this->m_sysType == SysType::PackagedHP) {
                     state.dataSize->DataIsDXCoil = false;
