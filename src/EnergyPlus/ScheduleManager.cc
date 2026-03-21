@@ -326,6 +326,21 @@ namespace Sched {
         missingDaySchedule->isUsed = true;
     }
 
+    // Helper: check day-schedule values for limit violations and bad integers, issuing warnings.
+    static void warnDayScheduleValueIssues(EnergyPlusData &state,
+                                           ErrorObjectHeader const &eoh,
+                                           DaySchedule const *daySched,
+                                           Array1D_string const &Alphas,
+                                           Array1D_string const &cAlphaFields)
+    {
+        if (daySched->checkValsForLimitViolations(state)) {
+            ShowWarningCustom(state, eoh, EnergyPlus::format("Values are outside of range for {}={}", cAlphaFields(2), Alphas(2)));
+        }
+        if (daySched->checkValsForBadIntegers(state)) {
+            ShowWarningCustom(state, eoh, EnergyPlus::format("One or more values are not integer in {}={}", cAlphaFields(2), Alphas(2)));
+        }
+    }
+
     // Helper: validate ScheduleType for a schedule or day-schedule object.
     // Sets schedTypeNumOut to the type index if valid, or leaves it unchanged if blank/invalid.
     // Returns true if valid, false if blank or not found (warnings are issued either way).
@@ -886,13 +901,7 @@ namespace Sched {
                 }
             }
 
-            if (daySched->checkValsForLimitViolations(state)) {
-                ShowWarningCustom(state, eoh, EnergyPlus::format("Values are outside of range for {}={}", cAlphaFields(2), Alphas(2)));
-            }
-
-            if (daySched->checkValsForBadIntegers(state)) {
-                ShowWarningCustom(state, eoh, EnergyPlus::format("One or more values are not integer in {}={}", cAlphaFields(2), Alphas(2)));
-            }
+            warnDayScheduleValueIssues(state, eoh, daySched, Alphas, cAlphaFields);
 
         } // for (Loop)
 
@@ -958,13 +967,7 @@ namespace Sched {
             // Now parcel into TS Value.... tsVals.resize() was called in AddDaySchedule()
             daySched->populateFromMinuteVals(state, minuteVals);
 
-            if (daySched->checkValsForLimitViolations(state)) {
-                ShowWarningCustom(state, eoh, EnergyPlus::format("Values are outside of range for {}={}", cAlphaFields(2), Alphas(2)));
-            }
-
-            if (daySched->checkValsForBadIntegers(state)) {
-                ShowWarningCustom(state, eoh, EnergyPlus::format("One or more values are not integer in {}={}", cAlphaFields(2), Alphas(2)));
-            }
+            warnDayScheduleValueIssues(state, eoh, daySched, Alphas, cAlphaFields);
         }
 
         //!! Get "DaySchedule:List"
@@ -1061,13 +1064,7 @@ namespace Sched {
             // Now parcel into TS Value.... tsVals.resize() was called in AddDaySchedule()
             daySched->populateFromMinuteVals(state, minuteVals);
 
-            if (daySched->checkValsForLimitViolations(state)) {
-                ShowWarningCustom(state, eoh, EnergyPlus::format("Values are outside of range for {}={}", cAlphaFields(2), Alphas(2)));
-            }
-
-            if (daySched->checkValsForBadIntegers(state)) {
-                ShowWarningCustom(state, eoh, EnergyPlus::format("One or more values are not integer for {}={}", cAlphaFields(2), Alphas(2)));
-            }
+            warnDayScheduleValueIssues(state, eoh, daySched, Alphas, cAlphaFields);
         }
 
         //!! Get Week Schedules - regular
