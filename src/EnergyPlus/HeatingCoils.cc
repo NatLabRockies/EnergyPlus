@@ -241,6 +241,57 @@ namespace HeatingCoils {
         }
     }
 
+    // Parse air inlet/outlet nodes, validate the component set, and optionally parse
+    // a temperature setpoint sensor node. Shared by all heating coil types.
+    static void setupCoilAirNodes(EnergyPlusData &state,
+                                  HeatingCoilEquipConditions &heatingCoil,
+                                  std::string const &CurrentModuleObject,
+                                  Array1D_string const &Alphas,
+                                  Node::ConnectionObjectType connObjType,
+                                  int inletAlphaIdx,
+                                  int outletAlphaIdx,
+                                  int sensorAlphaIdx) // 0 = skip sensor node
+    {
+        bool errFlag = false;
+        heatingCoil.AirInletNodeNum = GetOnlySingleNode(state,
+                                                        Alphas(inletAlphaIdx),
+                                                        errFlag,
+                                                        connObjType,
+                                                        Alphas(1),
+                                                        Node::FluidType::Air,
+                                                        Node::ConnectionType::Inlet,
+                                                        Node::CompFluidStream::Primary,
+                                                        Node::ObjectIsNotParent);
+        state.dataHeatingCoils->InputErrorsFound = errFlag || state.dataHeatingCoils->InputErrorsFound;
+        errFlag = false;
+        heatingCoil.AirOutletNodeNum = GetOnlySingleNode(state,
+                                                         Alphas(outletAlphaIdx),
+                                                         errFlag,
+                                                         connObjType,
+                                                         Alphas(1),
+                                                         Node::FluidType::Air,
+                                                         Node::ConnectionType::Outlet,
+                                                         Node::CompFluidStream::Primary,
+                                                         Node::ObjectIsNotParent);
+        state.dataHeatingCoils->InputErrorsFound = errFlag || state.dataHeatingCoils->InputErrorsFound;
+
+        Node::TestCompSet(state, CurrentModuleObject, Alphas(1), Alphas(inletAlphaIdx), Alphas(outletAlphaIdx), "Air Nodes");
+
+        if (sensorAlphaIdx > 0) {
+            errFlag = false;
+            heatingCoil.TempSetPointNodeNum = GetOnlySingleNode(state,
+                                                                Alphas(sensorAlphaIdx),
+                                                                errFlag,
+                                                                connObjType,
+                                                                Alphas(1),
+                                                                Node::FluidType::Air,
+                                                                Node::ConnectionType::Sensor,
+                                                                Node::CompFluidStream::Primary,
+                                                                Node::ObjectIsNotParent);
+            state.dataHeatingCoils->InputErrorsFound = errFlag || state.dataHeatingCoils->InputErrorsFound;
+        }
+    }
+
     // Setup the common output variables shared by all heating coil types:
     // Heating Energy/Rate and Electricity Energy/Rate.
     static void setupCommonHeatingCoilOutputVars(EnergyPlusData &state, HeatingCoilEquipConditions &heatingCoil)
@@ -403,42 +454,7 @@ namespace HeatingCoils {
 
             heatingCoil.Efficiency = Numbers(1);
             heatingCoil.NominalCapacity = Numbers(2);
-            errFlag = false;
-            heatingCoil.AirInletNodeNum = GetOnlySingleNode(state,
-                                                            Alphas(3),
-                                                            errFlag,
-                                                            Node::ConnectionObjectType::CoilHeatingElectric,
-                                                            Alphas(1),
-                                                            Node::FluidType::Air,
-                                                            Node::ConnectionType::Inlet,
-                                                            Node::CompFluidStream::Primary,
-                                                            Node::ObjectIsNotParent);
-            state.dataHeatingCoils->InputErrorsFound = errFlag || state.dataHeatingCoils->InputErrorsFound;
-            errFlag = false;
-            heatingCoil.AirOutletNodeNum = GetOnlySingleNode(state,
-                                                             Alphas(4),
-                                                             errFlag,
-                                                             Node::ConnectionObjectType::CoilHeatingElectric,
-                                                             Alphas(1),
-                                                             Node::FluidType::Air,
-                                                             Node::ConnectionType::Outlet,
-                                                             Node::CompFluidStream::Primary,
-                                                             Node::ObjectIsNotParent);
-            state.dataHeatingCoils->InputErrorsFound = errFlag || state.dataHeatingCoils->InputErrorsFound;
-
-            Node::TestCompSet(state, CurrentModuleObject, Alphas(1), Alphas(3), Alphas(4), "Air Nodes");
-
-            errFlag = false;
-            heatingCoil.TempSetPointNodeNum = GetOnlySingleNode(state,
-                                                                Alphas(5),
-                                                                errFlag,
-                                                                Node::ConnectionObjectType::CoilHeatingElectric,
-                                                                Alphas(1),
-                                                                Node::FluidType::Air,
-                                                                Node::ConnectionType::Sensor,
-                                                                Node::CompFluidStream::Primary,
-                                                                Node::ObjectIsNotParent);
-            state.dataHeatingCoils->InputErrorsFound = errFlag || state.dataHeatingCoils->InputErrorsFound;
+            setupCoilAirNodes(state, heatingCoil, CurrentModuleObject, Alphas, Node::ConnectionObjectType::CoilHeatingElectric, 3, 4, 5);
 
             // Setup Report variables for the Electric Coils
             setupCommonHeatingCoilOutputVars(state, heatingCoil);
@@ -497,42 +513,7 @@ namespace HeatingCoils {
                 heatingCoil.MSNominalCapacity(StageNum) = Numbers(StageNum * 2 + 1);
             }
 
-            errFlag = false;
-            heatingCoil.AirInletNodeNum = GetOnlySingleNode(state,
-                                                            Alphas(3),
-                                                            errFlag,
-                                                            Node::ConnectionObjectType::CoilHeatingElectricMultiStage,
-                                                            Alphas(1),
-                                                            Node::FluidType::Air,
-                                                            Node::ConnectionType::Inlet,
-                                                            Node::CompFluidStream::Primary,
-                                                            Node::ObjectIsNotParent);
-            state.dataHeatingCoils->InputErrorsFound = errFlag || state.dataHeatingCoils->InputErrorsFound;
-            errFlag = false;
-            heatingCoil.AirOutletNodeNum = GetOnlySingleNode(state,
-                                                             Alphas(4),
-                                                             errFlag,
-                                                             Node::ConnectionObjectType::CoilHeatingElectricMultiStage,
-                                                             Alphas(1),
-                                                             Node::FluidType::Air,
-                                                             Node::ConnectionType::Outlet,
-                                                             Node::CompFluidStream::Primary,
-                                                             Node::ObjectIsNotParent);
-            state.dataHeatingCoils->InputErrorsFound = errFlag || state.dataHeatingCoils->InputErrorsFound;
-
-            Node::TestCompSet(state, CurrentModuleObject, Alphas(1), Alphas(3), Alphas(4), "Air Nodes");
-
-            errFlag = false;
-            heatingCoil.TempSetPointNodeNum = GetOnlySingleNode(state,
-                                                                Alphas(5),
-                                                                errFlag,
-                                                                Node::ConnectionObjectType::CoilHeatingElectricMultiStage,
-                                                                Alphas(1),
-                                                                Node::FluidType::Air,
-                                                                Node::ConnectionType::Sensor,
-                                                                Node::CompFluidStream::Primary,
-                                                                Node::ObjectIsNotParent);
-            state.dataHeatingCoils->InputErrorsFound = errFlag || state.dataHeatingCoils->InputErrorsFound;
+            setupCoilAirNodes(state, heatingCoil, CurrentModuleObject, Alphas, Node::ConnectionObjectType::CoilHeatingElectricMultiStage, 3, 4, 5);
 
             // Setup Report variables for the Electric Coils
             setupCommonHeatingCoilOutputVars(state, heatingCoil);
@@ -599,42 +580,7 @@ namespace HeatingCoils {
 
             heatingCoil.Efficiency = Numbers(1);
             heatingCoil.NominalCapacity = Numbers(2);
-            errFlag = false;
-            heatingCoil.AirInletNodeNum = GetOnlySingleNode(state,
-                                                            Alphas(4),
-                                                            errFlag,
-                                                            Node::ConnectionObjectType::CoilHeatingFuel,
-                                                            Alphas(1),
-                                                            Node::FluidType::Air,
-                                                            Node::ConnectionType::Inlet,
-                                                            Node::CompFluidStream::Primary,
-                                                            Node::ObjectIsNotParent);
-            state.dataHeatingCoils->InputErrorsFound = errFlag || state.dataHeatingCoils->InputErrorsFound;
-            errFlag = false;
-            heatingCoil.AirOutletNodeNum = GetOnlySingleNode(state,
-                                                             Alphas(5),
-                                                             errFlag,
-                                                             Node::ConnectionObjectType::CoilHeatingFuel,
-                                                             Alphas(1),
-                                                             Node::FluidType::Air,
-                                                             Node::ConnectionType::Outlet,
-                                                             Node::CompFluidStream::Primary,
-                                                             Node::ObjectIsNotParent);
-            state.dataHeatingCoils->InputErrorsFound = errFlag || state.dataHeatingCoils->InputErrorsFound;
-
-            Node::TestCompSet(state, CurrentModuleObject, Alphas(1), Alphas(4), Alphas(5), "Air Nodes");
-
-            errFlag = false;
-            heatingCoil.TempSetPointNodeNum = GetOnlySingleNode(state,
-                                                                Alphas(6),
-                                                                errFlag,
-                                                                Node::ConnectionObjectType::CoilHeatingFuel,
-                                                                Alphas(1),
-                                                                Node::FluidType::Air,
-                                                                Node::ConnectionType::Sensor,
-                                                                Node::CompFluidStream::Primary,
-                                                                Node::ObjectIsNotParent);
-            state.dataHeatingCoils->InputErrorsFound = errFlag || state.dataHeatingCoils->InputErrorsFound;
+            setupCoilAirNodes(state, heatingCoil, CurrentModuleObject, Alphas, Node::ConnectionObjectType::CoilHeatingFuel, 4, 5, 6);
 
             // parasitic electric load associated with the fuel heating coil
             heatingCoil.ParasiticElecLoad = Numbers(3);
@@ -748,42 +694,7 @@ namespace HeatingCoils {
                 heatingCoil.MSParasiticElecLoad(StageNum) = Numbers(StageNum * 3 + 2);
             }
 
-            errFlag = false;
-            heatingCoil.AirInletNodeNum = GetOnlySingleNode(state,
-                                                            Alphas(3),
-                                                            errFlag,
-                                                            Node::ConnectionObjectType::CoilHeatingGasMultiStage,
-                                                            Alphas(1),
-                                                            Node::FluidType::Air,
-                                                            Node::ConnectionType::Inlet,
-                                                            Node::CompFluidStream::Primary,
-                                                            Node::ObjectIsNotParent);
-            state.dataHeatingCoils->InputErrorsFound = errFlag || state.dataHeatingCoils->InputErrorsFound;
-            errFlag = false;
-            heatingCoil.AirOutletNodeNum = GetOnlySingleNode(state,
-                                                             Alphas(4),
-                                                             errFlag,
-                                                             Node::ConnectionObjectType::CoilHeatingGasMultiStage,
-                                                             Alphas(1),
-                                                             Node::FluidType::Air,
-                                                             Node::ConnectionType::Outlet,
-                                                             Node::CompFluidStream::Primary,
-                                                             Node::ObjectIsNotParent);
-            state.dataHeatingCoils->InputErrorsFound = errFlag || state.dataHeatingCoils->InputErrorsFound;
-
-            Node::TestCompSet(state, CurrentModuleObject, Alphas(1), Alphas(3), Alphas(4), "Air Nodes");
-
-            errFlag = false;
-            heatingCoil.TempSetPointNodeNum = GetOnlySingleNode(state,
-                                                                Alphas(5),
-                                                                errFlag,
-                                                                Node::ConnectionObjectType::CoilHeatingGasMultiStage,
-                                                                Alphas(1),
-                                                                Node::FluidType::Air,
-                                                                Node::ConnectionType::Sensor,
-                                                                Node::CompFluidStream::Primary,
-                                                                Node::ObjectIsNotParent);
-            state.dataHeatingCoils->InputErrorsFound = errFlag || state.dataHeatingCoils->InputErrorsFound;
+            setupCoilAirNodes(state, heatingCoil, CurrentModuleObject, Alphas, Node::ConnectionObjectType::CoilHeatingGasMultiStage, 3, 4, 5);
 
             // parasitic electric load associated with the gas heating coil
             heatingCoil.ParasiticElecLoad = Numbers(10);
@@ -886,30 +797,7 @@ namespace HeatingCoils {
             //(Numbers(1)) error limits checked and defaults applied on efficiency after
             //       identifying source type.
 
-            errFlag = false;
-            heatingCoil.AirInletNodeNum = GetOnlySingleNode(state,
-                                                            Alphas(3),
-                                                            errFlag,
-                                                            Node::ConnectionObjectType::CoilHeatingDesuperheater,
-                                                            Alphas(1),
-                                                            Node::FluidType::Air,
-                                                            Node::ConnectionType::Inlet,
-                                                            Node::CompFluidStream::Primary,
-                                                            Node::ObjectIsNotParent);
-            state.dataHeatingCoils->InputErrorsFound = errFlag || state.dataHeatingCoils->InputErrorsFound;
-            errFlag = false;
-            heatingCoil.AirOutletNodeNum = GetOnlySingleNode(state,
-                                                             Alphas(4),
-                                                             errFlag,
-                                                             Node::ConnectionObjectType::CoilHeatingDesuperheater,
-                                                             Alphas(1),
-                                                             Node::FluidType::Air,
-                                                             Node::ConnectionType::Outlet,
-                                                             Node::CompFluidStream::Primary,
-                                                             Node::ObjectIsNotParent);
-            state.dataHeatingCoils->InputErrorsFound = errFlag || state.dataHeatingCoils->InputErrorsFound;
-
-            Node::TestCompSet(state, CurrentModuleObject, Alphas(1), Alphas(3), Alphas(4), "Air Nodes");
+            setupCoilAirNodes(state, heatingCoil, CurrentModuleObject, Alphas, Node::ConnectionObjectType::CoilHeatingDesuperheater, 3, 4, 0);
 
             if ((Util::SameString(Alphas(5), "Refrigeration:Condenser:AirCooled")) ||
                 (Util::SameString(Alphas(5), "Refrigeration:Condenser:EvaporativeCooled")) ||
