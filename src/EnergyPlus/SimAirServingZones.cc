@@ -5317,9 +5317,9 @@ static void copyCoolPeakToCalcSysSizing(DataSizing::SystemSizingData &calcSS,
 
 // Copy heating peak fields from a per-design-day SysSizing record into CalcSysSizing.
 // Mirrors copyCoolPeakToCalcSysSizing but for the heating side.
-static void copyHeatPeakToCalcSysSizing(DataSizing::SystemSizingData &calcSS,
-                                         DataSizing::SystemSizingData const &srcSS,
-                                         int DDNum)
+[[maybe_unused]] static void copyHeatPeakToCalcSysSizing(DataSizing::SystemSizingData &calcSS,
+                                                          DataSizing::SystemSizingData const &srcSS,
+                                                          int DDNum)
 {
     calcSS.DesHeatVolFlow = srcSS.DesHeatVolFlow;
     calcSS.HeatDesDay = srcSS.HeatDesDay;
@@ -5347,6 +5347,71 @@ static void copyHeatPeakToCalcSysSizing(DataSizing::SystemSizingData &calcSS,
     calcSS.SysHeatCoinSpaceSens = srcSS.SysHeatCoinSpaceSens;
     calcSS.SysDesHeatLoad = srcSS.SysDesHeatLoad;
     calcSS.SysHeatLoadTimeStepPk = srcSS.SysHeatLoadTimeStepPk;
+}
+
+// Copy computed system sizing scalars and sequences from CalcSysSizing to FinalSysSizing.
+// Used once at the end of the EndSysSizingCalc block of UpdateSysSizing to propagate results.
+static void copyCalcToFinalSysSizing(DataSizing::SystemSizingData &z,
+                                      DataSizing::SystemSizingData const &c)
+{
+    // Scalar fields
+    z.CoolDesDay = c.CoolDesDay;
+    z.HeatDesDay = c.HeatDesDay;
+    z.CoinCoolMassFlow = c.CoinCoolMassFlow;
+    z.CoinHeatMassFlow = c.CoinHeatMassFlow;
+    z.NonCoinCoolMassFlow = c.NonCoinCoolMassFlow;
+    z.NonCoinHeatMassFlow = c.NonCoinHeatMassFlow;
+    z.DesMainVolFlow = c.DesMainVolFlow;
+    z.DesHeatVolFlow = c.DesHeatVolFlow;
+    z.DesCoolVolFlow = c.DesCoolVolFlow;
+    z.MassFlowAtCoolPeak = c.MassFlowAtCoolPeak;
+    z.SensCoolCap = c.SensCoolCap;
+    z.TotCoolCap = c.TotCoolCap;
+    z.HeatCap = c.HeatCap;
+    z.PreheatCap = c.PreheatCap;
+    z.MixTempAtCoolPeak = c.MixTempAtCoolPeak;
+    z.MixHumRatAtCoolPeak = c.MixHumRatAtCoolPeak;
+    z.RetTempAtCoolPeak = c.RetTempAtCoolPeak;
+    z.RetHumRatAtCoolPeak = c.RetHumRatAtCoolPeak;
+    z.OutTempAtCoolPeak = c.OutTempAtCoolPeak;
+    z.OutHumRatAtCoolPeak = c.OutHumRatAtCoolPeak;
+    z.HeatMixTemp = c.HeatMixTemp;
+    z.HeatMixHumRat = c.HeatMixHumRat;
+    z.HeatRetTemp = c.HeatRetTemp;
+    z.HeatRetHumRat = c.HeatRetHumRat;
+    z.HeatOutTemp = c.HeatOutTemp;
+    z.HeatOutHumRat = c.HeatOutHumRat;
+    z.SysHeatCoilTimeStepPk = c.SysHeatCoilTimeStepPk;
+    z.SysHeatAirTimeStepPk = c.SysHeatAirTimeStepPk;
+    z.HeatDDNum = c.HeatDDNum;
+    z.SysCoolCoinSpaceSens = c.SysCoolCoinSpaceSens;
+    z.SysHeatCoinSpaceSens = c.SysHeatCoinSpaceSens;
+    z.SysDesCoolLoad = c.SysDesCoolLoad;
+    z.SysCoolLoadTimeStepPk = c.SysCoolLoadTimeStepPk;
+    z.SysDesHeatLoad = c.SysDesHeatLoad;
+    z.SysHeatLoadTimeStepPk = c.SysHeatLoadTimeStepPk;
+
+    // Sequence arrays (whole-array assignment)
+    z.HeatFlowSeq = c.HeatFlowSeq;
+    z.CoolFlowSeq = c.CoolFlowSeq;
+    z.SumZoneCoolLoadSeq = c.SumZoneCoolLoadSeq;
+    z.SumZoneHeatLoadSeq = c.SumZoneHeatLoadSeq;
+    z.CoolZoneAvgTempSeq = c.CoolZoneAvgTempSeq;
+    z.HeatZoneAvgTempSeq = c.HeatZoneAvgTempSeq;
+    z.SensCoolCapSeq = c.SensCoolCapSeq;
+    z.TotCoolCapSeq = c.TotCoolCapSeq;
+    z.HeatCapSeq = c.HeatCapSeq;
+    z.PreheatCapSeq = c.PreheatCapSeq;
+    z.SysCoolRetTempSeq = c.SysCoolRetTempSeq;
+    z.SysCoolRetHumRatSeq = c.SysCoolRetHumRatSeq;
+    z.SysHeatRetTempSeq = c.SysHeatRetTempSeq;
+    z.SysHeatRetHumRatSeq = c.SysHeatRetHumRatSeq;
+    z.SysCoolOutTempSeq = c.SysCoolOutTempSeq;
+    z.SysCoolOutHumRatSeq = c.SysCoolOutHumRatSeq;
+    z.SysHeatOutTempSeq = c.SysHeatOutTempSeq;
+    z.SysHeatOutHumRatSeq = c.SysHeatOutHumRatSeq;
+    z.SysDOASHeatAddSeq = c.SysDOASHeatAddSeq;
+    z.SysDOASLatAddSeq = c.SysDOASLatAddSeq;
 }
 
 // Save cooling peak conditions into the per-design-day SysSizing record during DuringDay processing.
@@ -6453,70 +6518,7 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
 
         // Move final system design data (calculated from zone data) to user design array
         for (std::size_t i = 0; i < state.dataSize->FinalSysSizing.size(); ++i) {
-            auto &z = state.dataSize->FinalSysSizing[i];
-            auto &c = state.dataSize->CalcSysSizing[i];
-            z.CoolDesDay = c.CoolDesDay;
-            z.HeatDesDay = c.HeatDesDay;
-            z.CoinCoolMassFlow = c.CoinCoolMassFlow;
-            z.CoinHeatMassFlow = c.CoinHeatMassFlow;
-            z.NonCoinCoolMassFlow = c.NonCoinCoolMassFlow;
-            z.NonCoinHeatMassFlow = c.NonCoinHeatMassFlow;
-            z.DesMainVolFlow = c.DesMainVolFlow;
-            z.DesHeatVolFlow = c.DesHeatVolFlow;
-            z.DesCoolVolFlow = c.DesCoolVolFlow;
-            z.MassFlowAtCoolPeak = c.MassFlowAtCoolPeak;
-            z.SensCoolCap = c.SensCoolCap;
-            z.TotCoolCap = c.TotCoolCap;
-            z.HeatCap = c.HeatCap;
-            z.PreheatCap = c.PreheatCap;
-            z.MixTempAtCoolPeak = c.MixTempAtCoolPeak;
-            z.MixHumRatAtCoolPeak = c.MixHumRatAtCoolPeak;
-            z.RetTempAtCoolPeak = c.RetTempAtCoolPeak;
-            z.RetHumRatAtCoolPeak = c.RetHumRatAtCoolPeak;
-            z.OutTempAtCoolPeak = c.OutTempAtCoolPeak;
-            z.OutHumRatAtCoolPeak = c.OutHumRatAtCoolPeak;
-            z.HeatMixTemp = c.HeatMixTemp;
-            z.HeatMixHumRat = c.HeatMixHumRat;
-            z.HeatRetTemp = c.HeatRetTemp;
-            z.HeatRetHumRat = c.HeatRetHumRat;
-            z.HeatOutTemp = c.HeatOutTemp;
-            z.HeatOutHumRat = c.HeatOutHumRat;
-            z.SysHeatCoilTimeStepPk = c.SysHeatCoilTimeStepPk;
-            z.SysHeatAirTimeStepPk = c.SysHeatAirTimeStepPk;
-            z.HeatDDNum = c.HeatDDNum;
-            z.SysCoolCoinSpaceSens = c.SysCoolCoinSpaceSens;
-            z.SysHeatCoinSpaceSens = c.SysHeatCoinSpaceSens;
-            z.SysDesCoolLoad = c.SysDesCoolLoad;
-            z.SysCoolLoadTimeStepPk = c.SysCoolLoadTimeStepPk;
-            z.SysDesHeatLoad = c.SysDesHeatLoad;
-            z.SysHeatLoadTimeStepPk = c.SysHeatLoadTimeStepPk;
-        }
-
-        for (AirLoopNum = 1; AirLoopNum <= state.dataHVACGlobal->NumPrimaryAirSys; ++AirLoopNum) {
-            auto &finalSysSizing = state.dataSize->FinalSysSizing(AirLoopNum);
-            auto &calcSysSizing = state.dataSize->CalcSysSizing(AirLoopNum);
-            for (TimeStepIndex = 1; TimeStepIndex <= numOfTimeStepInDay; ++TimeStepIndex) {
-                finalSysSizing.HeatFlowSeq(TimeStepIndex) = calcSysSizing.HeatFlowSeq(TimeStepIndex);
-                finalSysSizing.CoolFlowSeq(TimeStepIndex) = calcSysSizing.CoolFlowSeq(TimeStepIndex);
-                finalSysSizing.SumZoneCoolLoadSeq(TimeStepIndex) = calcSysSizing.SumZoneCoolLoadSeq(TimeStepIndex);
-                finalSysSizing.SumZoneHeatLoadSeq(TimeStepIndex) = calcSysSizing.SumZoneHeatLoadSeq(TimeStepIndex);
-                finalSysSizing.CoolZoneAvgTempSeq(TimeStepIndex) = calcSysSizing.CoolZoneAvgTempSeq(TimeStepIndex);
-                finalSysSizing.HeatZoneAvgTempSeq(TimeStepIndex) = calcSysSizing.HeatZoneAvgTempSeq(TimeStepIndex);
-                finalSysSizing.SensCoolCapSeq(TimeStepIndex) = calcSysSizing.SensCoolCapSeq(TimeStepIndex);
-                finalSysSizing.TotCoolCapSeq(TimeStepIndex) = calcSysSizing.TotCoolCapSeq(TimeStepIndex);
-                finalSysSizing.HeatCapSeq(TimeStepIndex) = calcSysSizing.HeatCapSeq(TimeStepIndex);
-                finalSysSizing.PreheatCapSeq(TimeStepIndex) = calcSysSizing.PreheatCapSeq(TimeStepIndex);
-                finalSysSizing.SysCoolRetTempSeq(TimeStepIndex) = calcSysSizing.SysCoolRetTempSeq(TimeStepIndex);
-                finalSysSizing.SysCoolRetHumRatSeq(TimeStepIndex) = calcSysSizing.SysCoolRetHumRatSeq(TimeStepIndex);
-                finalSysSizing.SysHeatRetTempSeq(TimeStepIndex) = calcSysSizing.SysHeatRetTempSeq(TimeStepIndex);
-                finalSysSizing.SysHeatRetHumRatSeq(TimeStepIndex) = calcSysSizing.SysHeatRetHumRatSeq(TimeStepIndex);
-                finalSysSizing.SysCoolOutTempSeq(TimeStepIndex) = calcSysSizing.SysCoolOutTempSeq(TimeStepIndex);
-                finalSysSizing.SysCoolOutHumRatSeq(TimeStepIndex) = calcSysSizing.SysCoolOutHumRatSeq(TimeStepIndex);
-                finalSysSizing.SysHeatOutTempSeq(TimeStepIndex) = calcSysSizing.SysHeatOutTempSeq(TimeStepIndex);
-                finalSysSizing.SysHeatOutHumRatSeq(TimeStepIndex) = calcSysSizing.SysHeatOutHumRatSeq(TimeStepIndex);
-                finalSysSizing.SysDOASHeatAddSeq(TimeStepIndex) = calcSysSizing.SysDOASHeatAddSeq(TimeStepIndex);
-                finalSysSizing.SysDOASLatAddSeq(TimeStepIndex) = calcSysSizing.SysDOASLatAddSeq(TimeStepIndex);
-            }
+            copyCalcToFinalSysSizing(state.dataSize->FinalSysSizing[i], state.dataSize->CalcSysSizing[i]);
         }
 
         // Check for user input design system flow rates. Set the sizing ratios.
