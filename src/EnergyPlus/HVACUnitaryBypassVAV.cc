@@ -2041,6 +2041,81 @@ namespace HVACUnitaryBypassVAV {
         }
     }
 
+    // Simulate the cooling coil with compressor off (all coil types).
+    // When savePLR is true, also updates SaveCompressorPLR.
+    static void simulateCoolingCoilOff(EnergyPlusData &state,
+                                       CBVAVData &cBVAV,
+                                       bool const FirstHVACIteration,
+                                       Real64 const OnOffAirFlowRatio,
+                                       bool const HXUnitOn,
+                                       bool const savePLR)
+    {
+        switch (cBVAV.CoolCoilType) {
+        case HVAC::CoilType::DXCoolingHXAssisted: {
+            HVACHXAssistedCoolingCoil::SimHXAssistedCoolingCoil(state,
+                                                                cBVAV.DXCoolCoilName,
+                                                                FirstHVACIteration,
+                                                                HVAC::CompressorOp::Off,
+                                                                0.0,
+                                                                cBVAV.CoolCoilCompIndex,
+                                                                HVAC::FanOp::Continuous,
+                                                                HXUnitOn);
+            if (savePLR) {
+                state.dataHVACUnitaryBypassVAV->SaveCompressorPLR = state.dataDXCoils->DXCoilPartLoadRatio(cBVAV.DXCoolCoilIndexNum);
+            }
+        } break;
+        case HVAC::CoilType::DXCoolingSingleSpeed: {
+            DXCoils::SimDXCoil(state,
+                               cBVAV.DXCoolCoilName,
+                               HVAC::CompressorOp::Off,
+                               FirstHVACIteration,
+                               cBVAV.CoolCoilCompIndex,
+                               HVAC::FanOp::Continuous,
+                               0.0,
+                               OnOffAirFlowRatio);
+            if (savePLR) {
+                state.dataHVACUnitaryBypassVAV->SaveCompressorPLR = state.dataDXCoils->DXCoilPartLoadRatio(cBVAV.DXCoolCoilIndexNum);
+            }
+        } break;
+        case HVAC::CoilType::DXCoolingTwoStageWHumControl: {
+            DXCoils::SimDXCoilMultiMode(state,
+                                        cBVAV.DXCoolCoilName,
+                                        HVAC::CompressorOp::Off,
+                                        FirstHVACIteration,
+                                        0.0,
+                                        HVAC::CoilMode::Normal,
+                                        cBVAV.CoolCoilCompIndex,
+                                        HVAC::FanOp::Continuous);
+            if (savePLR) {
+                state.dataHVACUnitaryBypassVAV->SaveCompressorPLR = state.dataDXCoils->DXCoilPartLoadRatio(cBVAV.DXCoolCoilIndexNum);
+            }
+        } break;
+        case HVAC::CoilType::CoolingAirToAirVariableSpeed: {
+            Real64 LocalPartLoadFrac = 0.0;
+            Real64 QZnReq = 0.0;
+            Real64 QLatReq = 0.0;
+            Real64 SpeedRatio = 0.0;
+            int SpeedNum = 1;
+            VariableSpeedCoils::SimVariableSpeedCoils(state,
+                                                      cBVAV.DXCoolCoilName,
+                                                      cBVAV.CoolCoilCompIndex,
+                                                      HVAC::FanOp::Continuous,
+                                                      HVAC::CompressorOp::Off,
+                                                      LocalPartLoadFrac,
+                                                      SpeedNum,
+                                                      SpeedRatio,
+                                                      QZnReq,
+                                                      QLatReq);
+            if (savePLR) {
+                state.dataHVACUnitaryBypassVAV->SaveCompressorPLR =
+                    VariableSpeedCoils::getVarSpeedPartLoadRatio(state, cBVAV.CoolCoilCompIndex);
+            }
+        } break;
+        default:
+            break;
+        }
+    }
+
     void CalcCBVAV(EnergyPlusData &state,
                    int const CBVAVNum,            // Unit index in fan coil array
                    bool const FirstHVACIteration, // Flag for 1st HVAC iteration
@@ -2906,106 +2981,12 @@ namespace HVACUnitaryBypassVAV {
                 }
             } else { // IF(OutdoorDryBulbTemp .GE. cBVAV%MinOATCompressor)THEN
                 //     Simulate DX cooling coil with compressor off
-                if (cBVAV.CoolCoilType == HVAC::CoilType::DXCoolingHXAssisted) {
-                    HVACHXAssistedCoolingCoil::SimHXAssistedCoolingCoil(state,
-                                                                        cBVAV.DXCoolCoilName,
-                                                                        FirstHVACIteration,
-                                                                        HVAC::CompressorOp::Off,
-                                                                        0.0,
-                                                                        cBVAV.CoolCoilCompIndex,
-                                                                        HVAC::FanOp::Continuous,
-                                                                        HXUnitOn);
-                    state.dataHVACUnitaryBypassVAV->SaveCompressorPLR = state.dataDXCoils->DXCoilPartLoadRatio(cBVAV.DXCoolCoilIndexNum);
-                } else if (cBVAV.CoolCoilType == HVAC::CoilType::DXCoolingSingleSpeed) {
-                    DXCoils::SimDXCoil(state,
-                                       cBVAV.DXCoolCoilName,
-                                       HVAC::CompressorOp::Off,
-                                       FirstHVACIteration,
-                                       cBVAV.CoolCoilCompIndex,
-                                       HVAC::FanOp::Continuous,
-                                       0.0,
-                                       OnOffAirFlowRatio);
-                    state.dataHVACUnitaryBypassVAV->SaveCompressorPLR = state.dataDXCoils->DXCoilPartLoadRatio(cBVAV.DXCoolCoilIndexNum);
-                } else if (cBVAV.CoolCoilType == HVAC::CoilType::DXCoolingTwoStageWHumControl) {
-                    DXCoils::SimDXCoilMultiMode(state,
-                                                cBVAV.DXCoolCoilName,
-                                                HVAC::CompressorOp::Off,
-                                                FirstHVACIteration,
-                                                0.0,
-                                                HVAC::CoilMode::Normal,
-                                                cBVAV.CoolCoilCompIndex,
-                                                HVAC::FanOp::Continuous);
-                    state.dataHVACUnitaryBypassVAV->SaveCompressorPLR = state.dataDXCoils->DXCoilPartLoadRatio(cBVAV.DXCoolCoilIndexNum);
-                } else if (cBVAV.CoolCoilType == HVAC::CoilType::CoolingAirToAirVariableSpeed) {
-                    // Real64 PartLoadFrac(0.0);
-                    Real64 LocalPartLoadFrac = 0.0;
-                    Real64 QZnReq = 0.0;  // Zone load (W), input to variable-speed DX coil
-                    Real64 QLatReq = 0.0; // Zone latent load, input to variable-speed DX coil
-                    Real64 SpeedRatio = 0.0;
-                    int SpeedNum = 1;
-                    // Get no load result
-                    VariableSpeedCoils::SimVariableSpeedCoils(state,
-                                                              cBVAV.DXCoolCoilName,
-                                                              cBVAV.CoolCoilCompIndex,
-                                                              HVAC::FanOp::Continuous,
-                                                              HVAC::CompressorOp::Off,
-                                                              LocalPartLoadFrac,
-                                                              SpeedNum,
-                                                              SpeedRatio,
-                                                              QZnReq,
-                                                              QLatReq);
-                    state.dataHVACUnitaryBypassVAV->SaveCompressorPLR = VariableSpeedCoils::getVarSpeedPartLoadRatio(state, cBVAV.CoolCoilCompIndex);
-                }
+                simulateCoolingCoilOff(state, cBVAV, FirstHVACIteration, OnOffAirFlowRatio, HXUnitOn, /*savePLR=*/true);
             }
 
             // Simulate cooling coil with compressor off if zone requires heating
         } else { // HeatCoolMode == HeatingMode and no cooling is required, set PLR to 0
-            if (cBVAV.CoolCoilType == HVAC::CoilType::DXCoolingHXAssisted) {
-                HVACHXAssistedCoolingCoil::SimHXAssistedCoolingCoil(state,
-                                                                    cBVAV.DXCoolCoilName,
-                                                                    FirstHVACIteration,
-                                                                    HVAC::CompressorOp::Off,
-                                                                    0.0,
-                                                                    cBVAV.CoolCoilCompIndex,
-                                                                    HVAC::FanOp::Continuous,
-                                                                    HXUnitOn);
-            } else if (cBVAV.CoolCoilType == HVAC::CoilType::DXCoolingSingleSpeed) {
-                DXCoils::SimDXCoil(state,
-                                   cBVAV.DXCoolCoilName,
-                                   HVAC::CompressorOp::Off,
-                                   FirstHVACIteration,
-                                   cBVAV.CoolCoilCompIndex,
-                                   HVAC::FanOp::Continuous,
-                                   0.0,
-                                   OnOffAirFlowRatio);
-            } else if (cBVAV.CoolCoilType == HVAC::CoilType::CoolingAirToAirVariableSpeed) {
-                Real64 QZnReq = 0.0;  // Zone load (W), input to variable-speed DX coil
-                Real64 QLatReq = 0.0; // Zone latent load, input to variable-speed DX coil
-                Real64 LocalPartLoadFrac = 0.0;
-                Real64 SpeedRatio = 0.0;
-                int SpeedNum = 1;
-                // run model with no load
-                VariableSpeedCoils::SimVariableSpeedCoils(state,
-                                                          cBVAV.DXCoolCoilName,
-                                                          cBVAV.CoolCoilCompIndex,
-                                                          HVAC::FanOp::Continuous,
-                                                          HVAC::CompressorOp::Off,
-                                                          LocalPartLoadFrac,
-                                                          SpeedNum,
-                                                          SpeedRatio,
-                                                          QZnReq,
-                                                          QLatReq);
-
-            } else if (cBVAV.CoolCoilType == HVAC::CoilType::DXCoolingTwoStageWHumControl) {
-                DXCoils::SimDXCoilMultiMode(state,
-                                            cBVAV.DXCoolCoilName,
-                                            HVAC::CompressorOp::Off,
-                                            FirstHVACIteration,
-                                            0.0,
-                                            HVAC::CoilMode::Normal,
-                                            cBVAV.CoolCoilCompIndex,
-                                            HVAC::FanOp::Continuous);
-            }
+            simulateCoolingCoilOff(state, cBVAV, FirstHVACIteration, OnOffAirFlowRatio, HXUnitOn, /*savePLR=*/false);
         }
 
         // Simulate the heating coil based on coil type
