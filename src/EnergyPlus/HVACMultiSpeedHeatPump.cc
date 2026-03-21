@@ -902,11 +902,7 @@ namespace HVACMultiSpeedHeatPump {
                 }
                 thisMSHP.HeatCoilName = Alphas(11);
                 LocalError = false;
-                if (Util::SameString(Alphas(10), "Coil:Heating:Electric:MultiStage")) {
-                    HeatingCoils::GetCoilIndex(state, thisMSHP.HeatCoilName, thisMSHP.HeatCoilIndex, LocalError);
-                } else {
-                    HeatingCoils::GetCoilIndex(state, thisMSHP.HeatCoilName, thisMSHP.HeatCoilIndex, LocalError);
-                }
+                HeatingCoils::GetCoilIndex(state, thisMSHP.HeatCoilName, thisMSHP.HeatCoilIndex, LocalError);
                 if (LocalError) {
                     ShowSevereError(state, EnergyPlus::format("The index of {} is not found \"{}\"", cAlphaFields(11), Alphas(11)));
                     ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", state.dataHVACMultiSpdHP->CurrentModuleObject, Alphas(1)));
@@ -927,23 +923,13 @@ namespace HVACMultiSpeedHeatPump {
                     ErrorsFound = true;
                     LocalError = false;
                 }
-                if (Util::SameString(Alphas(10), "Coil:Heating:Electric:MultiStage")) {
-                    Node::SetUpCompSets(state,
-                                        state.dataHVACMultiSpdHP->CurrentModuleObject,
-                                        thisMSHP.Name,
-                                        "Coil:Heating:Electric:MultiStage",
-                                        thisMSHP.HeatCoilName,
-                                        "UNDEFINED",
-                                        "UNDEFINED");
-                } else {
-                    Node::SetUpCompSets(state,
-                                        state.dataHVACMultiSpdHP->CurrentModuleObject,
-                                        thisMSHP.Name,
-                                        "Coil:Heating:Gas:MultiStage",
-                                        thisMSHP.HeatCoilName,
-                                        "UNDEFINED",
-                                        "UNDEFINED");
-                }
+                Node::SetUpCompSets(state,
+                                    state.dataHVACMultiSpdHP->CurrentModuleObject,
+                                    thisMSHP.Name,
+                                    Alphas(10),
+                                    thisMSHP.HeatCoilName,
+                                    "UNDEFINED",
+                                    "UNDEFINED");
             } else if (Util::SameString(Alphas(10), "Coil:Heating:Water")) {
                 thisMSHP.HeatCoilType = HVAC::Coil_HeatingWater;
                 ValidateComponent(state, Alphas(10), Alphas(11), IsNotOK, state.dataHVACMultiSpdHP->CurrentModuleObject);
