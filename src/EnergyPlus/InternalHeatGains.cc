@@ -3763,6 +3763,30 @@ namespace InternalHeatGains {
         }
     }
 
+    // Register the 8 Baseboard zone/space total output variables for a single zone or space.
+    static void setupBaseboardZoneSpaceOutputs(EnergyPlusData &state,
+                                               DataHeatBalance::ZoneReportVars &rpt,
+                                               std::string const &name,
+                                               std::string_view prefix)
+    {
+        SetupOutputVariable(
+            state, format("{} Baseboard Electricity Rate", prefix), Constant::Units::W, rpt.BaseHeatPower, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+        SetupOutputVariable(
+            state, format("{} Baseboard Electricity Energy", prefix), Constant::Units::J, rpt.BaseHeatElecCons, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+        SetupOutputVariable(
+            state, format("{} Baseboard Radiant Heating Energy", prefix), Constant::Units::J, rpt.BaseHeatRadGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+        SetupOutputVariable(
+            state, format("{} Baseboard Radiant Heating Rate", prefix), Constant::Units::W, rpt.BaseHeatRadGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+        SetupOutputVariable(
+            state, format("{} Baseboard Convective Heating Energy", prefix), Constant::Units::J, rpt.BaseHeatConGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+        SetupOutputVariable(
+            state, format("{} Baseboard Convective Heating Rate", prefix), Constant::Units::W, rpt.BaseHeatConGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+        SetupOutputVariable(
+            state, format("{} Baseboard Total Heating Energy", prefix), Constant::Units::J, rpt.BaseHeatTotGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+        SetupOutputVariable(
+            state, format("{} Baseboard Total Heating Rate", prefix), Constant::Units::W, rpt.BaseHeatTotGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+    }
+
     void setupIHGOutputs(EnergyPlusData &state)
     {
         for (int zoneNum = 1; zoneNum <= state.dataGlobal->NumOfZones; ++zoneNum) {
@@ -4948,130 +4972,16 @@ namespace InternalHeatGains {
         // Zone total report variables
         for (int zoneNum = 1; zoneNum <= state.dataGlobal->NumOfZones; ++zoneNum) {
             if (addZoneOutputs(zoneNum)) {
-                SetupOutputVariable(state,
-                                    "Zone Baseboard Electricity Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).BaseHeatPower,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Baseboard Electricity Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).BaseHeatElecCons,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-
-                SetupOutputVariable(state,
-                                    "Zone Baseboard Radiant Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).BaseHeatRadGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Baseboard Radiant Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).BaseHeatRadGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Baseboard Convective Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).BaseHeatConGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Baseboard Convective Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).BaseHeatConGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Baseboard Total Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).BaseHeatTotGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
-                SetupOutputVariable(state,
-                                    "Zone Baseboard Total Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->ZoneRpt(zoneNum).BaseHeatTotGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->Zone(zoneNum).Name);
+                setupBaseboardZoneSpaceOutputs(state, state.dataHeatBal->ZoneRpt(zoneNum), state.dataHeatBal->Zone(zoneNum).Name, "Zone");
             }
-            // Reset zone output flag
             addZoneOutputs(zoneNum) = false;
         }
 
         // Space total report variables
         for (int spaceNum = 1; spaceNum <= state.dataGlobal->numSpaces; ++spaceNum) {
             if (addSpaceOutputs(spaceNum)) {
-                SetupOutputVariable(state,
-                                    "Space Baseboard Electricity Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).BaseHeatPower,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Baseboard Electricity Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).BaseHeatElecCons,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-
-                SetupOutputVariable(state,
-                                    "Space Baseboard Radiant Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).BaseHeatRadGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Baseboard Radiant Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).BaseHeatRadGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Baseboard Convective Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).BaseHeatConGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Baseboard Convective Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).BaseHeatConGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Baseboard Total Heating Energy",
-                                    Constant::Units::J,
-                                    state.dataHeatBal->spaceRpt(spaceNum).BaseHeatTotGain,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    state.dataHeatBal->space(spaceNum).Name);
-                SetupOutputVariable(state,
-                                    "Space Baseboard Total Heating Rate",
-                                    Constant::Units::W,
-                                    state.dataHeatBal->spaceRpt(spaceNum).BaseHeatTotGainRate,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    state.dataHeatBal->space(spaceNum).Name);
+                setupBaseboardZoneSpaceOutputs(state, state.dataHeatBal->spaceRpt(spaceNum), state.dataHeatBal->space(spaceNum).Name, "Space");
             }
-            // Reset space output flag
             addSpaceOutputs(spaceNum) = false;
         }
     }
