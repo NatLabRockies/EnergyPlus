@@ -215,6 +215,26 @@ static int getAndValidateCurve(EnergyPlusData &state,
     return curveIndex;
 }
 
+// Helper: parse a Yes/No alpha field into a bool, reporting an error if the value is invalid.
+static bool parseModeAvailability(EnergyPlusData &state,
+                                  int alphaIndex,
+                                  std::string_view routineName,
+                                  std::string_view objectType,
+                                  std::string_view objectName,
+                                  bool &errorsFound)
+{
+    auto &ip = state.dataIPShortCut;
+    BooleanSwitch const answer = getYesNoValue(ip->cAlphaArgs(alphaIndex));
+    if (answer == BooleanSwitch::Yes || answer == BooleanSwitch::No) {
+        return static_cast<bool>(answer);
+    }
+    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", routineName, objectType, objectName));
+    ShowContinueError(state, EnergyPlus::format("...{}=\"{}\".", ip->cAlphaFieldNames(alphaIndex), ip->cAlphaArgs(alphaIndex)));
+    ShowContinueError(state, "Available choices are Yes or No.");
+    errorsFound = true;
+    return false;
+}
+
 void GetTESCoilInput(EnergyPlusData &state)
 {
 
@@ -407,20 +427,8 @@ void GetTESCoilInput(EnergyPlusData &state)
                     state.dataIPShortCut->cAlphaArgs(9),
                     "Air Nodes");
 
-        BooleanSwitch const answer = getYesNoValue(state.dataIPShortCut->cAlphaArgs(10));
-        switch (answer) {
-        case BooleanSwitch::Yes:
-        case BooleanSwitch::No:
-            thisTESCoil.CoolingOnlyModeIsAvailable = static_cast<bool>(answer);
-            break;
-        default:
-            thisTESCoil.CoolingOnlyModeIsAvailable = false;
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-            ShowContinueError(state,
-                              EnergyPlus::format("...{}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(10), state.dataIPShortCut->cAlphaArgs(10)));
-            ShowContinueError(state, "Available choices are Yes or No.");
-            ErrorsFound = true;
-        }
+        thisTESCoil.CoolingOnlyModeIsAvailable =
+            parseModeAvailability(state, 10, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
 
         thisTESCoil.CoolingOnlyRatedTotCap = state.dataIPShortCut->rNumericArgs(7);
         if (thisTESCoil.CoolingOnlyModeIsAvailable) { // get input data for this mode
@@ -444,20 +452,8 @@ void GetTESCoilInput(EnergyPlusData &state)
                 getAndValidateCurve(state, 17, {1}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
         }
 
-        BooleanSwitch const answer2 = getYesNoValue(state.dataIPShortCut->cAlphaArgs(18));
-        switch (answer2) {
-        case BooleanSwitch::Yes:
-        case BooleanSwitch::No:
-            thisTESCoil.CoolingAndChargeModeAvailable = static_cast<bool>(answer2);
-            break;
-        default:
-            thisTESCoil.CoolingAndChargeModeAvailable = false;
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-            ShowContinueError(state,
-                              EnergyPlus::format("...{}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(18), state.dataIPShortCut->cAlphaArgs(18)));
-            ShowContinueError(state, "Available choices are Yes or No.");
-            ErrorsFound = true;
-        }
+        thisTESCoil.CoolingAndChargeModeAvailable =
+            parseModeAvailability(state, 18, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
 
         if (thisTESCoil.CoolingAndChargeModeAvailable) {
 
@@ -499,20 +495,8 @@ void GetTESCoilInput(EnergyPlusData &state)
 
         } // Cooling and Charge Mode available
 
-        BooleanSwitch answer3 = getYesNoValue(state.dataIPShortCut->cAlphaArgs(31));
-        switch (answer3) {
-        case BooleanSwitch::Yes:
-        case BooleanSwitch::No:
-            thisTESCoil.CoolingAndDischargeModeAvailable = static_cast<bool>(answer3);
-            break;
-        default:
-            thisTESCoil.CoolingAndDischargeModeAvailable = false;
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-            ShowContinueError(state,
-                              EnergyPlus::format("...{}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(31), state.dataIPShortCut->cAlphaArgs(31)));
-            ShowContinueError(state, "Available choices are Yes or No.");
-            ErrorsFound = true;
-        }
+        thisTESCoil.CoolingAndDischargeModeAvailable =
+            parseModeAvailability(state, 31, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
 
         if (thisTESCoil.CoolingAndDischargeModeAvailable) {
 
@@ -557,20 +541,8 @@ void GetTESCoilInput(EnergyPlusData &state)
 
         } // cooling and discharge mode available
 
-        BooleanSwitch answer4 = getYesNoValue(state.dataIPShortCut->cAlphaArgs(45));
-        switch (answer4) {
-        case BooleanSwitch::Yes:
-        case BooleanSwitch::No:
-            thisTESCoil.ChargeOnlyModeAvailable = static_cast<bool>(answer4);
-            break;
-        default:
-            thisTESCoil.ChargeOnlyModeAvailable = false;
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-            ShowContinueError(state,
-                              EnergyPlus::format("...{}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(45), state.dataIPShortCut->cAlphaArgs(45)));
-            ShowContinueError(state, "Available choices are Yes or No.");
-            ErrorsFound = true;
-        }
+        thisTESCoil.ChargeOnlyModeAvailable =
+            parseModeAvailability(state, 45, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
 
         if (thisTESCoil.ChargeOnlyModeAvailable) {
 
@@ -585,20 +557,8 @@ void GetTESCoilInput(EnergyPlusData &state)
 
         } // Charge only mode available
 
-        BooleanSwitch answer5 = getYesNoValue(state.dataIPShortCut->cAlphaArgs(48));
-        switch (answer5) {
-        case BooleanSwitch::Yes:
-        case BooleanSwitch::No:
-            thisTESCoil.DischargeOnlyModeAvailable = static_cast<bool>(answer5);
-            break;
-        default:
-            thisTESCoil.DischargeOnlyModeAvailable = false;
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-            ShowContinueError(state,
-                              EnergyPlus::format("...{}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(48), state.dataIPShortCut->cAlphaArgs(48)));
-            ShowContinueError(state, "Available choices are Yes or No.");
-            ErrorsFound = true;
-        }
+        thisTESCoil.DischargeOnlyModeAvailable =
+            parseModeAvailability(state, 48, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
 
         if (thisTESCoil.DischargeOnlyModeAvailable) {
             thisTESCoil.DischargeOnlyRatedDischargeCap = state.dataIPShortCut->rNumericArgs(27); // gross total evaporator cooling capacity  [W]
