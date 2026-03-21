@@ -181,6 +181,75 @@ namespace LowTempRadiantSystem {
     [[maybe_unused]] constexpr std::array<std::string_view, (int)CircuitCalc::Num> circuitCalcNames = {"OnePerSurface", "CalculateFromCircuitLength"};
     constexpr std::array<std::string_view, (int)CircuitCalc::Num> circuitCalcNamesUC = {"ONEPERSURFACE", "CALCULATEFROMCIRCUITLENGTH"};
 
+    // Helper: validate and parse a design capacity sizing method for VariableFlow:Design objects.
+    // Handles "XDesignCapacity", "CapacityPerFloorArea", and "FractionOfAutosizedXCapacity" patterns.
+    static void parseDesignCapacitySizingMethod(EnergyPlusData &state,
+                                                std::string_view const &methodInput,
+                                                std::string const &objectName,
+                                                std::string const &currentModuleObject,
+                                                std::string const &alphaFieldName,
+                                                std::string_view designCapacityName,
+                                                int designCapacityEnum,
+                                                std::string_view fractionCapacityName,
+                                                int fractionCapacityEnum,
+                                                int capPerFloorAreaNumIdx,
+                                                int fractionNumIdx,
+                                                Array1D<Real64> const &Numbers,
+                                                Array1D_bool const &lNumericBlanks,
+                                                Array1D_string const &cNumericFields,
+                                                int &capMethodOut,
+                                                Real64 &scaledCapacityOut,
+                                                bool &ErrorsFound)
+    {
+        using DataSizing::AutoSize;
+        using DataSizing::CapacityPerFloorArea;
+
+        if (Util::SameString(methodInput, designCapacityName)) {
+            capMethodOut = designCapacityEnum;
+        } else if (Util::SameString(methodInput, "CapacityPerFloorArea")) {
+            capMethodOut = CapacityPerFloorArea;
+            if (!lNumericBlanks(capPerFloorAreaNumIdx)) {
+                scaledCapacityOut = Numbers(capPerFloorAreaNumIdx);
+                if (scaledCapacityOut <= 0.0) {
+                    ShowSevereError(state, EnergyPlus::format("{} = {}", currentModuleObject, objectName));
+                    ShowContinueError(state, EnergyPlus::format("Input for {} = {}", alphaFieldName, methodInput));
+                    ShowContinueError(state,
+                                      EnergyPlus::format("Illegal {} = {:.7T}", cNumericFields(capPerFloorAreaNumIdx), Numbers(capPerFloorAreaNumIdx)));
+                    ErrorsFound = true;
+                } else if (scaledCapacityOut == AutoSize) {
+                    ShowSevereError(state, EnergyPlus::format("{} = {}", currentModuleObject, objectName));
+                    ShowContinueError(state, EnergyPlus::format("Input for {} = {}", alphaFieldName, methodInput));
+                    ShowContinueError(state, EnergyPlus::format("Illegal {} = Autosize", cNumericFields(capPerFloorAreaNumIdx)));
+                    ErrorsFound = true;
+                }
+            } else {
+                ShowSevereError(state, EnergyPlus::format("{} = {}", currentModuleObject, objectName));
+                ShowContinueError(state, EnergyPlus::format("Input for {} = {}", alphaFieldName, methodInput));
+                ShowContinueError(state, EnergyPlus::format("Blank field not allowed for {}", cNumericFields(capPerFloorAreaNumIdx)));
+                ErrorsFound = true;
+            }
+        } else if (Util::SameString(methodInput, fractionCapacityName)) {
+            capMethodOut = fractionCapacityEnum;
+            if (!lNumericBlanks(fractionNumIdx)) {
+                scaledCapacityOut = Numbers(fractionNumIdx);
+                if (scaledCapacityOut < 0.0) {
+                    ShowSevereError(state, EnergyPlus::format("{} = {}", currentModuleObject, objectName));
+                    ShowContinueError(state, EnergyPlus::format("Illegal {} = {:.7T}", cNumericFields(fractionNumIdx), Numbers(fractionNumIdx)));
+                    ErrorsFound = true;
+                }
+            } else {
+                ShowSevereError(state, EnergyPlus::format("{} = {}", currentModuleObject, objectName));
+                ShowContinueError(state, EnergyPlus::format("Input for {} = {}", alphaFieldName, methodInput));
+                ShowContinueError(state, EnergyPlus::format("Blank field not allowed for {}", cNumericFields(fractionNumIdx)));
+                ErrorsFound = true;
+            }
+        } else {
+            ShowSevereError(state, EnergyPlus::format("{} = {}", currentModuleObject, objectName));
+            ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", alphaFieldName, methodInput));
+            ErrorsFound = true;
+        }
+    }
+
     // Helper: check that no surface is assigned to more than one radiant system.
     // Marks each surface (and its interzone partner) in AssignedAsRadiantSurface.
     static void checkRadiantSurfaceAssignment(EnergyPlusData &state,
@@ -533,51 +602,23 @@ namespace LowTempRadiantSystem {
 
             // Determine Low Temp Radiant heating design capacity sizing method
             thisRadSysDesign.DesignHeatingCapMethodInput = Alphas(5);
-            if (Util::SameString(thisRadSysDesign.DesignHeatingCapMethodInput, "HeatingDesignCapacity")) {
-                thisRadSysDesign.DesignHeatingCapMethod = HeatingDesignCapacity;
-            } else if (Util::SameString(thisRadSysDesign.DesignHeatingCapMethodInput, "CapacityPerFloorArea")) {
-                thisRadSysDesign.DesignHeatingCapMethod = CapacityPerFloorArea;
-                if (!lNumericBlanks(4)) {
-                    thisRadSysDesign.DesignScaledHeatingCapacity = Numbers(4);
-                    if (thisRadSysDesign.DesignScaledHeatingCapacity <= 0.0) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Input for {} = {}", cAlphaFields(5), thisRadSysDesign.DesignHeatingCapMethodInput));
-                        ShowContinueError(state, EnergyPlus::format("Illegal {} = {:.7T}", cNumericFields(4), Numbers(4)));
-                        ErrorsFound = true;
-                    } else if (thisRadSysDesign.DesignScaledHeatingCapacity == AutoSize) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Input for {} = {}", cAlphaFields(5), thisRadSysDesign.DesignHeatingCapMethodInput));
-                        ShowContinueError(state, EnergyPlus::format("Illegal {} = Autosize", cNumericFields(4)));
-                        ErrorsFound = true;
-                    }
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.Name));
-                    ShowContinueError(state, EnergyPlus::format("Input for {} = {}", cAlphaFields(5), thisRadSysDesign.DesignHeatingCapMethodInput));
-                    ShowContinueError(state, EnergyPlus::format("Blank field not allowed for {}", cNumericFields(4)));
-                    ErrorsFound = true;
-                }
-            } else if (Util::SameString(thisRadSysDesign.DesignHeatingCapMethodInput, "FractionOfAutosizedHeatingCapacity")) {
-                thisRadSysDesign.DesignHeatingCapMethod = FractionOfAutosizedHeatingCapacity;
-                if (!lNumericBlanks(5)) {
-                    thisRadSysDesign.DesignScaledHeatingCapacity = Numbers(5);
-                    if (thisRadSysDesign.DesignScaledHeatingCapacity < 0.0) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
-                        ShowContinueError(state, EnergyPlus::format("Illegal {} = {:.7T}", cNumericFields(5), Numbers(5)));
-                        ErrorsFound = true;
-                    }
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
-                    ShowContinueError(state, EnergyPlus::format("Input for {} = {}", cAlphaFields(5), thisRadSysDesign.DesignHeatingCapMethodInput));
-                    ShowContinueError(state, EnergyPlus::format("Blank field not allowed for {}", cNumericFields(5)));
-                    ErrorsFound = true;
-                }
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
-                ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(5), thisRadSysDesign.DesignHeatingCapMethodInput));
-                ErrorsFound = true;
-            }
+            parseDesignCapacitySizingMethod(state,
+                                            thisRadSysDesign.DesignHeatingCapMethodInput,
+                                            thisRadSysDesign.designName,
+                                            CurrentModuleObject,
+                                            cAlphaFields(5),
+                                            "HeatingDesignCapacity",
+                                            HeatingDesignCapacity,
+                                            "FractionOfAutosizedHeatingCapacity",
+                                            FractionOfAutosizedHeatingCapacity,
+                                            4,  // capPerFloorArea numeric index
+                                            5,  // fraction numeric index
+                                            Numbers,
+                                            lNumericBlanks,
+                                            cNumericFields,
+                                            thisRadSysDesign.DesignHeatingCapMethod,
+                                            thisRadSysDesign.DesignScaledHeatingCapacity,
+                                            ErrorsFound);
 
             thisRadSysDesign.HotThrottlRange = Numbers(6);
 
@@ -589,52 +630,23 @@ namespace LowTempRadiantSystem {
 
             // Determine Low Temp Radiant cooling design capacity sizing method
             thisRadSysDesign.DesignCoolingCapMethodInput = Alphas(7);
-            if (Util::SameString(thisRadSysDesign.DesignCoolingCapMethodInput, "CoolingDesignCapacity")) {
-                thisRadSysDesign.DesignCoolingCapMethod = CoolingDesignCapacity;
-            } else if (Util::SameString(thisRadSysDesign.DesignCoolingCapMethodInput, "CapacityPerFloorArea")) {
-                thisRadSysDesign.DesignCoolingCapMethod = CapacityPerFloorArea;
-                if (!lNumericBlanks(7)) {
-                    thisRadSysDesign.DesignScaledCoolingCapacity = Numbers(7);
-                    if (thisRadSysDesign.DesignScaledCoolingCapacity <= 0.0) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Input for {} = {}", cAlphaFields(7), thisRadSysDesign.DesignCoolingCapMethodInput));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Illegal {} = {:.7T}", cNumericFields(7), thisRadSysDesign.DesignScaledCoolingCapacity));
-                        ErrorsFound = true;
-                    } else if (thisRadSysDesign.DesignScaledCoolingCapacity == AutoSize) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Input for {} = {}", cAlphaFields(7), thisRadSysDesign.DesignCoolingCapMethodInput));
-                        ShowContinueError(state, EnergyPlus::format("Illegal {} = Autosize", cNumericFields(7)));
-                        ErrorsFound = true;
-                    }
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
-                    ShowContinueError(state, EnergyPlus::format("Input for {} = {}", cAlphaFields(7), thisRadSysDesign.DesignCoolingCapMethodInput));
-                    ShowContinueError(state, EnergyPlus::format("Blank field not allowed for {}", cNumericFields(7)));
-                    ErrorsFound = true;
-                }
-            } else if (Util::SameString(thisRadSysDesign.DesignCoolingCapMethodInput, "FractionOfAutosizedCoolingCapacity")) {
-                thisRadSysDesign.DesignCoolingCapMethod = FractionOfAutosizedCoolingCapacity;
-                if (!lNumericBlanks(8)) {
-                    thisRadSysDesign.DesignScaledCoolingCapacity = Numbers(8);
-                    if (thisRadSysDesign.DesignScaledCoolingCapacity < 0.0) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
-                        ShowContinueError(state, EnergyPlus::format("Illegal {} = {:.7T}", cNumericFields(8), Numbers(8)));
-                        ErrorsFound = true;
-                    }
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
-                    ShowContinueError(state, EnergyPlus::format("Input for {} = {}", cAlphaFields(7), thisRadSysDesign.DesignCoolingCapMethodInput));
-                    ShowContinueError(state, EnergyPlus::format("Blank field not allowed for {}", cNumericFields(8)));
-                    ErrorsFound = true;
-                }
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
-                ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(7), thisRadSysDesign.DesignCoolingCapMethodInput));
-                ErrorsFound = true;
-            }
+            parseDesignCapacitySizingMethod(state,
+                                            thisRadSysDesign.DesignCoolingCapMethodInput,
+                                            thisRadSysDesign.designName,
+                                            CurrentModuleObject,
+                                            cAlphaFields(7),
+                                            "CoolingDesignCapacity",
+                                            CoolingDesignCapacity,
+                                            "FractionOfAutosizedCoolingCapacity",
+                                            FractionOfAutosizedCoolingCapacity,
+                                            7,  // capPerFloorArea numeric index
+                                            8,  // fraction numeric index
+                                            Numbers,
+                                            lNumericBlanks,
+                                            cNumericFields,
+                                            thisRadSysDesign.DesignCoolingCapMethod,
+                                            thisRadSysDesign.DesignScaledCoolingCapacity,
+                                            ErrorsFound);
 
             thisRadSysDesign.ColdThrottlRange = Numbers(9);
 
