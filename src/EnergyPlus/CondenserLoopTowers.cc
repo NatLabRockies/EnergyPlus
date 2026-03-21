@@ -186,6 +186,35 @@ namespace CondenserLoopTowers {
 
     static constexpr std::string_view routineName = "GetTowerInput";
 
+    // Helper: parse design inlet conditions (DB temp, WB temp, approach, range) and derived water temps.
+    static void parseDesignConditions(CoolingTower &tower,
+                                      Array1D<Real64> const &NumArray,
+                                      int const dbIdx, int const wbIdx, int const appIdx, int const rangeIdx)
+    {
+        tower.DesInletAirDBTemp = NumArray(dbIdx);
+        if (tower.DesInletAirDBTemp == 0) {
+            tower.DesInletAirDBTemp = 35.0;
+            tower.TowerInletCondsAutoSize = true;
+        }
+        tower.DesignInletWB = NumArray(wbIdx);
+        if (tower.DesignInletWB == 0) {
+            tower.DesignInletWB = 25.6;
+            tower.TowerInletCondsAutoSize = true;
+        }
+        tower.DesignApproach = NumArray(appIdx);
+        if (tower.DesignApproach == DataSizing::AutoSize || tower.DesignApproach == 0) {
+            tower.DesignApproach = 3.9;
+            tower.TowerInletCondsAutoSize = true;
+        }
+        tower.DesignRange = NumArray(rangeIdx);
+        if (tower.DesignRange == DataSizing::AutoSize || tower.DesignRange == 0) {
+            tower.DesignRange = 5.5;
+            tower.TowerInletCondsAutoSize = true;
+        }
+        tower.DesOutletWaterTemp = tower.DesignInletWB + tower.DesignApproach;
+        tower.DesInletWaterTemp = tower.DesOutletWaterTemp + tower.DesignRange;
+    }
+
     // Helper: parse basin heater power, setpoint temperature, and schedule fields common to all tower types.
     static void parseBasinHeaterFields(EnergyPlusData &state,
                                        CoolingTower &tower,
@@ -467,30 +496,7 @@ namespace CondenserLoopTowers {
                 // Since Performance Input Method has been omitted then assume it to be UA and DESIGN WATER FLOW RATE
                 tower.PerformanceInputMethod_Num = PIM::UFactor;
             }
-            // cooling tower design inlet conditions
-            tower.DesInletAirDBTemp = NumArray(13);
-            if (tower.DesInletAirDBTemp == 0) {
-                tower.DesInletAirDBTemp = 35.0;
-                tower.TowerInletCondsAutoSize = true;
-            }
-            tower.DesignInletWB = NumArray(14);
-            if (tower.DesignInletWB == 0) {
-                tower.DesignInletWB = 25.6;
-                tower.TowerInletCondsAutoSize = true;
-            }
-            tower.DesignApproach = NumArray(15);
-            if (tower.DesignApproach == DataSizing::AutoSize || tower.DesignApproach == 0) {
-                tower.DesignApproach = 3.9;
-                tower.TowerInletCondsAutoSize = true;
-            }
-            tower.DesignRange = NumArray(16);
-            if (tower.DesignRange == DataSizing::AutoSize || tower.DesignRange == 0) {
-                tower.DesignRange = 5.5;
-                tower.TowerInletCondsAutoSize = true;
-            }
-            // set tower design water outlet and inlet temperatures
-            tower.DesOutletWaterTemp = tower.DesignInletWB + tower.DesignApproach;
-            tower.DesInletWaterTemp = tower.DesOutletWaterTemp + tower.DesignRange;
+            parseDesignConditions(tower, NumArray, 13, 14, 15, 16);
             parseBasinHeaterFields(state, tower, eoh, NumArray, NumNums, AlphArray, 17, 18, 5, ErrorsFound);
             parseEvapAndBlowdownFields(state, tower, eoh, NumArray, AlphArray, 6, 19, 20, 21, 25, 7, 8, ErrorsFound);
             parseWaterSupplyAndOAFields(state, tower, AlphArray, NumAlphas, 9, 10, Node::ConnectionObjectType::CoolingTowerSingleSpeed, 13, ErrorsFound);
@@ -680,30 +686,7 @@ namespace CondenserLoopTowers {
                 tower.TowerFreeConvNomCapWasAutoSized = true;
             }
             tower.TowerFreeConvNomCapSizingFactor = NumArray(20);
-            // cooling tower design inlet conditions
-            tower.DesInletAirDBTemp = NumArray(21);
-            if (tower.DesInletAirDBTemp == 0) {
-                tower.DesInletAirDBTemp = 35.0;
-                tower.TowerInletCondsAutoSize = true;
-            }
-            tower.DesignInletWB = NumArray(22);
-            if (tower.DesignInletWB == 0) {
-                tower.DesignInletWB = 25.6;
-                tower.TowerInletCondsAutoSize = true;
-            }
-            tower.DesignApproach = NumArray(23);
-            if (tower.DesignApproach == DataSizing::AutoSize || tower.DesignApproach == 0) {
-                tower.DesignApproach = 3.9;
-                tower.TowerInletCondsAutoSize = true;
-            }
-            tower.DesignRange = NumArray(24);
-            if (tower.DesignRange == DataSizing::AutoSize || tower.DesignRange == 0) {
-                tower.DesignRange = 5.5;
-                tower.TowerInletCondsAutoSize = true;
-            }
-            // set tower design water outlet and inlet temperatures
-            tower.DesOutletWaterTemp = tower.DesignInletWB + tower.DesignApproach;
-            tower.DesInletWaterTemp = tower.DesOutletWaterTemp + tower.DesignRange;
+            parseDesignConditions(tower, NumArray, 21, 22, 23, 24);
             parseBasinHeaterFields(state, tower, eoh, NumArray, NumNums, AlphArray, 25, 26, 5, ErrorsFound);
             parseEvapAndBlowdownFields(state, tower, eoh, NumArray, AlphArray, 6, 27, 28, 29, 33, 7, 8, ErrorsFound);
             parseMultiCellFields(state, tower, NumArray, NumNums, AlphArray, 30, 31, 32, 11);
@@ -1382,30 +1365,7 @@ namespace CondenserLoopTowers {
                 ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(8), AlphArray(8));
                 ErrorsFound = true;
             }
-            // cooling tower design inlet conditions
-            tower.DesInletAirDBTemp = NumArray(17);
-            if (tower.DesInletAirDBTemp == 0) {
-                tower.DesInletAirDBTemp = 35.0;
-                tower.TowerInletCondsAutoSize = true;
-            }
-            tower.DesignInletWB = NumArray(18);
-            if (tower.DesignInletWB == 0) {
-                tower.DesignInletWB = 25.6;
-                tower.TowerInletCondsAutoSize = true;
-            }
-            tower.DesignApproach = NumArray(19);
-            if (tower.DesignApproach == DataSizing::AutoSize || tower.DesignApproach == 0) {
-                tower.DesignApproach = 3.9;
-                tower.TowerInletCondsAutoSize = true;
-            }
-            tower.DesignRange = NumArray(20);
-            if (tower.DesignRange == DataSizing::AutoSize || tower.DesignRange == 0) {
-                tower.DesignRange = 5.5;
-                tower.TowerInletCondsAutoSize = true;
-            }
-            // set tower design water outlet and inlet temperatures
-            tower.DesOutletWaterTemp = tower.DesignInletWB + tower.DesignApproach;
-            tower.DesInletWaterTemp = tower.DesOutletWaterTemp + tower.DesignRange;
+            parseDesignConditions(tower, NumArray, 17, 18, 19, 20);
             parseBasinHeaterFields(state, tower, eoh, NumArray, NumNums, AlphArray, 21, 22, 9, ErrorsFound);
             parseEvapAndBlowdownFields(state, tower, eoh, NumArray, AlphArray, 10, 23, 24, 25, 29, 11, 12, ErrorsFound);
             parseMultiCellFields(state, tower, NumArray, NumNums, AlphArray, 26, 27, 28, 15);
