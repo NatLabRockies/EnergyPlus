@@ -181,6 +181,56 @@ namespace LowTempRadiantSystem {
     [[maybe_unused]] constexpr std::array<std::string_view, (int)CircuitCalc::Num> circuitCalcNames = {"OnePerSurface", "CalculateFromCircuitLength"};
     constexpr std::array<std::string_view, (int)CircuitCalc::Num> circuitCalcNamesUC = {"ONEPERSURFACE", "CALCULATEFROMCIRCUITLENGTH"};
 
+    // Helper: apply capacity sizing method from a design object to a system instance.
+    // For DesignCapacity, validates the user-entered numeric; for CapacityPerFloorArea
+    // and FractionOfAutosized, copies the value from the design object.
+    static void applyDesignCapacityFromDesignObject(EnergyPlusData &state,
+                                                    int designCapMethod,
+                                                    int designCapacityEnum,
+                                                    int capPerFloorAreaEnum,
+                                                    int fractionEnum,
+                                                    Real64 designScaledCapacity,
+                                                    std::string const &currentModuleObject,
+                                                    std::string const &sysName,
+                                                    std::string_view heatOrCool,
+                                                    int numericIdx,
+                                                    int nodeAlpha1Idx,
+                                                    int nodeAlpha2Idx,
+                                                    Array1D<Real64> const &Numbers,
+                                                    Array1D_bool const &lNumericBlanks,
+                                                    Array1D_bool const &lAlphaBlanks,
+                                                    Array1D_string const &cNumericFields,
+                                                    int &capMethodOut,
+                                                    Real64 &scaledCapacityOut,
+                                                    bool &ErrorsFound)
+    {
+        using DataSizing::AutoSize;
+        if (designCapMethod == designCapacityEnum) {
+            capMethodOut = designCapacityEnum;
+            if (!lNumericBlanks(numericIdx)) {
+                scaledCapacityOut = Numbers(numericIdx);
+                if (scaledCapacityOut < 0.0 && scaledCapacityOut != AutoSize) {
+                    ShowSevereError(state, EnergyPlus::format("{} = {}", currentModuleObject, sysName));
+                    ShowContinueError(state, EnergyPlus::format("Illegal {} = {:.7T}", cNumericFields(numericIdx), Numbers(numericIdx)));
+                    ErrorsFound = true;
+                }
+            } else {
+                if ((!lAlphaBlanks(nodeAlpha1Idx)) || (!lAlphaBlanks(nodeAlpha2Idx))) {
+                    ShowSevereError(state, EnergyPlus::format("{} = {}", currentModuleObject, sysName));
+                    ShowContinueError(state, EnergyPlus::format("Input for {} Design Capacity Method = {}DesignCapacity", heatOrCool, heatOrCool));
+                    ShowContinueError(state, EnergyPlus::format("Blank field not allowed for {}", cNumericFields(numericIdx)));
+                    ErrorsFound = true;
+                }
+            }
+        } else if (designCapMethod == capPerFloorAreaEnum) {
+            capMethodOut = capPerFloorAreaEnum;
+            scaledCapacityOut = designScaledCapacity;
+        } else if (designCapMethod == fractionEnum) {
+            capMethodOut = fractionEnum;
+            scaledCapacityOut = designScaledCapacity;
+        }
+    }
+
     // Helper: parse surface list or single surface name for a radiant system.
     // Populates the base-class surface arrays (NumOfSurfaces, SurfacePtr, SurfaceName, SurfaceFrac).
     // Returns the SurfListNum (>0 if a surface list was found, 0 if single surface).
@@ -812,30 +862,20 @@ namespace LowTempRadiantSystem {
             thisRadSys.TubeLength = Numbers(1);
 
             // Determine Low Temp Radiant heating design capacity sizing method
-            if (variableFlowDesignDataObject.DesignHeatingCapMethod == HeatingDesignCapacity) {
-                thisRadSys.HeatingCapMethod = HeatingDesignCapacity;
-                if (!lNumericBlanks(2)) {
-                    thisRadSys.ScaledHeatingCapacity = Numbers(2);
-                    if (thisRadSys.ScaledHeatingCapacity < 0.0 && thisRadSys.ScaledHeatingCapacity != AutoSize) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSys.Name));
-                        ShowContinueError(state, EnergyPlus::format("Illegal {} = {:.7T}", cNumericFields(2), Numbers(2)));
-                        ErrorsFound = true;
-                    }
-                } else {
-                    if ((!lAlphaBlanks(6)) || (!lAlphaBlanks(7))) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSys.Name));
-                        ShowContinueError(state, "Input for Heating Design Capacity Method = HeatingDesignCapacity");
-                        ShowContinueError(state, EnergyPlus::format("Blank field not allowed for {}", cNumericFields(2)));
-                        ErrorsFound = true;
-                    }
-                }
-            } else if (variableFlowDesignDataObject.DesignHeatingCapMethod == CapacityPerFloorArea) {
-                thisRadSys.HeatingCapMethod = CapacityPerFloorArea;
-                thisRadSys.ScaledHeatingCapacity = variableFlowDesignDataObject.DesignScaledHeatingCapacity;
-            } else if (variableFlowDesignDataObject.DesignHeatingCapMethod == FractionOfAutosizedHeatingCapacity) {
-                thisRadSys.HeatingCapMethod = FractionOfAutosizedHeatingCapacity;
-                thisRadSys.ScaledHeatingCapacity = variableFlowDesignDataObject.DesignScaledHeatingCapacity;
-            }
+            applyDesignCapacityFromDesignObject(state,
+                                                variableFlowDesignDataObject.DesignHeatingCapMethod,
+                                                HeatingDesignCapacity,
+                                                CapacityPerFloorArea,
+                                                FractionOfAutosizedHeatingCapacity,
+                                                variableFlowDesignDataObject.DesignScaledHeatingCapacity,
+                                                CurrentModuleObject,
+                                                thisRadSys.Name,
+                                                "Heating",
+                                                2, 6, 7,
+                                                Numbers, lNumericBlanks, lAlphaBlanks, cNumericFields,
+                                                thisRadSys.HeatingCapMethod,
+                                                thisRadSys.ScaledHeatingCapacity,
+                                                ErrorsFound);
 
             // Heating user input data
             thisRadSys.WaterVolFlowMaxHeat = Numbers(3);
@@ -872,30 +912,20 @@ namespace LowTempRadiantSystem {
             }
 
             // Determine Low Temp Radiant cooling design capacity sizing method
-            if (variableFlowDesignDataObject.DesignCoolingCapMethod == CoolingDesignCapacity) {
-                thisRadSys.CoolingCapMethod = CoolingDesignCapacity;
-                if (!lNumericBlanks(4)) {
-                    thisRadSys.ScaledCoolingCapacity = Numbers(4);
-                    if (thisRadSys.ScaledCoolingCapacity < 0.0 && thisRadSys.ScaledCoolingCapacity != AutoSize) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSys.Name));
-                        ShowContinueError(state, EnergyPlus::format("Illegal {} = {:.7T}", cNumericFields(4), Numbers(4)));
-                        ErrorsFound = true;
-                    }
-                } else {
-                    if ((!lAlphaBlanks(8)) || (!lAlphaBlanks(9))) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSys.Name));
-                        ShowContinueError(state, "Input for Cooling Design Capacity Method = CoolingDesignCapacity");
-                        ShowContinueError(state, EnergyPlus::format("Blank field not allowed for {}", cNumericFields(4)));
-                        ErrorsFound = true;
-                    }
-                }
-            } else if (variableFlowDesignDataObject.DesignCoolingCapMethod == CapacityPerFloorArea) {
-                thisRadSys.CoolingCapMethod = CapacityPerFloorArea;
-                thisRadSys.ScaledCoolingCapacity = variableFlowDesignDataObject.DesignScaledCoolingCapacity;
-            } else if (variableFlowDesignDataObject.DesignCoolingCapMethod == FractionOfAutosizedCoolingCapacity) {
-                thisRadSys.CoolingCapMethod = FractionOfAutosizedCoolingCapacity;
-                thisRadSys.ScaledCoolingCapacity = variableFlowDesignDataObject.DesignScaledCoolingCapacity;
-            }
+            applyDesignCapacityFromDesignObject(state,
+                                                variableFlowDesignDataObject.DesignCoolingCapMethod,
+                                                CoolingDesignCapacity,
+                                                CapacityPerFloorArea,
+                                                FractionOfAutosizedCoolingCapacity,
+                                                variableFlowDesignDataObject.DesignScaledCoolingCapacity,
+                                                CurrentModuleObject,
+                                                thisRadSys.Name,
+                                                "Cooling",
+                                                4, 8, 9,
+                                                Numbers, lNumericBlanks, lAlphaBlanks, cNumericFields,
+                                                thisRadSys.CoolingCapMethod,
+                                                thisRadSys.ScaledCoolingCapacity,
+                                                ErrorsFound);
 
             // Cooling user input data
             thisRadSys.WaterVolFlowMaxCool = Numbers(5);
