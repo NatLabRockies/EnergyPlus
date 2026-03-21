@@ -5222,6 +5222,50 @@ static void saveDuringDayCoolPeak(EnergyPlusData &state,
     sysSizing.MassFlowAtCoolPeak = sysSizing.CoolFlowSeq(TimeStepInDay);
 }
 
+// Complete DuringDay heating return/mix/capacity computation when system flow is nonzero.
+// Called after the zone accumulation loop for both heated-zone and cooled-zone-for-heating paths.
+static void computeHeatRetMixCap(EnergyPlusData &state,
+                                 DataSizing::SystemSizingData &sysSizing,
+                                 int TimeStepInDay,
+                                 Real64 &SysHeatRetTemp,
+                                 Real64 &SysHeatRetHumRat,
+                                 Real64 &SysHeatZoneAvgTemp,
+                                 Real64 &SysHeatMixTemp,
+                                 Real64 &SysHeatMixHumRat,
+                                 Real64 &SysHeatCap)
+{
+    using Psychrometrics::PsyCpAirFnW;
+    if (sysSizing.HeatFlowSeq(TimeStepInDay) > 0.0) {
+        // complete return air temp calc
+        SysHeatRetTemp /= sysSizing.HeatFlowSeq(TimeStepInDay);
+        SysHeatRetHumRat /= sysSizing.HeatFlowSeq(TimeStepInDay);
+        SysHeatZoneAvgTemp /= sysSizing.HeatFlowSeq(TimeStepInDay);
+        sysSizing.SysHeatRetTempSeq(TimeStepInDay) = SysHeatRetTemp;
+        sysSizing.SysHeatRetHumRatSeq(TimeStepInDay) = SysHeatRetHumRat;
+        sysSizing.HeatZoneAvgTempSeq(TimeStepInDay) = SysHeatZoneAvgTemp;
+        // calculate the outside air fraction for this time step
+        Real64 RhoAir = state.dataEnvrn->StdRhoAir;
+        Real64 OutAirFrac;
+        if (sysSizing.HeatOAOption == DataSizing::OAControl::MinOA) {
+            OutAirFrac = RhoAir * sysSizing.DesOutAirVolFlow / sysSizing.HeatFlowSeq(TimeStepInDay);
+            OutAirFrac = min(1.0, max(0.0, OutAirFrac));
+        } else {
+            OutAirFrac = 1.0;
+        }
+        // calculate the mixed air temperature
+        SysHeatMixTemp = state.dataEnvrn->OutDryBulbTemp * OutAirFrac + SysHeatRetTemp * (1.0 - OutAirFrac);
+        SysHeatMixHumRat = state.dataEnvrn->OutHumRat * OutAirFrac + SysHeatRetHumRat * (1.0 - OutAirFrac);
+        sysSizing.SysHeatOutTempSeq(TimeStepInDay) = state.dataEnvrn->OutDryBulbTemp;
+        sysSizing.SysHeatOutHumRatSeq(TimeStepInDay) = state.dataEnvrn->OutHumRat;
+        // From the mixed air temp, heating supply air temp, and mass flow rate calculate the system heating capacity
+        SysHeatCap = PsyCpAirFnW(DataPrecisionGlobals::constant_zero) * sysSizing.HeatFlowSeq(TimeStepInDay) *
+                     (sysSizing.HeatSupTemp - SysHeatMixTemp);
+        SysHeatCap = max(0.0, SysHeatCap);
+        // save the system heating capacity for the time step
+        sysSizing.HeatCapSeq(TimeStepInDay) = SysHeatCap;
+    }
+}
+
 // Accumulate heating zone flows, loads, and weighted return-air conditions for the DuringDay time step.
 // Used for both the centrally-heated-zones path and the cooled-zones-used-for-heating path.
 static void accumulateHeatZoneFlowsDuringDay(EnergyPlusData &state,
@@ -5631,35 +5675,9 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
                     sysSizing.SysDesHeatLoad = sysSizing.SumZoneHeatLoadSeq(TimeStepInDay);
                     sysSizing.SysHeatLoadTimeStepPk = TimeStepInDay;
                 }
-                // check that the system flow rate is nonzero
-                if (sysSizing.HeatFlowSeq(TimeStepInDay) > 0.0) {
-                    // complete return air temp calc
-                    SysHeatRetTemp /= sysSizing.HeatFlowSeq(TimeStepInDay);
-                    SysHeatRetHumRat /= sysSizing.HeatFlowSeq(TimeStepInDay);
-                    SysHeatZoneAvgTemp /= sysSizing.HeatFlowSeq(TimeStepInDay);
-                    sysSizing.SysHeatRetTempSeq(TimeStepInDay) = SysHeatRetTemp;
-                    sysSizing.SysHeatRetHumRatSeq(TimeStepInDay) = SysHeatRetHumRat;
-                    sysSizing.HeatZoneAvgTempSeq(TimeStepInDay) = SysHeatZoneAvgTemp;
-                    // calculate the outside air fraction for this time step
-                    RhoAir = state.dataEnvrn->StdRhoAir;
-                    if (sysSizing.HeatOAOption == DataSizing::OAControl::MinOA) {
-                        OutAirFrac = RhoAir * sysSizing.DesOutAirVolFlow / sysSizing.HeatFlowSeq(TimeStepInDay);
-                        OutAirFrac = min(1.0, max(0.0, OutAirFrac));
-                    } else {
-                        OutAirFrac = 1.0;
-                    }
-                    // calculate the mixed air temperature
-                    SysHeatMixTemp = state.dataEnvrn->OutDryBulbTemp * OutAirFrac + SysHeatRetTemp * (1.0 - OutAirFrac);
-                    SysHeatMixHumRat = state.dataEnvrn->OutHumRat * OutAirFrac + SysHeatRetHumRat * (1.0 - OutAirFrac);
-                    sysSizing.SysHeatOutTempSeq(TimeStepInDay) = state.dataEnvrn->OutDryBulbTemp;
-                    sysSizing.SysHeatOutHumRatSeq(TimeStepInDay) = state.dataEnvrn->OutHumRat;
-                    // From the mixed air temp, heating supply air temp, and mass flow rate calculate the system heating capacity
-                    SysHeatCap = PsyCpAirFnW(DataPrecisionGlobals::constant_zero) * sysSizing.HeatFlowSeq(TimeStepInDay) *
-                                 (sysSizing.HeatSupTemp - SysHeatMixTemp);
-                    SysHeatCap = max(0.0, SysHeatCap);
-                    // save the system heating capacity for the time step
-                    sysSizing.HeatCapSeq(TimeStepInDay) = SysHeatCap;
-                } // end system flow rate IF
+                computeHeatRetMixCap(state, sysSizing, TimeStepInDay,
+                                     SysHeatRetTemp, SysHeatRetHumRat, SysHeatZoneAvgTemp,
+                                     SysHeatMixTemp, SysHeatMixHumRat, SysHeatCap);
 
                 // Get the maximum system heating capacity
                 if (SysHeatCap > sysSizing.HeatCap) {
@@ -5703,34 +5721,9 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
                     sysSizing.SysHeatLoadTimeStepPk = TimeStepInDay;
                 }
 
-                if (sysSizing.HeatFlowSeq(TimeStepInDay) > 0.0) {
-                    // complete return air temp calc
-                    SysHeatRetTemp /= sysSizing.HeatFlowSeq(TimeStepInDay);
-                    SysHeatRetHumRat /= sysSizing.HeatFlowSeq(TimeStepInDay);
-                    SysHeatZoneAvgTemp /= sysSizing.HeatFlowSeq(TimeStepInDay);
-                    sysSizing.SysHeatRetTempSeq(TimeStepInDay) = SysHeatRetTemp;
-                    sysSizing.SysHeatRetHumRatSeq(TimeStepInDay) = SysHeatRetHumRat;
-                    sysSizing.HeatZoneAvgTempSeq(TimeStepInDay) = SysHeatZoneAvgTemp;
-                    // calculate the outside air fraction for this time step
-                    RhoAir = state.dataEnvrn->StdRhoAir;
-                    if (sysSizing.HeatOAOption == DataSizing::OAControl::MinOA) {
-                        OutAirFrac = RhoAir * sysSizing.DesOutAirVolFlow / sysSizing.HeatFlowSeq(TimeStepInDay);
-                        OutAirFrac = min(1.0, max(0.0, OutAirFrac));
-                    } else {
-                        OutAirFrac = 1.0;
-                    }
-                    // calculate the mixed air temperature
-                    SysHeatMixTemp = state.dataEnvrn->OutDryBulbTemp * OutAirFrac + SysHeatRetTemp * (1.0 - OutAirFrac);
-                    SysHeatMixHumRat = state.dataEnvrn->OutHumRat * OutAirFrac + SysHeatRetHumRat * (1.0 - OutAirFrac);
-                    sysSizing.SysHeatOutTempSeq(TimeStepInDay) = state.dataEnvrn->OutDryBulbTemp;
-                    sysSizing.SysHeatOutHumRatSeq(TimeStepInDay) = state.dataEnvrn->OutHumRat;
-                    // From the mixed air temp, heating supply air temp, and mass flow rate calculate the system heating capacity
-                    SysHeatCap = PsyCpAirFnW(DataPrecisionGlobals::constant_zero) * sysSizing.HeatFlowSeq(TimeStepInDay) *
-                                 (sysSizing.HeatSupTemp - SysHeatMixTemp);
-                    SysHeatCap = max(0.0, SysHeatCap);
-                    // save the system heating capacity for the time step
-                    sysSizing.HeatCapSeq(TimeStepInDay) = SysHeatCap;
-                } // end system flow rate IF
+                computeHeatRetMixCap(state, sysSizing, TimeStepInDay,
+                                     SysHeatRetTemp, SysHeatRetHumRat, SysHeatZoneAvgTemp,
+                                     SysHeatMixTemp, SysHeatMixHumRat, SysHeatCap);
 
                 // Get the maximum system heating capacity
                 if (SysHeatCap > sysSizing.HeatCap) {
