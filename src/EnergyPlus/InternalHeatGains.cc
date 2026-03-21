@@ -192,6 +192,66 @@ namespace InternalHeatGains {
     static constexpr std::array<std::string_view, static_cast<int>(DesignLevelMethod::Num)> DesignLevelMethodNamesUC = {
         "PEOPLE", "PEOPLE/AREA", "AREA/PERSON", "LIGHTINGLEVEL", "EQUIPMENTLEVEL", "WATTS/AREA", "WATTS/PERSON", "POWER/AREA", "POWER/PERSON"};
 
+    // Print one EIO data row for a ZoneEquipData-derived equipment object.
+    // Used by ElectricEquipment, GasEquipment, HotWaterEquipment, SteamEquipment, and OtherEquipment.
+    static void printEquipEioRow(EnergyPlusData &state,
+                                 DataHeatBalance::ZoneEquipData const &eq,
+                                 std::string_view eioLabel,
+                                 std::string_view illegalZoneLabel,
+                                 bool hasEndUseSub)
+    {
+        static constexpr std::string_view Format_722(" {} Internal Gains Nominal, {},{},{},{:.2R},{:.1R},");
+        static constexpr std::string_view Format_724(" {}, {}\n");
+
+        if (eq.ZonePtr == 0) {
+            print(state.files.eio, Format_724, illegalZoneLabel, eq.Name);
+            return;
+        }
+
+        auto const &zone = state.dataHeatBal->Zone(eq.ZonePtr);
+
+        print(state.files.eio, Format_722, eioLabel, eq.Name, eq.sched->Name, zone.Name, zone.FloorArea, zone.TotOccupants);
+        print(state.files.eio, "{:.3R},", eq.DesignLevel);
+
+        // Equipment per floor area
+        if (zone.FloorArea > 0.0) {
+            print(state.files.eio, "{:.3R},", eq.DesignLevel / zone.FloorArea);
+        } else {
+            print(state.files.eio, "N/A,");
+        }
+        // Equipment per person
+        if (zone.TotOccupants > 0.0) {
+            print(state.files.eio, "{:.3R},", eq.DesignLevel / zone.TotOccupants);
+        } else {
+            print(state.files.eio, "N/A,");
+        }
+
+        print(state.files.eio, "{:.3R},", eq.FractionLatent);
+        print(state.files.eio, "{:.3R},", eq.FractionRadiant);
+        print(state.files.eio, "{:.3R},", eq.FractionLost);
+        print(state.files.eio, "{:.3R},", eq.FractionConvected);
+        if (hasEndUseSub) {
+            print(state.files.eio, "{},", eq.EndUseSubcategory);
+        }
+        print(state.files.eio, "{:.3R},", eq.NomMinDesignLevel);
+        print(state.files.eio, "{:.3R},", eq.NomMaxDesignLevel);
+
+        // Print 4 day-type schedule rows (weekday, weekend/holiday, summer DD, winter DD)
+        Real64 SchMin, SchMax;
+        std::tie(SchMin, SchMax) = eq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::Weekday);
+        print(state.files.eio, "{:.3R},", eq.DesignLevel * SchMin);
+        print(state.files.eio, "{:.3R},", eq.DesignLevel * SchMax);
+        std::tie(SchMin, SchMax) = eq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WeekEndHoliday);
+        print(state.files.eio, "{:.3R},", eq.DesignLevel * SchMin);
+        print(state.files.eio, "{:.3R},", eq.DesignLevel * SchMax);
+        std::tie(SchMin, SchMax) = eq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::SummerDesignDay);
+        print(state.files.eio, "{:.3R},", eq.DesignLevel * SchMin);
+        print(state.files.eio, "{:.3R},", eq.DesignLevel * SchMax);
+        std::tie(SchMin, SchMax) = eq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WinterDesignDay);
+        print(state.files.eio, "{:.3R},", eq.DesignLevel * SchMin);
+        print(state.files.eio, "{:.3R}\n", eq.DesignLevel * SchMax);
+    }
+
     void ManageInternalHeatGains(EnergyPlusData &state,
                                  ObjexxFCL::Optional_bool_const InitOnly) // when true, just calls the get input, if appropriate and returns.
     {
@@ -283,30 +343,6 @@ namespace InternalHeatGains {
             } else {
                 print(state.files.eio, "N/A,");
             }
-        };
-
-        // Print four day-type schedule rows (weekday, weekend/holiday, summer DD, winter DD)
-        // for a generic equipment object that shares the ZoneEquipData layout.
-        // Each block prints: min*level, max*level for the day-type group.
-        // The final value ends with "\n" instead of ",".
-        auto printEquipEioScheduleRows = [&](Sched::Schedule *sched, Real64 designLevel) {
-            Real64 SchMin, SchMax;
-            // weekdays
-            std::tie(SchMin, SchMax) = sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::Weekday);
-            print(state.files.eio, "{:.3R},", designLevel * SchMin);
-            print(state.files.eio, "{:.3R},", designLevel * SchMax);
-            // weekends/holidays
-            std::tie(SchMin, SchMax) = sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WeekEndHoliday);
-            print(state.files.eio, "{:.3R},", designLevel * SchMin);
-            print(state.files.eio, "{:.3R},", designLevel * SchMax);
-            // summer design days
-            std::tie(SchMin, SchMax) = sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::SummerDesignDay);
-            print(state.files.eio, "{:.3R},", designLevel * SchMin);
-            print(state.files.eio, "{:.3R},", designLevel * SchMax);
-            // winter design days
-            std::tie(SchMin, SchMax) = sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WinterDesignDay);
-            print(state.files.eio, "{:.3R},", designLevel * SchMin);
-            print(state.files.eio, "{:.3R}\n", designLevel * SchMax);
         };
 
         auto &ErrorsFound(state.dataInternalHeatGains->ErrorsFound);
@@ -2845,8 +2881,6 @@ namespace InternalHeatGains {
         }
 
         for (int Loop = 1; Loop <= state.dataHeatBal->TotElecEquip; ++Loop) {
-            auto &elecEq = state.dataHeatBal->ZoneElectric(Loop);
-
             if (Loop == 1) {
                 print(state.files.eio,
                       Format_723,
@@ -2859,34 +2893,10 @@ namespace InternalHeatGains {
                       "Minimum Equipment Level for Summer Design Days {W}, Maximum Equipment Level for Summer Design Days {W},"
                       "Minimum Equipment Level for Winter Design Days {W}, Maximum Equipment Level for Winter Design Days {W}\n");
             }
-
-            if (elecEq.ZonePtr == 0) {
-                print(state.files.eio, Format_724, "Electric Equipment-Illegal Zone specified", elecEq.Name);
-                continue;
-            }
-
-            auto &zone = state.dataHeatBal->Zone(elecEq.ZonePtr);
-
-            print(state.files.eio, Format_722, "ElectricEquipment", elecEq.Name, elecEq.sched->Name, zone.Name, zone.FloorArea, zone.TotOccupants);
-            print(state.files.eio, "{:.3R},", elecEq.DesignLevel);
-
-            print_and_divide_if_greater_than_zero(elecEq.DesignLevel, zone.FloorArea);
-            print_and_divide_if_greater_than_zero(elecEq.DesignLevel, zone.TotOccupants);
-
-            print(state.files.eio, "{:.3R},", elecEq.FractionLatent);
-            print(state.files.eio, "{:.3R},", elecEq.FractionRadiant);
-            print(state.files.eio, "{:.3R},", elecEq.FractionLost);
-            print(state.files.eio, "{:.3R},", elecEq.FractionConvected);
-            print(state.files.eio, "{},", elecEq.EndUseSubcategory);
-            print(state.files.eio, "{:.3R},", elecEq.NomMinDesignLevel);
-            print(state.files.eio, "{:.3R},", elecEq.NomMaxDesignLevel);
-
-            printEquipEioScheduleRows(elecEq.sched, elecEq.DesignLevel);
+            printEquipEioRow(state, state.dataHeatBal->ZoneElectric(Loop), "ElectricEquipment", "Electric Equipment-Illegal Zone specified", true);
         }
 
         for (int Loop = 1; Loop <= state.dataHeatBal->TotGasEquip; ++Loop) {
-            auto &gasEq = state.dataHeatBal->ZoneGas(Loop);
-
             if (Loop == 1) {
                 print(state.files.eio,
                       Format_723,
@@ -2899,34 +2909,10 @@ namespace InternalHeatGains {
                       "Minimum Equipment Level for Summer Design Days {W}, Maximum Equipment Level for Summer Design Days {W},"
                       "Minimum Equipment Level for Winter Design Days {W}, Maximum Equipment Level for Winter Design Days {W}\n");
             }
-
-            if (gasEq.ZonePtr == 0) {
-                print(state.files.eio, Format_724, "Gas Equipment-Illegal Zone specified", gasEq.Name);
-                continue;
-            }
-
-            auto &zone = state.dataHeatBal->Zone(gasEq.ZonePtr);
-
-            print(state.files.eio, Format_722, "GasEquipment", gasEq.Name, gasEq.sched->Name, zone.Name, zone.FloorArea, zone.TotOccupants);
-            print(state.files.eio, "{:.3R},", gasEq.DesignLevel);
-
-            print_and_divide_if_greater_than_zero(gasEq.DesignLevel, zone.FloorArea);
-            print_and_divide_if_greater_than_zero(gasEq.DesignLevel, zone.TotOccupants);
-
-            print(state.files.eio, "{:.3R},", gasEq.FractionLatent);
-            print(state.files.eio, "{:.3R},", gasEq.FractionRadiant);
-            print(state.files.eio, "{:.3R},", gasEq.FractionLost);
-            print(state.files.eio, "{:.3R},", gasEq.FractionConvected);
-            print(state.files.eio, "{},", gasEq.EndUseSubcategory);
-            print(state.files.eio, "{:.3R},", gasEq.NomMinDesignLevel);
-            print(state.files.eio, "{:.3R},", gasEq.NomMaxDesignLevel);
-
-            printEquipEioScheduleRows(gasEq.sched, gasEq.DesignLevel);
+            printEquipEioRow(state, state.dataHeatBal->ZoneGas(Loop), "GasEquipment", "Gas Equipment-Illegal Zone specified", true);
         }
 
         for (int Loop = 1; Loop <= state.dataHeatBal->TotHWEquip; ++Loop) {
-            auto &hotWaterEq = state.dataHeatBal->ZoneHWEq(Loop);
-
             if (Loop == 1) {
                 print(state.files.eio,
                       Format_723,
@@ -2939,42 +2925,10 @@ namespace InternalHeatGains {
                       "Minimum Equipment Level for Summer Design Days {W}, Maximum Equipment Level for Summer Design Days {W},"
                       "Minimum Equipment Level for Winter Design Days {W}, Maximum Equipment Level for Winter Design Days {W}\n");
             }
-
-            if (hotWaterEq.ZonePtr == 0) {
-                print(state.files.eio, Format_724, "Hot Water Equipment-Illegal Zone specified", hotWaterEq.Name);
-                continue;
-            }
-
-            auto const &zone = state.dataHeatBal->Zone(hotWaterEq.ZonePtr);
-
-            print(state.files.eio,
-                  Format_722,
-                  "HotWaterEquipment",
-                  hotWaterEq.Name,
-                  hotWaterEq.sched->Name,
-                  zone.Name,
-                  zone.FloorArea,
-                  zone.TotOccupants);
-
-            print(state.files.eio, "{:.3R},", hotWaterEq.DesignLevel);
-
-            print_and_divide_if_greater_than_zero(hotWaterEq.DesignLevel, zone.FloorArea);
-            print_and_divide_if_greater_than_zero(hotWaterEq.DesignLevel, zone.TotOccupants);
-
-            print(state.files.eio, "{:.3R},", hotWaterEq.FractionLatent);
-            print(state.files.eio, "{:.3R},", hotWaterEq.FractionRadiant);
-            print(state.files.eio, "{:.3R},", hotWaterEq.FractionLost);
-            print(state.files.eio, "{:.3R},", hotWaterEq.FractionConvected);
-            print(state.files.eio, "{},", hotWaterEq.EndUseSubcategory);
-            print(state.files.eio, "{:.3R},", hotWaterEq.NomMinDesignLevel);
-            print(state.files.eio, "{:.3R},", hotWaterEq.NomMaxDesignLevel);
-
-            printEquipEioScheduleRows(hotWaterEq.sched, hotWaterEq.DesignLevel);
+            printEquipEioRow(state, state.dataHeatBal->ZoneHWEq(Loop), "HotWaterEquipment", "Hot Water Equipment-Illegal Zone specified", true);
         }
 
         for (int Loop = 1; Loop <= state.dataHeatBal->TotStmEquip; ++Loop) {
-            auto &steamEq = state.dataHeatBal->ZoneSteamEq(Loop);
-
             if (Loop == 1) {
                 print(state.files.eio,
                       Format_723,
@@ -2987,29 +2941,7 @@ namespace InternalHeatGains {
                       "Minimum Equipment Level for Summer Design Days {W}, Maximum Equipment Level for Summer Design Days {W},"
                       "Minimum Equipment Level for Winter Design Days {W}, Maximum Equipment Level for Winter Design Days {W}\n");
             }
-
-            if (steamEq.ZonePtr == 0) {
-                print(state.files.eio, Format_724, "Steam Equipment-Illegal Zone specified", steamEq.Name);
-                continue;
-            }
-
-            auto &zone = state.dataHeatBal->Zone(steamEq.ZonePtr);
-
-            print(state.files.eio, Format_722, "SteamEquipment", steamEq.Name, steamEq.sched->Name, zone.Name, zone.FloorArea, zone.TotOccupants);
-            print(state.files.eio, "{:.3R},", steamEq.DesignLevel);
-
-            print_and_divide_if_greater_than_zero(steamEq.DesignLevel, zone.FloorArea);
-            print_and_divide_if_greater_than_zero(steamEq.DesignLevel, zone.TotOccupants);
-
-            print(state.files.eio, "{:.3R},", steamEq.FractionLatent);
-            print(state.files.eio, "{:.3R},", steamEq.FractionRadiant);
-            print(state.files.eio, "{:.3R},", steamEq.FractionLost);
-            print(state.files.eio, "{:.3R},", steamEq.FractionConvected);
-            print(state.files.eio, "{},", steamEq.EndUseSubcategory);
-            print(state.files.eio, "{:.3R},", steamEq.NomMinDesignLevel);
-            print(state.files.eio, "{:.3R},", steamEq.NomMaxDesignLevel);
-
-            printEquipEioScheduleRows(steamEq.sched, steamEq.DesignLevel);
+            printEquipEioRow(state, state.dataHeatBal->ZoneSteamEq(Loop), "SteamEquipment", "Steam Equipment-Illegal Zone specified", true);
         }
 
         for (int Loop = 1; Loop <= state.dataHeatBal->TotOthEquip; ++Loop) {
@@ -3025,30 +2957,7 @@ namespace InternalHeatGains {
                       "Minimum Equipment Level for Summer Design Days {W}, Maximum Equipment Level for Summer Design Days {W},"
                       "Minimum Equipment Level for Winter Design Days {W}, Maximum Equipment Level for Winter Design Days {W}\n");
             }
-
-            auto &otherEq = state.dataHeatBal->ZoneOtherEq(Loop);
-
-            if (otherEq.ZonePtr == 0) {
-                print(state.files.eio, Format_724, "Other Equipment-Illegal Zone specified", otherEq.Name);
-                continue;
-            }
-
-            auto const &zone = state.dataHeatBal->Zone(otherEq.ZonePtr);
-
-            print(state.files.eio, Format_722, "OtherEquipment", otherEq.Name, otherEq.sched->Name, zone.Name, zone.FloorArea, zone.TotOccupants);
-            print(state.files.eio, "{:.3R},", otherEq.DesignLevel);
-
-            print_and_divide_if_greater_than_zero(otherEq.DesignLevel, zone.FloorArea);
-            print_and_divide_if_greater_than_zero(otherEq.DesignLevel, zone.TotOccupants);
-
-            print(state.files.eio, "{:.3R},", otherEq.FractionLatent);
-            print(state.files.eio, "{:.3R},", otherEq.FractionRadiant);
-            print(state.files.eio, "{:.3R},", otherEq.FractionLost);
-            print(state.files.eio, "{:.3R},", otherEq.FractionConvected);
-            print(state.files.eio, "{:.3R},", otherEq.NomMinDesignLevel);
-            print(state.files.eio, "{:.3R},", otherEq.NomMaxDesignLevel);
-
-            printEquipEioScheduleRows(otherEq.sched, otherEq.DesignLevel);
+            printEquipEioRow(state, state.dataHeatBal->ZoneOtherEq(Loop), "OtherEquipment", "Other Equipment-Illegal Zone specified", false);
         }
 
         for (int Loop = 1; Loop <= state.dataHeatBal->TotITEquip; ++Loop) {
