@@ -2184,53 +2184,27 @@ namespace InternalHeatGains {
                         bool hasSupplyApproachTemp = !IHGNumericFieldBlanks(10);
                         bool hasReturnApproachTemp = !IHGNumericFieldBlanks(11);
 
+                        // Helper to look up a required or optional curve, emitting a severe error when invalid.
+                        // For optional curves, pass optional=true; blank fields return 0 without error.
+                        auto getITECurve = [&](int alphaIdx, bool optional = false) -> int {
+                            if (optional && IHGAlphaFieldBlanks(alphaIdx)) {
+                                return 0; // blank optional field defaults to always 1.0
+                            }
+                            int idx = GetCurveIndex(state, IHGAlphas(alphaIdx));
+                            if (idx == 0) {
+                                ShowSevereError(state, EnergyPlus::format("{}{} \"{}\"", RoutineName, itEqModuleObject, IHGAlphas(1)));
+                                ShowContinueError(state, EnergyPlus::format("Invalid {}={}", IHGAlphaFieldNames(alphaIdx), IHGAlphas(alphaIdx)));
+                                ErrorsFound = true;
+                            }
+                            return idx;
+                        };
+
                         // Performance curves
-                        thisZoneITEq.CPUPowerFLTCurve = GetCurveIndex(state, IHGAlphas(7));
-                        if (thisZoneITEq.CPUPowerFLTCurve == 0) {
-                            ShowSevereError(state, EnergyPlus::format("{}{} \"{}\"", RoutineName, itEqModuleObject, IHGAlphas(1)));
-                            ShowContinueError(state, EnergyPlus::format("Invalid {}={}", IHGAlphaFieldNames(7), IHGAlphas(7)));
-                            ErrorsFound = true;
-                        }
-
-                        thisZoneITEq.AirFlowFLTCurve = GetCurveIndex(state, IHGAlphas(8));
-                        if (thisZoneITEq.AirFlowFLTCurve == 0) {
-                            ShowSevereError(state, EnergyPlus::format("{}{} \"{}\"", RoutineName, itEqModuleObject, IHGAlphas(1)));
-                            ShowContinueError(state, EnergyPlus::format("Invalid {}={}", IHGAlphaFieldNames(8), IHGAlphas(8)));
-                            ErrorsFound = true;
-                        }
-
-                        thisZoneITEq.FanPowerFFCurve = GetCurveIndex(state, IHGAlphas(9));
-                        if (thisZoneITEq.FanPowerFFCurve == 0) {
-                            ShowSevereError(state, EnergyPlus::format("{}{} \"{}\"", RoutineName, itEqModuleObject, IHGAlphas(1)));
-                            ShowContinueError(state, EnergyPlus::format("Invalid {}={}", IHGAlphaFieldNames(9), IHGAlphas(9)));
-                            ErrorsFound = true;
-                        }
-
-                        if (!IHGAlphaFieldBlanks(15)) {
-                            // If this field isn't blank, it must point to a valid curve
-                            thisZoneITEq.RecircFLTCurve = GetCurveIndex(state, IHGAlphas(15));
-                            if (thisZoneITEq.RecircFLTCurve == 0) {
-                                ShowSevereError(state, EnergyPlus::format("{}{} \"{}\"", RoutineName, itEqModuleObject, IHGAlphas(1)));
-                                ShowContinueError(state, EnergyPlus::format("Invalid {}={}", IHGAlphaFieldNames(15), IHGAlphas(15)));
-                                ErrorsFound = true;
-                            }
-                        } else {
-                            // If this curve is left blank, then the curve is assumed to always equal 1.0.
-                            thisZoneITEq.RecircFLTCurve = 0;
-                        }
-
-                        if (!IHGAlphaFieldBlanks(16)) {
-                            // If this field isn't blank, it must point to a valid curve
-                            thisZoneITEq.UPSEfficFPLRCurve = GetCurveIndex(state, IHGAlphas(16));
-                            if (thisZoneITEq.UPSEfficFPLRCurve == 0) {
-                                ShowSevereError(state, EnergyPlus::format("{}{} \"{}\"", RoutineName, itEqModuleObject, IHGAlphas(1)));
-                                ShowContinueError(state, EnergyPlus::format("Invalid {}={}", IHGAlphaFieldNames(16), IHGAlphas(16)));
-                                ErrorsFound = true;
-                            }
-                        } else {
-                            // If this curve is left blank, then the curve is assumed to always equal 1.0.
-                            thisZoneITEq.UPSEfficFPLRCurve = 0;
-                        }
+                        thisZoneITEq.CPUPowerFLTCurve = getITECurve(7);
+                        thisZoneITEq.AirFlowFLTCurve = getITECurve(8);
+                        thisZoneITEq.FanPowerFFCurve = getITECurve(9);
+                        thisZoneITEq.RecircFLTCurve = getITECurve(15, true);
+                        thisZoneITEq.UPSEfficFPLRCurve = getITECurve(16, true);
 
                         // Environmental class
                         thisZoneITEq.Class = static_cast<ITEClass>(getEnumValue(ITEClassNamesUC, Util::makeUPPER(IHGAlphas(10))));
