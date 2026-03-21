@@ -502,105 +502,57 @@ namespace Sched {
         int MaxNums = 1; // Need at least 1 number because it's used as a local variable in the Schedule Types loop
         int MaxAlps = 0;
 
-        std::string CurrentModuleObject = "ScheduleTypeLimits";
-        int NumScheduleTypes = s_ip->getNumObjectsFound(state, CurrentModuleObject);
-        if (NumScheduleTypes > 0) {
-            s_ip->getObjectDefMaxArgs(state, CurrentModuleObject, Count, NumAlphas, NumNumbers);
-            MaxNums = max(MaxNums, NumNumbers);
-            MaxAlps = max(MaxAlps, NumAlphas);
-        }
-        CurrentModuleObject = "Schedule:Day:Hourly";
-        int NumHrDaySchedules = s_ip->getNumObjectsFound(state, CurrentModuleObject);
-        if (NumHrDaySchedules > 0) {
-            s_ip->getObjectDefMaxArgs(state, CurrentModuleObject, Count, NumAlphas, NumNumbers);
-            MaxNums = max(MaxNums, NumNumbers);
-            MaxAlps = max(MaxAlps, NumAlphas);
-        }
-        CurrentModuleObject = "Schedule:Day:Interval";
-        int NumIntDaySchedules = s_ip->getNumObjectsFound(state, CurrentModuleObject);
-        if (NumIntDaySchedules > 0) {
-            s_ip->getObjectDefMaxArgs(state, CurrentModuleObject, Count, NumAlphas, NumNumbers);
-            MaxNums = max(MaxNums, NumNumbers);
-            MaxAlps = max(MaxAlps, NumAlphas);
-        }
-        CurrentModuleObject = "Schedule:Day:List";
-        int NumLstDaySchedules = s_ip->getNumObjectsFound(state, CurrentModuleObject);
-        if (NumLstDaySchedules > 0) {
-            s_ip->getObjectDefMaxArgs(state, CurrentModuleObject, Count, NumAlphas, NumNumbers);
-            MaxNums = max(MaxNums, NumNumbers);
-            MaxAlps = max(MaxAlps, NumAlphas);
-        }
-        CurrentModuleObject = "Schedule:Week:Daily";
-        int NumRegWeekSchedules = s_ip->getNumObjectsFound(state, CurrentModuleObject);
-        if (NumRegWeekSchedules > 0) {
-            s_ip->getObjectDefMaxArgs(state, CurrentModuleObject, Count, NumAlphas, NumNumbers);
-            MaxNums = max(MaxNums, NumNumbers);
-            MaxAlps = max(MaxAlps, NumAlphas);
-        }
-        CurrentModuleObject = "Schedule:Week:Compact";
-        int NumCptWeekSchedules = s_ip->getNumObjectsFound(state, CurrentModuleObject);
-        if (NumCptWeekSchedules > 0) {
-            s_ip->getObjectDefMaxArgs(state, CurrentModuleObject, Count, NumAlphas, NumNumbers);
-            MaxNums = max(MaxNums, NumNumbers);
-            MaxAlps = max(MaxAlps, NumAlphas);
-        }
-        CurrentModuleObject = "Schedule:Year";
-        int NumRegSchedules = s_ip->getNumObjectsFound(state, CurrentModuleObject);
-        if (NumRegSchedules > 0) {
-            s_ip->getObjectDefMaxArgs(state, CurrentModuleObject, Count, NumAlphas, NumNumbers);
-            MaxNums = max(MaxNums, NumNumbers);
-            MaxAlps = max(MaxAlps, NumAlphas);
-        }
-        CurrentModuleObject = "Schedule:Compact";
-        int NumCptSchedules = s_ip->getNumObjectsFound(state, CurrentModuleObject);
-        if (NumCptSchedules > 0) {
-            s_ip->getObjectDefMaxArgs(state, CurrentModuleObject, Count, NumAlphas, NumNumbers);
-            MaxNums = max(MaxNums, NumNumbers);
-            MaxAlps = max(MaxAlps, NumAlphas + 1);
-        }
-        CurrentModuleObject = "Schedule:File";
-        int NumCommaFileSchedules = s_ip->getNumObjectsFound(state, CurrentModuleObject);
-        if (NumCommaFileSchedules > 0) {
-            s_ip->getObjectDefMaxArgs(state, CurrentModuleObject, Count, NumAlphas, NumNumbers);
-            MaxNums = max(MaxNums, NumNumbers);
-            MaxAlps = max(MaxAlps, NumAlphas);
+        // Count objects and determine max alphas/numbers for all schedule object types
+        int NumScheduleTypes = 0;
+        int NumHrDaySchedules = 0;
+        int NumIntDaySchedules = 0;
+        int NumLstDaySchedules = 0;
+        int NumRegWeekSchedules = 0;
+        int NumCptWeekSchedules = 0;
+        int NumRegSchedules = 0;
+        int NumCptSchedules = 0;
+        int NumCommaFileSchedules = 0;
+        int NumConstantSchedules = 0;
+        int NumExternalInterfaceSchedules = 0;
+        int NumExternalInterfaceFunctionalMockupUnitImportSchedules = 0;
+        int NumExternalInterfaceFunctionalMockupUnitExportSchedules = 0;
+
+        struct SchedObjInfo {
+            const char *name;
+            int *count;
+            int alphaAdj; // added to NumAlphas for MaxAlps calculation
+        };
+
+        std::array<SchedObjInfo, 14> schedObjs = {{
+            {"ScheduleTypeLimits", &NumScheduleTypes, 0},
+            {"Schedule:Day:Hourly", &NumHrDaySchedules, 0},
+            {"Schedule:Day:Interval", &NumIntDaySchedules, 0},
+            {"Schedule:Day:List", &NumLstDaySchedules, 0},
+            {"Schedule:Week:Daily", &NumRegWeekSchedules, 0},
+            {"Schedule:Week:Compact", &NumCptWeekSchedules, 0},
+            {"Schedule:Year", &NumRegSchedules, 0},
+            {"Schedule:Compact", &NumCptSchedules, 1},
+            {"Schedule:File", &NumCommaFileSchedules, 0},
+            {"Schedule:Constant", &NumConstantSchedules, 0},
+            {"ExternalInterface:Schedule", &NumExternalInterfaceSchedules, 1},
+            {"ExternalInterface:FunctionalMockupUnitImport:To:Schedule", &NumExternalInterfaceFunctionalMockupUnitImportSchedules, 1},
+            {"ExternalInterface:FunctionalMockupUnitExport:To:Schedule", &NumExternalInterfaceFunctionalMockupUnitExportSchedules, 1},
+            {"Output:Schedules", nullptr, 0},
+        }};
+
+        for (auto &obj : schedObjs) {
+            int numFound = s_ip->getNumObjectsFound(state, obj.name);
+            if (obj.count != nullptr) {
+                *obj.count = numFound;
+            }
+            if (numFound > 0 || obj.count == nullptr) {
+                s_ip->getObjectDefMaxArgs(state, obj.name, Count, NumAlphas, NumNumbers);
+                MaxNums = max(MaxNums, NumNumbers);
+                MaxAlps = max(MaxAlps, NumAlphas + obj.alphaAdj);
+            }
         }
 
-        CurrentModuleObject = "Schedule:Constant";
-        int NumConstantSchedules = s_ip->getNumObjectsFound(state, CurrentModuleObject);
-        if (NumConstantSchedules > 0) {
-            s_ip->getObjectDefMaxArgs(state, CurrentModuleObject, Count, NumAlphas, NumNumbers);
-            MaxNums = max(MaxNums, NumNumbers);
-            MaxAlps = max(MaxAlps, NumAlphas);
-        }
-        CurrentModuleObject = "ExternalInterface:Schedule";
-        int NumExternalInterfaceSchedules = s_ip->getNumObjectsFound(state, CurrentModuleObject);
-        // added for FMI
-        if (NumExternalInterfaceSchedules > 0) {
-            s_ip->getObjectDefMaxArgs(state, CurrentModuleObject, Count, NumAlphas, NumNumbers);
-            MaxNums = max(MaxNums, NumNumbers);
-            MaxAlps = max(MaxAlps, NumAlphas + 1);
-        }
-        // added for FMU Import
-        CurrentModuleObject = "ExternalInterface:FunctionalMockupUnitImport:To:Schedule";
-        int NumExternalInterfaceFunctionalMockupUnitImportSchedules = s_ip->getNumObjectsFound(state, CurrentModuleObject);
-        if (NumExternalInterfaceFunctionalMockupUnitImportSchedules > 0) {
-            s_ip->getObjectDefMaxArgs(state, CurrentModuleObject, Count, NumAlphas, NumNumbers);
-            MaxNums = max(MaxNums, NumNumbers);
-            MaxAlps = max(MaxAlps, NumAlphas + 1);
-        }
-        // added for FMU Export
-        CurrentModuleObject = "ExternalInterface:FunctionalMockupUnitExport:To:Schedule";
-        int NumExternalInterfaceFunctionalMockupUnitExportSchedules = s_ip->getNumObjectsFound(state, CurrentModuleObject);
-        if (NumExternalInterfaceFunctionalMockupUnitExportSchedules > 0) {
-            s_ip->getObjectDefMaxArgs(state, CurrentModuleObject, Count, NumAlphas, NumNumbers);
-            MaxNums = max(MaxNums, NumNumbers);
-            MaxAlps = max(MaxAlps, NumAlphas + 1);
-        }
-        CurrentModuleObject = "Output:Schedules";
-        s_ip->getObjectDefMaxArgs(state, CurrentModuleObject, Count, NumAlphas, NumNumbers);
-        MaxNums = max(MaxNums, NumNumbers);
-        MaxAlps = max(MaxAlps, NumAlphas);
+        std::string CurrentModuleObject;
 
         Alphas.allocate(MaxAlps); // Maximum Alphas possible
         cAlphaFields.allocate(MaxAlps);
