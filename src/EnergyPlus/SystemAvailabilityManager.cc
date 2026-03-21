@@ -2279,6 +2279,27 @@ namespace Avail {
         return 0.0;
     }
 
+    // Compute PreStartTime, PreStartTimeTmr and OverNightStartFlag from DeltaTime.
+    static void calcPreStartTimes(Real64 const DeltaTime,
+                                  Real64 const FanStartTime,
+                                  Real64 const FanStartTimeTmr,
+                                  Real64 &PreStartTime,
+                                  Real64 &PreStartTimeTmr,
+                                  bool &OverNightStartFlag)
+    {
+        PreStartTime = FanStartTime - DeltaTime;
+        if (PreStartTime < 0.0) {
+            PreStartTime = -0.1;
+        }
+        PreStartTimeTmr = FanStartTimeTmr - DeltaTime;
+        if (PreStartTimeTmr < 0.0) {
+            PreStartTimeTmr += 24.0;
+            OverNightStartFlag = true;
+        } else {
+            OverNightStartFlag = false;
+        }
+    }
+
     Status CalcOptStartSysAvailMgr(EnergyPlusData &state,
                                    int const SysAvailNum,  // number of the current scheduled system availability manager
                                    int const PriAirSysNum, // number of the primary air system affected by this Avail. Manager
@@ -2449,17 +2470,7 @@ namespace Avail {
                     if (DeltaTime > OptStartMgr.MaxOptStartTime) {
                         DeltaTime = OptStartMgr.MaxOptStartTime;
                     }
-                    PreStartTime = FanStartTime - DeltaTime;
-                    if (PreStartTime < 0.0) {
-                        PreStartTime = -0.1;
-                    }
-                    PreStartTimeTmr = FanStartTimeTmr - DeltaTime;
-                    if (PreStartTimeTmr < 0.0) {
-                        PreStartTimeTmr += 24.0;
-                        OverNightStartFlag = true;
-                    } else {
-                        OverNightStartFlag = false;
-                    }
+                    calcPreStartTimes(DeltaTime, FanStartTime, FanStartTimeTmr, PreStartTime, PreStartTimeTmr, OverNightStartFlag);
                     if (!OverNightStartFlag) {
                         if (FanStartTime == 0.0 || state.dataGlobal->PreviousHour > FanStartTime) {
                             availStatus = Status::NoAction;
@@ -2519,17 +2530,7 @@ namespace Avail {
                             if (DeltaTime > OptStartMgr.MaxOptStartTime) {
                                 DeltaTime = OptStartMgr.MaxOptStartTime;
                             }
-                            PreStartTime = FanStartTime - DeltaTime;
-                            if (PreStartTime < 0) {
-                                PreStartTime = -0.1;
-                            }
-                            PreStartTimeTmr = FanStartTimeTmr - DeltaTime;
-                            if (PreStartTimeTmr < 0) {
-                                PreStartTimeTmr += 24.0;
-                                OverNightStartFlag = true;
-                            } else {
-                                OverNightStartFlag = false;
-                            }
+                            calcPreStartTimes(DeltaTime, FanStartTime, FanStartTimeTmr, PreStartTime, PreStartTimeTmr, OverNightStartFlag);
                             if (!OverNightStartFlag) {
                                 if (FanStartTime == 0.0 || state.dataGlobal->CurrentTime > FanStartTime) {
                                     CycleOnFlag = false;
@@ -2589,17 +2590,7 @@ namespace Avail {
                         if (DeltaTime > OptStartMgr.MaxOptStartTime) {
                             DeltaTime = OptStartMgr.MaxOptStartTime;
                         }
-                        PreStartTime = FanStartTime - DeltaTime;
-                        if (PreStartTime < 0) {
-                            PreStartTime = -0.1;
-                        }
-                        PreStartTimeTmr = FanStartTimeTmr - DeltaTime;
-                        if (PreStartTimeTmr < 0) {
-                            PreStartTimeTmr += 24.0;
-                            OverNightStartFlag = true;
-                        } else {
-                            OverNightStartFlag = false;
-                        }
+                        calcPreStartTimes(DeltaTime, FanStartTime, FanStartTimeTmr, PreStartTime, PreStartTimeTmr, OverNightStartFlag);
                         if (!OverNightStartFlag) {
                             if (FanStartTime == 0.0 || state.dataGlobal->CurrentTime > FanStartTime) {
                                 availStatus = Status::NoAction;
@@ -2679,17 +2670,7 @@ namespace Avail {
                         if (DeltaTime > OptStartMgr.MaxOptStartTime) {
                             DeltaTime = OptStartMgr.MaxOptStartTime;
                         }
-                        PreStartTime = FanStartTime - DeltaTime;
-                        if (PreStartTime < 0) {
-                            PreStartTime = -0.1;
-                        }
-                        PreStartTimeTmr = FanStartTimeTmr - DeltaTime;
-                        if (PreStartTimeTmr < 0) {
-                            PreStartTimeTmr += 24.0;
-                            OverNightStartFlag = true;
-                        } else {
-                            OverNightStartFlag = false;
-                        }
+                        calcPreStartTimes(DeltaTime, FanStartTime, FanStartTimeTmr, PreStartTime, PreStartTimeTmr, OverNightStartFlag);
                         if (!OverNightStartFlag) {
                             if (FanStartTime == 0.0 || state.dataGlobal->CurrentTime > FanStartTime) {
                                 availStatus = Status::NoAction;
@@ -2751,17 +2732,7 @@ namespace Avail {
                         if (DeltaTime > OptStartMgr.MaxOptStartTime) {
                             DeltaTime = OptStartMgr.MaxOptStartTime;
                         }
-                        PreStartTime = FanStartTime - DeltaTime;
-                        if (PreStartTime < 0) {
-                            PreStartTime = -0.1;
-                        }
-                        PreStartTimeTmr = FanStartTimeTmr - DeltaTime;
-                        if (PreStartTimeTmr < 0) {
-                            PreStartTimeTmr += 24.0;
-                            OverNightStartFlag = true;
-                        } else {
-                            OverNightStartFlag = false;
-                        }
+                        calcPreStartTimes(DeltaTime, FanStartTime, FanStartTimeTmr, PreStartTime, PreStartTimeTmr, OverNightStartFlag);
                         if (!OverNightStartFlag) {
                             if (FanStartTime == 0.0 || state.dataGlobal->CurrentTime > FanStartTime) {
                                 availStatus = Status::NoAction;
@@ -2873,17 +2844,7 @@ namespace Avail {
                             if (DeltaTime > OptStartMgr.MaxOptStartTime) {
                                 DeltaTime = OptStartMgr.MaxOptStartTime;
                             }
-                            PreStartTime = FanStartTime - DeltaTime;
-                            if (PreStartTime < 0.0) {
-                                PreStartTime = -0.1;
-                            }
-                            PreStartTimeTmr = FanStartTimeTmr - DeltaTime;
-                            if (PreStartTimeTmr < 0.0) {
-                                PreStartTimeTmr += 24.0;
-                                OverNightStartFlag = true;
-                            } else {
-                                OverNightStartFlag = false;
-                            }
+                            calcPreStartTimes(DeltaTime, FanStartTime, FanStartTimeTmr, PreStartTime, PreStartTimeTmr, OverNightStartFlag);
                             if (!OverNightStartFlag) {
                                 if (FanStartTime == 0.0 || state.dataGlobal->CurrentTime > FanStartTime) {
                                     availStatus = Status::NoAction;
@@ -2992,17 +2953,7 @@ namespace Avail {
                         if (DeltaTime > OptStartMgr.MaxOptStartTime) {
                             DeltaTime = OptStartMgr.MaxOptStartTime;
                         }
-                        PreStartTime = FanStartTime - DeltaTime;
-                        if (PreStartTime < 0.0) {
-                            PreStartTime = -0.1;
-                        }
-                        PreStartTimeTmr = FanStartTimeTmr - DeltaTime;
-                        if (PreStartTimeTmr < 0.0) {
-                            PreStartTimeTmr += 24.0;
-                            OverNightStartFlag = true;
-                        } else {
-                            OverNightStartFlag = false;
-                        }
+                        calcPreStartTimes(DeltaTime, FanStartTime, FanStartTimeTmr, PreStartTime, PreStartTimeTmr, OverNightStartFlag);
                         if (!OverNightStartFlag) {
                             if (FanStartTime == 0.0 || state.dataGlobal->CurrentTime > FanStartTime) {
                                 availStatus = Status::NoAction;
@@ -3170,17 +3121,7 @@ namespace Avail {
                         if (DeltaTime > OptStartMgr.MaxOptStartTime) {
                             DeltaTime = OptStartMgr.MaxOptStartTime;
                         }
-                        PreStartTime = FanStartTime - DeltaTime;
-                        if (PreStartTime < 0.0) {
-                            PreStartTime = -0.1;
-                        }
-                        PreStartTimeTmr = FanStartTimeTmr - DeltaTime;
-                        if (PreStartTimeTmr < 0.0) {
-                            PreStartTimeTmr += 24.0;
-                            OverNightStartFlag = true;
-                        } else {
-                            OverNightStartFlag = false;
-                        }
+                        calcPreStartTimes(DeltaTime, FanStartTime, FanStartTimeTmr, PreStartTime, PreStartTimeTmr, OverNightStartFlag);
                         if (!OverNightStartFlag) {
                             if (FanStartTime == 0.0 || state.dataGlobal->CurrentTime > FanStartTime) {
                                 OSReportVarFlag = true;
@@ -3292,17 +3233,7 @@ namespace Avail {
                         if (DeltaTime > OptStartMgr.MaxOptStartTime) {
                             DeltaTime = OptStartMgr.MaxOptStartTime;
                         }
-                        PreStartTime = FanStartTime - DeltaTime;
-                        if (PreStartTime < 0) {
-                            PreStartTime = -0.1;
-                        }
-                        PreStartTimeTmr = FanStartTimeTmr - DeltaTime;
-                        if (PreStartTimeTmr < 0) {
-                            PreStartTimeTmr += 24.0;
-                            OverNightStartFlag = true;
-                        } else {
-                            OverNightStartFlag = false;
-                        }
+                        calcPreStartTimes(DeltaTime, FanStartTime, FanStartTimeTmr, PreStartTime, PreStartTimeTmr, OverNightStartFlag);
                         if (!OverNightStartFlag) {
                             if (FanStartTime == 0.0 || state.dataGlobal->CurrentTime > FanStartTime) {
                                 availStatus = Status::NoAction;
