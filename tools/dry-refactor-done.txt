@@ -53,3 +53,4 @@ src/EnergyPlus/ZoneEquipmentManager.cc:CalcAirFlowSimple
 src/EnergyPlus/SystemAvailabilityManager.cc:CalcOptStartSysAvailMgr
 src/EnergyPlus/Furnaces.cc:CalcNewZoneHeatCoolFlowRates
 src/EnergyPlus/Pumps.cc:GetPumpInput
+src/EnergyPlus/EvaporativeFluidCoolers.cc:SizeEvapFluidCooler
