@@ -7325,36 +7325,24 @@ void SetupReportInput(EnergyPlusData &state)
             const std::string_view txvTempSuffix =
                 sys.CoilFlag ? "TXV Liquid Temperature" : "Thermostatic Expansion Valve Liquid Temperature";
 
-            if (sys.NumStages == 1) {
-                SetupOutputVariable(state,
-                                    sysPrefix + " Total Compressor Electricity Rate",
-                                    Constant::Units::W,
-                                    sys.TotCompPower,
-                                    sysTsType,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    sysPrefix + " Total Compressor Electricity Energy",
-                                    Constant::Units::J,
-                                    sys.TotCompElecConsump,
-                                    sysTsType,
-                                    OutputProcessor::StoreType::Sum,
-                                    sys.Name);
-            } else if (sys.NumStages == 2) {
-                SetupOutputVariable(state,
-                                    sysPrefix + " Total Low Stage Compressor Electricity Rate",
-                                    Constant::Units::W,
-                                    sys.TotCompPower,
-                                    sysTsType,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    sysPrefix + " Total Low Stage Compressor Electricity Energy",
-                                    Constant::Units::J,
-                                    sys.TotCompElecConsump,
-                                    sysTsType,
-                                    OutputProcessor::StoreType::Sum,
-                                    sys.Name);
+            // For 2-stage systems, the primary compressor labels use "Low Stage" instead of just "Total"
+            const std::string_view compStageLabel = (sys.NumStages == 2) ? "Total Low Stage Compressor" : "Total Compressor";
+
+            SetupOutputVariable(state,
+                                format("{} {} Electricity Rate", sysPrefix, compStageLabel),
+                                Constant::Units::W,
+                                sys.TotCompPower,
+                                sysTsType,
+                                OutputProcessor::StoreType::Average,
+                                sys.Name);
+            SetupOutputVariable(state,
+                                format("{} {} Electricity Energy", sysPrefix, compStageLabel),
+                                Constant::Units::J,
+                                sys.TotCompElecConsump,
+                                sysTsType,
+                                OutputProcessor::StoreType::Sum,
+                                sys.Name);
+            if (sys.NumStages == 2) {
                 SetupOutputVariable(state,
                                     sysPrefix + " Total High Stage Compressor Electricity Rate",
                                     Constant::Units::W,
@@ -7376,7 +7364,7 @@ void SetupReportInput(EnergyPlusData &state)
                                     sysTsType,
                                     OutputProcessor::StoreType::Sum,
                                     sys.Name);
-            } // NumStages
+            } // NumStages == 2
             SetupOutputVariable(state,
                                 sysPrefix + " Average Compressor COP",
                                 Constant::Units::W_W,
@@ -7426,36 +7414,22 @@ void SetupReportInput(EnergyPlusData &state)
                                 sysTsType,
                                 OutputProcessor::StoreType::Sum,
                                 sys.Name);
-            if (sys.NumStages == 1) {
-                SetupOutputVariable(state,
-                                    sysPrefix + " Total Compressor Heat Transfer Rate",
-                                    Constant::Units::W,
-                                    sys.TotCompCapacity,
-                                    sysTsType,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    sysPrefix + " Total Compressor Heat Transfer Energy",
-                                    Constant::Units::J,
-                                    sys.TotCompCoolingEnergy,
-                                    sysTsType,
-                                    OutputProcessor::StoreType::Sum,
-                                    sys.Name); // indiv compressors go to meter, not system sum
-            } else if (sys.NumStages == 2) {
-                SetupOutputVariable(state,
-                                    sysPrefix + " Total Low Stage Compressor Heat Transfer Rate",
-                                    Constant::Units::W,
-                                    sys.TotCompCapacity,
-                                    sysTsType,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    sysPrefix + " Total Low Stage Compressor Heat Transfer Energy",
-                                    Constant::Units::J,
-                                    sys.TotCompCoolingEnergy,
-                                    sysTsType,
-                                    OutputProcessor::StoreType::Sum,
-                                    sys.Name); // indiv compressors go to meter, not system sum
+            // compStageLabel already computed above for the electricity block
+            SetupOutputVariable(state,
+                                format("{} {} Heat Transfer Rate", sysPrefix, compStageLabel),
+                                Constant::Units::W,
+                                sys.TotCompCapacity,
+                                sysTsType,
+                                OutputProcessor::StoreType::Average,
+                                sys.Name);
+            SetupOutputVariable(state,
+                                format("{} {} Heat Transfer Energy", sysPrefix, compStageLabel),
+                                Constant::Units::J,
+                                sys.TotCompCoolingEnergy,
+                                sysTsType,
+                                OutputProcessor::StoreType::Sum,
+                                sys.Name); // indiv compressors go to meter, not system sum
+            if (sys.NumStages == 2) {
                 SetupOutputVariable(state,
                                     sysPrefix + " Total High Stage Compressor Heat Transfer Rate",
                                     Constant::Units::W,
@@ -7470,7 +7444,7 @@ void SetupReportInput(EnergyPlusData &state)
                                     sysTsType,
                                     OutputProcessor::StoreType::Sum,
                                     sys.Name); // indiv compressors go to meter, not system sum
-            } // NumStages
+            } // NumStages == 2
             SetupOutputVariable(state,
                                 sysPrefix + " Net Rejected Heat Transfer Rate",
                                 Constant::Units::W,
@@ -7492,22 +7466,18 @@ void SetupReportInput(EnergyPlusData &state)
                                 sysTsType,
                                 OutputProcessor::StoreType::Average,
                                 sys.Name);
-            if (sys.NumStages == 1) {
+            {
+                const std::string_view massFlowLabel =
+                    (sys.NumStages == 2) ? "Estimated Low Stage Refrigerant Mass Flow Rate" : "Estimated Refrigerant Mass Flow Rate";
                 SetupOutputVariable(state,
-                                    sysPrefix + " Estimated Refrigerant Mass Flow Rate",
+                                    format("{} {}", sysPrefix, massFlowLabel),
                                     Constant::Units::kg_s,
                                     sys.RefMassFlowComps,
                                     sysTsType,
                                     OutputProcessor::StoreType::Average,
                                     sys.Name);
-            } else if (sys.NumStages == 2) {
-                SetupOutputVariable(state,
-                                    sysPrefix + " Estimated Low Stage Refrigerant Mass Flow Rate",
-                                    Constant::Units::kg_s,
-                                    sys.RefMassFlowComps,
-                                    sysTsType,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
+            }
+            if (sys.NumStages == 2) {
                 SetupOutputVariable(state,
                                     sysPrefix + " Estimated High Stage Refrigerant Mass Flow Rate",
                                     Constant::Units::kg_s,
@@ -7515,7 +7485,7 @@ void SetupReportInput(EnergyPlusData &state)
                                     sysTsType,
                                     OutputProcessor::StoreType::Average,
                                     sys.Name);
-            } // NumStages
+            }
             if (sys.NumStages == 2) {
                 SetupOutputVariable(state,
                                     sysPrefix + " Intercooler Temperature",
