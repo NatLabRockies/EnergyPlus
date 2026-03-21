@@ -5255,6 +5255,35 @@ static void updateMinADEffBySys(EnergyPlusData &state,
     }
 }
 
+// Compute design volume flows from mass flows and update Vot/Xs for ZoneSum OA method.
+// Shared between Coincident and NonCoincident sizing in the EndDay block of UpdateSysSizing.
+static void updateZoneSumVolFlows(EnergyPlusData &state,
+                                  DataSizing::SystemSizingData &sysSizing,
+                                  DataSizing::SystemSizingData const &finalSysSizing,
+                                  int AirLoopNum,
+                                  int NumZonesCooled,
+                                  int NumZonesHeated,
+                                  Real64 coolMassFlow,
+                                  Real64 heatMassFlow)
+{
+    sysSizing.DesCoolVolFlow = coolMassFlow / state.dataEnvrn->StdRhoAir;
+    sysSizing.DesHeatVolFlow = heatMassFlow / state.dataEnvrn->StdRhoAir;
+    state.dataSize->VotClgBySys(AirLoopNum) = finalSysSizing.SysUncOA;
+    state.dataSize->VotHtgBySys(AirLoopNum) = finalSysSizing.SysUncOA;
+    updateMinADEffBySys(state, state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex, NumZonesCooled, AirLoopNum);
+    updateMinADEffBySys(state, state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitHeatSizingIndex, NumZonesHeated, AirLoopNum);
+    if (sysSizing.DesCoolVolFlow > 0) {
+        state.dataSize->XsBySysCool(AirLoopNum) = min(1.0, finalSysSizing.SysUncOA / sysSizing.DesCoolVolFlow);
+    } else {
+        state.dataSize->XsBySysCool(AirLoopNum) = 0.0;
+    }
+    if (sysSizing.DesHeatVolFlow > 0) {
+        state.dataSize->XsBySysHeat(AirLoopNum) = min(1.0, finalSysSizing.SysUncOA / sysSizing.DesHeatVolFlow);
+    } else {
+        state.dataSize->XsBySysHeat(AirLoopNum) = 0.0;
+    }
+}
+
 // Copy cooling peak design data from a per-design-day SysSizing record into CalcSysSizing.
 // Used in EndSysSizingCalc to pick the peak across all design days for both sensible and total cooling.
 static void copyCoolPeakToCalcSysSizing(DataSizing::SystemSizingData &calcSS,
@@ -5920,22 +5949,8 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
             switch (sysSizing.SizingOption) {
             case DataSizing::SizingConcurrence::Coincident: {
                 if (finalSysSizing.SystemOAMethod == SysOAMethod::ZoneSum) {
-                    sysSizing.DesCoolVolFlow = sysSizing.CoinCoolMassFlow / state.dataEnvrn->StdRhoAir;
-                    sysSizing.DesHeatVolFlow = sysSizing.CoinHeatMassFlow / state.dataEnvrn->StdRhoAir;
-                    state.dataSize->VotClgBySys(AirLoopNum) = finalSysSizing.SysUncOA;
-                    state.dataSize->VotHtgBySys(AirLoopNum) = finalSysSizing.SysUncOA;
-                    updateMinADEffBySys(state, state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex, NumZonesCooled, AirLoopNum);
-                    updateMinADEffBySys(state, state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitHeatSizingIndex, NumZonesHeated, AirLoopNum);
-                    if (sysSizing.DesCoolVolFlow > 0) {
-                        state.dataSize->XsBySysCool(AirLoopNum) = min(1.0, finalSysSizing.SysUncOA / sysSizing.DesCoolVolFlow);
-                    } else {
-                        state.dataSize->XsBySysCool(AirLoopNum) = 0.0;
-                    }
-                    if (sysSizing.DesHeatVolFlow > 0) {
-                        state.dataSize->XsBySysHeat(AirLoopNum) = min(1.0, finalSysSizing.SysUncOA / sysSizing.DesHeatVolFlow);
-                    } else {
-                        state.dataSize->XsBySysHeat(AirLoopNum) = 0.0;
-                    }
+                    updateZoneSumVolFlows(state, sysSizing, finalSysSizing, AirLoopNum, NumZonesCooled, NumZonesHeated,
+                                          sysSizing.CoinCoolMassFlow, sysSizing.CoinHeatMassFlow);
                 } else if (finalSysSizing.SystemOAMethod == SysOAMethod::VRP ||
                            finalSysSizing.SystemOAMethod == SysOAMethod::SP) { // Ventilation Rate and Simplified Procedure
                     // cooling
@@ -6016,22 +6031,8 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
             } break;
             case DataSizing::SizingConcurrence::NonCoincident: {
                 if (finalSysSizing.SystemOAMethod == SysOAMethod::ZoneSum) {
-                    sysSizing.DesCoolVolFlow = sysSizing.NonCoinCoolMassFlow / state.dataEnvrn->StdRhoAir;
-                    sysSizing.DesHeatVolFlow = sysSizing.NonCoinHeatMassFlow / state.dataEnvrn->StdRhoAir;
-                    state.dataSize->VotClgBySys(AirLoopNum) = finalSysSizing.SysUncOA;
-                    state.dataSize->VotHtgBySys(AirLoopNum) = finalSysSizing.SysUncOA;
-                    updateMinADEffBySys(state, state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex, NumZonesCooled, AirLoopNum);
-                    updateMinADEffBySys(state, state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitHeatSizingIndex, NumZonesHeated, AirLoopNum);
-                    if (sysSizing.DesCoolVolFlow > 0) {
-                        state.dataSize->XsBySysCool(AirLoopNum) = min(1.0, finalSysSizing.SysUncOA / sysSizing.DesCoolVolFlow);
-                    } else {
-                        state.dataSize->XsBySysCool(AirLoopNum) = 0.0;
-                    }
-                    if (sysSizing.DesHeatVolFlow > 0) {
-                        state.dataSize->XsBySysHeat(AirLoopNum) = min(1.0, finalSysSizing.SysUncOA / sysSizing.DesHeatVolFlow);
-                    } else {
-                        state.dataSize->XsBySysHeat(AirLoopNum) = 0.0;
-                    }
+                    updateZoneSumVolFlows(state, sysSizing, finalSysSizing, AirLoopNum, NumZonesCooled, NumZonesHeated,
+                                          sysSizing.NonCoinCoolMassFlow, sysSizing.NonCoinHeatMassFlow);
                 } else if (finalSysSizing.SystemOAMethod == SysOAMethod::VRP ||
                            finalSysSizing.SystemOAMethod == SysOAMethod::SP) { // Ventilation Rate and Simplified Procedure
                     // cooling
