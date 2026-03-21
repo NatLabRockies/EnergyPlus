@@ -2264,6 +2264,21 @@ namespace Avail {
         return false;
     }
 
+
+    // Find the first time step in a day schedule where the value is positive.
+    // Returns the corresponding hour as a Real64, or 0.0 if none found.
+    static Real64 findFanStartTime(std::vector<Real64> const &dayVals, int const TimeStepsInHour)
+    {
+        for (int hr = 0; hr < Constant::iHoursInDay; ++hr) {
+            for (int ts = 0; ts < TimeStepsInHour; ++ts) {
+                if (dayVals[hr * TimeStepsInHour + ts] > 0.0) {
+                    return hr + (1.0 / TimeStepsInHour) * (ts + 1) - 0.01;
+                }
+            }
+        }
+        return 0.0;
+    }
+
     Status CalcOptStartSysAvailMgr(EnergyPlusData &state,
                                    int const SysAvailNum,  // number of the current scheduled system availability manager
                                    int const PriAirSysNum, // number of the primary air system affected by this Avail. Manager
@@ -2393,37 +2408,8 @@ namespace Avail {
             std::vector<Real64> const &dayVals = OptStartMgr.fanSched->getDayVals(state);
             std::vector<Real64> const &tmwDayVals = OptStartMgr.fanSched->getDayVals(state, TmrJDay, TmrDayOfWeek);
 
-            FanStartTime = 0.0;
-            FanStartTimeTmr = 0.0;
-            bool exitLoop = false; // exit loop on found data
-            for (int hr = 0; hr < Constant::iHoursInDay; ++hr) {
-                for (int ts = 0; ts <= state.dataGlobal->TimeStepsInHour; ++ts) {
-                    if (dayVals[hr * state.dataGlobal->TimeStepsInHour + ts] <= 0.0) {
-                        continue;
-                    }
-                    FanStartTime = hr + (1.0 / state.dataGlobal->TimeStepsInHour) * (ts + 1) - 0.01;
-                    exitLoop = true;
-                    break;
-                }
-                if (exitLoop) {
-                    break;
-                }
-            }
-
-            exitLoop = false;
-            for (int hr = 0; hr < Constant::iHoursInDay; ++hr) {
-                for (int ts = 0; ts < state.dataGlobal->TimeStepsInHour; ++ts) {
-                    if (tmwDayVals[hr * state.dataGlobal->TimeStepsInHour + ts] <= 0.0) {
-                        continue;
-                    }
-                    FanStartTimeTmr = hr + (1.0 / state.dataGlobal->TimeStepsInHour) * (ts + 1) - 0.01;
-                    exitLoop = true;
-                    break;
-                }
-                if (exitLoop) {
-                    break;
-                }
-            }
+            FanStartTime = findFanStartTime(dayVals, state.dataGlobal->TimeStepsInHour);
+            FanStartTimeTmr = findFanStartTime(tmwDayVals, state.dataGlobal->TimeStepsInHour);
 
             if (FanStartTimeTmr == 0.0) {
                 FanStartTimeTmr = 24.0;
