@@ -331,13 +331,14 @@ namespace Sched {
                                            ErrorObjectHeader const &eoh,
                                            DaySchedule const *daySched,
                                            Array1D_string const &Alphas,
-                                           Array1D_string const &cAlphaFields)
+                                           Array1D_string const &cAlphaFields,
+                                           std::string_view badIntPreposition = "in")
     {
         if (daySched->checkValsForLimitViolations(state)) {
             ShowWarningCustom(state, eoh, EnergyPlus::format("Values are outside of range for {}={}", cAlphaFields(2), Alphas(2)));
         }
         if (daySched->checkValsForBadIntegers(state)) {
-            ShowWarningCustom(state, eoh, EnergyPlus::format("One or more values are not integer in {}={}", cAlphaFields(2), Alphas(2)));
+            ShowWarningCustom(state, eoh, EnergyPlus::format("One or more values are not integer {} {}={}", badIntPreposition, cAlphaFields(2), Alphas(2)));
         }
     }
 
@@ -1064,7 +1065,7 @@ namespace Sched {
             // Now parcel into TS Value.... tsVals.resize() was called in AddDaySchedule()
             daySched->populateFromMinuteVals(state, minuteVals);
 
-            warnDayScheduleValueIssues(state, eoh, daySched, Alphas, cAlphaFields);
+            warnDayScheduleValueIssues(state, eoh, daySched, Alphas, cAlphaFields, "for");
         }
 
         //!! Get Week Schedules - regular

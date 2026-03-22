@@ -5317,7 +5317,7 @@ static void copyCoolPeakToCalcSysSizing(DataSizing::SystemSizingData &calcSS,
 
 // Copy heating peak fields from a per-design-day SysSizing record into CalcSysSizing.
 // Mirrors copyCoolPeakToCalcSysSizing but for the heating side.
-[[maybe_unused]] static void copyHeatPeakToCalcSysSizing(DataSizing::SystemSizingData &calcSS,
+static void copyHeatPeakToCalcSysSizing(DataSizing::SystemSizingData &calcSS,
                                                           DataSizing::SystemSizingData const &srcSS,
                                                           int DDNum)
 {

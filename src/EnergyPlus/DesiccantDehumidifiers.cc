@@ -203,7 +203,8 @@ namespace DesiccantDehumidifiers {
                                          DesiccantDehumidifierData &desicDehum,
                                          std::string_view currentModuleObject,
                                          std::string_view regenCoilName,
-                                         std::string_view alphaFieldName)
+                                         std::string_view alphaFieldName,
+                                         std::string_view routineNamePrefix = "")
     {
         bool anyError = false;
         bool errFlag = false;
@@ -211,7 +212,7 @@ namespace DesiccantDehumidifiers {
         desicDehum.RegenCoilIndex = WaterCoils::GetWaterCoilIndex(state, "COIL:HEATING:WATER", std::string(regenCoilName), errFlag);
         if (desicDehum.RegenCoilIndex == 0) {
             ShowSevereError(
-                state, EnergyPlus::format("{} illegal {} = {}", currentModuleObject, alphaFieldName, regenCoilName));
+                state, EnergyPlus::format("{}{} illegal {} = {}", routineNamePrefix, currentModuleObject, alphaFieldName, regenCoilName));
             ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", currentModuleObject, desicDehum.Name));
             anyError = true;
         }
@@ -254,7 +255,8 @@ namespace DesiccantDehumidifiers {
                                          std::string_view currentModuleObject,
                                          std::string_view regenCoilName,
                                          std::string_view alphaFieldName,
-                                         std::string_view callerName)
+                                         std::string_view callerName,
+                                         std::string_view routineNamePrefix = "")
     {
         bool anyError = false;
         bool errFlag = false;
@@ -262,7 +264,7 @@ namespace DesiccantDehumidifiers {
         desicDehum.RegenCoilIndex = SteamCoils::GetSteamCoilIndex(state, "COIL:HEATING:STEAM", std::string(regenCoilName), errFlag);
         if (desicDehum.RegenCoilIndex == 0) {
             ShowSevereError(
-                state, EnergyPlus::format("{} illegal {} = {}", currentModuleObject, alphaFieldName, regenCoilName));
+                state, EnergyPlus::format("{}{} illegal {} = {}", routineNamePrefix, currentModuleObject, alphaFieldName, regenCoilName));
             ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", currentModuleObject, desicDehum.Name));
             anyError = true;
         }
@@ -506,7 +508,7 @@ namespace DesiccantDehumidifiers {
                     ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
                     ErrorsFound = true;
                 } else { // mine data from heating coil object
-                    if (mineWaterHeatingCoilData(state, desicDehum, CurrentModuleObject, RegenCoilName, cAlphaFields(9))) {
+                    if (mineWaterHeatingCoilData(state, desicDehum, CurrentModuleObject, RegenCoilName, cAlphaFields(9), RoutineName)) {
                         ErrorsFound = true;
                     }
                 }
@@ -517,7 +519,7 @@ namespace DesiccantDehumidifiers {
                     ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
                     ErrorsFound = true;
                 } else { // mine data from the regeneration heating coil object
-                    if (mineSteamHeatingCoilData(state, desicDehum, CurrentModuleObject, RegenCoilName, cAlphaFields(9), dehumidifierDesiccantNoFans)) {
+                    if (mineSteamHeatingCoilData(state, desicDehum, CurrentModuleObject, RegenCoilName, cAlphaFields(9), dehumidifierDesiccantNoFans, RoutineName)) {
                         ErrorsFound = true;
                     }
                 }

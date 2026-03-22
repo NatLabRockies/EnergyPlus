@@ -340,8 +340,16 @@ namespace CondenserLoopTowers {
                                                                    Node::FluidType::Air, Node::ConnectionType::OutsideAirReference,
                                                                    Node::CompFluidStream::Primary, Node::ObjectIsNotParent);
             if (!OutAirNodeManager::CheckOutAirNodeNumber(state, tower.OutdoorAirInletNodeNum)) {
-                ShowSevereItemNotFound(state, ErrorObjectHeader{routineName, s_ipsc->cCurrentModuleObject, tower.Name},
-                                       s_ipsc->cAlphaFieldNames(oaAlpIdx), AlphArray(oaAlpIdx));
+                if (connType == Node::ConnectionObjectType::CoolingTowerSingleSpeed) {
+                    ShowSevereCustom(state,
+                                     ErrorObjectHeader{routineName, s_ipsc->cCurrentModuleObject, tower.Name},
+                                     EnergyPlus::format("Outdoor Air Inlet Node Name not valid Outdoor Air Node= {}"
+                                                        "does not appear in an OutdoorAir:NodeList or as an OutdoorAir:Node.",
+                                                        AlphArray(oaAlpIdx)));
+                } else {
+                    ShowSevereItemNotFound(state, ErrorObjectHeader{routineName, s_ipsc->cCurrentModuleObject, tower.Name},
+                                           s_ipsc->cAlphaFieldNames(oaAlpIdx), AlphArray(oaAlpIdx));
+                }
                 ErrorsFound = true;
             }
         }

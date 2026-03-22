@@ -2267,10 +2267,14 @@ namespace Avail {
 
     // Find the first time step in a day schedule where the value is positive.
     // Returns the corresponding hour as a Real64, or 0.0 if none found.
-    static Real64 findFanStartTime(std::vector<Real64> const &dayVals, int const TimeStepsInHour)
+    static Real64 findFanStartTime(std::vector<Real64> const &dayVals, int const TimeStepsInHour, bool const useInclusiveBound = false)
     {
+        // POSSIBLE BUG: original code uses ts <= TimeStepsInHour for today's schedule,
+        // which accesses index hr*TimeStepsInHour + TimeStepsInHour (potentially out-of-bounds).
+        // Preserving original behavior via useInclusiveBound parameter.
+        int const tsBound = useInclusiveBound ? TimeStepsInHour + 1 : TimeStepsInHour;
         for (int hr = 0; hr < Constant::iHoursInDay; ++hr) {
-            for (int ts = 0; ts < TimeStepsInHour; ++ts) {
+            for (int ts = 0; ts < tsBound; ++ts) {
                 if (dayVals[hr * TimeStepsInHour + ts] > 0.0) {
                     return hr + (1.0 / TimeStepsInHour) * (ts + 1) - 0.01;
                 }
@@ -2514,7 +2518,7 @@ namespace Avail {
             std::vector<Real64> const &dayVals = OptStartMgr.fanSched->getDayVals(state);
             std::vector<Real64> const &tmwDayVals = OptStartMgr.fanSched->getDayVals(state, TmrJDay, TmrDayOfWeek);
 
-            FanStartTime = findFanStartTime(dayVals, state.dataGlobal->TimeStepsInHour);
+            FanStartTime = findFanStartTime(dayVals, state.dataGlobal->TimeStepsInHour, true); // today: original used <=
             FanStartTimeTmr = findFanStartTime(tmwDayVals, state.dataGlobal->TimeStepsInHour);
 
             if (FanStartTimeTmr == 0.0) {

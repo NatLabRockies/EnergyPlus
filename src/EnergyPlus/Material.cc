@@ -611,7 +611,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         // Get SpectralAndAngle table names
         // Helper lambda to validate a SpectralAndAngle curve: checks that the curve
         // exists, is 2-D, and has the required angle (0-90) and wavelength (0.1-4.0) ranges.
-        auto validateSpecAngCurve = [&](int alphaFieldIdx, Curve::Curve *&curvePtr) {
+        auto validateSpecAngCurve = [&](int alphaFieldIdx, Curve::Curve *&curvePtr, Curve::Curve *inputLimitsOverride = nullptr) {
             if (s_ipsc->lAlphaFieldBlanks(alphaFieldIdx)) {
                 ErrorsFound = true;
                 ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(alphaFieldIdx), s_ipsc->cAlphaFieldNames(2), "SpectralAndAngle");
@@ -623,10 +623,11 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
                     state, eoh, s_ipsc->cAlphaFieldNames(alphaFieldIdx), s_ipsc->cAlphaArgs(alphaFieldIdx), "2", curvePtr->numDims);
                 ErrorsFound = true;
             } else {
-                Real64 minAng = curvePtr->inputLimits[0].min;
-                Real64 maxAng = curvePtr->inputLimits[0].max;
-                Real64 minLam = curvePtr->inputLimits[1].min;
-                Real64 maxLam = curvePtr->inputLimits[1].max;
+                Curve::Curve *limitsSource = (inputLimitsOverride != nullptr) ? inputLimitsOverride : curvePtr;
+                Real64 minAng = limitsSource->inputLimits[0].min;
+                Real64 maxAng = limitsSource->inputLimits[0].max;
+                Real64 minLam = limitsSource->inputLimits[1].min;
+                Real64 maxLam = limitsSource->inputLimits[1].max;
 
                 if (minAng > 1.0e-6) {
                     ErrorsFound = true;
@@ -666,7 +667,8 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         if (mat->windowOpticalData == Window::OpticalDataModel::SpectralAndAngle) {
             validateSpecAngCurve(5, mat->GlassSpecAngTransCurve);
             validateSpecAngCurve(6, mat->GlassSpecAngFReflCurve);
-            validateSpecAngCurve(7, mat->GlassSpecAngBReflCurve);
+            // POSSIBLE BUG: original code validates BReflCurve using FReflCurve's inputLimits
+            validateSpecAngCurve(7, mat->GlassSpecAngBReflCurve, mat->GlassSpecAngFReflCurve);
         }
     }
 

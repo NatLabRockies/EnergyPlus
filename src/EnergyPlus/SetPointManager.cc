@@ -671,7 +671,12 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
             } // switch (spm->type)
 
             // Warn once for all three variants that loaded minSetTemp/maxSetTemp above
-            if (spm->maxSetTemp < spm->minSetTemp) {
+            if (spm->maxSetTemp < spm->minSetTemp &&
+                (spm->type == SPMType::OutsideAirPretreat || spm->type == SPMType::Warmest || spm->type == SPMType::Coldest ||
+                 spm->type == SPMType::WarmestTempFlow || spm->type == SPMType::MZCoolingAverage ||
+                 spm->type == SPMType::MZHeatingAverage || spm->type == SPMType::FollowOutsideAirTemp ||
+                 spm->type == SPMType::FollowGroundTemp || spm->type == SPMType::SZReheat || spm->type == SPMType::SZHeating ||
+                 spm->type == SPMType::SZCooling || spm->type == SPMType::FollowSystemNodeTemp)) {
                 ShowWarningError(state, EnergyPlus::format("{}: {}=\"{}\",", routineName, cCurrentModuleObject, spm->Name));
                 ShowContinueError(
                     state,

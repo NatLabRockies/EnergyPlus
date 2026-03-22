@@ -1068,7 +1068,8 @@ namespace Furnaces {
                 errFlag = false;
                 thisFurnace.DesignHeatingCapacity = HeatingCoils::GetCoilCapacity(state, HeatingCoilType, HeatingCoilName, errFlag);
                 if (errFlag) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+                    // Original HeatOnly path used "...occurs in {} ={}" (no space before =); HeatCool used "...occurs in {} = {}"
+                    ShowContinueError(state, EnergyPlus::format(setHWCoilAirInletNode ? "...occurs in {} ={}" : "...occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
                     ErrorsFound = true;
                 }
                 errFlag = false;
@@ -1077,13 +1078,13 @@ namespace Furnaces {
                     thisFurnace.HWCoilAirInletNode = HeatingCoilInletNode;
                 }
                 if (errFlag) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+                    ShowContinueError(state, EnergyPlus::format(setHWCoilAirInletNode ? "...occurs in {} ={}" : "...occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
                     ErrorsFound = true;
                 }
                 errFlag = false;
                 HeatingCoilOutletNode = HeatingCoils::GetCoilOutletNode(state, HeatingCoilType, HeatingCoilName, errFlag);
                 if (errFlag) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+                    ShowContinueError(state, EnergyPlus::format(setHWCoilAirInletNode ? "...occurs in {} ={}" : "...occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
                     ErrorsFound = true;
                 }
                 if (plfCurveIndex != nullptr) {
