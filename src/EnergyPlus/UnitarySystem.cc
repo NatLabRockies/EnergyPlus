@@ -2568,7 +2568,12 @@ namespace UnitarySystems {
         }
 
         if (this->OAMixerExists) {
-            Real64 minOA = state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).MinOA;
+            // Only access FinalZoneSizing when at least one OA flow is autosized or a sizing design run exists,
+            // since FinalZoneSizing may not be allocated otherwise (e.g., when ZoneSizingRunDone is false).
+            bool needDesignOA = SizingDesRunThisZone || this->m_CoolOutAirVolFlow == DataSizing::AutoSize ||
+                                this->m_HeatOutAirVolFlow == DataSizing::AutoSize ||
+                                this->m_NoCoolHeatOutAirVolFlow == DataSizing::AutoSize;
+            Real64 minOA = needDesignOA ? state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).MinOA : 0.0;
             sizeOutdoorAirFlow(
                 state, this->m_CoolOutAirVolFlow, minOA, SizingDesRunThisZone, this->UnitType, this->Name, "During Cooling Operation");
             sizeOutdoorAirFlow(
