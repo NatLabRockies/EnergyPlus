@@ -7329,14 +7329,14 @@ void SetupReportInput(EnergyPlusData &state)
             const std::string_view compStageLabel = (sys.NumStages == 2) ? "Total Low Stage Compressor" : "Total Compressor";
 
             SetupOutputVariable(state,
-                                format("{} {} Electricity Rate", sysPrefix, compStageLabel),
+                                EnergyPlus::format("{} {} Electricity Rate", sysPrefix, compStageLabel),
                                 Constant::Units::W,
                                 sys.TotCompPower,
                                 sysTsType,
                                 OutputProcessor::StoreType::Average,
                                 sys.Name);
             SetupOutputVariable(state,
-                                format("{} {} Electricity Energy", sysPrefix, compStageLabel),
+                                EnergyPlus::format("{} {} Electricity Energy", sysPrefix, compStageLabel),
                                 Constant::Units::J,
                                 sys.TotCompElecConsump,
                                 sysTsType,
@@ -7373,14 +7373,14 @@ void SetupReportInput(EnergyPlusData &state)
                                 OutputProcessor::StoreType::Average,
                                 sys.Name);
             SetupOutputVariable(state,
-                                format("{} {}", sysPrefix, coolingRateSuffix),
+                                EnergyPlus::format("{} {}", sysPrefix, coolingRateSuffix),
                                 Constant::Units::W,
                                 sys.TotalCoolingLoad,
                                 sysTsType,
                                 OutputProcessor::StoreType::Average,
                                 sys.Name);
             SetupOutputVariable(state,
-                                format("{} {}", sysPrefix, coolingEnergySuffix),
+                                EnergyPlus::format("{} {}", sysPrefix, coolingEnergySuffix),
                                 Constant::Units::J,
                                 sys.TotalCoolingEnergy,
                                 sysTsType,
@@ -7416,14 +7416,14 @@ void SetupReportInput(EnergyPlusData &state)
                                 sys.Name);
             // compStageLabel already computed above for the electricity block
             SetupOutputVariable(state,
-                                format("{} {} Heat Transfer Rate", sysPrefix, compStageLabel),
+                                EnergyPlus::format("{} {} Heat Transfer Rate", sysPrefix, compStageLabel),
                                 Constant::Units::W,
                                 sys.TotCompCapacity,
                                 sysTsType,
                                 OutputProcessor::StoreType::Average,
                                 sys.Name);
             SetupOutputVariable(state,
-                                format("{} {} Heat Transfer Energy", sysPrefix, compStageLabel),
+                                EnergyPlus::format("{} {} Heat Transfer Energy", sysPrefix, compStageLabel),
                                 Constant::Units::J,
                                 sys.TotCompCoolingEnergy,
                                 sysTsType,
@@ -7470,7 +7470,7 @@ void SetupReportInput(EnergyPlusData &state)
                 const std::string_view massFlowLabel =
                     (sys.NumStages == 2) ? "Estimated Low Stage Refrigerant Mass Flow Rate" : "Estimated Refrigerant Mass Flow Rate";
                 SetupOutputVariable(state,
-                                    format("{} {}", sysPrefix, massFlowLabel),
+                                    EnergyPlus::format("{} {}", sysPrefix, massFlowLabel),
                                     Constant::Units::kg_s,
                                     sys.RefMassFlowComps,
                                     sysTsType,
@@ -7517,14 +7517,14 @@ void SetupReportInput(EnergyPlusData &state)
                                 OutputProcessor::StoreType::Average,
                                 sys.Name);
             SetupOutputVariable(state,
-                                format("{} {}", sysPrefix, suctionTempSuffix),
+                                EnergyPlus::format("{} {}", sysPrefix, suctionTempSuffix),
                                 Constant::Units::C,
                                 sys.TCompIn,
                                 sysTsType,
                                 OutputProcessor::StoreType::Average,
                                 sys.Name);
             SetupOutputVariable(state,
-                                format("{} {}", sysPrefix, txvTempSuffix),
+                                EnergyPlus::format("{} {}", sysPrefix, txvTempSuffix),
                                 Constant::Units::C,
                                 sys.TLiqInActual,
                                 sysTsType,
