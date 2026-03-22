@@ -3289,70 +3289,70 @@ namespace InternalHeatGains {
                                     std::string_view prefix)
     {
         SetupOutputVariable(state,
-                            format("{} Total Internal Radiant Heating Energy", prefix),
+                            EnergyPlus::format("{} Total Internal Radiant Heating Energy", prefix),
                             Constant::Units::J,
                             rpt.TotRadiantGain,
                             OutputProcessor::TimeStepType::Zone,
                             OutputProcessor::StoreType::Sum,
                             name);
         SetupOutputVariable(state,
-                            format("{} Total Internal Radiant Heating Rate", prefix),
+                            EnergyPlus::format("{} Total Internal Radiant Heating Rate", prefix),
                             Constant::Units::W,
                             rpt.TotRadiantGainRate,
                             OutputProcessor::TimeStepType::Zone,
                             OutputProcessor::StoreType::Average,
                             name);
         SetupOutputVariable(state,
-                            format("{} Total Internal Visible Radiation Heating Energy", prefix),
+                            EnergyPlus::format("{} Total Internal Visible Radiation Heating Energy", prefix),
                             Constant::Units::J,
                             rpt.TotVisHeatGain,
                             OutputProcessor::TimeStepType::Zone,
                             OutputProcessor::StoreType::Sum,
                             name);
         SetupOutputVariable(state,
-                            format("{} Total Internal Visible Radiation Heating Rate", prefix),
+                            EnergyPlus::format("{} Total Internal Visible Radiation Heating Rate", prefix),
                             Constant::Units::W,
                             rpt.TotVisHeatGainRate,
                             OutputProcessor::TimeStepType::Zone,
                             OutputProcessor::StoreType::Average,
                             name);
         SetupOutputVariable(state,
-                            format("{} Total Internal Convective Heating Energy", prefix),
+                            EnergyPlus::format("{} Total Internal Convective Heating Energy", prefix),
                             Constant::Units::J,
                             rpt.TotConvectiveGain,
                             OutputProcessor::TimeStepType::Zone,
                             OutputProcessor::StoreType::Sum,
                             name);
         SetupOutputVariable(state,
-                            format("{} Total Internal Convective Heating Rate", prefix),
+                            EnergyPlus::format("{} Total Internal Convective Heating Rate", prefix),
                             Constant::Units::W,
                             rpt.TotConvectiveGainRate,
                             OutputProcessor::TimeStepType::Zone,
                             OutputProcessor::StoreType::Average,
                             name);
         SetupOutputVariable(state,
-                            format("{} Total Internal Latent Gain Energy", prefix),
+                            EnergyPlus::format("{} Total Internal Latent Gain Energy", prefix),
                             Constant::Units::J,
                             rpt.TotLatentGain,
                             OutputProcessor::TimeStepType::Zone,
                             OutputProcessor::StoreType::Sum,
                             name);
         SetupOutputVariable(state,
-                            format("{} Total Internal Latent Gain Rate", prefix),
+                            EnergyPlus::format("{} Total Internal Latent Gain Rate", prefix),
                             Constant::Units::W,
                             rpt.TotLatentGainRate,
                             OutputProcessor::TimeStepType::Zone,
                             OutputProcessor::StoreType::Average,
                             name);
         SetupOutputVariable(state,
-                            format("{} Total Internal Total Heating Energy", prefix),
+                            EnergyPlus::format("{} Total Internal Total Heating Energy", prefix),
                             Constant::Units::J,
                             rpt.TotTotalHeatGain,
                             OutputProcessor::TimeStepType::Zone,
                             OutputProcessor::StoreType::Sum,
                             name);
         SetupOutputVariable(state,
-                            format("{} Total Internal Total Heating Rate", prefix),
+                            EnergyPlus::format("{} Total Internal Total Heating Rate", prefix),
                             Constant::Units::W,
                             rpt.TotTotalHeatGainRate,
                             OutputProcessor::TimeStepType::Zone,
@@ -3367,27 +3367,27 @@ namespace InternalHeatGains {
                                             std::string_view prefix)
     {
         SetupOutputVariable(
-            state, format("{} People Occupant Count", prefix), Constant::Units::None, rpt.PeopleNumOcc, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+            state, EnergyPlus::format("{} People Occupant Count", prefix), Constant::Units::None, rpt.PeopleNumOcc, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
         SetupOutputVariable(
-            state, format("{} People Radiant Heating Energy", prefix), Constant::Units::J, rpt.PeopleRadGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+            state, EnergyPlus::format("{} People Radiant Heating Energy", prefix), Constant::Units::J, rpt.PeopleRadGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
         SetupOutputVariable(
-            state, format("{} People Radiant Heating Rate", prefix), Constant::Units::W, rpt.PeopleRadGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+            state, EnergyPlus::format("{} People Radiant Heating Rate", prefix), Constant::Units::W, rpt.PeopleRadGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
         SetupOutputVariable(
-            state, format("{} People Convective Heating Energy", prefix), Constant::Units::J, rpt.PeopleConGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+            state, EnergyPlus::format("{} People Convective Heating Energy", prefix), Constant::Units::J, rpt.PeopleConGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
         SetupOutputVariable(
-            state, format("{} People Convective Heating Rate", prefix), Constant::Units::W, rpt.PeopleConGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+            state, EnergyPlus::format("{} People Convective Heating Rate", prefix), Constant::Units::W, rpt.PeopleConGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
         SetupOutputVariable(
-            state, format("{} People Sensible Heating Energy", prefix), Constant::Units::J, rpt.PeopleSenGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+            state, EnergyPlus::format("{} People Sensible Heating Energy", prefix), Constant::Units::J, rpt.PeopleSenGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
         SetupOutputVariable(
-            state, format("{} People Sensible Heating Rate", prefix), Constant::Units::W, rpt.PeopleSenGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+            state, EnergyPlus::format("{} People Sensible Heating Rate", prefix), Constant::Units::W, rpt.PeopleSenGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
         SetupOutputVariable(
-            state, format("{} People Latent Gain Energy", prefix), Constant::Units::J, rpt.PeopleLatGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+            state, EnergyPlus::format("{} People Latent Gain Energy", prefix), Constant::Units::J, rpt.PeopleLatGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
         SetupOutputVariable(
-            state, format("{} People Latent Gain Rate", prefix), Constant::Units::W, rpt.PeopleLatGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+            state, EnergyPlus::format("{} People Latent Gain Rate", prefix), Constant::Units::W, rpt.PeopleLatGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
         SetupOutputVariable(
-            state, format("{} People Total Heating Energy", prefix), Constant::Units::J, rpt.PeopleTotGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+            state, EnergyPlus::format("{} People Total Heating Energy", prefix), Constant::Units::J, rpt.PeopleTotGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
         SetupOutputVariable(
-            state, format("{} People Total Heating Rate", prefix), Constant::Units::W, rpt.PeopleTotGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+            state, EnergyPlus::format("{} People Total Heating Rate", prefix), Constant::Units::W, rpt.PeopleTotGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
     }
 
     // Register the 12 Lights zone/space total output variables for a single zone or space.
@@ -3397,29 +3397,29 @@ namespace InternalHeatGains {
                                             std::string_view prefix)
     {
         SetupOutputVariable(
-            state, format("{} Lights Electricity Rate", prefix), Constant::Units::W, rpt.LtsPower, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+            state, EnergyPlus::format("{} Lights Electricity Rate", prefix), Constant::Units::W, rpt.LtsPower, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
         SetupOutputVariable(
-            state, format("{} Lights Electricity Energy", prefix), Constant::Units::J, rpt.LtsElecConsump, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+            state, EnergyPlus::format("{} Lights Electricity Energy", prefix), Constant::Units::J, rpt.LtsElecConsump, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
         SetupOutputVariable(
-            state, format("{} Lights Radiant Heating Energy", prefix), Constant::Units::J, rpt.LtsRadGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+            state, EnergyPlus::format("{} Lights Radiant Heating Energy", prefix), Constant::Units::J, rpt.LtsRadGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
         SetupOutputVariable(
-            state, format("{} Lights Radiant Heating Rate", prefix), Constant::Units::W, rpt.LtsRadGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+            state, EnergyPlus::format("{} Lights Radiant Heating Rate", prefix), Constant::Units::W, rpt.LtsRadGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
         SetupOutputVariable(
-            state, format("{} Lights Visible Radiation Heating Energy", prefix), Constant::Units::J, rpt.LtsVisGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+            state, EnergyPlus::format("{} Lights Visible Radiation Heating Energy", prefix), Constant::Units::J, rpt.LtsVisGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
         SetupOutputVariable(
-            state, format("{} Lights Visible Radiation Heating Rate", prefix), Constant::Units::W, rpt.LtsVisGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+            state, EnergyPlus::format("{} Lights Visible Radiation Heating Rate", prefix), Constant::Units::W, rpt.LtsVisGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
         SetupOutputVariable(
-            state, format("{} Lights Convective Heating Energy", prefix), Constant::Units::J, rpt.LtsConGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+            state, EnergyPlus::format("{} Lights Convective Heating Energy", prefix), Constant::Units::J, rpt.LtsConGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
         SetupOutputVariable(
-            state, format("{} Lights Convective Heating Rate", prefix), Constant::Units::W, rpt.LtsConGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+            state, EnergyPlus::format("{} Lights Convective Heating Rate", prefix), Constant::Units::W, rpt.LtsConGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
         SetupOutputVariable(
-            state, format("{} Lights Return Air Heating Energy", prefix), Constant::Units::J, rpt.LtsRetAirGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+            state, EnergyPlus::format("{} Lights Return Air Heating Energy", prefix), Constant::Units::J, rpt.LtsRetAirGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
         SetupOutputVariable(
-            state, format("{} Lights Return Air Heating Rate", prefix), Constant::Units::W, rpt.LtsRetAirGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+            state, EnergyPlus::format("{} Lights Return Air Heating Rate", prefix), Constant::Units::W, rpt.LtsRetAirGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
         SetupOutputVariable(
-            state, format("{} Lights Total Heating Energy", prefix), Constant::Units::J, rpt.LtsTotGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+            state, EnergyPlus::format("{} Lights Total Heating Energy", prefix), Constant::Units::J, rpt.LtsTotGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
         SetupOutputVariable(
-            state, format("{} Lights Total Heating Rate", prefix), Constant::Units::W, rpt.LtsTotGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+            state, EnergyPlus::format("{} Lights Total Heating Rate", prefix), Constant::Units::W, rpt.LtsTotGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
     }
 
     // Register the 12 standard equipment zone/space output variables (Power, Consump, Rad, Con, Lat, Lost, Tot and their rates).
@@ -3445,29 +3445,29 @@ namespace InternalHeatGains {
                                            Real64 ZRV::*totGainRate)
     {
         SetupOutputVariable(
-            state, format("{} {} {} Rate", prefix, equipLabel, energyLabel), Constant::Units::W, rpt.*power, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+            state, EnergyPlus::format("{} {} {} Rate", prefix, equipLabel, energyLabel), Constant::Units::W, rpt.*power, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
         SetupOutputVariable(
-            state, format("{} {} {} Energy", prefix, equipLabel, energyLabel), Constant::Units::J, rpt.*consump, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+            state, EnergyPlus::format("{} {} {} Energy", prefix, equipLabel, energyLabel), Constant::Units::J, rpt.*consump, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
         SetupOutputVariable(
-            state, format("{} {} Radiant Heating Energy", prefix, equipLabel), Constant::Units::J, rpt.*radGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+            state, EnergyPlus::format("{} {} Radiant Heating Energy", prefix, equipLabel), Constant::Units::J, rpt.*radGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
         SetupOutputVariable(
-            state, format("{} {} Radiant Heating Rate", prefix, equipLabel), Constant::Units::W, rpt.*radGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+            state, EnergyPlus::format("{} {} Radiant Heating Rate", prefix, equipLabel), Constant::Units::W, rpt.*radGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
         SetupOutputVariable(
-            state, format("{} {} Convective Heating Energy", prefix, equipLabel), Constant::Units::J, rpt.*conGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+            state, EnergyPlus::format("{} {} Convective Heating Energy", prefix, equipLabel), Constant::Units::J, rpt.*conGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
         SetupOutputVariable(
-            state, format("{} {} Convective Heating Rate", prefix, equipLabel), Constant::Units::W, rpt.*conGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+            state, EnergyPlus::format("{} {} Convective Heating Rate", prefix, equipLabel), Constant::Units::W, rpt.*conGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
         SetupOutputVariable(
-            state, format("{} {} Latent Gain Energy", prefix, equipLabel), Constant::Units::J, rpt.*latGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+            state, EnergyPlus::format("{} {} Latent Gain Energy", prefix, equipLabel), Constant::Units::J, rpt.*latGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
         SetupOutputVariable(
-            state, format("{} {} Latent Gain Rate", prefix, equipLabel), Constant::Units::W, rpt.*latGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+            state, EnergyPlus::format("{} {} Latent Gain Rate", prefix, equipLabel), Constant::Units::W, rpt.*latGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
         SetupOutputVariable(
-            state, format("{} {} Lost Heat Energy", prefix, equipLabel), Constant::Units::J, rpt.*lost, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+            state, EnergyPlus::format("{} {} Lost Heat Energy", prefix, equipLabel), Constant::Units::J, rpt.*lost, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
         SetupOutputVariable(
-            state, format("{} {} Lost Heat Rate", prefix, equipLabel), Constant::Units::W, rpt.*lostRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+            state, EnergyPlus::format("{} {} Lost Heat Rate", prefix, equipLabel), Constant::Units::W, rpt.*lostRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
         SetupOutputVariable(
-            state, format("{} {} Total Heating Energy", prefix, equipLabel), Constant::Units::J, rpt.*totGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
+            state, EnergyPlus::format("{} {} Total Heating Energy", prefix, equipLabel), Constant::Units::J, rpt.*totGain, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Sum, name);
         SetupOutputVariable(
-            state, format("{} {} Total Heating Rate", prefix, equipLabel), Constant::Units::W, rpt.*totGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
+            state, EnergyPlus::format("{} {} Total Heating Rate", prefix, equipLabel), Constant::Units::W, rpt.*totGainRate, OutputProcessor::TimeStepType::Zone, OutputProcessor::StoreType::Average, name);
     }
 
     // Register the standard per-object output variables for equipment that uses ZoneEquipData.
