@@ -350,7 +350,7 @@ namespace VariableSpeedCoils {
             std::string_view prefix = isCooling ? "Cooling Coil" : "Heating Coil";
             auto endUseCat = isCooling ? OutputProcessor::EndUseCat::Cooling : OutputProcessor::EndUseCat::Heating;
             auto coilsEndUseCat = isCooling ? OutputProcessor::EndUseCat::CoolingCoils : OutputProcessor::EndUseCat::HeatingCoils;
-            SetupOutputVariable(state, format("{} Electricity Energy", prefix), Constant::Units::J, c.Energy,
+            SetupOutputVariable(state, EnergyPlus::format("{} Electricity Energy", prefix), Constant::Units::J, c.Energy,
                                 OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, c.Name,
                                 Constant::eResource::Electricity, OutputProcessor::Group::HVAC, endUseCat);
             std::string totalName = isCooling ? "Cooling Coil Total Cooling Energy" : "Heating Coil Heating Energy";
