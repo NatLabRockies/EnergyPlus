@@ -17200,21 +17200,21 @@ namespace UnitarySystems {
                     auto setupCoilSpeedVars = [&](std::string_view coilKind) {
                         auto &sys = state.dataUnitarySystems->unitarySys[sysNum];
                         SetupOutputVariable(state,
-                                            format("Unitary System {} Cycling Ratio", coilKind),
+                                            EnergyPlus::format("Unitary System {} Cycling Ratio", coilKind),
                                             Constant::Units::None,
                                             sys.m_CycRatio,
                                             OutputProcessor::TimeStepType::System,
                                             OutputProcessor::StoreType::Average,
                                             sys.Name);
                         SetupOutputVariable(state,
-                                            format("Unitary System {} Speed Ratio", coilKind),
+                                            EnergyPlus::format("Unitary System {} Speed Ratio", coilKind),
                                             Constant::Units::None,
                                             sys.m_SpeedRatio,
                                             OutputProcessor::TimeStepType::System,
                                             OutputProcessor::StoreType::Average,
                                             sys.Name);
                         SetupOutputVariable(state,
-                                            format("Unitary System {} Speed Level", coilKind),
+                                            EnergyPlus::format("Unitary System {} Speed Level", coilKind),
                                             Constant::Units::None,
                                             sys.m_SpeedNum,
                                             OutputProcessor::TimeStepType::System,
