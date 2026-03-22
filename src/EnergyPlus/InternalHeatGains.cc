@@ -3963,8 +3963,101 @@ namespace InternalHeatGains {
             // Set flags for zone and space total report variables
             addZoneOutputs(state.dataHeatBal->ZoneGas(gasEqNum).ZonePtr) = true;
             addSpaceOutputs(state.dataHeatBal->ZoneGas(gasEqNum).spaceIndex) = true;
-            setupEquipObjectOutputs(state, state.dataHeatBal->ZoneGas(gasEqNum),
-                                    "Gas Equipment", "NaturalGas", Constant::eResource::NaturalGas);
+            // Gas Equipment uses a different output variable order than other equipment types:
+            // Rate, Energy, then all Energy variables grouped together, then all Rate variables.
+            SetupOutputVariable(state,
+                                "Gas Equipment NaturalGas Rate",
+                                Constant::Units::W,
+                                state.dataHeatBal->ZoneGas(gasEqNum).Power,
+                                OutputProcessor::TimeStepType::Zone,
+                                OutputProcessor::StoreType::Average,
+                                state.dataHeatBal->ZoneGas(gasEqNum).Name);
+            SetupOutputVariable(state,
+                                "Gas Equipment NaturalGas Energy",
+                                Constant::Units::J,
+                                state.dataHeatBal->ZoneGas(gasEqNum).Consumption,
+                                OutputProcessor::TimeStepType::Zone,
+                                OutputProcessor::StoreType::Sum,
+                                state.dataHeatBal->ZoneGas(gasEqNum).Name,
+                                Constant::eResource::NaturalGas,
+                                OutputProcessor::Group::Building,
+                                OutputProcessor::EndUseCat::InteriorEquipment,
+                                state.dataHeatBal->ZoneGas(gasEqNum).EndUseSubcategory,
+                                state.dataHeatBal->Zone(state.dataHeatBal->ZoneGas(gasEqNum).ZonePtr).Name,
+                                state.dataHeatBal->Zone(state.dataHeatBal->ZoneGas(gasEqNum).ZonePtr).Multiplier,
+                                state.dataHeatBal->Zone(state.dataHeatBal->ZoneGas(gasEqNum).ZonePtr).ListMultiplier,
+                                state.dataHeatBal->space(state.dataHeatBal->ZoneGas(gasEqNum).spaceIndex).spaceType);
+
+            SetupOutputVariable(state,
+                                "Gas Equipment Radiant Heating Energy",
+                                Constant::Units::J,
+                                state.dataHeatBal->ZoneGas(gasEqNum).RadGainEnergy,
+                                OutputProcessor::TimeStepType::Zone,
+                                OutputProcessor::StoreType::Sum,
+                                state.dataHeatBal->ZoneGas(gasEqNum).Name);
+            SetupOutputVariable(state,
+                                "Gas Equipment Convective Heating Energy",
+                                Constant::Units::J,
+                                state.dataHeatBal->ZoneGas(gasEqNum).ConGainEnergy,
+                                OutputProcessor::TimeStepType::Zone,
+                                OutputProcessor::StoreType::Sum,
+                                state.dataHeatBal->ZoneGas(gasEqNum).Name);
+            SetupOutputVariable(state,
+                                "Gas Equipment Latent Gain Energy",
+                                Constant::Units::J,
+                                state.dataHeatBal->ZoneGas(gasEqNum).LatGainEnergy,
+                                OutputProcessor::TimeStepType::Zone,
+                                OutputProcessor::StoreType::Sum,
+                                state.dataHeatBal->ZoneGas(gasEqNum).Name);
+            SetupOutputVariable(state,
+                                "Gas Equipment Lost Heat Energy",
+                                Constant::Units::J,
+                                state.dataHeatBal->ZoneGas(gasEqNum).LostEnergy,
+                                OutputProcessor::TimeStepType::Zone,
+                                OutputProcessor::StoreType::Sum,
+                                state.dataHeatBal->ZoneGas(gasEqNum).Name);
+            SetupOutputVariable(state,
+                                "Gas Equipment Total Heating Energy",
+                                Constant::Units::J,
+                                state.dataHeatBal->ZoneGas(gasEqNum).TotGainEnergy,
+                                OutputProcessor::TimeStepType::Zone,
+                                OutputProcessor::StoreType::Sum,
+                                state.dataHeatBal->ZoneGas(gasEqNum).Name);
+            SetupOutputVariable(state,
+                                "Gas Equipment Radiant Heating Rate",
+                                Constant::Units::W,
+                                state.dataHeatBal->ZoneGas(gasEqNum).RadGainRate,
+                                OutputProcessor::TimeStepType::Zone,
+                                OutputProcessor::StoreType::Average,
+                                state.dataHeatBal->ZoneGas(gasEqNum).Name);
+            SetupOutputVariable(state,
+                                "Gas Equipment Convective Heating Rate",
+                                Constant::Units::W,
+                                state.dataHeatBal->ZoneGas(gasEqNum).ConGainRate,
+                                OutputProcessor::TimeStepType::Zone,
+                                OutputProcessor::StoreType::Average,
+                                state.dataHeatBal->ZoneGas(gasEqNum).Name);
+            SetupOutputVariable(state,
+                                "Gas Equipment Latent Gain Rate",
+                                Constant::Units::W,
+                                state.dataHeatBal->ZoneGas(gasEqNum).LatGainRate,
+                                OutputProcessor::TimeStepType::Zone,
+                                OutputProcessor::StoreType::Average,
+                                state.dataHeatBal->ZoneGas(gasEqNum).Name);
+            SetupOutputVariable(state,
+                                "Gas Equipment Lost Heat Rate",
+                                Constant::Units::W,
+                                state.dataHeatBal->ZoneGas(gasEqNum).LostRate,
+                                OutputProcessor::TimeStepType::Zone,
+                                OutputProcessor::StoreType::Average,
+                                state.dataHeatBal->ZoneGas(gasEqNum).Name);
+            SetupOutputVariable(state,
+                                "Gas Equipment Total Heating Rate",
+                                Constant::Units::W,
+                                state.dataHeatBal->ZoneGas(gasEqNum).TotGainRate,
+                                OutputProcessor::TimeStepType::Zone,
+                                OutputProcessor::StoreType::Average,
+                                state.dataHeatBal->ZoneGas(gasEqNum).Name);
         }
 
         dispatchEquipZoneSpaceOutputs(state, addZoneOutputs, addSpaceOutputs,

@@ -6407,12 +6407,25 @@ static void warnVRFSizingMismatch(EnergyPlusData &state,
     if (!state.dataGlobal->DisplayExtraWarnings) return;
     if ((std::abs(desValue - userValue) / userValue) <= state.dataSize->AutoVsHardSizingThreshold) return;
     ShowMessage(state, EnergyPlus::format("SizeVRF: Potential issue with equipment sizing for {} {}", compType, warningCompName));
+    // Extract unit suffix (e.g. " [W]") from labels so it appears after the value,
+    // matching the original format: "{label} of {value} [{unit}]"
+    auto extractUnit = [](std::string_view label) -> std::pair<std::string_view, std::string_view> {
+        auto pos = label.rfind('[');
+        if (pos != std::string_view::npos && pos > 0 && label.back() == ']') {
+            // Include the space before '['
+            size_t unitStart = (pos > 0 && label[pos - 1] == ' ') ? pos - 1 : pos;
+            return {label.substr(0, unitStart), label.substr(unitStart)};
+        }
+        return {label, {}};
+    };
+    auto [userBase, userUnit] = extractUnit(userLabel);
+    auto [desBase, desUnit] = extractUnit(desLabel);
     if (fmtPrecision == 5) {
-        ShowContinueError(state, EnergyPlus::format("{} of {:.5R}", userLabel, userValue));
-        ShowContinueError(state, EnergyPlus::format("differs from {} of {:.5R}", desLabel, desValue));
+        ShowContinueError(state, EnergyPlus::format("{} of {:.5R}{}", userBase, userValue, userUnit));
+        ShowContinueError(state, EnergyPlus::format("differs from {} of {:.5R}{}", desBase, desValue, desUnit));
     } else {
-        ShowContinueError(state, EnergyPlus::format("{} of {:.2R}", userLabel, userValue));
-        ShowContinueError(state, EnergyPlus::format("differs from {} of {:.2R}", desLabel, desValue));
+        ShowContinueError(state, EnergyPlus::format("{} of {:.2R}{}", userBase, userValue, userUnit));
+        ShowContinueError(state, EnergyPlus::format("differs from {} of {:.2R}{}", desBase, desValue, desUnit));
     }
     ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
     ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");

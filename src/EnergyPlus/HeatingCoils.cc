@@ -316,9 +316,8 @@ namespace HeatingCoils {
         }
     }
 
-    // Setup the common output variables shared by all heating coil types:
-    // Heating Energy/Rate and Electricity Energy/Rate.
-    static void setupCommonHeatingCoilOutputVars(EnergyPlusData &state, HeatingCoilEquipConditions &heatingCoil)
+    // Setup heating energy/rate output variables (registered first for all coil types).
+    static void setupHeatingEnergyOutputVars(EnergyPlusData &state, HeatingCoilEquipConditions &heatingCoil)
     {
         SetupOutputVariable(state,
                             "Heating Coil Heating Energy",
@@ -337,6 +336,11 @@ namespace HeatingCoils {
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Average,
                             heatingCoil.Name);
+    }
+
+    // Setup electricity energy/rate output variables.
+    static void setupElectricityOutputVars(EnergyPlusData &state, HeatingCoilEquipConditions &heatingCoil)
+    {
         SetupOutputVariable(state,
                             "Heating Coil Electricity Energy",
                             Constant::Units::J,
@@ -354,6 +358,14 @@ namespace HeatingCoils {
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Average,
                             heatingCoil.Name);
+    }
+
+    // Setup all common output variables (heating + electricity) for coil types
+    // where no fuel-specific variables are interleaved between them.
+    static void setupCommonHeatingCoilOutputVars(EnergyPlusData &state, HeatingCoilEquipConditions &heatingCoil)
+    {
+        setupHeatingEnergyOutputVars(state, heatingCoil);
+        setupElectricityOutputVars(state, heatingCoil);
     }
 
     void GetHeatingCoilInput(EnergyPlusData &state)
@@ -615,7 +627,9 @@ namespace HeatingCoils {
             heatingCoil.ParasiticFuelCapacity = Numbers(4);
 
             // Setup Report variables for the Fuel Coils
-            setupCommonHeatingCoilOutputVars(state, heatingCoil);
+            // Register heating energy/rate first, then fuel-specific, then electricity
+            // to match original output variable ordering.
+            setupHeatingEnergyOutputVars(state, heatingCoil);
             SetupOutputVariable(state,
                                 EnergyPlus::format("Heating Coil {} Energy", sFuelType),
                                 Constant::Units::J,
@@ -633,6 +647,7 @@ namespace HeatingCoils {
                                 OutputProcessor::TimeStepType::System,
                                 OutputProcessor::StoreType::Average,
                                 heatingCoil.Name);
+            setupElectricityOutputVars(state, heatingCoil);
             SetupOutputVariable(state,
                                 "Heating Coil Runtime Fraction",
                                 Constant::Units::None,
@@ -728,7 +743,9 @@ namespace HeatingCoils {
             // parasitic gas load associated with the gas heating coil (standing pilot light)
 
             // Setup Report variables for the Gas Coils
-            setupCommonHeatingCoilOutputVars(state, heatingCoil);
+            // Register heating energy/rate first, then fuel-specific, then electricity
+            // to match original output variable ordering.
+            setupHeatingEnergyOutputVars(state, heatingCoil);
             SetupOutputVariable(state,
                                 "Heating Coil NaturalGas Energy",
                                 Constant::Units::J,
@@ -746,6 +763,7 @@ namespace HeatingCoils {
                                 OutputProcessor::TimeStepType::System,
                                 OutputProcessor::StoreType::Average,
                                 heatingCoil.Name);
+            setupElectricityOutputVars(state, heatingCoil);
             SetupOutputVariable(state,
                                 "Heating Coil Runtime Fraction",
                                 Constant::Units::None,

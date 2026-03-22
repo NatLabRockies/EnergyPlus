@@ -1193,12 +1193,16 @@ namespace WaterToAirHeatPumpSimple {
                                         Real64 ratioTWB,
                                         Real64 ratioTS,
                                         Real64 RatedTotCapTempModFac,
-                                        Real64 PeakTotCapTempModFac)
+                                        Real64 PeakTotCapTempModFac,
+                                        std::string_view sizingStatsHeader,
+                                        Real64 RatedSensCapTempModFac = -1.0,
+                                        Real64 PeakSensCapTempModFac = -1.0)
     {
+        bool const includeSensibleModifiers = (RatedSensCapTempModFac >= 0.0);
         ShowContinueError(state, "See eio file for further details.");
         ShowContinueError(state, "Check Total and Sensible Cooling Capacity coefficients in curves to ensure they are accurate.");
         ShowContinueError(state, "Check Zone and System Sizing objects to verify sizing inputs.");
-        ShowContinueError(state, "Sizing statistics:");
+        ShowContinueError(state, std::string(sizingStatsHeader));
         ShowContinueError(state, EnergyPlus::format("Rated entering Air Wet-Bulb Temperature = {:.3T} C", RatedMixWetBulb));
         ShowContinueError(state, EnergyPlus::format("Peak entering Air Wet-Bulb Temperature = {:.3T} C", MixWetBulb));
         ShowContinueError(state, EnergyPlus::format("Entering Water Temperature used = {:.3T} C", RatedEntWaterTemp));
@@ -1213,6 +1217,10 @@ namespace WaterToAirHeatPumpSimple {
             state, EnergyPlus::format("Peak ratio of source-side inlet water temperature to 283.15 C (Peak ratioTS)  = {:.3T}", ratioTS));
         ShowContinueError(state, EnergyPlus::format("Rated Total Cooling Capacity Modifier = {:.5T}", RatedTotCapTempModFac));
         ShowContinueError(state, EnergyPlus::format("Peak Design Total Cooling Capacity Modifier = {:.5T}", PeakTotCapTempModFac));
+        if (includeSensibleModifiers) {
+            ShowContinueError(state, EnergyPlus::format("Rated Sensible Cooling Capacity Modifier = {:.5T}", RatedSensCapTempModFac));
+            ShowContinueError(state, EnergyPlus::format("Peak Design Sensible Cooling Capacity Modifier = {:.5T}", PeakSensCapTempModFac));
+        }
         ShowContinueError(state,
                           "...Rated Total Cooling Capacity at Rated Conditions = Total Peak Design Load * Rated Total "
                           "Cooling Capacity Modifier  / "
@@ -2173,9 +2181,10 @@ namespace WaterToAirHeatPumpSimple {
                                            ratioTWB,
                                            ratioTS,
                                            RatedTotCapTempModFac,
-                                           PeakTotCapTempModFac);
-                    ShowContinueError(state, EnergyPlus::format("Rated Sensible Cooling Capacity Modifier = {:.5T}", RatedSensCapTempModFac));
-                    ShowContinueError(state, EnergyPlus::format("Peak Design Sensible Cooling Capacity Modifier = {:.5T}", PeakSensCapTempModFac));
+                                           PeakTotCapTempModFac,
+                                           "Sizing statistics:",
+                                           RatedSensCapTempModFac,
+                                           PeakSensCapTempModFac);
                 }
             } else if (RatedCapCoolTotalAutoSized) {
                 if (simpleWatertoAirHP.RatedCapCoolSensDesAtRatedCdts > simpleWatertoAirHP.RatedCapCoolAtRatedCdts) {
@@ -2198,7 +2207,8 @@ namespace WaterToAirHeatPumpSimple {
                                            ratioTWB,
                                            ratioTS,
                                            RatedTotCapTempModFac,
-                                           PeakTotCapTempModFac);
+                                           PeakTotCapTempModFac,
+                                           "Sizing statistics for Total Cooling Capacity:");
                 }
             }
 
