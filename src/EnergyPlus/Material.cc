@@ -86,6 +86,28 @@ constexpr std::array<std::string_view, (int)EcoRoofCalcMethod::Num> ecoRoofCalcM
 
 // Helper to check that the sum of two numeric input fields is less than 1.0.
 // Sets ErrorsFound and emits "Illegal value combination" if the check fails.
+// Helper to check for duplicate material name. Returns true if duplicate found (caller should continue/skip).
+static bool checkDupMaterialName(EnergyPlusData &state, ErrorObjectHeader const &eoh, bool &ErrorsFound)
+{
+    auto &s_mat = state.dataMaterial;
+    auto &s_ipsc = state.dataIPShortCut;
+    if (s_mat->materialMap.find(s_ipsc->cAlphaArgs(1)) != s_mat->materialMap.end()) {
+        ShowSevereDuplicateName(state, eoh);
+        ErrorsFound = true;
+        return true;
+    }
+    return false;
+}
+
+// Helper to register a newly-created material in the materials list and map.
+static void registerMaterial(EnergyPlusData &state, MaterialBase *mat)
+{
+    auto &s_mat = state.dataMaterial;
+    s_mat->materials.push_back(mat);
+    mat->Num = s_mat->materials.isize();
+    s_mat->materialMap.insert_or_assign(mat->Name, mat->Num);
+}
+
 static void checkFieldSumLessThan(EnergyPlusData &state, bool &ErrorsFound, int idx1, int idx2)
 {
     auto &s_ipsc = state.dataIPShortCut;
@@ -308,9 +330,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
-        if (s_mat->materialMap.find(s_ipsc->cAlphaArgs(1)) != s_mat->materialMap.end()) {
-            ShowSevereDuplicateName(state, eoh);
-            ErrorsFound = true;
+        if (checkDupMaterialName(state, eoh, ErrorsFound)) {
             continue;
         }
 
@@ -318,9 +338,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         mat->group = Group::Regular;
         mat->Name = s_ipsc->cAlphaArgs(1);
 
-        s_mat->materials.push_back(mat);
-        mat->Num = s_mat->materials.isize();
-        s_mat->materialMap.insert_or_assign(mat->Name, mat->Num);
+        registerMaterial(state, mat);
 
         mat->Roughness = static_cast<SurfaceRoughness>(getEnumValue(surfaceRoughnessNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(2))));
 
@@ -379,9 +397,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
-        if (s_mat->materialMap.find(s_ipsc->cAlphaArgs(1)) != s_mat->materialMap.end()) {
-            ShowSevereDuplicateName(state, eoh);
-            ErrorsFound = true;
+        if (checkDupMaterialName(state, eoh, ErrorsFound)) {
             continue;
         }
 
@@ -390,9 +406,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         mat->group = Group::AirGap;
         mat->Name = s_ipsc->cAlphaArgs(1);
 
-        s_mat->materials.push_back(mat);
-        mat->Num = s_mat->materials.isize();
-        s_mat->materialMap.insert_or_assign(mat->Name, mat->Num);
+        registerMaterial(state, mat);
 
         mat->Roughness = SurfaceRoughness::MediumRough;
 
@@ -408,9 +422,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
-        if (s_mat->materialMap.find(s_ipsc->cAlphaArgs(1)) != s_mat->materialMap.end()) {
-            ShowSevereDuplicateName(state, eoh);
-            ErrorsFound = true;
+        if (checkDupMaterialName(state, eoh, ErrorsFound)) {
             continue;
         }
 
@@ -418,9 +430,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         mat->group = Group::IRTransparent;
         mat->Name = s_ipsc->cAlphaArgs(1);
 
-        s_mat->materials.push_back(mat);
-        mat->Num = s_mat->materials.isize();
-        s_mat->materialMap.insert_or_assign(mat->Name, mat->Num);
+        registerMaterial(state, mat);
 
         // Load data for other properties that need defaults
         mat->ROnly = true;
@@ -444,18 +454,14 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
-        if (s_mat->materialMap.find(s_ipsc->cAlphaArgs(1)) != s_mat->materialMap.end()) {
-            ShowSevereDuplicateName(state, eoh);
-            ErrorsFound = true;
+        if (checkDupMaterialName(state, eoh, ErrorsFound)) {
             continue;
         }
 
         auto *mat = new MaterialGlass;
         mat->Name = s_ipsc->cAlphaArgs(1);
 
-        s_mat->materials.push_back(mat);
-        mat->Num = s_mat->materials.isize();
-        s_mat->materialMap.insert_or_assign(mat->Name, mat->Num);
+        registerMaterial(state, mat);
 
         mat->Roughness = SurfaceRoughness::VerySmooth;
         mat->ROnly = true;
@@ -695,9 +701,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
-        if (s_mat->materialMap.find(s_ipsc->cAlphaArgs(1)) != s_mat->materialMap.end()) {
-            ShowSevereDuplicateName(state, eoh);
-            ErrorsFound = true;
+        if (checkDupMaterialName(state, eoh, ErrorsFound)) {
             continue;
         }
 
@@ -705,9 +709,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         mat->group = Group::Glass;
         mat->Name = s_ipsc->cAlphaArgs(1);
 
-        s_mat->materials.push_back(mat);
-        mat->Num = s_mat->materials.isize();
-        s_mat->materialMap.insert_or_assign(mat->Name, mat->Num);
+        registerMaterial(state, mat);
 
         mat->Roughness = SurfaceRoughness::VerySmooth;
         mat->Thickness = s_ipsc->rNumericArgs(1);
@@ -775,9 +777,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
-        if (s_mat->materialMap.find(s_ipsc->cAlphaArgs(1)) != s_mat->materialMap.end()) {
-            ShowSevereDuplicateName(state, eoh);
-            ErrorsFound = true;
+        if (checkDupMaterialName(state, eoh, ErrorsFound)) {
             continue;
         }
 
@@ -785,9 +785,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         mat->group = Group::GlassEQL;
         mat->Name = s_ipsc->cAlphaArgs(1);
 
-        s_mat->materials.push_back(mat);
-        mat->Num = s_mat->materials.isize();
-        s_mat->materialMap.insert_or_assign(mat->Name, mat->Num);
+        registerMaterial(state, mat);
 
         mat->Roughness = SurfaceRoughness::VerySmooth;
         mat->ROnly = true;
@@ -904,9 +902,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
-        if (s_mat->materialMap.find(s_ipsc->cAlphaArgs(1)) != s_mat->materialMap.end()) {
-            ShowSevereDuplicateName(state, eoh);
-            ErrorsFound = true;
+        if (checkDupMaterialName(state, eoh, ErrorsFound)) {
             continue;
         }
 
@@ -914,9 +910,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         matGas->group = Group::Gas;
         matGas->Name = s_ipsc->cAlphaArgs(1);
 
-        s_mat->materials.push_back(matGas);
-        matGas->Num = s_mat->materials.isize();
-        s_mat->materialMap.insert_or_assign(matGas->Name, matGas->Num);
+        registerMaterial(state, matGas);
 
         matGas->numGases = 1;
         matGas->gasFracts[0] = 1.0;
@@ -953,9 +947,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
-        if (s_mat->materialMap.find(s_ipsc->cAlphaArgs(1)) != s_mat->materialMap.end()) {
-            ShowSevereDuplicateName(state, eoh);
-            ErrorsFound = true;
+        if (checkDupMaterialName(state, eoh, ErrorsFound)) {
             continue;
         }
 
@@ -963,9 +955,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         matGas->group = Group::WindowGapEQL;
         matGas->Name = s_ipsc->cAlphaArgs(1);
 
-        s_mat->materials.push_back(matGas);
-        matGas->Num = s_mat->materials.isize();
-        s_mat->materialMap.insert_or_assign(matGas->Name, matGas->Num);
+        registerMaterial(state, matGas);
 
         matGas->numGases = 1;
         matGas->gasFracts[0] = 1.0;
@@ -1007,9 +997,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         getMaterialInput(state, Loop, NumAlphas, NumNums, IOStat);
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
-        if (s_mat->materialMap.find(s_ipsc->cAlphaArgs(1)) != s_mat->materialMap.end()) {
-            ShowSevereDuplicateName(state, eoh);
-            ErrorsFound = true;
+        if (checkDupMaterialName(state, eoh, ErrorsFound)) {
             continue;
         }
 
@@ -1017,9 +1005,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         matGas->group = Group::GasMixture;
         matGas->Name = s_ipsc->cAlphaArgs(1);
 
-        s_mat->materials.push_back(matGas);
-        matGas->Num = s_mat->materials.isize();
-        s_mat->materialMap.insert_or_assign(matGas->Name, matGas->Num);
+        registerMaterial(state, matGas);
 
         matGas->gases[0].type = matGas->gases[1].type = matGas->gases[2].type = matGas->gases[3].type = matGas->gases[4].type = GasType::Invalid;
 
@@ -1069,18 +1055,14 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
-        if (s_mat->materialMap.find(s_ipsc->cAlphaArgs(1)) != s_mat->materialMap.end()) {
-            ShowSevereDuplicateName(state, eoh);
-            ErrorsFound = true;
+        if (checkDupMaterialName(state, eoh, ErrorsFound)) {
             continue;
         }
 
         auto *mat = new MaterialShade;
         mat->Name = s_ipsc->cAlphaArgs(1);
 
-        s_mat->materials.push_back(mat);
-        mat->Num = s_mat->materials.isize();
-        s_mat->materialMap.insert_or_assign(mat->Name, mat->Num);
+        registerMaterial(state, mat);
 
         mat->Roughness = SurfaceRoughness::MediumRough;
         mat->Trans = s_ipsc->rNumericArgs(1);
@@ -1126,9 +1108,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
-        if (s_mat->materialMap.find(s_ipsc->cAlphaArgs(1)) != s_mat->materialMap.end()) {
-            ShowSevereDuplicateName(state, eoh);
-            ErrorsFound = true;
+        if (checkDupMaterialName(state, eoh, ErrorsFound)) {
             continue;
         }
 
@@ -1136,9 +1116,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         mat->group = Group::ShadeEQL;
         mat->Name = s_ipsc->cAlphaArgs(1);
 
-        s_mat->materials.push_back(mat);
-        mat->Num = s_mat->materials.isize();
-        s_mat->materialMap.insert_or_assign(mat->Name, mat->Num);
+        registerMaterial(state, mat);
 
         mat->Roughness = SurfaceRoughness::MediumRough;
         mat->ROnly = true;
@@ -1182,9 +1160,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
-        if (s_mat->materialMap.find(s_ipsc->cAlphaArgs(1)) != s_mat->materialMap.end()) {
-            ShowSevereDuplicateName(state, eoh);
-            ErrorsFound = true;
+        if (checkDupMaterialName(state, eoh, ErrorsFound)) {
             continue;
         }
 
@@ -1192,9 +1168,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         mat->group = Group::DrapeEQL;
         mat->Name = s_ipsc->cAlphaArgs(1);
 
-        s_mat->materials.push_back(mat);
-        mat->Num = s_mat->materials.isize();
-        s_mat->materialMap.insert_or_assign(mat->Name, mat->Num);
+        registerMaterial(state, mat);
 
         mat->Roughness = SurfaceRoughness::MediumRough;
         mat->ROnly = true;
@@ -1254,18 +1228,14 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
-        if (s_mat->materialMap.find(s_ipsc->cAlphaArgs(1)) != s_mat->materialMap.end()) {
-            ShowSevereDuplicateName(state, eoh);
-            ErrorsFound = true;
+        if (checkDupMaterialName(state, eoh, ErrorsFound)) {
             continue;
         }
 
         auto *matScreen = new MaterialScreen;
         matScreen->Name = s_ipsc->cAlphaArgs(1);
 
-        s_mat->materials.push_back(matScreen);
-        matScreen->Num = s_mat->materials.isize();
-        s_mat->materialMap.insert_or_assign(matScreen->Name, matScreen->Num);
+        registerMaterial(state, matScreen);
 
         // Load the material derived type from the input data.
 
@@ -1424,9 +1394,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
-        if (s_mat->materialMap.find(s_ipsc->cAlphaArgs(1)) != s_mat->materialMap.end()) {
-            ShowSevereDuplicateName(state, eoh);
-            ErrorsFound = true;
+        if (checkDupMaterialName(state, eoh, ErrorsFound)) {
             continue;
         }
 
@@ -1434,9 +1402,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         matScreen->group = Group::ScreenEQL;
         matScreen->Name = s_ipsc->cAlphaArgs(1);
 
-        s_mat->materials.push_back(matScreen);
-        matScreen->Num = s_mat->materials.isize();
-        s_mat->materialMap.insert_or_assign(matScreen->Name, matScreen->Num);
+        registerMaterial(state, matScreen);
 
         // Load the material derived type from the input data.
         // WindowMaterial:Screen:EquivalentLayer,
@@ -1546,18 +1512,14 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
-        if (s_mat->materialMap.find(s_ipsc->cAlphaArgs(1)) != s_mat->materialMap.end()) {
-            ShowSevereDuplicateName(state, eoh);
-            ErrorsFound = true;
+        if (checkDupMaterialName(state, eoh, ErrorsFound)) {
             continue;
         }
 
         auto *matBlind = new MaterialBlind;
         matBlind->Name = s_ipsc->cAlphaArgs(1);
 
-        s_mat->materials.push_back(matBlind);
-        matBlind->Num = s_mat->materials.isize();
-        s_mat->materialMap.insert_or_assign(matBlind->Name, matBlind->Num);
+        registerMaterial(state, matBlind);
 
         matBlind->Roughness = SurfaceRoughness::Rough;
         matBlind->ROnly = true;
@@ -1730,9 +1692,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
-        if (s_mat->materialMap.find(s_ipsc->cAlphaArgs(1)) != s_mat->materialMap.end()) {
-            ShowSevereDuplicateName(state, eoh);
-            ErrorsFound = true;
+        if (checkDupMaterialName(state, eoh, ErrorsFound)) {
             continue;
         }
 
@@ -1740,9 +1700,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         mat->group = Group::BlindEQL;
         mat->Name = s_ipsc->cAlphaArgs(1);
 
-        s_mat->materials.push_back(mat);
-        mat->Num = s_mat->materials.isize();
-        s_mat->materialMap.insert_or_assign(mat->Name, mat->Num);
+        registerMaterial(state, mat);
 
         mat->Roughness = SurfaceRoughness::Rough;
         mat->ROnly = true;
@@ -1873,9 +1831,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
-        if (s_mat->materialMap.find(s_ipsc->cAlphaArgs(1)) != s_mat->materialMap.end()) {
-            ShowSevereDuplicateName(state, eoh);
-            ErrorsFound = true;
+        if (checkDupMaterialName(state, eoh, ErrorsFound)) {
             continue;
         }
 
@@ -1885,9 +1841,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         mat->group = Group::EcoRoof;
         mat->Name = s_ipsc->cAlphaArgs(1);
 
-        s_mat->materials.push_back(mat);
-        mat->Num = s_mat->materials.isize();
-        s_mat->materialMap.insert_or_assign(mat->Name, mat->Num);
+        registerMaterial(state, mat);
 
         mat->HeightOfPlants = s_ipsc->rNumericArgs(1);
         mat->LAI = s_ipsc->rNumericArgs(2);
@@ -2012,9 +1966,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
-        if (s_mat->materialMap.find(s_ipsc->cAlphaArgs(1)) != s_mat->materialMap.end()) {
-            ShowSevereDuplicateName(state, eoh);
-            ErrorsFound = true;
+        if (checkDupMaterialName(state, eoh, ErrorsFound)) {
             continue;
         }
 
@@ -2022,9 +1974,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         mat->group = Group::GlassSimple;
         mat->Name = s_ipsc->cAlphaArgs(1);
 
-        s_mat->materials.push_back(mat);
-        mat->Num = s_mat->materials.isize();
-        s_mat->materialMap.insert_or_assign(mat->Name, mat->Num);
+        registerMaterial(state, mat);
 
         mat->SimpleWindowUfactor = s_ipsc->rNumericArgs(1);
         mat->SimpleWindowSHGC = s_ipsc->rNumericArgs(2);
@@ -2047,18 +1997,14 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
-        if (s_mat->materialMap.find(s_ipsc->cAlphaArgs(1)) != s_mat->materialMap.end()) {
-            ShowSevereDuplicateName(state, eoh);
-            ErrorsFound = true;
+        if (checkDupMaterialName(state, eoh, ErrorsFound)) {
             continue;
         }
 
         auto *mat = new Material::MaterialComplexWindowGap;
         mat->Name = s_ipsc->cAlphaArgs(1);
 
-        s_mat->materials.push_back(mat);
-        mat->Num = s_mat->materials.isize();
-        s_mat->materialMap.insert_or_assign(mat->Name, mat->Num);
+        registerMaterial(state, mat);
 
         mat->group = Material::Group::ComplexWindowGap;
         mat->Roughness = Material::SurfaceRoughness::Rough;
@@ -2167,18 +2113,14 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
-        if (s_mat->materialMap.find(s_ipsc->cAlphaArgs(1)) != s_mat->materialMap.end()) {
-            ShowSevereDuplicateName(state, eoh);
-            ErrorsFound = true;
+        if (checkDupMaterialName(state, eoh, ErrorsFound)) {
             continue;
         }
 
         auto *mat = new Material::MaterialComplexShade;
         mat->Name = s_ipsc->cAlphaArgs(1);
 
-        s_mat->materials.push_back(mat);
-        mat->Num = s_mat->materials.isize();
-        s_mat->materialMap.insert_or_assign(mat->Name, mat->Num);
+        registerMaterial(state, mat);
 
         mat->Roughness = Material::SurfaceRoughness::Rough;
         mat->ROnly = true;
