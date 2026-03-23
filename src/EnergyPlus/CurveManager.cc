@@ -838,7 +838,7 @@ namespace Curve {
             int numCoeffs;
             bool validateUnitTypes;
         };
-        static constexpr std::array<SimpleCurveSpec, 18> simpleCurveSpecs{{
+        static constexpr std::array<SimpleCurveSpec, 20> simpleCurveSpecs{{
             {"Curve:Biquadratic", CurveType::BiQuadratic, 2, 6, true},
             {"Curve:ChillerPartLoadWithLift", CurveType::ChillerPartLoadWithLift, 3, 12, true},
             {"Curve:Cubic", CurveType::Cubic, 1, 4, true},
@@ -849,6 +849,8 @@ namespace Curve {
             {"Curve:Linear", CurveType::Linear, 1, 2, true},
             {"Curve:Bicubic", CurveType::BiCubic, 2, 10, true},
             {"Curve:Triquadratic", CurveType::TriQuadratic, 3, 27, true},
+            {"Curve:QuadLinear", CurveType::QuadLinear, 4, 5, true},
+            {"Curve:QuintLinear", CurveType::QuintLinear, 5, 6, true},
             {"Curve:Exponent", CurveType::Exponent, 1, 3, true},
             {"Curve:FanPressureRise", CurveType::FanPressureRise, 2, 4, false},
             {"Curve:ExponentialSkewNormal", CurveType::ExponentialSkewNormal, 1, 4, true},
@@ -859,9 +861,7 @@ namespace Curve {
             {"Curve:DoubleExponentialDecay", CurveType::DoubleExponentialDecay, 1, 5, true},
         }};
 
-        // Find the number of non-simple curve types (QuadLinear, QuintLinear, TableLookup, WPC)
-        int const NumQLinear = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "Curve:QuadLinear");
-        int const NumQuintLinear = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "Curve:QuintLinear");
+        // Find the number of non-simple curve types (TableLookup, WPC)
         int const NumTableLookup = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "Table:Lookup");
         int const NumWPCValTab =
             state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "AirflowNetwork:MultiZone:WindPressureCoefficientValues");
@@ -885,95 +885,6 @@ namespace Curve {
                                       spec.numCoeffs,
                                       ErrorsFound,
                                       spec.validateUnitTypes);
-            }
-        }
-
-        // Loop over quad linear curves and load data
-        CurrentModuleObject = "Curve:QuadLinear";
-        for (int CurveIndex = 1; CurveIndex <= NumQLinear; ++CurveIndex) {
-            auto *thisCurve =
-                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-
-            thisCurve->curveType = CurveType::QuadLinear;
-            thisCurve->numDims = 4;
-            for (int in = 0; in < 5; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(6);
-            thisCurve->inputLimits[0].max = Numbers(7);
-            thisCurve->inputLimits[1].min = Numbers(8);
-            thisCurve->inputLimits[1].max = Numbers(9);
-            thisCurve->inputLimits[2].min = Numbers(10);
-            thisCurve->inputLimits[2].max = Numbers(11);
-            thisCurve->inputLimits[3].min = Numbers(12);
-            thisCurve->inputLimits[3].max = Numbers(13);
-
-            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 14);
-
-            constexpr int NumVar = 4;
-            constexpr std::array<std::string_view, NumVar> VarNames{"w", "x", "y", "z"};
-            for (int i = 1; i <= NumVar; ++i) {
-                int MinIndex = 2 * i + 4;
-                int MaxIndex = MinIndex + 1;
-                checkCurveInputLimits(state, CurrentModuleObject, Numbers, MinIndex, MaxIndex, ErrorsFound);
-                int InputTypeIndex = i + 1;
-                if (NumAlphas >= InputTypeIndex) {
-                    if (!IsCurveInputTypeValid(Alphas(InputTypeIndex))) {
-                        ShowWarningError(
-                            state,
-                            EnergyPlus::format("In {} named {} the Input Unit Type for {} is invalid.", CurrentModuleObject, Alphas(1), VarNames[i]));
-                    }
-                }
-            }
-            if (NumAlphas >= 6) {
-                if (!IsCurveOutputTypeValid(Alphas(6))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-        }
-
-        // Loop over quint linear curves and load data
-        CurrentModuleObject = "Curve:QuintLinear";
-        for (int CurveIndex = 1; CurveIndex <= NumQuintLinear; ++CurveIndex) {
-            auto *thisCurve =
-                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-
-            thisCurve->curveType = CurveType::QuintLinear;
-            thisCurve->numDims = 5;
-            for (int in = 0; in < 6; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(7);
-            thisCurve->inputLimits[0].max = Numbers(8);
-            thisCurve->inputLimits[1].min = Numbers(9);
-            thisCurve->inputLimits[1].max = Numbers(10);
-            thisCurve->inputLimits[2].min = Numbers(11);
-            thisCurve->inputLimits[2].max = Numbers(12);
-            thisCurve->inputLimits[3].min = Numbers(13);
-            thisCurve->inputLimits[3].max = Numbers(14);
-            thisCurve->inputLimits[4].min = Numbers(15);
-            thisCurve->inputLimits[4].max = Numbers(16);
-            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 17);
-
-            constexpr int NumVar = 5;
-            constexpr std::array<std::string_view, NumVar> VarNames{"v", "w", "x", "y", "z"};
-            for (int i = 1; i <= NumVar; ++i) {
-                int MinIndex = 2 * i + 5;
-                int MaxIndex = MinIndex + 1;
-                checkCurveInputLimits(state, CurrentModuleObject, Numbers, MinIndex, MaxIndex, ErrorsFound);
-                int InputTypeIndex = i + 1;
-                if (NumAlphas >= InputTypeIndex) {
-                    if (!IsCurveInputTypeValid(Alphas(InputTypeIndex))) {
-                        ShowWarningError(
-                            state,
-                            EnergyPlus::format("In {} named {} the Input Unit Type for {} is invalid.", CurrentModuleObject, Alphas(1), VarNames[i]));
-                    }
-                }
-            }
-            if (NumAlphas >= 7) {
-                if (!IsCurveOutputTypeValid(Alphas(7))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
             }
         }
 
