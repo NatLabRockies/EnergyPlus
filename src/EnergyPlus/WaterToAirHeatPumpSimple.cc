@@ -1286,6 +1286,64 @@ namespace WaterToAirHeatPumpSimple {
         }
     }
 
+    // Helper: compute rated sensible cooling capacity from peak design conditions.
+    // Calculates enthalpies, fan heat adjustment, peak sensible load, curve modifiers,
+    // and returns the rated sensible cooling capacity.
+    static void calcRatedSensCoolCap(EnergyPlusData &state,
+                                     SimpleWatertoAirHPConditions const &coil,
+                                     std::string const &CompType,
+                                     Real64 VolFlowRate,
+                                     Real64 &MixTemp,
+                                     Real64 MixHumRat,
+                                     Real64 &SupTemp,
+                                     HVAC::FanPlace fanPlace,
+                                     Real64 Tref,
+                                     Real64 &FanCoolLoad,
+                                     Real64 &MixWetBulb,
+                                     Real64 &RatedMixWetBulb,
+                                     Real64 &RatedMixDryBulb,
+                                     Real64 &ratioTDB,
+                                     Real64 &ratioTWB,
+                                     Real64 &ratioTS,
+                                     Real64 &RatedratioTDB,
+                                     Real64 &RatedratioTWB,
+                                     Real64 &RatedratioTS,
+                                     Real64 &PeakSensCapTempModFac,
+                                     Real64 &RatedSensCapTempModFac,
+                                     Real64 &RatedCapCoolSensDes,
+                                     int &PltSizNum,
+                                     bool &ErrorsFound)
+    {
+        static constexpr std::string_view RoutineName("SizeWaterToAirCoil");
+        Real64 rhoair = Psychrometrics::PsyRhoAirFnPbTdbW(state, state.dataEnvrn->StdBaroPress, MixTemp, MixHumRat, RoutineName);
+        Real64 MixEnth = Psychrometrics::PsyHFnTdbW(MixTemp, MixHumRat);
+        Real64 SupEnth = Psychrometrics::PsyHFnTdbW(SupTemp, MixHumRat);
+        if (state.dataSize->DataFanType != HVAC::FanType::Invalid && state.dataSize->DataFanIndex > 0) {
+            FanCoolLoad = state.dataFans->fans(state.dataSize->DataFanIndex)->getDesignHeatGain(state, VolFlowRate);
+            Real64 CpAir = Psychrometrics::PsyCpAirFnW(MixHumRat);
+            if (fanPlace == HVAC::FanPlace::BlowThru) {
+                MixTemp += FanCoolLoad / (CpAir * rhoair * VolFlowRate);
+            } else if (fanPlace == HVAC::FanPlace::DrawThru) {
+                SupTemp -= FanCoolLoad / (CpAir * rhoair * VolFlowRate);
+            }
+        }
+        Real64 SensCapAtPeak = (rhoair * VolFlowRate * (MixEnth - SupEnth)) + FanCoolLoad;
+        SensCapAtPeak = max(0.0, SensCapAtPeak);
+        MixWetBulb = Psychrometrics::PsyTwbFnTdbWPb(state, MixTemp, MixHumRat, state.dataEnvrn->StdBaroPress, RoutineName);
+        RatedMixWetBulb = coil.RatedEntAirWetbulbTemp;
+        RatedMixDryBulb = coil.RatedEntAirDrybulbTemp;
+        ratioTDB = (MixTemp + Constant::Kelvin) / Tref;
+        ratioTWB = (MixWetBulb + Constant::Kelvin) / Tref;
+        PltSizNum = getPlantSizingIndexAndRatioTS(
+            state, CompType, coil.Name, coil.WaterInletNodeNum, coil.WaterOutletNodeNum, "sensible cooling capacity", Tref, ratioTS, ErrorsFound);
+        RatedratioTDB = (RatedMixDryBulb + Constant::Kelvin) / Tref;
+        RatedratioTWB = (RatedMixWetBulb + Constant::Kelvin) / Tref;
+        RatedratioTS = (coil.RatedEntWaterTemp + Constant::Kelvin) / Tref;
+        PeakSensCapTempModFac = coil.SensCoolCapCurve->value(state, ratioTDB, ratioTWB, ratioTS, 1.0, 1.0);
+        RatedSensCapTempModFac = coil.SensCoolCapCurve->value(state, RatedratioTDB, RatedratioTWB, RatedratioTS, 1.0, 1.0);
+        RatedCapCoolSensDes = (PeakSensCapTempModFac > 0.0) ? SensCapAtPeak / PeakSensCapTempModFac : SensCapAtPeak;
+    }
+
     // Helper: compute rated total cooling capacity from peak design conditions.
     // Calculates enthalpies, fan heat adjustment, peak load, curve modifiers,
     // and returns the rated total cooling capacity. Also sets reporting data.
@@ -1382,7 +1440,7 @@ namespace WaterToAirHeatPumpSimple {
         Real64 MixHumRatSys;     // Mixed air humidity ratio at cooling design conditions at system air flow
         Real64 HeatMixHumRat;    // Mixed air humidity ratio at heating design conditions
         Real64 HeatMixHumRatSys; // Mixed air humidity ratio at heating design conditions at system air flow
-        Real64 MixEnth;          // Mixed air enthalpy at cooling design conditions
+        // MixEnth is now computed inside calcRatedTotalCoolCap and calcRatedSensCoolCap
         // MixEnthSys is now computed inside calcRatedTotalCoolCap
         Real64 MixWetBulb;                // Mixed air wet-bulb temperature at cooling design conditions
         Real64 RatedMixWetBulb = 0.0;     // Rated mixed air wetbulb temperature
@@ -1391,29 +1449,29 @@ namespace WaterToAirHeatPumpSimple {
         Real64 SupTemp;                   // Supply air temperature at cooling design conditions
         Real64 HeatSupTemp;               // Supply air temperature at heating design conditions
         Real64 SupHumRat;                 // Supply air humidity ratio at cooling design conditions
-        Real64 SupEnth;                   // Supply air enthalpy at cooling design conditions
-        Real64 OutTemp;                   // Outdoor aur dry-bulb temperature at cooling design conditions
-        Real64 ratioTDB;                  // Load-side dry-bulb temperature ratio at cooling design conditions
-        Real64 HeatratioTDB;              // Load-side dry-bulb temperature ratio at heating design conditions
-        Real64 ratioTWB;                  // Load-side wet-bulb temperature ratio at cooling design conditions
-        Real64 ratioTS;                   // Source-side temperature ratio at cooling design conditions
-        Real64 HeatratioTS;               // Source-side temperature ratio at heating design conditions
-        Real64 RatedratioTDB;             // Rated cooling load-side dry-bulb temperature ratio
-        Real64 RatedHeatratioTDB = 0.0;   // Rated cooling load-side dry-bulb temperature ratio
-        Real64 RatedratioTWB;             // Rated cooling load-side wet-bulb temperature ratio
-        Real64 RatedratioTS;              // Rated cooling source-side temperature ratio
-        Real64 RatedHeatratioTS;          // Rated heating source-side temperature ratio
-        Real64 OutAirFrac;                // Outdoor air fraction at cooling design conditions
-        Real64 OutAirFracSys;             // Outdoor air fraction at cooling design conditions at system air flow
-        Real64 HeatOutAirFrac;            // Outdoor air fraction at heating design conditions
-        Real64 HeatOutAirFracSys;         // Outdoor air fraction at heating design conditions at system air flow
+        // SupEnth is now computed inside calcRatedTotalCoolCap and calcRatedSensCoolCap
+        Real64 OutTemp;                 // Outdoor aur dry-bulb temperature at cooling design conditions
+        Real64 ratioTDB;                // Load-side dry-bulb temperature ratio at cooling design conditions
+        Real64 HeatratioTDB;            // Load-side dry-bulb temperature ratio at heating design conditions
+        Real64 ratioTWB;                // Load-side wet-bulb temperature ratio at cooling design conditions
+        Real64 ratioTS;                 // Source-side temperature ratio at cooling design conditions
+        Real64 HeatratioTS;             // Source-side temperature ratio at heating design conditions
+        Real64 RatedratioTDB;           // Rated cooling load-side dry-bulb temperature ratio
+        Real64 RatedHeatratioTDB = 0.0; // Rated cooling load-side dry-bulb temperature ratio
+        Real64 RatedratioTWB;           // Rated cooling load-side wet-bulb temperature ratio
+        Real64 RatedratioTS;            // Rated cooling source-side temperature ratio
+        Real64 RatedHeatratioTS;        // Rated heating source-side temperature ratio
+        Real64 OutAirFrac;              // Outdoor air fraction at cooling design conditions
+        Real64 OutAirFracSys;           // Outdoor air fraction at cooling design conditions at system air flow
+        Real64 HeatOutAirFrac;          // Outdoor air fraction at heating design conditions
+        Real64 HeatOutAirFracSys;       // Outdoor air fraction at heating design conditions at system air flow
         Real64 VolFlowRate;
         // CoolCapAtPeak is now computed inside calcRatedTotalCoolCap
-        Real64 HeatCapAtPeak;                  // Load on the heating coil at heating design conditions
-        Real64 PeakTotCapTempModFac = 1.0;     // Peak total cooling capacity curve modifier
-        Real64 RatedTotCapTempModFac = 1.0;    // Rated total cooling capacity curve modifier
-        Real64 PeakHeatCapTempModFac = 1.0;    // Peak heating capacity curve modifier
-        Real64 SensCapAtPeak;                  // Sensible load on the cooling coil at cooling design conditions
+        Real64 HeatCapAtPeak;               // Load on the heating coil at heating design conditions
+        Real64 PeakTotCapTempModFac = 1.0;  // Peak total cooling capacity curve modifier
+        Real64 RatedTotCapTempModFac = 1.0; // Rated total cooling capacity curve modifier
+        Real64 PeakHeatCapTempModFac = 1.0; // Peak heating capacity curve modifier
+        // SensCapAtPeak is now computed inside calcRatedSensCoolCap
         Real64 PeakSensCapTempModFac = 1.0;    // Peak sensible cooling capacity curve modifier
         Real64 RatedSensCapTempModFac = 1.0;   // Rated sensible cooling capacity curve modifier
         Real64 RatedHeatCapTempModFac = 1.0;   // Rated heating capacity curve modifier
@@ -1800,54 +1858,30 @@ namespace WaterToAirHeatPumpSimple {
                         SupTemp = min(MixTemp, SupTemp);
                         SupHumRat = min(MixHumRat, SupHumRat);
                         OutTemp = finalSysSizing.OutTempAtCoolPeak;
-                        rhoair = Psychrometrics::PsyRhoAirFnPbTdbW(state, state.dataEnvrn->StdBaroPress, MixTemp, MixHumRat, RoutineName);
-                        MixEnth = Psychrometrics::PsyHFnTdbW(MixTemp, MixHumRat);
-                        SupEnth = Psychrometrics::PsyHFnTdbW(SupTemp, MixHumRat);
-                        if (state.dataSize->DataFanType != HVAC::FanType::Invalid && state.dataSize->DataFanIndex > 0) { // add fan heat to coil load
-                            FanCoolLoad = state.dataFans->fans(state.dataSize->DataFanIndex)->getDesignHeatGain(state, VolFlowRate);
-
-                            Real64 CpAir = Psychrometrics::PsyCpAirFnW(MixHumRat);
-                            if (state.dataAirSystemsData->PrimaryAirSystems(state.dataSize->CurSysNum).supFanPlace == HVAC::FanPlace::BlowThru) {
-                                MixTemp += FanCoolLoad / (CpAir * rhoair * VolFlowRate); // this is now the temperature entering the coil
-                            } else if (state.dataAirSystemsData->PrimaryAirSystems(state.dataSize->CurSysNum).supFanPlace ==
-                                       HVAC::FanPlace::DrawThru) {
-                                SupTemp -= FanCoolLoad / (CpAir * rhoair * VolFlowRate); // this is now the temperature leaving the coil
-                            }
-                        }
-                        // Sensible capacity is calculated from enthalpy difference with constant humidity ratio, i.e.,
-                        // there is only temperature difference between entering and leaving air enthalpy. Previously
-                        // it was calculated using m.cp.dT
-                        SensCapAtPeak = (rhoair * VolFlowRate * (MixEnth - SupEnth)) +
-                                        FanCoolLoad; // load on the cooling coil which includes ventilation load and fan heat (sensible)
-                        SensCapAtPeak = max(0.0, SensCapAtPeak);
-                        MixWetBulb = Psychrometrics::PsyTwbFnTdbWPb(state, MixTemp, MixHumRat, state.dataEnvrn->StdBaroPress, RoutineName);
-                        RatedMixWetBulb = simpleWatertoAirHP.RatedEntAirWetbulbTemp;
-                        RatedMixDryBulb = simpleWatertoAirHP.RatedEntAirDrybulbTemp;
-                        // calculate temperature ratios at design day peak conditions
-                        ratioTDB = (MixTemp + Constant::Kelvin) / Tref;
-                        ratioTWB = (MixWetBulb + Constant::Kelvin) / Tref;
-                        PltSizNum = getPlantSizingIndexAndRatioTS(state,
-                                                                  CompType,
-                                                                  simpleWatertoAirHP.Name,
-                                                                  simpleWatertoAirHP.WaterInletNodeNum,
-                                                                  simpleWatertoAirHP.WaterOutletNodeNum,
-                                                                  "sensible cooling capacity",
-                                                                  Tref,
-                                                                  ratioTS,
-                                                                  ErrorsFound);
-                        // calculate temperatue ratio at rated conditions
-                        RatedratioTDB = (RatedMixDryBulb + Constant::Kelvin) / Tref;
-                        RatedratioTWB = (RatedMixWetBulb + Constant::Kelvin) / Tref;
-                        RatedratioTS = (simpleWatertoAirHP.RatedEntWaterTemp + Constant::Kelvin) / Tref;
-                        // determine curve modifiers at peak and rated conditions
-                        PeakSensCapTempModFac = simpleWatertoAirHP.SensCoolCapCurve->value(state, ratioTDB, ratioTWB, ratioTS, 1.0, 1.0);
-                        RatedSensCapTempModFac =
-                            simpleWatertoAirHP.SensCoolCapCurve->value(state, RatedratioTDB, RatedratioTWB, RatedratioTS, 1.0, 1.0);
-                        // calculate the rated sensible capacity based on peak conditions
-                        // note: the rated sensible capacity can be different than the sensible capacity
-                        // at rated conditions if the capacity curve isn't normalized at the rated
-                        // conditions
-                        RatedCapCoolSensDes = (PeakSensCapTempModFac > 0.0) ? SensCapAtPeak / PeakSensCapTempModFac : SensCapAtPeak;
+                        calcRatedSensCoolCap(state,
+                                             simpleWatertoAirHP,
+                                             CompType,
+                                             VolFlowRate,
+                                             MixTemp,
+                                             MixHumRat,
+                                             SupTemp,
+                                             state.dataAirSystemsData->PrimaryAirSystems(state.dataSize->CurSysNum).supFanPlace,
+                                             Tref,
+                                             FanCoolLoad,
+                                             MixWetBulb,
+                                             RatedMixWetBulb,
+                                             RatedMixDryBulb,
+                                             ratioTDB,
+                                             ratioTWB,
+                                             ratioTS,
+                                             RatedratioTDB,
+                                             RatedratioTWB,
+                                             RatedratioTS,
+                                             PeakSensCapTempModFac,
+                                             RatedSensCapTempModFac,
+                                             RatedCapCoolSensDes,
+                                             PltSizNum,
+                                             ErrorsFound);
                     } else {
                         RatedCapCoolSensDes = 0.0;
                     }
@@ -1894,53 +1928,30 @@ namespace WaterToAirHeatPumpSimple {
                         } else {
                             OutTemp = 0.0;
                         }
-                        rhoair = Psychrometrics::PsyRhoAirFnPbTdbW(state, state.dataEnvrn->StdBaroPress, MixTemp, MixHumRat, RoutineName);
-                        MixEnth = Psychrometrics::PsyHFnTdbW(MixTemp, MixHumRat);
-                        SupEnth = Psychrometrics::PsyHFnTdbW(SupTemp, MixHumRat);
-                        if (state.dataSize->DataFanType != HVAC::FanType::Invalid && state.dataSize->DataFanIndex > 0) { // add fan heat to coil load
-                            FanCoolLoad = state.dataFans->fans(state.dataSize->DataFanIndex)->getDesignHeatGain(state, VolFlowRate);
-
-                            Real64 CpAir = Psychrometrics::PsyCpAirFnW(MixHumRat);
-                            if (state.dataSize->DataFanPlacement == HVAC::FanPlace::BlowThru) {
-                                MixTemp += FanCoolLoad / (CpAir * rhoair * VolFlowRate); // this is now the temperature entering the coil
-                            } else {
-                                SupTemp -= FanCoolLoad / (CpAir * rhoair * VolFlowRate); // this is now the temperature leaving the coil
-                            }
-                        }
-                        // Sensible capacity is calculated from enthalpy difference with constant humidity ratio, i.e.,
-                        // there is only temperature difference between entering and leaving air enthalpy. Previously
-                        // it was calculated using m.cp.dT
-                        SensCapAtPeak = (rhoair * VolFlowRate * (MixEnth - SupEnth)) +
-                                        FanCoolLoad; // load on the cooling coil which includes ventilation load and fan heat (sensible)
-                        SensCapAtPeak = max(0.0, SensCapAtPeak);
-                        MixWetBulb = Psychrometrics::PsyTwbFnTdbWPb(state, MixTemp, MixHumRat, state.dataEnvrn->StdBaroPress, RoutineName);
-                        RatedMixWetBulb = simpleWatertoAirHP.RatedEntAirWetbulbTemp;
-                        RatedMixDryBulb = simpleWatertoAirHP.RatedEntAirDrybulbTemp;
-                        // calculate temperature ratios at design day peak conditions
-                        ratioTDB = (MixTemp + Constant::Kelvin) / Tref;
-                        ratioTWB = (MixWetBulb + Constant::Kelvin) / Tref;
-                        PltSizNum = getPlantSizingIndexAndRatioTS(state,
-                                                                  CompType,
-                                                                  simpleWatertoAirHP.Name,
-                                                                  simpleWatertoAirHP.WaterInletNodeNum,
-                                                                  simpleWatertoAirHP.WaterOutletNodeNum,
-                                                                  "sensible cooling capacity",
-                                                                  Tref,
-                                                                  ratioTS,
-                                                                  ErrorsFound);
-                        // calculate temperatue ratio at rated conditions
-                        RatedratioTDB = (RatedMixDryBulb + Constant::Kelvin) / Tref;
-                        RatedratioTWB = (RatedMixWetBulb + Constant::Kelvin) / Tref;
-                        RatedratioTS = (simpleWatertoAirHP.RatedEntWaterTemp + Constant::Kelvin) / Tref;
-                        PeakSensCapTempModFac = simpleWatertoAirHP.SensCoolCapCurve->value(state, ratioTDB, ratioTWB, ratioTS, 1.0, 1.0);
-                        RatedSensCapTempModFac =
-                            simpleWatertoAirHP.SensCoolCapCurve->value(state, RatedratioTDB, RatedratioTWB, RatedratioTS, 1.0, 1.0);
-                        // Check curve output when rated mixed air wetbulb is the design mixed air wetbulb
-                        // calculate the rated sensible capacity based on peak conditions
-                        // note: the rated sensible capacity can be different than the sensible capacity
-                        // at rated conditions if the capacity curve isn't normalized at the rated
-                        // conditions
-                        RatedCapCoolSensDes = (PeakSensCapTempModFac > 0.0) ? SensCapAtPeak / PeakSensCapTempModFac : SensCapAtPeak;
+                        calcRatedSensCoolCap(state,
+                                             simpleWatertoAirHP,
+                                             CompType,
+                                             VolFlowRate,
+                                             MixTemp,
+                                             MixHumRat,
+                                             SupTemp,
+                                             state.dataSize->DataFanPlacement,
+                                             Tref,
+                                             FanCoolLoad,
+                                             MixWetBulb,
+                                             RatedMixWetBulb,
+                                             RatedMixDryBulb,
+                                             ratioTDB,
+                                             ratioTWB,
+                                             ratioTS,
+                                             RatedratioTDB,
+                                             RatedratioTWB,
+                                             RatedratioTS,
+                                             PeakSensCapTempModFac,
+                                             RatedSensCapTempModFac,
+                                             RatedCapCoolSensDes,
+                                             PltSizNum,
+                                             ErrorsFound);
                     } else {
                         RatedCapCoolSensDes = 0.0;
                     }
