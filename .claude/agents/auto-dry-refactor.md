@@ -80,7 +80,13 @@ ctest --test-dir build-normal -j8 -R "EnergyPlusFixture.*<substring>" 2>&1 | tai
 - Tests must pass for a commit to be made
 - Build must succeed for a commit to be made
 
-### Step 4: Verify LOC Improvement
+### Step 4: Reformat Files Edited
+
+```bash
+clang-format-19 -i <source_file>
+```
+
+### Step 5: Verify LOC Improvement
 Before committing, verify the stage made a meaningful reduction:
 ```bash
 lizard <source_file> 2>&1 | grep "<function_name>"
@@ -89,7 +95,7 @@ Compare the NLOC to the value before this stage. Also check `git diff --stat` to
 - The stage must show a **net reduction in NLOC** of the target function (not just cosmetic changes).
 - If the NLOC did not decrease, or the change only removed comments/whitespace/blank lines, **revert the changes** (`git checkout -- <files>`) and skip this stage.
 
-### Step 5: Commit
+### Step 6: Commit
 First stage the files:
 ```bash
 git add <changed files>
@@ -99,7 +105,7 @@ Then commit (as a separate command):
 git commit -m "<descriptive message of the DRY improvement>"
 ```
 
-### Step 6: Continue
+### Step 7: Continue
 Move to the next stage (maximum 4 stages total).
 
 ## Key Rules
@@ -112,6 +118,9 @@ Move to the next stage (maximum 4 stages total).
 - **Always verify.** Never commit without a successful compile and test run.
 - **Do NOT install anything.** All required tools (lizard, cmake, ctest, git) are already installed. Never run pip, apt, npm, or any package manager.
 - **Do NOT use `touch` to force recompilation.** The build system tracks file modifications correctly.
+- **Do NOT set `CCACHE_DISABLE=1` or any other env vars that disable caching.** Always run plain `ninja -C build-normal energyplus_tests` for incremental builds.
+- **Do NOT use `sleep` commands.** Never wait/poll — just run the build or test command directly and wait for it to complete.
+- **Do NOT run commands in the background.** Run builds and tests as foreground commands so you get the output directly.
 
 ## Final Summary
 
