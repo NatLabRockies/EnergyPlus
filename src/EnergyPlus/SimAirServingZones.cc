@@ -5573,6 +5573,79 @@ static void accumulateNonCoinHeatZoneData(EnergyPlusData &state,
     }
 }
 
+// Accumulate non-coincident cooling zone data: weighted return temps, outside air conditions,
+// and compute mixed-air conditions and cooling capacity.  Parallels accumulateNonCoinHeatZoneData.
+static void accumulateNonCoinCoolZoneData(EnergyPlusData &state,
+                                          int AirLoopNum,
+                                          int NumZonesCooled,
+                                          Real64 &SysCoolRetTemp,
+                                          Real64 &SysCoolRetHumRat,
+                                          Real64 &SysCoolOutTemp,
+                                          Real64 &SysCoolOutHumRat,
+                                          Real64 &SysCoolMixTemp,
+                                          Real64 &SysCoolMixHumRat,
+                                          Real64 &SysSensCoolCap,
+                                          Real64 &SysTotCoolCap)
+{
+    using Psychrometrics::PsyCpAirFnW;
+    using Psychrometrics::PsyHFnTdbW;
+    auto &calcSysSizing = state.dataSize->CalcSysSizing(AirLoopNum);
+    Real64 OutAirTemp = 0.0;
+    Real64 OutAirHumRat = 0.0;
+
+    for (int ZonesCooledNum = 1; ZonesCooledNum <= NumZonesCooled; ++ZonesCooledNum) {
+        int TermUnitSizingIndex = state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex(ZonesCooledNum);
+        auto const &termUnitSizing = state.dataSize->TermUnitSizing(TermUnitSizingIndex);
+        // save the system cooling supply air temp
+        state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).DesCoolCoilInTempTU = calcSysSizing.CoolSupTemp;
+        // save the system cooling supply air hum rat
+        state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).DesCoolCoilInHumRatTU = calcSysSizing.CoolSupHumRat;
+        if (state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).DesCoolMassFlow <= 0.0) {
+            continue;
+        }
+        Real64 coolMassFlow = state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).DesCoolMassFlow;
+        calcSysSizing.NonCoinCoolMassFlow += coolMassFlow / (1.0 + termUnitSizing.InducRat);
+        SysCoolRetTemp +=
+            state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).ZoneRetTempAtCoolPeak * coolMassFlow / (1.0 + termUnitSizing.InducRat);
+        SysCoolRetHumRat +=
+            state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).ZoneHumRatAtCoolPeak * coolMassFlow / (1.0 + termUnitSizing.InducRat);
+        int CoolDDNum = state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).CoolDDNum;
+        int CoolTimeStepNum = state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).TimeStepNumAtCoolMax;
+        if (CoolDDNum == 0) {
+            auto const &zoneCFS = state.dataSize->CalcFinalZoneSizing(state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).ZoneNum);
+            OutAirTemp += zoneCFS.CoolOutTemp * coolMassFlow / (1.0 + termUnitSizing.InducRat);
+            OutAirHumRat += zoneCFS.CoolOutHumRat * coolMassFlow / (1.0 + termUnitSizing.InducRat);
+        } else {
+            OutAirTemp += state.dataSize->DesDayWeath(CoolDDNum).Temp(CoolTimeStepNum) * coolMassFlow / (1.0 + termUnitSizing.InducRat);
+            OutAirHumRat += state.dataSize->DesDayWeath(CoolDDNum).HumRat(CoolTimeStepNum) * coolMassFlow / (1.0 + termUnitSizing.InducRat);
+        }
+    }
+    if (calcSysSizing.NonCoinCoolMassFlow > 0.0) {
+        SysCoolRetTemp /= calcSysSizing.NonCoinCoolMassFlow;
+        SysCoolRetHumRat /= calcSysSizing.NonCoinCoolMassFlow;
+        OutAirTemp /= calcSysSizing.NonCoinCoolMassFlow;
+        OutAirHumRat /= calcSysSizing.NonCoinCoolMassFlow;
+        SysCoolOutTemp = OutAirTemp;
+        SysCoolOutHumRat = OutAirHumRat;
+        Real64 RhoAir = state.dataEnvrn->StdRhoAir;
+        Real64 OutAirFrac;
+        if (calcSysSizing.CoolOAOption == DataSizing::OAControl::MinOA) {
+            OutAirFrac = RhoAir * calcSysSizing.DesOutAirVolFlow / calcSysSizing.NonCoinCoolMassFlow;
+            OutAirFrac = min(1.0, max(0.0, OutAirFrac));
+        } else {
+            OutAirFrac = 1.0;
+        }
+        SysCoolMixTemp = OutAirTemp * OutAirFrac + SysCoolRetTemp * (1.0 - OutAirFrac);
+        SysCoolMixHumRat = OutAirHumRat * OutAirFrac + SysCoolRetHumRat * (1.0 - OutAirFrac);
+        SysSensCoolCap =
+            PsyCpAirFnW(DataPrecisionGlobals::constant_zero) * calcSysSizing.NonCoinCoolMassFlow * (SysCoolMixTemp - calcSysSizing.CoolSupTemp);
+        SysSensCoolCap = max(0.0, SysSensCoolCap);
+        SysTotCoolCap = calcSysSizing.NonCoinCoolMassFlow *
+                        (PsyHFnTdbW(SysCoolMixTemp, SysCoolMixHumRat) - PsyHFnTdbW(calcSysSizing.CoolSupTemp, calcSysSizing.CoolSupHumRat));
+        SysTotCoolCap = max(0.0, SysTotCoolCap);
+    }
+}
+
 // Accumulate heating zone flows, loads, and weighted return-air conditions for the DuringDay time step.
 // Used for both the centrally-heated-zones path and the cooled-zones-used-for-heating path.
 static void accumulateHeatZoneFlowsDuringDay(EnergyPlusData &state,
@@ -6412,74 +6485,25 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
             int NumZonesCooled = state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).NumZonesCooled;
             int NumZonesHeated = state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).NumZonesHeated;
             SysCoolRetTemp = 0.0;
-            OutAirFrac = 0.0;
             SysCoolMixTemp = 0.0;
             SysSensCoolCap = 0.0;
             SysTotCoolCap = 0.0;
-            OutAirTemp = 0.0;
-            OutAirHumRat = 0.0;
             SysCoolMixHumRat = 0.0;
             SysCoolRetHumRat = 0.0;
             SysCoolOutTemp = 0.0;
             SysCoolOutHumRat = 0.0;
 
-            for (int ZonesCooledNum = 1; ZonesCooledNum <= NumZonesCooled; ++ZonesCooledNum) { // loop over cooled zones
-                int TermUnitSizingIndex = state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex(ZonesCooledNum);
-                auto const &termUnitSizing = state.dataSize->TermUnitSizing(TermUnitSizingIndex);
-                // save the system cooling supply air temp
-                state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).DesCoolCoilInTempTU =
-                    state.dataSize->CalcSysSizing(AirLoopNum).CoolSupTemp;
-                // save the system cooling supply air hum rat
-                state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).DesCoolCoilInHumRatTU =
-                    state.dataSize->CalcSysSizing(AirLoopNum).CoolSupHumRat;
-                if (state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).DesCoolMassFlow <= 0.0) {
-                    continue;
-                }
-                Real64 coolMassFlow = state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex)
-                                          .DesCoolMassFlow; // already scaled for term unit sizing in Updatestate.dataSize->TermUnitFinalZoneSizing
-                state.dataSize->CalcSysSizing(AirLoopNum).NonCoinCoolMassFlow += coolMassFlow / (1.0 + termUnitSizing.InducRat);
-                SysCoolRetTemp += state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).ZoneRetTempAtCoolPeak * coolMassFlow /
-                                  (1.0 + termUnitSizing.InducRat);
-                SysCoolRetHumRat += state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).ZoneHumRatAtCoolPeak * coolMassFlow /
-                                    (1.0 + termUnitSizing.InducRat);
-                int CoolDDNum = 0;       // design day index of a peak cooling day
-                int CoolTimeStepNum = 0; // time step index (in day) of a cooling peak
-                CoolDDNum = state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).CoolDDNum;
-                CoolTimeStepNum = state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).TimeStepNumAtCoolMax;
-                if (CoolDDNum == 0) {
-                    auto const &zoneCFS = state.dataSize->CalcFinalZoneSizing(state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).ZoneNum);
-                    OutAirTemp += zoneCFS.CoolOutTemp * coolMassFlow / (1.0 + termUnitSizing.InducRat);
-                    OutAirHumRat += zoneCFS.CoolOutHumRat * coolMassFlow / (1.0 + termUnitSizing.InducRat);
-                } else {
-                    OutAirTemp += state.dataSize->DesDayWeath(CoolDDNum).Temp(CoolTimeStepNum) * coolMassFlow / (1.0 + termUnitSizing.InducRat);
-                    OutAirHumRat += state.dataSize->DesDayWeath(CoolDDNum).HumRat(CoolTimeStepNum) * coolMassFlow / (1.0 + termUnitSizing.InducRat);
-                }
-            }
-            if (state.dataSize->CalcSysSizing(AirLoopNum).NonCoinCoolMassFlow > 0.0) {
-                SysCoolRetTemp /= state.dataSize->CalcSysSizing(AirLoopNum).NonCoinCoolMassFlow;
-                SysCoolRetHumRat /= state.dataSize->CalcSysSizing(AirLoopNum).NonCoinCoolMassFlow;
-                OutAirTemp /= state.dataSize->CalcSysSizing(AirLoopNum).NonCoinCoolMassFlow;
-                OutAirHumRat /= state.dataSize->CalcSysSizing(AirLoopNum).NonCoinCoolMassFlow;
-                SysCoolOutTemp = OutAirTemp;
-                SysCoolOutHumRat = OutAirHumRat;
-                RhoAir = state.dataEnvrn->StdRhoAir;
-                if (state.dataSize->CalcSysSizing(AirLoopNum).CoolOAOption == OAControl::MinOA) {
-                    OutAirFrac = RhoAir * state.dataSize->CalcSysSizing(AirLoopNum).DesOutAirVolFlow /
-                                 state.dataSize->CalcSysSizing(AirLoopNum).NonCoinCoolMassFlow;
-                    OutAirFrac = min(1.0, max(0.0, OutAirFrac));
-                } else {
-                    OutAirFrac = 1.0;
-                }
-                SysCoolMixTemp = OutAirTemp * OutAirFrac + SysCoolRetTemp * (1.0 - OutAirFrac);
-                SysCoolMixHumRat = OutAirHumRat * OutAirFrac + SysCoolRetHumRat * (1.0 - OutAirFrac);
-                SysSensCoolCap = PsyCpAirFnW(DataPrecisionGlobals::constant_zero) * state.dataSize->CalcSysSizing(AirLoopNum).NonCoinCoolMassFlow *
-                                 (SysCoolMixTemp - state.dataSize->CalcSysSizing(AirLoopNum).CoolSupTemp);
-                SysSensCoolCap = max(0.0, SysSensCoolCap);
-                SysTotCoolCap = state.dataSize->CalcSysSizing(AirLoopNum).NonCoinCoolMassFlow *
-                                (PsyHFnTdbW(SysCoolMixTemp, SysCoolMixHumRat) - PsyHFnTdbW(state.dataSize->CalcSysSizing(AirLoopNum).CoolSupTemp,
-                                                                                           state.dataSize->CalcSysSizing(AirLoopNum).CoolSupHumRat));
-                SysTotCoolCap = max(0.0, SysTotCoolCap);
-            }
+            accumulateNonCoinCoolZoneData(state,
+                                          AirLoopNum,
+                                          NumZonesCooled,
+                                          SysCoolRetTemp,
+                                          SysCoolRetHumRat,
+                                          SysCoolOutTemp,
+                                          SysCoolOutHumRat,
+                                          SysCoolMixTemp,
+                                          SysCoolMixHumRat,
+                                          SysSensCoolCap,
+                                          SysTotCoolCap);
 
             SysHeatRetTemp = 0.0;
             OutAirFrac = 0.0;
