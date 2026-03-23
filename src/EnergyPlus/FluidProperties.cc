@@ -674,6 +674,32 @@ namespace Fluid {
 
     } // InitConstantFluidPropertiesData()
 
+    // Helper to initialize one default glycol property (Cp, Rho, Cond, or Visc) from compile-time data.
+    // This avoids repeating the same 15-line pattern 8 times (4 properties x 2 glycols).
+    static void initDefaultGlycolProperty(bool &dataPresent,
+                                          int &numTempPoints,
+                                          int &numConcPoints,
+                                          Array1D<Real64> &temps,
+                                          Array1D<Real64> &concs,
+                                          Array2D<Real64> &values,
+                                          std::array<std::array<Real64, DefaultNumGlyTemps>, DefaultNumGlyConcs> const &defaultData)
+    {
+        dataPresent = true;
+        numTempPoints = DefaultNumGlyTemps;
+        numConcPoints = DefaultNumGlyConcs;
+
+        temps.allocate(numTempPoints);
+        temps = DefaultGlycolTemps;
+
+        concs.allocate(numConcPoints);
+        concs = DefaultGlycolConcs;
+
+        values.allocate(numConcPoints, numTempPoints);
+        for (int i = 1; i <= numConcPoints; ++i) {
+            values(i, {1, numTempPoints}) = defaultData[i - 1];
+        }
+    }
+
     void GetFluidPropertiesData(EnergyPlusData &state)
     {
 
@@ -1255,69 +1281,34 @@ namespace Fluid {
             ethylene->Num = df->glycolsRaw.isize();
         }
 
-        // Specific Heat
-        ethylene->CpDataPresent = true;                 // Flag set when specific heat data is available
-        ethylene->NumCpTempPoints = DefaultNumGlyTemps; // Number of temperature points for specific heat
-        ethylene->NumCpConcPoints = DefaultNumGlyConcs; // Number of concentration points for specific heat
-
-        ethylene->CpTemps.allocate(ethylene->NumCpTempPoints); // Temperatures for specific heat of glycol
-        ethylene->CpTemps = DefaultGlycolTemps;
-
-        ethylene->CpConcs.allocate(ethylene->NumCpConcPoints); // Concentration for specific heat of glycol
-        ethylene->CpConcs = DefaultGlycolConcs;
-
-        ethylene->CpValues.allocate(ethylene->NumCpConcPoints, ethylene->NumCpTempPoints); // Specific heat data values
-        for (int i = 1; i <= ethylene->NumCpConcPoints; ++i) {
-            ethylene->CpValues(i, {1, ethylene->NumCpTempPoints}) = DefaultEthGlyCpData[i - 1];
-        }
-
-        // Density
-        ethylene->RhoDataPresent = true;
-        ethylene->NumRhoTempPoints = DefaultNumGlyTemps;
-        ethylene->NumRhoConcPoints = DefaultNumGlyConcs;
-
-        ethylene->RhoTemps.allocate(ethylene->NumRhoTempPoints); // Temperatures for density of glycol
-        ethylene->RhoTemps = DefaultGlycolTemps;
-
-        ethylene->RhoConcs.allocate(ethylene->NumRhoConcPoints); // Concentration for density of glycol
-        ethylene->RhoConcs = DefaultGlycolConcs;
-
-        ethylene->RhoValues.allocate(ethylene->NumRhoConcPoints, ethylene->NumRhoTempPoints); // Density data values
-        for (int i = 1; i <= ethylene->NumRhoConcPoints; ++i) {
-            ethylene->RhoValues(i, {1, ethylene->NumRhoTempPoints}) = DefaultEthGlyRhoData[i - 1];
-        }
-
-        // Conductivity
-        ethylene->CondDataPresent = true;
-        ethylene->NumCondTempPoints = DefaultNumGlyTemps;
-        ethylene->NumCondConcPoints = DefaultNumGlyConcs;
-
-        ethylene->CondTemps.allocate(ethylene->NumCondTempPoints); // Temperatures for density of glycol
-        ethylene->CondTemps = DefaultGlycolTemps;
-
-        ethylene->CondConcs.allocate(ethylene->NumCondConcPoints); // Concentration for density of glycol
-        ethylene->CondConcs = DefaultGlycolConcs;
-
-        ethylene->CondValues.allocate(ethylene->NumCondConcPoints, ethylene->NumCondTempPoints); // Density data values
-        for (int i = 1; i <= ethylene->NumCondConcPoints; ++i) {
-            ethylene->CondValues(i, {1, ethylene->NumCondTempPoints}) = DefaultEthGlyCondData[i - 1];
-        }
-
-        // Viscosity
-        ethylene->ViscDataPresent = true;
-        ethylene->NumViscTempPoints = DefaultNumGlyTemps;
-        ethylene->NumViscConcPoints = DefaultNumGlyConcs;
-
-        ethylene->ViscTemps.allocate(ethylene->NumViscTempPoints); // Temperatures for density of glycol
-        ethylene->ViscTemps = DefaultGlycolTemps;
-
-        ethylene->ViscConcs.allocate(ethylene->NumViscConcPoints); // Concentration for density of glycol
-        ethylene->ViscConcs = DefaultGlycolConcs;
-
-        ethylene->ViscValues.allocate(ethylene->NumViscConcPoints, ethylene->NumViscTempPoints); // Density data values
-        for (int i = 1; i <= ethylene->NumViscConcPoints; ++i) {
-            ethylene->ViscValues(i, {1, ethylene->NumViscTempPoints}) = DefaultEthGlyViscData[i - 1];
-        }
+        initDefaultGlycolProperty(ethylene->CpDataPresent,
+                                  ethylene->NumCpTempPoints,
+                                  ethylene->NumCpConcPoints,
+                                  ethylene->CpTemps,
+                                  ethylene->CpConcs,
+                                  ethylene->CpValues,
+                                  DefaultEthGlyCpData);
+        initDefaultGlycolProperty(ethylene->RhoDataPresent,
+                                  ethylene->NumRhoTempPoints,
+                                  ethylene->NumRhoConcPoints,
+                                  ethylene->RhoTemps,
+                                  ethylene->RhoConcs,
+                                  ethylene->RhoValues,
+                                  DefaultEthGlyRhoData);
+        initDefaultGlycolProperty(ethylene->CondDataPresent,
+                                  ethylene->NumCondTempPoints,
+                                  ethylene->NumCondConcPoints,
+                                  ethylene->CondTemps,
+                                  ethylene->CondConcs,
+                                  ethylene->CondValues,
+                                  DefaultEthGlyCondData);
+        initDefaultGlycolProperty(ethylene->ViscDataPresent,
+                                  ethylene->NumViscTempPoints,
+                                  ethylene->NumViscConcPoints,
+                                  ethylene->ViscTemps,
+                                  ethylene->ViscConcs,
+                                  ethylene->ViscValues,
+                                  DefaultEthGlyViscData);
 
         // Propylene
         auto *propylene = GetGlycolRaw(state, "PROPYLENEGLYCOL");
@@ -1328,70 +1319,34 @@ namespace Fluid {
             propylene->Num = df->glycolsRaw.isize();
         }
 
-        // Specific Heat
-        propylene->CpDataPresent = true;                 // Flag set when specific heat data is available
-        propylene->NumCpTempPoints = DefaultNumGlyTemps; // Number of temperature points for specific heat
-        propylene->NumCpConcPoints = DefaultNumGlyConcs; // Number of concentration points for specific heat
-
-        // No ObjexxFCL templates for assigning std::array to Array1S, Probably want to covert these Array1D and 2D to std::vector eventually anyway
-        propylene->CpTemps.allocate(propylene->NumCpTempPoints); // Temperatures for specific heat of glycol
-        propylene->CpTemps = DefaultGlycolTemps;
-
-        propylene->CpConcs.allocate(propylene->NumCpConcPoints); // Concentration for specific heat of glycol
-        propylene->CpConcs = DefaultGlycolConcs;
-
-        propylene->CpValues.allocate(propylene->NumCpConcPoints, propylene->NumCpTempPoints); // Specific heat data values
-        for (int i = 1; i <= propylene->NumCpConcPoints; ++i) {
-            propylene->CpValues(i, {1, propylene->NumCpTempPoints}) = DefaultPropGlyCpData[i - 1];
-        }
-
-        // Density
-        propylene->RhoDataPresent = true;
-        propylene->NumRhoTempPoints = DefaultNumGlyTemps;
-        propylene->NumRhoConcPoints = DefaultNumGlyConcs;
-
-        propylene->RhoTemps.allocate(propylene->NumRhoTempPoints); // Temperatures for density of glycol
-        propylene->RhoTemps = DefaultGlycolTemps;
-
-        propylene->RhoConcs.allocate(propylene->NumRhoConcPoints); // Concentration for density of glycol
-        propylene->RhoConcs = DefaultGlycolConcs;
-
-        propylene->RhoValues.allocate(propylene->NumRhoConcPoints, propylene->NumRhoTempPoints); // Density data values
-        for (int i = 1; i <= propylene->NumRhoConcPoints; ++i) {
-            propylene->RhoValues(i, {1, propylene->NumRhoTempPoints}) = DefaultPropGlyRhoData[i - 1];
-        }
-
-        // Conductivity
-        propylene->CondDataPresent = true;
-        propylene->NumCondTempPoints = DefaultNumGlyTemps;
-        propylene->NumCondConcPoints = DefaultNumGlyConcs;
-
-        propylene->CondTemps.allocate(propylene->NumCondTempPoints); // Temperatures for density of glycol
-        propylene->CondTemps = DefaultGlycolTemps;
-
-        propylene->CondConcs.allocate(propylene->NumCondConcPoints); // Concentration for density of glycol
-        propylene->CondConcs = DefaultGlycolConcs;
-
-        propylene->CondValues.allocate(propylene->NumCondConcPoints, propylene->NumCondTempPoints); // Density data values
-        for (int i = 1; i <= propylene->NumCondConcPoints; ++i) {
-            propylene->CondValues(i, {1, propylene->NumCondTempPoints}) = DefaultPropGlyCondData[i - 1];
-        }
-
-        // Viscosity
-        propylene->ViscDataPresent = true;
-        propylene->NumViscTempPoints = DefaultNumGlyTemps;
-        propylene->NumViscConcPoints = DefaultNumGlyConcs;
-
-        propylene->ViscTemps.allocate(propylene->NumViscTempPoints); // Temperatures for density of glycol
-        propylene->ViscTemps = DefaultGlycolTemps;
-
-        propylene->ViscConcs.allocate(propylene->NumViscConcPoints); // Concentration for density of glycol
-        propylene->ViscConcs = DefaultGlycolConcs;
-
-        propylene->ViscValues.allocate(propylene->NumViscConcPoints, propylene->NumViscTempPoints); // Density data values
-        for (int i = 1; i <= propylene->NumViscConcPoints; ++i) {
-            propylene->ViscValues(i, {1, propylene->NumViscTempPoints}) = DefaultPropGlyViscData[i - 1];
-        }
+        initDefaultGlycolProperty(propylene->CpDataPresent,
+                                  propylene->NumCpTempPoints,
+                                  propylene->NumCpConcPoints,
+                                  propylene->CpTemps,
+                                  propylene->CpConcs,
+                                  propylene->CpValues,
+                                  DefaultPropGlyCpData);
+        initDefaultGlycolProperty(propylene->RhoDataPresent,
+                                  propylene->NumRhoTempPoints,
+                                  propylene->NumRhoConcPoints,
+                                  propylene->RhoTemps,
+                                  propylene->RhoConcs,
+                                  propylene->RhoValues,
+                                  DefaultPropGlyRhoData);
+        initDefaultGlycolProperty(propylene->CondDataPresent,
+                                  propylene->NumCondTempPoints,
+                                  propylene->NumCondConcPoints,
+                                  propylene->CondTemps,
+                                  propylene->CondConcs,
+                                  propylene->CondValues,
+                                  DefaultPropGlyCondData);
+        initDefaultGlycolProperty(propylene->ViscDataPresent,
+                                  propylene->NumViscTempPoints,
+                                  propylene->NumViscConcPoints,
+                                  propylene->ViscTemps,
+                                  propylene->ViscConcs,
+                                  propylene->ViscValues,
+                                  DefaultPropGlyViscData);
 
         // *************** RAW GLYCOLS ***************
         // Go through each glycol found in the fluid names statement and read in the data
