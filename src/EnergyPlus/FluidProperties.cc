@@ -1122,71 +1122,25 @@ namespace Fluid {
         for (auto const *refrig : df->refrigs) {
 
             ErrorObjectHeader eoh{routineName, CurrentModuleObject, refrig->Name};
-            if (refrig->PsValues.empty()) {
-                ShowSevereCustom(
-                    state,
-                    eoh,
-                    EnergyPlus::format(R"(No Gas/Fluid Saturation Pressure found. Need properties with {}="Pressure" and {}="FluidGas".)",
-                                       cAlphaFields(2),
-                                       cAlphaFields(3)));
-                ErrorsFound = true;
-            }
 
-            if (refrig->HfValues.empty()) {
-                ShowSevereCustom(state,
-                                 eoh,
-                                 EnergyPlus::format(R"(No Saturated Fluid Enthalpy found. Need properties with {}="Enthalpy" and {}="Fluid".)",
-                                                    cAlphaFields(2),
-                                                    cAlphaFields(3)));
-                ErrorsFound = true;
-            }
-
-            if (refrig->HfgValues.empty()) {
-                ShowSevereCustom(state,
-                                 eoh,
-                                 EnergyPlus::format(R"(No Saturated Gas/Fluid Enthalpy found. Need properties with {}="Enthalpy" and {}="FluidGas".)",
-                                                    cAlphaFields(2),
-                                                    cAlphaFields(3)));
-                ErrorsFound = true;
-            }
-
-            if (refrig->CpfValues.empty()) {
-                ShowSevereCustom(
-                    state,
-                    eoh,
-                    EnergyPlus::format(R"(No Saturated Fluid Specific Heat found. Need properties with {}="SpecificHeat" and {}="Fluid".)",
-                                       cAlphaFields(2),
-                                       cAlphaFields(3)));
-                ErrorsFound = true;
-            }
-
-            if (refrig->CpfgValues.empty()) {
-                ShowSevereCustom(
-                    state,
-                    eoh,
-                    EnergyPlus::format(R"(No Saturated Gas/Fluid Specific Heat found. Need properties with {}="SpecificHeat" and {}="FluidGas".)",
-                                       cAlphaFields(2),
-                                       cAlphaFields(3)));
-                ErrorsFound = true;
-            }
-
-            if (refrig->RhofValues.empty()) {
-                ShowSevereCustom(state,
-                                 eoh,
-                                 EnergyPlus::format(R"(No Saturated Fluid Density found. Need properties with {}="Density" and {}="Fluid".)",
-                                                    cAlphaFields(2),
-                                                    cAlphaFields(3)));
-                ErrorsFound = true;
-            }
-
-            if (refrig->RhofgValues.empty()) {
-                ShowSevereCustom(state,
-                                 eoh,
-                                 EnergyPlus::format(R"(No Saturated Gas/Fluid Density found. Need properties with {}="Density" and {}="FluidGas".)",
-                                                    cAlphaFields(2),
-                                                    cAlphaFields(3)));
-                ErrorsFound = true;
-            }
+            // Check that each required saturated property has data
+            auto checkSatProp = [&](auto const &values, std::string_view desc, std::string_view propKey, std::string_view phaseKey) {
+                if (values.empty()) {
+                    ShowSevereCustom(
+                        state,
+                        eoh,
+                        EnergyPlus::format(
+                            R"(No {} found. Need properties with {}="{}" and {}="{}".)", desc, cAlphaFields(2), propKey, cAlphaFields(3), phaseKey));
+                    ErrorsFound = true;
+                }
+            };
+            checkSatProp(refrig->PsValues, "Gas/Fluid Saturation Pressure", "Pressure", "FluidGas");
+            checkSatProp(refrig->HfValues, "Saturated Fluid Enthalpy", "Enthalpy", "Fluid");
+            checkSatProp(refrig->HfgValues, "Saturated Gas/Fluid Enthalpy", "Enthalpy", "FluidGas");
+            checkSatProp(refrig->CpfValues, "Saturated Fluid Specific Heat", "SpecificHeat", "Fluid");
+            checkSatProp(refrig->CpfgValues, "Saturated Gas/Fluid Specific Heat", "SpecificHeat", "FluidGas");
+            checkSatProp(refrig->RhofValues, "Saturated Fluid Density", "Density", "Fluid");
+            checkSatProp(refrig->RhofgValues, "Saturated Gas/Fluid Density", "Density", "FluidGas");
         } // for (refrigNum)
 
         // Check: TEMPERATURES for saturated density (must all be the same)
