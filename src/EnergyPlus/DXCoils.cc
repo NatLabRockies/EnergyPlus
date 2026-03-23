@@ -6019,6 +6019,25 @@ static void validateMultispeedMonotonicity(EnergyPlusData &state,
     }
 }
 
+// Reset all sizing state variables used by SizeDXCoil back to defaults.
+// Called after each sizing sub-step to avoid stale state leaking into the next step.
+static void resetDXCoilSizingState(EnergyPlusData &state)
+{
+    auto &ds = *state.dataSize;
+    ds.DataIsDXCoil = false;
+    ds.DataEMSOverrideON = false;
+    ds.DataEMSOverride = 0.0;
+    ds.DataBypassFrac = 0.0;
+    ds.DataFlowUsedForSizing = 0.0;
+    ds.DataCoolCoilCap = 0.0;
+    ds.DataTotCapCurveIndex = 0;
+    ds.DataConstantUsedForSizing = 0.0;
+    ds.DataFractionUsedForSizing = 0.0;
+    ds.DataTotCapCurveValue = 0.0;
+    ds.DataCapacityUsedForSizing = 0.0;
+    ds.DataDXSpeedNum = 0;
+}
+
 void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
 {
 
@@ -6235,10 +6254,7 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
                     sizingCoolingAirFlow.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
                     thisDXCoil.RatedAirVolFlowRate(Mode) = sizingCoolingAirFlow.size(state, TempSize, errorsFound);
                 }
-                state.dataSize->DataIsDXCoil = false;
-                state.dataSize->DataEMSOverrideON = false;
-                state.dataSize->DataEMSOverride = 0.0;
-                state.dataSize->DataBypassFrac = 0.0;
+                resetDXCoilSizingState(state);
             }
 
             state.dataSize->DataFlowUsedForSizing = thisDXCoil.RatedAirVolFlowRate(Mode);
@@ -6354,15 +6370,7 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
                 sizerCoolingCapacity.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
                 thisDXCoil.RatedTotCap(Mode) = sizerCoolingCapacity.size(state, TempSize, ErrorsFound);
             }
-            state.dataSize->DataIsDXCoil = false;
-            state.dataSize->DataFlowUsedForSizing = 0.0;
-            state.dataSize->DataCoolCoilCap = 0.0;
-            state.dataSize->DataTotCapCurveIndex = 0;
-            state.dataSize->DataEMSOverrideON = false;
-            state.dataSize->DataEMSOverride = 0.0;
-            state.dataSize->DataConstantUsedForSizing = 0.0;
-            state.dataSize->DataFractionUsedForSizing = 0.0;
-            state.dataSize->DataTotCapCurveValue = 0.0;
+            resetDXCoilSizingState(state);
 
             // Cooling coil capacity
             if (thisDXCoil.DXCoilType_Num == HVAC::CoilDX_CoolingSingleSpeed || thisDXCoil.DXCoilType_Num == HVAC::CoilDX_CoolingTwoSpeed ||
@@ -6390,11 +6398,7 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
                 state.dataSize->DataEMSOverride = thisDXCoil.RatedSHREMSOverrideValue(Mode);
                 sizerCoolingSHR.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
                 thisDXCoil.RatedSHR(Mode) = sizerCoolingSHR.size(state, TempSize, ErrorsFound);
-                state.dataSize->DataDXSpeedNum = 0;
-                state.dataSize->DataFlowUsedForSizing = 0.0;
-                state.dataSize->DataCapacityUsedForSizing = 0.0;
-                state.dataSize->DataEMSOverrideON = false;
-                state.dataSize->DataEMSOverride = 0.0;
+                resetDXCoilSizingState(state);
 
             } // End of Rated SHR
 
@@ -6636,9 +6640,7 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
                 TempSize = thisDXCoil.RatedSHR2;
                 sizerCoolingSHR.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
                 thisDXCoil.RatedSHR2 = sizerCoolingSHR.size(state, TempSize, ErrorsFound);
-                state.dataSize->DataConstantUsedForSizing = 0.0;
-                state.dataSize->DataFractionUsedForSizing = 0.0;
-                state.dataSize->DataDXSpeedNum = 0;
+                resetDXCoilSizingState(state);
             }
 
             //                // Sizing resistive defrost heater capacity
@@ -6727,12 +6729,7 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
                 sizingCoolingAirFlow.initializeWithinEP(state, CompType, CompName, bPRINT, RoutineName);
                 thisDXCoil.MSRatedAirVolFlowRate(Mode) = sizingCoolingAirFlow.size(state, TempSize, errorsFound);
             }
-            state.dataSize->DataEMSOverride = 0.0;
-            state.dataSize->DataEMSOverrideON = false;
-            state.dataSize->DataIsDXCoil = false;
-            state.dataSize->DataTotCapCurveIndex = 0;
-            state.dataSize->DataConstantUsedForSizing = 0.0;
-            state.dataSize->DataFractionUsedForSizing = 0.0;
+            resetDXCoilSizingState(state);
         }
 
         // Ensure flow rate at lower speed must be lower or equal to the flow rate at higher speed. Otherwise, a severe error is issued.
@@ -6804,13 +6801,7 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
                 sizerCoolingCapacity.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
                 thisDXCoil.MSRatedTotCap(Mode) = sizerCoolingCapacity.size(state, TempSize, ErrorsFound);
             }
-            state.dataSize->DataEMSOverride = 0.0;
-            state.dataSize->DataEMSOverrideON = false;
-            state.dataSize->DataIsDXCoil = false;
-            state.dataSize->DataCoolCoilCap = 0.0;
-            state.dataSize->DataTotCapCurveIndex = 0;
-            state.dataSize->DataConstantUsedForSizing = 0.0;
-            state.dataSize->DataFractionUsedForSizing = 0.0;
+            resetDXCoilSizingState(state);
         }
 
         // Ensure capacity at lower speed must be lower or equal to the capacity at higher speed.
@@ -6849,13 +6840,7 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
                 thisDXCoil.MSRatedSHR(Mode) = sizerCoolingSHR.size(state, TempSize, ErrorsFound);
             }
         }
-        state.dataSize->DataFlowUsedForSizing = 0.0;
-        state.dataSize->DataCapacityUsedForSizing = 0.0;
-        state.dataSize->DataEMSOverrideON = false;
-        state.dataSize->DataEMSOverride = 0.0;
-        state.dataSize->DataDXSpeedNum = 0;
-        state.dataSize->DataFractionUsedForSizing = 0.0;
-        state.dataSize->DataConstantUsedForSizing = 0.0;
+        resetDXCoilSizingState(state);
 
         // Rated Evaporative condenser airflow rates
         for (Mode = 1; Mode <= thisDXCoil.NumOfSpeeds; ++Mode) {
@@ -6985,12 +6970,7 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
                 sizingHeatingAirFlow.initializeWithinEP(state, CompType, CompName, bPRINT, RoutineName);
                 thisDXCoil.MSRatedAirVolFlowRate(Mode) = sizingHeatingAirFlow.size(state, TempSize, errorsFound);
             }
-            state.dataSize->DataEMSOverride = 0.0;
-            state.dataSize->DataEMSOverrideON = false;
-            state.dataSize->DataIsDXCoil = false;
-            state.dataSize->DataTotCapCurveIndex = 0;
-            state.dataSize->DataConstantUsedForSizing = 0.0;
-            state.dataSize->DataFractionUsedForSizing = 0.0;
+            resetDXCoilSizingState(state);
         }
 
         // Ensure flow rate at lower speed must be lower or equal to the flow rate at higher speed. Otherwise, a severe error is issued.
@@ -7091,14 +7071,7 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
                 thisDXCoil.MSRatedTotCap(Mode) = TempSize;
             }
             PrintFlag = false;
-            state.dataSize->DataEMSOverrideON = false;
-            state.dataSize->DataEMSOverride = 0.0;
-            state.dataSize->DataIsDXCoil = false;
-            state.dataSize->DataFlowUsedForSizing = 0.0;
-            state.dataSize->DataCoolCoilCap = 0.0;
-            state.dataSize->DataTotCapCurveIndex = 0;
-            state.dataSize->DataConstantUsedForSizing = 0.0;
-            state.dataSize->DataFractionUsedForSizing = 0.0;
+            resetDXCoilSizingState(state);
         }
         // Ensure capacity at lower speed must be lower or equal to the capacity at higher speed.
         validateMultispeedMonotonicity(
