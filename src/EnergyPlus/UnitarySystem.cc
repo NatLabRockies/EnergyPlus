@@ -1577,6 +1577,58 @@ namespace UnitarySystems {
         }
     }
 
+    // Helper: size an outdoor air flow rate field and report design vs user-specified values.
+    // Used for cooling, heating, and no-load OA flow rate sizing in sizeSystem.
+    static void sizeOutdoorAirFlowRate(EnergyPlusData &state,
+                                       Real64 &outAirVolFlow,
+                                       Real64 desFlowValue,
+                                       bool sizingDesRunThisZone,
+                                       std::string_view unitType,
+                                       std::string_view unitName,
+                                       std::string_view operationDesc)
+    {
+        bool const isAutoSize = (outAirVolFlow == DataSizing::AutoSize);
+        if (!isAutoSize && !sizingDesRunThisZone) {
+            if (outAirVolFlow > 0.0) {
+                BaseSizer::reportSizerOutput(
+                    state, unitType, unitName, EnergyPlus::format("User-Specified Outdoor Air Flow Rate {} [m3/s]", operationDesc), outAirVolFlow);
+            }
+            return;
+        }
+        CheckZoneSizing(state, unitType, unitName);
+        if (desFlowValue < HVAC::SmallAirVolFlow) {
+            desFlowValue = 0.0;
+        }
+        if (isAutoSize) {
+            outAirVolFlow = desFlowValue;
+            BaseSizer::reportSizerOutput(
+                state, unitType, unitName, EnergyPlus::format("Design Size Outdoor Air Flow Rate {} [m3/s]", operationDesc), desFlowValue);
+        } else {
+            if (outAirVolFlow > 0.0 && desFlowValue > 0.0 && sizingDesRunThisZone) {
+                Real64 const userValue = outAirVolFlow;
+                BaseSizer::reportSizerOutput(state,
+                                             unitType,
+                                             unitName,
+                                             EnergyPlus::format("Design Size Outdoor Air Flow Rate {} [m3/s]", operationDesc),
+                                             desFlowValue,
+                                             EnergyPlus::format("User-Specified Outdoor Air Flow Rate {} [m3/s]", operationDesc),
+                                             userValue);
+                if (state.dataGlobal->DisplayExtraWarnings) {
+                    if ((std::abs(desFlowValue - userValue) / userValue) > state.dataSize->AutoVsHardSizingThreshold) {
+                        ShowMessage(state, EnergyPlus::format("SizePTUnit: Potential issue with equipment sizing for {} {}", unitType, unitName));
+                        ShowContinueError(state,
+                                          EnergyPlus::format("User-Specified Outdoor Air Flow Rate {} of {:.5R} [m3/s]", operationDesc, userValue));
+                        ShowContinueError(
+                            state,
+                            EnergyPlus::format("differs from Design Size Outdoor Air Flow Rate {} of {:.5R} [m3/s]", operationDesc, desFlowValue));
+                        ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
+                        ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
+                    }
+                }
+            }
+        }
+    }
+
     void UnitarySys::sizeSystem(EnergyPlusData &state, bool const FirstHVACIteration, int const AirLoopNum)
     {
 
@@ -2550,170 +2602,29 @@ namespace UnitarySystems {
         }
 
         if (this->OAMixerExists) {
-            IsAutoSize = false;
-            if (this->m_CoolOutAirVolFlow == DataSizing::AutoSize) {
-                IsAutoSize = true;
-            }
-            if (!IsAutoSize && !SizingDesRunThisZone) { // Simulation continue
-                if (this->m_CoolOutAirVolFlow > 0.0) {
-                    BaseSizer::reportSizerOutput(state,
-                                                 this->UnitType,
-                                                 this->Name,
-                                                 "User-Specified Outdoor Air Flow Rate During Cooling Operation [m3/s]",
-                                                 this->m_CoolOutAirVolFlow);
-                }
-            } else {
-                CheckZoneSizing(state, this->UnitType, this->Name);
-                Real64 CoolOutAirVolFlowDes = state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).MinOA;
-                if (CoolOutAirVolFlowDes < HVAC::SmallAirVolFlow) {
-                    CoolOutAirVolFlowDes = 0.0;
-                }
-                if (IsAutoSize) {
-                    this->m_CoolOutAirVolFlow = CoolOutAirVolFlowDes;
-                    BaseSizer::reportSizerOutput(
-                        state, this->UnitType, this->Name, "Design Size Outdoor Air Flow Rate During Cooling Operation [m3/s]", CoolOutAirVolFlowDes);
-                } else {
-                    if (this->m_CoolOutAirVolFlow > 0.0 && CoolOutAirVolFlowDes > 0.0 && SizingDesRunThisZone) {
-                        Real64 CoolOutAirVolFlowUser = this->m_CoolOutAirVolFlow;
-                        BaseSizer::reportSizerOutput(state,
-                                                     this->UnitType,
-                                                     this->Name,
-                                                     "Design Size Outdoor Air Flow Rate During Cooling Operation [m3/s]",
-                                                     CoolOutAirVolFlowDes,
-                                                     "User-Specified Outdoor Air Flow Rate During Cooling Operation [m3/s]",
-                                                     CoolOutAirVolFlowUser);
-                        if (state.dataGlobal->DisplayExtraWarnings) {
-                            if ((std::abs(CoolOutAirVolFlowDes - CoolOutAirVolFlowUser) / CoolOutAirVolFlowUser) >
-                                state.dataSize->AutoVsHardSizingThreshold) {
-                                ShowMessage(
-                                    state,
-                                    EnergyPlus::format("SizePTUnit: Potential issue with equipment sizing for {} {}", this->UnitType, this->Name));
-                                ShowContinueError(state,
-                                                  EnergyPlus::format("User-Specified Outdoor Air Flow Rate During Cooling Operation of {:.5R} [m3/s]",
-                                                                     CoolOutAirVolFlowUser));
-                                ShowContinueError(
-                                    state,
-                                    EnergyPlus::format("differs from Design Size Outdoor Air Flow Rate During Cooling Operation of {:.5R} [m3/s]",
-                                                       CoolOutAirVolFlowDes));
-                                ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
-                                ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
-                            }
-                        }
-                    }
-                }
-            }
+            sizeOutdoorAirFlowRate(state,
+                                   this->m_CoolOutAirVolFlow,
+                                   state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).MinOA,
+                                   SizingDesRunThisZone,
+                                   this->UnitType,
+                                   this->Name,
+                                   "During Cooling Operation");
 
-            IsAutoSize = false;
-            if (this->m_HeatOutAirVolFlow == DataSizing::AutoSize) {
-                IsAutoSize = true;
-            }
-            if (!IsAutoSize && !SizingDesRunThisZone) { // Simulation continue
-                if (this->m_HeatOutAirVolFlow > 0.0) {
-                    BaseSizer::reportSizerOutput(state,
-                                                 this->UnitType,
-                                                 this->Name,
-                                                 "User-Specified Outdoor Air Flow Rate During Heating Operation [m3/s]",
-                                                 this->m_HeatOutAirVolFlow);
-                }
-            } else {
-                CheckZoneSizing(state, this->UnitType, this->Name);
-                Real64 HeatOutAirVolFlowDes = state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).MinOA;
-                if (HeatOutAirVolFlowDes < HVAC::SmallAirVolFlow) {
-                    HeatOutAirVolFlowDes = 0.0;
-                }
-                if (IsAutoSize) {
-                    this->m_HeatOutAirVolFlow = HeatOutAirVolFlowDes;
-                    BaseSizer::reportSizerOutput(
-                        state, this->UnitType, this->Name, "Design Size Outdoor Air Flow Rate During Heating Operation [m3/s]", HeatOutAirVolFlowDes);
-                } else {
-                    if (this->m_HeatOutAirVolFlow > 0.0 && HeatOutAirVolFlowDes > 0.0 && SizingDesRunThisZone) {
-                        Real64 HeatOutAirVolFlowUser = this->m_HeatOutAirVolFlow;
-                        BaseSizer::reportSizerOutput(state,
-                                                     this->UnitType,
-                                                     this->Name,
-                                                     "Design Size Outdoor Air Flow Rate During Heating Operation [m3/s]",
-                                                     HeatOutAirVolFlowDes,
-                                                     "User-Specified Outdoor Air Flow Rate During Heating Operation [m3/s]",
-                                                     HeatOutAirVolFlowUser);
-                        if (state.dataGlobal->DisplayExtraWarnings) {
-                            if ((std::abs(HeatOutAirVolFlowDes - HeatOutAirVolFlowUser) / HeatOutAirVolFlowUser) >
-                                state.dataSize->AutoVsHardSizingThreshold) {
-                                ShowMessage(
-                                    state,
-                                    EnergyPlus::format("SizePTUnit: Potential issue with equipment sizing for {} {}", this->UnitType, this->Name));
-                                ShowContinueError(state,
-                                                  EnergyPlus::format("User-Specified Outdoor Air Flow Rate During Heating Operation of {:.5R} [m3/s]",
-                                                                     HeatOutAirVolFlowUser));
-                                ShowContinueError(
-                                    state,
-                                    EnergyPlus::format("differs from Design Size Outdoor Air Flow Rate During Heating Operation of {:.5R} [m3/s]",
-                                                       HeatOutAirVolFlowDes));
-                                ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
-                                ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
-                            }
-                        }
-                    }
-                }
-            }
+            sizeOutdoorAirFlowRate(state,
+                                   this->m_HeatOutAirVolFlow,
+                                   state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).MinOA,
+                                   SizingDesRunThisZone,
+                                   this->UnitType,
+                                   this->Name,
+                                   "During Heating Operation");
 
-            IsAutoSize = false;
-            if (this->m_NoCoolHeatOutAirVolFlow == DataSizing::AutoSize) {
-                IsAutoSize = true;
-            }
-            if (!IsAutoSize && !SizingDesRunThisZone) { // Simulation continue
-                if (this->m_NoCoolHeatOutAirVolFlow > 0.0) {
-                    BaseSizer::reportSizerOutput(state,
-                                                 this->UnitType,
-                                                 this->Name,
-                                                 "User-Specified Outdoor Air Flow Rate When No Cooling or Heating is Needed [m3/s]",
-                                                 this->m_NoCoolHeatOutAirVolFlow);
-                }
-            } else {
-                CheckZoneSizing(state, this->UnitType, this->Name);
-                Real64 NoCoolHeatOutAirVolFlowDes =
-                    min(state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).MinOA, this->m_MaxNoCoolHeatAirVolFlow);
-                if (NoCoolHeatOutAirVolFlowDes < HVAC::SmallAirVolFlow) {
-                    NoCoolHeatOutAirVolFlowDes = 0.0;
-                }
-                if (IsAutoSize) {
-                    this->m_NoCoolHeatOutAirVolFlow = NoCoolHeatOutAirVolFlowDes;
-                    BaseSizer::reportSizerOutput(state,
-                                                 this->UnitType,
-                                                 this->Name,
-                                                 "Design Size Outdoor Air Flow Rate When No Cooling or Heating is Needed [m3/s]",
-                                                 NoCoolHeatOutAirVolFlowDes);
-                } else {
-                    if (this->m_NoCoolHeatOutAirVolFlow > 0.0 && NoCoolHeatOutAirVolFlowDes > 0.0 && SizingDesRunThisZone) {
-                        Real64 NoCoolHeatOutAirVolFlowUser = this->m_NoCoolHeatOutAirVolFlow;
-                        BaseSizer::reportSizerOutput(state,
-                                                     this->UnitType,
-                                                     this->Name,
-                                                     "Design Size Outdoor Air Flow Rate When No Cooling or Heating is Needed [m3/s]",
-                                                     NoCoolHeatOutAirVolFlowDes,
-                                                     "User-Specified Outdoor Air Flow Rate When No Cooling or Heating is Needed [m3/s]",
-                                                     NoCoolHeatOutAirVolFlowUser);
-                        if (state.dataGlobal->DisplayExtraWarnings) {
-                            if ((std::abs(NoCoolHeatOutAirVolFlowDes - NoCoolHeatOutAirVolFlowUser) / NoCoolHeatOutAirVolFlowUser) >
-                                state.dataSize->AutoVsHardSizingThreshold) {
-                                ShowMessage(
-                                    state,
-                                    EnergyPlus::format("SizePTUnit: Potential issue with equipment sizing for {} {}", this->UnitType, this->Name));
-                                ShowContinueError(
-                                    state,
-                                    EnergyPlus::format("User-Specified Outdoor Air Flow Rate When No Cooling or Heating is Needed of {:.5R} [m3/s]",
-                                                       NoCoolHeatOutAirVolFlowUser));
-                                ShowContinueError(
-                                    state,
-                                    EnergyPlus::format(
-                                        "differs from Design Size Outdoor Air Flow Rate When No Cooling or Heating is Needed of {:.5R} [m3/s]",
-                                        NoCoolHeatOutAirVolFlowDes));
-                                ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
-                                ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
-                            }
-                        }
-                    }
-                }
-            }
+            sizeOutdoorAirFlowRate(state,
+                                   this->m_NoCoolHeatOutAirVolFlow,
+                                   min(state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).MinOA, this->m_MaxNoCoolHeatAirVolFlow),
+                                   SizingDesRunThisZone,
+                                   this->UnitType,
+                                   this->Name,
+                                   "When No Cooling or Heating is Needed");
         }
         if (this->m_sysType == SysType::PackagedHP || this->m_sysType == SysType::PackagedWSHP) {
             PrintFlag = false;
