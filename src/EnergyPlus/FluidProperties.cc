@@ -700,6 +700,55 @@ namespace Fluid {
         }
     }
 
+    // Helper to load glycol concentration property values from input into the raw glycol arrays.
+    // Returns false if the number of data points doesn't match the expected temperature points.
+    static bool loadGlycolConcValues(EnergyPlusData &state,
+                                     ErrorObjectHeader const &eoh,
+                                     std::string_view propName,
+                                     int numNumbers,
+                                     Array1D<Real64> const &numbers,
+                                     int numTempPoints,
+                                     Array1D<Real64> const &concs,
+                                     Array2D<Real64> &values,
+                                     bool &errorsFound)
+    {
+        if ((numNumbers - 1) != numTempPoints) {
+            ShowSevereCustom(state,
+                             eoh,
+                             EnergyPlus::format(
+                                 "Number of {} points ({}) not equal to number of temperature points ({})", propName, numNumbers - 1, numTempPoints));
+            errorsFound = true;
+            return false;
+        }
+        auto concFound = std::find(concs.begin(), concs.end(), numbers(1));
+        assert(concFound != concs.end());
+        int concNum = static_cast<int>(concFound - concs.begin()) + 1;
+        values(concNum, {1, numTempPoints}) = numbers({2, numNumbers});
+        return true;
+    }
+
+    // Helper to allocate and initialize a glycol raw property's temperature/concentration arrays from FluidTemps data.
+    template <typename FluidTempDataArray>
+    static void allocGlycolRawProperty(std::string const &tempArrayName,
+                                       FluidTempDataArray const &fluidTemps,
+                                       int &numTempPoints,
+                                       Array1D<Real64> &temps,
+                                       int numConcPoints,
+                                       Array1D<Real64> &concs,
+                                       Array2D<Real64> &values)
+    {
+        if (tempArrayName.empty()) {
+            return;
+        }
+        int tempArrayNum = Util::FindItemInList(tempArrayName, fluidTemps);
+        auto const &tempArray = fluidTemps(tempArrayNum);
+        numTempPoints = tempArray.NumOfTemps;
+        temps.allocate(numTempPoints);
+        temps = tempArray.Temps;
+        values.allocate(numConcPoints, numTempPoints);
+        std::sort(concs.begin(), concs.end());
+    }
+
     void GetFluidPropertiesData(EnergyPlusData &state)
     {
 
@@ -1480,49 +1529,34 @@ namespace Fluid {
         // Allocate and sort temp point/conc point arrays
         for (auto *glycolRaw : df->glycolsRaw) {
 
-            if (!glycolRaw->CpTempArrayName.empty()) {
-                int cpTempArrayNum = Util::FindItemInList(glycolRaw->CpTempArrayName, FluidTemps);
-                auto const &cpTempArray = FluidTemps(cpTempArrayNum);
-                glycolRaw->NumCpTempPoints = cpTempArray.NumOfTemps;
-                glycolRaw->CpTemps.allocate(glycolRaw->NumCpTempPoints);
-                glycolRaw->CpTemps = cpTempArray.Temps;
-
-                glycolRaw->CpValues.allocate(glycolRaw->NumCpConcPoints, glycolRaw->NumCpTempPoints);
-                std::sort(glycolRaw->CpConcs.begin(), glycolRaw->CpConcs.end());
-            }
-
-            if (!glycolRaw->RhoTempArrayName.empty()) {
-                int rhoTempArrayNum = Util::FindItemInList(glycolRaw->RhoTempArrayName, FluidTemps);
-                auto const &rhoTempArray = FluidTemps(rhoTempArrayNum);
-                glycolRaw->NumRhoTempPoints = rhoTempArray.NumOfTemps;
-                glycolRaw->RhoTemps.allocate(glycolRaw->NumRhoTempPoints);
-                glycolRaw->RhoTemps = rhoTempArray.Temps;
-
-                glycolRaw->RhoValues.allocate(glycolRaw->NumRhoConcPoints, glycolRaw->NumRhoTempPoints);
-                std::sort(glycolRaw->RhoConcs.begin(), glycolRaw->RhoConcs.end());
-            }
-
-            if (!glycolRaw->CondTempArrayName.empty()) {
-                int condTempArrayNum = Util::FindItemInList(glycolRaw->CondTempArrayName, FluidTemps);
-                auto const &condTempArray = FluidTemps(condTempArrayNum);
-                glycolRaw->NumCondTempPoints = condTempArray.NumOfTemps;
-                glycolRaw->CondTemps.allocate(glycolRaw->NumCondTempPoints);
-                glycolRaw->CondTemps = condTempArray.Temps;
-
-                glycolRaw->CondValues.allocate(glycolRaw->NumCondConcPoints, glycolRaw->NumCondTempPoints);
-                std::sort(glycolRaw->CondConcs.begin(), glycolRaw->CondConcs.end());
-            }
-
-            if (!glycolRaw->ViscTempArrayName.empty()) {
-                int viscTempArrayNum = Util::FindItemInList(glycolRaw->ViscTempArrayName, FluidTemps);
-                auto const &viscTempArray = FluidTemps(viscTempArrayNum);
-                glycolRaw->NumViscTempPoints = viscTempArray.NumOfTemps;
-                glycolRaw->ViscTemps.allocate(glycolRaw->NumViscTempPoints);
-                glycolRaw->ViscTemps = viscTempArray.Temps;
-
-                glycolRaw->ViscValues.allocate(glycolRaw->NumViscConcPoints, glycolRaw->NumViscTempPoints);
-                std::sort(glycolRaw->ViscConcs.begin(), glycolRaw->ViscConcs.end());
-            }
+            allocGlycolRawProperty(glycolRaw->CpTempArrayName,
+                                   FluidTemps,
+                                   glycolRaw->NumCpTempPoints,
+                                   glycolRaw->CpTemps,
+                                   glycolRaw->NumCpConcPoints,
+                                   glycolRaw->CpConcs,
+                                   glycolRaw->CpValues);
+            allocGlycolRawProperty(glycolRaw->RhoTempArrayName,
+                                   FluidTemps,
+                                   glycolRaw->NumRhoTempPoints,
+                                   glycolRaw->RhoTemps,
+                                   glycolRaw->NumRhoConcPoints,
+                                   glycolRaw->RhoConcs,
+                                   glycolRaw->RhoValues);
+            allocGlycolRawProperty(glycolRaw->CondTempArrayName,
+                                   FluidTemps,
+                                   glycolRaw->NumCondTempPoints,
+                                   glycolRaw->CondTemps,
+                                   glycolRaw->NumCondConcPoints,
+                                   glycolRaw->CondConcs,
+                                   glycolRaw->CondValues);
+            allocGlycolRawProperty(glycolRaw->ViscTempArrayName,
+                                   FluidTemps,
+                                   glycolRaw->NumViscTempPoints,
+                                   glycolRaw->ViscTemps,
+                                   glycolRaw->NumViscConcPoints,
+                                   glycolRaw->ViscConcs,
+                                   glycolRaw->ViscValues);
         }
 
         // Finally, get the specific heat and concentration values from the user input
@@ -1550,64 +1584,53 @@ namespace Fluid {
             assert(glycolRaw != nullptr); // We've already tested for this, can just assert now
 
             if (Alphas(2) == "SPECIFICHEAT") {
-                if ((NumNumbers - 1) != glycolRaw->NumCpTempPoints) {
-                    ShowSevereCustom(state,
-                                     eoh,
-                                     EnergyPlus::format("Number of specific heat points ({}) not equal to number of temperature points ({})",
-                                                        NumNumbers - 1,
-                                                        glycolRaw->NumCpTempPoints));
-                    ErrorsFound = true;
+                if (!loadGlycolConcValues(state,
+                                          eoh,
+                                          "specific heat",
+                                          NumNumbers,
+                                          Numbers,
+                                          glycolRaw->NumCpTempPoints,
+                                          glycolRaw->CpConcs,
+                                          glycolRaw->CpValues,
+                                          ErrorsFound)) {
                     continue;
                 }
-                auto concFound = std::find(glycolRaw->CpConcs.begin(), glycolRaw->CpConcs.end(), Numbers(1));
-                assert(concFound != glycolRaw->CpConcs.end());
-                int concNum = (concFound - glycolRaw->CpConcs.begin()) + 1;
-                glycolRaw->CpValues(concNum, {1, glycolRaw->NumCpTempPoints}) = Numbers({2, NumNumbers});
-
             } else if (Alphas(2) == "DENSITY") {
-                if ((NumNumbers - 1) != glycolRaw->NumRhoTempPoints) {
-                    ShowSevereCustom(state,
-                                     eoh,
-                                     EnergyPlus::format("Number of density points ({}) not equal to number of temperature points ({})",
-                                                        NumNumbers - 1,
-                                                        glycolRaw->NumRhoTempPoints));
-                    ErrorsFound = true;
+                if (!loadGlycolConcValues(state,
+                                          eoh,
+                                          "density",
+                                          NumNumbers,
+                                          Numbers,
+                                          glycolRaw->NumRhoTempPoints,
+                                          glycolRaw->RhoConcs,
+                                          glycolRaw->RhoValues,
+                                          ErrorsFound)) {
                     continue;
                 }
-                auto concFound = std::find(glycolRaw->RhoConcs.begin(), glycolRaw->RhoConcs.end(), Numbers(1));
-                assert(concFound != glycolRaw->RhoConcs.end());
-                int concNum = (concFound - glycolRaw->RhoConcs.begin()) + 1;
-                glycolRaw->RhoValues(concNum, {1, glycolRaw->NumRhoTempPoints}) = Numbers({2, NumNumbers});
-
             } else if (Alphas(2) == "CONDUCTIVITY") {
-                if ((NumNumbers - 1) != glycolRaw->NumCondTempPoints) {
-                    ShowSevereCustom(state,
-                                     eoh,
-                                     EnergyPlus::format("Number of conductivity points ({}) not equal to number of temperature points ({})",
-                                                        NumNumbers - 1,
-                                                        glycolRaw->NumCondTempPoints));
-                    ErrorsFound = true;
+                if (!loadGlycolConcValues(state,
+                                          eoh,
+                                          "conductivity",
+                                          NumNumbers,
+                                          Numbers,
+                                          glycolRaw->NumCondTempPoints,
+                                          glycolRaw->CondConcs,
+                                          glycolRaw->CondValues,
+                                          ErrorsFound)) {
                     continue;
                 }
-                auto concFound = std::find(glycolRaw->CondConcs.begin(), glycolRaw->CondConcs.end(), Numbers(1));
-                assert(concFound != glycolRaw->CondConcs.end());
-                int concNum = (concFound - glycolRaw->CondConcs.begin()) + 1;
-                glycolRaw->CondValues(concNum, {1, glycolRaw->NumCondTempPoints}) = Numbers({2, NumNumbers});
-
             } else if (Alphas(2) == "VISCOSITY") {
-                if ((NumNumbers - 1) != glycolRaw->NumViscTempPoints) {
-                    ShowSevereCustom(state,
-                                     eoh,
-                                     EnergyPlus::format("Number of viscosity points ({}) not equal to number of temperature points ({})",
-                                                        NumNumbers - 1,
-                                                        glycolRaw->NumViscTempPoints));
-                    ErrorsFound = true;
+                if (!loadGlycolConcValues(state,
+                                          eoh,
+                                          "viscosity",
+                                          NumNumbers,
+                                          Numbers,
+                                          glycolRaw->NumViscTempPoints,
+                                          glycolRaw->ViscConcs,
+                                          glycolRaw->ViscValues,
+                                          ErrorsFound)) {
                     continue;
                 }
-                auto concFound = std::find(glycolRaw->ViscConcs.begin(), glycolRaw->ViscConcs.end(), Numbers(1));
-                assert(concFound != glycolRaw->ViscConcs.end());
-                int concNum = (concFound - glycolRaw->ViscConcs.begin()) + 1;
-                glycolRaw->ViscValues(concNum, {1, glycolRaw->NumViscTempPoints}) = Numbers({2, NumNumbers});
             }
         } // for (InData)
 
