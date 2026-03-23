@@ -150,6 +150,35 @@ namespace Window {
         }
     }
 
+    // Convert glass spectral data to average properties and warn when between-glass shading is present.
+    // Called for both spectral-data and spectral-and-angle glass layers that have the BGFlag set.
+    static void convertGlassToBGSpectralAverage(EnergyPlusData &state,
+                                                Material::MaterialGlass *matGlass,
+                                                std::string const &constrName,
+                                                std::string const &dataDescription,
+                                                std::array<Real64, maxSpectralDataElements> const &tData,
+                                                std::array<Real64, maxSpectralDataElements> const &rffData,
+                                                std::array<Real64, maxSpectralDataElements> const &rbbData)
+    {
+        ShowWarningError(state,
+                         EnergyPlus::format("Window glazing material \"{}\" was defined with full {} and has been converted to average spectral data",
+                                            matGlass->Name,
+                                            dataDescription));
+        ShowContinueError(state,
+                          EnergyPlus::format("due to its use with between-glass shades or blinds of the window construction \"{}\".", constrName));
+        ShowContinueError(state, "All occurrences of this glazing material will be modeled as SpectralAverage.");
+        ShowContinueError(state, "If this material is also used in other window constructions  without between-glass shades or blinds,");
+        ShowContinueError(state,
+                          "then make a duplicate material (with new name) if you want to model those windows  (and reference the new "
+                          "material) using the full spectral data.");
+        matGlass->Trans = solarSpectrumAverage(state, tData);
+        matGlass->TransVis = visibleSpectrumAverage(state, tData);
+        matGlass->ReflectSolBeamFront = solarSpectrumAverage(state, rffData);
+        matGlass->ReflectSolBeamBack = solarSpectrumAverage(state, rbbData);
+        matGlass->ReflectVisBeamFront = visibleSpectrumAverage(state, rffData);
+        matGlass->ReflectVisBeamBack = visibleSpectrumAverage(state, rbbData);
+    }
+
     void InitGlassOpticalCalculations(EnergyPlusData &state)
     {
 
@@ -561,30 +590,8 @@ namespace Window {
 
                     // If there is spectral data for between-glass shades or blinds, calc the average spectral properties for use.
                     if (wm->BGFlag) {
-                        // Add warning message for the glazing defined with full spectral data.
-                        ShowWarningError(
-                            state,
-                            EnergyPlus::format(
-                                "Window glazing material \"{}\" was defined with full spectral data and has been converted to average spectral data",
-                                matGlass->Name));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("due to its use with between-glass shades or blinds of the window construction \"{}\".",
-                                                             thisConstruct.Name));
-                        ShowContinueError(state, "All occurrences of this glazing material will be modeled as SpectralAverage.");
-                        ShowContinueError(state,
-                                          "If this material is also used in other window constructions  without between-glass shades or blinds,");
-                        ShowContinueError(state,
-                                          "then make a duplicate material (with new name) if you want to model those windows  (and reference the new "
-                                          "material) using the full spectral data.");
-
-                        // set this material to average spectral data
+                        convertGlassToBGSpectralAverage(state, matGlass, thisConstruct.Name, "spectral data", t[0], rff[0], rbb[0]);
                         matGlass->GlassSpectralDataPtr = 0;
-                        matGlass->Trans = solarSpectrumAverage(state, t[0]);
-                        matGlass->TransVis = visibleSpectrumAverage(state, t[0]);
-                        matGlass->ReflectSolBeamFront = solarSpectrumAverage(state, rff[0]);
-                        matGlass->ReflectSolBeamBack = solarSpectrumAverage(state, rbb[0]);
-                        matGlass->ReflectVisBeamFront = visibleSpectrumAverage(state, rff[0]);
-                        matGlass->ReflectVisBeamBack = visibleSpectrumAverage(state, rbb[0]);
                         SpecDataNum = 0;
                     }
                 }
@@ -614,24 +621,6 @@ namespace Window {
                     numptDAT = wm->wle.size();
                     numpt[iGlass] = numptDAT;
                     if (wm->BGFlag) {
-                        // 5/16/2012 CR 8793. Add warning message for the glazing defined with full spectral data.
-                        ShowWarningError(
-                            state,
-                            EnergyPlus::format("Window glazing material \"{}\" was defined with full spectral and angular data and has been "
-                                               "converted to average spectral data",
-                                               matGlass->Name));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("due to its use with between-glass shades or blinds of the window construction \"{}\".",
-                                                             thisConstruct.Name));
-                        ShowContinueError(state, "All occurrences of this glazing material will be modeled as SpectralAverage.");
-                        ShowContinueError(state,
-                                          "If this material is also used in other window constructions  without between-glass shades or blinds,");
-                        ShowContinueError(state,
-                                          "then make a duplicate material (with new name) if you want to model those windows  (and reference the new "
-                                          "material) using the full spectral data.");
-                        // calc Trans, TransVis, ReflectSolBeamFront, ReflectSolBeamBack, ReflectVisBeamFront, ReflectVisBeamBack
-                        //  assuming wlt same as wle
-
                         for (int iLam = 0; iLam < nume; ++iLam) {
                             Real64 lam = wm->wle[iLam];
                             wlt[iGlass][iLam] = lam;
@@ -639,15 +628,8 @@ namespace Window {
                             rff[iGlass][iLam] = matGlass->GlassSpecAngFReflCurve->value(state, 0.0, lam);
                             rbb[iGlass][iLam] = matGlass->GlassSpecAngBReflCurve->value(state, 0.0, lam);
                         }
-
-                        // set this material to average spectral data
+                        convertGlassToBGSpectralAverage(state, matGlass, thisConstruct.Name, "spectral and angular data", t[0], rff[0], rbb[0]);
                         matGlass->windowOpticalData = Window::OpticalDataModel::SpectralAverage;
-                        matGlass->Trans = solarSpectrumAverage(state, t[0]);
-                        matGlass->TransVis = visibleSpectrumAverage(state, t[0]);
-                        matGlass->ReflectSolBeamFront = solarSpectrumAverage(state, rff[0]);
-                        matGlass->ReflectSolBeamBack = solarSpectrumAverage(state, rbb[0]);
-                        matGlass->ReflectVisBeamFront = visibleSpectrumAverage(state, rff[0]);
-                        matGlass->ReflectVisBeamBack = visibleSpectrumAverage(state, rbb[0]);
                         SpecDataNum = 0;
                     }
                 }
