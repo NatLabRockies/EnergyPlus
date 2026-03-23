@@ -1286,6 +1286,71 @@ namespace WaterToAirHeatPumpSimple {
         }
     }
 
+    // Helper: compute rated total cooling capacity from peak design conditions.
+    // Calculates enthalpies, fan heat adjustment, peak load, curve modifiers,
+    // and returns the rated total cooling capacity. Also sets reporting data.
+    static void calcRatedTotalCoolCap(EnergyPlusData &state,
+                                      SimpleWatertoAirHPConditions const &coil,
+                                      std::string const &CompType,
+                                      Real64 VolFlowRate,
+                                      Real64 &MixTemp,
+                                      Real64 MixHumRat,
+                                      Real64 MixTempSys,
+                                      Real64 MixHumRatSys,
+                                      Real64 &SupTemp,
+                                      Real64 SupHumRat,
+                                      HVAC::FanPlace fanPlace,
+                                      Real64 Tref,
+                                      Real64 &FanCoolLoad,
+                                      Real64 &dHratio,
+                                      Real64 &MixWetBulb,
+                                      Real64 &RatedMixWetBulb,
+                                      Real64 &ratioTWB,
+                                      Real64 &ratioTS,
+                                      Real64 &RatedratioTWB,
+                                      Real64 &RatedratioTS,
+                                      Real64 &PeakTotCapTempModFac,
+                                      Real64 &RatedTotCapTempModFac,
+                                      Real64 &RatedCoolPowerTempModFac,
+                                      Real64 &RatedCapCoolTotalDes,
+                                      int &PltSizNum,
+                                      bool &ErrorsFound)
+    {
+        static constexpr std::string_view RoutineName("SizeWaterToAirCoil");
+        Real64 rhoair = Psychrometrics::PsyRhoAirFnPbTdbW(state, state.dataEnvrn->StdBaroPress, MixTemp, MixHumRat, RoutineName);
+        Real64 MixEnth = Psychrometrics::PsyHFnTdbW(MixTemp, MixHumRat);
+        Real64 MixEnthSys = Psychrometrics::PsyHFnTdbW(MixTempSys, MixHumRatSys);
+        Real64 SupEnth = Psychrometrics::PsyHFnTdbW(SupTemp, SupHumRat);
+        dHratio = (SupEnth - MixEnthSys) / (SupEnth - MixEnth);
+        if (state.dataSize->DataFanType != HVAC::FanType::Invalid && state.dataSize->DataFanIndex > 0) {
+            FanCoolLoad = state.dataFans->fans(state.dataSize->DataFanIndex)->getDesignHeatGain(state, VolFlowRate);
+            Real64 CpAir = Psychrometrics::PsyCpAirFnW(MixHumRat);
+            if (fanPlace == HVAC::FanPlace::BlowThru) {
+                MixTemp += FanCoolLoad / (CpAir * rhoair * VolFlowRate);
+            } else if (fanPlace == HVAC::FanPlace::DrawThru) {
+                SupTemp -= FanCoolLoad / (CpAir * rhoair * VolFlowRate);
+            }
+        }
+        Real64 CoolCapAtPeak = (rhoair * VolFlowRate * (MixEnth - SupEnth)) + FanCoolLoad;
+        CoolCapAtPeak = max(0.0, CoolCapAtPeak);
+        MixWetBulb = Psychrometrics::PsyTwbFnTdbWPb(state, MixTemp, MixHumRat, state.dataEnvrn->StdBaroPress, RoutineName);
+        RatedMixWetBulb = coil.RatedEntAirWetbulbTemp;
+        ratioTWB = (MixWetBulb + Constant::Kelvin) / Tref;
+        PltSizNum = getPlantSizingIndexAndRatioTS(
+            state, CompType, coil.Name, coil.WaterInletNodeNum, coil.WaterOutletNodeNum, "total cooling capacity", Tref, ratioTS, ErrorsFound);
+        RatedratioTWB = (RatedMixWetBulb + Constant::Kelvin) / Tref;
+        RatedratioTS = (coil.RatedEntWaterTemp + Constant::Kelvin) / Tref;
+        PeakTotCapTempModFac = coil.TotalCoolCapCurve->value(state, ratioTWB, ratioTS, 1.0, 1.0);
+        RatedTotCapTempModFac = coil.TotalCoolCapCurve->value(state, RatedratioTWB, RatedratioTS, 1.0, 1.0);
+        RatedCoolPowerTempModFac = coil.CoolPowCurve->value(state, RatedratioTWB, RatedratioTS, 1.0, 1.0);
+        RatedCapCoolTotalDes = (PeakTotCapTempModFac > 0.0) ? CoolCapAtPeak / PeakTotCapTempModFac : CoolCapAtPeak;
+        state.dataRptCoilSelection->coilSelectionReportObj->setCoilEntAirTemp(
+            state, coil.Name, CompType, MixTemp, state.dataSize->CurSysNum, state.dataSize->CurZoneEqNum);
+        state.dataRptCoilSelection->coilSelectionReportObj->setCoilEntAirHumRat(state, coil.Name, CompType, MixHumRat);
+        state.dataRptCoilSelection->coilSelectionReportObj->setCoilLvgAirTemp(state, coil.Name, CompType, SupTemp);
+        state.dataRptCoilSelection->coilSelectionReportObj->setCoilLvgAirHumRat(state, coil.Name, CompType, SupHumRat);
+    }
+
     void SizeHVACWaterToAir(EnergyPlusData &state, int const HPNum)
     {
 
@@ -1309,16 +1374,16 @@ namespace WaterToAirHeatPumpSimple {
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         Real64 rhoair;
-        Real64 MixTemp;                   // Mixed air temperature at cooling design conditions
-        Real64 MixTempSys;                // Mixed air temperature at cooling design conditions at system air flow
-        Real64 HeatMixTemp;               // Mixed air temperature at heating design conditions
-        Real64 HeatMixTempSys;            // Mixed air temperature at heating design conditions at system air flow
-        Real64 MixHumRat;                 // Mixed air humidity ratio at cooling design conditions
-        Real64 MixHumRatSys;              // Mixed air humidity ratio at cooling design conditions at system air flow
-        Real64 HeatMixHumRat;             // Mixed air humidity ratio at heating design conditions
-        Real64 HeatMixHumRatSys;          // Mixed air humidity ratio at heating design conditions at system air flow
-        Real64 MixEnth;                   // Mixed air enthalpy at cooling design conditions
-        Real64 MixEnthSys;                // Mixed air enthalpy at cooling design conditions at system air flow
+        Real64 MixTemp;          // Mixed air temperature at cooling design conditions
+        Real64 MixTempSys;       // Mixed air temperature at cooling design conditions at system air flow
+        Real64 HeatMixTemp;      // Mixed air temperature at heating design conditions
+        Real64 HeatMixTempSys;   // Mixed air temperature at heating design conditions at system air flow
+        Real64 MixHumRat;        // Mixed air humidity ratio at cooling design conditions
+        Real64 MixHumRatSys;     // Mixed air humidity ratio at cooling design conditions at system air flow
+        Real64 HeatMixHumRat;    // Mixed air humidity ratio at heating design conditions
+        Real64 HeatMixHumRatSys; // Mixed air humidity ratio at heating design conditions at system air flow
+        Real64 MixEnth;          // Mixed air enthalpy at cooling design conditions
+        // MixEnthSys is now computed inside calcRatedTotalCoolCap
         Real64 MixWetBulb;                // Mixed air wet-bulb temperature at cooling design conditions
         Real64 RatedMixWetBulb = 0.0;     // Rated mixed air wetbulb temperature
         Real64 RatedMixDryBulb = 0.0;     // Rated mixed air drybulb temperature
@@ -1343,7 +1408,7 @@ namespace WaterToAirHeatPumpSimple {
         Real64 HeatOutAirFrac;            // Outdoor air fraction at heating design conditions
         Real64 HeatOutAirFracSys;         // Outdoor air fraction at heating design conditions at system air flow
         Real64 VolFlowRate;
-        Real64 CoolCapAtPeak;                  // Load on the cooling coil at cooling design conditions
+        // CoolCapAtPeak is now computed inside calcRatedTotalCoolCap
         Real64 HeatCapAtPeak;                  // Load on the heating coil at heating design conditions
         Real64 PeakTotCapTempModFac = 1.0;     // Peak total cooling capacity curve modifier
         Real64 RatedTotCapTempModFac = 1.0;    // Rated total cooling capacity curve modifier
@@ -1558,57 +1623,32 @@ namespace WaterToAirHeatPumpSimple {
                         // supply air condition is capped with that of mixed air to avoid SHR > 1.0
                         SupTemp = min(MixTemp, SupTemp);
                         SupHumRat = min(MixHumRat, SupHumRat);
-                        rhoair = Psychrometrics::PsyRhoAirFnPbTdbW(state, state.dataEnvrn->StdBaroPress, MixTemp, MixHumRat, RoutineName);
-                        MixEnth = Psychrometrics::PsyHFnTdbW(MixTemp, MixHumRat);
-                        MixEnthSys = Psychrometrics::PsyHFnTdbW(MixTempSys, MixHumRatSys);
-                        SupEnth = Psychrometrics::PsyHFnTdbW(SupTemp, SupHumRat);
-                        // determine the coil ratio of coil dT with system air flow to design heating air flow
-                        dHratio = (SupEnth - MixEnthSys) / (SupEnth - MixEnth);
-                        if (state.dataSize->DataFanType != HVAC::FanType::Invalid && state.dataSize->DataFanIndex > 0) { // add fan heat to coil load
-                            FanCoolLoad = state.dataFans->fans(state.dataSize->DataFanIndex)->getDesignHeatGain(state, VolFlowRate);
-
-                            Real64 CpAir = Psychrometrics::PsyCpAirFnW(MixHumRat);
-                            if (state.dataAirSystemsData->PrimaryAirSystems(state.dataSize->CurSysNum).supFanPlace == HVAC::FanPlace::BlowThru) {
-                                MixTemp += FanCoolLoad / (CpAir * rhoair * VolFlowRate); // this is now the temperature entering the coil
-                            } else if (state.dataAirSystemsData->PrimaryAirSystems(state.dataSize->CurSysNum).supFanPlace ==
-                                       HVAC::FanPlace::DrawThru) {
-                                SupTemp -= FanCoolLoad / (CpAir * rhoair * VolFlowRate); // this is now the temperature leaving the coil
-                            }
-                        }
-                        CoolCapAtPeak = (rhoair * VolFlowRate * (MixEnth - SupEnth)) +
-                                        FanCoolLoad; // load on the cooling coil which includes ventilation load and fan heat
-                        CoolCapAtPeak = max(0.0, CoolCapAtPeak);
-                        MixWetBulb = Psychrometrics::PsyTwbFnTdbWPb(state, MixTemp, MixHumRat, state.dataEnvrn->StdBaroPress, RoutineName);
-                        RatedMixWetBulb = simpleWatertoAirHP.RatedEntAirWetbulbTemp;
-                        // calculate temperatue ratio at design day peak conditions
-                        ratioTWB = (MixWetBulb + Constant::Kelvin) / Tref;
-                        PltSizNum = getPlantSizingIndexAndRatioTS(state,
-                                                                  CompType,
-                                                                  simpleWatertoAirHP.Name,
-                                                                  simpleWatertoAirHP.WaterInletNodeNum,
-                                                                  simpleWatertoAirHP.WaterOutletNodeNum,
-                                                                  "total cooling capacity",
-                                                                  Tref,
-                                                                  ratioTS,
-                                                                  ErrorsFound);
-                        // calculate temperatue ratio at rated conditions
-                        RatedratioTWB = (RatedMixWetBulb + Constant::Kelvin) / Tref;
-                        RatedratioTS = (simpleWatertoAirHP.RatedEntWaterTemp + Constant::Kelvin) / Tref;
-                        // determine curve modifiers at peak and rated conditions
-                        PeakTotCapTempModFac = simpleWatertoAirHP.TotalCoolCapCurve->value(state, ratioTWB, ratioTS, 1.0, 1.0);
-                        RatedTotCapTempModFac = simpleWatertoAirHP.TotalCoolCapCurve->value(state, RatedratioTWB, RatedratioTS, 1.0, 1.0);
-                        RatedCoolPowerTempModFac = simpleWatertoAirHP.CoolPowCurve->value(state, RatedratioTWB, RatedratioTS, 1.0, 1.0);
-                        // calculate the rated total capacity based on peak conditions
-                        // note: the rated total capacity can be different than the total capacity at
-                        // rated conditions if the capacity curve isn't normalized at the rated
-                        // conditions
-                        RatedCapCoolTotalDes = (PeakTotCapTempModFac > 0.0) ? CoolCapAtPeak / PeakTotCapTempModFac : CoolCapAtPeak;
-                        // reporting
-                        state.dataRptCoilSelection->coilSelectionReportObj->setCoilEntAirTemp(
-                            state, simpleWatertoAirHP.Name, CompType, MixTemp, state.dataSize->CurSysNum, state.dataSize->CurZoneEqNum);
-                        state.dataRptCoilSelection->coilSelectionReportObj->setCoilEntAirHumRat(state, simpleWatertoAirHP.Name, CompType, MixHumRat);
-                        state.dataRptCoilSelection->coilSelectionReportObj->setCoilLvgAirTemp(state, simpleWatertoAirHP.Name, CompType, SupTemp);
-                        state.dataRptCoilSelection->coilSelectionReportObj->setCoilLvgAirHumRat(state, simpleWatertoAirHP.Name, CompType, SupHumRat);
+                        calcRatedTotalCoolCap(state,
+                                              simpleWatertoAirHP,
+                                              CompType,
+                                              VolFlowRate,
+                                              MixTemp,
+                                              MixHumRat,
+                                              MixTempSys,
+                                              MixHumRatSys,
+                                              SupTemp,
+                                              SupHumRat,
+                                              state.dataAirSystemsData->PrimaryAirSystems(state.dataSize->CurSysNum).supFanPlace,
+                                              Tref,
+                                              FanCoolLoad,
+                                              dHratio,
+                                              MixWetBulb,
+                                              RatedMixWetBulb,
+                                              ratioTWB,
+                                              ratioTS,
+                                              RatedratioTWB,
+                                              RatedratioTS,
+                                              PeakTotCapTempModFac,
+                                              RatedTotCapTempModFac,
+                                              RatedCoolPowerTempModFac,
+                                              RatedCapCoolTotalDes,
+                                              PltSizNum,
+                                              ErrorsFound);
                     } else {
                         RatedCapCoolTotalDes = 0.0;
                     }
@@ -1673,56 +1713,32 @@ namespace WaterToAirHeatPumpSimple {
                         } else {
                             OutTemp = 0.0;
                         }
-                        rhoair = Psychrometrics::PsyRhoAirFnPbTdbW(state, state.dataEnvrn->StdBaroPress, MixTemp, MixHumRat, RoutineName);
-                        MixEnth = Psychrometrics::PsyHFnTdbW(MixTemp, MixHumRat);
-                        MixEnthSys = Psychrometrics::PsyHFnTdbW(MixTempSys, MixHumRatSys);
-                        SupEnth = Psychrometrics::PsyHFnTdbW(SupTemp, SupHumRat);
-                        // determine the coil ratio of coil dH with system air flow to design heating air flow
-                        dHratio = (SupEnth - MixEnthSys) / (SupEnth - MixEnth);
-                        if (state.dataSize->DataFanType != HVAC::FanType::Invalid && state.dataSize->DataFanIndex > 0) { // add fan heat to coil load
-                            FanCoolLoad = state.dataFans->fans(state.dataSize->DataFanIndex)->getDesignHeatGain(state, VolFlowRate);
-
-                            Real64 CpAir = Psychrometrics::PsyCpAirFnW(MixHumRat);
-                            if (state.dataSize->DataFanPlacement == HVAC::FanPlace::BlowThru) {
-                                MixTemp += FanCoolLoad / (CpAir * rhoair * VolFlowRate); // this is now the temperature entering the coil
-                            } else {
-                                SupTemp -= FanCoolLoad / (CpAir * rhoair * VolFlowRate); // this is now the temperature leaving the coil
-                            }
-                        }
-                        CoolCapAtPeak = (rhoair * VolFlowRate * (MixEnth - SupEnth)) +
-                                        FanCoolLoad; // load on the cooling coil which includes ventilation load and fan heat
-                        CoolCapAtPeak = max(0.0, CoolCapAtPeak);
-                        MixWetBulb = Psychrometrics::PsyTwbFnTdbWPb(state, MixTemp, MixHumRat, state.dataEnvrn->StdBaroPress, RoutineName);
-                        RatedMixWetBulb = simpleWatertoAirHP.RatedEntAirWetbulbTemp;
-                        // calculate temperatue ratio at design day peak conditions
-                        ratioTWB = (MixWetBulb + Constant::Kelvin) / Tref;
-                        PltSizNum = getPlantSizingIndexAndRatioTS(state,
-                                                                  CompType,
-                                                                  simpleWatertoAirHP.Name,
-                                                                  simpleWatertoAirHP.WaterInletNodeNum,
-                                                                  simpleWatertoAirHP.WaterOutletNodeNum,
-                                                                  "total cooling capacity",
-                                                                  Tref,
-                                                                  ratioTS,
-                                                                  ErrorsFound);
-                        // calculate temperatue ratio at rated conditions
-                        RatedratioTWB = (RatedMixWetBulb + Constant::Kelvin) / Tref;
-                        RatedratioTS = (simpleWatertoAirHP.RatedEntWaterTemp + Constant::Kelvin) / Tref;
-                        // determine curve modifiers at peak and rated conditions
-                        PeakTotCapTempModFac = simpleWatertoAirHP.TotalCoolCapCurve->value(state, ratioTWB, ratioTS, 1.0, 1.0);
-                        RatedTotCapTempModFac = simpleWatertoAirHP.TotalCoolCapCurve->value(state, RatedratioTWB, RatedratioTS, 1.0, 1.0);
-                        RatedCoolPowerTempModFac = simpleWatertoAirHP.CoolPowCurve->value(state, RatedratioTWB, RatedratioTS, 1.0, 1.0);
-                        // calculate the rated total capacity based on peak conditions
-                        // note: the rated total capacity can be different than the total capacity at
-                        // rated conditions if the capacity curve isn't normalized at the rated
-                        // conditions
-                        RatedCapCoolTotalDes = (PeakTotCapTempModFac > 0.0) ? CoolCapAtPeak / PeakTotCapTempModFac : CoolCapAtPeak;
-                        // reporting
-                        state.dataRptCoilSelection->coilSelectionReportObj->setCoilEntAirTemp(
-                            state, simpleWatertoAirHP.Name, CompType, MixTemp, state.dataSize->CurSysNum, state.dataSize->CurZoneEqNum);
-                        state.dataRptCoilSelection->coilSelectionReportObj->setCoilEntAirHumRat(state, simpleWatertoAirHP.Name, CompType, MixHumRat);
-                        state.dataRptCoilSelection->coilSelectionReportObj->setCoilLvgAirTemp(state, simpleWatertoAirHP.Name, CompType, SupTemp);
-                        state.dataRptCoilSelection->coilSelectionReportObj->setCoilLvgAirHumRat(state, simpleWatertoAirHP.Name, CompType, SupHumRat);
+                        calcRatedTotalCoolCap(state,
+                                              simpleWatertoAirHP,
+                                              CompType,
+                                              VolFlowRate,
+                                              MixTemp,
+                                              MixHumRat,
+                                              MixTempSys,
+                                              MixHumRatSys,
+                                              SupTemp,
+                                              SupHumRat,
+                                              state.dataSize->DataFanPlacement,
+                                              Tref,
+                                              FanCoolLoad,
+                                              dHratio,
+                                              MixWetBulb,
+                                              RatedMixWetBulb,
+                                              ratioTWB,
+                                              ratioTS,
+                                              RatedratioTWB,
+                                              RatedratioTS,
+                                              PeakTotCapTempModFac,
+                                              RatedTotCapTempModFac,
+                                              RatedCoolPowerTempModFac,
+                                              RatedCapCoolTotalDes,
+                                              PltSizNum,
+                                              ErrorsFound);
                     } else {
                         RatedCapCoolTotalDes = 0.0;
                     }
