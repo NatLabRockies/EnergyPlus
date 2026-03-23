@@ -84,6 +84,42 @@ constexpr std::array<Material::Gas, 10> gases = {
 
 constexpr std::array<std::string_view, (int)EcoRoofCalcMethod::Num> ecoRoofCalcMethodNamesUC = {"SIMPLE", "ADVANCED"};
 
+// Helper to check that the sum of two numeric input fields is less than 1.0.
+// Sets ErrorsFound and emits "Illegal value combination" if the check fails.
+static void checkFieldSumLessThan(EnergyPlusData &state, bool &ErrorsFound, int idx1, int idx2)
+{
+    auto &s_ipsc = state.dataIPShortCut;
+    if (s_ipsc->rNumericArgs(idx1) + s_ipsc->rNumericArgs(idx2) >= 1.0) {
+        ErrorsFound = true;
+        ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
+        ShowContinueError(state, s_ipsc->cNumericFieldNames(idx1) + " + " + s_ipsc->cNumericFieldNames(idx2) + " not < 1.0");
+    }
+}
+
+// Helper to check that the sum of three numeric input fields is less than 1.0.
+static void checkFieldSumLessThan3(EnergyPlusData &state, bool &ErrorsFound, int idx1, int idx2, int idx3)
+{
+    auto &s_ipsc = state.dataIPShortCut;
+    if (s_ipsc->rNumericArgs(idx1) + s_ipsc->rNumericArgs(idx2) + s_ipsc->rNumericArgs(idx3) >= 1.0) {
+        ErrorsFound = true;
+        ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
+        ShowContinueError(state,
+                          s_ipsc->cNumericFieldNames(idx1) + " + " + s_ipsc->cNumericFieldNames(idx2) + " + " + s_ipsc->cNumericFieldNames(idx3) +
+                              "not < 1.0");
+    }
+}
+
+// Helper to check that two numeric input fields are equal (within tolerance).
+static void checkFieldsEqual(EnergyPlusData &state, bool &ErrorsFound, int idx1, int idx2)
+{
+    auto &s_ipsc = state.dataIPShortCut;
+    if (std::abs(s_ipsc->rNumericArgs(idx1) - s_ipsc->rNumericArgs(idx2)) > 1.e-5) {
+        ErrorsFound = true;
+        ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
+        ShowContinueError(state, s_ipsc->cNumericFieldNames(idx1) + " must equal " + s_ipsc->cNumericFieldNames(idx2));
+    }
+}
+
 // Helper to call getObjectItem with the standard set of material input arguments.
 // Wraps the repetitive 12-argument call that appears for every material type.
 static void getMaterialInput(EnergyPlusData &state, int Loop, int &NumAlphas, int &NumNums, int &IOStat)
@@ -1072,23 +1108,9 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
             mat->NominalR = 1.0;
         }
 
-        if (s_ipsc->rNumericArgs(1) + s_ipsc->rNumericArgs(2) >= 1.0) {
-            ErrorsFound = true;
-            ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
-            ShowContinueError(state, s_ipsc->cNumericFieldNames(1) + " + " + s_ipsc->cNumericFieldNames(2) + " not < 1.0");
-        }
-
-        if (s_ipsc->rNumericArgs(3) + s_ipsc->rNumericArgs(4) >= 1.0) {
-            ErrorsFound = true;
-            ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
-            ShowContinueError(state, s_ipsc->cNumericFieldNames(3) + " + " + s_ipsc->cNumericFieldNames(4) + " not < 1.0");
-        }
-
-        if (s_ipsc->rNumericArgs(5) + s_ipsc->rNumericArgs(6) >= 1.0) {
-            ErrorsFound = true;
-            ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
-            ShowContinueError(state, s_ipsc->cNumericFieldNames(5) + " + " + s_ipsc->cNumericFieldNames(6) + " not < 1.0");
-        }
+        checkFieldSumLessThan(state, ErrorsFound, 1, 2);
+        checkFieldSumLessThan(state, ErrorsFound, 3, 4);
+        checkFieldSumLessThan(state, ErrorsFound, 5, 6);
     }
 
     // Window Shade Materials
@@ -1139,34 +1161,11 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         mat->AbsorpThermalBack = mat->TAR.IR.Bk.Emi;
         mat->TransThermal = mat->TAR.IR.Ft.Tra;
 
-        if (s_ipsc->rNumericArgs(1) + s_ipsc->rNumericArgs(2) + s_ipsc->rNumericArgs(4) >= 1.0) {
-            ErrorsFound = true;
-            ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
-            ShowContinueError(
-                state, s_ipsc->cNumericFieldNames(1) + " + " + s_ipsc->cNumericFieldNames(2) + " + " + s_ipsc->cNumericFieldNames(4) + "not < 1.0");
-        }
-        if (s_ipsc->rNumericArgs(1) + s_ipsc->rNumericArgs(3) + s_ipsc->rNumericArgs(5) >= 1.0) {
-            ErrorsFound = true;
-            ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
-            ShowContinueError(
-                state, s_ipsc->cNumericFieldNames(1) + " + " + s_ipsc->cNumericFieldNames(3) + " + " + s_ipsc->cNumericFieldNames(5) + "not < 1.0");
-        }
-        if (s_ipsc->rNumericArgs(6) + s_ipsc->rNumericArgs(7) + s_ipsc->rNumericArgs(8) >= 1.0) {
-            ErrorsFound = true;
-            ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
-            ShowContinueError(
-                state, s_ipsc->cNumericFieldNames(6) + " + " + s_ipsc->cNumericFieldNames(7) + " + " + s_ipsc->cNumericFieldNames(8) + "not < 1.0");
-        }
-        if (s_ipsc->rNumericArgs(9) + s_ipsc->rNumericArgs(10) >= 1.0) {
-            ErrorsFound = true;
-            ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
-            ShowContinueError(state, s_ipsc->cNumericFieldNames(9) + " + " + s_ipsc->cNumericFieldNames(10) + " not < 1.0");
-        }
-        if (s_ipsc->rNumericArgs(9) + s_ipsc->rNumericArgs(11) >= 1.0) {
-            ErrorsFound = true;
-            ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
-            ShowContinueError(state, s_ipsc->cNumericFieldNames(9) + " + " + s_ipsc->cNumericFieldNames(11) + " not < 1.0");
-        }
+        checkFieldSumLessThan3(state, ErrorsFound, 1, 2, 4);
+        checkFieldSumLessThan3(state, ErrorsFound, 1, 3, 5);
+        checkFieldSumLessThan3(state, ErrorsFound, 6, 7, 8);
+        checkFieldSumLessThan(state, ErrorsFound, 9, 10);
+        checkFieldSumLessThan(state, ErrorsFound, 9, 11);
 
     } // TotShadesEQL loop
 
@@ -1229,12 +1228,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         } else {
             mat->isPleated = false;
         }
-        if (s_ipsc->rNumericArgs(1) + s_ipsc->rNumericArgs(2) + s_ipsc->rNumericArgs(4) >= 1.0) {
-            ErrorsFound = true;
-            ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
-            ShowContinueError(
-                state, s_ipsc->cNumericFieldNames(1) + " + " + s_ipsc->cNumericFieldNames(2) + " + " + s_ipsc->cNumericFieldNames(4) + "not < 1.0");
-        }
+        checkFieldSumLessThan3(state, ErrorsFound, 1, 2, 4);
         if (s_ipsc->rNumericArgs(6) + s_ipsc->rNumericArgs(7) + s_ipsc->rNumericArgs(8) >= 1.0) {
             ErrorsFound = true;
             ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
@@ -1616,27 +1610,10 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
             ShowContinueError(state, "This will allow direct beam to be transmitted when Slat angle = 0.");
         }
 
-        if ((s_ipsc->rNumericArgs(6) + s_ipsc->rNumericArgs(7) >= 1.0)) {
-            ErrorsFound = true;
-            ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
-            ShowContinueError(state, s_ipsc->cNumericFieldNames(6) + " + " + s_ipsc->cNumericFieldNames(7) + " not < 1.0");
-        }
-        if ((s_ipsc->rNumericArgs(6) + s_ipsc->rNumericArgs(8) >= 1.0)) {
-            ErrorsFound = true;
-            ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
-            ShowContinueError(state, s_ipsc->cNumericFieldNames(6) + " + " + s_ipsc->cNumericFieldNames(8) + " not < 1.0");
-        }
-
-        if ((s_ipsc->rNumericArgs(9) + s_ipsc->rNumericArgs(10) >= 1.0)) {
-            ErrorsFound = true;
-            ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
-            ShowContinueError(state, s_ipsc->cNumericFieldNames(9) + " + " + s_ipsc->cNumericFieldNames(10) + " not < 1.0");
-        }
-        if ((s_ipsc->rNumericArgs(9) + s_ipsc->rNumericArgs(11) >= 1.0)) {
-            ErrorsFound = true;
-            ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
-            ShowContinueError(state, s_ipsc->cNumericFieldNames(9) + " + " + s_ipsc->cNumericFieldNames(11) + " not < 1.0");
-        }
+        checkFieldSumLessThan(state, ErrorsFound, 6, 7);
+        checkFieldSumLessThan(state, ErrorsFound, 6, 8);
+        checkFieldSumLessThan(state, ErrorsFound, 9, 10);
+        checkFieldSumLessThan(state, ErrorsFound, 9, 11);
 
         if ((s_ipsc->rNumericArgs(12) + s_ipsc->rNumericArgs(13) >= 1.0) || (s_ipsc->rNumericArgs(12) + s_ipsc->rNumericArgs(14) >= 1.0)) {
             ErrorsFound = true;
@@ -1645,75 +1622,21 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
             ShowContinueError(state, s_ipsc->cNumericFieldNames(12) + " + " + s_ipsc->cNumericFieldNames(14) + " not < 1.0");
         }
 
-        if ((s_ipsc->rNumericArgs(12) + s_ipsc->rNumericArgs(13) >= 1.0)) {
-            ErrorsFound = true;
-            ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
-            ShowContinueError(state, s_ipsc->cNumericFieldNames(12) + " + " + s_ipsc->cNumericFieldNames(13) + " not < 1.0");
-        }
-        if ((s_ipsc->rNumericArgs(12) + s_ipsc->rNumericArgs(14) >= 1.0)) {
-            ErrorsFound = true;
-            ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
-            ShowContinueError(state, s_ipsc->cNumericFieldNames(12) + " + " + s_ipsc->cNumericFieldNames(14) + " not < 1.0");
-        }
-
-        if ((s_ipsc->rNumericArgs(15) + s_ipsc->rNumericArgs(16) >= 1.0)) {
-            ErrorsFound = true;
-            ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
-            ShowContinueError(state, s_ipsc->cNumericFieldNames(15) + " + " + s_ipsc->cNumericFieldNames(16) + " not < 1.0");
-        }
-        if ((s_ipsc->rNumericArgs(15) + s_ipsc->rNumericArgs(17) >= 1.0)) {
-            ErrorsFound = true;
-            ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
-            ShowContinueError(state, s_ipsc->cNumericFieldNames(15) + " + " + s_ipsc->cNumericFieldNames(17) + " not < 1.0");
-        }
+        checkFieldSumLessThan(state, ErrorsFound, 12, 13);
+        checkFieldSumLessThan(state, ErrorsFound, 12, 14);
+        checkFieldSumLessThan(state, ErrorsFound, 15, 16);
+        checkFieldSumLessThan(state, ErrorsFound, 15, 17);
 
         // Require that beam and diffuse properties be the same
-        if (std::abs(s_ipsc->rNumericArgs(9) - s_ipsc->rNumericArgs(6)) > 1.e-5) {
-            ErrorsFound = true;
-            ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
-            ShowContinueError(state, s_ipsc->cNumericFieldNames(6) + " must equal " + s_ipsc->cNumericFieldNames(9));
-        }
+        checkFieldsEqual(state, ErrorsFound, 6, 9);
+        checkFieldsEqual(state, ErrorsFound, 7, 10);
+        checkFieldsEqual(state, ErrorsFound, 8, 11);
+        checkFieldsEqual(state, ErrorsFound, 12, 15);
+        checkFieldsEqual(state, ErrorsFound, 13, 16);
+        checkFieldsEqual(state, ErrorsFound, 14, 17);
 
-        if (std::abs(s_ipsc->rNumericArgs(10) - s_ipsc->rNumericArgs(7)) > 1.e-5) {
-            ErrorsFound = true;
-            ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
-            ShowContinueError(state, s_ipsc->cNumericFieldNames(7) + " must equal " + s_ipsc->cNumericFieldNames(10));
-        }
-
-        if (std::abs(s_ipsc->rNumericArgs(11) - s_ipsc->rNumericArgs(8)) > 1.e-5) {
-            ErrorsFound = true;
-            ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
-            ShowContinueError(state, s_ipsc->cNumericFieldNames(8) + " must equal " + s_ipsc->cNumericFieldNames(11));
-        }
-
-        if (std::abs(s_ipsc->rNumericArgs(15) - s_ipsc->rNumericArgs(12)) > 1.e-5) {
-            ErrorsFound = true;
-            ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
-            ShowContinueError(state, s_ipsc->cNumericFieldNames(12) + " must equal " + s_ipsc->cNumericFieldNames(15));
-        }
-
-        if (std::abs(s_ipsc->rNumericArgs(16) - s_ipsc->rNumericArgs(13)) > 1.e-5) {
-            ErrorsFound = true;
-            ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
-            ShowContinueError(state, s_ipsc->cNumericFieldNames(13) + " must equal " + s_ipsc->cNumericFieldNames(16));
-        }
-
-        if (std::abs(s_ipsc->rNumericArgs(17) - s_ipsc->rNumericArgs(14)) > 1.e-5) {
-            ErrorsFound = true;
-            ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
-            ShowContinueError(state, s_ipsc->cNumericFieldNames(14) + " must equal " + s_ipsc->cNumericFieldNames(17));
-        }
-
-        if ((s_ipsc->rNumericArgs(18) + s_ipsc->rNumericArgs(19) >= 1.0)) {
-            ErrorsFound = true;
-            ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
-            ShowContinueError(state, s_ipsc->cNumericFieldNames(18) + " + " + s_ipsc->cNumericFieldNames(19) + " not < 1.0");
-        }
-        if ((s_ipsc->rNumericArgs(18) + s_ipsc->rNumericArgs(20) >= 1.0)) {
-            ErrorsFound = true;
-            ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
-            ShowContinueError(state, s_ipsc->cNumericFieldNames(18) + " + " + s_ipsc->cNumericFieldNames(20) + " not < 1.0");
-        }
+        checkFieldSumLessThan(state, ErrorsFound, 18, 19);
+        checkFieldSumLessThan(state, ErrorsFound, 18, 20);
 
         if (matBlind->toGlassDist < 0.5 * matBlind->SlatWidth) {
             ErrorsFound = true;
