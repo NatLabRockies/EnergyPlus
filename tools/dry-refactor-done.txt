@@ -22,6 +22,7 @@ src/EnergyPlus/UnitarySystem.cc:reportUnitarySystem
 src/EnergyPlus/UnitarySystem.cc:simMultiSpeedCoils
 src/EnergyPlus/UnitarySystem.cc:setupAllOutputVars
 src/EnergyPlus/UnitarySystem.cc:sizeSystem
+src/EnergyPlus/WaterToAirHeatPumpSimple.cc:SizeHVACWaterToAir
 src/EnergyPlus/SurfaceGeometry.cc:GetSurfaceData
 src/EnergyPlus/SolarShading.cc:SHADOW
 src/EnergyPlus/Material.cc:GetMaterialData
