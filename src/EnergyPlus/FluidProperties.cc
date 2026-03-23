@@ -749,6 +749,40 @@ namespace Fluid {
         std::sort(concs.begin(), concs.end());
     }
 
+    // Helper to register a glycol raw property concentration point and validate
+    // temperature array name consistency. Returns false if temp array names conflict.
+    static bool registerGlycolRawConcPoint(EnergyPlusData &state,
+                                           ErrorObjectHeader const &eoh,
+                                           std::string_view propName,
+                                           std::string const &enteredTempArrayName,
+                                           Real64 concValue,
+                                           std::string &tempArrayName,
+                                           Array1D<Real64> &concs,
+                                           int &numConcPoints,
+                                           bool &dataPresent,
+                                           bool &errorsFound)
+    {
+        if (!tempArrayName.empty() && tempArrayName != enteredTempArrayName) {
+            ShowSevereCustom(state,
+                             eoh,
+                             EnergyPlus::format("All {} data for the same glycol must use the same temperature list"
+                                                "Expected name={}, Entered name={}",
+                                                propName,
+                                                tempArrayName,
+                                                enteredTempArrayName));
+            errorsFound = true;
+            return false;
+        }
+        tempArrayName = enteredTempArrayName;
+
+        if (std::find(concs.begin(), concs.end(), concValue) == concs.end()) {
+            concs.push_back(concValue);
+            ++numConcPoints;
+        }
+        dataPresent = true;
+        return true;
+    }
+
     void GetFluidPropertiesData(EnergyPlusData &state)
     {
 
@@ -1442,83 +1476,59 @@ namespace Fluid {
                 continue;
             }
 
-            // Can temperatue and pressure points be different for different properties?  Why is this allowed?
+            // Can temperature and pressure points be different for different properties?  Why is this allowed?
             if (Alphas(2) == "SPECIFICHEAT") {
-                if (!glycolRaw->CpTempArrayName.empty() && glycolRaw->CpTempArrayName != Alphas(3)) {
-                    ShowSevereCustom(state,
-                                     eoh,
-                                     EnergyPlus::format("All specific heat data for the same glycol must use the same temperature list"
-                                                        "Expected name={}, Entered name={}",
-                                                        glycolRaw->CpTempArrayName,
-                                                        Alphas(3)));
-                    ErrorsFound = true;
+                if (!registerGlycolRawConcPoint(state,
+                                                eoh,
+                                                "specific heat",
+                                                Alphas(3),
+                                                Numbers(1),
+                                                glycolRaw->CpTempArrayName,
+                                                glycolRaw->CpConcs,
+                                                glycolRaw->NumCpConcPoints,
+                                                glycolRaw->CpDataPresent,
+                                                ErrorsFound)) {
                     continue;
                 }
-                glycolRaw->CpTempArrayName = Alphas(3);
-
-                if (std::find(glycolRaw->CpConcs.begin(), glycolRaw->CpConcs.end(), Numbers(1)) == glycolRaw->CpConcs.end()) {
-                    glycolRaw->CpConcs.push_back(Numbers(1));
-                    ++glycolRaw->NumCpConcPoints;
-                }
-                glycolRaw->CpDataPresent = true;
-
             } else if (Alphas(2) == "DENSITY") {
-                if (!glycolRaw->RhoTempArrayName.empty() && glycolRaw->RhoTempArrayName != Alphas(3)) {
-                    ShowSevereCustom(state,
-                                     eoh,
-                                     EnergyPlus::format("All density data for the same glycol must use the same temperature list"
-                                                        "Expected name={}, Entered name={}",
-                                                        glycolRaw->RhoTempArrayName,
-                                                        Alphas(3)));
-                    ErrorsFound = true;
+                if (!registerGlycolRawConcPoint(state,
+                                                eoh,
+                                                "density",
+                                                Alphas(3),
+                                                Numbers(1),
+                                                glycolRaw->RhoTempArrayName,
+                                                glycolRaw->RhoConcs,
+                                                glycolRaw->NumRhoConcPoints,
+                                                glycolRaw->RhoDataPresent,
+                                                ErrorsFound)) {
                     continue;
                 }
-                glycolRaw->RhoTempArrayName = Alphas(3);
-
-                if (std::find(glycolRaw->RhoConcs.begin(), glycolRaw->RhoConcs.end(), Numbers(1)) == glycolRaw->RhoConcs.end()) {
-                    glycolRaw->RhoConcs.push_back(Numbers(1));
-                    ++glycolRaw->NumRhoConcPoints;
-                }
-                glycolRaw->RhoDataPresent = true;
-
             } else if (Alphas(2) == "CONDUCTIVITY") {
-                if (!glycolRaw->CondTempArrayName.empty() && glycolRaw->CondTempArrayName != Alphas(3)) {
-                    ShowSevereCustom(state,
-                                     eoh,
-                                     EnergyPlus::format("All conductivity data for the same glycol must use the same temperature list"
-                                                        "Expected name={}, Entered name={}",
-                                                        glycolRaw->CondTempArrayName,
-                                                        Alphas(3)));
-                    ErrorsFound = true;
+                if (!registerGlycolRawConcPoint(state,
+                                                eoh,
+                                                "conductivity",
+                                                Alphas(3),
+                                                Numbers(1),
+                                                glycolRaw->CondTempArrayName,
+                                                glycolRaw->CondConcs,
+                                                glycolRaw->NumCondConcPoints,
+                                                glycolRaw->CondDataPresent,
+                                                ErrorsFound)) {
                     continue;
                 }
-                glycolRaw->CondTempArrayName = Alphas(3);
-
-                if (std::find(glycolRaw->CondConcs.begin(), glycolRaw->CondConcs.end(), Numbers(1)) == glycolRaw->CondConcs.end()) {
-                    glycolRaw->CondConcs.push_back(Numbers(1));
-                    ++glycolRaw->NumCondConcPoints;
-                }
-                glycolRaw->CondDataPresent = true;
-
             } else if (Alphas(2) == "VISCOSITY") {
-                if (!glycolRaw->ViscTempArrayName.empty() && glycolRaw->ViscTempArrayName != Alphas(3)) {
-                    ShowSevereCustom(state,
-                                     eoh,
-                                     EnergyPlus::format("All conductivity data for the same glycol must use the same temperature list"
-                                                        "Expected name={}, Entered name={}",
-                                                        glycolRaw->ViscTempArrayName,
-                                                        Alphas(3)));
-                    ErrorsFound = true;
+                if (!registerGlycolRawConcPoint(state,
+                                                eoh,
+                                                "viscosity",
+                                                Alphas(3),
+                                                Numbers(1),
+                                                glycolRaw->ViscTempArrayName,
+                                                glycolRaw->ViscConcs,
+                                                glycolRaw->NumViscConcPoints,
+                                                glycolRaw->ViscDataPresent,
+                                                ErrorsFound)) {
                     continue;
                 }
-                glycolRaw->ViscTempArrayName = Alphas(3);
-
-                if (std::find(glycolRaw->ViscConcs.begin(), glycolRaw->ViscConcs.end(), Numbers(1)) == glycolRaw->ViscConcs.end()) {
-                    glycolRaw->ViscConcs.push_back(Numbers(1));
-                    ++glycolRaw->NumViscConcPoints;
-                }
-                glycolRaw->ViscDataPresent = true;
-
             } else {
                 ShowSevereInvalidKey(
                     state, eoh, cAlphaFields(2), Alphas(2), "Valid options are (\"Specific Heat\", \"Density\", \"Conductivity\", \"Viscosity\")");
