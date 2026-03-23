@@ -55,5 +55,6 @@ src/EnergyPlus/Furnaces.cc:CalcNewZoneHeatCoolFlowRates
 src/EnergyPlus/Pumps.cc:GetPumpInput
 src/EnergyPlus/EvaporativeFluidCoolers.cc:SizeEvapFluidCooler
 src/EnergyPlus/FluidProperties.cc:GetFluidPropertiesData
+src/EnergyPlus/UnitarySystem.cc:controlCoolingSystemToSP
 src/EnergyPlus/WindowManager.cc:InitGlassOpticalCalculations
 src/EnergyPlus/HVACVariableRefrigerantFlow.cc:CalcVRFCondenser_FluidTCtrl
