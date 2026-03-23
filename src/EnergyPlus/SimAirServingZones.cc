@@ -5147,6 +5147,26 @@ static void updateMinADEffBySys(EnergyPlusData &state, Array1D_int const &termUn
     }
 }
 
+// Accumulate NonCoinHeatMassFlow for the BeginDay block of UpdateSysSizing.
+// Loops over the given zone index arrays (heated or cooled zones) and sums the
+// adjusted heating mass flow into sysSizing.NonCoinHeatMassFlow.
+static void accumulateBeginDayNonCoinHeatMassFlow(EnergyPlusData &state,
+                                                  DataSizing::SystemSizingData &sysSizing,
+                                                  int numZones,
+                                                  Array1D_int const &ctrlZoneNums,
+                                                  Array1D_int const &termUnitSizingIndices)
+{
+    for (int zoneNum = 1; zoneNum <= numZones; ++zoneNum) {
+        int CtrlZoneNum = ctrlZoneNums(zoneNum);
+        int TermUnitSizingIndex = termUnitSizingIndices(zoneNum);
+        Real64 adjHeatMassFlow =
+            state.dataSize->TermUnitSizing(TermUnitSizingIndex)
+                .applyTermUnitSizingHeatFlow(state.dataSize->ZoneSizing(state.dataSize->CurOverallSimDay, CtrlZoneNum).DesHeatMassFlow,
+                                             state.dataSize->ZoneSizing(state.dataSize->CurOverallSimDay, CtrlZoneNum).DesHeatMassFlowNoOA);
+        sysSizing.NonCoinHeatMassFlow += adjHeatMassFlow / (1.0 + state.dataSize->TermUnitSizing(TermUnitSizingIndex).InducRat);
+    }
+}
+
 // Compute design volume flows from mass flows and update Vot/Xs for ZoneSum OA method.
 // Shared between Coincident and NonCoincident sizing in the EndDay block of UpdateSysSizing.
 static void updateZoneSumVolFlows(EnergyPlusData &state,
@@ -5687,29 +5707,19 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
                 }
             } // end of loop over cooled zones
 
-            if (NumZonesHeated > 0) {                                                              // if there are zones supplied with central hot air
-                for (int ZonesHeatedNum = 1; ZonesHeatedNum <= NumZonesHeated; ++ZonesHeatedNum) { // loop over heated zones
-                    int CtrlZoneNum = airToZoneNodeInfo.HeatCtrlZoneNums(ZonesHeatedNum);
-                    int TermUnitSizingIndex = airToZoneNodeInfo.TermUnitHeatSizingIndex(ZonesHeatedNum);
-                    Real64 adjHeatMassFlow = state.dataSize->TermUnitSizing(TermUnitSizingIndex)
-                                                 .applyTermUnitSizingHeatFlow(
-                                                     state.dataSize->ZoneSizing(state.dataSize->CurOverallSimDay, CtrlZoneNum).DesHeatMassFlow,
-                                                     state.dataSize->ZoneSizing(state.dataSize->CurOverallSimDay, CtrlZoneNum).DesHeatMassFlowNoOA);
-                    state.dataSize->SysSizing(state.dataSize->CurOverallSimDay, AirLoopNum).NonCoinHeatMassFlow +=
-                        adjHeatMassFlow / (1.0 + state.dataSize->TermUnitSizing(TermUnitSizingIndex).InducRat);
-                } // end of loop over heated zones
-            } else {                                                                               // otherwise use cool supply zones
-                for (int ZonesCooledNum = 1; ZonesCooledNum <= NumZonesCooled; ++ZonesCooledNum) { // loop over cooled zones
-                    int CtrlZoneNum = airToZoneNodeInfo.CoolCtrlZoneNums(ZonesCooledNum);
-                    int TermUnitSizingIndex = airToZoneNodeInfo.TermUnitCoolSizingIndex(ZonesCooledNum);
-                    Real64 adjHeatMassFlow = state.dataSize->TermUnitSizing(TermUnitSizingIndex)
-                                                 .applyTermUnitSizingHeatFlow(
-                                                     state.dataSize->ZoneSizing(state.dataSize->CurOverallSimDay, CtrlZoneNum).DesHeatMassFlow,
-                                                     state.dataSize->ZoneSizing(state.dataSize->CurOverallSimDay, CtrlZoneNum).DesHeatMassFlowNoOA);
-                    state.dataSize->SysSizing(state.dataSize->CurOverallSimDay, AirLoopNum).NonCoinHeatMassFlow +=
-                        adjHeatMassFlow / (1.0 + state.dataSize->TermUnitSizing(TermUnitSizingIndex).InducRat);
-                } // end of loop over cooled zones
-            } // End of heat / cool zone if - else
+            if (NumZonesHeated > 0) { // if there are zones supplied with central hot air
+                accumulateBeginDayNonCoinHeatMassFlow(state,
+                                                      state.dataSize->SysSizing(state.dataSize->CurOverallSimDay, AirLoopNum),
+                                                      NumZonesHeated,
+                                                      airToZoneNodeInfo.HeatCtrlZoneNums,
+                                                      airToZoneNodeInfo.TermUnitHeatSizingIndex);
+            } else { // otherwise use cool supply zones
+                accumulateBeginDayNonCoinHeatMassFlow(state,
+                                                      state.dataSize->SysSizing(state.dataSize->CurOverallSimDay, AirLoopNum),
+                                                      NumZonesCooled,
+                                                      airToZoneNodeInfo.CoolCtrlZoneNums,
+                                                      airToZoneNodeInfo.TermUnitCoolSizingIndex);
+            }
 
         } // End of begin day loop over primary air systems
     } break;
