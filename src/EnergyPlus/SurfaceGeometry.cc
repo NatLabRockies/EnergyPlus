@@ -928,6 +928,397 @@ namespace SurfaceGeometry {
         state.dataSurface->extMovInsuls.allocate(state.dataSurface->TotSurfaces);
     }
 
+    // Match up interzone surfaces: reconcile ExtBoundCond, check construction layers,
+    // areas, tilts, azimuths, and exposures for each pair of interzone surfaces.
+    static void matchInterzoneSurfaces(EnergyPlusData &state, std::string_view RoutineName, int MovedSurfs, bool &SurfError)
+    {
+        bool NonMatch = false;
+        bool izConstDiffMsg = false;
+
+        for (int SurfNum = 1; SurfNum <= MovedSurfs; ++SurfNum) {
+            if (!state.dataSurface->Surface(SurfNum).HeatTransSurf) {
+                continue;
+            }
+            if (state.dataSurface->Surface(SurfNum).ExtBoundCond == unreconciledZoneSurface) {
+                if (not_blank(state.dataSurface->Surface(SurfNum).ExtBoundCondName)) {
+                    int Found = 0;
+                    if (state.dataSurface->Surface(SurfNum).ExtBoundCondName == state.dataSurface->Surface(SurfNum).Name) {
+                        Found = SurfNum;
+                    } else {
+                        Found = Util::FindItemInList(state.dataSurface->Surface(SurfNum).ExtBoundCondName, state.dataSurface->Surface, MovedSurfs);
+                    }
+                    if (Found != 0) {
+                        state.dataSurface->Surface(SurfNum).ExtBoundCond = Found;
+                        // Check that matching surface is also "OtherZoneSurface"
+                        if (state.dataSurface->Surface(Found).ExtBoundCond <= 0 &&
+                            state.dataSurface->Surface(Found).ExtBoundCond != unreconciledZoneSurface) {
+                            ShowSevereError(state, EnergyPlus::format("{}Potential \"OtherZoneSurface\" is not matched correctly:", RoutineName));
+                            ShowContinueError(state,
+                                              EnergyPlus::format("Surface={}, Zone={}",
+                                                                 state.dataSurface->Surface(SurfNum).Name,
+                                                                 state.dataSurface->Surface(SurfNum).ZoneName));
+                            ShowContinueError(state,
+                                              EnergyPlus::format("Nonmatched Other/InterZone Surface={}, Zone={}",
+                                                                 state.dataSurface->Surface(Found).Name,
+                                                                 state.dataSurface->Surface(Found).ZoneName));
+                            SurfError = true;
+                        }
+                        // Check that matching interzone surface has construction with reversed layers
+                        if (Found != SurfNum) { // Interzone surface
+                            // Make sure different zones too (CR 4110)
+                            if (state.dataSurface->Surface(SurfNum).spaceNum == state.dataSurface->Surface(Found).spaceNum) {
+                                ++state.dataSurfaceGeometry->ErrCount2;
+                                if (state.dataSurfaceGeometry->ErrCount2 == 1 && !state.dataGlobal->DisplayExtraWarnings) {
+                                    ShowWarningError(
+                                        state,
+                                        EnergyPlus::format("{}CAUTION -- Interspace surfaces are occurring in the same space(s).", RoutineName));
+                                    ShowContinueError(
+                                        state, "...use Output:Diagnostics,DisplayExtraWarnings; to show more details on individual occurrences.");
+                                }
+                                if (state.dataGlobal->DisplayExtraWarnings) {
+                                    ShowWarningError(
+                                        state, EnergyPlus::format("{}CAUTION -- Interspace surfaces are usually in different spaces", RoutineName));
+                                    ShowContinueError(state,
+                                                      EnergyPlus::format("Surface={}, Space={}, Zone={}",
+                                                                         state.dataSurface->Surface(SurfNum).Name,
+                                                                         state.dataHeatBal->space(state.dataSurface->Surface(SurfNum).spaceNum).Name,
+                                                                         state.dataSurface->Surface(SurfNum).ZoneName));
+                                    ShowContinueError(state,
+                                                      EnergyPlus::format("Surface={}, Space={}, Zone={}",
+                                                                         state.dataSurface->Surface(Found).Name,
+                                                                         state.dataHeatBal->space(state.dataSurface->Surface(Found).spaceNum).Name,
+                                                                         state.dataSurface->Surface(Found).ZoneName));
+                                }
+                            }
+                            int ConstrNum = state.dataSurface->Surface(SurfNum).Construction;
+                            int ConstrNumFound = state.dataSurface->Surface(Found).Construction;
+                            if (ConstrNum <= 0 || ConstrNumFound <= 0) {
+                                continue;
+                            }
+                            if (state.dataConstruction->Construct(ConstrNum).ReverseConstructionNumLayersWarning &&
+                                state.dataConstruction->Construct(ConstrNumFound).ReverseConstructionNumLayersWarning) {
+                                continue;
+                            }
+                            if (state.dataConstruction->Construct(ConstrNum).ReverseConstructionLayersOrderWarning &&
+                                state.dataConstruction->Construct(ConstrNumFound).ReverseConstructionLayersOrderWarning) {
+                                continue;
+                            }
+                            int TotLay = state.dataConstruction->Construct(ConstrNum).TotLayers;
+                            int TotLayFound = state.dataConstruction->Construct(ConstrNumFound).TotLayers;
+                            if (TotLay != TotLayFound) { // Different number of layers
+                                // match on like Uvalues (nominal)
+                                if (std::abs(state.dataHeatBal->NominalU(ConstrNum) - state.dataHeatBal->NominalU(ConstrNumFound)) > 0.001) {
+                                    ShowSevereError(
+                                        state,
+                                        EnergyPlus::format("{}Construction {} of interzone surface {} does not have the same number of layers as the "
+                                                           "construction {} of adjacent surface {}",
+                                                           RoutineName,
+                                                           state.dataConstruction->Construct(ConstrNum).Name,
+                                                           state.dataSurface->Surface(SurfNum).Name,
+                                                           state.dataConstruction->Construct(ConstrNumFound).Name,
+                                                           state.dataSurface->Surface(Found).Name));
+                                    if (!state.dataConstruction->Construct(ConstrNum).ReverseConstructionNumLayersWarning ||
+                                        !state.dataConstruction->Construct(ConstrNumFound).ReverseConstructionNumLayersWarning) {
+                                        ShowContinueError(state, "...this problem for this pair will not be reported again.");
+                                        state.dataConstruction->Construct(ConstrNum).ReverseConstructionNumLayersWarning = true;
+                                        state.dataConstruction->Construct(ConstrNumFound).ReverseConstructionNumLayersWarning = true;
+                                    }
+                                    SurfError = true;
+                                }
+                            } else { // Same number of layers; check for reverse layers
+                                bool izConstDiff = false;
+                                CheckForReversedLayers(state, izConstDiff, ConstrNum, ConstrNumFound, TotLay);
+                                if (izConstDiff &&
+                                    std::abs(state.dataHeatBal->NominalU(ConstrNum) - state.dataHeatBal->NominalU(ConstrNumFound)) > 0.001) {
+                                    ShowSevereError(
+                                        state,
+                                        EnergyPlus::format("{}Construction {} of interzone surface {} does not have the same materials in the "
+                                                           "reverse order as the construction {} of adjacent surface {}",
+                                                           RoutineName,
+                                                           state.dataConstruction->Construct(ConstrNum).Name,
+                                                           state.dataSurface->Surface(SurfNum).Name,
+                                                           state.dataConstruction->Construct(ConstrNumFound).Name,
+                                                           state.dataSurface->Surface(Found).Name));
+                                    ShowContinueError(state,
+                                                      "or the properties of the reversed layers are not correct due to differing layer front and "
+                                                      "back side values");
+                                    if (!state.dataConstruction->Construct(ConstrNum).ReverseConstructionLayersOrderWarning ||
+                                        !state.dataConstruction->Construct(ConstrNumFound).ReverseConstructionLayersOrderWarning) {
+                                        ShowContinueError(state, "...this problem for this pair will not be reported again.");
+                                        state.dataConstruction->Construct(ConstrNum).ReverseConstructionLayersOrderWarning = true;
+                                        state.dataConstruction->Construct(ConstrNumFound).ReverseConstructionLayersOrderWarning = true;
+                                    }
+                                    SurfError = true;
+                                } else if (izConstDiff) {
+                                    ShowWarningError(
+                                        state,
+                                        EnergyPlus::format("{}Construction {} of interzone surface {} does not have the same materials in the "
+                                                           "reverse order as the construction {} of adjacent surface {}",
+                                                           RoutineName,
+                                                           state.dataConstruction->Construct(ConstrNum).Name,
+                                                           state.dataSurface->Surface(SurfNum).Name,
+                                                           state.dataConstruction->Construct(ConstrNumFound).Name,
+                                                           state.dataSurface->Surface(Found).Name));
+                                    ShowContinueError(state,
+                                                      "or the properties of the reversed layers are not correct due to differing layer front and "
+                                                      "back side values");
+                                    ShowContinueError(
+                                        state,
+                                        EnergyPlus::format(
+                                            "...but Nominal U values are similar, diff=[{:.4R}] ... simulation proceeds.",
+                                            std::abs(state.dataHeatBal->NominalU(ConstrNum) - state.dataHeatBal->NominalU(ConstrNumFound))));
+                                    if (!izConstDiffMsg) {
+                                        ShowContinueError(state,
+                                                          "...if the two zones are expected to have significantly different temperatures, the proper "
+                                                          "\"reverse\" construction should be created.");
+                                        izConstDiffMsg = true;
+                                    }
+                                    if (!state.dataConstruction->Construct(ConstrNum).ReverseConstructionLayersOrderWarning ||
+                                        !state.dataConstruction->Construct(ConstrNumFound).ReverseConstructionLayersOrderWarning) {
+                                        ShowContinueError(state, "...this problem for this pair will not be reported again.");
+                                        state.dataConstruction->Construct(ConstrNum).ReverseConstructionLayersOrderWarning = true;
+                                        state.dataConstruction->Construct(ConstrNumFound).ReverseConstructionLayersOrderWarning = true;
+                                    }
+                                }
+                            }
+
+                            // If significantly different areas
+                            int MultFound = state.dataHeatBal->Zone(state.dataSurface->Surface(Found).Zone).Multiplier *
+                                            state.dataHeatBal->Zone(state.dataSurface->Surface(Found).Zone).ListMultiplier;
+                            int MultSurfNum = state.dataHeatBal->Zone(state.dataSurface->Surface(SurfNum).Zone).Multiplier *
+                                              state.dataHeatBal->Zone(state.dataSurface->Surface(SurfNum).Zone).ListMultiplier;
+                            if (state.dataSurface->Surface(Found).Area > 0.0) {
+                                if (std::abs((state.dataSurface->Surface(Found).Area * MultFound -
+                                              state.dataSurface->Surface(SurfNum).Area * MultSurfNum) /
+                                             state.dataSurface->Surface(Found).Area * MultFound) > 0.02) { // 2% difference in areas
+                                    ++state.dataSurfaceGeometry->ErrCount4;
+                                    if (state.dataSurfaceGeometry->ErrCount4 == 1 && !state.dataGlobal->DisplayExtraWarnings) {
+                                        ShowWarningError(
+                                            state,
+                                            EnergyPlus::format(
+                                                "{}InterZone Surface Areas do not match as expected and might not satisfy conservation of energy:",
+                                                RoutineName));
+                                        ShowContinueError(
+                                            state, "...use Output:Diagnostics,DisplayExtraWarnings; to show more details on individual mismatches.");
+                                    }
+                                    if (state.dataGlobal->DisplayExtraWarnings) {
+                                        ShowWarningError(
+                                            state,
+                                            EnergyPlus::format(
+                                                "{}InterZone Surface Areas do not match as expected and might not satisfy conservation of energy:",
+                                                RoutineName));
+
+                                        if (MultFound == 1 && MultSurfNum == 1) {
+                                            ShowContinueError(state,
+                                                              EnergyPlus::format("  Area={:.1T} in Surface={}, Zone={}",
+                                                                                 state.dataSurface->Surface(SurfNum).Area,
+                                                                                 state.dataSurface->Surface(SurfNum).Name,
+                                                                                 state.dataSurface->Surface(SurfNum).ZoneName));
+                                            ShowContinueError(state,
+                                                              EnergyPlus::format("  Area={:.1T} in Surface={}, Zone={}",
+                                                                                 state.dataSurface->Surface(Found).Area,
+                                                                                 state.dataSurface->Surface(Found).Name,
+                                                                                 state.dataSurface->Surface(Found).ZoneName));
+                                        } else { // Show multiplier info
+                                            ShowContinueError(
+                                                state,
+                                                EnergyPlus::format("  Area={:.1T}, Multipliers={}, Total Area={:.1T} in Surface={} Zone={}",
+                                                                   state.dataSurface->Surface(SurfNum).Area,
+                                                                   MultSurfNum,
+                                                                   state.dataSurface->Surface(SurfNum).Area * MultSurfNum,
+                                                                   state.dataSurface->Surface(SurfNum).Name,
+                                                                   state.dataSurface->Surface(SurfNum).ZoneName));
+
+                                            ShowContinueError(
+                                                state,
+                                                EnergyPlus::format("  Area={:.1T}, Multipliers={}, Total Area={:.1T} in Surface={} Zone={}",
+                                                                   state.dataSurface->Surface(Found).Area,
+                                                                   MultFound,
+                                                                   state.dataSurface->Surface(Found).Area * MultFound,
+                                                                   state.dataSurface->Surface(Found).Name,
+                                                                   state.dataSurface->Surface(Found).ZoneName));
+                                        }
+                                    }
+                                }
+                            }
+                            // Check opposites Azimuth and Tilt
+                            if (std::abs(std::abs(state.dataSurface->Surface(Found).Tilt + state.dataSurface->Surface(SurfNum).Tilt) - 180.0) > 1.0) {
+                                ShowWarningError(state, EnergyPlus::format("{}InterZone Surface Tilts do not match as expected.", RoutineName));
+                                ShowContinueError(state,
+                                                  EnergyPlus::format("  Tilt={:.1T} in Surface={}, Zone={}",
+                                                                     state.dataSurface->Surface(SurfNum).Tilt,
+                                                                     state.dataSurface->Surface(SurfNum).Name,
+                                                                     state.dataSurface->Surface(SurfNum).ZoneName));
+                                ShowContinueError(state,
+                                                  EnergyPlus::format("  Tilt={:.1T} in Surface={}, Zone={}",
+                                                                     state.dataSurface->Surface(Found).Tilt,
+                                                                     state.dataSurface->Surface(Found).Name,
+                                                                     state.dataSurface->Surface(Found).ZoneName));
+                            }
+                            // check surface class match
+                            bool classMismatch = (state.dataSurface->Surface(SurfNum).Class == SurfaceClass::Wall &&
+                                                  state.dataSurface->Surface(Found).Class != SurfaceClass::Wall) ||
+                                                 (state.dataSurface->Surface(SurfNum).Class != SurfaceClass::Wall &&
+                                                  state.dataSurface->Surface(Found).Class == SurfaceClass::Wall) ||
+                                                 (state.dataSurface->Surface(SurfNum).Class == SurfaceClass::Roof &&
+                                                  state.dataSurface->Surface(Found).Class != SurfaceClass::Floor) ||
+                                                 (state.dataSurface->Surface(SurfNum).Class != SurfaceClass::Roof &&
+                                                  state.dataSurface->Surface(Found).Class == SurfaceClass::Floor);
+                            if (classMismatch) {
+                                ShowWarningError(state, EnergyPlus::format("{}InterZone Surface Classes do not match as expected.", RoutineName));
+                                ShowContinueError(state,
+                                                  EnergyPlus::format("Surface=\"{}\", surface class={}",
+                                                                     state.dataSurface->Surface(SurfNum).Name,
+                                                                     cSurfaceClass(state.dataSurface->Surface(SurfNum).Class)));
+                                ShowContinueError(state,
+                                                  EnergyPlus::format("Adjacent Surface=\"{}\", surface class={}",
+                                                                     state.dataSurface->Surface(Found).Name,
+                                                                     cSurfaceClass(state.dataSurface->Surface(Found).Class)));
+                                ShowContinueError(state, "Other errors/warnings may follow about these surfaces.");
+                            }
+                            if (state.dataSurface->Surface(SurfNum).Class != SurfaceClass::Roof &&
+                                state.dataSurface->Surface(SurfNum).Class != SurfaceClass::Floor) {
+                                if (state.dataSurface->Surface(SurfNum).Class != SurfaceClass::Wall) {
+                                    if (state.dataSurface->Surface(SurfNum).BaseSurf == 0) {
+                                        continue;
+                                    }
+                                    if (state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).Class == SurfaceClass::Roof ||
+                                        state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).Class == SurfaceClass::Floor) {
+                                        continue;
+                                    }
+                                }
+                                if (std::abs(std::abs(state.dataSurface->Surface(SurfNum).Azimuth - state.dataSurface->Surface(Found).Azimuth) -
+                                             180.0) > 1.0) {
+                                    if (std::abs(state.dataSurface->Surface(SurfNum).SinTilt) > 0.5 || state.dataGlobal->DisplayExtraWarnings) {
+                                        ShowWarningError(state,
+                                                         EnergyPlus::format("{}InterZone Surface Azimuths do not match as expected.", RoutineName));
+                                        ShowContinueError(state,
+                                                          EnergyPlus::format("  Azimuth={:.1T}, Tilt={:.1T}, in Surface={}, Zone={}",
+                                                                             state.dataSurface->Surface(SurfNum).Azimuth,
+                                                                             state.dataSurface->Surface(SurfNum).Tilt,
+                                                                             state.dataSurface->Surface(SurfNum).Name,
+                                                                             state.dataSurface->Surface(SurfNum).ZoneName));
+                                        ShowContinueError(state,
+                                                          EnergyPlus::format("  Azimuth={:.1T}, Tilt={:.1T}, in Surface={}, Zone={}",
+                                                                             state.dataSurface->Surface(Found).Azimuth,
+                                                                             state.dataSurface->Surface(Found).Tilt,
+                                                                             state.dataSurface->Surface(Found).Name,
+                                                                             state.dataSurface->Surface(Found).ZoneName));
+                                        ShowContinueError(state,
+                                                          EnergyPlus::format("..surface class of first surface={}",
+                                                                             cSurfaceClass(state.dataSurface->Surface(SurfNum).Class)));
+                                        ShowContinueError(state,
+                                                          EnergyPlus::format("..surface class of second surface={}",
+                                                                             cSurfaceClass(state.dataSurface->Surface(Found).Class)));
+                                    }
+                                }
+                            }
+
+                            // Make sure exposures (Sun, Wind) are the same and are "not"
+                            auto warnAndClearExposure = [&](bool &flag1, bool &flag2, std::string_view exposureName) {
+                                if (flag1 || flag2) {
+                                    ShowWarningError(
+                                        state,
+                                        EnergyPlus::format(
+                                            "{}Interzone surfaces cannot be \"{}\" -- removing {}", RoutineName, exposureName, exposureName));
+                                    ShowContinueError(state,
+                                                      EnergyPlus::format("  Surface={}, Zone={}",
+                                                                         state.dataSurface->Surface(SurfNum).Name,
+                                                                         state.dataSurface->Surface(SurfNum).ZoneName));
+                                    ShowContinueError(state,
+                                                      EnergyPlus::format("  Surface={}, Zone={}",
+                                                                         state.dataSurface->Surface(Found).Name,
+                                                                         state.dataSurface->Surface(Found).ZoneName));
+                                    flag1 = false;
+                                    flag2 = false;
+                                }
+                            };
+                            warnAndClearExposure(
+                                state.dataSurface->Surface(SurfNum).ExtSolar, state.dataSurface->Surface(Found).ExtSolar, "SunExposed");
+                            warnAndClearExposure(
+                                state.dataSurface->Surface(SurfNum).ExtWind, state.dataSurface->Surface(Found).ExtWind, "WindExposed");
+                        }
+                        // Set opposing surface back to this one (regardless of error)
+                        state.dataSurface->Surface(Found).ExtBoundCond = SurfNum;
+                        // Check subsurfaces...  make sure base surface is also an interzone surface
+                        if (state.dataSurface->Surface(SurfNum).BaseSurf != SurfNum) { // Subsurface
+                            if ((state.dataSurface->Surface(SurfNum).ExtBoundCond != SurfNum) &&
+                                not_blank(state.dataSurface->Surface(SurfNum).ExtBoundCondName)) {
+                                if (state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).ExtBoundCond ==
+                                    state.dataSurface->Surface(SurfNum).BaseSurf) {
+                                    ShowSevereError(state,
+                                                    EnergyPlus::format("{}SubSurface=\"{}\" is an interzone subsurface.",
+                                                                       RoutineName,
+                                                                       state.dataSurface->Surface(SurfNum).Name));
+                                    ShowContinueError(
+                                        state,
+                                        EnergyPlus::format("..but the Base Surface is not an interzone surface, Surface=\"{}\".",
+                                                           state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).Name));
+                                    SurfError = true;
+                                }
+                            }
+                        }
+                    } else {
+                        ShowSevereError(state,
+                                        EnergyPlus::format("{}Adjacent Surface not found: {} adjacent to surface {}",
+                                                           RoutineName,
+                                                           state.dataSurface->Surface(SurfNum).ExtBoundCondName,
+                                                           state.dataSurface->Surface(SurfNum).Name));
+                        NonMatch = true;
+                        SurfError = true;
+                    }
+                } else if (state.dataSurface->Surface(SurfNum).BaseSurf != SurfNum) { // Subsurface
+                    if (state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).ExtBoundCond > 0 &&
+                        state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).ExtBoundCond !=
+                            state.dataSurface->Surface(SurfNum).BaseSurf) {
+                        ShowSevereError(state, EnergyPlus::format("{}SubSurface on Interzone Surface must be an Interzone SubSurface.", RoutineName));
+                        ShowContinueError(
+                            state, EnergyPlus::format("...OutsideFaceEnvironment is blank, in Surface={}", state.dataSurface->Surface(SurfNum).Name));
+                        SurfError = true;
+                    } else {
+                        ++state.dataSurfaceGeometry->ErrCount3;
+                        if (state.dataSurfaceGeometry->ErrCount3 == 1 && !state.dataGlobal->DisplayExtraWarnings) {
+                            ShowWarningError(state, EnergyPlus::format("{}Blank name for Outside Boundary Condition Objects.", RoutineName));
+                            ShowContinueError(state, "...use Output:Diagnostics,DisplayExtraWarnings; to show more details on individual surfaces.");
+                        }
+                        if (state.dataGlobal->DisplayExtraWarnings) {
+                            ShowWarningError(state,
+                                             EnergyPlus::format("{}Blank name for Outside Boundary Condition Object, in surface={}",
+                                                                RoutineName,
+                                                                state.dataSurface->Surface(SurfNum).Name));
+                            ShowContinueError(state,
+                                              EnergyPlus::format("Resetting this surface to be an internal zone surface, zone={}",
+                                                                 state.dataSurface->Surface(SurfNum).ZoneName));
+                        }
+                        state.dataSurface->Surface(SurfNum).ExtBoundCondName = state.dataSurface->Surface(SurfNum).Name;
+                        state.dataSurface->Surface(SurfNum).ExtBoundCond = SurfNum;
+                    }
+                } else {
+                    ++state.dataSurfaceGeometry->ErrCount3;
+                    if (state.dataSurfaceGeometry->ErrCount3 == 1 && !state.dataGlobal->DisplayExtraWarnings) {
+                        ShowSevereError(state, EnergyPlus::format("{}Blank name for Outside Boundary Condition Objects.", RoutineName));
+                        ShowContinueError(state, "...use Output:Diagnostics,DisplayExtraWarnings; to show more details on individual surfaces.");
+                    }
+                    if (state.dataGlobal->DisplayExtraWarnings) {
+                        ShowWarningError(state,
+                                         EnergyPlus::format("{}Blank name for Outside Boundary Condition Object, in surface={}",
+                                                            RoutineName,
+                                                            state.dataSurface->Surface(SurfNum).Name));
+                        ShowContinueError(state,
+                                          EnergyPlus::format("Resetting this surface to be an internal zone (adiabatic) surface, zone={}",
+                                                             state.dataSurface->Surface(SurfNum).ZoneName));
+                    }
+                    state.dataSurface->Surface(SurfNum).ExtBoundCondName = state.dataSurface->Surface(SurfNum).Name;
+                    state.dataSurface->Surface(SurfNum).ExtBoundCond = SurfNum;
+                    SurfError = true;
+                }
+            }
+        }
+        if (NonMatch) {
+            ShowSevereError(state, EnergyPlus::format("{}Non matching interzone surfaces found", RoutineName));
+        }
+    }
+
     // Check that subsurface exterior boundary conditions are consistent with
     // their base surface (e.g. adiabatic sub in exterior base, interzone sub in adiabatic base, etc.)
     static void checkSubSurfaceExtBoundConsistency(EnergyPlusData &state, std::string_view RoutineName, bool &SurfError)
@@ -1145,11 +1536,8 @@ namespace SurfaceGeometry {
         using namespace Vectors;
         using namespace DataErrorTracking;
 
-        bool NonMatch(false);  // Error for non-matching interzone surfaces
         int MovedSurfs;        // Number of Moved Surfaces (when sorting into hierarchical structure)
         bool SurfError(false); // General Surface Error, causes fatal error at end of routine
-        int TotLay;            // Total layers in a construction
-        int TotLayFound;       // Total layers in the construction of a matching interzone surface
         // Simple Surfaces (Rectangular)
         int LayNumOutside; // Outside material numbers for a shaded construction
         // entries with two glazing systems
@@ -1159,13 +1547,8 @@ namespace SurfaceGeometry {
         Real64 SurfWorldAz;
         Real64 SurfTilt;
 
-        int MultFound;
-        int MultSurfNum;
         bool subSurfaceError(false);
         bool errFlag;
-
-        bool izConstDiff;    // differences in construction for IZ surfaces
-        bool izConstDiffMsg; // display message about hb diffs only once.
 
         // Get the total number of surfaces to allocate derived type and for surface loops
 
@@ -1789,407 +2172,7 @@ namespace SurfaceGeometry {
 
         //**********************************************************************************
         // Now, match up interzone surfaces
-        NonMatch = false;
-        izConstDiffMsg = false;
-        for (int SurfNum = 1; SurfNum <= MovedSurfs; ++SurfNum) { // TotSurfaces
-            //  Clean up Shading Surfaces, make sure they don't go through here.
-            if (!state.dataSurface->Surface(SurfNum).HeatTransSurf) {
-                continue;
-            }
-            //   If other surface, match it up
-            //  Both interzone and "internal" surfaces have this pointer set
-            //  Internal surfaces point to themselves, Interzone to another
-            if (state.dataSurface->Surface(SurfNum).ExtBoundCond == unreconciledZoneSurface) {
-                if (not_blank(state.dataSurface->Surface(SurfNum).ExtBoundCondName)) {
-                    int Found = 0;
-                    if (state.dataSurface->Surface(SurfNum).ExtBoundCondName == state.dataSurface->Surface(SurfNum).Name) {
-                        Found = SurfNum;
-                    } else {
-                        Found = Util::FindItemInList(state.dataSurface->Surface(SurfNum).ExtBoundCondName, state.dataSurface->Surface, MovedSurfs);
-                    }
-                    if (Found != 0) {
-                        state.dataSurface->Surface(SurfNum).ExtBoundCond = Found;
-                        // Check that matching surface is also "OtherZoneSurface"
-                        if (state.dataSurface->Surface(Found).ExtBoundCond <= 0 &&
-                            state.dataSurface->Surface(Found).ExtBoundCond != unreconciledZoneSurface) {
-                            ShowSevereError(state, EnergyPlus::format("{}Potential \"OtherZoneSurface\" is not matched correctly:", RoutineName));
-
-                            ShowContinueError(state,
-                                              EnergyPlus::format("Surface={}, Zone={}",
-                                                                 state.dataSurface->Surface(SurfNum).Name,
-                                                                 state.dataSurface->Surface(SurfNum).ZoneName));
-                            ShowContinueError(state,
-                                              EnergyPlus::format("Nonmatched Other/InterZone Surface={}, Zone={}",
-                                                                 state.dataSurface->Surface(Found).Name,
-                                                                 state.dataSurface->Surface(Found).ZoneName));
-                            SurfError = true;
-                        }
-                        // Check that matching interzone surface has construction with reversed layers
-                        if (Found != SurfNum) { // Interzone surface
-                            // Make sure different zones too (CR 4110)
-                            if (state.dataSurface->Surface(SurfNum).spaceNum == state.dataSurface->Surface(Found).spaceNum) {
-                                ++state.dataSurfaceGeometry->ErrCount2;
-                                if (state.dataSurfaceGeometry->ErrCount2 == 1 && !state.dataGlobal->DisplayExtraWarnings) {
-                                    ShowWarningError(
-                                        state,
-                                        EnergyPlus::format("{}CAUTION -- Interspace surfaces are occurring in the same space(s).", RoutineName));
-                                    ShowContinueError(
-                                        state, "...use Output:Diagnostics,DisplayExtraWarnings; to show more details on individual occurrences.");
-                                }
-                                if (state.dataGlobal->DisplayExtraWarnings) {
-                                    ShowWarningError(
-                                        state, EnergyPlus::format("{}CAUTION -- Interspace surfaces are usually in different spaces", RoutineName));
-                                    ShowContinueError(state,
-                                                      EnergyPlus::format("Surface={}, Space={}, Zone={}",
-                                                                         state.dataSurface->Surface(SurfNum).Name,
-                                                                         state.dataHeatBal->space(state.dataSurface->Surface(SurfNum).spaceNum).Name,
-                                                                         state.dataSurface->Surface(SurfNum).ZoneName));
-                                    ShowContinueError(state,
-                                                      EnergyPlus::format("Surface={}, Space={}, Zone={}",
-                                                                         state.dataSurface->Surface(Found).Name,
-                                                                         state.dataHeatBal->space(state.dataSurface->Surface(Found).spaceNum).Name,
-                                                                         state.dataSurface->Surface(Found).ZoneName));
-                                }
-                            }
-                            int ConstrNum = state.dataSurface->Surface(SurfNum).Construction;
-                            int ConstrNumFound = state.dataSurface->Surface(Found).Construction;
-                            if (ConstrNum <= 0 || ConstrNumFound <= 0) {
-                                continue;
-                            }
-                            if (state.dataConstruction->Construct(ConstrNum).ReverseConstructionNumLayersWarning &&
-                                state.dataConstruction->Construct(ConstrNumFound).ReverseConstructionNumLayersWarning) {
-                                continue;
-                            }
-                            if (state.dataConstruction->Construct(ConstrNum).ReverseConstructionLayersOrderWarning &&
-                                state.dataConstruction->Construct(ConstrNumFound).ReverseConstructionLayersOrderWarning) {
-                                continue;
-                            }
-                            TotLay = state.dataConstruction->Construct(ConstrNum).TotLayers;
-                            TotLayFound = state.dataConstruction->Construct(ConstrNumFound).TotLayers;
-                            if (TotLay != TotLayFound) { // Different number of layers
-                                // match on like Uvalues (nominal)
-                                if (std::abs(state.dataHeatBal->NominalU(ConstrNum) - state.dataHeatBal->NominalU(ConstrNumFound)) > 0.001) {
-                                    ShowSevereError(
-                                        state,
-                                        EnergyPlus::format("{}Construction {} of interzone surface {} does not have the same number of layers as the "
-                                                           "construction {} of adjacent surface {}",
-                                                           RoutineName,
-                                                           state.dataConstruction->Construct(ConstrNum).Name,
-                                                           state.dataSurface->Surface(SurfNum).Name,
-                                                           state.dataConstruction->Construct(ConstrNumFound).Name,
-                                                           state.dataSurface->Surface(Found).Name));
-                                    if (!state.dataConstruction->Construct(ConstrNum).ReverseConstructionNumLayersWarning ||
-                                        !state.dataConstruction->Construct(ConstrNumFound).ReverseConstructionNumLayersWarning) {
-                                        ShowContinueError(state, "...this problem for this pair will not be reported again.");
-                                        state.dataConstruction->Construct(ConstrNum).ReverseConstructionNumLayersWarning = true;
-                                        state.dataConstruction->Construct(ConstrNumFound).ReverseConstructionNumLayersWarning = true;
-                                    }
-                                    SurfError = true;
-                                }
-                            } else { // Same number of layers; check for reverse layers
-                                // check layers as number of layers is the same
-                                izConstDiff = false;
-                                // ok if same nominal U
-                                CheckForReversedLayers(state, izConstDiff, ConstrNum, ConstrNumFound, TotLay);
-                                if (izConstDiff &&
-                                    std::abs(state.dataHeatBal->NominalU(ConstrNum) - state.dataHeatBal->NominalU(ConstrNumFound)) > 0.001) {
-                                    ShowSevereError(
-                                        state,
-                                        EnergyPlus::format("{}Construction {} of interzone surface {} does not have the same materials in the "
-                                                           "reverse order as the construction {} of adjacent surface {}",
-                                                           RoutineName,
-                                                           state.dataConstruction->Construct(ConstrNum).Name,
-                                                           state.dataSurface->Surface(SurfNum).Name,
-                                                           state.dataConstruction->Construct(ConstrNumFound).Name,
-                                                           state.dataSurface->Surface(Found).Name));
-                                    ShowContinueError(state,
-                                                      "or the properties of the reversed layers are not correct due to differing layer front and "
-                                                      "back side values");
-                                    if (!state.dataConstruction->Construct(ConstrNum).ReverseConstructionLayersOrderWarning ||
-                                        !state.dataConstruction->Construct(ConstrNumFound).ReverseConstructionLayersOrderWarning) {
-                                        ShowContinueError(state, "...this problem for this pair will not be reported again.");
-                                        state.dataConstruction->Construct(ConstrNum).ReverseConstructionLayersOrderWarning = true;
-                                        state.dataConstruction->Construct(ConstrNumFound).ReverseConstructionLayersOrderWarning = true;
-                                    }
-                                    SurfError = true;
-                                } else if (izConstDiff) {
-                                    ShowWarningError(
-                                        state,
-                                        EnergyPlus::format("{}Construction {} of interzone surface {} does not have the same materials in the "
-                                                           "reverse order as the construction {} of adjacent surface {}",
-                                                           RoutineName,
-                                                           state.dataConstruction->Construct(ConstrNum).Name,
-                                                           state.dataSurface->Surface(SurfNum).Name,
-                                                           state.dataConstruction->Construct(ConstrNumFound).Name,
-                                                           state.dataSurface->Surface(Found).Name));
-                                    ShowContinueError(state,
-                                                      "or the properties of the reversed layers are not correct due to differing layer front and "
-                                                      "back side values");
-                                    ShowContinueError(
-                                        state,
-                                        EnergyPlus::format(
-                                            "...but Nominal U values are similar, diff=[{:.4R}] ... simulation proceeds.",
-                                            std::abs(state.dataHeatBal->NominalU(ConstrNum) - state.dataHeatBal->NominalU(ConstrNumFound))));
-                                    if (!izConstDiffMsg) {
-                                        ShowContinueError(state,
-                                                          "...if the two zones are expected to have significantly different temperatures, the proper "
-                                                          "\"reverse\" construction should be created.");
-                                        izConstDiffMsg = true;
-                                    }
-                                    if (!state.dataConstruction->Construct(ConstrNum).ReverseConstructionLayersOrderWarning ||
-                                        !state.dataConstruction->Construct(ConstrNumFound).ReverseConstructionLayersOrderWarning) {
-                                        ShowContinueError(state, "...this problem for this pair will not be reported again.");
-                                        state.dataConstruction->Construct(ConstrNum).ReverseConstructionLayersOrderWarning = true;
-                                        state.dataConstruction->Construct(ConstrNumFound).ReverseConstructionLayersOrderWarning = true;
-                                    }
-                                }
-                            }
-
-                            // If significantly different areas -- this would not be good
-                            MultFound = state.dataHeatBal->Zone(state.dataSurface->Surface(Found).Zone).Multiplier *
-                                        state.dataHeatBal->Zone(state.dataSurface->Surface(Found).Zone).ListMultiplier;
-                            MultSurfNum = state.dataHeatBal->Zone(state.dataSurface->Surface(SurfNum).Zone).Multiplier *
-                                          state.dataHeatBal->Zone(state.dataSurface->Surface(SurfNum).Zone).ListMultiplier;
-                            if (state.dataSurface->Surface(Found).Area > 0.0) {
-                                if (std::abs((state.dataSurface->Surface(Found).Area * MultFound -
-                                              state.dataSurface->Surface(SurfNum).Area * MultSurfNum) /
-                                             state.dataSurface->Surface(Found).Area * MultFound) > 0.02) { // 2% difference in areas
-                                    ++state.dataSurfaceGeometry->ErrCount4;
-                                    if (state.dataSurfaceGeometry->ErrCount4 == 1 && !state.dataGlobal->DisplayExtraWarnings) {
-                                        ShowWarningError(
-                                            state,
-                                            EnergyPlus::format(
-                                                "{}InterZone Surface Areas do not match as expected and might not satisfy conservation of energy:",
-                                                RoutineName));
-                                        ShowContinueError(
-                                            state, "...use Output:Diagnostics,DisplayExtraWarnings; to show more details on individual mismatches.");
-                                    }
-                                    if (state.dataGlobal->DisplayExtraWarnings) {
-                                        ShowWarningError(
-                                            state,
-                                            EnergyPlus::format(
-                                                "{}InterZone Surface Areas do not match as expected and might not satisfy conservation of energy:",
-                                                RoutineName));
-
-                                        if (MultFound == 1 && MultSurfNum == 1) {
-                                            ShowContinueError(state,
-                                                              EnergyPlus::format("  Area={:.1T} in Surface={}, Zone={}",
-                                                                                 state.dataSurface->Surface(SurfNum).Area,
-                                                                                 state.dataSurface->Surface(SurfNum).Name,
-                                                                                 state.dataSurface->Surface(SurfNum).ZoneName));
-                                            ShowContinueError(state,
-                                                              EnergyPlus::format("  Area={:.1T} in Surface={}, Zone={}",
-                                                                                 state.dataSurface->Surface(Found).Area,
-                                                                                 state.dataSurface->Surface(Found).Name,
-                                                                                 state.dataSurface->Surface(Found).ZoneName));
-                                        } else { // Show multiplier info
-                                            ShowContinueError(
-                                                state,
-                                                EnergyPlus::format("  Area={:.1T}, Multipliers={}, Total Area={:.1T} in Surface={} Zone={}",
-                                                                   state.dataSurface->Surface(SurfNum).Area,
-                                                                   MultSurfNum,
-                                                                   state.dataSurface->Surface(SurfNum).Area * MultSurfNum,
-                                                                   state.dataSurface->Surface(SurfNum).Name,
-                                                                   state.dataSurface->Surface(SurfNum).ZoneName));
-
-                                            ShowContinueError(
-                                                state,
-                                                EnergyPlus::format("  Area={:.1T}, Multipliers={}, Total Area={:.1T} in Surface={} Zone={}",
-                                                                   state.dataSurface->Surface(Found).Area,
-                                                                   MultFound,
-                                                                   state.dataSurface->Surface(Found).Area * MultFound,
-                                                                   state.dataSurface->Surface(Found).Name,
-                                                                   state.dataSurface->Surface(Found).ZoneName));
-                                        }
-                                    }
-                                }
-                            }
-                            // Check opposites Azimuth and Tilt
-                            // Tilt
-                            if (std::abs(std::abs(state.dataSurface->Surface(Found).Tilt + state.dataSurface->Surface(SurfNum).Tilt) - 180.0) > 1.0) {
-                                ShowWarningError(state, EnergyPlus::format("{}InterZone Surface Tilts do not match as expected.", RoutineName));
-                                ShowContinueError(state,
-                                                  EnergyPlus::format("  Tilt={:.1T} in Surface={}, Zone={}",
-                                                                     state.dataSurface->Surface(SurfNum).Tilt,
-                                                                     state.dataSurface->Surface(SurfNum).Name,
-                                                                     state.dataSurface->Surface(SurfNum).ZoneName));
-                                ShowContinueError(state,
-                                                  EnergyPlus::format("  Tilt={:.1T} in Surface={}, Zone={}",
-                                                                     state.dataSurface->Surface(Found).Tilt,
-                                                                     state.dataSurface->Surface(Found).Name,
-                                                                     state.dataSurface->Surface(Found).ZoneName));
-                            }
-                            // check surface class match.  interzone surface.
-                            // Wall must match Wall; Roof must match Floor (and vice versa)
-                            bool classMismatch = (state.dataSurface->Surface(SurfNum).Class == SurfaceClass::Wall &&
-                                                  state.dataSurface->Surface(Found).Class != SurfaceClass::Wall) ||
-                                                 (state.dataSurface->Surface(SurfNum).Class != SurfaceClass::Wall &&
-                                                  state.dataSurface->Surface(Found).Class == SurfaceClass::Wall) ||
-                                                 (state.dataSurface->Surface(SurfNum).Class == SurfaceClass::Roof &&
-                                                  state.dataSurface->Surface(Found).Class != SurfaceClass::Floor) ||
-                                                 (state.dataSurface->Surface(SurfNum).Class != SurfaceClass::Roof &&
-                                                  state.dataSurface->Surface(Found).Class == SurfaceClass::Floor);
-                            if (classMismatch) {
-                                ShowWarningError(state, EnergyPlus::format("{}InterZone Surface Classes do not match as expected.", RoutineName));
-                                ShowContinueError(state,
-                                                  EnergyPlus::format("Surface=\"{}\", surface class={}",
-                                                                     state.dataSurface->Surface(SurfNum).Name,
-                                                                     cSurfaceClass(state.dataSurface->Surface(SurfNum).Class)));
-                                ShowContinueError(state,
-                                                  EnergyPlus::format("Adjacent Surface=\"{}\", surface class={}",
-                                                                     state.dataSurface->Surface(Found).Name,
-                                                                     cSurfaceClass(state.dataSurface->Surface(Found).Class)));
-                                ShowContinueError(state, "Other errors/warnings may follow about these surfaces.");
-                            }
-                            if (state.dataSurface->Surface(SurfNum).Class != SurfaceClass::Roof &&
-                                state.dataSurface->Surface(SurfNum).Class != SurfaceClass::Floor) {
-                                // Walls, Windows, Doors, Glass Doors
-                                if (state.dataSurface->Surface(SurfNum).Class != SurfaceClass::Wall) {
-                                    // Surface is a Door, Window or Glass Door
-                                    if (state.dataSurface->Surface(SurfNum).BaseSurf == 0) {
-                                        continue; // error detected elsewhere
-                                    }
-                                    if (state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).Class == SurfaceClass::Roof ||
-                                        state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).Class == SurfaceClass::Floor) {
-                                        continue;
-                                    }
-                                }
-                                if (std::abs(std::abs(state.dataSurface->Surface(SurfNum).Azimuth - state.dataSurface->Surface(Found).Azimuth) -
-                                             180.0) > 1.0) {
-                                    if (std::abs(state.dataSurface->Surface(SurfNum).SinTilt) > 0.5 || state.dataGlobal->DisplayExtraWarnings) {
-                                        // if horizontal surfaces, then these are windows/doors/etc in those items.
-                                        ShowWarningError(state,
-                                                         EnergyPlus::format("{}InterZone Surface Azimuths do not match as expected.", RoutineName));
-                                        ShowContinueError(state,
-                                                          EnergyPlus::format("  Azimuth={:.1T}, Tilt={:.1T}, in Surface={}, Zone={}",
-                                                                             state.dataSurface->Surface(SurfNum).Azimuth,
-                                                                             state.dataSurface->Surface(SurfNum).Tilt,
-                                                                             state.dataSurface->Surface(SurfNum).Name,
-                                                                             state.dataSurface->Surface(SurfNum).ZoneName));
-                                        ShowContinueError(state,
-                                                          EnergyPlus::format("  Azimuth={:.1T}, Tilt={:.1T}, in Surface={}, Zone={}",
-                                                                             state.dataSurface->Surface(Found).Azimuth,
-                                                                             state.dataSurface->Surface(Found).Tilt,
-                                                                             state.dataSurface->Surface(Found).Name,
-                                                                             state.dataSurface->Surface(Found).ZoneName));
-                                        ShowContinueError(state,
-                                                          EnergyPlus::format("..surface class of first surface={}",
-                                                                             cSurfaceClass(state.dataSurface->Surface(SurfNum).Class)));
-                                        ShowContinueError(state,
-                                                          EnergyPlus::format("..surface class of second surface={}",
-                                                                             cSurfaceClass(state.dataSurface->Surface(Found).Class)));
-                                    }
-                                }
-                            }
-
-                            // Make sure exposures (Sun, Wind) are the same.....and are "not"
-                            auto warnAndClearExposure = [&](bool &flag1, bool &flag2, std::string_view exposureName) {
-                                if (flag1 || flag2) {
-                                    ShowWarningError(
-                                        state,
-                                        EnergyPlus::format(
-                                            "{}Interzone surfaces cannot be \"{}\" -- removing {}", RoutineName, exposureName, exposureName));
-                                    ShowContinueError(state,
-                                                      EnergyPlus::format("  Surface={}, Zone={}",
-                                                                         state.dataSurface->Surface(SurfNum).Name,
-                                                                         state.dataSurface->Surface(SurfNum).ZoneName));
-                                    ShowContinueError(state,
-                                                      EnergyPlus::format("  Surface={}, Zone={}",
-                                                                         state.dataSurface->Surface(Found).Name,
-                                                                         state.dataSurface->Surface(Found).ZoneName));
-                                    flag1 = false;
-                                    flag2 = false;
-                                }
-                            };
-                            warnAndClearExposure(
-                                state.dataSurface->Surface(SurfNum).ExtSolar, state.dataSurface->Surface(Found).ExtSolar, "SunExposed");
-                            warnAndClearExposure(
-                                state.dataSurface->Surface(SurfNum).ExtWind, state.dataSurface->Surface(Found).ExtWind, "WindExposed");
-                        }
-                        // Set opposing surface back to this one (regardless of error)
-                        state.dataSurface->Surface(Found).ExtBoundCond = SurfNum;
-                        // Check subsurfaces...  make sure base surface is also an interzone surface
-                        if (state.dataSurface->Surface(SurfNum).BaseSurf != SurfNum) { // Subsurface
-                            if ((state.dataSurface->Surface(SurfNum).ExtBoundCond != SurfNum) &&
-                                not_blank(state.dataSurface->Surface(SurfNum).ExtBoundCondName)) {
-                                // if not internal subsurface
-                                if (state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).ExtBoundCond ==
-                                    state.dataSurface->Surface(SurfNum).BaseSurf) {
-                                    // base surface is not interzone surface
-                                    ShowSevereError(state,
-                                                    EnergyPlus::format("{}SubSurface=\"{}\" is an interzone subsurface.",
-                                                                       RoutineName,
-                                                                       state.dataSurface->Surface(SurfNum).Name));
-                                    ShowContinueError(
-                                        state,
-                                        EnergyPlus::format("..but the Base Surface is not an interzone surface, Surface=\"{}\".",
-                                                           state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).Name));
-                                    SurfError = true;
-                                }
-                            }
-                        }
-                    } else {
-                        //  Seems unlikely that an internal surface would be missing itself, so this message
-                        //  only indicates for adjacent (interzone) surfaces.
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}Adjacent Surface not found: {} adjacent to surface {}",
-                                                           RoutineName,
-                                                           state.dataSurface->Surface(SurfNum).ExtBoundCondName,
-                                                           state.dataSurface->Surface(SurfNum).Name));
-                        NonMatch = true;
-                        SurfError = true;
-                    }
-                } else if (state.dataSurface->Surface(SurfNum).BaseSurf != SurfNum) { // Subsurface
-                    if (state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).ExtBoundCond > 0 &&
-                        state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).ExtBoundCond !=
-                            state.dataSurface->Surface(SurfNum).BaseSurf) { // If Interzone surface, subsurface must be also.
-                        ShowSevereError(state, EnergyPlus::format("{}SubSurface on Interzone Surface must be an Interzone SubSurface.", RoutineName));
-                        ShowContinueError(
-                            state, EnergyPlus::format("...OutsideFaceEnvironment is blank, in Surface={}", state.dataSurface->Surface(SurfNum).Name));
-                        SurfError = true;
-                    } else {
-                        ++state.dataSurfaceGeometry->ErrCount3;
-                        if (state.dataSurfaceGeometry->ErrCount3 == 1 && !state.dataGlobal->DisplayExtraWarnings) {
-                            ShowWarningError(state, EnergyPlus::format("{}Blank name for Outside Boundary Condition Objects.", RoutineName));
-                            ShowContinueError(state, "...use Output:Diagnostics,DisplayExtraWarnings; to show more details on individual surfaces.");
-                        }
-                        if (state.dataGlobal->DisplayExtraWarnings) {
-                            ShowWarningError(state,
-                                             EnergyPlus::format("{}Blank name for Outside Boundary Condition Object, in surface={}",
-                                                                RoutineName,
-                                                                state.dataSurface->Surface(SurfNum).Name));
-                            ShowContinueError(state,
-                                              EnergyPlus::format("Resetting this surface to be an internal zone surface, zone={}",
-                                                                 state.dataSurface->Surface(SurfNum).ZoneName));
-                        }
-                        state.dataSurface->Surface(SurfNum).ExtBoundCondName = state.dataSurface->Surface(SurfNum).Name;
-                        state.dataSurface->Surface(SurfNum).ExtBoundCond = SurfNum;
-                    }
-                } else {
-                    ++state.dataSurfaceGeometry->ErrCount3;
-                    if (state.dataSurfaceGeometry->ErrCount3 == 1 && !state.dataGlobal->DisplayExtraWarnings) {
-                        ShowSevereError(state, EnergyPlus::format("{}Blank name for Outside Boundary Condition Objects.", RoutineName));
-                        ShowContinueError(state, "...use Output:Diagnostics,DisplayExtraWarnings; to show more details on individual surfaces.");
-                    }
-                    if (state.dataGlobal->DisplayExtraWarnings) {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("{}Blank name for Outside Boundary Condition Object, in surface={}",
-                                                            RoutineName,
-                                                            state.dataSurface->Surface(SurfNum).Name));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Resetting this surface to be an internal zone (adiabatic) surface, zone={}",
-                                                             state.dataSurface->Surface(SurfNum).ZoneName));
-                    }
-                    state.dataSurface->Surface(SurfNum).ExtBoundCondName = state.dataSurface->Surface(SurfNum).Name;
-                    state.dataSurface->Surface(SurfNum).ExtBoundCond = SurfNum;
-                    SurfError = true;
-                }
-            }
-
-        } // ...end of the Surface DO loop for finding BaseSurf
-        if (NonMatch) {
-            ShowSevereError(state, EnergyPlus::format("{}Non matching interzone surfaces found", RoutineName));
-        }
+        matchInterzoneSurfaces(state, RoutineName, MovedSurfs, SurfError);
 
         //**********************************************************************************
         // Warn about interzone surfaces that have adiabatic windows/vice versa
