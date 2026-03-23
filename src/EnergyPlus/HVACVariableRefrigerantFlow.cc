@@ -4706,6 +4706,28 @@ static void warnOATLimitExceeded(EnergyPlusData &state,
                                    OutsideDryBulbTemp);
 }
 
+// Helper: search zone equipment configs for a zone node matching the given TU node.
+// Searches exhaust nodes when isExhaustSearch is true, inlet nodes otherwise.
+// Returns the zone air node number if found, or 0 if not found.
+static int findMatchingZoneAirNode(EnergyPlusData &state, int const tuNodeNum, bool const isExhaustSearch)
+{
+    for (int CtrlZone = 1; CtrlZone <= state.dataGlobal->NumOfZones; ++CtrlZone) {
+        if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) {
+            continue;
+        }
+        int const numNodes = isExhaustSearch ? state.dataZoneEquip->ZoneEquipConfig(CtrlZone).NumExhaustNodes
+                                             : state.dataZoneEquip->ZoneEquipConfig(CtrlZone).NumInletNodes;
+        for (int NodeNum = 1; NodeNum <= numNodes; ++NodeNum) {
+            int const zoneNode = isExhaustSearch ? state.dataZoneEquip->ZoneEquipConfig(CtrlZone).ExhaustNode(NodeNum)
+                                                 : state.dataZoneEquip->ZoneEquipConfig(CtrlZone).InletNode(NodeNum);
+            if (tuNodeNum == zoneNode) {
+                return state.dataZoneEquip->ZoneEquipConfig(CtrlZone).ZoneNode;
+            }
+        }
+    }
+    return 0;
+}
+
 // Helper: check OAT limits for a given VRF operating mode and optionally switch to the opposite mode.
 // When the current mode's OAT is out of range, it disables the current mode and checks whether
 // the opposite mode can be enabled based on thermostat priority and OAT limits.
@@ -5543,24 +5565,10 @@ void InitVRF(EnergyPlusData &state, int const VRFTUNum, int const ZoneNum, bool 
         if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).isInZone &&
             (!state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ATMixerExists ||
              state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ATMixerType == HVAC::MixerType::SupplySide)) {
-            bool ZoneNodeNotFound = true;
-            for (int CtrlZone = 1; CtrlZone <= state.dataGlobal->NumOfZones; ++CtrlZone) {
-                if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) {
-                    continue;
-                }
-                for (int NodeNum = 1; NodeNum <= state.dataZoneEquip->ZoneEquipConfig(CtrlZone).NumExhaustNodes; ++NodeNum) {
-                    if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUInletNodeNum ==
-                        state.dataZoneEquip->ZoneEquipConfig(CtrlZone).ExhaustNode(NodeNum)) {
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ZoneAirNode = state.dataZoneEquip->ZoneEquipConfig(CtrlZone).ZoneNode;
-                        ZoneNodeNotFound = false;
-                        break;
-                    }
-                }
-                if (!ZoneNodeNotFound) {
-                    break;
-                }
-            }
-            if (ZoneNodeNotFound && !state.dataHVACVarRefFlow->VRFTU(VRFTUNum).isInAirLoop) {
+            int zoneAirNode = findMatchingZoneAirNode(state, state.dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUInletNodeNum, true);
+            if (zoneAirNode > 0) {
+                state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ZoneAirNode = zoneAirNode;
+            } else if (!state.dataHVACVarRefFlow->VRFTU(VRFTUNum).isInAirLoop) {
                 ShowSevereError(state,
                                 EnergyPlus::format("{} \"{}\" Zone terminal unit air inlet node name must be the same as a zone exhaust node name.",
                                                    cCurrentModuleObject,
@@ -5594,24 +5602,10 @@ void InitVRF(EnergyPlusData &state, int const VRFTUNum, int const ZoneNum, bool 
         if ((state.dataHVACVarRefFlow->VRFTU(VRFTUNum).isInZone &&
              (!state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ATMixerExists ||
               state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ATMixerType == HVAC::MixerType::InletSide))) {
-            bool ZoneNodeNotFound = true;
-            for (int CtrlZone = 1; CtrlZone <= state.dataGlobal->NumOfZones; ++CtrlZone) {
-                if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) {
-                    continue;
-                }
-                for (int NodeNum = 1; NodeNum <= state.dataZoneEquip->ZoneEquipConfig(CtrlZone).NumInletNodes; ++NodeNum) {
-                    if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUOutletNodeNum ==
-                        state.dataZoneEquip->ZoneEquipConfig(CtrlZone).InletNode(NodeNum)) {
-                        state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ZoneAirNode = state.dataZoneEquip->ZoneEquipConfig(CtrlZone).ZoneNode;
-                        ZoneNodeNotFound = false;
-                        break;
-                    }
-                }
-                if (!ZoneNodeNotFound) {
-                    break;
-                }
-            }
-            if (ZoneNodeNotFound) {
+            int zoneAirNode = findMatchingZoneAirNode(state, state.dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUOutletNodeNum, false);
+            if (zoneAirNode > 0) {
+                state.dataHVACVarRefFlow->VRFTU(VRFTUNum).ZoneAirNode = zoneAirNode;
+            } else {
                 ShowSevereError(state,
                                 EnergyPlus::format("{} \"{}\" Zone terminal unit air outlet node name must be the same as a zone inlet node name.",
                                                    cCurrentModuleObject,
