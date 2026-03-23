@@ -1412,6 +1412,111 @@ namespace SurfaceGeometry {
         }
     }
 
+    // Build the various heat-transfer, window, non-window, interzone, exterior-solar,
+    // obstruction, Kiva, and SurfaceFilter surface lists.  Also set the IsShadowPossibleObstruction flag.
+    static void buildSurfaceLists(EnergyPlusData &state, bool ErrorsFound)
+    {
+        auto &s_surf = state.dataSurface;
+
+        s_surf->AllHTSurfaceList.reserve(s_surf->TotSurfaces);
+        s_surf->AllExtSolarSurfaceList.reserve(s_surf->TotSurfaces);
+        s_surf->AllShadowPossObstrSurfaceList.reserve(s_surf->TotSurfaces);
+        s_surf->AllIZSurfaceList.reserve(s_surf->TotSurfaces);
+        s_surf->AllHTNonWindowSurfaceList.reserve(s_surf->TotSurfaces - s_surf->TotWindows);
+        s_surf->AllHTWindowSurfaceList.reserve(s_surf->TotWindows);
+        s_surf->AllExtSolWindowSurfaceList.reserve(s_surf->TotWindows);
+        s_surf->AllExtSolWinWithFrameSurfaceList.reserve(s_surf->TotWindows);
+        s_surf->AllHTKivaSurfaceList.reserve(s_surf->TotSurfaces);
+
+        for (int SurfNum = 1; SurfNum <= s_surf->TotSurfaces; ++SurfNum) {
+            auto &surf = s_surf->Surface(SurfNum);
+            surf.IsShadowPossibleObstruction = false;
+            if (surf.ExtSolar) {
+                s_surf->AllExtSolarSurfaceList.push_back(SurfNum);
+            }
+            if (surf.HeatTransSurf) {
+                s_surf->AllHTSurfaceList.push_back(SurfNum);
+                int const zoneNum(surf.Zone);
+                auto &surfZone(state.dataHeatBal->Zone(zoneNum));
+                surfZone.ZoneHTSurfaceList.push_back(SurfNum);
+                if (surf.Class == DataSurfaces::SurfaceClass::Window) {
+                    s_surf->AllHTWindowSurfaceList.push_back(SurfNum);
+                    surfZone.ZoneHTWindowSurfaceList.push_back(SurfNum);
+                    if (surf.ExtSolar) {
+                        s_surf->AllExtSolWindowSurfaceList.push_back(SurfNum);
+                        if (surf.FrameDivider > 0) {
+                            s_surf->AllExtSolWinWithFrameSurfaceList.push_back(SurfNum);
+                        }
+                    }
+                } else {
+                    s_surf->AllHTNonWindowSurfaceList.push_back(SurfNum);
+                    surfZone.ZoneHTNonWindowSurfaceList.push_back(SurfNum);
+                }
+                int const surfExtBoundCond(surf.ExtBoundCond);
+                if ((surfExtBoundCond > 0) && (surfExtBoundCond != SurfNum)) {
+                    s_surf->AllIZSurfaceList.push_back(SurfNum);
+                    surfZone.ZoneIZSurfaceList.push_back(SurfNum);
+                    auto &adjZone(state.dataHeatBal->Zone(s_surf->Surface(surfExtBoundCond).Zone));
+                    adjZone.ZoneHTSurfaceList.push_back(SurfNum);
+                    adjZone.ZoneIZSurfaceList.push_back(SurfNum);
+                    if (surf.Class == DataSurfaces::SurfaceClass::Window) {
+                        adjZone.ZoneHTWindowSurfaceList.push_back(SurfNum);
+                    } else {
+                        adjZone.ZoneHTNonWindowSurfaceList.push_back(SurfNum);
+                    }
+                }
+            }
+
+            // Exclude non-exterior heat transfer surfaces (but not OtherSideCondModeledExt = -4 CR7640)
+            if (surf.HeatTransSurf && surf.ExtBoundCond > 0) {
+                continue;
+            }
+            if (surf.HeatTransSurf && surf.ExtBoundCond == DataSurfaces::Ground) {
+                continue;
+            }
+            if (surf.HeatTransSurf && surf.ExtBoundCond == DataSurfaces::KivaFoundation) {
+                s_surf->AllHTKivaSurfaceList.push_back(SurfNum);
+                if (!ErrorsFound) {
+                    state.dataSurfaceGeometry->kivaManager.foundationInputs[surf.OSCPtr].surfaces.push_back(SurfNum);
+                }
+                continue;
+            }
+            if (surf.HeatTransSurf && surf.ExtBoundCond == DataSurfaces::OtherSideCoefNoCalcExt) {
+                continue;
+            }
+            if (surf.HeatTransSurf && surf.ExtBoundCond == DataSurfaces::OtherSideCoefCalcExt) {
+                continue;
+            }
+            if (surf.Class == SurfaceClass::Window || surf.Class == SurfaceClass::Door) {
+                continue;
+            }
+            if (surf.MirroredSurf) {
+                continue;
+            }
+            if (surf.IsAirBoundarySurf) {
+                continue;
+            }
+
+            surf.IsShadowPossibleObstruction = true;
+            s_surf->AllShadowPossObstrSurfaceList.push_back(SurfNum);
+        }
+
+        // Populate SurfaceFilter lists
+        for (int iSurfaceFilter = 1; iSurfaceFilter < static_cast<int>(DataSurfaces::SurfaceFilter::Num); ++iSurfaceFilter) {
+            s_surf->SurfaceFilterLists[iSurfaceFilter].reserve(s_surf->TotSurfaces);
+        }
+
+        for (int SurfNum = 1; SurfNum <= s_surf->TotSurfaces; ++SurfNum) {
+            auto const &surf = s_surf->Surface(SurfNum);
+            if (!surf.HeatTransSurf) {
+                continue;
+            }
+            bool isWindow = state.dataConstruction->Construct(surf.Construction).TypeIsWindow;
+            bool isInterior = surf.ExtBoundCond > 0;
+            classifySurfaceFilter(state, SurfNum, surf.Class, isWindow, isInterior);
+        }
+    }
+
     // Classify a heat-transfer surface into the appropriate SurfaceFilter lists
     // (interior vs exterior, then by class: window/wall/floor/roof).
     static void classifySurfaceFilter(EnergyPlusData &state, int SurfNum, DataSurfaces::SurfaceClass surfClass, bool isWindow, bool isInterior)
@@ -2503,99 +2608,8 @@ namespace SurfaceGeometry {
             }
         }
 
-        // Reserve space to avoid excess allocations
-        state.dataSurface->AllHTSurfaceList.reserve(state.dataSurface->TotSurfaces);
-        state.dataSurface->AllExtSolarSurfaceList.reserve(state.dataSurface->TotSurfaces);
-        state.dataSurface->AllShadowPossObstrSurfaceList.reserve(state.dataSurface->TotSurfaces);
-        state.dataSurface->AllIZSurfaceList.reserve(state.dataSurface->TotSurfaces);
-        state.dataSurface->AllHTNonWindowSurfaceList.reserve(state.dataSurface->TotSurfaces - state.dataSurface->TotWindows);
-        state.dataSurface->AllHTWindowSurfaceList.reserve(state.dataSurface->TotWindows);
-        state.dataSurface->AllExtSolWindowSurfaceList.reserve(state.dataSurface->TotWindows);
-        state.dataSurface->AllExtSolWinWithFrameSurfaceList.reserve(state.dataSurface->TotWindows);
-        state.dataSurface->AllHTKivaSurfaceList.reserve(state.dataSurface->TotSurfaces);
-
-        // Set flag that determines whether a surface can be an exterior obstruction
-        // Also set associated surfaces for Kiva foundations and build heat transfer surface lists
-        for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
-            auto &surf = state.dataSurface->Surface(SurfNum);
-            surf.IsShadowPossibleObstruction = false;
-            if (surf.ExtSolar) {
-                // This may include some attached shading surfaces
-                state.dataSurface->AllExtSolarSurfaceList.push_back(SurfNum);
-            }
-            if (surf.HeatTransSurf) {
-                // Outside light shelves get tagged later as HeatTransSurf=true but they haven't been processed yet
-                state.dataSurface->AllHTSurfaceList.push_back(SurfNum);
-                int const zoneNum(surf.Zone);
-                auto &surfZone(state.dataHeatBal->Zone(zoneNum));
-                surfZone.ZoneHTSurfaceList.push_back(SurfNum);
-                // Sort window vs non-window surfaces
-                if (surf.Class == DataSurfaces::SurfaceClass::Window) {
-                    state.dataSurface->AllHTWindowSurfaceList.push_back(SurfNum);
-                    surfZone.ZoneHTWindowSurfaceList.push_back(SurfNum);
-                    if (surf.ExtSolar) {
-                        state.dataSurface->AllExtSolWindowSurfaceList.push_back(SurfNum);
-                        if (surf.FrameDivider > 0) {
-                            state.dataSurface->AllExtSolWinWithFrameSurfaceList.push_back(SurfNum);
-                        }
-                    }
-                } else {
-                    state.dataSurface->AllHTNonWindowSurfaceList.push_back(SurfNum);
-                    surfZone.ZoneHTNonWindowSurfaceList.push_back(SurfNum);
-                }
-                int const surfExtBoundCond(surf.ExtBoundCond);
-                // Build zone and interzone surface lists
-                if ((surfExtBoundCond > 0) && (surfExtBoundCond != SurfNum)) {
-                    state.dataSurface->AllIZSurfaceList.push_back(SurfNum);
-                    surfZone.ZoneIZSurfaceList.push_back(SurfNum);
-                    auto &adjZone(state.dataHeatBal->Zone(state.dataSurface->Surface(surfExtBoundCond).Zone));
-                    adjZone.ZoneHTSurfaceList.push_back(SurfNum);
-                    adjZone.ZoneIZSurfaceList.push_back(SurfNum);
-                    // Sort window vs non-window surfaces
-                    if (surf.Class == DataSurfaces::SurfaceClass::Window) {
-                        adjZone.ZoneHTWindowSurfaceList.push_back(SurfNum);
-                    } else {
-                        adjZone.ZoneHTNonWindowSurfaceList.push_back(SurfNum);
-                    }
-                }
-            }
-
-            // Exclude non-exterior heat transfer surfaces (but not OtherSideCondModeledExt = -4 CR7640)
-            if (surf.HeatTransSurf && surf.ExtBoundCond > 0) {
-                continue;
-            }
-            if (surf.HeatTransSurf && surf.ExtBoundCond == DataSurfaces::Ground) {
-                continue;
-            }
-            if (surf.HeatTransSurf && surf.ExtBoundCond == DataSurfaces::KivaFoundation) {
-                state.dataSurface->AllHTKivaSurfaceList.push_back(SurfNum);
-                if (!ErrorsFound) {
-                    state.dataSurfaceGeometry->kivaManager.foundationInputs[surf.OSCPtr].surfaces.push_back(SurfNum);
-                }
-                continue;
-            }
-            if (surf.HeatTransSurf && surf.ExtBoundCond == DataSurfaces::OtherSideCoefNoCalcExt) {
-                continue;
-            }
-            if (surf.HeatTransSurf && surf.ExtBoundCond == DataSurfaces::OtherSideCoefCalcExt) {
-                continue;
-            }
-            // Exclude windows and doors, i.e., consider only their base surfaces as possible obstructions
-            if (surf.Class == SurfaceClass::Window || surf.Class == SurfaceClass::Door) {
-                continue;
-            }
-            // Exclude duplicate shading surfaces
-            if (surf.MirroredSurf) {
-                continue;
-            }
-            // Exclude air boundary surfaces
-            if (surf.IsAirBoundarySurf) {
-                continue;
-            }
-
-            surf.IsShadowPossibleObstruction = true;
-            state.dataSurface->AllShadowPossObstrSurfaceList.push_back(SurfNum);
-        } // for (SurfNum)
+        // Build all surface classification lists and set obstruction flags
+        buildSurfaceLists(state, ErrorsFound);
 
         // Check for IRT surfaces in invalid places.
         if (std::any_of(state.dataConstruction->Construct.begin(),
@@ -2631,21 +2645,6 @@ namespace SurfaceGeometry {
                 ShowContinueError(state, "For explicit details on each use, use Output:Diagnostics,DisplayExtraWarnings;");
             }
         }
-
-        // Populate SurfaceFilter lists
-        for (int iSurfaceFilter = 1; iSurfaceFilter < static_cast<int>(DataSurfaces::SurfaceFilter::Num); ++iSurfaceFilter) {
-            state.dataSurface->SurfaceFilterLists[iSurfaceFilter].reserve(state.dataSurface->TotSurfaces);
-        }
-
-        for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
-            auto const &surf = state.dataSurface->Surface(SurfNum);
-            if (!surf.HeatTransSurf) {
-                continue;
-            }
-            bool isWindow = state.dataConstruction->Construct(surf.Construction).TypeIsWindow;
-            bool isInterior = surf.ExtBoundCond > 0;
-            classifySurfaceFilter(state, SurfNum, surf.Class, isWindow, isInterior);
-        } // for (SurfNum)
 
         // Note, could do same for Window Area and detecting if Interzone Surface in Zone
 
