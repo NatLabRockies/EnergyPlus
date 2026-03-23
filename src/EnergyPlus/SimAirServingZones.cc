@@ -244,6 +244,20 @@ static constexpr std::array<std::string_view, 6> childOnlyCompTypes = {
     "COIL:HEATING:DX:MULTISPEED",
 };
 
+// Allocate and initialize controller arrays for a primary air system.
+static void allocateControllerArrays(DataAirSystems::DefinePrimaryAirSystem &primaryAirSystems, int numControllers)
+{
+    primaryAirSystems.NumControllers = numControllers;
+    primaryAirSystems.ControllerName.allocate(numControllers);
+    primaryAirSystems.ControllerType.allocate(numControllers);
+    primaryAirSystems.ControllerIndex.allocate(numControllers);
+    primaryAirSystems.ControllerIndex = 0;
+    primaryAirSystems.ControlConverged.allocate(numControllers);
+    primaryAirSystems.ControlConverged = false;
+    primaryAirSystems.CanBeLockedOutByEcono.allocate(numControllers);
+    primaryAirSystems.CanBeLockedOutByEcono = false;
+}
+
 void ManageAirLoops(EnergyPlusData &state,
                     bool const FirstHVACIteration, // TRUE if first full HVAC iteration in an HVAC timestep
                     bool &SimAir,                  // TRUE means air loops must be (re)simulated
@@ -1050,13 +1064,7 @@ void GetAirPathData(EnergyPlusData &state)
                 // Check the current controller list and if it matches input names
                 NumControllers = (NumAlphas - 1) / 2; // Subtract off the controller list name first
                 // store all the controller data
-                primaryAirSystems.NumControllers = NumControllers + NumOASysSimpControllers;
-                primaryAirSystems.ControllerName.allocate(NumControllers + NumOASysSimpControllers);
-                primaryAirSystems.ControllerType.allocate(NumControllers + NumOASysSimpControllers);
-                primaryAirSystems.ControllerIndex.allocate(NumControllers + NumOASysSimpControllers);
-                primaryAirSystems.ControllerIndex = 0;
-                primaryAirSystems.ControlConverged.allocate(NumControllers + NumOASysSimpControllers);
-                primaryAirSystems.CanBeLockedOutByEcono.allocate(NumControllers + NumOASysSimpControllers);
+                allocateControllerArrays(primaryAirSystems, NumControllers + NumOASysSimpControllers);
                 for (ControllerNum = NumOASysSimpControllers + 1; ControllerNum <= NumOASysSimpControllers + NumControllers; ++ControllerNum) {
                     ControllerName = Alphas((ControllerNum - NumOASysSimpControllers) * 2 + 1);
                     ControllerType = Alphas((ControllerNum - NumOASysSimpControllers) * 2);
@@ -1088,15 +1096,7 @@ void GetAirPathData(EnergyPlusData &state)
                 state, "AirLoopHVAC:ControllerList", OASysContListNum, Alphas, NumAlphas, Numbers, NumNumbers, IOStat);
             // allocate air primary system controller lists if not already done
             if (NumControllers == 0) {
-                primaryAirSystems.NumControllers = NumOASysSimpControllers;
-                primaryAirSystems.ControllerName.allocate(NumOASysSimpControllers);
-                primaryAirSystems.ControllerType.allocate(NumOASysSimpControllers);
-                primaryAirSystems.ControllerIndex.allocate(NumOASysSimpControllers);
-                primaryAirSystems.ControllerIndex = 0;
-                primaryAirSystems.ControlConverged.allocate(NumOASysSimpControllers);
-                primaryAirSystems.CanBeLockedOutByEcono.allocate(NumOASysSimpControllers);
-                primaryAirSystems.ControlConverged = false;
-                primaryAirSystems.CanBeLockedOutByEcono = false;
+                allocateControllerArrays(primaryAirSystems, NumOASysSimpControllers);
             }
             // loop over the OA Sys controllers and move them up to the primary air system controller lists
             OASysControllerNum = 0;
@@ -1161,11 +1161,7 @@ void GetAirPathData(EnergyPlusData &state)
                 ShowWarningError(state,
                                  EnergyPlus::format("{}{}=\"{}\" has no Controllers.", RoutineName, CurrentModuleObject, primaryAirSystems.Name));
             }
-            primaryAirSystems.NumControllers = 0;
-            primaryAirSystems.ControllerName.allocate(0);
-            primaryAirSystems.ControllerType.allocate(0);
-            primaryAirSystems.ControlConverged.allocate(0);
-            primaryAirSystems.CanBeLockedOutByEcono.allocate(0);
+            allocateControllerArrays(primaryAirSystems, 0);
         }
 
         errFlag = false;
