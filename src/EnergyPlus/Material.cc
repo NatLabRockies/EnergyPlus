@@ -172,6 +172,17 @@ static void checkFieldsEqual(EnergyPlusData &state, bool &ErrorsFound, int idx1,
     }
 }
 
+// Helper to check that the sum of two numeric input fields does not exceed 1.0.
+// Uses ShowSevereCustom with an ErrorObjectHeader (unlike checkFieldSumLessThan which uses ShowSevereError).
+static void checkFieldPairSumNotExceedOne(EnergyPlusData &state, bool &ErrorsFound, ErrorObjectHeader const &eoh, int idx1, int idx2)
+{
+    auto &s_ipsc = state.dataIPShortCut;
+    if (s_ipsc->rNumericArgs(idx1) + s_ipsc->rNumericArgs(idx2) > 1.0) {
+        ErrorsFound = true;
+        ShowSevereCustom(state, eoh, EnergyPlus::format("{} + {} not <= 1.0", s_ipsc->cNumericFieldNames(idx1), s_ipsc->cNumericFieldNames(idx2)));
+    }
+}
+
 // Helper to check that a numeric input field is strictly positive (> 0).
 static void checkFieldPositive(EnergyPlusData &state, bool &ErrorsFound, ErrorObjectHeader const &eoh, int idx)
 {
@@ -565,35 +576,12 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
             // Fixed CR 8413 - modeling spandrel panels as glazing systems
         } else if (mat->windowOpticalData == Window::OpticalDataModel::SpectralAverage) {
 
-            if (s_ipsc->rNumericArgs(2) + s_ipsc->rNumericArgs(3) > 1.0) {
-                ErrorsFound = true;
-                ShowSevereCustom(state, eoh, EnergyPlus::format("{} + {} not <= 1.0", s_ipsc->cNumericFieldNames(2), s_ipsc->cNumericFieldNames(3)));
-            }
-
-            if (s_ipsc->rNumericArgs(2) + s_ipsc->rNumericArgs(4) > 1.0) {
-                ErrorsFound = true;
-                ShowSevereCustom(state, eoh, EnergyPlus::format("{} + {} not <= 1.0", s_ipsc->cNumericFieldNames(2), s_ipsc->cNumericFieldNames(4)));
-            }
-
-            if (s_ipsc->rNumericArgs(5) + s_ipsc->rNumericArgs(6) > 1.0) {
-                ErrorsFound = true;
-                ShowSevereCustom(state, eoh, EnergyPlus::format("{} + {} not <= 1.0", s_ipsc->cNumericFieldNames(5), s_ipsc->cNumericFieldNames(6)));
-            }
-
-            if (s_ipsc->rNumericArgs(5) + s_ipsc->rNumericArgs(7) > 1.0) {
-                ErrorsFound = true;
-                ShowSevereCustom(state, eoh, EnergyPlus::format("{} + {} not <= 1.0", s_ipsc->cNumericFieldNames(5), s_ipsc->cNumericFieldNames(7)));
-            }
-
-            if (s_ipsc->rNumericArgs(8) + s_ipsc->rNumericArgs(9) > 1.0) {
-                ErrorsFound = true;
-                ShowSevereCustom(state, eoh, EnergyPlus::format("{} + {} not <= 1.0", s_ipsc->cNumericFieldNames(8), s_ipsc->cNumericFieldNames(9)));
-            }
-
-            if (s_ipsc->rNumericArgs(8) + s_ipsc->rNumericArgs(10) > 1.0) {
-                ErrorsFound = true;
-                ShowSevereCustom(state, eoh, EnergyPlus::format("{} + {} not <= 1.0", s_ipsc->cNumericFieldNames(8), s_ipsc->cNumericFieldNames(10)));
-            }
+            checkFieldPairSumNotExceedOne(state, ErrorsFound, eoh, 2, 3);
+            checkFieldPairSumNotExceedOne(state, ErrorsFound, eoh, 2, 4);
+            checkFieldPairSumNotExceedOne(state, ErrorsFound, eoh, 5, 6);
+            checkFieldPairSumNotExceedOne(state, ErrorsFound, eoh, 5, 7);
+            checkFieldPairSumNotExceedOne(state, ErrorsFound, eoh, 8, 9);
+            checkFieldPairSumNotExceedOne(state, ErrorsFound, eoh, 8, 10);
 
             if (s_ipsc->rNumericArgs(2) < 0.0) {
                 ShowSevereCustom(state, eoh, EnergyPlus::format("{} not >= 0.0", s_ipsc->cNumericFieldNames(2)));
