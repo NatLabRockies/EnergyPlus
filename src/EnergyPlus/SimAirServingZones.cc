@@ -5167,6 +5167,42 @@ static void accumulateBeginDayNonCoinHeatMassFlow(EnergyPlusData &state,
     }
 }
 
+// Scale zone heating flows in EndSysSizingCalc when SysHeatSizingRat != 1.
+// Loops over the given zone index array and applies ventilation-load or user-input sizing.
+// When warnOnMissingOA is true (cooled-zones fallback path), a warning is emitted for zones
+// with no design OA flow.
+static void scaleZoneHeatFlows(EnergyPlusData &state,
+                               DataSizing::SystemSizingData const &finalSysSizing,
+                               int AirLoopNum,
+                               int numZones,
+                               Array1D_int const &termUnitSizingIndices,
+                               Real64 SysHeatSizingRat,
+                               bool warnOnMissingOA)
+{
+    for (int zoneNum = 1; zoneNum <= numZones; ++zoneNum) {
+        int TermUnitSizingIndex = termUnitSizingIndices(zoneNum);
+        auto &termUnitFinalZoneSizing = state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex);
+        if (warnOnMissingOA && (SysHeatSizingRat != 1.0) && (finalSysSizing.loadSizingType == DataSizing::LoadSizing::Ventilation) &&
+            (termUnitFinalZoneSizing.MinOA <= 0.0)) {
+            ShowWarningError(state,
+                             EnergyPlus::format("FinalSystemSizing: AirLoop=\"{}\", Requested sizing on Ventilation,",
+                                                state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).AirLoopName));
+            ShowContinueError(state, EnergyPlus::format("but Zone has no design OA Flow. Zone=\"{}\".", termUnitFinalZoneSizing.ZoneName));
+        }
+        if ((SysHeatSizingRat != 1.0) && (finalSysSizing.loadSizingType == DataSizing::LoadSizing::Ventilation) &&
+            (termUnitFinalZoneSizing.MinOA > 0.0)) {
+            // size on ventilation load
+            Real64 ZoneOARatio = termUnitFinalZoneSizing.MinOA / max(termUnitFinalZoneSizing.DesHeatVolFlow, termUnitFinalZoneSizing.MinOA);
+            ZoneOARatio *= (1.0 + state.dataSize->TermUnitSizing(TermUnitSizingIndex).InducRat);
+            termUnitFinalZoneSizing.scaleZoneHeating(ZoneOARatio);
+        } else if ((SysHeatSizingRat > 1.0) ||
+                   (SysHeatSizingRat < 1.0 && finalSysSizing.SizingOption == DataSizing::SizingConcurrence::NonCoincident)) {
+            // size on user input system design flows
+            termUnitFinalZoneSizing.scaleZoneHeating(SysHeatSizingRat);
+        }
+    }
+}
+
 // Compute design volume flows from mass flows and update Vot/Xs for ZoneSum OA method.
 // Shared between Coincident and NonCoincident sizing in the EndDay block of UpdateSysSizing.
 static void updateZoneSumVolFlows(EnergyPlusData &state,
@@ -6675,46 +6711,22 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
                     finalSysSizing.HeatCap = max(0.0, finalSysSizing.HeatCap);
                 }
                 // take account of the user input system flow rates and alter the zone flow rates to match (for terminal unit sizing)
-                if (NumZonesHeated > 0) {                                                              // IF there are centrally heated zones
-                    for (int ZonesHeatedNum = 1; ZonesHeatedNum <= NumZonesHeated; ++ZonesHeatedNum) { // loop over the heated zones
-                        int TermUnitSizingIndex = state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitHeatSizingIndex(ZonesHeatedNum);
-                        auto &termUnitFinalZoneSizing = state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex);
-                        if ((SysHeatSizingRat != 1.0) && (finalSysSizing.loadSizingType == DataSizing::LoadSizing::Ventilation) &&
-                            (termUnitFinalZoneSizing.MinOA > 0.0)) {
-                            // size on ventilation load
-                            ZoneOARatio = termUnitFinalZoneSizing.MinOA / max(termUnitFinalZoneSizing.DesHeatVolFlow, termUnitFinalZoneSizing.MinOA);
-                            ZoneOARatio *= (1.0 + state.dataSize->TermUnitSizing(TermUnitSizingIndex).InducRat);
-                            termUnitFinalZoneSizing.scaleZoneHeating(ZoneOARatio);
-                        } else if ((SysHeatSizingRat > 1.0) ||
-                                   (SysHeatSizingRat < 1.0 && finalSysSizing.SizingOption == DataSizing::SizingConcurrence::NonCoincident)) {
-                            // size on user input system design flows
-                            termUnitFinalZoneSizing.scaleZoneHeating(SysHeatSizingRat);
-                        }
-                    }
-                } else {                                                                               // No centrally heated zones: use cooled zones
-                    for (int ZonesCooledNum = 1; ZonesCooledNum <= NumZonesCooled; ++ZonesCooledNum) { // loop over the cooled zones
-                        int TermUnitSizingIndex = state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex(ZonesCooledNum);
-                        auto &termUnitFinalZoneSizing = state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex);
-                        if ((SysHeatSizingRat != 1.0) && (finalSysSizing.loadSizingType == DataSizing::LoadSizing::Ventilation) &&
-                            (termUnitFinalZoneSizing.MinOA <= 0.0)) {
-                            ShowWarningError(state,
-                                             EnergyPlus::format("FinalSystemSizing: AirLoop=\"{}\", Requested sizing on Ventilation,",
-                                                                state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).AirLoopName));
-                            ShowContinueError(state,
-                                              EnergyPlus::format("but Zone has no design OA Flow. Zone=\"{}\".", termUnitFinalZoneSizing.ZoneName));
-                        }
-                        if ((SysHeatSizingRat != 1.0) && (finalSysSizing.loadSizingType == DataSizing::LoadSizing::Ventilation) &&
-                            (termUnitFinalZoneSizing.MinOA > 0.0)) {
-                            // size on ventilation load
-                            ZoneOARatio = termUnitFinalZoneSizing.MinOA / max(termUnitFinalZoneSizing.DesHeatVolFlow, termUnitFinalZoneSizing.MinOA);
-                            ZoneOARatio *= (1.0 + state.dataSize->TermUnitSizing(TermUnitSizingIndex).InducRat);
-                            termUnitFinalZoneSizing.scaleZoneHeating(ZoneOARatio);
-                        } else if ((SysHeatSizingRat != 1.0) && (finalSysSizing.loadSizingType == DataSizing::LoadSizing::Ventilation) &&
-                                   (termUnitFinalZoneSizing.MinOA > 0.0)) {
-                            // size on user input system design flows
-                            termUnitFinalZoneSizing.scaleZoneHeating(SysHeatSizingRat);
-                        }
-                    }
+                if (NumZonesHeated > 0) { // IF there are centrally heated zones
+                    scaleZoneHeatFlows(state,
+                                       finalSysSizing,
+                                       AirLoopNum,
+                                       NumZonesHeated,
+                                       state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitHeatSizingIndex,
+                                       SysHeatSizingRat,
+                                       false);
+                } else { // No centrally heated zones: use cooled zones
+                    scaleZoneHeatFlows(state,
+                                       finalSysSizing,
+                                       AirLoopNum,
+                                       NumZonesCooled,
+                                       state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex,
+                                       SysHeatSizingRat,
+                                       true);
                 }
             }
 
