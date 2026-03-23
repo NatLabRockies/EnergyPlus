@@ -2958,7 +2958,6 @@ namespace FanCoilUnits {
                              QUnitOutNoHC,
                              0.0); // needs PLR=0 for electric heating coil, otherwise will run at full capacity
 
-            int Iter = 0;
             if (UnitOn && state.dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlledZoneNum).RemainingOutputReqToCoolSP < (-1.0 * HVAC::SmallLoad) &&
                 state.dataHeatBalFanSys->TempControlType(ControlledZoneNum) != HVAC::SetptType::SingleHeat) {
                 // cooling coil action, maximum cold water flow

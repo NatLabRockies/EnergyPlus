@@ -1412,6 +1412,33 @@ namespace SurfaceGeometry {
         }
     }
 
+    // Classify a heat-transfer surface into the appropriate SurfaceFilter lists
+    // (interior vs exterior, then by class: window/wall/floor/roof).
+    static void classifySurfaceFilter(EnergyPlusData &state, int SurfNum, DataSurfaces::SurfaceClass surfClass, bool isWindow, bool isInterior)
+    {
+        using DataSurfaces::SurfaceFilter;
+        auto &filterLists = state.dataSurface->SurfaceFilterLists;
+
+        // Pick the correct set of filter enums based on interior vs exterior
+        SurfaceFilter const allSurfaces = isInterior ? SurfaceFilter::AllInteriorSurfaces : SurfaceFilter::AllExteriorSurfaces;
+        SurfaceFilter const allWindows = isInterior ? SurfaceFilter::AllInteriorWindows : SurfaceFilter::AllExteriorWindows;
+        SurfaceFilter const allWalls = isInterior ? SurfaceFilter::AllInteriorWalls : SurfaceFilter::AllExteriorWalls;
+        SurfaceFilter const allFloors = isInterior ? SurfaceFilter::AllInteriorFloors : SurfaceFilter::AllExteriorFloors;
+        SurfaceFilter const allRoofs = isInterior ? SurfaceFilter::AllInteriorRoofs : SurfaceFilter::AllExteriorRoofs;
+
+        filterLists[static_cast<int>(allSurfaces)].push_back(SurfNum);
+        if (isWindow) {
+            filterLists[static_cast<int>(allWindows)].push_back(SurfNum);
+        } else if (surfClass == DataSurfaces::SurfaceClass::Wall) {
+            filterLists[static_cast<int>(allWalls)].push_back(SurfNum);
+        } else if (surfClass == DataSurfaces::SurfaceClass::Floor) {
+            filterLists[static_cast<int>(allFloors)].push_back(SurfNum);
+        } else if (surfClass == DataSurfaces::SurfaceClass::Roof) {
+            filterLists[static_cast<int>(allRoofs)].push_back(SurfNum);
+            filterLists[static_cast<int>(SurfaceFilter::AllInteriorCeilings)].push_back(SurfNum);
+        }
+    }
+
     // Build the various heat-transfer, window, non-window, interzone, exterior-solar,
     // obstruction, Kiva, and SurfaceFilter surface lists.  Also set the IsShadowPossibleObstruction flag.
     static void buildSurfaceLists(EnergyPlusData &state, bool ErrorsFound)
@@ -1514,33 +1541,6 @@ namespace SurfaceGeometry {
             bool isWindow = state.dataConstruction->Construct(surf.Construction).TypeIsWindow;
             bool isInterior = surf.ExtBoundCond > 0;
             classifySurfaceFilter(state, SurfNum, surf.Class, isWindow, isInterior);
-        }
-    }
-
-    // Classify a heat-transfer surface into the appropriate SurfaceFilter lists
-    // (interior vs exterior, then by class: window/wall/floor/roof).
-    static void classifySurfaceFilter(EnergyPlusData &state, int SurfNum, DataSurfaces::SurfaceClass surfClass, bool isWindow, bool isInterior)
-    {
-        using DataSurfaces::SurfaceFilter;
-        auto &filterLists = state.dataSurface->SurfaceFilterLists;
-
-        // Pick the correct set of filter enums based on interior vs exterior
-        SurfaceFilter const allSurfaces = isInterior ? SurfaceFilter::AllInteriorSurfaces : SurfaceFilter::AllExteriorSurfaces;
-        SurfaceFilter const allWindows = isInterior ? SurfaceFilter::AllInteriorWindows : SurfaceFilter::AllExteriorWindows;
-        SurfaceFilter const allWalls = isInterior ? SurfaceFilter::AllInteriorWalls : SurfaceFilter::AllExteriorWalls;
-        SurfaceFilter const allFloors = isInterior ? SurfaceFilter::AllInteriorFloors : SurfaceFilter::AllExteriorFloors;
-        SurfaceFilter const allRoofs = isInterior ? SurfaceFilter::AllInteriorRoofs : SurfaceFilter::AllExteriorRoofs;
-
-        filterLists[static_cast<int>(allSurfaces)].push_back(SurfNum);
-        if (isWindow) {
-            filterLists[static_cast<int>(allWindows)].push_back(SurfNum);
-        } else if (surfClass == DataSurfaces::SurfaceClass::Wall) {
-            filterLists[static_cast<int>(allWalls)].push_back(SurfNum);
-        } else if (surfClass == DataSurfaces::SurfaceClass::Floor) {
-            filterLists[static_cast<int>(allFloors)].push_back(SurfNum);
-        } else if (surfClass == DataSurfaces::SurfaceClass::Roof) {
-            filterLists[static_cast<int>(allRoofs)].push_back(SurfNum);
-            filterLists[static_cast<int>(SurfaceFilter::AllInteriorCeilings)].push_back(SurfNum);
         }
     }
 
