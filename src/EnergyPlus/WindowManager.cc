@@ -1002,6 +1002,16 @@ namespace Window {
                 rf2 = constr.rfBareSolDiff(2);
                 rf1v = constr.rfBareVisDiff(1);
                 rf2v = constr.rfBareVisDiff(2);
+                if (NGlass == 3) {
+                    td3 = constr.tBareSolDiff(3);
+                    td3v = constr.tBareVisDiff(3);
+                    afd3 = constr.afBareSolDiff(3);
+                    abd3 = constr.abBareSolDiff(3);
+                    rb3 = constr.rbBareSolDiff(3);
+                    rb3v = constr.rbBareVisDiff(3);
+                    rf3 = constr.rfBareSolDiff(3);
+                    rf3v = constr.rfBareVisDiff(3);
+                }
             }
 
             if (IntShade) {
@@ -1112,15 +1122,6 @@ namespace Window {
                     constr.ReflectVisDiffBack = rb2v + td2v * (rshv + rshv * rf2v * rshv + tshv * rb1v * tshv) * td2v;
 
                 } else if (NGlass == 3) {
-
-                    td3 = constr.tBareSolDiff(3);
-                    td3v = constr.tBareVisDiff(3);
-                    afd3 = constr.afBareSolDiff(3);
-                    abd3 = constr.abBareSolDiff(3);
-                    rb3 = constr.rbBareSolDiff(3);
-                    rb3v = constr.rbBareVisDiff(3);
-                    rf3 = constr.rfBareSolDiff(3);
-                    rf3v = constr.rfBareVisDiff(3);
 
                     // Front incident solar, beam, between-glass shade, NGlass = 3
 
@@ -1324,14 +1325,6 @@ namespace Window {
                         auto &dfAbs1 = constr.layerSlatBlindDfAbs(1)[iSlatAng];
                         auto &dfAbs2 = constr.layerSlatBlindDfAbs(2)[iSlatAng];
                         auto &dfAbs3 = constr.layerSlatBlindDfAbs(3)[iSlatAng];
-                        td3 = constr.tBareSolDiff(3);
-                        td3v = constr.tBareVisDiff(3);
-                        afd3 = constr.afBareSolDiff(3);
-                        abd3 = constr.abBareSolDiff(3);
-                        rb3 = constr.rbBareSolDiff(3);
-                        rb3v = constr.rbBareVisDiff(3);
-                        rf3 = constr.rfBareSolDiff(3);
-                        rf3v = constr.rfBareVisDiff(3);
 
                         // Front incident solar, diffuse, between-glass blind, NGlass = 3
 
