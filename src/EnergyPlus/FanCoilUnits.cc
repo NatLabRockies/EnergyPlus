@@ -1998,6 +1998,57 @@ namespace FanCoilUnits {
         }
     }
 
+    // Report SolveRoot convergence / limit errors for CycFan/VarFanVarFlow PLR control.
+    // Called for both cooling and heating branches.
+    static void reportPLRSolveRootErrors(EnergyPlusData &state,
+                                         int const SolFlag,
+                                         std::string const &modeLabel, // "cooling" or "heating"
+                                         std::string const &fcuName,
+                                         int const FanCoilNum,
+                                         int const ControlledZoneNum,
+                                         bool const FirstHVACIteration,
+                                         int const fluidInletNode,
+                                         Real64 const PLR,
+                                         Real64 const maxCoilFluidFlow,
+                                         Real64 const QZnReq,
+                                         Real64 const PLRMin,
+                                         Real64 const PLRMax,
+                                         int &convgErrCount,
+                                         int &limitErrCount,
+                                         int &maxIterIndex,
+                                         int &badMassFlowLimIndex)
+    {
+        if (SolFlag == -1) {
+            ++convgErrCount;
+            if (convgErrCount < 2) {
+                ShowWarningError(state, EnergyPlus::format("Part-load ratio {} control failed in fan coil unit {}", modeLabel, fcuName));
+                ShowContinueError(state, "  Iteration limit exceeded in calculating FCU part-load ratio ");
+                state.dataLoopNodes->Node(fluidInletNode).MassFlowRate = PLR * maxCoilFluidFlow;
+                Real64 QUnitOut;
+                Calc4PipeFanCoil(state, FanCoilNum, ControlledZoneNum, FirstHVACIteration, QUnitOut, PLR);
+                ShowContinueErrorTimeStamp(state, EnergyPlus::format("Load Request = {}, Final Capacity = {}", QZnReq, QUnitOut));
+                ShowContinueErrorTimeStamp(
+                    state,
+                    EnergyPlus::format("Min part-load used during iterations = {}, Max part-load used during iterations = {}", PLRMin, PLRMax));
+                ShowContinueErrorTimeStamp(state, EnergyPlus::format("Part-load ratio on last iteration = {}", PLR));
+                ShowContinueErrorTimeStamp(state, "..Part-load ratio set to last iteration value ");
+            } else {
+                ShowRecurringWarningErrorAtEnd(
+                    state, "Part-load ratio " + modeLabel + " iteration limit exceeded in fan coil unit " + fcuName, maxIterIndex);
+            }
+        } else if (SolFlag == -2) {
+            ++limitErrCount;
+            if (limitErrCount < 2) {
+                ShowWarningError(state, EnergyPlus::format("Part-load ratio {} control failed in fan coil unit {}", modeLabel, fcuName));
+                ShowContinueError(state, "  Bad part-load ratio limits");
+                ShowContinueErrorTimeStamp(state, EnergyPlus::format("..Part-load ratio set to {}", PLRMin));
+            } else {
+                ShowRecurringWarningErrorAtEnd(
+                    state, "Part-load ratio " + modeLabel + " control failed in fan coil unit " + fcuName, badMassFlowLimIndex);
+            }
+        }
+    }
+
     void Sim4PipeFanCoil(EnergyPlusData &state,
                          int &FanCoilNum,               // number of the current fan coil unit being simulated
                          int const ControlledZoneNum,   // index into ZoneEqupConfig
@@ -2514,48 +2565,41 @@ namespace FanCoilUnits {
                                                      PLRMin,
                                                      PLRMax);
                         General::SolveRoot(state, 0.001, MaxIterCycl, SolFlag, PLR, f, PLRMin, PLRMax);
-                        if (SolFlag == -1) {
-                            ++fanCoil.ConvgErrCountC;
-                            if (fanCoil.ConvgErrCountC < 2) {
-                                ShowWarningError(state,
-                                                 EnergyPlus::format("Part-load ratio cooling control failed in fan coil unit {}", fanCoil.Name));
-                                ShowContinueError(state, "  Iteration limit exceeded in calculating FCU part-load ratio ");
-                                state.dataLoopNodes->Node(fanCoil.CoolCoilFluidInletNode).MassFlowRate = PLR * fanCoil.MaxCoolCoilFluidFlow;
-                                Calc4PipeFanCoil(state, FanCoilNum, ControlledZoneNum, FirstHVACIteration, QUnitOut, PLR);
-                                ShowContinueErrorTimeStamp(state, EnergyPlus::format("Load Request = {}, Final Capacity = {}", QZnReq, QUnitOut));
-                                ShowContinueErrorTimeStamp(
-                                    state,
-                                    EnergyPlus::format(
-                                        "Min part-load used during iterations = {}, Max part-load used during iterations = {}", PLRMin, PLRMax));
-                                ShowContinueErrorTimeStamp(state, EnergyPlus::format("Part-load ratio on last iteration = {}", PLR));
-                                ShowContinueErrorTimeStamp(state, "..Part-load ratio set to last iteration value ");
-                            } else {
-                                ShowRecurringWarningErrorAtEnd(state,
-                                                               "Part-load ratio cooling iteration limit exceeded in fan coil unit " + fanCoil.Name,
-                                                               fanCoil.MaxIterIndexC);
-                            }
-                        } else if (SolFlag == -2) {
-                            ++fanCoil.LimitErrCountC;
-                            if (fanCoil.LimitErrCountC < 2) {
-                                ShowWarningError(state,
-                                                 EnergyPlus::format("Part-load ratio cooling control failed in fan coil unit {}", fanCoil.Name));
-                                ShowContinueError(state, "  Bad part-load ratio limits");
-                                ShowContinueErrorTimeStamp(state, EnergyPlus::format("..Part-load ratio set to {}", PLRMin));
-                            } else {
-                                ShowRecurringWarningErrorAtEnd(
-                                    state, "Part-load ratio cooling control failed in fan coil unit " + fanCoil.Name, fanCoil.BadMassFlowLimIndexC);
-                            }
-                        }
+                        reportPLRSolveRootErrors(state,
+                                                 SolFlag,
+                                                 "cooling",
+                                                 fanCoil.Name,
+                                                 FanCoilNum,
+                                                 ControlledZoneNum,
+                                                 FirstHVACIteration,
+                                                 fanCoil.CoolCoilFluidInletNode,
+                                                 PLR,
+                                                 fanCoil.MaxCoolCoilFluidFlow,
+                                                 QZnReq,
+                                                 PLRMin,
+                                                 PLRMax,
+                                                 fanCoil.ConvgErrCountC,
+                                                 fanCoil.LimitErrCountC,
+                                                 fanCoil.MaxIterIndexC,
+                                                 fanCoil.BadMassFlowLimIndexC);
                     } else if (SolFlag == -2) {
-                        ++fanCoil.LimitErrCountC;
-                        if (fanCoil.LimitErrCountC < 2) {
-                            ShowWarningError(state, EnergyPlus::format("Part-load ratio control failed in fan coil unit {}", fanCoil.Name));
-                            ShowContinueError(state, "  Bad part-load ratio limits");
-                            ShowContinueErrorTimeStamp(state, "..Part-load ratio set to 0");
-                        } else {
-                            ShowRecurringWarningErrorAtEnd(
-                                state, "Part-load ratio control failed in fan coil unit " + fanCoil.Name, fanCoil.BadMassFlowLimIndexC);
-                        }
+                        reportPLRSolveRootErrors(state,
+                                                 SolFlag,
+                                                 "cooling",
+                                                 fanCoil.Name,
+                                                 FanCoilNum,
+                                                 ControlledZoneNum,
+                                                 FirstHVACIteration,
+                                                 fanCoil.CoolCoilFluidInletNode,
+                                                 PLR,
+                                                 fanCoil.MaxCoolCoilFluidFlow,
+                                                 QZnReq,
+                                                 PLRMin,
+                                                 PLRMax,
+                                                 fanCoil.ConvgErrCountC,
+                                                 fanCoil.LimitErrCountC,
+                                                 fanCoil.MaxIterIndexC,
+                                                 fanCoil.BadMassFlowLimIndexC);
                     }
                     mdot = PLR * fanCoil.MaxCoolCoilFluidFlow;
                     PlantUtilities::SetComponentFlowRate(
@@ -2615,53 +2659,41 @@ namespace FanCoilUnits {
                                                          PLRMin,
                                                          PLRMax);
                             General::SolveRoot(state, 0.001, MaxIterCycl, SolFlag, PLR, f, PLRMin, PLRMax);
-                            if (SolFlag == -1) {
-                                ++fanCoil.ConvgErrCountH;
-                                if (fanCoil.ConvgErrCountH < 2) {
-                                    ShowWarningError(state,
-                                                     EnergyPlus::format("Part-load ratio heating control failed in fan coil unit {}", fanCoil.Name));
-                                    ShowContinueError(state, "  Iteration limit exceeded in calculating FCU part-load ratio ");
-                                    state.dataLoopNodes->Node(fanCoil.HeatCoilFluidInletNode).MassFlowRate = PLR * fanCoil.MaxHeatCoilFluidFlow;
-                                    Calc4PipeFanCoil(state, FanCoilNum, ControlledZoneNum, FirstHVACIteration, QUnitOut, PLR);
-                                    ShowContinueErrorTimeStamp(state, EnergyPlus::format("Load Request = {}, Final Capacity = {}", QZnReq, QUnitOut));
-                                    ShowContinueErrorTimeStamp(
-                                        state,
-                                        EnergyPlus::format(
-                                            "Min part-load ratio used during iterations = {}, Max part-load used during iterations = {}",
-                                            PLRMin,
-                                            PLRMax));
-                                    ShowContinueErrorTimeStamp(state, EnergyPlus::format("Part-load ratio on last iteration = {}", PLR));
-                                    ShowContinueErrorTimeStamp(state, "..Part-load ratio set to last iteration value ");
-                                } else {
-                                    ShowRecurringWarningErrorAtEnd(state,
-                                                                   "Part-load ratio heating iteration limit exceeded in fan coil unit " +
-                                                                       fanCoil.Name,
-                                                                   fanCoil.MaxIterIndexH);
-                                }
-                            } else if (SolFlag == -2) {
-                                ++fanCoil.LimitErrCountH;
-                                if (fanCoil.LimitErrCountH < 2) {
-                                    ShowWarningError(state,
-                                                     EnergyPlus::format("Part-load ratio heating control failed in fan coil unit {}", fanCoil.Name));
-                                    ShowContinueError(state, "  Bad hot part-load ratio limits");
-                                    ShowContinueErrorTimeStamp(state, EnergyPlus::format("..Part-load ratio set to {}", PLRMin));
-                                } else {
-                                    ShowRecurringWarningErrorAtEnd(state,
-                                                                   "Part-load ratio heating control failed in fan coil unit " + fanCoil.Name,
-                                                                   fanCoil.BadMassFlowLimIndexH);
-                                }
-                            }
+                            reportPLRSolveRootErrors(state,
+                                                     SolFlag,
+                                                     "heating",
+                                                     fanCoil.Name,
+                                                     FanCoilNum,
+                                                     ControlledZoneNum,
+                                                     FirstHVACIteration,
+                                                     fanCoil.HeatCoilFluidInletNode,
+                                                     PLR,
+                                                     fanCoil.MaxHeatCoilFluidFlow,
+                                                     QZnReq,
+                                                     PLRMin,
+                                                     PLRMax,
+                                                     fanCoil.ConvgErrCountH,
+                                                     fanCoil.LimitErrCountH,
+                                                     fanCoil.MaxIterIndexH,
+                                                     fanCoil.BadMassFlowLimIndexH);
                         } else if (SolFlag == -2) {
-                            ++fanCoil.LimitErrCountH;
-                            if (fanCoil.LimitErrCountH < 2) {
-                                ShowWarningError(state,
-                                                 EnergyPlus::format("Part-load ratio heating control failed in fan coil unit {}", fanCoil.Name));
-                                ShowContinueError(state, "  Bad part-load ratio limits");
-                                ShowContinueErrorTimeStamp(state, "..Part-load ratio set to 0");
-                            } else {
-                                ShowRecurringWarningErrorAtEnd(
-                                    state, "Part-load ratio heating control failed in fan coil unit " + fanCoil.Name, fanCoil.BadMassFlowLimIndexH);
-                            }
+                            reportPLRSolveRootErrors(state,
+                                                     SolFlag,
+                                                     "heating",
+                                                     fanCoil.Name,
+                                                     FanCoilNum,
+                                                     ControlledZoneNum,
+                                                     FirstHVACIteration,
+                                                     fanCoil.HeatCoilFluidInletNode,
+                                                     PLR,
+                                                     fanCoil.MaxHeatCoilFluidFlow,
+                                                     QZnReq,
+                                                     PLRMin,
+                                                     PLRMax,
+                                                     fanCoil.ConvgErrCountH,
+                                                     fanCoil.LimitErrCountH,
+                                                     fanCoil.MaxIterIndexH,
+                                                     fanCoil.BadMassFlowLimIndexH);
                         }
                         HWFlow = PLR * fanCoil.MaxHeatCoilFluidFlow;
                         PlantUtilities::SetComponentFlowRate(
