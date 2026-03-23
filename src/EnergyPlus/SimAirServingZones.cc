@@ -5167,6 +5167,36 @@ static void accumulateBeginDayNonCoinHeatMassFlow(EnergyPlusData &state,
     }
 }
 
+// Compute heating ventilation efficiency and accumulate VozSumHtg for the given zones.
+// When coolSizingIndices is non-null, zones that match a cooled zone are skipped
+// (used for the heated-zones path where matching cooled zones were already handled).
+static void computeHeatVentEffAndVozSum(EnergyPlusData &state,
+                                        DataSizing::SystemSizingData const &finalSysSizing,
+                                        int AirLoopNum,
+                                        int numZones,
+                                        Array1D_int const &termUnitSizingIndices,
+                                        int NumZonesCooled,
+                                        Array1D_int const *coolSizingIndices)
+{
+    for (int zoneNum = 1; zoneNum <= numZones; ++zoneNum) {
+        int TermUnitSizingIndex = termUnitSizingIndices(zoneNum);
+        if (coolSizingIndices != nullptr) {
+            int MatchingCooledZoneNum = General::FindNumberInList(TermUnitSizingIndex, *coolSizingIndices, NumZonesCooled);
+            if (MatchingCooledZoneNum != 0) {
+                continue;
+            }
+        }
+        calcZoneVentEfficiency(state,
+                               finalSysSizing,
+                               TermUnitSizingIndex,
+                               AirLoopNum,
+                               state.dataSimAirServingZones->Xs,
+                               false,
+                               state.dataSimAirServingZones->MinHeatingEvz);
+        state.dataSize->VozSumHtgBySys(AirLoopNum) += state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).VozHtgByZone;
+    }
+}
+
 // Sum DesHeatVolFlow across the given terminal unit sizing indices.
 static Real64 sumDesHeatVolFlow(EnergyPlusData &state, int numZones, Array1D_int const &termUnitSizingIndices)
 {
@@ -6085,35 +6115,21 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
                         state.dataSimAirServingZones->MinHeatingEvz = 1.0;
                         state.dataSize->VozSumHtgBySys(AirLoopNum) = 0.0;
                         if (numZonesHeated > 0) {
-                            for (int ZonesHeatedNum = 1; ZonesHeatedNum <= numZonesHeated; ++ZonesHeatedNum) {
-                                int TermUnitSizingIndex = state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitHeatSizingIndex(ZonesHeatedNum);
-                                MatchingCooledZoneNum = FindNumberInList(
-                                    TermUnitSizingIndex, state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex, NumZonesCooled);
-                                if (MatchingCooledZoneNum == 0) {
-                                    SysHeatingEv = calcZoneVentEfficiency(state,
-                                                                          finalSysSizing,
-                                                                          TermUnitSizingIndex,
-                                                                          AirLoopNum,
-                                                                          state.dataSimAirServingZones->Xs,
-                                                                          false,
-                                                                          state.dataSimAirServingZones->MinHeatingEvz);
-                                    state.dataSize->VozSumHtgBySys(AirLoopNum) +=
-                                        state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).VozHtgByZone;
-                                }
-                            }
+                            computeHeatVentEffAndVozSum(state,
+                                                        finalSysSizing,
+                                                        AirLoopNum,
+                                                        numZonesHeated,
+                                                        state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitHeatSizingIndex,
+                                                        NumZonesCooled,
+                                                        &state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex);
                         } else {
-                            for (int ZonesHeatedNum = 1; ZonesHeatedNum <= NumZonesCooled; ++ZonesHeatedNum) {
-                                int TermUnitSizingIndex = state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex(ZonesHeatedNum);
-                                SysHeatingEv = calcZoneVentEfficiency(state,
-                                                                      finalSysSizing,
-                                                                      TermUnitSizingIndex,
-                                                                      AirLoopNum,
-                                                                      state.dataSimAirServingZones->Xs,
-                                                                      false,
-                                                                      state.dataSimAirServingZones->MinHeatingEvz);
-                                state.dataSize->VozSumHtgBySys(AirLoopNum) +=
-                                    state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).VozHtgByZone;
-                            }
+                            computeHeatVentEffAndVozSum(state,
+                                                        finalSysSizing,
+                                                        AirLoopNum,
+                                                        NumZonesCooled,
+                                                        state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex,
+                                                        NumZonesCooled,
+                                                        nullptr);
                         }
 
                         updateHeatVRPVot(state, finalSysSizing, AirLoopNum, numZonesHeated, NumZonesCooled);
