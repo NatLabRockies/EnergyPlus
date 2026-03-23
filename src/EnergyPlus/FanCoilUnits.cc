@@ -1948,6 +1948,56 @@ namespace FanCoilUnits {
         }
     }
 
+    // Report SolveRoot convergence / limit errors for ConsFanVarFlow water-flow control.
+    // Called for both hot-water and cold-water branches; the string and counter
+    // references distinguish the two cases.
+    static void reportWaterFlowSolveRootErrors(EnergyPlusData &state,
+                                               int const SolFlag,
+                                               std::string const &fluidLabel, // "Cold Water" or "Hot Water"
+                                               std::string const &fcuName,
+                                               int const FanCoilNum,
+                                               int const ControlledZoneNum,
+                                               bool const FirstHVACIteration,
+                                               int const fluidInletNode,
+                                               Real64 const waterFlow,
+                                               Real64 const QZnReq,
+                                               Real64 const MinWaterFlow,
+                                               Real64 const MaxWaterFlow,
+                                               int &convgErrCount,
+                                               int &limitErrCount,
+                                               int &maxIterIndex,
+                                               int &badMassFlowLimIndex)
+    {
+        if (SolFlag == -1) {
+            ++convgErrCount;
+            if (convgErrCount < 2) {
+                ShowWarningError(state, EnergyPlus::format("{} control failed in fan coil unit {}", fluidLabel, fcuName));
+                ShowContinueError(state, "  Iteration limit exceeded in calculating water flow rate ");
+                state.dataLoopNodes->Node(fluidInletNode).MassFlowRate = waterFlow;
+                Real64 QUnitOut;
+                Calc4PipeFanCoil(state, FanCoilNum, ControlledZoneNum, FirstHVACIteration, QUnitOut);
+                ShowContinueErrorTimeStamp(state, EnergyPlus::format("Load Request = {}, Final Capacity = {}", QZnReq, QUnitOut));
+                ShowContinueErrorTimeStamp(
+                    state,
+                    EnergyPlus::format(
+                        "Min water flow used during iterations = {}, Max water flow used during iterations = {}", MinWaterFlow, MaxWaterFlow));
+                ShowContinueErrorTimeStamp(state, EnergyPlus::format("Water flow rate on last iteration = {}", waterFlow));
+                ShowContinueErrorTimeStamp(state, "..Water flow rate set to last iteration value ");
+            } else {
+                ShowRecurringWarningErrorAtEnd(state, fluidLabel + " flow Iteration limit exceeded in fan coil unit " + fcuName, maxIterIndex);
+            }
+        } else if (SolFlag == -2) {
+            ++limitErrCount;
+            if (limitErrCount < 2) {
+                ShowWarningError(state, EnergyPlus::format("{} control failed in fan coil unit {}", fluidLabel, fcuName));
+                ShowContinueError(state, EnergyPlus::format("  Bad {} mass flow limits", fluidLabel));
+                ShowContinueErrorTimeStamp(state, "..Water flow rate set to lower limit ");
+            } else {
+                ShowRecurringWarningErrorAtEnd(state, fluidLabel + " control failed in fan coil unit " + fcuName, badMassFlowLimIndex);
+            }
+        }
+    }
+
     void Sim4PipeFanCoil(EnergyPlusData &state,
                          int &FanCoilNum,               // number of the current fan coil unit being simulated
                          int const ControlledZoneNum,   // index into ZoneEqupConfig
@@ -2113,46 +2163,39 @@ namespace FanCoilUnits {
                                                MinWaterFlow,
                                                MaxWaterFlow);
                         General::SolveRoot(state, 0.001, MaxIterCycl, SolFlag, CWFlow, f, MinWaterFlow, MaxWaterFlow);
-                        if (SolFlag == -1) {
-                            ++fanCoil.ConvgErrCountC;
-                            if (fanCoil.ConvgErrCountC < 2) {
-                                ShowWarningError(state, EnergyPlus::format("Cold Water control failed in fan coil unit {}", fanCoil.Name));
-                                ShowContinueError(state, "  Iteration limit exceeded in calculating water flow rate ");
-                                state.dataLoopNodes->Node(fanCoil.CoolCoilFluidInletNode).MassFlowRate = CWFlow;
-                                Calc4PipeFanCoil(state, FanCoilNum, ControlledZoneNum, FirstHVACIteration, QUnitOut);
-                                ShowContinueErrorTimeStamp(state, EnergyPlus::format("Load Request = {}, Final Capacity = {}", QZnReq, QUnitOut));
-                                ShowContinueErrorTimeStamp(
-                                    state,
-                                    EnergyPlus::format("Min water flow used during iterations = {}, Max water flow used during iterations = {}",
+                        reportWaterFlowSolveRootErrors(state,
+                                                       SolFlag,
+                                                       "Cold Water",
+                                                       fanCoil.Name,
+                                                       FanCoilNum,
+                                                       ControlledZoneNum,
+                                                       FirstHVACIteration,
+                                                       fanCoil.CoolCoilFluidInletNode,
+                                                       CWFlow,
+                                                       QZnReq,
                                                        MinWaterFlow,
-                                                       MaxWaterFlow));
-                                ShowContinueErrorTimeStamp(state, EnergyPlus::format("Water flow rate on last iteration = {}", CWFlow));
-                                ShowContinueErrorTimeStamp(state, "..Water flow rate set to last iteration value ");
-                            } else {
-                                ShowRecurringWarningErrorAtEnd(
-                                    state, "Cold water flow Iteration limit exceeded in fan coil unit " + fanCoil.Name, fanCoil.MaxIterIndexC);
-                            }
-                        } else if (SolFlag == -2) {
-                            ++fanCoil.LimitErrCountC;
-                            if (fanCoil.LimitErrCountC < 2) {
-                                ShowWarningError(state, EnergyPlus::format("Cold Water control failed in fan coil unit {}", fanCoil.Name));
-                                ShowContinueError(state, "  Bad cold water mass flow limits");
-                                ShowContinueErrorTimeStamp(state, "..Water flow rate set to lower limit ");
-                            } else {
-                                ShowRecurringWarningErrorAtEnd(
-                                    state, "Cold Water control failed in fan coil unit " + fanCoil.Name, fanCoil.BadMassFlowLimIndexC);
-                            }
-                        }
+                                                       MaxWaterFlow,
+                                                       fanCoil.ConvgErrCountC,
+                                                       fanCoil.LimitErrCountC,
+                                                       fanCoil.MaxIterIndexC,
+                                                       fanCoil.BadMassFlowLimIndexC);
                     } else if (SolFlag == -2) {
-                        ++fanCoil.LimitErrCountC;
-                        if (fanCoil.LimitErrCountC < 2) {
-                            ShowWarningError(state, EnergyPlus::format("Cold Water control failed in fan coil unit {}", fanCoil.Name));
-                            ShowContinueError(state, "  Bad cold water mass flow limits");
-                            ShowContinueErrorTimeStamp(state, "..Water flow rate set to lower limit ");
-                        } else {
-                            ShowRecurringWarningErrorAtEnd(
-                                state, "Cold Water control failed in fan coil unit " + fanCoil.Name, fanCoil.BadMassFlowLimIndexC);
-                        }
+                        reportWaterFlowSolveRootErrors(state,
+                                                       SolFlag,
+                                                       "Cold Water",
+                                                       fanCoil.Name,
+                                                       FanCoilNum,
+                                                       ControlledZoneNum,
+                                                       FirstHVACIteration,
+                                                       fanCoil.CoolCoilFluidInletNode,
+                                                       CWFlow,
+                                                       QZnReq,
+                                                       MinWaterFlow,
+                                                       MaxWaterFlow,
+                                                       fanCoil.ConvgErrCountC,
+                                                       fanCoil.LimitErrCountC,
+                                                       fanCoil.MaxIterIndexC,
+                                                       fanCoil.BadMassFlowLimIndexC);
                     }
                 } else {
                     // demand greater than capacity
@@ -2259,46 +2302,39 @@ namespace FanCoilUnits {
                                                    MinWaterFlow,
                                                    MaxWaterFlow);
                             General::SolveRoot(state, 0.001, MaxIterCycl, SolFlag, HWFlow, f, MinWaterFlow, MaxWaterFlow);
-                            if (SolFlag == -1) {
-                                ++fanCoil.ConvgErrCountH;
-                                if (fanCoil.ConvgErrCountH < 2) {
-                                    ShowWarningError(state, EnergyPlus::format("Hot Water control failed in fan coil unit {}", fanCoil.Name));
-                                    ShowContinueError(state, "  Iteration limit exceeded in calculating water flow rate ");
-                                    state.dataLoopNodes->Node(fanCoil.HeatCoilFluidInletNode).MassFlowRate = HWFlow;
-                                    Calc4PipeFanCoil(state, FanCoilNum, ControlledZoneNum, FirstHVACIteration, QUnitOut);
-                                    ShowContinueErrorTimeStamp(state, EnergyPlus::format("Load Request = {}, Final Capacity = {}", QZnReq, QUnitOut));
-                                    ShowContinueErrorTimeStamp(
-                                        state,
-                                        EnergyPlus::format("Min water flow used during iterations = {}, Max water flow used during iterations = {}",
+                            reportWaterFlowSolveRootErrors(state,
+                                                           SolFlag,
+                                                           "Hot Water",
+                                                           fanCoil.Name,
+                                                           FanCoilNum,
+                                                           ControlledZoneNum,
+                                                           FirstHVACIteration,
+                                                           fanCoil.HeatCoilFluidInletNode,
+                                                           HWFlow,
+                                                           QZnReq,
                                                            MinWaterFlow,
-                                                           MaxWaterFlow));
-                                    ShowContinueErrorTimeStamp(state, EnergyPlus::format("Water flow rate on last iteration = {}", HWFlow));
-                                    ShowContinueErrorTimeStamp(state, "..Water flow rate set to last iteration value ");
-                                } else {
-                                    ShowRecurringWarningErrorAtEnd(
-                                        state, "Hot water flow Iteration limit exceeded in fan coil unit " + fanCoil.Name, fanCoil.MaxIterIndexH);
-                                }
-                            } else if (SolFlag == -2) {
-                                ++fanCoil.LimitErrCountH;
-                                if (fanCoil.LimitErrCountH < 2) {
-                                    ShowWarningError(state, EnergyPlus::format("Hot Water control failed in fan coil unit {}", fanCoil.Name));
-                                    ShowContinueError(state, "  Bad hot water mass flow limits");
-                                    ShowContinueErrorTimeStamp(state, "..Water flow rate set to lower limit ");
-                                } else {
-                                    ShowRecurringWarningErrorAtEnd(
-                                        state, "Hot Water control failed in fan coil unit " + fanCoil.Name, fanCoil.BadMassFlowLimIndexH);
-                                }
-                            }
+                                                           MaxWaterFlow,
+                                                           fanCoil.ConvgErrCountH,
+                                                           fanCoil.LimitErrCountH,
+                                                           fanCoil.MaxIterIndexH,
+                                                           fanCoil.BadMassFlowLimIndexH);
                         } else if (SolFlag == -2) {
-                            ++fanCoil.LimitErrCountH;
-                            if (fanCoil.LimitErrCountH < 2) {
-                                ShowWarningError(state, EnergyPlus::format("Hot Water control failed in fan coil unit {}", fanCoil.Name));
-                                ShowContinueError(state, "  Bad hot water mass flow limits");
-                                ShowContinueErrorTimeStamp(state, "..Water flow rate set to lower limit ");
-                            } else {
-                                ShowRecurringWarningErrorAtEnd(
-                                    state, "Hot Water control failed in fan coil unit " + fanCoil.Name, fanCoil.BadMassFlowLimIndexH);
-                            }
+                            reportWaterFlowSolveRootErrors(state,
+                                                           SolFlag,
+                                                           "Hot Water",
+                                                           fanCoil.Name,
+                                                           FanCoilNum,
+                                                           ControlledZoneNum,
+                                                           FirstHVACIteration,
+                                                           fanCoil.HeatCoilFluidInletNode,
+                                                           HWFlow,
+                                                           QZnReq,
+                                                           MinWaterFlow,
+                                                           MaxWaterFlow,
+                                                           fanCoil.ConvgErrCountH,
+                                                           fanCoil.LimitErrCountH,
+                                                           fanCoil.MaxIterIndexH,
+                                                           fanCoil.BadMassFlowLimIndexH);
                         }
                     } else {
                         auto f = [&state, FirstHVACIteration, FanCoilNum, ControlledZoneNum, QZnReq](Real64 const PartLoadRatio) {
