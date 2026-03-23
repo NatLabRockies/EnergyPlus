@@ -928,6 +928,99 @@ namespace SurfaceGeometry {
         state.dataSurface->extMovInsuls.allocate(state.dataSurface->TotSurfaces);
     }
 
+    // Check that subsurface exterior boundary conditions are consistent with
+    // their base surface (e.g. adiabatic sub in exterior base, interzone sub in adiabatic base, etc.)
+    static void checkSubSurfaceExtBoundConsistency(EnergyPlusData &state, std::string_view RoutineName, bool &SurfError)
+    {
+        bool SubSurfaceSevereDisplayed = false;
+        for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
+            auto const &surf = state.dataSurface->Surface(SurfNum);
+            if (!surf.HeatTransSurf) {
+                continue;
+            }
+            if (surf.BaseSurf == SurfNum) {
+                continue; // base surface
+            }
+            auto const &baseSurf = state.dataSurface->Surface(surf.BaseSurf);
+            // not base surface.  Check it.
+            if (baseSurf.ExtBoundCond <= 0) {                     // exterior or other base surface
+                if (surf.ExtBoundCond != baseSurf.ExtBoundCond) { // should match base surface
+                    std::string subCondStr;
+                    if (surf.ExtBoundCond == SurfNum) {
+                        subCondStr = "adiabatic surface";
+                    } else if (surf.ExtBoundCond > 0) {
+                        subCondStr = "interzone surface";
+                    } else {
+                        subCondStr = std::string(DataSurfaces::cExtBoundCondition(surf.ExtBoundCond));
+                    }
+                    std::string baseCondStr(DataSurfaces::cExtBoundCondition(baseSurf.ExtBoundCond));
+
+                    if (baseSurf.ExtBoundCond == DataSurfaces::OtherSideCondModeledExt) {
+                        ShowWarningError(
+                            state,
+                            EnergyPlus::format("{}Subsurface=\"{}\" exterior condition [{}] in a base surface=\"{}\" with exterior condition [{}]",
+                                               RoutineName,
+                                               surf.Name,
+                                               DataSurfaces::cExtBoundCondition(surf.ExtBoundCond),
+                                               baseSurf.Name,
+                                               baseCondStr));
+                        ShowContinueError(state, "...SubSurface will not use the exterior condition model of the base surface.");
+                    } else {
+                        ShowSevereError(
+                            state,
+                            EnergyPlus::format("{}Subsurface=\"{}\" exterior condition [{}] in a base surface=\"{}\" with exterior condition [{}]",
+                                               RoutineName,
+                                               surf.Name,
+                                               subCondStr,
+                                               baseSurf.Name,
+                                               baseCondStr));
+                        SurfError = true;
+                    }
+                    if (!SubSurfaceSevereDisplayed && SurfError) {
+                        ShowContinueError(state, "...calculations for heat balance would be compromised.");
+                        SubSurfaceSevereDisplayed = true;
+                    }
+                }
+            } else if (baseSurf.BaseSurf == baseSurf.ExtBoundCond) {
+                // adiabatic base surface. make sure subsurfaces match
+                if (surf.ExtBoundCond != SurfNum) { // not adiabatic surface
+                    std::string subCondStr;
+                    if (surf.ExtBoundCond > 0) {
+                        subCondStr = "interzone surface";
+                    } else {
+                        subCondStr = std::string(DataSurfaces::cExtBoundCondition(surf.ExtBoundCond));
+                    }
+                    ShowSevereError(
+                        state,
+                        EnergyPlus::format(
+                            "{}Subsurface=\"{}\" exterior condition [{}] in a base surface=\"{}\" with exterior condition [adiabatic surface]",
+                            RoutineName,
+                            surf.Name,
+                            subCondStr,
+                            baseSurf.Name));
+                    if (!SubSurfaceSevereDisplayed) {
+                        ShowContinueError(state, "...calculations for heat balance would be compromised.");
+                        SubSurfaceSevereDisplayed = true;
+                    }
+                    SurfError = true;
+                }
+            } else if (baseSurf.ExtBoundCond > 0) { // interzone surface
+                if (surf.ExtBoundCond == SurfNum) {
+                    ShowSevereError(state,
+                                    EnergyPlus::format("{}Subsurface=\"{}\" is an adiabatic surface in an Interzone base surface=\"{}\"",
+                                                       RoutineName,
+                                                       surf.Name,
+                                                       baseSurf.Name));
+                    if (!SubSurfaceSevereDisplayed) {
+                        ShowContinueError(state, "...calculations for heat balance would be compromised.");
+                        SubSurfaceSevereDisplayed = true;
+                    }
+                    //        SurfError=.TRUE.
+                }
+            }
+        }
+    }
+
     // Classify a heat-transfer surface into the appropriate SurfaceFilter lists
     // (interior vs exterior, then by class: window/wall/floor/roof).
     static void classifySurfaceFilter(EnergyPlusData &state, int SurfNum, DataSurfaces::SurfaceClass surfClass, bool isWindow, bool isInterior)
@@ -1068,7 +1161,6 @@ namespace SurfaceGeometry {
 
         int MultFound;
         int MultSurfNum;
-        bool SubSurfaceSevereDisplayed;
         bool subSurfaceError(false);
         bool errFlag;
 
@@ -2101,112 +2193,7 @@ namespace SurfaceGeometry {
 
         //**********************************************************************************
         // Warn about interzone surfaces that have adiabatic windows/vice versa
-        SubSurfaceSevereDisplayed = false;
-        for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
-            if (!state.dataSurface->Surface(SurfNum).HeatTransSurf) {
-                continue;
-            }
-            if (state.dataSurface->Surface(SurfNum).BaseSurf == SurfNum) {
-                continue; // base surface
-            }
-            // not base surface.  Check it.
-            if (state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).ExtBoundCond <= 0) { // exterior or other base surface
-                if (state.dataSurface->Surface(SurfNum).ExtBoundCond !=
-                    state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).ExtBoundCond) { // should match base surface
-                    if (state.dataSurface->Surface(SurfNum).ExtBoundCond == SurfNum) {
-                        ShowSevereError(
-                            state,
-                            EnergyPlus::format(
-                                "{}Subsurface=\"{}\" exterior condition [adiabatic surface] in a base surface=\"{}\" with exterior condition [{}]",
-                                RoutineName,
-                                state.dataSurface->Surface(SurfNum).Name,
-                                state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).Name,
-                                DataSurfaces::cExtBoundCondition(
-                                    state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).ExtBoundCond)));
-                        SurfError = true;
-                    } else if (state.dataSurface->Surface(SurfNum).ExtBoundCond > 0) {
-                        ShowSevereError(
-                            state,
-                            EnergyPlus::format(
-                                "{}Subsurface=\"{}\" exterior condition [interzone surface] in a base surface=\"{}\" with exterior condition [{}]",
-                                RoutineName,
-                                state.dataSurface->Surface(SurfNum).Name,
-                                state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).Name,
-                                DataSurfaces::cExtBoundCondition(
-                                    state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).ExtBoundCond)));
-                        SurfError = true;
-                    } else if (state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).ExtBoundCond ==
-                               DataSurfaces::OtherSideCondModeledExt) {
-                        ShowWarningError(
-                            state,
-                            EnergyPlus::format("{}Subsurface=\"{}\" exterior condition [{}] in a base surface=\"{}\" with exterior condition [{}]",
-                                               RoutineName,
-                                               state.dataSurface->Surface(SurfNum).Name,
-                                               DataSurfaces::cExtBoundCondition(state.dataSurface->Surface(SurfNum).ExtBoundCond),
-                                               state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).Name,
-                                               DataSurfaces::cExtBoundCondition(
-                                                   state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).ExtBoundCond)));
-                        ShowContinueError(state, "...SubSurface will not use the exterior condition model of the base surface.");
-                    } else {
-                        ShowSevereError(
-                            state,
-                            EnergyPlus::format("{}Subsurface=\"{}\" exterior condition [{}] in a base surface=\"{}\" with exterior condition [{}]",
-                                               RoutineName,
-                                               state.dataSurface->Surface(SurfNum).Name,
-                                               DataSurfaces::cExtBoundCondition(state.dataSurface->Surface(SurfNum).ExtBoundCond),
-                                               state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).Name,
-                                               DataSurfaces::cExtBoundCondition(
-                                                   state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).ExtBoundCond)));
-                        SurfError = true;
-                    }
-                    if (!SubSurfaceSevereDisplayed && SurfError) {
-                        ShowContinueError(state, "...calculations for heat balance would be compromised.");
-                        SubSurfaceSevereDisplayed = true;
-                    }
-                }
-            } else if (state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).BaseSurf ==
-                       state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).ExtBoundCond) {
-                // adiabatic surface. make sure subsurfaces match
-                if (state.dataSurface->Surface(SurfNum).ExtBoundCond != SurfNum) { // not adiabatic surface
-                    if (state.dataSurface->Surface(SurfNum).ExtBoundCond > 0) {
-                        ShowSevereError(
-                            state,
-                            EnergyPlus::format("{}Subsurface=\"{}\" exterior condition [interzone surface] in a base surface=\"{}\" with exterior "
-                                               "condition [adiabatic surface]",
-                                               RoutineName,
-                                               state.dataSurface->Surface(SurfNum).Name,
-                                               state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).Name));
-                    } else {
-                        ShowSevereError(
-                            state,
-                            EnergyPlus::format(
-                                "{}Subsurface=\"{}\" exterior condition [{}] in a base surface=\"{}\" with exterior condition [adiabatic surface]",
-                                RoutineName,
-                                state.dataSurface->Surface(SurfNum).Name,
-                                DataSurfaces::cExtBoundCondition(state.dataSurface->Surface(SurfNum).ExtBoundCond),
-                                state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).Name));
-                    }
-                    if (!SubSurfaceSevereDisplayed) {
-                        ShowContinueError(state, "...calculations for heat balance would be compromised.");
-                        SubSurfaceSevereDisplayed = true;
-                    }
-                    SurfError = true;
-                }
-            } else if (state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).ExtBoundCond > 0) { // interzone surface
-                if (state.dataSurface->Surface(SurfNum).ExtBoundCond == SurfNum) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}Subsurface=\"{}\" is an adiabatic surface in an Interzone base surface=\"{}\"",
-                                                       RoutineName,
-                                                       state.dataSurface->Surface(SurfNum).Name,
-                                                       state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).Name));
-                    if (!SubSurfaceSevereDisplayed) {
-                        ShowContinueError(state, "...calculations for heat balance would be compromised.");
-                        SubSurfaceSevereDisplayed = true;
-                    }
-                    //        SurfError=.TRUE.
-                }
-            }
-        }
+        checkSubSurfaceExtBoundConsistency(state, RoutineName, SurfError);
 
         setSurfaceFirstLast(state);
 
