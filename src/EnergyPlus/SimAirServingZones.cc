@@ -134,6 +134,45 @@ using namespace DataSizing;
 using namespace DataZoneEquipment;
 using namespace DataAirSystems;
 
+// Local struct used by GetAirPathData for tracking unique node names across air loops.
+struct AirUniqueNodes
+{
+    std::string NodeName;
+    std::string AirLoopName;
+    std::string FieldName;
+    bool NodeNameUsed = false;
+};
+
+// Check that a node name is unique across all air loops; register it if new, or report an error if duplicate.
+static void checkUniqueAirNode(EnergyPlusData &state,
+                               std::string_view RoutineName,
+                               std::string_view CurrentModuleObject,
+                               std::string const &airLoopName,
+                               std::string const &nodeName,
+                               std::string const &fieldName,
+                               std::string_view duplicateSuffix,
+                               Array1D<AirUniqueNodes> &TestUniqueNodes,
+                               bool &ErrorsFound)
+{
+    int test = Util::FindItemInList(nodeName, TestUniqueNodes, &AirUniqueNodes::NodeName, state.dataSimAirServingZones->TestUniqueNodesNum);
+    if (test == 0) {
+        ++state.dataSimAirServingZones->TestUniqueNodesNum;
+        auto &newNode = TestUniqueNodes(state.dataSimAirServingZones->TestUniqueNodesNum);
+        newNode.NodeName = nodeName;
+        newNode.AirLoopName = airLoopName;
+        newNode.FieldName = fieldName;
+        newNode.NodeNameUsed = true;
+    } else {
+        ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", duplicate {}.", RoutineName, CurrentModuleObject, airLoopName, duplicateSuffix));
+        ShowContinueError(state, EnergyPlus::format("...used for {}=\"{}\"", fieldName, nodeName));
+        ShowContinueError(
+            state,
+            EnergyPlus::format(
+                "...first used in {}=\"{}\" for {}", CurrentModuleObject, TestUniqueNodes(test).AirLoopName, TestUniqueNodes(test).FieldName));
+        ErrorsFound = true;
+    }
+}
+
 void ManageAirLoops(EnergyPlusData &state,
                     bool const FirstHVACIteration, // TRUE if first full HVAC iteration in an HVAC timestep
                     bool &SimAir,                  // TRUE means air loops must be (re)simulated
@@ -340,20 +379,6 @@ void GetAirPathData(EnergyPlusData &state)
     int ActuatorNodeNum;    // numeric equivalent for controller actuator node number
     Array1D_string MatchNodeName(3);
 
-    struct AirUniqueNodes
-    {
-        // Members
-        std::string NodeName;
-        std::string AirLoopName;
-        std::string FieldName;
-        bool NodeNameUsed;
-
-        // Default Constructor
-        AirUniqueNodes() : NodeNameUsed(false)
-        {
-        }
-    };
-
     // Object Data
     Array1D<AirUniqueNodes> TestUniqueNodes;
 
@@ -496,73 +521,15 @@ void GetAirPathData(EnergyPlusData &state)
         }
 
         // work on unique nodes
-        test = Util::FindItemInList(Alphas(6), TestUniqueNodes, &AirUniqueNodes::NodeName, state.dataSimAirServingZones->TestUniqueNodesNum);
-        if (test == 0) {
-            ++state.dataSimAirServingZones->TestUniqueNodesNum;
-            TestUniqueNodes(state.dataSimAirServingZones->TestUniqueNodesNum).NodeName = Alphas(6);
-            TestUniqueNodes(state.dataSimAirServingZones->TestUniqueNodesNum).AirLoopName = Alphas(1);
-            TestUniqueNodes(state.dataSimAirServingZones->TestUniqueNodesNum).FieldName = cAlphaFields(6);
-            TestUniqueNodes(state.dataSimAirServingZones->TestUniqueNodesNum).NodeNameUsed = true;
-        } else {
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", duplicate node name.", RoutineName, CurrentModuleObject, Alphas(1)));
-            ShowContinueError(state, EnergyPlus::format("...used for {}=\"{}\"", cAlphaFields(6), Alphas(6)));
-            ShowContinueError(
-                state,
-                EnergyPlus::format(
-                    "...first used in {}=\"{}\" for {}", CurrentModuleObject, TestUniqueNodes(test).AirLoopName, TestUniqueNodes(test).FieldName));
-            ErrorsFound = true;
-        }
+        checkUniqueAirNode(state, RoutineName, CurrentModuleObject, Alphas(1), Alphas(6), cAlphaFields(6), "node name", TestUniqueNodes, ErrorsFound);
         if (!lAlphaBlanks(7)) {
-            test = Util::FindItemInList(Alphas(7), TestUniqueNodes, &AirUniqueNodes::NodeName, state.dataSimAirServingZones->TestUniqueNodesNum);
-            if (test == 0) {
-                ++state.dataSimAirServingZones->TestUniqueNodesNum;
-                TestUniqueNodes(state.dataSimAirServingZones->TestUniqueNodesNum).NodeName = Alphas(7);
-                TestUniqueNodes(state.dataSimAirServingZones->TestUniqueNodesNum).AirLoopName = Alphas(1);
-                TestUniqueNodes(state.dataSimAirServingZones->TestUniqueNodesNum).FieldName = cAlphaFields(7);
-                TestUniqueNodes(state.dataSimAirServingZones->TestUniqueNodesNum).NodeNameUsed = true;
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", duplicate node name.", RoutineName, CurrentModuleObject, Alphas(1)));
-                ShowContinueError(state, EnergyPlus::format("...used for {}=\"{}\"", cAlphaFields(7), Alphas(7)));
-                ShowContinueError(state,
-                                  EnergyPlus::format("...first used in {}=\"{}\" for {}",
-                                                     CurrentModuleObject,
-                                                     TestUniqueNodes(test).AirLoopName,
-                                                     TestUniqueNodes(test).FieldName));
-                ErrorsFound = true;
-            }
+            checkUniqueAirNode(
+                state, RoutineName, CurrentModuleObject, Alphas(1), Alphas(7), cAlphaFields(7), "node name", TestUniqueNodes, ErrorsFound);
         }
-        test = Util::FindItemInList(Alphas(8), TestUniqueNodes, &AirUniqueNodes::NodeName, state.dataSimAirServingZones->TestUniqueNodesNum);
-        if (test == 0) {
-            ++state.dataSimAirServingZones->TestUniqueNodesNum;
-            TestUniqueNodes(state.dataSimAirServingZones->TestUniqueNodesNum).NodeName = Alphas(8);
-            TestUniqueNodes(state.dataSimAirServingZones->TestUniqueNodesNum).AirLoopName = Alphas(1);
-            TestUniqueNodes(state.dataSimAirServingZones->TestUniqueNodesNum).FieldName = cAlphaFields(8);
-            TestUniqueNodes(state.dataSimAirServingZones->TestUniqueNodesNum).NodeNameUsed = true;
-        } else {
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", duplicate node name/list.", RoutineName, CurrentModuleObject, Alphas(1)));
-            ShowContinueError(state, EnergyPlus::format("...used for {}=\"{}\"", cAlphaFields(8), Alphas(8)));
-            ShowContinueError(
-                state,
-                EnergyPlus::format(
-                    "...first used in {}=\"{}\" for {}", CurrentModuleObject, TestUniqueNodes(test).AirLoopName, TestUniqueNodes(test).FieldName));
-            ErrorsFound = true;
-        }
-        test = Util::FindItemInList(Alphas(9), TestUniqueNodes, &AirUniqueNodes::NodeName, state.dataSimAirServingZones->TestUniqueNodesNum);
-        if (test == 0) {
-            ++state.dataSimAirServingZones->TestUniqueNodesNum;
-            TestUniqueNodes(state.dataSimAirServingZones->TestUniqueNodesNum).NodeName = Alphas(9);
-            TestUniqueNodes(state.dataSimAirServingZones->TestUniqueNodesNum).AirLoopName = Alphas(1);
-            TestUniqueNodes(state.dataSimAirServingZones->TestUniqueNodesNum).FieldName = cAlphaFields(9);
-            TestUniqueNodes(state.dataSimAirServingZones->TestUniqueNodesNum).NodeNameUsed = true;
-        } else {
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", duplicate node name/list.", RoutineName, CurrentModuleObject, Alphas(1)));
-            ShowContinueError(state, EnergyPlus::format("...used for {}=\"{}\"", cAlphaFields(9), Alphas(9)));
-            ShowContinueError(
-                state,
-                EnergyPlus::format(
-                    "...first used in {}=\"{}\" for {}", CurrentModuleObject, TestUniqueNodes(test).AirLoopName, TestUniqueNodes(test).FieldName));
-            ErrorsFound = true;
-        }
+        checkUniqueAirNode(
+            state, RoutineName, CurrentModuleObject, Alphas(1), Alphas(8), cAlphaFields(8), "node name/list", TestUniqueNodes, ErrorsFound);
+        checkUniqueAirNode(
+            state, RoutineName, CurrentModuleObject, Alphas(1), Alphas(9), cAlphaFields(9), "node name/list", TestUniqueNodes, ErrorsFound);
         // this test depends on the controlled zone input having been "gotten"
         test = 0;
         for (count = 1; count <= state.dataZoneEquip->NumReturnAirPaths; ++count) {
