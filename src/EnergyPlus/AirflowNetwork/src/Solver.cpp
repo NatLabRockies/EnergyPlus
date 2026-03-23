@@ -191,11 +191,8 @@ namespace AirflowNetwork {
     }
 
     // Check that an opening surface is a window, door, glassdoor, or air boundary.
-    static void checkOpeningSurfaceClass(EnergyPlusData &state,
-                                         DataSurfaces::SurfaceData const &surf,
-                                         std::string_view routineName,
-                                         std::string const &linkageName,
-                                         bool &errorsFound)
+    static void checkOpeningSurfaceClass(
+        EnergyPlusData &state, DataSurfaces::SurfaceData const &surf, std::string_view routineName, std::string const &linkageName, bool &errorsFound)
     {
         if (!(surf.OriginalClass == DataSurfaces::SurfaceClass::Window || surf.OriginalClass == DataSurfaces::SurfaceClass::GlassDoor ||
               surf.OriginalClass == DataSurfaces::SurfaceClass::Door || surf.IsAirBoundarySurf)) {
@@ -1765,20 +1762,20 @@ namespace AirflowNetwork {
 
         // Set the maximum numbers of input fields
         for (auto const *objName : {"AirflowNetwork:SimulationControl",
-                                     "AirflowNetwork:MultiZone:Zone",
-                                     "AirflowNetwork:MultiZone:Surface",
-                                     "AirflowNetwork:MultiZone:Component:DetailedOpening",
-                                     "AirflowNetwork:MultiZone:ExternalNode",
-                                     "AirflowNetwork:MultiZone:WindPressureCoefficientArray",
-                                     "AirflowNetwork:MultiZone:WindPressureCoefficientValues",
-                                     "AirflowNetwork:Distribution:Node",
-                                     "AirflowNetwork:Distribution:DuctViewFactors",
-                                     "AirflowNetwork:Distribution:Linkage",
-                                     "AirflowNetwork:OccupantVentilationControl",
-                                     "AirflowNetwork:IntraZone:Node",
-                                     "AirflowNetwork:IntraZone:Linkage",
-                                     "AirflowNetwork:ZoneControl:PressureController",
-                                     "AirflowNetwork:Distribution:DuctSizing"}) {
+                                    "AirflowNetwork:MultiZone:Zone",
+                                    "AirflowNetwork:MultiZone:Surface",
+                                    "AirflowNetwork:MultiZone:Component:DetailedOpening",
+                                    "AirflowNetwork:MultiZone:ExternalNode",
+                                    "AirflowNetwork:MultiZone:WindPressureCoefficientArray",
+                                    "AirflowNetwork:MultiZone:WindPressureCoefficientValues",
+                                    "AirflowNetwork:Distribution:Node",
+                                    "AirflowNetwork:Distribution:DuctViewFactors",
+                                    "AirflowNetwork:Distribution:Linkage",
+                                    "AirflowNetwork:OccupantVentilationControl",
+                                    "AirflowNetwork:IntraZone:Node",
+                                    "AirflowNetwork:IntraZone:Linkage",
+                                    "AirflowNetwork:ZoneControl:PressureController",
+                                    "AirflowNetwork:Distribution:DuctSizing"}) {
             m_state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(m_state, objName, TotalArgs, NumAlphas, NumNumbers);
             MaxNums = max(MaxNums, NumNumbers);
             MaxAlphas = max(MaxAlphas, NumAlphas);
@@ -2118,9 +2115,11 @@ namespace AirflowNetwork {
                     {m_state.dataHeatBal->TotCrossMixing, "ZoneCrossMixing", "ZoneCrossMixing"},
                     {m_state.dataHeatBal->TotZoneAirBalance, "ZoneAirBalance:OutdoorAir", "ZoneAirBalance:OutdoorAir"},
                     {m_state.dataInputProcessing->inputProcessor->getNumObjectsFound(m_state, "ZoneEarthtube"), "ZoneEarthtube", "ZoneEarthtube"},
-                    {m_state.dataInputProcessing->inputProcessor->getNumObjectsFound(m_state, "ZoneThermalChimney"), "ZoneThermalChimney",
+                    {m_state.dataInputProcessing->inputProcessor->getNumObjectsFound(m_state, "ZoneThermalChimney"),
+                     "ZoneThermalChimney",
                      "ZoneThermalChimney"},
-                    {m_state.dataInputProcessing->inputProcessor->getNumObjectsFound(m_state, "ZoneCoolTower:Shower"), "ZoneCoolTower:Shower",
+                    {m_state.dataInputProcessing->inputProcessor->getNumObjectsFound(m_state, "ZoneCoolTower:Shower"),
+                     "ZoneCoolTower:Shower",
                      "ZoneCoolTower:Shower"},
                 }};
                 for (auto const &obj : overriddenObjects) {
@@ -3389,8 +3388,7 @@ namespace AirflowNetwork {
         for (int i = 1; i <= AirflowNetworkNumOfExtNode; ++i) {
             for (int j = 1; j <= AirflowNetworkNumOfSurfaces; ++j) {
                 auto const &surf = m_state.dataSurface->Surface(MultizoneSurfaceData(j).SurfNum);
-                if (surf.ExtBoundCond == ExternalEnvironment ||
-                    (surf.ExtBoundCond == OtherSideCoefNoCalcExt && surf.ExtWind)) {
+                if (surf.ExtBoundCond == ExternalEnvironment || (surf.ExtBoundCond == OtherSideCoefNoCalcExt && surf.ExtWind)) {
                     if (Util::SameString(MultizoneSurfaceData(j).ExternalNodeName, MultizoneExternalNodeData(i).Name)) {
                         if (assignHeight) {
                             MultizoneExternalNodeData(i).height = surf.Centroid.z;
@@ -3773,11 +3771,10 @@ namespace AirflowNetwork {
                             MultizoneSurfaceData(j).ZonePtr = MultizoneSurfaceData(j).NodeNums[0];
                             MultizoneSurfaceData(j).NodeNums[0] = IntraZoneLinkageData(i).NodeNums[1];
                         } else {
-                            ShowSevereError(m_state,
-                                            EnergyPlus::format(RoutineName) +
-                                                "The InterZone link is not found between AirflowNetwork:IntraZone:Linkage =" +
-                                                IntraZoneLinkageData(i).Name + " and AirflowNetwork:Multizone:Surface = " +
-                                                MultizoneSurfaceData(j).SurfName);
+                            ShowSevereError(
+                                m_state,
+                                EnergyPlus::format(RoutineName) + "The InterZone link is not found between AirflowNetwork:IntraZone:Linkage =" +
+                                    IntraZoneLinkageData(i).Name + " and AirflowNetwork:Multizone:Surface = " + MultizoneSurfaceData(j).SurfName);
                             ErrorsFound = true;
                         }
                     } else {
@@ -3805,12 +3802,11 @@ namespace AirflowNetwork {
                                 MultizoneSurfaceData(j).ZonePtr = MultizoneSurfaceData(j).NodeNums[0];
                                 MultizoneSurfaceData(j).NodeNums[0] = IntraZoneLinkageData(i).NodeNums[0];
                             } else {
-                                ShowSevereError(m_state,
-                                            EnergyPlus::format(RoutineName) +
-                                                "The InterZone link is not found between AirflowNetwork:IntraZone:Linkage =" +
-                                                IntraZoneLinkageData(i).Name + " and AirflowNetwork:Multizone:Surface = " +
-                                                MultizoneSurfaceData(j).SurfName);
-                            ErrorsFound = true;
+                                ShowSevereError(
+                                    m_state,
+                                    EnergyPlus::format(RoutineName) + "The InterZone link is not found between AirflowNetwork:IntraZone:Linkage =" +
+                                        IntraZoneLinkageData(i).Name + " and AirflowNetwork:Multizone:Surface = " + MultizoneSurfaceData(j).SurfName);
+                                ErrorsFound = true;
                             }
                         } else if (IntraZoneLinkageData(i).NodeNums[1] > AirflowNetworkNumOfZones + AirflowNetworkNumOfExtNode) {
                             MultizoneSurfaceData(j).RAFNflag = true;
@@ -3820,12 +3816,11 @@ namespace AirflowNetwork {
                                 MultizoneSurfaceData(j).ZonePtr = MultizoneSurfaceData(j).NodeNums[0];
                                 MultizoneSurfaceData(j).NodeNums[0] = IntraZoneLinkageData(i).NodeNums[1];
                             } else {
-                                ShowSevereError(m_state,
-                                            EnergyPlus::format(RoutineName) +
-                                                "The InterZone link is not found between AirflowNetwork:IntraZone:Linkage =" +
-                                                IntraZoneLinkageData(i).Name + " and AirflowNetwork:Multizone:Surface = " +
-                                                MultizoneSurfaceData(j).SurfName);
-                            ErrorsFound = true;
+                                ShowSevereError(
+                                    m_state,
+                                    EnergyPlus::format(RoutineName) + "The InterZone link is not found between AirflowNetwork:IntraZone:Linkage =" +
+                                        IntraZoneLinkageData(i).Name + " and AirflowNetwork:Multizone:Surface = " + MultizoneSurfaceData(j).SurfName);
+                                ErrorsFound = true;
                             }
                         }
                     }
@@ -4063,9 +4058,8 @@ namespace AirflowNetwork {
 
                 // Validate that the control object name refers to the correct component type
                 // (EXF for Exhaust, REL for Relief). This is not great but works for now.
-                ComponentType requiredCompType = (PressureControllerData(i).ControlTypeSet == PressureCtrlExhaust)
-                                                     ? ComponentType::EXF
-                                                     : ComponentType::REL;
+                ComponentType requiredCompType =
+                    (PressureControllerData(i).ControlTypeSet == PressureCtrlExhaust) ? ComponentType::EXF : ComponentType::REL;
                 bool compTypeValid{false};
                 auto afe_ctrl = elements.find(Alphas(4));
                 if (afe_ctrl != elements.end()) {
@@ -4241,55 +4235,91 @@ namespace AirflowNetwork {
         AirflowNetworkCompData.allocate(AirflowNetworkNumOfComps);
 
         int j = 0;
-        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, AirflowNetworkNumOfDetOpenings, iComponentTypeNum::DOP,
-                                  [&](int n) { return MultizoneCompDetOpeningData(n).name; });
-        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, AirflowNetworkNumOfSimOpenings, iComponentTypeNum::SOP,
-                                  [&](int n) { return MultizoneCompSimpleOpeningData(n).name; });
-        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, AirflowNetworkNumOfSurCracks, iComponentTypeNum::SCR,
-                                  [&](int n) { return MultizoneSurfaceCrackData(n).name; });
-        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, AirflowNetworkNumOfSurELA, iComponentTypeNum::SEL,
-                                  [&](int n) { return MultizoneSurfaceELAData(n).name; });
-        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, AirflowNetworkNumOfExhFan, iComponentTypeNum::EXF,
-                                  [&](int n) { return MultizoneCompExhaustFanData(n).name; });
-        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, AirflowNetworkNumOfHorOpenings, iComponentTypeNum::HOP,
-                                  [&](int n) { return MultizoneCompHorOpeningData(n).name; });
-        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, DisSysNumOfLeaks, iComponentTypeNum::PLR,
-                                  [&](int n) { return DisSysCompLeakData(n).name; });
-        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, DisSysNumOfELRs, iComponentTypeNum::ELR,
-                                  [&](int n) { return DisSysCompELRData(n).name; });
-        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, DisSysNumOfDucts, iComponentTypeNum::DWC,
-                                  [&](int n) { return DisSysCompDuctData(n).name; });
-        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, DisSysNumOfDampers, iComponentTypeNum::DMP,
-                                  [&](int n) { return DisSysCompDamperData(n).name; });
-        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, DisSysNumOfCVFs, iComponentTypeNum::CVF,
-                                  [&](int n) { return DisSysCompCVFData(n).name; }, iEPlusComponentType::FAN);
-        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, DisSysNumOfDetFans, iComponentTypeNum::FAN,
-                                  [&](int n) { return DisSysCompDetFanData(n).name; }, iEPlusComponentType::FAN);
-        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, DisSysNumOfCPDs, iComponentTypeNum::CPD,
-                                  [&](int n) { return DisSysCompCPDData(n).name; });
-        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, DisSysNumOfCoils, iComponentTypeNum::COI,
-                                  [&](int n) { return DisSysCompCoilData(n).name; }, iEPlusComponentType::COI);
-        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, DisSysNumOfTermUnits, iComponentTypeNum::TMU,
-                                  [&](int n) { return DisSysCompTermUnitData(n).name; }, iEPlusComponentType::RHT);
-        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, DisSysNumOfHXs, iComponentTypeNum::HEX,
-                                  [&](int n) { return DisSysCompHXData(n).name; }, iEPlusComponentType::HEX);
-        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, NumOfOAFans, iComponentTypeNum::OAF,
-                                  [&](int n) { return DisSysCompOutdoorAirData(n).name; });
-        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, NumOfReliefFans, iComponentTypeNum::REL,
-                                  [&](int n) { return DisSysCompReliefAirData(n).name; });
+        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, AirflowNetworkNumOfDetOpenings, iComponentTypeNum::DOP, [&](int n) {
+            return MultizoneCompDetOpeningData(n).name;
+        });
+        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, AirflowNetworkNumOfSimOpenings, iComponentTypeNum::SOP, [&](int n) {
+            return MultizoneCompSimpleOpeningData(n).name;
+        });
+        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, AirflowNetworkNumOfSurCracks, iComponentTypeNum::SCR, [&](int n) {
+            return MultizoneSurfaceCrackData(n).name;
+        });
+        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, AirflowNetworkNumOfSurELA, iComponentTypeNum::SEL, [&](int n) {
+            return MultizoneSurfaceELAData(n).name;
+        });
+        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, AirflowNetworkNumOfExhFan, iComponentTypeNum::EXF, [&](int n) {
+            return MultizoneCompExhaustFanData(n).name;
+        });
+        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, AirflowNetworkNumOfHorOpenings, iComponentTypeNum::HOP, [&](int n) {
+            return MultizoneCompHorOpeningData(n).name;
+        });
+        j = populateCompDataRange(
+            AirflowNetworkCompData, compnum, j, DisSysNumOfLeaks, iComponentTypeNum::PLR, [&](int n) { return DisSysCompLeakData(n).name; });
+        j = populateCompDataRange(
+            AirflowNetworkCompData, compnum, j, DisSysNumOfELRs, iComponentTypeNum::ELR, [&](int n) { return DisSysCompELRData(n).name; });
+        j = populateCompDataRange(
+            AirflowNetworkCompData, compnum, j, DisSysNumOfDucts, iComponentTypeNum::DWC, [&](int n) { return DisSysCompDuctData(n).name; });
+        j = populateCompDataRange(
+            AirflowNetworkCompData, compnum, j, DisSysNumOfDampers, iComponentTypeNum::DMP, [&](int n) { return DisSysCompDamperData(n).name; });
+        j = populateCompDataRange(
+            AirflowNetworkCompData,
+            compnum,
+            j,
+            DisSysNumOfCVFs,
+            iComponentTypeNum::CVF,
+            [&](int n) { return DisSysCompCVFData(n).name; },
+            iEPlusComponentType::FAN);
+        j = populateCompDataRange(
+            AirflowNetworkCompData,
+            compnum,
+            j,
+            DisSysNumOfDetFans,
+            iComponentTypeNum::FAN,
+            [&](int n) { return DisSysCompDetFanData(n).name; },
+            iEPlusComponentType::FAN);
+        j = populateCompDataRange(
+            AirflowNetworkCompData, compnum, j, DisSysNumOfCPDs, iComponentTypeNum::CPD, [&](int n) { return DisSysCompCPDData(n).name; });
+        j = populateCompDataRange(
+            AirflowNetworkCompData,
+            compnum,
+            j,
+            DisSysNumOfCoils,
+            iComponentTypeNum::COI,
+            [&](int n) { return DisSysCompCoilData(n).name; },
+            iEPlusComponentType::COI);
+        j = populateCompDataRange(
+            AirflowNetworkCompData,
+            compnum,
+            j,
+            DisSysNumOfTermUnits,
+            iComponentTypeNum::TMU,
+            [&](int n) { return DisSysCompTermUnitData(n).name; },
+            iEPlusComponentType::RHT);
+        j = populateCompDataRange(
+            AirflowNetworkCompData,
+            compnum,
+            j,
+            DisSysNumOfHXs,
+            iComponentTypeNum::HEX,
+            [&](int n) { return DisSysCompHXData(n).name; },
+            iEPlusComponentType::HEX);
+        j = populateCompDataRange(
+            AirflowNetworkCompData, compnum, j, NumOfOAFans, iComponentTypeNum::OAF, [&](int n) { return DisSysCompOutdoorAirData(n).name; });
+        j = populateCompDataRange(
+            AirflowNetworkCompData, compnum, j, NumOfReliefFans, iComponentTypeNum::REL, [&](int n) { return DisSysCompReliefAirData(n).name; });
         // This is also a bit of a hack to keep things working, this needs to be removed ASAP
-        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, static_cast<int>(SpecifiedMassFlowData.size()), iComponentTypeNum::SMF,
-                                  [&](int n) {
-                                      auto it = SpecifiedMassFlowData.begin();
-                                      std::advance(it, n - 1);
-                                      return it->name;
-                                  });
-        j = populateCompDataRange(AirflowNetworkCompData, compnum, j, static_cast<int>(SpecifiedVolumeFlowData.size()), iComponentTypeNum::SVF,
-                                  [&](int n) {
-                                      auto it = SpecifiedVolumeFlowData.begin();
-                                      std::advance(it, n - 1);
-                                      return it->name;
-                                  });
+        j = populateCompDataRange(
+            AirflowNetworkCompData, compnum, j, static_cast<int>(SpecifiedMassFlowData.size()), iComponentTypeNum::SMF, [&](int n) {
+                auto it = SpecifiedMassFlowData.begin();
+                std::advance(it, n - 1);
+                return it->name;
+            });
+        j = populateCompDataRange(
+            AirflowNetworkCompData, compnum, j, static_cast<int>(SpecifiedVolumeFlowData.size()), iComponentTypeNum::SVF, [&](int n) {
+                auto it = SpecifiedVolumeFlowData.begin();
+                std::advance(it, n - 1);
+                return it->name;
+            });
 
         // Assign linkage data
 

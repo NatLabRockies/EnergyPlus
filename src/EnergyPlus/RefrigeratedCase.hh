@@ -1279,27 +1279,69 @@ namespace RefrigeratedCase {
         // Called during input processing once NumZones is known.
         void allocateZoneArrays(int n)
         {
-            if (!allocated(ZoneName)) ZoneName.allocate(n);
-            if (!allocated(ZoneNum)) ZoneNum.allocate(n) = 0;
-            if (!allocated(ZoneNodeNum)) ZoneNodeNum.allocate(n) = 0;
-            if (!allocated(SurfaceArea)) SurfaceArea.allocate(n) = 0.0;
-            if (!allocated(UValue)) UValue.allocate(n) = 0.0;
-            if (!allocated(UValueGlassDr)) UValueGlassDr.allocate(n) = 0.0;
-            if (!allocated(glassDoorOpenScheds)) glassDoorOpenScheds.allocate(n) = nullptr;
-            if (!allocated(AreaGlassDr)) AreaGlassDr.allocate(n) = 0.0;
-            if (!allocated(HeightGlassDr)) HeightGlassDr.allocate(n) = 0.0;
-            if (!allocated(UValueStockDr)) UValueStockDr.allocate(n) = 0.0;
-            if (!allocated(stockDoorOpenScheds)) stockDoorOpenScheds.allocate(n) = nullptr;
-            if (!allocated(StockDoorProtectType)) StockDoorProtectType.allocate(n) = WIStockDoor::Invalid;
-            if (!allocated(AreaStockDr)) AreaStockDr.allocate(n) = 0.0;
-            if (!allocated(HeightStockDr)) HeightStockDr.allocate(n) = 0.0;
-            if (!allocated(SensZoneCreditRate)) SensZoneCreditRate.allocate(n) = 0.0;
-            if (!allocated(SensZoneCreditCoolRate)) SensZoneCreditCoolRate.allocate(n) = 0.0;
-            if (!allocated(SensZoneCreditCool)) SensZoneCreditCool.allocate(n) = 0.0;
-            if (!allocated(SensZoneCreditHeatRate)) SensZoneCreditHeatRate.allocate(n) = 0.0;
-            if (!allocated(SensZoneCreditHeat)) SensZoneCreditHeat.allocate(n) = 0.0;
-            if (!allocated(LatZoneCreditRate)) LatZoneCreditRate.allocate(n) = 0.0;
-            if (!allocated(LatZoneCredit)) LatZoneCredit.allocate(n) = 0.0;
+            if (!allocated(ZoneName)) {
+                ZoneName.allocate(n);
+            }
+            if (!allocated(ZoneNum)) {
+                ZoneNum.allocate(n) = 0;
+            }
+            if (!allocated(ZoneNodeNum)) {
+                ZoneNodeNum.allocate(n) = 0;
+            }
+            if (!allocated(SurfaceArea)) {
+                SurfaceArea.allocate(n) = 0.0;
+            }
+            if (!allocated(UValue)) {
+                UValue.allocate(n) = 0.0;
+            }
+            if (!allocated(UValueGlassDr)) {
+                UValueGlassDr.allocate(n) = 0.0;
+            }
+            if (!allocated(glassDoorOpenScheds)) {
+                glassDoorOpenScheds.allocate(n) = nullptr;
+            }
+            if (!allocated(AreaGlassDr)) {
+                AreaGlassDr.allocate(n) = 0.0;
+            }
+            if (!allocated(HeightGlassDr)) {
+                HeightGlassDr.allocate(n) = 0.0;
+            }
+            if (!allocated(UValueStockDr)) {
+                UValueStockDr.allocate(n) = 0.0;
+            }
+            if (!allocated(stockDoorOpenScheds)) {
+                stockDoorOpenScheds.allocate(n) = nullptr;
+            }
+            if (!allocated(StockDoorProtectType)) {
+                StockDoorProtectType.allocate(n) = WIStockDoor::Invalid;
+            }
+            if (!allocated(AreaStockDr)) {
+                AreaStockDr.allocate(n) = 0.0;
+            }
+            if (!allocated(HeightStockDr)) {
+                HeightStockDr.allocate(n) = 0.0;
+            }
+            if (!allocated(SensZoneCreditRate)) {
+                SensZoneCreditRate.allocate(n) = 0.0;
+            }
+            if (!allocated(SensZoneCreditCoolRate)) {
+                SensZoneCreditCoolRate.allocate(n) = 0.0;
+            }
+            if (!allocated(SensZoneCreditCool)) {
+                SensZoneCreditCool.allocate(n) = 0.0;
+            }
+            if (!allocated(SensZoneCreditHeatRate)) {
+                SensZoneCreditHeatRate.allocate(n) = 0.0;
+            }
+            if (!allocated(SensZoneCreditHeat)) {
+                SensZoneCreditHeat.allocate(n) = 0.0;
+            }
+            if (!allocated(LatZoneCreditRate)) {
+                LatZoneCreditRate.allocate(n) = 0.0;
+            }
+            if (!allocated(LatZoneCredit)) {
+                LatZoneCredit.allocate(n) = 0.0;
+            }
         }
 
         // Reset Initialization Values to Zeros
