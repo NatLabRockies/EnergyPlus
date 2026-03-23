@@ -6077,6 +6077,19 @@ static void sizeMultispeedEvapCondField(EnergyPlusData &state,
     validateMultispeedMonotonicity(state, coil.DXCoilType, coil.Name, coil.NumOfSpeeds, fieldValues, validationLabel);
 }
 
+// Validate that a low-speed value does not exceed the corresponding high-speed value for a two-speed coil.
+// Issues a severe error + fatal if the low-speed value is greater than the high-speed value.
+static void validateTwoSpeedLowVsHigh(
+    EnergyPlusData &state, std::string_view coilType, std::string_view coilName, Real64 lowSpeedVal, Real64 highSpeedVal, std::string_view fieldDesc)
+{
+    if (lowSpeedVal > highSpeedVal) {
+        ShowSevereError(
+            state, EnergyPlus::format("SizeDXCoil: {} {}, {} low speed must be less than or equal to high speed.", coilType, coilName, fieldDesc));
+        ShowContinueError(state, EnergyPlus::format("Instead, {:.2R} > {:.2R}", lowSpeedVal, highSpeedVal));
+        ShowFatalError(state, "Preceding conditions cause termination.");
+    }
+}
+
 void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
 {
 
@@ -6616,54 +6629,30 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
             }
 
             if (thisDXCoil.DXCoilType_Num == HVAC::CoilDX_CoolingTwoSpeed) {
-                if (thisDXCoil.EvapCondAirFlow2 > thisDXCoil.EvapCondAirFlow(Mode)) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "SizeDXCoil: {} {}, Evaporative Condenser low speed air flow must be less than or equal to high speed air flow.",
-                            thisDXCoil.DXCoilType,
-                            thisDXCoil.Name));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("Instead, {:.2R} > {:.2R}", thisDXCoil.EvapCondAirFlow2, thisDXCoil.EvapCondAirFlow(Mode)));
-                    ShowFatalError(state, "Preceding conditions cause termination.");
-                }
-
-                if (thisDXCoil.EvapCondPumpElecNomPower2 > thisDXCoil.EvapCondPumpElecNomPower(Mode)) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "SizeDXCoil: {} {}, Evaporative Condenser low speed pump power must be less than or equal to high speed pump power.",
-                            thisDXCoil.DXCoilType,
-                            thisDXCoil.Name));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("Instead, {:.2R} > {:.2R}",
-                                                         thisDXCoil.EvapCondPumpElecNomPower2,
-                                                         thisDXCoil.EvapCondPumpElecNomPower(Mode)));
-                    ShowFatalError(state, "Preceding conditions cause termination.");
-                }
-
-                if (thisDXCoil.RatedTotCap2 > thisDXCoil.RatedTotCap(Mode)) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format("SizeDXCoil: {} {}, Rated Total Cooling Capacity, Low Speed must be less than or equal to Rated Total "
-                                           "Cooling Capacity, High Speed.",
-                                           thisDXCoil.DXCoilType,
-                                           thisDXCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Instead, {:.2R} > {:.2R}", thisDXCoil.RatedTotCap2, thisDXCoil.RatedTotCap(Mode)));
-                    ShowFatalError(state, "Preceding conditions cause termination.");
-                }
-
-                if (thisDXCoil.RatedAirVolFlowRate2 > thisDXCoil.RatedAirVolFlowRate(Mode)) {
-                    ShowFatalError(
-                        state,
-                        EnergyPlus::format("SizeDXCoil: {} {}, Rated Air Volume Flow Rate, low speed must be less than or equal to Rated Air Volume "
-                                           "Flow Rate, high speed.",
-                                           thisDXCoil.DXCoilType,
-                                           thisDXCoil.Name));
-                    ShowContinueError(
-                        state, EnergyPlus::format("Instead, {:.2R} > {:.2R}", thisDXCoil.RatedAirVolFlowRate2, thisDXCoil.RatedAirVolFlowRate(Mode)));
-                    ShowFatalError(state, "Preceding conditions cause termination.");
-                }
+                validateTwoSpeedLowVsHigh(state,
+                                          thisDXCoil.DXCoilType,
+                                          thisDXCoil.Name,
+                                          thisDXCoil.EvapCondAirFlow2,
+                                          thisDXCoil.EvapCondAirFlow(Mode),
+                                          "Evaporative Condenser Air Flow Rate,");
+                validateTwoSpeedLowVsHigh(state,
+                                          thisDXCoil.DXCoilType,
+                                          thisDXCoil.Name,
+                                          thisDXCoil.EvapCondPumpElecNomPower2,
+                                          thisDXCoil.EvapCondPumpElecNomPower(Mode),
+                                          "Evaporative Condenser Pump Power,");
+                validateTwoSpeedLowVsHigh(state,
+                                          thisDXCoil.DXCoilType,
+                                          thisDXCoil.Name,
+                                          thisDXCoil.RatedTotCap2,
+                                          thisDXCoil.RatedTotCap(Mode),
+                                          "Rated Total Cooling Capacity,");
+                validateTwoSpeedLowVsHigh(state,
+                                          thisDXCoil.DXCoilType,
+                                          thisDXCoil.Name,
+                                          thisDXCoil.RatedAirVolFlowRate2,
+                                          thisDXCoil.RatedAirVolFlowRate(Mode),
+                                          "Rated Air Volume Flow Rate,");
             }
 
             //                // Sizing rated low speed SHR2
