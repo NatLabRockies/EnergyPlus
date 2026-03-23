@@ -4706,6 +4706,82 @@ static void warnOATLimitExceeded(EnergyPlusData &state,
                                    OutsideDryBulbTemp);
 }
 
+// Helper: check OAT limits for a given VRF operating mode and optionally switch to the opposite mode.
+// When the current mode's OAT is out of range, it disables the current mode and checks whether
+// the opposite mode can be enabled based on thermostat priority and OAT limits.
+static void checkOATLimitAndSwitchMode(EnergyPlusData &state,
+                                       int const VRFCond,
+                                       int const TUListIndex,
+                                       Real64 const OutsideDryBulbTemp,
+                                       bool const isCoolingMode) // true = current mode is cooling, false = heating
+{
+    auto &vrf = state.dataHVACVarRefFlow->VRF(VRFCond);
+    auto &tuList = state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex);
+
+    // Current mode parameters
+    Real64 const curMinOAT = isCoolingMode ? vrf.MinOATCooling : vrf.MinOATHeating;
+    Real64 const curMaxOAT = isCoolingMode ? vrf.MaxOATCooling : vrf.MaxOATHeating;
+    auto const &curCoilPresent = isCoolingMode ? tuList.CoolingCoilPresent : tuList.HeatingCoilPresent;
+    bool &curLoad = isCoolingMode ? state.dataHVACVarRefFlow->CoolingLoad(VRFCond) : state.dataHVACVarRefFlow->HeatingLoad(VRFCond);
+
+    // Opposite mode parameters
+    Real64 const oppMinOAT = isCoolingMode ? vrf.MinOATHeating : vrf.MinOATCooling;
+    Real64 const oppMaxOAT = isCoolingMode ? vrf.MaxOATHeating : vrf.MaxOATCooling;
+    auto const &oppCoilPresent = isCoolingMode ? tuList.HeatingCoilPresent : tuList.CoolingCoilPresent;
+    bool &oppLoad = isCoolingMode ? state.dataHVACVarRefFlow->HeatingLoad(VRFCond) : state.dataHVACVarRefFlow->CoolingLoad(VRFCond);
+
+    // Warning parameters for current mode
+    std::string_view modeLabel = isCoolingMode ? "Cooling" : "Heating";
+    int &tempLimitIndex = isCoolingMode ? vrf.CoolingMaxTempLimitIndex : vrf.HeatingMaxTempLimitIndex;
+    auto const &coilAvailable = isCoolingMode ? tuList.CoolingCoilAvailable : tuList.HeatingCoilAvailable;
+
+    if ((OutsideDryBulbTemp < curMinOAT || OutsideDryBulbTemp > curMaxOAT) && any(curCoilPresent)) {
+        curLoad = false;
+        // Test if opposite load exists, account for thermostat control type
+        bool EnableSystem = false;
+        switch (vrf.ThermostatPriority) {
+        case ThermostatCtrlType::LoadPriority:
+        case ThermostatCtrlType::ZonePriority: {
+            if (isCoolingMode) {
+                if (state.dataHVACVarRefFlow->SumHeatingLoads(VRFCond) > 0.0) {
+                    EnableSystem = true;
+                }
+            } else {
+                if (state.dataHVACVarRefFlow->SumCoolingLoads(VRFCond) < 0.0) {
+                    EnableSystem = true;
+                }
+            }
+        } break;
+        case ThermostatCtrlType::ThermostatOffsetPriority: {
+            if (isCoolingMode) {
+                if (state.dataHVACVarRefFlow->MinDeltaT(VRFCond) < 0.0) {
+                    EnableSystem = true;
+                }
+            } else {
+                if (state.dataHVACVarRefFlow->MaxDeltaT(VRFCond) > 0.0) {
+                    EnableSystem = true;
+                }
+            }
+        } break;
+        case ThermostatCtrlType::ScheduledPriority:
+        case ThermostatCtrlType::MasterThermostatPriority: {
+            // can't switch modes if scheduled or master TSTAT used
+        } break;
+        default:
+            break;
+        }
+        if (EnableSystem) {
+            if ((OutsideDryBulbTemp >= oppMinOAT && OutsideDryBulbTemp <= oppMaxOAT) && any(oppCoilPresent)) {
+                oppLoad = true;
+            } else {
+                warnOATLimitExceeded(state, VRFCond, OutsideDryBulbTemp, modeLabel, curMinOAT, curMaxOAT, tempLimitIndex, coilAvailable);
+            }
+        } else {
+            warnOATLimitExceeded(state, VRFCond, OutsideDryBulbTemp, modeLabel, curMinOAT, curMaxOAT, tempLimitIndex, coilAvailable);
+        }
+    }
+}
+
 // Helper: dispatch CalcVRF or CalcVRF_FluidTCtrl with zero load (coil-off capacity test)
 static void calcVRFCoilOff(EnergyPlusData &state,
                            int const VRFTUNum,
@@ -4861,7 +4937,6 @@ void InitVRF(EnergyPlusData &state, int const VRFTUNum, int const ZoneNum, bool 
     Real64 TempOutput;           // Sensible output of TU
     Real64 LoadToCoolingSP;      // thermostat load to cooling setpoint (W)
     Real64 LoadToHeatingSP;      // thermostat load to heating setpoint (W)
-    bool EnableSystem;           // use to turn on secondary operating mode if OA temp limits exceeded
     bool ErrorsFound;            // flag returned from mining call
     Real64 rho;                  // density of water (kg/m3)
     Real64 OutsideDryBulbTemp;   // Outdoor air temperature at external node height
@@ -5966,109 +6041,10 @@ void InitVRF(EnergyPlusData &state, int const VRFTUNum, int const ZoneNum, bool 
         //*** End of Operating Mode Initialization done at beginning of each iteration ***!
 
         // disable VRF system when outside limits of operation based on OAT
-        EnableSystem = false; // flag used to switch operating modes when OAT is outside operating limits
         if (state.dataHVACVarRefFlow->CoolingLoad(VRFCond)) {
-            if ((OutsideDryBulbTemp < state.dataHVACVarRefFlow->VRF(VRFCond).MinOATCooling ||
-                 OutsideDryBulbTemp > state.dataHVACVarRefFlow->VRF(VRFCond).MaxOATCooling) &&
-                any(state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).CoolingCoilPresent)) {
-                state.dataHVACVarRefFlow->CoolingLoad(VRFCond) = false;
-                // test if heating load exists, account for thermostat control type
-                switch (state.dataHVACVarRefFlow->VRF(VRFCond).ThermostatPriority) {
-                case ThermostatCtrlType::LoadPriority:
-                case ThermostatCtrlType::ZonePriority: {
-                    if (state.dataHVACVarRefFlow->SumHeatingLoads(VRFCond) > 0.0) {
-                        EnableSystem = true;
-                    }
-                } break;
-                case ThermostatCtrlType::ThermostatOffsetPriority: {
-                    if (state.dataHVACVarRefFlow->MinDeltaT(VRFCond) < 0.0) {
-                        EnableSystem = true;
-                    }
-                } break;
-                case ThermostatCtrlType::ScheduledPriority:
-                case ThermostatCtrlType::MasterThermostatPriority: {
-                    // can't switch modes if scheduled (i.e., would be switching to unscheduled mode)
-                    // or master TSTAT used (i.e., master zone only has a specific load - can't switch)
-                } break;
-                default:
-                    break;
-                }
-                if (EnableSystem) {
-                    if ((OutsideDryBulbTemp >= state.dataHVACVarRefFlow->VRF(VRFCond).MinOATHeating &&
-                         OutsideDryBulbTemp <= state.dataHVACVarRefFlow->VRF(VRFCond).MaxOATHeating) &&
-                        any(state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HeatingCoilPresent)) {
-                        state.dataHVACVarRefFlow->HeatingLoad(VRFCond) = true;
-                    } else {
-                        warnOATLimitExceeded(state,
-                                             VRFCond,
-                                             OutsideDryBulbTemp,
-                                             "Cooling",
-                                             state.dataHVACVarRefFlow->VRF(VRFCond).MinOATCooling,
-                                             state.dataHVACVarRefFlow->VRF(VRFCond).MaxOATCooling,
-                                             state.dataHVACVarRefFlow->VRF(VRFCond).CoolingMaxTempLimitIndex,
-                                             state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).CoolingCoilAvailable);
-                    }
-                } else {
-                    warnOATLimitExceeded(state,
-                                         VRFCond,
-                                         OutsideDryBulbTemp,
-                                         "Cooling",
-                                         state.dataHVACVarRefFlow->VRF(VRFCond).MinOATCooling,
-                                         state.dataHVACVarRefFlow->VRF(VRFCond).MaxOATCooling,
-                                         state.dataHVACVarRefFlow->VRF(VRFCond).CoolingMaxTempLimitIndex,
-                                         state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).CoolingCoilAvailable);
-                }
-            }
+            checkOATLimitAndSwitchMode(state, VRFCond, TUListIndex, OutsideDryBulbTemp, true);
         } else if (state.dataHVACVarRefFlow->HeatingLoad(VRFCond)) {
-            if ((OutsideDryBulbTemp < state.dataHVACVarRefFlow->VRF(VRFCond).MinOATHeating ||
-                 OutsideDryBulbTemp > state.dataHVACVarRefFlow->VRF(VRFCond).MaxOATHeating) &&
-                any(state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HeatingCoilPresent)) {
-                state.dataHVACVarRefFlow->HeatingLoad(VRFCond) = false;
-                // test if cooling load exists, account for thermostat control type
-                switch (state.dataHVACVarRefFlow->VRF(VRFCond).ThermostatPriority) {
-                case ThermostatCtrlType::LoadPriority:
-                case ThermostatCtrlType::ZonePriority: {
-                    if (state.dataHVACVarRefFlow->SumCoolingLoads(VRFCond) < 0.0) {
-                        EnableSystem = true;
-                    }
-                } break;
-                case ThermostatCtrlType::ThermostatOffsetPriority: {
-                    if (state.dataHVACVarRefFlow->MaxDeltaT(VRFCond) > 0.0) {
-                        EnableSystem = true;
-                    }
-                } break;
-                case ThermostatCtrlType::ScheduledPriority:
-                case ThermostatCtrlType::MasterThermostatPriority: {
-                } break;
-                default:
-                    break;
-                }
-                if (EnableSystem) {
-                    if ((OutsideDryBulbTemp >= state.dataHVACVarRefFlow->VRF(VRFCond).MinOATCooling &&
-                         OutsideDryBulbTemp <= state.dataHVACVarRefFlow->VRF(VRFCond).MaxOATCooling) &&
-                        any(state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).CoolingCoilPresent)) {
-                        state.dataHVACVarRefFlow->CoolingLoad(VRFCond) = true;
-                    } else {
-                        warnOATLimitExceeded(state,
-                                             VRFCond,
-                                             OutsideDryBulbTemp,
-                                             "Heating",
-                                             state.dataHVACVarRefFlow->VRF(VRFCond).MinOATHeating,
-                                             state.dataHVACVarRefFlow->VRF(VRFCond).MaxOATHeating,
-                                             state.dataHVACVarRefFlow->VRF(VRFCond).HeatingMaxTempLimitIndex,
-                                             state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HeatingCoilAvailable);
-                    }
-                } else {
-                    warnOATLimitExceeded(state,
-                                         VRFCond,
-                                         OutsideDryBulbTemp,
-                                         "Heating",
-                                         state.dataHVACVarRefFlow->VRF(VRFCond).MinOATHeating,
-                                         state.dataHVACVarRefFlow->VRF(VRFCond).MaxOATHeating,
-                                         state.dataHVACVarRefFlow->VRF(VRFCond).HeatingMaxTempLimitIndex,
-                                         state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HeatingCoilAvailable);
-                }
-            }
+            checkOATLimitAndSwitchMode(state, VRFCond, TUListIndex, OutsideDryBulbTemp, false);
         }
 
     } // IF (GetCurrentScheduleValue(state, VRF(VRFCond)%SchedPtr) .EQ. 0.0) THEN
