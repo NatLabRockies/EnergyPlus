@@ -5167,6 +5167,16 @@ static void accumulateBeginDayNonCoinHeatMassFlow(EnergyPlusData &state,
     }
 }
 
+// Sum DesHeatVolFlow across the given terminal unit sizing indices.
+static Real64 sumDesHeatVolFlow(EnergyPlusData &state, int numZones, Array1D_int const &termUnitSizingIndices)
+{
+    Real64 total = 0.0;
+    for (int zoneNum = 1; zoneNum <= numZones; ++zoneNum) {
+        total += state.dataSize->TermUnitFinalZoneSizing(termUnitSizingIndices(zoneNum)).DesHeatVolFlow;
+    }
+    return total;
+}
+
 // Scale zone heating flows in EndSysSizingCalc when SysHeatSizingRat != 1.
 // Loops over the given zone index array and applies ventilation-load or user-input sizing.
 // When warnOnMissingOA is true (cooled-zones fallback path), a warning is emitted for zones
@@ -6051,17 +6061,12 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
                     // the MaxZoneOaFraction, then the SysSizing(AirLoopNum,state.dataSize->CurOverallSimDay)%DesHeatVolFlow
                     // variable will be out of sync with the
                     if (finalSysSizing.MaxZoneOAFraction > 0 && finalSysSizing.HeatAirDesMethod == AirflowSizingMethod::FromDDCalc) {
-                        SysHtgPeakAirflow = 0.0;
                         if (NumZonesHeated > 0) {
-                            for (int ZonesHeatedNum = 1; ZonesHeatedNum <= NumZonesHeated; ++ZonesHeatedNum) {
-                                int TermUnitSizingIndex = state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitHeatSizingIndex(ZonesHeatedNum);
-                                SysHtgPeakAirflow += state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).DesHeatVolFlow;
-                            }
+                            SysHtgPeakAirflow =
+                                sumDesHeatVolFlow(state, NumZonesHeated, state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitHeatSizingIndex);
                         } else {
-                            for (int ZonesHeatedNum = 1; ZonesHeatedNum <= NumZonesCooled; ++ZonesHeatedNum) {
-                                int TermUnitSizingIndex = state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex(ZonesHeatedNum);
-                                SysHtgPeakAirflow += state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).DesHeatVolFlow;
-                            }
+                            SysHtgPeakAirflow =
+                                sumDesHeatVolFlow(state, NumZonesCooled, state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex);
                         }
                     } else {
                         SysHtgPeakAirflow = sysSizing.DesHeatVolFlow;
