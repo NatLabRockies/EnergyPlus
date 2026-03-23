@@ -280,6 +280,55 @@ static void validateSpecAngCurve(EnergyPlusData &state,
     }
 }
 
+// Helper to load custom gas properties from input fields and validate them.
+// Loads conductivity, viscosity, specific heat coefficients (c0/c1/c2), molecular weight,
+// and specific heat ratio from rNumericArgs(2..12), then checks vis.c0, cp.c0, wght > 0.
+static void loadCustomGasProps(EnergyPlusData &state, MaterialGasMix *matGas, bool &ErrorsFound, ErrorObjectHeader const &eoh)
+{
+    auto &s_ipsc = state.dataIPShortCut;
+    matGas->gases[0].con.c0 = s_ipsc->rNumericArgs(2);
+    matGas->gases[0].con.c1 = s_ipsc->rNumericArgs(3);
+    matGas->gases[0].con.c2 = s_ipsc->rNumericArgs(4);
+    matGas->gases[0].vis.c0 = s_ipsc->rNumericArgs(5);
+    matGas->gases[0].vis.c1 = s_ipsc->rNumericArgs(6);
+    matGas->gases[0].vis.c2 = s_ipsc->rNumericArgs(7);
+    matGas->gases[0].cp.c0 = s_ipsc->rNumericArgs(8);
+    matGas->gases[0].cp.c1 = s_ipsc->rNumericArgs(9);
+    matGas->gases[0].cp.c2 = s_ipsc->rNumericArgs(10);
+    matGas->gases[0].wght = s_ipsc->rNumericArgs(11);
+    matGas->gases[0].specHeatRatio = s_ipsc->rNumericArgs(12);
+
+    if (matGas->gases[0].vis.c0 <= 0.0) {
+        ErrorsFound = true;
+        ShowSevereCustom(state, eoh, EnergyPlus::format("{} not > 0.0", s_ipsc->cNumericFieldNames(5)));
+    }
+    if (matGas->gases[0].cp.c0 <= 0.0) {
+        ErrorsFound = true;
+        ShowSevereCustom(state, eoh, EnergyPlus::format("{} not > 0.0", s_ipsc->cNumericFieldNames(8)));
+    }
+    if (matGas->gases[0].wght <= 0.0) {
+        ErrorsFound = true;
+        ShowSevereCustom(state, eoh, EnergyPlus::format("{} not > 0.0", s_ipsc->cNumericFieldNames(11)));
+    }
+}
+
+// Helper to compute the nominal resistance of a gas gap at room temperature.
+static void calcGasNominalR(EnergyPlusData &state, MaterialGasMix *matGas, bool &ErrorsFound, ErrorObjectHeader const &eoh)
+{
+    if (!ErrorsFound) {
+        Real64 DenomRGas = (matGas->gases[0].con.c0 + matGas->gases[0].con.c1 * 300.0 + matGas->gases[0].con.c2 * 90000.0);
+        if (DenomRGas > 0.0) {
+            matGas->NominalR = matGas->Thickness / DenomRGas;
+        } else {
+            ShowSevereCustom(
+                state,
+                eoh,
+                EnergyPlus::format("Nominal resistance of gap at room temperature calculated at a negative Conductivity=[{:.3R}].", DenomRGas));
+            ErrorsFound = true;
+        }
+    }
+}
+
 // Helper to call getObjectItem with the standard set of material input arguments.
 // Wraps the repetitive 12-argument call that appears for every material type.
 static void getMaterialInput(EnergyPlusData &state, int Loop, int &NumAlphas, int &NumNums, int &IOStat)
@@ -920,52 +969,6 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         }
     };
 
-    // Helper lambda to load custom gas properties from input fields and validate them.
-    // Loads conductivity, viscosity, specific heat coefficients (c0/c1/c2), molecular weight,
-    // and specific heat ratio from rNumericArgs(2..12), then checks vis.c0, cp.c0, wght > 0.
-    auto loadCustomGasProps = [&](MaterialGasMix *matGas, ErrorObjectHeader const &eoh) {
-        matGas->gases[0].con.c0 = s_ipsc->rNumericArgs(2);
-        matGas->gases[0].con.c1 = s_ipsc->rNumericArgs(3);
-        matGas->gases[0].con.c2 = s_ipsc->rNumericArgs(4);
-        matGas->gases[0].vis.c0 = s_ipsc->rNumericArgs(5);
-        matGas->gases[0].vis.c1 = s_ipsc->rNumericArgs(6);
-        matGas->gases[0].vis.c2 = s_ipsc->rNumericArgs(7);
-        matGas->gases[0].cp.c0 = s_ipsc->rNumericArgs(8);
-        matGas->gases[0].cp.c1 = s_ipsc->rNumericArgs(9);
-        matGas->gases[0].cp.c2 = s_ipsc->rNumericArgs(10);
-        matGas->gases[0].wght = s_ipsc->rNumericArgs(11);
-        matGas->gases[0].specHeatRatio = s_ipsc->rNumericArgs(12);
-
-        if (matGas->gases[0].vis.c0 <= 0.0) {
-            ErrorsFound = true;
-            ShowSevereCustom(state, eoh, EnergyPlus::format("{} not > 0.0", s_ipsc->cNumericFieldNames(5)));
-        }
-        if (matGas->gases[0].cp.c0 <= 0.0) {
-            ErrorsFound = true;
-            ShowSevereCustom(state, eoh, EnergyPlus::format("{} not > 0.0", s_ipsc->cNumericFieldNames(8)));
-        }
-        if (matGas->gases[0].wght <= 0.0) {
-            ErrorsFound = true;
-            ShowSevereCustom(state, eoh, EnergyPlus::format("{} not > 0.0", s_ipsc->cNumericFieldNames(11)));
-        }
-    };
-
-    // Helper lambda to compute the nominal resistance of a gas gap at room temperature.
-    auto calcGasNominalR = [&](MaterialGasMix *matGas, ErrorObjectHeader const &eoh) {
-        if (!ErrorsFound) {
-            Real64 DenomRGas = (matGas->gases[0].con.c0 + matGas->gases[0].con.c1 * 300.0 + matGas->gases[0].con.c2 * 90000.0);
-            if (DenomRGas > 0.0) {
-                matGas->NominalR = matGas->Thickness / DenomRGas;
-            } else {
-                ShowSevereCustom(
-                    state,
-                    eoh,
-                    EnergyPlus::format("Nominal resistance of gap at room temperature calculated at a negative Conductivity=[{:.3R}].", DenomRGas));
-                ErrorsFound = true;
-            }
-        }
-    };
-
     // Window gas materials (for gaps with a single gas)
 
     s_ipsc->cCurrentModuleObject = "WindowMaterial:Gas";
@@ -990,11 +993,11 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         initSingleGasMaterial(matGas);
 
         if (matGas->gases[0].type == GasType::Custom) {
-            loadCustomGasProps(matGas, eoh);
+            loadCustomGasProps(state, matGas, ErrorsFound, eoh);
         }
 
         // Nominal resistance of gap at room temperature
-        calcGasNominalR(matGas, eoh);
+        calcGasNominalR(state, matGas, ErrorsFound, eoh);
     }
     // Window gap materials (for gaps with a single gas for EquivalentLayer)
 
@@ -1025,11 +1028,11 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         }
 
         if (matGas->gases[0].type == GasType::Custom) {
-            loadCustomGasProps(matGas, eoh);
+            loadCustomGasProps(state, matGas, ErrorsFound, eoh);
         }
 
         // Nominal resistance of gap at room temperature
-        calcGasNominalR(matGas, eoh);
+        calcGasNominalR(state, matGas, ErrorsFound, eoh);
 
     } // for (Loop : W5MatEQL)
     // Window gas mixtures (for gaps with two or more gases)
