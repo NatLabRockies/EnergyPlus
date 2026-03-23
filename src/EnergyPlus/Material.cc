@@ -219,6 +219,67 @@ static void readFieldAndValidateRange01(EnergyPlusData &state, Real64 &outVar, i
     }
 }
 
+// Helper to validate a SpectralAndAngle curve: checks that the curve
+// exists, is 2-D, and has the required angle (0-90) and wavelength (0.1-4.0) ranges.
+static void validateSpecAngCurve(EnergyPlusData &state,
+                                 bool &ErrorsFound,
+                                 ErrorObjectHeader const &eoh,
+                                 int alphaFieldIdx,
+                                 Curve::Curve *&curvePtr,
+                                 Curve::Curve *inputLimitsOverride = nullptr)
+{
+    auto &s_ipsc = state.dataIPShortCut;
+    if (s_ipsc->lAlphaFieldBlanks(alphaFieldIdx)) {
+        ErrorsFound = true;
+        ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(alphaFieldIdx), s_ipsc->cAlphaFieldNames(2), "SpectralAndAngle");
+    } else if ((curvePtr = Curve::GetCurve(state, s_ipsc->cAlphaArgs(alphaFieldIdx))) == nullptr) {
+        ErrorsFound = true;
+        ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(alphaFieldIdx), s_ipsc->cAlphaArgs(alphaFieldIdx));
+    } else if (curvePtr->numDims != 2) {
+        Curve::ShowSevereCurveDims(state, eoh, s_ipsc->cAlphaFieldNames(alphaFieldIdx), s_ipsc->cAlphaArgs(alphaFieldIdx), "2", curvePtr->numDims);
+        ErrorsFound = true;
+    } else {
+        Curve::Curve *limitsSource = (inputLimitsOverride != nullptr) ? inputLimitsOverride : curvePtr;
+        Real64 minAng = limitsSource->inputLimits[0].min;
+        Real64 maxAng = limitsSource->inputLimits[0].max;
+        Real64 minLam = limitsSource->inputLimits[1].min;
+        Real64 maxLam = limitsSource->inputLimits[1].max;
+
+        if (minAng > 1.0e-6) {
+            ErrorsFound = true;
+            ShowSevereCustom(state,
+                             eoh,
+                             EnergyPlus::format("{} requires the minimum value = 0.0 in the entered table name={}",
+                                                s_ipsc->cAlphaFieldNames(alphaFieldIdx),
+                                                s_ipsc->cAlphaArgs(alphaFieldIdx)));
+        }
+        if (std::abs(maxAng - 90.0) > 1.0e-6) {
+            ErrorsFound = true;
+            ShowSevereCustom(state,
+                             eoh,
+                             EnergyPlus::format("{} requires the maximum value = 90.0 in the entered table name={}",
+                                                s_ipsc->cAlphaFieldNames(alphaFieldIdx),
+                                                s_ipsc->cAlphaArgs(alphaFieldIdx)));
+        }
+        if (minLam < 0.1) {
+            ErrorsFound = true;
+            ShowSevereCustom(state,
+                             eoh,
+                             EnergyPlus::format("{} requires the minimum value = 0.1 micron in the entered table name={}",
+                                                s_ipsc->cAlphaFieldNames(alphaFieldIdx),
+                                                s_ipsc->cAlphaArgs(alphaFieldIdx)));
+        }
+        if (maxLam > 4.0) {
+            ErrorsFound = true;
+            ShowSevereCustom(state,
+                             eoh,
+                             EnergyPlus::format("{} requires the maximum value = 4.0 microns in the entered table name={}",
+                                                s_ipsc->cAlphaFieldNames(alphaFieldIdx),
+                                                s_ipsc->cAlphaArgs(alphaFieldIdx)));
+        }
+    }
+}
+
 // Helper to call getObjectItem with the standard set of material input arguments.
 // Wraps the repetitive 12-argument call that appears for every material type.
 static void getMaterialInput(EnergyPlusData &state, int Loop, int &NumAlphas, int &NumNums, int &IOStat)
@@ -681,66 +742,11 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         }
 
         // Get SpectralAndAngle table names
-        // Helper lambda to validate a SpectralAndAngle curve: checks that the curve
-        // exists, is 2-D, and has the required angle (0-90) and wavelength (0.1-4.0) ranges.
-        auto validateSpecAngCurve = [&](int alphaFieldIdx, Curve::Curve *&curvePtr, Curve::Curve *inputLimitsOverride = nullptr) {
-            if (s_ipsc->lAlphaFieldBlanks(alphaFieldIdx)) {
-                ErrorsFound = true;
-                ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(alphaFieldIdx), s_ipsc->cAlphaFieldNames(2), "SpectralAndAngle");
-            } else if ((curvePtr = Curve::GetCurve(state, s_ipsc->cAlphaArgs(alphaFieldIdx))) == nullptr) {
-                ErrorsFound = true;
-                ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(alphaFieldIdx), s_ipsc->cAlphaArgs(alphaFieldIdx));
-            } else if (curvePtr->numDims != 2) {
-                Curve::ShowSevereCurveDims(
-                    state, eoh, s_ipsc->cAlphaFieldNames(alphaFieldIdx), s_ipsc->cAlphaArgs(alphaFieldIdx), "2", curvePtr->numDims);
-                ErrorsFound = true;
-            } else {
-                Curve::Curve *limitsSource = (inputLimitsOverride != nullptr) ? inputLimitsOverride : curvePtr;
-                Real64 minAng = limitsSource->inputLimits[0].min;
-                Real64 maxAng = limitsSource->inputLimits[0].max;
-                Real64 minLam = limitsSource->inputLimits[1].min;
-                Real64 maxLam = limitsSource->inputLimits[1].max;
-
-                if (minAng > 1.0e-6) {
-                    ErrorsFound = true;
-                    ShowSevereCustom(state,
-                                     eoh,
-                                     EnergyPlus::format("{} requires the minimum value = 0.0 in the entered table name={}",
-                                                        s_ipsc->cAlphaFieldNames(alphaFieldIdx),
-                                                        s_ipsc->cAlphaArgs(alphaFieldIdx)));
-                }
-                if (std::abs(maxAng - 90.0) > 1.0e-6) {
-                    ErrorsFound = true;
-                    ShowSevereCustom(state,
-                                     eoh,
-                                     EnergyPlus::format("{} requires the maximum value = 90.0 in the entered table name={}",
-                                                        s_ipsc->cAlphaFieldNames(alphaFieldIdx),
-                                                        s_ipsc->cAlphaArgs(alphaFieldIdx)));
-                }
-                if (minLam < 0.1) {
-                    ErrorsFound = true;
-                    ShowSevereCustom(state,
-                                     eoh,
-                                     EnergyPlus::format("{} requires the minimum value = 0.1 micron in the entered table name={}",
-                                                        s_ipsc->cAlphaFieldNames(alphaFieldIdx),
-                                                        s_ipsc->cAlphaArgs(alphaFieldIdx)));
-                }
-                if (maxLam > 4.0) {
-                    ErrorsFound = true;
-                    ShowSevereCustom(state,
-                                     eoh,
-                                     EnergyPlus::format("{} requires the maximum value = 4.0 microns in the entered table name={}",
-                                                        s_ipsc->cAlphaFieldNames(alphaFieldIdx),
-                                                        s_ipsc->cAlphaArgs(alphaFieldIdx)));
-                }
-            }
-        };
-
         if (mat->windowOpticalData == Window::OpticalDataModel::SpectralAndAngle) {
-            validateSpecAngCurve(5, mat->GlassSpecAngTransCurve);
-            validateSpecAngCurve(6, mat->GlassSpecAngFReflCurve);
+            validateSpecAngCurve(state, ErrorsFound, eoh, 5, mat->GlassSpecAngTransCurve);
+            validateSpecAngCurve(state, ErrorsFound, eoh, 6, mat->GlassSpecAngFReflCurve);
             // POSSIBLE BUG: original code validates BReflCurve using FReflCurve's inputLimits
-            validateSpecAngCurve(7, mat->GlassSpecAngBReflCurve, mat->GlassSpecAngFReflCurve);
+            validateSpecAngCurve(state, ErrorsFound, eoh, 7, mat->GlassSpecAngBReflCurve, mat->GlassSpecAngFReflCurve);
         }
     }
 
