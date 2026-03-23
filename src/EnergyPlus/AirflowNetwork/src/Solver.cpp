@@ -632,14 +632,7 @@ namespace AirflowNetwork {
                 MultizoneCompExhaustFanData(i).StandardW = refW;
 
                 // Add the element to the lookup table, check for name overlaps
-                if (elements.find(thisObjectName) == elements.end()) {
-                    elements[thisObjectName] = &MultizoneCompExhaustFanData(i); // Yet another workaround
-                } else {
-                    ShowSevereError(
-                        m_state,
-                        EnergyPlus::format(
-                            "{}: {}: Duplicated airflow element names are found = \"{}\".", RoutineName, CurrentModuleObject, thisObjectName));
-                    // ShowContinueError(state, "A unique component name is required in both objects " + CompName(1) + " and " + CompName(2));
+                if (!addElementToLookup(m_state, RoutineName, CurrentModuleObject, thisObjectName, &MultizoneCompExhaustFanData(i), elements)) {
                     success = false;
                 }
 
@@ -704,14 +697,7 @@ namespace AirflowNetwork {
                 DisSysCompOutdoorAirData(i).StandardW = refW;
 
                 // Add the element to the lookup table, check for name overlaps
-                if (elements.find(thisObjectName) == elements.end()) {
-                    elements[thisObjectName] = &DisSysCompOutdoorAirData(i); // Yet another workaround
-                } else {
-                    ShowSevereError(
-                        m_state,
-                        EnergyPlus::format(
-                            "{}: {}: Duplicated airflow element names are found = \"{}\".", RoutineName, CurrentModuleObject, thisObjectName));
-                    // ShowContinueError(state, "A unique component name is required in both objects " + CompName(1) + " and " + CompName(2));
+                if (!addElementToLookup(m_state, RoutineName, CurrentModuleObject, thisObjectName, &DisSysCompOutdoorAirData(i), elements)) {
                     success = false;
                 }
 
@@ -771,14 +757,7 @@ namespace AirflowNetwork {
                 DisSysCompReliefAirData(i).StandardW = refW;
 
                 // Add the element to the lookup table, check for name overlaps
-                if (elements.find(thisObjectName) == elements.end()) {
-                    elements[thisObjectName] = &DisSysCompReliefAirData(i); // Yet another workaround
-                } else {
-                    ShowSevereError(
-                        m_state,
-                        EnergyPlus::format(
-                            "{}: {}: Duplicated airflow element names are found = \"{}\".", RoutineName, CurrentModuleObject, thisObjectName));
-                    // ShowContinueError(state, "A unique component name is required in both objects " + CompName(1) + " and " + CompName(2));
+                if (!addElementToLookup(m_state, RoutineName, CurrentModuleObject, thisObjectName, &DisSysCompReliefAirData(i), elements)) {
                     success = false;
                 }
 
@@ -1055,14 +1034,7 @@ namespace AirflowNetwork {
                 }
 
                 // Add the element to the lookup table, check for name overlaps
-                if (elements.find(thisObjectName) == elements.end()) {
-                    elements[thisObjectName] = &MultizoneCompDetOpeningData(i); // Yet another workaround
-                } else {
-                    ShowSevereError(
-                        m_state,
-                        EnergyPlus::format(
-                            "{}: {}: Duplicated airflow element names are found = \"{}\".", RoutineName, CurrentModuleObject, thisObjectName));
-                    // ShowContinueError(state, "A unique component name is required in both objects " + CompName(1) + " and " + CompName(2));
+                if (!addElementToLookup(m_state, RoutineName, CurrentModuleObject, thisObjectName, &MultizoneCompDetOpeningData(i), elements)) {
                     success = false;
                 }
 
@@ -1099,14 +1071,7 @@ namespace AirflowNetwork {
                 MultizoneCompSimpleOpeningData(i).DischCoeff = dischargeCoeff; // Discharge coefficient at full opening
 
                 // Add the element to the lookup table, check for name overlaps
-                if (elements.find(thisObjectName) == elements.end()) {
-                    elements[thisObjectName] = &MultizoneCompSimpleOpeningData(i); // Yet another workaround
-                } else {
-                    ShowSevereError(
-                        m_state,
-                        EnergyPlus::format(
-                            "{}: {}: Duplicated airflow element names are found = \"{}\".", RoutineName, CurrentModuleObject, thisObjectName));
-                    // ShowContinueError(state, "A unique component name is required in both objects " + CompName(1) + " and " + CompName(2));
+                if (!addElementToLookup(m_state, RoutineName, CurrentModuleObject, thisObjectName, &MultizoneCompSimpleOpeningData(i), elements)) {
                     success = false;
                 }
 
@@ -1146,14 +1111,7 @@ namespace AirflowNetwork {
                 MultizoneCompHorOpeningData(i).DischCoeff = dischargeCoeff; // Discharge coefficient at full opening
 
                 // Add the element to the lookup table, check for name overlaps
-                if (elements.find(thisObjectName) == elements.end()) {
-                    elements[thisObjectName] = &MultizoneCompHorOpeningData(i); // Yet another workaround
-                } else {
-                    ShowSevereError(
-                        m_state,
-                        EnergyPlus::format(
-                            "{}: {}: Duplicated airflow element names are found = \"{}\".", RoutineName, CurrentModuleObject, thisObjectName));
-                    // ShowContinueError(state, "A unique component name is required in both objects " + CompName(1) + " and " + CompName(2));
+                if (!addElementToLookup(m_state, RoutineName, CurrentModuleObject, thisObjectName, &MultizoneCompHorOpeningData(i), elements)) {
                     success = false;
                 }
 
@@ -1199,13 +1157,7 @@ namespace AirflowNetwork {
                 MultizoneSurfaceELAData(i).TestDisCoef = 0.0;     // Testing Discharge coefficient
 
                 // Add the element to the lookup table, check for name overlaps
-                if (elements.find(thisObjectName) == elements.end()) {
-                    elements[thisObjectName] = &MultizoneSurfaceELAData(i); // Yet another workaround
-                } else {
-                    ShowSevereError(
-                        m_state,
-                        EnergyPlus::format(
-                            "{}: {}: Duplicated airflow element names are found = \"{}\".", RoutineName, CurrentModuleObject, thisObjectName));
+                if (!addElementToLookup(m_state, RoutineName, CurrentModuleObject, thisObjectName, &MultizoneSurfaceELAData(i), elements)) {
                     success = false;
                 }
 
@@ -1291,14 +1243,7 @@ namespace AirflowNetwork {
                 DisSysCompLeakData(i).FlowExpo = expnt;      // Air Mass Flow exponent
 
                 // Add the element to the lookup table, check for name overlaps
-                if (elements.find(thisObjectName) == elements.end()) {
-                    elements[thisObjectName] = &DisSysCompLeakData(i); // Yet another workaround
-                } else {
-                    ShowSevereError(
-                        m_state,
-                        EnergyPlus::format(
-                            "{}: {}: Duplicated airflow element names are found = \"{}\".", RoutineName, CurrentModuleObject, thisObjectName));
-                    // ShowContinueError(state, "A unique component name is required in both objects " + CompName(1) + " and " + CompName(2));
+                if (!addElementToLookup(m_state, RoutineName, CurrentModuleObject, thisObjectName, &DisSysCompLeakData(i), elements)) {
                     success = false;
                 }
 
@@ -1334,14 +1279,7 @@ namespace AirflowNetwork {
                 DisSysCompELRData(i).FlowExpo = expnt;                                  // Air Mass Flow exponent
 
                 // Add the element to the lookup table, check for name overlaps
-                if (elements.find(thisObjectName) == elements.end()) {
-                    elements[thisObjectName] = &DisSysCompELRData(i); // Yet another workaround
-                } else {
-                    ShowSevereError(
-                        m_state,
-                        EnergyPlus::format(
-                            "{}: {}: Duplicated airflow element names are found = \"{}\".", RoutineName, CurrentModuleObject, thisObjectName));
-                    // ShowContinueError(state, "A unique component name is required in both objects " + CompName(1) + " and " + CompName(2));
+                if (!addElementToLookup(m_state, RoutineName, CurrentModuleObject, thisObjectName, &DisSysCompELRData(i), elements)) {
                     success = false;
                 }
 
@@ -1411,14 +1349,7 @@ namespace AirflowNetwork {
                 DisSysCompDuctData(i).g = DisSysCompDuctData(i).A1;                                    // 1/sqrt(Darcy friction factor)
 
                 // Add the element to the lookup table, check for name overlaps
-                if (elements.find(thisObjectName) == elements.end()) {
-                    elements[thisObjectName] = &DisSysCompDuctData(i); // Yet another workaround
-                } else {
-                    ShowSevereError(
-                        m_state,
-                        EnergyPlus::format(
-                            "{}: {}: Duplicated airflow element names are found = \"{}\".", RoutineName, CurrentModuleObject, thisObjectName));
-                    // ShowContinueError(state, "A unique component name is required in both objects " + CompName(1) + " and " + CompName(2));
+                if (!addElementToLookup(m_state, RoutineName, CurrentModuleObject, thisObjectName, &DisSysCompDuctData(i), elements)) {
                     success = false;
                 }
 
@@ -1545,13 +1476,7 @@ namespace AirflowNetwork {
                 DisSysCompCVFData(i).OutletNode = outletNode;
 
                 // Add the element to the lookup table, check for name overlaps
-                if (elements.find(fan_name) == elements.end()) {
-                    elements[fan_name] = &DisSysCompCVFData(i); // Yet another workaround
-                } else {
-                    ShowSevereError(m_state,
-                                    EnergyPlus::format(
-                                        "{}: {}: Duplicated airflow element names are found = \"{}\".", RoutineName, CurrentModuleObject, fan_name));
-                    // ShowContinueError(state, "A unique component name is required in both objects " + CompName(1) + " and " + CompName(2));
+                if (!addElementToLookup(m_state, RoutineName, CurrentModuleObject, fan_name, &DisSysCompCVFData(i), elements)) {
                     success = false;
                 }
 
@@ -1583,15 +1508,7 @@ namespace AirflowNetwork {
                 DisSysCompCoilData(i).hydraulicDiameter = D;             // Air path hydraulic diameter
 
                 // Add the element to the lookup table, check for name overlaps
-                if (elements.find(DisSysCompCoilData(i).name) == elements.end()) {
-                    elements[DisSysCompCoilData(i).name] = &DisSysCompCoilData(i); // Yet another workaround
-                } else {
-                    ShowSevereError(m_state,
-                                    EnergyPlus::format("{}: {}: Duplicated airflow element names are found = \"{}\".",
-                                                       RoutineName,
-                                                       CurrentModuleObject,
-                                                       DisSysCompCoilData(i).name));
-                    // ShowContinueError(state, "A unique component name is required in both objects " + CompName(1) + " and " + CompName(2));
+                if (!addElementToLookup(m_state, RoutineName, CurrentModuleObject, DisSysCompCoilData(i).name, &DisSysCompCoilData(i), elements)) {
                     success = false;
                 }
 
@@ -1624,15 +1541,7 @@ namespace AirflowNetwork {
                 DisSysCompHXData(i).CoilParentExists = HVACHXAssistedCoolingCoil::VerifyHeatExchangerParent(m_state, hx_type, hx_name);
 
                 // Add the element to the lookup table, check for name overlaps
-                if (elements.find(DisSysCompHXData(i).name) == elements.end()) {
-                    elements[DisSysCompHXData(i).name] = &DisSysCompHXData(i); // Yet another workaround
-                } else {
-                    ShowSevereError(m_state,
-                                    EnergyPlus::format("{}: {}: Duplicated airflow element names are found = \"{}\".",
-                                                       RoutineName,
-                                                       CurrentModuleObject,
-                                                       DisSysCompHXData(i).name));
-                    // ShowContinueError(state, "A unique component name is required in both objects " + CompName(1) + " and " + CompName(2));
+                if (!addElementToLookup(m_state, RoutineName, CurrentModuleObject, DisSysCompHXData(i).name, &DisSysCompHXData(i), elements)) {
                     success = false;
                 }
                 ++i;
@@ -1663,15 +1572,8 @@ namespace AirflowNetwork {
                 DisSysCompTermUnitData(i).hydraulicDiameter = D;           // Air path hydraulic diameter
 
                 // Add the element to the lookup table, check for name overlaps
-                if (elements.find(DisSysCompTermUnitData(i).name) == elements.end()) {
-                    elements[DisSysCompTermUnitData(i).name] = &DisSysCompTermUnitData(i); // Yet another workaround
-                } else {
-                    ShowSevereError(m_state,
-                                    EnergyPlus::format("{}: {}: Duplicated airflow element names are found = \"{}\".",
-                                                       RoutineName,
-                                                       CurrentModuleObject,
-                                                       DisSysCompTermUnitData(i).name));
-                    // ShowContinueError(state, "A unique component name is required in both objects " + CompName(1) + " and " + CompName(2));
+                if (!addElementToLookup(
+                        m_state, RoutineName, CurrentModuleObject, DisSysCompTermUnitData(i).name, &DisSysCompTermUnitData(i), elements)) {
                     success = false;
                 }
 
@@ -1699,14 +1601,7 @@ namespace AirflowNetwork {
                 DisSysCompCPDData(i).DP = dp;               // Pressure difference across the component
 
                 // Add the element to the lookup table, check for name overlaps
-                if (elements.find(thisObjectName) == elements.end()) {
-                    elements[thisObjectName] = &DisSysCompCPDData(i); // Yet another workaround
-                } else {
-                    ShowSevereError(
-                        m_state,
-                        EnergyPlus::format(
-                            "{}: {}: Duplicated airflow element names are found = \"{}\".", RoutineName, CurrentModuleObject, thisObjectName));
-                    // ShowContinueError(state, "A unique component name is required in both objects " + CompName(1) + " and " + CompName(2));
+                if (!addElementToLookup(m_state, RoutineName, CurrentModuleObject, thisObjectName, &DisSysCompCPDData(i), elements)) {
                     success = false;
                 }
 
