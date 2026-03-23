@@ -5573,6 +5573,96 @@ static void accumulateNonCoinHeatZoneData(EnergyPlusData &state,
     }
 }
 
+// Apply the user-input cooling sizing ratio to final system sizing: scale mass flows, recompute
+// timestep capacities, and adjust zone cooling flows.  Extracted from the EndSysSizingCalc block.
+static void applyCoolSizingRat(EnergyPlusData &state,
+                               DataSizing::SystemSizingData &finalSysSizing,
+                               DataSizing::SystemSizingData const &calcSysSizing,
+                               int AirLoopNum,
+                               int NumZonesCooled,
+                               int numOfTimeStepInDay,
+                               Real64 SysCoolSizingRat)
+{
+    using Psychrometrics::PsyCpAirFnW;
+    using Psychrometrics::PsyHFnTdbW;
+
+    finalSysSizing.CoinCoolMassFlow = SysCoolSizingRat * calcSysSizing.CoinCoolMassFlow;
+    finalSysSizing.NonCoinCoolMassFlow = SysCoolSizingRat * calcSysSizing.NonCoinCoolMassFlow;
+    finalSysSizing.DesCoolVolFlow = SysCoolSizingRat * calcSysSizing.DesCoolVolFlow;
+    finalSysSizing.MassFlowAtCoolPeak = SysCoolSizingRat * calcSysSizing.MassFlowAtCoolPeak;
+
+    if (finalSysSizing.DesCoolVolFlow > 0.0) {
+        Real64 RhoAir = state.dataEnvrn->StdRhoAir;
+
+        for (int TimeStepIndex = 1; TimeStepIndex <= numOfTimeStepInDay; ++TimeStepIndex) {
+            if (calcSysSizing.CoolFlowSeq(TimeStepIndex) > 0.0) {
+                finalSysSizing.CoolFlowSeq(TimeStepIndex) = SysCoolSizingRat * calcSysSizing.CoolFlowSeq(TimeStepIndex);
+                Real64 OutAirFrac;
+                if (finalSysSizing.CoolOAOption == DataSizing::OAControl::MinOA) {
+                    OutAirFrac = RhoAir * finalSysSizing.DesOutAirVolFlow / finalSysSizing.CoolFlowSeq(TimeStepIndex);
+                    OutAirFrac = min(1.0, max(0.0, OutAirFrac));
+                } else {
+                    OutAirFrac = 1.0;
+                }
+                Real64 SysCoolMixTemp = finalSysSizing.SysCoolOutTempSeq(TimeStepIndex) * OutAirFrac +
+                                        finalSysSizing.SysCoolRetTempSeq(TimeStepIndex) * (1.0 - OutAirFrac);
+                Real64 SysCoolMixHumRat = finalSysSizing.SysCoolOutHumRatSeq(TimeStepIndex) * OutAirFrac +
+                                          finalSysSizing.SysCoolRetHumRatSeq(TimeStepIndex) * (1.0 - OutAirFrac);
+                Real64 SysSensCoolCap = PsyCpAirFnW(DataPrecisionGlobals::constant_zero) * finalSysSizing.CoolFlowSeq(TimeStepIndex) *
+                                        (SysCoolMixTemp - finalSysSizing.CoolSupTemp);
+                SysSensCoolCap = max(0.0, SysSensCoolCap);
+                Real64 SysTotCoolCap =
+                    finalSysSizing.CoolFlowSeq(TimeStepIndex) *
+                    (PsyHFnTdbW(SysCoolMixTemp, SysCoolMixHumRat) - PsyHFnTdbW(finalSysSizing.CoolSupTemp, finalSysSizing.CoolSupHumRat));
+                SysTotCoolCap = max(0.0, SysTotCoolCap);
+                finalSysSizing.SensCoolCapSeq(TimeStepIndex) = SysSensCoolCap;
+                finalSysSizing.TotCoolCapSeq(TimeStepIndex) = SysTotCoolCap;
+            }
+        }
+
+        Real64 OutAirFrac;
+        if (finalSysSizing.CoolOAOption == DataSizing::OAControl::MinOA) {
+            OutAirFrac = finalSysSizing.DesOutAirVolFlow / finalSysSizing.DesCoolVolFlow;
+            OutAirFrac = min(1.0, max(0.0, OutAirFrac));
+        } else {
+            OutAirFrac = 1.0;
+        }
+        finalSysSizing.MixTempAtCoolPeak = finalSysSizing.OutTempAtCoolPeak * OutAirFrac + finalSysSizing.RetTempAtCoolPeak * (1.0 - OutAirFrac);
+        finalSysSizing.MixHumRatAtCoolPeak =
+            finalSysSizing.OutHumRatAtCoolPeak * OutAirFrac + finalSysSizing.RetHumRatAtCoolPeak * (1.0 - OutAirFrac);
+        finalSysSizing.SensCoolCap = PsyCpAirFnW(DataPrecisionGlobals::constant_zero) * RhoAir * finalSysSizing.DesCoolVolFlow *
+                                     (finalSysSizing.MixTempAtCoolPeak - finalSysSizing.CoolSupTemp);
+        finalSysSizing.SensCoolCap = max(0.0, finalSysSizing.SensCoolCap);
+        finalSysSizing.TotCoolCap = RhoAir * finalSysSizing.DesCoolVolFlow *
+                                    (PsyHFnTdbW(finalSysSizing.MixTempAtCoolPeak, finalSysSizing.MixHumRatAtCoolPeak) -
+                                     PsyHFnTdbW(finalSysSizing.CoolSupTemp, finalSysSizing.CoolSupHumRat));
+        finalSysSizing.TotCoolCap = max(0.0, finalSysSizing.TotCoolCap);
+    }
+
+    // take account of the user input system flow rates and alter the zone flow rates to match
+    for (int ZonesCooledNum = 1; ZonesCooledNum <= NumZonesCooled; ++ZonesCooledNum) {
+        int TermUnitSizingIndex = state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex(ZonesCooledNum);
+        if ((SysCoolSizingRat != 1.0) && (finalSysSizing.loadSizingType == DataSizing::LoadSizing::Ventilation) &&
+            (state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).MinOA > 0.0)) {
+            // size on ventilation load
+            Real64 ZoneOARatio;
+            if (state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).MinOA > 0.0) {
+                ZoneOARatio = state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).MinOA /
+                              max(state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).DesCoolVolFlow,
+                                  state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).MinOA);
+                ZoneOARatio *= (1.0 + state.dataSize->TermUnitSizing(TermUnitSizingIndex).InducRat);
+            } else {
+                ZoneOARatio = 0.0;
+            }
+            state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).scaleZoneCooling(ZoneOARatio);
+        } else if ((SysCoolSizingRat > 1.0) ||
+                   (SysCoolSizingRat < 1.0 && finalSysSizing.SizingOption == DataSizing::SizingConcurrence::NonCoincident)) {
+            // size on user input system design flows
+            state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).scaleZoneCooling(SysCoolSizingRat);
+        }
+    }
+}
+
 // Accumulate non-coincident cooling zone data: weighted return temps, outside air conditions,
 // and compute mixed-air conditions and cooling capacity.  Parallels accumulateNonCoinHeatZoneData.
 static void accumulateNonCoinCoolZoneData(EnergyPlusData &state,
@@ -5761,7 +5851,6 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
     Real64 SysDOASLatAdd;      // system DOAS latent heat addition rate [W]
     Real64 SysCoolSizingRat;   // ratio of user input design flow for cooling divided by calculated design cooling flow
     Real64 SysHeatSizingRat;   // ratio of user input design flow for heating divided by calculated design heating flow
-    Real64 ZoneOARatio;        // ratio of zone OA flow to zone design cooling or heating flow
     Real64 RetTempRise;        // difference between zone return temperature and zone temperature [delta K]
     Real64 SysCoolingEv;       // System level ventilation effectiveness for cooling mode
     Real64 SysHeatingEv;       // System level ventilation effectiveness for heating mode
@@ -6636,81 +6725,7 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
 
             // Calculate the new user modified system design quantities
             if (std::abs(SysCoolSizingRat - 1.0) > 0.00001) {
-
-                finalSysSizing.CoinCoolMassFlow = SysCoolSizingRat * calcSysSizing.CoinCoolMassFlow;
-                finalSysSizing.NonCoinCoolMassFlow = SysCoolSizingRat * calcSysSizing.NonCoinCoolMassFlow;
-                finalSysSizing.DesCoolVolFlow = SysCoolSizingRat * calcSysSizing.DesCoolVolFlow;
-                finalSysSizing.MassFlowAtCoolPeak = SysCoolSizingRat * calcSysSizing.MassFlowAtCoolPeak;
-
-                if (finalSysSizing.DesCoolVolFlow > 0.0) {
-
-                    for (TimeStepIndex = 1; TimeStepIndex <= numOfTimeStepInDay; ++TimeStepIndex) {
-
-                        if (calcSysSizing.CoolFlowSeq(TimeStepIndex) > 0.0) {
-
-                            finalSysSizing.CoolFlowSeq(TimeStepIndex) = SysCoolSizingRat * calcSysSizing.CoolFlowSeq(TimeStepIndex);
-                            if (finalSysSizing.CoolOAOption == OAControl::MinOA) {
-                                OutAirFrac = RhoAir * finalSysSizing.DesOutAirVolFlow / finalSysSizing.CoolFlowSeq(TimeStepIndex);
-                                OutAirFrac = min(1.0, max(0.0, OutAirFrac));
-                            } else {
-                                OutAirFrac = 1.0;
-                            }
-                            SysCoolMixTemp = finalSysSizing.SysCoolOutTempSeq(TimeStepIndex) * OutAirFrac +
-                                             finalSysSizing.SysCoolRetTempSeq(TimeStepIndex) * (1.0 - OutAirFrac);
-                            SysCoolMixHumRat = finalSysSizing.SysCoolOutHumRatSeq(TimeStepIndex) * OutAirFrac +
-                                               finalSysSizing.SysCoolRetHumRatSeq(TimeStepIndex) * (1.0 - OutAirFrac);
-                            SysSensCoolCap = PsyCpAirFnW(DataPrecisionGlobals::constant_zero) * finalSysSizing.CoolFlowSeq(TimeStepIndex) *
-                                             (SysCoolMixTemp - finalSysSizing.CoolSupTemp);
-                            SysSensCoolCap = max(0.0, SysSensCoolCap);
-                            SysTotCoolCap =
-                                finalSysSizing.CoolFlowSeq(TimeStepIndex) *
-                                (PsyHFnTdbW(SysCoolMixTemp, SysCoolMixHumRat) - PsyHFnTdbW(finalSysSizing.CoolSupTemp, finalSysSizing.CoolSupHumRat));
-                            SysTotCoolCap = max(0.0, SysTotCoolCap);
-                            finalSysSizing.SensCoolCapSeq(TimeStepIndex) = SysSensCoolCap;
-                            finalSysSizing.TotCoolCapSeq(TimeStepIndex) = SysTotCoolCap;
-                        }
-                    }
-
-                    if (finalSysSizing.CoolOAOption == OAControl::MinOA) {
-                        OutAirFrac = finalSysSizing.DesOutAirVolFlow / finalSysSizing.DesCoolVolFlow;
-                        OutAirFrac = min(1.0, max(0.0, OutAirFrac));
-                    } else {
-                        OutAirFrac = 1.0;
-                    }
-                    finalSysSizing.MixTempAtCoolPeak =
-                        finalSysSizing.OutTempAtCoolPeak * OutAirFrac + finalSysSizing.RetTempAtCoolPeak * (1.0 - OutAirFrac);
-                    finalSysSizing.MixHumRatAtCoolPeak =
-                        finalSysSizing.OutHumRatAtCoolPeak * OutAirFrac + finalSysSizing.RetHumRatAtCoolPeak * (1.0 - OutAirFrac);
-                    finalSysSizing.SensCoolCap = PsyCpAirFnW(DataPrecisionGlobals::constant_zero) * RhoAir * finalSysSizing.DesCoolVolFlow *
-                                                 (finalSysSizing.MixTempAtCoolPeak - finalSysSizing.CoolSupTemp);
-                    finalSysSizing.SensCoolCap = max(0.0, finalSysSizing.SensCoolCap);
-                    finalSysSizing.TotCoolCap = RhoAir * finalSysSizing.DesCoolVolFlow *
-                                                (PsyHFnTdbW(finalSysSizing.MixTempAtCoolPeak, finalSysSizing.MixHumRatAtCoolPeak) -
-                                                 PsyHFnTdbW(finalSysSizing.CoolSupTemp, finalSysSizing.CoolSupHumRat));
-                    finalSysSizing.TotCoolCap = max(0.0, finalSysSizing.TotCoolCap);
-                }
-
-                // take account of the user input system flow rates and alter the zone flow rates to match
-                for (int ZonesCooledNum = 1; ZonesCooledNum <= NumZonesCooled; ++ZonesCooledNum) {
-                    int TermUnitSizingIndex = state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex(ZonesCooledNum);
-                    if ((SysCoolSizingRat != 1.0) && (finalSysSizing.loadSizingType == DataSizing::LoadSizing::Ventilation) &&
-                        (state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).MinOA > 0.0)) {
-                        // size on ventilation load
-                        if (state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).MinOA > 0.0) {
-                            ZoneOARatio = state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).MinOA /
-                                          max(state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).DesCoolVolFlow,
-                                              state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).MinOA);
-                            ZoneOARatio *= (1.0 + state.dataSize->TermUnitSizing(TermUnitSizingIndex).InducRat);
-                        } else {
-                            ZoneOARatio = 0.0;
-                        }
-                        state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).scaleZoneCooling(ZoneOARatio);
-                    } else if ((SysCoolSizingRat > 1.0) ||
-                               (SysCoolSizingRat < 1.0 && finalSysSizing.SizingOption == DataSizing::SizingConcurrence::NonCoincident)) {
-                        // size on user input system design flows
-                        state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex).scaleZoneCooling(SysCoolSizingRat);
-                    }
-                }
+                applyCoolSizingRat(state, finalSysSizing, calcSysSizing, AirLoopNum, NumZonesCooled, numOfTimeStepInDay, SysCoolSizingRat);
             }
 
             if (std::abs(SysHeatSizingRat - 1.0) > 0.00001) {
