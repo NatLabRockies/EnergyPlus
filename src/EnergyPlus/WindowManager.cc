@@ -966,7 +966,8 @@ namespace Window {
             Real64 const tsolDiff_2(pow_2(tsolDiff));
             Real64 const tvisDiff_2(pow_2(tvisDiff));
 
-            if (IntShade) {
+            // Extract shade material properties common to IntShade, ExtShade, and BGShade
+            if (ShadeOn) {
                 auto const *matSh = dynamic_cast<Material::MaterialShade const *>(s_mat->materials(constr.LayerPoint(ShadeLayNum)));
                 assert(matSh != nullptr);
                 ShadeAbs = matSh->AbsorpSolar;
@@ -979,7 +980,9 @@ namespace Window {
                 tsh = ShadeTrans;
                 tshv = ShadeTransVis;
                 ash = ShadeAbs;
+            }
 
+            if (IntShade) {
                 // Correction factors for inter-reflections between glass and shading device
                 ShadeReflFac = 1.0 / (1.0 - ShadeRefl * constr.ReflectSolDiffBack);
                 ShadeReflFacVis = 1.0 / (1.0 - ShadeReflVis * constr.ReflectVisDiffBack);
@@ -1017,19 +1020,6 @@ namespace Window {
 
                 // Exterior Shade
             } else if (ExtShade) {
-                auto const *matSh = dynamic_cast<Material::MaterialShade const *>(s_mat->materials(constr.LayerPoint(ShadeLayNum)));
-                assert(matSh != nullptr);
-                ShadeAbs = matSh->AbsorpSolar;
-                ShadeTrans = matSh->Trans;
-                ShadeTransVis = matSh->TransVis;
-                ShadeRefl = matSh->ReflectShade;
-                ShadeReflVis = matSh->ReflectShadeVis;
-                rsh = ShadeRefl;
-                rshv = ShadeReflVis;
-                tsh = ShadeTrans;
-                tshv = ShadeTransVis;
-                ash = ShadeAbs;
-
                 // Correction factors for inter-reflections between glass and shading device
                 ShadeReflFac = 1.0 / (1.0 - ShadeRefl * constr.ReflectSolDiffFront);
                 ShadeReflFacVis = 1.0 / (1.0 - ShadeReflVis * constr.ReflectVisDiffFront);
@@ -1065,19 +1055,6 @@ namespace Window {
 
                 // Between-glass shade
             } else if (BGShade) {
-                auto const *matSh = dynamic_cast<Material::MaterialShade const *>(s_mat->materials(constr.LayerPoint(ShadeLayNum)));
-                assert(matSh != nullptr);
-                ShadeAbs = matSh->AbsorpSolar;
-                ShadeTrans = matSh->Trans;
-                ShadeTransVis = matSh->TransVis;
-                ShadeRefl = matSh->ReflectShade;
-                ShadeReflVis = matSh->ReflectShadeVis;
-                rsh = ShadeRefl;
-                rshv = ShadeReflVis;
-                tsh = ShadeTrans;
-                tshv = ShadeTransVis;
-                ash = ShadeAbs;
-
                 // Between-glass shade/blind; assumed to be between glass #2 and glass #3
                 tsh2 = pow_2(tsh);
                 tshv2 = pow_2(tshv);
