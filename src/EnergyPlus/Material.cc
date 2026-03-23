@@ -172,6 +172,30 @@ static void checkFieldsEqual(EnergyPlusData &state, bool &ErrorsFound, int idx1,
     }
 }
 
+// Helper to check that a numeric input field is strictly positive (> 0).
+static void checkFieldPositive(EnergyPlusData &state, bool &ErrorsFound, ErrorObjectHeader const &eoh, int idx)
+{
+    auto &s_ipsc = state.dataIPShortCut;
+    if (s_ipsc->rNumericArgs(idx) <= 0.0) {
+        ErrorsFound = true;
+        ShowSevereCustom(
+            state, eoh, EnergyPlus::format("{} must be > 0, entered value = {:.2R}", s_ipsc->cNumericFieldNames(idx), s_ipsc->rNumericArgs(idx)));
+    }
+}
+
+// Helper to check that a numeric input field is in the range [0, 1].
+static void checkFieldInRange01(EnergyPlusData &state, bool &ErrorsFound, ErrorObjectHeader const &eoh, int idx)
+{
+    auto &s_ipsc = state.dataIPShortCut;
+    if ((s_ipsc->rNumericArgs(idx) < 0.0) || (s_ipsc->rNumericArgs(idx) > 1.0)) {
+        ErrorsFound = true;
+        ShowSevereCustom(
+            state,
+            eoh,
+            EnergyPlus::format("{} must be >= 0 and <= 1, entered value = {:.2R}", s_ipsc->cNumericFieldNames(idx), s_ipsc->rNumericArgs(idx)));
+    }
+}
+
 // Helper to call getObjectItem with the standard set of material input arguments.
 // Wraps the repetitive 12-argument call that appears for every material type.
 static void getMaterialInput(EnergyPlusData &state, int Loop, int &NumAlphas, int &NumNums, int &IOStat)
@@ -2142,104 +2166,16 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         mat->SlatConductivity = s_ipsc->rNumericArgs(15);
         mat->SlatCurve = s_ipsc->rNumericArgs(16);
 
-        if (s_ipsc->rNumericArgs(1) <= 0.0) {
-            ErrorsFound = true;
-            ShowSevereCustom(
-                state, eoh, EnergyPlus::format("{} must be > 0, entered value = {:.2R}", s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1)));
-        }
-
-        if (s_ipsc->rNumericArgs(2) <= 0.0) {
-            ErrorsFound = true;
-            ShowSevereCustom(
-                state, eoh, EnergyPlus::format("{} must be > 0, entered value = {:.2R}", s_ipsc->cNumericFieldNames(2), s_ipsc->rNumericArgs(2)));
-        }
-
-        if ((s_ipsc->rNumericArgs(3) < 0.0) || (s_ipsc->rNumericArgs(3) > 1.0)) {
-            ErrorsFound = true;
-            ShowSevereCustom(
-                state,
-                eoh,
-                EnergyPlus::format("{} value must be >= 0 and <= 1, entered value = {:.2R}", s_ipsc->cNumericFieldNames(3), s_ipsc->rNumericArgs(3)));
-        }
-
-        if ((s_ipsc->rNumericArgs(4) <= 0.0) || (s_ipsc->rNumericArgs(4) > 1.0)) {
-            ErrorsFound = true;
-            ShowSevereCustom(
-                state,
-                eoh,
-                EnergyPlus::format("{} value must be >= 0 and <= 1, entered value = {:.2R}", s_ipsc->cNumericFieldNames(4), s_ipsc->rNumericArgs(4)));
-        }
-
-        if ((s_ipsc->rNumericArgs(5) <= 0.0) || (s_ipsc->rNumericArgs(5) > 1.0)) {
-            ErrorsFound = true;
-            ShowSevereCustom(
-                state,
-                eoh,
-                EnergyPlus::format("{} value must be >= 0 and <= 1, entered value = {:.2R}", s_ipsc->cNumericFieldNames(5), s_ipsc->rNumericArgs(5)));
-        }
-
-        if ((s_ipsc->rNumericArgs(6) < 0.0) || (s_ipsc->rNumericArgs(6) > 1.0)) {
-            ErrorsFound = true;
-            ShowSevereCustom(
-                state,
-                eoh,
-                EnergyPlus::format("{} must be >= 0 or <= 1, entered value = {:.2R}", s_ipsc->cNumericFieldNames(6), s_ipsc->rNumericArgs(6)));
-        }
-
-        if ((s_ipsc->rNumericArgs(7) < 0.0) || (s_ipsc->rNumericArgs(7) > 1.0)) {
-            ErrorsFound = true;
-            ShowSevereCustom(
-                state, eoh, EnergyPlus::format("{} must be >=0 or <=1, entered {:.2R}", s_ipsc->cNumericFieldNames(7), s_ipsc->rNumericArgs(7)));
-        }
-
-        if ((s_ipsc->rNumericArgs(8) < 0.0) || (s_ipsc->rNumericArgs(8) > 1.0)) {
-            ErrorsFound = true;
-            ShowSevereCustom(
-                state,
-                eoh,
-                EnergyPlus::format("{} must be >=0 or <=1, entered value = {:.2R}", s_ipsc->cNumericFieldNames(8), s_ipsc->rNumericArgs(8)));
-        }
-
-        if ((s_ipsc->rNumericArgs(9) < 0.0) || (s_ipsc->rNumericArgs(9) > 1.0)) {
-            ErrorsFound = true;
-            ShowSevereCustom(
-                state,
-                eoh,
-                EnergyPlus::format("{} must be >=0 or <=1, entered value = {:.2R}", s_ipsc->cNumericFieldNames(9), s_ipsc->rNumericArgs(9)));
-        }
-
-        if ((s_ipsc->rNumericArgs(10) < 0.0) || (s_ipsc->rNumericArgs(10) > 1.0)) {
-            ErrorsFound = true;
-            ShowSevereCustom(
-                state,
-                eoh,
-                EnergyPlus::format("{} must be >=0 or <=1, entered value = {:.2R}", s_ipsc->cNumericFieldNames(10), s_ipsc->rNumericArgs(10)));
+        checkFieldPositive(state, ErrorsFound, eoh, 1);
+        checkFieldPositive(state, ErrorsFound, eoh, 2);
+        for (int idx = 3; idx <= 10; ++idx) {
+            checkFieldInRange01(state, ErrorsFound, eoh, idx);
         }
 
         if ((mat->LayerType == TARCOGParams::TARCOGLayerType::VENETBLIND_HORIZ) ||
             (mat->LayerType == TARCOGParams::TARCOGLayerType::VENETBLIND_VERT)) {
-            if (s_ipsc->rNumericArgs(11) <= 0.0) {
-                ErrorsFound = true;
-                ShowSevereCustom(
-                    state,
-                    eoh,
-                    EnergyPlus::format("{} must be >0, entered value = {:.2R}", s_ipsc->cNumericFieldNames(11), s_ipsc->rNumericArgs(11)));
-            }
-
-            if (s_ipsc->rNumericArgs(12) <= 0.0) {
-                ErrorsFound = true;
-                ShowSevereCustom(
-                    state,
-                    eoh,
-                    EnergyPlus::format("{} must be >0, entered value = {:.2R}", s_ipsc->cNumericFieldNames(12), s_ipsc->rNumericArgs(12)));
-            }
-
-            if (s_ipsc->rNumericArgs(13) <= 0.0) {
-                ErrorsFound = true;
-                ShowSevereCustom(
-                    state,
-                    eoh,
-                    EnergyPlus::format("{} must be >0, entered value = {:.2R}", s_ipsc->cNumericFieldNames(13), s_ipsc->rNumericArgs(13)));
+            for (int idx : {11, 12, 13, 15}) {
+                checkFieldPositive(state, ErrorsFound, eoh, idx);
             }
 
             if ((s_ipsc->rNumericArgs(14) < -90.0) || (s_ipsc->rNumericArgs(14) > 90.0)) {
@@ -2248,14 +2184,6 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
                                  eoh,
                                  EnergyPlus::format(
                                      "{} must be >=-90 and <=90, entered value = {:.2R}", s_ipsc->cNumericFieldNames(14), s_ipsc->rNumericArgs(14)));
-            }
-
-            if (s_ipsc->rNumericArgs(15) <= 0.0) {
-                ErrorsFound = true;
-                ShowSevereCustom(
-                    state,
-                    eoh,
-                    EnergyPlus::format("{} must be >0, entered value = {:.2R}", s_ipsc->cNumericFieldNames(15), s_ipsc->rNumericArgs(15)));
             }
 
             if ((s_ipsc->rNumericArgs(16) < 0.0) ||
