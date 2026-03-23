@@ -59,3 +59,4 @@ src/EnergyPlus/FluidProperties.cc:GetFluidPropertiesData
 src/EnergyPlus/UnitarySystem.cc:controlCoolingSystemToSP
 src/EnergyPlus/WindowManager.cc:InitGlassOpticalCalculations
 src/EnergyPlus/HVACVariableRefrigerantFlow.cc:CalcVRFCondenser_FluidTCtrl
+src/EnergyPlus/SimAirServingZones.cc:GetAirPathData
