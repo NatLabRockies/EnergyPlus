@@ -3201,6 +3201,16 @@ namespace VariableSpeedCoils {
         ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
     }
 
+    // Calculate HPWH cooling capacity from rated capacity and COP, accounting for pump power.
+    static Real64 calcHPWHCoolCapacity(Real64 ratedTotCap, Real64 ratedCOP, Real64 pumpPower, Real64 pumpFracToWater, bool pumpPowerInCOP)
+    {
+        if (pumpPowerInCOP) {
+            return ratedTotCap * (1.0 - 1.0 / ratedCOP) + pumpPower - pumpPower * pumpFracToWater;
+        } else {
+            return ratedTotCap * (1.0 - 1.0 / ratedCOP) - pumpPower * pumpFracToWater;
+        }
+    }
+
     // Warn when rated sensible cooling capacity exceeds rated total cooling capacity.
     static void warnSensibleExceedsTotal(EnergyPlusData &state,
                                          std::string_view coolHeatType,
@@ -4209,13 +4219,11 @@ namespace VariableSpeedCoils {
 
             for (Mode = 1; Mode <= varSpeedCoil.NumOfSpeeds; ++Mode) {
                 // get cooling capacity, without fan power, i.e. total coil cooling
-                if (varSpeedCoil.CondPumpPowerInCOP) {
-                    HPWHCoolCapacity = varSpeedCoil.MSRatedTotCap(Mode) * (1.0 - 1.0 / varSpeedCoil.MSRatedCOP(Mode)) +
-                                       varSpeedCoil.MSWHPumpPower(Mode) - varSpeedCoil.MSWHPumpPower(Mode) * varSpeedCoil.HPWHCondPumpFracToWater;
-                } else {
-                    HPWHCoolCapacity = varSpeedCoil.MSRatedTotCap(Mode) * (1.0 - 1.0 / varSpeedCoil.MSRatedCOP(Mode)) -
-                                       varSpeedCoil.MSWHPumpPower(Mode) * varSpeedCoil.HPWHCondPumpFracToWater;
-                }
+                HPWHCoolCapacity = calcHPWHCoolCapacity(varSpeedCoil.MSRatedTotCap(Mode),
+                                                        varSpeedCoil.MSRatedCOP(Mode),
+                                                        varSpeedCoil.MSWHPumpPower(Mode),
+                                                        varSpeedCoil.HPWHCondPumpFracToWater,
+                                                        varSpeedCoil.CondPumpPowerInCOP);
 
                 varSpeedCoil.MSRatedCBF(Mode) = DXCoils::CalcCBF(state,
                                                                  varSpeedCoil.VarSpeedCoilType,
@@ -4235,14 +4243,11 @@ namespace VariableSpeedCoils {
 
             // update VarSpeedCoil(DXCoilNum).RatedCapCoolTotal
             Mode = varSpeedCoil.NormSpedLevel;
-            if (varSpeedCoil.CondPumpPowerInCOP) {
-                varSpeedCoil.RatedCapCoolTotal = varSpeedCoil.MSRatedTotCap(Mode) * (1.0 - 1.0 / varSpeedCoil.MSRatedCOP(Mode)) +
-                                                 varSpeedCoil.MSWHPumpPower(Mode) -
-                                                 varSpeedCoil.MSWHPumpPower(Mode) * varSpeedCoil.HPWHCondPumpFracToWater;
-            } else {
-                varSpeedCoil.RatedCapCoolTotal = varSpeedCoil.MSRatedTotCap(Mode) * (1.0 - 1.0 / varSpeedCoil.MSRatedCOP(Mode)) -
-                                                 varSpeedCoil.MSWHPumpPower(Mode) * varSpeedCoil.HPWHCondPumpFracToWater;
-            }
+            varSpeedCoil.RatedCapCoolTotal = calcHPWHCoolCapacity(varSpeedCoil.MSRatedTotCap(Mode),
+                                                                  varSpeedCoil.MSRatedCOP(Mode),
+                                                                  varSpeedCoil.MSWHPumpPower(Mode),
+                                                                  varSpeedCoil.HPWHCondPumpFracToWater,
+                                                                  varSpeedCoil.CondPumpPowerInCOP);
         }
 
         // size rated sensible cooling capacity
