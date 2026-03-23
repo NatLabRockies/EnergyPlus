@@ -982,6 +982,28 @@ namespace Window {
                 ash = ShadeAbs;
             }
 
+            // Load between-glass diffuse properties common to BGShade and BGBlind
+            if (wm->BGFlag) {
+                tsh2 = pow_2(tsh);
+                tshv2 = pow_2(tshv);
+                td1 = constr.tBareSolDiff(1);
+                td2 = constr.tBareSolDiff(2);
+                td1v = constr.tBareVisDiff(1);
+                td2v = constr.tBareVisDiff(2);
+                afd1 = constr.afBareSolDiff(1);
+                afd2 = constr.afBareSolDiff(2);
+                abd1 = constr.abBareSolDiff(1);
+                abd2 = constr.abBareSolDiff(2);
+                rb1 = constr.rbBareSolDiff(1);
+                rb2 = constr.rbBareSolDiff(2);
+                rb1v = constr.rbBareVisDiff(1);
+                rb2v = constr.rbBareVisDiff(2);
+                rf1 = constr.rfBareSolDiff(1);
+                rf2 = constr.rfBareSolDiff(2);
+                rf1v = constr.rfBareVisDiff(1);
+                rf2v = constr.rfBareVisDiff(2);
+            }
+
             if (IntShade) {
                 // Correction factors for inter-reflections between glass and shading device
                 ShadeReflFac = 1.0 / (1.0 - ShadeRefl * constr.ReflectSolDiffBack);
@@ -1055,26 +1077,6 @@ namespace Window {
 
                 // Between-glass shade
             } else if (BGShade) {
-                // Between-glass shade/blind; assumed to be between glass #2 and glass #3
-                tsh2 = pow_2(tsh);
-                tshv2 = pow_2(tshv);
-                td1 = constr.tBareSolDiff(1);
-                td2 = constr.tBareSolDiff(2);
-                td1v = constr.tBareVisDiff(1);
-                td2v = constr.tBareVisDiff(2);
-                afd1 = constr.afBareSolDiff(1);
-                afd2 = constr.afBareSolDiff(2);
-                abd1 = constr.abBareSolDiff(1);
-                abd2 = constr.abBareSolDiff(2);
-                rb1 = constr.rbBareSolDiff(1);
-                rb2 = constr.rbBareSolDiff(2);
-                rb1v = constr.rbBareVisDiff(1);
-                rb2v = constr.rbBareVisDiff(2);
-                rf1 = constr.rfBareSolDiff(1);
-                rf2 = constr.rfBareSolDiff(2);
-                rf1v = constr.rfBareVisDiff(1);
-                rf2v = constr.rfBareVisDiff(2);
-
                 if (NGlass == 2) {
 
                     // Front incident solar, beam, between-glass shade, NGlass = 2
@@ -1271,26 +1273,6 @@ namespace Window {
             } else if (BGBlind) {
                 auto const *matBlind = dynamic_cast<Material::MaterialBlind const *>(s_mat->materials(BlNum));
                 assert(matBlind != nullptr);
-
-                // Between-glass shade/blind; assumed to be between glass #2 and glass #3
-                tsh2 = pow_2(tsh);
-                tshv2 = pow_2(tshv);
-                td1 = constr.tBareSolDiff(1);
-                td2 = constr.tBareSolDiff(2);
-                td1v = constr.tBareVisDiff(1);
-                td2v = constr.tBareVisDiff(2);
-                afd1 = constr.afBareSolDiff(1);
-                afd2 = constr.afBareSolDiff(2);
-                abd1 = constr.abBareSolDiff(1);
-                abd2 = constr.abBareSolDiff(2);
-                rb1 = constr.rbBareSolDiff(1);
-                rb2 = constr.rbBareSolDiff(2);
-                rb1v = constr.rbBareVisDiff(1);
-                rb2v = constr.rbBareVisDiff(2);
-                rf1 = constr.rfBareSolDiff(1);
-                rf2 = constr.rfBareSolDiff(2);
-                rf1v = constr.rfBareVisDiff(1);
-                rf2v = constr.rfBareVisDiff(2);
 
                 for (int iSlatAng = 0; iSlatAng < Material::MaxSlatAngs; ++iSlatAng) {
                     auto const &btar = matBlind->TARs[iSlatAng];
