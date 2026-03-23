@@ -6364,9 +6364,8 @@ void CalcInteriorSolarOverlaps(EnergyPlusData &state,
 // Compute screen beam transmittance/absorptance/reflectance for the given surface and screen.
 // Encapsulates the phi/theta calculation from SOLCOS + surface orientation, and handles both
 // the PRECALC_INTERP_SCREEN (BilinearInterp) and non-PRECALC (CalcScreenTransmittance) paths.
-static Material::ScreenBmTransAbsRef getScreenBtar(EnergyPlusData &state,
-                                                    Material::MaterialScreen const *screen,
-                                                    DataSurfaces::SurfaceData const &surf)
+static Material::ScreenBmTransAbsRef
+getScreenBtar(EnergyPlusData &state, Material::MaterialScreen const *screen, DataSurfaces::SurfaceData const &surf)
 {
     Real64 solPhi = std::acos(state.dataEnvrn->SOLCOS.z);
     Real64 solTheta = std::atan2(state.dataEnvrn->SOLCOS.x, state.dataEnvrn->SOLCOS.y);

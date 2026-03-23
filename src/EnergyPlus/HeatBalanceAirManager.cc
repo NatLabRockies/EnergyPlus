@@ -237,8 +237,13 @@ void SetZoneMassConservationFlag(EnergyPlusData &state)
 // CrossMixing from-zone, RefDoorMixing zone-A, and RefDoorMixing zone-B).
 static void setupZoneMixingOutputVars(EnergyPlusData &state, DataHeatBalance::AirReportVars &znAirRpt, std::string const &zoneName)
 {
-    SetupOutputVariable(
-        state, "Zone Mixing Volume", Constant::Units::m3, znAirRpt.MixVolume, OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, zoneName);
+    SetupOutputVariable(state,
+                        "Zone Mixing Volume",
+                        Constant::Units::m3,
+                        znAirRpt.MixVolume,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        zoneName);
     SetupOutputVariable(state,
                         "Zone Mixing Current Density Volume Flow Rate",
                         Constant::Units::m3_s,
@@ -253,8 +258,13 @@ static void setupZoneMixingOutputVars(EnergyPlusData &state, DataHeatBalance::Ai
                         OutputProcessor::TimeStepType::System,
                         OutputProcessor::StoreType::Average,
                         zoneName);
-    SetupOutputVariable(
-        state, "Zone Mixing Mass", Constant::Units::kg, znAirRpt.MixMass, OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, zoneName);
+    SetupOutputVariable(state,
+                        "Zone Mixing Mass",
+                        Constant::Units::kg,
+                        znAirRpt.MixMass,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        zoneName);
     SetupOutputVariable(state,
                         "Zone Mixing Mass Flow Rate",
                         Constant::Units::kg_s,
@@ -462,7 +472,10 @@ static void readExteriorAreaInfiltrationInput(EnergyPlusData &state,
     if (lNumericFieldBlanks(1)) {
         ShowWarningError(state,
                          EnergyPlus::format("{}{}=\"{}\", field {} is blank.  0 Infiltration will result.",
-                                            routineName, currentModuleObject, inputObj.Name, cNumericFieldNames(1)));
+                                            routineName,
+                                            currentModuleObject,
+                                            inputObj.Name,
+                                            cNumericFieldNames(1)));
     } else {
         Real64 spaceFrac = 1.0;
         if (!inputObj.spaceListActive && (inputObj.numOfSpaces > 1)) {
@@ -482,7 +495,10 @@ static void readExteriorAreaInfiltrationInput(EnergyPlusData &state,
     if (spaceIndex > 0 && thisSpace.ExteriorTotalSurfArea <= 0.0) {
         ShowWarningError(state,
                          EnergyPlus::format(R"({}{}="{}", Space="{}" does not have surfaces exposed to outdoors.)",
-                                            routineName, currentModuleObject, inputObj.Name, thisSpace.Name));
+                                            routineName,
+                                            currentModuleObject,
+                                            inputObj.Name,
+                                            thisSpace.Name));
         ShowContinueError(state, "Infiltration model is appropriate for exterior spaces not interior spaces, simulation continues.");
     }
 }
@@ -512,22 +528,32 @@ static bool computeAirflowDesignLevel(EnergyPlusData &state,
             if (rNumericArgs(2) >= 0.0) {
                 designLevel = rNumericArgs(2) * thisSpace.FloorArea;
                 if (thisSpace.FloorArea <= 0.0) {
-                    ShowWarningError(
-                        state,
-                        EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but Space Floor Area = 0.  0 {} will result.",
-                                           routineName, currentModuleObject, objName, cAlphaFieldNames(4), cNumericFieldNames(2), flowTypeName));
+                    ShowWarningError(state,
+                                     EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but Space Floor Area = 0.  0 {} will result.",
+                                                        routineName,
+                                                        currentModuleObject,
+                                                        objName,
+                                                        cAlphaFieldNames(4),
+                                                        cNumericFieldNames(2),
+                                                        flowTypeName));
                 }
             } else {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}{}=\"{}\", invalid flow/area specification [<0.0]={:.3R}",
-                                                   routineName, currentModuleObject, objName, rNumericArgs(2)));
+                ShowSevereError(
+                    state,
+                    EnergyPlus::format(
+                        "{}{}=\"{}\", invalid flow/area specification [<0.0]={:.3R}", routineName, currentModuleObject, objName, rNumericArgs(2)));
                 errorsFound = true;
             }
         }
         if (lNumericFieldBlanks(2)) {
             ShowWarningError(state,
                              EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 {} will result.",
-                                                routineName, currentModuleObject, objName, cAlphaFieldNames(4), cNumericFieldNames(2), flowTypeName));
+                                                routineName,
+                                                currentModuleObject,
+                                                objName,
+                                                cAlphaFieldNames(4),
+                                                cNumericFieldNames(2),
+                                                flowTypeName));
         }
         return true;
 
@@ -536,22 +562,32 @@ static bool computeAirflowDesignLevel(EnergyPlusData &state,
             if (rNumericArgs(3) >= 0.0) {
                 designLevel = rNumericArgs(3) * thisSpace.TotOccupants;
                 if (thisSpace.TotOccupants <= 0.0) {
-                    ShowWarningError(
-                        state,
-                        EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but Space Total Occupants = 0.  0 {} will result.",
-                                           routineName, currentModuleObject, objName, cAlphaFieldNames(4), cNumericFieldNames(3), flowTypeName));
+                    ShowWarningError(state,
+                                     EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but Space Total Occupants = 0.  0 {} will result.",
+                                                        routineName,
+                                                        currentModuleObject,
+                                                        objName,
+                                                        cAlphaFieldNames(4),
+                                                        cNumericFieldNames(3),
+                                                        flowTypeName));
                 }
             } else {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}{}=\"{}\", invalid flow/person specification [<0.0]={:.3R}",
-                                                   routineName, currentModuleObject, objName, rNumericArgs(3)));
+                ShowSevereError(
+                    state,
+                    EnergyPlus::format(
+                        "{}{}=\"{}\", invalid flow/person specification [<0.0]={:.3R}", routineName, currentModuleObject, objName, rNumericArgs(3)));
                 errorsFound = true;
             }
         }
         if (lNumericFieldBlanks(3)) {
             ShowWarningError(state,
                              EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 {} will result.",
-                                                routineName, currentModuleObject, objName, cAlphaFieldNames(4), cNumericFieldNames(3), flowTypeName));
+                                                routineName,
+                                                currentModuleObject,
+                                                objName,
+                                                cAlphaFieldNames(4),
+                                                cNumericFieldNames(3),
+                                                flowTypeName));
         }
         return true;
 
@@ -560,22 +596,34 @@ static bool computeAirflowDesignLevel(EnergyPlusData &state,
             if (rNumericArgs(4) >= 0.0) {
                 designLevel = rNumericArgs(4) * thisSpace.Volume / Constant::rSecsInHour;
                 if (thisSpace.Volume <= 0.0) {
-                    ShowWarningError(
-                        state,
-                        EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but Space Volume = 0.  0 {} will result.",
-                                           routineName, currentModuleObject, objName, cAlphaFieldNames(4), cNumericFieldNames(4), flowTypeName));
+                    ShowWarningError(state,
+                                     EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but Space Volume = 0.  0 {} will result.",
+                                                        routineName,
+                                                        currentModuleObject,
+                                                        objName,
+                                                        cAlphaFieldNames(4),
+                                                        cNumericFieldNames(4),
+                                                        flowTypeName));
                 }
             } else {
                 ShowSevereError(state,
                                 EnergyPlus::format("{}{}=\"{}\", invalid ACH (air changes per hour) specification [<0.0]={:.3R}",
-                                                   routineName, currentModuleObject, objName, rNumericArgs(4)));
+                                                   routineName,
+                                                   currentModuleObject,
+                                                   objName,
+                                                   rNumericArgs(4)));
                 errorsFound = true;
             }
         }
         if (lNumericFieldBlanks(4)) {
             ShowWarningError(state,
                              EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 {} will result.",
-                                                routineName, currentModuleObject, objName, cAlphaFieldNames(4), cNumericFieldNames(4), flowTypeName));
+                                                routineName,
+                                                currentModuleObject,
+                                                objName,
+                                                cAlphaFieldNames(4),
+                                                cNumericFieldNames(4),
+                                                flowTypeName));
         }
         return true;
 
@@ -588,75 +636,235 @@ static bool computeAirflowDesignLevel(EnergyPlusData &state,
 static void setupInfiltrationObjOutputVars(EnergyPlusData &state, DataHeatBalance::InfiltrationData &infil)
 {
     std::string const &name = infil.Name;
-    SetupOutputVariable(state, "Infiltration Sensible Heat Loss Energy", Constant::Units::J, infil.InfilHeatLoss,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, name);
-    SetupOutputVariable(state, "Infiltration Sensible Heat Gain Energy", Constant::Units::J, infil.InfilHeatGain,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, name);
-    SetupOutputVariable(state, "Infiltration Latent Heat Loss Energy", Constant::Units::J, infil.InfilLatentLoss,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, name);
-    SetupOutputVariable(state, "Infiltration Latent Heat Gain Energy", Constant::Units::J, infil.InfilLatentGain,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, name);
-    SetupOutputVariable(state, "Infiltration Total Heat Loss Energy", Constant::Units::J, infil.InfilTotalLoss,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, name);
-    SetupOutputVariable(state, "Infiltration Total Heat Gain Energy", Constant::Units::J, infil.InfilTotalGain,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, name);
-    SetupOutputVariable(state, "Infiltration Current Density Volume Flow Rate", Constant::Units::m3_s, infil.InfilVdotCurDensity,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, name);
-    SetupOutputVariable(state, "Infiltration Standard Density Volume Flow Rate", Constant::Units::m3_s, infil.InfilVdotStdDensity,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, name);
-    SetupOutputVariable(state, "Infiltration Outdoor Density Volume Flow Rate", Constant::Units::m3_s, infil.InfilVdotOutDensity,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, name);
-    SetupOutputVariable(state, "Infiltration Current Density Volume", Constant::Units::m3, infil.InfilVolumeCurDensity,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, name);
-    SetupOutputVariable(state, "Infiltration Standard Density Volume", Constant::Units::m3, infil.InfilVolumeStdDensity,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, name);
-    SetupOutputVariable(state, "Infiltration Mass", Constant::Units::kg, infil.InfilMass,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, name);
-    SetupOutputVariable(state, "Infiltration Mass Flow Rate", Constant::Units::kg_s, infil.InfilMdot,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, name);
-    SetupOutputVariable(state, "Infiltration Current Density Air Change Rate", Constant::Units::ach, infil.InfilAirChangeRateCurDensity,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, name);
-    SetupOutputVariable(state, "Infiltration Standard Density Air Change Rate", Constant::Units::ach, infil.InfilAirChangeRateStdDensity,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, name);
-    SetupOutputVariable(state, "Infiltration Outdoor Density Air Change Rate", Constant::Units::ach, infil.InfilAirChangeRateOutDensity,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, name);
+    SetupOutputVariable(state,
+                        "Infiltration Sensible Heat Loss Energy",
+                        Constant::Units::J,
+                        infil.InfilHeatLoss,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        name);
+    SetupOutputVariable(state,
+                        "Infiltration Sensible Heat Gain Energy",
+                        Constant::Units::J,
+                        infil.InfilHeatGain,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        name);
+    SetupOutputVariable(state,
+                        "Infiltration Latent Heat Loss Energy",
+                        Constant::Units::J,
+                        infil.InfilLatentLoss,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        name);
+    SetupOutputVariable(state,
+                        "Infiltration Latent Heat Gain Energy",
+                        Constant::Units::J,
+                        infil.InfilLatentGain,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        name);
+    SetupOutputVariable(state,
+                        "Infiltration Total Heat Loss Energy",
+                        Constant::Units::J,
+                        infil.InfilTotalLoss,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        name);
+    SetupOutputVariable(state,
+                        "Infiltration Total Heat Gain Energy",
+                        Constant::Units::J,
+                        infil.InfilTotalGain,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        name);
+    SetupOutputVariable(state,
+                        "Infiltration Current Density Volume Flow Rate",
+                        Constant::Units::m3_s,
+                        infil.InfilVdotCurDensity,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        name);
+    SetupOutputVariable(state,
+                        "Infiltration Standard Density Volume Flow Rate",
+                        Constant::Units::m3_s,
+                        infil.InfilVdotStdDensity,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        name);
+    SetupOutputVariable(state,
+                        "Infiltration Outdoor Density Volume Flow Rate",
+                        Constant::Units::m3_s,
+                        infil.InfilVdotOutDensity,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        name);
+    SetupOutputVariable(state,
+                        "Infiltration Current Density Volume",
+                        Constant::Units::m3,
+                        infil.InfilVolumeCurDensity,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        name);
+    SetupOutputVariable(state,
+                        "Infiltration Standard Density Volume",
+                        Constant::Units::m3,
+                        infil.InfilVolumeStdDensity,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        name);
+    SetupOutputVariable(state,
+                        "Infiltration Mass",
+                        Constant::Units::kg,
+                        infil.InfilMass,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        name);
+    SetupOutputVariable(state,
+                        "Infiltration Mass Flow Rate",
+                        Constant::Units::kg_s,
+                        infil.InfilMdot,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        name);
+    SetupOutputVariable(state,
+                        "Infiltration Current Density Air Change Rate",
+                        Constant::Units::ach,
+                        infil.InfilAirChangeRateCurDensity,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        name);
+    SetupOutputVariable(state,
+                        "Infiltration Standard Density Air Change Rate",
+                        Constant::Units::ach,
+                        infil.InfilAirChangeRateStdDensity,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        name);
+    SetupOutputVariable(state,
+                        "Infiltration Outdoor Density Air Change Rate",
+                        Constant::Units::ach,
+                        infil.InfilAirChangeRateOutDensity,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        name);
 }
 
 // Helper: set up the 16 standard zone-level "Zone Infiltration" output variables.
 static void setupZoneInfiltrationOutputVars(EnergyPlusData &state, DataHeatBalance::AirReportVars &znAirRpt, std::string const &zoneName)
 {
-    SetupOutputVariable(state, "Zone Infiltration Sensible Heat Loss Energy", Constant::Units::J, znAirRpt.InfilHeatLoss,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, zoneName);
-    SetupOutputVariable(state, "Zone Infiltration Sensible Heat Gain Energy", Constant::Units::J, znAirRpt.InfilHeatGain,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, zoneName);
-    SetupOutputVariable(state, "Zone Infiltration Latent Heat Loss Energy", Constant::Units::J, znAirRpt.InfilLatentLoss,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, zoneName);
-    SetupOutputVariable(state, "Zone Infiltration Latent Heat Gain Energy", Constant::Units::J, znAirRpt.InfilLatentGain,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, zoneName);
-    SetupOutputVariable(state, "Zone Infiltration Total Heat Loss Energy", Constant::Units::J, znAirRpt.InfilTotalLoss,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, zoneName);
-    SetupOutputVariable(state, "Zone Infiltration Total Heat Gain Energy", Constant::Units::J, znAirRpt.InfilTotalGain,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, zoneName);
-    SetupOutputVariable(state, "Zone Infiltration Current Density Volume Flow Rate", Constant::Units::m3_s, znAirRpt.InfilVdotCurDensity,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, zoneName);
-    SetupOutputVariable(state, "Zone Infiltration Standard Density Volume Flow Rate", Constant::Units::m3_s, znAirRpt.InfilVdotStdDensity,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, zoneName);
-    SetupOutputVariable(state, "Zone Infiltration Outdoor Density Volume Flow Rate", Constant::Units::m3_s, znAirRpt.InfilVdotOutDensity,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, zoneName);
-    SetupOutputVariable(state, "Zone Infiltration Current Density Volume", Constant::Units::m3, znAirRpt.InfilVolumeCurDensity,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, zoneName);
-    SetupOutputVariable(state, "Zone Infiltration Standard Density Volume", Constant::Units::m3, znAirRpt.InfilVolumeStdDensity,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, zoneName);
-    SetupOutputVariable(state, "Zone Infiltration Mass", Constant::Units::kg, znAirRpt.InfilMass,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, zoneName);
-    SetupOutputVariable(state, "Zone Infiltration Mass Flow Rate", Constant::Units::kg_s, znAirRpt.InfilMdot,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, zoneName);
-    SetupOutputVariable(state, "Zone Infiltration Current Density Air Change Rate", Constant::Units::ach, znAirRpt.InfilAirChangeRateCurDensity,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, zoneName);
-    SetupOutputVariable(state, "Zone Infiltration Standard Density Air Change Rate", Constant::Units::ach, znAirRpt.InfilAirChangeRateStdDensity,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, zoneName);
-    SetupOutputVariable(state, "Zone Infiltration Outdoor Density Air Change Rate", Constant::Units::ach, znAirRpt.InfilAirChangeRateOutDensity,
-                        OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, zoneName);
+    SetupOutputVariable(state,
+                        "Zone Infiltration Sensible Heat Loss Energy",
+                        Constant::Units::J,
+                        znAirRpt.InfilHeatLoss,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        zoneName);
+    SetupOutputVariable(state,
+                        "Zone Infiltration Sensible Heat Gain Energy",
+                        Constant::Units::J,
+                        znAirRpt.InfilHeatGain,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        zoneName);
+    SetupOutputVariable(state,
+                        "Zone Infiltration Latent Heat Loss Energy",
+                        Constant::Units::J,
+                        znAirRpt.InfilLatentLoss,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        zoneName);
+    SetupOutputVariable(state,
+                        "Zone Infiltration Latent Heat Gain Energy",
+                        Constant::Units::J,
+                        znAirRpt.InfilLatentGain,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        zoneName);
+    SetupOutputVariable(state,
+                        "Zone Infiltration Total Heat Loss Energy",
+                        Constant::Units::J,
+                        znAirRpt.InfilTotalLoss,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        zoneName);
+    SetupOutputVariable(state,
+                        "Zone Infiltration Total Heat Gain Energy",
+                        Constant::Units::J,
+                        znAirRpt.InfilTotalGain,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        zoneName);
+    SetupOutputVariable(state,
+                        "Zone Infiltration Current Density Volume Flow Rate",
+                        Constant::Units::m3_s,
+                        znAirRpt.InfilVdotCurDensity,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        zoneName);
+    SetupOutputVariable(state,
+                        "Zone Infiltration Standard Density Volume Flow Rate",
+                        Constant::Units::m3_s,
+                        znAirRpt.InfilVdotStdDensity,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        zoneName);
+    SetupOutputVariable(state,
+                        "Zone Infiltration Outdoor Density Volume Flow Rate",
+                        Constant::Units::m3_s,
+                        znAirRpt.InfilVdotOutDensity,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        zoneName);
+    SetupOutputVariable(state,
+                        "Zone Infiltration Current Density Volume",
+                        Constant::Units::m3,
+                        znAirRpt.InfilVolumeCurDensity,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        zoneName);
+    SetupOutputVariable(state,
+                        "Zone Infiltration Standard Density Volume",
+                        Constant::Units::m3,
+                        znAirRpt.InfilVolumeStdDensity,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        zoneName);
+    SetupOutputVariable(state,
+                        "Zone Infiltration Mass",
+                        Constant::Units::kg,
+                        znAirRpt.InfilMass,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        zoneName);
+    SetupOutputVariable(state,
+                        "Zone Infiltration Mass Flow Rate",
+                        Constant::Units::kg_s,
+                        znAirRpt.InfilMdot,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        zoneName);
+    SetupOutputVariable(state,
+                        "Zone Infiltration Current Density Air Change Rate",
+                        Constant::Units::ach,
+                        znAirRpt.InfilAirChangeRateCurDensity,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        zoneName);
+    SetupOutputVariable(state,
+                        "Zone Infiltration Standard Density Air Change Rate",
+                        Constant::Units::ach,
+                        znAirRpt.InfilAirChangeRateStdDensity,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        zoneName);
+    SetupOutputVariable(state,
+                        "Zone Infiltration Outdoor Density Air Change Rate",
+                        Constant::Units::ach,
+                        znAirRpt.InfilAirChangeRateOutDensity,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        zoneName);
 }
 
 void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF errors found in input
@@ -718,8 +926,12 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
     // validate that all values are within [-MixingTempLimit, MixingTempLimit], and
     // assign the result to schedOut.  Reports errors on missing or out-of-range schedules.
     auto getOptionalTempLimitSched = [&](const ErrorObjectHeader &eoh, int alphaThreshold, int alphaIdx, Sched::Schedule *&schedOut) {
-        if (NumAlpha <= alphaThreshold) return;
-        if (lAlphaFieldBlanks(alphaIdx)) return;
+        if (NumAlpha <= alphaThreshold) {
+            return;
+        }
+        if (lAlphaFieldBlanks(alphaIdx)) {
+            return;
+        }
         if ((schedOut = Sched::GetSchedule(state, cAlphaArgs(alphaIdx))) == nullptr) {
             ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(alphaIdx), cAlphaArgs(alphaIdx));
             ErrorsFound = true;
@@ -1392,10 +1604,18 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                 thisInfiltration.BasicStackCoefficient = rNumericArgs(2);
                 thisInfiltration.BasicWindCoefficient = rNumericArgs(3);
 
-                readExteriorAreaInfiltrationInput(state, ErrorsFound, RoutineName, cCurrentModuleObject,
-                                                 thisInfiltrationInput, thisZone, thisSpace, thisInfiltration.spaceIndex,
-                                                 rNumericArgs, lNumericFieldBlanks, cNumericFieldNames,
-                                                 thisInfiltration.LeakageArea);
+                readExteriorAreaInfiltrationInput(state,
+                                                  ErrorsFound,
+                                                  RoutineName,
+                                                  cCurrentModuleObject,
+                                                  thisInfiltrationInput,
+                                                  thisZone,
+                                                  thisSpace,
+                                                  thisInfiltration.spaceIndex,
+                                                  rNumericArgs,
+                                                  lNumericFieldBlanks,
+                                                  cNumericFieldNames,
+                                                  thisInfiltration.LeakageArea);
             }
         }
     }
@@ -1431,10 +1651,18 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                 thisInfiltration.AIM2WindCoefficient = rNumericArgs(4);
                 thisInfiltration.ShelterFactor = rNumericArgs(5);
 
-                readExteriorAreaInfiltrationInput(state, ErrorsFound, RoutineName, cCurrentModuleObject,
-                                                 thisInfiltrationInput, thisZone, thisSpace, thisInfiltration.spaceIndex,
-                                                 rNumericArgs, lNumericFieldBlanks, cNumericFieldNames,
-                                                 thisInfiltration.FlowCoefficient);
+                readExteriorAreaInfiltrationInput(state,
+                                                  ErrorsFound,
+                                                  RoutineName,
+                                                  cCurrentModuleObject,
+                                                  thisInfiltrationInput,
+                                                  thisZone,
+                                                  thisSpace,
+                                                  thisInfiltration.spaceIndex,
+                                                  rNumericArgs,
+                                                  lNumericFieldBlanks,
+                                                  cNumericFieldNames,
+                                                  thisInfiltration.FlowCoefficient);
             }
         }
     }
@@ -1536,9 +1764,20 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
 
                 // Ventilation equipment design level calculation method
                 AirflowSpec flow = static_cast<AirflowSpec>(getEnumValue(airflowSpecNamesUC, cAlphaArgs(4))); // NOLINT(modernize-use-auto)
-                if (!computeAirflowDesignLevel(state, flow, thisVentilation.DesignLevel, thisVentilation.spaceIndex, thisSpace,
-                                               rNumericArgs, lNumericFieldBlanks, cAlphaFieldNames, cNumericFieldNames,
-                                               RoutineName, cCurrentModuleObject, thisVentilation.Name, "Ventilation", ErrorsFound)) {
+                if (!computeAirflowDesignLevel(state,
+                                               flow,
+                                               thisVentilation.DesignLevel,
+                                               thisVentilation.spaceIndex,
+                                               thisSpace,
+                                               rNumericArgs,
+                                               lNumericFieldBlanks,
+                                               cAlphaFieldNames,
+                                               cNumericFieldNames,
+                                               RoutineName,
+                                               cCurrentModuleObject,
+                                               thisVentilation.Name,
+                                               "Ventilation",
+                                               ErrorsFound)) {
                     if (flow == AirflowSpec::FlowPerZone) {
                         thisVentilation.DesignLevel = rNumericArgs(1);
                         if (lNumericFieldBlanks(1)) {
@@ -2165,12 +2404,9 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                 if (zoneVolume > 0.0) {
                     spaceFrac = thisSpace.Volume / zoneVolume;
                 } else {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format("{}Zone volume is zero when allocating {} to Spaces.", RoutineName, typeName));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Occurs for {}=\"{}\" in Zone=\"{}\".", cCurrentModuleObject, inputObj.Name, thisZone.Name));
+                    ShowSevereError(state, EnergyPlus::format("{}Zone volume is zero when allocating {} to Spaces.", RoutineName, typeName));
+                    ShowContinueError(state,
+                                      EnergyPlus::format("Occurs for {}=\"{}\" in Zone=\"{}\".", cCurrentModuleObject, inputObj.Name, thisZone.Name));
                     ErrorsFound = true;
                 }
             }
@@ -2218,9 +2454,20 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
 
                 // Mixing equipment design level calculation method
                 AirflowSpec flow = static_cast<AirflowSpec>(getEnumValue(airflowSpecNamesUC, cAlphaArgs(4)));
-                if (!computeAirflowDesignLevel(state, flow, thisMixing.DesignLevel, thisMixing.spaceIndex, thisSpace,
-                                               rNumericArgs, lNumericFieldBlanks, cAlphaFieldNames, cNumericFieldNames,
-                                               RoutineName, cCurrentModuleObject, thisMixingInput.Name, "Mixing", ErrorsFound)) {
+                if (!computeAirflowDesignLevel(state,
+                                               flow,
+                                               thisMixing.DesignLevel,
+                                               thisMixing.spaceIndex,
+                                               thisSpace,
+                                               rNumericArgs,
+                                               lNumericFieldBlanks,
+                                               cAlphaFieldNames,
+                                               cNumericFieldNames,
+                                               RoutineName,
+                                               cCurrentModuleObject,
+                                               thisMixingInput.Name,
+                                               "Mixing",
+                                               ErrorsFound)) {
                     if (flow == AirflowSpec::FlowPerZone) {
                         applyMixingFlowPerZone(thisMixing.DesignLevel, thisMixingInput, thisSpace, thisZone, "Mixing");
                     } else {
@@ -2436,9 +2683,20 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
 
                 // Cross Mixing equipment design level calculation method.
                 AirflowSpec flow = static_cast<AirflowSpec>(getEnumValue(airflowSpecNamesUC, cAlphaArgs(4))); // NOLINT(modernize-use-auto)
-                if (!computeAirflowDesignLevel(state, flow, thisMixing.DesignLevel, thisMixing.spaceIndex, thisSpace,
-                                               rNumericArgs, lNumericFieldBlanks, cAlphaFieldNames, cNumericFieldNames,
-                                               RoutineName, cCurrentModuleObject, thisMixingInput.Name, "Cross Mixing", ErrorsFound)) {
+                if (!computeAirflowDesignLevel(state,
+                                               flow,
+                                               thisMixing.DesignLevel,
+                                               thisMixing.spaceIndex,
+                                               thisSpace,
+                                               rNumericArgs,
+                                               lNumericFieldBlanks,
+                                               cAlphaFieldNames,
+                                               cNumericFieldNames,
+                                               RoutineName,
+                                               cCurrentModuleObject,
+                                               thisMixingInput.Name,
+                                               "Cross Mixing",
+                                               ErrorsFound)) {
                     if (flow == AirflowSpec::FlowPerZone) {
                         applyMixingFlowPerZone(thisMixing.DesignLevel, thisMixingInput, thisSpace, thisZone, "Cross Mixing");
                     } else {
@@ -2624,7 +2882,9 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
 
             // Initialize all per-zone arrays on first use (identical logic for both sides of a door).
             auto initRefDoorZone = [&](DataHeatBalance::MixingData &zone) {
-                if (allocated(zone.openScheds)) return;
+                if (allocated(zone.openScheds)) {
+                    return;
+                }
                 zone.DoorMixingObjectName.allocate(state.dataGlobal->NumOfZones);
                 zone.openScheds.allocate(state.dataGlobal->NumOfZones);
                 zone.DoorHeight.allocate(state.dataGlobal->NumOfZones);

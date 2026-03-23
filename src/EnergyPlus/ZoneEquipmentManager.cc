@@ -5593,13 +5593,11 @@ static bool checkMixingTempLimits(EnergyPlusData &state,
         if (tMin > tMax) {
             ++errCount;
             if (errCount < 2) {
-                ShowWarningError(state,
-                                 EnergyPlus::format("{}: The {} is above the {} in {}", contextMsg, minLabel, maxLabel, objectName));
+                ShowWarningError(state, EnergyPlus::format("{}: The {} is above the {} in {}", contextMsg, minLabel, maxLabel, objectName));
                 ShowContinueError(state, EnergyPlus::format("The {} is set to the {}. Simulation continues.", minLabel, maxLabel));
                 ShowContinueErrorTimeStamp(state, " Occurrence info:");
             } else {
-                ShowRecurringWarningErrorAtEnd(
-                    state, EnergyPlus::format("The {} is still above the {}", minLabel, maxLabel), errIndex, tMin, tMin);
+                ShowRecurringWarningErrorAtEnd(state, EnergyPlus::format("The {} is still above the {}", minLabel, maxLabel), errIndex, tMin, tMin);
             }
             tMin = tMax;
         }
@@ -5788,8 +5786,14 @@ void CalcAirFlowSimple(EnergyPlusData &state,
             EnthalpyExt = state.dataEnvrn->OutEnthalpy;
         }
 
-        Real64 AirDensity = calcInfVentAirDensity(state, thisVentilation.densityBasis, thisVentilation.spaceIndex,
-                                                    thisMixingMAT, thisZoneHB.MixingHumRat, TempExt, HumRatExt, RoutineNameInfiltration);
+        Real64 AirDensity = calcInfVentAirDensity(state,
+                                                  thisVentilation.densityBasis,
+                                                  thisVentilation.spaceIndex,
+                                                  thisMixingMAT,
+                                                  thisZoneHB.MixingHumRat,
+                                                  TempExt,
+                                                  HumRatExt,
+                                                  RoutineNameInfiltration);
 
         Real64 CpAir = PsyCpAirFnW(HumRatExt);
 
@@ -6152,15 +6156,36 @@ void CalcAirFlowSimple(EnergyPlusData &state,
             Real64 TempExt = state.dataHeatBal->Zone(thisZoneNum).OutDryBulbTemp;
             // Evaluate all three checks independently (no short-circuit) so that
             // error counters and warnings are updated for every violated limit.
-            bool indoorLimited = checkMixingTempLimits(state, thisMixing.minIndoorTempSched, thisMixing.maxIndoorTempSched, TZN,
-                                      thisMixing.IndoorTempErrCount, thisMixing.IndoorTempErrIndex, thisMixing.Name,
-                                      "Mixing zone temperature control", "minimum zone temperature", "maximum zone temperature");
-            bool sourceLimited = checkMixingTempLimits(state, thisMixing.minSourceTempSched, thisMixing.maxSourceTempSched, TZM,
-                                      thisMixing.SourceTempErrCount, thisMixing.SourceTempErrIndex, thisMixing.Name,
-                                      "Mixing source temperature control", "minimum source temperature", "maximum source temperature");
-            bool outdoorLimited = checkMixingTempLimits(state, thisMixing.minOutdoorTempSched, thisMixing.maxOutdoorTempSched, TempExt,
-                                      thisMixing.OutdoorTempErrCount, thisMixing.OutdoorTempErrIndex, thisMixing.Name,
-                                      "Mixing outdoor temperature control", "minimum outdoor temperature", "maximum outdoor temperature");
+            bool indoorLimited = checkMixingTempLimits(state,
+                                                       thisMixing.minIndoorTempSched,
+                                                       thisMixing.maxIndoorTempSched,
+                                                       TZN,
+                                                       thisMixing.IndoorTempErrCount,
+                                                       thisMixing.IndoorTempErrIndex,
+                                                       thisMixing.Name,
+                                                       "Mixing zone temperature control",
+                                                       "minimum zone temperature",
+                                                       "maximum zone temperature");
+            bool sourceLimited = checkMixingTempLimits(state,
+                                                       thisMixing.minSourceTempSched,
+                                                       thisMixing.maxSourceTempSched,
+                                                       TZM,
+                                                       thisMixing.SourceTempErrCount,
+                                                       thisMixing.SourceTempErrIndex,
+                                                       thisMixing.Name,
+                                                       "Mixing source temperature control",
+                                                       "minimum source temperature",
+                                                       "maximum source temperature");
+            bool outdoorLimited = checkMixingTempLimits(state,
+                                                        thisMixing.minOutdoorTempSched,
+                                                        thisMixing.maxOutdoorTempSched,
+                                                        TempExt,
+                                                        thisMixing.OutdoorTempErrCount,
+                                                        thisMixing.OutdoorTempErrIndex,
+                                                        thisMixing.Name,
+                                                        "Mixing outdoor temperature control",
+                                                        "minimum outdoor temperature",
+                                                        "maximum outdoor temperature");
             if (indoorLimited || sourceLimited || outdoorLimited) {
                 MixingLimitFlag = true;
             }
@@ -6271,15 +6296,36 @@ void CalcAirFlowSimple(EnergyPlusData &state,
             Real64 TempExt = state.dataHeatBal->Zone(thisZoneNum).OutDryBulbTemp;
             // Evaluate all three checks independently (no short-circuit) so that
             // error counters and warnings are updated for every violated limit.
-            bool indoorLimited = checkMixingTempLimits(state, thisCrossMixing.minIndoorTempSched, thisCrossMixing.maxIndoorTempSched, TZN,
-                                      thisCrossMixing.IndoorTempErrCount, thisCrossMixing.IndoorTempErrIndex, thisCrossMixing.Name,
-                                      "CrossMixing zone temperature control", "minimum zone temperature", "maximum zone temperature");
-            bool sourceLimited = checkMixingTempLimits(state, thisCrossMixing.minSourceTempSched, thisCrossMixing.maxSourceTempSched, TZM,
-                                      thisCrossMixing.SourceTempErrCount, thisCrossMixing.SourceTempErrIndex, thisCrossMixing.Name,
-                                      "CrossMixing source temperature control", "minimum source temperature", "maximum source temperature");
-            bool outdoorLimited = checkMixingTempLimits(state, thisCrossMixing.minOutdoorTempSched, thisCrossMixing.maxOutdoorTempSched, TempExt,
-                                      thisCrossMixing.OutdoorTempErrCount, thisCrossMixing.OutdoorTempErrIndex, thisCrossMixing.Name,
-                                      "CrossMixing outdoor temperature control", "minimum outdoor temperature", "maximum outdoor temperature");
+            bool indoorLimited = checkMixingTempLimits(state,
+                                                       thisCrossMixing.minIndoorTempSched,
+                                                       thisCrossMixing.maxIndoorTempSched,
+                                                       TZN,
+                                                       thisCrossMixing.IndoorTempErrCount,
+                                                       thisCrossMixing.IndoorTempErrIndex,
+                                                       thisCrossMixing.Name,
+                                                       "CrossMixing zone temperature control",
+                                                       "minimum zone temperature",
+                                                       "maximum zone temperature");
+            bool sourceLimited = checkMixingTempLimits(state,
+                                                       thisCrossMixing.minSourceTempSched,
+                                                       thisCrossMixing.maxSourceTempSched,
+                                                       TZM,
+                                                       thisCrossMixing.SourceTempErrCount,
+                                                       thisCrossMixing.SourceTempErrIndex,
+                                                       thisCrossMixing.Name,
+                                                       "CrossMixing source temperature control",
+                                                       "minimum source temperature",
+                                                       "maximum source temperature");
+            bool outdoorLimited = checkMixingTempLimits(state,
+                                                        thisCrossMixing.minOutdoorTempSched,
+                                                        thisCrossMixing.maxOutdoorTempSched,
+                                                        TempExt,
+                                                        thisCrossMixing.OutdoorTempErrCount,
+                                                        thisCrossMixing.OutdoorTempErrIndex,
+                                                        thisCrossMixing.Name,
+                                                        "CrossMixing outdoor temperature control",
+                                                        "minimum outdoor temperature",
+                                                        "maximum outdoor temperature");
             bool MixingLimitFlag = indoorLimited || sourceLimited || outdoorLimited;
             if (MixingLimitFlag) {
                 continue;
@@ -6520,8 +6566,14 @@ void CalcAirFlowSimple(EnergyPlusData &state,
             HumRatExt = state.dataEnvrn->OutHumRat;
         }
 
-        Real64 AirDensity = calcInfVentAirDensity(state, thisInfiltration.densityBasis, thisInfiltration.spaceIndex,
-                                                    tempInt, thisZoneHB.MixingHumRat, TempExt, HumRatExt, RoutineNameInfiltration);
+        Real64 AirDensity = calcInfVentAirDensity(state,
+                                                  thisInfiltration.densityBasis,
+                                                  thisInfiltration.spaceIndex,
+                                                  tempInt,
+                                                  thisZoneHB.MixingHumRat,
+                                                  TempExt,
+                                                  HumRatExt,
+                                                  RoutineNameInfiltration);
 
         Real64 CpAir = PsyCpAirFnW(HumRatExt);
         Real64 MCpI_temp = 0.0;

@@ -111,8 +111,7 @@ static void connectAirTermToZone(EnergyPlusData &state,
     }
     if (airTerm.ADUNum == 0) {
         ShowSevereError(
-            state,
-            EnergyPlus::format("{}No matching Air Distribution Unit, for System = [{},{}].", RoutineName, airTerm.sysType, airTerm.SysName));
+            state, EnergyPlus::format("{}No matching Air Distribution Unit, for System = [{},{}].", RoutineName, airTerm.sysType, airTerm.SysName));
         ShowContinueError(state, EnergyPlus::format("...should have outlet node = {}", state.dataLoopNodes->NodeID(outletNode)));
         ErrorsFound = true;
     } else {
@@ -124,9 +123,7 @@ static void connectAirTermToZone(EnergyPlusData &state,
                 if (outletNode == state.dataZoneEquip->ZoneEquipConfig(CtrlZone).InletNode(SupAirIn)) {
                     if (state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).OutNode > 0) {
                         ShowSevereError(state, "Error in connecting a terminal unit to a zone");
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format("{} already connects to another zone", state.dataLoopNodes->NodeID(outletNode)));
+                        ShowContinueError(state, EnergyPlus::format("{} already connects to another zone", state.dataLoopNodes->NodeID(outletNode)));
                         ShowContinueError(state, EnergyPlus::format("Occurs for terminal unit {} = {}", airTerm.sysType, airTerm.SysName));
                         ShowContinueError(state, "Check terminal unit node names for errors");
                         ErrorsFound = true;
@@ -336,11 +333,8 @@ void GetSysInput(EnergyPlusData &state)
                                 "AirTerminal:SingleDuct:VAV:Reheat:VariableSpeedFan",
                                 "AirTerminal:SingleDuct:VAV:HeatAndCool:Reheat",
                                 "AirTerminal:SingleDuct:VAV:HeatAndCool:NoReheat"}) {
-        state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state,
-                                                                       objName,
-                                                                       state.dataSingleDuct->TotalArgsGSI,
-                                                                       state.dataSingleDuct->NumAlphasGSI,
-                                                                       state.dataSingleDuct->NumNumsGSI);
+        state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(
+            state, objName, state.dataSingleDuct->TotalArgsGSI, state.dataSingleDuct->NumAlphasGSI, state.dataSingleDuct->NumNumsGSI);
         state.dataSingleDuct->MaxNumsGSI = max(state.dataSingleDuct->MaxNumsGSI, state.dataSingleDuct->NumNumsGSI);
         state.dataSingleDuct->MaxAlphasGSI = max(state.dataSingleDuct->MaxAlphasGSI, state.dataSingleDuct->NumAlphasGSI);
     }

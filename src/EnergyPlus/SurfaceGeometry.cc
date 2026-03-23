@@ -1556,16 +1556,12 @@ namespace SurfaceGeometry {
 
                 // Exterior window subsurfaces (Window and GlassDoor)
                 moveSurfacesMatching(
-                    [](auto const &s) {
-                        return s.ExtBoundCond <= 0 && (s.Class == SurfaceClass::Window || s.Class == SurfaceClass::GlassDoor);
-                    },
+                    [](auto const &s) { return s.ExtBoundCond <= 0 && (s.Class == SurfaceClass::Window || s.Class == SurfaceClass::GlassDoor); },
                     false);
 
                 // Interior window subsurfaces (Window and GlassDoor)
                 moveSurfacesMatching(
-                    [](auto const &s) {
-                        return s.ExtBoundCond > 0 && (s.Class == SurfaceClass::Window || s.Class == SurfaceClass::GlassDoor);
-                    },
+                    [](auto const &s) { return s.ExtBoundCond > 0 && (s.Class == SurfaceClass::Window || s.Class == SurfaceClass::GlassDoor); },
                     false);
 
                 // TDD_Diffuser
@@ -1906,15 +1902,14 @@ namespace SurfaceGeometry {
                             }
                             // check surface class match.  interzone surface.
                             // Wall must match Wall; Roof must match Floor (and vice versa)
-                            bool classMismatch =
-                                (state.dataSurface->Surface(SurfNum).Class == SurfaceClass::Wall &&
-                                 state.dataSurface->Surface(Found).Class != SurfaceClass::Wall) ||
-                                (state.dataSurface->Surface(SurfNum).Class != SurfaceClass::Wall &&
-                                 state.dataSurface->Surface(Found).Class == SurfaceClass::Wall) ||
-                                (state.dataSurface->Surface(SurfNum).Class == SurfaceClass::Roof &&
-                                 state.dataSurface->Surface(Found).Class != SurfaceClass::Floor) ||
-                                (state.dataSurface->Surface(SurfNum).Class != SurfaceClass::Roof &&
-                                 state.dataSurface->Surface(Found).Class == SurfaceClass::Floor);
+                            bool classMismatch = (state.dataSurface->Surface(SurfNum).Class == SurfaceClass::Wall &&
+                                                  state.dataSurface->Surface(Found).Class != SurfaceClass::Wall) ||
+                                                 (state.dataSurface->Surface(SurfNum).Class != SurfaceClass::Wall &&
+                                                  state.dataSurface->Surface(Found).Class == SurfaceClass::Wall) ||
+                                                 (state.dataSurface->Surface(SurfNum).Class == SurfaceClass::Roof &&
+                                                  state.dataSurface->Surface(Found).Class != SurfaceClass::Floor) ||
+                                                 (state.dataSurface->Surface(SurfNum).Class != SurfaceClass::Roof &&
+                                                  state.dataSurface->Surface(Found).Class == SurfaceClass::Floor);
                             if (classMismatch) {
                                 ShowWarningError(state, EnergyPlus::format("{}InterZone Surface Classes do not match as expected.", RoutineName));
                                 ShowContinueError(state,

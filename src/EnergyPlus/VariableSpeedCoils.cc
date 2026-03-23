@@ -214,15 +214,15 @@ namespace VariableSpeedCoils {
                                       nlohmann::json const &fields,
                                       nlohmann::json const &schemaProps,
                                       int speedNum,
-                                      std::string_view fieldSuffix,      // e.g. "_total_cooling_capacity_function_of_temperature_curve_name"
-                                      std::string_view displaySuffix,    // e.g. " Total Cooling Capacity Function of Temperature Curve Name"
+                                      std::string_view fieldSuffix,   // e.g. "_total_cooling_capacity_function_of_temperature_curve_name"
+                                      std::string_view displaySuffix, // e.g. " Total Cooling Capacity Function of Temperature Curve Name"
                                       int &curveIndexOut,
                                       std::initializer_list<int> validDims,
                                       std::string_view routineName,
                                       std::string const &currentModuleObject,
                                       std::string const &coilName,
                                       Real64 ratedVal1,
-                                      Real64 ratedVal2 = -999.0, // omit for 1-D curves
+                                      Real64 ratedVal2 = -999.0,   // omit for 1-D curves
                                       bool useInvalidBool = false) // use ShowSevereInvalidBool instead of ShowSevereItemNotFound
     {
         bool errFound = false;
@@ -247,8 +247,7 @@ namespace VariableSpeedCoils {
                                                         : Curve::CurveValue(state, curveIndexOut, ratedVal1, ratedVal2);
                 if (curveVal > 1.10 || curveVal < 0.90) {
                     ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\", curve values", routineName, currentModuleObject, coilName));
-                    ShowContinueError(
-                        state, EnergyPlus::format("...{} output is not equal to 1.0 (+ or - 10%) at rated conditions.", fieldDisplay));
+                    ShowContinueError(state, EnergyPlus::format("...{} output is not equal to 1.0 (+ or - 10%) at rated conditions.", fieldDisplay));
                     ShowContinueError(state, EnergyPlus::format("...Curve output at rated conditions = {:.3T}", curveVal));
                 }
             }
@@ -286,8 +285,7 @@ namespace VariableSpeedCoils {
         auto validateNumSpeedsAndNormLevel = [&](VariableSpeedCoilData &coil, std::string_view modObj) {
             if (coil.NumOfSpeeds < 1) {
                 ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, modObj, coil.Name));
-                ShowContinueError(state,
-                                  EnergyPlus::format("...Number of Speeds must be >= 1. entered number is {:.0T}", coil.NumOfSpeeds));
+                ShowContinueError(state, EnergyPlus::format("...Number of Speeds must be >= 1. entered number is {:.0T}", coil.NumOfSpeeds));
                 ErrorsFound = true;
             }
             if (coil.NormSpedLevel > coil.NumOfSpeeds) {
@@ -296,16 +294,18 @@ namespace VariableSpeedCoils {
             if ((coil.NormSpedLevel > coil.NumOfSpeeds) || (coil.NormSpedLevel <= 0)) {
                 ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, modObj, coil.Name));
                 ShowContinueError(
-                    state,
-                    EnergyPlus::format("...Nominal Speed Level must be valid speed level entered number is {:.0T}", coil.NormSpedLevel));
+                    state, EnergyPlus::format("...Nominal Speed Level must be valid speed level entered number is {:.0T}", coil.NormSpedLevel));
                 ErrorsFound = true;
             }
         };
 
         // Helper: look up a PLF curve by JSON field name, validate it, and assign to varSpeedCoil.PLFFPLR
-        auto validatePLFCurve = [&](VariableSpeedCoilData &coil, const ErrorObjectHeader &eoh,
-                                    std::string_view displayFieldName, const std::string &jsonFieldName,
-                                    const nlohmann::json &fields, const nlohmann::json &schemaProps,
+        auto validatePLFCurve = [&](VariableSpeedCoilData &coil,
+                                    const ErrorObjectHeader &eoh,
+                                    std::string_view displayFieldName,
+                                    const std::string &jsonFieldName,
+                                    const nlohmann::json &fields,
+                                    const nlohmann::json &schemaProps,
                                     std::string_view modObj) {
             std::string const curveName = s_ip->getAlphaFieldValue(fields, schemaProps, jsonFieldName);
             if (curveName.empty()) {
@@ -326,20 +326,21 @@ namespace VariableSpeedCoils {
         };
 
         // Helper: look up the optional crankcase heater capacity curve and validate dimensions
-        auto lookupCrankcaseHeaterCurve = [&](VariableSpeedCoilData &coil, const ErrorObjectHeader &eoh,
-                                              const nlohmann::json &fields, const nlohmann::json &schemaProps,
+        auto lookupCrankcaseHeaterCurve = [&](VariableSpeedCoilData &coil,
+                                              const ErrorObjectHeader &eoh,
+                                              const nlohmann::json &fields,
+                                              const nlohmann::json &schemaProps,
                                               std::string_view modObj) {
             std::string_view displayField = "Crankcase Heater Capacity Function of Temperature Curve Name";
-            std::string curveName =
-                s_ip->getAlphaFieldValue(fields, schemaProps, "crankcase_heater_capacity_function_of_temperature_curve_name");
+            std::string curveName = s_ip->getAlphaFieldValue(fields, schemaProps, "crankcase_heater_capacity_function_of_temperature_curve_name");
             if (!curveName.empty()) {
                 coil.CrankcaseHeaterCapacityCurveIndex = Curve::GetCurveIndex(state, curveName);
                 if (coil.CrankcaseHeaterCapacityCurveIndex == 0) {
                     ShowSevereItemNotFound(state, eoh, displayField, curveName);
                     ErrorsFound = true;
                 } else {
-                    ErrorsFound |= Curve::CheckCurveDims(state, coil.CrankcaseHeaterCapacityCurveIndex, {1},
-                                                         RoutineName, modObj, coil.Name, displayField);
+                    ErrorsFound |=
+                        Curve::CheckCurveDims(state, coil.CrankcaseHeaterCapacityCurveIndex, {1}, RoutineName, modObj, coil.Name, displayField);
                 }
             }
         };
@@ -350,32 +351,56 @@ namespace VariableSpeedCoils {
             std::string_view prefix = isCooling ? "Cooling Coil" : "Heating Coil";
             auto endUseCat = isCooling ? OutputProcessor::EndUseCat::Cooling : OutputProcessor::EndUseCat::Heating;
             auto coilsEndUseCat = isCooling ? OutputProcessor::EndUseCat::CoolingCoils : OutputProcessor::EndUseCat::HeatingCoils;
-            SetupOutputVariable(state, EnergyPlus::format("{} Electricity Energy", prefix), Constant::Units::J, c.Energy,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, c.Name,
-                                Constant::eResource::Electricity, OutputProcessor::Group::HVAC, endUseCat);
+            SetupOutputVariable(state,
+                                EnergyPlus::format("{} Electricity Energy", prefix),
+                                Constant::Units::J,
+                                c.Energy,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
+                                c.Name,
+                                Constant::eResource::Electricity,
+                                OutputProcessor::Group::HVAC,
+                                endUseCat);
             std::string totalName = isCooling ? "Cooling Coil Total Cooling Energy" : "Heating Coil Heating Energy";
-            SetupOutputVariable(state, totalName, Constant::Units::J, c.EnergyLoadTotal,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, c.Name,
-                                Constant::eResource::EnergyTransfer, OutputProcessor::Group::HVAC, coilsEndUseCat);
+            SetupOutputVariable(state,
+                                totalName,
+                                Constant::Units::J,
+                                c.EnergyLoadTotal,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
+                                c.Name,
+                                Constant::eResource::EnergyTransfer,
+                                OutputProcessor::Group::HVAC,
+                                coilsEndUseCat);
             if (isCooling) {
-                SetupOutputVariable(state, "Cooling Coil Sensible Cooling Energy", Constant::Units::J, c.EnergySensible,
-                                    OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, c.Name);
-                SetupOutputVariable(state, "Cooling Coil Latent Cooling Energy", Constant::Units::J, c.EnergyLatent,
-                                    OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Sum, c.Name);
+                SetupOutputVariable(state,
+                                    "Cooling Coil Sensible Cooling Energy",
+                                    Constant::Units::J,
+                                    c.EnergySensible,
+                                    OutputProcessor::TimeStepType::System,
+                                    OutputProcessor::StoreType::Sum,
+                                    c.Name);
+                SetupOutputVariable(state,
+                                    "Cooling Coil Latent Cooling Energy",
+                                    Constant::Units::J,
+                                    c.EnergyLatent,
+                                    OutputProcessor::TimeStepType::System,
+                                    OutputProcessor::StoreType::Sum,
+                                    c.Name);
             }
         };
 
         // Helper: read and validate the availability schedule
-        auto readAvailSchedule = [&](VariableSpeedCoilData &coil, const ErrorObjectHeader &eoh,
-                                     const nlohmann::json &fields, const nlohmann::json &schemaProps) {
-            std::string const schedName = s_ip->getAlphaFieldValue(fields, schemaProps, "availability_schedule_name");
-            if (schedName.empty()) {
-                coil.availSched = Sched::GetScheduleAlwaysOn(state);
-            } else if ((coil.availSched = Sched::GetSchedule(state, schedName)) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, "Availability Schedule Name", schedName);
-                ErrorsFound = true;
-            }
-        };
+        auto readAvailSchedule =
+            [&](VariableSpeedCoilData &coil, const ErrorObjectHeader &eoh, const nlohmann::json &fields, const nlohmann::json &schemaProps) {
+                std::string const schedName = s_ip->getAlphaFieldValue(fields, schemaProps, "availability_schedule_name");
+                if (schedName.empty()) {
+                    coil.availSched = Sched::GetScheduleAlwaysOn(state);
+                } else if ((coil.availSched = Sched::GetSchedule(state, schedName)) == nullptr) {
+                    ShowSevereItemNotFound(state, eoh, "Availability Schedule Name", schedName);
+                    ErrorsFound = true;
+                }
+            };
 
         // Helper: compute per-speed scale values (percent total capacity, air/water/evapCond volume flow per rated total cap, etc.)
         auto computeScaleValues = [](VariableSpeedCoilData &coil, bool hasWater, bool hasEvapCond, bool hasPumpPower) {
@@ -384,51 +409,87 @@ namespace VariableSpeedCoils {
                 Real64 capI = coil.MSRatedTotCap(I);
                 coil.MSRatedPercentTotCap(I) = capI / maxCap;
                 coil.MSRatedAirVolFlowPerRatedTotCap(I) = coil.MSRatedAirVolFlowRate(I) / capI;
-                if (hasWater) coil.MSRatedWaterVolFlowPerRatedTotCap(I) = coil.MSRatedWaterVolFlowRate(I) / capI;
-                if (hasEvapCond) coil.MSRatedEvapCondVolFlowPerRatedTotCap(I) = coil.EvapCondAirFlow(I) / capI;
-                if (hasPumpPower) coil.MSWHPumpPowerPerRatedTotCap(I) = coil.MSWHPumpPower(I) / capI;
+                if (hasWater) {
+                    coil.MSRatedWaterVolFlowPerRatedTotCap(I) = coil.MSRatedWaterVolFlowRate(I) / capI;
+                }
+                if (hasEvapCond) {
+                    coil.MSRatedEvapCondVolFlowPerRatedTotCap(I) = coil.EvapCondAirFlow(I) / capI;
+                }
+                if (hasPumpPower) {
+                    coil.MSWHPumpPowerPerRatedTotCap(I) = coil.MSWHPumpPower(I) / capI;
+                }
             }
         };
 
         // Helper: read crankcase heater capacity, validate >= 0, set ErrorsFound if invalid
-        auto readCrankcaseHeaterCapacity = [&](VariableSpeedCoilData &coil, const nlohmann::json &fields,
-                                               const nlohmann::json &schemaProps, std::string_view modObj) {
-            coil.CrankcaseHeaterCapacity = s_ip->getRealFieldValue(fields, schemaProps, "crankcase_heater_capacity");
-            if (coil.CrankcaseHeaterCapacity < 0.0) {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, modObj, coil.Name));
-                ShowContinueError(state, "...Crankcase Heater Capacity cannot be < 0.0.");
-                ShowContinueError(state, EnergyPlus::format("...entered value=[{:.2T}].", coil.CrankcaseHeaterCapacity));
-                ErrorsFound = true;
-            }
-        };
+        auto readCrankcaseHeaterCapacity =
+            [&](VariableSpeedCoilData &coil, const nlohmann::json &fields, const nlohmann::json &schemaProps, std::string_view modObj) {
+                coil.CrankcaseHeaterCapacity = s_ip->getRealFieldValue(fields, schemaProps, "crankcase_heater_capacity");
+                if (coil.CrankcaseHeaterCapacity < 0.0) {
+                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, modObj, coil.Name));
+                    ShowContinueError(state, "...Crankcase Heater Capacity cannot be < 0.0.");
+                    ShowContinueError(state, EnergyPlus::format("...entered value=[{:.2T}].", coil.CrankcaseHeaterCapacity));
+                    ErrorsFound = true;
+                }
+            };
 
         // Helper: register air inlet/outlet nodes, call TestCompSet, and return the node names
-        auto registerAirNodes = [&](VariableSpeedCoilData &coil, Node::ConnectionObjectType connType,
-                                    const nlohmann::json &fields, const nlohmann::json &schemaProps,
-                                    std::string const &inletField, std::string const &outletField) {
+        auto registerAirNodes = [&](VariableSpeedCoilData &coil,
+                                    Node::ConnectionObjectType connType,
+                                    const nlohmann::json &fields,
+                                    const nlohmann::json &schemaProps,
+                                    std::string const &inletField,
+                                    std::string const &outletField) {
             std::string inName = s_ip->getAlphaFieldValue(fields, schemaProps, inletField);
             std::string outName = s_ip->getAlphaFieldValue(fields, schemaProps, outletField);
-            coil.AirInletNodeNum = GetOnlySingleNode(state, inName, ErrorsFound, connType, coil.Name,
-                                                     Node::FluidType::Air, Node::ConnectionType::Inlet,
-                                                     Node::CompFluidStream::Primary, Node::ObjectIsNotParent);
-            coil.AirOutletNodeNum = GetOnlySingleNode(state, outName, ErrorsFound, connType, coil.Name,
-                                                      Node::FluidType::Air, Node::ConnectionType::Outlet,
-                                                      Node::CompFluidStream::Primary, Node::ObjectIsNotParent);
+            coil.AirInletNodeNum = GetOnlySingleNode(state,
+                                                     inName,
+                                                     ErrorsFound,
+                                                     connType,
+                                                     coil.Name,
+                                                     Node::FluidType::Air,
+                                                     Node::ConnectionType::Inlet,
+                                                     Node::CompFluidStream::Primary,
+                                                     Node::ObjectIsNotParent);
+            coil.AirOutletNodeNum = GetOnlySingleNode(state,
+                                                      outName,
+                                                      ErrorsFound,
+                                                      connType,
+                                                      coil.Name,
+                                                      Node::FluidType::Air,
+                                                      Node::ConnectionType::Outlet,
+                                                      Node::CompFluidStream::Primary,
+                                                      Node::ObjectIsNotParent);
             Node::TestCompSet(state, CurrentModuleObject, coil.Name, inName, outName, "Air Nodes");
         };
 
         // Helper: register water inlet/outlet nodes and call TestCompSet
-        auto registerWaterNodes = [&](VariableSpeedCoilData &coil, Node::ConnectionObjectType connType,
-                                      const nlohmann::json &fields, const nlohmann::json &schemaProps,
-                                      std::string const &inletField, std::string const &outletField) {
+        auto registerWaterNodes = [&](VariableSpeedCoilData &coil,
+                                      Node::ConnectionObjectType connType,
+                                      const nlohmann::json &fields,
+                                      const nlohmann::json &schemaProps,
+                                      std::string const &inletField,
+                                      std::string const &outletField) {
             std::string inName = s_ip->getAlphaFieldValue(fields, schemaProps, inletField);
             std::string outName = s_ip->getAlphaFieldValue(fields, schemaProps, outletField);
-            coil.WaterInletNodeNum = GetOnlySingleNode(state, inName, ErrorsFound, connType, coil.Name,
-                                                       Node::FluidType::Water, Node::ConnectionType::Inlet,
-                                                       Node::CompFluidStream::Secondary, Node::ObjectIsNotParent);
-            coil.WaterOutletNodeNum = GetOnlySingleNode(state, outName, ErrorsFound, connType, coil.Name,
-                                                        Node::FluidType::Water, Node::ConnectionType::Outlet,
-                                                        Node::CompFluidStream::Secondary, Node::ObjectIsNotParent);
+            coil.WaterInletNodeNum = GetOnlySingleNode(state,
+                                                       inName,
+                                                       ErrorsFound,
+                                                       connType,
+                                                       coil.Name,
+                                                       Node::FluidType::Water,
+                                                       Node::ConnectionType::Inlet,
+                                                       Node::CompFluidStream::Secondary,
+                                                       Node::ObjectIsNotParent);
+            coil.WaterOutletNodeNum = GetOnlySingleNode(state,
+                                                        outName,
+                                                        ErrorsFound,
+                                                        connType,
+                                                        coil.Name,
+                                                        Node::FluidType::Water,
+                                                        Node::ConnectionType::Outlet,
+                                                        Node::CompFluidStream::Secondary,
+                                                        Node::ObjectIsNotParent);
             Node::TestCompSet(state, CurrentModuleObject, coil.Name, inName, outName, "Water Nodes");
         };
 
@@ -496,16 +557,29 @@ namespace VariableSpeedCoils {
                 varSpeedCoil.FanDelayTime = s_ip->getRealFieldValue(fields, schemaProps, "fan_delay_time");
                 varSpeedCoil.HOTGASREHEATFLG = s_ip->getIntFieldValue(fields, schemaProps, "flag_for_using_hot_gas_reheat_0_or_1");
                 varSpeedCoil.CondenserType = DataHeatBalance::RefrigCondenserType::Water;
-                registerWaterNodes(varSpeedCoil, Node::ConnectionObjectType::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit,
-                                   fields, schemaProps, "water_to_refrigerant_hx_water_inlet_node_name", "water_to_refrigerant_hx_water_outlet_node_name");
-                registerAirNodes(varSpeedCoil, Node::ConnectionObjectType::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit,
-                                 fields, schemaProps, "indoor_air_inlet_node_name", "indoor_air_outlet_node_name");
+                registerWaterNodes(varSpeedCoil,
+                                   Node::ConnectionObjectType::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit,
+                                   fields,
+                                   schemaProps,
+                                   "water_to_refrigerant_hx_water_inlet_node_name",
+                                   "water_to_refrigerant_hx_water_outlet_node_name");
+                registerAirNodes(varSpeedCoil,
+                                 Node::ConnectionObjectType::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit,
+                                 fields,
+                                 schemaProps,
+                                 "indoor_air_inlet_node_name",
+                                 "indoor_air_outlet_node_name");
 
                 validateNumSpeedsAndNormLevel(varSpeedCoil, CurrentModuleObject);
 
                 // part load curve
-                validatePLFCurve(varSpeedCoil, eoh, "Energy Part Load Fraction Curve Name",
-                                 "energy_part_load_fraction_curve_name", fields, schemaProps, CurrentModuleObject);
+                validatePLFCurve(varSpeedCoil,
+                                 eoh,
+                                 "Energy Part Load Fraction Curve Name",
+                                 "energy_part_load_fraction_curve_name",
+                                 fields,
+                                 schemaProps,
+                                 CurrentModuleObject);
 
                 for (int I = 1; I <= varSpeedCoil.NumOfSpeeds; ++I) {
                     std::string fieldName;
@@ -523,47 +597,114 @@ namespace VariableSpeedCoils {
                         EnergyPlus::format("speed_{}{}", std::to_string(I), "_reference_unit_waste_heat_fraction_of_input_power_at_rated_conditions");
                     varSpeedCoil.MSWasteHeatFrac(I) = s_ip->getRealFieldValue(fields, schemaProps, fieldName);
 
-                    ErrorsFound |= getAndCheckSpeedCurve(state, eoh, s_ip.get(), fields, schemaProps, I,
-                        "_total_cooling_capacity_function_of_temperature_curve_name",
-                        " Total Cooling Capacity Function of Temperature Curve Name",
-                        varSpeedCoil.MSCCapFTemp(I), {2}, RoutineName, CurrentModuleObject, varSpeedCoil.Name,
-                        RatedInletWetBulbTemp, RatedInletWaterTemp);
+                    ErrorsFound |= getAndCheckSpeedCurve(state,
+                                                         eoh,
+                                                         s_ip.get(),
+                                                         fields,
+                                                         schemaProps,
+                                                         I,
+                                                         "_total_cooling_capacity_function_of_temperature_curve_name",
+                                                         " Total Cooling Capacity Function of Temperature Curve Name",
+                                                         varSpeedCoil.MSCCapFTemp(I),
+                                                         {2},
+                                                         RoutineName,
+                                                         CurrentModuleObject,
+                                                         varSpeedCoil.Name,
+                                                         RatedInletWetBulbTemp,
+                                                         RatedInletWaterTemp);
 
-                    ErrorsFound |= getAndCheckSpeedCurve(state, eoh, s_ip.get(), fields, schemaProps, I,
-                        "_total_cooling_capacity_function_of_air_flow_fraction_curve_name",
-                        " Total Cooling Capacity Function of Air Flow Fraction Curve Name",
-                        varSpeedCoil.MSCCapAirFFlow(I), {1}, RoutineName, CurrentModuleObject, varSpeedCoil.Name,
-                        1.0);
+                    ErrorsFound |= getAndCheckSpeedCurve(state,
+                                                         eoh,
+                                                         s_ip.get(),
+                                                         fields,
+                                                         schemaProps,
+                                                         I,
+                                                         "_total_cooling_capacity_function_of_air_flow_fraction_curve_name",
+                                                         " Total Cooling Capacity Function of Air Flow Fraction Curve Name",
+                                                         varSpeedCoil.MSCCapAirFFlow(I),
+                                                         {1},
+                                                         RoutineName,
+                                                         CurrentModuleObject,
+                                                         varSpeedCoil.Name,
+                                                         1.0);
 
-                    ErrorsFound |= getAndCheckSpeedCurve(state, eoh, s_ip.get(), fields, schemaProps, I,
-                        "_total_cooling_capacity_function_of_water_flow_fraction_curve_name",
-                        " Total Cooling Capacity Function of Water Flow Fraction Curve Name",
-                        varSpeedCoil.MSCCapWaterFFlow(I), {1}, RoutineName, CurrentModuleObject, varSpeedCoil.Name,
-                        1.0);
+                    ErrorsFound |= getAndCheckSpeedCurve(state,
+                                                         eoh,
+                                                         s_ip.get(),
+                                                         fields,
+                                                         schemaProps,
+                                                         I,
+                                                         "_total_cooling_capacity_function_of_water_flow_fraction_curve_name",
+                                                         " Total Cooling Capacity Function of Water Flow Fraction Curve Name",
+                                                         varSpeedCoil.MSCCapWaterFFlow(I),
+                                                         {1},
+                                                         RoutineName,
+                                                         CurrentModuleObject,
+                                                         varSpeedCoil.Name,
+                                                         1.0);
 
-                    ErrorsFound |= getAndCheckSpeedCurve(state, eoh, s_ip.get(), fields, schemaProps, I,
-                        "_energy_input_ratio_function_of_temperature_curve_name",
-                        " Energy Input Ratio Function of Temperature Curve Name",
-                        varSpeedCoil.MSEIRFTemp(I), {2}, RoutineName, CurrentModuleObject, varSpeedCoil.Name,
-                        RatedInletWetBulbTemp, RatedInletWaterTemp, true);
+                    ErrorsFound |= getAndCheckSpeedCurve(state,
+                                                         eoh,
+                                                         s_ip.get(),
+                                                         fields,
+                                                         schemaProps,
+                                                         I,
+                                                         "_energy_input_ratio_function_of_temperature_curve_name",
+                                                         " Energy Input Ratio Function of Temperature Curve Name",
+                                                         varSpeedCoil.MSEIRFTemp(I),
+                                                         {2},
+                                                         RoutineName,
+                                                         CurrentModuleObject,
+                                                         varSpeedCoil.Name,
+                                                         RatedInletWetBulbTemp,
+                                                         RatedInletWaterTemp,
+                                                         true);
 
-                    ErrorsFound |= getAndCheckSpeedCurve(state, eoh, s_ip.get(), fields, schemaProps, I,
-                        "_energy_input_ratio_function_of_air_flow_fraction_curve_name",
-                        " Energy Input Ratio Function of Air Flow Fraction Curve Name",
-                        varSpeedCoil.MSEIRAirFFlow(I), {1}, RoutineName, CurrentModuleObject, varSpeedCoil.Name,
-                        1.0);
+                    ErrorsFound |= getAndCheckSpeedCurve(state,
+                                                         eoh,
+                                                         s_ip.get(),
+                                                         fields,
+                                                         schemaProps,
+                                                         I,
+                                                         "_energy_input_ratio_function_of_air_flow_fraction_curve_name",
+                                                         " Energy Input Ratio Function of Air Flow Fraction Curve Name",
+                                                         varSpeedCoil.MSEIRAirFFlow(I),
+                                                         {1},
+                                                         RoutineName,
+                                                         CurrentModuleObject,
+                                                         varSpeedCoil.Name,
+                                                         1.0);
 
-                    ErrorsFound |= getAndCheckSpeedCurve(state, eoh, s_ip.get(), fields, schemaProps, I,
-                        "_energy_input_ratio_function_of_water_flow_fraction_curve_name",
-                        " Energy Input Ratio Function of Water Flow Fraction Curve Name",
-                        varSpeedCoil.MSEIRWaterFFlow(I), {1}, RoutineName, CurrentModuleObject, varSpeedCoil.Name,
-                        1.0);
+                    ErrorsFound |= getAndCheckSpeedCurve(state,
+                                                         eoh,
+                                                         s_ip.get(),
+                                                         fields,
+                                                         schemaProps,
+                                                         I,
+                                                         "_energy_input_ratio_function_of_water_flow_fraction_curve_name",
+                                                         " Energy Input Ratio Function of Water Flow Fraction Curve Name",
+                                                         varSpeedCoil.MSEIRWaterFFlow(I),
+                                                         {1},
+                                                         RoutineName,
+                                                         CurrentModuleObject,
+                                                         varSpeedCoil.Name,
+                                                         1.0);
 
-                    ErrorsFound |= getAndCheckSpeedCurve(state, eoh, s_ip.get(), fields, schemaProps, I,
-                        "_waste_heat_function_of_temperature_curve_name",
-                        " Waste Heat Function of Temperature Curve Name",
-                        varSpeedCoil.MSWasteHeat(I), {2}, RoutineName, CurrentModuleObject, varSpeedCoil.Name,
-                        RatedInletWaterTemp, RatedInletAirTemp);
+                    ErrorsFound |= getAndCheckSpeedCurve(state,
+                                                         eoh,
+                                                         s_ip.get(),
+                                                         fields,
+                                                         schemaProps,
+                                                         I,
+                                                         "_waste_heat_function_of_temperature_curve_name",
+                                                         " Waste Heat Function of Temperature Curve Name",
+                                                         varSpeedCoil.MSWasteHeat(I),
+                                                         {2},
+                                                         RoutineName,
+                                                         CurrentModuleObject,
+                                                         varSpeedCoil.Name,
+                                                         RatedInletWaterTemp,
+                                                         RatedInletAirTemp);
                 }
 
                 computeScaleValues(varSpeedCoil, true, false, false);
@@ -631,14 +772,23 @@ namespace VariableSpeedCoils {
                 varSpeedCoil.MaxONOFFCyclesperHour = s_ip->getRealFieldValue(fields, schemaProps, "maximum_cycling_rate");
                 varSpeedCoil.LatentCapacityTimeConstant = s_ip->getRealFieldValue(fields, schemaProps, "latent_capacity_time_constant");
                 varSpeedCoil.FanDelayTime = s_ip->getRealFieldValue(fields, schemaProps, "fan_delay_time");
-                registerAirNodes(varSpeedCoil, Node::ConnectionObjectType::CoilCoolingDXVariableSpeed,
-                                 fields, schemaProps, "indoor_air_inlet_node_name", "indoor_air_outlet_node_name");
+                registerAirNodes(varSpeedCoil,
+                                 Node::ConnectionObjectType::CoilCoolingDXVariableSpeed,
+                                 fields,
+                                 schemaProps,
+                                 "indoor_air_inlet_node_name",
+                                 "indoor_air_outlet_node_name");
 
                 validateNumSpeedsAndNormLevel(varSpeedCoil, CurrentModuleObject);
 
                 // part load curve
-                validatePLFCurve(varSpeedCoil, eoh, "Energy Part Load Fraction Curve Name",
-                                 "energy_part_load_fraction_curve_name", fields, schemaProps, CurrentModuleObject);
+                validatePLFCurve(varSpeedCoil,
+                                 eoh,
+                                 "Energy Part Load Fraction Curve Name",
+                                 "energy_part_load_fraction_curve_name",
+                                 fields,
+                                 schemaProps,
+                                 CurrentModuleObject);
 
                 cFieldName = "Condenser Air Inlet Node Name"; // cAlphaFields(10)
                 std::string condenserAirInletNodeName = s_ip->getAlphaFieldValue(fields, schemaProps, "condenser_air_inlet_node_name");
@@ -803,29 +953,68 @@ namespace VariableSpeedCoils {
                         ErrorsFound = true;
                     }
 
-                    ErrorsFound |= getAndCheckSpeedCurve(state, eoh, s_ip.get(), fields, schemaProps, I,
-                        "_total_cooling_capacity_function_of_temperature_curve_name",
-                        " Total Cooling Capacity Function of Temperature Curve Name",
-                        varSpeedCoil.MSCCapFTemp(I), {2}, RoutineName, CurrentModuleObject, varSpeedCoil.Name,
-                        RatedInletWetBulbTemp, RatedAmbAirTemp);
+                    ErrorsFound |= getAndCheckSpeedCurve(state,
+                                                         eoh,
+                                                         s_ip.get(),
+                                                         fields,
+                                                         schemaProps,
+                                                         I,
+                                                         "_total_cooling_capacity_function_of_temperature_curve_name",
+                                                         " Total Cooling Capacity Function of Temperature Curve Name",
+                                                         varSpeedCoil.MSCCapFTemp(I),
+                                                         {2},
+                                                         RoutineName,
+                                                         CurrentModuleObject,
+                                                         varSpeedCoil.Name,
+                                                         RatedInletWetBulbTemp,
+                                                         RatedAmbAirTemp);
 
-                    ErrorsFound |= getAndCheckSpeedCurve(state, eoh, s_ip.get(), fields, schemaProps, I,
-                        "_total_cooling_capacity_function_of_air_flow_fraction_curve_name",
-                        " Total Cooling Capacity Function of Air Flow Fraction Curve Name",
-                        varSpeedCoil.MSCCapAirFFlow(I), {1}, RoutineName, CurrentModuleObject, varSpeedCoil.Name,
-                        1.0);
+                    ErrorsFound |= getAndCheckSpeedCurve(state,
+                                                         eoh,
+                                                         s_ip.get(),
+                                                         fields,
+                                                         schemaProps,
+                                                         I,
+                                                         "_total_cooling_capacity_function_of_air_flow_fraction_curve_name",
+                                                         " Total Cooling Capacity Function of Air Flow Fraction Curve Name",
+                                                         varSpeedCoil.MSCCapAirFFlow(I),
+                                                         {1},
+                                                         RoutineName,
+                                                         CurrentModuleObject,
+                                                         varSpeedCoil.Name,
+                                                         1.0);
 
-                    ErrorsFound |= getAndCheckSpeedCurve(state, eoh, s_ip.get(), fields, schemaProps, I,
-                        "_energy_input_ratio_function_of_temperature_curve_name",
-                        " Energy Input Ratio Function of Temperature Curve Name",
-                        varSpeedCoil.MSEIRFTemp(I), {2}, RoutineName, CurrentModuleObject, varSpeedCoil.Name,
-                        RatedInletWetBulbTemp, RatedAmbAirTemp, true);
+                    ErrorsFound |= getAndCheckSpeedCurve(state,
+                                                         eoh,
+                                                         s_ip.get(),
+                                                         fields,
+                                                         schemaProps,
+                                                         I,
+                                                         "_energy_input_ratio_function_of_temperature_curve_name",
+                                                         " Energy Input Ratio Function of Temperature Curve Name",
+                                                         varSpeedCoil.MSEIRFTemp(I),
+                                                         {2},
+                                                         RoutineName,
+                                                         CurrentModuleObject,
+                                                         varSpeedCoil.Name,
+                                                         RatedInletWetBulbTemp,
+                                                         RatedAmbAirTemp,
+                                                         true);
 
-                    ErrorsFound |= getAndCheckSpeedCurve(state, eoh, s_ip.get(), fields, schemaProps, I,
-                        "_energy_input_ratio_function_of_air_flow_fraction_curve_name",
-                        " Energy Input Ratio Function of Air Flow Fraction Curve Name",
-                        varSpeedCoil.MSEIRAirFFlow(I), {1}, RoutineName, CurrentModuleObject, varSpeedCoil.Name,
-                        1.0);
+                    ErrorsFound |= getAndCheckSpeedCurve(state,
+                                                         eoh,
+                                                         s_ip.get(),
+                                                         fields,
+                                                         schemaProps,
+                                                         I,
+                                                         "_energy_input_ratio_function_of_air_flow_fraction_curve_name",
+                                                         " Energy Input Ratio Function of Air Flow Fraction Curve Name",
+                                                         varSpeedCoil.MSEIRAirFFlow(I),
+                                                         {1},
+                                                         RoutineName,
+                                                         CurrentModuleObject,
+                                                         varSpeedCoil.Name,
+                                                         1.0);
                 }
 
                 computeScaleValues(varSpeedCoil, false, true, false);
@@ -882,15 +1071,28 @@ namespace VariableSpeedCoils {
                 varSpeedCoil.LatentCapacityTimeConstant = 0.;
                 varSpeedCoil.FanDelayTime = 0.;
 
-                registerWaterNodes(varSpeedCoil, Node::ConnectionObjectType::CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit,
-                                   fields, schemaProps, "water_to_refrigerant_hx_water_inlet_node_name", "water_to_refrigerant_hx_water_outlet_node_name");
-                registerAirNodes(varSpeedCoil, Node::ConnectionObjectType::CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit,
-                                 fields, schemaProps, "indoor_air_inlet_node_name", "indoor_air_outlet_node_name");
+                registerWaterNodes(varSpeedCoil,
+                                   Node::ConnectionObjectType::CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit,
+                                   fields,
+                                   schemaProps,
+                                   "water_to_refrigerant_hx_water_inlet_node_name",
+                                   "water_to_refrigerant_hx_water_outlet_node_name");
+                registerAirNodes(varSpeedCoil,
+                                 Node::ConnectionObjectType::CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit,
+                                 fields,
+                                 schemaProps,
+                                 "indoor_air_inlet_node_name",
+                                 "indoor_air_outlet_node_name");
 
                 validateNumSpeedsAndNormLevel(varSpeedCoil, CurrentModuleObject);
                 // part load curve
-                validatePLFCurve(varSpeedCoil, eoh, "Energy Part Load Fraction Curve Name",
-                                 "energy_part_load_fraction_curve_name", fields, schemaProps, CurrentModuleObject);
+                validatePLFCurve(varSpeedCoil,
+                                 eoh,
+                                 "Energy Part Load Fraction Curve Name",
+                                 "energy_part_load_fraction_curve_name",
+                                 fields,
+                                 schemaProps,
+                                 CurrentModuleObject);
 
                 for (int I = 1; I <= varSpeedCoil.NumOfSpeeds; ++I) {
                     std::string fieldName;
@@ -907,47 +1109,114 @@ namespace VariableSpeedCoils {
                         EnergyPlus::format("speed_{}{}", std::to_string(I), "_reference_unit_waste_heat_fraction_of_input_power_at_rated_conditions");
                     varSpeedCoil.MSWasteHeatFrac(I) = s_ip->getRealFieldValue(fields, schemaProps, fieldName);
 
-                    ErrorsFound |= getAndCheckSpeedCurve(state, eoh, s_ip.get(), fields, schemaProps, I,
-                        "_heating_capacity_function_of_temperature_curve_name",
-                        " Heating Capacity Function of Temperature Curve Name",
-                        varSpeedCoil.MSCCapFTemp(I), {2}, RoutineName, CurrentModuleObject, varSpeedCoil.Name,
-                        RatedInletAirTempHeat, RatedInletWaterTempHeat);
+                    ErrorsFound |= getAndCheckSpeedCurve(state,
+                                                         eoh,
+                                                         s_ip.get(),
+                                                         fields,
+                                                         schemaProps,
+                                                         I,
+                                                         "_heating_capacity_function_of_temperature_curve_name",
+                                                         " Heating Capacity Function of Temperature Curve Name",
+                                                         varSpeedCoil.MSCCapFTemp(I),
+                                                         {2},
+                                                         RoutineName,
+                                                         CurrentModuleObject,
+                                                         varSpeedCoil.Name,
+                                                         RatedInletAirTempHeat,
+                                                         RatedInletWaterTempHeat);
 
-                    ErrorsFound |= getAndCheckSpeedCurve(state, eoh, s_ip.get(), fields, schemaProps, I,
-                        "_total_heating_capacity_function_of_air_flow_fraction_curve_name",
-                        " Total Heating Capacity Function of Air Flow Fraction Curve Name",
-                        varSpeedCoil.MSCCapAirFFlow(I), {1}, RoutineName, CurrentModuleObject, varSpeedCoil.Name,
-                        1.0);
+                    ErrorsFound |= getAndCheckSpeedCurve(state,
+                                                         eoh,
+                                                         s_ip.get(),
+                                                         fields,
+                                                         schemaProps,
+                                                         I,
+                                                         "_total_heating_capacity_function_of_air_flow_fraction_curve_name",
+                                                         " Total Heating Capacity Function of Air Flow Fraction Curve Name",
+                                                         varSpeedCoil.MSCCapAirFFlow(I),
+                                                         {1},
+                                                         RoutineName,
+                                                         CurrentModuleObject,
+                                                         varSpeedCoil.Name,
+                                                         1.0);
 
-                    ErrorsFound |= getAndCheckSpeedCurve(state, eoh, s_ip.get(), fields, schemaProps, I,
-                        "_heating_capacity_function_of_water_flow_fraction_curve_name",
-                        " Heating Capacity Function of Water Flow Fraction Curve Name",
-                        varSpeedCoil.MSCCapWaterFFlow(I), {1}, RoutineName, CurrentModuleObject, varSpeedCoil.Name,
-                        1.0);
+                    ErrorsFound |= getAndCheckSpeedCurve(state,
+                                                         eoh,
+                                                         s_ip.get(),
+                                                         fields,
+                                                         schemaProps,
+                                                         I,
+                                                         "_heating_capacity_function_of_water_flow_fraction_curve_name",
+                                                         " Heating Capacity Function of Water Flow Fraction Curve Name",
+                                                         varSpeedCoil.MSCCapWaterFFlow(I),
+                                                         {1},
+                                                         RoutineName,
+                                                         CurrentModuleObject,
+                                                         varSpeedCoil.Name,
+                                                         1.0);
 
-                    ErrorsFound |= getAndCheckSpeedCurve(state, eoh, s_ip.get(), fields, schemaProps, I,
-                        "_energy_input_ratio_function_of_temperature_curve_name",
-                        " Energy Input Ratio Function of Temperature Curve Name",
-                        varSpeedCoil.MSEIRFTemp(I), {2}, RoutineName, CurrentModuleObject, varSpeedCoil.Name,
-                        RatedInletAirTempHeat, RatedInletWaterTempHeat, true);
+                    ErrorsFound |= getAndCheckSpeedCurve(state,
+                                                         eoh,
+                                                         s_ip.get(),
+                                                         fields,
+                                                         schemaProps,
+                                                         I,
+                                                         "_energy_input_ratio_function_of_temperature_curve_name",
+                                                         " Energy Input Ratio Function of Temperature Curve Name",
+                                                         varSpeedCoil.MSEIRFTemp(I),
+                                                         {2},
+                                                         RoutineName,
+                                                         CurrentModuleObject,
+                                                         varSpeedCoil.Name,
+                                                         RatedInletAirTempHeat,
+                                                         RatedInletWaterTempHeat,
+                                                         true);
 
-                    ErrorsFound |= getAndCheckSpeedCurve(state, eoh, s_ip.get(), fields, schemaProps, I,
-                        "_energy_input_ratio_function_of_air_flow_fraction_curve_name",
-                        " Energy Input Ratio Function of Air Flow Fraction Curve Name",
-                        varSpeedCoil.MSEIRAirFFlow(I), {1}, RoutineName, CurrentModuleObject, varSpeedCoil.Name,
-                        1.0);
+                    ErrorsFound |= getAndCheckSpeedCurve(state,
+                                                         eoh,
+                                                         s_ip.get(),
+                                                         fields,
+                                                         schemaProps,
+                                                         I,
+                                                         "_energy_input_ratio_function_of_air_flow_fraction_curve_name",
+                                                         " Energy Input Ratio Function of Air Flow Fraction Curve Name",
+                                                         varSpeedCoil.MSEIRAirFFlow(I),
+                                                         {1},
+                                                         RoutineName,
+                                                         CurrentModuleObject,
+                                                         varSpeedCoil.Name,
+                                                         1.0);
 
-                    ErrorsFound |= getAndCheckSpeedCurve(state, eoh, s_ip.get(), fields, schemaProps, I,
-                        "_energy_input_ratio_function_of_water_flow_fraction_curve_name",
-                        " Energy Input Ratio Function of Water Flow Fraction Curve Name",
-                        varSpeedCoil.MSEIRWaterFFlow(I), {1}, RoutineName, CurrentModuleObject, varSpeedCoil.Name,
-                        1.0);
+                    ErrorsFound |= getAndCheckSpeedCurve(state,
+                                                         eoh,
+                                                         s_ip.get(),
+                                                         fields,
+                                                         schemaProps,
+                                                         I,
+                                                         "_energy_input_ratio_function_of_water_flow_fraction_curve_name",
+                                                         " Energy Input Ratio Function of Water Flow Fraction Curve Name",
+                                                         varSpeedCoil.MSEIRWaterFFlow(I),
+                                                         {1},
+                                                         RoutineName,
+                                                         CurrentModuleObject,
+                                                         varSpeedCoil.Name,
+                                                         1.0);
 
-                    ErrorsFound |= getAndCheckSpeedCurve(state, eoh, s_ip.get(), fields, schemaProps, I,
-                        "_waste_heat_function_of_temperature_curve_name",
-                        " Waste Heat Function of Temperature Curve Name",
-                        varSpeedCoil.MSWasteHeat(I), {2}, RoutineName, CurrentModuleObject, varSpeedCoil.Name,
-                        RatedInletWaterTemp, RatedInletAirTemp);
+                    ErrorsFound |= getAndCheckSpeedCurve(state,
+                                                         eoh,
+                                                         s_ip.get(),
+                                                         fields,
+                                                         schemaProps,
+                                                         I,
+                                                         "_waste_heat_function_of_temperature_curve_name",
+                                                         " Waste Heat Function of Temperature Curve Name",
+                                                         varSpeedCoil.MSWasteHeat(I),
+                                                         {2},
+                                                         RoutineName,
+                                                         CurrentModuleObject,
+                                                         varSpeedCoil.Name,
+                                                         RatedInletWaterTemp,
+                                                         RatedInletAirTemp);
                 }
 
                 computeScaleValues(varSpeedCoil, true, false, false);
@@ -1016,13 +1285,22 @@ namespace VariableSpeedCoils {
                     varSpeedCoil.RatedAirVolFlowRate =
                         s_ip->getRealFieldValue(fields, schemaProps, "rated_air_flow_rate_at_selected_nominal_speed_level");
                 }
-                registerAirNodes(varSpeedCoil, Node::ConnectionObjectType::CoilHeatingDXVariableSpeed,
-                                 fields, schemaProps, "indoor_air_inlet_node_name", "indoor_air_outlet_node_name");
+                registerAirNodes(varSpeedCoil,
+                                 Node::ConnectionObjectType::CoilHeatingDXVariableSpeed,
+                                 fields,
+                                 schemaProps,
+                                 "indoor_air_inlet_node_name",
+                                 "indoor_air_outlet_node_name");
                 validateNumSpeedsAndNormLevel(varSpeedCoil, CurrentModuleObject);
 
                 // part load curve
-                validatePLFCurve(varSpeedCoil, eoh, "Energy Part Load Fraction Curve Name",
-                                 "energy_part_load_fraction_curve_name", fields, schemaProps, CurrentModuleObject);
+                validatePLFCurve(varSpeedCoil,
+                                 eoh,
+                                 "Energy Part Load Fraction Curve Name",
+                                 "energy_part_load_fraction_curve_name",
+                                 fields,
+                                 schemaProps,
+                                 CurrentModuleObject);
 
                 std::string const defrostEIRFTFieldName = "Defrost Energy Input Ratio Function of Temperature Curve Name"; // AlphArray(5)
                 std::string defrostEIRFTCurveName =
@@ -1128,29 +1406,68 @@ namespace VariableSpeedCoils {
                     fieldName = EnergyPlus::format("2023_speed_{}{}", std::to_string(I), "_rated_supply_air_fan_power_per_volume_flow_rate");
                     varSpeedCoil.MSRatedEvaporatorFanPowerPerVolumeFlowRate2023(I) = s_ip->getRealFieldValue(fields, schemaProps, fieldName);
 
-                    ErrorsFound |= getAndCheckSpeedCurve(state, eoh, s_ip.get(), fields, schemaProps, I,
-                        "_heating_capacity_function_of_temperature_curve_name",
-                        " Heating Capacity Function of Temperature Curve Name",
-                        varSpeedCoil.MSCCapFTemp(I), {2}, RoutineName, CurrentModuleObject, varSpeedCoil.Name,
-                        RatedInletAirTempHeat, RatedAmbAirTempHeat);
+                    ErrorsFound |= getAndCheckSpeedCurve(state,
+                                                         eoh,
+                                                         s_ip.get(),
+                                                         fields,
+                                                         schemaProps,
+                                                         I,
+                                                         "_heating_capacity_function_of_temperature_curve_name",
+                                                         " Heating Capacity Function of Temperature Curve Name",
+                                                         varSpeedCoil.MSCCapFTemp(I),
+                                                         {2},
+                                                         RoutineName,
+                                                         CurrentModuleObject,
+                                                         varSpeedCoil.Name,
+                                                         RatedInletAirTempHeat,
+                                                         RatedAmbAirTempHeat);
 
-                    ErrorsFound |= getAndCheckSpeedCurve(state, eoh, s_ip.get(), fields, schemaProps, I,
-                        "_total_heating_capacity_function_of_air_flow_fraction_curve_name",
-                        " Total  Heating Capacity Function of Air Flow Fraction Curve Name",
-                        varSpeedCoil.MSCCapAirFFlow(I), {1}, RoutineName, CurrentModuleObject, varSpeedCoil.Name,
-                        1.0);
+                    ErrorsFound |= getAndCheckSpeedCurve(state,
+                                                         eoh,
+                                                         s_ip.get(),
+                                                         fields,
+                                                         schemaProps,
+                                                         I,
+                                                         "_total_heating_capacity_function_of_air_flow_fraction_curve_name",
+                                                         " Total  Heating Capacity Function of Air Flow Fraction Curve Name",
+                                                         varSpeedCoil.MSCCapAirFFlow(I),
+                                                         {1},
+                                                         RoutineName,
+                                                         CurrentModuleObject,
+                                                         varSpeedCoil.Name,
+                                                         1.0);
 
-                    ErrorsFound |= getAndCheckSpeedCurve(state, eoh, s_ip.get(), fields, schemaProps, I,
-                        "_energy_input_ratio_function_of_temperature_curve_name",
-                        " Energy Input Ratio Function of Temperature Curve Name",
-                        varSpeedCoil.MSEIRFTemp(I), {2}, RoutineName, CurrentModuleObject, varSpeedCoil.Name,
-                        RatedInletAirTempHeat, RatedAmbAirTempHeat, true);
+                    ErrorsFound |= getAndCheckSpeedCurve(state,
+                                                         eoh,
+                                                         s_ip.get(),
+                                                         fields,
+                                                         schemaProps,
+                                                         I,
+                                                         "_energy_input_ratio_function_of_temperature_curve_name",
+                                                         " Energy Input Ratio Function of Temperature Curve Name",
+                                                         varSpeedCoil.MSEIRFTemp(I),
+                                                         {2},
+                                                         RoutineName,
+                                                         CurrentModuleObject,
+                                                         varSpeedCoil.Name,
+                                                         RatedInletAirTempHeat,
+                                                         RatedAmbAirTempHeat,
+                                                         true);
 
-                    ErrorsFound |= getAndCheckSpeedCurve(state, eoh, s_ip.get(), fields, schemaProps, I,
-                        "_energy_input_ratio_function_of_air_flow_fraction_curve_name",
-                        " Energy Input Ratio Function of Air Flow Fraction Curve Name",
-                        varSpeedCoil.MSEIRAirFFlow(I), {1}, RoutineName, CurrentModuleObject, varSpeedCoil.Name,
-                        1.0);
+                    ErrorsFound |= getAndCheckSpeedCurve(state,
+                                                         eoh,
+                                                         s_ip.get(),
+                                                         fields,
+                                                         schemaProps,
+                                                         I,
+                                                         "_energy_input_ratio_function_of_air_flow_fraction_curve_name",
+                                                         " Energy Input Ratio Function of Air Flow Fraction Curve Name",
+                                                         varSpeedCoil.MSEIRAirFFlow(I),
+                                                         {1},
+                                                         RoutineName,
+                                                         CurrentModuleObject,
+                                                         varSpeedCoil.Name,
+                                                         1.0);
                 }
 
                 if (ErrorsFound) {
@@ -1287,14 +1604,22 @@ namespace VariableSpeedCoils {
                     varSpeedCoil.HPWHCondPumpFracToWater = 0.0;
                 }
 
-                registerAirNodes(varSpeedCoil, Node::ConnectionObjectType::CoilWaterHeatingAirToWaterHeatPumpVariableSpeed,
-                                 fields, schemaProps, "evaporator_air_inlet_node_name", "evaporator_air_outlet_node_name");
+                registerAirNodes(varSpeedCoil,
+                                 Node::ConnectionObjectType::CoilWaterHeatingAirToWaterHeatPumpVariableSpeed,
+                                 fields,
+                                 schemaProps,
+                                 "evaporator_air_inlet_node_name",
+                                 "evaporator_air_outlet_node_name");
 
                 // Check if the air inlet node is OA node, to justify whether the coil is placed in zone or not
                 varSpeedCoil.IsDXCoilInZone = !OutAirNodeManager::CheckOutAirNodeNumber(state, varSpeedCoil.AirInletNodeNum);
 
-                registerWaterNodes(varSpeedCoil, Node::ConnectionObjectType::CoilWaterHeatingAirToWaterHeatPumpVariableSpeed,
-                                   fields, schemaProps, "condenser_water_inlet_node_name", "condenser_water_outlet_node_name");
+                registerWaterNodes(varSpeedCoil,
+                                   Node::ConnectionObjectType::CoilWaterHeatingAirToWaterHeatPumpVariableSpeed,
+                                   fields,
+                                   schemaProps,
+                                   "condenser_water_inlet_node_name",
+                                   "condenser_water_outlet_node_name");
 
                 readCrankcaseHeaterCapacity(varSpeedCoil, fields, schemaProps, CurrentModuleObject);
 
@@ -1332,8 +1657,13 @@ namespace VariableSpeedCoils {
                 WHInletWaterTemp = varSpeedCoil.WHRatedInletWaterTemp;
 
                 // part load curve
-                validatePLFCurve(varSpeedCoil, eoh, "Part Load Fraction Correlation Curve Name",
-                                 "part_load_fraction_correlation_curve_name", fields, schemaProps, CurrentModuleObject);
+                validatePLFCurve(varSpeedCoil,
+                                 eoh,
+                                 "Part Load Fraction Correlation Curve Name",
+                                 "part_load_fraction_correlation_curve_name",
+                                 fields,
+                                 schemaProps,
+                                 CurrentModuleObject);
 
                 for (int I = 1; I <= varSpeedCoil.NumOfSpeeds; ++I) {
                     std::string jfieldName;
@@ -1350,41 +1680,98 @@ namespace VariableSpeedCoils {
                     jfieldName = EnergyPlus::format("speed_{}{}", std::to_string(I), "_reference_unit_water_pump_input_power_at_rated_conditions");
                     varSpeedCoil.MSWHPumpPower(I) = s_ip->getRealFieldValue(fields, schemaProps, jfieldName);
 
-                    ErrorsFound |= getAndCheckSpeedCurve(state, eoh, s_ip.get(), fields, schemaProps, I,
-                        "_total_wh_capacity_function_of_temperature_curve_name",
-                        " Total WH Capacity Function of Temperature Curve Name",
-                        varSpeedCoil.MSCCapFTemp(I), {2}, RoutineName, CurrentModuleObject, varSpeedCoil.Name,
-                        WHInletAirTemp, WHInletWaterTemp);
+                    ErrorsFound |= getAndCheckSpeedCurve(state,
+                                                         eoh,
+                                                         s_ip.get(),
+                                                         fields,
+                                                         schemaProps,
+                                                         I,
+                                                         "_total_wh_capacity_function_of_temperature_curve_name",
+                                                         " Total WH Capacity Function of Temperature Curve Name",
+                                                         varSpeedCoil.MSCCapFTemp(I),
+                                                         {2},
+                                                         RoutineName,
+                                                         CurrentModuleObject,
+                                                         varSpeedCoil.Name,
+                                                         WHInletAirTemp,
+                                                         WHInletWaterTemp);
 
-                    ErrorsFound |= getAndCheckSpeedCurve(state, eoh, s_ip.get(), fields, schemaProps, I,
-                        "_total_wh_capacity_function_of_air_flow_fraction_curve_name",
-                        " Total WH Capacity Function of Air Flow Fraction Curve Name",
-                        varSpeedCoil.MSCCapAirFFlow(I), {1}, RoutineName, CurrentModuleObject, varSpeedCoil.Name,
-                        1.0);
+                    ErrorsFound |= getAndCheckSpeedCurve(state,
+                                                         eoh,
+                                                         s_ip.get(),
+                                                         fields,
+                                                         schemaProps,
+                                                         I,
+                                                         "_total_wh_capacity_function_of_air_flow_fraction_curve_name",
+                                                         " Total WH Capacity Function of Air Flow Fraction Curve Name",
+                                                         varSpeedCoil.MSCCapAirFFlow(I),
+                                                         {1},
+                                                         RoutineName,
+                                                         CurrentModuleObject,
+                                                         varSpeedCoil.Name,
+                                                         1.0);
 
-                    ErrorsFound |= getAndCheckSpeedCurve(state, eoh, s_ip.get(), fields, schemaProps, I,
-                        "_total_wh_capacity_function_of_water_flow_fraction_curve_name",
-                        " Total WH Capacity Function of Water Flow Fraction Curve Name",
-                        varSpeedCoil.MSCCapWaterFFlow(I), {1}, RoutineName, CurrentModuleObject, varSpeedCoil.Name,
-                        1.0);
+                    ErrorsFound |= getAndCheckSpeedCurve(state,
+                                                         eoh,
+                                                         s_ip.get(),
+                                                         fields,
+                                                         schemaProps,
+                                                         I,
+                                                         "_total_wh_capacity_function_of_water_flow_fraction_curve_name",
+                                                         " Total WH Capacity Function of Water Flow Fraction Curve Name",
+                                                         varSpeedCoil.MSCCapWaterFFlow(I),
+                                                         {1},
+                                                         RoutineName,
+                                                         CurrentModuleObject,
+                                                         varSpeedCoil.Name,
+                                                         1.0);
 
-                    ErrorsFound |= getAndCheckSpeedCurve(state, eoh, s_ip.get(), fields, schemaProps, I,
-                        "_cop_function_of_temperature_curve_name",
-                        " COP Function of Temperature Curve Name",
-                        varSpeedCoil.MSEIRFTemp(I), {2}, RoutineName, CurrentModuleObject, varSpeedCoil.Name,
-                        WHInletAirTemp, WHInletWaterTemp, true);
+                    ErrorsFound |= getAndCheckSpeedCurve(state,
+                                                         eoh,
+                                                         s_ip.get(),
+                                                         fields,
+                                                         schemaProps,
+                                                         I,
+                                                         "_cop_function_of_temperature_curve_name",
+                                                         " COP Function of Temperature Curve Name",
+                                                         varSpeedCoil.MSEIRFTemp(I),
+                                                         {2},
+                                                         RoutineName,
+                                                         CurrentModuleObject,
+                                                         varSpeedCoil.Name,
+                                                         WHInletAirTemp,
+                                                         WHInletWaterTemp,
+                                                         true);
 
-                    ErrorsFound |= getAndCheckSpeedCurve(state, eoh, s_ip.get(), fields, schemaProps, I,
-                        "_cop_function_of_air_flow_fraction_curve_name",
-                        " COP Function of Air Flow Fraction Curve Name",
-                        varSpeedCoil.MSEIRAirFFlow(I), {1}, RoutineName, CurrentModuleObject, varSpeedCoil.Name,
-                        1.0);
+                    ErrorsFound |= getAndCheckSpeedCurve(state,
+                                                         eoh,
+                                                         s_ip.get(),
+                                                         fields,
+                                                         schemaProps,
+                                                         I,
+                                                         "_cop_function_of_air_flow_fraction_curve_name",
+                                                         " COP Function of Air Flow Fraction Curve Name",
+                                                         varSpeedCoil.MSEIRAirFFlow(I),
+                                                         {1},
+                                                         RoutineName,
+                                                         CurrentModuleObject,
+                                                         varSpeedCoil.Name,
+                                                         1.0);
 
-                    ErrorsFound |= getAndCheckSpeedCurve(state, eoh, s_ip.get(), fields, schemaProps, I,
-                        "_cop_function_of_water_flow_fraction_curve_name",
-                        " COP Function of Water Flow Fraction Curve Name",
-                        varSpeedCoil.MSEIRWaterFFlow(I), {1}, RoutineName, CurrentModuleObject, varSpeedCoil.Name,
-                        1.0);
+                    ErrorsFound |= getAndCheckSpeedCurve(state,
+                                                         eoh,
+                                                         s_ip.get(),
+                                                         fields,
+                                                         schemaProps,
+                                                         I,
+                                                         "_cop_function_of_water_flow_fraction_curve_name",
+                                                         " COP Function of Water Flow Fraction Curve Name",
+                                                         varSpeedCoil.MSEIRWaterFFlow(I),
+                                                         {1},
+                                                         RoutineName,
+                                                         CurrentModuleObject,
+                                                         varSpeedCoil.Name,
+                                                         1.0);
                 }
 
                 computeScaleValues(varSpeedCoil, true, false, true);
@@ -1458,139 +1845,449 @@ namespace VariableSpeedCoils {
         // Each preserves the exact original registration order to maintain RDD compatibility.
 
         auto setupAirSourceCoolingVars = [&state](VariableSpeedCoilData &c) {
-            SetupOutputVariable(state, "Cooling Coil Air Mass Flow Rate", Constant::Units::kg_s, c.AirMassFlowRate,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Cooling Coil Air Inlet Temperature", Constant::Units::C, c.InletAirDBTemp,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Cooling Coil Air Inlet Humidity Ratio", Constant::Units::kgWater_kgDryAir, c.InletAirHumRat,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Cooling Coil Latent Cooling Rate", Constant::Units::W, c.QLatent,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Cooling Coil Air Outlet Temperature", Constant::Units::C, c.OutletAirDBTemp,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Cooling Coil Air Outlet Humidity Ratio", Constant::Units::kgWater_kgDryAir, c.OutletAirHumRat,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Cooling Coil Sensible Cooling Rate", Constant::Units::W, c.QSensible,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Cooling Coil Total Cooling Rate", Constant::Units::W, c.QLoadTotal,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Cooling Coil Part Load Ratio", Constant::Units::None, c.PartLoadRatio,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Cooling Coil Electricity Rate", Constant::Units::W, c.Power,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Cooling Coil Runtime Fraction", Constant::Units::None, c.RunFrac,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Cooling Coil Source Side Heat Transfer Rate", Constant::Units::W, c.QSource,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Cooling Coil Upper Speed Level", Constant::Units::None, c.SpeedNumReport,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Cooling Coil Neighboring Speed Levels Ratio", Constant::Units::None, c.SpeedRatioReport,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Air Mass Flow Rate",
+                                Constant::Units::kg_s,
+                                c.AirMassFlowRate,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Air Inlet Temperature",
+                                Constant::Units::C,
+                                c.InletAirDBTemp,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Air Inlet Humidity Ratio",
+                                Constant::Units::kgWater_kgDryAir,
+                                c.InletAirHumRat,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Latent Cooling Rate",
+                                Constant::Units::W,
+                                c.QLatent,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Air Outlet Temperature",
+                                Constant::Units::C,
+                                c.OutletAirDBTemp,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Air Outlet Humidity Ratio",
+                                Constant::Units::kgWater_kgDryAir,
+                                c.OutletAirHumRat,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Sensible Cooling Rate",
+                                Constant::Units::W,
+                                c.QSensible,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Total Cooling Rate",
+                                Constant::Units::W,
+                                c.QLoadTotal,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Part Load Ratio",
+                                Constant::Units::None,
+                                c.PartLoadRatio,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Electricity Rate",
+                                Constant::Units::W,
+                                c.Power,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Runtime Fraction",
+                                Constant::Units::None,
+                                c.RunFrac,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Source Side Heat Transfer Rate",
+                                Constant::Units::W,
+                                c.QSource,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Upper Speed Level",
+                                Constant::Units::None,
+                                c.SpeedNumReport,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Neighboring Speed Levels Ratio",
+                                Constant::Units::None,
+                                c.SpeedRatioReport,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
         };
 
         auto setupAirSourceHeatingVars = [&state](VariableSpeedCoilData &c) {
-            SetupOutputVariable(state, "Heating Coil Air Mass Flow Rate", Constant::Units::kg_s, c.AirMassFlowRate,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Heating Coil Air Inlet Temperature", Constant::Units::C, c.InletAirDBTemp,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Heating Coil Air Inlet Humidity Ratio", Constant::Units::kgWater_kgDryAir, c.InletAirHumRat,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Heating Coil Air Outlet Temperature", Constant::Units::C, c.OutletAirDBTemp,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Heating Coil Air Outlet Humidity Ratio", Constant::Units::kgWater_kgDryAir, c.OutletAirHumRat,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Heating Coil Sensible Heating Rate", Constant::Units::W, c.QSensible,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Heating Coil Heating Rate", Constant::Units::W, c.QLoadTotal,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Heating Coil Part Load Ratio", Constant::Units::None, c.PartLoadRatio,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Heating Coil Electricity Rate", Constant::Units::W, c.Power,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Heating Coil Runtime Fraction", Constant::Units::None, c.RunFrac,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Heating Coil Source Side Heat Transfer Rate", Constant::Units::W, c.QSource,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Heating Coil Upper Speed Level", Constant::Units::None, c.SpeedNumReport,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Heating Coil Neighboring Speed Levels Ratio", Constant::Units::None, c.SpeedRatioReport,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state,
+                                "Heating Coil Air Mass Flow Rate",
+                                Constant::Units::kg_s,
+                                c.AirMassFlowRate,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Heating Coil Air Inlet Temperature",
+                                Constant::Units::C,
+                                c.InletAirDBTemp,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Heating Coil Air Inlet Humidity Ratio",
+                                Constant::Units::kgWater_kgDryAir,
+                                c.InletAirHumRat,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Heating Coil Air Outlet Temperature",
+                                Constant::Units::C,
+                                c.OutletAirDBTemp,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Heating Coil Air Outlet Humidity Ratio",
+                                Constant::Units::kgWater_kgDryAir,
+                                c.OutletAirHumRat,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Heating Coil Sensible Heating Rate",
+                                Constant::Units::W,
+                                c.QSensible,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Heating Coil Heating Rate",
+                                Constant::Units::W,
+                                c.QLoadTotal,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Heating Coil Part Load Ratio",
+                                Constant::Units::None,
+                                c.PartLoadRatio,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Heating Coil Electricity Rate",
+                                Constant::Units::W,
+                                c.Power,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Heating Coil Runtime Fraction",
+                                Constant::Units::None,
+                                c.RunFrac,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Heating Coil Source Side Heat Transfer Rate",
+                                Constant::Units::W,
+                                c.QSource,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Heating Coil Upper Speed Level",
+                                Constant::Units::None,
+                                c.SpeedNumReport,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Heating Coil Neighboring Speed Levels Ratio",
+                                Constant::Units::None,
+                                c.SpeedRatioReport,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
         };
 
         auto setupWaterSourceCoolingVars = [&state](VariableSpeedCoilData &c) {
-            SetupOutputVariable(state, "Cooling Coil Electricity Rate", Constant::Units::W, c.Power,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Cooling Coil Total Cooling Rate", Constant::Units::W, c.QLoadTotal,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Cooling Coil Sensible Cooling Rate", Constant::Units::W, c.QSensible,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Cooling Coil Latent Cooling Rate", Constant::Units::W, c.QLatent,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Cooling Coil Source Side Heat Transfer Rate", Constant::Units::W, c.QSource,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Cooling Coil Part Load Ratio", Constant::Units::None, c.PartLoadRatio,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Cooling Coil Runtime Fraction", Constant::Units::None, c.RunFrac,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Cooling Coil Air Mass Flow Rate", Constant::Units::kg_s, c.AirMassFlowRate,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Cooling Coil Air Inlet Temperature", Constant::Units::C, c.InletAirDBTemp,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Cooling Coil Air Inlet Humidity Ratio", Constant::Units::kgWater_kgDryAir, c.InletAirHumRat,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Cooling Coil Air Outlet Temperature", Constant::Units::C, c.OutletAirDBTemp,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Cooling Coil Air Outlet Humidity Ratio", Constant::Units::kgWater_kgDryAir, c.OutletAirHumRat,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Cooling Coil Source Side Mass Flow Rate", Constant::Units::kg_s, c.WaterMassFlowRate,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Cooling Coil Source Side Inlet Temperature", Constant::Units::C, c.InletWaterTemp,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Cooling Coil Source Side Outlet Temperature", Constant::Units::C, c.OutletWaterTemp,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Cooling Coil Upper Speed Level", Constant::Units::None, c.SpeedNumReport,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Cooling Coil Neighboring Speed Levels Ratio", Constant::Units::None, c.SpeedRatioReport,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Cooling Coil Recoverable Heat Transfer Rate", Constant::Units::W, c.QWasteHeat,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Electricity Rate",
+                                Constant::Units::W,
+                                c.Power,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Total Cooling Rate",
+                                Constant::Units::W,
+                                c.QLoadTotal,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Sensible Cooling Rate",
+                                Constant::Units::W,
+                                c.QSensible,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Latent Cooling Rate",
+                                Constant::Units::W,
+                                c.QLatent,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Source Side Heat Transfer Rate",
+                                Constant::Units::W,
+                                c.QSource,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Part Load Ratio",
+                                Constant::Units::None,
+                                c.PartLoadRatio,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Runtime Fraction",
+                                Constant::Units::None,
+                                c.RunFrac,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Air Mass Flow Rate",
+                                Constant::Units::kg_s,
+                                c.AirMassFlowRate,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Air Inlet Temperature",
+                                Constant::Units::C,
+                                c.InletAirDBTemp,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Air Inlet Humidity Ratio",
+                                Constant::Units::kgWater_kgDryAir,
+                                c.InletAirHumRat,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Air Outlet Temperature",
+                                Constant::Units::C,
+                                c.OutletAirDBTemp,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Air Outlet Humidity Ratio",
+                                Constant::Units::kgWater_kgDryAir,
+                                c.OutletAirHumRat,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Source Side Mass Flow Rate",
+                                Constant::Units::kg_s,
+                                c.WaterMassFlowRate,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Source Side Inlet Temperature",
+                                Constant::Units::C,
+                                c.InletWaterTemp,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Source Side Outlet Temperature",
+                                Constant::Units::C,
+                                c.OutletWaterTemp,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Upper Speed Level",
+                                Constant::Units::None,
+                                c.SpeedNumReport,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Neighboring Speed Levels Ratio",
+                                Constant::Units::None,
+                                c.SpeedRatioReport,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Cooling Coil Recoverable Heat Transfer Rate",
+                                Constant::Units::W,
+                                c.QWasteHeat,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
         };
 
         auto setupWaterSourceHeatingVars = [&state](VariableSpeedCoilData &c) {
-            SetupOutputVariable(state, "Heating Coil Electricity Rate", Constant::Units::W, c.Power,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Heating Coil Heating Rate", Constant::Units::W, c.QLoadTotal,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Heating Coil Sensible Heating Rate", Constant::Units::W, c.QSensible,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Heating Coil Source Side Heat Transfer Rate", Constant::Units::W, c.QSource,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Heating Coil Part Load Ratio", Constant::Units::None, c.PartLoadRatio,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Heating Coil Runtime Fraction", Constant::Units::None, c.RunFrac,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Heating Coil Air Mass Flow Rate", Constant::Units::kg_s, c.AirMassFlowRate,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Heating Coil Air Inlet Temperature", Constant::Units::C, c.InletAirDBTemp,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Heating Coil Air Inlet Humidity Ratio", Constant::Units::kgWater_kgDryAir, c.InletAirHumRat,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Heating Coil Air Outlet Temperature", Constant::Units::C, c.OutletAirDBTemp,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Heating Coil Air Outlet Humidity Ratio", Constant::Units::kgWater_kgDryAir, c.OutletAirHumRat,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Heating Coil Source Side Mass Flow Rate", Constant::Units::kg_s, c.WaterMassFlowRate,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Heating Coil Source Side Inlet Temperature", Constant::Units::C, c.InletWaterTemp,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Heating Coil Source Side Outlet Temperature", Constant::Units::C, c.OutletWaterTemp,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Heating Coil Upper Speed Level", Constant::Units::None, c.SpeedNumReport,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Heating Coil Neighboring Speed Levels Ratio", Constant::Units::None, c.SpeedRatioReport,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
-            SetupOutputVariable(state, "Heating Coil Recoverable Heat Transfer Rate", Constant::Units::W, c.QWasteHeat,
-                                OutputProcessor::TimeStepType::System, OutputProcessor::StoreType::Average, c.Name);
+            SetupOutputVariable(state,
+                                "Heating Coil Electricity Rate",
+                                Constant::Units::W,
+                                c.Power,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Heating Coil Heating Rate",
+                                Constant::Units::W,
+                                c.QLoadTotal,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Heating Coil Sensible Heating Rate",
+                                Constant::Units::W,
+                                c.QSensible,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Heating Coil Source Side Heat Transfer Rate",
+                                Constant::Units::W,
+                                c.QSource,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Heating Coil Part Load Ratio",
+                                Constant::Units::None,
+                                c.PartLoadRatio,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Heating Coil Runtime Fraction",
+                                Constant::Units::None,
+                                c.RunFrac,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Heating Coil Air Mass Flow Rate",
+                                Constant::Units::kg_s,
+                                c.AirMassFlowRate,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Heating Coil Air Inlet Temperature",
+                                Constant::Units::C,
+                                c.InletAirDBTemp,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Heating Coil Air Inlet Humidity Ratio",
+                                Constant::Units::kgWater_kgDryAir,
+                                c.InletAirHumRat,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Heating Coil Air Outlet Temperature",
+                                Constant::Units::C,
+                                c.OutletAirDBTemp,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Heating Coil Air Outlet Humidity Ratio",
+                                Constant::Units::kgWater_kgDryAir,
+                                c.OutletAirHumRat,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Heating Coil Source Side Mass Flow Rate",
+                                Constant::Units::kg_s,
+                                c.WaterMassFlowRate,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Heating Coil Source Side Inlet Temperature",
+                                Constant::Units::C,
+                                c.InletWaterTemp,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Heating Coil Source Side Outlet Temperature",
+                                Constant::Units::C,
+                                c.OutletWaterTemp,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Heating Coil Upper Speed Level",
+                                Constant::Units::None,
+                                c.SpeedNumReport,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Heating Coil Neighboring Speed Levels Ratio",
+                                Constant::Units::None,
+                                c.SpeedRatioReport,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
+            SetupOutputVariable(state,
+                                "Heating Coil Recoverable Heat Transfer Rate",
+                                Constant::Units::W,
+                                c.QWasteHeat,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                c.Name);
         };
 
         for (DXCoilNum = 1; DXCoilNum <= state.dataVariableSpeedCoils->NumVarSpeedCoils; ++DXCoilNum) {
@@ -2486,9 +3183,15 @@ namespace VariableSpeedCoils {
                                             std::string_view desDesc,
                                             Real64 desValue)
     {
-        if (!state.dataGlobal->DisplayExtraWarnings) return;
-        if (userValue == 0.0) return;
-        if ((std::abs(desValue - userValue) / userValue) <= state.dataSize->AutoVsHardSizingThreshold) return;
+        if (!state.dataGlobal->DisplayExtraWarnings) {
+            return;
+        }
+        if (userValue == 0.0) {
+            return;
+        }
+        if ((std::abs(desValue - userValue) / userValue) <= state.dataSize->AutoVsHardSizingThreshold) {
+            return;
+        }
 
         ShowMessage(state, EnergyPlus::format("SizeVarSpeedCoil: Potential issue with equipment sizing for {} {}", coolHeatType, objSubfix));
         ShowContinueError(state, EnergyPlus::format("Coil Name = {}", coilName));
@@ -2938,9 +3641,14 @@ namespace VariableSpeedCoils {
                                                  RatedCapCoolTotalDes,
                                                  "User-Specified Rated Total Cooling Capacity [W]",
                                                  RatedCapCoolTotalUser);
-                    reportSizingMismatchWarning(state, varSpeedCoil.CoolHeatType, CurrentObjSubfix, varSpeedCoil.Name,
-                                               "Rated Total Cooling Capacity [W]", RatedCapCoolTotalUser,
-                                               "Rated Total Cooling Capacity [W]", RatedCapCoolTotalDes);
+                    reportSizingMismatchWarning(state,
+                                                varSpeedCoil.CoolHeatType,
+                                                CurrentObjSubfix,
+                                                varSpeedCoil.Name,
+                                                "Rated Total Cooling Capacity [W]",
+                                                RatedCapCoolTotalUser,
+                                                "Rated Total Cooling Capacity [W]",
+                                                RatedCapCoolTotalDes);
                 }
             }
 
@@ -3057,9 +3765,14 @@ namespace VariableSpeedCoils {
                                              RatedCapHeatDes,
                                              "User-Specified Nominal Heating Capacity [W]",
                                              RatedCapHeatUser);
-                reportSizingMismatchWarning(state, varSpeedCoil.CoolHeatType, CurrentObjSubfix, varSpeedCoil.Name,
-                                           "Rated Total Heating Capacity [W]", RatedCapHeatUser,
-                                           "Rated Total Heating Capacity [W]", RatedCapHeatDes);
+                reportSizingMismatchWarning(state,
+                                            varSpeedCoil.CoolHeatType,
+                                            CurrentObjSubfix,
+                                            varSpeedCoil.Name,
+                                            "Rated Total Heating Capacity [W]",
+                                            RatedCapHeatUser,
+                                            "Rated Total Heating Capacity [W]",
+                                            RatedCapHeatDes);
             }
         }
 
@@ -3089,9 +3802,14 @@ namespace VariableSpeedCoils {
                                                  RatedAirVolFlowRateDes,
                                                  "User-Specified Rated Air Flow Rate [m3/s]",
                                                  RatedAirVolFlowRateUser);
-                    reportSizingMismatchWarning(state, varSpeedCoil.CoolHeatType, CurrentObjSubfix, varSpeedCoil.Name,
-                                               "Rated Air Flow Rate [m3/s]", RatedAirVolFlowRateUser,
-                                               "Rated Air Flow Rate [m3/s]", RatedAirVolFlowRateDes);
+                    reportSizingMismatchWarning(state,
+                                                varSpeedCoil.CoolHeatType,
+                                                CurrentObjSubfix,
+                                                varSpeedCoil.Name,
+                                                "Rated Air Flow Rate [m3/s]",
+                                                RatedAirVolFlowRateUser,
+                                                "Rated Air Flow Rate [m3/s]",
+                                                RatedAirVolFlowRateDes);
                 }
             }
             state.dataRptCoilSelection->coilSelectionReportObj->setCoilAirFlow(
@@ -3338,9 +4056,14 @@ namespace VariableSpeedCoils {
                                              RatedWaterVolFlowRateDes,
                                              "User-Specified Rated Water Flow Rate [m3/s]",
                                              RatedWaterVolFlowRateUser);
-                reportSizingMismatchWarning(state, varSpeedCoil.CoolHeatType, CurrentObjSubfix, varSpeedCoil.Name,
-                                           "Rated Water Flow Rate [m3/s]", RatedWaterVolFlowRateUser,
-                                           "Rated Water Flow Rate [m3/s]", RatedWaterVolFlowRateDes);
+                reportSizingMismatchWarning(state,
+                                            varSpeedCoil.CoolHeatType,
+                                            CurrentObjSubfix,
+                                            varSpeedCoil.Name,
+                                            "Rated Water Flow Rate [m3/s]",
+                                            RatedWaterVolFlowRateUser,
+                                            "Rated Water Flow Rate [m3/s]",
+                                            RatedWaterVolFlowRateDes);
             }
         }
 
@@ -3615,9 +4338,14 @@ namespace VariableSpeedCoils {
                                                  EvapCondPumpElecNomPowerDes,
                                                  "User-Specified Evaporative Condenser Pump Rated Power Consumption [W]",
                                                  EvapCondPumpElecNomPowerUser);
-                    reportSizingMismatchWarning(state, varSpeedCoil.CoolHeatType, CurrentObjSubfix, varSpeedCoil.Name,
-                                               "Evaporative Condenser Pump Rated Power Consumption [W]", EvapCondPumpElecNomPowerUser,
-                                               "Evaporative Condenser Pump Rated Power Consumption [W]", EvapCondPumpElecNomPowerDes);
+                    reportSizingMismatchWarning(state,
+                                                varSpeedCoil.CoolHeatType,
+                                                CurrentObjSubfix,
+                                                varSpeedCoil.Name,
+                                                "Evaporative Condenser Pump Rated Power Consumption [W]",
+                                                EvapCondPumpElecNomPowerUser,
+                                                "Evaporative Condenser Pump Rated Power Consumption [W]",
+                                                EvapCondPumpElecNomPowerDes);
                 }
             }
         }
@@ -3650,9 +4378,14 @@ namespace VariableSpeedCoils {
                                                  DefrostCapacityDes,
                                                  "User-Specified Resistive Defrost Heater Capacity [W]",
                                                  DefrostCapacityUser);
-                    reportSizingMismatchWarning(state, varSpeedCoil.CoolHeatType, CurrentObjSubfix, varSpeedCoil.Name,
-                                               "Resistive Defrost Heater Capacity [W]", DefrostCapacityUser,
-                                               "Resistive Defrost Heater Capacity [W]", DefrostCapacityDes);
+                    reportSizingMismatchWarning(state,
+                                                varSpeedCoil.CoolHeatType,
+                                                CurrentObjSubfix,
+                                                varSpeedCoil.Name,
+                                                "Resistive Defrost Heater Capacity [W]",
+                                                DefrostCapacityUser,
+                                                "Resistive Defrost Heater Capacity [W]",
+                                                DefrostCapacityDes);
                 }
             }
         }

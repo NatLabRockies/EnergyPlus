@@ -254,12 +254,12 @@ namespace HeatingCoils {
         }
         HeatReclaim.ReclaimEfficiencyTotal += heatingCoil.Efficiency;
         if (HeatReclaim.ReclaimEfficiencyTotal > 0.3) {
-            ShowSevereError(state,
-                            EnergyPlus::format(
-                                "{}, \"{}\" sum of heat reclaim recovery efficiencies from the same source coil: \"{}\" cannot be over 0.3",
-                                HVAC::cAllCoilTypes(heatingCoil.HCoilType_Num),
-                                heatingCoil.Name,
-                                heatingCoil.ReclaimHeatingCoilName));
+            ShowSevereError(
+                state,
+                EnergyPlus::format("{}, \"{}\" sum of heat reclaim recovery efficiencies from the same source coil: \"{}\" cannot be over 0.3",
+                                   HVAC::cAllCoilTypes(heatingCoil.HCoilType_Num),
+                                   heatingCoil.Name,
+                                   heatingCoil.ReclaimHeatingCoilName));
         }
         state.dataHeatingCoils->ValidSourceType(CoilNum) = true;
         return true;

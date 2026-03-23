@@ -317,28 +317,43 @@ void GetSetPointManagerInputs(EnergyPlusData &state)
 static void applySetPointToNode(Node::NodeData &node, HVAC::CtrlVarType ctrlVar, Real64 value)
 {
     switch (ctrlVar) {
-    case HVAC::CtrlVarType::Temp:            node.TempSetPoint          = value; break;
-    case HVAC::CtrlVarType::MaxTemp:         node.TempSetPointHi        = value; break;
-    case HVAC::CtrlVarType::MinTemp:         node.TempSetPointLo        = value; break;
-    case HVAC::CtrlVarType::HumRat:          node.HumRatSetPoint        = value; break;
-    case HVAC::CtrlVarType::MaxHumRat:       node.HumRatMax             = value; break;
-    case HVAC::CtrlVarType::MinHumRat:       node.HumRatMin             = value; break;
-    case HVAC::CtrlVarType::MassFlowRate:    node.MassFlowRateSetPoint  = value; break;
-    case HVAC::CtrlVarType::MaxMassFlowRate: node.MassFlowRateMax       = value; break;
-    case HVAC::CtrlVarType::MinMassFlowRate: node.MassFlowRateMin       = value; break;
-    default: break;
+    case HVAC::CtrlVarType::Temp:
+        node.TempSetPoint = value;
+        break;
+    case HVAC::CtrlVarType::MaxTemp:
+        node.TempSetPointHi = value;
+        break;
+    case HVAC::CtrlVarType::MinTemp:
+        node.TempSetPointLo = value;
+        break;
+    case HVAC::CtrlVarType::HumRat:
+        node.HumRatSetPoint = value;
+        break;
+    case HVAC::CtrlVarType::MaxHumRat:
+        node.HumRatMax = value;
+        break;
+    case HVAC::CtrlVarType::MinHumRat:
+        node.HumRatMin = value;
+        break;
+    case HVAC::CtrlVarType::MassFlowRate:
+        node.MassFlowRateSetPoint = value;
+        break;
+    case HVAC::CtrlVarType::MaxMassFlowRate:
+        node.MassFlowRateMax = value;
+        break;
+    case HVAC::CtrlVarType::MinMassFlowRate:
+        node.MassFlowRateMin = value;
+        break;
+    default:
+        break;
     }
 }
 
 // Helper: resolve and validate the HVAC air loop for SPMs that require one.
 // Sets spm->airLoopNum and returns true when the loop is found, false otherwise
 // (setting ErrorsFound = true in both failure modes).
-static bool findSPMAirLoop(EnergyPlusData &state,
-                            SPMBase *spm,
-                            std::string_view spmTypeName,
-                            std::string_view spmName,
-                            ErrorObjectHeader const &eoh,
-                            bool &ErrorsFound)
+static bool findSPMAirLoop(
+    EnergyPlusData &state, SPMBase *spm, std::string_view spmTypeName, std::string_view spmName, ErrorObjectHeader const &eoh, bool &ErrorsFound)
 {
     if (state.dataHVACGlobal->NumPrimaryAirSys <= 0) {
         ShowSevereError(state, EnergyPlus::format("{}=\"{}\", no AirLoopHVAC objects found:", spmTypeName, spmName));
@@ -346,8 +361,7 @@ static bool findSPMAirLoop(EnergyPlusData &state,
         ErrorsFound = true;
         return false;
     }
-    spm->airLoopNum =
-        Util::FindItemInList(spm->airLoopName, state.dataAirLoop->AirToZoneNodeInfo, &AirLoopZoneEquipConnectData::AirLoopName);
+    spm->airLoopNum = Util::FindItemInList(spm->airLoopName, state.dataAirLoop->AirToZoneNodeInfo, &AirLoopZoneEquipConnectData::AirLoopName);
     if (spm->airLoopNum == 0) {
         ShowSevereItemNotFound(state, eoh, "hvac_air_loop_name", spm->airLoopName);
         ErrorsFound = true;
@@ -366,14 +380,14 @@ static int getSPMSensorNode(EnergyPlusData &state,
                             Node::FluidType fluidType = Node::FluidType::Air)
 {
     return Node::GetOnlySingleNode(state,
-                                               nodeName,
-                                               errorsFound,
-                                               spmNodeObjectTypes[(int)spmType],
-                                               spmName,
-                                               fluidType,
-                                               Node::ConnectionType::Sensor,
-                                               Node::CompFluidStream::Primary,
-                                               Node::ObjectIsNotParent);
+                                   nodeName,
+                                   errorsFound,
+                                   spmNodeObjectTypes[(int)spmType],
+                                   spmName,
+                                   fluidType,
+                                   Node::ConnectionType::Sensor,
+                                   Node::CompFluidStream::Primary,
+                                   Node::ObjectIsNotParent);
 }
 
 void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
@@ -673,10 +687,9 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
             // Warn once for all three variants that loaded minSetTemp/maxSetTemp above
             if (spm->maxSetTemp < spm->minSetTemp &&
                 (spm->type == SPMType::OutsideAirPretreat || spm->type == SPMType::Warmest || spm->type == SPMType::Coldest ||
-                 spm->type == SPMType::WarmestTempFlow || spm->type == SPMType::MZCoolingAverage ||
-                 spm->type == SPMType::MZHeatingAverage || spm->type == SPMType::FollowOutsideAirTemp ||
-                 spm->type == SPMType::FollowGroundTemp || spm->type == SPMType::SZReheat || spm->type == SPMType::SZHeating ||
-                 spm->type == SPMType::SZCooling || spm->type == SPMType::FollowSystemNodeTemp)) {
+                 spm->type == SPMType::WarmestTempFlow || spm->type == SPMType::MZCoolingAverage || spm->type == SPMType::MZHeatingAverage ||
+                 spm->type == SPMType::FollowOutsideAirTemp || spm->type == SPMType::FollowGroundTemp || spm->type == SPMType::SZReheat ||
+                 spm->type == SPMType::SZHeating || spm->type == SPMType::SZCooling || spm->type == SPMType::FollowSystemNodeTemp)) {
                 ShowWarningError(state, EnergyPlus::format("{}: {}=\"{}\",", routineName, cCurrentModuleObject, spm->Name));
                 ShowContinueError(
                     state,
@@ -887,8 +900,8 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
 
                 spmSZTemp->zoneNodeNum =
                     getSPMSensorNode(state, ip->getAlphaFieldValue(fields, props, "zone_node_name"), ErrorsFound, spm->type, spmSZTemp->Name);
-                spmSZTemp->zoneInletNodeNum = getSPMSensorNode(
-                    state, ip->getAlphaFieldValue(fields, props, "zone_inlet_node_name"), ErrorsFound, spm->type, spmSZTemp->Name);
+                spmSZTemp->zoneInletNodeNum =
+                    getSPMSensorNode(state, ip->getAlphaFieldValue(fields, props, "zone_inlet_node_name"), ErrorsFound, spm->type, spmSZTemp->Name);
 
             } break;
 
@@ -943,10 +956,10 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
 
                 spmMA->refNodeNum = getSPMSensorNode(
                     state, ip->getAlphaFieldValue(fields, props, "reference_setpoint_node_name"), ErrorsFound, spm->type, spmMA->Name);
-                spmMA->fanInNodeNum = getSPMSensorNode(
-                    state, ip->getAlphaFieldValue(fields, props, "fan_inlet_node_name"), ErrorsFound, spm->type, spmMA->Name);
-                spmMA->fanOutNodeNum = getSPMSensorNode(
-                    state, ip->getAlphaFieldValue(fields, props, "fan_outlet_node_name"), ErrorsFound, spm->type, spmMA->Name);
+                spmMA->fanInNodeNum =
+                    getSPMSensorNode(state, ip->getAlphaFieldValue(fields, props, "fan_inlet_node_name"), ErrorsFound, spm->type, spmMA->Name);
+                spmMA->fanOutNodeNum =
+                    getSPMSensorNode(state, ip->getAlphaFieldValue(fields, props, "fan_outlet_node_name"), ErrorsFound, spm->type, spmMA->Name);
             } break;
 
             // SetpointManager:OutdoorAirPretreat
@@ -1073,11 +1086,11 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
                 }
 
                 spmFNT->refNodeNum = getSPMSensorNode(state,
-                                                       ip->getAlphaFieldValue(fields, props, "reference_node_name"),
-                                                       ErrorsFound,
-                                                       spm->type,
-                                                       spmFNT->Name,
-                                                       Node::FluidType::Blank);
+                                                      ip->getAlphaFieldValue(fields, props, "reference_node_name"),
+                                                      ErrorsFound,
+                                                      spm->type,
+                                                      spmFNT->Name,
+                                                      Node::FluidType::Blank);
 
                 spmFNT->refTempType =
                     static_cast<AirTempType>(getEnumValue(nodeTempTypeNamesUC, ip->getAlphaFieldValue(fields, props, "reference_temperature_type")));
@@ -1321,10 +1334,8 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
                 }
 
                 std::string_view const suffix = isTemp ? "temperature" : "humidity_ratio";
-                spmSNR->lowRefSetPt =
-                    ip->getRealFieldValue(fields, props, EnergyPlus::format("setpoint_at_low_reference_{}", suffix));
-                spmSNR->highRefSetPt =
-                    ip->getRealFieldValue(fields, props, EnergyPlus::format("setpoint_at_high_reference_{}", suffix));
+                spmSNR->lowRefSetPt = ip->getRealFieldValue(fields, props, EnergyPlus::format("setpoint_at_low_reference_{}", suffix));
+                spmSNR->highRefSetPt = ip->getRealFieldValue(fields, props, EnergyPlus::format("setpoint_at_high_reference_{}", suffix));
                 spmSNR->lowRef = ip->getRealFieldValue(fields, props, EnergyPlus::format("low_reference_{}", suffix));
                 spmSNR->highRef = ip->getRealFieldValue(fields, props, EnergyPlus::format("high_reference_{}", suffix));
 

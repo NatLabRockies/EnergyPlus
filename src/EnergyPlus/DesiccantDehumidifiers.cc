@@ -211,8 +211,7 @@ namespace DesiccantDehumidifiers {
 
         desicDehum.RegenCoilIndex = WaterCoils::GetWaterCoilIndex(state, "COIL:HEATING:WATER", std::string(regenCoilName), errFlag);
         if (desicDehum.RegenCoilIndex == 0) {
-            ShowSevereError(
-                state, EnergyPlus::format("{}{} illegal {} = {}", routineNamePrefix, currentModuleObject, alphaFieldName, regenCoilName));
+            ShowSevereError(state, EnergyPlus::format("{}{} illegal {} = {}", routineNamePrefix, currentModuleObject, alphaFieldName, regenCoilName));
             ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", currentModuleObject, desicDehum.Name));
             anyError = true;
         }
@@ -263,8 +262,7 @@ namespace DesiccantDehumidifiers {
 
         desicDehum.RegenCoilIndex = SteamCoils::GetSteamCoilIndex(state, "COIL:HEATING:STEAM", std::string(regenCoilName), errFlag);
         if (desicDehum.RegenCoilIndex == 0) {
-            ShowSevereError(
-                state, EnergyPlus::format("{}{} illegal {} = {}", routineNamePrefix, currentModuleObject, alphaFieldName, regenCoilName));
+            ShowSevereError(state, EnergyPlus::format("{}{} illegal {} = {}", routineNamePrefix, currentModuleObject, alphaFieldName, regenCoilName));
             ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", currentModuleObject, desicDehum.Name));
             anyError = true;
         }
@@ -519,7 +517,8 @@ namespace DesiccantDehumidifiers {
                     ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
                     ErrorsFound = true;
                 } else { // mine data from the regeneration heating coil object
-                    if (mineSteamHeatingCoilData(state, desicDehum, CurrentModuleObject, RegenCoilName, cAlphaFields(9), dehumidifierDesiccantNoFans, RoutineName)) {
+                    if (mineSteamHeatingCoilData(
+                            state, desicDehum, CurrentModuleObject, RegenCoilName, cAlphaFields(9), dehumidifierDesiccantNoFans, RoutineName)) {
                         ErrorsFound = true;
                     }
                 }
@@ -820,14 +819,12 @@ namespace DesiccantDehumidifiers {
                 if (controlNodeNum > 0) {
                     ShowSevereError(state, EnergyPlus::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
                     ShowContinueError(
-                        state,
-                        EnergyPlus::format("{} is specified as {:.3R} C in this object.", cNumericFields(1), desicDehum.RegenSetPointTemp));
+                        state, EnergyPlus::format("{} is specified as {:.3R} C in this object.", cNumericFields(1), desicDehum.RegenSetPointTemp));
                     ShowContinueError(state, " Do not specify a coil temperature setpoint node name in the regeneration air heater object.");
                     ShowContinueError(state, EnergyPlus::format("...{} = {}", cAlphaFields(9), desicDehum.RegenCoilType));
                     ShowContinueError(state, EnergyPlus::format("...{} = {}", cAlphaFields(10), desicDehum.RegenCoilName));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("...heating coil temperature setpoint node = {}",
-                                                         state.dataLoopNodes->NodeID(controlNodeNum)));
+                    ShowContinueError(
+                        state, EnergyPlus::format("...heating coil temperature setpoint node = {}", state.dataLoopNodes->NodeID(controlNodeNum)));
                     ShowContinueError(state, "...leave the heating coil temperature setpoint node name blank in the regen heater object.");
                     ErrorsFoundGeneric = true;
                 }
@@ -928,7 +925,8 @@ namespace DesiccantDehumidifiers {
                             ErrorsFoundGeneric = true;
                         }
 
-                        if (mineSteamHeatingCoilData(state, desicDehum, CurrentModuleObject, RegenCoilName, cAlphaFields(9), dehumidifierDesiccantNoFans)) {
+                        if (mineSteamHeatingCoilData(
+                                state, desicDehum, CurrentModuleObject, RegenCoilName, cAlphaFields(9), dehumidifierDesiccantNoFans)) {
                             ErrorsFound = true;
                         }
                     }

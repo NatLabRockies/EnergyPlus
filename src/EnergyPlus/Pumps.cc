@@ -105,12 +105,8 @@ using HVAC::SmallWaterVolFlow;
 using Node::ObjectIsNotParent;
 
 // Parse zone skin loss fields common to all pump types.
-static void parsePumpZoneSkinLosses(EnergyPlusData &state,
-                                    PumpSpecs &thisPump,
-                                    std::string_view cCurrentModuleObject,
-                                    int alphaZoneIdx,
-                                    int numSkinLossIdx,
-                                    bool &ErrorsFound)
+static void parsePumpZoneSkinLosses(
+    EnergyPlusData &state, PumpSpecs &thisPump, std::string_view cCurrentModuleObject, int alphaZoneIdx, int numSkinLossIdx, bool &ErrorsFound)
 {
     auto &thisInput = state.dataIPShortCut;
     if (!thisInput->lAlphaFieldBlanks(alphaZoneIdx)) {
@@ -131,7 +127,6 @@ static void parsePumpZoneSkinLosses(EnergyPlusData &state,
         }
     }
 }
-
 
 // Parse power sizing method and scaling factors common to all pump types.
 static void parsePumpPowerSizing(EnergyPlusData &state,
@@ -166,13 +161,9 @@ static void parsePumpPowerSizing(EnergyPlusData &state,
     }
 }
 
-
 // Parse pressure curve input for VarSpeed and ConSpeed pumps.
-static void parsePumpPressureCurve(EnergyPlusData &state,
-                                   PumpSpecs &thisPump,
-                                   std::string_view cCurrentModuleObject,
-                                   int alphaCurveIdx,
-                                   bool &ErrorsFound)
+static void
+parsePumpPressureCurve(EnergyPlusData &state, PumpSpecs &thisPump, std::string_view cCurrentModuleObject, int alphaCurveIdx, bool &ErrorsFound)
 {
     static constexpr std::string_view RoutineName("GetPumpInput: ");
     auto &thisInput = state.dataIPShortCut;
@@ -184,11 +175,11 @@ static void parsePumpPressureCurve(EnergyPlusData &state,
             thisPump.PressureCurve_Index = -1;
         } else {
             ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 TempCurveIndex,                            // Curve index
-                                                 {1},                                       // Valid dimensions
-                                                 RoutineName,                               // Routine name
-                                                 cCurrentModuleObject,                      // Object Type
-                                                 thisPump.Name,                             // Object Name
+                                                 TempCurveIndex,                              // Curve index
+                                                 {1},                                         // Valid dimensions
+                                                 RoutineName,                                 // Routine name
+                                                 cCurrentModuleObject,                        // Object Type
+                                                 thisPump.Name,                               // Object Name
                                                  thisInput->cAlphaFieldNames(alphaCurveIdx)); // Field Name
 
             if (!ErrorsFound) {

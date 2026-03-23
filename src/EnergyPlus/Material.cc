@@ -962,7 +962,6 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         // Nominal resistance of gap at room temperature
         calcGasNominalR(matGas, eoh);
-
     }
     // Window gap materials (for gaps with a single gas for EquivalentLayer)
 

@@ -247,8 +247,7 @@ static void applyOpTempCtrlToZone(EnergyPlusData &state,
     // Adaptive comfort model
     if (tempZone.OpTempCtrl == DataZoneControls::TempCtrl::Constant || tempZone.OpTempCtrl == DataZoneControls::TempCtrl::Scheduled) {
         if (NumAlphas >= 4 && !s_ipsc->lAlphaFieldBlanks(4)) {
-            int adaptiveComfortModelTypeIndex =
-                Util::FindItem(s_ipsc->cAlphaArgs(4), AdaptiveComfortModelTypes, AdaptiveComfortModelTypes.isize());
+            int adaptiveComfortModelTypeIndex = Util::FindItem(s_ipsc->cAlphaArgs(4), AdaptiveComfortModelTypes, AdaptiveComfortModelTypes.isize());
             if (adaptiveComfortModelTypeIndex == 0) {
                 ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4));
                 ErrorsFound = true;
@@ -287,10 +286,9 @@ static void showMissingSetptSchedError(EnergyPlusData &state,
 {
     if (setptTypeSched->hasVal(state, (int)setptType)) {
         ShowSevereError(state, EnergyPlus::format("Control Type Schedule={}", setptTypeSched->Name));
-        ShowContinueError(state,
-                          EnergyPlus::format("..specifies {} ({}) as the control type. Not valid for this zone.",
-                                             (int)setptType,
-                                             setptTypeNames[(int)setptType]));
+        ShowContinueError(
+            state,
+            EnergyPlus::format("..specifies {} ({}) as the control type. Not valid for this zone.", (int)setptType, setptTypeNames[(int)setptType]));
         ShowContinueError(state, EnergyPlus::format("..reference {}={}", controlTypeName, zoneName));
         ShowContinueError(state, EnergyPlus::format("..reference ZONE={}", zoneRealName));
         ErrorsFound = true;
@@ -351,10 +349,10 @@ static void loadSetptSchedObjects(EnergyPlusData &state,
         setptScheds[iType].allocate(numControls[iType]);
     }
 
-    bool needsHeat = (setptType == HVAC::SetptType::SingleHeat || setptType == HVAC::SetptType::SingleHeatCool ||
-                      setptType == HVAC::SetptType::DualHeatCool);
-    bool needsCool = (setptType == HVAC::SetptType::SingleCool || setptType == HVAC::SetptType::SingleHeatCool ||
-                      setptType == HVAC::SetptType::DualHeatCool);
+    bool needsHeat =
+        (setptType == HVAC::SetptType::SingleHeat || setptType == HVAC::SetptType::SingleHeatCool || setptType == HVAC::SetptType::DualHeatCool);
+    bool needsCool =
+        (setptType == HVAC::SetptType::SingleCool || setptType == HVAC::SetptType::SingleHeatCool || setptType == HVAC::SetptType::DualHeatCool);
     bool isDual = (setptType == HVAC::SetptType::DualHeatCool);
 
     for (int idx = 1; idx <= numControls[iType]; ++idx) {
@@ -740,8 +738,7 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
         setptTypeNames[(int)HVAC::SetptType::DualHeatCool]};
 
     for (HVAC::SetptType setptType : HVAC::controlledSetptTypes) {
-        loadSetptSchedObjects(
-            state, routineName, setptType, tempSetptObjNames, s_ztpc->NumTempControls, s_ztpc->tempSetptScheds, ErrorsFound);
+        loadSetptSchedObjects(state, routineName, setptType, tempSetptObjNames, s_ztpc->NumTempControls, s_ztpc->tempSetptScheds, ErrorsFound);
     }
 
     // Finish filling in Schedule pointing indexes
@@ -809,8 +806,13 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
 
             if (!setpt.isUsed) {
                 // Catch early issues
-                showMissingSetptSchedError(state, tempZone.setptTypeSched, setptType,
-                                           cZControlTypes((int)ZoneControlTypes::TStat), tempZone.Name, tempZone.ZoneName, ErrorsFound);
+                showMissingSetptSchedError(state,
+                                           tempZone.setptTypeSched,
+                                           setptType,
+                                           cZControlTypes((int)ZoneControlTypes::TStat),
+                                           tempZone.Name,
+                                           tempZone.ZoneName,
+                                           ErrorsFound);
                 continue;
             }
 
@@ -820,13 +822,23 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
                               setptType == HVAC::SetptType::DualHeatCool);
 
             if (needsHeat && setpt.heatSetptSched == nullptr) {
-                showMissingSetptSchedError(state, tempZone.setptTypeSched, setptType,
-                                           cZControlTypes((int)ZoneControlTypes::TStat), tempZone.Name, tempZone.ZoneName, ErrorsFound);
+                showMissingSetptSchedError(state,
+                                           tempZone.setptTypeSched,
+                                           setptType,
+                                           cZControlTypes((int)ZoneControlTypes::TStat),
+                                           tempZone.Name,
+                                           tempZone.ZoneName,
+                                           ErrorsFound);
             }
 
             if (needsCool && setpt.coolSetptSched == nullptr) {
-                showMissingSetptSchedError(state, tempZone.setptTypeSched, setptType,
-                                           cZControlTypes((int)ZoneControlTypes::TStat), tempZone.Name, tempZone.ZoneName, ErrorsFound);
+                showMissingSetptSchedError(state,
+                                           tempZone.setptTypeSched,
+                                           setptType,
+                                           cZControlTypes((int)ZoneControlTypes::TStat),
+                                           tempZone.Name,
+                                           tempZone.ZoneName,
+                                           ErrorsFound);
             }
         } // for (setptType)
     }
@@ -1217,9 +1229,16 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
     // End of Thermal comfort control reading and checking
 
     for (HVAC::SetptType setptType : HVAC::controlledSetptTypes) {
-        loadSetptSchedObjects(
-            state, routineName, setptType, comfortSetptTypeNames, s_ztpc->NumComfortControls, s_ztpc->comfortSetptScheds, ErrorsFound,
-            true, -3.0, 3.0);
+        loadSetptSchedObjects(state,
+                              routineName,
+                              setptType,
+                              comfortSetptTypeNames,
+                              s_ztpc->NumComfortControls,
+                              s_ztpc->comfortSetptScheds,
+                              ErrorsFound,
+                              true,
+                              -3.0,
+                              3.0);
     }
 
     // Finish filling in Schedule pointing indexes for Thermal Comfort Control
@@ -1284,13 +1303,23 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
                               setptType == HVAC::SetptType::DualHeatCool);
 
             if (needsHeat && setpt.heatSetptSched == nullptr) {
-                showMissingSetptSchedError(state, comfortZone.setptTypeSched, setptType,
-                                           cZControlTypes((int)ZoneControlTypes::TStat), comfortZone.Name, comfortZone.ZoneName, ErrorsFound);
+                showMissingSetptSchedError(state,
+                                           comfortZone.setptTypeSched,
+                                           setptType,
+                                           cZControlTypes((int)ZoneControlTypes::TStat),
+                                           comfortZone.Name,
+                                           comfortZone.ZoneName,
+                                           ErrorsFound);
             }
 
             if (needsCool && setpt.coolSetptSched == nullptr) {
-                showMissingSetptSchedError(state, comfortZone.setptTypeSched, setptType,
-                                           cZControlTypes((int)ZoneControlTypes::TStat), comfortZone.Name, comfortZone.ZoneName, ErrorsFound);
+                showMissingSetptSchedError(state,
+                                           comfortZone.setptTypeSched,
+                                           setptType,
+                                           cZControlTypes((int)ZoneControlTypes::TStat),
+                                           comfortZone.Name,
+                                           comfortZone.ZoneName,
+                                           ErrorsFound);
             }
         } // for (setptType)
     } // for (ComfortControlledZoneNum)

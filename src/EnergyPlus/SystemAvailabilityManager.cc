@@ -2264,7 +2264,6 @@ namespace Avail {
         return false;
     }
 
-
     // Find the first time step in a day schedule where the value is positive.
     // Returns the corresponding hour as a Real64, or 0.0 if none found.
     static Real64 findFanStartTime(std::vector<Real64> const &dayVals, int const TimeStepsInHour, bool const useInclusiveBound = false)
@@ -2348,7 +2347,6 @@ namespace Avail {
         }
     }
 
-
     // Update adaptive temperature gradient history: initialize during warmup/day1,
     // shift the trailing average on subsequent days.
     static void updateAdaptiveTempGradHistory(EnergyPlusData &state,
@@ -2376,10 +2374,8 @@ namespace Avail {
                                    state.dataAvail->OptStart_AdaTempGradTrdCool(1) / NumPreDays;
                 if (FanStartTime > 0) {
                     for (int ATGCounter = 1; ATGCounter <= NumPreDays - 1; ++ATGCounter) {
-                        state.dataAvail->OptStart_AdaTempGradTrdHeat(ATGCounter) =
-                            state.dataAvail->OptStart_AdaTempGradTrdHeat(ATGCounter + 1);
-                        state.dataAvail->OptStart_AdaTempGradTrdCool(ATGCounter) =
-                            state.dataAvail->OptStart_AdaTempGradTrdCool(ATGCounter + 1);
+                        state.dataAvail->OptStart_AdaTempGradTrdHeat(ATGCounter) = state.dataAvail->OptStart_AdaTempGradTrdHeat(ATGCounter + 1);
+                        state.dataAvail->OptStart_AdaTempGradTrdCool(ATGCounter) = state.dataAvail->OptStart_AdaTempGradTrdCool(ATGCounter + 1);
                     }
                 }
             }
@@ -2891,8 +2887,7 @@ namespace Avail {
                             }
                         }
                     }
-                    updateAdaptiveTempGradHistory(state, OptStartMgr, NumPreDays, FanStartTime,
-                                                 AdaTempGradHeat, AdaTempGradCool, FirstTimeATGFlag);
+                    updateAdaptiveTempGradHistory(state, OptStartMgr, NumPreDays, FanStartTime, AdaTempGradHeat, AdaTempGradCool, FirstTimeATGFlag);
 
                     if (TempDiffHi < 0.0) {
                         TempDiff = TempDiffLo;
@@ -2914,9 +2909,18 @@ namespace Avail {
                                     if (state.dataGlobal->CurrentTime > FanStartTime) {
                                         CycleOnFlag = false;
                                     }
-                                    updateAdaptiveTempGrad(state, ZoneNum, true, 0.0, NumPreDays,
+                                    updateAdaptiveTempGrad(state,
+                                                           ZoneNum,
+                                                           true,
+                                                           0.0,
+                                                           NumPreDays,
 
-                                                           ATGUpdateTime1, ATGUpdateTime2, ATGUpdateTemp1, ATGUpdateTemp2, ATGUpdateFlag1, ATGUpdateFlag2);
+                                                           ATGUpdateTime1,
+                                                           ATGUpdateTime2,
+                                                           ATGUpdateTemp1,
+                                                           ATGUpdateTemp2,
+                                                           ATGUpdateFlag1,
+                                                           ATGUpdateFlag2);
                                 } else if (PreStartTime < state.dataGlobal->CurrentTime) {
                                     if (OSReportVarFlag) {
                                         NumHoursBeforeOccupancy = DeltaTime;
@@ -2944,9 +2948,18 @@ namespace Avail {
                                     if (state.dataGlobal->CurrentTime > FanStartTime && state.dataGlobal->CurrentTime < PreStartTimeTmr) {
                                         CycleOnFlag = false;
                                     }
-                                    updateAdaptiveTempGrad(state, ZoneNum, true, 24.0, NumPreDays,
+                                    updateAdaptiveTempGrad(state,
+                                                           ZoneNum,
+                                                           true,
+                                                           24.0,
+                                                           NumPreDays,
 
-                                                           ATGUpdateTime1, ATGUpdateTime2, ATGUpdateTemp1, ATGUpdateTemp2, ATGUpdateFlag1, ATGUpdateFlag2);
+                                                           ATGUpdateTime1,
+                                                           ATGUpdateTime2,
+                                                           ATGUpdateTemp1,
+                                                           ATGUpdateTemp2,
+                                                           ATGUpdateFlag1,
+                                                           ATGUpdateFlag2);
                                 } else if (PreStartTime < state.dataGlobal->CurrentTime || PreStartTimeTmr < state.dataGlobal->CurrentTime) {
                                     if (OSReportVarFlag) {
                                         NumHoursBeforeOccupancy = DeltaTime;
@@ -3101,8 +3114,7 @@ namespace Avail {
                             }
                         }
                     }
-                    updateAdaptiveTempGradHistory(state, OptStartMgr, NumPreDays, FanStartTime,
-                                                 AdaTempGradHeat, AdaTempGradCool, FirstTimeATGFlag);
+                    updateAdaptiveTempGradHistory(state, OptStartMgr, NumPreDays, FanStartTime, AdaTempGradHeat, AdaTempGradCool, FirstTimeATGFlag);
 
                     if ((TempDiffHi < 0.0 && TempDiffLo < 0.0) || (std::abs(TempDiffLo) > std::abs(TempDiffHi) && TempDiffLo < 0.0)) { // Heating Mode
                         TempDiff = TempDiffLo;
@@ -3123,9 +3135,18 @@ namespace Avail {
                                 if (state.dataGlobal->CurrentTime > FanStartTime) {
                                     CycleOnFlag = false;
                                 }
-                                updateAdaptiveTempGrad(state, ATGWCZoneNumLo, true, 0.0, NumPreDays,
+                                updateAdaptiveTempGrad(state,
+                                                       ATGWCZoneNumLo,
+                                                       true,
+                                                       0.0,
+                                                       NumPreDays,
 
-                                                       ATGUpdateTime1, ATGUpdateTime2, ATGUpdateTemp1, ATGUpdateTemp2, ATGUpdateFlag1, ATGUpdateFlag2);
+                                                       ATGUpdateTime1,
+                                                       ATGUpdateTime2,
+                                                       ATGUpdateTemp1,
+                                                       ATGUpdateTemp2,
+                                                       ATGUpdateFlag1,
+                                                       ATGUpdateFlag2);
                             } else if (PreStartTime < state.dataGlobal->CurrentTime) {
                                 if (OSReportVarFlag) {
                                     NumHoursBeforeOccupancy = DeltaTime;
@@ -3149,9 +3170,18 @@ namespace Avail {
                                 OSReportVarFlag = true;
                             } else if (CycleOnFlag) {
                                 availStatus = Status::CycleOn;
-                                updateAdaptiveTempGrad(state, ATGWCZoneNumLo, true, 24.0, NumPreDays,
+                                updateAdaptiveTempGrad(state,
+                                                       ATGWCZoneNumLo,
+                                                       true,
+                                                       24.0,
+                                                       NumPreDays,
 
-                                                       ATGUpdateTime1, ATGUpdateTime2, ATGUpdateTemp1, ATGUpdateTemp2, ATGUpdateFlag1, ATGUpdateFlag2);
+                                                       ATGUpdateTime1,
+                                                       ATGUpdateTime2,
+                                                       ATGUpdateTemp1,
+                                                       ATGUpdateTemp2,
+                                                       ATGUpdateFlag1,
+                                                       ATGUpdateFlag2);
                                 OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                                 if (state.dataGlobal->CurrentTime > FanStartTime && state.dataGlobal->CurrentTime < PreStartTimeTmr) {
                                     CycleOnFlag = false;
@@ -3191,9 +3221,18 @@ namespace Avail {
                                 OSReportVarFlag = true;
                             } else if (CycleOnFlag) {
                                 availStatus = Status::CycleOn;
-                                updateAdaptiveTempGrad(state, ATGWCZoneNumHi, false, 0.0, NumPreDays,
+                                updateAdaptiveTempGrad(state,
+                                                       ATGWCZoneNumHi,
+                                                       false,
+                                                       0.0,
+                                                       NumPreDays,
 
-                                                       ATGUpdateTime1, ATGUpdateTime2, ATGUpdateTemp1, ATGUpdateTemp2, ATGUpdateFlag1, ATGUpdateFlag2);
+                                                       ATGUpdateTime1,
+                                                       ATGUpdateTime2,
+                                                       ATGUpdateTemp1,
+                                                       ATGUpdateTemp2,
+                                                       ATGUpdateFlag1,
+                                                       ATGUpdateFlag2);
                                 OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                             } else if (PreStartTime < state.dataGlobal->CurrentTime) {
                                 if (OSReportVarFlag) {
@@ -3218,9 +3257,18 @@ namespace Avail {
                                 OSReportVarFlag = true;
                             } else if (CycleOnFlag) {
                                 availStatus = Status::CycleOn;
-                                updateAdaptiveTempGrad(state, ATGWCZoneNumHi, false, 24.0, NumPreDays,
+                                updateAdaptiveTempGrad(state,
+                                                       ATGWCZoneNumHi,
+                                                       false,
+                                                       24.0,
+                                                       NumPreDays,
 
-                                                       ATGUpdateTime1, ATGUpdateTime2, ATGUpdateTemp1, ATGUpdateTemp2, ATGUpdateFlag1, ATGUpdateFlag2);
+                                                       ATGUpdateTime1,
+                                                       ATGUpdateTime2,
+                                                       ATGUpdateTemp1,
+                                                       ATGUpdateTemp2,
+                                                       ATGUpdateFlag1,
+                                                       ATGUpdateFlag2);
                                 OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                             } else if (PreStartTime < state.dataGlobal->CurrentTime || PreStartTimeTmr < state.dataGlobal->CurrentTime) {
                                 if (OSReportVarFlag) {

@@ -7771,8 +7771,8 @@ void WriteTimeBinTables(EnergyPlusData &state)
 // bepsIndex into gatherTotalsBEPS, and the corresponding default source factor.
 struct FuelSourceEntry
 {
-    int fuelFactorIdx; // index into fuelfactorsused / gatherTotalsSource
-    int bepsIdx;       // index into gatherTotalsBEPS
+    int fuelFactorIdx;                             // index into fuelfactorsused / gatherTotalsSource
+    int bepsIdx;                                   // index into gatherTotalsBEPS
     Real64 OutputReportTabularData::*sourceFactor; // pointer-to-member for the default source factor
 };
 
@@ -7783,10 +7783,7 @@ static constexpr int kNumFuelSourceEntries = 10;
 // Helper: accumulate source energy for fuels in the fuelSourceMap from startIdx..end.
 // For each fuel, uses gatherTotalsSource when a fuel-factor schedule was used,
 // otherwise falls back to gatherTotalsBEPS * default source factor.
-static Real64 accumulateSourceEnergy(OutputReportTabularData const &ort,
-                                     FuelSourceEntry const *map,
-                                     int startIdx,
-                                     int endIdx)
+static Real64 accumulateSourceEnergy(OutputReportTabularData const &ort, FuelSourceEntry const *map, int startIdx, int endIdx)
 {
     Real64 total = 0.0;
     for (int i = startIdx; i < endIdx; ++i) {
@@ -7826,14 +7823,14 @@ static void fillSourceConversionCell(OutputReportTabularData const &ort,
 // Helper: emit a BEPS sub-table to all active output targets (tabular, SQLite, JSON).
 // When subtitle is non-empty WriteSubtitle is called before WriteTable.
 static void writeBEPSSubtable(EnergyPlusData &state,
-                               Array2D_string &tableBody,
-                               Array1D_string &rowHead,
-                               Array1D_string &columnHead,
-                               Array1D_int &columnWidth,
-                               tabularReportStyle const &currentStyle,
-                               std::string const &subtitle,
-                               bool transposeXML = false,
-                               std::string_view footnote = {})
+                              Array2D_string &tableBody,
+                              Array1D_string &rowHead,
+                              Array1D_string &columnHead,
+                              Array1D_int &columnWidth,
+                              tabularReportStyle const &currentStyle,
+                              std::string const &subtitle,
+                              bool transposeXML = false,
+                              std::string_view footnote = {})
 {
     auto const &ort = state.dataOutRptTab;
     if (!ort->displayTabularBEPS) {
@@ -8298,7 +8295,7 @@ void WriteBEPSTable(EnergyPlusData &state)
         tableBody(1, 3) = RealToStr(currentStyle.formatReals, ort->sourceFactorElectric / ort->efficiencyDistrictCooling, 3); // District Cooling
         tableBody(1, 4) =
             RealToStr(currentStyle.formatReals, ort->sourceFactorNaturalGas / ort->efficiencyDistrictHeatingWater, 3); // District Heating Water
-        tableBody(1, 5) = RealToStr(currentStyle.formatReals, ort->sourceFactorDistrictHeatingSteam, 3); // District Heating Steam
+        tableBody(1, 5) = RealToStr(currentStyle.formatReals, ort->sourceFactorDistrictHeatingSteam, 3);               // District Heating Steam
 
         fillSourceConversionCell(*ort, tableBody, currentStyle.formatReals, 6, 6, 6, ort->sourceFactorGasoline, SmallValue);
         fillSourceConversionCell(*ort, tableBody, currentStyle.formatReals, 8, 8, 7, ort->sourceFactorDiesel, SmallValue);

@@ -338,7 +338,8 @@ namespace Sched {
             ShowWarningCustom(state, eoh, EnergyPlus::format("Values are outside of range for {}={}", cAlphaFields(2), Alphas(2)));
         }
         if (daySched->checkValsForBadIntegers(state)) {
-            ShowWarningCustom(state, eoh, EnergyPlus::format("One or more values are not integer {} {}={}", badIntPreposition, cAlphaFields(2), Alphas(2)));
+            ShowWarningCustom(
+                state, eoh, EnergyPlus::format("One or more values are not integer {} {}={}", badIntPreposition, cAlphaFields(2), Alphas(2)));
         }
     }
 
@@ -545,7 +546,8 @@ namespace Sched {
         int NumExternalInterfaceFunctionalMockupUnitImportSchedules = 0;
         int NumExternalInterfaceFunctionalMockupUnitExportSchedules = 0;
 
-        struct SchedObjInfo {
+        struct SchedObjInfo
+        {
             const char *name;
             int *count;
             int alphaAdj; // added to NumAlphas for MaxAlps calculation
@@ -2002,20 +2004,50 @@ namespace Sched {
         static_cast<ScheduleConstant *>(s_sched->schedules[SchedNum_AlwaysOff])->tsVals.assign(Constant::iHoursInDay * s_glob->TimeStepsInHour, 0.0);
         static_cast<ScheduleConstant *>(s_sched->schedules[SchedNum_AlwaysOn])->tsVals.assign(Constant::iHoursInDay * s_glob->TimeStepsInHour, 1.0);
 
-        processExternalInterfaceSchedule(state, routineName, "ExternalInterface:Schedule",
-                                          NumExternalInterfaceSchedules, false, NumExternalInterfaceSchedules,
-                                          Alphas, cAlphaFields, cNumericFields, Numbers, lAlphaBlanks, lNumericBlanks,
-                                          ErrorsFound, NumErrorFlag);
+        processExternalInterfaceSchedule(state,
+                                         routineName,
+                                         "ExternalInterface:Schedule",
+                                         NumExternalInterfaceSchedules,
+                                         false,
+                                         NumExternalInterfaceSchedules,
+                                         Alphas,
+                                         cAlphaFields,
+                                         cNumericFields,
+                                         Numbers,
+                                         lAlphaBlanks,
+                                         lNumericBlanks,
+                                         ErrorsFound,
+                                         NumErrorFlag);
 
-        processExternalInterfaceSchedule(state, routineName, "ExternalInterface:FunctionalMockupUnitImport:To:Schedule",
-                                          NumExternalInterfaceFunctionalMockupUnitImportSchedules, true, NumExternalInterfaceSchedules,
-                                          Alphas, cAlphaFields, cNumericFields, Numbers, lAlphaBlanks, lNumericBlanks,
-                                          ErrorsFound, NumErrorFlag);
+        processExternalInterfaceSchedule(state,
+                                         routineName,
+                                         "ExternalInterface:FunctionalMockupUnitImport:To:Schedule",
+                                         NumExternalInterfaceFunctionalMockupUnitImportSchedules,
+                                         true,
+                                         NumExternalInterfaceSchedules,
+                                         Alphas,
+                                         cAlphaFields,
+                                         cNumericFields,
+                                         Numbers,
+                                         lAlphaBlanks,
+                                         lNumericBlanks,
+                                         ErrorsFound,
+                                         NumErrorFlag);
 
-        processExternalInterfaceSchedule(state, routineName, "ExternalInterface:FunctionalMockupUnitExport:To:Schedule",
-                                          NumExternalInterfaceFunctionalMockupUnitExportSchedules, true, NumExternalInterfaceSchedules,
-                                          Alphas, cAlphaFields, cNumericFields, Numbers, lAlphaBlanks, lNumericBlanks,
-                                          ErrorsFound, NumErrorFlag);
+        processExternalInterfaceSchedule(state,
+                                         routineName,
+                                         "ExternalInterface:FunctionalMockupUnitExport:To:Schedule",
+                                         NumExternalInterfaceFunctionalMockupUnitExportSchedules,
+                                         true,
+                                         NumExternalInterfaceSchedules,
+                                         Alphas,
+                                         cAlphaFields,
+                                         cNumericFields,
+                                         Numbers,
+                                         lAlphaBlanks,
+                                         lNumericBlanks,
+                                         ErrorsFound,
+                                         NumErrorFlag);
 
         // Validate by ScheduleLimitsType
         for (auto *sched : s_sched->schedules) {

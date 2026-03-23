@@ -204,24 +204,19 @@ static int getAndValidateCurve(EnergyPlusData &state,
             ShowContinueError(state, EnergyPlus::format("Required {}is blank.", ip->cAlphaFieldNames(alphaIndex)));
         } else {
             ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", routineName, objectType, objectName));
-            ShowContinueError(state,
-                              EnergyPlus::format("Not found {}=\"{}\".", ip->cAlphaFieldNames(alphaIndex), ip->cAlphaArgs(alphaIndex)));
+            ShowContinueError(state, EnergyPlus::format("Not found {}=\"{}\".", ip->cAlphaFieldNames(alphaIndex), ip->cAlphaArgs(alphaIndex)));
         }
         errorsFound = true;
     } else {
-        errorsFound |= EnergyPlus::Curve::CheckCurveDims(
-            state, curveIndex, validDims, routineName, objectType, objectName, ip->cAlphaFieldNames(alphaIndex));
+        errorsFound |=
+            EnergyPlus::Curve::CheckCurveDims(state, curveIndex, validDims, routineName, objectType, objectName, ip->cAlphaFieldNames(alphaIndex));
     }
     return curveIndex;
 }
 
 // Helper: parse a Yes/No alpha field into a bool, reporting an error if the value is invalid.
-static bool parseModeAvailability(EnergyPlusData &state,
-                                  int alphaIndex,
-                                  std::string_view routineName,
-                                  std::string_view objectType,
-                                  std::string_view objectName,
-                                  bool &errorsFound)
+static bool parseModeAvailability(
+    EnergyPlusData &state, int alphaIndex, std::string_view routineName, std::string_view objectType, std::string_view objectName, bool &errorsFound)
 {
     auto &ip = state.dataIPShortCut;
     BooleanSwitch const answer = getYesNoValue(ip->cAlphaArgs(alphaIndex));
@@ -427,8 +422,7 @@ void GetTESCoilInput(EnergyPlusData &state)
                     state.dataIPShortCut->cAlphaArgs(9),
                     "Air Nodes");
 
-        thisTESCoil.CoolingOnlyModeIsAvailable =
-            parseModeAvailability(state, 10, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+        thisTESCoil.CoolingOnlyModeIsAvailable = parseModeAvailability(state, 10, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
 
         thisTESCoil.CoolingOnlyRatedTotCap = state.dataIPShortCut->rNumericArgs(7);
         if (thisTESCoil.CoolingOnlyModeIsAvailable) { // get input data for this mode
@@ -541,8 +535,7 @@ void GetTESCoilInput(EnergyPlusData &state)
 
         } // cooling and discharge mode available
 
-        thisTESCoil.ChargeOnlyModeAvailable =
-            parseModeAvailability(state, 45, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+        thisTESCoil.ChargeOnlyModeAvailable = parseModeAvailability(state, 45, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
 
         if (thisTESCoil.ChargeOnlyModeAvailable) {
 
@@ -557,8 +550,7 @@ void GetTESCoilInput(EnergyPlusData &state)
 
         } // Charge only mode available
 
-        thisTESCoil.DischargeOnlyModeAvailable =
-            parseModeAvailability(state, 48, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+        thisTESCoil.DischargeOnlyModeAvailable = parseModeAvailability(state, 48, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
 
         if (thisTESCoil.DischargeOnlyModeAvailable) {
             thisTESCoil.DischargeOnlyRatedDischargeCap = state.dataIPShortCut->rNumericArgs(27); // gross total evaporator cooling capacity  [W]

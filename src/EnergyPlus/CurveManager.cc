@@ -695,11 +695,7 @@ namespace Curve {
 
     // Helper: read optional output min/max limits from numeric fields.
     // minIdx is the 1-based index of the output-min field; maxIdx = minIdx+1 for the output-max field.
-    static void readOptionalOutputLimits(EnergyPlusData &state,
-                                         Curve *thisCurve,
-                                         int NumNumbers,
-                                         Array1D<Real64> const &Numbers,
-                                         int minIdx)
+    static void readOptionalOutputLimits(EnergyPlusData &state, Curve *thisCurve, int NumNumbers, Array1D<Real64> const &Numbers, int minIdx)
     {
         int maxIdx = minIdx + 1;
         if (NumNumbers > (minIdx - 1) && !state.dataIPShortCut->lNumericFieldBlanks(minIdx)) {
@@ -748,12 +744,8 @@ namespace Curve {
     }
 
     // Helper: validate that input-limit min <= max for a given numeric field pair, report error if not.
-    static void checkCurveInputLimits(EnergyPlusData &state,
-                                      std::string const &CurrentModuleObject,
-                                      Array1D<Real64> const &Numbers,
-                                      int minIdx,
-                                      int maxIdx,
-                                      bool &ErrorsFound)
+    static void checkCurveInputLimits(
+        EnergyPlusData &state, std::string const &CurrentModuleObject, Array1D<Real64> const &Numbers, int minIdx, int maxIdx, bool &ErrorsFound)
     {
         if (Numbers(minIdx) > Numbers(maxIdx)) {
             ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
@@ -872,77 +864,106 @@ namespace Curve {
         // Loop over biquadratic curves and load data
         CurrentModuleObject = "Curve:Biquadratic";
         for (int CurveIndex = 1; CurveIndex <= NumBiQuad; ++CurveIndex) {
-            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::BiQuadratic, 2, 6, ErrorsFound);
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::BiQuadratic, 2, 6, ErrorsFound);
         }
 
         // Loop over ChillerPartLoadWithLift curves and load data //zrp_Aug2014
         CurrentModuleObject = "Curve:ChillerPartLoadWithLift";
         for (int CurveIndex = 1; CurveIndex <= NumChillerPartLoadWithLift; ++CurveIndex) {
-            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::ChillerPartLoadWithLift, 3, 12, ErrorsFound);
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(state,
+                                  thisCurve,
+                                  CurrentModuleObject,
+                                  Alphas,
+                                  NumAlphas,
+                                  Numbers,
+                                  NumNumbers,
+                                  CurveType::ChillerPartLoadWithLift,
+                                  3,
+                                  12,
+                                  ErrorsFound);
         }
 
         // Loop over cubic curves and load data
         CurrentModuleObject = "Curve:Cubic";
         for (int CurveIndex = 1; CurveIndex <= NumCubic; ++CurveIndex) {
-            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
             readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::Cubic, 1, 4, ErrorsFound);
         }
 
         // Loop over quadrinomial curves and load data
         CurrentModuleObject = "Curve:Quartic";
         for (int CurveIndex = 1; CurveIndex <= NumQuartic; ++CurveIndex) {
-            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::Quartic, 1, 5, ErrorsFound);
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::Quartic, 1, 5, ErrorsFound);
         }
 
         // Loop over quadratic curves and load data
         CurrentModuleObject = "Curve:Quadratic";
         for (int CurveIndex = 1; CurveIndex <= NumQuad; ++CurveIndex) {
-            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::Quadratic, 1, 3, ErrorsFound);
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::Quadratic, 1, 3, ErrorsFound);
         }
 
         // Loop over quadratic-linear curves and load data
         CurrentModuleObject = "Curve:QuadraticLinear";
         for (int CurveIndex = 1; CurveIndex <= NumQuadLinear; ++CurveIndex) {
-            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::QuadraticLinear, 2, 6, ErrorsFound);
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::QuadraticLinear, 2, 6, ErrorsFound);
         }
 
         // Loop over cubic-linear curves and load data
         CurrentModuleObject = "Curve:CubicLinear";
         for (int CurveIndex = 1; CurveIndex <= NumCubicLinear; ++CurveIndex) {
-            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::CubicLinear, 2, 6, ErrorsFound);
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::CubicLinear, 2, 6, ErrorsFound);
         }
 
         // Loop over linear curves and load data
         CurrentModuleObject = "Curve:Linear";
         for (int CurveIndex = 1; CurveIndex <= NumLinear; ++CurveIndex) {
-            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::Linear, 1, 2, ErrorsFound);
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::Linear, 1, 2, ErrorsFound);
         }
 
         // Loop over bicubic curves and load data
         CurrentModuleObject = "Curve:Bicubic";
         for (int CurveIndex = 1; CurveIndex <= NumBicubic; ++CurveIndex) {
-            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::BiCubic, 2, 10, ErrorsFound);
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::BiCubic, 2, 10, ErrorsFound);
         }
 
         // Loop over Triquadratic curves and load data
         CurrentModuleObject = "Curve:Triquadratic";
         for (int CurveIndex = 1; CurveIndex <= NumTriQuad; ++CurveIndex) {
-            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::TriQuadratic, 3, 27, ErrorsFound);
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::TriQuadratic, 3, 27, ErrorsFound);
         }
 
         // Loop over quad linear curves and load data
         CurrentModuleObject = "Curve:QuadLinear";
         for (int CurveIndex = 1; CurveIndex <= NumQLinear; ++CurveIndex) {
-            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
 
             thisCurve->curveType = CurveType::QuadLinear;
             thisCurve->numDims = 4;
@@ -985,7 +1006,8 @@ namespace Curve {
         // Loop over quint linear curves and load data
         CurrentModuleObject = "Curve:QuintLinear";
         for (int CurveIndex = 1; CurveIndex <= NumQuintLinear; ++CurveIndex) {
-            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
 
             thisCurve->curveType = CurveType::QuintLinear;
             thisCurve->numDims = 5;
@@ -1029,57 +1051,73 @@ namespace Curve {
         // Loop over Exponent curves and load data
         CurrentModuleObject = "Curve:Exponent";
         for (int CurveIndex = 1; CurveIndex <= NumExponent; ++CurveIndex) {
-            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::Exponent, 1, 3, ErrorsFound);
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::Exponent, 1, 3, ErrorsFound);
         }
 
         // Loop over Fan Pressure Rise curves and load data (no unit type validation)
         CurrentModuleObject = "Curve:FanPressureRise";
         for (int CurveIndex = 1; CurveIndex <= NumFanPressRise; ++CurveIndex) {
-            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::FanPressureRise, 2, 4, ErrorsFound, false);
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::FanPressureRise, 2, 4, ErrorsFound, false);
         }
 
         // Loop over Exponential Skew Normal curves and load data
         CurrentModuleObject = "Curve:ExponentialSkewNormal";
         for (int CurveIndex = 1; CurveIndex <= NumExpSkewNorm; ++CurveIndex) {
-            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::ExponentialSkewNormal, 1, 4, ErrorsFound);
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::ExponentialSkewNormal, 1, 4, ErrorsFound);
         }
 
         // Loop over Sigmoid curves and load data
         CurrentModuleObject = "Curve:Sigmoid";
         for (int CurveIndex = 1; CurveIndex <= NumSigmoid; ++CurveIndex) {
-            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::Sigmoid, 1, 5, ErrorsFound);
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::Sigmoid, 1, 5, ErrorsFound);
         }
 
         // Loop over Rectangular Hyperbola Type 1 curves and load data
         CurrentModuleObject = "Curve:RectangularHyperbola1";
         for (int CurveIndex = 1; CurveIndex <= NumRectHyper1; ++CurveIndex) {
-            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::RectangularHyperbola1, 1, 3, ErrorsFound);
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::RectangularHyperbola1, 1, 3, ErrorsFound);
         }
 
         // Loop over Rectangular Hyperbola Type 2 curves and load data
         CurrentModuleObject = "Curve:RectangularHyperbola2";
         for (int CurveIndex = 1; CurveIndex <= NumRectHyper2; ++CurveIndex) {
-            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::RectangularHyperbola2, 1, 3, ErrorsFound);
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::RectangularHyperbola2, 1, 3, ErrorsFound);
         }
 
         // Loop over Exponential Decay curves and load data
         CurrentModuleObject = "Curve:ExponentialDecay";
         for (int CurveIndex = 1; CurveIndex <= NumExpDecay; ++CurveIndex) {
-            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::ExponentialDecay, 1, 3, ErrorsFound);
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::ExponentialDecay, 1, 3, ErrorsFound);
         }
 
         // Loop over DoubleExponential Decay curves and load data
         CurrentModuleObject = "Curve:DoubleExponentialDecay";
         for (int CurveIndex = 1; CurveIndex <= NumDoubleExpDecay; ++CurveIndex) {
-            auto *thisCurve = readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
-            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::DoubleExponentialDecay, 1, 5, ErrorsFound);
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::DoubleExponentialDecay, 1, 5, ErrorsFound);
         }
 
         // Loop over wind pressure coefficient tables and load data

@@ -314,8 +314,8 @@ namespace LowTempRadiantSystem {
                 if (scaledCapacityOut <= 0.0) {
                     ShowSevereError(state, EnergyPlus::format("{} = {}", currentModuleObject, objectName));
                     ShowContinueError(state, EnergyPlus::format("Input for {} = {}", alphaFieldName, methodInput));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("Illegal {} = {:.7T}", cNumericFields(capPerFloorAreaNumIdx), Numbers(capPerFloorAreaNumIdx)));
+                    ShowContinueError(
+                        state, EnergyPlus::format("Illegal {} = {:.7T}", cNumericFields(capPerFloorAreaNumIdx), Numbers(capPerFloorAreaNumIdx)));
                     ErrorsFound = true;
                 } else if (scaledCapacityOut == AutoSize) {
                     ShowSevereError(state, EnergyPlus::format("{} = {}", currentModuleObject, objectName));
@@ -353,11 +353,8 @@ namespace LowTempRadiantSystem {
 
     // Helper: check that no surface is assigned to more than one radiant system.
     // Marks each surface (and its interzone partner) in AssignedAsRadiantSurface.
-    static void checkRadiantSurfaceAssignment(EnergyPlusData &state,
-                                              Array1D_bool &AssignedAsRadiantSurface,
-                                              int numSurfaces,
-                                              const Array1D_int &SurfacePtr,
-                                              bool &ErrorsFound)
+    static void checkRadiantSurfaceAssignment(
+        EnergyPlusData &state, Array1D_bool &AssignedAsRadiantSurface, int numSurfaces, const Array1D_int &SurfacePtr, bool &ErrorsFound)
     {
         auto &Surface = state.dataSurface->Surface;
         for (int SurfNum = 1; SurfNum <= numSurfaces; ++SurfNum) {
@@ -366,9 +363,9 @@ namespace LowTempRadiantSystem {
                 continue;
             }
             if (AssignedAsRadiantSurface(CheckSurfNum)) {
-                ShowSevereError(state,
-                                EnergyPlus::format("Surface {} is referenced by more than one radiant system--this is not allowed",
-                                                   Surface(CheckSurfNum).Name));
+                ShowSevereError(
+                    state,
+                    EnergyPlus::format("Surface {} is referenced by more than one radiant system--this is not allowed", Surface(CheckSurfNum).Name));
                 ErrorsFound = true;
             } else {
                 AssignedAsRadiantSurface(CheckSurfNum) = true;
@@ -710,8 +707,8 @@ namespace LowTempRadiantSystem {
                                             HeatingDesignCapacity,
                                             "FractionOfAutosizedHeatingCapacity",
                                             FractionOfAutosizedHeatingCapacity,
-                                            4,  // capPerFloorArea numeric index
-                                            5,  // fraction numeric index
+                                            4, // capPerFloorArea numeric index
+                                            5, // fraction numeric index
                                             Numbers,
                                             lNumericBlanks,
                                             cNumericFields,
@@ -738,8 +735,8 @@ namespace LowTempRadiantSystem {
                                             CoolingDesignCapacity,
                                             "FractionOfAutosizedCoolingCapacity",
                                             FractionOfAutosizedCoolingCapacity,
-                                            7,  // capPerFloorArea numeric index
-                                            8,  // fraction numeric index
+                                            7, // capPerFloorArea numeric index
+                                            8, // fraction numeric index
                                             Numbers,
                                             lNumericBlanks,
                                             cNumericFields,
@@ -869,8 +866,13 @@ namespace LowTempRadiantSystem {
                                                 CurrentModuleObject,
                                                 thisRadSys.Name,
                                                 "Heating",
-                                                2, 6, 7,
-                                                Numbers, lNumericBlanks, lAlphaBlanks, cNumericFields,
+                                                2,
+                                                6,
+                                                7,
+                                                Numbers,
+                                                lNumericBlanks,
+                                                lAlphaBlanks,
+                                                cNumericFields,
                                                 thisRadSys.HeatingCapMethod,
                                                 thisRadSys.ScaledHeatingCapacity,
                                                 ErrorsFound);
@@ -919,8 +921,13 @@ namespace LowTempRadiantSystem {
                                                 CurrentModuleObject,
                                                 thisRadSys.Name,
                                                 "Cooling",
-                                                4, 8, 9,
-                                                Numbers, lNumericBlanks, lAlphaBlanks, cNumericFields,
+                                                4,
+                                                8,
+                                                9,
+                                                Numbers,
+                                                lNumericBlanks,
+                                                lAlphaBlanks,
+                                                cNumericFields,
                                                 thisRadSys.CoolingCapMethod,
                                                 thisRadSys.ScaledCoolingCapacity,
                                                 ErrorsFound);

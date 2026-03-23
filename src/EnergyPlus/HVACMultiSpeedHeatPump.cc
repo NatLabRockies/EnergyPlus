@@ -485,10 +485,9 @@ namespace HVACMultiSpeedHeatPump {
             }
             if (Found) {
                 if (flowRates(i) < flowRates(j)) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{}, \"{}\", {}", state.dataHVACMultiSpdHP->CurrentModuleObject, objName, cNumericFields(numericOffset + i)));
+                    ShowSevereError(state,
+                                    EnergyPlus::format(
+                                        "{}, \"{}\", {}", state.dataHVACMultiSpdHP->CurrentModuleObject, objName, cNumericFields(numericOffset + i)));
                     ShowContinueError(state, EnergyPlus::format(" cannot be less than {}", cNumericFields(numericOffset + j)));
                     ErrorsFound = true;
                 }
@@ -512,8 +511,8 @@ namespace HVACMultiSpeedHeatPump {
         bool errFlag = false;
         thisMSHP.SuppHeatCoilNum = HeatingCoils::GetHeatingCoilIndex(state, std::string{coilTypeStr}, Alphas(15), errFlag);
         if (thisMSHP.SuppHeatCoilNum <= 0 || errFlag) {
-            ShowContinueError(
-                state, EnergyPlus::format("Configuration error in {} \"{}\"", state.dataHVACMultiSpdHP->CurrentModuleObject, Alphas(1)));
+            ShowContinueError(state,
+                              EnergyPlus::format("Configuration error in {} \"{}\"", state.dataHVACMultiSpdHP->CurrentModuleObject, Alphas(1)));
             ShowContinueError(state, EnergyPlus::format("{} of type {} \"{}\" not found.", cAlphaFields(15), coilTypeStr, Alphas(15)));
             ErrorsFound = true;
         }
@@ -543,13 +542,8 @@ namespace HVACMultiSpeedHeatPump {
             ErrorsFound = true;
             LocalError = false;
         }
-        Node::SetUpCompSets(state,
-                            state.dataHVACMultiSpdHP->CurrentModuleObject,
-                            thisMSHP.Name,
-                            coilTypeStr,
-                            thisMSHP.SuppHeatCoilName,
-                            "UNDEFINED",
-                            "UNDEFINED");
+        Node::SetUpCompSets(
+            state, state.dataHVACMultiSpdHP->CurrentModuleObject, thisMSHP.Name, coilTypeStr, thisMSHP.SuppHeatCoilName, "UNDEFINED", "UNDEFINED");
     }
 
     void GetMSHeatPumpInput(EnergyPlusData &state)
@@ -867,14 +861,12 @@ namespace HVACMultiSpeedHeatPump {
             } else if (Util::SameString(Alphas(10), "Coil:Heating:Electric:MultiStage") ||
                        Util::SameString(Alphas(10), "Coil:Heating:Gas:MultiStage")) {
 
-                thisMSHP.HeatCoilType = Util::SameString(Alphas(10), "Coil:Heating:Electric:MultiStage")
-                                           ? HVAC::Coil_HeatingElectric_MultiStage
-                                           : HVAC::Coil_HeatingGas_MultiStage;
-                thisMSHP.HeatCoilNum =
-                    state.dataInputProcessing->inputProcessor->getObjectItemNum(state, Alphas(10), Alphas(11));
+                thisMSHP.HeatCoilType = Util::SameString(Alphas(10), "Coil:Heating:Electric:MultiStage") ? HVAC::Coil_HeatingElectric_MultiStage
+                                                                                                         : HVAC::Coil_HeatingGas_MultiStage;
+                thisMSHP.HeatCoilNum = state.dataInputProcessing->inputProcessor->getObjectItemNum(state, Alphas(10), Alphas(11));
                 if (thisMSHP.HeatCoilNum <= 0) {
-                    ShowSevereError(
-                        state, EnergyPlus::format("Configuration error in {} \"{}\"", state.dataHVACMultiSpdHP->CurrentModuleObject, Alphas(1)));
+                    ShowSevereError(state,
+                                    EnergyPlus::format("Configuration error in {} \"{}\"", state.dataHVACMultiSpdHP->CurrentModuleObject, Alphas(1)));
                     ShowContinueError(state, EnergyPlus::format("{} \"{}\" not found.", cAlphaFields(11), Alphas(11)));
                     ShowContinueError(state, EnergyPlus::format("{} must be {} ", cAlphaFields(10), Alphas(10)));
                     ShowFatalError(state,
@@ -906,13 +898,8 @@ namespace HVACMultiSpeedHeatPump {
                     ErrorsFound = true;
                     LocalError = false;
                 }
-                Node::SetUpCompSets(state,
-                                    state.dataHVACMultiSpdHP->CurrentModuleObject,
-                                    thisMSHP.Name,
-                                    Alphas(10),
-                                    thisMSHP.HeatCoilName,
-                                    "UNDEFINED",
-                                    "UNDEFINED");
+                Node::SetUpCompSets(
+                    state, state.dataHVACMultiSpdHP->CurrentModuleObject, thisMSHP.Name, Alphas(10), thisMSHP.HeatCoilName, "UNDEFINED", "UNDEFINED");
             } else if (Util::SameString(Alphas(10), "Coil:Heating:Water")) {
                 thisMSHP.HeatCoilType = HVAC::Coil_HeatingWater;
                 ValidateComponent(state, Alphas(10), Alphas(11), IsNotOK, state.dataHVACMultiSpdHP->CurrentModuleObject);
@@ -1105,12 +1092,26 @@ namespace HVACMultiSpeedHeatPump {
             // Get supplemental heating coil data
             thisMSHP.SuppHeatCoilName = Alphas(15);
             if (Util::SameString(Alphas(14), "Coil:Heating:Fuel")) {
-                readSuppHeatingCoilFuelOrElectric(
-                    state, thisMSHP, HVAC::Coil_HeatingGasOrOtherFuel, "Coil:Heating:Fuel", Alphas, cAlphaFields, ErrorsFound, SuppHeatCoilInletNode, SuppHeatCoilOutletNode);
+                readSuppHeatingCoilFuelOrElectric(state,
+                                                  thisMSHP,
+                                                  HVAC::Coil_HeatingGasOrOtherFuel,
+                                                  "Coil:Heating:Fuel",
+                                                  Alphas,
+                                                  cAlphaFields,
+                                                  ErrorsFound,
+                                                  SuppHeatCoilInletNode,
+                                                  SuppHeatCoilOutletNode);
             }
             if (Util::SameString(Alphas(14), "Coil:Heating:Electric")) {
-                readSuppHeatingCoilFuelOrElectric(
-                    state, thisMSHP, HVAC::Coil_HeatingElectric, "Coil:Heating:Electric", Alphas, cAlphaFields, ErrorsFound, SuppHeatCoilInletNode, SuppHeatCoilOutletNode);
+                readSuppHeatingCoilFuelOrElectric(state,
+                                                  thisMSHP,
+                                                  HVAC::Coil_HeatingElectric,
+                                                  "Coil:Heating:Electric",
+                                                  Alphas,
+                                                  cAlphaFields,
+                                                  ErrorsFound,
+                                                  SuppHeatCoilInletNode,
+                                                  SuppHeatCoilOutletNode);
             }
 
             if (Util::SameString(Alphas(14), "Coil:Heating:Water")) {
@@ -1406,8 +1407,14 @@ namespace HVACMultiSpeedHeatPump {
                     thisMSHP.HeatVolumeFlowRate(i) = Numbers(10 + i);
                 }
                 bool alwaysValidatePositive = (thisMSHP.HeatCoilType == HVAC::CoilDX_MultiSpeedHeating);
-                validateSpeedFlowRates(
-                    state, thisMSHP.Name, thisMSHP.HeatVolumeFlowRate, thisMSHP.NumOfSpeedHeating, 10, cNumericFields, alwaysValidatePositive, ErrorsFound);
+                validateSpeedFlowRates(state,
+                                       thisMSHP.Name,
+                                       thisMSHP.HeatVolumeFlowRate,
+                                       thisMSHP.NumOfSpeedHeating,
+                                       10,
+                                       cNumericFields,
+                                       alwaysValidatePositive,
+                                       ErrorsFound);
             }
 
             if (state.dataGlobal->DoCoilDirectSolutions) {

@@ -187,26 +187,34 @@ namespace CondenserLoopTowers {
     static constexpr std::string_view routineName = "GetTowerInput";
 
     // Helper: parse water inlet/outlet node connections and test component set.
-    static void parseWaterNodes(EnergyPlusData &state,
-                                CoolingTower &tower,
-                                Array1D_string const &AlphArray,
-                                Node::ConnectionObjectType connType,
-                                bool &ErrorsFound)
+    static void parseWaterNodes(
+        EnergyPlusData &state, CoolingTower &tower, Array1D_string const &AlphArray, Node::ConnectionObjectType connType, bool &ErrorsFound)
     {
         auto &s_ipsc = state.dataIPShortCut;
-        tower.WaterInletNodeNum = Node::GetOnlySingleNode(state, AlphArray(2), ErrorsFound, connType, tower.Name,
-                                                          Node::FluidType::Water, Node::ConnectionType::Inlet,
-                                                          Node::CompFluidStream::Primary, Node::ObjectIsNotParent);
-        tower.WaterOutletNodeNum = Node::GetOnlySingleNode(state, AlphArray(3), ErrorsFound, connType, tower.Name,
-                                                           Node::FluidType::Water, Node::ConnectionType::Outlet,
-                                                           Node::CompFluidStream::Primary, Node::ObjectIsNotParent);
+        tower.WaterInletNodeNum = Node::GetOnlySingleNode(state,
+                                                          AlphArray(2),
+                                                          ErrorsFound,
+                                                          connType,
+                                                          tower.Name,
+                                                          Node::FluidType::Water,
+                                                          Node::ConnectionType::Inlet,
+                                                          Node::CompFluidStream::Primary,
+                                                          Node::ObjectIsNotParent);
+        tower.WaterOutletNodeNum = Node::GetOnlySingleNode(state,
+                                                           AlphArray(3),
+                                                           ErrorsFound,
+                                                           connType,
+                                                           tower.Name,
+                                                           Node::FluidType::Water,
+                                                           Node::ConnectionType::Outlet,
+                                                           Node::CompFluidStream::Primary,
+                                                           Node::ObjectIsNotParent);
         Node::TestCompSet(state, s_ipsc->cCurrentModuleObject, tower.Name, AlphArray(2), AlphArray(3), "Chilled Water Nodes");
     }
 
     // Helper: parse design inlet conditions (DB temp, WB temp, approach, range) and derived water temps.
-    static void parseDesignConditions(CoolingTower &tower,
-                                      Array1D<Real64> const &NumArray,
-                                      int const dbIdx, int const wbIdx, int const appIdx, int const rangeIdx)
+    static void parseDesignConditions(
+        CoolingTower &tower, Array1D<Real64> const &NumArray, int const dbIdx, int const wbIdx, int const appIdx, int const rangeIdx)
     {
         tower.DesInletAirDBTemp = NumArray(dbIdx);
         if (tower.DesInletAirDBTemp == 0) {
@@ -262,7 +270,10 @@ namespace CondenserLoopTowers {
         }
         if (!AlphArray(schedAlpIdx).empty()) {
             if ((tower.basinHeaterSched = Sched::GetSchedule(state, AlphArray(schedAlpIdx))) == nullptr) {
-                ShowWarningItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(schedAlpIdx), AlphArray(schedAlpIdx),
+                ShowWarningItemNotFound(state,
+                                        eoh,
+                                        s_ipsc->cAlphaFieldNames(schedAlpIdx),
+                                        AlphArray(schedAlpIdx),
                                         "Basin heater operation will not be modeled and the simulation continues");
             }
         }
@@ -274,8 +285,13 @@ namespace CondenserLoopTowers {
                                            ErrorObjectHeader const &eoh,
                                            Array1D<Real64> const &NumArray,
                                            Array1D_string const &AlphArray,
-                                           int const evapAlpIdx, int const evapFactIdx, int const driftIdx,
-                                           int const concIdx, int const sizIdx, int const bdModeAlpIdx, int const bdSchedAlpIdx,
+                                           int const evapAlpIdx,
+                                           int const evapFactIdx,
+                                           int const driftIdx,
+                                           int const concIdx,
+                                           int const sizIdx,
+                                           int const bdModeAlpIdx,
+                                           int const bdSchedAlpIdx,
                                            bool &ErrorsFound)
     {
         constexpr std::array<std::string_view, static_cast<int>(EvapLoss::Num)> EvapLossNamesUC{"LOSSFACTOR", "SATURATEDEXIT"};
@@ -286,7 +302,9 @@ namespace CondenserLoopTowers {
         tower.DriftLossFraction = NumArray(driftIdx) / 100.0;
         tower.ConcentrationRatio = NumArray(concIdx);
         tower.SizFac = NumArray(sizIdx);
-        if (tower.SizFac <= 0.0) tower.SizFac = 1.0;
+        if (tower.SizFac <= 0.0) {
+            tower.SizFac = 1.0;
+        }
         tower.BlowdownMode = static_cast<Blowdown>(getEnumValue(BlowDownNamesUC, Util::makeUPPER(AlphArray(bdModeAlpIdx))));
         if (tower.BlowdownMode == Blowdown::Schedule) {
             if ((tower.blowdownSched = Sched::GetSchedule(state, AlphArray(bdSchedAlpIdx))) == nullptr) {
@@ -299,18 +317,28 @@ namespace CondenserLoopTowers {
     // Helper: parse multi-cell fields common to all tower types.
     static void parseMultiCellFields(EnergyPlusData &state,
                                      CoolingTower &tower,
-                                     Array1D<Real64> const &NumArray, int const NumNums,
+                                     Array1D<Real64> const &NumArray,
+                                     int const NumNums,
                                      Array1D_string const &AlphArray,
-                                     int const cellIdx, int const minIdx, int const maxIdx, int const ctrlAlpIdx)
+                                     int const cellIdx,
+                                     int const minIdx,
+                                     int const maxIdx,
+                                     int const ctrlAlpIdx)
     {
         constexpr std::array<std::string_view, static_cast<int>(CellCtrl::Num)> CellCtrlNamesUC = {"MINIMALCELL", "MAXIMALCELL"};
         auto &s_ipsc = state.dataIPShortCut;
         tower.NumCell = NumArray(cellIdx);
-        if ((NumNums < cellIdx) && (tower.NumCell == 0)) tower.NumCell = 1;
+        if ((NumNums < cellIdx) && (tower.NumCell == 0)) {
+            tower.NumCell = 1;
+        }
         tower.MinFracFlowRate = NumArray(minIdx);
-        if ((NumNums < minIdx) && (tower.MinFracFlowRate == 0.0)) tower.MinFracFlowRate = 0.33;
+        if ((NumNums < minIdx) && (tower.MinFracFlowRate == 0.0)) {
+            tower.MinFracFlowRate = 0.33;
+        }
         tower.MaxFracFlowRate = NumArray(maxIdx);
-        if ((NumNums < maxIdx) && (tower.MaxFracFlowRate == 0.0)) tower.MaxFracFlowRate = 2.5;
+        if ((NumNums < maxIdx) && (tower.MaxFracFlowRate == 0.0)) {
+            tower.MaxFracFlowRate = 2.5;
+        }
         if (!s_ipsc->lAlphaFieldBlanks(ctrlAlpIdx)) {
             tower.cellCtrl = static_cast<CellCtrl>(getEnumValue(CellCtrlNamesUC, Util::makeUPPER(AlphArray(ctrlAlpIdx))));
         }
@@ -319,8 +347,10 @@ namespace CondenserLoopTowers {
     // Helper: parse water supply tank, outdoor air inlet node, and end-use subcategory fields.
     static void parseWaterSupplyAndOAFields(EnergyPlusData &state,
                                             CoolingTower &tower,
-                                            Array1D_string const &AlphArray, int const NumAlphas,
-                                            int const waterAlpIdx, int const oaAlpIdx,
+                                            Array1D_string const &AlphArray,
+                                            int const NumAlphas,
+                                            int const waterAlpIdx,
+                                            int const oaAlpIdx,
                                             Node::ConnectionObjectType connType,
                                             int const endUseAlpIdx,
                                             bool &ErrorsFound)
@@ -329,16 +359,27 @@ namespace CondenserLoopTowers {
         if (s_ipsc->lAlphaFieldBlanks(waterAlpIdx) || AlphArray(waterAlpIdx).empty()) {
             tower.SuppliedByWaterSystem = false;
         } else {
-            WaterManager::SetupTankDemandComponent(state, AlphArray(1), s_ipsc->cCurrentModuleObject,
-                                                   AlphArray(waterAlpIdx), ErrorsFound, tower.WaterTankID, tower.WaterTankDemandARRID);
+            WaterManager::SetupTankDemandComponent(state,
+                                                   AlphArray(1),
+                                                   s_ipsc->cCurrentModuleObject,
+                                                   AlphArray(waterAlpIdx),
+                                                   ErrorsFound,
+                                                   tower.WaterTankID,
+                                                   tower.WaterTankDemandARRID);
             tower.SuppliedByWaterSystem = true;
         }
         if (s_ipsc->lAlphaFieldBlanks(oaAlpIdx)) {
             tower.OutdoorAirInletNodeNum = 0;
         } else {
-            tower.OutdoorAirInletNodeNum = Node::GetOnlySingleNode(state, AlphArray(oaAlpIdx), ErrorsFound, connType, tower.Name,
-                                                                   Node::FluidType::Air, Node::ConnectionType::OutsideAirReference,
-                                                                   Node::CompFluidStream::Primary, Node::ObjectIsNotParent);
+            tower.OutdoorAirInletNodeNum = Node::GetOnlySingleNode(state,
+                                                                   AlphArray(oaAlpIdx),
+                                                                   ErrorsFound,
+                                                                   connType,
+                                                                   tower.Name,
+                                                                   Node::FluidType::Air,
+                                                                   Node::ConnectionType::OutsideAirReference,
+                                                                   Node::CompFluidStream::Primary,
+                                                                   Node::ObjectIsNotParent);
             if (!OutAirNodeManager::CheckOutAirNodeNumber(state, tower.OutdoorAirInletNodeNum)) {
                 if (connType == Node::ConnectionObjectType::CoolingTowerSingleSpeed) {
                     ShowSevereCustom(state,
@@ -347,8 +388,10 @@ namespace CondenserLoopTowers {
                                                         "does not appear in an OutdoorAir:NodeList or as an OutdoorAir:Node.",
                                                         AlphArray(oaAlpIdx)));
                 } else {
-                    ShowSevereItemNotFound(state, ErrorObjectHeader{routineName, s_ipsc->cCurrentModuleObject, tower.Name},
-                                           s_ipsc->cAlphaFieldNames(oaAlpIdx), AlphArray(oaAlpIdx));
+                    ShowSevereItemNotFound(state,
+                                           ErrorObjectHeader{routineName, s_ipsc->cCurrentModuleObject, tower.Name},
+                                           s_ipsc->cAlphaFieldNames(oaAlpIdx),
+                                           AlphArray(oaAlpIdx));
                 }
                 ErrorsFound = true;
             }
@@ -506,7 +549,8 @@ namespace CondenserLoopTowers {
             parseDesignConditions(tower, NumArray, 13, 14, 15, 16);
             parseBasinHeaterFields(state, tower, eoh, NumArray, NumNums, AlphArray, 17, 18, 5, ErrorsFound);
             parseEvapAndBlowdownFields(state, tower, eoh, NumArray, AlphArray, 6, 19, 20, 21, 25, 7, 8, ErrorsFound);
-            parseWaterSupplyAndOAFields(state, tower, AlphArray, NumAlphas, 9, 10, Node::ConnectionObjectType::CoolingTowerSingleSpeed, 13, ErrorsFound);
+            parseWaterSupplyAndOAFields(
+                state, tower, AlphArray, NumAlphas, 9, 10, Node::ConnectionObjectType::CoolingTowerSingleSpeed, 13, ErrorsFound);
 
             //   fluid bypass for single speed tower
             if (s_ipsc->lAlphaFieldBlanks(11) || AlphArray(11).empty()) {
@@ -1216,7 +1260,8 @@ namespace CondenserLoopTowers {
 
             parseEvapAndBlowdownFields(state, tower, eoh, NumArray, AlphArray, 8, 11, 12, 13, 17, 9, 10, ErrorsFound);
             parseMultiCellFields(state, tower, NumArray, NumNums, AlphArray, 14, 15, 16, 13);
-            parseWaterSupplyAndOAFields(state, tower, AlphArray, NumAlphas, 11, 12, Node::ConnectionObjectType::CoolingTowerVariableSpeed, 14, ErrorsFound);
+            parseWaterSupplyAndOAFields(
+                state, tower, AlphArray, NumAlphas, 11, 12, Node::ConnectionObjectType::CoolingTowerVariableSpeed, 14, ErrorsFound);
 
         } // End Variable-Speed Tower Loop
 
@@ -1323,7 +1368,8 @@ namespace CondenserLoopTowers {
             parseEvapAndBlowdownFields(state, tower, eoh, NumArray, AlphArray, 10, 23, 24, 25, 29, 11, 12, ErrorsFound);
             parseMultiCellFields(state, tower, NumArray, NumNums, AlphArray, 26, 27, 28, 15);
             tower.TowerMassFlowRateMultiplier = tower.MaxFracFlowRate;
-            parseWaterSupplyAndOAFields(state, tower, AlphArray, NumAlphas, 13, 14, Node::ConnectionObjectType::CoolingTowerVariableSpeedMerkel, 16, ErrorsFound);
+            parseWaterSupplyAndOAFields(
+                state, tower, AlphArray, NumAlphas, 13, 14, Node::ConnectionObjectType::CoolingTowerVariableSpeedMerkel, 16, ErrorsFound);
 
         } // end merkel vs tower loop
 

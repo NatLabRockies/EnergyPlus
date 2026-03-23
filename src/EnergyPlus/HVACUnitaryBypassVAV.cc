@@ -2045,43 +2045,43 @@ namespace HVACUnitaryBypassVAV {
     // Estimates PLR from inlet/outlet temperatures on solver failure (SolFla == -2).
     // Checks WarmupFlag when checkWarmup is true (used by HX-Assisted and SingleSpeed coils).
     static void reportDXCoilPLRSolverError(EnergyPlusData &state,
-                                            CBVAVData const &cBVAV,
-                                            int const SolFla,
-                                            Real64 &PartLoadFrac,
-                                            bool const checkWarmup,
-                                            int &iterExceededCounter,
-                                            int &iterExceededIndex,
-                                            std::string const &iterExceededMsg,
-                                            std::string const &iterExceededRecurMsg,
-                                            int &iterFailedCounter,
-                                            int &iterFailedIndex,
-                                            std::string const &iterFailedMsg,
-                                            std::string const &iterFailedRecurMsg)
+                                           CBVAVData const &cBVAV,
+                                           int const SolFla,
+                                           Real64 &PartLoadFrac,
+                                           bool const checkWarmup,
+                                           int &iterExceededCounter,
+                                           int &iterExceededIndex,
+                                           std::string const &iterExceededMsg,
+                                           std::string const &iterExceededRecurMsg,
+                                           int &iterFailedCounter,
+                                           int &iterFailedIndex,
+                                           std::string const &iterFailedMsg,
+                                           std::string const &iterFailedRecurMsg)
     {
-        if (checkWarmup && state.dataGlobal->WarmupFlag) return;
+        if (checkWarmup && state.dataGlobal->WarmupFlag) {
+            return;
+        }
 
         if (SolFla == -1) {
             if (iterExceededCounter < 1) {
                 ++iterExceededCounter;
                 ShowWarningError(state, iterExceededMsg);
                 ShowContinueError(state, EnergyPlus::format("Calculated part-load ratio = {:.3R}", PartLoadFrac));
-                ShowContinueErrorTimeStamp(
-                    state, "The calculated part-load ratio will be used and the simulation continues. Occurrence info:");
+                ShowContinueErrorTimeStamp(state, "The calculated part-load ratio will be used and the simulation continues. Occurrence info:");
             } else {
                 ShowRecurringWarningErrorAtEnd(state, iterExceededRecurMsg, iterExceededIndex, PartLoadFrac, PartLoadFrac);
             }
         } else if (SolFla == -2) {
-            PartLoadFrac = max(0.0,
-                               min(1.0,
-                                   (state.dataLoopNodes->Node(cBVAV.DXCoilInletNode).Temp - cBVAV.CoilTempSetPoint) /
-                                       (state.dataLoopNodes->Node(cBVAV.DXCoilInletNode).Temp -
-                                        state.dataLoopNodes->Node(cBVAV.DXCoilOutletNode).Temp)));
+            PartLoadFrac =
+                max(0.0,
+                    min(1.0,
+                        (state.dataLoopNodes->Node(cBVAV.DXCoilInletNode).Temp - cBVAV.CoilTempSetPoint) /
+                            (state.dataLoopNodes->Node(cBVAV.DXCoilInletNode).Temp - state.dataLoopNodes->Node(cBVAV.DXCoilOutletNode).Temp)));
             if (iterFailedCounter < 1) {
                 ++iterFailedCounter;
                 ShowSevereError(state, iterFailedMsg);
                 ShowContinueError(state, EnergyPlus::format("Estimated part-load ratio = {:.3R}", PartLoadFrac));
-                ShowContinueErrorTimeStamp(
-                    state, "The estimated part-load ratio will be used and the simulation continues. Occurrence info:");
+                ShowContinueErrorTimeStamp(state, "The estimated part-load ratio will be used and the simulation continues. Occurrence info:");
             } else {
                 ShowRecurringWarningErrorAtEnd(state, iterFailedRecurMsg, iterFailedIndex, PartLoadFrac, PartLoadFrac);
             }
@@ -2130,14 +2130,8 @@ namespace HVACUnitaryBypassVAV {
             PartLoadFrac = 1.0;
         } else {
             auto f = [&state, &cBVAV, DehumidMode](Real64 const PartLoadRatio) {
-                DXCoils::SimDXCoilMultiMode(state,
-                                            "",
-                                            HVAC::CompressorOp::On,
-                                            false,
-                                            PartLoadRatio,
-                                            DehumidMode,
-                                            cBVAV.CoolCoilCompIndex,
-                                            HVAC::FanOp::Continuous);
+                DXCoils::SimDXCoilMultiMode(
+                    state, "", HVAC::CompressorOp::On, false, PartLoadRatio, DehumidMode, cBVAV.CoolCoilCompIndex, HVAC::FanOp::Continuous);
                 return cBVAV.CoilTempSetPoint - state.dataDXCoils->DXCoilOutletTemp(cBVAV.CoolCoilCompIndex);
             };
             General::SolveRoot(state, HVAC::SmallTempDiff, MaxIte, SolFla, PartLoadFrac, f, 0.0, 1.0);
@@ -2146,23 +2140,21 @@ namespace HVACUnitaryBypassVAV {
                     ++iterExceededCounter;
                     ShowWarningError(state, iterExceededMsg);
                     ShowContinueErrorTimeStamp(state, EnergyPlus::format("Part-load ratio returned = {:.2R}", PartLoadFrac));
-                    ShowContinueErrorTimeStamp(
-                        state, "The calculated part-load ratio will be used and the simulation continues. Occurrence info:");
+                    ShowContinueErrorTimeStamp(state, "The calculated part-load ratio will be used and the simulation continues. Occurrence info:");
                 } else {
                     ShowRecurringWarningErrorAtEnd(state, iterExceededRecurMsg, iterExceededIndex, PartLoadFrac, PartLoadFrac);
                 }
             } else if (SolFla == -2) {
-                PartLoadFrac = max(0.0,
-                                   min(1.0,
-                                       (state.dataLoopNodes->Node(cBVAV.DXCoilInletNode).Temp - cBVAV.CoilTempSetPoint) /
-                                           (state.dataLoopNodes->Node(cBVAV.DXCoilInletNode).Temp -
-                                            state.dataLoopNodes->Node(cBVAV.DXCoilOutletNode).Temp)));
+                PartLoadFrac =
+                    max(0.0,
+                        min(1.0,
+                            (state.dataLoopNodes->Node(cBVAV.DXCoilInletNode).Temp - cBVAV.CoilTempSetPoint) /
+                                (state.dataLoopNodes->Node(cBVAV.DXCoilInletNode).Temp - state.dataLoopNodes->Node(cBVAV.DXCoilOutletNode).Temp)));
                 if (iterFailedCounter < 1) {
                     ++iterFailedCounter;
                     ShowSevereError(state, iterFailedMsg);
                     ShowContinueError(state, EnergyPlus::format("Estimated part-load ratio = {:.3R}", PartLoadFrac));
-                    ShowContinueErrorTimeStamp(
-                        state, "The estimated part-load ratio will be used and the simulation continues. Occurrence info:");
+                    ShowContinueErrorTimeStamp(state, "The estimated part-load ratio will be used and the simulation continues. Occurrence info:");
                 } else {
                     ShowRecurringWarningErrorAtEnd(state, iterFailedRecurMsg, iterFailedIndex, PartLoadFrac, PartLoadFrac);
                 }
@@ -2236,8 +2228,7 @@ namespace HVACUnitaryBypassVAV {
                                                       QZnReq,
                                                       QLatReq);
             if (savePLR) {
-                state.dataHVACUnitaryBypassVAV->SaveCompressorPLR =
-                    VariableSpeedCoils::getVarSpeedPartLoadRatio(state, cBVAV.CoolCoilCompIndex);
+                state.dataHVACUnitaryBypassVAV->SaveCompressorPLR = VariableSpeedCoils::getVarSpeedPartLoadRatio(state, cBVAV.CoolCoilCompIndex);
             }
         } break;
         default:
@@ -2363,12 +2354,21 @@ namespace HVACUnitaryBypassVAV {
                                                                             HVAC::FanOp::Continuous,
                                                                             HXUnitOn);
                         reportDXCoilPLRSolverError(
-                            state, cBVAV, SolFla, PartLoadFrac, /*checkWarmup=*/true,
-                            cBVAV.HXDXIterationExceeded, cBVAV.HXDXIterationExceededIndex,
-                            EnergyPlus::format("Iteration limit exceeded calculating HX assisted DX unit part-load ratio, for unit = {}", cBVAV.DXCoolCoilName),
+                            state,
+                            cBVAV,
+                            SolFla,
+                            PartLoadFrac,
+                            /*checkWarmup=*/true,
+                            cBVAV.HXDXIterationExceeded,
+                            cBVAV.HXDXIterationExceededIndex,
+                            EnergyPlus::format("Iteration limit exceeded calculating HX assisted DX unit part-load ratio, for unit = {}",
+                                               cBVAV.DXCoolCoilName),
                             cBVAV.Name + ", Iteration limit exceeded for HX assisted DX unit part-load ratio error continues.",
-                            cBVAV.HXDXIterationFailed, cBVAV.HXDXIterationFailedIndex,
-                            EnergyPlus::format("HX assisted DX unit part-load ratio calculation failed: part-load ratio limits exceeded, for unit = {}", cBVAV.DXCoolCoilName),
+                            cBVAV.HXDXIterationFailed,
+                            cBVAV.HXDXIterationFailedIndex,
+                            EnergyPlus::format(
+                                "HX assisted DX unit part-load ratio calculation failed: part-load ratio limits exceeded, for unit = {}",
+                                cBVAV.DXCoolCoilName),
                             cBVAV.Name + ", Part-load ratio calculation failed for HX assisted DX unit error continues.");
                     }
                 } break;
@@ -2416,12 +2416,19 @@ namespace HVACUnitaryBypassVAV {
                                            PartLoadFrac,
                                            OnOffAirFlowRatio);
                         reportDXCoilPLRSolverError(
-                            state, cBVAV, SolFla, PartLoadFrac, /*checkWarmup=*/true,
-                            cBVAV.DXIterationExceeded, cBVAV.DXIterationExceededIndex,
+                            state,
+                            cBVAV,
+                            SolFla,
+                            PartLoadFrac,
+                            /*checkWarmup=*/true,
+                            cBVAV.DXIterationExceeded,
+                            cBVAV.DXIterationExceededIndex,
                             EnergyPlus::format("Iteration limit exceeded calculating DX unit part-load ratio, for unit = {}", cBVAV.DXCoolCoilName),
                             cBVAV.Name + ", Iteration limit exceeded for DX unit part-load ratio calculation error continues.",
-                            cBVAV.DXIterationFailed, cBVAV.DXIterationFailedIndex,
-                            EnergyPlus::format("DX unit part-load ratio calculation failed: part-load ratio limits exceeded, for unit = {}", cBVAV.DXCoolCoilName),
+                            cBVAV.DXIterationFailed,
+                            cBVAV.DXIterationFailedIndex,
+                            EnergyPlus::format("DX unit part-load ratio calculation failed: part-load ratio limits exceeded, for unit = {}",
+                                               cBVAV.DXCoolCoilName),
                             cBVAV.Name + ", Part-load ratio calculation failed for DX unit error continues.");
                     }
                     state.dataHVACUnitaryBypassVAV->SaveCompressorPLR = state.dataDXCoils->DXCoilPartLoadRatio(cBVAV.DXCoolCoilIndexNum);
@@ -2766,11 +2773,17 @@ namespace HVACUnitaryBypassVAV {
                     HVAC::CoilMode DehumidMode = HVAC::CoilMode::Normal; // Dehumidification mode (0=normal, 1=enhanced)
                     cBVAV.DehumidificationMode = DehumidMode;
                     findMultiModeDXCoilPLR(
-                        state, cBVAV, FirstHVACIteration, DehumidMode, PartLoadFrac,
-                        cBVAV.MMDXIterationExceeded, cBVAV.MMDXIterationExceededIndex,
+                        state,
+                        cBVAV,
+                        FirstHVACIteration,
+                        DehumidMode,
+                        PartLoadFrac,
+                        cBVAV.MMDXIterationExceeded,
+                        cBVAV.MMDXIterationExceededIndex,
                         EnergyPlus::format("Iteration limit exceeded calculating DX unit part-load ratio, for unit={}", cBVAV.Name),
                         cBVAV.Name + ", Iteration limit exceeded calculating DX unit part-load ratio error continues.",
-                        cBVAV.MMDXIterationFailed, cBVAV.MMDXIterationFailedIndex,
+                        cBVAV.MMDXIterationFailed,
+                        cBVAV.MMDXIterationFailedIndex,
                         EnergyPlus::format("DX unit part-load ratio calculation failed: part-load ratio limits exceeded, for unit={}", cBVAV.Name),
                         cBVAV.Name + ", Part-load ratio calculation failed for DX unit error continues.");
 
@@ -2786,12 +2799,21 @@ namespace HVACUnitaryBypassVAV {
                         DehumidMode = HVAC::CoilMode::Enhanced;
                         cBVAV.DehumidificationMode = DehumidMode;
                         findMultiModeDXCoilPLR(
-                            state, cBVAV, FirstHVACIteration, DehumidMode, PartLoadFrac,
-                            cBVAV.DMDXIterationExceeded, cBVAV.DMDXIterationExceededIndex,
-                            EnergyPlus::format("Iteration limit exceeded calculating DX unit dehumidifying part-load ratio, for unit = {}", cBVAV.Name),
+                            state,
+                            cBVAV,
+                            FirstHVACIteration,
+                            DehumidMode,
+                            PartLoadFrac,
+                            cBVAV.DMDXIterationExceeded,
+                            cBVAV.DMDXIterationExceededIndex,
+                            EnergyPlus::format("Iteration limit exceeded calculating DX unit dehumidifying part-load ratio, for unit = {}",
+                                               cBVAV.Name),
                             cBVAV.Name + ", Iteration limit exceeded calculating DX unit dehumidifying part-load ratio error continues.",
-                            cBVAV.DMDXIterationFailed, cBVAV.DMDXIterationFailedIndex,
-                            EnergyPlus::format("DX unit dehumidifying part-load ratio calculation failed: part-load ratio limits exceeded, for unit = {}", cBVAV.Name),
+                            cBVAV.DMDXIterationFailed,
+                            cBVAV.DMDXIterationFailedIndex,
+                            EnergyPlus::format(
+                                "DX unit dehumidifying part-load ratio calculation failed: part-load ratio limits exceeded, for unit = {}",
+                                cBVAV.Name),
                             cBVAV.Name + ", Dehumidifying part-load ratio calculation failed for DX unit error continues.");
                     } // End if humidity ratio setpoint not met - multimode humidity control
 
@@ -2818,12 +2840,19 @@ namespace HVACUnitaryBypassVAV {
                         DehumidMode = HVAC::CoilMode::Normal;
                         cBVAV.DehumidificationMode = DehumidMode;
                         findMultiModeDXCoilPLR(
-                            state, cBVAV, FirstHVACIteration, DehumidMode, PartLoadFrac,
-                            cBVAV.CRDXIterationExceeded, cBVAV.CRDXIterationExceededIndex,
+                            state,
+                            cBVAV,
+                            FirstHVACIteration,
+                            DehumidMode,
+                            PartLoadFrac,
+                            cBVAV.CRDXIterationExceeded,
+                            cBVAV.CRDXIterationExceededIndex,
                             EnergyPlus::format("Iteration limit exceeded calculating DX unit cool reheat part-load ratio, for unit = {}", cBVAV.Name),
                             cBVAV.Name + ", Iteration limit exceeded calculating cool reheat part-load ratio DX unit error continues.",
-                            cBVAV.CRDXIterationFailed, cBVAV.CRDXIterationFailedIndex,
-                            EnergyPlus::format("DX unit cool reheat part-load ratio calculation failed: part-load ratio limits exceeded, for unit = {}", cBVAV.Name),
+                            cBVAV.CRDXIterationFailed,
+                            cBVAV.CRDXIterationFailedIndex,
+                            EnergyPlus::format(
+                                "DX unit cool reheat part-load ratio calculation failed: part-load ratio limits exceeded, for unit = {}", cBVAV.Name),
                             cBVAV.Name + ", Dehumidifying part-load ratio calculation failed for DX unit error continues.");
                     } // End if humidity ratio setpoint not met - CoolReheat humidity control
 
