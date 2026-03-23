@@ -84,6 +84,26 @@ constexpr std::array<Material::Gas, 10> gases = {
 
 constexpr std::array<std::string_view, (int)EcoRoofCalcMethod::Num> ecoRoofCalcMethodNamesUC = {"SIMPLE", "ADVANCED"};
 
+// Helper to call getObjectItem with the standard set of material input arguments.
+// Wraps the repetitive 12-argument call that appears for every material type.
+static void getMaterialInput(EnergyPlusData &state, int Loop, int &NumAlphas, int &NumNums, int &IOStat)
+{
+    auto &s_ip = state.dataInputProcessing->inputProcessor;
+    auto &s_ipsc = state.dataIPShortCut;
+    s_ip->getObjectItem(state,
+                        s_ipsc->cCurrentModuleObject,
+                        Loop,
+                        s_ipsc->cAlphaArgs,
+                        NumAlphas,
+                        s_ipsc->rNumericArgs,
+                        NumNums,
+                        IOStat,
+                        s_ipsc->lNumericFieldBlanks,
+                        s_ipsc->lAlphaFieldBlanks,
+                        s_ipsc->cAlphaFieldNames,
+                        s_ipsc->cNumericFieldNames);
+}
+
 int GetMaterialNum(EnergyPlusData const &state, std::string const &matName)
 {
     auto const &s_mat = state.dataMaterial;
@@ -248,18 +268,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
     for (int Loop = 1; Loop <= s_mat->NumNoMasses; ++Loop) {
 
         // Call Input Get routine to retrieve material data
-        s_ip->getObjectItem(state,
-                            s_ipsc->cCurrentModuleObject,
-                            Loop,
-                            s_ipsc->cAlphaArgs,
-                            NumAlphas,
-                            s_ipsc->rNumericArgs,
-                            NumNums,
-                            IOStat,
-                            s_ipsc->lNumericFieldBlanks,
-                            s_ipsc->lAlphaFieldBlanks,
-                            s_ipsc->cAlphaFieldNames,
-                            s_ipsc->cNumericFieldNames);
+        getMaterialInput(state, Loop, NumAlphas, NumNums, IOStat);
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
@@ -330,18 +339,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
     for (int Loop = 1; Loop <= s_mat->NumAirGaps; ++Loop) {
 
         // Call Input Get routine to retrieve material data
-        s_ip->getObjectItem(state,
-                            s_ipsc->cCurrentModuleObject,
-                            Loop,
-                            s_ipsc->cAlphaArgs,
-                            NumAlphas,
-                            s_ipsc->rNumericArgs,
-                            NumNums,
-                            IOStat,
-                            s_ipsc->lNumericFieldBlanks,
-                            s_ipsc->lAlphaFieldBlanks,
-                            s_ipsc->cAlphaFieldNames,
-                            s_ipsc->cNumericFieldNames);
+        getMaterialInput(state, Loop, NumAlphas, NumNums, IOStat);
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
@@ -370,18 +368,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
     for (int Loop = 1; Loop <= s_mat->NumIRTs; ++Loop) {
 
         // Call Input Get routine to retrieve material data
-        s_ip->getObjectItem(state,
-                            s_ipsc->cCurrentModuleObject,
-                            Loop,
-                            s_ipsc->cAlphaArgs,
-                            NumAlphas,
-                            s_ipsc->rNumericArgs,
-                            NumNums,
-                            IOStat,
-                            s_ipsc->lNumericFieldBlanks,
-                            s_ipsc->lAlphaFieldBlanks,
-                            s_ipsc->cAlphaFieldNames,
-                            s_ipsc->cNumericFieldNames);
+        getMaterialInput(state, Loop, NumAlphas, NumNums, IOStat);
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
@@ -417,18 +404,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
     for (int Loop = 1; Loop <= s_mat->NumW5Glazings; ++Loop) {
 
         // Call Input Get routine to retrieve material data
-        s_ip->getObjectItem(state,
-                            s_ipsc->cCurrentModuleObject,
-                            Loop,
-                            s_ipsc->cAlphaArgs,
-                            NumAlphas,
-                            s_ipsc->rNumericArgs,
-                            NumNums,
-                            IOStat,
-                            s_ipsc->lNumericFieldBlanks,
-                            s_ipsc->lAlphaFieldBlanks,
-                            s_ipsc->cAlphaFieldNames,
-                            s_ipsc->cNumericFieldNames);
+        getMaterialInput(state, Loop, NumAlphas, NumNums, IOStat);
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
@@ -679,18 +655,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
     for (int Loop = 1; Loop <= s_mat->NumW5AltGlazings; ++Loop) {
 
         // Call Input Get routine to retrieve material data
-        s_ip->getObjectItem(state,
-                            s_ipsc->cCurrentModuleObject,
-                            Loop,
-                            s_ipsc->cAlphaArgs,
-                            NumAlphas,
-                            s_ipsc->rNumericArgs,
-                            NumNums,
-                            IOStat,
-                            s_ipsc->lNumericFieldBlanks,
-                            s_ipsc->lAlphaFieldBlanks,
-                            s_ipsc->cAlphaFieldNames,
-                            s_ipsc->cNumericFieldNames);
+        getMaterialInput(state, Loop, NumAlphas, NumNums, IOStat);
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
@@ -770,18 +735,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
     for (int Loop = 1; Loop <= s_mat->NumEQLGlazings; ++Loop) {
 
         // Call Input Get routine to retrieve material data
-        s_ip->getObjectItem(state,
-                            s_ipsc->cCurrentModuleObject,
-                            Loop,
-                            s_ipsc->cAlphaArgs,
-                            NumAlphas,
-                            s_ipsc->rNumericArgs,
-                            NumNums,
-                            IOStat,
-                            s_ipsc->lNumericFieldBlanks,
-                            s_ipsc->lAlphaFieldBlanks,
-                            s_ipsc->cAlphaFieldNames,
-                            s_ipsc->cNumericFieldNames);
+        getMaterialInput(state, Loop, NumAlphas, NumNums, IOStat);
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
@@ -910,18 +864,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
     for (int Loop = 1; Loop <= s_mat->NumW5Gases; ++Loop) {
 
         // Call Input Get routine to retrieve material data
-        s_ip->getObjectItem(state,
-                            s_ipsc->cCurrentModuleObject,
-                            Loop,
-                            s_ipsc->cAlphaArgs,
-                            NumAlphas,
-                            s_ipsc->rNumericArgs,
-                            NumNums,
-                            IOStat,
-                            s_ipsc->lNumericFieldBlanks,
-                            s_ipsc->lAlphaFieldBlanks,
-                            s_ipsc->cAlphaFieldNames,
-                            s_ipsc->cNumericFieldNames);
+        getMaterialInput(state, Loop, NumAlphas, NumNums, IOStat);
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
@@ -970,18 +913,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
     for (int Loop = 1; Loop <= s_mat->NumEQLGaps; ++Loop) {
 
         // Call Input Get routine to retrieve material data
-        s_ip->getObjectItem(state,
-                            s_ipsc->cCurrentModuleObject,
-                            Loop,
-                            s_ipsc->cAlphaArgs,
-                            NumAlphas,
-                            s_ipsc->rNumericArgs,
-                            NumNums,
-                            IOStat,
-                            s_ipsc->lNumericFieldBlanks,
-                            s_ipsc->lAlphaFieldBlanks,
-                            s_ipsc->cAlphaFieldNames,
-                            s_ipsc->cNumericFieldNames);
+        getMaterialInput(state, Loop, NumAlphas, NumNums, IOStat);
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
@@ -1036,18 +968,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
     for (int Loop = 1; Loop <= s_mat->NumW5GasMixtures; ++Loop) {
 
         // Call Input Get routine to retrieve material data
-        s_ip->getObjectItem(state,
-                            s_ipsc->cCurrentModuleObject,
-                            Loop,
-                            s_ipsc->cAlphaArgs,
-                            NumAlphas,
-                            s_ipsc->rNumericArgs,
-                            NumNums,
-                            IOStat,
-                            s_ipsc->lNumericFieldBlanks,
-                            s_ipsc->lAlphaFieldBlanks,
-                            s_ipsc->cAlphaFieldNames,
-                            s_ipsc->cNumericFieldNames);
+        getMaterialInput(state, Loop, NumAlphas, NumNums, IOStat);
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
         if (s_mat->materialMap.find(s_ipsc->cAlphaArgs(1)) != s_mat->materialMap.end()) {
@@ -1108,18 +1029,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
     for (int Loop = 1; Loop <= s_mat->NumShades; ++Loop) {
 
         // Call Input Get routine to retrieve material data
-        s_ip->getObjectItem(state,
-                            s_ipsc->cCurrentModuleObject,
-                            Loop,
-                            s_ipsc->cAlphaArgs,
-                            NumAlphas,
-                            s_ipsc->rNumericArgs,
-                            NumNums,
-                            IOStat,
-                            s_ipsc->lNumericFieldBlanks,
-                            s_ipsc->lAlphaFieldBlanks,
-                            s_ipsc->cAlphaFieldNames,
-                            s_ipsc->cNumericFieldNames);
+        getMaterialInput(state, Loop, NumAlphas, NumNums, IOStat);
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
@@ -1190,18 +1100,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         s_ipsc->rNumericArgs = 0;
 
         // Call Input Get routine to retrieve material data
-        s_ip->getObjectItem(state,
-                            s_ipsc->cCurrentModuleObject,
-                            Loop,
-                            s_ipsc->cAlphaArgs,
-                            NumAlphas,
-                            s_ipsc->rNumericArgs,
-                            NumNums,
-                            IOStat,
-                            s_ipsc->lNumericFieldBlanks,
-                            s_ipsc->lAlphaFieldBlanks,
-                            s_ipsc->cAlphaFieldNames,
-                            s_ipsc->cNumericFieldNames);
+        getMaterialInput(state, Loop, NumAlphas, NumNums, IOStat);
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
@@ -1280,18 +1179,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         s_ipsc->rNumericArgs = 0;
 
         // Call Input Get routine to retrieve material data
-        s_ip->getObjectItem(state,
-                            s_ipsc->cCurrentModuleObject,
-                            Loop,
-                            s_ipsc->cAlphaArgs,
-                            NumAlphas,
-                            s_ipsc->rNumericArgs,
-                            NumNums,
-                            IOStat,
-                            s_ipsc->lNumericFieldBlanks,
-                            s_ipsc->lAlphaFieldBlanks,
-                            s_ipsc->cAlphaFieldNames,
-                            s_ipsc->cNumericFieldNames);
+        getMaterialInput(state, Loop, NumAlphas, NumNums, IOStat);
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
@@ -1368,18 +1256,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
     for (int Loop = 1; Loop <= s_mat->NumScreens; ++Loop) {
 
         // Call GetObjectItem routine to retrieve material data
-        s_ip->getObjectItem(state,
-                            s_ipsc->cCurrentModuleObject,
-                            Loop,
-                            s_ipsc->cAlphaArgs,
-                            NumAlphas,
-                            s_ipsc->rNumericArgs,
-                            NumNums,
-                            IOStat,
-                            s_ipsc->lNumericFieldBlanks,
-                            s_ipsc->lAlphaFieldBlanks,
-                            s_ipsc->cAlphaFieldNames,
-                            s_ipsc->cNumericFieldNames);
+        getMaterialInput(state, Loop, NumAlphas, NumNums, IOStat);
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
@@ -1549,18 +1426,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         s_ipsc->rNumericArgs = 0;
 
         // Call GetObjectItem routine to retrieve material data
-        s_ip->getObjectItem(state,
-                            s_ipsc->cCurrentModuleObject,
-                            Loop,
-                            s_ipsc->cAlphaArgs,
-                            NumAlphas,
-                            s_ipsc->rNumericArgs,
-                            NumNums,
-                            IOStat,
-                            s_ipsc->lNumericFieldBlanks,
-                            s_ipsc->lAlphaFieldBlanks,
-                            s_ipsc->cAlphaFieldNames,
-                            s_ipsc->cNumericFieldNames);
+        getMaterialInput(state, Loop, NumAlphas, NumNums, IOStat);
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
@@ -1682,18 +1548,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
     for (int Loop = 1; Loop <= s_mat->NumBlinds; ++Loop) {
 
         // Call Input Get routine to retrieve material data
-        s_ip->getObjectItem(state,
-                            s_ipsc->cCurrentModuleObject,
-                            Loop,
-                            s_ipsc->cAlphaArgs,
-                            NumAlphas,
-                            s_ipsc->rNumericArgs,
-                            NumNums,
-                            IOStat,
-                            s_ipsc->lNumericFieldBlanks,
-                            s_ipsc->lAlphaFieldBlanks,
-                            s_ipsc->cAlphaFieldNames,
-                            s_ipsc->cNumericFieldNames);
+        getMaterialInput(state, Loop, NumAlphas, NumNums, IOStat);
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
@@ -1948,18 +1803,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
     for (int Loop = 1; Loop <= s_mat->NumEQLBlinds; ++Loop) {
 
         // Call Input Get routine to retrieve material data
-        s_ip->getObjectItem(state,
-                            s_ipsc->cCurrentModuleObject,
-                            Loop,
-                            s_ipsc->cAlphaArgs,
-                            NumAlphas,
-                            s_ipsc->rNumericArgs,
-                            NumNums,
-                            IOStat,
-                            s_ipsc->lNumericFieldBlanks,
-                            s_ipsc->lAlphaFieldBlanks,
-                            s_ipsc->cAlphaFieldNames,
-                            s_ipsc->cNumericFieldNames);
+        getMaterialInput(state, Loop, NumAlphas, NumNums, IOStat);
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
@@ -2102,18 +1946,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
     for (int Loop = 1; Loop <= s_mat->NumEcoRoofs; ++Loop) {
         // Call Input Get Routine to retrieve material data from ecoroof
 
-        s_ip->getObjectItem(state,
-                            s_ipsc->cCurrentModuleObject,
-                            Loop,
-                            s_ipsc->cAlphaArgs,
-                            NumAlphas,
-                            s_ipsc->rNumericArgs,
-                            NumNums,
-                            IOStat,
-                            s_ipsc->lNumericFieldBlanks,
-                            s_ipsc->lAlphaFieldBlanks,
-                            s_ipsc->cAlphaFieldNames,
-                            s_ipsc->cNumericFieldNames);
+        getMaterialInput(state, Loop, NumAlphas, NumNums, IOStat);
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
@@ -2190,18 +2023,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
     for (int Loop = 1; Loop <= s_mat->NumTCGlazings; ++Loop) {
         // Get each TCGlazings from the input processor
-        s_ip->getObjectItem(state,
-                            s_ipsc->cCurrentModuleObject,
-                            Loop,
-                            s_ipsc->cAlphaArgs,
-                            NumAlphas,
-                            s_ipsc->rNumericArgs,
-                            NumNums,
-                            IOStat,
-                            s_ipsc->lNumericFieldBlanks,
-                            s_ipsc->lAlphaFieldBlanks,
-                            s_ipsc->cAlphaFieldNames,
-                            s_ipsc->cNumericFieldNames);
+        getMaterialInput(state, Loop, NumAlphas, NumNums, IOStat);
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
         std::string nameUC = Util::makeUPPER(s_ipsc->cAlphaArgs(1));
@@ -2263,18 +2085,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
     s_mat->NumSimpleWindows = s_ip->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
     for (int Loop = 1; Loop <= s_mat->NumSimpleWindows; ++Loop) {
 
-        s_ip->getObjectItem(state,
-                            s_ipsc->cCurrentModuleObject,
-                            Loop,
-                            s_ipsc->cAlphaArgs,
-                            NumAlphas,
-                            s_ipsc->rNumericArgs,
-                            NumNums,
-                            IOStat,
-                            s_ipsc->lNumericFieldBlanks,
-                            s_ipsc->lAlphaFieldBlanks,
-                            s_ipsc->cAlphaFieldNames,
-                            s_ipsc->cNumericFieldNames);
+        getMaterialInput(state, Loop, NumAlphas, NumNums, IOStat);
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
@@ -2309,18 +2120,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
     s_mat->NumW7Gaps = s_ip->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
     // ALLOCATE(DeflectionState(W7DeflectionStates))
     for (int Loop = 1; Loop <= s_mat->NumW7Gaps; ++Loop) {
-        s_ip->getObjectItem(state,
-                            s_ipsc->cCurrentModuleObject,
-                            Loop,
-                            s_ipsc->cAlphaArgs,
-                            NumAlphas,
-                            s_ipsc->rNumericArgs,
-                            NumNums,
-                            IOStat,
-                            s_ipsc->lNumericFieldBlanks,
-                            s_ipsc->lAlphaFieldBlanks,
-                            s_ipsc->cAlphaFieldNames,
-                            s_ipsc->cNumericFieldNames);
+        getMaterialInput(state, Loop, NumAlphas, NumNums, IOStat);
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
@@ -2440,18 +2240,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
     s_ipsc->cCurrentModuleObject = "WindowMaterial:ComplexShade";
     int TotComplexShades = s_ip->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
     for (int Loop = 1; Loop <= TotComplexShades; ++Loop) {
-        s_ip->getObjectItem(state,
-                            s_ipsc->cCurrentModuleObject,
-                            Loop,
-                            s_ipsc->cAlphaArgs,
-                            NumAlphas,
-                            s_ipsc->rNumericArgs,
-                            NumNums,
-                            IOStat,
-                            s_ipsc->lNumericFieldBlanks,
-                            s_ipsc->lAlphaFieldBlanks,
-                            s_ipsc->cAlphaFieldNames,
-                            s_ipsc->cNumericFieldNames);
+        getMaterialInput(state, Loop, NumAlphas, NumNums, IOStat);
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
@@ -2860,18 +2649,7 @@ void GetWindowGlassSpectralData(EnergyPlusData &state, bool &ErrorsFound) // set
         // Name is followed by up to 450 sets of normal-incidence measured values of
         // [wavelength (microns), transmittance, front reflectance, back reflectance] for
         // wavelengths covering the short-wave solar spectrum (from about 0.25 to 2.5 microns)
-        s_ip->getObjectItem(state,
-                            s_ipsc->cCurrentModuleObject,
-                            Loop,
-                            s_ipsc->cAlphaArgs,
-                            NumAlphas,
-                            s_ipsc->rNumericArgs,
-                            NumNums,
-                            IOStat,
-                            s_ipsc->lNumericFieldBlanks,
-                            s_ipsc->lAlphaFieldBlanks,
-                            s_ipsc->cAlphaFieldNames,
-                            s_ipsc->cNumericFieldNames);
+        getMaterialInput(state, Loop, NumAlphas, NumNums, IOStat);
 
         ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
