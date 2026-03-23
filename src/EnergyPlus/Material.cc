@@ -887,6 +887,21 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
     } // W5GlsMatEQL loop
 
+    // Helper lambda to set up a single-gas material from input fields.
+    // Shared between WindowMaterial:Gas and WindowMaterial:Gap:EquivalentLayer.
+    auto initSingleGasMaterial = [&](MaterialGasMix *matGas) {
+        matGas->numGases = 1;
+        matGas->gasFracts[0] = 1.0;
+        matGas->gases[0].type = static_cast<GasType>(getEnumValue(gasTypeNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(2))));
+        matGas->Roughness = SurfaceRoughness::MediumRough;
+        matGas->Thickness = s_ipsc->rNumericArgs(1);
+        matGas->ROnly = true;
+        GasType gt = matGas->gases[0].type;
+        if (gt != GasType::Custom) {
+            matGas->gases[0] = gases[(int)gt];
+        }
+    };
+
     // Helper lambda to load custom gas properties from input fields and validate them.
     // Loads conductivity, viscosity, specific heat coefficients (c0/c1/c2), molecular weight,
     // and specific heat ratio from rNumericArgs(2..12), then checks vis.c0, cp.c0, wght > 0.
@@ -954,24 +969,9 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         registerMaterial(state, matGas);
 
-        matGas->numGases = 1;
-        matGas->gasFracts[0] = 1.0;
+        initSingleGasMaterial(matGas);
 
-        // Load the material derived type from the input data.
-
-        matGas->gases[0].type = static_cast<GasType>(getEnumValue(gasTypeNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(2))));
-        matGas->Roughness = SurfaceRoughness::MediumRough;
-
-        matGas->Thickness = s_ipsc->rNumericArgs(1);
-        matGas->ROnly = true;
-
-        gasType = matGas->gases[0].type;
-        if (gasType != GasType::Custom) {
-            matGas->gases[0] = gases[(int)gasType];
-        }
-
-        // Custom gas
-        if (gasType == GasType::Custom) {
+        if (matGas->gases[0].type == GasType::Custom) {
             loadCustomGasProps(matGas, eoh);
         }
 
@@ -999,29 +999,14 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         registerMaterial(state, matGas);
 
-        matGas->numGases = 1;
-        matGas->gasFracts[0] = 1.0;
-
-        // Load the material derived type from the input data.
-
-        matGas->gases[0].type = static_cast<GasType>(getEnumValue(gasTypeNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(2)))); // Error check?
-
-        matGas->Roughness = SurfaceRoughness::MediumRough;
-
-        matGas->Thickness = s_ipsc->rNumericArgs(1);
-        matGas->ROnly = true;
-
-        gasType = matGas->gases[0].type;
-        if (gasType != GasType::Custom) {
-            matGas->gases[0] = gases[(int)gasType];
-        }
+        initSingleGasMaterial(matGas);
 
         if (!s_ipsc->lAlphaFieldBlanks(2)) {
             // Get gap vent type
             matGas->gapVentType = static_cast<GapVentType>(getEnumValue(gapVentTypeNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(3))));
         }
 
-        if (gasType == GasType::Custom) {
+        if (matGas->gases[0].type == GasType::Custom) {
             loadCustomGasProps(matGas, eoh);
         }
 
