@@ -6038,6 +6038,45 @@ static void resetDXCoilSizingState(EnergyPlusData &state)
     ds.DataDXSpeedNum = 0;
 }
 
+// Size a multispeed evaporative condenser quantity (air flow or pump power) for all speeds.
+// Computes design values based on a per-unit-capacity factor, then reports/validates via applySizeResultOrReport.
+static void sizeMultispeedEvapCondField(EnergyPlusData &state,
+                                        DXCoilData const &coil,
+                                        bool HardSizeNoDesRun,
+                                        Real64 MSRatedTotCapDesAtMaxSpeed,
+                                        Array1D<Real64> &fieldValues,
+                                        Real64 perCapFactor,
+                                        std::string_view designLabel,
+                                        std::string_view userLabel,
+                                        std::string_view userDiffFmt,
+                                        std::string_view desDiffFmt,
+                                        std::string_view validationLabel)
+{
+    for (int Mode = 1; Mode <= coil.NumOfSpeeds; ++Mode) {
+        bool IsAutoSize = (fieldValues(Mode) == DataSizing::AutoSize);
+
+        Real64 desSizeValue;
+        if (IsAutoSize || !HardSizeNoDesRun) {
+            desSizeValue = ((float)Mode / coil.NumOfSpeeds) * MSRatedTotCapDesAtMaxSpeed * perCapFactor;
+        } else {
+            desSizeValue = coil.MSRatedTotCap(Mode) * perCapFactor;
+        }
+        applySizeResultOrReport(state,
+                                coil.DXCoilType,
+                                coil.Name,
+                                IsAutoSize,
+                                HardSizeNoDesRun,
+                                desSizeValue,
+                                fieldValues(Mode),
+                                EnergyPlus::format(designLabel, Mode),
+                                EnergyPlus::format(userLabel, Mode),
+                                EnergyPlus::format(userDiffFmt, fieldValues(Mode)),
+                                EnergyPlus::format(desDiffFmt, desSizeValue));
+    }
+
+    validateMultispeedMonotonicity(state, coil.DXCoilType, coil.Name, coil.NumOfSpeeds, fieldValues, validationLabel);
+}
+
 void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
 {
 
@@ -6843,77 +6882,30 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
         resetDXCoilSizingState(state);
 
         // Rated Evaporative condenser airflow rates
-        for (Mode = 1; Mode <= thisDXCoil.NumOfSpeeds; ++Mode) {
-            IsAutoSize = false;
-            if (thisDXCoil.MSEvapCondAirFlow(Mode) == AutoSize) {
-                IsAutoSize = true;
-            }
-            if (IsAutoSize || !HardSizeNoDesRun) {
-                // Autosize condenser air flow to Total Capacity * 0.000114 m3/s/w (850 cfm/ton)
-                MSEvapCondAirFlowDes = ((float)Mode / thisDXCoil.NumOfSpeeds) * MSRatedTotCapDesAtMaxSpeed * 0.000114;
-            } else {
-                // this is done to duplicate any existing calc method
-                MSEvapCondAirFlowDes = thisDXCoil.MSRatedTotCap(Mode) * 0.000114;
-            }
-            applySizeResultOrReport(
-                state,
-                thisDXCoil.DXCoilType,
-                thisDXCoil.Name,
-                IsAutoSize,
-                HardSizeNoDesRun,
-                MSEvapCondAirFlowDes,
-                thisDXCoil.MSEvapCondAirFlow(Mode),
-                EnergyPlus::format("Design Size Speed {} Evaporative Condenser Air Flow Rate [m3/s]", Mode),
-                EnergyPlus::format("User-Specified Speed {} Evaporative Condenser Air Flow Rate [m3/s]", Mode),
-                EnergyPlus::format("User-Specified Evaporative Condenser Air Flow Rate of {:.5R} [m3/s]", thisDXCoil.MSEvapCondAirFlow(Mode)),
-                EnergyPlus::format("differs from Design Size Evaporative Condenser Air Flow Rate of {:.5R} [m3/s]", MSEvapCondAirFlowDes));
-        }
-
-        // Ensure evaporative condenser airflow rate at lower speed must be lower or equal to one at higher speed.
-        validateMultispeedMonotonicity(state,
-                                       thisDXCoil.DXCoilType,
-                                       thisDXCoil.Name,
-                                       thisDXCoil.NumOfSpeeds,
-                                       thisDXCoil.MSEvapCondAirFlow,
-                                       "Evaporative Condenser Air Flow Rate");
+        sizeMultispeedEvapCondField(state,
+                                    thisDXCoil,
+                                    HardSizeNoDesRun,
+                                    MSRatedTotCapDesAtMaxSpeed,
+                                    thisDXCoil.MSEvapCondAirFlow,
+                                    0.000114,
+                                    "Design Size Speed {} Evaporative Condenser Air Flow Rate [m3/s]",
+                                    "User-Specified Speed {} Evaporative Condenser Air Flow Rate [m3/s]",
+                                    "User-Specified Evaporative Condenser Air Flow Rate of {:.5R} [m3/s]",
+                                    "differs from Design Size Evaporative Condenser Air Flow Rate of {:.5R} [m3/s]",
+                                    "Evaporative Condenser Air Flow Rate");
 
         // Sizing multispeed rated evaporative condenser pump power
-        for (Mode = 1; Mode <= thisDXCoil.NumOfSpeeds; ++Mode) {
-            IsAutoSize = false;
-            if (thisDXCoil.MSEvapCondPumpElecNomPower(Mode) == AutoSize) {
-                IsAutoSize = true;
-            }
-
-            if (IsAutoSize || !HardSizeNoDesRun) {
-                // Autosize low speed evap condenser pump power to 1/3 Total Capacity * 0.004266 w/w (15 w/ton)
-                MSEvapCondPumpElecNomPowerDes = ((float)Mode / thisDXCoil.NumOfSpeeds) * MSRatedTotCapDesAtMaxSpeed * 0.004266;
-            } else {
-                // this is done to duplicate any existing calc method
-                MSEvapCondPumpElecNomPowerDes = thisDXCoil.MSRatedTotCap(Mode) * 0.004266;
-            }
-            // Design Size data is always available
-            applySizeResultOrReport(state,
-                                    thisDXCoil.DXCoilType,
-                                    thisDXCoil.Name,
-                                    IsAutoSize,
+        sizeMultispeedEvapCondField(state,
+                                    thisDXCoil,
                                     HardSizeNoDesRun,
-                                    MSEvapCondPumpElecNomPowerDes,
-                                    thisDXCoil.MSEvapCondPumpElecNomPower(Mode),
-                                    EnergyPlus::format("Design Size Speed {} Rated Evaporative Condenser Pump Power Consumption [W]", Mode),
-                                    EnergyPlus::format("User-Specified Speed {} Rated Evaporative Condenser Pump Power Consumption [W]", Mode),
-                                    EnergyPlus::format("User-Specified Evaporative Condenser Pump Rated Power Consumption of {:.2R} [W]",
-                                                       thisDXCoil.MSEvapCondPumpElecNomPower(Mode)),
-                                    EnergyPlus::format("differs from Design Size Evaporative Condenser Pump Rated Power Consumption of {:.2R} [W]",
-                                                       MSEvapCondPumpElecNomPowerDes));
-        }
-
-        // Ensure evaporative condenser pump power at lower speed must be lower or equal to one at higher speed.
-        validateMultispeedMonotonicity(state,
-                                       thisDXCoil.DXCoilType,
-                                       thisDXCoil.Name,
-                                       thisDXCoil.NumOfSpeeds,
-                                       thisDXCoil.MSEvapCondPumpElecNomPower,
-                                       "Rated Evaporative Condenser Pump Power Consumption");
+                                    MSRatedTotCapDesAtMaxSpeed,
+                                    thisDXCoil.MSEvapCondPumpElecNomPower,
+                                    0.004266,
+                                    "Design Size Speed {} Rated Evaporative Condenser Pump Power Consumption [W]",
+                                    "User-Specified Speed {} Rated Evaporative Condenser Pump Power Consumption [W]",
+                                    "User-Specified Evaporative Condenser Pump Rated Power Consumption of {:.2R} [W]",
+                                    "differs from Design Size Evaporative Condenser Pump Rated Power Consumption of {:.2R} [W]",
+                                    "Rated Evaporative Condenser Pump Power Consumption");
     }
 
     // Autosizing for multispeed heating coil
