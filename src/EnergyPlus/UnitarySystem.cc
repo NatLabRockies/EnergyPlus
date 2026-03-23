@@ -1577,6 +1577,42 @@ namespace UnitarySystems {
         }
     }
 
+    // Helper: auto-size any DataSizing::AutoSize entries in a vol-flow-ratio array.
+    // Sets each auto-sized entry to (speed / numSpeeds). Used for both cooling and heating
+    // designSpecMSHP ratios in sizeSystem.
+    static void autosizeMSHPVolFlowRatios(std::vector<Real64> &volFlowRatios, int numSpeeds)
+    {
+        for (int iter = numSpeeds; iter >= 1; --iter) {
+            if (volFlowRatios[iter - 1] == DataSizing::AutoSize) {
+                volFlowRatios[iter - 1] = double(iter) / double(numSpeeds);
+            }
+        }
+    }
+
+    // Helper: compute multi-speed cooling flow rates from MSHP design spec ratios and set noLoad values.
+    // Replaces the repeated block: autosize ratios -> compute vol/mass/speed-ratio -> set noLoad.
+    static void computeMSHPCoolingFlowRates(DesignSpecMSHP &msHP,
+                                            std::vector<Real64> &coolVolFlow,
+                                            std::vector<Real64> &coolMassFlow,
+                                            std::vector<Real64> &coolSpeedRatio,
+                                            Real64 maxCoolAirVolFlow,
+                                            Real64 designFanVolFlowRate,
+                                            Real64 stdRhoAir,
+                                            Real64 &maxNoCoolHeatAirVolFlow,
+                                            Real64 &maxNoCoolHeatAirMassFlow,
+                                            Real64 &noLoadAirFlowRateRatio)
+    {
+        autosizeMSHPVolFlowRatios(msHP.coolingVolFlowRatio, msHP.numOfSpeedCooling);
+        for (int iter = msHP.numOfSpeedCooling; iter > 0; --iter) {
+            coolVolFlow[iter] = maxCoolAirVolFlow * msHP.coolingVolFlowRatio[iter - 1];
+            coolMassFlow[iter] = coolVolFlow[iter] * stdRhoAir;
+            coolSpeedRatio[iter] = coolVolFlow[iter] / designFanVolFlowRate;
+        }
+        maxNoCoolHeatAirVolFlow = maxCoolAirVolFlow * msHP.noLoadAirFlowRateRatio;
+        maxNoCoolHeatAirMassFlow = maxNoCoolHeatAirVolFlow * stdRhoAir;
+        noLoadAirFlowRateRatio = maxNoCoolHeatAirVolFlow / designFanVolFlowRate;
+    }
+
     // Helper: ensure multi-speed flow rate arrays are allocated to the required size.
     // Used for both cooling and heating arrays in sizeSystem.
     static void
@@ -2670,12 +2706,8 @@ namespace UnitarySystems {
 
             MSHPIndex = this->m_DesignSpecMSHPIndex;
             if (MSHPIndex > -1) {
-                for (Iter = state.dataUnitarySystems->designSpecMSHP[MSHPIndex].numOfSpeedCooling; Iter >= 1; --Iter) {
-                    if (state.dataUnitarySystems->designSpecMSHP[MSHPIndex].coolingVolFlowRatio[Iter - 1] == DataSizing::AutoSize) {
-                        state.dataUnitarySystems->designSpecMSHP[MSHPIndex].coolingVolFlowRatio[Iter - 1] =
-                            double(Iter) / double(state.dataUnitarySystems->designSpecMSHP[MSHPIndex].numOfSpeedCooling);
-                    }
-                }
+                autosizeMSHPVolFlowRatios(state.dataUnitarySystems->designSpecMSHP[MSHPIndex].coolingVolFlowRatio,
+                                          state.dataUnitarySystems->designSpecMSHP[MSHPIndex].numOfSpeedCooling);
             }
 
             VariableSpeedCoils::SimVariableSpeedCoils(state,
@@ -2758,13 +2790,8 @@ namespace UnitarySystems {
                 // it feels like we are jamming the rectangular DXCoil into an oval box here
                 MSHPIndex = this->m_DesignSpecMSHPIndex;
                 if (MSHPIndex > -1) {
-                    for (Iter = state.dataUnitarySystems->designSpecMSHP[MSHPIndex].numOfSpeedCooling; Iter >= 1;
-                         --Iter) { // use reverse order since we divide by HeatVolumeFlowRate(max)
-                        if (state.dataUnitarySystems->designSpecMSHP[MSHPIndex].coolingVolFlowRatio[Iter - 1] == DataSizing::AutoSize) {
-                            state.dataUnitarySystems->designSpecMSHP[MSHPIndex].coolingVolFlowRatio[Iter - 1] =
-                                double(Iter) / double(state.dataUnitarySystems->designSpecMSHP[MSHPIndex].numOfSpeedCooling);
-                        }
-                    }
+                    autosizeMSHPVolFlowRatios(state.dataUnitarySystems->designSpecMSHP[MSHPIndex].coolingVolFlowRatio,
+                                              state.dataUnitarySystems->designSpecMSHP[MSHPIndex].numOfSpeedCooling);
                 }
 
                 // TODO: Determine operating mode based on dehumidification stuff, using normalMode for now
@@ -2803,20 +2830,16 @@ namespace UnitarySystems {
                 }
 
                 if (MSHPIndex > -1) {
-                    for (Iter = state.dataUnitarySystems->designSpecMSHP[MSHPIndex].numOfSpeedCooling; Iter > 0; --Iter) {
-                        if (state.dataUnitarySystems->designSpecMSHP[MSHPIndex].coolingVolFlowRatio[Iter - 1] == DataSizing::AutoSize) {
-                            state.dataUnitarySystems->designSpecMSHP[MSHPIndex].coolingVolFlowRatio[Iter - 1] =
-                                double(Iter) / double(state.dataUnitarySystems->designSpecMSHP[MSHPIndex].numOfSpeedCooling);
-                        }
-                        this->m_CoolVolumeFlowRate[Iter] =
-                            this->m_MaxCoolAirVolFlow * state.dataUnitarySystems->designSpecMSHP[MSHPIndex].coolingVolFlowRatio[Iter - 1];
-                        this->m_CoolMassFlowRate[Iter] = this->m_CoolVolumeFlowRate[Iter] * state.dataEnvrn->StdRhoAir;
-                        this->m_MSCoolingSpeedRatio[Iter] = this->m_CoolVolumeFlowRate[Iter] / this->m_DesignFanVolFlowRate;
-                    }
-                    this->m_MaxNoCoolHeatAirVolFlow =
-                        this->m_MaxCoolAirVolFlow * state.dataUnitarySystems->designSpecMSHP[MSHPIndex].noLoadAirFlowRateRatio;
-                    this->MaxNoCoolHeatAirMassFlow = this->m_MaxNoCoolHeatAirVolFlow * state.dataEnvrn->StdRhoAir;
-                    this->m_NoLoadAirFlowRateRatio = this->m_MaxNoCoolHeatAirVolFlow / this->m_DesignFanVolFlowRate;
+                    computeMSHPCoolingFlowRates(state.dataUnitarySystems->designSpecMSHP[MSHPIndex],
+                                                this->m_CoolVolumeFlowRate,
+                                                this->m_CoolMassFlowRate,
+                                                this->m_MSCoolingSpeedRatio,
+                                                this->m_MaxCoolAirVolFlow,
+                                                this->m_DesignFanVolFlowRate,
+                                                state.dataEnvrn->StdRhoAir,
+                                                this->m_MaxNoCoolHeatAirVolFlow,
+                                                this->MaxNoCoolHeatAirMassFlow,
+                                                this->m_NoLoadAirFlowRateRatio);
                 } else if (this->m_CoolVolumeFlowRate.empty()) {
                     this->m_NoLoadAirFlowRateRatio = this->m_MaxNoCoolHeatAirVolFlow / this->m_DesignFanVolFlowRate;
                 }
@@ -2827,13 +2850,8 @@ namespace UnitarySystems {
             // it feels like we are jamming the rectangular DXCoil into an oval box here
             MSHPIndex = this->m_DesignSpecMSHPIndex;
             if (MSHPIndex > -1) {
-                for (Iter = state.dataUnitarySystems->designSpecMSHP[MSHPIndex].numOfSpeedCooling; Iter >= 1;
-                     --Iter) { // use reverse order since we divide by HeatVolumeFlowRate(max)
-                    if (state.dataUnitarySystems->designSpecMSHP[MSHPIndex].coolingVolFlowRatio[Iter - 1] == DataSizing::AutoSize) {
-                        state.dataUnitarySystems->designSpecMSHP[MSHPIndex].coolingVolFlowRatio[Iter - 1] =
-                            double(Iter) / double(state.dataUnitarySystems->designSpecMSHP[MSHPIndex].numOfSpeedCooling);
-                    }
-                }
+                autosizeMSHPVolFlowRatios(state.dataUnitarySystems->designSpecMSHP[MSHPIndex].coolingVolFlowRatio,
+                                          state.dataUnitarySystems->designSpecMSHP[MSHPIndex].numOfSpeedCooling);
             }
 
             // mine capacity from Coil:Cooling:DX object
@@ -2874,20 +2892,16 @@ namespace UnitarySystems {
             }
 
             if (MSHPIndex > -1) {
-                for (Iter = state.dataUnitarySystems->designSpecMSHP[MSHPIndex].numOfSpeedCooling; Iter > 0; --Iter) {
-                    if (state.dataUnitarySystems->designSpecMSHP[MSHPIndex].coolingVolFlowRatio[Iter - 1] == DataSizing::AutoSize) {
-                        state.dataUnitarySystems->designSpecMSHP[MSHPIndex].coolingVolFlowRatio[Iter - 1] =
-                            double(Iter) / double(state.dataUnitarySystems->designSpecMSHP[MSHPIndex].numOfSpeedCooling);
-                    }
-                    this->m_CoolVolumeFlowRate[Iter] =
-                        this->m_MaxCoolAirVolFlow * state.dataUnitarySystems->designSpecMSHP[MSHPIndex].coolingVolFlowRatio[Iter - 1];
-                    this->m_CoolMassFlowRate[Iter] = this->m_CoolVolumeFlowRate[Iter] * state.dataEnvrn->StdRhoAir;
-                    this->m_MSCoolingSpeedRatio[Iter] = this->m_CoolVolumeFlowRate[Iter] / this->m_DesignFanVolFlowRate;
-                }
-                this->m_MaxNoCoolHeatAirVolFlow =
-                    this->m_MaxCoolAirVolFlow * state.dataUnitarySystems->designSpecMSHP[MSHPIndex].noLoadAirFlowRateRatio;
-                this->MaxNoCoolHeatAirMassFlow = this->m_MaxNoCoolHeatAirVolFlow * state.dataEnvrn->StdRhoAir;
-                this->m_NoLoadAirFlowRateRatio = this->m_MaxNoCoolHeatAirVolFlow / this->m_DesignFanVolFlowRate;
+                computeMSHPCoolingFlowRates(state.dataUnitarySystems->designSpecMSHP[MSHPIndex],
+                                            this->m_CoolVolumeFlowRate,
+                                            this->m_CoolMassFlowRate,
+                                            this->m_MSCoolingSpeedRatio,
+                                            this->m_MaxCoolAirVolFlow,
+                                            this->m_DesignFanVolFlowRate,
+                                            state.dataEnvrn->StdRhoAir,
+                                            this->m_MaxNoCoolHeatAirVolFlow,
+                                            this->MaxNoCoolHeatAirMassFlow,
+                                            this->m_NoLoadAirFlowRateRatio);
             } else if (this->m_CoolVolumeFlowRate.empty()) {
                 this->m_NoLoadAirFlowRateRatio = this->m_MaxNoCoolHeatAirVolFlow / this->m_DesignFanVolFlowRate;
             }
@@ -2913,20 +2927,16 @@ namespace UnitarySystems {
 
             if (MSHPIndex > -1) {
                 // use reverse order since we divide by CoolVolumeFlowRate(max)
-                for (Iter = state.dataUnitarySystems->designSpecMSHP[MSHPIndex].numOfSpeedCooling; Iter > 0; --Iter) {
-                    if (state.dataUnitarySystems->designSpecMSHP[MSHPIndex].coolingVolFlowRatio[Iter - 1] == DataSizing::AutoSize) {
-                        state.dataUnitarySystems->designSpecMSHP[MSHPIndex].coolingVolFlowRatio[Iter - 1] =
-                            double(Iter) / double(state.dataUnitarySystems->designSpecMSHP[MSHPIndex].numOfSpeedCooling);
-                    }
-                    this->m_CoolVolumeFlowRate[Iter] =
-                        this->m_MaxCoolAirVolFlow * state.dataUnitarySystems->designSpecMSHP[MSHPIndex].coolingVolFlowRatio[Iter - 1];
-                    this->m_CoolMassFlowRate[Iter] = this->m_CoolVolumeFlowRate[Iter] * state.dataEnvrn->StdRhoAir;
-                    this->m_MSCoolingSpeedRatio[Iter] = this->m_CoolVolumeFlowRate[Iter] / this->m_DesignFanVolFlowRate;
-                }
-                this->m_MaxNoCoolHeatAirVolFlow =
-                    this->m_MaxCoolAirVolFlow * state.dataUnitarySystems->designSpecMSHP[MSHPIndex].noLoadAirFlowRateRatio;
-                this->MaxNoCoolHeatAirMassFlow = this->m_MaxNoCoolHeatAirVolFlow * state.dataEnvrn->StdRhoAir;
-                this->m_NoLoadAirFlowRateRatio = this->m_MaxNoCoolHeatAirVolFlow / this->m_DesignFanVolFlowRate;
+                computeMSHPCoolingFlowRates(state.dataUnitarySystems->designSpecMSHP[MSHPIndex],
+                                            this->m_CoolVolumeFlowRate,
+                                            this->m_CoolMassFlowRate,
+                                            this->m_MSCoolingSpeedRatio,
+                                            this->m_MaxCoolAirVolFlow,
+                                            this->m_DesignFanVolFlowRate,
+                                            state.dataEnvrn->StdRhoAir,
+                                            this->m_MaxNoCoolHeatAirVolFlow,
+                                            this->MaxNoCoolHeatAirMassFlow,
+                                            this->m_NoLoadAirFlowRateRatio);
             } else if (this->m_CoolVolumeFlowRate.empty()) {
                 this->m_NoLoadAirFlowRateRatio = this->m_MaxNoCoolHeatAirVolFlow / this->m_DesignFanVolFlowRate;
             } else {
@@ -2943,20 +2953,16 @@ namespace UnitarySystems {
             MSHPIndex = this->m_DesignSpecMSHPIndex;
 
             if (MSHPIndex > -1) {
-                for (Iter = state.dataUnitarySystems->designSpecMSHP[MSHPIndex].numOfSpeedCooling; Iter > 0; --Iter) {
-                    if (state.dataUnitarySystems->designSpecMSHP[MSHPIndex].coolingVolFlowRatio[Iter - 1] == DataSizing::AutoSize) {
-                        state.dataUnitarySystems->designSpecMSHP[MSHPIndex].coolingVolFlowRatio[Iter - 1] =
-                            double(Iter) / double(state.dataUnitarySystems->designSpecMSHP[MSHPIndex].numOfSpeedCooling);
-                    }
-                    this->m_CoolVolumeFlowRate[Iter] =
-                        this->m_MaxCoolAirVolFlow * state.dataUnitarySystems->designSpecMSHP[MSHPIndex].coolingVolFlowRatio[Iter - 1];
-                    this->m_CoolMassFlowRate[Iter] = this->m_CoolVolumeFlowRate[Iter] * state.dataEnvrn->StdRhoAir;
-                    this->m_MSCoolingSpeedRatio[Iter] = this->m_CoolVolumeFlowRate[Iter] / this->m_DesignFanVolFlowRate;
-                }
-                this->m_MaxNoCoolHeatAirVolFlow =
-                    this->m_MaxCoolAirVolFlow * state.dataUnitarySystems->designSpecMSHP[MSHPIndex].noLoadAirFlowRateRatio;
-                this->MaxNoCoolHeatAirMassFlow = this->m_MaxNoCoolHeatAirVolFlow * state.dataEnvrn->StdRhoAir;
-                this->m_NoLoadAirFlowRateRatio = this->m_MaxNoCoolHeatAirVolFlow / this->m_DesignFanVolFlowRate;
+                computeMSHPCoolingFlowRates(state.dataUnitarySystems->designSpecMSHP[MSHPIndex],
+                                            this->m_CoolVolumeFlowRate,
+                                            this->m_CoolMassFlowRate,
+                                            this->m_MSCoolingSpeedRatio,
+                                            this->m_MaxCoolAirVolFlow,
+                                            this->m_DesignFanVolFlowRate,
+                                            state.dataEnvrn->StdRhoAir,
+                                            this->m_MaxNoCoolHeatAirVolFlow,
+                                            this->MaxNoCoolHeatAirMassFlow,
+                                            this->m_NoLoadAirFlowRateRatio);
             } else if (this->m_CoolVolumeFlowRate.empty()) {
                 this->m_NoLoadAirFlowRateRatio = this->m_MaxNoCoolHeatAirVolFlow / this->m_DesignFanVolFlowRate;
             }
@@ -3032,12 +3038,8 @@ namespace UnitarySystems {
                    this->m_HeatingCoilType_Num == HVAC::Coil_HeatingAirToAirVariableSpeed) {
             MSHPIndex = this->m_DesignSpecMSHPIndex;
             if (MSHPIndex > -1) {
-                for (Iter = state.dataUnitarySystems->designSpecMSHP[MSHPIndex].numOfSpeedHeating; Iter > 0; --Iter) {
-                    if (state.dataUnitarySystems->designSpecMSHP[MSHPIndex].heatingVolFlowRatio[Iter - 1] == DataSizing::AutoSize) {
-                        state.dataUnitarySystems->designSpecMSHP[MSHPIndex].heatingVolFlowRatio[Iter - 1] =
-                            double(Iter) / double(state.dataUnitarySystems->designSpecMSHP[MSHPIndex].numOfSpeedHeating);
-                    }
-                }
+                autosizeMSHPVolFlowRatios(state.dataUnitarySystems->designSpecMSHP[MSHPIndex].heatingVolFlowRatio,
+                                          state.dataUnitarySystems->designSpecMSHP[MSHPIndex].numOfSpeedHeating);
             }
 
             VariableSpeedCoils::SimVariableSpeedCoils(state,
