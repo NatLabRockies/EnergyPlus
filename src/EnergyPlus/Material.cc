@@ -1839,26 +1839,10 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
             mat->SlatAngle = 0.0;
         }
 
-        if ((s_ipsc->rNumericArgs(5) + s_ipsc->rNumericArgs(7) >= 1.0)) {
-            ErrorsFound = true;
-            ShowSevereError(state, EnergyPlus::format("{}=\"{}\", Illegal value combination.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-            ShowContinueError(state, EnergyPlus::format("{} + {} not < 1.0", s_ipsc->cNumericFieldNames(5), s_ipsc->cNumericFieldNames(7)));
-        }
-        if ((s_ipsc->rNumericArgs(6) + s_ipsc->rNumericArgs(8) >= 1.0)) {
-            ErrorsFound = true;
-            ShowSevereError(state, EnergyPlus::format("{}=\"{}\", Illegal value combination.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-            ShowContinueError(state, EnergyPlus::format("{} + {} not < 1.0", s_ipsc->cNumericFieldNames(6), s_ipsc->cNumericFieldNames(8)));
-        }
-        if ((s_ipsc->rNumericArgs(9) + s_ipsc->rNumericArgs(11) >= 1.0)) {
-            ErrorsFound = true;
-            ShowSevereError(state, EnergyPlus::format("{}=\"{}\", Illegal value combination.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-            ShowContinueError(state, EnergyPlus::format("{} + {} not < 1.0", s_ipsc->cNumericFieldNames(9), s_ipsc->cNumericFieldNames(11)));
-        }
-        if ((s_ipsc->rNumericArgs(10) + s_ipsc->rNumericArgs(12) >= 1.0)) {
-            ErrorsFound = true;
-            ShowSevereError(state, EnergyPlus::format("{}=\"{}\", Illegal value combination.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-            ShowContinueError(state, EnergyPlus::format("{} + {} not < 1.0", s_ipsc->cNumericFieldNames(10), s_ipsc->cNumericFieldNames(12)));
-        }
+        checkFieldSumLessThan(state, ErrorsFound, 5, 7);
+        checkFieldSumLessThan(state, ErrorsFound, 6, 8);
+        checkFieldSumLessThan(state, ErrorsFound, 9, 11);
+        checkFieldSumLessThan(state, ErrorsFound, 10, 12);
 
     } // TotBlindsEQL loop
 
