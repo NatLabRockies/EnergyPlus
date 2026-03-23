@@ -928,6 +928,33 @@ namespace SurfaceGeometry {
         state.dataSurface->extMovInsuls.allocate(state.dataSurface->TotSurfaces);
     }
 
+    // Classify a heat-transfer surface into the appropriate SurfaceFilter lists
+    // (interior vs exterior, then by class: window/wall/floor/roof).
+    static void classifySurfaceFilter(EnergyPlusData &state, int SurfNum, DataSurfaces::SurfaceClass surfClass, bool isWindow, bool isInterior)
+    {
+        using DataSurfaces::SurfaceFilter;
+        auto &filterLists = state.dataSurface->SurfaceFilterLists;
+
+        // Pick the correct set of filter enums based on interior vs exterior
+        SurfaceFilter const allSurfaces = isInterior ? SurfaceFilter::AllInteriorSurfaces : SurfaceFilter::AllExteriorSurfaces;
+        SurfaceFilter const allWindows = isInterior ? SurfaceFilter::AllInteriorWindows : SurfaceFilter::AllExteriorWindows;
+        SurfaceFilter const allWalls = isInterior ? SurfaceFilter::AllInteriorWalls : SurfaceFilter::AllExteriorWalls;
+        SurfaceFilter const allFloors = isInterior ? SurfaceFilter::AllInteriorFloors : SurfaceFilter::AllExteriorFloors;
+        SurfaceFilter const allRoofs = isInterior ? SurfaceFilter::AllInteriorRoofs : SurfaceFilter::AllExteriorRoofs;
+
+        filterLists[static_cast<int>(allSurfaces)].push_back(SurfNum);
+        if (isWindow) {
+            filterLists[static_cast<int>(allWindows)].push_back(SurfNum);
+        } else if (surfClass == DataSurfaces::SurfaceClass::Wall) {
+            filterLists[static_cast<int>(allWalls)].push_back(SurfNum);
+        } else if (surfClass == DataSurfaces::SurfaceClass::Floor) {
+            filterLists[static_cast<int>(allFloors)].push_back(SurfNum);
+        } else if (surfClass == DataSurfaces::SurfaceClass::Roof) {
+            filterLists[static_cast<int>(allRoofs)].push_back(SurfNum);
+            filterLists[static_cast<int>(SurfaceFilter::AllInteriorCeilings)].push_back(SurfNum);
+        }
+    }
+
     void GetSurfaceData(EnergyPlusData &state, bool &ErrorsFound) // If errors found in input
     {
 
@@ -2645,31 +2672,9 @@ namespace SurfaceGeometry {
             if (!surf.HeatTransSurf) {
                 continue;
             }
-            if (surf.ExtBoundCond > 0) {
-                state.dataSurface->SurfaceFilterLists[static_cast<int>(DataSurfaces::SurfaceFilter::AllInteriorSurfaces)].push_back(SurfNum);
-                if (state.dataConstruction->Construct(surf.Construction).TypeIsWindow) {
-                    state.dataSurface->SurfaceFilterLists[static_cast<int>(DataSurfaces::SurfaceFilter::AllInteriorWindows)].push_back(SurfNum);
-                } else if (surf.Class == SurfaceClass::Wall) {
-                    state.dataSurface->SurfaceFilterLists[static_cast<int>(DataSurfaces::SurfaceFilter::AllInteriorWalls)].push_back(SurfNum);
-                } else if (surf.Class == SurfaceClass::Floor) {
-                    state.dataSurface->SurfaceFilterLists[static_cast<int>(DataSurfaces::SurfaceFilter::AllInteriorFloors)].push_back(SurfNum);
-                } else if (surf.Class == SurfaceClass::Roof) {
-                    state.dataSurface->SurfaceFilterLists[static_cast<int>(DataSurfaces::SurfaceFilter::AllInteriorRoofs)].push_back(SurfNum);
-                    state.dataSurface->SurfaceFilterLists[static_cast<int>(DataSurfaces::SurfaceFilter::AllInteriorCeilings)].push_back(SurfNum);
-                }
-            } else {
-                state.dataSurface->SurfaceFilterLists[static_cast<int>(DataSurfaces::SurfaceFilter::AllExteriorSurfaces)].push_back(SurfNum);
-                if (state.dataConstruction->Construct(surf.Construction).TypeIsWindow) {
-                    state.dataSurface->SurfaceFilterLists[static_cast<int>(DataSurfaces::SurfaceFilter::AllExteriorWindows)].push_back(SurfNum);
-                } else if (surf.Class == SurfaceClass::Wall) {
-                    state.dataSurface->SurfaceFilterLists[static_cast<int>(DataSurfaces::SurfaceFilter::AllExteriorWalls)].push_back(SurfNum);
-                } else if (surf.Class == SurfaceClass::Floor) {
-                    state.dataSurface->SurfaceFilterLists[static_cast<int>(DataSurfaces::SurfaceFilter::AllExteriorFloors)].push_back(SurfNum);
-                } else if (surf.Class == SurfaceClass::Roof) {
-                    state.dataSurface->SurfaceFilterLists[static_cast<int>(DataSurfaces::SurfaceFilter::AllExteriorRoofs)].push_back(SurfNum);
-                    state.dataSurface->SurfaceFilterLists[static_cast<int>(DataSurfaces::SurfaceFilter::AllInteriorCeilings)].push_back(SurfNum);
-                }
-            }
+            bool isWindow = state.dataConstruction->Construct(surf.Construction).TypeIsWindow;
+            bool isInterior = surf.ExtBoundCond > 0;
+            classifySurfaceFilter(state, SurfNum, surf.Class, isWindow, isInterior);
         } // for (SurfNum)
 
         // Note, could do same for Window Area and detecting if Interzone Surface in Zone
