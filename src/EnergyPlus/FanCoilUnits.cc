@@ -2108,6 +2108,36 @@ namespace FanCoilUnits {
         }
     }
 
+    // Handle flow-locked bypass logic for ConsFanVarFlow water coil control.
+    // When the plant flow is locked at a higher rate than needed, compute
+    // the coil output at the needed rate and then blend the bypass flow
+    // with the coil outlet to correct temperature and enthalpy.
+    static void calcFlowLockedBypass(EnergyPlusData &state,
+                                     int const FanCoilNum,
+                                     int const ControlledZoneNum,
+                                     bool const FirstHVACIteration,
+                                     int const inletNode,
+                                     int const outletNode,
+                                     Real64 const mdotLock,
+                                     Real64 const waterFlow,
+                                     Real64 &QUnitOut)
+    {
+        if (mdotLock > waterFlow) {
+            Calc4PipeFanCoil(state, FanCoilNum, ControlledZoneNum, FirstHVACIteration, QUnitOut);
+            state.dataLoopNodes->Node(inletNode).MassFlowRate = mdotLock;
+            state.dataLoopNodes->Node(outletNode).MassFlowRate = mdotLock;
+            Real64 const bypassFlow = mdotLock - waterFlow;
+            state.dataLoopNodes->Node(outletNode).Temp =
+                (bypassFlow * state.dataLoopNodes->Node(inletNode).Temp + waterFlow * state.dataLoopNodes->Node(outletNode).Temp) / mdotLock;
+            state.dataLoopNodes->Node(outletNode).Enthalpy =
+                (bypassFlow * state.dataLoopNodes->Node(inletNode).Enthalpy + waterFlow * state.dataLoopNodes->Node(outletNode).Enthalpy) / mdotLock;
+        } else {
+            state.dataLoopNodes->Node(inletNode).MassFlowRate = mdotLock;
+            state.dataLoopNodes->Node(outletNode).MassFlowRate = mdotLock;
+            Calc4PipeFanCoil(state, FanCoilNum, ControlledZoneNum, FirstHVACIteration, QUnitOut);
+        }
+    }
+
     void Sim4PipeFanCoil(EnergyPlusData &state,
                          int &FanCoilNum,               // number of the current fan coil unit being simulated
                          int const ControlledZoneNum,   // index into ZoneEqupConfig
@@ -2157,8 +2187,7 @@ namespace FanCoilUnits {
         Real64 MinSAMassFlowRate; // minimum supply air mass flow rate [kg/s]
         Real64 MaxSAMassFlowRate; // maximum supply air mass flow rate [kg/s]
         // Real64 FCOutletTempOn;        // ASHRAE outlet air temperature when coil is on [C]
-        Real64 CWFlow;       // cold water mass flow rate solution [kg/s]
-        Real64 CWFlowBypass; // cold water bypassed mass flow rate [kg/s]
+        Real64 CWFlow; // cold water mass flow rate solution [kg/s]
 
         auto &fanCoil = state.dataFanCoilUnits->FanCoil(FanCoilNum);
 
@@ -2179,7 +2208,6 @@ namespace FanCoilUnits {
         int InletNode = fanCoil.AirInNode;
         Real64 AirMassFlow = state.dataLoopNodes->Node(InletNode).MassFlowRate; // air mass flow rate [kg/sec]
         Real64 HWFlow = 0.0;                                                    // hot water mass flow rate solution [kg/s]
-        Real64 HWFlowBypass = 0.0;                                              // hot water bypassed mass flow rate [kg/s]
         Real64 MdotLockH = 0.0;                                                 // saved value of locked chilled water mass flow rate [kg/s]
         Real64 MdotLockC = 0.0;                                                 // saved value of locked hot water mass flow rate [kg/s]
         bool ColdFlowLocked = false;                                            // if true cold water flow is locked
@@ -2313,34 +2341,15 @@ namespace FanCoilUnits {
                         state, mdot, fanCoil.CoolCoilFluidInletNode, fanCoil.CoolCoilFluidOutletNodeNum, fanCoil.CoolCoilPlantLoc);
                     Calc4PipeFanCoil(state, FanCoilNum, ControlledZoneNum, FirstHVACIteration, QUnitOut); // get QUnitOut
                 } else {
-                    // flow lock on
-                    if (MdotLockC > CWFlow) { // if mdot > CWFlow, bypass extra flow
-                        Calc4PipeFanCoil(state,
+                    calcFlowLockedBypass(state,
                                          FanCoilNum,
                                          ControlledZoneNum,
                                          FirstHVACIteration,
-                                         QUnitOut); // get QUnitOut with CWFlow; rest will be bypassed
-                        state.dataLoopNodes->Node(fanCoil.CoolCoilFluidInletNode).MassFlowRate =
-                            MdotLockC; // reset flow to locked value. Since lock is on, must do this by hand
-                        state.dataLoopNodes->Node(fanCoil.CoolCoilFluidOutletNodeNum).MassFlowRate = MdotLockC;
-                        // Keep soln flow rate but reset outlet water temperature - i.e. bypass extra water
-                        CWFlowBypass = MdotLockC - CWFlow;
-                        // change water outlet temperature and enthalpy
-                        state.dataLoopNodes->Node(fanCoil.CoolCoilFluidOutletNodeNum).Temp =
-                            (CWFlowBypass * state.dataLoopNodes->Node(fanCoil.CoolCoilFluidInletNode).Temp +
-                             CWFlow * state.dataLoopNodes->Node(fanCoil.CoolCoilFluidOutletNodeNum).Temp) /
-                            MdotLockC;
-                        state.dataLoopNodes->Node(fanCoil.CoolCoilFluidOutletNodeNum).Enthalpy =
-                            (CWFlowBypass * state.dataLoopNodes->Node(fanCoil.CoolCoilFluidInletNode).Enthalpy +
-                             CWFlow * state.dataLoopNodes->Node(fanCoil.CoolCoilFluidOutletNodeNum).Enthalpy) /
-                            MdotLockC;
-                    } else {
-                        // if MdotLockC <= CWFlow use MdotLockC as is
-                        state.dataLoopNodes->Node(fanCoil.CoolCoilFluidInletNode).MassFlowRate =
-                            MdotLockC; // reset flow to locked value. Since lock is on, must do this by hand
-                        state.dataLoopNodes->Node(fanCoil.CoolCoilFluidOutletNodeNum).MassFlowRate = MdotLockC;
-                        Calc4PipeFanCoil(state, FanCoilNum, ControlledZoneNum, FirstHVACIteration, QUnitOut);
-                    }
+                                         fanCoil.CoolCoilFluidInletNode,
+                                         fanCoil.CoolCoilFluidOutletNodeNum,
+                                         MdotLockC,
+                                         CWFlow,
+                                         QUnitOut);
                 }
                 QUnitOut = calcZoneSensibleOutput(AirMassFlow,
                                                   state.dataLoopNodes->Node(OutletNode).Temp,
@@ -2463,34 +2472,15 @@ namespace FanCoilUnits {
                             state, mdot, fanCoil.HeatCoilFluidInletNode, fanCoil.HeatCoilFluidOutletNodeNum, fanCoil.HeatCoilPlantLoc);
                         Calc4PipeFanCoil(state, FanCoilNum, ControlledZoneNum, FirstHVACIteration, QUnitOut); // get QUnitOut
                     } else {
-                        // flow lock on
-                        if (MdotLockH > HWFlow) { // if mdot > HWFlow, bypass extra flow
-                            Calc4PipeFanCoil(state,
+                        calcFlowLockedBypass(state,
                                              FanCoilNum,
                                              ControlledZoneNum,
                                              FirstHVACIteration,
-                                             QUnitOut); // get QUnitOut with HWFlow; rest will be bypassed
-                            state.dataLoopNodes->Node(fanCoil.HeatCoilFluidInletNode).MassFlowRate =
-                                MdotLockH; // reset flow to locked value. Since lock is on, must do this by hand
-                            state.dataLoopNodes->Node(fanCoil.HeatCoilFluidOutletNodeNum).MassFlowRate = MdotLockH;
-                            // Keep soln flow rate but reset outlet water temperature - i.e. bypass extra water
-                            HWFlowBypass = MdotLockH - HWFlow;
-                            // change outlet water temperature and enthalpy
-                            state.dataLoopNodes->Node(fanCoil.HeatCoilFluidOutletNodeNum).Temp =
-                                (HWFlowBypass * state.dataLoopNodes->Node(fanCoil.HeatCoilFluidInletNode).Temp +
-                                 HWFlow * state.dataLoopNodes->Node(fanCoil.HeatCoilFluidOutletNodeNum).Temp) /
-                                MdotLockH;
-                            state.dataLoopNodes->Node(fanCoil.HeatCoilFluidOutletNodeNum).Enthalpy =
-                                (HWFlowBypass * state.dataLoopNodes->Node(fanCoil.HeatCoilFluidInletNode).Enthalpy +
-                                 HWFlow * state.dataLoopNodes->Node(fanCoil.HeatCoilFluidOutletNodeNum).Enthalpy) /
-                                MdotLockH;
-                        } else {
-                            // if MdotLockH <= HWFlow use MdotLockH as is
-                            state.dataLoopNodes->Node(fanCoil.HeatCoilFluidInletNode).MassFlowRate =
-                                MdotLockH; // reset flow to locked value. Since lock is on, must do this by hand
-                            state.dataLoopNodes->Node(fanCoil.HeatCoilFluidOutletNodeNum).MassFlowRate = MdotLockH;
-                            Calc4PipeFanCoil(state, FanCoilNum, ControlledZoneNum, FirstHVACIteration, QUnitOut);
-                        }
+                                             fanCoil.HeatCoilFluidInletNode,
+                                             fanCoil.HeatCoilFluidOutletNodeNum,
+                                             MdotLockH,
+                                             HWFlow,
+                                             QUnitOut);
                     }
                 }
                 QUnitOut = calcZoneSensibleOutput(AirMassFlow,
