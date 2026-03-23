@@ -1286,6 +1286,75 @@ namespace WaterToAirHeatPumpSimple {
         }
     }
 
+    // Helper: compute rated heating capacity from peak design conditions.
+    // Calculates rhoair, peak heating load, fan heat adjustment, temperature ratios,
+    // curve modifiers, and returns the rated heating capacity.
+    static void calcRatedHeatCap(EnergyPlusData &state,
+                                 SimpleWatertoAirHPConditions const &coil,
+                                 std::string const &CompType,
+                                 Real64 VolFlowRate,
+                                 Real64 &HeatMixTemp,
+                                 Real64 HeatMixHumRat,
+                                 Real64 &HeatSupTemp,
+                                 HVAC::FanPlace fanPlace,
+                                 Real64 Tref,
+                                 Real64 &FanHeatLoad,
+                                 Real64 &RatedHeatMixDryBulb,
+                                 Real64 &HeatratioTDB,
+                                 Real64 &HeatratioTS,
+                                 Real64 &RatedHeatratioTDB,
+                                 Real64 &RatedHeatratioTS,
+                                 Real64 &PeakHeatCapTempModFac,
+                                 Real64 &RatedHeatCapTempModFac,
+                                 Real64 &RatedHeatPowerTempModFac,
+                                 Real64 &RatedCapHeatDes,
+                                 int &PltSizNum,
+                                 bool &ErrorsFound)
+    {
+        static constexpr std::string_view RoutineName("SizeWaterToAirCoil");
+        Real64 rhoair = Psychrometrics::PsyRhoAirFnPbTdbW(state, state.dataEnvrn->StdBaroPress, HeatMixTemp, HeatMixHumRat, RoutineName);
+        Real64 HeatCapAtPeak = rhoair * VolFlowRate * Psychrometrics::PsyCpAirFnW(DataPrecisionGlobals::constant_zero) * (HeatSupTemp - HeatMixTemp);
+        if (state.dataSize->DataFanType != HVAC::FanType::Invalid && state.dataSize->DataFanIndex > 0) {
+            FanHeatLoad = state.dataFans->fans(state.dataSize->DataFanIndex)->getDesignHeatGain(state, VolFlowRate);
+            Real64 CpAir = Psychrometrics::PsyCpAirFnW(HeatMixHumRat);
+            if (fanPlace == HVAC::FanPlace::BlowThru) {
+                HeatMixTemp += FanHeatLoad / (CpAir * rhoair * VolFlowRate);
+            } else if (fanPlace == HVAC::FanPlace::DrawThru) {
+                HeatSupTemp -= FanHeatLoad / (CpAir * rhoair * VolFlowRate);
+            }
+        }
+        HeatCapAtPeak -= FanHeatLoad;
+        HeatCapAtPeak = max(0.0, HeatCapAtPeak);
+        RatedHeatMixDryBulb = coil.RatedEntAirDrybulbTemp;
+        HeatratioTDB = (HeatMixTemp + Constant::Kelvin) / Tref;
+        PltSizNum = getPlantSizingIndexAndRatioTS(
+            state, CompType, coil.Name, coil.WaterInletNodeNum, coil.WaterOutletNodeNum, "heating capacity", Tref, HeatratioTS, ErrorsFound);
+        RatedHeatratioTDB = (RatedHeatMixDryBulb + Constant::Kelvin) / Tref;
+        RatedHeatratioTS = (coil.RatedEntWaterTemp + Constant::Kelvin) / Tref;
+        PeakHeatCapTempModFac = coil.HeatCapCurve->value(state, HeatratioTDB, HeatratioTS, 1.0, 1.0);
+        RatedHeatCapTempModFac = coil.HeatCapCurve->value(state, RatedHeatratioTDB, RatedHeatratioTS, 1.0, 1.0);
+        if (coil.HeatPowCurve != nullptr) {
+            RatedHeatPowerTempModFac = coil.HeatPowCurve->value(state, RatedHeatratioTDB, RatedHeatratioTS, 1.0, 1.0);
+        }
+        if (RatedHeatMixDryBulb == HeatMixTemp) {
+            if (RatedHeatCapTempModFac > 1.02 || RatedHeatCapTempModFac < 0.98) {
+                ShowWarningError(state, EnergyPlus::format("{} Coil:Heating:WaterToAirHeatPump:EquationFit={}", RoutineName, coil.Name));
+                ShowContinueError(state,
+                                  "Heating capacity as a function of temperature curve output is not equal to 1.0 (+ or - 2%) "
+                                  "at rated conditions.");
+                ShowContinueError(state, EnergyPlus::format("Curve output at rated conditions = {:.3T}", RatedHeatCapTempModFac));
+            }
+            if (coil.HeatPowCurve != nullptr && (RatedHeatPowerTempModFac > 1.02 || RatedHeatPowerTempModFac < 0.98)) {
+                ShowWarningError(state, EnergyPlus::format("{} Coil:Heating:WaterToAirHeatPump:EquationFit={}", RoutineName, coil.Name));
+                ShowContinueError(state,
+                                  "Heating power consumption as a function of temperature curve output is not equal to "
+                                  "1.0 (+ or - 2%) at rated conditions.");
+                ShowContinueError(state, EnergyPlus::format("Curve output at rated conditions = {:.3T}", RatedHeatPowerTempModFac));
+            }
+        }
+        RatedCapHeatDes = (PeakHeatCapTempModFac > 0.0) ? HeatCapAtPeak / PeakHeatCapTempModFac : HeatCapAtPeak;
+    }
+
     // Helper: compute rated sensible cooling capacity from peak design conditions.
     // Calculates enthalpies, fan heat adjustment, peak sensible load, curve modifiers,
     // and returns the rated sensible cooling capacity.
@@ -1431,7 +1500,7 @@ namespace WaterToAirHeatPumpSimple {
         static constexpr std::string_view RoutineNameAlt("SizeHVACWaterToAir");
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        Real64 rhoair;
+        // rhoair is now computed inside the calcRated* helpers
         Real64 MixTemp;          // Mixed air temperature at cooling design conditions
         Real64 MixTempSys;       // Mixed air temperature at cooling design conditions at system air flow
         Real64 HeatMixTemp;      // Mixed air temperature at heating design conditions
@@ -1467,7 +1536,7 @@ namespace WaterToAirHeatPumpSimple {
         Real64 HeatOutAirFracSys;       // Outdoor air fraction at heating design conditions at system air flow
         Real64 VolFlowRate;
         // CoolCapAtPeak is now computed inside calcRatedTotalCoolCap
-        Real64 HeatCapAtPeak;               // Load on the heating coil at heating design conditions
+        // HeatCapAtPeak is now computed inside calcRatedHeatCap
         Real64 PeakTotCapTempModFac = 1.0;  // Peak total cooling capacity curve modifier
         Real64 RatedTotCapTempModFac = 1.0; // Rated total cooling capacity curve modifier
         Real64 PeakHeatCapTempModFac = 1.0; // Peak heating capacity curve modifier
@@ -2277,60 +2346,27 @@ namespace WaterToAirHeatPumpSimple {
                             // determine the coil ratio of coil dT with system air flow to design heating air flow
                             HeatdTratio = (HeatSupTemp - HeatMixTempSys) / (HeatSupTemp - HeatMixTemp);
                         }
-                        rhoair = Psychrometrics::PsyRhoAirFnPbTdbW(state, state.dataEnvrn->StdBaroPress, HeatMixTemp, HeatMixHumRat, RoutineName);
-                        HeatCapAtPeak = rhoair * VolFlowRate * Psychrometrics::PsyCpAirFnW(DataPrecisionGlobals::constant_zero) *
-                                        (HeatSupTemp - HeatMixTemp); // heating coil load
-                        if (state.dataSize->DataFanType != HVAC::FanType::Invalid &&
-                            state.dataSize->DataFanIndex > 0) { // remove fan heat to coil load
-                            FanHeatLoad = state.dataFans->fans(state.dataSize->DataFanIndex)->getDesignHeatGain(state, VolFlowRate);
-
-                            Real64 CpAir = Psychrometrics::PsyCpAirFnW(HeatMixHumRat);
-                            if (state.dataAirSystemsData->PrimaryAirSystems(state.dataSize->CurSysNum).supFanPlace == HVAC::FanPlace::BlowThru) {
-                                HeatMixTemp += FanHeatLoad / (CpAir * rhoair * VolFlowRate); // this is now the temperature entering the coil
-                            } else if (state.dataAirSystemsData->PrimaryAirSystems(state.dataSize->CurSysNum).supFanPlace ==
-                                       HVAC::FanPlace::DrawThru) {
-                                HeatSupTemp -= FanHeatLoad / (CpAir * rhoair * VolFlowRate); // this is now the temperature leaving the coil
-                            }
-                        }
-                        HeatCapAtPeak -= FanHeatLoad; // remove fan heat from heating coil load
-                        HeatCapAtPeak = max(0.0, HeatCapAtPeak);
-                        RatedHeatMixDryBulb = simpleWatertoAirHP.RatedEntAirDrybulbTemp;
-                        // calculate temperatue ratio at design day peak conditions
-                        HeatratioTDB = (HeatMixTemp + Constant::Kelvin) / Tref;
-                        PltSizNum = getPlantSizingIndexAndRatioTS(state,
-                                                                  CompType,
-                                                                  simpleWatertoAirHP.Name,
-                                                                  simpleWatertoAirHP.WaterInletNodeNum,
-                                                                  simpleWatertoAirHP.WaterOutletNodeNum,
-                                                                  "heating capacity",
-                                                                  Tref,
-                                                                  HeatratioTS,
-                                                                  ErrorsFound);
-
-                        // calculate temperatue ratio at refrence conditions
-                        RatedHeatratioTDB = (RatedHeatMixDryBulb + Constant::Kelvin) / Tref;
-                        RatedHeatratioTS = (simpleWatertoAirHP.RatedEntWaterTemp + Constant::Kelvin) / Tref;
-
-                        // determine curve modifiers at peak and rated conditions
-                        PeakHeatCapTempModFac = simpleWatertoAirHP.HeatCapCurve->value(state, HeatratioTDB, HeatratioTS, 1.0, 1.0);
-                        RatedHeatCapTempModFac = simpleWatertoAirHP.HeatCapCurve->value(state, RatedHeatratioTDB, RatedHeatratioTS, 1.0, 1.0);
-                        // Check curve output when rated mixed air wetbulb is the design mixed air wetbulb
-                        if (RatedHeatMixDryBulb == HeatMixTemp) {
-                            if (RatedHeatCapTempModFac > 1.02 || RatedHeatCapTempModFac < 0.98) {
-                                ShowWarningError(
-                                    state,
-                                    EnergyPlus::format("{} Coil:Heating:WaterToAirHeatPump:EquationFit={}", RoutineName, simpleWatertoAirHP.Name));
-                                ShowContinueError(state,
-                                                  "Heating capacity as a function of temperature curve output is not equal to 1.0 (+ or - 2%) "
-                                                  "at rated conditions.");
-                                ShowContinueError(state, EnergyPlus::format("Curve output at rated conditions = {:.3T}", RatedHeatCapTempModFac));
-                            }
-                        }
-                        // calculate the rated capacity based on peak conditions
-                        // note: the rated capacity can be different than the capacity at
-                        // rated conditions if the capacity curve isn't normalized at the
-                        // rated conditions
-                        RatedCapHeatDes = (PeakHeatCapTempModFac > 0.0) ? HeatCapAtPeak / PeakHeatCapTempModFac : HeatCapAtPeak;
+                        calcRatedHeatCap(state,
+                                         simpleWatertoAirHP,
+                                         CompType,
+                                         VolFlowRate,
+                                         HeatMixTemp,
+                                         HeatMixHumRat,
+                                         HeatSupTemp,
+                                         state.dataAirSystemsData->PrimaryAirSystems(state.dataSize->CurSysNum).supFanPlace,
+                                         Tref,
+                                         FanHeatLoad,
+                                         RatedHeatMixDryBulb,
+                                         HeatratioTDB,
+                                         HeatratioTS,
+                                         RatedHeatratioTDB,
+                                         RatedHeatratioTS,
+                                         PeakHeatCapTempModFac,
+                                         RatedHeatCapTempModFac,
+                                         RatedHeatPowerTempModFac,
+                                         RatedCapHeatDes,
+                                         PltSizNum,
+                                         ErrorsFound);
                     } else {
                         RatedCapHeatDes = 0.0;
                         RatedHeatratioTS = 0.0; // Clang complains it is used uninitialized if you don't give it a value
@@ -2371,68 +2407,27 @@ namespace WaterToAirHeatPumpSimple {
                         HeatSupTemp = state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).HeatDesTemp;
                         // determine the coil ratio of coil dT with system air flow to design heating air flow
                         HeatdTratio = (HeatSupTemp - HeatMixTempSys) / (HeatSupTemp - HeatMixTemp);
-                        rhoair = Psychrometrics::PsyRhoAirFnPbTdbW(state, state.dataEnvrn->StdBaroPress, HeatMixTemp, HeatMixHumRat, RoutineName);
-                        HeatCapAtPeak = rhoair * VolFlowRate * Psychrometrics::PsyCpAirFnW(DataPrecisionGlobals::constant_zero) *
-                                        (HeatSupTemp - HeatMixTemp);                                                     // heating coil load
-                        if (state.dataSize->DataFanType != HVAC::FanType::Invalid && state.dataSize->DataFanIndex > 0) { // add fan heat to coil load
-                            FanHeatLoad = state.dataFans->fans(state.dataSize->DataFanIndex)->getDesignHeatGain(state, VolFlowRate);
-
-                            Real64 CpAir = Psychrometrics::PsyCpAirFnW(HeatMixHumRat);
-                            if (state.dataSize->DataFanPlacement == HVAC::FanPlace::BlowThru) {
-                                HeatMixTemp += FanHeatLoad / (CpAir * rhoair * VolFlowRate); // this is now the temperature entering the coil
-                            } else {
-                                HeatSupTemp -= FanHeatLoad / (CpAir * rhoair * VolFlowRate); // this is now the temperature leaving the coil
-                            }
-                        }
-                        HeatCapAtPeak -= FanHeatLoad; // remove fan heat from heating coil load
-                        HeatCapAtPeak = max(0.0, HeatCapAtPeak);
-                        RatedHeatMixDryBulb = simpleWatertoAirHP.RatedEntAirDrybulbTemp;
-                        // calculate temperatue ratio at design day peak conditions
-                        HeatratioTDB = (HeatMixTemp + Constant::Kelvin) / Tref;
-                        PltSizNum = getPlantSizingIndexAndRatioTS(state,
-                                                                  CompType,
-                                                                  simpleWatertoAirHP.Name,
-                                                                  simpleWatertoAirHP.WaterInletNodeNum,
-                                                                  simpleWatertoAirHP.WaterOutletNodeNum,
-                                                                  "heating capacity",
-                                                                  Tref,
-                                                                  HeatratioTS,
-                                                                  ErrorsFound);
-
-                        // calculate temperatue ratio at refrence conditions
-                        RatedHeatratioTDB = (RatedHeatMixDryBulb + Constant::Kelvin) / Tref;
-                        RatedHeatratioTS = (simpleWatertoAirHP.RatedEntWaterTemp + Constant::Kelvin) / Tref;
-
-                        // determine curve modifiers at peak and rated conditions
-                        PeakHeatCapTempModFac = simpleWatertoAirHP.HeatCapCurve->value(state, HeatratioTDB, HeatratioTS, 1.0, 1.0);
-                        RatedHeatCapTempModFac = simpleWatertoAirHP.HeatCapCurve->value(state, RatedHeatratioTDB, RatedHeatratioTS, 1.0, 1.0);
-                        RatedHeatPowerTempModFac = simpleWatertoAirHP.HeatPowCurve->value(state, RatedHeatratioTDB, RatedHeatratioTS, 1.0, 1.0);
-                        // Check curve output when rated mixed air wetbulb is the design mixed air wetbulb
-                        if (RatedHeatMixDryBulb == HeatMixTemp) {
-                            if (RatedHeatCapTempModFac > 1.02 || RatedHeatCapTempModFac < 0.98) {
-                                ShowWarningError(
-                                    state,
-                                    EnergyPlus::format("{} Coil:Heating:WaterToAirHeatPump:EquationFit={}", RoutineName, simpleWatertoAirHP.Name));
-                                ShowContinueError(state,
-                                                  "Heating capacity as a function of temperature curve output is not equal to 1.0 (+ or - 2%) "
-                                                  "at rated conditions.");
-                                ShowContinueError(state, EnergyPlus::format("Curve output at rated conditions = {:.3T}", RatedHeatCapTempModFac));
-                            }
-                            if (RatedHeatPowerTempModFac > 1.02 || RatedHeatPowerTempModFac < 0.98) {
-                                ShowWarningError(
-                                    state,
-                                    EnergyPlus::format("{} Coil:Heating:WaterToAirHeatPump:EquationFit={}", RoutineName, simpleWatertoAirHP.Name));
-                                ShowContinueError(state,
-                                                  "Heating power consumption as a function of temperature curve output is not equal to "
-                                                  "1.0 (+ or - 2%) at rated conditions.");
-                                ShowContinueError(state, EnergyPlus::format("Curve output at rated conditions = {:.3T}", RatedHeatPowerTempModFac));
-                            }
-                        }
-                        // calculate the rated capacity based on peak conditions
-                        // note: the rated capacity can be different than the capacity at
-                        // rated conditions if the capacity curve isn't normalized at the
-                        // rated conditions
-                        RatedCapHeatDes = (PeakHeatCapTempModFac > 0.0) ? HeatCapAtPeak / PeakHeatCapTempModFac : HeatCapAtPeak;
+                        calcRatedHeatCap(state,
+                                         simpleWatertoAirHP,
+                                         CompType,
+                                         VolFlowRate,
+                                         HeatMixTemp,
+                                         HeatMixHumRat,
+                                         HeatSupTemp,
+                                         state.dataSize->DataFanPlacement,
+                                         Tref,
+                                         FanHeatLoad,
+                                         RatedHeatMixDryBulb,
+                                         HeatratioTDB,
+                                         HeatratioTS,
+                                         RatedHeatratioTDB,
+                                         RatedHeatratioTS,
+                                         PeakHeatCapTempModFac,
+                                         RatedHeatCapTempModFac,
+                                         RatedHeatPowerTempModFac,
+                                         RatedCapHeatDes,
+                                         PltSizNum,
+                                         ErrorsFound);
                     } else {
                         RatedHeatratioTS = 0.0; // Clang complains it is used uninitialized if you don't give it a value
                         RatedCapHeatDes = 0.0;
