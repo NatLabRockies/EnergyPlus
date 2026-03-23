@@ -374,6 +374,67 @@ namespace AirflowNetwork {
         update(FirstHVACIteration);
     }
 
+    // Helper: look up reference crack conditions from the map, or use defaults.
+    // Returns true on success, false if the named conditions object was not found.
+    static bool lookupReferenceConditions(EnergyPlusData &state,
+                                          std::string_view RoutineName,
+                                          std::string const &CurrentModuleObject,
+                                          std::string const &thisObjectName,
+                                          nlohmann::json const &fields,
+                                          bool conditionsAreDefaulted,
+                                          ReferenceConditions const &defaultReferenceConditions,
+                                          std::unordered_map<std::string, ReferenceConditions> &referenceConditions,
+                                          Real64 &refT,
+                                          Real64 &refP,
+                                          Real64 &refW)
+    {
+        refT = defaultReferenceConditions.temperature;
+        refP = defaultReferenceConditions.pressure;
+        refW = defaultReferenceConditions.humidity_ratio;
+        if (!conditionsAreDefaulted) {
+            if (fields.find("reference_crack_conditions") != fields.end()) {
+                auto refCrackCondName = fields.at("reference_crack_conditions").get<std::string>();
+                auto result = referenceConditions.find(Util::makeUPPER(refCrackCondName));
+                if (result == referenceConditions.end()) {
+                    ShowSevereError(state,
+                                    EnergyPlus::format("{}: {}: {}. Cannot find reference crack conditions object \"{}\".",
+                                                       RoutineName,
+                                                       CurrentModuleObject,
+                                                       thisObjectName,
+                                                       refCrackCondName));
+                    return false;
+                } else {
+                    refT = result->second.temperature;
+                    refP = result->second.pressure;
+                    refW = result->second.humidity_ratio;
+                    state.dataInputProcessing->inputProcessor->markObjectAsUsed("AirflowNetwork:MultiZone:ReferenceCrackConditions",
+                                                                                result->second.name);
+                }
+            }
+        }
+        return true;
+    }
+
+    // Helper: add an element to the lookup table, checking for duplicate names.
+    // Returns true on success, false if a duplicate was found.
+    static bool addElementToLookup(EnergyPlusData &state,
+                                   std::string_view RoutineName,
+                                   std::string const &CurrentModuleObject,
+                                   std::string const &elementName,
+                                   AirflowElement *element,
+                                   std::unordered_map<std::string, AirflowElement *> &elements)
+    {
+        if (elements.find(elementName) == elements.end()) {
+            elements[elementName] = element;
+            return true;
+        } else {
+            ShowSevereError(
+                state,
+                EnergyPlus::format("{}: {}: Duplicated airflow element names are found = \"{}\".", RoutineName, CurrentModuleObject, elementName));
+            return false;
+        }
+    }
+
     bool Solver::get_element_input()
     {
         // SUBROUTINE INFORMATION:
@@ -469,32 +530,20 @@ namespace AirflowNetwork {
                 if (fields.find("air_mass_flow_exponent") != fields.end()) { // not required field, has default value
                     expnt = fields.at("air_mass_flow_exponent").get<Real64>();
                 }
-                Real64 refT = defaultReferenceConditions.temperature;
-                Real64 refP = defaultReferenceConditions.pressure;
-                Real64 refW = defaultReferenceConditions.humidity_ratio;
-                if (!conditionsAreDefaulted) {
-                    if (fields.find("reference_crack_conditions") != fields.end()) { // not required field, *should* have default value
-                        auto refCrackCondName = fields.at("reference_crack_conditions").get<std::string>();
-                        auto result = referenceConditions.find(Util::makeUPPER(refCrackCondName));
-
-                        if (result == referenceConditions.end()) {
-                            ShowSevereError(m_state,
-                                            EnergyPlus::format("{}: {}: {}. Cannot find reference crack conditions object \"{}\".",
-                                                               RoutineName,
-                                                               CurrentModuleObject,
-                                                               thisObjectName,
-                                                               refCrackCondName));
-                            success = false;
-                        } else {
-                            refT = result->second.temperature;
-                            refP = result->second.pressure;
-                            refW = result->second.humidity_ratio;
-                            m_state.dataInputProcessing->inputProcessor->markObjectAsUsed("AirflowNetwork:MultiZone:ReferenceCrackConditions",
-                                                                                          result->second.name);
-                        }
-                    }
+                Real64 refT, refP, refW;
+                if (!lookupReferenceConditions(m_state,
+                                               RoutineName,
+                                               CurrentModuleObject,
+                                               thisObjectName,
+                                               fields,
+                                               conditionsAreDefaulted,
+                                               defaultReferenceConditions,
+                                               referenceConditions,
+                                               refT,
+                                               refP,
+                                               refW)) {
+                    success = false;
                 }
-                // globalSolverObject.cracks[thisObjectName] = SurfaceCrack(coeff, expnt, refT, refP, refW);
                 MultizoneSurfaceCrackData(i).name = thisObjectName; // Name of surface crack component
                 MultizoneSurfaceCrackData(i).coefficient = coeff;   // Air Mass Flow Coefficient
                 MultizoneSurfaceCrackData(i).exponent = expnt;      // Air Mass Flow exponent
@@ -555,29 +604,19 @@ namespace AirflowNetwork {
                     success = false;
                 }
 
-                Real64 refT = defaultReferenceConditions.temperature;
-                Real64 refP = defaultReferenceConditions.pressure;
-                Real64 refW = defaultReferenceConditions.humidity_ratio;
-                if (!conditionsAreDefaulted) {
-                    if (fields.find("reference_crack_conditions") != fields.end()) { // not required field, *should* have default value
-                        auto refCrackCondName = fields.at("reference_crack_conditions").get<std::string>();
-                        auto result = referenceConditions.find(Util::makeUPPER(refCrackCondName));
-                        if (result == referenceConditions.end()) {
-                            ShowSevereError(m_state,
-                                            EnergyPlus::format("{}: {}: {}. Cannot find reference crack conditions object \"{}\".",
-                                                               RoutineName,
-                                                               CurrentModuleObject,
-                                                               thisObjectName,
-                                                               fields.at("reference_crack_conditions").get<std::string>()));
-                            success = false;
-                        } else {
-                            refT = result->second.temperature;
-                            refP = result->second.pressure;
-                            refW = result->second.humidity_ratio;
-                            m_state.dataInputProcessing->inputProcessor->markObjectAsUsed("AirflowNetwork:MultiZone:ReferenceCrackConditions",
-                                                                                          result->second.name);
-                        }
-                    }
+                Real64 refT, refP, refW;
+                if (!lookupReferenceConditions(m_state,
+                                               RoutineName,
+                                               CurrentModuleObject,
+                                               thisObjectName,
+                                               fields,
+                                               conditionsAreDefaulted,
+                                               defaultReferenceConditions,
+                                               referenceConditions,
+                                               refT,
+                                               refP,
+                                               refW)) {
+                    success = false;
                 }
 
                 MultizoneCompExhaustFanData(i).name = thisObjectName; // Name of zone exhaust fan component
@@ -639,29 +678,19 @@ namespace AirflowNetwork {
                     success = false;
                 }
 
-                Real64 refT = defaultReferenceConditions.temperature;
-                Real64 refP = defaultReferenceConditions.pressure;
-                Real64 refW = defaultReferenceConditions.humidity_ratio;
-                if (!conditionsAreDefaulted) {
-                    if (fields.find("reference_crack_conditions") != fields.end()) { // not required field, *should* have default value
-                        auto refCrackCondName = fields.at("reference_crack_conditions").get<std::string>();
-                        auto result = referenceConditions.find(Util::makeUPPER(refCrackCondName));
-                        if (result == referenceConditions.end()) {
-                            ShowSevereError(m_state,
-                                            EnergyPlus::format("{}: {}: {}. Cannot find reference crack conditions object \"{}\".",
-                                                               RoutineName,
-                                                               CurrentModuleObject,
-                                                               thisObjectName,
-                                                               refCrackCondName));
-                            success = false;
-                        } else {
-                            refT = result->second.temperature;
-                            refP = result->second.pressure;
-                            refW = result->second.humidity_ratio;
-                            m_state.dataInputProcessing->inputProcessor->markObjectAsUsed("AirflowNetwork:MultiZone:ReferenceCrackConditions",
-                                                                                          result->second.name);
-                        }
-                    }
+                Real64 refT, refP, refW;
+                if (!lookupReferenceConditions(m_state,
+                                               RoutineName,
+                                               CurrentModuleObject,
+                                               thisObjectName,
+                                               fields,
+                                               conditionsAreDefaulted,
+                                               defaultReferenceConditions,
+                                               referenceConditions,
+                                               refT,
+                                               refP,
+                                               refW)) {
+                    success = false;
                 }
 
                 DisSysCompOutdoorAirData(i).name = thisObjectName; // Name of zone exhaust fan component
@@ -718,29 +747,19 @@ namespace AirflowNetwork {
                     success = false;
                 }
 
-                Real64 refT = defaultReferenceConditions.temperature;
-                Real64 refP = defaultReferenceConditions.pressure;
-                Real64 refW = defaultReferenceConditions.humidity_ratio;
-                if (!conditionsAreDefaulted) {
-                    if (fields.find("reference_crack_conditions") != fields.end()) { // not required field, *should* have default value
-                        auto refCrackCondName = fields.at("reference_crack_conditions").get<std::string>();
-                        auto result = referenceConditions.find(Util::makeUPPER(refCrackCondName));
-                        if (result == referenceConditions.end()) {
-                            ShowSevereError(m_state,
-                                            EnergyPlus::format("{}: {}: {}. Cannot find reference crack conditions object \"{}\".",
-                                                               RoutineName,
-                                                               CurrentModuleObject,
-                                                               thisObjectName,
-                                                               refCrackCondName));
-                            success = false;
-                        } else {
-                            refT = result->second.temperature;
-                            refP = result->second.pressure;
-                            refW = result->second.humidity_ratio;
-                            m_state.dataInputProcessing->inputProcessor->markObjectAsUsed("AirflowNetwork:MultiZone:ReferenceCrackConditions",
-                                                                                          result->second.name);
-                        }
-                    }
+                Real64 refT, refP, refW;
+                if (!lookupReferenceConditions(m_state,
+                                               RoutineName,
+                                               CurrentModuleObject,
+                                               thisObjectName,
+                                               fields,
+                                               conditionsAreDefaulted,
+                                               defaultReferenceConditions,
+                                               referenceConditions,
+                                               refT,
+                                               refP,
+                                               refW)) {
+                    success = false;
                 }
 
                 DisSysCompReliefAirData(i).name = thisObjectName; // Name of zone exhaust fan component
