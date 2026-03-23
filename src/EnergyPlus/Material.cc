@@ -86,6 +86,36 @@ constexpr std::array<std::string_view, (int)EcoRoofCalcMethod::Num> ecoRoofCalcM
 
 // Helper to check that the sum of two numeric input fields is less than 1.0.
 // Sets ErrorsFound and emits "Illegal value combination" if the check fails.
+// Helper to find a referenced epJSON object by case-insensitive name lookup.
+// Searches for objectType in epJSON, then finds an entry whose key matches
+// alphaFieldName (upper-cased). Marks it as used and returns a pointer to
+// the JSON value, or nullptr if not found (after emitting errors).
+static nlohmann::json const *
+findReferencedEpJSONObject(EnergyPlusData &state, ErrorObjectHeader const &eoh, bool &ErrorsFound, std::string const &objectType, int alphaFieldIdx)
+{
+    auto &s_ip = state.dataInputProcessing->inputProcessor;
+    auto &s_ipsc = state.dataIPShortCut;
+    auto const itInstances = s_ip->epJSON.find(objectType);
+    if (itInstances == s_ip->epJSON.end()) {
+        ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(alphaFieldIdx), s_ipsc->cAlphaArgs(alphaFieldIdx));
+        ErrorsFound = true;
+        return nullptr;
+    }
+
+    auto const &instances = itInstances.value();
+    // Can't use find here because epJSON keys are not upper-cased
+    for (auto itObj = instances.begin(); itObj != instances.end(); ++itObj) {
+        if (Util::makeUPPER(itObj.key()) == s_ipsc->cAlphaArgs(alphaFieldIdx)) {
+            s_ip->markObjectAsUsed(objectType, itObj.key());
+            return &(itObj.value());
+        }
+    }
+
+    ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(alphaFieldIdx), s_ipsc->cAlphaArgs(alphaFieldIdx));
+    ErrorsFound = true;
+    return nullptr;
+}
+
 // Helper to check for duplicate material name. Returns true if duplicate found (caller should continue/skip).
 static bool checkDupMaterialName(EnergyPlusData &state, ErrorObjectHeader const &eoh, bool &ErrorsFound)
 {
@@ -2042,66 +2072,25 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         // Find referenced DeflectionState object and copy field (i.e., deflected thickness) from it
         if (!s_ipsc->lAlphaFieldBlanks(3)) {
-            std::string deflectionState = "WindowGap:DeflectionState";
-            auto const itInstances = s_ip->epJSON.find(deflectionState);
-            if (itInstances == s_ip->epJSON.end()) {
-                ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3));
-                ErrorsFound = true;
+            std::string const deflectionState = "WindowGap:DeflectionState";
+            auto const *obj = findReferencedEpJSONObject(state, eoh, ErrorsFound, deflectionState, 3);
+            if (obj == nullptr) {
                 continue;
             }
-
-            auto const &instances2 = itInstances.value();
-            auto itObj = instances2.begin();
-            // Can't use find here because epJSON keys are not upper-cased
-            for (; itObj != instances2.end(); ++itObj) {
-                if (Util::makeUPPER(itObj.key()) == s_ipsc->cAlphaArgs(3)) {
-                    break;
-                }
-            }
-
-            if (itObj == instances2.end()) {
-                ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3));
-                ErrorsFound = true;
-                continue;
-            }
-
-            s_ip->markObjectAsUsed(deflectionState, itObj.key());
-            auto const &obj = itObj.value();
             auto const &objSchemaProps = s_ip->getObjectSchemaProps(state, deflectionState);
-            mat->deflectedThickness = s_ip->getRealFieldValue(obj, objSchemaProps, "deflected_thickness");
+            mat->deflectedThickness = s_ip->getRealFieldValue(*obj, objSchemaProps, "deflected_thickness");
         }
 
-        // Find referenced SupportPillar obect and copy fields (i.e., spacing, radius) from it
+        // Find referenced SupportPillar object and copy fields (i.e., spacing, radius) from it
         if (!s_ipsc->lAlphaFieldBlanks(4)) {
-            std::string supportPillar = "WindowGap:SupportPillar";
-            auto const itInstances = s_ip->epJSON.find(supportPillar);
-            if (itInstances == s_ip->epJSON.end()) {
-                ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4));
-                ErrorsFound = true;
+            std::string const supportPillar = "WindowGap:SupportPillar";
+            auto const *obj = findReferencedEpJSONObject(state, eoh, ErrorsFound, supportPillar, 4);
+            if (obj == nullptr) {
                 continue;
             }
-
-            auto const &instances3 = itInstances.value();
-
-            auto itObj = instances3.begin();
-            // Can't use find here because epJSON keys are not upper-cased
-            for (; itObj != instances3.end(); ++itObj) {
-                if (Util::makeUPPER(itObj.key()) == s_ipsc->cAlphaArgs(4)) {
-                    break;
-                }
-            }
-
-            if (itObj == instances3.end()) {
-                ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4));
-                ErrorsFound = true;
-                continue;
-            }
-
-            s_ip->markObjectAsUsed(supportPillar, itObj.key());
-            auto const &obj = itObj.value();
             auto const &objSchemaProps = s_ip->getObjectSchemaProps(state, supportPillar);
-            mat->pillarSpacing = s_ip->getRealFieldValue(obj, objSchemaProps, "spacing");
-            mat->pillarRadius = s_ip->getRealFieldValue(obj, objSchemaProps, "radius");
+            mat->pillarSpacing = s_ip->getRealFieldValue(*obj, objSchemaProps, "spacing");
+            mat->pillarRadius = s_ip->getRealFieldValue(*obj, objSchemaProps, "radius");
         }
     }
 
