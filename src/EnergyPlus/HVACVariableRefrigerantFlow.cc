@@ -4706,6 +4706,22 @@ static void warnOATLimitExceeded(EnergyPlusData &state,
                                    OutsideDryBulbTemp);
 }
 
+// Helper: set VRF terminal unit node mass flow rates based on OA mixer presence.
+// When an OA mixer is used, sets the return node and outside air node flow rates.
+// Otherwise, sets the inlet node flow rate (unless the TU is in an OA system).
+static void setVRFTUNodeMassFlowRate(
+    EnergyPlusData &state, int const VRFTUNum, int const InNode, int const OutsideAirNode, Real64 const mainAirMassFlow, Real64 const oaMassFlow)
+{
+    if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).OAMixerUsed) {
+        state.dataLoopNodes->Node(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUOAMixerRetNodeNum).MassFlowRate = mainAirMassFlow;
+        state.dataLoopNodes->Node(OutsideAirNode).MassFlowRate = oaMassFlow;
+    } else {
+        if (!state.dataHVACVarRefFlow->VRFTU(VRFTUNum).isInOASys) {
+            state.dataLoopNodes->Node(InNode).MassFlowRate = mainAirMassFlow;
+        }
+    }
+}
+
 // Helper: search zone equipment configs for a zone node matching the given TU node.
 // Searches exhaust nodes when isExhaustSearch is true, inlet nodes otherwise.
 // Returns the zone air node number if found, or 0 if not found.
@@ -6047,48 +6063,36 @@ void InitVRF(EnergyPlusData &state, int const VRFTUNum, int const ZoneNum, bool 
     if (state.dataHVACVarRefFlow->HeatingLoad(VRFCond) ||
         (state.dataHVACVarRefFlow->VRF(VRFCond).HeatRecoveryUsed &&
          state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HRHeatRequest(IndexToTUInTUList))) {
-        if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).OAMixerUsed) {
-            state.dataLoopNodes->Node(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUOAMixerRetNodeNum).MassFlowRate =
-                state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxHeatAirMassFlow;
-            state.dataLoopNodes->Node(OutsideAirNode).MassFlowRate = state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatOutAirMassFlow;
-        } else {
-            if (!state.dataHVACVarRefFlow->VRFTU(VRFTUNum).isInOASys) {
-                state.dataLoopNodes->Node(InNode).MassFlowRate = state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxHeatAirMassFlow;
-            }
-        }
+        setVRFTUNodeMassFlowRate(state,
+                                 VRFTUNum,
+                                 InNode,
+                                 OutsideAirNode,
+                                 state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxHeatAirMassFlow,
+                                 state.dataHVACVarRefFlow->VRFTU(VRFTUNum).HeatOutAirMassFlow);
     } else if (state.dataHVACVarRefFlow->CoolingLoad(VRFCond) ||
                (state.dataHVACVarRefFlow->VRF(VRFCond).HeatRecoveryUsed &&
                 state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HRCoolRequest(IndexToTUInTUList))) {
-        if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).OAMixerUsed) {
-            state.dataLoopNodes->Node(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUOAMixerRetNodeNum).MassFlowRate =
-                state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxCoolAirMassFlow;
-            state.dataLoopNodes->Node(OutsideAirNode).MassFlowRate = state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolOutAirMassFlow;
-        } else {
-            if (!state.dataHVACVarRefFlow->VRFTU(VRFTUNum).isInOASys) {
-                state.dataLoopNodes->Node(InNode).MassFlowRate = state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxCoolAirMassFlow;
-            }
-        }
+        setVRFTUNodeMassFlowRate(state,
+                                 VRFTUNum,
+                                 InNode,
+                                 OutsideAirNode,
+                                 state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxCoolAirMassFlow,
+                                 state.dataHVACVarRefFlow->VRFTU(VRFTUNum).CoolOutAirMassFlow);
     } else {
         if (state.dataHVACVarRefFlow->LastModeCooling(VRFCond)) {
-            if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).OAMixerUsed) {
-                state.dataLoopNodes->Node(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUOAMixerRetNodeNum).MassFlowRate =
-                    state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxNoCoolAirMassFlow;
-                state.dataLoopNodes->Node(OutsideAirNode).MassFlowRate = state.dataHVACVarRefFlow->VRFTU(VRFTUNum).NoCoolHeatOutAirMassFlow;
-            } else {
-                if (!state.dataHVACVarRefFlow->VRFTU(VRFTUNum).isInOASys) {
-                    state.dataLoopNodes->Node(InNode).MassFlowRate = state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxNoCoolAirMassFlow;
-                }
-            }
+            setVRFTUNodeMassFlowRate(state,
+                                     VRFTUNum,
+                                     InNode,
+                                     OutsideAirNode,
+                                     state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxNoCoolAirMassFlow,
+                                     state.dataHVACVarRefFlow->VRFTU(VRFTUNum).NoCoolHeatOutAirMassFlow);
         } else if (state.dataHVACVarRefFlow->LastModeHeating(VRFCond)) {
-            if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).OAMixerUsed) {
-                state.dataLoopNodes->Node(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUOAMixerRetNodeNum).MassFlowRate =
-                    state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxNoHeatAirMassFlow;
-                state.dataLoopNodes->Node(OutsideAirNode).MassFlowRate = state.dataHVACVarRefFlow->VRFTU(VRFTUNum).NoCoolHeatOutAirMassFlow;
-            } else {
-                if (!state.dataHVACVarRefFlow->VRFTU(VRFTUNum).isInOASys) {
-                    state.dataLoopNodes->Node(InNode).MassFlowRate = state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxNoHeatAirMassFlow;
-                }
-            }
+            setVRFTUNodeMassFlowRate(state,
+                                     VRFTUNum,
+                                     InNode,
+                                     OutsideAirNode,
+                                     state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxNoHeatAirMassFlow,
+                                     state.dataHVACVarRefFlow->VRFTU(VRFTUNum).NoCoolHeatOutAirMassFlow);
         }
     }
 
