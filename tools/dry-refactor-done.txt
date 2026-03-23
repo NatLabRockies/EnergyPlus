@@ -55,3 +55,4 @@ src/EnergyPlus/Furnaces.cc:CalcNewZoneHeatCoolFlowRates
 src/EnergyPlus/Pumps.cc:GetPumpInput
 src/EnergyPlus/EvaporativeFluidCoolers.cc:SizeEvapFluidCooler
 src/EnergyPlus/FluidProperties.cc:GetFluidPropertiesData
+src/EnergyPlus/WindowManager.cc:InitGlassOpticalCalculations
