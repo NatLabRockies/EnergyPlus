@@ -5663,6 +5663,112 @@ static void applyCoolSizingRat(EnergyPlusData &state,
     }
 }
 
+// Write the system sizing results file (.ssz): header, timestep data, and peak summaries.
+// Extracted from the EndSysSizingCalc block of UpdateSysSizing.
+static void writeSysSizingResults(EnergyPlusData &state)
+{
+    print(state.files.ssz, "Time");
+    for (int I = 1; I <= state.dataHVACGlobal->NumPrimaryAirSys; ++I) {
+        for (int J = 1; J <= state.dataEnvrn->TotDesDays + state.dataEnvrn->TotRunDesPersDays; ++J) {
+            constexpr const char *SSizeFmt12("{}{}{}{:2}{}{}{}{}{:2}{}{}{}{}{:2}{}{}{}{}{:2}{}{}{}{}{:2}{}");
+            print(state.files.ssz,
+                  SSizeFmt12,
+                  state.dataSize->SizingFileColSep,
+                  state.dataSize->CalcSysSizing(I).AirPriLoopName,
+                  ":DesPer",
+                  J,
+                  ":Des Heat Mass Flow [kg/s]",
+                  state.dataSize->SizingFileColSep,
+                  state.dataSize->CalcSysSizing(I).AirPriLoopName,
+                  ":DesPer",
+                  J,
+                  ":Des Heat Cap [W]",
+                  state.dataSize->SizingFileColSep,
+                  state.dataSize->CalcSysSizing(I).AirPriLoopName,
+                  ":DesPer",
+                  J,
+                  ":Des Cool Mass Flow [kg/s]",
+                  state.dataSize->SizingFileColSep,
+                  state.dataSize->CalcSysSizing(I).AirPriLoopName,
+                  ":DesPer",
+                  J,
+                  ":Des Sens Cool Cap [W]",
+                  state.dataSize->SizingFileColSep,
+                  state.dataSize->CalcSysSizing(I).AirPriLoopName,
+                  ":DesPer",
+                  J,
+                  ":Des Tot Cool Cap [W]");
+        }
+    }
+    print(state.files.ssz, "\n");
+    int Minutes = 0;
+    int TimeStepIndex = 0;
+    for (int HourCounter = 1; HourCounter <= 24; ++HourCounter) {
+        for (int TimeStepCounter = 1; TimeStepCounter <= state.dataGlobal->TimeStepsInHour; ++TimeStepCounter) {
+            ++TimeStepIndex;
+            Minutes += state.dataGlobal->MinutesInTimeStep;
+            int HourPrint;
+            if (Minutes == 60) {
+                Minutes = 0;
+                HourPrint = HourCounter;
+            } else {
+                HourPrint = HourCounter - 1;
+            }
+            constexpr const char *SSizeFmt20("{:02}:{:02}:00");
+            print(state.files.ssz, SSizeFmt20, HourPrint, Minutes);
+            for (int I = 1; I <= state.dataHVACGlobal->NumPrimaryAirSys; ++I) {
+                for (int J = 1; J <= state.dataEnvrn->TotDesDays + state.dataEnvrn->TotRunDesPersDays; ++J) {
+                    constexpr const char *SSizeFmt22("{}{:12.6E}{}{:12.6E}{}{:12.6E}{}{:12.6E}{}{:12.6E}");
+                    print(state.files.ssz,
+                          SSizeFmt22,
+                          state.dataSize->SizingFileColSep,
+                          state.dataSize->SysSizing(J, I).HeatFlowSeq(TimeStepIndex),
+                          state.dataSize->SizingFileColSep,
+                          state.dataSize->SysSizing(J, I).HeatCapSeq(TimeStepIndex),
+                          state.dataSize->SizingFileColSep,
+                          state.dataSize->SysSizing(J, I).CoolFlowSeq(TimeStepIndex),
+                          state.dataSize->SizingFileColSep,
+                          state.dataSize->SysSizing(J, I).SensCoolCapSeq(TimeStepIndex),
+                          state.dataSize->SizingFileColSep,
+                          state.dataSize->SysSizing(J, I).TotCoolCapSeq(TimeStepIndex));
+                }
+            }
+            print(state.files.ssz, "\n");
+        }
+    }
+
+    constexpr const char *SSizeFmt31("{}{:12.6E}{}{:12.6E}{}{:12.6E}{}{:12.6E}");
+    print(state.files.ssz, "Coinc Peak   ");
+    for (int I = 1; I <= state.dataHVACGlobal->NumPrimaryAirSys; ++I) {
+        print(state.files.ssz,
+              SSizeFmt31,
+              state.dataSize->SizingFileColSep,
+              state.dataSize->CalcSysSizing(I).CoinHeatMassFlow,
+              state.dataSize->SizingFileColSep,
+              state.dataSize->CalcSysSizing(I).CoinCoolMassFlow,
+              state.dataSize->SizingFileColSep,
+              state.dataSize->CalcSysSizing(I).HeatCap,
+              state.dataSize->SizingFileColSep,
+              state.dataSize->CalcSysSizing(I).SensCoolCap);
+    }
+    print(state.files.ssz, "\n");
+
+    print(state.files.ssz, "NonCoinc Peak");
+    for (int I = 1; I <= state.dataHVACGlobal->NumPrimaryAirSys; ++I) {
+        print(state.files.ssz,
+              SSizeFmt31,
+              state.dataSize->SizingFileColSep,
+              state.dataSize->CalcSysSizing(I).NonCoinHeatMassFlow,
+              state.dataSize->SizingFileColSep,
+              state.dataSize->CalcSysSizing(I).NonCoinCoolMassFlow,
+              state.dataSize->SizingFileColSep,
+              state.dataSize->CalcSysSizing(I).HeatCap,
+              state.dataSize->SizingFileColSep,
+              state.dataSize->CalcSysSizing(I).SensCoolCap);
+    }
+    print(state.files.ssz, "\n");
+}
+
 // Apply the user-input heating sizing ratio to final system sizing: scale mass flows, recompute
 // timestep heating capacities, and adjust zone heating flows.  Extracted from the EndSysSizingCalc block.
 static void applyHeatSizingRat(EnergyPlusData &state,
@@ -6877,111 +6983,7 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
         }
 
         // write out the sys design calc results
-
-        print(state.files.ssz, "Time");
-        int I; // write statement index
-        int J; // write statement index
-        for (I = 1; I <= state.dataHVACGlobal->NumPrimaryAirSys; ++I) {
-            for (J = 1; J <= state.dataEnvrn->TotDesDays + state.dataEnvrn->TotRunDesPersDays; ++J) {
-                constexpr const char *SSizeFmt12("{}{}{}{:2}{}{}{}{}{:2}{}{}{}{}{:2}{}{}{}{}{:2}{}{}{}{}{:2}{}");
-                print(state.files.ssz,
-                      SSizeFmt12,
-                      state.dataSize->SizingFileColSep,
-                      state.dataSize->CalcSysSizing(I).AirPriLoopName,
-                      ":DesPer",
-                      J,
-                      ":Des Heat Mass Flow [kg/s]",
-                      state.dataSize->SizingFileColSep,
-                      state.dataSize->CalcSysSizing(I).AirPriLoopName,
-                      ":DesPer",
-                      J,
-                      ":Des Heat Cap [W]",
-                      state.dataSize->SizingFileColSep,
-                      state.dataSize->CalcSysSizing(I).AirPriLoopName,
-                      ":DesPer",
-                      J,
-                      ":Des Cool Mass Flow [kg/s]",
-                      state.dataSize->SizingFileColSep,
-                      state.dataSize->CalcSysSizing(I).AirPriLoopName,
-                      ":DesPer",
-                      J,
-                      ":Des Sens Cool Cap [W]",
-                      state.dataSize->SizingFileColSep,
-                      state.dataSize->CalcSysSizing(I).AirPriLoopName,
-                      ":DesPer",
-                      J,
-                      ":Des Tot Cool Cap [W]");
-            }
-        }
-        print(state.files.ssz, "\n");
-        //      HourFrac = 0.0
-        int Minutes = 0; // Current Minutes Counter
-        TimeStepIndex = 0;
-        for (int HourCounter = 1; HourCounter <= 24; ++HourCounter) {                                                // Hour Counter
-            for (int TimeStepCounter = 1; TimeStepCounter <= state.dataGlobal->TimeStepsInHour; ++TimeStepCounter) { // Time Step Counter
-                ++TimeStepIndex;
-                Minutes += state.dataGlobal->MinutesInTimeStep;
-                int HourPrint; // Hour to print (timestamp)
-                if (Minutes == 60) {
-                    Minutes = 0;
-                    HourPrint = HourCounter;
-                } else {
-                    HourPrint = HourCounter - 1;
-                }
-                constexpr const char *SSizeFmt20("{:02}:{:02}:00");
-                print(state.files.ssz, SSizeFmt20, HourPrint, Minutes);
-                for (I = 1; I <= state.dataHVACGlobal->NumPrimaryAirSys; ++I) {
-                    for (J = 1; J <= state.dataEnvrn->TotDesDays + state.dataEnvrn->TotRunDesPersDays; ++J) {
-                        constexpr const char *SSizeFmt22("{}{:12.6E}{}{:12.6E}{}{:12.6E}{}{:12.6E}{}{:12.6E}");
-
-                        print(state.files.ssz,
-                              SSizeFmt22,
-                              state.dataSize->SizingFileColSep,
-                              state.dataSize->SysSizing(J, I).HeatFlowSeq(TimeStepIndex),
-                              state.dataSize->SizingFileColSep,
-                              state.dataSize->SysSizing(J, I).HeatCapSeq(TimeStepIndex),
-                              state.dataSize->SizingFileColSep,
-                              state.dataSize->SysSizing(J, I).CoolFlowSeq(TimeStepIndex),
-                              state.dataSize->SizingFileColSep,
-                              state.dataSize->SysSizing(J, I).SensCoolCapSeq(TimeStepIndex),
-                              state.dataSize->SizingFileColSep,
-                              state.dataSize->SysSizing(J, I).TotCoolCapSeq(TimeStepIndex));
-                    }
-                }
-                print(state.files.ssz, "\n");
-            }
-        }
-
-        constexpr const char *SSizeFmt31("{}{:12.6E}{}{:12.6E}{}{:12.6E}{}{:12.6E}");
-        print(state.files.ssz, "Coinc Peak   ");
-        for (I = 1; I <= state.dataHVACGlobal->NumPrimaryAirSys; ++I) {
-            print(state.files.ssz,
-                  SSizeFmt31,
-                  state.dataSize->SizingFileColSep,
-                  state.dataSize->CalcSysSizing(I).CoinHeatMassFlow,
-                  state.dataSize->SizingFileColSep,
-                  state.dataSize->CalcSysSizing(I).CoinCoolMassFlow,
-                  state.dataSize->SizingFileColSep,
-                  state.dataSize->CalcSysSizing(I).HeatCap,
-                  state.dataSize->SizingFileColSep,
-                  state.dataSize->CalcSysSizing(I).SensCoolCap);
-        }
-        print(state.files.ssz, "\n");
-
-        print(state.files.ssz, "NonCoinc Peak");
-        for (I = 1; I <= state.dataHVACGlobal->NumPrimaryAirSys; ++I) {
-            print(state.files.ssz,
-                  SSizeFmt31,
-                  state.dataSize->SizingFileColSep,
-                  state.dataSize->CalcSysSizing(I).NonCoinHeatMassFlow,
-                  state.dataSize->SizingFileColSep,
-                  state.dataSize->CalcSysSizing(I).NonCoinCoolMassFlow,
-                  state.dataSize->SizingFileColSep,
-                  state.dataSize->CalcSysSizing(I).HeatCap,
-                  state.dataSize->SizingFileColSep,
-                  state.dataSize->CalcSysSizing(I).SensCoolCap);
-        }
-        print(state.files.ssz, "\n");
+        writeSysSizingResults(state);
         // have moved a big section to later in calling order, write predefined standard 62.1 report data
     } break;
     default:
