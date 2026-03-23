@@ -50,6 +50,7 @@
 #include <cmath>
 #include <memory>
 #include <unordered_map>
+#include <unordered_set>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -215,6 +216,22 @@ static const std::unordered_map<std::string_view, CompType> airLoopCompTypeMap =
     {"DUCT", CompType::Duct},
     {"AIRLOOPHVAC:UNITARYHEATPUMP:AIRTOAIR:MULTISPEED", CompType::UnitarySystem_MSHeatPump},
     {"ZONEHVAC:TERMINALUNIT:VARIABLEREFRIGERANTFLOW", CompType::ZoneVRFasAirLoopEquip},
+};
+
+// Component types that indicate a packaged unit on an air loop branch.
+static const std::unordered_set<std::string_view> packagedUnitCompTypes = {
+    "COILSYSTEM:COOLING:DX",
+    "COILSYSTEM:HEATING:DX",
+    "COILSYSTEM:COOLING:WATER",
+    "AIRLOOPHVAC:UNITARYSYSTEM",
+    "AIRLOOPHVAC:UNITARY:FURNACE:HEATONLY",
+    "AIRLOOPHVAC:UNITARY:FURNACE:HEATCOOL",
+    "AIRLOOPHVAC:UNITARYHEATONLY",
+    "AIRLOOPHVAC:UNITARYHEATCOOL",
+    "AIRLOOPHVAC:UNITARYHEATPUMP:AIRTOAIR",
+    "AIRLOOPHVAC:UNITARYHEATPUMP:WATERTOAIR",
+    "AIRLOOPHVAC:UNITARYHEATCOOL:VAVCHANGEOVERBYPASS",
+    "AIRLOOPHVAC:UNITARYHEATPUMP:AIRTOAIR:MULTISPEED",
 };
 
 // Component types that may only be referenced by a parent component (not directly on an air loop branch).
@@ -805,33 +822,8 @@ void GetAirPathData(EnergyPlusData &state)
                         ErrorsFound = true;
                     }
                 }
-                {
-                    std::string const componentType = uppercased(CompTypes(CompNum));
-                    if (componentType == "COILSYSTEM:COOLING:DX") {
-                        PackagedUnit(AirSysNum) = true;
-                    } else if (componentType == "COILSYSTEM:HEATING:DX") {
-                        PackagedUnit(AirSysNum) = true;
-                    } else if (componentType == "COILSYSTEM:COOLING:WATER") {
-                        PackagedUnit(AirSysNum) = true;
-                    } else if (componentType == "AIRLOOPHVAC:UNITARYSYSTEM") {
-                        PackagedUnit(AirSysNum) = true;
-                    } else if (componentType == "AIRLOOPHVAC:UNITARY:FURNACE:HEATONLY") {
-                        PackagedUnit(AirSysNum) = true;
-                    } else if (componentType == "AIRLOOPHVAC:UNITARY:FURNACE:HEATCOOL") {
-                        PackagedUnit(AirSysNum) = true;
-                    } else if (componentType == "AIRLOOPHVAC:UNITARYHEATONLY") {
-                        PackagedUnit(AirSysNum) = true;
-                    } else if (componentType == "AIRLOOPHVAC:UNITARYHEATCOOL") {
-                        PackagedUnit(AirSysNum) = true;
-                    } else if (componentType == "AIRLOOPHVAC:UNITARYHEATPUMP:AIRTOAIR") {
-                        PackagedUnit(AirSysNum) = true;
-                    } else if (componentType == "AIRLOOPHVAC:UNITARYHEATPUMP:WATERTOAIR") {
-                        PackagedUnit(AirSysNum) = true;
-                    } else if (componentType == "AIRLOOPHVAC:UNITARYHEATCOOL:VAVCHANGEOVERBYPASS") {
-                        PackagedUnit(AirSysNum) = true;
-                    } else if (componentType == "AIRLOOPHVAC:UNITARYHEATPUMP:AIRTOAIR:MULTISPEED") {
-                        PackagedUnit(AirSysNum) = true;
-                    }
+                if (packagedUnitCompTypes.count(uppercased(CompTypes(CompNum))) > 0) {
+                    PackagedUnit(AirSysNum) = true;
                 }
 
             } // end of component loop
