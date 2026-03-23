@@ -2049,6 +2049,65 @@ namespace FanCoilUnits {
         }
     }
 
+    // Iteratively adjust PLR until the fan coil output matches the zone load.
+    // Used by the VarFanConsFlow control method for both cooling and heating.
+    static void iterateFanCoilPLR(EnergyPlusData &state,
+                                  int const FanCoilNum,
+                                  int const ControlledZoneNum,
+                                  bool const FirstHVACIteration,
+                                  Real64 const QZnReq,
+                                  Real64 const QUnitOutMax,
+                                  Real64 const ControlOffset,
+                                  int const MaxIterCycl,
+                                  Real64 &PLR,
+                                  Real64 &QUnitOut,
+                                  std::string const &modeLabel, // "cooling" or "heating"
+                                  std::string const &fcuName,
+                                  int &maxIterIndex)
+    {
+        Real64 Error = 1.0;
+        Real64 AbsError = 2.0 * HVAC::SmallLoad;
+        Real64 Relax = 1.0;
+        int Iter = 0;
+
+        while (std::abs(Error) > ControlOffset && std::abs(AbsError) > HVAC::SmallLoad && Iter < MaxIterCycl && PLR != 1.0) {
+            Calc4PipeFanCoil(state, FanCoilNum, ControlledZoneNum, FirstHVACIteration, QUnitOut, PLR);
+            Error = (QZnReq - QUnitOut) / QZnReq;
+            AbsError = QZnReq - QUnitOut;
+            Real64 DelPLR = (QZnReq - QUnitOut) / QUnitOutMax;
+            PLR += Relax * DelPLR;
+            PLR = max(0.0, min(1.0, PLR));
+            ++Iter;
+            if (Iter == 32) {
+                Relax = 0.5;
+            }
+            if (Iter == 65) {
+                Relax = 0.25;
+            }
+        }
+
+        // warning if not converged
+        if (Iter > (MaxIterCycl - 1)) {
+            if (maxIterIndex == 0) {
+                ShowWarningMessage(
+                    state,
+                    EnergyPlus::format("ZoneHVAC:FourPipeFanCoil=\"{}\" -- Exceeded max iterations while adjusting cycling fan sensible "
+                                       "runtime to meet the zone load within the {} convergence tolerance.",
+                                       fcuName,
+                                       modeLabel));
+                if (modeLabel == "heating") {
+                    ShowContinueError(state, EnergyPlus::format("...Requested zone load = {:.3T} [W]", QZnReq));
+                    ShowContinueError(state, EnergyPlus::format("...Fan coil capacity   = {:.3T} [W]", QUnitOut));
+                }
+                ShowContinueErrorTimeStamp(state, EnergyPlus::format("Iterations={}", MaxIterCycl));
+            }
+            ShowRecurringWarningErrorAtEnd(state,
+                                           "ZoneHVAC:FourPipeFanCoil=\"" + fcuName +
+                                               "\"  -- Exceeded max iterations error (sensible runtime) continues...",
+                                           maxIterIndex);
+        }
+    }
+
     void Sim4PipeFanCoil(EnergyPlusData &state,
                          int &FanCoilNum,               // number of the current fan coil unit being simulated
                          int const ControlledZoneNum,   // index into ZoneEqupConfig
@@ -2088,7 +2147,6 @@ namespace FanCoilUnits {
         Real64 QUnitOutMaxH; // unit output with full active heating [W]
         Real64 SpecHumOut;   // Specific humidity ratio of outlet air (kg moisture / kg moist air)
         Real64 SpecHumIn;    // Specific humidity ratio of inlet air (kg moisture / kg moist air)
-        Real64 DelPLR;
         Real64 mdot;
         // Real64 Low_mdot;
         Real64 QSensUnitOutNoATM; // unit output not including air added by supply side air terminal mixer
@@ -2120,15 +2178,12 @@ namespace FanCoilUnits {
         int OutletNode = fanCoil.AirOutNode;
         int InletNode = fanCoil.AirInNode;
         Real64 AirMassFlow = state.dataLoopNodes->Node(InletNode).MassFlowRate; // air mass flow rate [kg/sec]
-        Real64 Error = 1.0;                                                     // Error between QZnReq and QUnitOut
-        Real64 AbsError = 2.0 * HVAC::SmallLoad;                                // Absolute error between QZnReq and QUnitOut [W]   !FB
-        Real64 Relax = 1.0;
-        Real64 HWFlow = 0.0;         // hot water mass flow rate solution [kg/s]
-        Real64 HWFlowBypass = 0.0;   // hot water bypassed mass flow rate [kg/s]
-        Real64 MdotLockH = 0.0;      // saved value of locked chilled water mass flow rate [kg/s]
-        Real64 MdotLockC = 0.0;      // saved value of locked hot water mass flow rate [kg/s]
-        bool ColdFlowLocked = false; // if true cold water flow is locked
-        bool HotFlowLocked = false;  // if true Hot water flow is locked
+        Real64 HWFlow = 0.0;                                                    // hot water mass flow rate solution [kg/s]
+        Real64 HWFlowBypass = 0.0;                                              // hot water bypassed mass flow rate [kg/s]
+        Real64 MdotLockH = 0.0;                                                 // saved value of locked chilled water mass flow rate [kg/s]
+        Real64 MdotLockC = 0.0;                                                 // saved value of locked hot water mass flow rate [kg/s]
+        bool ColdFlowLocked = false;                                            // if true cold water flow is locked
+        bool HotFlowLocked = false;                                             // if true Hot water flow is locked
 
         // select capacity control method
         switch (fanCoil.CapCtrlMeth_Num) {
@@ -2933,38 +2988,19 @@ namespace FanCoilUnits {
                     PLR = 1.0;
                 }
 
-                // adjust the PLR to meet the cooling load calling Calc4PipeFanCoil repeatedly with the PLR adjusted
-                while (std::abs(Error) > ControlOffset && std::abs(AbsError) > HVAC::SmallLoad && Iter < MaxIterCycl && PLR != 1.0) {
-                    Calc4PipeFanCoil(state, FanCoilNum, ControlledZoneNum, FirstHVACIteration, QUnitOut, PLR);
-                    Error = (QZnReq - QUnitOut) / QZnReq;
-                    AbsError = QZnReq - QUnitOut;
-                    DelPLR = (QZnReq - QUnitOut) / QUnitOutMax;
-                    PLR += Relax * DelPLR;
-                    PLR = max(0.0, min(1.0, PLR));
-                    ++Iter;
-                    if (Iter == 32) {
-                        Relax = 0.5;
-                    }
-                    if (Iter == 65) {
-                        Relax = 0.25;
-                    }
-                }
-
-                // warning if not converged
-                if (Iter > (MaxIterCycl - 1)) {
-                    if (fanCoil.MaxIterIndexC == 0) {
-                        ShowWarningMessage(
-                            state,
-                            EnergyPlus::format("ZoneHVAC:FourPipeFanCoil=\"{}\" -- Exceeded max iterations while adjusting cycling fan sensible "
-                                               "runtime to meet the zone load within the cooling convergence tolerance.",
-                                               fanCoil.Name));
-                        ShowContinueErrorTimeStamp(state, EnergyPlus::format("Iterations={}", MaxIterCycl));
-                    }
-                    ShowRecurringWarningErrorAtEnd(state,
-                                                   "ZoneHVAC:FourPipeFanCoil=\"" + fanCoil.Name +
-                                                       "\"  -- Exceeded max iterations error (sensible runtime) continues...",
-                                                   fanCoil.MaxIterIndexC);
-                }
+                iterateFanCoilPLR(state,
+                                  FanCoilNum,
+                                  ControlledZoneNum,
+                                  FirstHVACIteration,
+                                  QZnReq,
+                                  QUnitOutMax,
+                                  ControlOffset,
+                                  MaxIterCycl,
+                                  PLR,
+                                  QUnitOut,
+                                  "cooling",
+                                  fanCoil.Name,
+                                  fanCoil.MaxIterIndexC);
 
                 // at the end calculate output with adjusted PLR
                 Calc4PipeFanCoil(state, FanCoilNum, ControlledZoneNum, FirstHVACIteration, QUnitOut, PLR);
@@ -2990,40 +3026,19 @@ namespace FanCoilUnits {
                     PLR = 1.0;
                 }
 
-                // adjust the PLR to meet the heating load calling Calc4PipeFanCoil repeatedly with the PLR adjusted
-                while (std::abs(Error) > ControlOffset && std::abs(AbsError) > HVAC::SmallLoad && Iter < MaxIterCycl && PLR != 1.0) {
-                    Calc4PipeFanCoil(state, FanCoilNum, ControlledZoneNum, FirstHVACIteration, QUnitOut, PLR);
-                    Error = (QZnReq - QUnitOut) / QZnReq;
-                    AbsError = QZnReq - QUnitOut;
-                    DelPLR = (QZnReq - QUnitOut) / QUnitOutMax;
-                    PLR += Relax * DelPLR;
-                    PLR = max(0.0, min(1.0, PLR));
-                    ++Iter;
-                    if (Iter == 32) {
-                        Relax = 0.5;
-                    }
-                    if (Iter == 65) {
-                        Relax = 0.25;
-                    }
-                }
-
-                // warning if not converged
-                if (Iter > (MaxIterCycl - 1)) {
-                    if (fanCoil.MaxIterIndexH == 0) {
-                        ShowWarningMessage(
-                            state,
-                            EnergyPlus::format("ZoneHVAC:FourPipeFanCoil=\"{}\" -- Exceeded max iterations while adjusting cycling fan sensible "
-                                               "runtime to meet the zone load within the heating convergence tolerance.",
-                                               fanCoil.Name));
-                        ShowContinueError(state, EnergyPlus::format("...Requested zone load = {:.3T} [W]", QZnReq));
-                        ShowContinueError(state, EnergyPlus::format("...Fan coil capacity   = {:.3T} [W]", QUnitOut));
-                        ShowContinueErrorTimeStamp(state, EnergyPlus::format("Iterations={}", MaxIterCycl));
-                    }
-                    ShowRecurringWarningErrorAtEnd(state,
-                                                   "ZoneHVAC:FourPipeFanCoil=\"" + fanCoil.Name +
-                                                       "\"  -- Exceeded max iterations error (sensible runtime) continues...",
-                                                   fanCoil.MaxIterIndexH);
-                }
+                iterateFanCoilPLR(state,
+                                  FanCoilNum,
+                                  ControlledZoneNum,
+                                  FirstHVACIteration,
+                                  QZnReq,
+                                  QUnitOutMax,
+                                  ControlOffset,
+                                  MaxIterCycl,
+                                  PLR,
+                                  QUnitOut,
+                                  "heating",
+                                  fanCoil.Name,
+                                  fanCoil.MaxIterIndexH);
 
                 // at the end calculate output with adjusted PLR
                 Calc4PipeFanCoil(state, FanCoilNum, ControlledZoneNum, FirstHVACIteration, QUnitOut, PLR);
