@@ -5663,6 +5663,78 @@ static void applyCoolSizingRat(EnergyPlusData &state,
     }
 }
 
+// Apply the user-input heating sizing ratio to final system sizing: scale mass flows, recompute
+// timestep heating capacities, and adjust zone heating flows.  Extracted from the EndSysSizingCalc block.
+static void applyHeatSizingRat(EnergyPlusData &state,
+                               DataSizing::SystemSizingData &finalSysSizing,
+                               DataSizing::SystemSizingData const &calcSysSizing,
+                               int AirLoopNum,
+                               int NumZonesCooled,
+                               int NumZonesHeated,
+                               int numOfTimeStepInDay,
+                               Real64 SysHeatSizingRat)
+{
+    using Psychrometrics::PsyCpAirFnW;
+
+    finalSysSizing.CoinHeatMassFlow = SysHeatSizingRat * calcSysSizing.CoinHeatMassFlow;
+    finalSysSizing.NonCoinHeatMassFlow = SysHeatSizingRat * calcSysSizing.NonCoinHeatMassFlow;
+    finalSysSizing.DesHeatVolFlow = SysHeatSizingRat * calcSysSizing.DesHeatVolFlow;
+
+    if (finalSysSizing.DesHeatVolFlow > 0.0) {
+        Real64 RhoAir = state.dataEnvrn->StdRhoAir;
+
+        for (int TimeStepIndex = 1; TimeStepIndex <= numOfTimeStepInDay; ++TimeStepIndex) {
+            if (calcSysSizing.HeatFlowSeq(TimeStepIndex) > 0.0) {
+                finalSysSizing.HeatFlowSeq(TimeStepIndex) = SysHeatSizingRat * calcSysSizing.HeatFlowSeq(TimeStepIndex);
+                Real64 OutAirFrac;
+                if (finalSysSizing.HeatOAOption == DataSizing::OAControl::MinOA) {
+                    OutAirFrac = RhoAir * finalSysSizing.DesOutAirVolFlow / finalSysSizing.HeatFlowSeq(TimeStepIndex);
+                    OutAirFrac = min(1.0, max(0.0, OutAirFrac));
+                } else {
+                    OutAirFrac = 1.0;
+                }
+                Real64 SysHeatMixTemp = finalSysSizing.SysHeatOutTempSeq(TimeStepIndex) * OutAirFrac +
+                                        finalSysSizing.SysHeatRetTempSeq(TimeStepIndex) * (1.0 - OutAirFrac);
+                Real64 SysHeatCap = PsyCpAirFnW(DataPrecisionGlobals::constant_zero) * finalSysSizing.HeatFlowSeq(TimeStepIndex) *
+                                    (finalSysSizing.HeatSupTemp - SysHeatMixTemp);
+                SysHeatCap = max(0.0, SysHeatCap);
+                finalSysSizing.HeatCapSeq(TimeStepIndex) = SysHeatCap;
+            }
+        }
+
+        Real64 OutAirFrac;
+        if (finalSysSizing.HeatOAOption == DataSizing::OAControl::MinOA) {
+            OutAirFrac = finalSysSizing.DesOutAirVolFlow / finalSysSizing.DesHeatVolFlow;
+            OutAirFrac = min(1.0, max(0.0, OutAirFrac));
+        } else {
+            OutAirFrac = 1.0;
+        }
+        finalSysSizing.HeatMixTemp = finalSysSizing.HeatOutTemp * OutAirFrac + finalSysSizing.HeatRetTemp * (1.0 - OutAirFrac);
+        finalSysSizing.HeatMixHumRat = finalSysSizing.HeatOutHumRat * OutAirFrac + finalSysSizing.HeatRetHumRat * (1.0 - OutAirFrac);
+        finalSysSizing.HeatCap = PsyCpAirFnW(DataPrecisionGlobals::constant_zero) * RhoAir * finalSysSizing.DesHeatVolFlow *
+                                 (finalSysSizing.HeatSupTemp - finalSysSizing.HeatMixTemp);
+        finalSysSizing.HeatCap = max(0.0, finalSysSizing.HeatCap);
+    }
+    // take account of the user input system flow rates and alter the zone flow rates to match (for terminal unit sizing)
+    if (NumZonesHeated > 0) { // IF there are centrally heated zones
+        scaleZoneHeatFlows(state,
+                           finalSysSizing,
+                           AirLoopNum,
+                           NumZonesHeated,
+                           state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitHeatSizingIndex,
+                           SysHeatSizingRat,
+                           false);
+    } else { // No centrally heated zones: use cooled zones
+        scaleZoneHeatFlows(state,
+                           finalSysSizing,
+                           AirLoopNum,
+                           NumZonesCooled,
+                           state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex,
+                           SysHeatSizingRat,
+                           true);
+    }
+}
+
 // Accumulate non-coincident cooling zone data: weighted return temps, outside air conditions,
 // and compute mixed-air conditions and cooling capacity.  Parallels accumulateNonCoinHeatZoneData.
 static void accumulateNonCoinCoolZoneData(EnergyPlusData &state,
@@ -6729,65 +6801,8 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
             }
 
             if (std::abs(SysHeatSizingRat - 1.0) > 0.00001) {
-
-                finalSysSizing.CoinHeatMassFlow = SysHeatSizingRat * calcSysSizing.CoinHeatMassFlow;
-                finalSysSizing.NonCoinHeatMassFlow = SysHeatSizingRat * calcSysSizing.NonCoinHeatMassFlow;
-                finalSysSizing.DesHeatVolFlow = SysHeatSizingRat * calcSysSizing.DesHeatVolFlow;
-
-                if (finalSysSizing.DesHeatVolFlow > 0.0) {
-
-                    for (TimeStepIndex = 1; TimeStepIndex <= numOfTimeStepInDay; ++TimeStepIndex) {
-
-                        if (calcSysSizing.HeatFlowSeq(TimeStepIndex) > 0.0) {
-
-                            finalSysSizing.HeatFlowSeq(TimeStepIndex) = SysHeatSizingRat * calcSysSizing.HeatFlowSeq(TimeStepIndex);
-                            if (finalSysSizing.HeatOAOption == DataSizing::OAControl::MinOA) {
-                                OutAirFrac = RhoAir * finalSysSizing.DesOutAirVolFlow / finalSysSizing.HeatFlowSeq(TimeStepIndex);
-                                OutAirFrac = min(1.0, max(0.0, OutAirFrac));
-                            } else {
-                                OutAirFrac = 1.0;
-                            }
-                            SysHeatMixTemp = finalSysSizing.SysHeatOutTempSeq(TimeStepIndex) * OutAirFrac +
-                                             finalSysSizing.SysHeatRetTempSeq(TimeStepIndex) * (1.0 - OutAirFrac);
-                            SysHeatMixHumRat = finalSysSizing.SysHeatOutHumRatSeq(TimeStepIndex) * OutAirFrac +
-                                               finalSysSizing.SysHeatRetHumRatSeq(TimeStepIndex) * (1.0 - OutAirFrac);
-                            SysHeatCap = PsyCpAirFnW(DataPrecisionGlobals::constant_zero) * finalSysSizing.HeatFlowSeq(TimeStepIndex) *
-                                         (finalSysSizing.HeatSupTemp - SysHeatMixTemp);
-                            SysHeatCap = max(0.0, SysHeatCap);
-                            finalSysSizing.HeatCapSeq(TimeStepIndex) = SysHeatCap;
-                        }
-                    }
-
-                    if (finalSysSizing.HeatOAOption == DataSizing::OAControl::MinOA) {
-                        OutAirFrac = finalSysSizing.DesOutAirVolFlow / finalSysSizing.DesHeatVolFlow;
-                        OutAirFrac = min(1.0, max(0.0, OutAirFrac));
-                    } else {
-                        OutAirFrac = 1.0;
-                    }
-                    finalSysSizing.HeatMixTemp = finalSysSizing.HeatOutTemp * OutAirFrac + finalSysSizing.HeatRetTemp * (1.0 - OutAirFrac);
-                    finalSysSizing.HeatMixHumRat = finalSysSizing.HeatOutHumRat * OutAirFrac + finalSysSizing.HeatRetHumRat * (1.0 - OutAirFrac);
-                    finalSysSizing.HeatCap = PsyCpAirFnW(DataPrecisionGlobals::constant_zero) * RhoAir * finalSysSizing.DesHeatVolFlow *
-                                             (finalSysSizing.HeatSupTemp - finalSysSizing.HeatMixTemp);
-                    finalSysSizing.HeatCap = max(0.0, finalSysSizing.HeatCap);
-                }
-                // take account of the user input system flow rates and alter the zone flow rates to match (for terminal unit sizing)
-                if (NumZonesHeated > 0) { // IF there are centrally heated zones
-                    scaleZoneHeatFlows(state,
-                                       finalSysSizing,
-                                       AirLoopNum,
-                                       NumZonesHeated,
-                                       state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitHeatSizingIndex,
-                                       SysHeatSizingRat,
-                                       false);
-                } else { // No centrally heated zones: use cooled zones
-                    scaleZoneHeatFlows(state,
-                                       finalSysSizing,
-                                       AirLoopNum,
-                                       NumZonesCooled,
-                                       state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex,
-                                       SysHeatSizingRat,
-                                       true);
-                }
+                applyHeatSizingRat(
+                    state, finalSysSizing, calcSysSizing, AirLoopNum, NumZonesCooled, NumZonesHeated, numOfTimeStepInDay, SysHeatSizingRat);
             }
 
             finalSysSizing.DesMainVolFlow = max(finalSysSizing.DesCoolVolFlow, finalSysSizing.DesHeatVolFlow);
