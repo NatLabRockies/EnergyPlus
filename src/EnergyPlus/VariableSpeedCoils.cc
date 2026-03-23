@@ -3201,6 +3201,48 @@ namespace VariableSpeedCoils {
         ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
     }
 
+    // Warn when rated sensible cooling capacity exceeds rated total cooling capacity.
+    static void warnSensibleExceedsTotal(EnergyPlusData &state,
+                                         std::string_view coolHeatType,
+                                         std::string_view coilName,
+                                         std::string_view autosizeContext,
+                                         std::string_view statsHeader,
+                                         Real64 sensCap,
+                                         Real64 totalCap,
+                                         Real64 mixWetBulb,
+                                         Real64 mixTemp,          // -999 means omit dry-bulb stats
+                                         Real64 totCapTempModFac) // -999 means omit modifier stats
+    {
+        static constexpr std::string_view RoutineNameLocal("SizeVarSpeedCoil");
+        ShowWarningError(state, EnergyPlus::format("COIL:{}:WATERTOAIRHEATPUMP:VARIABLESPEEDEQUATIONFIT \"{}\"", coolHeatType, coilName));
+        ShowContinueError(state, EnergyPlus::format("{}: Rated Sensible Cooling Capacity > Rated Total Cooling Capacity", RoutineNameLocal));
+        ShowContinueError(state, std::string{autosizeContext});
+        ShowContinueError(state, EnergyPlus::format("Rated Sensible Cooling Capacity = {:.2T} W", sensCap));
+        ShowContinueError(state, EnergyPlus::format("Rated Total Cooling Capacity    = {:.2T} W", totalCap));
+        ShowContinueError(state, "See eio file for further details.");
+        ShowContinueError(state, "Check Total and Sensible Cooling Capacity Coefficients to ensure they are accurate.");
+        ShowContinueError(state, "Check Zone and System Sizing objects to verify sizing inputs.");
+        ShowContinueError(state, std::string{statsHeader});
+        if (mixTemp > -998.0) {
+            ShowContinueError(state, EnergyPlus::format("Entering Air Dry-Bulb Temperature = {:.3T} C", mixTemp));
+        }
+        ShowContinueError(state, EnergyPlus::format("Entering Air Wet-Bulb Temperature = {:.3T} C", mixWetBulb));
+        ShowContinueError(state, "Entering Condenser Water Temperature used = 24.4444 C");
+        ShowContinueError(state, "Used design air and water flow rates (i.e., used 1 for ratioVL and ratioVS)");
+        if (mixTemp > -998.0) {
+            ShowContinueError(state, EnergyPlus::format("ratioTDB = {:.3T}", ((mixTemp + 283.15) / 273.15)));
+        }
+        ShowContinueError(state, EnergyPlus::format("ratioTWB = {:.3T}", ((mixWetBulb + 283.15) / 273.15)));
+        ShowContinueError(state, EnergyPlus::format("ratioTS  = {:.3T}", ((85.0 + 283.15) / 273.15)));
+        ShowContinueError(state, "Rated Sensible Cooling Capacity = Rated Total Cooling Capacity * Sensible Heat Ratio");
+        if (totCapTempModFac > -998.0) {
+            ShowContinueError(state, EnergyPlus::format("Total Cooling Capacity Modifier = {:.5T}", totCapTempModFac));
+            ShowContinueError(state, "...Rated Total Cooling Capacity = Total Design Load / Total Cooling Capacity Modifier");
+        }
+        ShowContinueError(state, "Carefully review the Load Side Total, Sensible, and Latent heat transfer rates");
+        ShowContinueError(state, "... to ensure they meet the expected manufacturers performance specifications.");
+    }
+
     // Validate that speed-level rated values are monotonically non-decreasing.
     // If any adjacent pair violates this, issue a warning and fatal error.
     static void checkSpeedLevelMonotonicity(EnergyPlusData &state,
@@ -4395,51 +4437,29 @@ namespace VariableSpeedCoils {
         // test autosized sensible and total cooling capacity for total > sensible
         if (RatedCapCoolSensAutoSized && RatedCapCoolTotalAutoSized) {
             if (varSpeedCoil.RatedCapCoolSens > varSpeedCoil.RatedCapCoolTotal) {
-                ShowWarningError(
-                    state,
-                    EnergyPlus::format("COIL:{}:WATERTOAIRHEATPUMP:VARIABLESPEEDEQUATIONFIT \"{}\"", varSpeedCoil.CoolHeatType, varSpeedCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("{}: Rated Sensible Cooling Capacity > Rated Total Cooling Capacity", RoutineName));
-                ShowContinueError(state, "Each of these capacity inputs have been autosized.");
-                ShowContinueError(state, EnergyPlus::format("Rated Sensible Cooling Capacity = {:.2T} W", varSpeedCoil.RatedCapCoolSens));
-                ShowContinueError(state, EnergyPlus::format("Rated Total Cooling Capacity    = {:.2T} W", varSpeedCoil.RatedCapCoolTotal));
-                ShowContinueError(state, "See eio file for further details.");
-                ShowContinueError(state, "Check Total and Sensible Cooling Capacity Coefficients to ensure they are accurate.");
-                ShowContinueError(state, "Check Zone and System Sizing objects to verify sizing inputs.");
-                ShowContinueError(state, "Sizing statistics:");
-                ShowContinueError(state, EnergyPlus::format("Entering Air Dry-Bulb Temperature = {:.3T} C", MixTemp));
-                ShowContinueError(state, EnergyPlus::format("Entering Air Wet-Bulb Temperature = {:.3T} C", MixWetBulb));
-                ShowContinueError(state, "Entering Condenser Water Temperature used = 24.4444 C");
-                ShowContinueError(state, "Used design air and water flow rates (i.e., used 1 for ratioVL and ratioVS)");
-                ShowContinueError(state, EnergyPlus::format("ratioTDB = {:.3T}", ((MixTemp + 283.15) / 273.15)));
-                ShowContinueError(state, EnergyPlus::format("ratioTWB = {:.3T}", ((MixWetBulb + 283.15) / 273.15)));
-                ShowContinueError(state, EnergyPlus::format("ratioTS  = {:.3T}", ((85.0 + 283.15) / 273.15)));
-                ShowContinueError(state, "Rated Sensible Cooling Capacity = Rated Total Cooling Capacity * Sensible Heat Ratio");
-                ShowContinueError(state, EnergyPlus::format("Total Cooling Capacity Modifier = {:.5T}", TotCapTempModFac));
-                ShowContinueError(state, "...Rated Total Cooling Capacity = Total Design Load / Total Cooling Capacity Modifier");
-                ShowContinueError(state, "Carefully review the Load Side Total, Sensible, and Latent heat transfer rates");
-                ShowContinueError(state, "... to ensure they meet the expected manufacturers performance specifications.");
+                warnSensibleExceedsTotal(state,
+                                         varSpeedCoil.CoolHeatType,
+                                         varSpeedCoil.Name,
+                                         "Each of these capacity inputs have been autosized.",
+                                         "Sizing statistics:",
+                                         varSpeedCoil.RatedCapCoolSens,
+                                         varSpeedCoil.RatedCapCoolTotal,
+                                         MixWetBulb,
+                                         MixTemp,
+                                         TotCapTempModFac);
             }
         } else if (RatedCapCoolTotalAutoSized) {
             if (varSpeedCoil.RatedCapCoolSens > varSpeedCoil.RatedCapCoolTotal) {
-                ShowWarningError(
-                    state,
-                    EnergyPlus::format("COIL:{}:WATERTOAIRHEATPUMP:VARIABLESPEEDEQUATIONFIT \"{}\"", varSpeedCoil.CoolHeatType, varSpeedCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("{}: Rated Sensible Cooling Capacity > Rated Total Cooling Capacity", RoutineName));
-                ShowContinueError(state, "Only the rated total capacity input is autosized, consider autosizing both inputs.");
-                ShowContinueError(state, EnergyPlus::format("Rated Sensible Cooling Capacity = {:.2T} W", varSpeedCoil.RatedCapCoolSens));
-                ShowContinueError(state, EnergyPlus::format("Rated Total Cooling Capacity    = {:.2T} W", varSpeedCoil.RatedCapCoolTotal));
-                ShowContinueError(state, "See eio file for further details.");
-                ShowContinueError(state, "Check Total and Sensible Cooling Capacity Coefficients to ensure they are accurate.");
-                ShowContinueError(state, "Check Zone and System Sizing objects to verify sizing inputs.");
-                ShowContinueError(state, "Sizing statistics for Total Cooling Capacity:");
-                ShowContinueError(state, EnergyPlus::format("Entering Air Wet-Bulb Temperature = {:.3T} C", MixWetBulb));
-                ShowContinueError(state, "Entering Condenser Water Temperature used = 24.4444 C");
-                ShowContinueError(state, "Used design air and water flow rates (i.e., used 1 for ratioVL and ratioVS)");
-                ShowContinueError(state, EnergyPlus::format("ratioTWB = {:.3T}", ((MixWetBulb + 283.15) / 273.15)));
-                ShowContinueError(state, EnergyPlus::format("ratioTS  = {:.3T}", ((85.0 + 283.15) / 273.15)));
-                ShowContinueError(state, "Rated Sensible Cooling Capacity = Rated Total Cooling Capacity * Sensible Heat Ratio");
-                ShowContinueError(state, "Carefully review the Load Side Total, Sensible, and Latent heat transfer rates");
-                ShowContinueError(state, "... to ensure they meet the expected manufacturers performance specifications.");
+                warnSensibleExceedsTotal(state,
+                                         varSpeedCoil.CoolHeatType,
+                                         varSpeedCoil.Name,
+                                         "Only the rated total capacity input is autosized, consider autosizing both inputs.",
+                                         "Sizing statistics for Total Cooling Capacity:",
+                                         varSpeedCoil.RatedCapCoolSens,
+                                         varSpeedCoil.RatedCapCoolTotal,
+                                         MixWetBulb,
+                                         -999.0,
+                                         -999.0);
             }
         }
 
