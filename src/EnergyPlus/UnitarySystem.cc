@@ -12425,6 +12425,80 @@ namespace UnitarySystems {
                                                             0.0);
     }
 
+    // Helper: handles the humidity control logic for DX MultiSpeed coils (TwoSpeed and MultiSpeed).
+    // After the sensible solve, if the outlet humidity ratio exceeds the setpoint,
+    // this routine re-simulates at low and high speeds and solves for the speed/cycling
+    // ratios that meet the humidity ratio setpoint.
+    static void dxMultiSpeedHumRatControl(EnergyPlusData &state,
+                                          std::string const &CompName,
+                                          int coilIndex,
+                                          Real64 DesOutHumRat,
+                                          Real64 &SpeedRatio,
+                                          Real64 &CycRatio,
+                                          Real64 &PartLoadFrac,
+                                          int unitarySysNum,
+                                          Real64 cycSolSpeedRatio,
+                                          int cycSolSpeedNum,
+                                          HVAC::FanOp cycSolFanOp,
+                                          bool updatePartLoadFrac)
+    {
+        int constexpr MaxIte(500);
+        Real64 constexpr HumRatAcc(1.e-6);
+        int SolFla = 0;
+
+        Real64 OutletHumRatDXCoil = state.dataDXCoils->DXCoilOutletHumRat(coilIndex);
+        if (OutletHumRatDXCoil <= DesOutHumRat) {
+            return;
+        }
+
+        CycRatio = 0.0;
+        SpeedRatio = 0.0;
+
+        DXCoils::SimDXCoilMultiSpeed(state, CompName, 0.0, 1.0, coilIndex);
+        Real64 OutletHumRatLS = state.dataDXCoils->DXCoilOutletHumRat(coilIndex);
+        if (OutletHumRatLS > DesOutHumRat) {
+            CycRatio = 1.0;
+            DXCoils::SimDXCoilMultiSpeed(state, CompName, 1.0, 1.0, coilIndex);
+            Real64 OutletHumRatHS = state.dataDXCoils->DXCoilOutletHumRat(coilIndex);
+            if (OutletHumRatHS < DesOutHumRat) {
+                solveForVarSpeedHumRat(state,
+                                       HumRatAcc,
+                                       MaxIte,
+                                       SolFla,
+                                       SpeedRatio,
+                                       coilIndex,
+                                       DesOutHumRat,
+                                       unitarySysNum,
+                                       0.0,
+                                       0,
+                                       HVAC::FanOp::Invalid,
+                                       HVAC::CompressorOp::On);
+            } else {
+                SpeedRatio = 1.0;
+            }
+            if (updatePartLoadFrac) {
+                PartLoadFrac = SpeedRatio;
+            }
+        } else {
+            SpeedRatio = 0.0;
+            solveForCyclingHumRat(state,
+                                  HumRatAcc,
+                                  MaxIte,
+                                  SolFla,
+                                  CycRatio,
+                                  coilIndex,
+                                  DesOutHumRat,
+                                  unitarySysNum,
+                                  cycSolSpeedRatio,
+                                  cycSolSpeedNum,
+                                  cycSolFanOp,
+                                  HVAC::CompressorOp::On);
+            if (updatePartLoadFrac) {
+                PartLoadFrac = CycRatio;
+            }
+        }
+    }
+
     void UnitarySys::controlCoolingSystemToSP(EnergyPlusData &state,
                                               int const AirLoopNum,            // index to air loop
                                               bool const FirstHVACIteration,   // First HVAC iteration flag
@@ -13788,107 +13862,39 @@ namespace UnitarySystems {
                         //               Simulate MultiSpeed DX coil at sensible result
                         DXCoils::SimDXCoilMultiSpeed(state, CompName, SpeedRatio, CycRatio, this->m_CoolingCoilIndex);
 
-                        OutletHumRatDXCoil = state.dataDXCoils->DXCoilOutletHumRat(this->m_CoolingCoilIndex);
                         // IF humidity setpoint is not satisfied and humidity control type is CoolReheat,
                         // then overcool to meet moisture load
-
-                        if (OutletHumRatDXCoil > DesOutHumRat) {
-
-                            CycRatio = 0.0;
-                            SpeedRatio = 0.0;
-
-                            DXCoils::SimDXCoilMultiSpeed(state, CompName, 0.0, 1.0, this->m_CoolingCoilIndex);
-                            OutletHumRatLS = state.dataDXCoils->DXCoilOutletHumRat(this->m_CoolingCoilIndex);
-                            if (OutletHumRatLS > DesOutHumRat) {
-                                CycRatio = 1.0;
-                                DXCoils::SimDXCoilMultiSpeed(state, CompName, 1.0, 1.0, this->m_CoolingCoilIndex);
-                                OutletHumRatHS = state.dataDXCoils->DXCoilOutletHumRat(this->m_CoolingCoilIndex);
-                                if (OutletHumRatHS < DesOutHumRat) {
-                                    solveForVarSpeedHumRat(state,
-                                                           HumRatAcc,
-                                                           MaxIte,
-                                                           SolFla,
-                                                           SpeedRatio,
-                                                           this->m_CoolingCoilIndex,
-                                                           DesOutHumRat,
-                                                           this->m_UnitarySysNum,
-                                                           0.0,
-                                                           0,
-                                                           HVAC::FanOp::Invalid,
-                                                           HVAC::CompressorOp::On);
-                                } else {
-                                    SpeedRatio = 1.0;
-                                }
-                                PartLoadFrac = SpeedRatio;
-                            } else {
-                                SpeedRatio = 0.0;
-                                solveForCyclingHumRat(state,
-                                                      HumRatAcc,
-                                                      MaxIte,
-                                                      SolFla,
-                                                      CycRatio,
-                                                      this->m_CoolingCoilIndex,
-                                                      DesOutHumRat,
-                                                      this->m_UnitarySysNum,
-                                                      1.0,
-                                                      this->m_CoolingSpeedNum,
-                                                      this->m_FanOpMode,
-                                                      HVAC::CompressorOp::On);
-                                PartLoadFrac = CycRatio;
-                            }
-                        }
+                        dxMultiSpeedHumRatControl(state,
+                                                  CompName,
+                                                  this->m_CoolingCoilIndex,
+                                                  DesOutHumRat,
+                                                  SpeedRatio,
+                                                  CycRatio,
+                                                  PartLoadFrac,
+                                                  this->m_UnitarySysNum,
+                                                  1.0,
+                                                  this->m_CoolingSpeedNum,
+                                                  this->m_FanOpMode,
+                                                  true);
 
                     } else if (CoilType_Num == HVAC::CoilDX_MultiSpeedCooling) {
 
                         DXCoils::SimDXCoilMultiSpeed(state, CompName, SpeedRatio, CycRatio, this->m_CoolingCoilIndex);
-                        OutletHumRatDXCoil = state.dataDXCoils->DXCoilOutletHumRat(this->m_CoolingCoilIndex);
 
                         // IF humidity setpoint is not satisfied and humidity control type is CoolReheat,
                         // then overcool to meet moisture load
-
-                        if (OutletHumRatDXCoil > DesOutHumRat) {
-
-                            CycRatio = 0.0;
-                            SpeedRatio = 0.0;
-
-                            DXCoils::SimDXCoilMultiSpeed(state, CompName, 0.0, 1.0, this->m_CoolingCoilIndex);
-                            OutletHumRatLS = state.dataDXCoils->DXCoilOutletHumRat(this->m_CoolingCoilIndex);
-                            if (OutletHumRatLS > DesOutHumRat) {
-                                CycRatio = 1.0;
-                                DXCoils::SimDXCoilMultiSpeed(state, CompName, 1.0, 1.0, this->m_CoolingCoilIndex);
-                                OutletHumRatHS = state.dataDXCoils->DXCoilOutletHumRat(this->m_CoolingCoilIndex);
-                                if (OutletHumRatHS < DesOutHumRat) {
-                                    solveForVarSpeedHumRat(state,
-                                                           HumRatAcc,
-                                                           MaxIte,
-                                                           SolFla,
-                                                           SpeedRatio,
-                                                           this->m_CoolingCoilIndex,
-                                                           DesOutHumRat,
-                                                           this->m_UnitarySysNum,
-                                                           0.0,
-                                                           0,
-                                                           HVAC::FanOp::Invalid,
-                                                           HVAC::CompressorOp::On);
-                                } else {
-                                    SpeedRatio = 1.0;
-                                }
-                            } else {
-                                SpeedRatio = 0.0;
-                                solveForCyclingHumRat(state,
-                                                      HumRatAcc,
-                                                      MaxIte,
-                                                      SolFla,
-                                                      CycRatio,
-                                                      this->m_CoolingCoilIndex,
-                                                      DesOutHumRat,
-                                                      this->m_UnitarySysNum,
-                                                      0.0,
-                                                      0,
-                                                      HVAC::FanOp::Invalid,
-                                                      HVAC::CompressorOp::On);
-                            }
-                        }
+                        dxMultiSpeedHumRatControl(state,
+                                                  CompName,
+                                                  this->m_CoolingCoilIndex,
+                                                  DesOutHumRat,
+                                                  SpeedRatio,
+                                                  CycRatio,
+                                                  PartLoadFrac,
+                                                  this->m_UnitarySysNum,
+                                                  0.0,
+                                                  0,
+                                                  HVAC::FanOp::Invalid,
+                                                  false);
                     } else if ((CoilType_Num == HVAC::Coil_CoolingAirToAirVariableSpeed) ||
                                (CoilType_Num == HVAC::Coil_CoolingWaterToAirHPVSEquationFit)) {
                         VariableSpeedCoils::SimVariableSpeedCoils(state,
