@@ -3201,6 +3201,33 @@ namespace VariableSpeedCoils {
         ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
     }
 
+    // Validate that speed-level rated values are monotonically non-decreasing.
+    // If any adjacent pair violates this, issue a warning and fatal error.
+    static void checkSpeedLevelMonotonicity(EnergyPlusData &state,
+                                            std::string_view coilType,
+                                            std::string_view coilName,
+                                            int numSpeeds,
+                                            Array1D<Real64> const &ratedValues,
+                                            Array1D<Real64> const &reportValues,
+                                            std::string_view quantityDesc,
+                                            Real64 toleranceFactor = 1.0)
+    {
+        for (int Mode = 1; Mode <= numSpeeds - 1; ++Mode) {
+            if (ratedValues(Mode) > ratedValues(Mode + 1) * toleranceFactor) {
+                ShowWarningError(state,
+                                 EnergyPlus::format("SizeDXCoil: {} {}, Speed {} {} must be less than or equal to Speed {} {}.",
+                                                    coilType,
+                                                    coilName,
+                                                    Mode,
+                                                    quantityDesc,
+                                                    Mode + 1,
+                                                    quantityDesc));
+                ShowContinueError(state, EnergyPlus::format("Instead, {:.2R} > {:.2R}", reportValues(Mode), reportValues(Mode + 1)));
+                ShowFatalError(state, "Preceding conditions cause termination.");
+            }
+        }
+    }
+
     void SizeVarSpeedCoil(EnergyPlusData &state, int const DXCoilNum, bool &ErrorsFound)
     {
 
@@ -4029,23 +4056,14 @@ namespace VariableSpeedCoils {
                                          RatedWaterVolFlowRateDes);
             // Ensure water flow rate at lower speed must be lower or
             // equal to the flow rate at higher speed. Otherwise, a severe error is issued.
-            for (Mode = 1; Mode <= varSpeedCoil.NumOfSpeeds - 1; ++Mode) {
-                if (varSpeedCoil.MSRatedWaterVolFlowRate(Mode) > varSpeedCoil.MSRatedWaterVolFlowRate(Mode + 1) * 1.05) {
-                    ShowWarningError(
-                        state,
-                        EnergyPlus::format(
-                            "SizeDXCoil: {} {}, Speed {} Rated Air Flow Rate must be less than or equal to Speed {} Rated Air Flow Rate.",
-                            varSpeedCoil.VarSpeedCoilType,
-                            varSpeedCoil.Name,
-                            Mode,
-                            Mode + 1));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("Instead, {:.2R} > {:.2R}",
-                                                         varSpeedCoil.MSRatedAirVolFlowRate(Mode),
-                                                         varSpeedCoil.MSRatedAirVolFlowRate(Mode + 1)));
-                    ShowFatalError(state, "Preceding conditions cause termination.");
-                }
-            }
+            checkSpeedLevelMonotonicity(state,
+                                        varSpeedCoil.VarSpeedCoilType,
+                                        varSpeedCoil.Name,
+                                        varSpeedCoil.NumOfSpeeds,
+                                        varSpeedCoil.MSRatedWaterVolFlowRate,
+                                        varSpeedCoil.MSRatedAirVolFlowRate,
+                                        "Rated Air Flow Rate",
+                                        1.05);
         } else {
             if (varSpeedCoil.RatedWaterVolFlowRate > 0.0 && RatedWaterVolFlowRateDes > 0.0) {
                 RatedWaterVolFlowRateUser = varSpeedCoil.RatedWaterVolFlowRate;
@@ -4103,39 +4121,22 @@ namespace VariableSpeedCoils {
 
         // Ensure air flow rate at lower speed must be lower or
         // equal to the flow rate at higher speed. Otherwise, a severe error is issued.
-        for (Mode = 1; Mode <= varSpeedCoil.NumOfSpeeds - 1; ++Mode) {
-            if (varSpeedCoil.MSRatedAirVolFlowRate(Mode) > varSpeedCoil.MSRatedAirVolFlowRate(Mode + 1)) {
-                ShowWarningError(
-                    state,
-                    EnergyPlus::format("SizeDXCoil: {} {}, Speed {} Rated Air Flow Rate must be less than or equal to Speed {} Rated Air Flow Rate.",
-                                       varSpeedCoil.VarSpeedCoilType,
-                                       varSpeedCoil.Name,
-                                       Mode,
-                                       Mode + 1));
-                ShowContinueError(state,
-                                  EnergyPlus::format("Instead, {:.2R} > {:.2R}",
-                                                     varSpeedCoil.MSRatedAirVolFlowRate(Mode),
-                                                     varSpeedCoil.MSRatedAirVolFlowRate(Mode + 1)));
-                ShowFatalError(state, "Preceding conditions cause termination.");
-            }
-        }
+        checkSpeedLevelMonotonicity(state,
+                                    varSpeedCoil.VarSpeedCoilType,
+                                    varSpeedCoil.Name,
+                                    varSpeedCoil.NumOfSpeeds,
+                                    varSpeedCoil.MSRatedAirVolFlowRate,
+                                    varSpeedCoil.MSRatedAirVolFlowRate,
+                                    "Rated Air Flow Rate");
 
         // Ensure capacity at lower speed must be lower or equal to the capacity at higher speed.
-        for (Mode = 1; Mode <= varSpeedCoil.NumOfSpeeds - 1; ++Mode) {
-            if (varSpeedCoil.MSRatedTotCap(Mode) > varSpeedCoil.MSRatedTotCap(Mode + 1)) {
-                ShowWarningError(
-                    state,
-                    EnergyPlus::format("SizeDXCoil: {} {}, Speed {} Rated Total Cooling Capacity must be less than or equal to Speed {} Rated Total "
-                                       "Cooling Capacity.",
-                                       varSpeedCoil.VarSpeedCoilType,
-                                       varSpeedCoil.Name,
-                                       Mode,
-                                       Mode + 1));
-                ShowContinueError(
-                    state, EnergyPlus::format("Instead, {:.2R} > {:.2R}", varSpeedCoil.MSRatedTotCap(Mode), varSpeedCoil.MSRatedTotCap(Mode + 1)));
-                ShowFatalError(state, "Preceding conditions cause termination.");
-            }
-        }
+        checkSpeedLevelMonotonicity(state,
+                                    varSpeedCoil.VarSpeedCoilType,
+                                    varSpeedCoil.Name,
+                                    varSpeedCoil.NumOfSpeeds,
+                                    varSpeedCoil.MSRatedTotCap,
+                                    varSpeedCoil.MSRatedTotCap,
+                                    "Rated Total Cooling Capacity");
 
         // convert SHR to rated Bypass factor and effective air side surface area
         if (varSpeedCoil.VSCoilType == HVAC::Coil_CoolingWaterToAirHPVSEquationFit ||
