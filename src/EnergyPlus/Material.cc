@@ -207,6 +207,18 @@ static void checkFieldInRange01(EnergyPlusData &state, bool &ErrorsFound, ErrorO
     }
 }
 
+// Helper to read a numeric input field into a given variable and validate it is in [0, 1].
+// Uses the legacy "Illegal value" two-line error format matching existing WindowMaterial:Screen messages.
+static void readFieldAndValidateRange01(EnergyPlusData &state, Real64 &outVar, int fieldIdx)
+{
+    auto &s_ipsc = state.dataIPShortCut;
+    outVar = s_ipsc->rNumericArgs(fieldIdx);
+    if (outVar < 0.0 || outVar > 1.0) {
+        ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value.");
+        ShowContinueError(state, s_ipsc->cNumericFieldNames(fieldIdx) + " must be greater than or equal to 0 and less than or equal to 1.");
+    }
+}
+
 // Helper to call getObjectItem with the standard set of material input arguments.
 // Wraps the repetitive 12-argument call that appears for every material type.
 static void getMaterialInput(EnergyPlusData &state, int Loop, int &NumAlphas, int &NumNums, int &IOStat)
@@ -1333,29 +1345,10 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
             ShowContinueError(state, s_ipsc->cNumericFieldNames(7) + " must be greater than or equal to 0.001 and less than or equal to 1.");
         }
 
-        matScreen->topOpeningMult = s_ipsc->rNumericArgs(8);
-        if (matScreen->topOpeningMult < 0.0 || matScreen->topOpeningMult > 1.0) {
-            ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value.");
-            ShowContinueError(state, s_ipsc->cNumericFieldNames(8) + " must be greater than or equal to 0 and less than or equal to 1.");
-        }
-
-        matScreen->bottomOpeningMult = s_ipsc->rNumericArgs(9);
-        if (matScreen->bottomOpeningMult < 0.0 || matScreen->bottomOpeningMult > 1.0) {
-            ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value.");
-            ShowContinueError(state, s_ipsc->cNumericFieldNames(9) + " must be greater than or equal to 0 and less than or equal to 1.");
-        }
-
-        matScreen->leftOpeningMult = s_ipsc->rNumericArgs(10);
-        if (matScreen->leftOpeningMult < 0.0 || matScreen->leftOpeningMult > 1.0) {
-            ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value.");
-            ShowContinueError(state, s_ipsc->cNumericFieldNames(10) + " must be greater than or equal to 0 and less than or equal to 1.");
-        }
-
-        matScreen->rightOpeningMult = s_ipsc->rNumericArgs(11);
-        if (matScreen->rightOpeningMult < 0.0 || matScreen->rightOpeningMult > 1.0) {
-            ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value.");
-            ShowContinueError(state, s_ipsc->cNumericFieldNames(11) + " must be greater than or equal to 0 and less than or equal to 1.");
-        }
+        readFieldAndValidateRange01(state, matScreen->topOpeningMult, 8);
+        readFieldAndValidateRange01(state, matScreen->bottomOpeningMult, 9);
+        readFieldAndValidateRange01(state, matScreen->leftOpeningMult, 10);
+        readFieldAndValidateRange01(state, matScreen->rightOpeningMult, 11);
 
         matScreen->mapDegResolution = s_ipsc->rNumericArgs(12);
         if (matScreen->mapDegResolution < 0 || matScreen->mapDegResolution > 5 || matScreen->mapDegResolution == 4) {
