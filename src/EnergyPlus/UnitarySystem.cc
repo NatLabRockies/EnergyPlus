@@ -1577,6 +1577,25 @@ namespace UnitarySystems {
         }
     }
 
+    // Helper: ensure multi-speed flow rate arrays are allocated to the required size.
+    // Used for both cooling and heating arrays in sizeSystem.
+    static void
+    ensureMultiSpeedArrays(std::vector<Real64> &volFlowRate, std::vector<Real64> &massFlowRate, std::vector<Real64> &speedRatio, int numSpeeds)
+    {
+        if (numSpeeds <= 0) {
+            return;
+        }
+        if (volFlowRate.empty()) {
+            volFlowRate.resize(numSpeeds + 1);
+        }
+        if (massFlowRate.empty()) {
+            massFlowRate.resize(numSpeeds + 1);
+        }
+        if (speedRatio.empty()) {
+            speedRatio.resize(numSpeeds + 1);
+        }
+    }
+
     // Helper: size an outdoor air flow rate field and report design vs user-specified values.
     // Used for cooling, heating, and no-load OA flow rate sizing in sizeSystem.
     static void sizeOutdoorAirFlowRate(EnergyPlusData &state,
@@ -2686,17 +2705,7 @@ namespace UnitarySystems {
         // initialize multi-speed coils
         if ((this->m_CoolingCoilType_Num == HVAC::Coil_CoolingWaterToAirHPVSEquationFit) ||
             (this->m_CoolingCoilType_Num == HVAC::Coil_CoolingAirToAirVariableSpeed)) {
-            if (this->m_NumOfSpeedCooling > 0) {
-                if (this->m_CoolVolumeFlowRate.empty()) {
-                    this->m_CoolVolumeFlowRate.resize(this->m_NumOfSpeedCooling + 1);
-                }
-                if (this->m_CoolMassFlowRate.empty()) {
-                    this->m_CoolMassFlowRate.resize(this->m_NumOfSpeedCooling + 1);
-                }
-                if (this->m_MSCoolingSpeedRatio.empty()) {
-                    this->m_MSCoolingSpeedRatio.resize(this->m_NumOfSpeedCooling + 1);
-                }
-            }
+            ensureMultiSpeedArrays(this->m_CoolVolumeFlowRate, this->m_CoolMassFlowRate, this->m_MSCoolingSpeedRatio, this->m_NumOfSpeedCooling);
 
             MSHPIndex = this->m_DesignSpecMSHPIndex;
             if (MSHPIndex > -1) {
@@ -2852,17 +2861,7 @@ namespace UnitarySystems {
                 }
             }
         } else if (this->m_CoolingCoilType_Num == HVAC::CoilDX_Cooling) {
-            if (this->m_NumOfSpeedCooling > 0) {
-                if (this->m_CoolVolumeFlowRate.empty()) {
-                    this->m_CoolVolumeFlowRate.resize(this->m_NumOfSpeedCooling + 1);
-                }
-                if (this->m_CoolMassFlowRate.empty()) {
-                    this->m_CoolMassFlowRate.resize(this->m_NumOfSpeedCooling + 1);
-                }
-                if (this->m_MSCoolingSpeedRatio.empty()) {
-                    this->m_MSCoolingSpeedRatio.resize(this->m_NumOfSpeedCooling + 1);
-                }
-            }
+            ensureMultiSpeedArrays(this->m_CoolVolumeFlowRate, this->m_CoolMassFlowRate, this->m_MSCoolingSpeedRatio, this->m_NumOfSpeedCooling);
 
             // it feels like we are jamming the rectangular DXCoil into an oval box here
             MSHPIndex = this->m_DesignSpecMSHPIndex;
@@ -2933,17 +2932,7 @@ namespace UnitarySystems {
             }
 
         } else if (this->m_CoolingCoilType_Num == HVAC::CoilDX_MultiSpeedCooling || this->m_CoolingCoilType_Num == HVAC::CoilDX_CoolingTwoSpeed) {
-            if (this->m_NumOfSpeedCooling > 0) {
-                if (this->m_CoolVolumeFlowRate.empty()) {
-                    this->m_CoolVolumeFlowRate.resize(this->m_NumOfSpeedCooling + 1);
-                }
-                if (this->m_CoolMassFlowRate.empty()) {
-                    this->m_CoolMassFlowRate.resize(this->m_NumOfSpeedCooling + 1);
-                }
-                if (this->m_MSCoolingSpeedRatio.empty()) {
-                    this->m_MSCoolingSpeedRatio.resize(this->m_NumOfSpeedCooling + 1);
-                }
-            }
+            ensureMultiSpeedArrays(this->m_CoolVolumeFlowRate, this->m_CoolMassFlowRate, this->m_MSCoolingSpeedRatio, this->m_NumOfSpeedCooling);
 
             // set the multi-speed high flow rate variable in case a non-zero air flow rate resides on the coil inlet during sizing (e.g., upstream
             // system ran prior to this one)
@@ -2989,17 +2978,7 @@ namespace UnitarySystems {
                 this->m_NoLoadAirFlowRateRatio = this->m_MaxNoCoolHeatAirVolFlow / this->m_DesignFanVolFlowRate;
             }
         } else if (this->m_CoolingCoilType_Num == HVAC::Coil_CoolingWater || this->m_CoolingCoilType_Num == HVAC::Coil_CoolingWaterDetailed) {
-            if (this->m_NumOfSpeedCooling > 0) {
-                if (this->m_CoolVolumeFlowRate.empty()) {
-                    this->m_CoolVolumeFlowRate.resize(this->m_NumOfSpeedCooling + 1);
-                }
-                if (this->m_CoolMassFlowRate.empty()) {
-                    this->m_CoolMassFlowRate.resize(this->m_NumOfSpeedCooling + 1);
-                }
-                if (this->m_MSCoolingSpeedRatio.empty()) {
-                    this->m_MSCoolingSpeedRatio.resize(this->m_NumOfSpeedCooling + 1);
-                }
-            }
+            ensureMultiSpeedArrays(this->m_CoolVolumeFlowRate, this->m_CoolMassFlowRate, this->m_MSCoolingSpeedRatio, this->m_NumOfSpeedCooling);
             MSHPIndex = this->m_DesignSpecMSHPIndex;
 
             if (MSHPIndex > -1) {
@@ -3024,17 +3003,7 @@ namespace UnitarySystems {
 
         if (this->m_HeatingCoilType_Num == HVAC::CoilDX_MultiSpeedHeating || this->m_HeatingCoilType_Num == HVAC::Coil_HeatingElectric_MultiStage ||
             this->m_HeatingCoilType_Num == HVAC::Coil_HeatingGas_MultiStage) {
-            if (this->m_NumOfSpeedHeating > 0) {
-                if (this->m_HeatVolumeFlowRate.empty()) {
-                    this->m_HeatVolumeFlowRate.resize(this->m_NumOfSpeedHeating + 1);
-                }
-                if (this->m_HeatMassFlowRate.empty()) {
-                    this->m_HeatMassFlowRate.resize(this->m_NumOfSpeedHeating + 1);
-                }
-                if (this->m_MSHeatingSpeedRatio.empty()) {
-                    this->m_MSHeatingSpeedRatio.resize(this->m_NumOfSpeedHeating + 1);
-                }
-            }
+            ensureMultiSpeedArrays(this->m_HeatVolumeFlowRate, this->m_HeatMassFlowRate, this->m_MSHeatingSpeedRatio, this->m_NumOfSpeedHeating);
 
             MSHPIndex = this->m_DesignSpecMSHPIndex;
 
@@ -3131,17 +3100,7 @@ namespace UnitarySystems {
                                                   state.dataVariableSpeedCoils->VarSpeedCoil(this->m_HeatingCoilIndex).Name));
             }
 
-            if (this->m_NumOfSpeedHeating > 0) {
-                if (this->m_HeatVolumeFlowRate.empty()) {
-                    this->m_HeatVolumeFlowRate.resize(this->m_NumOfSpeedHeating + 1);
-                }
-                if (this->m_HeatMassFlowRate.empty()) {
-                    this->m_HeatMassFlowRate.resize(this->m_NumOfSpeedHeating + 1);
-                }
-                if (this->m_MSHeatingSpeedRatio.empty()) {
-                    this->m_MSHeatingSpeedRatio.resize(this->m_NumOfSpeedHeating + 1);
-                }
-            }
+            ensureMultiSpeedArrays(this->m_HeatVolumeFlowRate, this->m_HeatMassFlowRate, this->m_MSHeatingSpeedRatio, this->m_NumOfSpeedHeating);
 
             for (Iter = this->m_NumOfSpeedHeating; Iter >= 1; --Iter) {
                 // using only for PTUnit to UnitarySystem conversion for the time being, should use this all the time
@@ -3222,17 +3181,7 @@ namespace UnitarySystems {
                                            state.dataUnitarySystems->initUnitarySystemsErrorsFound);
             }
 
-            if (this->m_NumOfSpeedHeating > 0) {
-                if (this->m_HeatVolumeFlowRate.empty()) {
-                    this->m_HeatVolumeFlowRate.resize(this->m_NumOfSpeedHeating + 1);
-                }
-                if (this->m_HeatMassFlowRate.empty()) {
-                    this->m_HeatMassFlowRate.resize(this->m_NumOfSpeedHeating + 1);
-                }
-                if (this->m_MSHeatingSpeedRatio.empty()) {
-                    this->m_MSHeatingSpeedRatio.resize(this->m_NumOfSpeedHeating + 1);
-                }
-            }
+            ensureMultiSpeedArrays(this->m_HeatVolumeFlowRate, this->m_HeatMassFlowRate, this->m_MSHeatingSpeedRatio, this->m_NumOfSpeedHeating);
 
             MSHPIndex = this->m_DesignSpecMSHPIndex;
             if (MSHPIndex > -1) {
