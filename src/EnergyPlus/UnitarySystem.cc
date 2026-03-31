@@ -140,6 +140,15 @@ namespace UnitarySystems {
             return;
         }
 
+        // Save the current AFN coil runtime fraction for comparison with the one calculated below
+        Real64 refAFNLoopHeatingCoilMaxRTF(0.0);
+        Real64 refAFNLoopCoolingCoilMaxRTF(0.0);
+        if (state.afn->distribution_simulated && this->m_sysType != SysType::PackagedAC && this->m_sysType != SysType::PackagedHP &&
+            this->m_sysType != SysType::PackagedWSHP && AirLoopNum > 0) {
+            refAFNLoopHeatingCoilMaxRTF = state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopHeatingCoilMaxRTF;
+            refAFNLoopCoolingCoilMaxRTF = state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopDXCoilRTF;
+        }
+
         // MassFlowRateMaxAvail issues are impeding non-VAV air loop equipment by limiting air flow
         // temporarily open up flow limits while simulating, and then set this same value at the INLET after this parent has simulated
         Real64 tempMassFlowRateMaxAvail = state.dataLoopNodes->Node(this->AirInNode).MassFlowRateMaxAvail;
@@ -159,6 +168,128 @@ namespace UnitarySystems {
 
         // Report the current output
         this->reportUnitarySystem(state, AirLoopNum);
+
+        // Get the actual maximum RTF for AFN simulations
+        if (state.afn->distribution_simulated && this->m_sysType != SysType::PackagedAC && this->m_sysType != SysType::PackagedHP &&
+            this->m_sysType != SysType::PackagedWSHP && AirLoopNum > 0) {
+            Real64 heatingCoilRTF = 0.0;
+            Real64 coolingCoilRTF = 0.0;
+            Real64 suppHeatingCoilRTF = 0.0;
+            bool errorFound(false);
+            switch (this->m_HeatingCoilType_Num) {
+            case HVAC::Coil_HeatingGasOrOtherFuel:
+            case HVAC::Coil_HeatingElectric:
+            case HVAC::Coil_HeatingDesuperheater:
+            case HVAC::Coil_HeatingElectric_MultiStage:
+            case HVAC::Coil_HeatingGas_MultiStage: {
+                if (this->m_HeatingCoilIndex > 0) {
+                    heatingCoilRTF = state.dataHeatingCoils->HeatingCoil(this->m_HeatingCoilIndex).RTF;
+                }
+            } break;
+            case HVAC::CoilDX_HeatingEmpirical:
+            case HVAC::CoilDX_MultiSpeedHeating: {
+                if (this->m_HeatingCoilIndex > 0) {
+                    heatingCoilRTF = state.dataDXCoils->DXCoil(this->m_HeatingCoilIndex).HeatingCoilRuntimeFraction;
+                }
+            } break;
+            case HVAC::Coil_HeatingWaterToAirHPSimple: {
+                if (this->m_HeatingCoilIndex > 0) {
+                    heatingCoilRTF = state.dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(this->m_HeatingCoilIndex).RunFrac;
+                }
+            } break;
+            case HVAC::Coil_HeatingWaterToAirHP: {
+                if (this->m_HeatingCoilIndex > 0) {
+                    heatingCoilRTF = state.dataWaterToAirHeatPump->WatertoAirHP(this->m_HeatingCoilIndex).RunFrac;
+                }
+            } break;
+            case HVAC::Coil_HeatingWaterToAirHPVSEquationFit:
+            case HVAC::Coil_HeatingAirToAirVariableSpeed: {
+                if (this->m_HeatingCoilIndex > 0) {
+                    heatingCoilRTF = state.dataVariableSpeedCoils->VarSpeedCoil(this->m_HeatingCoilIndex).RunFrac;
+                }
+            } break;
+            case HVAC::Coil_HeatingSteam:
+            case HVAC::Coil_HeatingWater:
+            case HVAC::Coil_UserDefined: {
+                heatingCoilRTF = 1.0;
+            } break;
+            default:;
+            }
+            if (errorFound) {
+                ShowSevereError(state, EnergyPlus::format("The index of \"{}\" is not found", this->m_HeatingCoilName));
+                ShowContinueError(state, EnergyPlus::format("...occurs for {}", this->m_HeatingCoilName));
+                errorFound = false;
+            }
+            switch (this->m_SuppHeatCoilType_Num) {
+            case HVAC::Coil_HeatingGasOrOtherFuel:
+            case HVAC::Coil_HeatingElectric:
+            case HVAC::Coil_HeatingDesuperheater:
+            case HVAC::Coil_HeatingElectric_MultiStage: {
+                if (this->m_SuppHeatCoilIndex > 0) {
+                    suppHeatingCoilRTF = state.dataHeatingCoils->HeatingCoil(this->m_SuppHeatCoilIndex).RTF;
+                }
+            } break;
+            case HVAC::Coil_HeatingSteam:
+            case HVAC::Coil_HeatingWater:
+            case HVAC::Coil_UserDefined: {
+                heatingCoilRTF = 1.0;
+            } break;
+            default:;
+            }
+            if (errorFound) {
+                ShowSevereError(state, EnergyPlus::format("The index of \"{}\" is not found", this->m_SuppHeatCoilName));
+                ShowContinueError(state, EnergyPlus::format("...occurs for {}", this->m_SuppHeatCoilName));
+                errorFound = false;
+            }
+            state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopHeatingCoilMaxRTF =
+                max(refAFNLoopHeatingCoilMaxRTF, heatingCoilRTF, suppHeatingCoilRTF);
+
+            switch (this->m_CoolingCoilType_Num) {
+            case HVAC::CoilDX_Cooling: {
+                if (this->m_CoolingCoilIndex > 0) {
+                    coolingCoilRTF = state.dataCoilCoolingDX->coilCoolingDXs[this->m_CoolingCoilIndex].coolingCoilRuntimeFraction;
+                }
+            } break;
+            case HVAC::CoilDX_CoolingSingleSpeed:
+            case HVAC::CoilDX_MultiSpeedCooling:
+            case HVAC::CoilDX_CoolingTwoSpeed:
+            case HVAC::CoilDX_CoolingTwoStageWHumControl: {
+                if (this->m_CoolingCoilIndex > 0) {
+                    coolingCoilRTF = state.dataDXCoils->DXCoil(this->m_CoolingCoilIndex).CoolingCoilRuntimeFraction;
+                }
+            } break;
+            case HVAC::CoilDX_PackagedThermalStorageCooling: {
+                if (this->m_CoolingCoilIndex > 0) {
+                    coolingCoilRTF = state.dataPackagedThermalStorageCoil->TESCoil(this->m_CoolingCoilIndex).RuntimeFraction;
+                }
+            } break;
+            case HVAC::Coil_CoolingWaterToAirHPSimple: {
+                if (this->m_CoolingCoilIndex > 0) {
+                    coolingCoilRTF = state.dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(this->m_CoolingCoilIndex).RunFrac;
+                }
+            } break;
+            case HVAC::Coil_CoolingWaterToAirHP: {
+                if (this->m_CoolingCoilIndex > 0) {
+                    coolingCoilRTF = state.dataWaterToAirHeatPump->WatertoAirHP(this->m_CoolingCoilIndex).RunFrac;
+                }
+            } break;
+            case HVAC::Coil_CoolingWaterToAirHPVSEquationFit:
+            case HVAC::Coil_CoolingAirToAirVariableSpeed: {
+                if (this->m_CoolingCoilIndex > 0) {
+                    coolingCoilRTF = state.dataVariableSpeedCoils->VarSpeedCoil(this->m_CoolingCoilIndex).RunFrac;
+                }
+            } break;
+            case HVAC::Coil_CoolingWater:
+            case HVAC::Coil_CoolingWaterDetailed:
+            case HVAC::Coil_UserDefined:
+            case HVAC::CoilDX_CoolingHXAssisted:
+            case HVAC::CoilWater_CoolingHXAssisted: {
+                coolingCoilRTF = 1.0;
+            } break;
+            default:;
+            }
+            state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopDXCoilRTF = max(refAFNLoopCoolingCoilMaxRTF, coolingCoilRTF);
+        }
 
         // CoolActive = false; // set in call from ZoneEquipmentManager
         if (this->m_CoolingPartLoadFrac * double(CompressorOn) > 0.0) {
@@ -14597,17 +14728,6 @@ namespace UnitarySystems {
         int CompIndex = this->m_HeatingCoilIndex;
         HVAC::FanOp fanOp = this->m_FanOpMode;
         Real64 DesOutTemp = this->m_DesiredOutletTemp;
-
-        Real64 LoopHeatingCoilMaxRTFSave = 0.0;
-        Real64 LoopDXCoilMaxRTFSave = 0.0;
-        if (state.afn->distribution_simulated && this->m_sysType != SysType::PackagedAC && this->m_sysType != SysType::PackagedHP &&
-            this->m_sysType != SysType::PackagedWSHP) {
-            LoopHeatingCoilMaxRTFSave = state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopHeatingCoilMaxRTF;
-            state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopHeatingCoilMaxRTF = 0.0;
-            LoopDXCoilMaxRTFSave = state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopDXCoilRTF;
-            state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopDXCoilRTF = 0.0;
-        }
-
         Real64 PartLoadFrac = 0.0;
         Real64 SpeedRatio = 0.0;
         Real64 CycRatio = 0.0;
@@ -15233,14 +15353,6 @@ namespace UnitarySystems {
         this->m_HeatingCycRatio = CycRatio;
         HeatCoilLoad = ReqOutput;
 
-        if (state.afn->distribution_simulated && this->m_sysType != SysType::PackagedAC && this->m_sysType != SysType::PackagedHP &&
-            this->m_sysType != SysType::PackagedWSHP) {
-            state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopHeatingCoilMaxRTF =
-                max(state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopHeatingCoilMaxRTF, LoopHeatingCoilMaxRTFSave);
-            state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopDXCoilRTF =
-                max(state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopDXCoilRTF, LoopDXCoilMaxRTFSave);
-        }
-
         if (this->m_HeatingCoilType_Num == HVAC::Coil_HeatingWater || this->m_HeatingCoilType_Num == HVAC::Coil_HeatingSteam) {
             mdot = PartLoadFrac * this->MaxHeatCoilFluidFlow;
             PlantUtilities::SetComponentFlowRate(state, mdot, this->HeatCoilFluidInletNode, this->HeatCoilFluidOutletNodeNum, this->HeatCoilPlantLoc);
@@ -15282,17 +15394,6 @@ namespace UnitarySystems {
         auto &outletNode = state.dataLoopNodes->Node(this->SuppCoilOutletNodeNum);
         Real64 DesOutTemp = this->m_DesiredOutletTemp;
         std::string_view CompName = this->m_SuppHeatCoilName;
-
-        Real64 LoopHeatingCoilMaxRTFSave = 0.0;
-        Real64 LoopDXCoilMaxRTFSave = 0.0;
-        if (state.afn->distribution_simulated && this->m_sysType != SysType::PackagedAC && this->m_sysType != SysType::PackagedHP &&
-            this->m_sysType != SysType::PackagedWSHP) {
-            auto &afnInfo = state.dataAirLoop->AirLoopAFNInfo(AirLoopNum);
-            LoopHeatingCoilMaxRTFSave = afnInfo.AFNLoopHeatingCoilMaxRTF;
-            afnInfo.AFNLoopHeatingCoilMaxRTF = 0.0;
-            LoopDXCoilMaxRTFSave = afnInfo.AFNLoopDXCoilRTF;
-            afnInfo.AFNLoopDXCoilRTF = 0.0;
-        }
 
         // IF there is a fault of coil SAT Sensor
         if (this->m_FaultyCoilSATFlag) {
@@ -15645,14 +15746,6 @@ namespace UnitarySystems {
 
             } // IF SENSIBLE LOAD
         } // IF((GetCurrentScheduleValue(state, UnitarySystem(UnitarySysNum)%m_SysAvailSchedPtr) > 0.0d0) .AND. &
-
-        // LoopHeatingCoilMaxRTF used for AirflowNetwork gets set in child components (gas and fuel)
-        if (state.afn->distribution_simulated && this->m_sysType != SysType::PackagedAC && this->m_sysType != SysType::PackagedHP &&
-            this->m_sysType != SysType::PackagedWSHP) {
-            auto &afnInfo = state.dataAirLoop->AirLoopAFNInfo(AirLoopNum);
-            afnInfo.AFNLoopHeatingCoilMaxRTF = max(afnInfo.AFNLoopHeatingCoilMaxRTF, LoopHeatingCoilMaxRTFSave);
-            afnInfo.AFNLoopDXCoilRTF = max(afnInfo.AFNLoopDXCoilRTF, LoopDXCoilMaxRTFSave);
-        }
 
         if (this->m_SuppHeatCoilType_Num == HVAC::Coil_HeatingWater || this->m_SuppHeatCoilType_Num == HVAC::Coil_HeatingSteam) {
             mdot = PartLoadFrac * this->m_MaxSuppCoilFluidFlow;
