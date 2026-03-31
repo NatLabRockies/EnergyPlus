@@ -780,18 +780,7 @@ InputProcessor::MaxFields InputProcessor::findMaxFields(
                 auto const &legacy_idd_extensibles = legacy_idd_extensibles_iter.value();
                 auto const &epJSON_extensions_array = epJSON_extensions_array_itr.value();
 
-                for (auto const &exts : epJSON_extensions_array.items()) {
-                    std::size_t max_extensible_field = 0;
-                    for (auto const &ext : exts.value().items()) {
-                        auto const &ext_key = ext.key();
-                        for (std::size_t i = max_extensible_field; i < legacy_idd_extensibles.size(); ++i) {
-                            if (ext_key == legacy_idd_extensibles[i].get<std::string>()) {
-                                max_extensible_field = (i + 1);
-                            }
-                        }
-                    }
-                    maxFields.max_extensible_fields += max_extensible_field;
-                }
+                maxFields.max_extensible_fields += epJSON_extensions_array.size() * legacy_idd_extensibles.size();
             }
         }
     }

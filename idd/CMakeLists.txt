@@ -61,6 +61,8 @@ install(FILES "versions/V23-1-0-Energy+.idd" DESTINATION "PreProcess/IDFVersionU
 install(FILES "versions/V23-2-0-Energy+.idd" DESTINATION "PreProcess/IDFVersionUpdater")
 install(FILES "versions/V24-1-0-Energy+.idd" DESTINATION "PreProcess/IDFVersionUpdater")
 install(FILES "versions/V24-2-0-Energy+.idd" DESTINATION "PreProcess/IDFVersionUpdater")
+install(FILES "versions/V25-1-0-Energy+.idd" DESTINATION "PreProcess/IDFVersionUpdater")
+install(FILES "versions/V25-2-0-Energy+.idd" DESTINATION "PreProcess/IDFVersionUpdater")
 
 # For fortran...
 set(PREVIOUS_IDD "${CMAKE_CURRENT_SOURCE_DIR}/versions/V${PREV_RELEASE_MAJOR}-${PREV_RELEASE_MINOR}-${PREV_RELEASE_PATCH}-Energy+.idd")

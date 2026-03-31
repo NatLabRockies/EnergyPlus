@@ -177,9 +177,9 @@
         <li class="list-group-item">
           We are excited for users to give these tools a try and let us know how it goes. As always, we appreciate issue
           reports on our
-          <a href="https://github.com/NatLabRockies/EnergyPlus/issues/">GitHub repository</a>. We will be addressing any issues
-          identified from user feedback, and at some point deprecating some of these classic tools. We are also planning
-          to add more tools to this integration, such as a new EpJSON editor.
+          <a href="https://github.com/NatLabRockies/EnergyPlus/issues/">GitHub repository</a>. We will be addressing any
+          issues identified from user feedback, and at some point deprecating some of these classic tools. We are also
+          planning to add more tools to this integration, such as a new EpJSON editor.
         </li>
       </ul>
 
@@ -381,33 +381,9 @@
         </tr>
         <tr>
           <td>
-            <a href="https://github.com/NatLabRockies/EnergyPlus/pull/11130">11130</a>
+            <a href="https://github.com/NatLabRockies/EnergyPlus/pull/11038">11038</a>
           </td>
-          <td>Heat Pump Sizing According to ACCA Manual S</td>
-        </tr>
-        <tr>
-          <td>
-            <a href="https://github.com/NatLabRockies/EnergyPlus/pull/11001">11001</a>
-          </td>
-          <td>New Air-to-water Heat Pump Object</td>
-        </tr>
-        <tr>
-          <td>
-            <a href="https://github.com/NatLabRockies/EnergyPlus/pull/11147">11147</a>
-          </td>
-          <td>Allow Autosizing of Thermal Energy Storage Tank Capacity</td>
-        </tr>
-        <tr>
-          <td>
-            <a href="https://github.com/NatLabRockies/EnergyPlus/pull/11113">11113</a>
-          </td>
-          <td>New Phase Change Material Thermal Storage Object</td>
-        </tr>
-        <tr>
-          <td>
-            <a href="https://github.com/NatLabRockies/EnergyPlus/pull/11217">11217</a>
-          </td>
-          <td>Adding Ground Heat Exchanger Design and Sizing</td>
+          <td>Add Options to Model Air Leakage in Parallel Fan-powered Terminal Units</td>
         </tr>
       </table>
       <h3><a id="DefectsRepaired"></a>Targeted Defect Repairs</h3>
@@ -418,27 +394,27 @@
         </tr>
         <tr>
           <td>
-            <a href="https://github.com/NatLabRockies/EnergyPlus/pull/11063">11063</a>
+            <a href="https://github.com/NatLabRockies/EnergyPlus/pull/11452">11452</a>
           </td>
-          <td>Fix Coil Sizing Report for Coil:Heating:Gas:MultiStage and Coil:Heating:Electric:MultiStage</td>
+          <td>Fix Crankcase Energy for Coil:Cooling:DX and Coil:Cooling:DX:VariableSpeed</td>
         </tr>
         <tr>
           <td>
-            <a href="https://github.com/NatLabRockies/EnergyPlus/pull/11124">11124</a>
+            <a href="https://github.com/NatLabRockies/EnergyPlus/pull/11447">11447</a>
           </td>
-          <td>Correct Handling of Improper Design Objects in Radiant/Convective Systems</td>
+          <td>Fix Optimum Start Availability Manager for Zone Equipment Not Connected to an Air Loop</td>
         </tr>
         <tr>
           <td>
-            <a href="https://github.com/NatLabRockies/EnergyPlus/pull/11051">11051</a>
+            <a href="https://github.com/NatLabRockies/EnergyPlus/pull/11427">11427</a>
           </td>
-          <td>Fix Controller:MechanicalVentilation with DesignSpecification:OutdoorAir:SpaceList</td>
+          <td>Fix DesignSpecification:ZoneHVAC:Sizing Check for FractionOfAutosizedHeatingCapacity</td>
         </tr>
         <tr>
           <td>
-            <a href="https://github.com/NatLabRockies/EnergyPlus/pull/11278">11278</a>
+            <a href="https://github.com/NatLabRockies/EnergyPlus/pull/11410">11410</a>
           </td>
-          <td>Fix space component loads reporting when number of spaces exceeds number of zones</td>
+          <td>Fix Tabular Annual Average Values with Unit Conversion</td>
         </tr>
       </table>
       <h3><a id="RefactoringEfforts"></a>Targeted Refactoring Efforts</h3>
@@ -449,15 +425,15 @@
         </tr>
         <tr>
           <td>
-            <a href="https://github.com/NatLabRockies/EnergyPlus/pull/11109">11109</a>
+            <a href="https://github.com/NatLabRockies/EnergyPlus/pull/11423">11423</a>
           </td>
-          <td>Remove fmt fortran workarounds - Z & N (and S)</td>
+          <td>Upgrade to C++20 Standard</td>
         </tr>
         <tr>
           <td>
-            <a href="https://github.com/NatLabRockies/EnergyPlus/pull/10505">10505</a>
+            <a href="https://github.com/NatLabRockies/EnergyPlus/pull/11429">11429</a>
           </td>
-          <td>Refactoring GoTo Statements</td>
+          <td>SolveRoot with local Optimization</td>
         </tr>
       </table>
 
@@ -476,21 +452,20 @@
 
       <h2><a id="Platforms_90"></a>Platforms</h2>
       <p>
-        We test and develop on Windows 11, and currently produce 64 bit builds on Windows. For Linux, we provide
-        packages for Ubuntu 22.04 and 24.04. On Mac, we are releasing an installer for OSX on both Intel and ARM
-        architectures.
+        We test and develop on Windows 11, and currently produce 64-bit builds on Windows. For Linux, we provide
+        packages for Ubuntu 24.04. On Mac, we are releasing an installer for OSX on both Intel and ARM architectures.
       </p>
       <ul class="list-group">
         <li class="list-group-item">Windows 11</li>
-        <li class="list-group-item">Linux (Ubuntu 22.04 and 24.04) 64 bit versions</li>
-        <li class="list-group-item">Mac OSX 12 x64 and 13 arm64</li>
+        <li class="list-group-item">Linux Ubuntu 24.04 64 bit versions</li>
+        <li class="list-group-item">macOS 12 x64 and 13 arm64</li>
         <li class="list-group-item">
           EnergyPlus V@CMAKE_VERSION_MAJOR@.@CMAKE_VERSION_MINOR@ has been tested on all of these platforms
         </li>
         <li class="list-group-item">
           <em
             >EnergyPlus does intensive computations, and based on configuration, can write massive amounts of data to
-            disk. For best performance, computers should have a substantial amount of memory and high speed hard
+            disk. For the best performance, computers should have a substantial amount of memory and high speed hard
             drives.</em
           >
         </li>
@@ -508,8 +483,8 @@
         While every effort has been made to clean up all the “defects” that have occurred during our testing, quite a
         few known (and even more unknown) probably remain. Specifics on the remaining known problems can be found on the
         GitHub repository
-        <a href="https://github.com/NatLabRockies/EnergyPlus/issues">issues page</a>. If you are interested in what has been
-        addressed, the issues resolved in this release are listed in the
+        <a href="https://github.com/NatLabRockies/EnergyPlus/issues">issues page</a>. If you are interested in what has
+        been addressed, the issues resolved in this release are listed in the
         <a href="https://github.com/NatLabRockies/EnergyPlus/releases/latest">release details</a>.
       </p>
 
