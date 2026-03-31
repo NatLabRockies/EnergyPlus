@@ -517,7 +517,10 @@ namespace {
 
         void rk4Step(Real64 timeStepSeconds, Context const &ctx)
         {
-            int const n = std::max(20, std::max(1, odeSettings.stepsPerTimeStep) * 5);
+            Real64 const maxStableSubstep = stableSubstepSeconds(ctx);
+            int const minSubsteps = std::max(20, std::max(1, odeSettings.stepsPerTimeStep) * 5);
+            int const stableSubsteps = static_cast<int>(std::ceil(timeStepSeconds / clampMin(maxStableSubstep, small)));
+            int const n = std::max(minSubsteps, stableSubsteps);
             Real64 const h = timeStepSeconds / n;
             std::array<Real64, 5> k1{}, k2{}, k3{}, k4{}, y2{}, y3{}, y4{};
             for (int i = 0; i < n; ++i) {
@@ -538,6 +541,30 @@ namespace {
                     y[j] += h * (k1[j] + 2.0 * k2[j] + 2.0 * k3[j] + k4[j]) / 6.0;
                 }
             }
+        }
+
+        [[nodiscard]] Real64 stableSubstepSeconds(Context const &ctx) const
+        {
+            Real64 const rF = 1.0 / clampMin(ctx.inputs.flowRate * ctx.fluidCp, small);
+            Real64 const rB = clampMin(ctx.inputs.bhResistance, small);
+            Real64 const r12 = clampMin(ctx.inputs.dcResistance, small);
+            Real64 const cF = clampMin(ctx.fluidRho * ctx.fluidCp * pipeFluidVolume(), small);
+            Real64 const cG1 =
+                clampMin(groutFraction * groutSpecificHeat * groutDensity * groutVolume() + pipeSpecificHeat * pipeDensity * pipeWallVolume(), small);
+            Real64 const cG2 = clampMin(
+                ((1.0 - groutFraction) * groutSpecificHeat * groutDensity * groutVolume() + pipeSpecificHeat * pipeDensity * pipeWallVolume()) / 2.0,
+                small);
+
+            Real64 const fluidConductance = 1.0 / rF + 2.0 * length / r12 + length / rB;
+            Real64 const coreConductance = 4.0 * length / r12;
+            Real64 const wallConductance = 2.0 * length / rB;
+            Real64 const tauFluid = cF / clampMin(fluidConductance, small);
+            Real64 const tauCore = cG1 / clampMin(coreConductance, small);
+            Real64 const tauWall = cG2 / clampMin(wallConductance, small);
+            Real64 const tauMin = std::min({tauFluid, tauCore, tauWall});
+
+            // Keep the explicit RK4 step well below the fastest segment time constant.
+            return std::max(0.1, 0.25 * tauMin);
         }
 
         [[nodiscard]] Real64 pipeFluidVolume() const
@@ -660,7 +687,9 @@ struct Model::Impl
         bhWallTemp = inputs.farFieldGroundTemp + hist.first * c0;
 
         Real64 const numBoreholes = static_cast<Real64>(std::max(1u, config.numBoreholes));
-        Real64 const massFlowRatePerBorehole = inputs.massFlowRate / numBoreholes;
+        // Match the original GLHEC field behavior. The prototype applies the field loop flow to
+        // each borehole path and then normalizes the borehole-wall load history by borehole count.
+        Real64 const massFlowRatePerBorehole = inputs.massFlowRate;
 
         if (massFlowRatePerBorehole <= small) {
             energy = 0.0;
@@ -700,7 +729,8 @@ struct Model::Impl
 
         Real64 const cp = fluidProps.cp(inputs.inletTemp);
         Real64 const heatRate = inputs.massFlowRate * cp * (inputs.inletTemp - outletTemp);
-        energy = boreholeHeatRatePerBorehole / clampMin(config.boreholeLength, small) * static_cast<Real64>(inputs.timeStepSeconds);
+        Real64 const historyHeatRatePerBorehole = (config.numBoreholes > 1) ? (heatRate / numBoreholes) : boreholeHeatRatePerBorehole;
+        energy = historyHeatRatePerBorehole / clampMin(config.boreholeLength, small) * static_cast<Real64>(inputs.timeStepSeconds);
 
         ModelStepOutputs outputs;
         outputs.outletTemp = outletTemp;
