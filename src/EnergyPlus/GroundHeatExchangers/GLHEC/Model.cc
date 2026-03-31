@@ -687,9 +687,7 @@ struct Model::Impl
         bhWallTemp = inputs.farFieldGroundTemp + hist.first * c0;
 
         Real64 const numBoreholes = static_cast<Real64>(std::max(1u, config.numBoreholes));
-        // Match the original GLHEC field behavior. The prototype applies the field loop flow to
-        // each borehole path and then normalizes the borehole-wall load history by borehole count.
-        Real64 const massFlowRatePerBorehole = inputs.massFlowRate;
+        Real64 const massFlowRatePerBorehole = inputs.massFlowRate / numBoreholes;
 
         if (massFlowRatePerBorehole <= small) {
             energy = 0.0;
@@ -722,20 +720,20 @@ struct Model::Impl
 
         outletTemp = segments.front().outlet2();
 
-        Real64 boreholeHeatRatePerBorehole = 0.0;
+        Real64 boreholeHeatRateToGroundPerBorehole = 0.0;
         for (auto const &seg : segments) {
-            boreholeHeatRatePerBorehole += seg.boreholeHeatRate();
+            boreholeHeatRateToGroundPerBorehole += seg.boreholeHeatRate();
         }
 
         Real64 const cp = fluidProps.cp(inputs.inletTemp);
-        Real64 const heatRate = inputs.massFlowRate * cp * (inputs.inletTemp - outletTemp);
-        Real64 const historyHeatRatePerBorehole = (config.numBoreholes > 1) ? (heatRate / numBoreholes) : boreholeHeatRatePerBorehole;
+        Real64 const heatRateToGround = inputs.massFlowRate * cp * (inputs.inletTemp - outletTemp);
+        Real64 const historyHeatRatePerBorehole = (config.numBoreholes > 1) ? (heatRateToGround / numBoreholes) : boreholeHeatRateToGroundPerBorehole;
         energy = historyHeatRatePerBorehole / clampMin(config.boreholeLength, small) * static_cast<Real64>(inputs.timeStepSeconds);
 
         ModelStepOutputs outputs;
         outputs.outletTemp = outletTemp;
-        outputs.heatRate = heatRate;
-        outputs.boreholeHeatRate = boreholeHeatRatePerBorehole * numBoreholes;
+        outputs.heatRate = -heatRateToGround;
+        outputs.boreholeHeatRate = -boreholeHeatRateToGroundPerBorehole * numBoreholes;
         outputs.boreholeWallTemp = bhWallTemp;
         outputs.avgFluidTemp = 0.5 * (inputs.inletTemp + outletTemp);
         return outputs;
@@ -774,12 +772,12 @@ struct Model::Impl
         Real64 const doPipe = std::max(config.pipeOuterDiameter, di + small);
         Real64 const re = 4.0 * massFlowRate / (mu * Constant::Pi * di);
         Real64 const pr = cp * mu / k;
+        Real64 constexpr nuLow = 4.01;
 
         Real64 nu = 0.0;
         if (re < 2000.0) {
-            nu = 4.01;
+            nu = nuLow;
         } else if (re < 4000.0) {
-            Real64 const nuLow = 4.01;
             Real64 const nuHigh = turbulentNusselt(re, pr);
             Real64 const sf = 1.0 / (1.0 + std::exp(-(re - 3000.0) / 150.0));
             nu = (1.0 - sf) * nuLow + sf * nuHigh;

@@ -339,6 +339,52 @@ TEST(GLHECModel, RepeatedCallsAtSameTimeDoNotAccumulate)
     EXPECT_NEAR(first.boreholeWallTemp, second.boreholeWallTemp, 1.0e-9);
 }
 
+TEST(GLHECModel, HeatRateMatchesEnergyPlusSignConvention)
+{
+    auto const fluid = makeFluidFuncs();
+    Model model(makeConfig(), fluid);
+    model.reset(15.0);
+
+    ModelStepInputs inputs;
+    inputs.timeSeconds = 600;
+    inputs.timeStepSeconds = 600;
+    inputs.massFlowRate = 1.0;
+    inputs.inletTemp = 20.0;
+    inputs.farFieldGroundTemp = 15.0;
+
+    auto const outputs = model.simulate(inputs);
+
+    EXPECT_NEAR(outputs.heatRate, inputs.massFlowRate * fluid.cp(inputs.inletTemp) * (outputs.outletTemp - inputs.inletTemp), 1.0e-6);
+}
+
+TEST(GLHECModel, MultiBoreholeFieldsUsePerBoreholeFlow)
+{
+    auto const fluid = makeFluidFuncs();
+
+    ModelConfig singleCfg = makeConfig();
+    singleCfg.numBoreholes = 1;
+
+    ModelConfig fieldCfg = makeConfig();
+    fieldCfg.numBoreholes = 4;
+
+    Model singleModel(singleCfg, fluid);
+    Model fieldModel(fieldCfg, fluid);
+    singleModel.reset(15.0);
+    fieldModel.reset(15.0);
+
+    ModelStepInputs inputs;
+    inputs.timeSeconds = 600;
+    inputs.timeStepSeconds = 600;
+    inputs.massFlowRate = 1.0;
+    inputs.inletTemp = 20.0;
+    inputs.farFieldGroundTemp = 15.0;
+
+    auto const singleOut = singleModel.simulate(inputs);
+    auto const fieldOut = fieldModel.simulate(inputs);
+
+    EXPECT_GT(fieldOut.outletTemp, singleOut.outletTemp);
+}
+
 TEST(GLHECModel, AggregationTuningChangesLongTermResponse)
 {
     ModelConfig coarse = makeConfig();
@@ -386,6 +432,7 @@ TEST(GLHECModel, PrototypeTrajectoryRegressionCheckpoints)
     };
 
     // Reference checkpoints from prototype GLHEC run (temps2.csv) at 600 s timesteps.
+    // Prototype heat rates are positive to the ground; EnergyPlus reports the opposite sign convention.
     std::vector<Checkpoint> const checkpoints = {
         {0, 16.1, 19.6839, 2995.95, 444.649, 16.1},
         {1, 16.1021, 19.6861, 2983.52, 422.268, 16.5592},
@@ -439,8 +486,8 @@ TEST(GLHECModel, PrototypeTrajectoryRegressionCheckpoints)
             EXPECT_NEAR(outputs.boreholeWallTemp, cpRef.boreholeWallTemp, 0.5);
 
             if (step >= 500) {
-                EXPECT_NEAR(outputs.heatRate, cpRef.heatRate, 150.0);
-                EXPECT_NEAR(outputs.boreholeHeatRate, cpRef.boreholeHeatRate, 150.0);
+                EXPECT_NEAR(outputs.heatRate, -cpRef.heatRate, 150.0);
+                EXPECT_NEAR(outputs.boreholeHeatRate, -cpRef.boreholeHeatRate, 150.0);
             }
             ++nextCheckpoint;
         }
