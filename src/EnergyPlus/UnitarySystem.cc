@@ -143,8 +143,7 @@ namespace UnitarySystems {
         // Save the current AFN coil runtime fraction for comparison with the one calculated below
         Real64 refAFNLoopHeatingCoilMaxRTF(0.0);
         Real64 refAFNLoopCoolingCoilMaxRTF(0.0);
-        if (state.afn->distribution_simulated && this->m_sysType != SysType::PackagedAC && this->m_sysType != SysType::PackagedHP &&
-            this->m_sysType != SysType::PackagedWSHP && AirLoopNum > 0) {
+        if (state.afn->distribution_simulated && AirLoopNum > 0 && state.dataSize->CurOASysNum == 0) {
             refAFNLoopHeatingCoilMaxRTF = state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopHeatingCoilMaxRTF;
             refAFNLoopCoolingCoilMaxRTF = state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopDXCoilRTF;
         }
@@ -170,8 +169,7 @@ namespace UnitarySystems {
         this->reportUnitarySystem(state, AirLoopNum);
 
         // Get the actual maximum RTF for AFN simulations
-        if (state.afn->distribution_simulated && this->m_sysType != SysType::PackagedAC && this->m_sysType != SysType::PackagedHP &&
-            this->m_sysType != SysType::PackagedWSHP && AirLoopNum > 0) {
+        if (state.afn->distribution_simulated && AirLoopNum > 0 && state.dataSize->CurOASysNum == 0) {
             Real64 heatingCoilRTF = 0.0;
             Real64 coolingCoilRTF = 0.0;
             Real64 suppHeatingCoilRTF = 0.0;
@@ -10837,8 +10835,7 @@ namespace UnitarySystems {
             Real64 TotalOutputDelta = 0.0;    // delta total output rate, {W}
             int ZoneInNode = this->m_ZoneInletNode;
             Real64 MassFlowRate = state.dataLoopNodes->Node(ZoneInNode).MassFlowRate / this->ControlZoneMassFlowFrac;
-            if (state.afn->distribution_simulated && this->m_sysType != SysType::PackagedAC && this->m_sysType != SysType::PackagedHP &&
-                this->m_sysType != SysType::PackagedWSHP) {
+            if (state.afn->distribution_simulated && AirLoopNum > 0 && state.dataSize->CurOASysNum == 0) {
                 DeltaMassRate = state.dataLoopNodes->Node(this->AirOutNode).MassFlowRate -
                                 state.dataLoopNodes->Node(ZoneInNode).MassFlowRate / this->ControlZoneMassFlowFrac;
                 if (DeltaMassRate < 0.0) {
@@ -12879,8 +12876,7 @@ namespace UnitarySystems {
         Real64 DesOutHumRat = this->m_DesiredOutletHumRat;
         int CoilType_Num = this->m_CoolingCoilType_Num;
         Real64 LoopDXCoilMaxRTFSave = 0.0;
-        if (state.afn->distribution_simulated && this->m_sysType != SysType::PackagedAC && this->m_sysType != SysType::PackagedHP &&
-            this->m_sysType != SysType::PackagedWSHP) {
+        if (state.afn->distribution_simulated && AirLoopNum > 0 && state.dataSize->CurOASysNum == 0) {
             LoopDXCoilMaxRTFSave = state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopDXCoilRTF;
             state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopDXCoilRTF = 0.0;
         }
@@ -14675,8 +14671,7 @@ namespace UnitarySystems {
         this->m_CoolingCycRatio = CycRatio;
         this->m_DehumidificationMode = DehumidMode;
 
-        if (state.afn->distribution_simulated && this->m_sysType != SysType::PackagedAC && this->m_sysType != SysType::PackagedHP &&
-            this->m_sysType != SysType::PackagedWSHP) {
+        if (state.afn->distribution_simulated && AirLoopNum > 0 && state.dataSize->CurOASysNum == 0) {
             state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopDXCoilRTF =
                 max(state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopDXCoilRTF, LoopDXCoilMaxRTFSave);
         }
@@ -16394,8 +16389,7 @@ namespace UnitarySystems {
         this->m_ElecPower = locFanElecPower + elecCoolingPower + elecHeatingPower + suppHeatingPower + defrostElecPower + this->m_TotalAuxElecPower;
         this->m_ElecPowerConsumption = this->m_ElecPower * ReportingConstant;
 
-        if (state.afn->distribution_simulated && this->m_sysType != SysType::PackagedAC && this->m_sysType != SysType::PackagedHP &&
-            this->m_sysType != SysType::PackagedWSHP) {
+        if (state.afn->distribution_simulated && AirLoopNum > 0 && state.dataSize->CurOASysNum == 0) {
             state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).LoopSystemOnMassFlowrate = state.dataUnitarySystems->CompOnMassFlow;
             state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).LoopSystemOffMassFlowrate = state.dataUnitarySystems->CompOffMassFlow;
             state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).LoopFanOperationMode = this->m_FanOpMode;
