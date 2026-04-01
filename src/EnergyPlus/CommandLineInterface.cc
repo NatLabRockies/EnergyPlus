@@ -295,6 +295,28 @@ run_manager_from_cli()
                 exit(1);
             }
         });
+
+        auto *viewfactorsSubCommand = auxiliaryToolsSubcommand->add_subcommand("viewfactors", "View Factors");
+        viewfactorsSubCommand->add_option("args", python_fwd_args, "Extra Arguments forwarded to energyplus_viewfactors")->option_text("ARG ...");
+        viewfactorsSubCommand->positionals_at_end(true);
+        viewfactorsSubCommand->footer(
+            "You can pass extra arguments after the ghedesigner keyword, they should be the input file and output directory.");
+
+        viewfactorsSubCommand->callback([&state, &python_fwd_args] {
+            EnergyPlus::Python::PythonEngine engine(state);
+            // There's probably better to be done, like instantiating the pythonEngine with the argc/argv then calling PyRun_SimpleFile but whatever
+            std::string cmd = Python::PythonEngine::getTclPreppedPreamble(python_fwd_args);
+            cmd += R"python(
+from energyplus_viewfactors import EnergyPlusViewFactors
+EnergyPlusViewFactors().run()
+)python";
+            try {
+                engine.exec(cmd);
+                exit(0);
+            } catch (std::runtime_error &) {
+                exit(1);
+            }
+        });
 #    endif
 #endif
 
