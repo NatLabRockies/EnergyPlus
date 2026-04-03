@@ -1338,6 +1338,129 @@ namespace EvaporativeFluidCoolers {
         PlantUtilities::SetComponentFlowRate(state, this->WaterMassFlowRate, this->WaterInletNodeNum, this->WaterOutletNodeNum, this->plantLoc);
     }
 
+    // Helper: emit both final and initial sizer output for a given description.
+    // The "Initial " prefix is automatically prepended for the first-sizes report.
+    static void reportSizerPair(EnergyPlusData &state, std::string_view type, std::string const &name, std::string_view desc, Real64 value)
+    {
+        if (state.dataPlnt->PlantFinalSizesOkayToReport) {
+            BaseSizer::reportSizerOutput(state, type, name, desc, value);
+        }
+        if (state.dataPlnt->PlantFirstSizesOkayToReport) {
+            BaseSizer::reportSizerOutput(state, type, name, EnergyPlus::format("Initial {}", desc), value);
+        }
+    }
+
+    // Helper: emit sizer output choosing the correct type string and description
+    // depending on whether the equipment is single-speed or two-speed.
+    static void reportSizerByType(EnergyPlusData &state,
+                                  DataPlant::PlantEquipmentType eqType,
+                                  std::string const &name,
+                                  std::string_view singleDesc,
+                                  std::string_view twoDesc,
+                                  Real64 value)
+    {
+        if (eqType == DataPlant::PlantEquipmentType::EvapFluidCooler_SingleSpd) {
+            reportSizerPair(state, cEvapFluidCooler_SingleSpeed, name, singleDesc, value);
+        } else if (eqType == DataPlant::PlantEquipmentType::EvapFluidCooler_TwoSpd) {
+            reportSizerPair(state, cEvapFluidCooler_TwoSpeed, name, twoDesc, value);
+        }
+    }
+
+    // Helper: emit detailed diagnostic output when the UA solver fails to converge (SolFla == -2).
+    // Reports the design inputs and calculated outlet water temperatures at the UA bounds.
+    static void reportUASolverFailure(EnergyPlusData &state,
+                                      std::string const &name,
+                                      Real64 desLoad,
+                                      Real64 desWaterFlowRate,
+                                      Real64 airFlowRate,
+                                      Real64 airWetBulb,
+                                      Real64 waterInletTemp,
+                                      Real64 exitWaterTemp,
+                                      Real64 UA0,
+                                      Real64 UA1,
+                                      Real64 outWaterTempAtUA0,
+                                      Real64 outWaterTempAtUA1,
+                                      int PltSizCondNum,
+                                      EnergyPlusData const &stateForPlantSiz)
+    {
+        std::string const CalledFrom("SizeEvapFluidCooler");
+        ShowSevereError(state, EnergyPlus::format("{}: The combination of design input values did not allow the calculation of a ", CalledFrom));
+        ShowContinueError(state, "reasonable UA value. Review and revise design input values as appropriate. Specifying hard");
+        ShowContinueError(state,
+                          "sizes for some \"autosizable\" fields while autosizing other \"autosizable\" fields may be contributing "
+                          "to this problem.");
+        ShowContinueError(state, "This model iterates on UA to find the heat transfer required to provide the design outlet ");
+        ShowContinueError(state, "water temperature. Initially, the outlet water temperatures at high and low UA values are ");
+        ShowContinueError(state, "calculated. The Design Exit Water Temperature should be between the outlet water ");
+        ShowContinueError(state, "temperatures calculated at high and low UA values. If the Design Exit Water Temperature is ");
+        ShowContinueError(state, "out of this range, the solution will not converge and UA will not be calculated. ");
+        ShowContinueError(state, "The possible solutions could be to manually input adjusted water and/or air flow rates ");
+        ShowContinueError(state,
+                          "based on the autosized values shown below or to adjust design evaporative fluid cooler air inlet wet-bulb temperature.");
+        ShowContinueError(state, "Plant:Sizing object inputs also influence these results (e.g. DeltaT and ExitTemp).");
+        ShowContinueError(state, "Inputs to the evaporative fluid cooler object:");
+        ShowContinueError(state, EnergyPlus::format("Design Evaporative Fluid Cooler Load [W]                      = {:.2R}", desLoad));
+        ShowContinueError(state, EnergyPlus::format("Design Evaporative Fluid Cooler Water Volume Flow Rate [m3/s] = {:.6R}", desWaterFlowRate));
+        ShowContinueError(state, EnergyPlus::format("Design Evaporative Fluid Cooler Air Volume Flow Rate [m3/s]   = {:.2R}", airFlowRate));
+        ShowContinueError(state, EnergyPlus::format("Design Evaporative Fluid Cooler Air Inlet Wet-bulb Temp [C]   = {:.2R}", airWetBulb));
+        ShowContinueError(state, EnergyPlus::format("Design Evaporative Fluid Cooler Water Inlet Temp [C]          = {:.2R}", waterInletTemp));
+        ShowContinueError(state, "Inputs to the plant sizing object:");
+        ShowContinueError(state, EnergyPlus::format("Design Exit Water Temp [C]                                    = {:.2R}", exitWaterTemp));
+        if (PltSizCondNum > 0) {
+            ShowContinueError(state,
+                              EnergyPlus::format("Loop Design Temperature Difference [C]                        = {:.2R}",
+                                                 stateForPlantSiz.dataSize->PlantSizData(PltSizCondNum).DeltaT));
+        }
+        ShowContinueError(state, EnergyPlus::format("Design Evaporative Fluid Cooler Water Inlet Temp [C]          = {:.2R}", waterInletTemp));
+        ShowContinueError(state,
+                          EnergyPlus::format("Calculated water outlet temperature at low UA [C](UA = {:.2R} W/C)  = {:.2R}", UA0, outWaterTempAtUA0));
+        ShowContinueError(
+            state, EnergyPlus::format("Calculated water outlet temperature at high UA [C](UA = {:.2R} W/C)  = {:.2R}", UA1, outWaterTempAtUA1));
+        ShowFatalError(state, EnergyPlus::format("Autosizing of Evaporative Fluid Cooler UA failed for Evaporative Fluid Cooler = {}", name));
+    }
+
+    // Helper: solve for UA given design load and flow parameters.
+    // Caller must set cooler->inletConds (WaterTemp, AirTemp, AirWetBulb) before calling.
+    // Sets inletConds.AirPress and AirHumRat, computes UA0/UA1, creates the solver lambda,
+    // and calls SolveRoot. SolFla == -1 is handled with a warning.
+    // Returns the solver flag; on -2, caller handles the bracket-failure error reporting.
+    static int solveForUA(EnergyPlusData &state,
+                          EvapFluidCoolerSpecs *cooler,
+                          Real64 desLoad,
+                          Real64 waterMassFlowRate,
+                          Real64 airFlowRate,
+                          Real64 Cp,
+                          Real64 &UA,
+                          Real64 &UA0out,
+                          Real64 &UA1out)
+    {
+        int constexpr MaxIte(500);
+        Real64 constexpr Acc(0.0001);
+
+        cooler->inletConds.AirPress = state.dataEnvrn->StdBaroPress;
+        cooler->inletConds.AirHumRat =
+            Psychrometrics::PsyWFnTdbTwbPb(state, cooler->inletConds.AirTemp, cooler->inletConds.AirWetBulb, cooler->inletConds.AirPress);
+
+        UA0out = 0.0001 * desLoad; // Lower bound: assume deltaT = 10000K
+        UA1out = desLoad;          // Upper bound: assume deltaT = 1K
+
+        auto f = [&state, cooler, desLoad, waterMassFlowRate, airFlowRate, Cp](Real64 UAval) {
+            cooler->SimSimpleEvapFluidCooler(state, waterMassFlowRate, airFlowRate, UAval, cooler->DesignExitWaterTemp);
+            Real64 const CoolingOutput = Cp * waterMassFlowRate * (cooler->inletConds.WaterTemp - cooler->DesignExitWaterTemp);
+            return (desLoad - CoolingOutput) / desLoad;
+        };
+
+        int SolFla = 0;
+        General::SolveRoot(state, Acc, MaxIte, SolFla, UA, f, UA0out, UA1out);
+
+        if (SolFla == -1) {
+            ShowWarningError(state, "Iteration limit exceeded in calculating evaporative fluid cooler UA.");
+            ShowContinueError(state, EnergyPlus::format("Autosizing of fluid cooler UA failed for evaporative fluid cooler = {}", cooler->Name));
+            ShowContinueError(state, EnergyPlus::format("The final UA value = {:.2R}W/C, and the simulation continues...", UA));
+        }
+        return SolFla;
+    }
+
     void EvapFluidCoolerSpecs::SizeEvapFluidCooler(EnergyPlusData &state)
     {
 
@@ -1359,8 +1482,6 @@ namespace EvaporativeFluidCoolers {
         // REFERENCES:
         // Based on SizeTower by Don Shirey, Sept/Oct 2002; Richard Raustad, Feb 2005
 
-        int constexpr MaxIte(500);    // Maximum number of iterations
-        Real64 constexpr Acc(0.0001); // Accuracy of result
         std::string const CalledFrom("SizeEvapFluidCooler");
 
         int SolFla = 0;                    // Flag of solver
@@ -1460,14 +1581,7 @@ namespace EvaporativeFluidCoolers {
                     }
                 }
                 if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
-                    if (state.dataPlnt->PlantFinalSizesOkayToReport) {
-                        BaseSizer::reportSizerOutput(
-                            state, this->EvapFluidCoolerType, this->Name, "Design Water Flow Rate [m3/s]", this->DesignWaterFlowRate);
-                    }
-                    if (state.dataPlnt->PlantFirstSizesOkayToReport) {
-                        BaseSizer::reportSizerOutput(
-                            state, this->EvapFluidCoolerType, this->Name, "Initial Design Water Flow Rate [m3/s]", this->DesignWaterFlowRate);
-                    }
+                    reportSizerPair(state, this->EvapFluidCoolerType, this->Name, "Design Water Flow Rate [m3/s]", this->DesignWaterFlowRate);
                 }
             } else {
                 if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
@@ -1493,40 +1607,12 @@ namespace EvaporativeFluidCoolers {
             tmpDesignWaterFlowRate = 5.382e-8 * this->HighSpeedStandardDesignCapacity;
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                 this->DesignWaterFlowRate = tmpDesignWaterFlowRate;
-                if (this->Type == DataPlant::PlantEquipmentType::EvapFluidCooler_SingleSpd) {
-                    if (state.dataPlnt->PlantFinalSizesOkayToReport) {
-                        BaseSizer::reportSizerOutput(state,
-                                                     cEvapFluidCooler_SingleSpeed,
-                                                     this->Name,
-                                                     "Design Water Flow Rate based on evaporative fluid cooler Standard Design Capacity [m3/s]",
-                                                     this->DesignWaterFlowRate);
-                    }
-                    if (state.dataPlnt->PlantFirstSizesOkayToReport) {
-                        BaseSizer::reportSizerOutput(
-                            state,
-                            cEvapFluidCooler_SingleSpeed,
-                            this->Name,
-                            "Initial Design Water Flow Rate based on evaporative fluid cooler Standard Design Capacity [m3/s]",
-                            this->DesignWaterFlowRate);
-                    }
-                } else if (this->Type == DataPlant::PlantEquipmentType::EvapFluidCooler_TwoSpd) {
-                    if (state.dataPlnt->PlantFinalSizesOkayToReport) {
-                        BaseSizer::reportSizerOutput(
-                            state,
-                            cEvapFluidCooler_TwoSpeed,
-                            this->Name,
-                            "Design Water Flow Rate based on evaporative fluid cooler high-speed Standard Design Capacity [m3/s]",
-                            this->DesignWaterFlowRate);
-                    }
-                    if (state.dataPlnt->PlantFirstSizesOkayToReport) {
-                        BaseSizer::reportSizerOutput(
-                            state,
-                            cEvapFluidCooler_TwoSpeed,
-                            this->Name,
-                            "Initial Design Water Flow Rate based on evaporative fluid cooler high-speed Standard Design Capacity [m3/s]",
-                            this->DesignWaterFlowRate);
-                    }
-                }
+                reportSizerByType(state,
+                                  this->Type,
+                                  this->Name,
+                                  "Design Water Flow Rate based on evaporative fluid cooler Standard Design Capacity [m3/s]",
+                                  "Design Water Flow Rate based on evaporative fluid cooler high-speed Standard Design Capacity [m3/s]",
+                                  this->DesignWaterFlowRate);
             }
         }
 
@@ -1573,28 +1659,12 @@ namespace EvaporativeFluidCoolers {
                 }
             }
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
-                if (this->Type == DataPlant::PlantEquipmentType::EvapFluidCooler_SingleSpd) {
-                    if (state.dataPlnt->PlantFinalSizesOkayToReport) {
-                        BaseSizer::reportSizerOutput(
-                            state, cEvapFluidCooler_SingleSpeed, this->Name, "Fan Power at Design Air Flow Rate [W]", this->HighSpeedFanPower);
-                    }
-                    if (state.dataPlnt->PlantFirstSizesOkayToReport) {
-                        BaseSizer::reportSizerOutput(state,
-                                                     cEvapFluidCooler_SingleSpeed,
-                                                     this->Name,
-                                                     "Initial Fan Power at Design Air Flow Rate [W]",
-                                                     this->HighSpeedFanPower);
-                    }
-                } else if (this->Type == DataPlant::PlantEquipmentType::EvapFluidCooler_TwoSpd) {
-                    if (state.dataPlnt->PlantFinalSizesOkayToReport) {
-                        BaseSizer::reportSizerOutput(
-                            state, cEvapFluidCooler_TwoSpeed, this->Name, "Fan Power at High Fan Speed [W]", this->HighSpeedFanPower);
-                    }
-                    if (state.dataPlnt->PlantFirstSizesOkayToReport) {
-                        BaseSizer::reportSizerOutput(
-                            state, cEvapFluidCooler_TwoSpeed, this->Name, "Initial Fan Power at High Fan Speed [W]", this->HighSpeedFanPower);
-                    }
-                }
+                reportSizerByType(state,
+                                  this->Type,
+                                  this->Name,
+                                  "Fan Power at Design Air Flow Rate [W]",
+                                  "Fan Power at High Fan Speed [W]",
+                                  this->HighSpeedFanPower);
             }
         }
 
@@ -1605,28 +1675,12 @@ namespace EvaporativeFluidCoolers {
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                 this->HighSpeedAirFlowRate = tmpHighSpeedAirFlowRate;
 
-                if (this->Type == DataPlant::PlantEquipmentType::EvapFluidCooler_SingleSpd) {
-                    if (state.dataPlnt->PlantFinalSizesOkayToReport) {
-                        BaseSizer::reportSizerOutput(
-                            state, cEvapFluidCooler_SingleSpeed, this->Name, "Design Air Flow Rate [m3/s]", this->HighSpeedAirFlowRate);
-                    }
-                    if (state.dataPlnt->PlantFirstSizesOkayToReport) {
-                        BaseSizer::reportSizerOutput(
-                            state, cEvapFluidCooler_SingleSpeed, this->Name, "Initial Design Air Flow Rate [m3/s]", this->HighSpeedAirFlowRate);
-                    }
-                } else if (this->Type == DataPlant::PlantEquipmentType::EvapFluidCooler_TwoSpd) {
-                    if (state.dataPlnt->PlantFinalSizesOkayToReport) {
-                        BaseSizer::reportSizerOutput(
-                            state, cEvapFluidCooler_TwoSpeed, this->Name, "Air Flow Rate at High Fan Speed [m3/s]", this->HighSpeedAirFlowRate);
-                    }
-                    if (state.dataPlnt->PlantFirstSizesOkayToReport) {
-                        BaseSizer::reportSizerOutput(state,
-                                                     cEvapFluidCooler_TwoSpeed,
-                                                     this->Name,
-                                                     "Initial Air Flow Rate at High Fan Speed [m3/s]",
-                                                     this->HighSpeedAirFlowRate);
-                    }
-                }
+                reportSizerByType(state,
+                                  this->Type,
+                                  this->Name,
+                                  "Design Air Flow Rate [m3/s]",
+                                  "Air Flow Rate at High Fan Speed [m3/s]",
+                                  this->HighSpeedAirFlowRate);
             }
         }
 
@@ -1660,80 +1714,29 @@ namespace EvaporativeFluidCoolers {
                     DesEvapFluidCoolerLoad = rho * Cp * tmpDesignWaterFlowRate * state.dataSize->PlantSizData(PltSizCondNum).DeltaT;
                     Real64 const par1 = rho * tmpDesignWaterFlowRate; // Design water mass flow rate
                     Real64 const par2 = tmpHighSpeedAirFlowRate;      // Design air volume flow rate
-                    // Lower bound for UA [W/C]
-                    Real64 UA0 = 0.0001 * DesEvapFluidCoolerLoad; // Assume deltaT = 10000K (limit)
-                    Real64 UA1 = DesEvapFluidCoolerLoad;          // Assume deltaT = 1K
                     this->inletConds.WaterTemp = this->DesignExitWaterTemp + state.dataSize->PlantSizData(PltSizCondNum).DeltaT;
                     this->inletConds.AirTemp = 35.0;
                     this->inletConds.AirWetBulb = 25.6;
-                    this->inletConds.AirPress = state.dataEnvrn->StdBaroPress;
-                    this->inletConds.AirHumRat =
-                        Psychrometrics::PsyWFnTdbTwbPb(state, this->inletConds.AirTemp, this->inletConds.AirWetBulb, this->inletConds.AirPress);
-                    auto f = [&state, this, DesEvapFluidCoolerLoad, par1, par2, Cp](Real64 UA) {
-                        this->SimSimpleEvapFluidCooler(state, par1, par2, UA, this->DesignExitWaterTemp);
-                        Real64 const CoolingOutput = Cp * par1 * (this->inletConds.WaterTemp - this->DesignExitWaterTemp);
-                        return (DesEvapFluidCoolerLoad - CoolingOutput) / DesEvapFluidCoolerLoad;
-                    };
-                    General::SolveRoot(state, Acc, MaxIte, SolFla, UA, f, UA0, UA1);
-                    if (SolFla == -1) {
-                        ShowWarningError(state, "Iteration limit exceeded in calculating evaporative fluid cooler UA.");
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Autosizing of fluid cooler UA failed for evaporative fluid cooler = {}", this->Name));
-                        ShowContinueError(state, EnergyPlus::format("The final UA value = {:.2R}W/C, and the simulation continues...", UA));
-                    } else if (SolFla == -2) {
+                    Real64 UA0 = 0.0;
+                    Real64 UA1 = 0.0;
+                    SolFla = solveForUA(state, this, DesEvapFluidCoolerLoad, par1, par2, Cp, UA, UA0, UA1);
+                    if (SolFla == -2) {
                         this->SimSimpleEvapFluidCooler(state, par1, par2, UA0, OutWaterTempAtUA0);
                         this->SimSimpleEvapFluidCooler(state, par1, par2, UA1, OutWaterTempAtUA1);
-                        ShowSevereError(
-                            state, EnergyPlus::format("{}: The combination of design input values did not allow the calculation of a ", CalledFrom));
-                        ShowContinueError(state, "reasonable UA value. Review and revise design input values as appropriate. Specifying hard");
-                        ShowContinueError(state,
-                                          "sizes for some \"autosizable\" fields while autosizing other \"autosizable\" fields may be contributing "
-                                          "to this problem.");
-                        ShowContinueError(state, "This model iterates on UA to find the heat transfer required to provide the design outlet ");
-                        ShowContinueError(state, "water temperature. Initially, the outlet water temperatures at high and low UA values are ");
-                        ShowContinueError(state, "calculated. The Design Exit Water Temperature should be between the outlet water ");
-                        ShowContinueError(state, "temperatures calculated at high and low UA values. If the Design Exit Water Temperature is ");
-                        ShowContinueError(state, "out of this range, the solution will not converge and UA will not be calculated. ");
-                        ShowContinueError(state, "The possible solutions could be to manually input adjusted water and/or air flow rates ");
-                        ShowContinueError(
-                            state,
-                            "based on the autosized values shown below or to adjust design evaporative fluid cooler air inlet wet-bulb temperature.");
-                        ShowContinueError(state, "Plant:Sizing object inputs also influence these results (e.g. DeltaT and ExitTemp).");
-                        ShowContinueError(state, "Inputs to the evaporative fluid cooler object:");
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format("Design Evaporative Fluid Cooler Load [W]                      = {:.2R}", DesEvapFluidCoolerLoad));
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format("Design Evaporative Fluid Cooler Water Volume Flow Rate [m3/s] = {:.6R}", this->DesignWaterFlowRate));
-                        ShowContinueError(state, EnergyPlus::format("Design Evaporative Fluid Cooler Air Volume Flow Rate [m3/s]   = {:.2R}", par2));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Design Evaporative Fluid Cooler Air Inlet Wet-bulb Temp [C]   = {:.2R}",
-                                                             this->inletConds.AirWetBulb));
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format("Design Evaporative Fluid Cooler Water Inlet Temp [C]          = {:.2R}", this->inletConds.WaterTemp));
-                        ShowContinueError(state, "Inputs to the plant sizing object:");
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format("Design Exit Water Temp [C]                                    = {:.2R}", this->DesignExitWaterTemp));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Loop Design Temperature Difference [C]                        = {:.2R}",
-                                                             state.dataSize->PlantSizData(PltSizCondNum).DeltaT));
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format("Design Evaporative Fluid Cooler Water Inlet Temp [C]          = {:.2R}", this->inletConds.WaterTemp));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Calculated water outlet temperature at low UA [C](UA = {:.2R} W/C)  = {:.2R}",
-                                                             UA0,
-                                                             OutWaterTempAtUA0));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Calculated water outlet temperature at high UA [C](UA = {:.2R} W/C)  = {:.2R}",
-                                                             UA1,
-                                                             OutWaterTempAtUA1));
-                        ShowFatalError(
-                            state,
-                            EnergyPlus::format("Autosizing of Evaporative Fluid Cooler UA failed for Evaporative Fluid Cooler = {}", this->Name));
+                        reportUASolverFailure(state,
+                                              this->Name,
+                                              DesEvapFluidCoolerLoad,
+                                              this->DesignWaterFlowRate,
+                                              par2,
+                                              this->inletConds.AirWetBulb,
+                                              this->inletConds.WaterTemp,
+                                              this->DesignExitWaterTemp,
+                                              UA0,
+                                              UA1,
+                                              OutWaterTempAtUA0,
+                                              OutWaterTempAtUA1,
+                                              PltSizCondNum,
+                                              state);
                     }
                     if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                         this->HighSpeedEvapFluidCoolerUA = UA;
@@ -1745,37 +1748,12 @@ namespace EvaporativeFluidCoolers {
                     }
                 }
                 if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
-                    if (this->Type == DataPlant::PlantEquipmentType::EvapFluidCooler_SingleSpd) {
-                        if (state.dataPlnt->PlantFinalSizesOkayToReport) {
-                            BaseSizer::reportSizerOutput(state,
-                                                         cEvapFluidCooler_SingleSpeed,
-                                                         this->Name,
-                                                         "U-Factor Times Area Value at Design Air Flow Rate [W/C]",
-                                                         this->HighSpeedEvapFluidCoolerUA);
-                        }
-                        if (state.dataPlnt->PlantFirstSizesOkayToReport) {
-                            BaseSizer::reportSizerOutput(state,
-                                                         cEvapFluidCooler_SingleSpeed,
-                                                         this->Name,
-                                                         "Initial U-Factor Times Area Value at Design Air Flow Rate [W/C]",
-                                                         this->HighSpeedEvapFluidCoolerUA);
-                        }
-                    } else if (this->Type == DataPlant::PlantEquipmentType::EvapFluidCooler_TwoSpd) {
-                        if (state.dataPlnt->PlantFinalSizesOkayToReport) {
-                            BaseSizer::reportSizerOutput(state,
-                                                         cEvapFluidCooler_TwoSpeed,
-                                                         this->Name,
-                                                         "U-Factor Times Area Value at High Fan Speed [W/C]",
-                                                         this->HighSpeedEvapFluidCoolerUA);
-                        }
-                        if (state.dataPlnt->PlantFirstSizesOkayToReport) {
-                            BaseSizer::reportSizerOutput(state,
-                                                         cEvapFluidCooler_TwoSpeed,
-                                                         this->Name,
-                                                         "Initial U-Factor Times Area Value at High Fan Speed [W/C]",
-                                                         this->HighSpeedEvapFluidCoolerUA);
-                        }
-                    }
+                    reportSizerByType(state,
+                                      this->Type,
+                                      this->Name,
+                                      "U-Factor Times Area Value at Design Air Flow Rate [W/C]",
+                                      "U-Factor Times Area Value at High Fan Speed [W/C]",
+                                      this->HighSpeedEvapFluidCoolerUA);
                 }
             } else {
                 if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
@@ -1794,28 +1772,15 @@ namespace EvaporativeFluidCoolers {
                 DesEvapFluidCoolerLoad = this->HighSpeedStandardDesignCapacity * this->HeatRejectCapNomCapSizingRatio;
                 Real64 const par1 = rho * this->DesignWaterFlowRate; // Design water mass flow rate
                 Real64 const par2 = this->HighSpeedAirFlowRate;      // Design air volume flow rate
-                Real64 UA0 = 0.0001 * DesEvapFluidCoolerLoad;        // Assume deltaT = 10000K (limit)
-                Real64 UA1 = DesEvapFluidCoolerLoad;                 // Assume deltaT = 1K
                 this->inletConds.WaterTemp = 35.0;                   // 95F design inlet water temperature
                 this->DesignEnteringWaterTemp = this->inletConds.WaterTemp;
                 this->inletConds.AirTemp = 35.0;    // 95F design inlet air dry-bulb temp
                 this->inletConds.AirWetBulb = 25.6; // 78F design inlet air wet-bulb temp
                 this->DesignEnteringAirWetBulbTemp = this->inletConds.AirWetBulb;
-                this->inletConds.AirPress = state.dataEnvrn->StdBaroPress;
-                this->inletConds.AirHumRat =
-                    Psychrometrics::PsyWFnTdbTwbPb(state, this->inletConds.AirTemp, this->inletConds.AirWetBulb, this->inletConds.AirPress);
-                auto f = [&state, this, DesEvapFluidCoolerLoad, par1, par2, Cp](Real64 UA) {
-                    this->SimSimpleEvapFluidCooler(state, par1, par2, UA, this->DesignExitWaterTemp);
-                    Real64 const CoolingOutput = Cp * par1 * (this->inletConds.WaterTemp - this->DesignExitWaterTemp);
-                    return (DesEvapFluidCoolerLoad - CoolingOutput) / DesEvapFluidCoolerLoad;
-                };
-                General::SolveRoot(state, Acc, MaxIte, SolFla, UA, f, UA0, UA1);
-                if (SolFla == -1) {
-                    ShowWarningError(state, "Iteration limit exceeded in calculating evaporative fluid cooler UA.");
-                    ShowContinueError(state,
-                                      EnergyPlus::format("Autosizing of fluid cooler UA failed for evaporative fluid cooler = {}", this->Name));
-                    ShowContinueError(state, EnergyPlus::format("The final UA value = {:.2R}W/C, and the simulation continues...", UA));
-                } else if (SolFla == -2) {
+                Real64 UA0 = 0.0;
+                Real64 UA1 = 0.0;
+                SolFla = solveForUA(state, this, DesEvapFluidCoolerLoad, par1, par2, Cp, UA, UA0, UA1);
+                if (SolFla == -2) {
                     ShowSevereError(state,
                                     EnergyPlus::format("{}: The combination of design input values did not allow the calculation of a ", CalledFrom));
                     ShowContinueError(state, "reasonable UA value. Review and revise design input values as appropriate. ");
@@ -1827,37 +1792,12 @@ namespace EvaporativeFluidCoolers {
                 this->HighSpeedEvapFluidCoolerUA = 0.0;
             }
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
-                if (this->Type == DataPlant::PlantEquipmentType::EvapFluidCooler_SingleSpd) {
-                    if (state.dataPlnt->PlantFinalSizesOkayToReport) {
-                        BaseSizer::reportSizerOutput(state,
-                                                     cEvapFluidCooler_SingleSpeed,
-                                                     this->Name,
-                                                     "U-Factor Times Area Value at Design Air Flow Rate [W/C]",
-                                                     this->HighSpeedEvapFluidCoolerUA);
-                    }
-                    if (state.dataPlnt->PlantFirstSizesOkayToReport) {
-                        BaseSizer::reportSizerOutput(state,
-                                                     cEvapFluidCooler_SingleSpeed,
-                                                     this->Name,
-                                                     "Initial U-Factor Times Area Value at Design Air Flow Rate [W/C]",
-                                                     this->HighSpeedEvapFluidCoolerUA);
-                    }
-                } else if (this->Type == DataPlant::PlantEquipmentType::EvapFluidCooler_TwoSpd) {
-                    if (state.dataPlnt->PlantFinalSizesOkayToReport) {
-                        BaseSizer::reportSizerOutput(state,
-                                                     cEvapFluidCooler_TwoSpeed,
-                                                     this->Name,
-                                                     "U-Factor Times Area Value at High Fan Speed [W/C]",
-                                                     this->HighSpeedEvapFluidCoolerUA);
-                    }
-                    if (state.dataPlnt->PlantFirstSizesOkayToReport) {
-                        BaseSizer::reportSizerOutput(state,
-                                                     cEvapFluidCooler_TwoSpeed,
-                                                     this->Name,
-                                                     "Initial U-Factor Times Area Value at High Fan Speed [W/C]",
-                                                     this->HighSpeedEvapFluidCoolerUA);
-                    }
-                }
+                reportSizerByType(state,
+                                  this->Type,
+                                  this->Name,
+                                  "U-Factor Times Area Value at Design Air Flow Rate [W/C]",
+                                  "U-Factor Times Area Value at High Fan Speed [W/C]",
+                                  this->HighSpeedEvapFluidCoolerUA);
             }
         }
 
@@ -1868,157 +1808,58 @@ namespace EvaporativeFluidCoolers {
                 DesEvapFluidCoolerLoad = this->HighSpeedUserSpecifiedDesignCapacity;
                 Real64 const par1 = rho * tmpDesignWaterFlowRate; // Design water mass flow rate
                 Real64 const par2 = tmpHighSpeedAirFlowRate;      // Design air volume flow rate
-                Real64 UA0 = 0.0001 * DesEvapFluidCoolerLoad;     // Assume deltaT = 10000K (limit)
-                Real64 UA1 = DesEvapFluidCoolerLoad;              // Assume deltaT = 1K
-
                 this->inletConds.WaterTemp = this->DesignEnteringWaterTemp;
                 this->inletConds.AirTemp = this->DesignEnteringAirTemp;
                 this->inletConds.AirWetBulb = this->DesignEnteringAirWetBulbTemp;
-                this->inletConds.AirPress = state.dataEnvrn->StdBaroPress;
-                this->inletConds.AirHumRat =
-                    Psychrometrics::PsyWFnTdbTwbPb(state, this->inletConds.AirTemp, this->inletConds.AirWetBulb, this->inletConds.AirPress);
-                auto f = [&state, this, DesEvapFluidCoolerLoad, par1, par2, Cp](Real64 UA) {
-                    this->SimSimpleEvapFluidCooler(state, par1, par2, UA, this->DesignExitWaterTemp);
-                    Real64 const CoolingOutput = Cp * par1 * (this->inletConds.WaterTemp - this->DesignExitWaterTemp);
-                    return (DesEvapFluidCoolerLoad - CoolingOutput) / DesEvapFluidCoolerLoad;
-                };
-                General::SolveRoot(state, Acc, MaxIte, SolFla, UA, f, UA0, UA1);
-                if (SolFla == -1) {
-                    ShowWarningError(state, "Iteration limit exceeded in calculating evaporative fluid cooler UA.");
-                    ShowContinueError(state,
-                                      EnergyPlus::format("Autosizing of fluid cooler UA failed for evaporative fluid cooler = {}", this->Name));
-                    ShowContinueError(state, EnergyPlus::format("The final UA value = {:.2R}W/C, and the simulation continues...", UA));
-                } else if (SolFla == -2) {
+                Real64 UA0 = 0.0;
+                Real64 UA1 = 0.0;
+                SolFla = solveForUA(state, this, DesEvapFluidCoolerLoad, par1, par2, Cp, UA, UA0, UA1);
+                if (SolFla == -2) {
                     this->SimSimpleEvapFluidCooler(state, par1, par2, UA0, OutWaterTempAtUA0);
                     this->SimSimpleEvapFluidCooler(state, par1, par2, UA1, OutWaterTempAtUA1);
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}: The combination of design input values did not allow the calculation of a ", CalledFrom));
-                    ShowContinueError(state, "reasonable UA value. Review and revise design input values as appropriate. Specifying hard");
-                    ShowContinueError(
-                        state,
-                        R"(sizes for some "autosizable" fields while autosizing other "autosizable" fields may be contributing to this problem.)");
-                    ShowContinueError(state, "This model iterates on UA to find the heat transfer required to provide the design outlet ");
-                    ShowContinueError(state, "water temperature. Initially, the outlet water temperatures at high and low UA values are ");
-                    ShowContinueError(state, "calculated. The Design Exit Water Temperature should be between the outlet water ");
-                    ShowContinueError(state, "temperatures calculated at high and low UA values. If the Design Exit Water Temperature is ");
-                    ShowContinueError(state, "out of this range, the solution will not converge and UA will not be calculated. ");
-                    ShowContinueError(state, "The possible solutions could be to manually input adjusted water and/or air flow rates ");
-                    ShowContinueError(
-                        state,
-                        "based on the autosized values shown below or to adjust design evaporative fluid cooler air inlet wet-bulb temperature.");
-                    ShowContinueError(state, "Plant:Sizing object inputs also influence these results (e.g. DeltaT and ExitTemp).");
-                    ShowContinueError(state, "Inputs to the evaporative fluid cooler object:");
-                    ShowContinueError(
-                        state, EnergyPlus::format("Design Evaporative Fluid Cooler Load [W]                      = {:.2R}", DesEvapFluidCoolerLoad));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Design Evaporative Fluid Cooler Water Volume Flow Rate [m3/s] = {:.6R}", this->DesignWaterFlowRate));
-                    ShowContinueError(state, EnergyPlus::format("Design Evaporative Fluid Cooler Air Volume Flow Rate [m3/s]   = {:.2R}", par2));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Design Evaporative Fluid Cooler Air Inlet Wet-bulb Temp [C]   = {:.2R}", this->inletConds.AirWetBulb));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Design Evaporative Fluid Cooler Water Inlet Temp [C]          = {:.2R}", this->inletConds.WaterTemp));
-                    ShowContinueError(state, "Inputs to the plant sizing object:");
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Design Exit Water Temp [C]                                    = {:.2R}", this->DesignExitWaterTemp));
-                    if (PltSizCondNum > 0) {
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Loop Design Temperature Difference [C]                        = {:.2R}",
-                                                             state.dataSize->PlantSizData(PltSizCondNum).DeltaT));
-                    }
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Design Evaporative Fluid Cooler Water Inlet Temp [C]          = {:.2R}", this->inletConds.WaterTemp));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Calculated water outlet temperature at low UA [C](UA = {:.2R} W/C)  = {:.2R}", UA0, OutWaterTempAtUA0));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Calculated water outlet temperature at high UA [C](UA = {:.2R} W/C)  = {:.2R}", UA1, OutWaterTempAtUA1));
-                    ShowFatalError(
-                        state, EnergyPlus::format("Autosizing of Evaporative Fluid Cooler UA failed for Evaporative Fluid Cooler = {}", this->Name));
+                    reportUASolverFailure(state,
+                                          this->Name,
+                                          DesEvapFluidCoolerLoad,
+                                          this->DesignWaterFlowRate,
+                                          par2,
+                                          this->inletConds.AirWetBulb,
+                                          this->inletConds.WaterTemp,
+                                          this->DesignExitWaterTemp,
+                                          UA0,
+                                          UA1,
+                                          OutWaterTempAtUA0,
+                                          OutWaterTempAtUA1,
+                                          PltSizCondNum,
+                                          state);
                 }
                 this->HighSpeedEvapFluidCoolerUA = UA;
             } else {
                 this->HighSpeedEvapFluidCoolerUA = 0.0;
             }
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
-                if (this->Type == DataPlant::PlantEquipmentType::EvapFluidCooler_SingleSpd) {
-                    if (state.dataPlnt->PlantFinalSizesOkayToReport) {
-                        BaseSizer::reportSizerOutput(state,
-                                                     cEvapFluidCooler_SingleSpeed,
-                                                     this->Name,
-                                                     "U-Factor Times Area Value at Design Air Flow Rate [W/C]",
-                                                     this->HighSpeedEvapFluidCoolerUA);
-                    }
-                    if (state.dataPlnt->PlantFirstSizesOkayToReport) {
-                        BaseSizer::reportSizerOutput(state,
-                                                     cEvapFluidCooler_SingleSpeed,
-                                                     this->Name,
-                                                     "Initial U-Factor Times Area Value at Design Air Flow Rate [W/C]",
-                                                     this->HighSpeedEvapFluidCoolerUA);
-                    }
-                } else if (this->Type == DataPlant::PlantEquipmentType::EvapFluidCooler_TwoSpd) {
-                    if (state.dataPlnt->PlantFinalSizesOkayToReport) {
-                        BaseSizer::reportSizerOutput(state,
-                                                     cEvapFluidCooler_TwoSpeed,
-                                                     this->Name,
-                                                     "U-Factor Times Area Value at High Fan Speed [W/C]",
-                                                     this->HighSpeedEvapFluidCoolerUA);
-                    }
-                    if (state.dataPlnt->PlantFirstSizesOkayToReport) {
-                        BaseSizer::reportSizerOutput(state,
-                                                     cEvapFluidCooler_TwoSpeed,
-                                                     this->Name,
-                                                     "Initial U-Factor Times Area Value at High Fan Speed [W/C]",
-                                                     this->HighSpeedEvapFluidCoolerUA);
-                    }
-                }
+                reportSizerByType(state,
+                                  this->Type,
+                                  this->Name,
+                                  "U-Factor Times Area Value at Design Air Flow Rate [W/C]",
+                                  "U-Factor Times Area Value at High Fan Speed [W/C]",
+                                  this->HighSpeedEvapFluidCoolerUA);
             }
         }
 
         if (this->LowSpeedAirFlowRateWasAutoSized && state.dataPlnt->PlantFirstSizesOkayToFinalize) {
             this->LowSpeedAirFlowRate = this->LowSpeedAirFlowRateSizingFactor * this->HighSpeedAirFlowRate;
-            if (state.dataPlnt->PlantFinalSizesOkayToReport) {
-                BaseSizer::reportSizerOutput(
-                    state, this->EvapFluidCoolerType, this->Name, "Air Flow Rate at Low Fan Speed [m3/s]", this->LowSpeedAirFlowRate);
-            }
-            if (state.dataPlnt->PlantFirstSizesOkayToReport) {
-                BaseSizer::reportSizerOutput(
-                    state, this->EvapFluidCoolerType, this->Name, "Initial Air Flow Rate at Low Fan Speed [m3/s]", this->LowSpeedAirFlowRate);
-            }
+            reportSizerPair(state, this->EvapFluidCoolerType, this->Name, "Air Flow Rate at Low Fan Speed [m3/s]", this->LowSpeedAirFlowRate);
         }
 
         if (this->LowSpeedFanPowerWasAutoSized && state.dataPlnt->PlantFirstSizesOkayToFinalize) {
             this->LowSpeedFanPower = this->LowSpeedFanPowerSizingFactor * this->HighSpeedFanPower;
-            if (state.dataPlnt->PlantFinalSizesOkayToReport) {
-                BaseSizer::reportSizerOutput(state, this->EvapFluidCoolerType, this->Name, "Fan Power at Low Fan Speed [W]", this->LowSpeedFanPower);
-            }
-            if (state.dataPlnt->PlantFirstSizesOkayToReport) {
-                BaseSizer::reportSizerOutput(
-                    state, this->EvapFluidCoolerType, this->Name, "Initial Fan Power at Low Fan Speed [W]", this->LowSpeedFanPower);
-            }
+            reportSizerPair(state, this->EvapFluidCoolerType, this->Name, "Fan Power at Low Fan Speed [W]", this->LowSpeedFanPower);
         }
 
         if (this->LowSpeedEvapFluidCoolerUAWasAutoSized && state.dataPlnt->PlantFirstSizesOkayToFinalize) {
             this->LowSpeedEvapFluidCoolerUA = this->LowSpeedEvapFluidCoolerUASizingFactor * this->HighSpeedEvapFluidCoolerUA;
-            if (state.dataPlnt->PlantFinalSizesOkayToReport) {
-                BaseSizer::reportSizerOutput(state,
-                                             this->EvapFluidCoolerType,
-                                             this->Name,
-                                             "U-Factor Times Area Value at Low Fan Speed [W/C]",
-                                             this->LowSpeedEvapFluidCoolerUA);
-            }
-            if (state.dataPlnt->PlantFirstSizesOkayToReport) {
-                BaseSizer::reportSizerOutput(state,
-                                             this->EvapFluidCoolerType,
-                                             this->Name,
-                                             "Initial U-Factor Times Area Value at Low Fan Speed [W/C]",
-                                             this->LowSpeedEvapFluidCoolerUA);
-            }
+            reportSizerPair(
+                state, this->EvapFluidCoolerType, this->Name, "U-Factor Times Area Value at Low Fan Speed [W/C]", this->LowSpeedEvapFluidCoolerUA);
         }
 
         if (this->PerformanceInputMethod_Num == PIM::StandardDesignCapacity && this->Type == DataPlant::PlantEquipmentType::EvapFluidCooler_TwoSpd) {
@@ -2030,26 +1871,13 @@ namespace EvaporativeFluidCoolers {
                 DesEvapFluidCoolerLoad = this->LowSpeedStandardDesignCapacity * this->HeatRejectCapNomCapSizingRatio;
                 Real64 const par1 = rho * tmpDesignWaterFlowRate; // Design water mass flow rate
                 Real64 const par2 = this->LowSpeedAirFlowRate;    // Air volume flow rate at low fan speed
-                Real64 UA0 = 0.0001 * DesEvapFluidCoolerLoad;     // Assume deltaT = 10000K (limit)
-                Real64 UA1 = DesEvapFluidCoolerLoad;              // Assume deltaT = 1K
                 this->inletConds.WaterTemp = 35.0;                // 95F design inlet water temperature
                 this->inletConds.AirTemp = 35.0;                  // 95F design inlet air dry-bulb temp
                 this->inletConds.AirWetBulb = 25.6;               // 78F design inlet air wet-bulb temp
-                this->inletConds.AirPress = state.dataEnvrn->StdBaroPress;
-                this->inletConds.AirHumRat =
-                    Psychrometrics::PsyWFnTdbTwbPb(state, this->inletConds.AirTemp, this->inletConds.AirWetBulb, this->inletConds.AirPress);
-                auto f = [&state, this, DesEvapFluidCoolerLoad, par1, par2, Cp](Real64 UA) {
-                    this->SimSimpleEvapFluidCooler(state, par1, par2, UA, this->DesignExitWaterTemp);
-                    Real64 const CoolingOutput = Cp * par1 * (this->inletConds.WaterTemp - this->DesignExitWaterTemp);
-                    return (DesEvapFluidCoolerLoad - CoolingOutput) / DesEvapFluidCoolerLoad;
-                };
-                General::SolveRoot(state, Acc, MaxIte, SolFla, UA, f, UA0, UA1);
-                if (SolFla == -1) {
-                    ShowWarningError(state, "Iteration limit exceeded in calculating evaporative fluid cooler UA.");
-                    ShowContinueError(state,
-                                      EnergyPlus::format("Autosizing of fluid cooler UA failed for evaporative fluid cooler = {}", this->Name));
-                    ShowContinueError(state, EnergyPlus::format("The final UA value = {:.2R}W/C, and the simulation continues...", UA));
-                } else if (SolFla == -2) {
+                Real64 UA0 = 0.0;
+                Real64 UA1 = 0.0;
+                SolFla = solveForUA(state, this, DesEvapFluidCoolerLoad, par1, par2, Cp, UA, UA0, UA1);
+                if (SolFla == -2) {
                     ShowSevereError(state,
                                     EnergyPlus::format("{}: The combination of design input values did not allow the calculation of a ", CalledFrom));
                     ShowContinueError(state, "reasonable low-speed UA value. Review and revise design input values as appropriate. ");
@@ -2061,20 +1889,11 @@ namespace EvaporativeFluidCoolers {
                 this->LowSpeedEvapFluidCoolerUA = 0.0;
             }
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
-                if (state.dataPlnt->PlantFinalSizesOkayToReport) {
-                    BaseSizer::reportSizerOutput(state,
-                                                 this->EvapFluidCoolerType,
-                                                 this->Name,
-                                                 "U-Factor Times Area Value at Low Fan Speed [W/C]",
-                                                 this->LowSpeedEvapFluidCoolerUA);
-                }
-                if (state.dataPlnt->PlantFirstSizesOkayToReport) {
-                    BaseSizer::reportSizerOutput(state,
-                                                 this->EvapFluidCoolerType,
-                                                 this->Name,
-                                                 "Initial U-Factor Times Area Value at Low Fan Speed [W/C]",
-                                                 this->LowSpeedEvapFluidCoolerUA);
-                }
+                reportSizerPair(state,
+                                this->EvapFluidCoolerType,
+                                this->Name,
+                                "U-Factor Times Area Value at Low Fan Speed [W/C]",
+                                this->LowSpeedEvapFluidCoolerUA);
             }
         }
 
@@ -2086,77 +1905,45 @@ namespace EvaporativeFluidCoolers {
                 DesEvapFluidCoolerLoad = this->LowSpeedUserSpecifiedDesignCapacity;
                 Real64 const par1 = rho * tmpDesignWaterFlowRate; // Design water mass flow rate
                 Real64 const par2 = this->LowSpeedAirFlowRate;    // Air volume flow rate at low fan speed
-                Real64 UA0 = 0.0001 * DesEvapFluidCoolerLoad;     // Assume deltaT = 10000K (limit)
-                Real64 UA1 = DesEvapFluidCoolerLoad;              // Assume deltaT = 1K
                 this->inletConds.WaterTemp = this->DesignEnteringWaterTemp;
                 this->inletConds.AirTemp = this->DesignEnteringAirTemp;
                 this->inletConds.AirWetBulb = this->DesignEnteringAirWetBulbTemp;
-                this->inletConds.AirPress = state.dataEnvrn->StdBaroPress;
-                this->inletConds.AirHumRat =
-                    Psychrometrics::PsyWFnTdbTwbPb(state, this->inletConds.AirTemp, this->inletConds.AirWetBulb, this->inletConds.AirPress);
-                auto f = [&state, this, DesEvapFluidCoolerLoad, par1, par2, Cp](Real64 UA) {
-                    this->SimSimpleEvapFluidCooler(state, par1, par2, UA, this->DesignExitWaterTemp);
-                    Real64 const CoolingOutput = Cp * par1 * (this->inletConds.WaterTemp - this->DesignExitWaterTemp);
-                    return (DesEvapFluidCoolerLoad - CoolingOutput) / DesEvapFluidCoolerLoad;
-                };
-                General::SolveRoot(state, Acc, MaxIte, SolFla, UA, f, UA0, UA1);
+                Real64 UA0 = 0.0;
+                Real64 UA1 = 0.0;
+                SolFla = solveForUA(state, this, DesEvapFluidCoolerLoad, par1, par2, Cp, UA, UA0, UA1);
                 if (SolFla == -1) {
+                    // Override the warning from solveForUA with a fatal error for this case
                     ShowSevereError(state, "Iteration limit exceeded in calculating EvaporativeFluidCooler UA");
                     ShowFatalError(state,
                                    EnergyPlus::format("Autosizing of EvaporativeFluidCooler UA failed for EvaporativeFluidCooler {}", this->Name));
                 } else if (SolFla == -2) {
                     this->SimSimpleEvapFluidCooler(state, par1, par2, UA0, OutWaterTempAtUA0);
                     this->SimSimpleEvapFluidCooler(state, par1, par2, UA1, OutWaterTempAtUA1);
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}: The combination of design input values did not allow the calculation of a ", CalledFrom));
-                    ShowContinueError(state, "reasonable UA value. Review and revise design input values as appropriate. Specifying hard");
-                    ShowContinueError(
-                        state,
-                        R"(sizes for some "autosizable" fields while autosizing other "autosizable" fields may be contributing to this problem.)");
-                    ShowContinueError(state, "This model iterates on UA to find the heat transfer required to provide the design outlet ");
-                    ShowContinueError(state, "water temperature. Initially, the outlet water temperatures at high and low UA values are ");
-                    ShowContinueError(state, "calculated. The Design Exit Water Temperature should be between the outlet water ");
-                    ShowContinueError(state, "temperatures calculated at high and low UA values. If the Design Exit Water Temperature is ");
-                    ShowContinueError(state, "out of this range, the solution will not converge and UA will not be calculated. ");
-                    ShowContinueError(state, "Inputs to the Evaporative Fluid Cooler model are:");
-                    ShowContinueError(state,
-                                      EnergyPlus::format("Design Evaporative Fluid Cooler Load                    = {:.2R}", DesEvapFluidCoolerLoad));
-                    ShowContinueError(state, EnergyPlus::format("Design Evaporative Fluid Cooler Water Volume Flow Rate  = {:.2R}", par1));
-                    ShowContinueError(state, EnergyPlus::format("Design Evaporative Fluid Cooler Air Volume Flow Rate    = {:.2R}", par2));
-                    ShowContinueError(
-                        state, EnergyPlus::format("Design Evaporative Fluid Cooler Air Inlet Wet-bulb Temp = {:.2R}", this->inletConds.AirWetBulb));
-                    ShowContinueError(
-                        state, EnergyPlus::format("Design Evaporative Fluid Cooler Water Inlet Temp        = {:.2R}", this->inletConds.WaterTemp));
-                    ShowContinueError(
-                        state, EnergyPlus::format("Design Exit Water Temp                                  = {:.2R}", this->DesignExitWaterTemp));
-                    ShowContinueError(
-                        state, EnergyPlus::format("Design Evaporative Fluid Cooler Water Inlet Temp [C]    = {:.2R}", this->inletConds.WaterTemp));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("Calculated water outlet temperature at low UA({:.2R})  = {:.2R}", UA0, OutWaterTempAtUA0));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("Calculated water outlet temperature at high UA({:.2R})  = {:.2R}", UA1, OutWaterTempAtUA1));
-                    ShowFatalError(
-                        state, EnergyPlus::format("Autosizing of Evaporative Fluid Cooler UA failed for Evaporative Fluid Cooler = {}", this->Name));
+                    reportUASolverFailure(state,
+                                          this->Name,
+                                          DesEvapFluidCoolerLoad,
+                                          this->DesignWaterFlowRate,
+                                          par2,
+                                          this->inletConds.AirWetBulb,
+                                          this->inletConds.WaterTemp,
+                                          this->DesignExitWaterTemp,
+                                          UA0,
+                                          UA1,
+                                          OutWaterTempAtUA0,
+                                          OutWaterTempAtUA1,
+                                          PltSizCondNum,
+                                          state);
                 }
                 this->LowSpeedEvapFluidCoolerUA = UA;
             } else {
                 this->LowSpeedEvapFluidCoolerUA = 0.0;
             }
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
-                if (state.dataPlnt->PlantFinalSizesOkayToReport) {
-                    BaseSizer::reportSizerOutput(state,
-                                                 this->EvapFluidCoolerType,
-                                                 this->Name,
-                                                 "U-Factor Times Area Value at Low Fan Speed [W/C]",
-                                                 this->LowSpeedEvapFluidCoolerUA);
-                }
-                if (state.dataPlnt->PlantFirstSizesOkayToReport) {
-                    BaseSizer::reportSizerOutput(state,
-                                                 this->EvapFluidCoolerType,
-                                                 this->Name,
-                                                 "Initial U-Factor Times Area Value at Low Fan Speed [W/C]",
-                                                 this->LowSpeedEvapFluidCoolerUA);
-                }
+                reportSizerPair(state,
+                                this->EvapFluidCoolerType,
+                                this->Name,
+                                "U-Factor Times Area Value at Low Fan Speed [W/C]",
+                                this->LowSpeedEvapFluidCoolerUA);
             }
         }
 

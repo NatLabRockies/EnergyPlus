@@ -1057,39 +1057,15 @@ namespace SurfaceGeometry {
 
         GetGeometryParameters(state, ErrorsFound);
 
-        if (state.dataSurface->WorldCoordSystem) {
-            bool RelWarning = false;
-            if (state.dataHeatBal->BuildingAzimuth != 0.0) {
-                RelWarning = true;
-            }
-            for (int ZoneNum = 1; ZoneNum <= state.dataGlobal->NumOfZones; ++ZoneNum) {
-                if (state.dataHeatBal->Zone(ZoneNum).RelNorth != 0.0) {
+        if (state.dataSurface->WorldCoordSystem && !state.dataSurfaceGeometry->WarningDisplayed) {
+            bool RelWarning = (state.dataHeatBal->BuildingAzimuth != 0.0);
+            for (int ZoneNum = 1; !RelWarning && ZoneNum <= state.dataGlobal->NumOfZones; ++ZoneNum) {
+                auto const &zone = state.dataHeatBal->Zone(ZoneNum);
+                if (zone.RelNorth != 0.0 || zone.OriginX != 0.0 || zone.OriginY != 0.0 || zone.OriginZ != 0.0) {
                     RelWarning = true;
                 }
             }
-            if (RelWarning && !state.dataSurfaceGeometry->WarningDisplayed) {
-                ShowWarningError(
-                    state,
-                    EnergyPlus::format(
-                        "{}World Coordinate System selected.  Any non-zero Building/Zone North Axes or non-zero Zone Origins are ignored.",
-                        RoutineName));
-                ShowContinueError(state,
-                                  "These may be used in daylighting reference point coordinate calculations but not in normal geometry inputs.");
-                state.dataSurfaceGeometry->WarningDisplayed = true;
-            }
-            RelWarning = false;
-            for (int ZoneNum = 1; ZoneNum <= state.dataGlobal->NumOfZones; ++ZoneNum) {
-                if (state.dataHeatBal->Zone(ZoneNum).OriginX != 0.0) {
-                    RelWarning = true;
-                }
-                if (state.dataHeatBal->Zone(ZoneNum).OriginY != 0.0) {
-                    RelWarning = true;
-                }
-                if (state.dataHeatBal->Zone(ZoneNum).OriginZ != 0.0) {
-                    RelWarning = true;
-                }
-            }
-            if (RelWarning && !state.dataSurfaceGeometry->WarningDisplayed) {
+            if (RelWarning) {
                 ShowWarningError(
                     state,
                     EnergyPlus::format(
@@ -1548,129 +1524,51 @@ namespace SurfaceGeometry {
                     }
                 }
 
-                // Internal mass goes next
-                for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
-                    if (SurfaceTmpClassMoved(SurfNum)) {
-                        continue;
+                // Helper lambda: move all surfaces in this space that match a predicate,
+                // optionally adding them to the report-order list.
+                auto moveSurfacesMatching = [&](auto const &matchFn, bool addToReportOrder) {
+                    for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
+                        if (SurfaceTmpClassMoved(SurfNum)) {
+                            continue;
+                        }
+                        auto const &surfTemp = state.dataSurfaceGeometry->SurfaceTmp(SurfNum);
+                        if (surfTemp.spaceNum != spaceNum) {
+                            continue;
+                        }
+                        if (!matchFn(surfTemp)) {
+                            continue;
+                        }
+                        ++MovedSurfs;
+                        state.dataSurface->Surface(MovedSurfs) = state.dataSurfaceGeometry->SurfaceTmp(SurfNum);
+                        oldToNewSurfNums(SurfNum) = MovedSurfs;
+                        SurfaceTmpClassMoved(SurfNum) = true; // 'Moved'
+                        if (addToReportOrder) {
+                            state.dataSurface->AllSurfaceListReportOrder.push_back(SurfNum);
+                        }
                     }
+                };
 
-                    auto &surfTemp = state.dataSurfaceGeometry->SurfaceTmp(SurfNum);
-                    if (surfTemp.spaceNum != spaceNum) {
-                        continue;
-                    }
-                    if (surfTemp.Class != SurfaceClass::IntMass) {
-                        continue;
-                    }
-                    ++MovedSurfs;
-                    state.dataSurface->Surface(MovedSurfs) = state.dataSurfaceGeometry->SurfaceTmp(SurfNum);
-                    oldToNewSurfNums(SurfNum) = MovedSurfs;
-                    SurfaceTmpClassMoved(SurfNum) = true; // 'Moved'
-                    // Store list of moved surface numbers in reporting order
-                    state.dataSurface->AllSurfaceListReportOrder.push_back(SurfNum);
-                }
+                // Internal mass goes next
+                moveSurfacesMatching([](auto const &s) { return s.Class == SurfaceClass::IntMass; }, true);
 
                 // Opaque door goes next
-                for (int SubSurfNum = 1; SubSurfNum <= state.dataSurface->TotSurfaces; ++SubSurfNum) {
+                moveSurfacesMatching([](auto const &s) { return s.Class == SurfaceClass::Door; }, false);
 
-                    if (SurfaceTmpClassMoved(SubSurfNum)) {
-                        continue;
-                    }
-                    if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).spaceNum != spaceNum) {
-                        continue;
-                    }
-                    if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).Class != SurfaceClass::Door) {
-                        continue;
-                    }
+                // Exterior window subsurfaces (Window and GlassDoor)
+                moveSurfacesMatching(
+                    [](auto const &s) { return s.ExtBoundCond <= 0 && (s.Class == SurfaceClass::Window || s.Class == SurfaceClass::GlassDoor); },
+                    false);
 
-                    ++MovedSurfs;
-                    state.dataSurface->Surface(MovedSurfs) = state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum);
-                    oldToNewSurfNums(SubSurfNum) = MovedSurfs;
-                    SurfaceTmpClassMoved(SubSurfNum) = true; // 'Moved'
-                }
+                // Interior window subsurfaces (Window and GlassDoor)
+                moveSurfacesMatching(
+                    [](auto const &s) { return s.ExtBoundCond > 0 && (s.Class == SurfaceClass::Window || s.Class == SurfaceClass::GlassDoor); },
+                    false);
 
-                // The exterior window subsurfaces (includes SurfaceClass::Window and SurfaceClass::GlassDoor) goes next
-                for (int SubSurfNum = 1; SubSurfNum <= state.dataSurface->TotSurfaces; ++SubSurfNum) {
+                // TDD_Diffuser
+                moveSurfacesMatching([](auto const &s) { return s.Class == SurfaceClass::TDD_Diffuser; }, false);
 
-                    if (SurfaceTmpClassMoved(SubSurfNum)) {
-                        continue;
-                    }
-                    if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).spaceNum != spaceNum) {
-                        continue;
-                    }
-                    if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).ExtBoundCond > 0) {
-                        continue; // Exterior window
-                    }
-                    if ((state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).Class != SurfaceClass::Window) &&
-                        (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).Class != SurfaceClass::GlassDoor)) {
-                        continue;
-                    }
-
-                    ++MovedSurfs;
-                    state.dataSurface->Surface(MovedSurfs) = state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum);
-                    oldToNewSurfNums(SubSurfNum) = MovedSurfs;
-                    SurfaceTmpClassMoved(SubSurfNum) = true; // 'Moved'
-                }
-
-                // The interior window subsurfaces (includes SurfaceClass::Window and SurfaceClass::GlassDoor) goes next
-                for (int SubSurfNum = 1; SubSurfNum <= state.dataSurface->TotSurfaces; ++SubSurfNum) {
-
-                    if (SurfaceTmpClassMoved(SubSurfNum)) {
-                        continue;
-                    }
-                    if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).spaceNum != spaceNum) {
-                        continue;
-                    }
-                    if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).ExtBoundCond <= 0) {
-                        continue;
-                    }
-                    if ((state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).Class != SurfaceClass::Window) &&
-                        (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).Class != SurfaceClass::GlassDoor)) {
-                        continue;
-                    }
-
-                    ++MovedSurfs;
-                    state.dataSurface->Surface(MovedSurfs) = state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum);
-                    oldToNewSurfNums(SubSurfNum) = MovedSurfs;
-                    SurfaceTmpClassMoved(SubSurfNum) = true; // 'Moved'
-                }
-
-                // The SurfaceClass::TDD_Diffuser (OriginalClass = Window) goes next
-                for (int SubSurfNum = 1; SubSurfNum <= state.dataSurface->TotSurfaces; ++SubSurfNum) {
-
-                    if (SurfaceTmpClassMoved(SubSurfNum)) {
-                        continue;
-                    }
-                    if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).spaceNum != spaceNum) {
-                        continue;
-                    }
-                    if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).Class != SurfaceClass::TDD_Diffuser) {
-                        continue;
-                    }
-
-                    ++MovedSurfs;
-                    state.dataSurface->Surface(MovedSurfs) = state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum);
-                    oldToNewSurfNums(SubSurfNum) = MovedSurfs;
-                    SurfaceTmpClassMoved(SubSurfNum) = true; // 'Moved'
-                }
-
-                // Last but not least, SurfaceClass::TDD_Dome
-                for (int SubSurfNum = 1; SubSurfNum <= state.dataSurface->TotSurfaces; ++SubSurfNum) {
-
-                    if (SurfaceTmpClassMoved(SubSurfNum)) {
-                        continue;
-                    }
-                    if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).spaceNum != spaceNum) {
-                        continue;
-                    }
-                    if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).Class != SurfaceClass::TDD_Dome) {
-                        continue;
-                    }
-
-                    ++MovedSurfs;
-                    state.dataSurface->Surface(MovedSurfs) = state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum);
-                    oldToNewSurfNums(SubSurfNum) = MovedSurfs;
-                    SurfaceTmpClassMoved(SubSurfNum) = true; // 'Moved'
-                }
+                // TDD_Dome
+                moveSurfacesMatching([](auto const &s) { return s.Class == SurfaceClass::TDD_Dome; }, false);
             }
         }
 
@@ -2003,26 +1901,16 @@ namespace SurfaceGeometry {
                                                                      state.dataSurface->Surface(Found).ZoneName));
                             }
                             // check surface class match.  interzone surface.
-
-                            if ((state.dataSurface->Surface(SurfNum).Class == SurfaceClass::Wall &&
-                                 state.dataSurface->Surface(Found).Class != SurfaceClass::Wall) ||
-                                (state.dataSurface->Surface(SurfNum).Class != SurfaceClass::Wall &&
-                                 state.dataSurface->Surface(Found).Class == SurfaceClass::Wall)) {
-                                ShowWarningError(state, EnergyPlus::format("{}InterZone Surface Classes do not match as expected.", RoutineName));
-                                ShowContinueError(state,
-                                                  EnergyPlus::format("Surface=\"{}\", surface class={}",
-                                                                     state.dataSurface->Surface(SurfNum).Name,
-                                                                     cSurfaceClass(state.dataSurface->Surface(SurfNum).Class)));
-                                ShowContinueError(state,
-                                                  EnergyPlus::format("Adjacent Surface=\"{}\", surface class={}",
-                                                                     state.dataSurface->Surface(Found).Name,
-                                                                     cSurfaceClass(state.dataSurface->Surface(Found).Class)));
-                                ShowContinueError(state, "Other errors/warnings may follow about these surfaces.");
-                            }
-                            if ((state.dataSurface->Surface(SurfNum).Class == SurfaceClass::Roof &&
-                                 state.dataSurface->Surface(Found).Class != SurfaceClass::Floor) ||
-                                (state.dataSurface->Surface(SurfNum).Class != SurfaceClass::Roof &&
-                                 state.dataSurface->Surface(Found).Class == SurfaceClass::Floor)) {
+                            // Wall must match Wall; Roof must match Floor (and vice versa)
+                            bool classMismatch = (state.dataSurface->Surface(SurfNum).Class == SurfaceClass::Wall &&
+                                                  state.dataSurface->Surface(Found).Class != SurfaceClass::Wall) ||
+                                                 (state.dataSurface->Surface(SurfNum).Class != SurfaceClass::Wall &&
+                                                  state.dataSurface->Surface(Found).Class == SurfaceClass::Wall) ||
+                                                 (state.dataSurface->Surface(SurfNum).Class == SurfaceClass::Roof &&
+                                                  state.dataSurface->Surface(Found).Class != SurfaceClass::Floor) ||
+                                                 (state.dataSurface->Surface(SurfNum).Class != SurfaceClass::Roof &&
+                                                  state.dataSurface->Surface(Found).Class == SurfaceClass::Floor);
+                            if (classMismatch) {
                                 ShowWarningError(state, EnergyPlus::format("{}InterZone Surface Classes do not match as expected.", RoutineName));
                                 ShowContinueError(state,
                                                   EnergyPlus::format("Surface=\"{}\", surface class={}",
@@ -2076,34 +1964,28 @@ namespace SurfaceGeometry {
                             }
 
                             // Make sure exposures (Sun, Wind) are the same.....and are "not"
-                            if (state.dataSurface->Surface(SurfNum).ExtSolar || state.dataSurface->Surface(Found).ExtSolar) {
-                                ShowWarningError(
-                                    state, EnergyPlus::format("{}Interzone surfaces cannot be \"SunExposed\" -- removing SunExposed", RoutineName));
-                                ShowContinueError(state,
-                                                  EnergyPlus::format("  Surface={}, Zone={}",
-                                                                     state.dataSurface->Surface(SurfNum).Name,
-                                                                     state.dataSurface->Surface(SurfNum).ZoneName));
-                                ShowContinueError(state,
-                                                  EnergyPlus::format("  Surface={}, Zone={}",
-                                                                     state.dataSurface->Surface(Found).Name,
-                                                                     state.dataSurface->Surface(Found).ZoneName));
-                                state.dataSurface->Surface(SurfNum).ExtSolar = false;
-                                state.dataSurface->Surface(Found).ExtSolar = false;
-                            }
-                            if (state.dataSurface->Surface(SurfNum).ExtWind || state.dataSurface->Surface(Found).ExtWind) {
-                                ShowWarningError(
-                                    state, EnergyPlus::format("{}Interzone surfaces cannot be \"WindExposed\" -- removing WindExposed", RoutineName));
-                                ShowContinueError(state,
-                                                  EnergyPlus::format("  Surface={}, Zone={}",
-                                                                     state.dataSurface->Surface(SurfNum).Name,
-                                                                     state.dataSurface->Surface(SurfNum).ZoneName));
-                                ShowContinueError(state,
-                                                  EnergyPlus::format("  Surface={}, Zone={}",
-                                                                     state.dataSurface->Surface(Found).Name,
-                                                                     state.dataSurface->Surface(Found).ZoneName));
-                                state.dataSurface->Surface(SurfNum).ExtWind = false;
-                                state.dataSurface->Surface(Found).ExtWind = false;
-                            }
+                            auto warnAndClearExposure = [&](bool &flag1, bool &flag2, std::string_view exposureName) {
+                                if (flag1 || flag2) {
+                                    ShowWarningError(
+                                        state,
+                                        EnergyPlus::format(
+                                            "{}Interzone surfaces cannot be \"{}\" -- removing {}", RoutineName, exposureName, exposureName));
+                                    ShowContinueError(state,
+                                                      EnergyPlus::format("  Surface={}, Zone={}",
+                                                                         state.dataSurface->Surface(SurfNum).Name,
+                                                                         state.dataSurface->Surface(SurfNum).ZoneName));
+                                    ShowContinueError(state,
+                                                      EnergyPlus::format("  Surface={}, Zone={}",
+                                                                         state.dataSurface->Surface(Found).Name,
+                                                                         state.dataSurface->Surface(Found).ZoneName));
+                                    flag1 = false;
+                                    flag2 = false;
+                                }
+                            };
+                            warnAndClearExposure(
+                                state.dataSurface->Surface(SurfNum).ExtSolar, state.dataSurface->Surface(Found).ExtSolar, "SunExposed");
+                            warnAndClearExposure(
+                                state.dataSurface->Surface(SurfNum).ExtWind, state.dataSurface->Surface(Found).ExtWind, "WindExposed");
                         }
                         // Set opposing surface back to this one (regardless of error)
                         state.dataSurface->Surface(Found).ExtBoundCond = SurfNum;

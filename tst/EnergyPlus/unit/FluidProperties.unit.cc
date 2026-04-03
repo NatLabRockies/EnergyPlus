@@ -54,7 +54,7 @@
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/FluidProperties.hh>
 
-#include <ctgmath>
+#include <cmath>
 
 #include "Fixtures/EnergyPlusFixture.hh"
 

@@ -191,6 +191,217 @@ Array1D_string const AdaptiveComfortModelTypes(8,
                                                 "AdaptiveCEN15251CategoryIIUpperLine",
                                                 "AdaptiveCEN15251CategoryIIIUpperLine"});
 
+// Helper: apply Operative Temperature control settings to a single TempControlledZone.
+// showErrors controls whether validation errors are emitted (false when processing
+// zones after the first in a zone-list, where errors were already reported for item 1).
+static void applyOpTempCtrlToZone(EnergyPlusData &state,
+                                  DataZoneControls::ZoneTempControls &tempZone,
+                                  ErrorObjectHeader const &eoh,
+                                  int NumAlphas,
+                                  bool showErrors,
+                                  bool &ErrorsFound)
+{
+    auto &s_ipsc = state.dataIPShortCut;
+    auto &s_ztpc = state.dataZoneTempPredictorCorrector;
+
+    tempZone.OpTempCtrl = static_cast<DataZoneControls::TempCtrl>(getEnumValue(DataZoneControls::tempCtrlNamesUC, s_ipsc->cAlphaArgs(2)));
+
+    if (showErrors) {
+        if (tempZone.OpTempCtrl != DataZoneControls::TempCtrl::Constant && tempZone.OpTempCtrl != DataZoneControls::TempCtrl::Scheduled) {
+            ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2));
+            ErrorsFound = true;
+        }
+    }
+
+    tempZone.FixedRadiativeFraction = s_ipsc->rNumericArgs(1);
+
+    if (tempZone.OpTempCtrl == DataZoneControls::TempCtrl::Scheduled) {
+        if (s_ipsc->lAlphaFieldBlanks(3)) {
+            if (showErrors) {
+                ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(3));
+                ErrorsFound = true;
+            }
+        } else if ((tempZone.opTempRadiativeFractionSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(3))) == nullptr) {
+            if (showErrors) {
+                ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3));
+                ErrorsFound = true;
+            }
+        } else if (!tempZone.opTempRadiativeFractionSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::Ex, 0.9)) {
+            if (showErrors) {
+                Sched::ShowSevereBadMinMax(state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3), Clusive::In, 0.0, Clusive::Ex, 0.9);
+                ErrorsFound = true;
+            }
+        }
+    } else {
+        if (showErrors) {
+            if (tempZone.FixedRadiativeFraction < 0.0) {
+                ShowSevereBadMin(state, eoh, s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1), Clusive::In, 0.0);
+                ErrorsFound = true;
+            } else if (tempZone.FixedRadiativeFraction >= 0.9) {
+                ShowSevereBadMax(state, eoh, s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1), Clusive::Ex, 0.9);
+                ErrorsFound = true;
+            }
+        }
+    }
+
+    // Adaptive comfort model
+    if (tempZone.OpTempCtrl == DataZoneControls::TempCtrl::Constant || tempZone.OpTempCtrl == DataZoneControls::TempCtrl::Scheduled) {
+        if (NumAlphas >= 4 && !s_ipsc->lAlphaFieldBlanks(4)) {
+            int adaptiveComfortModelTypeIndex = Util::FindItem(s_ipsc->cAlphaArgs(4), AdaptiveComfortModelTypes, AdaptiveComfortModelTypes.isize());
+            if (adaptiveComfortModelTypeIndex == 0) {
+                ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4));
+                ErrorsFound = true;
+            } else if (adaptiveComfortModelTypeIndex != static_cast<int>(AdaptiveComfortModel::ADAP_NONE)) {
+                tempZone.AdaptiveComfortTempControl = true;
+                tempZone.AdaptiveComfortModelTypeIndex = adaptiveComfortModelTypeIndex;
+                if (!s_ztpc->AdapComfortDailySetPointSchedule.initialized) {
+                    Array1D<Real64> runningAverageASH(state.dataWeather->NumDaysInYear, 0.0);
+                    Array1D<Real64> runningAverageCEN(state.dataWeather->NumDaysInYear, 0.0);
+                    CalculateMonthlyRunningAverageDryBulb(state, runningAverageASH, runningAverageCEN);
+                    CalculateAdaptiveComfortSetPointSchl(state, runningAverageASH, runningAverageCEN);
+                }
+            }
+        }
+
+        auto &Zone = state.dataHeatBal->Zone;
+        SetupOutputVariable(state,
+                            "Zone Thermostat Operative Temperature",
+                            Constant::Units::C,
+                            state.dataHeatBal->ZnAirRpt(tempZone.ActualZoneNum).ThermOperativeTemp,
+                            OutputProcessor::TimeStepType::Zone,
+                            OutputProcessor::StoreType::Average,
+                            Zone(tempZone.ActualZoneNum).Name);
+    }
+}
+
+// Helper: emit a "control type not valid for this zone" error for a missing setpoint schedule.
+// Used by both TStat and ComfortTStat schedule validation.
+static void showMissingSetptSchedError(EnergyPlusData &state,
+                                       Sched::Schedule const *setptTypeSched,
+                                       HVAC::SetptType setptType,
+                                       std::string_view controlTypeName,
+                                       std::string_view zoneName,
+                                       std::string_view zoneRealName,
+                                       bool &ErrorsFound)
+{
+    if (setptTypeSched->hasVal(state, (int)setptType)) {
+        ShowSevereError(state, EnergyPlus::format("Control Type Schedule={}", setptTypeSched->Name));
+        ShowContinueError(
+            state,
+            EnergyPlus::format("..specifies {} ({}) as the control type. Not valid for this zone.", (int)setptType, setptTypeNames[(int)setptType]));
+        ShowContinueError(state, EnergyPlus::format("..reference {}={}", controlTypeName, zoneName));
+        ShowContinueError(state, EnergyPlus::format("..reference ZONE={}", zoneRealName));
+        ErrorsFound = true;
+    }
+}
+
+// Helper: read a single schedule field, look it up, and optionally validate min/max range.
+// Assigns the result to *target. Returns true if an error was found.
+static bool readSetptSchedField(EnergyPlusData &state,
+                                ErrorObjectHeader const &eoh,
+                                int fieldIdx,
+                                Sched::Schedule *&target,
+                                bool checkRange = false,
+                                Real64 rangeMin = 0.0,
+                                Real64 rangeMax = 0.0)
+{
+    auto &s_ipsc = state.dataIPShortCut;
+    if (s_ipsc->lAlphaFieldBlanks(fieldIdx)) {
+        ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(fieldIdx));
+        return true;
+    }
+    if ((target = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(fieldIdx))) == nullptr) {
+        ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(fieldIdx), s_ipsc->cAlphaArgs(fieldIdx));
+        return true;
+    }
+    if (checkRange && !target->checkMinMaxVals(state, Clusive::In, rangeMin, Clusive::In, rangeMax)) {
+        Sched::ShowSevereBadMinMax(
+            state, eoh, s_ipsc->cAlphaFieldNames(fieldIdx), s_ipsc->cAlphaArgs(fieldIdx), Clusive::In, rangeMin, Clusive::In, rangeMax);
+        return true;
+    }
+    return false;
+}
+
+// Helper: load setpoint schedule objects for a given setpoint type.
+// Reads the IDF objects, allocates the array, and fills in heatSched/coolSched.
+// objectNames is the array of object names indexed by SetptType.
+// numControls/setptScheds are arrays indexed by SetptType to fill in.
+static void loadSetptSchedObjects(EnergyPlusData &state,
+                                  std::string_view routineName,
+                                  HVAC::SetptType setptType,
+                                  std::array<std::string_view, (int)HVAC::SetptType::Num> const &objectNames,
+                                  std::array<int, (int)HVAC::SetptType::Num> &numControls,
+                                  std::array<Array1D<ZoneTempPredictorCorrector::ZoneSetptScheds>, (int)HVAC::SetptType::Num> &setptScheds,
+                                  bool &ErrorsFound,
+                                  bool checkRange = false,
+                                  Real64 rangeMin = 0.0,
+                                  Real64 rangeMax = 0.0)
+{
+    auto &s_ipsc = state.dataIPShortCut;
+    auto &s_ip = state.dataInputProcessing->inputProcessor;
+    int NumAlphas, NumNums, IOStat;
+    int iType = (int)setptType;
+
+    s_ipsc->cCurrentModuleObject = std::string(objectNames[iType]);
+    numControls[iType] = s_ip->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
+
+    if (numControls[iType] > 0) {
+        setptScheds[iType].allocate(numControls[iType]);
+    }
+
+    bool needsHeat =
+        (setptType == HVAC::SetptType::SingleHeat || setptType == HVAC::SetptType::SingleHeatCool || setptType == HVAC::SetptType::DualHeatCool);
+    bool needsCool =
+        (setptType == HVAC::SetptType::SingleCool || setptType == HVAC::SetptType::SingleHeatCool || setptType == HVAC::SetptType::DualHeatCool);
+    bool isDual = (setptType == HVAC::SetptType::DualHeatCool);
+
+    for (int idx = 1; idx <= numControls[iType]; ++idx) {
+        s_ip->getObjectItem(state,
+                            s_ipsc->cCurrentModuleObject,
+                            idx,
+                            s_ipsc->cAlphaArgs,
+                            NumAlphas,
+                            s_ipsc->rNumericArgs,
+                            NumNums,
+                            IOStat,
+                            s_ipsc->lNumericFieldBlanks,
+                            s_ipsc->lAlphaFieldBlanks,
+                            s_ipsc->cAlphaFieldNames,
+                            s_ipsc->cNumericFieldNames);
+
+        ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
+
+        auto &setpt = setptScheds[iType](idx);
+        setpt.Name = s_ipsc->cAlphaArgs(1);
+
+        if (isDual) {
+            // DualHeatCool: field 2 = heat schedule, field 3 = cool schedule
+            if (readSetptSchedField(state, eoh, 2, setpt.heatSched, checkRange, rangeMin, rangeMax)) {
+                ErrorsFound = true;
+            }
+            if (readSetptSchedField(state, eoh, 3, setpt.coolSched, checkRange, rangeMin, rangeMax)) {
+                ErrorsFound = true;
+            }
+        } else if (needsHeat && needsCool) {
+            // SingleHeatCool: field 2 = both heat and cool schedule
+            if (readSetptSchedField(state, eoh, 2, setpt.heatSched, checkRange, rangeMin, rangeMax)) {
+                ErrorsFound = true;
+            } else {
+                setpt.coolSched = setpt.heatSched;
+            }
+        } else if (needsHeat) {
+            if (readSetptSchedField(state, eoh, 2, setpt.heatSched, checkRange, rangeMin, rangeMax)) {
+                ErrorsFound = true;
+            }
+        } else {
+            // SingleCool
+            if (readSetptSchedField(state, eoh, 2, setpt.coolSched, checkRange, rangeMin, rangeMax)) {
+                ErrorsFound = true;
+            }
+        }
+    }
+}
+
 // Functions
 void ManageZoneAirUpdates(EnergyPlusData &state,
                           DataHeatBalFanSys::PredictorCorrectorCtrl const UpdateType, // Can be iGetZoneSetPoints, iPredictStep, iCorrectStep
@@ -518,157 +729,17 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
         } // NumTStatStatements
     } // Check on number of TempControlledZones
 
-    s_ipsc->cCurrentModuleObject = setptTypeNamesUC[(int)HVAC::SetptType::SingleHeat];
-    s_ztpc->NumTempControls[(int)HVAC::SetptType::SingleHeat] = s_ip->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
+    // Temperature setpoint object names indexed by SetptType (preserving original UC/non-UC usage)
+    static constexpr std::array<std::string_view, (int)HVAC::SetptType::Num> tempSetptObjNames = {
+        "",
+        setptTypeNamesUC[(int)HVAC::SetptType::SingleHeat],
+        setptTypeNamesUC[(int)HVAC::SetptType::SingleCool],
+        setptTypeNames[(int)HVAC::SetptType::SingleHeatCool],
+        setptTypeNames[(int)HVAC::SetptType::DualHeatCool]};
 
-    if (s_ztpc->NumTempControls[(int)HVAC::SetptType::SingleHeat] > 0) {
-        s_ztpc->tempSetptScheds[(int)HVAC::SetptType::SingleHeat].allocate(s_ztpc->NumTempControls[(int)HVAC::SetptType::SingleHeat]);
+    for (HVAC::SetptType setptType : HVAC::controlledSetptTypes) {
+        loadSetptSchedObjects(state, routineName, setptType, tempSetptObjNames, s_ztpc->NumTempControls, s_ztpc->tempSetptScheds, ErrorsFound);
     }
-
-    for (int idx = 1; idx <= s_ztpc->NumTempControls[(int)HVAC::SetptType::SingleHeat]; ++idx) {
-        s_ip->getObjectItem(state,
-                            s_ipsc->cCurrentModuleObject,
-                            idx,
-                            s_ipsc->cAlphaArgs,
-                            NumAlphas,
-                            s_ipsc->rNumericArgs,
-                            NumNums,
-                            IOStat,
-                            s_ipsc->lNumericFieldBlanks,
-                            s_ipsc->lAlphaFieldBlanks,
-                            s_ipsc->cAlphaFieldNames,
-                            s_ipsc->cNumericFieldNames);
-
-        ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
-
-        auto &setpt = s_ztpc->tempSetptScheds[(int)HVAC::SetptType::SingleHeat](idx);
-        setpt.Name = s_ipsc->cAlphaArgs(1);
-
-        if (s_ipsc->lAlphaFieldBlanks(2)) {
-            ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(2));
-            ErrorsFound = true;
-        } else if ((setpt.heatSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(2))) == nullptr) {
-            ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2));
-            ErrorsFound = true;
-        }
-
-    } // SingleTempHeatingControlNum
-
-    s_ipsc->cCurrentModuleObject = setptTypeNamesUC[(int)HVAC::SetptType::SingleCool];
-    s_ztpc->NumTempControls[(int)HVAC::SetptType::SingleCool] = s_ip->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
-
-    if (s_ztpc->NumTempControls[(int)HVAC::SetptType::SingleCool] > 0) {
-        s_ztpc->tempSetptScheds[(int)HVAC::SetptType::SingleCool].allocate(s_ztpc->NumTempControls[(int)HVAC::SetptType::SingleCool]);
-    }
-
-    for (int idx = 1; idx <= s_ztpc->NumTempControls[(int)HVAC::SetptType::SingleCool]; ++idx) {
-        s_ip->getObjectItem(state,
-                            s_ipsc->cCurrentModuleObject,
-                            idx,
-                            s_ipsc->cAlphaArgs,
-                            NumAlphas,
-                            s_ipsc->rNumericArgs,
-                            NumNums,
-                            IOStat,
-                            s_ipsc->lNumericFieldBlanks,
-                            s_ipsc->lAlphaFieldBlanks,
-                            s_ipsc->cAlphaFieldNames,
-                            s_ipsc->cNumericFieldNames);
-
-        ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
-
-        auto &setpt = s_ztpc->tempSetptScheds[(int)HVAC::SetptType::SingleCool](idx);
-        setpt.Name = s_ipsc->cAlphaArgs(1);
-
-        if (s_ipsc->lAlphaFieldBlanks(2)) {
-            ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(2));
-            ErrorsFound = true;
-        } else if ((setpt.coolSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(2))) == nullptr) {
-            ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2));
-            ErrorsFound = true;
-        }
-
-    } // SingleTempCoolingControlNum
-
-    s_ipsc->cCurrentModuleObject = setptTypeNames[(int)HVAC::SetptType::SingleHeatCool];
-    s_ztpc->NumTempControls[(int)HVAC::SetptType::SingleHeatCool] = s_ip->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
-
-    if (s_ztpc->NumTempControls[(int)HVAC::SetptType::SingleHeatCool] > 0) {
-        s_ztpc->tempSetptScheds[(int)HVAC::SetptType::SingleHeatCool].allocate(s_ztpc->NumTempControls[(int)HVAC::SetptType::SingleHeatCool]);
-    }
-
-    for (int idx = 1; idx <= s_ztpc->NumTempControls[(int)HVAC::SetptType::SingleHeatCool]; ++idx) {
-        s_ip->getObjectItem(state,
-                            s_ipsc->cCurrentModuleObject,
-                            idx,
-                            s_ipsc->cAlphaArgs,
-                            NumAlphas,
-                            s_ipsc->rNumericArgs,
-                            NumNums,
-                            IOStat,
-                            s_ipsc->lNumericFieldBlanks,
-                            s_ipsc->lAlphaFieldBlanks,
-                            s_ipsc->cAlphaFieldNames,
-                            s_ipsc->cNumericFieldNames);
-
-        ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
-
-        auto &setpt = s_ztpc->tempSetptScheds[(int)HVAC::SetptType::SingleHeatCool](idx);
-        setpt.Name = s_ipsc->cAlphaArgs(1);
-
-        if (s_ipsc->lAlphaFieldBlanks(2)) {
-            ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(2));
-            ErrorsFound = true;
-        } else if ((setpt.heatSched = setpt.coolSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(2))) == nullptr) {
-            ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2));
-            ErrorsFound = true;
-        }
-
-    } // SingleTempHeatCoolControlNum
-
-    s_ipsc->cCurrentModuleObject = setptTypeNames[(int)HVAC::SetptType::DualHeatCool];
-    s_ztpc->NumTempControls[(int)HVAC::SetptType::DualHeatCool] = s_ip->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
-
-    if (s_ztpc->NumTempControls[(int)HVAC::SetptType::DualHeatCool] > 0) {
-        s_ztpc->tempSetptScheds[(int)HVAC::SetptType::DualHeatCool].allocate(s_ztpc->NumTempControls[(int)HVAC::SetptType::DualHeatCool]);
-    }
-
-    for (int idx = 1; idx <= s_ztpc->NumTempControls[(int)HVAC::SetptType::DualHeatCool]; ++idx) {
-        s_ip->getObjectItem(state,
-                            s_ipsc->cCurrentModuleObject,
-                            idx,
-                            s_ipsc->cAlphaArgs,
-                            NumAlphas,
-                            s_ipsc->rNumericArgs,
-                            NumNums,
-                            IOStat,
-                            s_ipsc->lNumericFieldBlanks,
-                            s_ipsc->lAlphaFieldBlanks,
-                            s_ipsc->cAlphaFieldNames,
-                            s_ipsc->cNumericFieldNames);
-
-        ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
-
-        auto &setpt = s_ztpc->tempSetptScheds[(int)HVAC::SetptType::DualHeatCool](idx);
-        setpt.Name = s_ipsc->cAlphaArgs(1);
-
-        if (s_ipsc->lAlphaFieldBlanks(2)) {
-            ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(2));
-            ErrorsFound = true;
-        } else if ((setpt.heatSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(2))) == nullptr) {
-            ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2));
-            ErrorsFound = true;
-        }
-
-        if (s_ipsc->lAlphaFieldBlanks(3)) {
-            ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(3));
-            ErrorsFound = true;
-        } else if ((setpt.coolSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(3))) == nullptr) {
-            ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3));
-            ErrorsFound = true;
-        }
-
-    } // DualTempHeatCoolControlNum
 
     // Finish filling in Schedule pointing indexes
     for (TempControlledZoneNum = 1; TempControlledZoneNum <= state.dataZoneCtrls->NumTempControlledZones; ++TempControlledZoneNum) {
@@ -735,45 +806,39 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
 
             if (!setpt.isUsed) {
                 // Catch early issues
-                if (tempZone.setptTypeSched->hasVal(state, (int)setptType)) {
-                    ShowSevereError(state, EnergyPlus::format("Control Type Schedule={}", tempZone.setptTypeSched->Name));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("..specifies {} ({}) as the control type. Not valid for this zone.",
-                                                         (int)setptType,
-                                                         setptTypeNames[(int)setptType]));
-                    ShowContinueError(state, EnergyPlus::format("..reference {}={}", cZControlTypes((int)ZoneControlTypes::TStat), tempZone.Name));
-                    ShowContinueError(state, EnergyPlus::format("..reference ZONE={}", tempZone.ZoneName));
-                    ErrorsFound = true;
-                }
+                showMissingSetptSchedError(state,
+                                           tempZone.setptTypeSched,
+                                           setptType,
+                                           cZControlTypes((int)ZoneControlTypes::TStat),
+                                           tempZone.Name,
+                                           tempZone.ZoneName,
+                                           ErrorsFound);
                 continue;
             }
 
-            if (setpt.heatSetptSched == nullptr &&
-                (setptType == HVAC::SetptType::SingleHeat || setptType == HVAC::SetptType::SingleHeatCool ||
-                 setptType == HVAC::SetptType::DualHeatCool) &&
-                tempZone.setptTypeSched->hasVal(state, (int)setptType)) {
-                ShowSevereError(state, EnergyPlus::format("Control Type Schedule={}", tempZone.setptTypeSched->Name));
-                ShowContinueError(state,
-                                  EnergyPlus::format("..specifies {} ({}) as the control type. Not valid for this zone.",
-                                                     (int)setptType,
-                                                     setptTypeNames[(int)setptType]));
-                ShowContinueError(state, EnergyPlus::format("..reference {}={}", cZControlTypes((int)ZoneControlTypes::TStat), tempZone.Name));
-                ShowContinueError(state, EnergyPlus::format("..reference ZONE={}", tempZone.ZoneName));
-                ErrorsFound = true;
+            bool needsHeat = (setptType == HVAC::SetptType::SingleHeat || setptType == HVAC::SetptType::SingleHeatCool ||
+                              setptType == HVAC::SetptType::DualHeatCool);
+            bool needsCool = (setptType == HVAC::SetptType::SingleCool || setptType == HVAC::SetptType::SingleHeatCool ||
+                              setptType == HVAC::SetptType::DualHeatCool);
+
+            if (needsHeat && setpt.heatSetptSched == nullptr) {
+                showMissingSetptSchedError(state,
+                                           tempZone.setptTypeSched,
+                                           setptType,
+                                           cZControlTypes((int)ZoneControlTypes::TStat),
+                                           tempZone.Name,
+                                           tempZone.ZoneName,
+                                           ErrorsFound);
             }
 
-            if (setpt.coolSetptSched == nullptr &&
-                (setptType == HVAC::SetptType::SingleCool || setptType == HVAC::SetptType::SingleHeatCool ||
-                 setptType == HVAC::SetptType::DualHeatCool) &&
-                tempZone.setptTypeSched->hasVal(state, (int)setptType)) {
-                ShowSevereError(state, EnergyPlus::format("Control Type Schedule={}", tempZone.setptTypeSched->Name));
-                ShowContinueError(state,
-                                  EnergyPlus::format("..specifies {} ({}) as the control type. Not valid for this zone.",
-                                                     (int)setptType,
-                                                     setptTypeNames[(int)setptType]));
-                ShowContinueError(state, EnergyPlus::format("..reference {}={}", cZControlTypes((int)ZoneControlTypes::TStat), tempZone.Name));
-                ShowContinueError(state, EnergyPlus::format("..reference ZONE={}", tempZone.ZoneName));
-                ErrorsFound = true;
+            if (needsCool && setpt.coolSetptSched == nullptr) {
+                showMissingSetptSchedError(state,
+                                           tempZone.setptTypeSched,
+                                           setptType,
+                                           cZControlTypes((int)ZoneControlTypes::TStat),
+                                           tempZone.Name,
+                                           tempZone.ZoneName,
+                                           ErrorsFound);
             }
         } // for (setptType)
     }
@@ -1163,171 +1228,18 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
     }
     // End of Thermal comfort control reading and checking
 
-    s_ipsc->cCurrentModuleObject = comfortSetptTypeNames[(int)HVAC::SetptType::SingleHeat];
-    s_ztpc->NumComfortControls[(int)HVAC::SetptType::SingleHeat] = s_ip->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
-
-    if (s_ztpc->NumComfortControls[(int)HVAC::SetptType::SingleHeat] > 0) {
-        s_ztpc->comfortSetptScheds[(int)HVAC::SetptType::SingleHeat].allocate(s_ztpc->NumComfortControls[(int)HVAC::SetptType::SingleHeat]);
+    for (HVAC::SetptType setptType : HVAC::controlledSetptTypes) {
+        loadSetptSchedObjects(state,
+                              routineName,
+                              setptType,
+                              comfortSetptTypeNames,
+                              s_ztpc->NumComfortControls,
+                              s_ztpc->comfortSetptScheds,
+                              ErrorsFound,
+                              true,
+                              -3.0,
+                              3.0);
     }
-
-    for (int idx = 1; idx <= s_ztpc->NumComfortControls[(int)HVAC::SetptType::SingleHeat]; ++idx) {
-        s_ip->getObjectItem(state,
-                            s_ipsc->cCurrentModuleObject,
-                            idx,
-                            s_ipsc->cAlphaArgs,
-                            NumAlphas,
-                            s_ipsc->rNumericArgs,
-                            NumNums,
-                            IOStat,
-                            s_ipsc->lNumericFieldBlanks,
-                            s_ipsc->lAlphaFieldBlanks,
-                            s_ipsc->cAlphaFieldNames,
-                            s_ipsc->cNumericFieldNames);
-
-        ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
-
-        auto &setpt = s_ztpc->comfortSetptScheds[(int)HVAC::SetptType::SingleHeat](idx);
-        setpt.Name = s_ipsc->cAlphaArgs(1);
-
-        if (s_ipsc->lAlphaFieldBlanks(2)) {
-            ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(2));
-            ErrorsFound = true;
-        } else if ((setpt.heatSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(2))) == nullptr) {
-            ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2));
-            ErrorsFound = true;
-        } else if (!setpt.heatSched->checkMinMaxVals(state, Clusive::In, -3.0, Clusive::In, 3.0)) {
-            Sched::ShowSevereBadMinMax(state, eoh, s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2), Clusive::In, -3.0, Clusive::In, 3.0);
-            ErrorsFound = true;
-        }
-    } // SingleFangerHeatingControlNum
-
-    s_ipsc->cCurrentModuleObject = comfortSetptTypeNames[(int)HVAC::SetptType::SingleCool];
-    s_ztpc->NumComfortControls[(int)HVAC::SetptType::SingleCool] = s_ip->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
-
-    if (s_ztpc->NumComfortControls[(int)HVAC::SetptType::SingleCool] > 0) {
-        s_ztpc->comfortSetptScheds[(int)HVAC::SetptType::SingleCool].allocate(s_ztpc->NumComfortControls[(int)HVAC::SetptType::SingleCool]);
-    }
-
-    for (int idx = 1; idx <= s_ztpc->NumComfortControls[(int)HVAC::SetptType::SingleCool]; ++idx) {
-        s_ip->getObjectItem(state,
-                            s_ipsc->cCurrentModuleObject,
-                            idx,
-                            s_ipsc->cAlphaArgs,
-                            NumAlphas,
-                            s_ipsc->rNumericArgs,
-                            NumNums,
-                            IOStat,
-                            s_ipsc->lNumericFieldBlanks,
-                            s_ipsc->lAlphaFieldBlanks,
-                            s_ipsc->cAlphaFieldNames,
-                            s_ipsc->cNumericFieldNames);
-
-        ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
-
-        auto &setpt = s_ztpc->comfortSetptScheds[(int)HVAC::SetptType::SingleCool](idx);
-        setpt.Name = s_ipsc->cAlphaArgs(1);
-
-        if (s_ipsc->lAlphaFieldBlanks(2)) {
-            ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(2));
-            ErrorsFound = true;
-        } else if ((setpt.coolSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(2))) == nullptr) {
-            ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2));
-            ErrorsFound = true;
-        } else if (!setpt.coolSched->checkMinMaxVals(state, Clusive::In, -3.0, Clusive::In, 3.0)) {
-            Sched::ShowSevereBadMinMax(state, eoh, s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2), Clusive::In, -3.0, Clusive::In, 3.0);
-            ErrorsFound = true;
-        }
-
-    } // SingleFangerCoolingControlNum
-
-    s_ipsc->cCurrentModuleObject = comfortSetptTypeNames[(int)HVAC::SetptType::SingleHeatCool];
-    s_ztpc->NumComfortControls[(int)HVAC::SetptType::SingleHeatCool] = s_ip->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
-
-    if (s_ztpc->NumComfortControls[(int)HVAC::SetptType::SingleHeatCool] > 0) {
-        s_ztpc->comfortSetptScheds[(int)HVAC::SetptType::SingleHeatCool].allocate(s_ztpc->NumComfortControls[(int)HVAC::SetptType::SingleHeatCool]);
-    }
-
-    for (int idx = 1; idx <= s_ztpc->NumComfortControls[(int)HVAC::SetptType::SingleHeatCool]; ++idx) {
-        s_ip->getObjectItem(state,
-                            s_ipsc->cCurrentModuleObject,
-                            idx,
-                            s_ipsc->cAlphaArgs,
-                            NumAlphas,
-                            s_ipsc->rNumericArgs,
-                            NumNums,
-                            IOStat,
-                            s_ipsc->lNumericFieldBlanks,
-                            s_ipsc->lAlphaFieldBlanks,
-                            s_ipsc->cAlphaFieldNames,
-                            s_ipsc->cNumericFieldNames);
-
-        ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
-
-        auto &setpt = s_ztpc->comfortSetptScheds[(int)HVAC::SetptType::SingleHeatCool](idx);
-        setpt.Name = s_ipsc->cAlphaArgs(1);
-
-        if (s_ipsc->lAlphaFieldBlanks(2)) {
-            ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(2));
-            ErrorsFound = true;
-        } else if ((setpt.heatSched = setpt.coolSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(2))) == nullptr) {
-            ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2));
-            ErrorsFound = true;
-        } else if (!setpt.heatSched->checkMinMaxVals(state, Clusive::In, -3.0, Clusive::In, 3.0)) {
-            Sched::ShowSevereBadMinMax(state, eoh, s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2), Clusive::In, -3.0, Clusive::In, 3.0);
-            ErrorsFound = true;
-        }
-
-    } // SingleFangerHeatCoolControlNum
-
-    s_ipsc->cCurrentModuleObject = comfortSetptTypeNames[(int)HVAC::SetptType::DualHeatCool];
-    s_ztpc->NumComfortControls[(int)HVAC::SetptType::DualHeatCool] = s_ip->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
-
-    if (s_ztpc->NumComfortControls[(int)HVAC::SetptType::DualHeatCool] > 0) {
-        s_ztpc->comfortSetptScheds[(int)HVAC::SetptType::DualHeatCool].allocate(s_ztpc->NumComfortControls[(int)HVAC::SetptType::DualHeatCool]);
-    }
-
-    for (int idx = 1; idx <= s_ztpc->NumComfortControls[(int)HVAC::SetptType::DualHeatCool]; ++idx) {
-        s_ip->getObjectItem(state,
-                            s_ipsc->cCurrentModuleObject,
-                            idx,
-                            s_ipsc->cAlphaArgs,
-                            NumAlphas,
-                            s_ipsc->rNumericArgs,
-                            NumNums,
-                            IOStat,
-                            s_ipsc->lNumericFieldBlanks,
-                            s_ipsc->lAlphaFieldBlanks,
-                            s_ipsc->cAlphaFieldNames,
-                            s_ipsc->cNumericFieldNames);
-
-        ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
-
-        auto &setpt = s_ztpc->comfortSetptScheds[(int)HVAC::SetptType::DualHeatCool](idx);
-        setpt.Name = s_ipsc->cAlphaArgs(1);
-
-        if (s_ipsc->lAlphaFieldBlanks(2)) {
-            ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(2));
-            ErrorsFound = true;
-        } else if ((setpt.heatSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(2))) == nullptr) {
-            ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2));
-            ErrorsFound = true;
-        } else if (!setpt.heatSched->checkMinMaxVals(state, Clusive::In, -3.0, Clusive::In, 3.0)) {
-            Sched::ShowSevereBadMinMax(state, eoh, s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2), Clusive::In, -3.0, Clusive::In, 3.0);
-            ErrorsFound = true;
-        }
-
-        if (s_ipsc->lAlphaFieldBlanks(3)) {
-            ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(3));
-            ErrorsFound = true;
-        } else if ((setpt.coolSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(3))) == nullptr) {
-            ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3));
-            ErrorsFound = true;
-        } else if (!setpt.coolSched->checkMinMaxVals(state, Clusive::In, -3.0, Clusive::In, 3.0)) {
-            Sched::ShowSevereBadMinMax(state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3), Clusive::In, -3.0, Clusive::In, 3.0);
-            ErrorsFound = true;
-        }
-
-    } // DualFangerHeatCoolControlNum
 
     // Finish filling in Schedule pointing indexes for Thermal Comfort Control
     for (ComfortControlledZoneNum = 1; ComfortControlledZoneNum <= state.dataZoneCtrls->NumComfortControlledZones; ++ComfortControlledZoneNum) {
@@ -1385,32 +1297,29 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
 
             TComfortControlTypes(ComfortControlledZoneNum).DidHave[(int)setptType] = true;
 
-            if (setpt.heatSetptSched == nullptr &&
-                (setptType == HVAC::SetptType::SingleHeat || setptType == HVAC::SetptType::SingleHeatCool ||
-                 setptType == HVAC::SetptType::DualHeatCool) &&
-                comfortZone.setptTypeSched->hasVal(state, (int)setptType)) {
-                ShowSevereError(state, EnergyPlus::format("Control Type Schedule={}", comfortZone.setptTypeSched->Name));
-                ShowContinueError(state,
-                                  EnergyPlus::format("..specifies {} ({}) as the control type. Not valid for this zone.",
-                                                     (int)setptType,
-                                                     setptTypeNames[(int)setptType]));
-                ShowContinueError(state, EnergyPlus::format("..reference {}={}", cZControlTypes((int)ZoneControlTypes::TStat), comfortZone.Name));
-                ShowContinueError(state, EnergyPlus::format("..reference ZONE={}", comfortZone.ZoneName));
-                ErrorsFound = true;
+            bool needsHeat = (setptType == HVAC::SetptType::SingleHeat || setptType == HVAC::SetptType::SingleHeatCool ||
+                              setptType == HVAC::SetptType::DualHeatCool);
+            bool needsCool = (setptType == HVAC::SetptType::SingleCool || setptType == HVAC::SetptType::SingleHeatCool ||
+                              setptType == HVAC::SetptType::DualHeatCool);
+
+            if (needsHeat && setpt.heatSetptSched == nullptr) {
+                showMissingSetptSchedError(state,
+                                           comfortZone.setptTypeSched,
+                                           setptType,
+                                           cZControlTypes((int)ZoneControlTypes::TStat),
+                                           comfortZone.Name,
+                                           comfortZone.ZoneName,
+                                           ErrorsFound);
             }
 
-            if (setpt.coolSetptSched == nullptr &&
-                (setptType == HVAC::SetptType::SingleCool || setptType == HVAC::SetptType::SingleHeatCool ||
-                 setptType == HVAC::SetptType::DualHeatCool) &&
-                comfortZone.setptTypeSched->hasVal(state, (int)setptType)) {
-                ShowSevereError(state, EnergyPlus::format("Control Type Schedule={}", comfortZone.setptTypeSched->Name));
-                ShowContinueError(state,
-                                  EnergyPlus::format("..specifies {} ({}) as the control type. Not valid for this zone.",
-                                                     (int)setptType,
-                                                     setptTypeNames[(int)setptType]));
-                ShowContinueError(state, EnergyPlus::format("..reference {}={}", cZControlTypes((int)ZoneControlTypes::TStat), comfortZone.Name));
-                ShowContinueError(state, EnergyPlus::format("..reference ZONE={}", comfortZone.ZoneName));
-                ErrorsFound = true;
+            if (needsCool && setpt.coolSetptSched == nullptr) {
+                showMissingSetptSchedError(state,
+                                           comfortZone.setptTypeSched,
+                                           setptType,
+                                           cZControlTypes((int)ZoneControlTypes::TStat),
+                                           comfortZone.Name,
+                                           comfortZone.ZoneName,
+                                           ErrorsFound);
             }
         } // for (setptType)
     } // for (ComfortControlledZoneNum)
@@ -1596,83 +1505,7 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
                         continue;
                     }
                     auto &tempZone = state.dataZoneCtrls->TempControlledZone(TempControlledZoneNum);
-                    tempZone.OpTempCtrl =
-                        static_cast<DataZoneControls::TempCtrl>(getEnumValue(DataZoneControls::tempCtrlNamesUC, s_ipsc->cAlphaArgs(2)));
-
-                    if (Item == 1) {
-                        if (tempZone.OpTempCtrl != DataZoneControls::TempCtrl::Constant &&
-                            tempZone.OpTempCtrl != DataZoneControls::TempCtrl::Scheduled) {
-                            ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2));
-                            ErrorsFound = true;
-                        }
-                    }
-
-                    tempZone.FixedRadiativeFraction = s_ipsc->rNumericArgs(1);
-
-                    if (tempZone.OpTempCtrl == DataZoneControls::TempCtrl::Scheduled) {
-                        if (s_ipsc->lAlphaFieldBlanks(3)) {
-                            if (Item == 1) {
-                                ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(3));
-                                ErrorsFound = true;
-                            }
-                        } else if ((tempZone.opTempRadiativeFractionSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(3))) == nullptr) {
-                            if (Item == 1) {
-                                ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3));
-                                ErrorsFound = true;
-                            }
-                        } else if (!tempZone.opTempRadiativeFractionSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::Ex, 0.9)) {
-                            if (Item == 1) {
-                                Sched::ShowSevereBadMinMax(
-                                    state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3), Clusive::In, 0.0, Clusive::Ex, 0.9);
-                                ErrorsFound = true;
-                            }
-                        }
-
-                    } else { // !tempZone.OpTempCntrlModeScheduled
-
-                        // check validity of fixed radiative fraction
-                        if (Item == 1) {
-                            if (tempZone.FixedRadiativeFraction < 0.0) {
-                                ShowSevereBadMin(state, eoh, s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1), Clusive::In, 0.0);
-                                ErrorsFound = true;
-                            } else if (tempZone.FixedRadiativeFraction >= 0.9) {
-                                ShowSevereBadMax(state, eoh, s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1), Clusive::Ex, 0.9);
-                                ErrorsFound = true;
-                            }
-                        }
-                    }
-
-                    // added Jan, 2017 - Xuan Luo
-                    // read adaptive comfort model and calculate adaptive thermal comfort setpoint
-                    if (tempZone.OpTempCtrl == DataZoneControls::TempCtrl::Constant || tempZone.OpTempCtrl == DataZoneControls::TempCtrl::Scheduled) {
-                        if (NumAlphas >= 4 && !s_ipsc->lAlphaFieldBlanks(4)) {
-                            int adaptiveComfortModelTypeIndex =
-                                Util::FindItem(s_ipsc->cAlphaArgs(4), AdaptiveComfortModelTypes, AdaptiveComfortModelTypes.isize());
-                            if (adaptiveComfortModelTypeIndex == 0) {
-                                ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4));
-                                ErrorsFound = true;
-                            } else if (adaptiveComfortModelTypeIndex != static_cast<int>(AdaptiveComfortModel::ADAP_NONE)) {
-                                tempZone.AdaptiveComfortTempControl = true;
-                                tempZone.AdaptiveComfortModelTypeIndex =
-                                    Util::FindItem(s_ipsc->cAlphaArgs(4), AdaptiveComfortModelTypes, AdaptiveComfortModelTypes.isize());
-                                if (!s_ztpc->AdapComfortDailySetPointSchedule.initialized) {
-                                    Array1D<Real64> runningAverageASH(state.dataWeather->NumDaysInYear, 0.0);
-                                    Array1D<Real64> runningAverageCEN(state.dataWeather->NumDaysInYear, 0.0);
-                                    CalculateMonthlyRunningAverageDryBulb(state, runningAverageASH, runningAverageCEN);
-                                    CalculateAdaptiveComfortSetPointSchl(state, runningAverageASH, runningAverageCEN);
-                                }
-                            }
-                        }
-                    }
-
-                    // CurrentModuleObject='ZoneControl:Thermostat:OperativeTemperature'
-                    SetupOutputVariable(state,
-                                        "Zone Thermostat Operative Temperature",
-                                        Constant::Units::C,
-                                        state.dataHeatBal->ZnAirRpt(tempZone.ActualZoneNum).ThermOperativeTemp,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        Zone(tempZone.ActualZoneNum).Name);
+                    applyOpTempCtrlToZone(state, tempZone, eoh, NumAlphas, /*showErrors=*/Item == 1, ErrorsFound);
                 } // TStat Objects Loop
 
                 // It might be in the TempControlledZones
@@ -1680,69 +1513,7 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
 
                 TempControlledZoneNum = found;
                 auto &tempZone = state.dataZoneCtrls->TempControlledZone(TempControlledZoneNum);
-                tempZone.OpTempCtrl = static_cast<DataZoneControls::TempCtrl>(getEnumValue(DataZoneControls::tempCtrlNamesUC, s_ipsc->cAlphaArgs(2)));
-                if (tempZone.OpTempCtrl == DataZoneControls::TempCtrl::Invalid || tempZone.OpTempCtrl == DataZoneControls::TempCtrl::None) {
-                    ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2));
-                    ErrorsFound = true;
-                }
-
-                tempZone.FixedRadiativeFraction = s_ipsc->rNumericArgs(1);
-
-                if (tempZone.OpTempCtrl == DataZoneControls::TempCtrl::Scheduled) {
-                    if (s_ipsc->lAlphaFieldBlanks(3)) {
-                        ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(3));
-                        ErrorsFound = true;
-                    } else if ((tempZone.opTempRadiativeFractionSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(3))) == nullptr) {
-                        ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3));
-                        ErrorsFound = true;
-                    } else if (!tempZone.opTempRadiativeFractionSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::Ex, 0.9)) {
-                        Sched::ShowSevereBadMinMax(
-                            state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3), Clusive::In, 0.0, Clusive::Ex, 0.9);
-                        ErrorsFound = true;
-                    }
-
-                } else { // !tempZone.OpTempCntrlModeScheduled
-
-                    if (tempZone.FixedRadiativeFraction < 0.0) {
-                        ShowSevereBadMin(state, eoh, s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1), Clusive::In, 0.0);
-                        ErrorsFound = true;
-                    } else if (tempZone.FixedRadiativeFraction >= 0.9) {
-                        ShowSevereBadMax(state, eoh, s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1), Clusive::Ex, 0.9);
-                        ErrorsFound = true;
-                    }
-                }
-
-                // added Jan, 2017 - Xuan Luo
-                // read adaptive comfort model and calculate adaptive thermal comfort setpoint
-                if (tempZone.OpTempCtrl == DataZoneControls::TempCtrl::Constant || tempZone.OpTempCtrl == DataZoneControls::TempCtrl::Scheduled) {
-                    if (NumAlphas >= 4 && !s_ipsc->lAlphaFieldBlanks(4)) {
-                        int adaptiveComfortModelTypeIndex =
-                            Util::FindItem(s_ipsc->cAlphaArgs(4), AdaptiveComfortModelTypes, AdaptiveComfortModelTypes.isize());
-                        if (adaptiveComfortModelTypeIndex == 0) {
-                            ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4));
-                            ErrorsFound = true;
-                        } else if (adaptiveComfortModelTypeIndex != static_cast<int>(AdaptiveComfortModel::ADAP_NONE)) {
-                            tempZone.AdaptiveComfortTempControl = true;
-                            tempZone.AdaptiveComfortModelTypeIndex = adaptiveComfortModelTypeIndex;
-                            if (!s_ztpc->AdapComfortDailySetPointSchedule.initialized) {
-                                Array1D<Real64> runningAverageASH(state.dataWeather->NumDaysInYear, 0.0);
-                                Array1D<Real64> runningAverageCEN(state.dataWeather->NumDaysInYear, 0.0);
-                                // What does this accomplish?
-                                CalculateMonthlyRunningAverageDryBulb(state, runningAverageASH, runningAverageCEN);
-                                CalculateAdaptiveComfortSetPointSchl(state, runningAverageASH, runningAverageCEN);
-                            }
-                        }
-                    }
-
-                    // CurrentModuleObject='ZoneControl:Thermostat:OperativeTemperature'
-                    SetupOutputVariable(state,
-                                        "Zone Thermostat Operative Temperature",
-                                        Constant::Units::C,
-                                        state.dataHeatBal->ZnAirRpt(tempZone.ActualZoneNum).ThermOperativeTemp,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        Zone(tempZone.ActualZoneNum).Name);
-                }
+                applyOpTempCtrlToZone(state, tempZone, eoh, NumAlphas, /*showErrors=*/true, ErrorsFound);
                 // throw error
             } else {
                 ShowSevereError(state,

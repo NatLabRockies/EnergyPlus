@@ -718,6 +718,484 @@ namespace Furnaces {
     // Get Input Section of the Module
     //******************************************************************************
 
+    // Helper: read hot water heating coil data into thisFurnace fields.
+    // Populates CoilControlNode, MaxHeatCoilFluidFlow, HWCoilAirInletNode, HWCoilAirOutletNode.
+    // Also checks for a conflicting Controller:WaterCoil object.
+    // Returns inlet and outlet node numbers via HeatingCoilInletNode / HeatingCoilOutletNode.
+    static void readHeatWaterCoilData(EnergyPlusData &state,
+                                      FurnaceEquipConditions &thisFurnace,
+                                      std::string_view CurrentModuleObject,
+                                      const std::string &HeatingCoilName,
+                                      int &HeatingCoilInletNode,
+                                      int &HeatingCoilOutletNode,
+                                      bool &ErrorsFound)
+    {
+        bool errFlag = false;
+        thisFurnace.CoilControlNode = WaterCoils::GetCoilWaterInletNode(state, "Coil:Heating:Water", HeatingCoilName, errFlag);
+        if (errFlag) {
+            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+            ErrorsFound = true;
+        }
+
+        errFlag = false;
+        thisFurnace.MaxHeatCoilFluidFlow = WaterCoils::GetCoilMaxWaterFlowRate(state, "Coil:Heating:Water", HeatingCoilName, errFlag);
+        if (errFlag) {
+            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+            ErrorsFound = true;
+        }
+
+        errFlag = false;
+        HeatingCoilInletNode = WaterCoils::GetCoilInletNode(state, "Coil:Heating:Water", HeatingCoilName, errFlag);
+        thisFurnace.HWCoilAirInletNode = HeatingCoilInletNode;
+        if (errFlag) {
+            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+            ErrorsFound = true;
+        }
+
+        errFlag = false;
+        HeatingCoilOutletNode = WaterCoils::GetCoilOutletNode(state, "Coil:Heating:Water", HeatingCoilName, errFlag);
+        thisFurnace.HWCoilAirOutletNode = HeatingCoilOutletNode;
+        if (errFlag) {
+            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+            ErrorsFound = true;
+        }
+
+        errFlag = false;
+        HVACControllers::CheckCoilWaterInletNode(state, thisFurnace.CoilControlNode, errFlag);
+        if (!errFlag) {
+            ShowSevereError(state,
+                            EnergyPlus::format("{} = {} has a conflicting Controller:WaterCoil object", CurrentModuleObject, thisFurnace.Name));
+            ShowContinueError(state, "Hot water coils are controlled directly by unitary and furnace systems.");
+            ShowContinueError(state, "No water coil controller should be input for the coil.");
+            ErrorsFound = true;
+        }
+    }
+
+    // Helper: read steam heating coil data into thisFurnace fields.
+    // Populates HeatingCoilIndex, CoilControlNode, MaxHeatCoilFluidFlow, HWCoilAirInletNode, HWCoilAirOutletNode.
+    // Returns inlet and outlet node numbers via HeatingCoilInletNode / HeatingCoilOutletNode.
+    static void readHeatSteamCoilData(EnergyPlusData &state,
+                                      FurnaceEquipConditions &thisFurnace,
+                                      std::string_view CurrentModuleObject,
+                                      std::string_view coilAlphaField,
+                                      const std::string &HeatingCoilName,
+                                      std::string_view routineNameForSteam,
+                                      int &HeatingCoilInletNode,
+                                      int &HeatingCoilOutletNode,
+                                      bool &ErrorsFound)
+    {
+        bool errFlag = false;
+        thisFurnace.HeatingCoilIndex = SteamCoils::GetSteamCoilIndex(state, "COIL:HEATING:STEAM", HeatingCoilName, errFlag);
+        if (thisFurnace.HeatingCoilIndex == 0) {
+            ShowSevereError(state, EnergyPlus::format("{} illegal {} = {}", CurrentModuleObject, coilAlphaField, HeatingCoilName));
+            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+            ErrorsFound = true;
+        }
+
+        errFlag = false;
+        thisFurnace.CoilControlNode = SteamCoils::GetCoilSteamInletNode(state, "COIL:HEATING:STEAM", HeatingCoilName, errFlag);
+        if (errFlag) {
+            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+            ErrorsFound = true;
+        }
+
+        thisFurnace.MaxHeatCoilFluidFlow = SteamCoils::GetCoilMaxSteamFlowRate(state, thisFurnace.HeatingCoilIndex, errFlag);
+        if (thisFurnace.MaxHeatCoilFluidFlow > 0.0) {
+            Real64 SteamDensity = Fluid::GetSteam(state)->getSatDensity(state, state.dataFurnaces->TempSteamIn, 1.0, routineNameForSteam);
+            thisFurnace.MaxHeatCoilFluidFlow *= SteamDensity;
+        }
+
+        errFlag = false;
+        HeatingCoilInletNode = SteamCoils::GetCoilAirInletNode(state, thisFurnace.HeatingCoilIndex, HeatingCoilName, errFlag);
+        thisFurnace.HWCoilAirInletNode = HeatingCoilInletNode;
+        if (errFlag) {
+            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+            ErrorsFound = true;
+        }
+
+        errFlag = false;
+        HeatingCoilOutletNode = SteamCoils::GetCoilAirOutletNode(state, thisFurnace.HeatingCoilIndex, HeatingCoilName, errFlag);
+        thisFurnace.HWCoilAirOutletNode = HeatingCoilOutletNode;
+        if (errFlag) {
+            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+            ErrorsFound = true;
+        }
+    }
+
+    // Helper: read supplemental/reheat hot-water coil data into thisFurnace fields.
+    // Populates SuppCoilControlNode, MaxSuppCoilFluidFlow, SuppCoilAirInletNode, SuppCoilAirOutletNode.
+    // Also checks for a conflicting Controller:WaterCoil object.
+    // Returns inlet and outlet node numbers via coilInletNode / coilOutletNode.
+    static void readSuppWaterCoilData(EnergyPlusData &state,
+                                      FurnaceEquipConditions &thisFurnace,
+                                      std::string_view CurrentModuleObject,
+                                      const std::string &SuppCoilName,
+                                      int &coilInletNode,
+                                      int &coilOutletNode,
+                                      bool &ErrorsFound)
+    {
+        bool errFlag = false;
+        thisFurnace.SuppCoilControlNode = WaterCoils::GetCoilWaterInletNode(state, "Coil:Heating:Water", SuppCoilName, errFlag);
+        if (errFlag) {
+            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+            ErrorsFound = true;
+        }
+
+        errFlag = false;
+        thisFurnace.MaxSuppCoilFluidFlow = WaterCoils::GetCoilMaxWaterFlowRate(state, "Coil:Heating:Water", SuppCoilName, errFlag);
+        if (errFlag) {
+            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+            ErrorsFound = true;
+        }
+
+        errFlag = false;
+        coilInletNode = WaterCoils::GetCoilInletNode(state, "Coil:Heating:Water", SuppCoilName, errFlag);
+        thisFurnace.SuppCoilAirInletNode = coilInletNode;
+        if (errFlag) {
+            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+            ErrorsFound = true;
+        }
+
+        errFlag = false;
+        coilOutletNode = WaterCoils::GetCoilOutletNode(state, "Coil:Heating:Water", SuppCoilName, errFlag);
+        thisFurnace.SuppCoilAirOutletNode = coilOutletNode;
+        if (errFlag) {
+            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+            ErrorsFound = true;
+        }
+
+        errFlag = false;
+        HVACControllers::CheckCoilWaterInletNode(state, thisFurnace.CoilControlNode, errFlag);
+        if (!errFlag) {
+            ShowSevereError(state,
+                            EnergyPlus::format("{} = {} has a conflicting Controller:WaterCoil object", CurrentModuleObject, thisFurnace.Name));
+            ShowContinueError(state, "Hot water coils are controlled directly by unitary and furnace systems.");
+            ShowContinueError(state, "No water coil controller should be input for the coil.");
+            ErrorsFound = true;
+        }
+    }
+
+    // Helper: read supplemental/reheat steam coil data into thisFurnace fields.
+    // Populates SuppHeatCoilIndex, SuppCoilControlNode, MaxSuppCoilFluidFlow, SuppCoilAirInletNode, SuppCoilAirOutletNode.
+    // Returns inlet and outlet node numbers via coilInletNode / coilOutletNode.
+    static void readSuppSteamCoilData(EnergyPlusData &state,
+                                      FurnaceEquipConditions &thisFurnace,
+                                      std::string_view CurrentModuleObject,
+                                      std::string_view coilAlphaField,
+                                      const std::string &SuppCoilName,
+                                      std::string_view routineNameForSteam,
+                                      int &coilInletNode,
+                                      int &coilOutletNode,
+                                      bool &ErrorsFound)
+    {
+        bool errFlag = false;
+        thisFurnace.SuppHeatCoilIndex = SteamCoils::GetSteamCoilIndex(state, "COIL:HEATING:STEAM", SuppCoilName, errFlag);
+        if (thisFurnace.SuppHeatCoilIndex == 0) {
+            ShowSevereError(state, EnergyPlus::format("{} illegal {} = {}", CurrentModuleObject, coilAlphaField, SuppCoilName));
+            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+            ErrorsFound = true;
+        }
+
+        errFlag = false;
+        thisFurnace.SuppCoilControlNode = SteamCoils::GetCoilSteamInletNode(state, "COIL:HEATING:STEAM", SuppCoilName, errFlag);
+        if (errFlag) {
+            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+            ErrorsFound = true;
+        }
+
+        thisFurnace.MaxSuppCoilFluidFlow = SteamCoils::GetCoilMaxSteamFlowRate(state, thisFurnace.SuppHeatCoilIndex, errFlag);
+        if (thisFurnace.MaxSuppCoilFluidFlow > 0.0) {
+            Real64 SteamDensity = Fluid::GetSteam(state)->getSatDensity(state, state.dataFurnaces->TempSteamIn, 1.0, routineNameForSteam);
+            thisFurnace.MaxSuppCoilFluidFlow = SteamCoils::GetCoilMaxSteamFlowRate(state, thisFurnace.SuppHeatCoilIndex, errFlag) * SteamDensity;
+        }
+
+        errFlag = false;
+        coilInletNode = SteamCoils::GetCoilAirInletNode(state, thisFurnace.SuppHeatCoilIndex, SuppCoilName, errFlag);
+        thisFurnace.SuppCoilAirInletNode = coilInletNode;
+        if (errFlag) {
+            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+            ErrorsFound = true;
+        }
+
+        errFlag = false;
+        coilOutletNode = SteamCoils::GetCoilAirOutletNode(state, thisFurnace.SuppHeatCoilIndex, SuppCoilName, errFlag);
+        thisFurnace.SuppCoilAirOutletNode = coilOutletNode;
+        if (errFlag) {
+            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+            ErrorsFound = true;
+        }
+    }
+
+    // Helper: verify the control zone has a humidistat when Humidistat is enabled.
+    // Sets AirNodeFound to true if a matching ZoneControl:Humidistat is found.
+    // Reports a severe error if none is found.
+    static void checkHumidistatZone(EnergyPlusData &state,
+                                    FurnaceEquipConditions &thisFurnace,
+                                    std::string_view CurrentModuleObject,
+                                    std::string_view zoneAlphaField,
+                                    std::string_view zoneAlphaValue,
+                                    bool &AirNodeFound,
+                                    bool &ErrorsFound)
+    {
+        if (!thisFurnace.Humidistat) {
+            return;
+        }
+        AirNodeFound = false;
+        for (int HStatZoneNum = 1; HStatZoneNum <= state.dataZoneCtrls->NumHumidityControlZones; ++HStatZoneNum) {
+            if (state.dataZoneCtrls->HumidityControlZone(HStatZoneNum).ActualZoneNum == thisFurnace.ControlZoneNum) {
+                AirNodeFound = true;
+            }
+        }
+        if (!AirNodeFound) {
+            ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisFurnace.Name));
+            ShowContinueError(state, "Did not find Air Node (Zone with Humidistat).");
+            ShowContinueError(state, EnergyPlus::format("Specified {} = {}", zoneAlphaField, zoneAlphaValue));
+            ErrorsFound = true;
+        }
+    }
+
+    // Helper: find controlled zone and verify it is served by the furnace air loop.
+    // Populates NodeNumOfControlledZone, ZoneInletNode, and airloopNum on thisFurnace.
+    // Reports errors when the zone or air loop cannot be found.
+    // Helper: look up the control zone by name, validate it, then find the air loop and inlet node.
+    // Sets ControlZoneNum, NodeNumOfControlledZone, ZoneInletNode, and airloopNum on thisFurnace.
+    static void findControlledZoneAirLoop(EnergyPlusData &state,
+                                          FurnaceEquipConditions &thisFurnace,
+                                          std::string_view CurrentModuleObject,
+                                          std::string_view zoneAlphaField,
+                                          std::string_view zoneAlphaValue,
+                                          bool &ErrorsFound)
+    {
+        thisFurnace.ControlZoneNum = Util::FindItemInList(std::string{zoneAlphaValue}, state.dataHeatBal->Zone);
+        if (thisFurnace.ControlZoneNum == 0) {
+            ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisFurnace.Name));
+            ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", zoneAlphaField, zoneAlphaValue));
+            ErrorsFound = true;
+        }
+        if (thisFurnace.ControlZoneNum <= 0) {
+            return;
+        }
+
+        bool AirNodeFound = false;
+        bool AirLoopFound = false;
+        int ControlledZoneNum = thisFurnace.ControlZoneNum;
+
+        thisFurnace.NodeNumOfControlledZone = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).ZoneNode;
+
+        for (int zoneInNode = 1; zoneInNode <= state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).NumInletNodes; ++zoneInNode) {
+            int AirLoopNumber = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNodeAirLoopNum(zoneInNode);
+            thisFurnace.airloopNum = AirLoopNumber;
+            if (AirLoopNumber > 0) {
+                for (int BranchNum = 1; BranchNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).NumBranches; ++BranchNum) {
+                    for (int CompNum = 1; CompNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).TotalComponents;
+                         ++CompNum) {
+                        if (!Util::SameString(state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).Comp(CompNum).Name,
+                                              thisFurnace.Name) ||
+                            !Util::SameString(state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).Comp(CompNum).TypeOf,
+                                              CurrentModuleObject)) {
+                            continue;
+                        }
+                        AirLoopFound = true;
+                        thisFurnace.ZoneInletNode = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNode(zoneInNode);
+                        break;
+                    }
+                    if (AirLoopFound) {
+                        break;
+                    }
+                }
+                for (int TstatZoneNum = 1; TstatZoneNum <= state.dataZoneCtrls->NumTempControlledZones; ++TstatZoneNum) {
+                    if (state.dataZoneCtrls->TempControlledZone(TstatZoneNum).ActualZoneNum == thisFurnace.ControlZoneNum) {
+                        AirNodeFound = true;
+                    }
+                }
+                for (int TstatZoneNum = 1; TstatZoneNum <= state.dataZoneCtrls->NumComfortControlledZones; ++TstatZoneNum) {
+                    if (state.dataZoneCtrls->ComfortControlledZone(TstatZoneNum).ActualZoneNum == thisFurnace.ControlZoneNum) {
+                        AirNodeFound = true;
+                    }
+                }
+            }
+            if (AirLoopFound) {
+                break;
+            }
+        }
+        if (!AirNodeFound) {
+            ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisFurnace.Name));
+            ShowContinueError(state, "Did not find air node (zone with thermostat).");
+            ShowContinueError(state, EnergyPlus::format("Specified {} = {}", zoneAlphaField, zoneAlphaValue));
+            ShowContinueError(state,
+                              "Both a ZoneHVAC:EquipmentConnections object and a ZoneControl:Thermostat object must be specified for this zone.");
+            ErrorsFound = true;
+        }
+        if (!AirLoopFound) {
+            ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisFurnace.Name));
+            ShowContinueError(state, "Did not find correct AirLoopHVAC.");
+            ShowContinueError(state, EnergyPlus::format("Specified {} = {}", zoneAlphaField, zoneAlphaValue));
+            ErrorsFound = true;
+        }
+    }
+
+    // Helper: read gas/electric primary heating coil data into thisFurnace fields.
+    // Populates HeatingCoilType_Num, HeatingCoilIndex, DesignHeatingCapacity, inlet/outlet nodes.
+    // If plfCurveIndex is non-null, also fetches the PLF curve index (used by HeatCool loop).
+    // If setHWCoilAirInletNode is true, also assigns HWCoilAirInletNode (used by HeatOnly loop).
+    static void readHeatGasElecCoilData(EnergyPlusData &state,
+                                        FurnaceEquipConditions &thisFurnace,
+                                        std::string_view CurrentModuleObject,
+                                        const std::string &HeatingCoilType,
+                                        const std::string &HeatingCoilName,
+                                        int &HeatingCoilInletNode,
+                                        int &HeatingCoilOutletNode,
+                                        bool setHWCoilAirInletNode,
+                                        int *plfCurveIndex,
+                                        bool &ErrorsFound)
+    {
+        bool errFlag = false;
+        bool IsNotOK = false;
+        thisFurnace.HeatingCoilType_Num = HeatingCoils::GetHeatingCoilTypeNum(state, HeatingCoilType, HeatingCoilName, errFlag);
+        if (errFlag) {
+            ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+            ErrorsFound = true;
+        } else {
+            ValidateComponent(state, HeatingCoilType, HeatingCoilName, IsNotOK, CurrentModuleObject);
+            if (IsNotOK) {
+                ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+                ErrorsFound = true;
+            } else { // mine data from heating coil
+                errFlag = false;
+                HeatingCoils::GetCoilIndex(state, HeatingCoilName, thisFurnace.HeatingCoilIndex, errFlag);
+                if (errFlag) {
+                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+                    ErrorsFound = true;
+                }
+                errFlag = false;
+                thisFurnace.DesignHeatingCapacity = HeatingCoils::GetCoilCapacity(state, HeatingCoilType, HeatingCoilName, errFlag);
+                if (errFlag) {
+                    // Original HeatOnly path used "...occurs in {} ={}" (no space before =); HeatCool used "...occurs in {} = {}"
+                    ShowContinueError(state,
+                                      EnergyPlus::format(setHWCoilAirInletNode ? "...occurs in {} ={}" : "...occurs in {} = {}",
+                                                         CurrentModuleObject,
+                                                         thisFurnace.Name));
+                    ErrorsFound = true;
+                }
+                errFlag = false;
+                HeatingCoilInletNode = HeatingCoils::GetCoilInletNode(state, HeatingCoilType, HeatingCoilName, errFlag);
+                if (setHWCoilAirInletNode) {
+                    thisFurnace.HWCoilAirInletNode = HeatingCoilInletNode;
+                }
+                if (errFlag) {
+                    ShowContinueError(state,
+                                      EnergyPlus::format(setHWCoilAirInletNode ? "...occurs in {} ={}" : "...occurs in {} = {}",
+                                                         CurrentModuleObject,
+                                                         thisFurnace.Name));
+                    ErrorsFound = true;
+                }
+                errFlag = false;
+                HeatingCoilOutletNode = HeatingCoils::GetCoilOutletNode(state, HeatingCoilType, HeatingCoilName, errFlag);
+                if (errFlag) {
+                    ShowContinueError(state,
+                                      EnergyPlus::format(setHWCoilAirInletNode ? "...occurs in {} ={}" : "...occurs in {} = {}",
+                                                         CurrentModuleObject,
+                                                         thisFurnace.Name));
+                    ErrorsFound = true;
+                }
+                if (plfCurveIndex != nullptr) {
+                    errFlag = false;
+                    *plfCurveIndex = HeatingCoils::GetHeatingCoilPLFCurveIndex(state, HeatingCoilType, HeatingCoilName, errFlag);
+                    if (errFlag) {
+                        ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+                        ErrorsFound = true;
+                    }
+                }
+            } // IF (IsNotOK) THEN
+        }
+    }
+
+    // Helper: read supplemental heating coil data (gas/electric, water, or steam) into thisFurnace fields.
+    // Handles all coil types for both HeatPump AirToAir and WaterToAir supplemental coil inputs.
+    // SuppCoilTypeAlphaIndex is the 0-based alpha index for the coil type field used in error messages.
+    static void readSuppHeatCoilData(EnergyPlusData &state,
+                                     FurnaceEquipConditions &thisFurnace,
+                                     std::string_view CurrentModuleObject,
+                                     const std::string &SuppHeatCoilType,
+                                     const std::string &SuppHeatCoilName,
+                                     std::string_view coilTypeAlphaField,
+                                     int &SupHeatCoilInletNode,
+                                     int &SupHeatCoilOutletNode,
+                                     bool &ErrorsFound)
+    {
+        bool errFlag = false;
+        bool IsNotOK = false;
+        if (Util::SameString(SuppHeatCoilType, "Coil:Heating:Fuel") || Util::SameString(SuppHeatCoilType, "Coil:Heating:Electric")) {
+            thisFurnace.SuppHeatCoilType_Num = HeatingCoils::GetHeatingCoilTypeNum(state, SuppHeatCoilType, SuppHeatCoilName, errFlag);
+            if (errFlag) {
+                ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+                ErrorsFound = true;
+            } else {
+                IsNotOK = false;
+                ValidateComponent(state, SuppHeatCoilType, SuppHeatCoilName, IsNotOK, CurrentModuleObject);
+                if (IsNotOK) {
+                    ShowContinueError(state, EnergyPlus::format("In {} \"{}\"", CurrentModuleObject, thisFurnace.Name));
+                    ErrorsFound = true;
+                } else { // mine data from the supplemental heating coil
+                    HeatingCoils::GetCoilIndex(state, SuppHeatCoilName, thisFurnace.SuppHeatCoilIndex, IsNotOK);
+                    if (IsNotOK) {
+                        ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+                        ErrorsFound = true;
+                    }
+                    errFlag = false;
+                    SupHeatCoilInletNode = HeatingCoils::GetCoilInletNode(state, SuppHeatCoilType, SuppHeatCoilName, errFlag);
+                    if (errFlag) {
+                        ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", CurrentModuleObject, thisFurnace.Name));
+                        ErrorsFound = true;
+                    }
+                    errFlag = false;
+                    SupHeatCoilOutletNode = HeatingCoils::GetCoilOutletNode(state, SuppHeatCoilType, SuppHeatCoilName, errFlag);
+                    if (errFlag) {
+                        ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+                        ErrorsFound = true;
+                    }
+                    errFlag = false;
+                    thisFurnace.DesignSuppHeatingCapacity = HeatingCoils::GetCoilCapacity(state, SuppHeatCoilType, SuppHeatCoilName, errFlag);
+                    if (errFlag) {
+                        ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+                        ErrorsFound = true;
+                    }
+                } // IF (IsNotOK) THEN
+            }
+        } else if (Util::SameString(SuppHeatCoilType, "Coil:Heating:Water")) {
+            thisFurnace.SuppHeatCoilType_Num = HVAC::Coil_HeatingWater;
+            ValidateComponent(state, SuppHeatCoilType, SuppHeatCoilName, IsNotOK, CurrentModuleObject);
+            if (IsNotOK) {
+                ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+                ErrorsFound = true;
+            } else {
+                readSuppWaterCoilData(
+                    state, thisFurnace, CurrentModuleObject, SuppHeatCoilName, SupHeatCoilInletNode, SupHeatCoilOutletNode, ErrorsFound);
+            }
+        } else if (Util::SameString(SuppHeatCoilType, "Coil:Heating:Steam")) {
+            thisFurnace.SuppHeatCoilType_Num = HVAC::Coil_HeatingSteam;
+            ValidateComponent(state, SuppHeatCoilType, SuppHeatCoilName, IsNotOK, CurrentModuleObject);
+            if (IsNotOK) {
+                ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
+                ErrorsFound = true;
+            } else {
+                readSuppSteamCoilData(state,
+                                      thisFurnace,
+                                      CurrentModuleObject,
+                                      coilTypeAlphaField,
+                                      SuppHeatCoilName,
+                                      "GetAirLoopHVACHeatCoolInput",
+                                      SupHeatCoilInletNode,
+                                      SupHeatCoilOutletNode,
+                                      ErrorsFound);
+            }
+        } else {
+            ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisFurnace.Name));
+            ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", coilTypeAlphaField, SuppHeatCoilType));
+            ErrorsFound = true;
+        }
+    }
+
     void GetFurnaceInput(EnergyPlusData &state)
     {
 
@@ -761,10 +1239,7 @@ namespace Furnaces {
         std::string CompSetHeatOutlet;
         bool ErrorsFound(false);       // If errors detected in input
         bool IsNotOK;                  // Flag to verify name
-        bool AirNodeFound;             // Used to determine if control zone is valid
-        bool AirLoopFound;             // Used to determine if control zone is served by furnace air loop
-        int TstatZoneNum;              // Used to determine if control zone has a thermostat object
-        int HStatZoneNum;              // Used to determine if control zone has a humidistat object
+        bool AirNodeFound;             // Used to determine if control zone has a humidistat object
         bool errFlag;                  // Mining function error flag
         int FanInletNode;              // Used for node checking warning messages
         int FanOutletNode;             // Used for node checking warning messages
@@ -785,7 +1260,6 @@ namespace Furnaces {
         std::string FanName;           // Used in mining function CALLS
         bool PrintMessage;             // Used in mining function CALLS
         int HeatingCoilPLFCurveIndex;  // index of heating coil PLF curve
-        Real64 SteamDensity;           // density of steam at 100C
         int DXCoilIndex;               // Index to DX coil in HXAssited object
         std::string IHPCoilName;       // IHP cooling coil name
         auto &cCurrentModuleObject = state.dataIPShortCut->cCurrentModuleObject;
@@ -847,6 +1321,216 @@ namespace Furnaces {
         state.dataFurnaces->CheckEquipName.dimension(state.dataFurnaces->NumFurnaces, true);
 
         int IHPCoilIndex = 0;
+
+        // Lambda: set AirFlowControl based on the fan operating mode schedule.
+        // AirFlowControl is only relevant when the fan runs continuously (ContFanCycComp).
+        // If the schedule is always zero the compressor-on flow is used; otherwise the
+        // user-specified no-load flow rate is used.
+        auto setAirFlowControl = [&](FurnaceEquipConditions &furn) {
+            if (furn.fanOpModeSched != nullptr) {
+                if (!furn.fanOpModeSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 0.0)) {
+                    furn.AirFlowControl = (furn.MaxNoCoolHeatAirVolFlow == 0.0) ? AirFlowControlConstFan::UseCompressorOnFlow
+                                                                                : AirFlowControlConstFan::UseCompressorOffFlow;
+                }
+            }
+        };
+
+        // Lambda: warn and reset MaxCoolAirVolFlow and MaxHeatAirVolFlow when they exceed
+        // the fan's actual flow rate.  coolFieldName/heatFieldName are the numeric-field
+        // description strings used in the error message so callers can pass the correct
+        // cNumericFields entry for each object type.
+        auto checkFanFlowVsHVACFlowRates = [&](FurnaceEquipConditions &furn,
+                                               std::string_view objName,
+                                               std::string_view coolFieldName,
+                                               std::string_view heatFieldName,
+                                               const std::string &fanName) {
+            if (furn.ActualFanVolFlowRate == DataSizing::AutoSize) {
+                return;
+            }
+            if (furn.ActualFanVolFlowRate < furn.MaxCoolAirVolFlow && furn.MaxCoolAirVolFlow != DataSizing::AutoSize) {
+                ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, objName));
+                ShowContinueError(state,
+                                  EnergyPlus::format("... air flow rate = {:.7T} in fan object {} is less than the maximum HVAC system air flow "
+                                                     "rate in cooling mode.",
+                                                     furn.ActualFanVolFlowRate,
+                                                     fanName));
+                ShowContinueError(state, EnergyPlus::format(" The {} is reset to the fan flow rate and the simulation continues.", coolFieldName));
+                furn.MaxCoolAirVolFlow = furn.ActualFanVolFlowRate;
+                furn.DesignFanVolFlowRate = furn.ActualFanVolFlowRate;
+            }
+            if (furn.ActualFanVolFlowRate < furn.MaxHeatAirVolFlow && furn.MaxHeatAirVolFlow != DataSizing::AutoSize) {
+                ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, objName));
+                ShowContinueError(state,
+                                  EnergyPlus::format("... air flow rate = {:.7T} in fan object {} is less than the maximum HVAC system air flow "
+                                                     "rate in heating mode.",
+                                                     furn.ActualFanVolFlowRate,
+                                                     fanName));
+                ShowContinueError(state, EnergyPlus::format(" The {} is reset to the fan flow rate and the simulation continues.", heatFieldName));
+                furn.MaxHeatAirVolFlow = furn.ActualFanVolFlowRate;
+                furn.DesignFanVolFlowRate = furn.ActualFanVolFlowRate;
+            }
+        };
+
+        // Lambda: for a Coil:Cooling:DX:VariableSpeed (or IHP) cooling coil, populate
+        // CoolingCoilIndex, IHPCoilName, CoolingCoilInletNode, CoolingCoilOutletNode, and
+        // CondenserNodeNum on thisFurnace.  The caller is responsible for ValidateComponent
+        // before invoking this lambda.  On entry, thisFurnace.bIsIHP must already be set.
+        auto readVSCoolingCoilNodes = [&](FurnaceEquipConditions &furn,
+                                          std::string_view objName,
+                                          const std::string &coolCoilType,
+                                          const std::string &coolCoilName,
+                                          int &coolInletNode,
+                                          int &coolOutletNode) {
+            errFlag = false;
+            if (furn.bIsIHP) {
+                furn.CoolingCoilIndex = IntegratedHeatPump::GetCoilIndexIHP(state, coolCoilType, coolCoilName, errFlag);
+                IHPCoilName = state.dataIntegratedHP->IntegratedHeatPumps(furn.CoolingCoilIndex).SCCoilName;
+            } else {
+                furn.CoolingCoilIndex = VariableSpeedCoils::GetCoilIndexVariableSpeed(state, coolCoilType, coolCoilName, errFlag);
+                IHPCoilName = coolCoilName;
+            }
+
+            if (errFlag) {
+                ShowContinueError(state, EnergyPlus::format("...specified in {}=\"{}\".", CurrentModuleObject, objName));
+                ErrorsFound = true;
+            }
+
+            if (furn.bIsIHP) {
+                coolInletNode = VariableSpeedCoils::GetCoilInletNodeVariableSpeed(state, "COIL:COOLING:DX:VARIABLESPEED", IHPCoilName, errFlag);
+                coolOutletNode = VariableSpeedCoils::GetCoilOutletNodeVariableSpeed(state, "COIL:COOLING:DX:VARIABLESPEED", IHPCoilName, errFlag);
+                furn.CondenserNodeNum = VariableSpeedCoils::GetVSCoilCondenserInletNode(state, IHPCoilName, errFlag);
+            } else {
+                coolInletNode = VariableSpeedCoils::GetCoilInletNodeVariableSpeed(state, coolCoilType, coolCoilName, errFlag);
+                coolOutletNode = VariableSpeedCoils::GetCoilOutletNodeVariableSpeed(state, coolCoilType, coolCoilName, errFlag);
+                furn.CondenserNodeNum = VariableSpeedCoils::GetVSCoilCondenserInletNode(state, coolCoilName, errFlag);
+            }
+
+            if (errFlag) {
+                ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, objName));
+                ErrorsFound = true;
+            }
+        };
+
+        // Function-pointer type shared by WaterToAirHeatPump, WaterToAirHeatPumpSimple,
+        // and VariableSpeedCoils for GetCoilIndex / GetCoilInletNode / GetCoilOutletNode.
+        using CoilNodeFn = int (*)(EnergyPlusData &, std::string const &, std::string const &, bool &);
+        using CoilCapFn = Real64 (*)(EnergyPlusData &, std::string const &, std::string const &, bool &);
+
+        // Descriptor for a single WaterToAir coil variant.  The three supported
+        // coil types (ParameterEstimation, EquationFit, VariableSpeedEquationFit)
+        // differ only in the HVAC constant and the namespace of the getter functions.
+        struct WAHPCoilDesc
+        {
+            std::string_view typeString; // upper-case IDF object name to match
+            int coilTypeNum;             // HVAC::Coil_* constant
+            CoilNodeFn getIndex;
+            CoilNodeFn getInletNode;
+            CoilNodeFn getOutletNode;
+            CoilCapFn getCapacity;
+        };
+
+        static constexpr int numWAHPVariants = 3;
+
+        // Heating coil dispatch table.
+        const std::array<WAHPCoilDesc, numWAHPVariants> wahpHeatingCoils = {{
+            {"COIL:HEATING:WATERTOAIRHEATPUMP:PARAMETERESTIMATION",
+             HVAC::Coil_HeatingWaterToAirHP,
+             WaterToAirHeatPump::GetCoilIndex,
+             WaterToAirHeatPump::GetCoilInletNode,
+             WaterToAirHeatPump::GetCoilOutletNode,
+             WaterToAirHeatPump::GetCoilCapacity},
+            {"COIL:HEATING:WATERTOAIRHEATPUMP:EQUATIONFIT",
+             HVAC::Coil_HeatingWaterToAirHPSimple,
+             WaterToAirHeatPumpSimple::GetCoilIndex,
+             WaterToAirHeatPumpSimple::GetCoilInletNode,
+             WaterToAirHeatPumpSimple::GetCoilOutletNode,
+             WaterToAirHeatPumpSimple::GetCoilCapacity},
+            {"COIL:HEATING:WATERTOAIRHEATPUMP:VARIABLESPEEDEQUATIONFIT",
+             HVAC::Coil_HeatingWaterToAirHPVSEquationFit,
+             VariableSpeedCoils::GetCoilIndexVariableSpeed,
+             VariableSpeedCoils::GetCoilInletNodeVariableSpeed,
+             VariableSpeedCoils::GetCoilOutletNodeVariableSpeed,
+             VariableSpeedCoils::GetCoilCapacityVariableSpeed},
+        }};
+
+        // Cooling coil dispatch table.
+        const std::array<WAHPCoilDesc, numWAHPVariants> wahpCoolingCoils = {{
+            {"COIL:COOLING:WATERTOAIRHEATPUMP:PARAMETERESTIMATION",
+             HVAC::Coil_CoolingWaterToAirHP,
+             WaterToAirHeatPump::GetCoilIndex,
+             WaterToAirHeatPump::GetCoilInletNode,
+             WaterToAirHeatPump::GetCoilOutletNode,
+             WaterToAirHeatPump::GetCoilCapacity},
+            {"COIL:COOLING:WATERTOAIRHEATPUMP:EQUATIONFIT",
+             HVAC::Coil_CoolingWaterToAirHPSimple,
+             WaterToAirHeatPumpSimple::GetCoilIndex,
+             WaterToAirHeatPumpSimple::GetCoilInletNode,
+             WaterToAirHeatPumpSimple::GetCoilOutletNode,
+             WaterToAirHeatPumpSimple::GetCoilCapacity},
+            {"COIL:COOLING:WATERTOAIRHEATPUMP:VARIABLESPEEDEQUATIONFIT",
+             HVAC::Coil_CoolingWaterToAirHPVSEquationFit,
+             VariableSpeedCoils::GetCoilIndexVariableSpeed,
+             VariableSpeedCoils::GetCoilInletNodeVariableSpeed,
+             VariableSpeedCoils::GetCoilOutletNodeVariableSpeed,
+             VariableSpeedCoils::GetCoilCapacityVariableSpeed},
+        }};
+
+        // Lambda: look up a WaterToAir coil by type string, populate the furnace
+        // coil index and node numbers via the matching dispatch-table entry.
+        // Returns true if a matching coil type was found (even if validation fails).
+        auto readWaterToAirCoil = [&](const std::array<WAHPCoilDesc, numWAHPVariants> &table,
+                                      std::string_view alphaType,
+                                      std::string_view alphaName,
+                                      std::string_view /* alphaFieldType */,
+                                      int &coilIndex,
+                                      int &coilTypeNum,
+                                      std::string &coilType,
+                                      std::string &coilName,
+                                      int &inletNode,
+                                      int &outletNode) -> bool {
+            for (auto const &desc : table) {
+                if (alphaType != desc.typeString) {
+                    continue;
+                }
+
+                coilType = std::string(alphaType);
+                coilTypeNum = desc.coilTypeNum;
+                coilName = std::string(alphaName);
+                ValidateComponent(state, coilType, coilName, IsNotOK, CurrentModuleObject);
+                if (IsNotOK) {
+                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
+                    ErrorsFound = true;
+                } else {
+                    coilIndex = desc.getIndex(state, coilType, coilName, errFlag);
+                    inletNode = desc.getInletNode(state, coilType, coilName, errFlag);
+                    outletNode = desc.getOutletNode(state, coilType, coilName, errFlag);
+                }
+                return true;
+            }
+            return false;
+        };
+
+        // Lambda: retrieve design capacity for a WaterToAir coil whose type has
+        // already been identified.  Dispatches through the same table used by
+        // readWaterToAirCoil.
+        auto getWaterToAirCoilCapacity = [&](const std::array<WAHPCoilDesc, numWAHPVariants> &table,
+                                             int coilTypeNum,
+                                             const std::string &coilType,
+                                             const std::string &coilName) -> Real64 {
+            for (auto const &desc : table) {
+                if (coilTypeNum != desc.coilTypeNum) {
+                    continue;
+                }
+                errFlag = false;
+                Real64 cap = desc.getCapacity(state, coilType, coilName, errFlag);
+                if (errFlag) {
+                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
+                    ErrorsFound = true;
+                }
+                return cap;
+            }
+            return 0.0;
+        };
 
         // Get the data for the HeatOnly Furnace
         for (int HeatOnlyNum = 1; HeatOnlyNum <= NumHeatOnly + NumUnitaryHeatOnly; ++HeatOnlyNum) {
@@ -935,77 +1619,8 @@ namespace Furnaces {
 
             // Get the Controlling Zone or Location of the Furnace Thermostat
 
-            thisFurnace.ControlZoneNum = Util::FindItemInList(Alphas(6), state.dataHeatBal->Zone);
-            if (thisFurnace.ControlZoneNum == 0) {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(6), Alphas(6)));
-                ErrorsFound = true;
-            }
-
             // Get the node number for the zone with the thermostat
-            if (thisFurnace.ControlZoneNum > 0) {
-                AirNodeFound = false;
-                AirLoopFound = false;
-                int ControlledZoneNum = thisFurnace.ControlZoneNum;
-                //             Find the controlled zone number for the specified thermostat location
-                thisFurnace.NodeNumOfControlledZone = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).ZoneNode;
-                //             Determine if furnace is on air loop served by the thermostat location specified
-                for (int zoneInNode = 1; zoneInNode <= state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).NumInletNodes; ++zoneInNode) {
-                    int AirLoopNumber = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNodeAirLoopNum(zoneInNode);
-                    thisFurnace.airloopNum = AirLoopNumber;
-                    if (AirLoopNumber > 0) {
-                        for (int BranchNum = 1; BranchNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).NumBranches; ++BranchNum) {
-                            for (int CompNum = 1;
-                                 CompNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).TotalComponents;
-                                 ++CompNum) {
-                                if (!Util::SameString(state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).Comp(CompNum).Name,
-                                                      thisFurnace.Name) ||
-                                    !Util::SameString(
-                                        state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).Comp(CompNum).TypeOf,
-                                        CurrentModuleObject)) {
-                                    continue;
-                                }
-                                AirLoopFound = true;
-                                thisFurnace.ZoneInletNode = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNode(zoneInNode);
-                                break;
-                            }
-                            if (AirLoopFound) {
-                                break;
-                            }
-                        }
-                        for (TstatZoneNum = 1; TstatZoneNum <= state.dataZoneCtrls->NumTempControlledZones; ++TstatZoneNum) {
-                            if (state.dataZoneCtrls->TempControlledZone(TstatZoneNum).ActualZoneNum != thisFurnace.ControlZoneNum) {
-                                continue;
-                            }
-                            AirNodeFound = true;
-                        }
-                        for (TstatZoneNum = 1; TstatZoneNum <= state.dataZoneCtrls->NumComfortControlledZones; ++TstatZoneNum) {
-                            if (state.dataZoneCtrls->ComfortControlledZone(TstatZoneNum).ActualZoneNum != thisFurnace.ControlZoneNum) {
-                                continue;
-                            }
-                            AirNodeFound = true;
-                        }
-                    }
-                    if (AirLoopFound) {
-                        break;
-                    }
-                }
-                if (!AirNodeFound) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state, "Did not find Air Node (Zone with Thermostat).");
-                    ShowContinueError(state, EnergyPlus::format("Specified {} = {}", cAlphaFields(6), Alphas(6)));
-                    ShowContinueError(
-                        state, "Both a ZoneHVAC:EquipmentConnections object and a ZoneControl:Thermostat object must be specified for this zone.");
-                    ErrorsFound = true;
-                }
-                if (!AirLoopFound) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state, "Did not find correct Primary Air Loop.");
-                    ShowContinueError(
-                        state, EnergyPlus::format("Specified {} = {} is not served by this AirLoopHVAC equipment.", cAlphaFields(6), Alphas(6)));
-                    ErrorsFound = true;
-                }
-            }
+            findControlledZoneAirLoop(state, thisFurnace, CurrentModuleObject, cAlphaFields(6), Alphas(6), ErrorsFound);
 
             // Get fan data
             FanName = Alphas(8);
@@ -1061,54 +1676,16 @@ namespace Furnaces {
             thisFurnace.HeatingCoilType = HeatingCoilType;
             thisFurnace.HeatingCoilName = HeatingCoilName;
             if (Util::SameString(HeatingCoilType, "Coil:Heating:Fuel") || Util::SameString(HeatingCoilType, "Coil:Heating:Electric")) {
-                errFlag = false;
-                thisFurnace.HeatingCoilType_Num = HeatingCoils::GetHeatingCoilTypeNum(state, HeatingCoilType, HeatingCoilName, errFlag);
-                if (errFlag) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                } else {
-                    ValidateComponent(state, HeatingCoilType, HeatingCoilName, IsNotOK, CurrentModuleObject);
-                    if (IsNotOK) {
-                        ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                        ErrorsFound = true;
-
-                    } else { // mine data from heating coil object
-
-                        // Get index to Heating Coil
-                        errFlag = false;
-                        HeatingCoils::GetCoilIndex(state, HeatingCoilName, thisFurnace.HeatingCoilIndex, errFlag);
-                        if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                            ErrorsFound = true;
-                        }
-
-                        // Get the furnace design capacity
-                        errFlag = false;
-                        thisFurnace.DesignHeatingCapacity = HeatingCoils::GetCoilCapacity(state, HeatingCoilType, HeatingCoilName, errFlag);
-                        if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("...occurs in {} ={}", CurrentModuleObject, Alphas(1)));
-                            ErrorsFound = true;
-                        }
-
-                        // Get the Heating Coil Inlet Node
-                        errFlag = false;
-                        HeatingCoilInletNode = HeatingCoils::GetCoilInletNode(state, HeatingCoilType, HeatingCoilName, errFlag);
-                        thisFurnace.HWCoilAirInletNode = HeatingCoilInletNode;
-                        if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("...occurs in {} ={}", CurrentModuleObject, Alphas(1)));
-                            ErrorsFound = true;
-                        }
-
-                        // Get the Heating Coil Outlet Node
-                        errFlag = false;
-                        HeatingCoilOutletNode = HeatingCoils::GetCoilOutletNode(state, HeatingCoilType, HeatingCoilName, errFlag);
-                        if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("...occurs in {} ={}", CurrentModuleObject, Alphas(1)));
-                            ErrorsFound = true;
-                        }
-
-                    } // IF (IsNotOK) THEN
-                }
+                readHeatGasElecCoilData(state,
+                                        thisFurnace,
+                                        CurrentModuleObject,
+                                        HeatingCoilType,
+                                        HeatingCoilName,
+                                        HeatingCoilInletNode,
+                                        HeatingCoilOutletNode,
+                                        /*setHWCoilAirInletNode=*/true,
+                                        /*plfCurveIndex=*/nullptr,
+                                        ErrorsFound);
 
             } else if (Util::SameString(HeatingCoilType, "Coil:Heating:Water")) {
                 thisFurnace.HeatingCoilType_Num = HVAC::Coil_HeatingWater;
@@ -1116,53 +1693,9 @@ namespace Furnaces {
                 if (IsNotOK) {
                     ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
                     ErrorsFound = true;
-                } else { // mine data from heating coil object
-
-                    // Get the Heating Coil water Inlet or control Node number
-                    errFlag = false;
-                    thisFurnace.CoilControlNode = WaterCoils::GetCoilWaterInletNode(state, "Coil:Heating:Water", HeatingCoilName, errFlag);
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the Heating Coil hot water max volume flow rate
-                    errFlag = false;
-                    thisFurnace.MaxHeatCoilFluidFlow = WaterCoils::GetCoilMaxWaterFlowRate(state, "Coil:Heating:Water", HeatingCoilName, errFlag);
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the Heating Coil Inlet Node
-                    errFlag = false;
-                    HeatingCoilInletNode = WaterCoils::GetCoilInletNode(state, "Coil:Heating:Water", HeatingCoilName, errFlag);
-                    thisFurnace.HWCoilAirInletNode = HeatingCoilInletNode;
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the Heating Coil Outlet Node
-                    errFlag = false;
-                    HeatingCoilOutletNode = WaterCoils::GetCoilOutletNode(state, "Coil:Heating:Water", HeatingCoilName, errFlag);
-                    thisFurnace.HWCoilAirOutletNode = HeatingCoilOutletNode;
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // check if user has also used a water coil controller, which they should not do
-                    errFlag = false;
-                    HVACControllers::CheckCoilWaterInletNode(state, thisFurnace.CoilControlNode, errFlag);
-                    if (!errFlag) { // then did find a controller so that is bad
-                        ShowSevereError(
-                            state,
-                            EnergyPlus::format("{} = {} has a conflicting Controller:WaterCoil object", CurrentModuleObject, thisFurnace.Name));
-                        ShowContinueError(state, "Hot water coils are controlled directly by unitary and furnace systems.");
-                        ShowContinueError(state, "No water coil controller should be input for the coil.");
-                        ErrorsFound = true;
-                    }
+                } else {
+                    readHeatWaterCoilData(
+                        state, thisFurnace, CurrentModuleObject, HeatingCoilName, HeatingCoilInletNode, HeatingCoilOutletNode, ErrorsFound);
                 }
 
             } else if (Util::SameString(HeatingCoilType, "Coil:Heating:Steam")) {
@@ -1171,48 +1704,16 @@ namespace Furnaces {
                 if (IsNotOK) {
                     ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
                     ErrorsFound = true;
-                } else { // mine data from heating coil object
-
-                    errFlag = false;
-                    thisFurnace.HeatingCoilIndex = SteamCoils::GetSteamCoilIndex(state, "COIL:HEATING:STEAM", HeatingCoilName, errFlag);
-                    if (thisFurnace.HeatingCoilIndex == 0) {
-                        ShowSevereError(state, EnergyPlus::format("{} illegal {} = {}", CurrentModuleObject, cAlphaFields(11), HeatingCoilName));
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the Heating Coil steam inlet node number
-                    errFlag = false;
-                    thisFurnace.CoilControlNode = SteamCoils::GetCoilSteamInletNode(state, "COIL:HEATING:STEAM", HeatingCoilName, errFlag);
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the Heating Coil steam max volume flow rate
-                    thisFurnace.MaxHeatCoilFluidFlow = SteamCoils::GetCoilMaxSteamFlowRate(state, thisFurnace.HeatingCoilIndex, errFlag);
-                    if (thisFurnace.MaxHeatCoilFluidFlow > 0.0) {
-                        SteamDensity = Fluid::GetSteam(state)->getSatDensity(state, state.dataFurnaces->TempSteamIn, 1.0, getUnitaryHeatOnly);
-                        thisFurnace.MaxHeatCoilFluidFlow *= SteamDensity;
-                    }
-
-                    // Get the Heating Coil Inlet Node
-                    errFlag = false;
-                    HeatingCoilInletNode = SteamCoils::GetCoilAirInletNode(state, thisFurnace.HeatingCoilIndex, HeatingCoilName, errFlag);
-                    thisFurnace.HWCoilAirInletNode = HeatingCoilInletNode;
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the Heating Coil Outlet Node
-                    errFlag = false;
-                    HeatingCoilOutletNode = SteamCoils::GetCoilAirOutletNode(state, thisFurnace.HeatingCoilIndex, HeatingCoilName, errFlag);
-                    thisFurnace.HWCoilAirOutletNode = HeatingCoilOutletNode;
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
+                } else {
+                    readHeatSteamCoilData(state,
+                                          thisFurnace,
+                                          CurrentModuleObject,
+                                          cAlphaFields(11),
+                                          HeatingCoilName,
+                                          getUnitaryHeatOnly,
+                                          HeatingCoilInletNode,
+                                          HeatingCoilOutletNode,
+                                          ErrorsFound);
                 }
 
             } else {
@@ -1491,76 +1992,8 @@ namespace Furnaces {
             }
 
             // Get the Controlling Zone or Location of the Furnace Thermostat
-            thisFurnace.ControlZoneNum = Util::FindItemInList(Alphas(6), state.dataHeatBal->Zone);
-            if (thisFurnace.ControlZoneNum == 0) {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(6), Alphas(6)));
-                ErrorsFound = true;
-            }
-
             // Get the node number for the zone with the thermostat
-            if (thisFurnace.ControlZoneNum > 0) {
-                AirNodeFound = false;
-                AirLoopFound = false;
-                int ControlledZoneNum = thisFurnace.ControlZoneNum;
-                //             Find the controlled zone number for the specified thermostat location
-                thisFurnace.NodeNumOfControlledZone = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).ZoneNode;
-                //             Determine if system is on air loop served by the thermostat location specified
-                for (int zoneInNode = 1; zoneInNode <= state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).NumInletNodes; ++zoneInNode) {
-                    int AirLoopNumber = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNodeAirLoopNum(zoneInNode);
-                    thisFurnace.airloopNum = AirLoopNumber;
-                    if (AirLoopNumber > 0) {
-                        for (int BranchNum = 1; BranchNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).NumBranches; ++BranchNum) {
-                            for (int CompNum = 1;
-                                 CompNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).TotalComponents;
-                                 ++CompNum) {
-                                if (!Util::SameString(state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).Comp(CompNum).Name,
-                                                      Alphas(1)) ||
-                                    !Util::SameString(
-                                        state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).Comp(CompNum).TypeOf,
-                                        CurrentModuleObject)) {
-                                    continue;
-                                }
-                                AirLoopFound = true;
-                                thisFurnace.ZoneInletNode = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNode(zoneInNode);
-                                break;
-                            }
-                            if (AirLoopFound) {
-                                break;
-                            }
-                        }
-                        for (TstatZoneNum = 1; TstatZoneNum <= state.dataZoneCtrls->NumTempControlledZones; ++TstatZoneNum) {
-                            if (state.dataZoneCtrls->TempControlledZone(TstatZoneNum).ActualZoneNum != thisFurnace.ControlZoneNum) {
-                                continue;
-                            }
-                            AirNodeFound = true;
-                        }
-                        for (TstatZoneNum = 1; TstatZoneNum <= state.dataZoneCtrls->NumComfortControlledZones; ++TstatZoneNum) {
-                            if (state.dataZoneCtrls->ComfortControlledZone(TstatZoneNum).ActualZoneNum != thisFurnace.ControlZoneNum) {
-                                continue;
-                            }
-                            AirNodeFound = true;
-                        }
-                    }
-                    if (AirLoopFound) {
-                        break;
-                    }
-                }
-                if (!AirNodeFound) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state, "Did not find air node (zone with thermostat).");
-                    ShowContinueError(state, EnergyPlus::format("Specified {} = {}", cAlphaFields(6), Alphas(6)));
-                    ShowContinueError(
-                        state, "Both a ZoneHVAC:EquipmentConnections object and a ZoneControl:Thermostat object must be specified for this zone.");
-                    ErrorsFound = true;
-                }
-                if (!AirLoopFound) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state, "Did not find correct AirLoopHVAC.");
-                    ShowContinueError(state, EnergyPlus::format("Specified {} = {}", cAlphaFields(6), Alphas(6)));
-                    ErrorsFound = true;
-                }
-            }
+            findControlledZoneAirLoop(state, thisFurnace, CurrentModuleObject, cAlphaFields(6), Alphas(6), ErrorsFound);
 
             // Get fan data
             FanName = Alphas(8);
@@ -1617,62 +2050,16 @@ namespace Furnaces {
             thisFurnace.HeatingCoilType = HeatingCoilType;
             thisFurnace.HeatingCoilName = HeatingCoilName;
             if (Util::SameString(HeatingCoilType, "Coil:Heating:Fuel") || Util::SameString(HeatingCoilType, "Coil:Heating:Electric")) {
-                errFlag = false;
-                thisFurnace.HeatingCoilType_Num = HeatingCoils::GetHeatingCoilTypeNum(state, HeatingCoilType, HeatingCoilName, errFlag);
-                if (errFlag) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                } else {
-
-                    ValidateComponent(state, HeatingCoilType, HeatingCoilName, IsNotOK, CurrentModuleObject);
-                    if (IsNotOK) {
-                        ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                        ErrorsFound = true;
-
-                    } else { // mine data from heating coil
-
-                        // Get heating coil index
-                        errFlag = false;
-                        HeatingCoils::GetCoilIndex(state, HeatingCoilName, thisFurnace.HeatingCoilIndex, errFlag);
-                        if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                            ErrorsFound = true;
-                        }
-
-                        // Get the design heating capacity
-                        errFlag = false;
-                        thisFurnace.DesignHeatingCapacity = HeatingCoils::GetCoilCapacity(state, HeatingCoilType, HeatingCoilName, errFlag);
-                        if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                            ErrorsFound = true;
-                        }
-
-                        // Get the Heating Coil Inlet Node
-                        errFlag = false;
-                        HeatingCoilInletNode = HeatingCoils::GetCoilInletNode(state, HeatingCoilType, HeatingCoilName, errFlag);
-                        if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                            ErrorsFound = true;
-                        }
-
-                        // Get the Heating Coil Outlet Node
-                        errFlag = false;
-                        HeatingCoilOutletNode = HeatingCoils::GetCoilOutletNode(state, HeatingCoilType, HeatingCoilName, errFlag);
-                        if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                            ErrorsFound = true;
-                        }
-
-                        // Get the Heating Coil PLF Curve Index
-                        errFlag = false;
-                        HeatingCoilPLFCurveIndex = HeatingCoils::GetHeatingCoilPLFCurveIndex(state, HeatingCoilType, HeatingCoilName, errFlag);
-                        if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                            ErrorsFound = true;
-                        }
-
-                    } // IF (IsNotOK) THEN
-                }
+                readHeatGasElecCoilData(state,
+                                        thisFurnace,
+                                        CurrentModuleObject,
+                                        HeatingCoilType,
+                                        HeatingCoilName,
+                                        HeatingCoilInletNode,
+                                        HeatingCoilOutletNode,
+                                        /*setHWCoilAirInletNode=*/false,
+                                        /*plfCurveIndex=*/&HeatingCoilPLFCurveIndex,
+                                        ErrorsFound);
 
             } else if (Util::SameString(HeatingCoilType, "Coil:Heating:Water")) {
                 thisFurnace.HeatingCoilType_Num = HVAC::Coil_HeatingWater;
@@ -1680,53 +2067,9 @@ namespace Furnaces {
                 if (IsNotOK) {
                     ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
                     ErrorsFound = true;
-                } else { // mine data from heating coil object
-
-                    // Get the Heating Coil water Inlet or control Node number
-                    errFlag = false;
-                    thisFurnace.CoilControlNode = WaterCoils::GetCoilWaterInletNode(state, "Coil:Heating:Water", HeatingCoilName, errFlag);
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the Heating Coil hot water max volume flow rate
-                    errFlag = false;
-                    thisFurnace.MaxHeatCoilFluidFlow = WaterCoils::GetCoilMaxWaterFlowRate(state, "Coil:Heating:Water", HeatingCoilName, errFlag);
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the Heating Coil Inlet Node
-                    errFlag = false;
-                    HeatingCoilInletNode = WaterCoils::GetCoilInletNode(state, "Coil:Heating:Water", HeatingCoilName, errFlag);
-                    thisFurnace.HWCoilAirInletNode = HeatingCoilInletNode;
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the Heating Coil Outlet Node
-                    errFlag = false;
-                    HeatingCoilOutletNode = WaterCoils::GetCoilOutletNode(state, "Coil:Heating:Water", HeatingCoilName, errFlag);
-                    thisFurnace.HWCoilAirOutletNode = HeatingCoilOutletNode;
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // check if user has also used a water coil controller, which they should not do
-                    errFlag = false;
-                    HVACControllers::CheckCoilWaterInletNode(state, thisFurnace.CoilControlNode, errFlag);
-                    if (!errFlag) { // then did find a controller so that is bad
-                        ShowSevereError(
-                            state,
-                            EnergyPlus::format("{} = {} has a conflicting Controller:WaterCoil object", CurrentModuleObject, thisFurnace.Name));
-                        ShowContinueError(state, "Hot water coils are controlled directly by unitary and furnace systems.");
-                        ShowContinueError(state, "No water coil controller should be input for the coil.");
-                        ErrorsFound = true;
-                    }
+                } else {
+                    readHeatWaterCoilData(
+                        state, thisFurnace, CurrentModuleObject, HeatingCoilName, HeatingCoilInletNode, HeatingCoilOutletNode, ErrorsFound);
                 }
 
             } else if (Util::SameString(HeatingCoilType, "Coil:Heating:Steam")) {
@@ -1735,49 +2078,16 @@ namespace Furnaces {
                 if (IsNotOK) {
                     ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
                     ErrorsFound = true;
-                } else { // mine data from heating coil object
-
-                    errFlag = false;
-                    thisFurnace.HeatingCoilIndex = SteamCoils::GetSteamCoilIndex(state, "COIL:HEATING:STEAM", HeatingCoilName, errFlag);
-                    if (thisFurnace.HeatingCoilIndex == 0) {
-                        ShowSevereError(state, EnergyPlus::format("{} illegal {} = {}", CurrentModuleObject, cAlphaFields(11), HeatingCoilName));
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the Heating Coil steam inlet node number
-                    errFlag = false;
-                    thisFurnace.CoilControlNode = SteamCoils::GetCoilSteamInletNode(state, "Coil:Heating:Steam", HeatingCoilName, errFlag);
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the Heating Coil steam max volume flow rate
-                    thisFurnace.MaxHeatCoilFluidFlow = SteamCoils::GetCoilMaxSteamFlowRate(state, thisFurnace.HeatingCoilIndex, errFlag);
-                    if (thisFurnace.MaxHeatCoilFluidFlow > 0.0) {
-                        SteamDensity =
-                            Fluid::GetSteam(state)->getSatDensity(state, state.dataFurnaces->TempSteamIn, 1.0, getAirLoopHVACHeatCoolInput);
-                        thisFurnace.MaxHeatCoilFluidFlow *= SteamDensity;
-                    }
-
-                    // Get the Heating Coil Inlet Node
-                    errFlag = false;
-                    HeatingCoilInletNode = SteamCoils::GetCoilAirInletNode(state, thisFurnace.HeatingCoilIndex, HeatingCoilName, errFlag);
-                    thisFurnace.HWCoilAirInletNode = HeatingCoilInletNode;
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the Heating Coil Outlet Node
-                    errFlag = false;
-                    HeatingCoilOutletNode = SteamCoils::GetCoilAirOutletNode(state, thisFurnace.HeatingCoilIndex, HeatingCoilName, errFlag);
-                    thisFurnace.HWCoilAirOutletNode = HeatingCoilOutletNode;
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
+                } else {
+                    readHeatSteamCoilData(state,
+                                          thisFurnace,
+                                          CurrentModuleObject,
+                                          cAlphaFields(11),
+                                          HeatingCoilName,
+                                          getAirLoopHVACHeatCoolInput,
+                                          HeatingCoilInletNode,
+                                          HeatingCoilOutletNode,
+                                          ErrorsFound);
                 }
 
             } else {
@@ -1971,37 +2281,7 @@ namespace Furnaces {
                     ShowContinueError(state, EnergyPlus::format("...specified in {}=\"{}\".", CurrentModuleObject, Alphas(1)));
                     ErrorsFound = true;
                 } else {
-                    errFlag = false;
-                    if (thisFurnace.bIsIHP) {
-                        thisFurnace.CoolingCoilIndex = IntegratedHeatPump::GetCoilIndexIHP(state, CoolingCoilType, CoolingCoilName, errFlag);
-                        IHPCoilName = state.dataIntegratedHP->IntegratedHeatPumps(thisFurnace.CoolingCoilIndex).SCCoilName;
-                    } else {
-                        thisFurnace.CoolingCoilIndex =
-                            VariableSpeedCoils::GetCoilIndexVariableSpeed(state, CoolingCoilType, CoolingCoilName, errFlag);
-                        IHPCoilName = CoolingCoilName;
-                    }
-
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("...specified in {}=\"{}\".", CurrentModuleObject, Alphas(1)));
-                        ErrorsFound = true;
-                    }
-
-                    if (thisFurnace.bIsIHP) {
-                        CoolingCoilInletNode =
-                            VariableSpeedCoils::GetCoilInletNodeVariableSpeed(state, "COIL:COOLING:DX:VARIABLESPEED", IHPCoilName, errFlag);
-                        CoolingCoilOutletNode =
-                            VariableSpeedCoils::GetCoilOutletNodeVariableSpeed(state, "COIL:COOLING:DX:VARIABLESPEED", IHPCoilName, errFlag);
-                        thisFurnace.CondenserNodeNum = VariableSpeedCoils::GetVSCoilCondenserInletNode(state, IHPCoilName, errFlag);
-                    } else {
-                        CoolingCoilInletNode = VariableSpeedCoils::GetCoilInletNodeVariableSpeed(state, CoolingCoilType, CoolingCoilName, errFlag);
-                        CoolingCoilOutletNode = VariableSpeedCoils::GetCoilOutletNodeVariableSpeed(state, CoolingCoilType, CoolingCoilName, errFlag);
-                        thisFurnace.CondenserNodeNum = VariableSpeedCoils::GetVSCoilCondenserInletNode(state, CoolingCoilName, errFlag);
-                    }
-
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                        ErrorsFound = true;
-                    }
+                    readVSCoolingCoilNodes(thisFurnace, Alphas(1), CoolingCoilType, CoolingCoilName, CoolingCoilInletNode, CoolingCoilOutletNode);
                 }
             } else {
                 ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
@@ -2046,20 +2326,7 @@ namespace Furnaces {
                     thisFurnace.DehumidControlType_Num = DehumidificationControlMode::None;
                     thisFurnace.Humidistat = false;
                 }
-                if (thisFurnace.Humidistat) {
-                    for (HStatZoneNum = 1; HStatZoneNum <= state.dataZoneCtrls->NumHumidityControlZones; ++HStatZoneNum) {
-                        if (state.dataZoneCtrls->HumidityControlZone(HStatZoneNum).ActualZoneNum != thisFurnace.ControlZoneNum) {
-                            continue;
-                        }
-                        AirNodeFound = true;
-                    }
-                    if (!AirNodeFound) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                        ShowContinueError(state, "Did not find Air Node (Zone with Humidistat).");
-                        ShowContinueError(state, EnergyPlus::format("Specified {} = {}", cAlphaFields(6), Alphas(6)));
-                        ErrorsFound = true;
-                    }
-                }
+                checkHumidistatZone(state, thisFurnace, CurrentModuleObject, cAlphaFields(6), Alphas(6), AirNodeFound, ErrorsFound);
             } else { // invalid input
                 ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
                 ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(14), Alphas(14)));
@@ -2142,54 +2409,9 @@ namespace Furnaces {
                     if (IsNotOK) {
                         ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
                         ErrorsFound = true;
-                    } else { // mine data from heating coil object
-
-                        // Get the Heating Coil water Inlet or control Node number
-                        errFlag = false;
-                        thisFurnace.SuppCoilControlNode = WaterCoils::GetCoilWaterInletNode(state, "Coil:Heating:Water", ReheatingCoilName, errFlag);
-                        if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                            ErrorsFound = true;
-                        }
-
-                        // Get the ReHeat Coil hot water max volume flow rate
-                        errFlag = false;
-                        thisFurnace.MaxSuppCoilFluidFlow =
-                            WaterCoils::GetCoilMaxWaterFlowRate(state, "Coil:Heating:Water", ReheatingCoilName, errFlag);
-                        if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                            ErrorsFound = true;
-                        }
-
-                        // Get the ReHeat Coil Inlet Node
-                        errFlag = false;
-                        ReheatCoilInletNode = WaterCoils::GetCoilInletNode(state, "Coil:Heating:Water", ReheatingCoilName, errFlag);
-                        thisFurnace.SuppCoilAirInletNode = ReheatCoilInletNode;
-                        if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                            ErrorsFound = true;
-                        }
-
-                        // Get the ReHeat Coil Outlet Node
-                        errFlag = false;
-                        ReheatCoilOutletNode = WaterCoils::GetCoilOutletNode(state, "Coil:Heating:Water", ReheatingCoilName, errFlag);
-                        thisFurnace.SuppCoilAirOutletNode = ReheatCoilOutletNode;
-                        if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                            ErrorsFound = true;
-                        }
-
-                        // check if user has also used a water coil controller, which they should not do
-                        errFlag = false;
-                        HVACControllers::CheckCoilWaterInletNode(state, thisFurnace.CoilControlNode, errFlag);
-                        if (!errFlag) { // then did find a controller so that is bad
-                            ShowSevereError(
-                                state,
-                                EnergyPlus::format("{} = {} has a conflicting Controller:WaterCoil object", CurrentModuleObject, thisFurnace.Name));
-                            ShowContinueError(state, "Hot water coils are controlled directly by unitary and furnace systems.");
-                            ShowContinueError(state, "No water coil controller should be input for the coil.");
-                            ErrorsFound = true;
-                        }
+                    } else {
+                        readSuppWaterCoilData(
+                            state, thisFurnace, CurrentModuleObject, ReheatingCoilName, ReheatCoilInletNode, ReheatCoilOutletNode, ErrorsFound);
                     }
 
                 } else if (Util::SameString(ReheatingCoilType, "Coil:Heating:Steam")) {
@@ -2198,51 +2420,16 @@ namespace Furnaces {
                     if (IsNotOK) {
                         ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
                         ErrorsFound = true;
-                    } else { // mine data from heating coil object
-
-                        errFlag = false;
-                        thisFurnace.SuppHeatCoilIndex = SteamCoils::GetSteamCoilIndex(state, "COIL:HEATING:STEAM", ReheatingCoilName, errFlag);
-                        if (thisFurnace.SuppHeatCoilIndex == 0) {
-                            ShowSevereError(state,
-                                            EnergyPlus::format("{} illegal {} = {}", CurrentModuleObject, cAlphaFields(11), ReheatingCoilName));
-                            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                            ErrorsFound = true;
-                        }
-
-                        // Get the Heating Coil steam inlet node number
-                        errFlag = false;
-                        thisFurnace.SuppCoilControlNode = SteamCoils::GetCoilSteamInletNode(state, "Coil:Heating:Steam", ReheatingCoilName, errFlag);
-                        if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                            ErrorsFound = true;
-                        }
-
-                        // Get the Heating Coil steam max volume flow rate
-                        thisFurnace.MaxSuppCoilFluidFlow = SteamCoils::GetCoilMaxSteamFlowRate(state, thisFurnace.SuppHeatCoilIndex, errFlag);
-                        if (thisFurnace.MaxSuppCoilFluidFlow > 0.0) {
-                            SteamDensity =
-                                Fluid::GetSteam(state)->getSatDensity(state, state.dataFurnaces->TempSteamIn, 1.0, getAirLoopHVACHeatCoolInput);
-                            thisFurnace.MaxSuppCoilFluidFlow =
-                                SteamCoils::GetCoilMaxSteamFlowRate(state, thisFurnace.SuppHeatCoilIndex, errFlag) * SteamDensity;
-                        }
-
-                        // Get the Heating Coil Inlet Node
-                        errFlag = false;
-                        ReheatCoilInletNode = SteamCoils::GetCoilAirInletNode(state, thisFurnace.SuppHeatCoilIndex, ReheatingCoilName, errFlag);
-                        thisFurnace.SuppCoilAirInletNode = ReheatCoilInletNode;
-                        if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                            ErrorsFound = true;
-                        }
-
-                        // Get the Heating Coil Outlet Node
-                        errFlag = false;
-                        ReheatCoilOutletNode = SteamCoils::GetCoilAirOutletNode(state, thisFurnace.SuppHeatCoilIndex, ReheatingCoilName, errFlag);
-                        thisFurnace.SuppCoilAirOutletNode = ReheatCoilOutletNode;
-                        if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                            ErrorsFound = true;
-                        }
+                    } else {
+                        readSuppSteamCoilData(state,
+                                              thisFurnace,
+                                              CurrentModuleObject,
+                                              cAlphaFields(11),
+                                              ReheatingCoilName,
+                                              getAirLoopHVACHeatCoolInput,
+                                              ReheatCoilInletNode,
+                                              ReheatCoilOutletNode,
+                                              ErrorsFound);
                     }
 
                 } else { // Illegal heating coil
@@ -2688,49 +2875,9 @@ namespace Furnaces {
                 }
             }
 
-            if (thisFurnace.ActualFanVolFlowRate != DataSizing::AutoSize) {
-                if (thisFurnace.ActualFanVolFlowRate < thisFurnace.MaxCoolAirVolFlow && thisFurnace.MaxCoolAirVolFlow != DataSizing::AutoSize) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format(
-                            "... air flow rate = {:.7T} in fan object {} is less than the maximum HVAC system air flow rate in cooling mode.",
-                            thisFurnace.ActualFanVolFlowRate,
-                            FanName));
-                    ShowContinueError(state,
-                                      EnergyPlus::format(" The {} is reset to the fan flow rate and the simulation continues.", cNumericFields(2)));
-                    thisFurnace.MaxCoolAirVolFlow = thisFurnace.ActualFanVolFlowRate;
-                    thisFurnace.DesignFanVolFlowRate = thisFurnace.ActualFanVolFlowRate;
-                }
-                if (thisFurnace.ActualFanVolFlowRate < thisFurnace.MaxHeatAirVolFlow && thisFurnace.MaxHeatAirVolFlow != DataSizing::AutoSize) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format(
-                            "... air flow rate = {:.7T} in fan object {} is less than the maximum HVAC system air flow rate in heating mode.",
-                            thisFurnace.ActualFanVolFlowRate,
-                            FanName));
-                    ShowContinueError(state,
-                                      EnergyPlus::format(" The {} is reset to the fan flow rate and the simulation continues.", cNumericFields(3)));
-                    thisFurnace.MaxHeatAirVolFlow = thisFurnace.ActualFanVolFlowRate;
-                    thisFurnace.DesignFanVolFlowRate = thisFurnace.ActualFanVolFlowRate;
-                }
-            }
+            checkFanFlowVsHVACFlowRates(thisFurnace, Alphas(1), cNumericFields(2), cNumericFields(3), FanName);
 
-            if (thisFurnace.fanOpModeSched != nullptr) {
-                // Is this correct? 0.0 for max also?
-                if (!thisFurnace.fanOpModeSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 0.0)) {
-                    //           set air flow control mode:
-                    //             UseCompressorOnFlow = operate at last cooling or heating air flow requested when compressor is off
-                    //             UseCompressorOffFlow = operate at value specified by user
-                    //           AirFlowControl only valid if fan opmode = ContFanCycComp
-                    if (thisFurnace.MaxNoCoolHeatAirVolFlow == 0.0) {
-                        thisFurnace.AirFlowControl = AirFlowControlConstFan::UseCompressorOnFlow;
-                    } else {
-                        thisFurnace.AirFlowControl = AirFlowControlConstFan::UseCompressorOffFlow;
-                    }
-                }
-            }
+            setAirFlowControl(thisFurnace);
 
             if (thisFurnace.CoolingCoilType_Num == HVAC::Coil_CoolingAirToAirVariableSpeed) {
                 errFlag = false;
@@ -2833,76 +2980,8 @@ namespace Furnaces {
             Node::TestCompSet(state, CurrentModuleObject, Alphas(1), Alphas(3), Alphas(4), "Air Nodes");
 
             // Get the Controlling Zone or Location of the Furnace Thermostat
-            thisFurnace.ControlZoneNum = Util::FindItemInList(Alphas(5), state.dataHeatBal->Zone);
-            if (thisFurnace.ControlZoneNum == 0) {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(5), Alphas(5)));
-                ErrorsFound = true;
-            }
-
             // Get the node number for the zone with the thermostat
-            if (thisFurnace.ControlZoneNum > 0) {
-                AirNodeFound = false;
-                AirLoopFound = false;
-                int ControlledZoneNum = thisFurnace.ControlZoneNum;
-                //             Find the controlled zone number for the specified thermostat location
-                thisFurnace.NodeNumOfControlledZone = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).ZoneNode;
-                //             Determine if furnace is on air loop served by the thermostat location specified
-                for (int zoneInNode = 1; zoneInNode <= state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).NumInletNodes; ++zoneInNode) {
-                    int AirLoopNumber = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNodeAirLoopNum(zoneInNode);
-                    thisFurnace.airloopNum = AirLoopNumber;
-                    if (AirLoopNumber > 0) {
-                        for (int BranchNum = 1; BranchNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).NumBranches; ++BranchNum) {
-                            for (int CompNum = 1;
-                                 CompNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).TotalComponents;
-                                 ++CompNum) {
-                                if (!Util::SameString(state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).Comp(CompNum).Name,
-                                                      Alphas(1)) ||
-                                    !Util::SameString(
-                                        state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).Comp(CompNum).TypeOf,
-                                        CurrentModuleObject)) {
-                                    continue;
-                                }
-                                AirLoopFound = true;
-                                thisFurnace.ZoneInletNode = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNode(zoneInNode);
-                                break;
-                            }
-                            if (AirLoopFound) {
-                                break;
-                            }
-                        }
-                        for (TstatZoneNum = 1; TstatZoneNum <= state.dataZoneCtrls->NumTempControlledZones; ++TstatZoneNum) {
-                            if (state.dataZoneCtrls->TempControlledZone(TstatZoneNum).ActualZoneNum != thisFurnace.ControlZoneNum) {
-                                continue;
-                            }
-                            AirNodeFound = true;
-                        }
-                        for (TstatZoneNum = 1; TstatZoneNum <= state.dataZoneCtrls->NumComfortControlledZones; ++TstatZoneNum) {
-                            if (state.dataZoneCtrls->ComfortControlledZone(TstatZoneNum).ActualZoneNum != thisFurnace.ControlZoneNum) {
-                                continue;
-                            }
-                            AirNodeFound = true;
-                        }
-                    }
-                    if (AirLoopFound) {
-                        break;
-                    }
-                }
-                if (!AirNodeFound) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state, "Did not find air node (zone with thermostat).");
-                    ShowContinueError(state, EnergyPlus::format("Specified {} = {}", cAlphaFields(5), Alphas(5)));
-                    ShowContinueError(
-                        state, "Both a ZoneHVAC:EquipmentConnections object and a ZoneControl:Thermostat object must be specified for this zone.");
-                    ErrorsFound = true;
-                }
-                if (!AirLoopFound) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state, "Did not find correct AirLoopHVAC.");
-                    ShowContinueError(state, EnergyPlus::format("Specified {} = {}", cAlphaFields(5), Alphas(5)));
-                    ErrorsFound = true;
-                }
-            }
+            findControlledZoneAirLoop(state, thisFurnace, CurrentModuleObject, cAlphaFields(5), Alphas(5), ErrorsFound);
 
             // Get fan data
             FanName = Alphas(7);
@@ -3091,39 +3170,7 @@ namespace Furnaces {
                         ShowContinueError(state, EnergyPlus::format("...specified in {}=\"{}\".", CurrentModuleObject, Alphas(1)));
                         ErrorsFound = true;
                     } else {
-                        errFlag = false;
-                        if (thisFurnace.bIsIHP) {
-                            thisFurnace.CoolingCoilIndex = IntegratedHeatPump::GetCoilIndexIHP(state, CoolingCoilType, CoolingCoilName, errFlag);
-                            IHPCoilName = state.dataIntegratedHP->IntegratedHeatPumps(thisFurnace.CoolingCoilIndex).SCCoilName;
-                        } else {
-                            thisFurnace.CoolingCoilIndex =
-                                VariableSpeedCoils::GetCoilIndexVariableSpeed(state, CoolingCoilType, CoolingCoilName, errFlag);
-                            IHPCoilName = CoolingCoilName;
-                        }
-
-                        if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("...specified in {}=\"{}\".", CurrentModuleObject, Alphas(1)));
-                            ErrorsFound = true;
-                        }
-
-                        if (thisFurnace.bIsIHP) {
-                            CoolingCoilInletNode =
-                                VariableSpeedCoils::GetCoilInletNodeVariableSpeed(state, "COIL:COOLING:DX:VARIABLESPEED", IHPCoilName, errFlag);
-                            CoolingCoilOutletNode =
-                                VariableSpeedCoils::GetCoilOutletNodeVariableSpeed(state, "COIL:COOLING:DX:VARIABLESPEED", IHPCoilName, errFlag);
-                            thisFurnace.CondenserNodeNum = VariableSpeedCoils::GetVSCoilCondenserInletNode(state, IHPCoilName, errFlag);
-                        } else {
-                            CoolingCoilInletNode =
-                                VariableSpeedCoils::GetCoilInletNodeVariableSpeed(state, CoolingCoilType, CoolingCoilName, errFlag);
-                            CoolingCoilOutletNode =
-                                VariableSpeedCoils::GetCoilOutletNodeVariableSpeed(state, CoolingCoilType, CoolingCoilName, errFlag);
-                            thisFurnace.CondenserNodeNum = VariableSpeedCoils::GetVSCoilCondenserInletNode(state, CoolingCoilName, errFlag);
-                        }
-
-                        if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                            ErrorsFound = true;
-                        }
+                        readVSCoolingCoilNodes(thisFurnace, Alphas(1), CoolingCoilType, CoolingCoilName, CoolingCoilInletNode, CoolingCoilOutletNode);
                     }
                 } else {
                     ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
@@ -3151,165 +3198,15 @@ namespace Furnaces {
             SuppHeatCoilName = Alphas(13);
             thisFurnace.SuppHeatCoilType = SuppHeatCoilType;
             thisFurnace.SuppHeatCoilName = SuppHeatCoilName;
-            errFlag = false;
-            if (Util::SameString(SuppHeatCoilType, "Coil:Heating:Fuel") || Util::SameString(SuppHeatCoilType, "Coil:Heating:Electric")) {
-
-                thisFurnace.SuppHeatCoilType_Num = HeatingCoils::GetHeatingCoilTypeNum(state, SuppHeatCoilType, SuppHeatCoilName, errFlag);
-                if (errFlag) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                } else {
-                    IsNotOK = false;
-                    ValidateComponent(state, SuppHeatCoilType, SuppHeatCoilName, IsNotOK, CurrentModuleObject);
-                    if (IsNotOK) {
-                        ShowContinueError(state, EnergyPlus::format("In {} \"{}\"", CurrentModuleObject, Alphas(1)));
-                        ErrorsFound = true;
-
-                    } else { // mine data from the supplemental heating coil
-
-                        HeatingCoils::GetCoilIndex(state, SuppHeatCoilName, thisFurnace.SuppHeatCoilIndex, IsNotOK);
-                        if (IsNotOK) {
-                            ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                            ErrorsFound = true;
-                        }
-
-                        // Get the Supplemental Heating Coil Inlet Node Number
-                        errFlag = false;
-                        SupHeatCoilInletNode = HeatingCoils::GetCoilInletNode(state, SuppHeatCoilType, SuppHeatCoilName, errFlag);
-                        if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", CurrentModuleObject, Alphas(1)));
-                            ErrorsFound = true;
-                        }
-
-                        // Get the Supplemental Heating Coil Outlet Node Number
-                        errFlag = false;
-                        SupHeatCoilOutletNode = HeatingCoils::GetCoilOutletNode(state, SuppHeatCoilType, SuppHeatCoilName, errFlag);
-
-                        if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                            ErrorsFound = true;
-                        }
-
-                        // Get the supplemental heating coil design capacity
-                        errFlag = false;
-                        thisFurnace.DesignSuppHeatingCapacity = HeatingCoils::GetCoilCapacity(state, SuppHeatCoilType, SuppHeatCoilName, errFlag);
-                        if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                            ErrorsFound = true;
-                        }
-
-                    } // IF (IsNotOK) THEN
-                }
-            } else if (Util::SameString(SuppHeatCoilType, "Coil:Heating:Water")) {
-                thisFurnace.SuppHeatCoilType_Num = HVAC::Coil_HeatingWater;
-                ValidateComponent(state, SuppHeatCoilType, SuppHeatCoilName, IsNotOK, CurrentModuleObject);
-                if (IsNotOK) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                } else { // mine data from heating coil object
-
-                    // Get the Heating Coil water Inlet or control Node number
-                    errFlag = false;
-                    thisFurnace.SuppCoilControlNode = WaterCoils::GetCoilWaterInletNode(state, "Coil:Heating:Water", SuppHeatCoilName, errFlag);
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the ReHeat Coil hot water max volume flow rate
-                    errFlag = false;
-                    thisFurnace.MaxSuppCoilFluidFlow = WaterCoils::GetCoilMaxWaterFlowRate(state, "Coil:Heating:Water", SuppHeatCoilName, errFlag);
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the ReHeat Coil Inlet Node
-                    errFlag = false;
-                    SupHeatCoilInletNode = WaterCoils::GetCoilInletNode(state, "Coil:Heating:Water", SuppHeatCoilName, errFlag);
-                    thisFurnace.SuppCoilAirInletNode = SupHeatCoilInletNode;
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the ReHeat Coil Outlet Node
-                    errFlag = false;
-                    SupHeatCoilOutletNode = WaterCoils::GetCoilOutletNode(state, "Coil:Heating:Water", SuppHeatCoilName, errFlag);
-                    thisFurnace.SuppCoilAirOutletNode = SupHeatCoilOutletNode;
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-                    errFlag = false;
-                    HVACControllers::CheckCoilWaterInletNode(state, thisFurnace.CoilControlNode, errFlag);
-                    if (!errFlag) { // then did find a controller so that is bad
-                        ShowSevereError(
-                            state,
-                            EnergyPlus::format("{} = {} has a conflicting Controller:WaterCoil object", CurrentModuleObject, thisFurnace.Name));
-                        ShowContinueError(state, "Hot water coils are controlled directly by unitary and furnace systems.");
-                        ShowContinueError(state, "No water coil controller should be input for the coil.");
-                        ErrorsFound = true;
-                    }
-                }
-
-            } else if (Util::SameString(SuppHeatCoilType, "Coil:Heating:Steam")) {
-                thisFurnace.SuppHeatCoilType_Num = HVAC::Coil_HeatingSteam;
-                ValidateComponent(state, SuppHeatCoilType, SuppHeatCoilName, IsNotOK, CurrentModuleObject);
-                if (IsNotOK) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                } else { // mine data from heating coil object
-
-                    errFlag = false;
-                    thisFurnace.SuppHeatCoilIndex = SteamCoils::GetSteamCoilIndex(state, "COIL:HEATING:STEAM", SuppHeatCoilName, errFlag);
-                    if (thisFurnace.SuppHeatCoilIndex == 0) {
-                        ShowSevereError(state, EnergyPlus::format("{} illegal {} = {}", CurrentModuleObject, cAlphaFields(12), SuppHeatCoilName));
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the Heating Coil steam inlet node number
-                    errFlag = false;
-                    thisFurnace.SuppCoilControlNode = SteamCoils::GetCoilSteamInletNode(state, "Coil:Heating:Steam", SuppHeatCoilName, errFlag);
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the Heating Coil steam max volume flow rate
-                    thisFurnace.MaxSuppCoilFluidFlow = SteamCoils::GetCoilMaxSteamFlowRate(state, thisFurnace.SuppHeatCoilIndex, errFlag);
-                    if (thisFurnace.MaxSuppCoilFluidFlow > 0.0) {
-                        SteamDensity =
-                            Fluid::GetSteam(state)->getSatDensity(state, state.dataFurnaces->TempSteamIn, 1.0, getAirLoopHVACHeatCoolInput);
-                        thisFurnace.MaxSuppCoilFluidFlow =
-                            SteamCoils::GetCoilMaxSteamFlowRate(state, thisFurnace.SuppHeatCoilIndex, errFlag) * SteamDensity;
-                    }
-
-                    // Get the Heating Coil Inlet Node
-                    errFlag = false;
-                    SupHeatCoilInletNode = SteamCoils::GetCoilAirInletNode(state, thisFurnace.SuppHeatCoilIndex, SuppHeatCoilName, errFlag);
-                    thisFurnace.SuppCoilAirInletNode = SupHeatCoilInletNode;
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the Heating Coil Outlet Node
-                    errFlag = false;
-                    SupHeatCoilOutletNode = SteamCoils::GetCoilAirOutletNode(state, thisFurnace.SuppHeatCoilIndex, SuppHeatCoilName, errFlag);
-                    thisFurnace.SuppCoilAirOutletNode = SupHeatCoilOutletNode;
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-                }
-
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(12), Alphas(12)));
-                ErrorsFound = true;
-            } // IF (Furnace(FurnaceNum)%HeatingCoilType_Num == Coil_HeatingGasOrOtherFuel .OR. &, etc.
+            readSuppHeatCoilData(state,
+                                 thisFurnace,
+                                 CurrentModuleObject,
+                                 SuppHeatCoilType,
+                                 SuppHeatCoilName,
+                                 cAlphaFields(12),
+                                 SupHeatCoilInletNode,
+                                 SupHeatCoilOutletNode,
+                                 ErrorsFound);
 
             thisFurnace.fanPlace = static_cast<HVAC::FanPlace>(getEnumValue(HVAC::fanPlaceNamesUC, Alphas(14)));
             assert(thisFurnace.fanPlace != HVAC::FanPlace::Invalid);
@@ -3363,20 +3260,7 @@ namespace Furnaces {
                     thisFurnace.DehumidControlType_Num = DehumidificationControlMode::None;
                     thisFurnace.Humidistat = false;
                 }
-                if (thisFurnace.Humidistat) {
-                    for (HStatZoneNum = 1; HStatZoneNum <= state.dataZoneCtrls->NumHumidityControlZones; ++HStatZoneNum) {
-                        if (state.dataZoneCtrls->HumidityControlZone(HStatZoneNum).ActualZoneNum != thisFurnace.ControlZoneNum) {
-                            continue;
-                        }
-                        AirNodeFound = true;
-                    }
-                    if (!AirNodeFound) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                        ShowContinueError(state, "Did not find Air Node (Zone with Humidistat).");
-                        ShowContinueError(state, EnergyPlus::format("Specified {} = {}", cAlphaFields(5), Alphas(5)));
-                        ErrorsFound = true;
-                    }
-                }
+                checkHumidistatZone(state, thisFurnace, CurrentModuleObject, cAlphaFields(5), Alphas(5), AirNodeFound, ErrorsFound);
             } else { // invalid input or blank
                 if (!lAlphaBlanks(16)) {
                     ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
@@ -3550,19 +3434,7 @@ namespace Furnaces {
                 ErrorsFound = true;
             }
 
-            if (thisFurnace.fanOpModeSched != nullptr) {
-                if (!thisFurnace.fanOpModeSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 0.0)) { // Autodesk:Note Range is 0 to 0?
-                    //           set air flow control mode:
-                    //             UseCompressorOnFlow = operate at last cooling or heating air flow requested when compressor is off
-                    //             UseCompressorOffFlow = operate at value specified by user
-                    //           AirFlowControl only valid if fan opmode = ContFanCycComp
-                    if (thisFurnace.MaxNoCoolHeatAirVolFlow == 0.0) {
-                        thisFurnace.AirFlowControl = AirFlowControlConstFan::UseCompressorOnFlow;
-                    } else {
-                        thisFurnace.AirFlowControl = AirFlowControlConstFan::UseCompressorOffFlow;
-                    }
-                }
-            }
+            setAirFlowControl(thisFurnace);
 
             if (Numbers(1) != DataSizing::AutoSize && Numbers(2) != DataSizing::AutoSize && Numbers(3) != DataSizing::AutoSize) {
                 thisFurnace.DesignFanVolFlowRate = max(Numbers(1), Numbers(2), Numbers(3));
@@ -3600,34 +3472,7 @@ namespace Furnaces {
                 }
             }
 
-            if (thisFurnace.ActualFanVolFlowRate != DataSizing::AutoSize) {
-                if (thisFurnace.ActualFanVolFlowRate < thisFurnace.MaxCoolAirVolFlow && thisFurnace.MaxCoolAirVolFlow != DataSizing::AutoSize) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format(
-                            "... air flow rate = {:.7T} in fan object {} is less than the maximum HVAC system air flow rate in cooling mode.",
-                            thisFurnace.ActualFanVolFlowRate,
-                            FanName));
-                    ShowContinueError(state,
-                                      EnergyPlus::format(" The {} is reset to the fan flow rate and the simulation continues.", cNumericFields(1)));
-                    thisFurnace.MaxCoolAirVolFlow = thisFurnace.ActualFanVolFlowRate;
-                    thisFurnace.DesignFanVolFlowRate = thisFurnace.ActualFanVolFlowRate;
-                }
-                if (thisFurnace.ActualFanVolFlowRate < thisFurnace.MaxHeatAirVolFlow && thisFurnace.MaxHeatAirVolFlow != DataSizing::AutoSize) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format(
-                            "... air flow rate = {:.7T} in fan object {} is less than the maximum HVAC system air flow rate in heating mode.",
-                            thisFurnace.ActualFanVolFlowRate,
-                            FanName));
-                    ShowContinueError(state,
-                                      EnergyPlus::format(" The {} is reset to the fan flow rate and the simulation continues.", cNumericFields(2)));
-                    thisFurnace.MaxHeatAirVolFlow = thisFurnace.ActualFanVolFlowRate;
-                    thisFurnace.DesignFanVolFlowRate = thisFurnace.ActualFanVolFlowRate;
-                }
-            }
+            checkFanFlowVsHVACFlowRates(thisFurnace, Alphas(1), cNumericFields(1), cNumericFields(2), FanName);
 
             // Set heating convergence tolerance
             thisFurnace.HeatingConvergenceTolerance = 0.001;
@@ -3780,76 +3625,8 @@ namespace Furnaces {
             Node::TestCompSet(state, CurrentModuleObject, Alphas(1), Alphas(3), Alphas(4), "Air Nodes");
 
             // Get the Controlling Zone or Location of the Furnace Thermostat
-            thisFurnace.ControlZoneNum = Util::FindItemInList(Alphas(5), state.dataHeatBal->Zone);
-            if (thisFurnace.ControlZoneNum == 0) {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(5), Alphas(5)));
-                ErrorsFound = true;
-            }
-
             // Get the node number for the zone with the thermostat
-            if (thisFurnace.ControlZoneNum > 0) {
-                AirNodeFound = false;
-                AirLoopFound = false;
-                int ControlledZoneNum = thisFurnace.ControlZoneNum;
-                //             Find the controlled zone number for the specified thermostat location
-                thisFurnace.NodeNumOfControlledZone = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).ZoneNode;
-                //             Determine if furnace is on air loop served by the thermostat location specified
-                for (int zoneInNode = 1; zoneInNode <= state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).NumInletNodes; ++zoneInNode) {
-                    int AirLoopNumber = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNodeAirLoopNum(zoneInNode);
-                    thisFurnace.airloopNum = AirLoopNumber;
-                    if (AirLoopNumber > 0) {
-                        for (int BranchNum = 1; BranchNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).NumBranches; ++BranchNum) {
-                            for (int CompNum = 1;
-                                 CompNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).TotalComponents;
-                                 ++CompNum) {
-                                if (!Util::SameString(state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).Comp(CompNum).Name,
-                                                      Alphas(1)) ||
-                                    !Util::SameString(
-                                        state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).Comp(CompNum).TypeOf,
-                                        CurrentModuleObject)) {
-                                    continue;
-                                }
-                                AirLoopFound = true;
-                                thisFurnace.ZoneInletNode = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNode(zoneInNode);
-                                break;
-                            }
-                            if (AirLoopFound) {
-                                break;
-                            }
-                        }
-                        for (TstatZoneNum = 1; TstatZoneNum <= state.dataZoneCtrls->NumTempControlledZones; ++TstatZoneNum) {
-                            if (state.dataZoneCtrls->TempControlledZone(TstatZoneNum).ActualZoneNum != thisFurnace.ControlZoneNum) {
-                                continue;
-                            }
-                            AirNodeFound = true;
-                        }
-                        for (TstatZoneNum = 1; TstatZoneNum <= state.dataZoneCtrls->NumComfortControlledZones; ++TstatZoneNum) {
-                            if (state.dataZoneCtrls->ComfortControlledZone(TstatZoneNum).ActualZoneNum != thisFurnace.ControlZoneNum) {
-                                continue;
-                            }
-                            AirNodeFound = true;
-                        }
-                    }
-                    if (AirLoopFound) {
-                        break;
-                    }
-                }
-                if (!AirNodeFound) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state, "Did not find air node (zone with thermostat).");
-                    ShowContinueError(state, EnergyPlus::format("Specified {} = {}", cAlphaFields(5), Alphas(5)));
-                    ShowContinueError(
-                        state, "Both a ZoneHVAC:EquipmentConnections object and a ZoneControl:Thermostat object must be specified for this zone.");
-                    ErrorsFound = true;
-                }
-                if (!AirLoopFound) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state, "Did not find correct AirLoopHVAC.");
-                    ShowContinueError(state, EnergyPlus::format("Specified {} = {}", cAlphaFields(5), Alphas(5)));
-                    ErrorsFound = true;
-                }
-            }
+            findControlledZoneAirLoop(state, thisFurnace, CurrentModuleObject, cAlphaFields(5), Alphas(5), ErrorsFound);
 
             // Get fan data
             FanName = Alphas(7);
@@ -3873,92 +3650,32 @@ namespace Furnaces {
             }
 
             // Get heating coil type and name data
-            if (Alphas(8) == "COIL:HEATING:WATERTOAIRHEATPUMP:PARAMETERESTIMATION") {
-                HeatingCoilType = Alphas(8);
-                thisFurnace.HeatingCoilType_Num = HVAC::Coil_HeatingWaterToAirHP;
-                HeatingCoilName = Alphas(9);
-                ValidateComponent(state, HeatingCoilType, HeatingCoilName, IsNotOK, CurrentModuleObject);
-                if (IsNotOK) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                } else {
-                    thisFurnace.HeatingCoilIndex = WaterToAirHeatPump::GetCoilIndex(state, HeatingCoilType, HeatingCoilName, errFlag);
-                    HeatingCoilInletNode = WaterToAirHeatPump::GetCoilInletNode(state, HeatingCoilType, HeatingCoilName, errFlag);
-                    HeatingCoilOutletNode = WaterToAirHeatPump::GetCoilOutletNode(state, HeatingCoilType, HeatingCoilName, errFlag);
-                }
-            } else if (Alphas(8) == "COIL:HEATING:WATERTOAIRHEATPUMP:EQUATIONFIT") {
-                HeatingCoilType = Alphas(8);
-                thisFurnace.HeatingCoilType_Num = HVAC::Coil_HeatingWaterToAirHPSimple;
-                HeatingCoilName = Alphas(9);
-                ValidateComponent(state, HeatingCoilType, HeatingCoilName, IsNotOK, CurrentModuleObject);
-                if (IsNotOK) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                } else {
-                    thisFurnace.HeatingCoilIndex = WaterToAirHeatPumpSimple::GetCoilIndex(state, HeatingCoilType, HeatingCoilName, errFlag);
-                    HeatingCoilInletNode = WaterToAirHeatPumpSimple::GetCoilInletNode(state, HeatingCoilType, HeatingCoilName, errFlag);
-                    HeatingCoilOutletNode = WaterToAirHeatPumpSimple::GetCoilOutletNode(state, HeatingCoilType, HeatingCoilName, errFlag);
-                }
-            } else if (Alphas(8) == "COIL:HEATING:WATERTOAIRHEATPUMP:VARIABLESPEEDEQUATIONFIT") {
-                HeatingCoilType = Alphas(8);
-                thisFurnace.HeatingCoilType_Num = HVAC::Coil_HeatingWaterToAirHPVSEquationFit;
-                HeatingCoilName = Alphas(9);
-                ValidateComponent(state, HeatingCoilType, HeatingCoilName, IsNotOK, CurrentModuleObject);
-                if (IsNotOK) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                } else {
-                    thisFurnace.HeatingCoilIndex = VariableSpeedCoils::GetCoilIndexVariableSpeed(state, HeatingCoilType, HeatingCoilName, errFlag);
-                    HeatingCoilInletNode = VariableSpeedCoils::GetCoilInletNodeVariableSpeed(state, HeatingCoilType, HeatingCoilName, errFlag);
-                    HeatingCoilOutletNode = VariableSpeedCoils::GetCoilOutletNodeVariableSpeed(state, HeatingCoilType, HeatingCoilName, errFlag);
-                }
-            } else {
+            if (!readWaterToAirCoil(wahpHeatingCoils,
+                                    Alphas(8),
+                                    Alphas(9),
+                                    cAlphaFields(8),
+                                    thisFurnace.HeatingCoilIndex,
+                                    thisFurnace.HeatingCoilType_Num,
+                                    HeatingCoilType,
+                                    HeatingCoilName,
+                                    HeatingCoilInletNode,
+                                    HeatingCoilOutletNode)) {
                 ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
                 ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(8), Alphas(8)));
                 ErrorsFound = true;
             }
 
             // Get Cooling Coil Information if available
-            if (Alphas(10) == "COIL:COOLING:WATERTOAIRHEATPUMP:PARAMETERESTIMATION") {
-                CoolingCoilType = Alphas(10);
-                thisFurnace.CoolingCoilType_Num = HVAC::Coil_CoolingWaterToAirHP;
-                CoolingCoilName = Alphas(11);
-                ValidateComponent(state, CoolingCoilType, CoolingCoilName, IsNotOK, CurrentModuleObject);
-                if (IsNotOK) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                } else {
-                    thisFurnace.CoolingCoilIndex = WaterToAirHeatPump::GetCoilIndex(state, CoolingCoilType, CoolingCoilName, errFlag);
-                    CoolingCoilInletNode = WaterToAirHeatPump::GetCoilInletNode(state, CoolingCoilType, CoolingCoilName, errFlag);
-                    CoolingCoilOutletNode = WaterToAirHeatPump::GetCoilOutletNode(state, CoolingCoilType, CoolingCoilName, errFlag);
-                }
-            } else if (Alphas(10) == "COIL:COOLING:WATERTOAIRHEATPUMP:EQUATIONFIT") {
-                CoolingCoilType = Alphas(10);
-                thisFurnace.CoolingCoilType_Num = HVAC::Coil_CoolingWaterToAirHPSimple;
-                CoolingCoilName = Alphas(11);
-                ValidateComponent(state, CoolingCoilType, CoolingCoilName, IsNotOK, CurrentModuleObject);
-                if (IsNotOK) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                } else {
-                    thisFurnace.CoolingCoilIndex = WaterToAirHeatPumpSimple::GetCoilIndex(state, CoolingCoilType, CoolingCoilName, errFlag);
-                    CoolingCoilInletNode = WaterToAirHeatPumpSimple::GetCoilInletNode(state, CoolingCoilType, CoolingCoilName, errFlag);
-                    CoolingCoilOutletNode = WaterToAirHeatPumpSimple::GetCoilOutletNode(state, CoolingCoilType, CoolingCoilName, errFlag);
-                }
-            } else if (Alphas(10) == "COIL:COOLING:WATERTOAIRHEATPUMP:VARIABLESPEEDEQUATIONFIT") {
-                CoolingCoilType = Alphas(10);
-                thisFurnace.CoolingCoilType_Num = HVAC::Coil_CoolingWaterToAirHPVSEquationFit;
-                CoolingCoilName = Alphas(11);
-                ValidateComponent(state, CoolingCoilType, CoolingCoilName, IsNotOK, CurrentModuleObject);
-                if (IsNotOK) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                } else {
-                    thisFurnace.CoolingCoilIndex = VariableSpeedCoils::GetCoilIndexVariableSpeed(state, CoolingCoilType, CoolingCoilName, errFlag);
-                    CoolingCoilInletNode = VariableSpeedCoils::GetCoilInletNodeVariableSpeed(state, CoolingCoilType, CoolingCoilName, errFlag);
-                    CoolingCoilOutletNode = VariableSpeedCoils::GetCoilOutletNodeVariableSpeed(state, CoolingCoilType, CoolingCoilName, errFlag);
-                }
-            } else {
+            if (!readWaterToAirCoil(wahpCoolingCoils,
+                                    Alphas(10),
+                                    Alphas(11),
+                                    cAlphaFields(10),
+                                    thisFurnace.CoolingCoilIndex,
+                                    thisFurnace.CoolingCoilType_Num,
+                                    CoolingCoilType,
+                                    CoolingCoilName,
+                                    CoolingCoilInletNode,
+                                    CoolingCoilOutletNode)) {
                 ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
                 ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(10), Alphas(10)));
                 ErrorsFound = true;
@@ -3992,165 +3709,15 @@ namespace Furnaces {
             SuppHeatCoilName = Alphas(13);
             thisFurnace.SuppHeatCoilType = SuppHeatCoilType;
             thisFurnace.SuppHeatCoilName = SuppHeatCoilName;
-            errFlag = false;
-            if (Util::SameString(SuppHeatCoilType, "Coil:Heating:Fuel") || Util::SameString(SuppHeatCoilType, "Coil:Heating:Electric")) {
-
-                thisFurnace.SuppHeatCoilType_Num = HeatingCoils::GetHeatingCoilTypeNum(state, SuppHeatCoilType, SuppHeatCoilName, errFlag);
-                if (errFlag) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                } else {
-                    IsNotOK = false;
-                    ValidateComponent(state, SuppHeatCoilType, SuppHeatCoilName, IsNotOK, CurrentModuleObject);
-                    if (IsNotOK) {
-                        ShowContinueError(state, EnergyPlus::format("In {} \"{}\"", CurrentModuleObject, Alphas(1)));
-                        ErrorsFound = true;
-
-                    } else { // mine data from the supplemental heating coil
-
-                        HeatingCoils::GetCoilIndex(state, SuppHeatCoilName, thisFurnace.SuppHeatCoilIndex, IsNotOK);
-                        if (IsNotOK) {
-                            ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                            ErrorsFound = true;
-                        }
-
-                        // Get the Supplemental Heating Coil Inlet Node Number
-                        errFlag = false;
-                        SupHeatCoilInletNode = HeatingCoils::GetCoilInletNode(state, SuppHeatCoilType, SuppHeatCoilName, errFlag);
-                        if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", CurrentModuleObject, Alphas(1)));
-                            ErrorsFound = true;
-                        }
-
-                        // Get the Supplemental Heating Coil Outlet Node Number
-                        errFlag = false;
-                        SupHeatCoilOutletNode = HeatingCoils::GetCoilOutletNode(state, SuppHeatCoilType, SuppHeatCoilName, errFlag);
-                        if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                            ErrorsFound = true;
-                        }
-
-                        // Get the supplemental heating coil design capacity
-                        errFlag = false;
-                        thisFurnace.DesignSuppHeatingCapacity = HeatingCoils::GetCoilCapacity(state, SuppHeatCoilType, SuppHeatCoilName, errFlag);
-                        if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                            ErrorsFound = true;
-                        }
-
-                    } // IF (IsNotOK) THEN
-                }
-            } else if (Util::SameString(SuppHeatCoilType, "Coil:Heating:Water")) {
-                thisFurnace.SuppHeatCoilType_Num = HVAC::Coil_HeatingWater;
-                ValidateComponent(state, SuppHeatCoilType, SuppHeatCoilName, IsNotOK, CurrentModuleObject);
-                if (IsNotOK) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                } else { // mine data from heating coil object
-
-                    // Get the Heating Coil water Inlet or control Node number
-                    errFlag = false;
-                    thisFurnace.SuppCoilControlNode = WaterCoils::GetCoilWaterInletNode(state, "Coil:Heating:Water", SuppHeatCoilName, errFlag);
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the ReHeat Coil hot water max volume flow rate
-                    errFlag = false;
-                    thisFurnace.MaxSuppCoilFluidFlow = WaterCoils::GetCoilMaxWaterFlowRate(state, "Coil:Heating:Water", SuppHeatCoilName, errFlag);
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the ReHeat Coil Inlet Node
-                    errFlag = false;
-                    SupHeatCoilInletNode = WaterCoils::GetCoilInletNode(state, "Coil:Heating:Water", SuppHeatCoilName, errFlag);
-                    thisFurnace.SuppCoilAirInletNode = SupHeatCoilInletNode;
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the ReHeat Coil Outlet Node
-                    errFlag = false;
-                    SupHeatCoilOutletNode = WaterCoils::GetCoilOutletNode(state, "Coil:Heating:Water", SuppHeatCoilName, errFlag);
-                    thisFurnace.SuppCoilAirOutletNode = SupHeatCoilOutletNode;
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    errFlag = false;
-                    HVACControllers::CheckCoilWaterInletNode(state, thisFurnace.CoilControlNode, errFlag);
-                    if (!errFlag) { // then did find a controller so that is bad
-                        ShowSevereError(
-                            state,
-                            EnergyPlus::format("{} = {} has a conflicting Controller:WaterCoil object", CurrentModuleObject, thisFurnace.Name));
-                        ShowContinueError(state, "Hot water coils are controlled directly by unitary and furnace systems.");
-                        ShowContinueError(state, "No water coil controller should be input for the coil.");
-                        ErrorsFound = true;
-                    }
-                }
-
-            } else if (Util::SameString(SuppHeatCoilType, "Coil:Heating:Steam")) {
-                thisFurnace.SuppHeatCoilType_Num = HVAC::Coil_HeatingSteam;
-                ValidateComponent(state, SuppHeatCoilType, SuppHeatCoilName, IsNotOK, CurrentModuleObject);
-                if (IsNotOK) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                } else { // mine data from heating coil object
-
-                    errFlag = false;
-                    thisFurnace.SuppHeatCoilIndex = SteamCoils::GetSteamCoilIndex(state, SuppHeatCoilType, SuppHeatCoilName, errFlag);
-                    if (thisFurnace.SuppHeatCoilIndex == 0) {
-                        ShowSevereError(state, EnergyPlus::format("{} illegal {} = {}", CurrentModuleObject, cAlphaFields(12), SuppHeatCoilName));
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the Heating Coil steam inlet node number
-                    errFlag = false;
-                    thisFurnace.SuppCoilControlNode = SteamCoils::GetCoilSteamInletNode(state, "Coil:Heating:Steam", SuppHeatCoilName, errFlag);
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the Heating Coil steam max volume flow rate
-                    thisFurnace.MaxSuppCoilFluidFlow = SteamCoils::GetCoilMaxSteamFlowRate(state, thisFurnace.SuppHeatCoilIndex, errFlag);
-                    if (thisFurnace.MaxSuppCoilFluidFlow > 0.0) {
-                        SteamDensity =
-                            Fluid::GetSteam(state)->getSatDensity(state, state.dataFurnaces->TempSteamIn, 1.0, getAirLoopHVACHeatCoolInput);
-                        thisFurnace.MaxSuppCoilFluidFlow =
-                            SteamCoils::GetCoilMaxSteamFlowRate(state, thisFurnace.SuppHeatCoilIndex, errFlag) * SteamDensity;
-                    }
-
-                    // Get the Heating Coil Inlet Node
-                    errFlag = false;
-                    SupHeatCoilInletNode = SteamCoils::GetCoilAirInletNode(state, thisFurnace.SuppHeatCoilIndex, SuppHeatCoilName, errFlag);
-                    thisFurnace.SuppCoilAirInletNode = SupHeatCoilInletNode;
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-
-                    // Get the Heating Coil Outlet Node
-                    errFlag = false;
-                    SupHeatCoilOutletNode = SteamCoils::GetCoilAirOutletNode(state, thisFurnace.SuppHeatCoilIndex, SuppHeatCoilName, errFlag);
-                    thisFurnace.SuppCoilAirOutletNode = SupHeatCoilOutletNode;
-                    if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
-                        ErrorsFound = true;
-                    }
-                }
-
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(12), Alphas(12)));
-                ErrorsFound = true;
-            } // IF (Furnace(FurnaceNum)%HeatingCoilType_Num == Coil_HeatingGasOrOtherFuel .OR. &, etc.
+            readSuppHeatCoilData(state,
+                                 thisFurnace,
+                                 CurrentModuleObject,
+                                 SuppHeatCoilType,
+                                 SuppHeatCoilName,
+                                 cAlphaFields(12),
+                                 SupHeatCoilInletNode,
+                                 SupHeatCoilOutletNode,
+                                 ErrorsFound);
 
             if (lAlphaBlanks(14)) {
                 thisFurnace.CondenserNodeNum = 0;
@@ -4209,20 +3776,7 @@ namespace Furnaces {
                     thisFurnace.DehumidControlType_Num = DehumidificationControlMode::None;
                     thisFurnace.Humidistat = false;
                 }
-                if (thisFurnace.Humidistat) {
-                    for (HStatZoneNum = 1; HStatZoneNum <= state.dataZoneCtrls->NumHumidityControlZones; ++HStatZoneNum) {
-                        if (state.dataZoneCtrls->HumidityControlZone(HStatZoneNum).ActualZoneNum != thisFurnace.ControlZoneNum) {
-                            continue;
-                        }
-                        AirNodeFound = true;
-                    }
-                    if (!AirNodeFound) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                        ShowContinueError(state, "Did not find Air Node (Zone with Humidistat).");
-                        ShowContinueError(state, EnergyPlus::format("Specified {} = {}", cAlphaFields(5), Alphas(5)));
-                        ErrorsFound = true;
-                    }
-                }
+                checkHumidistatZone(state, thisFurnace, CurrentModuleObject, cAlphaFields(5), Alphas(5), AirNodeFound, ErrorsFound);
             } else { // invalid input or blank
                 if (!lAlphaBlanks(17)) {
                     ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
@@ -4445,58 +3999,14 @@ namespace Furnaces {
                 }
             }
 
-            // Set the heat pump heating coil capacity
-            //  Get from coil module.
-            if (thisFurnace.HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHP) {
-                errFlag = false;
-                thisFurnace.DesignHeatingCapacity = WaterToAirHeatPump::GetCoilCapacity(state, HeatingCoilType, HeatingCoilName, errFlag);
-                if (errFlag) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                }
-            } else if (thisFurnace.HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHPSimple) {
-                errFlag = false;
-                thisFurnace.DesignHeatingCapacity = WaterToAirHeatPumpSimple::GetCoilCapacity(state, HeatingCoilType, HeatingCoilName, errFlag);
-                if (errFlag) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                }
-            } else if (thisFurnace.HeatingCoilType_Num == HVAC::Coil_HeatingWaterToAirHPVSEquationFit) {
-                errFlag = false;
-                thisFurnace.DesignHeatingCapacity =
-                    VariableSpeedCoils::GetCoilCapacityVariableSpeed(state, HeatingCoilType, HeatingCoilName, errFlag);
-                if (errFlag) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                }
-            }
+            // Set the heat pump heating coil capacity via dispatch table
+            thisFurnace.DesignHeatingCapacity =
+                getWaterToAirCoilCapacity(wahpHeatingCoils, thisFurnace.HeatingCoilType_Num, HeatingCoilType, HeatingCoilName);
             // Set the heat pump heating coil convergence
             thisFurnace.HeatingConvergenceTolerance = Numbers(2);
-            // Set the heat pump cooling coil capacity (Total capacity)
-            //  Get from coil module.
-            if (thisFurnace.CoolingCoilType_Num == HVAC::Coil_CoolingWaterToAirHP) {
-                errFlag = false;
-                thisFurnace.DesignCoolingCapacity = WaterToAirHeatPump::GetCoilCapacity(state, CoolingCoilType, CoolingCoilName, errFlag);
-                if (errFlag) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                }
-            } else if (thisFurnace.CoolingCoilType_Num == HVAC::Coil_CoolingWaterToAirHPSimple) {
-                errFlag = false;
-                thisFurnace.DesignCoolingCapacity = WaterToAirHeatPumpSimple::GetCoilCapacity(state, CoolingCoilType, CoolingCoilName, errFlag);
-                if (errFlag) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                }
-            } else if (thisFurnace.CoolingCoilType_Num == HVAC::Coil_CoolingWaterToAirHPVSEquationFit) {
-                errFlag = false;
-                thisFurnace.DesignCoolingCapacity =
-                    VariableSpeedCoils::GetCoilCapacityVariableSpeed(state, CoolingCoilType, CoolingCoilName, errFlag);
-                if (errFlag) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                }
-            }
+            // Set the heat pump cooling coil capacity (Total capacity) via dispatch table
+            thisFurnace.DesignCoolingCapacity =
+                getWaterToAirCoilCapacity(wahpCoolingCoils, thisFurnace.CoolingCoilType_Num, CoolingCoilType, CoolingCoilName);
             // Set the heat pump cooling coil convergence
             thisFurnace.CoolingConvergenceTolerance = Numbers(3);
 
@@ -4526,10 +4036,13 @@ namespace Furnaces {
             ShowFatalError(state, "Errors found in getting Furnace or Unitary System input.");
         }
 
-        for (int HeatOnlyNum = 1; HeatOnlyNum <= NumHeatOnly; ++HeatOnlyNum) {
-            FurnaceNum = HeatOnlyNum;
+        // Single loop over all furnaces registers output variables and EMS actuators.
+        // The "Fan Part Load Ratio" variable is common to every type; additional variables
+        // and actuator object-type strings vary by UnitarySysType.
+        for (FurnaceNum = 1; FurnaceNum <= state.dataFurnaces->NumFurnaces; ++FurnaceNum) {
             auto &thisFurnace = state.dataFurnaces->Furnace(FurnaceNum);
-            // Setup Report variables for the Furnace that are not reported in the components themselves
+
+            // All furnace/unitary types report fan PLR
             SetupOutputVariable(state,
                                 "Unitary System Fan Part Load Ratio",
                                 Constant::Units::None,
@@ -4537,238 +4050,123 @@ namespace Furnaces {
                                 OutputProcessor::TimeStepType::System,
                                 OutputProcessor::StoreType::Average,
                                 thisFurnace.Name);
-            if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
-                SetupEMSActuator(state,
-                                 "AirLoopHVAC:Unitary:Furnace:HeatOnly",
-                                 thisFurnace.Name,
-                                 "Autosized Supply Air Flow Rate",
-                                 "[m3/s]",
-                                 thisFurnace.DesignFanVolFlowRateEMSOverrideOn,
-                                 thisFurnace.DesignFanVolFlowRateEMSOverrideValue);
+
+            switch (thisFurnace.type) {
+            case HVAC::UnitarySysType::Furnace_HeatCool:
+            case HVAC::UnitarySysType::Unitary_HeatCool:
+            case HVAC::UnitarySysType::Unitary_HeatPump_AirToAir:
+            case HVAC::UnitarySysType::Unitary_HeatPump_WaterToAir:
+                SetupOutputVariable(state,
+                                    "Unitary System Compressor Part Load Ratio",
+                                    Constant::Units::None,
+                                    thisFurnace.CompPartLoadRatio,
+                                    OutputProcessor::TimeStepType::System,
+                                    OutputProcessor::StoreType::Average,
+                                    thisFurnace.Name);
+                break;
+            default:
+                break;
             }
-        }
 
-        for (int UnitaryHeatOnlyNum = NumHeatOnly + 1; UnitaryHeatOnlyNum <= NumHeatOnly + NumUnitaryHeatOnly; ++UnitaryHeatOnlyNum) {
-            FurnaceNum = UnitaryHeatOnlyNum;
-            auto &thisFurnace = state.dataFurnaces->Furnace(FurnaceNum);
-            // Setup Report variables for Unitary System that are not reported in the components themselves
-            SetupOutputVariable(state,
-                                "Unitary System Fan Part Load Ratio",
-                                Constant::Units::None,
-                                thisFurnace.FanPartLoadRatio,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisFurnace.Name);
-            if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
-                SetupEMSActuator(state,
-                                 "AirLoopHVAC:UnitaryHeatOnly",
-                                 thisFurnace.Name,
-                                 "Autosized Supply Air Flow Rate",
-                                 "[m3/s]",
-                                 thisFurnace.DesignFanVolFlowRateEMSOverrideOn,
-                                 thisFurnace.DesignFanVolFlowRateEMSOverrideValue);
+            if (thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatPump_AirToAir) {
+                SetupOutputVariable(state,
+                                    "Unitary System Dehumidification Induced Heating Demand Rate",
+                                    Constant::Units::W,
+                                    thisFurnace.DehumidInducedHeatingDemandRate,
+                                    OutputProcessor::TimeStepType::System,
+                                    OutputProcessor::StoreType::Average,
+                                    thisFurnace.Name);
             }
-        }
 
-        for (int HeatCoolNum = NumHeatOnly + NumUnitaryHeatOnly + 1; HeatCoolNum <= NumHeatOnly + NumUnitaryHeatOnly + NumHeatCool; ++HeatCoolNum) {
-            FurnaceNum = HeatCoolNum;
-            auto &thisFurnace = state.dataFurnaces->Furnace(FurnaceNum);
-            // Setup Report variables for the Furnace that are not reported in the components themselves
-            SetupOutputVariable(state,
-                                "Unitary System Fan Part Load Ratio",
-                                Constant::Units::None,
-                                thisFurnace.FanPartLoadRatio,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisFurnace.Name);
-            SetupOutputVariable(state,
-                                "Unitary System Compressor Part Load Ratio",
-                                Constant::Units::None,
-                                thisFurnace.CompPartLoadRatio,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisFurnace.Name);
-
-            if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
-                SetupEMSActuator(state,
-                                 "AirLoopHVAC:Unitary:Furnace:HeatCool",
-                                 thisFurnace.Name,
-                                 "Autosized Supply Air Flow Rate",
-                                 "[m3/s]",
-                                 thisFurnace.DesignFanVolFlowRateEMSOverrideOn,
-                                 thisFurnace.DesignFanVolFlowRateEMSOverrideValue);
-                SetupEMSActuator(state,
-                                 "AirLoopHVAC:Unitary:Furnace:HeatCool",
-                                 thisFurnace.Name,
-                                 "Autosized Supply Air Flow Rate During Cooling Operation",
-                                 "[m3/s]",
-                                 thisFurnace.MaxCoolAirVolFlowEMSOverrideOn,
-                                 thisFurnace.MaxCoolAirVolFlowEMSOverrideValue);
-                SetupEMSActuator(state,
-                                 "AirLoopHVAC:Unitary:Furnace:HeatCool",
-                                 thisFurnace.Name,
-                                 "Autosized Supply Air Flow Rate During Heating Operation",
-                                 "[m3/s]",
-                                 thisFurnace.MaxHeatAirVolFlowEMSOverrideOn,
-                                 thisFurnace.MaxHeatAirVolFlowEMSOverrideValue);
-                SetupEMSActuator(state,
-                                 "AirLoopHVAC:Unitary:Furnace:HeatCool",
-                                 thisFurnace.Name,
-                                 "Autosized Supply Air Flow Rate During No Heating or Cooling Operation",
-                                 "[m3/s]",
-                                 thisFurnace.MaxNoCoolHeatAirVolFlowEMSOverrideOn,
-                                 thisFurnace.MaxNoCoolHeatAirVolFlowEMSOverrideValue);
+            if (thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatPump_WaterToAir) {
+                SetupOutputVariable(state,
+                                    "Unitary System Requested Sensible Cooling Rate",
+                                    Constant::Units::W,
+                                    thisFurnace.CoolingCoilSensDemand,
+                                    OutputProcessor::TimeStepType::System,
+                                    OutputProcessor::StoreType::Average,
+                                    thisFurnace.Name);
+                SetupOutputVariable(state,
+                                    "Unitary System Requested Latent Cooling Rate",
+                                    Constant::Units::W,
+                                    thisFurnace.CoolingCoilLatentDemand,
+                                    OutputProcessor::TimeStepType::System,
+                                    OutputProcessor::StoreType::Average,
+                                    thisFurnace.Name);
+                SetupOutputVariable(state,
+                                    "Unitary System Requested Heating Rate",
+                                    Constant::Units::W,
+                                    thisFurnace.HeatingCoilSensDemand,
+                                    OutputProcessor::TimeStepType::System,
+                                    OutputProcessor::StoreType::Average,
+                                    thisFurnace.Name);
+                SetupOutputVariable(state,
+                                    "Unitary System Dehumidification Induced Heating Demand Rate",
+                                    Constant::Units::W,
+                                    thisFurnace.DehumidInducedHeatingDemandRate,
+                                    OutputProcessor::TimeStepType::System,
+                                    OutputProcessor::StoreType::Average,
+                                    thisFurnace.Name);
             }
-        }
 
-        for (int UnitaryHeatCoolNum = NumHeatOnly + NumHeatCool + NumUnitaryHeatOnly + 1;
-             UnitaryHeatCoolNum <= NumHeatOnly + NumHeatCool + NumUnitaryHeatOnly + NumUnitaryHeatCool;
-             ++UnitaryHeatCoolNum) {
-            FurnaceNum = UnitaryHeatCoolNum;
-            auto &thisFurnace = state.dataFurnaces->Furnace(FurnaceNum);
-            // Setup Report variables for Unitary System that are not reported in the components themselves
-            SetupOutputVariable(state,
-                                "Unitary System Fan Part Load Ratio",
-                                Constant::Units::None,
-                                thisFurnace.FanPartLoadRatio,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisFurnace.Name);
-            SetupOutputVariable(state,
-                                "Unitary System Compressor Part Load Ratio",
-                                Constant::Units::None,
-                                thisFurnace.CompPartLoadRatio,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisFurnace.Name);
             if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
+                // Determine the EMS object-type string for this furnace type
+                std::string_view emsObjType;
+                switch (thisFurnace.type) {
+                case HVAC::UnitarySysType::Furnace_HeatOnly:
+                    emsObjType = "AirLoopHVAC:Unitary:Furnace:HeatOnly";
+                    break;
+                case HVAC::UnitarySysType::Unitary_HeatOnly:
+                    emsObjType = "AirLoopHVAC:UnitaryHeatOnly";
+                    break;
+                case HVAC::UnitarySysType::Furnace_HeatCool:
+                    emsObjType = "AirLoopHVAC:Unitary:Furnace:HeatCool";
+                    break;
+                case HVAC::UnitarySysType::Unitary_HeatCool:
+                    emsObjType = "AirLoopHVAC:UnitaryHeatCool";
+                    break;
+                case HVAC::UnitarySysType::Unitary_HeatPump_AirToAir:
+                    emsObjType = "AirLoopHVAC:UnitaryHeatPump:AirToAir";
+                    break;
+                case HVAC::UnitarySysType::Unitary_HeatPump_WaterToAir:
+                    emsObjType = "AirLoopHVAC:UnitaryHeatPump:WaterToAir";
+                    break;
+                default:
+                    emsObjType = "";
+                    break;
+                }
                 SetupEMSActuator(state,
-                                 "AirLoopHVAC:UnitaryHeatCool",
+                                 emsObjType,
                                  thisFurnace.Name,
                                  "Autosized Supply Air Flow Rate",
                                  "[m3/s]",
                                  thisFurnace.DesignFanVolFlowRateEMSOverrideOn,
                                  thisFurnace.DesignFanVolFlowRateEMSOverrideValue);
-                SetupEMSActuator(state,
-                                 "AirLoopHVAC:UnitaryHeatCool",
-                                 thisFurnace.Name,
-                                 "Autosized Supply Air Flow Rate During Cooling Operation",
-                                 "[m3/s]",
-                                 thisFurnace.MaxCoolAirVolFlowEMSOverrideOn,
-                                 thisFurnace.MaxCoolAirVolFlowEMSOverrideValue);
-                SetupEMSActuator(state,
-                                 "AirLoopHVAC:UnitaryHeatCool",
-                                 thisFurnace.Name,
-                                 "Autosized Supply Air Flow Rate During Heating Operation",
-                                 "[m3/s]",
-                                 thisFurnace.MaxHeatAirVolFlowEMSOverrideOn,
-                                 thisFurnace.MaxHeatAirVolFlowEMSOverrideValue);
-                SetupEMSActuator(state,
-                                 "AirLoopHVAC:UnitaryHeatCool",
-                                 thisFurnace.Name,
-                                 "Autosized Supply Air Flow Rate During No Heating or Cooling Operation",
-                                 "[m3/s]",
-                                 thisFurnace.MaxNoCoolHeatAirVolFlowEMSOverrideOn,
-                                 thisFurnace.MaxNoCoolHeatAirVolFlowEMSOverrideValue);
-            }
-        }
 
-        for (int HeatPumpNum = NumHeatOnly + NumHeatCool + NumUnitaryHeatOnly + NumUnitaryHeatCool + 1;
-             HeatPumpNum <= state.dataFurnaces->NumFurnaces - NumWaterToAirHeatPump;
-             ++HeatPumpNum) {
-            FurnaceNum = HeatPumpNum;
-            auto &thisFurnace = state.dataFurnaces->Furnace(FurnaceNum);
-            // Setup Report variables for Unitary System that are not reported in the components themselves
-            SetupOutputVariable(state,
-                                "Unitary System Fan Part Load Ratio",
-                                Constant::Units::None,
-                                thisFurnace.FanPartLoadRatio,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisFurnace.Name);
-            SetupOutputVariable(state,
-                                "Unitary System Compressor Part Load Ratio",
-                                Constant::Units::None,
-                                thisFurnace.CompPartLoadRatio,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisFurnace.Name);
-            SetupOutputVariable(state,
-                                "Unitary System Dehumidification Induced Heating Demand Rate",
-                                Constant::Units::W,
-                                thisFurnace.DehumidInducedHeatingDemandRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisFurnace.Name);
-
-            if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
-                SetupEMSActuator(state,
-                                 "AirLoopHVAC:UnitaryHeatPump:AirToAir",
-                                 thisFurnace.Name,
-                                 "Autosized Supply Air Flow Rate",
-                                 "[m3/s]",
-                                 thisFurnace.DesignFanVolFlowRateEMSOverrideOn,
-                                 thisFurnace.DesignFanVolFlowRateEMSOverrideValue);
-            }
-        }
-
-        for (int HeatPumpNum = NumHeatOnly + NumHeatCool + NumUnitaryHeatOnly + NumUnitaryHeatCool + NumHeatPump + 1;
-             HeatPumpNum <= state.dataFurnaces->NumFurnaces;
-             ++HeatPumpNum) {
-            FurnaceNum = HeatPumpNum;
-            auto &thisFurnace = state.dataFurnaces->Furnace(FurnaceNum);
-            // Setup Report variables for Unitary System that are not reported in the components themselves
-            SetupOutputVariable(state,
-                                "Unitary System Fan Part Load Ratio",
-                                Constant::Units::None,
-                                thisFurnace.FanPartLoadRatio,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisFurnace.Name);
-            SetupOutputVariable(state,
-                                "Unitary System Compressor Part Load Ratio",
-                                Constant::Units::None,
-                                thisFurnace.CompPartLoadRatio,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisFurnace.Name);
-            SetupOutputVariable(state,
-                                "Unitary System Requested Sensible Cooling Rate",
-                                Constant::Units::W,
-                                thisFurnace.CoolingCoilSensDemand,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisFurnace.Name);
-            SetupOutputVariable(state,
-                                "Unitary System Requested Latent Cooling Rate",
-                                Constant::Units::W,
-                                thisFurnace.CoolingCoilLatentDemand,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisFurnace.Name);
-            SetupOutputVariable(state,
-                                "Unitary System Requested Heating Rate",
-                                Constant::Units::W,
-                                thisFurnace.HeatingCoilSensDemand,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisFurnace.Name);
-            SetupOutputVariable(state,
-                                "Unitary System Dehumidification Induced Heating Demand Rate",
-                                Constant::Units::W,
-                                thisFurnace.DehumidInducedHeatingDemandRate,
-                                OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Average,
-                                thisFurnace.Name);
-
-            if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
-                SetupEMSActuator(state,
-                                 "AirLoopHVAC:UnitaryHeatPump:WaterToAir",
-                                 thisFurnace.Name,
-                                 "Autosized Supply Air Flow Rate",
-                                 "[m3/s]",
-                                 thisFurnace.DesignFanVolFlowRateEMSOverrideOn,
-                                 thisFurnace.DesignFanVolFlowRateEMSOverrideValue);
+                // HeatCool types additionally register per-mode flow-rate actuators
+                if (thisFurnace.type == HVAC::UnitarySysType::Furnace_HeatCool || thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatCool) {
+                    SetupEMSActuator(state,
+                                     emsObjType,
+                                     thisFurnace.Name,
+                                     "Autosized Supply Air Flow Rate During Cooling Operation",
+                                     "[m3/s]",
+                                     thisFurnace.MaxCoolAirVolFlowEMSOverrideOn,
+                                     thisFurnace.MaxCoolAirVolFlowEMSOverrideValue);
+                    SetupEMSActuator(state,
+                                     emsObjType,
+                                     thisFurnace.Name,
+                                     "Autosized Supply Air Flow Rate During Heating Operation",
+                                     "[m3/s]",
+                                     thisFurnace.MaxHeatAirVolFlowEMSOverrideOn,
+                                     thisFurnace.MaxHeatAirVolFlowEMSOverrideValue);
+                    SetupEMSActuator(state,
+                                     emsObjType,
+                                     thisFurnace.Name,
+                                     "Autosized Supply Air Flow Rate During No Heating or Cooling Operation",
+                                     "[m3/s]",
+                                     thisFurnace.MaxNoCoolHeatAirVolFlowEMSOverrideOn,
+                                     thisFurnace.MaxNoCoolHeatAirVolFlowEMSOverrideValue);
+                }
             }
         }
 
@@ -6784,6 +6182,55 @@ namespace Furnaces {
         furnaceInNode.MassFlowRate = thisFurnace.MdotFurnace;
     }
 
+    // Helper: create a CalcFurnaceResidual lambda and solve for PLR via RegulaFalsi.
+    // Returns SolFlag (>0 = converged iterations, -1 = max-iter, -2 = bounds error).
+    // On return, resultPLR holds the solved part-load ratio and OnOffAirFlowRatio is
+    // restored from the saved value.
+    static int solveFurnaceResidual(EnergyPlusData &state,
+                                    Real64 const errorToler,
+                                    int const maxIter,
+                                    Real64 &resultPLR,
+                                    int const FurnaceNum,
+                                    bool const FirstHVACIteration,
+                                    HVAC::FanOp const fanOp,
+                                    HVAC::CompressorOp const compressorOp,
+                                    Real64 const loadToBeMet,
+                                    Real64 const par6_loadFlag,
+                                    Real64 const par7_sensLatentFlag,
+                                    Real64 const par9_HXOnFlag,
+                                    Real64 const par10_HeatingCoilPLR,
+                                    Real64 const plrMin,
+                                    Real64 const plrMax,
+                                    Real64 &OnOffAirFlowRatio)
+    {
+        int SolFlag = 0;
+        auto f = [&state,
+                  FurnaceNum,
+                  FirstHVACIteration,
+                  fanOp,
+                  compressorOp,
+                  loadToBeMet,
+                  par6_loadFlag,
+                  par7_sensLatentFlag,
+                  par9_HXOnFlag,
+                  par10_HeatingCoilPLR](Real64 const PartLoadRatio) {
+            return CalcFurnaceResidual(state,
+                                       PartLoadRatio,
+                                       FurnaceNum,
+                                       FirstHVACIteration,
+                                       fanOp,
+                                       compressorOp,
+                                       loadToBeMet,
+                                       par6_loadFlag,
+                                       par7_sensLatentFlag,
+                                       par9_HXOnFlag,
+                                       par10_HeatingCoilPLR);
+        };
+        General::SolveRoot(state, errorToler, maxIter, SolFlag, resultPLR, f, plrMin, plrMax);
+        OnOffAirFlowRatio = state.dataFurnaces->OnOffAirFlowRatioSave;
+        return SolFlag;
+    }
+
     void CalcNewZoneHeatCoolFlowRates(EnergyPlusData &state,
                                       int const FurnaceNum,
                                       bool const FirstHVACIteration,
@@ -6881,6 +6328,9 @@ namespace Furnaces {
 
         Real64 &SystemSensibleLoad = state.dataFurnaces->SystemSensibleLoad;
         auto &thisFurnace = state.dataFurnaces->Furnace(FurnaceNum);
+        bool const isHP =
+            thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatPump_AirToAir ||
+            (thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatPump_WaterToAir && thisFurnace.WatertoAirHPType == WAHPCoilType::Simple);
         // Set local variables
         int FurnaceOutletNode = thisFurnace.FurnaceOutletNodeNum;
         int FurnaceInletNode = thisFurnace.FurnaceInletNodeNum;
@@ -6919,8 +6369,7 @@ namespace Furnaces {
 
             // Init for heating
             if (state.dataFurnaces->HeatingLoad) {
-                if (thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatPump_AirToAir ||
-                    (thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatPump_WaterToAir && thisFurnace.WatertoAirHPType == WAHPCoilType::Simple)) {
+                if (isHP) {
                     thisFurnace.HeatPartLoadRatio = 1.0;
                     HeatCoilLoad = 0.0;
                     thisFurnace.HeatingCoilSensDemand = 0.0;
@@ -6966,8 +6415,7 @@ namespace Furnaces {
             Real64 &CoolCoilLoad = state.dataFurnaces->CoolCoilLoad;
             if (state.dataFurnaces->HeatingLoad) {
                 CoolCoilLoad = 0.0;
-                if (thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatPump_AirToAir ||
-                    (thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatPump_WaterToAir && thisFurnace.WatertoAirHPType == WAHPCoilType::Simple)) {
+                if (isHP) {
                     SystemSensibleLoad = ZoneLoad;
                     SystemMoistureLoad = 0.0;
                     HeatCoilLoad = 0.0;
@@ -7014,8 +6462,7 @@ namespace Furnaces {
             if ((thisFurnace.availSched->getCurrentVal() > 0.0) && (state.dataFurnaces->HeatingLoad)) {
 
                 //    Heat pumps only calculate a single PLR each time step (i.e. only cooling or heating allowed in a single time step)
-                if (thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatPump_AirToAir ||
-                    (thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatPump_WaterToAir && thisFurnace.WatertoAirHPType == WAHPCoilType::Simple)) {
+                if (isHP) {
 
                     state.dataLoopNodes->Node(FurnaceInletNode).MassFlowRate = thisFurnace.MdotFurnace;
 
@@ -7077,24 +6524,22 @@ namespace Furnaces {
                         // Calculate the part load ratio through iteration
                         HeatErrorToler = thisFurnace.HeatingConvergenceTolerance; // Error tolerance for convergence from input deck
 
-                        int SolFlag = 0; // # of iterations if positive, -1 means failed to converge, -2 means bounds are incorrect
-                        // HeatErrorToler is in fraction of load, MaxIter = 30, SolFalg = # of iterations or error as appropriate
-                        auto f = [&state, FurnaceNum, FirstHVACIteration, fanOp, compressorOp, SystemSensibleLoad](Real64 const PartLoadRatio) {
-                            return CalcFurnaceResidual(state,
-                                                       PartLoadRatio,
-                                                       FurnaceNum,
-                                                       FirstHVACIteration,
-                                                       fanOp,
-                                                       compressorOp,
-                                                       SystemSensibleLoad,
-                                                       0.0,  // par6_loadFlag,
-                                                       1.0,  // par7_sensLatentFlag,
-                                                       0.0,  // par9_HXOnFlag,
-                                                       0.0); // par10_HeatingCoilPLR);
-                        };
-                        General::SolveRoot(state, HeatErrorToler, MaxIter, SolFlag, PartLoadRatio, f, 0.0, 1.0);
-                        //         OnOffAirFlowRatio is updated during the above iteration. Reset to correct value based on PLR.
-                        OnOffAirFlowRatio = state.dataFurnaces->OnOffAirFlowRatioSave;
+                        int SolFlag = solveFurnaceResidual(state,
+                                                           HeatErrorToler,
+                                                           MaxIter,
+                                                           PartLoadRatio,
+                                                           FurnaceNum,
+                                                           FirstHVACIteration,
+                                                           fanOp,
+                                                           compressorOp,
+                                                           SystemSensibleLoad,
+                                                           0.0,
+                                                           1.0,
+                                                           0.0,
+                                                           0.0,
+                                                           0.0,
+                                                           1.0,
+                                                           OnOffAirFlowRatio);
                         if (SolFlag < 0) {
                             if (SolFlag == -1) {
                                 CalcFurnaceOutput(state,
@@ -7302,24 +6747,22 @@ namespace Furnaces {
                             // Calculate the part load ratio through iteration
                             HeatErrorToler = thisFurnace.HeatingConvergenceTolerance; // Error tolerance for convergence from input deck
 
-                            int SolFlag = 0; // # of iterations if positive, -1 means failed to converge, -2 means bounds are incorrect
-                            // HeatErrorToler is in fraction load, MaxIter = 30, SolFalg = # of iterations or error as appropriate
-                            auto f = [&state, FurnaceNum, FirstHVACIteration, fanOp, compressorOp, SystemSensibleLoad](Real64 const PartLoadRatio) {
-                                return CalcFurnaceResidual(state,
-                                                           PartLoadRatio,
-                                                           FurnaceNum,
-                                                           FirstHVACIteration,
-                                                           fanOp,
-                                                           compressorOp,
-                                                           SystemSensibleLoad,
-                                                           0.0,  // par6_loadFlag,
-                                                           1.0,  // par7_sensLatentFlag,
-                                                           0.0,  // par9_HXOnFlag,
-                                                           0.0); // par10_HeatingCoilPLR);
-                            };
-                            General::SolveRoot(state, HeatErrorToler, MaxIter, SolFlag, PartLoadRatio, f, 0.0, 1.0);
-                            //         OnOffAirFlowRatio is updated during the above iteration. Reset to correct value based on PLR.
-                            OnOffAirFlowRatio = state.dataFurnaces->OnOffAirFlowRatioSave;
+                            int SolFlag = solveFurnaceResidual(state,
+                                                               HeatErrorToler,
+                                                               MaxIter,
+                                                               PartLoadRatio,
+                                                               FurnaceNum,
+                                                               FirstHVACIteration,
+                                                               fanOp,
+                                                               compressorOp,
+                                                               SystemSensibleLoad,
+                                                               0.0,
+                                                               1.0,
+                                                               0.0,
+                                                               0.0,
+                                                               0.0,
+                                                               1.0,
+                                                               OnOffAirFlowRatio);
                             //         Reset HeatCoilLoad calculated in CalcFurnaceResidual (in case it was reset because output temp >
                             //         DesignMaxOutletTemp)
                             if (state.dataFurnaces->ModifiedHeatCoilLoad > 0.0) {
@@ -7375,21 +6818,22 @@ namespace Furnaces {
                                                       false);
                                 }
                                 //           Now solve again with tighter PLR limits
-                                auto f2 = // (AUTO_OK_LAMBDA)
-                                    [&state, FurnaceNum, FirstHVACIteration, fanOp, compressorOp, SystemSensibleLoad](Real64 const PartLoadRatio) {
-                                        return CalcFurnaceResidual(state,
-                                                                   PartLoadRatio,
-                                                                   FurnaceNum,
-                                                                   FirstHVACIteration,
-                                                                   fanOp,
-                                                                   compressorOp,
-                                                                   SystemSensibleLoad,
-                                                                   0.0,  // par6_loadFlag,
-                                                                   1.0,  // par7_sensLatentFlag,
-                                                                   0.0,  // par9_HXOnFlag,
-                                                                   0.0); // par10_HeatingCoilPLR);
-                                    };
-                                General::SolveRoot(state, HeatErrorToler, MaxIter, SolFlag, PartLoadRatio, f2, TempMinPLR, TempMaxPLR);
+                                SolFlag = solveFurnaceResidual(state,
+                                                               HeatErrorToler,
+                                                               MaxIter,
+                                                               PartLoadRatio,
+                                                               FurnaceNum,
+                                                               FirstHVACIteration,
+                                                               fanOp,
+                                                               compressorOp,
+                                                               SystemSensibleLoad,
+                                                               0.0,
+                                                               1.0,
+                                                               0.0,
+                                                               0.0,
+                                                               TempMinPLR,
+                                                               TempMaxPLR,
+                                                               OnOffAirFlowRatio);
                                 if (state.dataFurnaces->ModifiedHeatCoilLoad > 0.0) {
                                     HeatCoilLoad = state.dataFurnaces->ModifiedHeatCoilLoad;
                                 } else {
@@ -7602,26 +7046,23 @@ namespace Furnaces {
 
                             // Calculate the sensible part load ratio through iteration
                             CoolErrorToler = thisFurnace.CoolingConvergenceTolerance; // Error tolerance for convergence from input deck
-                            int SolFlag = 0; // # of iterations if positive, -1 means failed to converge, -2 means bounds are incorrect
                             Real64 par8_HXFlag = HXUnitOn ? 1.0 : 0.0;
-                            // CoolErrorToler is in fraction of load, MaxIter = 30, SolFalg = # of iterations or error as appropriate
-                            auto f =
-                                [&state, FurnaceNum, FirstHVACIteration, fanOp, compressorOp, CoolCoilLoad, par8_HXFlag](Real64 const PartLoadRatio) {
-                                    return CalcFurnaceResidual(state,
+                            int SolFlag = solveFurnaceResidual(state,
+                                                               CoolErrorToler,
+                                                               MaxIter,
                                                                PartLoadRatio,
                                                                FurnaceNum,
                                                                FirstHVACIteration,
                                                                fanOp,
                                                                compressorOp,
                                                                CoolCoilLoad,
-                                                               1.0,         // par6_loadFlag,
-                                                               1.0,         // par7_sensLatentFlag,
-                                                               par8_HXFlag, // par9_HXOnFlag,
-                                                               0.0);        // par10_HeatingCoilPLR);
-                                };
-                            General::SolveRoot(state, CoolErrorToler, MaxIter, SolFlag, PartLoadRatio, f, 0.0, 1.0);
-                            //             OnOffAirFlowRatio is updated during the above iteration. Reset to correct value based on PLR.
-                            OnOffAirFlowRatio = state.dataFurnaces->OnOffAirFlowRatioSave;
+                                                               1.0,
+                                                               1.0,
+                                                               par8_HXFlag,
+                                                               0.0,
+                                                               0.0,
+                                                               1.0,
+                                                               OnOffAirFlowRatio);
                             if (SolFlag < 0) {
                                 if (SolFlag == -1) {
                                     CalcFurnaceOutput(state,
@@ -7805,31 +7246,22 @@ namespace Furnaces {
                             } else {
                                 par9_HtgCoilPLR = 0.0;
                             }
-                            auto f = [&state,
-                                      FurnaceNum,
-                                      FirstHVACIteration,
-                                      fanOp,
-                                      compressorOp,
-                                      par4_load,
-                                      par6_LatentSens,
-                                      par8_HXUnit,
-                                      par9_HtgCoilPLR](Real64 const PartLoadRatio) {
-                                return CalcFurnaceResidual(state,
-                                                           PartLoadRatio,
+                            SolFlag = solveFurnaceResidual(state,
+                                                           CoolErrorToler,
+                                                           MaxIter,
+                                                           LatentPartLoadRatio,
                                                            FurnaceNum,
                                                            FirstHVACIteration,
                                                            fanOp,
                                                            compressorOp,
                                                            par4_load,
-                                                           1.0,              // par6_loadFlag,
-                                                           par6_LatentSens,  // par7_sensLatentFlag,
-                                                           par8_HXUnit,      // par9_HXOnFlag,
-                                                           par9_HtgCoilPLR); // par10_HeatingCoilPLR);
-                            };
-                            //           CoolErrorToler is in fraction of load, MaxIter = 30, SolFalg = # of iterations or error as appropriate
-                            General::SolveRoot(state, CoolErrorToler, MaxIter, SolFlag, LatentPartLoadRatio, f, 0.0, 1.0);
-                            //           OnOffAirFlowRatio is updated during the above iteration. Reset to correct value based on PLR.
-                            OnOffAirFlowRatio = state.dataFurnaces->OnOffAirFlowRatioSave;
+                                                           1.0,
+                                                           par6_LatentSens,
+                                                           par8_HXUnit,
+                                                           par9_HtgCoilPLR,
+                                                           0.0,
+                                                           1.0,
+                                                           OnOffAirFlowRatio);
                             if (SolFlag == -1) {
                                 //             RegulaFalsi may not find latent PLR when the latent degradation model is used.
                                 //             If iteration limit is exceeded, find tighter boundary of solution and repeat RegulaFalsi
@@ -7905,30 +7337,22 @@ namespace Furnaces {
                                                       CoolingHeatingPLRRatio);
                                 }
                                 //             tighter boundary of solution has been found, call RegulaFalsi a second time
-                                auto f2 = [&state,
-                                           FurnaceNum,
-                                           FirstHVACIteration,
-                                           fanOp,
-                                           compressorOp,
-                                           par4_load,
-                                           par6_LatentSens,
-                                           par8_HXUnit,
-                                           par9_HtgCoilPLR](Real64 const PartLoadRatio) {
-                                    return CalcFurnaceResidual(state,
-                                                               PartLoadRatio,
+                                SolFlag = solveFurnaceResidual(state,
+                                                               CoolErrorToler,
+                                                               MaxIter,
+                                                               LatentPartLoadRatio,
                                                                FurnaceNum,
                                                                FirstHVACIteration,
                                                                fanOp,
                                                                compressorOp,
                                                                par4_load,
-                                                               1.0,              // par6_loadFlag,
-                                                               par6_LatentSens,  // par7_sensLatentFlag,
-                                                               par8_HXUnit,      // par9_HXOnFlag,
-                                                               par9_HtgCoilPLR); // par10_HeatingCoilPLR);
-                                };
-                                General::SolveRoot(state, CoolErrorToler, MaxIter, SolFlag, LatentPartLoadRatio, f2, TempMinPLR2, TempMaxPLR);
-                                //             OnOffAirFlowRatio is updated during the above iteration. Reset to correct value based on PLR.
-                                OnOffAirFlowRatio = state.dataFurnaces->OnOffAirFlowRatioSave;
+                                                               1.0,
+                                                               par6_LatentSens,
+                                                               par8_HXUnit,
+                                                               par9_HtgCoilPLR,
+                                                               TempMinPLR2,
+                                                               TempMaxPLR,
+                                                               OnOffAirFlowRatio);
                                 if (SolFlag == -1) {
 
                                     //               Set cooling to heating PLR for use with Subroutine CalcFurnaceOutput.
@@ -8143,9 +7567,7 @@ namespace Furnaces {
                         //         the heating coil pick up the load due to outdoor air.
                         ReheatCoilLoad = max(0.0, (ActualSensibleOutput - NoCoolOutput) * (-1.0));
                         //         Dehumidification is not required
-                        if (thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatPump_AirToAir ||
-                            (thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatPump_WaterToAir &&
-                             thisFurnace.WatertoAirHPType == WAHPCoilType::Simple)) {
+                        if (isHP) {
                             ReheatCoilLoad = max(QToHeatSetPt, QToHeatSetPt - ActualSensibleOutput);
                         }
                         thisFurnace.DehumidInducedHeatingDemandRate = max(0.0, ActualSensibleOutput * (-1.0));
@@ -8177,8 +7599,7 @@ namespace Furnaces {
             }
             thisFurnace.MdotFurnace = state.dataLoopNodes->Node(FurnaceInletNode).MassFlowRate;
 
-            if (thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatPump_AirToAir ||
-                (thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatPump_WaterToAir && thisFurnace.WatertoAirHPType == WAHPCoilType::Simple)) {
+            if (isHP) {
             } else {
                 // Non-HeatPump (non-DX) heating coils do not set PLR, reset to 0 here. This variable was set for non-DX
                 // coils to allow the SetAverageAirFlow CALL above to set the correct air mass flow rate. See this

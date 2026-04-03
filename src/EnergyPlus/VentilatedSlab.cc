@@ -671,7 +671,7 @@ namespace VentilatedSlab {
             //      %OutsideAirNode is the outdoor air inlet to the OA mixer
             //         For all types of ventilated slab, this is Node::NodeConnectionType::Inlet,ObjectIsNotParent, -OA MIXER
 
-            if (ventSlab.SysConfg == VentilatedSlabConfig::SlabOnly) {
+            if (ventSlab.SysConfg == VentilatedSlabConfig::SlabOnly || ventSlab.SysConfg == VentilatedSlabConfig::SeriesSlabs) {
 
                 ventSlab.ReturnAirNode = Node::GetOnlySingleNode(state,
                                                                  state.dataIPShortCut->cAlphaArgs(18),
@@ -719,56 +719,6 @@ namespace VentilatedSlab {
                                                                  Node::ConnectionType::Internal,
                                                                  Node::CompFluidStream::Primary,
                                                                  Node::ObjectIsParent);
-
-            } else if (ventSlab.SysConfg == VentilatedSlabConfig::SeriesSlabs) {
-
-                ventSlab.ReturnAirNode = Node::GetOnlySingleNode(state,
-                                                                 state.dataIPShortCut->cAlphaArgs(18),
-                                                                 ErrorsFound,
-                                                                 Node::ConnectionObjectType::ZoneHVACVentilatedSlab,
-                                                                 ventSlab.Name + "-OA MIXER",
-                                                                 Node::FluidType::Air,
-                                                                 Node::ConnectionType::Outlet,
-                                                                 Node::CompFluidStream::Primary,
-                                                                 Node::ObjectIsNotParent);
-                ventSlab.ReturnAirNode = Node::GetOnlySingleNode(state,
-                                                                 state.dataIPShortCut->cAlphaArgs(18),
-                                                                 ErrorsFound,
-                                                                 Node::ConnectionObjectType::ZoneHVACVentilatedSlab,
-                                                                 ventSlab.Name,
-                                                                 Node::FluidType::Air,
-                                                                 Node::ConnectionType::Inlet,
-                                                                 Node::CompFluidStream::Primary,
-                                                                 Node::ObjectIsParent);
-                ventSlab.RadInNode = Node::GetOnlySingleNode(state,
-                                                             state.dataIPShortCut->cAlphaArgs(19),
-                                                             ErrorsFound,
-                                                             Node::ConnectionObjectType::ZoneHVACVentilatedSlab,
-                                                             ventSlab.Name,
-                                                             Node::FluidType::Air,
-                                                             Node::ConnectionType::Inlet,
-                                                             Node::CompFluidStream::Primary,
-                                                             Node::ObjectIsNotParent);
-
-                ventSlab.OAMixerOutNode = Node::GetOnlySingleNode(state,
-                                                                  state.dataIPShortCut->cAlphaArgs(23),
-                                                                  ErrorsFound,
-                                                                  Node::ConnectionObjectType::ZoneHVACVentilatedSlab,
-                                                                  ventSlab.Name + "-OA MIXER",
-                                                                  Node::FluidType::Air,
-                                                                  Node::ConnectionType::Outlet,
-                                                                  Node::CompFluidStream::Primary,
-                                                                  Node::ObjectIsNotParent);
-                ventSlab.FanOutletNode = Node::GetOnlySingleNode(state,
-                                                                 state.dataIPShortCut->cAlphaArgs(24),
-                                                                 ErrorsFound,
-                                                                 Node::ConnectionObjectType::ZoneHVACVentilatedSlab,
-                                                                 ventSlab.Name,
-                                                                 Node::FluidType::Air,
-                                                                 Node::ConnectionType::Internal,
-                                                                 Node::CompFluidStream::Primary,
-                                                                 Node::ObjectIsParent);
-
             } else if (ventSlab.SysConfg == VentilatedSlabConfig::SlabAndZone) {
 
                 ventSlab.ReturnAirNode = Node::GetOnlySingleNode(state,

@@ -181,6 +181,209 @@ namespace LowTempRadiantSystem {
     [[maybe_unused]] constexpr std::array<std::string_view, (int)CircuitCalc::Num> circuitCalcNames = {"OnePerSurface", "CalculateFromCircuitLength"};
     constexpr std::array<std::string_view, (int)CircuitCalc::Num> circuitCalcNamesUC = {"ONEPERSURFACE", "CALCULATEFROMCIRCUITLENGTH"};
 
+    // Helper: apply capacity sizing method from a design object to a system instance.
+    // For DesignCapacity, validates the user-entered numeric; for CapacityPerFloorArea
+    // and FractionOfAutosized, copies the value from the design object.
+    static void applyDesignCapacityFromDesignObject(EnergyPlusData &state,
+                                                    int designCapMethod,
+                                                    int designCapacityEnum,
+                                                    int capPerFloorAreaEnum,
+                                                    int fractionEnum,
+                                                    Real64 designScaledCapacity,
+                                                    std::string const &currentModuleObject,
+                                                    std::string const &sysName,
+                                                    std::string_view heatOrCool,
+                                                    int numericIdx,
+                                                    int nodeAlpha1Idx,
+                                                    int nodeAlpha2Idx,
+                                                    Array1D<Real64> const &Numbers,
+                                                    Array1D_bool const &lNumericBlanks,
+                                                    Array1D_bool const &lAlphaBlanks,
+                                                    Array1D_string const &cNumericFields,
+                                                    int &capMethodOut,
+                                                    Real64 &scaledCapacityOut,
+                                                    bool &ErrorsFound)
+    {
+        using DataSizing::AutoSize;
+        if (designCapMethod == designCapacityEnum) {
+            capMethodOut = designCapacityEnum;
+            if (!lNumericBlanks(numericIdx)) {
+                scaledCapacityOut = Numbers(numericIdx);
+                if (scaledCapacityOut < 0.0 && scaledCapacityOut != AutoSize) {
+                    ShowSevereError(state, EnergyPlus::format("{} = {}", currentModuleObject, sysName));
+                    ShowContinueError(state, EnergyPlus::format("Illegal {} = {:.7T}", cNumericFields(numericIdx), Numbers(numericIdx)));
+                    ErrorsFound = true;
+                }
+            } else {
+                if ((!lAlphaBlanks(nodeAlpha1Idx)) || (!lAlphaBlanks(nodeAlpha2Idx))) {
+                    ShowSevereError(state, EnergyPlus::format("{} = {}", currentModuleObject, sysName));
+                    ShowContinueError(state, EnergyPlus::format("Input for {} Design Capacity Method = {}DesignCapacity", heatOrCool, heatOrCool));
+                    ShowContinueError(state, EnergyPlus::format("Blank field not allowed for {}", cNumericFields(numericIdx)));
+                    ErrorsFound = true;
+                }
+            }
+        } else if (designCapMethod == capPerFloorAreaEnum) {
+            capMethodOut = capPerFloorAreaEnum;
+            scaledCapacityOut = designScaledCapacity;
+        } else if (designCapMethod == fractionEnum) {
+            capMethodOut = fractionEnum;
+            scaledCapacityOut = designScaledCapacity;
+        }
+    }
+
+    // Helper: parse surface list or single surface name for a radiant system.
+    // Populates the base-class surface arrays (NumOfSurfaces, SurfacePtr, SurfaceName, SurfaceFrac).
+    // Returns the SurfListNum (>0 if a surface list was found, 0 if single surface).
+    static int parseSurfaceListOrSingleSurface(EnergyPlusData &state,
+                                               RadiantSystemBaseData &sys,
+                                               std::string_view routineName,
+                                               std::string const &currentModuleObject,
+                                               std::string const &surfAlphaFieldName,
+                                               std::string const &surfAlphaValue,
+                                               std::string const &objectName,
+                                               bool &ErrorsFound)
+    {
+        auto &Surface = state.dataSurface->Surface;
+        int SurfListNum = 0;
+        if (state.dataSurfLists->NumOfSurfaceLists > 0) {
+            SurfListNum = Util::FindItemInList(sys.SurfListName, state.dataSurfLists->SurfList);
+        }
+        if (SurfListNum > 0) { // Found a valid surface list
+            sys.NumOfSurfaces = state.dataSurfLists->SurfList(SurfListNum).NumOfSurfaces;
+            sys.SurfacePtr.allocate(sys.NumOfSurfaces);
+            sys.SurfaceName.allocate(sys.NumOfSurfaces);
+            sys.SurfaceFrac.allocate(sys.NumOfSurfaces);
+            for (int SurfNum = 1; SurfNum <= state.dataSurfLists->SurfList(SurfListNum).NumOfSurfaces; ++SurfNum) {
+                sys.SurfacePtr(SurfNum) = state.dataSurfLists->SurfList(SurfListNum).SurfPtr(SurfNum);
+                sys.SurfaceName(SurfNum) = state.dataSurfLists->SurfList(SurfListNum).SurfName(SurfNum);
+                sys.SurfaceFrac(SurfNum) = state.dataSurfLists->SurfList(SurfListNum).SurfFlowFrac(SurfNum);
+            }
+        } else { // User entered a single surface name rather than a surface list
+            sys.NumOfSurfaces = 1;
+            sys.SurfacePtr.allocate(1);
+            sys.SurfaceName.allocate(1);
+            sys.SurfaceFrac.allocate(1);
+            sys.SurfaceName(1) = sys.SurfListName;
+            sys.SurfacePtr(1) = Util::FindItemInList(sys.SurfaceName(1), Surface);
+            sys.SurfaceFrac(1) = 1.0;
+            // Error checking for single surfaces
+            if (sys.SurfacePtr(1) == 0) {
+                ShowSevereError(state, EnergyPlus::format("{}Invalid {} = {}", routineName, surfAlphaFieldName, surfAlphaValue));
+                ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", currentModuleObject, objectName));
+                ErrorsFound = true;
+            } else if (state.dataSurface->SurfIsRadSurfOrVentSlabOrPool(sys.SurfacePtr(1))) {
+                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", Invalid Surface", routineName, currentModuleObject, objectName));
+                ShowContinueError(
+                    state,
+                    EnergyPlus::format("{}=\"{}\" has been used in another radiant system or ventilated slab.", surfAlphaFieldName, surfAlphaValue));
+                ErrorsFound = true;
+            }
+        }
+        return SurfListNum;
+    }
+
+    // Helper: validate and parse a design capacity sizing method for VariableFlow:Design objects.
+    // Handles "XDesignCapacity", "CapacityPerFloorArea", and "FractionOfAutosizedXCapacity" patterns.
+    static void parseDesignCapacitySizingMethod(EnergyPlusData &state,
+                                                std::string_view const &methodInput,
+                                                std::string const &objectName,
+                                                std::string const &currentModuleObject,
+                                                std::string const &alphaFieldName,
+                                                std::string_view designCapacityName,
+                                                int designCapacityEnum,
+                                                std::string_view fractionCapacityName,
+                                                int fractionCapacityEnum,
+                                                int capPerFloorAreaNumIdx,
+                                                int fractionNumIdx,
+                                                Array1D<Real64> const &Numbers,
+                                                Array1D_bool const &lNumericBlanks,
+                                                Array1D_string const &cNumericFields,
+                                                int &capMethodOut,
+                                                Real64 &scaledCapacityOut,
+                                                bool &ErrorsFound)
+    {
+        using DataSizing::AutoSize;
+        using DataSizing::CapacityPerFloorArea;
+
+        if (Util::SameString(methodInput, designCapacityName)) {
+            capMethodOut = designCapacityEnum;
+        } else if (Util::SameString(methodInput, "CapacityPerFloorArea")) {
+            capMethodOut = CapacityPerFloorArea;
+            if (!lNumericBlanks(capPerFloorAreaNumIdx)) {
+                scaledCapacityOut = Numbers(capPerFloorAreaNumIdx);
+                if (scaledCapacityOut <= 0.0) {
+                    ShowSevereError(state, EnergyPlus::format("{} = {}", currentModuleObject, objectName));
+                    ShowContinueError(state, EnergyPlus::format("Input for {} = {}", alphaFieldName, methodInput));
+                    ShowContinueError(
+                        state, EnergyPlus::format("Illegal {} = {:.7T}", cNumericFields(capPerFloorAreaNumIdx), Numbers(capPerFloorAreaNumIdx)));
+                    ErrorsFound = true;
+                } else if (scaledCapacityOut == AutoSize) {
+                    ShowSevereError(state, EnergyPlus::format("{} = {}", currentModuleObject, objectName));
+                    ShowContinueError(state, EnergyPlus::format("Input for {} = {}", alphaFieldName, methodInput));
+                    ShowContinueError(state, EnergyPlus::format("Illegal {} = Autosize", cNumericFields(capPerFloorAreaNumIdx)));
+                    ErrorsFound = true;
+                }
+            } else {
+                ShowSevereError(state, EnergyPlus::format("{} = {}", currentModuleObject, objectName));
+                ShowContinueError(state, EnergyPlus::format("Input for {} = {}", alphaFieldName, methodInput));
+                ShowContinueError(state, EnergyPlus::format("Blank field not allowed for {}", cNumericFields(capPerFloorAreaNumIdx)));
+                ErrorsFound = true;
+            }
+        } else if (Util::SameString(methodInput, fractionCapacityName)) {
+            capMethodOut = fractionCapacityEnum;
+            if (!lNumericBlanks(fractionNumIdx)) {
+                scaledCapacityOut = Numbers(fractionNumIdx);
+                if (scaledCapacityOut < 0.0) {
+                    ShowSevereError(state, EnergyPlus::format("{} = {}", currentModuleObject, objectName));
+                    ShowContinueError(state, EnergyPlus::format("Illegal {} = {:.7T}", cNumericFields(fractionNumIdx), Numbers(fractionNumIdx)));
+                    ErrorsFound = true;
+                }
+            } else {
+                ShowSevereError(state, EnergyPlus::format("{} = {}", currentModuleObject, objectName));
+                ShowContinueError(state, EnergyPlus::format("Input for {} = {}", alphaFieldName, methodInput));
+                ShowContinueError(state, EnergyPlus::format("Blank field not allowed for {}", cNumericFields(fractionNumIdx)));
+                ErrorsFound = true;
+            }
+        } else {
+            ShowSevereError(state, EnergyPlus::format("{} = {}", currentModuleObject, objectName));
+            ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", alphaFieldName, methodInput));
+            ErrorsFound = true;
+        }
+    }
+
+    // Helper: check that no surface is assigned to more than one radiant system.
+    // Marks each surface (and its interzone partner) in AssignedAsRadiantSurface.
+    static void checkRadiantSurfaceAssignment(
+        EnergyPlusData &state, Array1D_bool &AssignedAsRadiantSurface, int numSurfaces, const Array1D_int &SurfacePtr, bool &ErrorsFound)
+    {
+        auto &Surface = state.dataSurface->Surface;
+        for (int SurfNum = 1; SurfNum <= numSurfaces; ++SurfNum) {
+            int CheckSurfNum = SurfacePtr(SurfNum);
+            if (CheckSurfNum == 0) {
+                continue;
+            }
+            if (AssignedAsRadiantSurface(CheckSurfNum)) {
+                ShowSevereError(
+                    state,
+                    EnergyPlus::format("Surface {} is referenced by more than one radiant system--this is not allowed", Surface(CheckSurfNum).Name));
+                ErrorsFound = true;
+            } else {
+                AssignedAsRadiantSurface(CheckSurfNum) = true;
+            }
+            // Also check the other side of interzone partitions
+            if ((Surface(CheckSurfNum).ExtBoundCond > 0) && (Surface(CheckSurfNum).ExtBoundCond != CheckSurfNum)) {
+                if (AssignedAsRadiantSurface(Surface(CheckSurfNum).ExtBoundCond)) {
+                    ShowSevereError(state,
+                                    EnergyPlus::format("Interzone surface {} is referenced by more than one radiant system--this is not allowed",
+                                                       Surface(Surface(CheckSurfNum).ExtBoundCond).Name));
+                    ErrorsFound = true;
+                } else {
+                    AssignedAsRadiantSurface(Surface(CheckSurfNum).ExtBoundCond) = true;
+                }
+            }
+        }
+    }
+
     void SimLowTempRadiantSystem(EnergyPlusData &state,
                                  std::string_view CompName,     // name of the low temperature radiant system
                                  bool const FirstHVACIteration, // TRUE if 1st HVAC simulation of system timestep
@@ -318,7 +521,6 @@ namespace LowTempRadiantSystem {
         Array1D_string cAlphaFields;           // Alpha field names
         Array1D_string cNumericFields;         // Numeric field names
         Array1D_bool AssignedAsRadiantSurface; // Set to true when a surface is part of a radiant system
-        int CheckSurfNum;                      // Surface number to check to see if it has already been used by a radiant system
         bool ErrorsFound(false);               // Set to true if errors in input, fatal at end of routine
         int IOStatus;                          // Used in GetObjectItem
         int Item;                              // Item to be "gotten"
@@ -335,7 +537,6 @@ namespace LowTempRadiantSystem {
         Array1D_bool lNumericBlanks;           // Logical array, numeric field input BLANK = .TRUE.
 
         auto &Zone = state.dataHeatBal->Zone;
-        auto &Surface = state.dataSurface->Surface;
 
         Array1D_string VarFlowRadDesignNames;
         Array1D_string CFlowRadDesignNames;
@@ -497,51 +698,23 @@ namespace LowTempRadiantSystem {
 
             // Determine Low Temp Radiant heating design capacity sizing method
             thisRadSysDesign.DesignHeatingCapMethodInput = Alphas(5);
-            if (Util::SameString(thisRadSysDesign.DesignHeatingCapMethodInput, "HeatingDesignCapacity")) {
-                thisRadSysDesign.DesignHeatingCapMethod = HeatingDesignCapacity;
-            } else if (Util::SameString(thisRadSysDesign.DesignHeatingCapMethodInput, "CapacityPerFloorArea")) {
-                thisRadSysDesign.DesignHeatingCapMethod = CapacityPerFloorArea;
-                if (!lNumericBlanks(4)) {
-                    thisRadSysDesign.DesignScaledHeatingCapacity = Numbers(4);
-                    if (thisRadSysDesign.DesignScaledHeatingCapacity <= 0.0) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Input for {} = {}", cAlphaFields(5), thisRadSysDesign.DesignHeatingCapMethodInput));
-                        ShowContinueError(state, EnergyPlus::format("Illegal {} = {:.7T}", cNumericFields(4), Numbers(4)));
-                        ErrorsFound = true;
-                    } else if (thisRadSysDesign.DesignScaledHeatingCapacity == AutoSize) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Input for {} = {}", cAlphaFields(5), thisRadSysDesign.DesignHeatingCapMethodInput));
-                        ShowContinueError(state, EnergyPlus::format("Illegal {} = Autosize", cNumericFields(4)));
-                        ErrorsFound = true;
-                    }
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.Name));
-                    ShowContinueError(state, EnergyPlus::format("Input for {} = {}", cAlphaFields(5), thisRadSysDesign.DesignHeatingCapMethodInput));
-                    ShowContinueError(state, EnergyPlus::format("Blank field not allowed for {}", cNumericFields(4)));
-                    ErrorsFound = true;
-                }
-            } else if (Util::SameString(thisRadSysDesign.DesignHeatingCapMethodInput, "FractionOfAutosizedHeatingCapacity")) {
-                thisRadSysDesign.DesignHeatingCapMethod = FractionOfAutosizedHeatingCapacity;
-                if (!lNumericBlanks(5)) {
-                    thisRadSysDesign.DesignScaledHeatingCapacity = Numbers(5);
-                    if (thisRadSysDesign.DesignScaledHeatingCapacity < 0.0) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
-                        ShowContinueError(state, EnergyPlus::format("Illegal {} = {:.7T}", cNumericFields(5), Numbers(5)));
-                        ErrorsFound = true;
-                    }
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
-                    ShowContinueError(state, EnergyPlus::format("Input for {} = {}", cAlphaFields(5), thisRadSysDesign.DesignHeatingCapMethodInput));
-                    ShowContinueError(state, EnergyPlus::format("Blank field not allowed for {}", cNumericFields(5)));
-                    ErrorsFound = true;
-                }
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
-                ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(5), thisRadSysDesign.DesignHeatingCapMethodInput));
-                ErrorsFound = true;
-            }
+            parseDesignCapacitySizingMethod(state,
+                                            thisRadSysDesign.DesignHeatingCapMethodInput,
+                                            thisRadSysDesign.designName,
+                                            CurrentModuleObject,
+                                            cAlphaFields(5),
+                                            "HeatingDesignCapacity",
+                                            HeatingDesignCapacity,
+                                            "FractionOfAutosizedHeatingCapacity",
+                                            FractionOfAutosizedHeatingCapacity,
+                                            4, // capPerFloorArea numeric index
+                                            5, // fraction numeric index
+                                            Numbers,
+                                            lNumericBlanks,
+                                            cNumericFields,
+                                            thisRadSysDesign.DesignHeatingCapMethod,
+                                            thisRadSysDesign.DesignScaledHeatingCapacity,
+                                            ErrorsFound);
 
             thisRadSysDesign.HotThrottlRange = Numbers(6);
 
@@ -553,52 +726,23 @@ namespace LowTempRadiantSystem {
 
             // Determine Low Temp Radiant cooling design capacity sizing method
             thisRadSysDesign.DesignCoolingCapMethodInput = Alphas(7);
-            if (Util::SameString(thisRadSysDesign.DesignCoolingCapMethodInput, "CoolingDesignCapacity")) {
-                thisRadSysDesign.DesignCoolingCapMethod = CoolingDesignCapacity;
-            } else if (Util::SameString(thisRadSysDesign.DesignCoolingCapMethodInput, "CapacityPerFloorArea")) {
-                thisRadSysDesign.DesignCoolingCapMethod = CapacityPerFloorArea;
-                if (!lNumericBlanks(7)) {
-                    thisRadSysDesign.DesignScaledCoolingCapacity = Numbers(7);
-                    if (thisRadSysDesign.DesignScaledCoolingCapacity <= 0.0) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Input for {} = {}", cAlphaFields(7), thisRadSysDesign.DesignCoolingCapMethodInput));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Illegal {} = {:.7T}", cNumericFields(7), thisRadSysDesign.DesignScaledCoolingCapacity));
-                        ErrorsFound = true;
-                    } else if (thisRadSysDesign.DesignScaledCoolingCapacity == AutoSize) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Input for {} = {}", cAlphaFields(7), thisRadSysDesign.DesignCoolingCapMethodInput));
-                        ShowContinueError(state, EnergyPlus::format("Illegal {} = Autosize", cNumericFields(7)));
-                        ErrorsFound = true;
-                    }
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
-                    ShowContinueError(state, EnergyPlus::format("Input for {} = {}", cAlphaFields(7), thisRadSysDesign.DesignCoolingCapMethodInput));
-                    ShowContinueError(state, EnergyPlus::format("Blank field not allowed for {}", cNumericFields(7)));
-                    ErrorsFound = true;
-                }
-            } else if (Util::SameString(thisRadSysDesign.DesignCoolingCapMethodInput, "FractionOfAutosizedCoolingCapacity")) {
-                thisRadSysDesign.DesignCoolingCapMethod = FractionOfAutosizedCoolingCapacity;
-                if (!lNumericBlanks(8)) {
-                    thisRadSysDesign.DesignScaledCoolingCapacity = Numbers(8);
-                    if (thisRadSysDesign.DesignScaledCoolingCapacity < 0.0) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
-                        ShowContinueError(state, EnergyPlus::format("Illegal {} = {:.7T}", cNumericFields(8), Numbers(8)));
-                        ErrorsFound = true;
-                    }
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
-                    ShowContinueError(state, EnergyPlus::format("Input for {} = {}", cAlphaFields(7), thisRadSysDesign.DesignCoolingCapMethodInput));
-                    ShowContinueError(state, EnergyPlus::format("Blank field not allowed for {}", cNumericFields(8)));
-                    ErrorsFound = true;
-                }
-            } else {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
-                ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(7), thisRadSysDesign.DesignCoolingCapMethodInput));
-                ErrorsFound = true;
-            }
+            parseDesignCapacitySizingMethod(state,
+                                            thisRadSysDesign.DesignCoolingCapMethodInput,
+                                            thisRadSysDesign.designName,
+                                            CurrentModuleObject,
+                                            cAlphaFields(7),
+                                            "CoolingDesignCapacity",
+                                            CoolingDesignCapacity,
+                                            "FractionOfAutosizedCoolingCapacity",
+                                            FractionOfAutosizedCoolingCapacity,
+                                            7, // capPerFloorArea numeric index
+                                            8, // fraction numeric index
+                                            Numbers,
+                                            lNumericBlanks,
+                                            cNumericFields,
+                                            thisRadSysDesign.DesignCoolingCapMethod,
+                                            thisRadSysDesign.DesignScaledCoolingCapacity,
+                                            ErrorsFound);
 
             thisRadSysDesign.ColdThrottlRange = Numbers(9);
 
@@ -691,49 +835,19 @@ namespace LowTempRadiantSystem {
             }
 
             thisRadSys.SurfListName = Alphas(5);
-            SurfListNum = 0;
-            if (state.dataSurfLists->NumOfSurfaceLists > 0) {
-                SurfListNum = Util::FindItemInList(thisRadSys.SurfListName, state.dataSurfLists->SurfList);
-            }
-            if (SurfListNum > 0) { // Found a valid surface list
-                thisRadSys.NumOfSurfaces = state.dataSurfLists->SurfList(SurfListNum).NumOfSurfaces;
-                thisRadSys.SurfacePtr.allocate(thisRadSys.NumOfSurfaces);
-                thisRadSys.SurfaceName.allocate(thisRadSys.NumOfSurfaces);
-                thisRadSys.SurfaceFrac.allocate(thisRadSys.NumOfSurfaces);
-                thisRadSys.NumCircuits.allocate(thisRadSys.NumOfSurfaces);
-                for (SurfNum = 1; SurfNum <= state.dataSurfLists->SurfList(SurfListNum).NumOfSurfaces; ++SurfNum) {
-                    thisRadSys.SurfacePtr(SurfNum) = state.dataSurfLists->SurfList(SurfListNum).SurfPtr(SurfNum);
-                    thisRadSys.SurfaceName(SurfNum) = state.dataSurfLists->SurfList(SurfListNum).SurfName(SurfNum);
-                    thisRadSys.SurfaceFrac(SurfNum) = state.dataSurfLists->SurfList(SurfListNum).SurfFlowFrac(SurfNum);
+            SurfListNum = parseSurfaceListOrSingleSurface(
+                state, thisRadSys, RoutineName, CurrentModuleObject, cAlphaFields(5), Alphas(5), Alphas(1), ErrorsFound);
+            thisRadSys.NumCircuits.allocate(thisRadSys.NumOfSurfaces);
+            if (SurfListNum > 0) {
+                for (SurfNum = 1; SurfNum <= thisRadSys.NumOfSurfaces; ++SurfNum) {
                     if (thisRadSys.SurfacePtr(SurfNum) > 0) {
                         state.dataSurface->surfIntConv(thisRadSys.SurfacePtr(SurfNum)).hasActiveInIt = true;
                     }
                 }
-            } else { // User entered a single surface name rather than a surface list
-                thisRadSys.NumOfSurfaces = 1;
-                thisRadSys.SurfacePtr.allocate(thisRadSys.NumOfSurfaces);
-                thisRadSys.SurfaceName.allocate(thisRadSys.NumOfSurfaces);
-                thisRadSys.SurfaceFrac.allocate(thisRadSys.NumOfSurfaces);
-                thisRadSys.NumCircuits.allocate(thisRadSys.NumOfSurfaces);
-                thisRadSys.SurfaceName(1) = thisRadSys.SurfListName;
-                thisRadSys.SurfacePtr(1) = Util::FindItemInList(thisRadSys.SurfaceName(1), Surface);
-                thisRadSys.SurfaceFrac(1) = 1.0;
+            } else {
                 thisRadSys.NumCircuits(1) = 0.0;
-                // Error checking for single surfaces
-                if (thisRadSys.SurfacePtr(1) == 0) {
-                    ShowSevereError(state, EnergyPlus::format("{}Invalid {} = {}", RoutineName, cAlphaFields(5), Alphas(5)));
-                    ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                } else if (state.dataSurface->SurfIsRadSurfOrVentSlabOrPool(thisRadSys.SurfacePtr(1))) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", Invalid Surface", RoutineName, CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("{}=\"{}\" has been used in another radiant system or ventilated slab.", cAlphaFields(5), Alphas(5)));
-                    ErrorsFound = true;
-                }
                 if (thisRadSys.SurfacePtr(1) != 0) {
                     state.dataSurface->surfIntConv(thisRadSys.SurfacePtr(1)).hasActiveInIt = true;
-                    state.dataSurface->surfIntConv(thisRadSys.SurfacePtr(1)).hasActiveInIt = true; // Ummmm ... what?
                 }
             }
 
@@ -743,30 +857,25 @@ namespace LowTempRadiantSystem {
             thisRadSys.TubeLength = Numbers(1);
 
             // Determine Low Temp Radiant heating design capacity sizing method
-            if (variableFlowDesignDataObject.DesignHeatingCapMethod == HeatingDesignCapacity) {
-                thisRadSys.HeatingCapMethod = HeatingDesignCapacity;
-                if (!lNumericBlanks(2)) {
-                    thisRadSys.ScaledHeatingCapacity = Numbers(2);
-                    if (thisRadSys.ScaledHeatingCapacity < 0.0 && thisRadSys.ScaledHeatingCapacity != AutoSize) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSys.Name));
-                        ShowContinueError(state, EnergyPlus::format("Illegal {} = {:.7T}", cNumericFields(2), Numbers(2)));
-                        ErrorsFound = true;
-                    }
-                } else {
-                    if ((!lAlphaBlanks(6)) || (!lAlphaBlanks(7))) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSys.Name));
-                        ShowContinueError(state, "Input for Heating Design Capacity Method = HeatingDesignCapacity");
-                        ShowContinueError(state, EnergyPlus::format("Blank field not allowed for {}", cNumericFields(2)));
-                        ErrorsFound = true;
-                    }
-                }
-            } else if (variableFlowDesignDataObject.DesignHeatingCapMethod == CapacityPerFloorArea) {
-                thisRadSys.HeatingCapMethod = CapacityPerFloorArea;
-                thisRadSys.ScaledHeatingCapacity = variableFlowDesignDataObject.DesignScaledHeatingCapacity;
-            } else if (variableFlowDesignDataObject.DesignHeatingCapMethod == FractionOfAutosizedHeatingCapacity) {
-                thisRadSys.HeatingCapMethod = FractionOfAutosizedHeatingCapacity;
-                thisRadSys.ScaledHeatingCapacity = variableFlowDesignDataObject.DesignScaledHeatingCapacity;
-            }
+            applyDesignCapacityFromDesignObject(state,
+                                                variableFlowDesignDataObject.DesignHeatingCapMethod,
+                                                HeatingDesignCapacity,
+                                                CapacityPerFloorArea,
+                                                FractionOfAutosizedHeatingCapacity,
+                                                variableFlowDesignDataObject.DesignScaledHeatingCapacity,
+                                                CurrentModuleObject,
+                                                thisRadSys.Name,
+                                                "Heating",
+                                                2,
+                                                6,
+                                                7,
+                                                Numbers,
+                                                lNumericBlanks,
+                                                lAlphaBlanks,
+                                                cNumericFields,
+                                                thisRadSys.HeatingCapMethod,
+                                                thisRadSys.ScaledHeatingCapacity,
+                                                ErrorsFound);
 
             // Heating user input data
             thisRadSys.WaterVolFlowMaxHeat = Numbers(3);
@@ -803,30 +912,25 @@ namespace LowTempRadiantSystem {
             }
 
             // Determine Low Temp Radiant cooling design capacity sizing method
-            if (variableFlowDesignDataObject.DesignCoolingCapMethod == CoolingDesignCapacity) {
-                thisRadSys.CoolingCapMethod = CoolingDesignCapacity;
-                if (!lNumericBlanks(4)) {
-                    thisRadSys.ScaledCoolingCapacity = Numbers(4);
-                    if (thisRadSys.ScaledCoolingCapacity < 0.0 && thisRadSys.ScaledCoolingCapacity != AutoSize) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSys.Name));
-                        ShowContinueError(state, EnergyPlus::format("Illegal {} = {:.7T}", cNumericFields(4), Numbers(4)));
-                        ErrorsFound = true;
-                    }
-                } else {
-                    if ((!lAlphaBlanks(8)) || (!lAlphaBlanks(9))) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSys.Name));
-                        ShowContinueError(state, "Input for Cooling Design Capacity Method = CoolingDesignCapacity");
-                        ShowContinueError(state, EnergyPlus::format("Blank field not allowed for {}", cNumericFields(4)));
-                        ErrorsFound = true;
-                    }
-                }
-            } else if (variableFlowDesignDataObject.DesignCoolingCapMethod == CapacityPerFloorArea) {
-                thisRadSys.CoolingCapMethod = CapacityPerFloorArea;
-                thisRadSys.ScaledCoolingCapacity = variableFlowDesignDataObject.DesignScaledCoolingCapacity;
-            } else if (variableFlowDesignDataObject.DesignCoolingCapMethod == FractionOfAutosizedCoolingCapacity) {
-                thisRadSys.CoolingCapMethod = FractionOfAutosizedCoolingCapacity;
-                thisRadSys.ScaledCoolingCapacity = variableFlowDesignDataObject.DesignScaledCoolingCapacity;
-            }
+            applyDesignCapacityFromDesignObject(state,
+                                                variableFlowDesignDataObject.DesignCoolingCapMethod,
+                                                CoolingDesignCapacity,
+                                                CapacityPerFloorArea,
+                                                FractionOfAutosizedCoolingCapacity,
+                                                variableFlowDesignDataObject.DesignScaledCoolingCapacity,
+                                                CurrentModuleObject,
+                                                thisRadSys.Name,
+                                                "Cooling",
+                                                4,
+                                                8,
+                                                9,
+                                                Numbers,
+                                                lNumericBlanks,
+                                                lAlphaBlanks,
+                                                cNumericFields,
+                                                thisRadSys.CoolingCapMethod,
+                                                thisRadSys.ScaledCoolingCapacity,
+                                                ErrorsFound);
 
             // Cooling user input data
             thisRadSys.WaterVolFlowMaxCool = Numbers(5);
@@ -1010,49 +1114,19 @@ namespace LowTempRadiantSystem {
             }
 
             thisCFloSys.SurfListName = Alphas(5);
-            SurfListNum = 0;
-            if (state.dataSurfLists->NumOfSurfaceLists > 0) {
-                SurfListNum = Util::FindItemInList(thisCFloSys.SurfListName, state.dataSurfLists->SurfList);
-            }
-            if (SurfListNum > 0) { // Found a valid surface list
-                thisCFloSys.NumOfSurfaces = state.dataSurfLists->SurfList(SurfListNum).NumOfSurfaces;
-                thisCFloSys.SurfacePtr.allocate(thisCFloSys.NumOfSurfaces);
-                thisCFloSys.SurfaceName.allocate(thisCFloSys.NumOfSurfaces);
-                thisCFloSys.SurfaceFrac.allocate(thisCFloSys.NumOfSurfaces);
-                thisCFloSys.NumCircuits.allocate(thisCFloSys.NumOfSurfaces);
-                state.dataLowTempRadSys->MaxCloNumOfSurfaces = max(state.dataLowTempRadSys->MaxCloNumOfSurfaces, thisCFloSys.NumOfSurfaces);
-                for (SurfNum = 1; SurfNum <= state.dataSurfLists->SurfList(SurfListNum).NumOfSurfaces; ++SurfNum) {
-                    thisCFloSys.SurfacePtr(SurfNum) = state.dataSurfLists->SurfList(SurfListNum).SurfPtr(SurfNum);
-                    thisCFloSys.SurfaceName(SurfNum) = state.dataSurfLists->SurfList(SurfListNum).SurfName(SurfNum);
-                    thisCFloSys.SurfaceFrac(SurfNum) = state.dataSurfLists->SurfList(SurfListNum).SurfFlowFrac(SurfNum);
+            SurfListNum = parseSurfaceListOrSingleSurface(
+                state, thisCFloSys, RoutineName, CurrentModuleObject, cAlphaFields(5), Alphas(5), Alphas(1), ErrorsFound);
+            thisCFloSys.NumCircuits.allocate(thisCFloSys.NumOfSurfaces);
+            state.dataLowTempRadSys->MaxCloNumOfSurfaces = max(state.dataLowTempRadSys->MaxCloNumOfSurfaces, thisCFloSys.NumOfSurfaces);
+            if (SurfListNum > 0) {
+                for (SurfNum = 1; SurfNum <= thisCFloSys.NumOfSurfaces; ++SurfNum) {
                     thisCFloSys.NumCircuits(SurfNum) = 0.0;
                     if (thisCFloSys.SurfacePtr(SurfNum) != 0) {
                         state.dataSurface->surfIntConv(thisCFloSys.SurfacePtr(SurfNum)).hasActiveInIt = true;
                     }
                 }
-            } else { // User entered a single surface name rather than a surface list
-                thisCFloSys.NumOfSurfaces = 1;
-                thisCFloSys.SurfacePtr.allocate(thisCFloSys.NumOfSurfaces);
-                thisCFloSys.SurfaceName.allocate(thisCFloSys.NumOfSurfaces);
-                thisCFloSys.SurfaceFrac.allocate(thisCFloSys.NumOfSurfaces);
-                thisCFloSys.NumCircuits.allocate(thisCFloSys.NumOfSurfaces);
-                state.dataLowTempRadSys->MaxCloNumOfSurfaces = max(state.dataLowTempRadSys->MaxCloNumOfSurfaces, thisCFloSys.NumOfSurfaces);
-                thisCFloSys.SurfaceName(1) = thisCFloSys.SurfListName;
-                thisCFloSys.SurfacePtr(1) = Util::FindItemInList(thisCFloSys.SurfaceName(1), Surface);
-                thisCFloSys.SurfaceFrac(1) = 1.0;
+            } else {
                 thisCFloSys.NumCircuits(1) = 0.0;
-                // Error checking for single surfaces
-                if (thisCFloSys.SurfacePtr(1) == 0) {
-                    ShowSevereError(state, EnergyPlus::format("{}Invalid {} = {}", RoutineName, cAlphaFields(4), Alphas(4)));
-                    ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                } else if (state.dataSurface->SurfIsRadSurfOrVentSlabOrPool(thisCFloSys.SurfacePtr(1))) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", Invalid Surface", RoutineName, CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("{}=\"{}\" has been used in another radiant system or ventilated slab.", cAlphaFields(5), Alphas(5)));
-                    ErrorsFound = true;
-                }
                 if (thisCFloSys.SurfacePtr(1) != 0) {
                     state.dataSurface->surfIntConv(thisCFloSys.SurfacePtr(1)).hasActiveInIt = true;
                     state.dataSurface->SurfIsRadSurfOrVentSlabOrPool(thisCFloSys.SurfacePtr(1)) = true;
@@ -1238,43 +1312,10 @@ namespace LowTempRadiantSystem {
             }
 
             thisElecSys.SurfListName = Alphas(4);
-            SurfListNum = 0;
-            if (state.dataSurfLists->NumOfSurfaceLists > 0) {
-                SurfListNum = Util::FindItemInList(thisElecSys.SurfListName, state.dataSurfLists->SurfList);
-            }
-            if (SurfListNum > 0) { // Found a valid surface list
-                thisElecSys.NumOfSurfaces = state.dataSurfLists->SurfList(SurfListNum).NumOfSurfaces;
-                thisElecSys.SurfacePtr.allocate(thisElecSys.NumOfSurfaces);
-                thisElecSys.SurfaceName.allocate(thisElecSys.NumOfSurfaces);
-                thisElecSys.SurfaceFrac.allocate(thisElecSys.NumOfSurfaces);
-                for (SurfNum = 1; SurfNum <= state.dataSurfLists->SurfList(SurfListNum).NumOfSurfaces; ++SurfNum) {
-                    thisElecSys.SurfacePtr(SurfNum) = state.dataSurfLists->SurfList(SurfListNum).SurfPtr(SurfNum);
-                    thisElecSys.SurfaceName(SurfNum) = state.dataSurfLists->SurfList(SurfListNum).SurfName(SurfNum);
-                    thisElecSys.SurfaceFrac(SurfNum) = state.dataSurfLists->SurfList(SurfListNum).SurfFlowFrac(SurfNum);
-                }
-            } else { // User entered a single surface name rather than a surface list
-                thisElecSys.NumOfSurfaces = 1;
-                thisElecSys.SurfacePtr.allocate(thisElecSys.NumOfSurfaces);
-                thisElecSys.SurfaceName.allocate(thisElecSys.NumOfSurfaces);
-                thisElecSys.SurfaceFrac.allocate(thisElecSys.NumOfSurfaces);
-                thisElecSys.SurfaceName(1) = thisElecSys.SurfListName;
-                thisElecSys.SurfacePtr(1) = Util::FindItemInList(thisElecSys.SurfaceName(1), Surface);
-                thisElecSys.SurfaceFrac(1) = 1.0;
-                // Error checking for single surfaces
-                if (thisElecSys.SurfacePtr(1) == 0) {
-                    ShowSevereError(state, EnergyPlus::format("{}Invalid {} = {}", RoutineName, cAlphaFields(4), Alphas(4)));
-                    ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                } else if (state.dataSurface->SurfIsRadSurfOrVentSlabOrPool(thisElecSys.SurfacePtr(1))) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", Invalid Surface", RoutineName, CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("{}=\"{}\" has been used in another radiant system or ventilated slab.", cAlphaFields(4), Alphas(4)));
-                    ErrorsFound = true;
-                }
-                if (thisElecSys.SurfacePtr(1) != 0) {
-                    state.dataSurface->SurfIsRadSurfOrVentSlabOrPool(state.dataLowTempRadSys->ElecRadSys(Item).SurfacePtr(1)) = true;
-                }
+            SurfListNum = parseSurfaceListOrSingleSurface(
+                state, thisElecSys, RoutineName, CurrentModuleObject, cAlphaFields(4), Alphas(4), Alphas(1), ErrorsFound);
+            if (SurfListNum <= 0 && thisElecSys.SurfacePtr(1) != 0) {
+                state.dataSurface->SurfIsRadSurfOrVentSlabOrPool(thisElecSys.SurfacePtr(1)) = true;
             }
 
             // Error checking for zones and construction information
@@ -1388,87 +1429,18 @@ namespace LowTempRadiantSystem {
         AssignedAsRadiantSurface.dimension(state.dataSurface->TotSurfaces, false);
 
         for (Item = 1; Item <= state.dataLowTempRadSys->NumOfHydrLowTempRadSys; ++Item) {
-            for (SurfNum = 1; SurfNum <= state.dataLowTempRadSys->HydrRadSys(Item).NumOfSurfaces; ++SurfNum) {
-                CheckSurfNum = state.dataLowTempRadSys->HydrRadSys(Item).SurfacePtr(SurfNum);
-                if (CheckSurfNum == 0) {
-                    continue;
-                }
-                if (AssignedAsRadiantSurface(CheckSurfNum)) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("Surface {} is referenced by more than one radiant system--this is not allowed",
-                                                       Surface(CheckSurfNum).Name));
-                    ErrorsFound = true;
-                } else {
-                    AssignedAsRadiantSurface(CheckSurfNum) = true;
-                }
-                // Also check the other side of interzone partitions
-                if ((Surface(CheckSurfNum).ExtBoundCond > 0) && (Surface(CheckSurfNum).ExtBoundCond != CheckSurfNum)) {
-                    if (AssignedAsRadiantSurface(Surface(CheckSurfNum).ExtBoundCond)) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("Interzone surface {} is referenced by more than one radiant system--this is not allowed",
-                                                           Surface(Surface(CheckSurfNum).ExtBoundCond).Name));
-                        ErrorsFound = true;
-                    } else {
-                        AssignedAsRadiantSurface(Surface(CheckSurfNum).ExtBoundCond) = true;
-                    }
-                }
-            }
+            auto &sys = state.dataLowTempRadSys->HydrRadSys(Item);
+            checkRadiantSurfaceAssignment(state, AssignedAsRadiantSurface, sys.NumOfSurfaces, sys.SurfacePtr, ErrorsFound);
         }
 
         for (Item = 1; Item <= state.dataLowTempRadSys->NumOfCFloLowTempRadSys; ++Item) {
-            for (SurfNum = 1; SurfNum <= state.dataLowTempRadSys->CFloRadSys(Item).NumOfSurfaces; ++SurfNum) {
-                CheckSurfNum = state.dataLowTempRadSys->CFloRadSys(Item).SurfacePtr(SurfNum);
-                if (CheckSurfNum == 0) {
-                    continue;
-                }
-                if (AssignedAsRadiantSurface(CheckSurfNum)) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("Surface {} is referenced by more than one radiant system--this is not allowed",
-                                                       Surface(CheckSurfNum).Name));
-                    ErrorsFound = true;
-                } else {
-                    AssignedAsRadiantSurface(CheckSurfNum) = true;
-                }
-                // Also check the other side of interzone partitions
-                if ((Surface(CheckSurfNum).ExtBoundCond > 0) && (Surface(CheckSurfNum).ExtBoundCond != CheckSurfNum)) {
-                    if (AssignedAsRadiantSurface(Surface(CheckSurfNum).ExtBoundCond)) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("Interzone surface {} is referenced by more than one radiant system--this is not allowed",
-                                                           Surface(Surface(CheckSurfNum).ExtBoundCond).Name));
-                        ErrorsFound = true;
-                    } else {
-                        AssignedAsRadiantSurface(Surface(CheckSurfNum).ExtBoundCond) = true;
-                    }
-                }
-            }
+            auto &sys = state.dataLowTempRadSys->CFloRadSys(Item);
+            checkRadiantSurfaceAssignment(state, AssignedAsRadiantSurface, sys.NumOfSurfaces, sys.SurfacePtr, ErrorsFound);
         }
 
         for (Item = 1; Item <= state.dataLowTempRadSys->NumOfElecLowTempRadSys; ++Item) {
-            for (SurfNum = 1; SurfNum <= state.dataLowTempRadSys->ElecRadSys(Item).NumOfSurfaces; ++SurfNum) {
-                CheckSurfNum = state.dataLowTempRadSys->ElecRadSys(Item).SurfacePtr(SurfNum);
-                if (CheckSurfNum == 0) {
-                    continue;
-                }
-                if (AssignedAsRadiantSurface(CheckSurfNum)) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("Surface {} is referenced by more than one radiant system--this is not allowed",
-                                                       Surface(CheckSurfNum).Name));
-                    ErrorsFound = true;
-                } else {
-                    AssignedAsRadiantSurface(CheckSurfNum) = true;
-                }
-                // Also check the other side of interzone partitions
-                if ((Surface(CheckSurfNum).ExtBoundCond > 0) && (Surface(CheckSurfNum).ExtBoundCond != CheckSurfNum)) {
-                    if (AssignedAsRadiantSurface(Surface(CheckSurfNum).ExtBoundCond)) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("Interzone surface {} is referenced by more than one radiant system--this is not allowed",
-                                                           Surface(Surface(CheckSurfNum).ExtBoundCond).Name));
-                        ErrorsFound = true;
-                    } else {
-                        AssignedAsRadiantSurface(Surface(CheckSurfNum).ExtBoundCond) = true;
-                    }
-                }
-            }
+            auto &sys = state.dataLowTempRadSys->ElecRadSys(Item);
+            checkRadiantSurfaceAssignment(state, AssignedAsRadiantSurface, sys.NumOfSurfaces, sys.SurfacePtr, ErrorsFound);
         }
 
         AssignedAsRadiantSurface.deallocate();

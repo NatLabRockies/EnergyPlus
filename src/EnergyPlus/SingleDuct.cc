@@ -92,6 +92,58 @@
 
 namespace EnergyPlus::SingleDuct {
 
+// Helper: look up the Air Distribution Unit for an air terminal, connect it to
+// the zone equipment config, and populate CtrlZoneNum / ZoneFloorArea.
+// Extracted from GetSysInput where this block was repeated for every terminal type.
+static void connectAirTermToZone(EnergyPlusData &state,
+                                 SingleDuctAirTerminal &airTerm,
+                                 std::string_view RoutineName,
+                                 int outletNode, // node used to match ADU and zone inlet
+                                 bool &ErrorsFound)
+{
+    // Find matching Air Distribution Unit
+    for (int ADUNum = 1; ADUNum <= (int)state.dataDefineEquipment->AirDistUnit.size(); ++ADUNum) {
+        if (outletNode == state.dataDefineEquipment->AirDistUnit(ADUNum).OutletNodeNum) {
+            state.dataDefineEquipment->AirDistUnit(ADUNum).InletNodeNum = airTerm.InletNodeNum;
+            airTerm.ADUNum = ADUNum;
+            break;
+        }
+    }
+    if (airTerm.ADUNum == 0) {
+        ShowSevereError(
+            state, EnergyPlus::format("{}No matching Air Distribution Unit, for System = [{},{}].", RoutineName, airTerm.sysType, airTerm.SysName));
+        ShowContinueError(state, EnergyPlus::format("...should have outlet node = {}", state.dataLoopNodes->NodeID(outletNode)));
+        ErrorsFound = true;
+    } else {
+        for (int CtrlZone = 1; CtrlZone <= state.dataGlobal->NumOfZones; ++CtrlZone) {
+            if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) {
+                continue;
+            }
+            for (int SupAirIn = 1; SupAirIn <= state.dataZoneEquip->ZoneEquipConfig(CtrlZone).NumInletNodes; ++SupAirIn) {
+                if (outletNode == state.dataZoneEquip->ZoneEquipConfig(CtrlZone).InletNode(SupAirIn)) {
+                    if (state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).OutNode > 0) {
+                        ShowSevereError(state, "Error in connecting a terminal unit to a zone");
+                        ShowContinueError(state, EnergyPlus::format("{} already connects to another zone", state.dataLoopNodes->NodeID(outletNode)));
+                        ShowContinueError(state, EnergyPlus::format("Occurs for terminal unit {} = {}", airTerm.sysType, airTerm.SysName));
+                        ShowContinueError(state, "Check terminal unit node names for errors");
+                        ErrorsFound = true;
+                    } else {
+                        state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).InNode = airTerm.InletNodeNum;
+                        state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).OutNode = outletNode;
+                        state.dataDefineEquipment->AirDistUnit(airTerm.ADUNum).TermUnitSizingNum =
+                            state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).TermUnitSizingIndex;
+                        state.dataDefineEquipment->AirDistUnit(airTerm.ADUNum).ZoneEqNum = CtrlZone;
+                    }
+                    airTerm.CtrlZoneNum = CtrlZone;
+                    airTerm.CtrlZoneInNodeIndex = SupAirIn;
+                    airTerm.ZoneFloorArea = state.dataHeatBal->Zone(CtrlZone).FloorArea * state.dataHeatBal->Zone(CtrlZone).Multiplier *
+                                            state.dataHeatBal->Zone(CtrlZone).ListMultiplier;
+                }
+            }
+        }
+    }
+}
+
 // Module containing the Single Duct Systems as a single component/ or really a single driver
 
 // MODULE INFORMATION:
@@ -240,9 +292,6 @@ void GetSysInput(EnergyPlusData &state)
     int IOStat;
     bool ErrorsFound(false);         // If errors detected in input
     bool IsNotOK;                    // Flag to verify name
-    int CtrlZone;                    // controlled zone do loop index
-    int SupAirIn;                    // controlled zone supply air inlet index
-    int ADUNum;                      // air distribution unit index
     std::string CurrentModuleObject; // for ease in getting objects
     Array1D_string Alphas;           // Alpha input items for object
     Array1D_string cAlphaFields;     // Alpha field names
@@ -277,55 +326,18 @@ void GetSysInput(EnergyPlusData &state)
     state.dataSingleDuct->SysUniqueNames.reserve(static_cast<unsigned>(state.dataSingleDuct->NumSDAirTerminal));
     state.dataSingleDuct->CheckEquipName.dimension(state.dataSingleDuct->NumSDAirTerminal, true);
 
-    state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state,
-                                                                   "AirTerminal:SingleDuct:VAV:Reheat",
-                                                                   state.dataSingleDuct->TotalArgsGSI,
-                                                                   state.dataSingleDuct->NumAlphasGSI,
-                                                                   state.dataSingleDuct->NumNumsGSI);
-    state.dataSingleDuct->MaxNumsGSI = max(state.dataSingleDuct->MaxNumsGSI, state.dataSingleDuct->NumNumsGSI);
-    state.dataSingleDuct->MaxAlphasGSI = max(state.dataSingleDuct->MaxAlphasGSI, state.dataSingleDuct->NumAlphasGSI);
-    state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state,
-                                                                   "AirTerminal:SingleDuct:VAV:NoReheat",
-                                                                   state.dataSingleDuct->TotalArgsGSI,
-                                                                   state.dataSingleDuct->NumAlphasGSI,
-                                                                   state.dataSingleDuct->NumNumsGSI);
-    state.dataSingleDuct->MaxNumsGSI = max(state.dataSingleDuct->MaxNumsGSI, state.dataSingleDuct->NumNumsGSI);
-    state.dataSingleDuct->MaxAlphasGSI = max(state.dataSingleDuct->MaxAlphasGSI, state.dataSingleDuct->NumAlphasGSI);
-    state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state,
-                                                                   "AirTerminal:SingleDuct:ConstantVolume:Reheat",
-                                                                   state.dataSingleDuct->TotalArgsGSI,
-                                                                   state.dataSingleDuct->NumAlphasGSI,
-                                                                   state.dataSingleDuct->NumNumsGSI);
-    state.dataSingleDuct->MaxNumsGSI = max(state.dataSingleDuct->MaxNumsGSI, state.dataSingleDuct->NumNumsGSI);
-    state.dataSingleDuct->MaxAlphasGSI = max(state.dataSingleDuct->MaxAlphasGSI, state.dataSingleDuct->NumAlphasGSI);
-    state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state,
-                                                                   "AirTerminal:SingleDuct:ConstantVolume:NoReheat",
-                                                                   state.dataSingleDuct->TotalArgsGSI,
-                                                                   state.dataSingleDuct->NumAlphasGSI,
-                                                                   state.dataSingleDuct->NumNumsGSI);
-    state.dataSingleDuct->MaxNumsGSI = max(state.dataSingleDuct->MaxNumsGSI, state.dataSingleDuct->NumNumsGSI);
-    state.dataSingleDuct->MaxAlphasGSI = max(state.dataSingleDuct->MaxAlphasGSI, state.dataSingleDuct->NumAlphasGSI);
-    state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state,
-                                                                   "AirTerminal:SingleDuct:VAV:Reheat:VariableSpeedFan",
-                                                                   state.dataSingleDuct->TotalArgsGSI,
-                                                                   state.dataSingleDuct->NumAlphasGSI,
-                                                                   state.dataSingleDuct->NumNumsGSI);
-    state.dataSingleDuct->MaxNumsGSI = max(state.dataSingleDuct->MaxNumsGSI, state.dataSingleDuct->NumNumsGSI);
-    state.dataSingleDuct->MaxAlphasGSI = max(state.dataSingleDuct->MaxAlphasGSI, state.dataSingleDuct->NumAlphasGSI);
-    state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state,
-                                                                   "AirTerminal:SingleDuct:VAV:HeatAndCool:Reheat",
-                                                                   state.dataSingleDuct->TotalArgsGSI,
-                                                                   state.dataSingleDuct->NumAlphasGSI,
-                                                                   state.dataSingleDuct->NumNumsGSI);
-    state.dataSingleDuct->MaxNumsGSI = max(state.dataSingleDuct->MaxNumsGSI, state.dataSingleDuct->NumNumsGSI);
-    state.dataSingleDuct->MaxAlphasGSI = max(state.dataSingleDuct->MaxAlphasGSI, state.dataSingleDuct->NumAlphasGSI);
-    state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state,
-                                                                   "AirTerminal:SingleDuct:VAV:HeatAndCool:NoReheat",
-                                                                   state.dataSingleDuct->TotalArgsGSI,
-                                                                   state.dataSingleDuct->NumAlphasGSI,
-                                                                   state.dataSingleDuct->NumNumsGSI);
-    state.dataSingleDuct->MaxNumsGSI = max(state.dataSingleDuct->MaxNumsGSI, state.dataSingleDuct->NumNumsGSI);
-    state.dataSingleDuct->MaxAlphasGSI = max(state.dataSingleDuct->MaxAlphasGSI, state.dataSingleDuct->NumAlphasGSI);
+    for (auto const *objName : {"AirTerminal:SingleDuct:VAV:Reheat",
+                                "AirTerminal:SingleDuct:VAV:NoReheat",
+                                "AirTerminal:SingleDuct:ConstantVolume:Reheat",
+                                "AirTerminal:SingleDuct:ConstantVolume:NoReheat",
+                                "AirTerminal:SingleDuct:VAV:Reheat:VariableSpeedFan",
+                                "AirTerminal:SingleDuct:VAV:HeatAndCool:Reheat",
+                                "AirTerminal:SingleDuct:VAV:HeatAndCool:NoReheat"}) {
+        state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(
+            state, objName, state.dataSingleDuct->TotalArgsGSI, state.dataSingleDuct->NumAlphasGSI, state.dataSingleDuct->NumNumsGSI);
+        state.dataSingleDuct->MaxNumsGSI = max(state.dataSingleDuct->MaxNumsGSI, state.dataSingleDuct->NumNumsGSI);
+        state.dataSingleDuct->MaxAlphasGSI = max(state.dataSingleDuct->MaxAlphasGSI, state.dataSingleDuct->NumAlphasGSI);
+    }
 
     Alphas.allocate(state.dataSingleDuct->MaxAlphasGSI);
     cAlphaFields.allocate(state.dataSingleDuct->MaxAlphasGSI);
@@ -549,53 +561,8 @@ void GetSysInput(EnergyPlusData &state)
                     state.dataLoopNodes->NodeID(airTerm.ReheatAirOutletNode),
                     "Air Nodes");
 
-        for (ADUNum = 1; ADUNum <= (int)state.dataDefineEquipment->AirDistUnit.size(); ++ADUNum) {
-            if (airTerm.ReheatAirOutletNode == state.dataDefineEquipment->AirDistUnit(ADUNum).OutletNodeNum) {
-                state.dataDefineEquipment->AirDistUnit(ADUNum).InletNodeNum = airTerm.InletNodeNum;
-                airTerm.ADUNum = ADUNum;
-                break;
-            }
-        }
-        // one assumes if there isn't one assigned, it's an error?
-        if (airTerm.ADUNum == 0) {
-            ShowSevereError(
-                state,
-                EnergyPlus::format("{}No matching Air Distribution Unit, for System = [{},{}].", RoutineName, airTerm.sysType, airTerm.SysName));
-            ShowContinueError(state, EnergyPlus::format("...should have outlet node = {}", state.dataLoopNodes->NodeID(airTerm.ReheatAirOutletNode)));
-            ErrorsFound = true;
-        } else {
+        connectAirTermToZone(state, airTerm, RoutineName, airTerm.ReheatAirOutletNode, ErrorsFound);
 
-            // Fill the Zone Equipment data with the inlet node number of this unit.
-            for (CtrlZone = 1; CtrlZone <= state.dataGlobal->NumOfZones; ++CtrlZone) {
-                if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) {
-                    continue;
-                }
-                for (SupAirIn = 1; SupAirIn <= state.dataZoneEquip->ZoneEquipConfig(CtrlZone).NumInletNodes; ++SupAirIn) {
-                    if (airTerm.ReheatAirOutletNode == state.dataZoneEquip->ZoneEquipConfig(CtrlZone).InletNode(SupAirIn)) {
-                        if (state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).OutNode > 0) {
-                            ShowSevereError(state, "Error in connecting a terminal unit to a zone");
-                            ShowContinueError(
-                                state,
-                                EnergyPlus::format("{} already connects to another zone", state.dataLoopNodes->NodeID(airTerm.ReheatAirOutletNode)));
-                            ShowContinueError(state, EnergyPlus::format("Occurs for terminal unit {} = {}", airTerm.sysType, airTerm.SysName));
-                            ShowContinueError(state, "Check terminal unit node names for errors");
-                            ErrorsFound = true;
-                        } else {
-                            state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).InNode = airTerm.InletNodeNum;
-                            state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).OutNode = airTerm.ReheatAirOutletNode;
-                            state.dataDefineEquipment->AirDistUnit(airTerm.ADUNum).TermUnitSizingNum =
-                                state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).TermUnitSizingIndex;
-                            state.dataDefineEquipment->AirDistUnit(airTerm.ADUNum).ZoneEqNum = CtrlZone;
-                        }
-
-                        airTerm.CtrlZoneNum = CtrlZone;
-                        airTerm.CtrlZoneInNodeIndex = SupAirIn;
-                        airTerm.ZoneFloorArea = state.dataHeatBal->Zone(CtrlZone).FloorArea * state.dataHeatBal->Zone(CtrlZone).Multiplier *
-                                                state.dataHeatBal->Zone(CtrlZone).ListMultiplier;
-                    }
-                }
-            }
-        }
         if (Numbers(7) == Constant::AutoCalculate) {
             airTerm.MaxAirVolFlowRateDuringReheat = Numbers(7);
         } else {
@@ -834,52 +801,8 @@ void GetSysInput(EnergyPlusData &state)
                     state.dataLoopNodes->NodeID(airTerm.ReheatAirOutletNode),
                     "Air Nodes");
 
-        for (ADUNum = 1; ADUNum <= (int)state.dataDefineEquipment->AirDistUnit.size(); ++ADUNum) {
-            if (airTerm.ReheatAirOutletNode == state.dataDefineEquipment->AirDistUnit(ADUNum).OutletNodeNum) {
-                state.dataDefineEquipment->AirDistUnit(ADUNum).InletNodeNum = airTerm.InletNodeNum;
-                airTerm.ADUNum = ADUNum;
-                break;
-            }
-        }
-        // one assumes if there isn't one assigned, it's an error?
-        if (airTerm.ADUNum == 0) {
-            ShowSevereError(
-                state,
-                EnergyPlus::format("{}No matching Air Distribution Unit, for System = [{},{}].", RoutineName, airTerm.sysType, airTerm.SysName));
-            ShowContinueError(state, EnergyPlus::format("...should have outlet node = {}", state.dataLoopNodes->NodeID(airTerm.ReheatAirOutletNode)));
-            ErrorsFound = true;
-        } else {
+        connectAirTermToZone(state, airTerm, RoutineName, airTerm.ReheatAirOutletNode, ErrorsFound);
 
-            // Fill the Zone Equipment data with the inlet node number of this unit
-            for (CtrlZone = 1; CtrlZone <= state.dataGlobal->NumOfZones; ++CtrlZone) {
-                if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) {
-                    continue;
-                }
-                for (SupAirIn = 1; SupAirIn <= state.dataZoneEquip->ZoneEquipConfig(CtrlZone).NumInletNodes; ++SupAirIn) {
-                    if (airTerm.ReheatAirOutletNode == state.dataZoneEquip->ZoneEquipConfig(CtrlZone).InletNode(SupAirIn)) {
-                        if (state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).OutNode > 0) {
-                            ShowSevereError(state, "Error in connecting a terminal unit to a zone");
-                            ShowContinueError(
-                                state,
-                                EnergyPlus::format("{} already connects to another zone", state.dataLoopNodes->NodeID(airTerm.ReheatAirOutletNode)));
-                            ShowContinueError(state, EnergyPlus::format("Occurs for terminal unit {} = {}", airTerm.sysType, airTerm.SysName));
-                            ShowContinueError(state, "Check terminal unit node names for errors");
-                            ErrorsFound = true;
-                        } else {
-                            state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).InNode = airTerm.InletNodeNum;
-                            state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).OutNode = airTerm.ReheatAirOutletNode;
-                            state.dataDefineEquipment->AirDistUnit(airTerm.ADUNum).TermUnitSizingNum =
-                                state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).TermUnitSizingIndex;
-                            state.dataDefineEquipment->AirDistUnit(airTerm.ADUNum).ZoneEqNum = CtrlZone;
-                        }
-                        airTerm.CtrlZoneNum = CtrlZone;
-                        airTerm.CtrlZoneInNodeIndex = SupAirIn;
-                        airTerm.ZoneFloorArea = state.dataHeatBal->Zone(CtrlZone).FloorArea * state.dataHeatBal->Zone(CtrlZone).Multiplier *
-                                                state.dataHeatBal->Zone(CtrlZone).ListMultiplier;
-                    }
-                }
-            }
-        }
         if (!lNumericBlanks(6)) {
             airTerm.MaxReheatTemp = Numbers(6);
             airTerm.MaxReheatTempSetByUser = true;
@@ -1065,51 +988,7 @@ void GetSysInput(EnergyPlusData &state)
                     state.dataLoopNodes->NodeID(airTerm.OutletNodeNum),
                     "Air Nodes");
 
-        for (ADUNum = 1; ADUNum <= (int)state.dataDefineEquipment->AirDistUnit.size(); ++ADUNum) {
-            if (airTerm.ReheatAirOutletNode == state.dataDefineEquipment->AirDistUnit(ADUNum).OutletNodeNum) {
-                state.dataDefineEquipment->AirDistUnit(ADUNum).InletNodeNum = airTerm.InletNodeNum;
-                airTerm.ADUNum = ADUNum;
-                break;
-            }
-        }
-        // one assumes if there isn't one assigned, it's an error?
-        if (airTerm.ADUNum == 0) {
-            ShowSevereError(
-                state,
-                EnergyPlus::format("{}No matching Air Distribution Unit, for System = [{},{}].", RoutineName, airTerm.sysType, airTerm.SysName));
-            ShowContinueError(state, EnergyPlus::format("...should have outlet node = {}", state.dataLoopNodes->NodeID(airTerm.ReheatAirOutletNode)));
-            ErrorsFound = true;
-        } else {
-
-            // Fill the Zone Equipment data with the inlet node number of this unit.
-            for (CtrlZone = 1; CtrlZone <= state.dataGlobal->NumOfZones; ++CtrlZone) {
-                if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) {
-                    continue;
-                }
-                for (SupAirIn = 1; SupAirIn <= state.dataZoneEquip->ZoneEquipConfig(CtrlZone).NumInletNodes; ++SupAirIn) {
-                    if (airTerm.OutletNodeNum == state.dataZoneEquip->ZoneEquipConfig(CtrlZone).InletNode(SupAirIn)) {
-                        if (state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).OutNode > 0) {
-                            ShowSevereError(state, "Error in connecting a terminal unit to a zone");
-                            ShowContinueError(
-                                state, EnergyPlus::format("{} already connects to another zone", state.dataLoopNodes->NodeID(airTerm.OutletNodeNum)));
-                            ShowContinueError(state, EnergyPlus::format("Occurs for terminal unit {} = {}", airTerm.sysType, airTerm.SysName));
-                            ShowContinueError(state, "Check terminal unit node names for errors");
-                            ErrorsFound = true;
-                        } else {
-                            state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).InNode = airTerm.InletNodeNum;
-                            state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).OutNode = airTerm.OutletNodeNum;
-                            state.dataDefineEquipment->AirDistUnit(airTerm.ADUNum).TermUnitSizingNum =
-                                state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).TermUnitSizingIndex;
-                            state.dataDefineEquipment->AirDistUnit(airTerm.ADUNum).ZoneEqNum = CtrlZone;
-                        }
-                        airTerm.CtrlZoneNum = CtrlZone;
-                        airTerm.CtrlZoneInNodeIndex = SupAirIn;
-                        airTerm.ZoneFloorArea = state.dataHeatBal->Zone(CtrlZone).FloorArea * state.dataHeatBal->Zone(CtrlZone).Multiplier *
-                                                state.dataHeatBal->Zone(CtrlZone).ListMultiplier;
-                    }
-                }
-            }
-        }
+        connectAirTermToZone(state, airTerm, RoutineName, airTerm.ReheatAirOutletNode, ErrorsFound);
 
         ValidateComponent(state, Alphas(5), Alphas(6), IsNotOK, airTerm.sysType);
         if (IsNotOK) {
@@ -1207,51 +1086,7 @@ void GetSysInput(EnergyPlusData &state)
                     state.dataLoopNodes->NodeID(airTerm.OutletNodeNum),
                     "Air Nodes");
 
-        for (ADUNum = 1; ADUNum <= (int)state.dataDefineEquipment->AirDistUnit.size(); ++ADUNum) {
-            if (airTerm.OutletNodeNum == state.dataDefineEquipment->AirDistUnit(ADUNum).OutletNodeNum) {
-                state.dataDefineEquipment->AirDistUnit(ADUNum).InletNodeNum = airTerm.InletNodeNum;
-                airTerm.ADUNum = ADUNum;
-                break;
-            }
-        }
-        // one assumes if there isn't one assigned, it's an error?
-        if (airTerm.ADUNum == 0) {
-            ShowSevereError(
-                state,
-                EnergyPlus::format("{}No matching Air Distribution Unit, for System = [{},{}].", RoutineName, airTerm.sysType, airTerm.SysName));
-            ShowContinueError(state, EnergyPlus::format("...should have outlet node = {}", state.dataLoopNodes->NodeID(airTerm.OutletNodeNum)));
-            ErrorsFound = true;
-        } else {
-
-            // Fill the Zone Equipment data with the inlet node number of this unit.
-            for (CtrlZone = 1; CtrlZone <= state.dataGlobal->NumOfZones; ++CtrlZone) {
-                if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) {
-                    continue;
-                }
-                for (SupAirIn = 1; SupAirIn <= state.dataZoneEquip->ZoneEquipConfig(CtrlZone).NumInletNodes; ++SupAirIn) {
-                    if (airTerm.OutletNodeNum == state.dataZoneEquip->ZoneEquipConfig(CtrlZone).InletNode(SupAirIn)) {
-                        if (state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).OutNode > 0) {
-                            ShowSevereError(state, "Error in connecting a terminal unit to a zone");
-                            ShowContinueError(
-                                state, EnergyPlus::format("{} already connects to another zone", state.dataLoopNodes->NodeID(airTerm.OutletNodeNum)));
-                            ShowContinueError(state, EnergyPlus::format("Occurs for terminal unit {} = {}", airTerm.sysType, airTerm.SysName));
-                            ShowContinueError(state, "Check terminal unit node names for errors");
-                            ErrorsFound = true;
-                        } else {
-                            state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).InNode = airTerm.InletNodeNum;
-                            state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).OutNode = airTerm.OutletNodeNum;
-                            state.dataDefineEquipment->AirDistUnit(airTerm.ADUNum).TermUnitSizingNum =
-                                state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).TermUnitSizingIndex;
-                            state.dataDefineEquipment->AirDistUnit(airTerm.ADUNum).ZoneEqNum = CtrlZone;
-                        }
-                        airTerm.CtrlZoneNum = CtrlZone;
-                        airTerm.CtrlZoneInNodeIndex = SupAirIn;
-                        airTerm.ZoneFloorArea = state.dataHeatBal->Zone(CtrlZone).FloorArea * state.dataHeatBal->Zone(CtrlZone).Multiplier *
-                                                state.dataHeatBal->Zone(CtrlZone).ListMultiplier;
-                    }
-                }
-            }
-        }
+        connectAirTermToZone(state, airTerm, RoutineName, airTerm.OutletNodeNum, ErrorsFound);
 
         if (lAlphaBlanks(5)) {
             airTerm.NoOAFlowInputFromUser = true;
@@ -1433,53 +1268,8 @@ void GetSysInput(EnergyPlusData &state)
                     state.dataLoopNodes->NodeID(airTerm.OutletNodeNum),
                     "Air Nodes");
 
-        for (ADUNum = 1; ADUNum <= (int)state.dataDefineEquipment->AirDistUnit.size(); ++ADUNum) {
-            if (airTerm.OutletNodeNum == state.dataDefineEquipment->AirDistUnit(ADUNum).OutletNodeNum) {
-                state.dataDefineEquipment->AirDistUnit(ADUNum).InletNodeNum = airTerm.InletNodeNum;
-                airTerm.ADUNum = ADUNum;
-                break;
-            }
-        }
-        // one assumes if there isn't one assigned, it's an error?
-        if (airTerm.ADUNum == 0) {
-            ShowSevereError(
-                state,
-                EnergyPlus::format("{}No matching Air Distribution Unit, for System = [{},{}].", RoutineName, airTerm.sysType, airTerm.SysName));
-            ShowContinueError(state, EnergyPlus::format("...should have outlet node = {}", state.dataLoopNodes->NodeID(airTerm.ReheatAirOutletNode)));
-            ErrorsFound = true;
-        } else {
+        connectAirTermToZone(state, airTerm, RoutineName, airTerm.ReheatAirOutletNode, ErrorsFound);
 
-            // Fill the Zone Equipment data with the inlet node number of this unit.
-            for (CtrlZone = 1; CtrlZone <= state.dataGlobal->NumOfZones; ++CtrlZone) {
-                if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) {
-                    continue;
-                }
-                for (SupAirIn = 1; SupAirIn <= state.dataZoneEquip->ZoneEquipConfig(CtrlZone).NumInletNodes; ++SupAirIn) {
-                    if (airTerm.ReheatAirOutletNode == state.dataZoneEquip->ZoneEquipConfig(CtrlZone).InletNode(SupAirIn)) {
-                        if (state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).OutNode > 0) {
-                            ShowSevereError(state, "Error in connecting a terminal unit to a zone");
-                            ShowContinueError(
-                                state,
-                                EnergyPlus::format("{} already connects to another zone", state.dataLoopNodes->NodeID(airTerm.ReheatAirOutletNode)));
-                            ShowContinueError(state, EnergyPlus::format("Occurs for terminal unit {} = {}", airTerm.sysType, airTerm.SysName));
-                            ShowContinueError(state, "Check terminal unit node names for errors");
-                            ErrorsFound = true;
-                        } else {
-                            state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).InNode = airTerm.InletNodeNum;
-                            state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).OutNode = airTerm.ReheatAirOutletNode;
-                            state.dataDefineEquipment->AirDistUnit(airTerm.ADUNum).TermUnitSizingNum =
-                                state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).TermUnitSizingIndex;
-                            state.dataDefineEquipment->AirDistUnit(airTerm.ADUNum).ZoneEqNum = CtrlZone;
-                        }
-
-                        airTerm.CtrlZoneNum = CtrlZone;
-                        airTerm.CtrlZoneInNodeIndex = SupAirIn;
-                        airTerm.ZoneFloorArea = state.dataHeatBal->Zone(CtrlZone).FloorArea * state.dataHeatBal->Zone(CtrlZone).Multiplier *
-                                                state.dataHeatBal->Zone(CtrlZone).ListMultiplier;
-                    }
-                }
-            }
-        }
         if (!lAlphaBlanks(7)) {
             airTerm.OARequirementsPtr = Util::FindItemInList(Alphas(7), state.dataSize->OARequirements);
             if (airTerm.OARequirementsPtr == 0) {
@@ -1608,52 +1398,7 @@ void GetSysInput(EnergyPlusData &state)
                     state.dataLoopNodes->NodeID(airTerm.OutletNodeNum),
                     "Air Nodes");
 
-        for (ADUNum = 1; ADUNum <= (int)state.dataDefineEquipment->AirDistUnit.size(); ++ADUNum) {
-            if (airTerm.OutletNodeNum == state.dataDefineEquipment->AirDistUnit(ADUNum).OutletNodeNum) {
-                state.dataDefineEquipment->AirDistUnit(ADUNum).InletNodeNum = airTerm.InletNodeNum;
-                airTerm.ADUNum = ADUNum;
-                break;
-            }
-        }
-        // one assumes if there isn't one assigned, it's an error?
-        if (airTerm.ADUNum == 0) {
-            ShowSevereError(
-                state,
-                EnergyPlus::format("{}No matching Air Distribution Unit, for System = [{},{}].", RoutineName, airTerm.sysType, airTerm.SysName));
-            ShowContinueError(state, EnergyPlus::format("...should have outlet node = {}", state.dataLoopNodes->NodeID(airTerm.ReheatAirOutletNode)));
-            ErrorsFound = true;
-        } else {
-
-            // Fill the Zone Equipment data with the inlet node number of this unit.
-            for (CtrlZone = 1; CtrlZone <= state.dataGlobal->NumOfZones; ++CtrlZone) {
-                if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) {
-                    continue;
-                }
-                for (SupAirIn = 1; SupAirIn <= state.dataZoneEquip->ZoneEquipConfig(CtrlZone).NumInletNodes; ++SupAirIn) {
-                    if (airTerm.ReheatAirOutletNode == state.dataZoneEquip->ZoneEquipConfig(CtrlZone).InletNode(SupAirIn)) {
-                        if (state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).OutNode > 0) {
-                            ShowSevereError(state, "Error in connecting a terminal unit to a zone");
-                            ShowContinueError(
-                                state,
-                                EnergyPlus::format("{} already connects to another zone", state.dataLoopNodes->NodeID(airTerm.ReheatAirOutletNode)));
-                            ShowContinueError(state, EnergyPlus::format("Occurs for terminal unit {} = {}", airTerm.sysType, airTerm.SysName));
-                            ShowContinueError(state, "Check terminal unit node names for errors");
-                            ErrorsFound = true;
-                        } else {
-                            state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).InNode = airTerm.InletNodeNum;
-                            state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).OutNode = airTerm.ReheatAirOutletNode;
-                            state.dataDefineEquipment->AirDistUnit(airTerm.ADUNum).TermUnitSizingNum =
-                                state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).TermUnitSizingIndex;
-                            state.dataDefineEquipment->AirDistUnit(airTerm.ADUNum).ZoneEqNum = CtrlZone;
-                        }
-                        airTerm.CtrlZoneNum = CtrlZone;
-                        airTerm.CtrlZoneInNodeIndex = SupAirIn;
-                        airTerm.ZoneFloorArea = state.dataHeatBal->Zone(CtrlZone).FloorArea * state.dataHeatBal->Zone(CtrlZone).Multiplier *
-                                                state.dataHeatBal->Zone(CtrlZone).ListMultiplier;
-                    }
-                }
-            }
-        }
+        connectAirTermToZone(state, airTerm, RoutineName, airTerm.ReheatAirOutletNode, ErrorsFound);
 
         if (lAlphaBlanks(5)) {
             airTerm.ZoneTurndownMinAirFrac = 1.0;
@@ -1891,56 +1636,9 @@ void GetSysInput(EnergyPlusData &state)
                     state.dataLoopNodes->NodeID(airTerm.ReheatAirOutletNode),
                     "Air Nodes");
 
-        for (ADUNum = 1; ADUNum <= (int)state.dataDefineEquipment->AirDistUnit.size(); ++ADUNum) {
-            if (airTerm.ReheatAirOutletNode == state.dataDefineEquipment->AirDistUnit(ADUNum).OutletNodeNum) {
-                state.dataDefineEquipment->AirDistUnit(ADUNum).InletNodeNum = airTerm.InletNodeNum;
-                airTerm.ADUNum = ADUNum;
-                break;
-            }
-        }
-        // one assumes if there isn't one assigned, it's an error?
-        if (airTerm.ADUNum == 0) {
-            ShowSevereError(
-                state,
-                EnergyPlus::format("{}No matching Air Distribution Unit, for System = [{},{}].", RoutineName, airTerm.sysType, airTerm.SysName));
-            ShowContinueError(state, EnergyPlus::format("...should have outlet node = {}", state.dataLoopNodes->NodeID(airTerm.ReheatAirOutletNode)));
-            ErrorsFound = true;
-        } else {
+        connectAirTermToZone(state, airTerm, RoutineName, airTerm.ReheatAirOutletNode, ErrorsFound);
 
-            // Fill the Zone Equipment data with the inlet node number of this unit.
-            // what if not found?  error?
-            IsNotOK = true;
-            for (CtrlZone = 1; CtrlZone <= state.dataGlobal->NumOfZones; ++CtrlZone) {
-                if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) {
-                    continue;
-                }
-                for (SupAirIn = 1; SupAirIn <= state.dataZoneEquip->ZoneEquipConfig(CtrlZone).NumInletNodes; ++SupAirIn) {
-                    if (airTerm.ReheatAirOutletNode == state.dataZoneEquip->ZoneEquipConfig(CtrlZone).InletNode(SupAirIn)) {
-                        IsNotOK = false;
-                        if (state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).OutNode > 0) {
-                            ShowSevereError(state, "Error in connecting a terminal unit to a zone");
-                            ShowContinueError(
-                                state,
-                                EnergyPlus::format("{} already connects to another zone", state.dataLoopNodes->NodeID(airTerm.ReheatAirOutletNode)));
-                            ShowContinueError(state, EnergyPlus::format("Occurs for terminal unit {} = {}", airTerm.sysType, airTerm.SysName));
-                            ShowContinueError(state, "Check terminal unit node names for errors");
-                            ErrorsFound = true;
-                        } else {
-                            state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).InNode = airTerm.InletNodeNum;
-                            state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).OutNode = airTerm.ReheatAirOutletNode;
-                            state.dataDefineEquipment->AirDistUnit(airTerm.ADUNum).TermUnitSizingNum =
-                                state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).TermUnitSizingIndex;
-                            state.dataDefineEquipment->AirDistUnit(airTerm.ADUNum).ZoneEqNum = CtrlZone;
-                        }
-                        airTerm.CtrlZoneNum = CtrlZone;
-                        airTerm.CtrlZoneInNodeIndex = SupAirIn;
-                        airTerm.ZoneFloorArea = state.dataHeatBal->Zone(CtrlZone).FloorArea * state.dataHeatBal->Zone(CtrlZone).Multiplier *
-                                                state.dataHeatBal->Zone(CtrlZone).ListMultiplier;
-                    }
-                }
-            }
-        }
-        if (IsNotOK) {
+        if (airTerm.ADUNum != 0 && airTerm.CtrlZoneNum == 0) {
             ShowWarningError(state, "Did not Match Supply Air Outlet Node to any Zone Node");
             ShowContinueError(state, EnergyPlus::format("..Occurs in {} = {}", airTerm.sysType, airTerm.SysName));
         }

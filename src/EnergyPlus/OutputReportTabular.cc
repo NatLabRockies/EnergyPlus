@@ -7767,6 +7767,95 @@ void WriteTimeBinTables(EnergyPlusData &state)
     }
 }
 
+// Fuel-source mapping entry: fuelFactorIndex into fuelfactorsused/gatherTotalsSource,
+// bepsIndex into gatherTotalsBEPS, and the corresponding default source factor.
+struct FuelSourceEntry
+{
+    int fuelFactorIdx;                             // index into fuelfactorsused / gatherTotalsSource
+    int bepsIdx;                                   // index into gatherTotalsBEPS
+    Real64 OutputReportTabularData::*sourceFactor; // pointer-to-member for the default source factor
+};
+
+// Table of fuel-to-source mappings used by totalSourceEnergyUse / netSourceEnergyUse.
+// Electricity is first so callers that skip it can start at index 1.
+static constexpr int kNumFuelSourceEntries = 10;
+
+// Helper: accumulate source energy for fuels in the fuelSourceMap from startIdx..end.
+// For each fuel, uses gatherTotalsSource when a fuel-factor schedule was used,
+// otherwise falls back to gatherTotalsBEPS * default source factor.
+static Real64 accumulateSourceEnergy(OutputReportTabularData const &ort, FuelSourceEntry const *map, int startIdx, int endIdx)
+{
+    Real64 total = 0.0;
+    for (int i = startIdx; i < endIdx; ++i) {
+        auto const &e = map[i];
+        if (ort.fuelfactorsused(e.fuelFactorIdx)) {
+            total += ort.gatherTotalsSource(e.fuelFactorIdx);
+        } else {
+            total += ort.gatherTotalsBEPS(e.bepsIdx) * (ort.*(e.sourceFactor));
+        }
+    }
+    return total;
+}
+
+// Helper: populate a site-to-source conversion factor cell in the tableBody.
+// Uses the schedule-based effective factor when a fuel factor schedule is in use,
+// the default source factor otherwise, or "N/A" when the BEPS total is negligible.
+static void fillSourceConversionCell(OutputReportTabularData const &ort,
+                                     Array2D_string &tableBody,
+                                     bool formatReals,
+                                     int ffSchedIdx,
+                                     int bepsIdx,
+                                     int tableRow,
+                                     Real64 defaultFactor,
+                                     Real64 SmallValue)
+{
+    if (!ort.ffSchedUsed(ffSchedIdx)) {
+        tableBody(1, tableRow) = RealToStr(formatReals, defaultFactor, 3);
+    } else if (ort.gatherTotalsBEPS(bepsIdx) > SmallValue) {
+        tableBody(1, tableRow) =
+            "Effective Factor = " + RealToStr(formatReals, ort.gatherTotalsBySourceBEPS(bepsIdx) / ort.gatherTotalsBEPS(bepsIdx), 3) +
+            " (calculated using schedule \"" + ort.ffScheds(bepsIdx)->Name + "\")";
+    } else {
+        tableBody(1, tableRow) = "N/A";
+    }
+}
+
+// Helper: emit a BEPS sub-table to all active output targets (tabular, SQLite, JSON).
+// When subtitle is non-empty WriteSubtitle is called before WriteTable.
+static void writeBEPSSubtable(EnergyPlusData &state,
+                              Array2D_string &tableBody,
+                              Array1D_string &rowHead,
+                              Array1D_string &columnHead,
+                              Array1D_int &columnWidth,
+                              tabularReportStyle const &currentStyle,
+                              std::string const &subtitle,
+                              bool transposeXML = false,
+                              std::string_view footnote = {})
+{
+    auto const &ort = state.dataOutRptTab;
+    if (!ort->displayTabularBEPS) {
+        return;
+    }
+    if (currentStyle.produceTabular) {
+        if (!subtitle.empty()) {
+            WriteSubtitle(state, subtitle);
+        }
+        WriteTable(state, tableBody, rowHead, columnHead, columnWidth, transposeXML, footnote);
+    }
+    if (currentStyle.produceSQLite) {
+        if (state.dataSQLiteProcedures->sqlite) {
+            state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
+                tableBody, rowHead, columnHead, "AnnualBuildingUtilityPerformanceSummary", "Entire Facility", subtitle);
+        }
+    }
+    if (currentStyle.produceJSON) {
+        if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
+            state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
+                tableBody, rowHead, columnHead, "AnnualBuildingUtilityPerformanceSummary", "Entire Facility", subtitle);
+        }
+    }
+}
+
 void WriteBEPSTable(EnergyPlusData &state)
 {
     // SUBROUTINE INFORMATION:
@@ -7856,38 +7945,21 @@ void WriteBEPSTable(EnergyPlusData &state)
 
         // determine building floor areas
         DetermineBuildingFloorArea(state);
+        // Resource index mapping: collapsed display index (1-14) -> gather BEPS source index.
+        // Order: electricity, natural gas, gasoline, diesel, coal, fuel oil 1, fuel oil 2,
+        //        propane, otherfuel1, otherfuel2, dist cooling, dist heat water, dist heat steam, water
+        static constexpr std::array<int, 14> gatherIdx = {1, 2, 6, 8, 9, 10, 11, 12, 13, 14, 3, 4, 5, 7};
+
         // collapse the gatherEndUseBEPS array to the resource groups displayed
         for (int jEndUse = 1; jEndUse <= static_cast<int>(Constant::EndUse::Num); ++jEndUse) {
-            collapsedEndUse(1, jEndUse) = ort->gatherEndUseBEPS(1, jEndUse);   // electricity
-            collapsedEndUse(2, jEndUse) = ort->gatherEndUseBEPS(2, jEndUse);   // natural gas
-            collapsedEndUse(3, jEndUse) = ort->gatherEndUseBEPS(6, jEndUse);   // gasoline
-            collapsedEndUse(4, jEndUse) = ort->gatherEndUseBEPS(8, jEndUse);   // diesel
-            collapsedEndUse(5, jEndUse) = ort->gatherEndUseBEPS(9, jEndUse);   // coal
-            collapsedEndUse(6, jEndUse) = ort->gatherEndUseBEPS(10, jEndUse);  // Fuel Oil No1
-            collapsedEndUse(7, jEndUse) = ort->gatherEndUseBEPS(11, jEndUse);  // Fuel Oil No2
-            collapsedEndUse(8, jEndUse) = ort->gatherEndUseBEPS(12, jEndUse);  // propane
-            collapsedEndUse(9, jEndUse) = ort->gatherEndUseBEPS(13, jEndUse);  // otherfuel1
-            collapsedEndUse(10, jEndUse) = ort->gatherEndUseBEPS(14, jEndUse); // otherfuel2
-            collapsedEndUse(11, jEndUse) = ort->gatherEndUseBEPS(3, jEndUse);  // district cooling <- purchased cooling
-            collapsedEndUse(12, jEndUse) = ort->gatherEndUseBEPS(4, jEndUse);  // district heating water <- purchased heating
-            collapsedEndUse(13, jEndUse) = ort->gatherEndUseBEPS(5, jEndUse);  // district heating steam  <- purchased heating
-            collapsedEndUse(14, jEndUse) = ort->gatherEndUseBEPS(7, jEndUse);  // water
+            for (int iRes = 0; iRes < 14; ++iRes) {
+                collapsedEndUse(iRes + 1, jEndUse) = ort->gatherEndUseBEPS(gatherIdx[iRes], jEndUse);
+            }
         }
         // repeat with totals
-        collapsedTotal(1) = ort->gatherTotalsBEPS(1);   // electricity
-        collapsedTotal(2) = ort->gatherTotalsBEPS(2);   // natural gas
-        collapsedTotal(3) = ort->gatherTotalsBEPS(6);   // gasoline
-        collapsedTotal(4) = ort->gatherTotalsBEPS(8);   // diesel
-        collapsedTotal(5) = ort->gatherTotalsBEPS(9);   // coal
-        collapsedTotal(6) = ort->gatherTotalsBEPS(10);  // Fuel Oil No1
-        collapsedTotal(7) = ort->gatherTotalsBEPS(11);  // Fuel Oil No2
-        collapsedTotal(8) = ort->gatherTotalsBEPS(12);  // propane
-        collapsedTotal(9) = ort->gatherTotalsBEPS(13);  // other fuel 1
-        collapsedTotal(10) = ort->gatherTotalsBEPS(14); // other fuel 2
-        collapsedTotal(11) = ort->gatherTotalsBEPS(3);  // district cooling <- purchased cooling
-        collapsedTotal(12) = ort->gatherTotalsBEPS(4);  // district heating water <- purchased heating
-        collapsedTotal(13) = ort->gatherTotalsBEPS(5);  // district heating steam  <- purchased heating
-        collapsedTotal(14) = ort->gatherTotalsBEPS(7);  // water
+        for (int iRes = 0; iRes < 14; ++iRes) {
+            collapsedTotal(iRes + 1) = ort->gatherTotalsBEPS(gatherIdx[iRes]);
+        }
 
         if (currentStyle.produceTabular) {
             if (state.dataGlobal->createPerfLog) {
@@ -7919,42 +7991,15 @@ void WriteBEPSTable(EnergyPlusData &state)
         }
         for (int jEndUse = 1; jEndUse <= static_cast<int>(Constant::EndUse::Num); ++jEndUse) {
             for (int kEndUseSub = 1; kEndUseSub <= op->EndUseCategory(jEndUse).NumSubcategories; ++kEndUseSub) {
-                collapsedEndUseSub(kEndUseSub, jEndUse, 1) = ort->gatherEndUseSubBEPS(kEndUseSub, jEndUse, 1);   // electricity
-                collapsedEndUseSub(kEndUseSub, jEndUse, 2) = ort->gatherEndUseSubBEPS(kEndUseSub, jEndUse, 2);   // natural gas
-                collapsedEndUseSub(kEndUseSub, jEndUse, 3) = ort->gatherEndUseSubBEPS(kEndUseSub, jEndUse, 6);   // gasoline
-                collapsedEndUseSub(kEndUseSub, jEndUse, 4) = ort->gatherEndUseSubBEPS(kEndUseSub, jEndUse, 8);   // diesel
-                collapsedEndUseSub(kEndUseSub, jEndUse, 5) = ort->gatherEndUseSubBEPS(kEndUseSub, jEndUse, 9);   // coal
-                collapsedEndUseSub(kEndUseSub, jEndUse, 6) = ort->gatherEndUseSubBEPS(kEndUseSub, jEndUse, 10);  // Fuel Oil No1
-                collapsedEndUseSub(kEndUseSub, jEndUse, 7) = ort->gatherEndUseSubBEPS(kEndUseSub, jEndUse, 11);  // Fuel Oil No2
-                collapsedEndUseSub(kEndUseSub, jEndUse, 8) = ort->gatherEndUseSubBEPS(kEndUseSub, jEndUse, 12);  // propane
-                collapsedEndUseSub(kEndUseSub, jEndUse, 9) = ort->gatherEndUseSubBEPS(kEndUseSub, jEndUse, 13);  // otherfuel1
-                collapsedEndUseSub(kEndUseSub, jEndUse, 10) = ort->gatherEndUseSubBEPS(kEndUseSub, jEndUse, 14); // otherfuel2
-                collapsedEndUseSub(kEndUseSub, jEndUse, 11) = ort->gatherEndUseSubBEPS(kEndUseSub, jEndUse, 3);  // district cooling <- purch cooling
-                collapsedEndUseSub(kEndUseSub, jEndUse, 12) =
-                    ort->gatherEndUseSubBEPS(kEndUseSub, jEndUse, 4); // district heating water <- purch heating
-                collapsedEndUseSub(kEndUseSub, jEndUse, 13) =
-                    ort->gatherEndUseSubBEPS(kEndUseSub, jEndUse, 5); // district heating steam <- purch heating
-                collapsedEndUseSub(kEndUseSub, jEndUse, 14) = ort->gatherEndUseSubBEPS(kEndUseSub, jEndUse, 7); // water
+                for (int iRes = 0; iRes < 14; ++iRes) {
+                    collapsedEndUseSub(kEndUseSub, jEndUse, iRes + 1) = ort->gatherEndUseSubBEPS(kEndUseSub, jEndUse, gatherIdx[iRes]);
+                }
             }
 
             for (int kEndUseSpType = 1; kEndUseSpType <= op->EndUseCategory(jEndUse).numSpaceTypes; ++kEndUseSpType) {
-                collapsedEndUseSpType(kEndUseSpType, jEndUse, 1) = ort->gatherEndUseSpTypeBEPS(kEndUseSpType, jEndUse, 1);   // electricity
-                collapsedEndUseSpType(kEndUseSpType, jEndUse, 2) = ort->gatherEndUseSpTypeBEPS(kEndUseSpType, jEndUse, 2);   // natural gas
-                collapsedEndUseSpType(kEndUseSpType, jEndUse, 3) = ort->gatherEndUseSpTypeBEPS(kEndUseSpType, jEndUse, 6);   // gasoline
-                collapsedEndUseSpType(kEndUseSpType, jEndUse, 4) = ort->gatherEndUseSpTypeBEPS(kEndUseSpType, jEndUse, 8);   // diesel
-                collapsedEndUseSpType(kEndUseSpType, jEndUse, 5) = ort->gatherEndUseSpTypeBEPS(kEndUseSpType, jEndUse, 9);   // coal
-                collapsedEndUseSpType(kEndUseSpType, jEndUse, 6) = ort->gatherEndUseSpTypeBEPS(kEndUseSpType, jEndUse, 10);  // Fuel Oil No1
-                collapsedEndUseSpType(kEndUseSpType, jEndUse, 7) = ort->gatherEndUseSpTypeBEPS(kEndUseSpType, jEndUse, 11);  // Fuel Oil No2
-                collapsedEndUseSpType(kEndUseSpType, jEndUse, 8) = ort->gatherEndUseSpTypeBEPS(kEndUseSpType, jEndUse, 12);  // propane
-                collapsedEndUseSpType(kEndUseSpType, jEndUse, 9) = ort->gatherEndUseSpTypeBEPS(kEndUseSpType, jEndUse, 13);  // otherfuel1
-                collapsedEndUseSpType(kEndUseSpType, jEndUse, 10) = ort->gatherEndUseSpTypeBEPS(kEndUseSpType, jEndUse, 14); // otherfuel2
-                collapsedEndUseSpType(kEndUseSpType, jEndUse, 11) =
-                    ort->gatherEndUseSpTypeBEPS(kEndUseSpType, jEndUse, 3); // district cooling <- purch cooling
-                collapsedEndUseSpType(kEndUseSpType, jEndUse, 12) =
-                    ort->gatherEndUseSpTypeBEPS(kEndUseSpType, jEndUse, 4); // district heating water <- purch heating
-                collapsedEndUseSpType(kEndUseSpType, jEndUse, 13) =
-                    ort->gatherEndUseSpTypeBEPS(kEndUseSpType, jEndUse, 5); // district heating steam <- purch heating
-                collapsedEndUseSpType(kEndUseSpType, jEndUse, 14) = ort->gatherEndUseSpTypeBEPS(kEndUseSpType, jEndUse, 7); // water
+                for (int iRes = 0; iRes < 14; ++iRes) {
+                    collapsedEndUseSpType(kEndUseSpType, jEndUse, iRes + 1) = ort->gatherEndUseSpTypeBEPS(kEndUseSpType, jEndUse, gatherIdx[iRes]);
+                }
             }
         }
         // unit conversion - all values are used as divisors
@@ -8136,67 +8181,22 @@ void WriteBEPSTable(EnergyPlusData &state)
         }
 
         // source emissions already have the source factors included in the calcs.
-        Real64 totalSourceEnergyUse = 0.0;
-        //  electricity
-        if (ort->fuelfactorsused(1)) {
-            totalSourceEnergyUse += ort->gatherTotalsSource(1);
-        } else {
-            totalSourceEnergyUse += ort->gatherTotalsBEPS(1) * ort->sourceFactorElectric;
-        }
-        //  natural gas
-        if (ort->fuelfactorsused(2)) {
-            totalSourceEnergyUse += ort->gatherTotalsSource(2);
-        } else {
-            totalSourceEnergyUse += ort->gatherTotalsBEPS(2) * ort->sourceFactorNaturalGas;
-        }
-        // gasoline
-        if (ort->fuelfactorsused(3)) {
-            totalSourceEnergyUse += ort->gatherTotalsSource(3);
-        } else {
-            totalSourceEnergyUse += ort->gatherTotalsBEPS(6) * ort->sourceFactorGasoline;
-        }
-        // diesel
-        if (ort->fuelfactorsused(4)) {
-            totalSourceEnergyUse += ort->gatherTotalsSource(4);
-        } else {
-            totalSourceEnergyUse += ort->gatherTotalsBEPS(8) * ort->sourceFactorDiesel;
-        }
-        // coal
-        if (ort->fuelfactorsused(5)) {
-            totalSourceEnergyUse += ort->gatherTotalsSource(5);
-        } else {
-            totalSourceEnergyUse += ort->gatherTotalsBEPS(9) * ort->sourceFactorCoal;
-        }
-        // Fuel Oil No1
-        if (ort->fuelfactorsused(6)) {
-            totalSourceEnergyUse += ort->gatherTotalsSource(6);
-        } else {
-            totalSourceEnergyUse += ort->gatherTotalsBEPS(10) * ort->sourceFactorFuelOil1;
-        }
-        // Fuel Oil No2
-        if (ort->fuelfactorsused(7)) {
-            totalSourceEnergyUse += ort->gatherTotalsSource(7);
-        } else {
-            totalSourceEnergyUse += ort->gatherTotalsBEPS(11) * ort->sourceFactorFuelOil2;
-        }
-        // propane
-        if (ort->fuelfactorsused(8)) {
-            totalSourceEnergyUse += ort->gatherTotalsSource(8);
-        } else {
-            totalSourceEnergyUse += ort->gatherTotalsBEPS(12) * ort->sourceFactorPropane;
-        }
-        // otherfuel1
-        if (ort->fuelfactorsused(11)) {
-            totalSourceEnergyUse += ort->gatherTotalsSource(11);
-        } else {
-            totalSourceEnergyUse += ort->gatherTotalsBEPS(13) * ort->sourceFactorOtherFuel1;
-        }
-        // otherfuel2
-        if (ort->fuelfactorsused(12)) {
-            totalSourceEnergyUse += ort->gatherTotalsSource(12);
-        } else {
-            totalSourceEnergyUse += ort->gatherTotalsBEPS(14) * ort->sourceFactorOtherFuel2;
-        }
+        // Fuel-source mapping: {fuelFactorIdx, bepsIdx, &sourceFactor}.
+        // Electricity is index 0; callers that skip it start at index 1.
+        static const FuelSourceEntry fuelSourceMap[kNumFuelSourceEntries] = {
+            {1, 1, &OutputReportTabularData::sourceFactorElectric},
+            {2, 2, &OutputReportTabularData::sourceFactorNaturalGas},
+            {3, 6, &OutputReportTabularData::sourceFactorGasoline},
+            {4, 8, &OutputReportTabularData::sourceFactorDiesel},
+            {5, 9, &OutputReportTabularData::sourceFactorCoal},
+            {6, 10, &OutputReportTabularData::sourceFactorFuelOil1},
+            {7, 11, &OutputReportTabularData::sourceFactorFuelOil2},
+            {8, 12, &OutputReportTabularData::sourceFactorPropane},
+            {11, 13, &OutputReportTabularData::sourceFactorOtherFuel1},
+            {12, 14, &OutputReportTabularData::sourceFactorOtherFuel2},
+        };
+        // totalSourceEnergyUse: all 10 fuels (electricity through otherfuel2)
+        Real64 totalSourceEnergyUse = accumulateSourceEnergy(*ort, fuelSourceMap, 0, kNumFuelSourceEntries);
 
         totalSourceEnergyUse = (totalSourceEnergyUse + ort->gatherTotalsBEPS(3) * ort->sourceFactorElectric / ort->efficiencyDistrictCooling +
                                 ort->gatherTotalsBEPS(4) * ort->sourceFactorNaturalGas / ort->efficiencyDistrictHeatingWater +
@@ -8212,61 +8212,8 @@ void WriteBEPSTable(EnergyPlusData &state)
             netSourceElecPurchasedSold = netElecPurchasedSold * ort->sourceFactorElectric * largeConversionFactor; // back to J
         }
 
-        Real64 netSourceEnergyUse = 0.0;
-        //  natural gas
-        if (ort->fuelfactorsused(2)) {
-            netSourceEnergyUse += ort->gatherTotalsSource(2);
-        } else {
-            netSourceEnergyUse += ort->gatherTotalsBEPS(2) * ort->sourceFactorNaturalGas;
-        }
-        // gasoline
-        if (ort->fuelfactorsused(3)) {
-            netSourceEnergyUse += ort->gatherTotalsSource(3);
-        } else {
-            netSourceEnergyUse += ort->gatherTotalsBEPS(6) * ort->sourceFactorGasoline;
-        }
-        // diesel
-        if (ort->fuelfactorsused(4)) {
-            netSourceEnergyUse += ort->gatherTotalsSource(4);
-        } else {
-            netSourceEnergyUse += ort->gatherTotalsBEPS(8) * ort->sourceFactorDiesel;
-        }
-        // coal
-        if (ort->fuelfactorsused(5)) {
-            netSourceEnergyUse += ort->gatherTotalsSource(5);
-        } else {
-            netSourceEnergyUse += ort->gatherTotalsBEPS(9) * ort->sourceFactorCoal;
-        }
-        // Fuel Oil No1
-        if (ort->fuelfactorsused(6)) {
-            netSourceEnergyUse += ort->gatherTotalsSource(6);
-        } else {
-            netSourceEnergyUse += ort->gatherTotalsBEPS(10) * ort->sourceFactorFuelOil1;
-        }
-        // Fuel Oil No2
-        if (ort->fuelfactorsused(7)) {
-            netSourceEnergyUse += ort->gatherTotalsSource(7);
-        } else {
-            netSourceEnergyUse += ort->gatherTotalsBEPS(11) * ort->sourceFactorFuelOil2;
-        }
-        // propane
-        if (ort->fuelfactorsused(8)) {
-            netSourceEnergyUse += ort->gatherTotalsSource(8);
-        } else {
-            netSourceEnergyUse += ort->gatherTotalsBEPS(12) * ort->sourceFactorPropane;
-        }
-        // otherfuel1
-        if (ort->fuelfactorsused(11)) {
-            netSourceEnergyUse += ort->gatherTotalsSource(11);
-        } else {
-            netSourceEnergyUse += ort->gatherTotalsBEPS(13) * ort->sourceFactorOtherFuel1;
-        }
-        // otherfuel2
-        if (ort->fuelfactorsused(12)) {
-            netSourceEnergyUse += ort->gatherTotalsSource(12);
-        } else {
-            netSourceEnergyUse += ort->gatherTotalsBEPS(14) * ort->sourceFactorOtherFuel2;
-        }
+        // netSourceEnergyUse: fuels 2-10 (skip electricity, which is handled via netSourceElecPurchasedSold)
+        Real64 netSourceEnergyUse = accumulateSourceEnergy(*ort, fuelSourceMap, 1, kNumFuelSourceEntries);
 
         netSourceEnergyUse =
             (netSourceEnergyUse + netSourceElecPurchasedSold + ort->gatherTotalsBEPS(3) * ort->sourceFactorElectric / ort->efficiencyDistrictCooling +
@@ -8301,24 +8248,7 @@ void WriteBEPSTable(EnergyPlusData &state)
         }
 
         // heading for the entire sub-table
-        if (ort->displayTabularBEPS) {
-            if (currentStyle.produceTabular) {
-                WriteSubtitle(state, "Site and Source Energy");
-                WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-            }
-            if (currentStyle.produceSQLite) {
-                if (state.dataSQLiteProcedures->sqlite) {
-                    state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
-                        tableBody, rowHead, columnHead, "AnnualBuildingUtilityPerformanceSummary", "Entire Facility", "Site and Source Energy");
-                }
-            }
-            if (currentStyle.produceJSON) {
-                if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-                    state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-                        tableBody, rowHead, columnHead, "AnnualBuildingUtilityPerformanceSummary", "Entire Facility", "Site and Source Energy");
-                }
-            }
-        }
+        writeBEPSSubtable(state, tableBody, rowHead, columnHead, columnWidth, currentStyle, "Site and Source Energy");
 
         //---- Source and Site Energy Sub-Table
         rowHead.allocate(13);
@@ -8359,140 +8289,25 @@ void WriteBEPSTable(EnergyPlusData &state)
         //  tableBody(10,1) = TRIM(RealToStr(currentStyle.formatReals, sourceFactorFuelOil2 ,3))
         //  tableBody(11,1) = TRIM(RealToStr(currentStyle.formatReals, sourceFactorPropane ,3))
 
-        if (!ort->ffSchedUsed(1)) {
-            tableBody(1, 1) = RealToStr(currentStyle.formatReals, ort->sourceFactorElectric, 3);
-        } else if (ort->gatherTotalsBEPS(1) > SmallValue) {
-            tableBody(1, 1) =
-                "Effective Factor = " + RealToStr(currentStyle.formatReals, ort->gatherTotalsBySourceBEPS(1) / ort->gatherTotalsBEPS(1), 3) +
-                " (calculated using schedule \"" + ort->ffScheds(1)->Name + "\")";
-        } else {
-            tableBody(1, 1) = "N/A";
-        }
-
-        if (!ort->ffSchedUsed(2)) {
-            tableBody(1, 2) = RealToStr(currentStyle.formatReals, ort->sourceFactorNaturalGas, 3);
-        } else if (ort->gatherTotalsBEPS(2) > SmallValue) {
-            tableBody(1, 2) =
-                "Effective Factor = " + RealToStr(currentStyle.formatReals, ort->gatherTotalsBySourceBEPS(2) / ort->gatherTotalsBEPS(2), 3) +
-                " (calculated using schedule \"" + ort->ffScheds(2)->Name + "\")";
-        } else {
-            tableBody(1, 2) = "N/A";
-        }
+        fillSourceConversionCell(*ort, tableBody, currentStyle.formatReals, 1, 1, 1, ort->sourceFactorElectric, SmallValue);
+        fillSourceConversionCell(*ort, tableBody, currentStyle.formatReals, 2, 2, 2, ort->sourceFactorNaturalGas, SmallValue);
 
         tableBody(1, 3) = RealToStr(currentStyle.formatReals, ort->sourceFactorElectric / ort->efficiencyDistrictCooling, 3); // District Cooling
-
         tableBody(1, 4) =
             RealToStr(currentStyle.formatReals, ort->sourceFactorNaturalGas / ort->efficiencyDistrictHeatingWater, 3); // District Heating Water
+        tableBody(1, 5) = RealToStr(currentStyle.formatReals, ort->sourceFactorDistrictHeatingSteam, 3);               // District Heating Steam
 
-        tableBody(1, 5) = RealToStr(currentStyle.formatReals, ort->sourceFactorDistrictHeatingSteam, 3); // District Heating Steam
-
-        if (!ort->ffSchedUsed(6)) {
-            tableBody(1, 6) = RealToStr(currentStyle.formatReals, ort->sourceFactorGasoline, 3);
-        } else if (ort->gatherTotalsBEPS(6) > SmallValue) {
-            tableBody(1, 6) =
-                "Effective Factor = " + RealToStr(currentStyle.formatReals, ort->gatherTotalsBySourceBEPS(6) / ort->gatherTotalsBEPS(6), 3) +
-                " (calculated using schedule \"" + ort->ffScheds(6)->Name + "\")";
-        } else {
-            tableBody(1, 6) = "N/A";
-        }
-
-        if (!ort->ffSchedUsed(8)) {
-            tableBody(1, 7) = RealToStr(currentStyle.formatReals, ort->sourceFactorDiesel, 3);
-        } else if (ort->gatherTotalsBEPS(8) > SmallValue) {
-            tableBody(1, 7) =
-                "Effective Factor = " + RealToStr(currentStyle.formatReals, ort->gatherTotalsBySourceBEPS(8) / ort->gatherTotalsBEPS(8), 3) +
-                " (calculated using schedule \"" + ort->ffScheds(8)->Name + "\")";
-        } else {
-            tableBody(1, 7) = "N/A";
-        }
-
-        if (!ort->ffSchedUsed(9)) {
-            tableBody(1, 8) = RealToStr(currentStyle.formatReals, ort->sourceFactorCoal, 3);
-        } else if (ort->gatherTotalsBEPS(9) > SmallValue) {
-            tableBody(1, 8) =
-                "Effective Factor = " + RealToStr(currentStyle.formatReals, ort->gatherTotalsBySourceBEPS(9) / ort->gatherTotalsBEPS(9), 3) +
-                " (calculated using schedule \"" + ort->ffScheds(9)->Name + "\")";
-        } else {
-            tableBody(1, 8) = "N/A";
-        }
-
-        if (!ort->ffSchedUsed(10)) {
-            tableBody(1, 9) = RealToStr(currentStyle.formatReals, ort->sourceFactorFuelOil1, 3);
-        } else if (ort->gatherTotalsBEPS(10) > SmallValue) {
-            tableBody(1, 9) =
-                "Effective Factor = " + RealToStr(currentStyle.formatReals, ort->gatherTotalsBySourceBEPS(10) / ort->gatherTotalsBEPS(10), 3) +
-                " (calculated using schedule \"" + ort->ffScheds(10)->Name + "\")";
-        } else {
-            tableBody(1, 9) = "N/A";
-        }
-
-        if (!ort->ffSchedUsed(11)) {
-            tableBody(1, 10) = RealToStr(currentStyle.formatReals, ort->sourceFactorFuelOil2, 3);
-        } else if (ort->gatherTotalsBEPS(11) > SmallValue) {
-            tableBody(1, 10) =
-                "Effective Factor = " + RealToStr(currentStyle.formatReals, ort->gatherTotalsBySourceBEPS(11) / ort->gatherTotalsBEPS(11), 3) +
-                " (calculated using schedule \"" + ort->ffScheds(11)->Name + "\")";
-        } else {
-            tableBody(1, 10) = "N/A";
-        }
-
-        if (!ort->ffSchedUsed(12)) {
-            tableBody(1, 11) = RealToStr(currentStyle.formatReals, ort->sourceFactorPropane, 3);
-        } else if (ort->gatherTotalsBEPS(12) > SmallValue) {
-            tableBody(1, 11) =
-                "Effective Factor = " + RealToStr(currentStyle.formatReals, ort->gatherTotalsBySourceBEPS(12) / ort->gatherTotalsBEPS(12), 3) +
-                " (calculated using schedule \"" + ort->ffScheds(12)->Name + "\")";
-        } else {
-            tableBody(1, 11) = "N/A";
-        }
-
-        if (!ort->ffSchedUsed(13)) {
-            tableBody(1, 12) = RealToStr(currentStyle.formatReals, ort->sourceFactorOtherFuel1, 3);
-        } else if (ort->gatherTotalsBEPS(13) > SmallValue) {
-            tableBody(1, 12) =
-                "Effective Factor = " + RealToStr(currentStyle.formatReals, ort->gatherTotalsBySourceBEPS(13) / ort->gatherTotalsBEPS(13), 3) +
-                " (calculated using schedule \"" + ort->ffScheds(13)->Name + "\")";
-        } else {
-            tableBody(1, 12) = "N/A";
-        }
-
-        if (!ort->ffSchedUsed(14)) {
-            tableBody(1, 13) = RealToStr(currentStyle.formatReals, ort->sourceFactorOtherFuel2, 3);
-        } else if (ort->gatherTotalsBEPS(14) > SmallValue) {
-            tableBody(1, 13) =
-                "Effective Factor = " + RealToStr(currentStyle.formatReals, ort->gatherTotalsBySourceBEPS(14) / ort->gatherTotalsBEPS(14), 3) +
-                " (calculated using schedule \"" + ort->ffScheds(14)->Name + "\")";
-        } else {
-            tableBody(1, 13) = "N/A";
-        }
+        fillSourceConversionCell(*ort, tableBody, currentStyle.formatReals, 6, 6, 6, ort->sourceFactorGasoline, SmallValue);
+        fillSourceConversionCell(*ort, tableBody, currentStyle.formatReals, 8, 8, 7, ort->sourceFactorDiesel, SmallValue);
+        fillSourceConversionCell(*ort, tableBody, currentStyle.formatReals, 9, 9, 8, ort->sourceFactorCoal, SmallValue);
+        fillSourceConversionCell(*ort, tableBody, currentStyle.formatReals, 10, 10, 9, ort->sourceFactorFuelOil1, SmallValue);
+        fillSourceConversionCell(*ort, tableBody, currentStyle.formatReals, 11, 11, 10, ort->sourceFactorFuelOil2, SmallValue);
+        fillSourceConversionCell(*ort, tableBody, currentStyle.formatReals, 12, 12, 11, ort->sourceFactorPropane, SmallValue);
+        fillSourceConversionCell(*ort, tableBody, currentStyle.formatReals, 13, 13, 12, ort->sourceFactorOtherFuel1, SmallValue);
+        fillSourceConversionCell(*ort, tableBody, currentStyle.formatReals, 14, 14, 13, ort->sourceFactorOtherFuel2, SmallValue);
 
         // heading for the entire sub-table
-        if (ort->displayTabularBEPS) {
-            if (currentStyle.produceTabular) {
-                WriteSubtitle(state, "Site to Source Energy Conversion Factors");
-                WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-            }
-            if (currentStyle.produceSQLite) {
-                if (state.dataSQLiteProcedures->sqlite) {
-                    state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(tableBody,
-                                                                                       rowHead,
-                                                                                       columnHead,
-                                                                                       "AnnualBuildingUtilityPerformanceSummary",
-                                                                                       "Entire Facility",
-                                                                                       "Site to Source Energy Conversion Factors");
-                }
-            }
-            if (currentStyle.produceJSON) {
-                if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-                    state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(tableBody,
-                                                                                                          rowHead,
-                                                                                                          columnHead,
-                                                                                                          "AnnualBuildingUtilityPerformanceSummary",
-                                                                                                          "Entire Facility",
-                                                                                                          "Site to Source Energy Conversion Factors");
-                }
-            }
-        }
+        writeBEPSSubtable(state, tableBody, rowHead, columnHead, columnWidth, currentStyle, "Site to Source Energy Conversion Factors");
 
         //---- Building Area Sub-Table
         rowHead.allocate(3);
@@ -8544,24 +8359,7 @@ void WriteBEPSTable(EnergyPlusData &state)
         tableBody(1, 3) = RealToStr(currentStyle.formatReals, convBldgGrossFloorArea - convBldgCondFloorArea, 2);
 
         // heading for the entire sub-table
-        if (ort->displayTabularBEPS) {
-            if (currentStyle.produceTabular) {
-                WriteSubtitle(state, "Building Area");
-                WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-            }
-            if (currentStyle.produceSQLite) {
-                if (state.dataSQLiteProcedures->sqlite) {
-                    state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
-                        tableBody, rowHead, columnHead, "AnnualBuildingUtilityPerformanceSummary", "Entire Facility", "Building Area");
-                }
-            }
-            if (currentStyle.produceJSON) {
-                if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-                    state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-                        tableBody, rowHead, columnHead, "AnnualBuildingUtilityPerformanceSummary", "Entire Facility", "Building Area");
-                }
-            }
-        }
+        writeBEPSSubtable(state, tableBody, rowHead, columnHead, columnWidth, currentStyle, "Building Area");
 
         //---- End Use Sub-Table
         rowHead.allocate(16);
@@ -8957,24 +8755,7 @@ void WriteBEPSTable(EnergyPlusData &state)
         } break;
         }
         // heading for the entire sub-table
-        if (ort->displayTabularBEPS) {
-            if (currentStyle.produceTabular) {
-                WriteSubtitle(state, "End Uses");
-                WriteTable(state, tableBody, rowHead, columnHead, columnWidth, false, footnote);
-            }
-            if (currentStyle.produceSQLite) {
-                if (state.dataSQLiteProcedures->sqlite) {
-                    state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
-                        tableBody, rowHead, columnHead, "AnnualBuildingUtilityPerformanceSummary", "Entire Facility", "End Uses");
-                }
-            }
-            if (currentStyle.produceJSON) {
-                if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-                    state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-                        tableBody, rowHead, columnHead, "AnnualBuildingUtilityPerformanceSummary", "Entire Facility", "End Uses");
-                }
-            }
-        }
+        writeBEPSSubtable(state, tableBody, rowHead, columnHead, columnWidth, currentStyle, "End Uses", false, footnote);
 
         //---- End Uses By Subcategory Sub-Table
         writeBEPSEndUseBySubCatOrSpaceType(
@@ -9163,32 +8944,7 @@ void WriteBEPSTable(EnergyPlusData &state)
             }
         }
         // heading for the entire sub-table
-        if (ort->displayTabularBEPS) {
-            if (currentStyle.produceTabular) {
-                WriteSubtitle(state, "Utility Use Per Conditioned Floor Area");
-                WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-            }
-            if (currentStyle.produceSQLite) {
-                if (state.dataSQLiteProcedures->sqlite) {
-                    state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(tableBody,
-                                                                                       rowHead,
-                                                                                       columnHead,
-                                                                                       "AnnualBuildingUtilityPerformanceSummary",
-                                                                                       "Entire Facility",
-                                                                                       "Utility Use Per Conditioned Floor Area");
-                }
-            }
-            if (currentStyle.produceJSON) {
-                if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-                    state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(tableBody,
-                                                                                                          rowHead,
-                                                                                                          columnHead,
-                                                                                                          "AnnualBuildingUtilityPerformanceSummary",
-                                                                                                          "Entire Facility",
-                                                                                                          "Utility Use Per Conditioned Floor Area");
-                }
-            }
-        }
+        writeBEPSSubtable(state, tableBody, rowHead, columnHead, columnWidth, currentStyle, "Utility Use Per Conditioned Floor Area");
         //---- Normalized by Total Area Sub-Table
         tableBody = "";
         if (convBldgGrossFloorArea > 0) {
@@ -9199,32 +8955,7 @@ void WriteBEPSTable(EnergyPlusData &state)
             }
         }
         // heading for the entire sub-table
-        if (ort->displayTabularBEPS) {
-            if (currentStyle.produceTabular) {
-                WriteSubtitle(state, "Utility Use Per Total Floor Area");
-                WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-            }
-            if (currentStyle.produceSQLite) {
-                if (state.dataSQLiteProcedures->sqlite) {
-                    state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(tableBody,
-                                                                                       rowHead,
-                                                                                       columnHead,
-                                                                                       "AnnualBuildingUtilityPerformanceSummary",
-                                                                                       "Entire Facility",
-                                                                                       "Utility Use Per Total Floor Area");
-                }
-            }
-            if (currentStyle.produceJSON) {
-                if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-                    state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(tableBody,
-                                                                                                          rowHead,
-                                                                                                          columnHead,
-                                                                                                          "AnnualBuildingUtilityPerformanceSummary",
-                                                                                                          "Entire Facility",
-                                                                                                          "Utility Use Per Total Floor Area");
-                }
-            }
-        }
+        writeBEPSSubtable(state, tableBody, rowHead, columnHead, columnWidth, currentStyle, "Utility Use Per Total Floor Area");
 
         //---- Electric Loads Satisfied Sub-Table
         rowHead.allocate(14);
@@ -9307,24 +9038,7 @@ void WriteBEPSTable(EnergyPlusData &state)
         }
 
         // heading for the entire sub-table
-        if (ort->displayTabularBEPS) {
-            if (currentStyle.produceTabular) {
-                WriteSubtitle(state, "Electric Loads Satisfied");
-                WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-            }
-            if (currentStyle.produceSQLite) {
-                if (state.dataSQLiteProcedures->sqlite) {
-                    state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
-                        tableBody, rowHead, columnHead, "AnnualBuildingUtilityPerformanceSummary", "Entire Facility", "Electric Loads Satisfied");
-                }
-            }
-            if (currentStyle.produceJSON) {
-                if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-                    state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-                        tableBody, rowHead, columnHead, "AnnualBuildingUtilityPerformanceSummary", "Entire Facility", "Electric Loads Satisfied");
-                }
-            }
-        }
+        writeBEPSSubtable(state, tableBody, rowHead, columnHead, columnWidth, currentStyle, "Electric Loads Satisfied");
 
         //---- On-Site Thermal Sources Sub-Table
         rowHead.allocate(7);
@@ -9408,24 +9122,7 @@ void WriteBEPSTable(EnergyPlusData &state)
         }
 
         // heading for the entire sub-table
-        if (ort->displayTabularBEPS) {
-            if (currentStyle.produceTabular) {
-                WriteSubtitle(state, "On-Site Thermal Sources");
-                WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-            }
-            if (currentStyle.produceSQLite) {
-                if (state.dataSQLiteProcedures->sqlite) {
-                    state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
-                        tableBody, rowHead, columnHead, "AnnualBuildingUtilityPerformanceSummary", "Entire Facility", "On-Site Thermal Sources");
-                }
-            }
-            if (currentStyle.produceJSON) {
-                if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-                    state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-                        tableBody, rowHead, columnHead, "AnnualBuildingUtilityPerformanceSummary", "Entire Facility", "On-Site Thermal Sources");
-                }
-            }
-        }
+        writeBEPSSubtable(state, tableBody, rowHead, columnHead, columnWidth, currentStyle, "On-Site Thermal Sources");
 
         //---- Water Loads Sub-Table
         // As of 12/8/2003 decided to not include this sub-table to wait
@@ -9513,24 +9210,9 @@ void WriteBEPSTable(EnergyPlusData &state)
         }
 
         //  ! heading for the entire sub-table
-        if (ort->displayTabularBEPS) {
-            if (currentStyle.produceTabular) {
-                WriteSubtitle(state, "Water Source Summary");
-                WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-            }
-            if (currentStyle.produceSQLite) {
-                if (state.dataSQLiteProcedures->sqlite) {
-                    state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
-                        tableBody, rowHead, columnHead, "AnnualBuildingUtilityPerformanceSummary", "Entire Facility", "Water Source Summary");
-                }
-            }
-            if (currentStyle.produceJSON) {
-                if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-                    state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-                        tableBody, rowHead, columnHead, "AnnualBuildingUtilityPerformanceSummary", "Entire Facility", "Water Source Summary");
-                }
-            }
+        writeBEPSSubtable(state, tableBody, rowHead, columnHead, columnWidth, currentStyle, "Water Source Summary");
 
+        if (ort->displayTabularBEPS) {
             //---- Comfort and Setpoint Not Met Sub-Table
             rowHead.allocate(2);
             columnHead.allocate(1);
@@ -9571,6 +9253,7 @@ void WriteBEPSTable(EnergyPlusData &state)
                     currentStyle.formatReals, ConvertIPdelta(state, indexUnitConv, state.dataHVACGlobal->deviationFromSetPtThresholdClg), 2);
             }
 
+            // subtitle already written above; pass empty to skip, but use proper name for SQLite/JSON
             if (currentStyle.produceTabular) {
                 WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
             }

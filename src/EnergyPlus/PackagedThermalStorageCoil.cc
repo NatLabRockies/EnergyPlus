@@ -186,6 +186,50 @@ void SimTESCoil(EnergyPlusData &state,
     }
 }
 
+// Helper: look up a performance curve by alpha index, report errors if missing, and validate dimensions.
+// Returns the curve index (0 if not found). Sets errorsFound on failure.
+static int getAndValidateCurve(EnergyPlusData &state,
+                               int alphaIndex,
+                               std::initializer_list<int> validDims,
+                               std::string_view routineName,
+                               std::string_view objectType,
+                               std::string_view objectName,
+                               bool &errorsFound)
+{
+    auto &ip = state.dataIPShortCut;
+    int curveIndex = GetCurveIndex(state, ip->cAlphaArgs(alphaIndex));
+    if (curveIndex == 0) {
+        if (ip->lAlphaFieldBlanks(alphaIndex)) {
+            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", routineName, objectType, objectName));
+            ShowContinueError(state, EnergyPlus::format("Required {}is blank.", ip->cAlphaFieldNames(alphaIndex)));
+        } else {
+            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", routineName, objectType, objectName));
+            ShowContinueError(state, EnergyPlus::format("Not found {}=\"{}\".", ip->cAlphaFieldNames(alphaIndex), ip->cAlphaArgs(alphaIndex)));
+        }
+        errorsFound = true;
+    } else {
+        errorsFound |=
+            EnergyPlus::Curve::CheckCurveDims(state, curveIndex, validDims, routineName, objectType, objectName, ip->cAlphaFieldNames(alphaIndex));
+    }
+    return curveIndex;
+}
+
+// Helper: parse a Yes/No alpha field into a bool, reporting an error if the value is invalid.
+static bool parseModeAvailability(
+    EnergyPlusData &state, int alphaIndex, std::string_view routineName, std::string_view objectType, std::string_view objectName, bool &errorsFound)
+{
+    auto &ip = state.dataIPShortCut;
+    BooleanSwitch const answer = getYesNoValue(ip->cAlphaArgs(alphaIndex));
+    if (answer == BooleanSwitch::Yes || answer == BooleanSwitch::No) {
+        return static_cast<bool>(answer);
+    }
+    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", routineName, objectType, objectName));
+    ShowContinueError(state, EnergyPlus::format("...{}=\"{}\".", ip->cAlphaFieldNames(alphaIndex), ip->cAlphaArgs(alphaIndex)));
+    ShowContinueError(state, "Available choices are Yes or No.");
+    errorsFound = true;
+    return false;
+}
+
 void GetTESCoilInput(EnergyPlusData &state)
 {
 
@@ -378,20 +422,7 @@ void GetTESCoilInput(EnergyPlusData &state)
                     state.dataIPShortCut->cAlphaArgs(9),
                     "Air Nodes");
 
-        BooleanSwitch const answer = getYesNoValue(state.dataIPShortCut->cAlphaArgs(10));
-        switch (answer) {
-        case BooleanSwitch::Yes:
-        case BooleanSwitch::No:
-            thisTESCoil.CoolingOnlyModeIsAvailable = static_cast<bool>(answer);
-            break;
-        default:
-            thisTESCoil.CoolingOnlyModeIsAvailable = false;
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-            ShowContinueError(state,
-                              EnergyPlus::format("...{}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(10), state.dataIPShortCut->cAlphaArgs(10)));
-            ShowContinueError(state, "Available choices are Yes or No.");
-            ErrorsFound = true;
-        }
+        thisTESCoil.CoolingOnlyModeIsAvailable = parseModeAvailability(state, 10, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
 
         thisTESCoil.CoolingOnlyRatedTotCap = state.dataIPShortCut->rNumericArgs(7);
         if (thisTESCoil.CoolingOnlyModeIsAvailable) { // get input data for this mode
@@ -399,182 +430,24 @@ void GetTESCoilInput(EnergyPlusData &state)
             thisTESCoil.CoolingOnlyRatedSHR = state.dataIPShortCut->rNumericArgs(8);
             thisTESCoil.CoolingOnlyRatedCOP = state.dataIPShortCut->rNumericArgs(9);
 
-            thisTESCoil.CoolingOnlyCapFTempCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(11));
-            if (thisTESCoil.CoolingOnlyCapFTempCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(11)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(11)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(11), state.dataIPShortCut->cAlphaArgs(11)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingOnlyCapFTempCurve,        // Curve index
-                                                                 {2},                                         // Valid dimensions
-                                                                 RoutineName,                                 // Routine name
-                                                                 cCurrentModuleObject,                        // Object Type
-                                                                 thisTESCoil.Name,                            // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(11)); // Field Name
-            }
-
-            thisTESCoil.CoolingOnlyCapFFlowCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(12));
-            if (thisTESCoil.CoolingOnlyCapFFlowCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(12)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(12)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(12), state.dataIPShortCut->cAlphaArgs(12)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object, any curve with just x as single independent variable
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingOnlyCapFFlowCurve,        // Curve index
-                                                                 {1},                                         // Valid dimensions
-                                                                 RoutineName,                                 // Routine name
-                                                                 cCurrentModuleObject,                        // Object Type
-                                                                 thisTESCoil.Name,                            // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(12)); // Field Name
-            }
-
-            thisTESCoil.CoolingOnlyEIRFTempCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(13));
-            if (thisTESCoil.CoolingOnlyEIRFTempCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(13)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(13)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(13), state.dataIPShortCut->cAlphaArgs(13)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingOnlyEIRFTempCurve,        // Curve index
-                                                                 {2},                                         // Valid dimensions
-                                                                 RoutineName,                                 // Routine name
-                                                                 cCurrentModuleObject,                        // Object Type
-                                                                 thisTESCoil.Name,                            // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(13)); // Field Name
-            }
-
-            thisTESCoil.CoolingOnlyEIRFFlowCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(14));
-            if (thisTESCoil.CoolingOnlyEIRFFlowCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(14)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(14)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(14), state.dataIPShortCut->cAlphaArgs(14)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object, any curve with just x as single independent variable
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingOnlyEIRFFlowCurve,        // Curve index
-                                                                 {1},                                         // Valid dimensions
-                                                                 RoutineName,                                 // Routine name
-                                                                 cCurrentModuleObject,                        // Object Type
-                                                                 thisTESCoil.Name,                            // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(14)); // Field Name
-            }
-
-            thisTESCoil.CoolingOnlyPLFFPLRCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(15));
-            if (thisTESCoil.CoolingOnlyPLFFPLRCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(15)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(15)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(15), state.dataIPShortCut->cAlphaArgs(15)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object, any curve with just x as single independent variable
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingOnlyPLFFPLRCurve,         // Curve index
-                                                                 {1},                                         // Valid dimensions
-                                                                 RoutineName,                                 // Routine name
-                                                                 cCurrentModuleObject,                        // Object Type
-                                                                 thisTESCoil.Name,                            // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(15)); // Field Name
-            }
-
-            thisTESCoil.CoolingOnlySHRFTempCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(16));
-            if (thisTESCoil.CoolingOnlySHRFTempCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(16)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(16)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(16), state.dataIPShortCut->cAlphaArgs(16)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingOnlySHRFTempCurve,        // Curve index
-                                                                 {2},                                         // Valid dimensions
-                                                                 RoutineName,                                 // Routine name
-                                                                 cCurrentModuleObject,                        // Object Type
-                                                                 thisTESCoil.Name,                            // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(16)); // Field Name
-            }
-
-            thisTESCoil.CoolingOnlySHRFFlowCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(17));
-            if (thisTESCoil.CoolingOnlySHRFFlowCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(17)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(17)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(17), state.dataIPShortCut->cAlphaArgs(17)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object, any curve with just x as single independent variable
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingOnlySHRFFlowCurve,        // Curve index
-                                                                 {1},                                         // Valid dimensions
-                                                                 RoutineName,                                 // Routine name
-                                                                 cCurrentModuleObject,                        // Object Type
-                                                                 thisTESCoil.Name,                            // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(17)); // Field Name
-            }
+            thisTESCoil.CoolingOnlyCapFTempCurve =
+                getAndValidateCurve(state, 11, {2}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.CoolingOnlyCapFFlowCurve =
+                getAndValidateCurve(state, 12, {1}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.CoolingOnlyEIRFTempCurve =
+                getAndValidateCurve(state, 13, {2}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.CoolingOnlyEIRFFlowCurve =
+                getAndValidateCurve(state, 14, {1}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.CoolingOnlyPLFFPLRCurve =
+                getAndValidateCurve(state, 15, {1}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.CoolingOnlySHRFTempCurve =
+                getAndValidateCurve(state, 16, {2}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.CoolingOnlySHRFFlowCurve =
+                getAndValidateCurve(state, 17, {1}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
         }
 
-        BooleanSwitch const answer2 = getYesNoValue(state.dataIPShortCut->cAlphaArgs(18));
-        switch (answer2) {
-        case BooleanSwitch::Yes:
-        case BooleanSwitch::No:
-            thisTESCoil.CoolingAndChargeModeAvailable = static_cast<bool>(answer2);
-            break;
-        default:
-            thisTESCoil.CoolingAndChargeModeAvailable = false;
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-            ShowContinueError(state,
-                              EnergyPlus::format("...{}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(18), state.dataIPShortCut->cAlphaArgs(18)));
-            ShowContinueError(state, "Available choices are Yes or No.");
-            ErrorsFound = true;
-        }
+        thisTESCoil.CoolingAndChargeModeAvailable =
+            parseModeAvailability(state, 18, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
 
         if (thisTESCoil.CoolingAndChargeModeAvailable) {
 
@@ -589,297 +462,35 @@ void GetTESCoilInput(EnergyPlusData &state)
             thisTESCoil.CoolingAndChargeCoolingRatedCOP = state.dataIPShortCut->rNumericArgs(15);  // Coefficient of performance , for cooling [W/W]
             thisTESCoil.CoolingAndChargeChargingRatedCOP = state.dataIPShortCut->rNumericArgs(16); // Coefficient of performance , for charging [W/W]
 
-            thisTESCoil.CoolingAndChargeCoolingCapFTempCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(19));
-            if (thisTESCoil.CoolingAndChargeCoolingCapFTempCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(19)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(19)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(19), state.dataIPShortCut->cAlphaArgs(19)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingAndChargeCoolingCapFTempCurve, // Curve index
-                                                                 {3},                                              // Valid dimensions
-                                                                 RoutineName,                                      // Routine name
-                                                                 cCurrentModuleObject,                             // Object Type
-                                                                 thisTESCoil.Name,                                 // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(19));      // Field Name
-            }
-
-            thisTESCoil.CoolingAndChargeCoolingCapFFlowCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(20));
-            if (thisTESCoil.CoolingAndChargeCoolingCapFFlowCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(20)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(20)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(20), state.dataIPShortCut->cAlphaArgs(20)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object, any curve with just x as single independent variable
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingAndChargeCoolingCapFFlowCurve, // Curve index
-                                                                 {1},                                              // Valid dimensions
-                                                                 RoutineName,                                      // Routine name
-                                                                 cCurrentModuleObject,                             // Object Type
-                                                                 thisTESCoil.Name,                                 // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(20));      // Field Name
-            }
-            thisTESCoil.CoolingAndChargeCoolingEIRFTempCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(21));
-            if (thisTESCoil.CoolingAndChargeCoolingEIRFTempCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(21)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(21)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(21), state.dataIPShortCut->cAlphaArgs(21)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingAndChargeCoolingEIRFTempCurve, // Curve index
-                                                                 {3},                                              // Valid dimensions
-                                                                 RoutineName,                                      // Routine name
-                                                                 cCurrentModuleObject,                             // Object Type
-                                                                 thisTESCoil.Name,                                 // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(21));      // Field Name
-            }
-
-            thisTESCoil.CoolingAndChargeCoolingEIRFFlowCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(22));
-            if (thisTESCoil.CoolingAndChargeCoolingEIRFFlowCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(22)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(22)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(22), state.dataIPShortCut->cAlphaArgs(22)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object, any curve with just x as single independent variable
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingAndChargeCoolingEIRFFlowCurve, // Curve index
-                                                                 {1},                                              // Valid dimensions
-                                                                 RoutineName,                                      // Routine name
-                                                                 cCurrentModuleObject,                             // Object Type
-                                                                 thisTESCoil.Name,                                 // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(22));      // Field Name
-            }
-
-            thisTESCoil.CoolingAndChargeCoolingPLFFPLRCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(23));
-            if (thisTESCoil.CoolingAndChargeCoolingPLFFPLRCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(23)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(23)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(23), state.dataIPShortCut->cAlphaArgs(23)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object, any curve with just x as single independent variable
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingAndChargeCoolingPLFFPLRCurve, // Curve index
-                                                                 {1},                                             // Valid dimensions
-                                                                 RoutineName,                                     // Routine name
-                                                                 cCurrentModuleObject,                            // Object Type
-                                                                 thisTESCoil.Name,                                // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(23));     // Field Name
-            }
-
-            thisTESCoil.CoolingAndChargeChargingCapFTempCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(24));
-            if (thisTESCoil.CoolingAndChargeChargingCapFTempCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(24)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(24)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(24), state.dataIPShortCut->cAlphaArgs(24)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingAndChargeChargingCapFTempCurve, // Curve index
-                                                                 {3},                                               // Valid dimensions
-                                                                 RoutineName,                                       // Routine name
-                                                                 cCurrentModuleObject,                              // Object Type
-                                                                 thisTESCoil.Name,                                  // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(24));       // Field Name
-            }
-
-            thisTESCoil.CoolingAndChargeChargingCapFEvapPLRCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(25));
-            if (thisTESCoil.CoolingAndChargeChargingCapFEvapPLRCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(25)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(25)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(25), state.dataIPShortCut->cAlphaArgs(25)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object, any curve with just x as single independent variable
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingAndChargeChargingCapFEvapPLRCurve, // Curve index
-                                                                 {1},                                                  // Valid dimensions
-                                                                 RoutineName,                                          // Routine name
-                                                                 cCurrentModuleObject,                                 // Object Type
-                                                                 thisTESCoil.Name,                                     // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(25));          // Field Name
-            }
-
-            thisTESCoil.CoolingAndChargeChargingEIRFTempCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(26));
-            if (thisTESCoil.CoolingAndChargeChargingEIRFTempCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(26)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(26)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(26), state.dataIPShortCut->cAlphaArgs(26)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingAndChargeChargingEIRFTempCurve, // Curve index
-                                                                 {3},                                               // Valid dimensions
-                                                                 RoutineName,                                       // Routine name
-                                                                 cCurrentModuleObject,                              // Object Type
-                                                                 thisTESCoil.Name,                                  // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(26));       // Field Name
-            }
-
-            thisTESCoil.CoolingAndChargeChargingEIRFFLowCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(27));
-            if (thisTESCoil.CoolingAndChargeChargingEIRFFLowCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(27)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(27)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(27), state.dataIPShortCut->cAlphaArgs(27)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object, any curve with just x as single independent variable
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingAndChargeChargingEIRFFLowCurve, // Curve index
-                                                                 {1},                                               // Valid dimensions
-                                                                 RoutineName,                                       // Routine name
-                                                                 cCurrentModuleObject,                              // Object Type
-                                                                 thisTESCoil.Name,                                  // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(27));       // Field Name
-            }
-
-            thisTESCoil.CoolingAndChargeChargingPLFFPLRCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(28));
-            if (thisTESCoil.CoolingAndChargeChargingPLFFPLRCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(28)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(28)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(28), state.dataIPShortCut->cAlphaArgs(28)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object, any curve with just x as single independent variable
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingAndChargeChargingPLFFPLRCurve, // Curve index
-                                                                 {1},                                              // Valid dimensions
-                                                                 RoutineName,                                      // Routine name
-                                                                 cCurrentModuleObject,                             // Object Type
-                                                                 thisTESCoil.Name,                                 // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(28));      // Field Name
-            }
-
-            thisTESCoil.CoolingAndChargeSHRFTempCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(29));
-            if (thisTESCoil.CoolingAndChargeSHRFTempCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(29)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(29)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(29), state.dataIPShortCut->cAlphaArgs(29)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingAndChargeSHRFTempCurve, // Curve index
-                                                                 {2, 3},                                    // Valid dimensions  // MULTIPLECURVEDIMS
-                                                                 RoutineName,                               // Routine name
-                                                                 cCurrentModuleObject,                      // Object Type
-                                                                 thisTESCoil.Name,                          // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(29)); // Field Name
-            }
-
-            thisTESCoil.CoolingAndChargeSHRFFlowCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(30));
-            if (thisTESCoil.CoolingAndChargeSHRFFlowCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(30)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(30)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(30), state.dataIPShortCut->cAlphaArgs(30)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object, any curve with just x as single independent variable
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingAndChargeSHRFFlowCurve,   // Curve index
-                                                                 {1},                                         // Valid dimensions
-                                                                 RoutineName,                                 // Routine name
-                                                                 cCurrentModuleObject,                        // Object Type
-                                                                 thisTESCoil.Name,                            // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(30)); // Field Name
-            }
+            thisTESCoil.CoolingAndChargeCoolingCapFTempCurve =
+                getAndValidateCurve(state, 19, {3}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.CoolingAndChargeCoolingCapFFlowCurve =
+                getAndValidateCurve(state, 20, {1}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.CoolingAndChargeCoolingEIRFTempCurve =
+                getAndValidateCurve(state, 21, {3}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.CoolingAndChargeCoolingEIRFFlowCurve =
+                getAndValidateCurve(state, 22, {1}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.CoolingAndChargeCoolingPLFFPLRCurve =
+                getAndValidateCurve(state, 23, {1}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.CoolingAndChargeChargingCapFTempCurve =
+                getAndValidateCurve(state, 24, {3}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.CoolingAndChargeChargingCapFEvapPLRCurve =
+                getAndValidateCurve(state, 25, {1}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.CoolingAndChargeChargingEIRFTempCurve =
+                getAndValidateCurve(state, 26, {3}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.CoolingAndChargeChargingEIRFFLowCurve =
+                getAndValidateCurve(state, 27, {1}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.CoolingAndChargeChargingPLFFPLRCurve =
+                getAndValidateCurve(state, 28, {1}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.CoolingAndChargeSHRFTempCurve =
+                getAndValidateCurve(state, 29, {2, 3}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.CoolingAndChargeSHRFFlowCurve =
+                getAndValidateCurve(state, 30, {1}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
 
         } // Cooling and Charge Mode available
 
-        BooleanSwitch answer3 = getYesNoValue(state.dataIPShortCut->cAlphaArgs(31));
-        switch (answer3) {
-        case BooleanSwitch::Yes:
-        case BooleanSwitch::No:
-            thisTESCoil.CoolingAndDischargeModeAvailable = static_cast<bool>(answer3);
-            break;
-        default:
-            thisTESCoil.CoolingAndDischargeModeAvailable = false;
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-            ShowContinueError(state,
-                              EnergyPlus::format("...{}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(31), state.dataIPShortCut->cAlphaArgs(31)));
-            ShowContinueError(state, "Available choices are Yes or No.");
-            ErrorsFound = true;
-        }
+        thisTESCoil.CoolingAndDischargeModeAvailable =
+            parseModeAvailability(state, 31, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
 
         if (thisTESCoil.CoolingAndDischargeModeAvailable) {
 
@@ -894,321 +505,37 @@ void GetTESCoilInput(EnergyPlusData &state)
             thisTESCoil.CoolingAndDischargeDischargingRatedCOP =
                 state.dataIPShortCut->rNumericArgs(23); // Coefficient of performance , for charging [W/W]
 
-            thisTESCoil.CoolingAndDischargeCoolingCapFTempCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(32));
-            if (thisTESCoil.CoolingAndDischargeCoolingCapFTempCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(32)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(32)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(32), state.dataIPShortCut->cAlphaArgs(32)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingAndDischargeCoolingCapFTempCurve, // Curve index
-                                                                 {3},                                                 // Valid dimensions
-                                                                 RoutineName,                                         // Routine name
-                                                                 cCurrentModuleObject,                                // Object Type
-                                                                 thisTESCoil.Name,                                    // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(32));         // Field Name
-            }
+            thisTESCoil.CoolingAndDischargeCoolingCapFTempCurve =
+                getAndValidateCurve(state, 32, {3}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.CoolingAndDischargeCoolingCapFFlowCurve =
+                getAndValidateCurve(state, 33, {1}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.CoolingAndDischargeCoolingEIRFTempCurve =
+                getAndValidateCurve(state, 34, {3}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.CoolingAndDischargeCoolingEIRFFlowCurve =
+                getAndValidateCurve(state, 35, {1}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
 
-            thisTESCoil.CoolingAndDischargeCoolingCapFFlowCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(33));
-            if (thisTESCoil.CoolingAndDischargeCoolingCapFFlowCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(33)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(33)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(33), state.dataIPShortCut->cAlphaArgs(33)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object, any curve with just x as single independent variable
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingAndDischargeCoolingCapFFlowCurve, // Curve index
-                                                                 {1},                                                 // Valid dimensions
-                                                                 RoutineName,                                         // Routine name
-                                                                 cCurrentModuleObject,                                // Object Type
-                                                                 thisTESCoil.Name,                                    // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(33));         // Field Name
-            }
-
-            thisTESCoil.CoolingAndDischargeCoolingEIRFTempCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(34));
-            if (thisTESCoil.CoolingAndDischargeCoolingEIRFTempCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(34)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(34)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(34), state.dataIPShortCut->cAlphaArgs(34)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingAndDischargeCoolingEIRFTempCurve, // Curve index
-                                                                 {3},                                                 // Valid dimensions
-                                                                 RoutineName,                                         // Routine name
-                                                                 cCurrentModuleObject,                                // Object Type
-                                                                 thisTESCoil.Name,                                    // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(34));         // Field Name
-            }
-
-            thisTESCoil.CoolingAndDischargeCoolingEIRFFlowCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(35));
-            if (thisTESCoil.CoolingAndDischargeCoolingEIRFFlowCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(35)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(35)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(35), state.dataIPShortCut->cAlphaArgs(35)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object, any curve with just x as single independent variable
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingAndDischargeCoolingEIRFFlowCurve, // Curve index
-                                                                 {1},                                                 // Valid dimensions
-                                                                 RoutineName,                                         // Routine name
-                                                                 cCurrentModuleObject,                                // Object Type
-                                                                 thisTESCoil.Name,                                    // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(35));         // Field Name
-            }
-
-            thisTESCoil.CoolingAndDischargeCoolingPLFFPLRCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(36));
-            if (thisTESCoil.CoolingAndDischargeCoolingPLFFPLRCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(36)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(36)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(36), state.dataIPShortCut->cAlphaArgs(36)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object, any curve with just x as single independent variable
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingAndDischargeCoolingPLFFPLRCurve, // Curve index
-                                                                 {1},                                                // Valid dimensions
-                                                                 RoutineName,                                        // Routine name
-                                                                 cCurrentModuleObject,                               // Object Type
-                                                                 thisTESCoil.Name,                                   // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(36));        // Field Name
-            }
-
-            thisTESCoil.CoolingAndDischargeDischargingCapFTempCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(37));
-            if (thisTESCoil.CoolingAndDischargeDischargingCapFTempCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(37)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(37)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(37), state.dataIPShortCut->cAlphaArgs(37)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingAndDischargeDischargingCapFTempCurve, // Curve index
-                                                                 {3},                                                     // Valid dimensions
-                                                                 RoutineName,                                             // Routine name
-                                                                 cCurrentModuleObject,                                    // Object Type
-                                                                 thisTESCoil.Name,                                        // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(37));             // Field Name
-            }
-
-            thisTESCoil.CoolingAndDischargeDischargingCapFFlowCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(38));
-            if (thisTESCoil.CoolingAndDischargeDischargingCapFFlowCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(38)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(38)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(38), state.dataIPShortCut->cAlphaArgs(38)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object, any curve with just x as single independent variable
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingAndDischargeDischargingCapFFlowCurve, // Curve index
-                                                                 {1},                                                     // Valid dimensions
-                                                                 RoutineName,                                             // Routine name
-                                                                 cCurrentModuleObject,                                    // Object Type
-                                                                 thisTESCoil.Name,                                        // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(38));             // Field Name
-            }
-
-            thisTESCoil.CoolingAndDischargeDischargingCapFEvapPLRCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(39));
-            if (thisTESCoil.CoolingAndDischargeDischargingCapFEvapPLRCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(39)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(39)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(39), state.dataIPShortCut->cAlphaArgs(39)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object, any curve with just x as single independent variable
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingAndDischargeDischargingCapFEvapPLRCurve, // Curve index
-                                                                 {1},                                                        // Valid dimensions
-                                                                 RoutineName,                                                // Routine name
-                                                                 cCurrentModuleObject,                                       // Object Type
-                                                                 thisTESCoil.Name,                                           // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(39));                // Field Name
-            }
-
-            thisTESCoil.CoolingAndDischargeDischargingEIRFTempCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(40));
-            if (thisTESCoil.CoolingAndDischargeDischargingEIRFTempCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(40)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(40)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(40), state.dataIPShortCut->cAlphaArgs(40)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingAndDischargeDischargingEIRFTempCurve, // Curve index
-                                                                 {3},                                                     // Valid dimensions
-                                                                 RoutineName,                                             // Routine name
-                                                                 cCurrentModuleObject,                                    // Object Type
-                                                                 thisTESCoil.Name,                                        // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(40));             // Field Name
-            }
-
-            thisTESCoil.CoolingAndDischargeDischargingEIRFFLowCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(41));
-            if (thisTESCoil.CoolingAndDischargeDischargingEIRFFLowCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(41)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(41)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(41), state.dataIPShortCut->cAlphaArgs(41)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object, any curve with just x as single independent variable
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingAndDischargeDischargingEIRFFLowCurve, // Curve index
-                                                                 {1},                                                     // Valid dimensions
-                                                                 RoutineName,                                             // Routine name
-                                                                 cCurrentModuleObject,                                    // Object Type
-                                                                 thisTESCoil.Name,                                        // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(41));             // Field Name
-            }
-
-            thisTESCoil.CoolingAndDischargeDischargingPLFFPLRCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(42));
-            if (thisTESCoil.CoolingAndDischargeDischargingPLFFPLRCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(42)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(42)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(42), state.dataIPShortCut->cAlphaArgs(42)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object, any curve with just x as single independent variable
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingAndDischargeDischargingPLFFPLRCurve, // Curve index
-                                                                 {1},                                                    // Valid dimensions
-                                                                 RoutineName,                                            // Routine name
-                                                                 cCurrentModuleObject,                                   // Object Type
-                                                                 thisTESCoil.Name,                                       // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(42));            // Field Name
-            }
-
-            thisTESCoil.CoolingAndDischargeSHRFTempCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(43));
-            if (thisTESCoil.CoolingAndDischargeSHRFTempCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(43)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(43)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(43), state.dataIPShortCut->cAlphaArgs(43)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingAndDischargeSHRFTempCurve, // Curve index
-                                                                 {2, 3},               // Valid dimensions  // MULTIPLECURVEDIMS
-                                                                 RoutineName,          // Routine name
-                                                                 cCurrentModuleObject, // Object Type
-                                                                 thisTESCoil.Name,     // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(43)); // Field Name
-            }
-
-            thisTESCoil.CoolingAndDischargeSHRFFlowCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(44));
-            if (thisTESCoil.CoolingAndDischargeSHRFFlowCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(44)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(44)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(44), state.dataIPShortCut->cAlphaArgs(44)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object, any curve with just x as single independent variable
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.CoolingAndDischargeSHRFFlowCurve, // Curve index
-                                                                 {1},                                          // Valid dimensions
-                                                                 RoutineName,                                  // Routine name
-                                                                 cCurrentModuleObject,                         // Object Type
-                                                                 thisTESCoil.Name,                             // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(44));  // Field Name
-            }
+            thisTESCoil.CoolingAndDischargeCoolingPLFFPLRCurve =
+                getAndValidateCurve(state, 36, {1}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.CoolingAndDischargeDischargingCapFTempCurve =
+                getAndValidateCurve(state, 37, {3}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.CoolingAndDischargeDischargingCapFFlowCurve =
+                getAndValidateCurve(state, 38, {1}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.CoolingAndDischargeDischargingCapFEvapPLRCurve =
+                getAndValidateCurve(state, 39, {1}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.CoolingAndDischargeDischargingEIRFTempCurve =
+                getAndValidateCurve(state, 40, {3}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.CoolingAndDischargeDischargingEIRFFLowCurve =
+                getAndValidateCurve(state, 41, {1}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.CoolingAndDischargeDischargingPLFFPLRCurve =
+                getAndValidateCurve(state, 42, {1}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.CoolingAndDischargeSHRFTempCurve =
+                getAndValidateCurve(state, 43, {2, 3}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.CoolingAndDischargeSHRFFlowCurve =
+                getAndValidateCurve(state, 44, {1}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
 
         } // cooling and discharge mode available
 
-        BooleanSwitch answer4 = getYesNoValue(state.dataIPShortCut->cAlphaArgs(45));
-        switch (answer4) {
-        case BooleanSwitch::Yes:
-        case BooleanSwitch::No:
-            thisTESCoil.ChargeOnlyModeAvailable = static_cast<bool>(answer4);
-            break;
-        default:
-            thisTESCoil.ChargeOnlyModeAvailable = false;
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-            ShowContinueError(state,
-                              EnergyPlus::format("...{}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(45), state.dataIPShortCut->cAlphaArgs(45)));
-            ShowContinueError(state, "Available choices are Yes or No.");
-            ErrorsFound = true;
-        }
+        thisTESCoil.ChargeOnlyModeAvailable = parseModeAvailability(state, 45, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
 
         if (thisTESCoil.ChargeOnlyModeAvailable) {
 
@@ -1216,68 +543,14 @@ void GetTESCoilInput(EnergyPlusData &state)
             thisTESCoil.ChargeOnlyRatedCapacitySizingFactor = state.dataIPShortCut->rNumericArgs(25); // sizing factor for charging capacity []
             thisTESCoil.ChargeOnlyRatedCOP = state.dataIPShortCut->rNumericArgs(26); // coefficient of performance at rating conditions [W/W]
 
-            thisTESCoil.ChargeOnlyChargingCapFTempCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(46));
-            if (thisTESCoil.ChargeOnlyChargingCapFTempCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(46)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(46)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(46), state.dataIPShortCut->cAlphaArgs(46)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.ChargeOnlyChargingCapFTempCurve, // Curve index
-                                                                 {2},                                         // Valid dimensions
-                                                                 RoutineName,                                 // Routine name
-                                                                 cCurrentModuleObject,                        // Object Type
-                                                                 thisTESCoil.Name,                            // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(46)); // Field Name
-            }
-
-            thisTESCoil.ChargeOnlyChargingEIRFTempCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(47));
-            if (thisTESCoil.ChargeOnlyChargingEIRFTempCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(47)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(47)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(47), state.dataIPShortCut->cAlphaArgs(47)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.ChargeOnlyChargingEIRFTempCurve, // Curve index
-                                                                 {2},                                         // Valid dimensions
-                                                                 RoutineName,                                 // Routine name
-                                                                 cCurrentModuleObject,                        // Object Type
-                                                                 thisTESCoil.Name,                            // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(47)); // Field Name
-            }
+            thisTESCoil.ChargeOnlyChargingCapFTempCurve =
+                getAndValidateCurve(state, 46, {2}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.ChargeOnlyChargingEIRFTempCurve =
+                getAndValidateCurve(state, 47, {2}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
 
         } // Charge only mode available
 
-        BooleanSwitch answer5 = getYesNoValue(state.dataIPShortCut->cAlphaArgs(48));
-        switch (answer5) {
-        case BooleanSwitch::Yes:
-        case BooleanSwitch::No:
-            thisTESCoil.DischargeOnlyModeAvailable = static_cast<bool>(answer5);
-            break;
-        default:
-            thisTESCoil.DischargeOnlyModeAvailable = false;
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-            ShowContinueError(state,
-                              EnergyPlus::format("...{}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(48), state.dataIPShortCut->cAlphaArgs(48)));
-            ShowContinueError(state, "Available choices are Yes or No.");
-            ErrorsFound = true;
-        }
+        thisTESCoil.DischargeOnlyModeAvailable = parseModeAvailability(state, 48, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
 
         if (thisTESCoil.DischargeOnlyModeAvailable) {
             thisTESCoil.DischargeOnlyRatedDischargeCap = state.dataIPShortCut->rNumericArgs(27); // gross total evaporator cooling capacity  [W]
@@ -1285,166 +558,20 @@ void GetTESCoilInput(EnergyPlusData &state)
             thisTESCoil.DischargeOnlyRatedSHR = state.dataIPShortCut->rNumericArgs(29); // sensible heat ratio (sens cap/total cap)
             thisTESCoil.DischargeOnlyRatedCOP = state.dataIPShortCut->rNumericArgs(30); // coefficient of performance  for discharging [W/W]
 
-            thisTESCoil.DischargeOnlyCapFTempCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(49));
-            if (thisTESCoil.DischargeOnlyCapFTempCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(49)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(49)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(49), state.dataIPShortCut->cAlphaArgs(49)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.DischargeOnlyCapFTempCurve,      // Curve index
-                                                                 {2},                                         // Valid dimensions
-                                                                 RoutineName,                                 // Routine name
-                                                                 cCurrentModuleObject,                        // Object Type
-                                                                 thisTESCoil.Name,                            // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(49)); // Field Name
-            }
-
-            thisTESCoil.DischargeOnlyCapFFlowCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(50));
-            if (thisTESCoil.DischargeOnlyCapFFlowCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(50)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(50)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(50), state.dataIPShortCut->cAlphaArgs(50)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object, any curve with just x as single independent variable
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.DischargeOnlyCapFFlowCurve,      // Curve index
-                                                                 {1},                                         // Valid dimensions
-                                                                 RoutineName,                                 // Routine name
-                                                                 cCurrentModuleObject,                        // Object Type
-                                                                 thisTESCoil.Name,                            // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(50)); // Field Name
-            }
-
-            thisTESCoil.DischargeOnlyEIRFTempCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(51));
-            if (thisTESCoil.DischargeOnlyEIRFTempCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(51)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(51)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(51), state.dataIPShortCut->cAlphaArgs(51)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.DischargeOnlyEIRFTempCurve,      // Curve index
-                                                                 {2},                                         // Valid dimensions
-                                                                 RoutineName,                                 // Routine name
-                                                                 cCurrentModuleObject,                        // Object Type
-                                                                 thisTESCoil.Name,                            // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(51)); // Field Name
-            }
-
-            thisTESCoil.DischargeOnlyEIRFFlowCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(52));
-            if (thisTESCoil.DischargeOnlyEIRFFlowCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(52)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(52)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(52), state.dataIPShortCut->cAlphaArgs(52)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object, any curve with just x as single independent variable
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.DischargeOnlyEIRFFlowCurve,      // Curve index
-                                                                 {1},                                         // Valid dimensions
-                                                                 RoutineName,                                 // Routine name
-                                                                 cCurrentModuleObject,                        // Object Type
-                                                                 thisTESCoil.Name,                            // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(52)); // Field Name
-            }
-
-            thisTESCoil.DischargeOnlyPLFFPLRCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(53));
-            if (thisTESCoil.DischargeOnlyPLFFPLRCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(53)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(53)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(53), state.dataIPShortCut->cAlphaArgs(53)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object, any curve with just x as single independent variable
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.DischargeOnlyPLFFPLRCurve,       // Curve index
-                                                                 {1},                                         // Valid dimensions
-                                                                 RoutineName,                                 // Routine name
-                                                                 cCurrentModuleObject,                        // Object Type
-                                                                 thisTESCoil.Name,                            // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(53)); // Field Name
-            }
-
-            thisTESCoil.DischargeOnlySHRFTempCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(54));
-            if (thisTESCoil.DischargeOnlySHRFTempCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(54)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(54)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(54), state.dataIPShortCut->cAlphaArgs(54)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.DischargeOnlySHRFTempCurve, // Curve index
-                                                                 {2, 3},                                 // Valid dimensions  // MULTIPLECURVEDIMS
-                                                                 RoutineName,                            // Routine name
-                                                                 cCurrentModuleObject,                   // Object Type
-                                                                 thisTESCoil.Name,                       // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(54)); // Field Name
-            }
-
-            thisTESCoil.DischargeOnlySHRFFLowCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(55));
-            if (thisTESCoil.DischargeOnlySHRFFLowCurve == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(55)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(55)));
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(55), state.dataIPShortCut->cAlphaArgs(55)));
-                }
-                ErrorsFound = true;
-            } else {
-                // Verify Curve Object, any curve with just x as single independent variable
-                ErrorsFound |= EnergyPlus::Curve::CheckCurveDims(state,
-                                                                 thisTESCoil.DischargeOnlySHRFFLowCurve,      // Curve index
-                                                                 {1},                                         // Valid dimensions
-                                                                 RoutineName,                                 // Routine name
-                                                                 cCurrentModuleObject,                        // Object Type
-                                                                 thisTESCoil.Name,                            // Object Name
-                                                                 state.dataIPShortCut->cAlphaFieldNames(55)); // Field Name
-            }
+            thisTESCoil.DischargeOnlyCapFTempCurve =
+                getAndValidateCurve(state, 49, {2}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.DischargeOnlyCapFFlowCurve =
+                getAndValidateCurve(state, 50, {1}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.DischargeOnlyEIRFTempCurve =
+                getAndValidateCurve(state, 51, {2}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.DischargeOnlyEIRFFlowCurve =
+                getAndValidateCurve(state, 52, {1}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.DischargeOnlyPLFFPLRCurve =
+                getAndValidateCurve(state, 53, {1}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.DischargeOnlySHRFTempCurve =
+                getAndValidateCurve(state, 54, {2, 3}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
+            thisTESCoil.DischargeOnlySHRFFLowCurve =
+                getAndValidateCurve(state, 55, {1}, RoutineName, cCurrentModuleObject, thisTESCoil.Name, ErrorsFound);
 
         } // Discharge Only mode available
 

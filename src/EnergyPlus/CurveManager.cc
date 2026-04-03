@@ -659,6 +659,142 @@ namespace Curve {
         }
     }
 
+    // Helper: validate input/output unit type alphas for a curve with 1-3 input dimensions.
+    // inputTypeStartAlpha is the 1-based alpha index where the first input unit type begins (typically 2).
+    // The output unit type alpha follows the last input unit type alpha.
+    // For numDims==1: checks X input type at inputTypeStartAlpha, output type at inputTypeStartAlpha+1
+    // For numDims==2: checks X,Y input types, output type at inputTypeStartAlpha+2
+    // For numDims==3: checks X,Y,Z input types, output type at inputTypeStartAlpha+3
+    static void checkCurveUnitTypes(EnergyPlusData &state,
+                                    std::string const &CurrentModuleObject,
+                                    std::string const &curveName,
+                                    int NumAlphas,
+                                    Array1D_string const &Alphas,
+                                    int numDims,
+                                    int inputTypeStartAlpha)
+    {
+        constexpr std::array<std::string_view, 3> dimLabels = {"X", "Y", "Z"};
+        int const dimsToCheck = std::min(numDims, 3);
+        for (int d = 0; d < dimsToCheck; ++d) {
+            int alphaIdx = inputTypeStartAlpha + d;
+            if (NumAlphas >= alphaIdx) {
+                if (!IsCurveInputTypeValid(Alphas(alphaIdx))) {
+                    ShowWarningError(
+                        state,
+                        EnergyPlus::format("In {} named {} the Input Unit Type for {} is invalid.", CurrentModuleObject, curveName, dimLabels[d]));
+                }
+            }
+        }
+        int outputAlphaIdx = inputTypeStartAlpha + dimsToCheck;
+        if (NumAlphas >= outputAlphaIdx) {
+            if (!IsCurveOutputTypeValid(Alphas(outputAlphaIdx))) {
+                ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, curveName));
+            }
+        }
+    }
+
+    // Helper: read optional output min/max limits from numeric fields.
+    // minIdx is the 1-based index of the output-min field; maxIdx = minIdx+1 for the output-max field.
+    static void readOptionalOutputLimits(EnergyPlusData &state, Curve *thisCurve, int NumNumbers, Array1D<Real64> const &Numbers, int minIdx)
+    {
+        int maxIdx = minIdx + 1;
+        if (NumNumbers > (minIdx - 1) && !state.dataIPShortCut->lNumericFieldBlanks(minIdx)) {
+            thisCurve->outputLimits.min = Numbers(minIdx);
+            thisCurve->outputLimits.minPresent = true;
+        }
+        if (NumNumbers > (maxIdx - 1) && !state.dataIPShortCut->lNumericFieldBlanks(maxIdx)) {
+            thisCurve->outputLimits.max = Numbers(maxIdx);
+            thisCurve->outputLimits.maxPresent = true;
+        }
+    }
+
+    // Helper: read one curve object from input, check for duplicate name, and create/return a new Curve.
+    static Curve *readCurveObject(EnergyPlusData &state,
+                                  std::string_view routineName,
+                                  std::string const &CurrentModuleObject,
+                                  int CurveIndex,
+                                  Array1D_string &Alphas,
+                                  int &NumAlphas,
+                                  Array1D<Real64> &Numbers,
+                                  int &NumNumbers,
+                                  int &IOStatus,
+                                  bool &ErrorsFound)
+    {
+        state.dataInputProcessing->inputProcessor->getObjectItem(state,
+                                                                 CurrentModuleObject,
+                                                                 CurveIndex,
+                                                                 Alphas,
+                                                                 NumAlphas,
+                                                                 Numbers,
+                                                                 NumNumbers,
+                                                                 IOStatus,
+                                                                 state.dataIPShortCut->lNumericFieldBlanks,
+                                                                 _,
+                                                                 state.dataIPShortCut->cAlphaFieldNames,
+                                                                 state.dataIPShortCut->cNumericFieldNames);
+
+        ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
+
+        if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
+            ShowSevereDuplicateName(state, eoh);
+            ErrorsFound = true;
+        }
+
+        return AddCurve(state, Alphas(1));
+    }
+
+    // Helper: validate that input-limit min <= max for a given numeric field pair, report error if not.
+    static void checkCurveInputLimits(
+        EnergyPlusData &state, std::string const &CurrentModuleObject, Array1D<Real64> const &Numbers, int minIdx, int maxIdx, bool &ErrorsFound)
+    {
+        if (Numbers(minIdx) > Numbers(maxIdx)) {
+            ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+            ShowContinueError(state,
+                              EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
+                                                 state.dataIPShortCut->cNumericFieldNames(minIdx),
+                                                 Numbers(minIdx),
+                                                 state.dataIPShortCut->cNumericFieldNames(maxIdx),
+                                                 Numbers(maxIdx)));
+            ErrorsFound = true;
+        }
+    }
+
+    // Helper: populate a simple polynomial/exponential curve from numeric fields.
+    // The layout is: numCoeffs coefficients starting at field 1, then numDims pairs of (min, max) input limits,
+    // then optional output min/max. Validates input limits and optionally validates unit-type alphas.
+    static void readSimpleCurveFields(EnergyPlusData &state,
+                                      Curve *thisCurve,
+                                      std::string const &CurrentModuleObject,
+                                      Array1D_string const &Alphas,
+                                      int NumAlphas,
+                                      Array1D<Real64> const &Numbers,
+                                      int NumNumbers,
+                                      CurveType curveType,
+                                      int numDims,
+                                      int numCoeffs,
+                                      bool &ErrorsFound,
+                                      bool validateUnitTypes = true)
+    {
+        thisCurve->curveType = curveType;
+        thisCurve->numDims = numDims;
+        for (int in = 0; in < numCoeffs; ++in) {
+            thisCurve->coeff[in] = Numbers(in + 1);
+        }
+        int limBase = numCoeffs + 1; // 1-based index where input limits start
+        for (int d = 0; d < numDims; ++d) {
+            int minIdx = limBase + 2 * d;
+            int maxIdx = minIdx + 1;
+            thisCurve->inputLimits[d].min = Numbers(minIdx);
+            thisCurve->inputLimits[d].max = Numbers(maxIdx);
+            checkCurveInputLimits(state, CurrentModuleObject, Numbers, minIdx, maxIdx, ErrorsFound);
+        }
+        int outLimIdx = limBase + 2 * numDims;
+        readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, outLimIdx);
+        if (validateUnitTypes) {
+            checkCurveUnitTypes(state, CurrentModuleObject, Alphas(1), NumAlphas, Alphas, numDims, 2);
+        }
+    }
+
     void GetCurveInputData(EnergyPlusData &state, bool &ErrorsFound)
     {
 
@@ -728,833 +864,106 @@ namespace Curve {
         // Loop over biquadratic curves and load data
         CurrentModuleObject = "Curve:Biquadratic";
         for (int CurveIndex = 1; CurveIndex <= NumBiQuad; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
-
-            // could add checks for blank numeric fields, and use field names for errors.
-            thisCurve->curveType = CurveType::BiQuadratic;
-            thisCurve->numDims = 2;
-            for (int in = 0; in < 6; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(7);
-            thisCurve->inputLimits[0].max = Numbers(8);
-            thisCurve->inputLimits[1].min = Numbers(9);
-            thisCurve->inputLimits[1].max = Numbers(10);
-            if (NumNumbers > 10 && !state.dataIPShortCut->lNumericFieldBlanks(11)) {
-                thisCurve->outputLimits.min = Numbers(11);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 11 && !state.dataIPShortCut->lNumericFieldBlanks(12)) {
-                thisCurve->outputLimits.max = Numbers(12);
-                thisCurve->outputLimits.maxPresent = true;
-            }
-
-            if (Numbers(7) > Numbers(8)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(7),
-                                                     Numbers(7),
-                                                     state.dataIPShortCut->cNumericFieldNames(8),
-                                                     Numbers(8)));
-                ErrorsFound = true;
-            }
-            if (Numbers(9) > Numbers(10)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(9),
-                                                     Numbers(9),
-                                                     state.dataIPShortCut->cNumericFieldNames(10),
-                                                     Numbers(10)));
-                ErrorsFound = true;
-            }
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveInputTypeValid(Alphas(3))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for Y is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 4) {
-                if (!IsCurveOutputTypeValid(Alphas(4))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::BiQuadratic, 2, 6, ErrorsFound);
         }
 
         // Loop over ChillerPartLoadWithLift curves and load data //zrp_Aug2014
         CurrentModuleObject = "Curve:ChillerPartLoadWithLift";
         for (int CurveIndex = 1; CurveIndex <= NumChillerPartLoadWithLift; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
-
-            thisCurve->curveType = CurveType::ChillerPartLoadWithLift;
-            thisCurve->numDims = 3;
-
-            for (int in = 0; in < 12; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-
-            thisCurve->inputLimits[0].min = Numbers(13);
-            thisCurve->inputLimits[0].max = Numbers(14);
-            if (Numbers(13) > Numbers(14)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(13),
-                                                     Numbers(13),
-                                                     state.dataIPShortCut->cNumericFieldNames(14),
-                                                     Numbers(14)));
-                ErrorsFound = true;
-            }
-
-            thisCurve->inputLimits[1].min = Numbers(15);
-            thisCurve->inputLimits[1].max = Numbers(16);
-            if (Numbers(15) > Numbers(16)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(15),
-                                                     Numbers(15),
-                                                     state.dataIPShortCut->cNumericFieldNames(16),
-                                                     Numbers(16)));
-                ErrorsFound = true;
-            }
-
-            thisCurve->inputLimits[2].min = Numbers(17);
-            thisCurve->inputLimits[2].max = Numbers(18);
-            if (Numbers(17) > Numbers(18)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(17),
-                                                     Numbers(17),
-                                                     state.dataIPShortCut->cNumericFieldNames(18),
-                                                     Numbers(18)));
-                ErrorsFound = true;
-            }
-
-            if (NumNumbers > 18 && !state.dataIPShortCut->lNumericFieldBlanks(19)) {
-                thisCurve->outputLimits.min = Numbers(19);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 19 && !state.dataIPShortCut->lNumericFieldBlanks(20)) {
-                thisCurve->outputLimits.max = Numbers(20);
-                thisCurve->outputLimits.maxPresent = true;
-            }
-
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveInputTypeValid(Alphas(3))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for Y is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 4) {
-                if (!IsCurveInputTypeValid(Alphas(4))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for Z is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 5) {
-                if (!IsCurveOutputTypeValid(Alphas(5))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(state,
+                                  thisCurve,
+                                  CurrentModuleObject,
+                                  Alphas,
+                                  NumAlphas,
+                                  Numbers,
+                                  NumNumbers,
+                                  CurveType::ChillerPartLoadWithLift,
+                                  3,
+                                  12,
+                                  ErrorsFound);
         }
 
         // Loop over cubic curves and load data
         CurrentModuleObject = "Curve:Cubic";
         for (int CurveIndex = 1; CurveIndex <= NumCubic; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
-
-            thisCurve->curveType = CurveType::Cubic;
-            thisCurve->numDims = 1;
-            for (int in = 0; in < 4; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(5);
-            thisCurve->inputLimits[0].max = Numbers(6);
-            if (NumNumbers > 6 && !state.dataIPShortCut->lNumericFieldBlanks(7)) {
-                thisCurve->outputLimits.min = Numbers(7);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 7 && !state.dataIPShortCut->lNumericFieldBlanks(8)) {
-                thisCurve->outputLimits.max = Numbers(8);
-                thisCurve->outputLimits.maxPresent = true;
-            }
-
-            if (Numbers(5) > Numbers(6)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(5),
-                                                     Numbers(5),
-                                                     state.dataIPShortCut->cNumericFieldNames(6),
-                                                     Numbers(6)));
-                ErrorsFound = true;
-            }
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::Cubic, 1, 4, ErrorsFound);
         }
 
         // Loop over quadrinomial curves and load data
         CurrentModuleObject = "Curve:Quartic";
         for (int CurveIndex = 1; CurveIndex <= NumQuartic; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
-
-            thisCurve->curveType = CurveType::Quartic;
-            thisCurve->numDims = 1;
-            for (int in = 0; in < 5; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(6);
-            thisCurve->inputLimits[0].max = Numbers(7);
-            if (NumNumbers > 7 && !state.dataIPShortCut->lNumericFieldBlanks(8)) {
-                thisCurve->outputLimits.min = Numbers(8);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 8 && !state.dataIPShortCut->lNumericFieldBlanks(9)) {
-                thisCurve->outputLimits.max = Numbers(9);
-                thisCurve->outputLimits.maxPresent = true;
-            }
-
-            if (Numbers(6) > Numbers(7)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(6),
-                                                     Numbers(6),
-                                                     state.dataIPShortCut->cNumericFieldNames(7),
-                                                     Numbers(7)));
-                ErrorsFound = true;
-            }
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::Quartic, 1, 5, ErrorsFound);
         }
 
         // Loop over quadratic curves and load data
         CurrentModuleObject = "Curve:Quadratic";
         for (int CurveIndex = 1; CurveIndex <= NumQuad; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
-
-            thisCurve->curveType = CurveType::Quadratic;
-            thisCurve->numDims = 1;
-            for (int in = 0; in < 3; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(4);
-            thisCurve->inputLimits[0].max = Numbers(5);
-            if (NumNumbers > 5 && !state.dataIPShortCut->lNumericFieldBlanks(6)) {
-                thisCurve->outputLimits.min = Numbers(6);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 6 && !state.dataIPShortCut->lNumericFieldBlanks(7)) {
-                thisCurve->outputLimits.max = Numbers(7);
-                thisCurve->outputLimits.maxPresent = true;
-            }
-
-            if (Numbers(4) > Numbers(5)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(4),
-                                                     Numbers(4),
-                                                     state.dataIPShortCut->cNumericFieldNames(5),
-                                                     Numbers(5)));
-                ErrorsFound = true;
-            }
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::Quadratic, 1, 3, ErrorsFound);
         }
 
         // Loop over quadratic-linear curves and load data
         CurrentModuleObject = "Curve:QuadraticLinear";
         for (int CurveIndex = 1; CurveIndex <= NumQuadLinear; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
-
-            thisCurve->curveType = CurveType::QuadraticLinear;
-            thisCurve->numDims = 2;
-            for (int in = 0; in < 6; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(7);
-            thisCurve->inputLimits[0].max = Numbers(8);
-            thisCurve->inputLimits[1].min = Numbers(9);
-            thisCurve->inputLimits[1].max = Numbers(10);
-            if (NumNumbers > 10 && !state.dataIPShortCut->lNumericFieldBlanks(11)) {
-                thisCurve->outputLimits.min = Numbers(11);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 11 && !state.dataIPShortCut->lNumericFieldBlanks(12)) {
-                thisCurve->outputLimits.max = Numbers(12);
-                thisCurve->outputLimits.maxPresent = true;
-            }
-
-            if (Numbers(7) > Numbers(8)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(7),
-                                                     Numbers(7),
-                                                     state.dataIPShortCut->cNumericFieldNames(8),
-                                                     Numbers(8)));
-                ErrorsFound = true;
-            }
-            if (Numbers(9) > Numbers(10)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(9),
-                                                     Numbers(9),
-                                                     state.dataIPShortCut->cNumericFieldNames(10),
-                                                     Numbers(10)));
-                ErrorsFound = true;
-            }
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveInputTypeValid(Alphas(3))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for Y is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 4) {
-                if (!IsCurveOutputTypeValid(Alphas(4))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::QuadraticLinear, 2, 6, ErrorsFound);
         }
 
         // Loop over cubic-linear curves and load data
         CurrentModuleObject = "Curve:CubicLinear";
         for (int CurveIndex = 1; CurveIndex <= NumCubicLinear; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
-
-            thisCurve->curveType = CurveType::CubicLinear;
-            thisCurve->numDims = 2;
-            for (int in = 0; in < 6; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(7);
-            thisCurve->inputLimits[0].max = Numbers(8);
-            thisCurve->inputLimits[1].min = Numbers(9);
-            thisCurve->inputLimits[1].max = Numbers(10);
-            if (NumNumbers > 10 && !state.dataIPShortCut->lNumericFieldBlanks(11)) {
-                thisCurve->outputLimits.min = Numbers(11);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 11 && !state.dataIPShortCut->lNumericFieldBlanks(12)) {
-                thisCurve->outputLimits.max = Numbers(12);
-                thisCurve->outputLimits.maxPresent = true;
-            }
-
-            if (Numbers(7) > Numbers(8)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(7),
-                                                     Numbers(7),
-                                                     state.dataIPShortCut->cNumericFieldNames(8),
-                                                     Numbers(8)));
-                ErrorsFound = true;
-            }
-            if (Numbers(9) > Numbers(10)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(9),
-                                                     Numbers(9),
-                                                     state.dataIPShortCut->cNumericFieldNames(10),
-                                                     Numbers(10)));
-                ErrorsFound = true;
-            }
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveInputTypeValid(Alphas(3))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for Y is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 4) {
-                if (!IsCurveOutputTypeValid(Alphas(4))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::CubicLinear, 2, 6, ErrorsFound);
         }
 
         // Loop over linear curves and load data
         CurrentModuleObject = "Curve:Linear";
         for (int CurveIndex = 1; CurveIndex <= NumLinear; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
-
-            thisCurve->curveType = CurveType::Linear;
-            thisCurve->numDims = 1;
-            for (int in = 0; in < 2; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(3);
-            thisCurve->inputLimits[0].max = Numbers(4);
-            if (NumNumbers > 4 && !state.dataIPShortCut->lNumericFieldBlanks(5)) {
-                thisCurve->outputLimits.min = Numbers(5);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 5 && !state.dataIPShortCut->lNumericFieldBlanks(6)) {
-                thisCurve->outputLimits.max = Numbers(6);
-                thisCurve->outputLimits.maxPresent = true;
-            }
-
-            if (Numbers(3) > Numbers(4)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(3),
-                                                     Numbers(3),
-                                                     state.dataIPShortCut->cNumericFieldNames(4),
-                                                     Numbers(4)));
-                ErrorsFound = true;
-            }
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::Linear, 1, 2, ErrorsFound);
         }
 
         // Loop over bicubic curves and load data
         CurrentModuleObject = "Curve:Bicubic";
         for (int CurveIndex = 1; CurveIndex <= NumBicubic; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
-
-            thisCurve->curveType = CurveType::BiCubic;
-            thisCurve->numDims = 2;
-            for (int in = 0; in < 10; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(11);
-            thisCurve->inputLimits[0].max = Numbers(12);
-            thisCurve->inputLimits[1].min = Numbers(13);
-            thisCurve->inputLimits[1].max = Numbers(14);
-            if (NumNumbers > 14 && !state.dataIPShortCut->lNumericFieldBlanks(15)) {
-                thisCurve->outputLimits.min = Numbers(15);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 15 && !state.dataIPShortCut->lNumericFieldBlanks(16)) {
-                thisCurve->outputLimits.max = Numbers(16);
-                thisCurve->outputLimits.maxPresent = true;
-            }
-
-            if (Numbers(11) > Numbers(12)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(11),
-                                                     Numbers(11),
-                                                     state.dataIPShortCut->cNumericFieldNames(12),
-                                                     Numbers(12)));
-                ErrorsFound = true;
-            }
-            if (Numbers(13) > Numbers(14)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(13),
-                                                     Numbers(13),
-                                                     state.dataIPShortCut->cNumericFieldNames(14),
-                                                     Numbers(14)));
-                ErrorsFound = true;
-            }
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveInputTypeValid(Alphas(3))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for Y is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 4) {
-                if (!IsCurveOutputTypeValid(Alphas(4))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::BiCubic, 2, 10, ErrorsFound);
         }
 
         // Loop over Triquadratic curves and load data
         CurrentModuleObject = "Curve:Triquadratic";
         for (int CurveIndex = 1; CurveIndex <= NumTriQuad; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
-
-            thisCurve->curveType = CurveType::TriQuadratic;
-            thisCurve->numDims = 3;
-            thisCurve->coeff[0] = Numbers(1);
-            thisCurve->coeff[1] = Numbers(2);
-            thisCurve->coeff[2] = Numbers(3);
-            thisCurve->coeff[3] = Numbers(4);
-            thisCurve->coeff[4] = Numbers(5);
-            thisCurve->coeff[5] = Numbers(6);
-            thisCurve->coeff[6] = Numbers(7);
-            thisCurve->coeff[7] = Numbers(8);
-            thisCurve->coeff[8] = Numbers(9);
-            thisCurve->coeff[9] = Numbers(10);
-            thisCurve->coeff[10] = Numbers(11);
-            thisCurve->coeff[11] = Numbers(12);
-            thisCurve->coeff[12] = Numbers(13);
-            thisCurve->coeff[13] = Numbers(14);
-            thisCurve->coeff[14] = Numbers(15);
-            thisCurve->coeff[15] = Numbers(16);
-            thisCurve->coeff[16] = Numbers(17);
-            thisCurve->coeff[17] = Numbers(18);
-            thisCurve->coeff[18] = Numbers(19);
-            thisCurve->coeff[19] = Numbers(20);
-            thisCurve->coeff[20] = Numbers(21);
-            thisCurve->coeff[21] = Numbers(22);
-            thisCurve->coeff[22] = Numbers(23);
-            thisCurve->coeff[23] = Numbers(24);
-            thisCurve->coeff[24] = Numbers(25);
-            thisCurve->coeff[25] = Numbers(26);
-            thisCurve->coeff[26] = Numbers(27);
-            thisCurve->inputLimits[0].min = Numbers(28);
-            thisCurve->inputLimits[0].max = Numbers(29);
-            thisCurve->inputLimits[1].min = Numbers(30);
-            thisCurve->inputLimits[1].max = Numbers(31);
-            thisCurve->inputLimits[2].min = Numbers(32);
-            thisCurve->inputLimits[2].max = Numbers(33);
-            if (NumNumbers > 33 && !state.dataIPShortCut->lNumericFieldBlanks(34)) {
-                thisCurve->outputLimits.min = Numbers(34);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 34 && !state.dataIPShortCut->lNumericFieldBlanks(35)) {
-                thisCurve->outputLimits.max = Numbers(35);
-                thisCurve->outputLimits.maxPresent = true;
-            }
-
-            if (Numbers(28) > Numbers(29)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(28),
-                                                     Numbers(28),
-                                                     state.dataIPShortCut->cNumericFieldNames(29),
-                                                     Numbers(29)));
-                ErrorsFound = true;
-            }
-            if (Numbers(30) > Numbers(31)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(30),
-                                                     Numbers(30),
-                                                     state.dataIPShortCut->cNumericFieldNames(31),
-                                                     Numbers(31)));
-                ErrorsFound = true;
-            }
-            if (Numbers(32) > Numbers(33)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(32),
-                                                     Numbers(32),
-                                                     state.dataIPShortCut->cNumericFieldNames(33),
-                                                     Numbers(33)));
-                ErrorsFound = true;
-            }
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveInputTypeValid(Alphas(3))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for Y is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 4) {
-                if (!IsCurveInputTypeValid(Alphas(4))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for Z is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 5) {
-                if (!IsCurveOutputTypeValid(Alphas(5))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::TriQuadratic, 3, 27, ErrorsFound);
         }
 
         // Loop over quad linear curves and load data
         CurrentModuleObject = "Curve:QuadLinear";
         for (int CurveIndex = 1; CurveIndex <= NumQLinear; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
 
             thisCurve->curveType = CurveType::QuadLinear;
             thisCurve->numDims = 4;
@@ -1570,30 +979,14 @@ namespace Curve {
             thisCurve->inputLimits[3].min = Numbers(12);
             thisCurve->inputLimits[3].max = Numbers(13);
 
-            if (NumNumbers > 13 && !state.dataIPShortCut->lNumericFieldBlanks(14)) {
-                thisCurve->outputLimits.min = Numbers(14);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 14 && !state.dataIPShortCut->lNumericFieldBlanks(15)) {
-                thisCurve->outputLimits.max = Numbers(15);
-                thisCurve->outputLimits.maxPresent = true;
-            }
+            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 14);
 
             constexpr int NumVar = 4;
             constexpr std::array<std::string_view, NumVar> VarNames{"w", "x", "y", "z"};
             for (int i = 1; i <= NumVar; ++i) {
                 int MinIndex = 2 * i + 4;
                 int MaxIndex = MinIndex + 1;
-                if (Numbers(MinIndex) > Numbers(MaxIndex)) { // error
-                    ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                         state.dataIPShortCut->cNumericFieldNames(MinIndex),
-                                                         Numbers(MinIndex),
-                                                         state.dataIPShortCut->cNumericFieldNames(MaxIndex),
-                                                         Numbers(MaxIndex)));
-                    ErrorsFound = true;
-                }
+                checkCurveInputLimits(state, CurrentModuleObject, Numbers, MinIndex, MaxIndex, ErrorsFound);
                 int InputTypeIndex = i + 1;
                 if (NumAlphas >= InputTypeIndex) {
                     if (!IsCurveInputTypeValid(Alphas(InputTypeIndex))) {
@@ -1613,26 +1006,8 @@ namespace Curve {
         // Loop over quint linear curves and load data
         CurrentModuleObject = "Curve:QuintLinear";
         for (int CurveIndex = 1; CurveIndex <= NumQuintLinear; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
 
             thisCurve->curveType = CurveType::QuintLinear;
             thisCurve->numDims = 5;
@@ -1649,30 +1024,14 @@ namespace Curve {
             thisCurve->inputLimits[3].max = Numbers(14);
             thisCurve->inputLimits[4].min = Numbers(15);
             thisCurve->inputLimits[4].max = Numbers(16);
-            if (NumNumbers > 16 && !state.dataIPShortCut->lNumericFieldBlanks(17)) {
-                thisCurve->outputLimits.min = Numbers(17);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 17 && !state.dataIPShortCut->lNumericFieldBlanks(18)) {
-                thisCurve->outputLimits.max = Numbers(18);
-                thisCurve->outputLimits.maxPresent = true;
-            }
+            readOptionalOutputLimits(state, thisCurve, NumNumbers, Numbers, 17);
 
             constexpr int NumVar = 5;
             constexpr std::array<std::string_view, NumVar> VarNames{"v", "w", "x", "y", "z"};
             for (int i = 1; i <= NumVar; ++i) {
                 int MinIndex = 2 * i + 5;
                 int MaxIndex = MinIndex + 1;
-                if (Numbers(MinIndex) > Numbers(MaxIndex)) { // error
-                    ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                         state.dataIPShortCut->cNumericFieldNames(MinIndex),
-                                                         Numbers(MinIndex),
-                                                         state.dataIPShortCut->cNumericFieldNames(MaxIndex),
-                                                         Numbers(MaxIndex)));
-                    ErrorsFound = true;
-                }
+                checkCurveInputLimits(state, CurrentModuleObject, Numbers, MinIndex, MaxIndex, ErrorsFound);
                 int InputTypeIndex = i + 1;
                 if (NumAlphas >= InputTypeIndex) {
                     if (!IsCurveInputTypeValid(Alphas(InputTypeIndex))) {
@@ -1692,522 +1051,74 @@ namespace Curve {
         // Loop over Exponent curves and load data
         CurrentModuleObject = "Curve:Exponent";
         for (int CurveIndex = 1; CurveIndex <= NumExponent; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
-
-            thisCurve->curveType = CurveType::Exponent;
-            thisCurve->numDims = 1;
-            for (int in = 0; in < 3; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(4);
-            thisCurve->inputLimits[0].max = Numbers(5);
-
-            if (Numbers(4) > Numbers(5)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(4),
-                                                     Numbers(4),
-                                                     state.dataIPShortCut->cNumericFieldNames(5),
-                                                     Numbers(5)));
-                ErrorsFound = true;
-            }
-
-            if (NumNumbers > 5 && !state.dataIPShortCut->lNumericFieldBlanks(6)) {
-                thisCurve->outputLimits.min = Numbers(6);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 6 && !state.dataIPShortCut->lNumericFieldBlanks(7)) {
-                thisCurve->outputLimits.max = Numbers(7);
-                thisCurve->outputLimits.maxPresent = true;
-            }
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::Exponent, 1, 3, ErrorsFound);
         }
 
-        // Loop over Fan Pressure Rise curves and load data
+        // Loop over Fan Pressure Rise curves and load data (no unit type validation)
         CurrentModuleObject = "Curve:FanPressureRise";
         for (int CurveIndex = 1; CurveIndex <= NumFanPressRise; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            Curve *thisCurve = AddCurve(state, Alphas(1));
-
-            thisCurve->curveType = CurveType::FanPressureRise;
-            thisCurve->numDims = 2;
-            for (int in = 0; in < 4; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(5);
-            thisCurve->inputLimits[0].max = Numbers(6);
-            thisCurve->inputLimits[1].min = Numbers(7);
-            thisCurve->inputLimits[1].max = Numbers(8);
-
-            if (NumNumbers > 8 && !state.dataIPShortCut->lNumericFieldBlanks(9)) {
-                thisCurve->outputLimits.min = Numbers(9);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 9 && !state.dataIPShortCut->lNumericFieldBlanks(10)) {
-                thisCurve->outputLimits.max = Numbers(10);
-                thisCurve->outputLimits.maxPresent = true;
-            }
-
-            if (Numbers(5) > Numbers(6)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(5),
-                                                     Numbers(5),
-                                                     state.dataIPShortCut->cNumericFieldNames(6),
-                                                     Numbers(6)));
-                ErrorsFound = true;
-            }
-            if (Numbers(7) > Numbers(8)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(7),
-                                                     Numbers(7),
-                                                     state.dataIPShortCut->cNumericFieldNames(8),
-                                                     Numbers(8)));
-                ErrorsFound = true;
-            }
-
-        } // Fan Pressure Rise
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::FanPressureRise, 2, 4, ErrorsFound, false);
+        }
 
         // Loop over Exponential Skew Normal curves and load data
         CurrentModuleObject = "Curve:ExponentialSkewNormal";
         for (int CurveIndex = 1; CurveIndex <= NumExpSkewNorm; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
-
-            thisCurve->curveType = CurveType::ExponentialSkewNormal;
-            thisCurve->numDims = 1;
-            for (int in = 0; in < 4; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(5);
-            thisCurve->inputLimits[0].max = Numbers(6);
-
-            if (NumNumbers > 6 && !state.dataIPShortCut->lNumericFieldBlanks(7)) {
-                thisCurve->outputLimits.min = Numbers(7);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 7 && !state.dataIPShortCut->lNumericFieldBlanks(8)) {
-                thisCurve->outputLimits.max = Numbers(8);
-                thisCurve->outputLimits.maxPresent = true;
-            }
-
-            if (Numbers(5) > Numbers(6)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(5),
-                                                     Numbers(5),
-                                                     state.dataIPShortCut->cNumericFieldNames(6),
-                                                     Numbers(6)));
-                ErrorsFound = true;
-            }
-
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-        } // Exponential Skew Normal
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::ExponentialSkewNormal, 1, 4, ErrorsFound);
+        }
 
         // Loop over Sigmoid curves and load data
         CurrentModuleObject = "Curve:Sigmoid";
         for (int CurveIndex = 1; CurveIndex <= NumSigmoid; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
-
-            thisCurve->curveType = CurveType::Sigmoid;
-            thisCurve->numDims = 1;
-            for (int in = 0; in < 5; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(6);
-            thisCurve->inputLimits[0].max = Numbers(7);
-
-            if (NumNumbers > 7 && !state.dataIPShortCut->lNumericFieldBlanks(8)) {
-                thisCurve->outputLimits.min = Numbers(8);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 8 && !state.dataIPShortCut->lNumericFieldBlanks(9)) {
-                thisCurve->outputLimits.max = Numbers(9);
-                thisCurve->outputLimits.maxPresent = true;
-            }
-
-            if (Numbers(6) > Numbers(7)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(6),
-                                                     Numbers(6),
-                                                     state.dataIPShortCut->cNumericFieldNames(7),
-                                                     Numbers(7)));
-                ErrorsFound = true;
-            }
-
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-        } // Sigmoid
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::Sigmoid, 1, 5, ErrorsFound);
+        }
 
         // Loop over Rectangular Hyperbola Type 1 curves and load data
         CurrentModuleObject = "Curve:RectangularHyperbola1";
         for (int CurveIndex = 1; CurveIndex <= NumRectHyper1; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
-
-            thisCurve->curveType = CurveType::RectangularHyperbola1;
-            thisCurve->numDims = 1;
-            for (int in = 0; in < 3; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(4);
-            thisCurve->inputLimits[0].max = Numbers(5);
-
-            if (NumNumbers > 5 && !state.dataIPShortCut->lNumericFieldBlanks(6)) {
-                thisCurve->outputLimits.min = Numbers(6);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 6 && !state.dataIPShortCut->lNumericFieldBlanks(7)) {
-                thisCurve->outputLimits.max = Numbers(7);
-                thisCurve->outputLimits.maxPresent = true;
-            }
-
-            if (Numbers(4) > Numbers(5)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(4),
-                                                     Numbers(4),
-                                                     state.dataIPShortCut->cNumericFieldNames(5),
-                                                     Numbers(5)));
-                ErrorsFound = true;
-            }
-
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-        } // Rectangular Hyperbola Type 1
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::RectangularHyperbola1, 1, 3, ErrorsFound);
+        }
 
         // Loop over Rectangular Hyperbola Type 2 curves and load data
         CurrentModuleObject = "Curve:RectangularHyperbola2";
         for (int CurveIndex = 1; CurveIndex <= NumRectHyper2; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
-
-            thisCurve->curveType = CurveType::RectangularHyperbola2;
-            thisCurve->numDims = 1;
-            for (int in = 0; in < 3; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(4);
-            thisCurve->inputLimits[0].max = Numbers(5);
-
-            if (NumNumbers > 5 && !state.dataIPShortCut->lNumericFieldBlanks(6)) {
-                thisCurve->outputLimits.min = Numbers(6);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 6 && !state.dataIPShortCut->lNumericFieldBlanks(7)) {
-                thisCurve->outputLimits.max = Numbers(7);
-                thisCurve->outputLimits.maxPresent = true;
-            }
-
-            if (Numbers(4) > Numbers(5)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(4),
-                                                     Numbers(4),
-                                                     state.dataIPShortCut->cNumericFieldNames(5),
-                                                     Numbers(5)));
-                ErrorsFound = true;
-            }
-
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-        } // Rectangular Hyperbola Type 2
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::RectangularHyperbola2, 1, 3, ErrorsFound);
+        }
 
         // Loop over Exponential Decay curves and load data
         CurrentModuleObject = "Curve:ExponentialDecay";
         for (int CurveIndex = 1; CurveIndex <= NumExpDecay; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::ExponentialDecay, 1, 3, ErrorsFound);
+        }
 
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
-
-            thisCurve->curveType = CurveType::ExponentialDecay;
-            thisCurve->numDims = 1;
-            for (int in = 0; in < 3; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(4);
-            thisCurve->inputLimits[0].max = Numbers(5);
-
-            if (NumNumbers > 5 && !state.dataIPShortCut->lNumericFieldBlanks(6)) {
-                thisCurve->outputLimits.min = Numbers(6);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 6 && !state.dataIPShortCut->lNumericFieldBlanks(7)) {
-                thisCurve->outputLimits.max = Numbers(7);
-                thisCurve->outputLimits.maxPresent = true;
-            }
-
-            if (Numbers(4) > Numbers(5)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(4),
-                                                     Numbers(4),
-                                                     state.dataIPShortCut->cNumericFieldNames(5),
-                                                     Numbers(5)));
-                ErrorsFound = true;
-            }
-
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-        } // Exponential Decay
-
-        // ykt July,2011 Loop over DoubleExponential Decay curves and load data
+        // Loop over DoubleExponential Decay curves and load data
         CurrentModuleObject = "Curve:DoubleExponentialDecay";
         for (int CurveIndex = 1; CurveIndex <= NumDoubleExpDecay; ++CurveIndex) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CurveIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (state.dataCurveManager->curveMap.find(Alphas(1)) != state.dataCurveManager->curveMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-            }
-
-            auto *thisCurve = AddCurve(state, Alphas(1));
-
-            thisCurve->curveType = CurveType::DoubleExponentialDecay;
-            thisCurve->numDims = 1;
-            for (int in = 0; in < 5; ++in) {
-                thisCurve->coeff[in] = Numbers(in + 1);
-            }
-            thisCurve->inputLimits[0].min = Numbers(6);
-            thisCurve->inputLimits[0].max = Numbers(7);
-
-            if (Numbers(6) > Numbers(7)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(6),
-                                                     Numbers(6),
-                                                     state.dataIPShortCut->cNumericFieldNames(7),
-                                                     Numbers(7)));
-                ErrorsFound = true;
-            }
-
-            if (NumNumbers > 7 && !state.dataIPShortCut->lNumericFieldBlanks(8)) {
-                thisCurve->outputLimits.min = Numbers(8);
-                thisCurve->outputLimits.minPresent = true;
-            }
-            if (NumNumbers > 8 && !state.dataIPShortCut->lNumericFieldBlanks(9)) {
-                thisCurve->outputLimits.max = Numbers(9);
-                thisCurve->outputLimits.maxPresent = true;
-            }
-
-            if (NumAlphas >= 2) {
-                if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-            if (NumAlphas >= 3) {
-                if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
-                }
-            }
-        } // Exponential Decay
+            auto *thisCurve =
+                readCurveObject(state, routineName, CurrentModuleObject, CurveIndex, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, ErrorsFound);
+            readSimpleCurveFields(
+                state, thisCurve, CurrentModuleObject, Alphas, NumAlphas, Numbers, NumNumbers, CurveType::DoubleExponentialDecay, 1, 5, ErrorsFound);
+        }
 
         // Loop over wind pressure coefficient tables and load data
         if (NumWPCValTab > 0) {
@@ -2558,28 +1469,10 @@ namespace Curve {
                 int numDims = state.dataCurveManager->btwxtManager.getNumGridDims(gridIndex);
                 thisCurve->numDims = numDims;
 
-                for (int i = 1; i <= std::min(6, numDims); ++i) {
-                    double vMin, vMax;
-                    std::tie(vMin, vMax) = varListLimits.at(indVarListName)[i - 1];
-                    if (i == 1) {
-                        thisCurve->inputLimits[0].min = vMin;
-                        thisCurve->inputLimits[0].max = vMax;
-                    } else if (i == 2) {
-                        thisCurve->inputLimits[1].min = vMin;
-                        thisCurve->inputLimits[1].max = vMax;
-                    } else if (i == 3) {
-                        thisCurve->inputLimits[2].min = vMin;
-                        thisCurve->inputLimits[2].max = vMax;
-                    } else if (i == 4) {
-                        thisCurve->inputLimits[3].min = vMin;
-                        thisCurve->inputLimits[3].max = vMax;
-                    } else if (i == 5) {
-                        thisCurve->inputLimits[4].min = vMin;
-                        thisCurve->inputLimits[4].max = vMax;
-                    } else if (i == 6) {
-                        thisCurve->inputLimits[5].min = vMin;
-                        thisCurve->inputLimits[5].max = vMax;
-                    }
+                for (int i = 0; i < std::min(6, numDims); ++i) {
+                    auto const &[vMin, vMax] = varListLimits.at(indVarListName)[i];
+                    thisCurve->inputLimits[i].min = vMin;
+                    thisCurve->inputLimits[i].max = vMax;
                 }
 
                 if (fields.count("minimum_output") != 0u) {

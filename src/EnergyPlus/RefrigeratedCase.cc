@@ -385,6 +385,635 @@ void ManageRefrigeratedCaseRacks(EnergyPlusData &state)
     }
 }
 
+// Helper: look up a load name in the Case, WalkIn, CaseAndWalkInList, and optionally
+// WarehouseCoil arrays.  Returns {CaseAndWalkInListNum, CaseNum, WalkInNum, CoilNum} (0 = not found).
+static std::tuple<int, int, int, int> findLoadNames(EnergyPlusData &state, const std::string &loadName, bool includeCoil = true)
+{
+    int listNum = 0, caseNum = 0, walkInNum = 0, coilNum = 0;
+    if (state.dataRefrigCase->NumSimulationCaseAndWalkInLists > 0) {
+        listNum = Util::FindItemInList(loadName, state.dataRefrigCase->CaseAndWalkInList);
+    }
+    if (state.dataRefrigCase->NumSimulationCases > 0) {
+        caseNum = Util::FindItemInList(loadName, state.dataRefrigCase->RefrigCase);
+    }
+    if (state.dataRefrigCase->NumSimulationWalkIns > 0) {
+        walkInNum = Util::FindItemInList(loadName, state.dataRefrigCase->WalkIn);
+    }
+    if (includeCoil && state.dataRefrigCase->NumSimulationRefrigAirChillers > 0) {
+        coilNum = Util::FindItemInList(loadName, state.dataRefrigCase->WarehouseCoil);
+    }
+    return {listNum, caseNum, walkInNum, coilNum};
+}
+
+// Helper: report the standard "invalid name" / "non-unique name" errors when
+// a load-list name lookup yields NumNameMatches != 1.  Sets ErrorsFound = true.
+static void reportNameMatchError(EnergyPlusData &state,
+                                 bool &ErrorsFound,
+                                 std::string_view RoutineName,
+                                 std::string_view CurrentModuleObject,
+                                 const std::string &objName,
+                                 int numMatches,
+                                 const std::string &alphaFieldName,
+                                 const std::string &alphaValue)
+{
+    ErrorsFound = true;
+    if (numMatches == 0) {
+        ShowSevereError(
+            state, EnergyPlus::format("{}{}=\"{}\", has an invalid {}: {}", RoutineName, CurrentModuleObject, objName, alphaFieldName, alphaValue));
+    } else {
+        ShowSevereError(state,
+                        EnergyPlus::format("{}{}=\"{}\", has a non-unique name that could be either a {}: {}",
+                                           RoutineName,
+                                           CurrentModuleObject,
+                                           objName,
+                                           alphaFieldName,
+                                           alphaValue));
+    }
+}
+
+namespace {
+
+    // Helper: given already-resolved listNum and compNum, populate count variables and
+    // the destination compressor-index array.
+    template <typename ArrayType>
+    void assignCompressors(
+        const Array1D<CompressorListDef> &CompressorLists, int listNum, int compNum, int &localCount, int &memberCount, ArrayType &destArray)
+    {
+        if (listNum != 0) {
+            localCount = memberCount = CompressorLists(listNum).NumCompressors;
+            if (!allocated(destArray)) {
+                destArray.allocate(localCount);
+            }
+            destArray({1, localCount}) = CompressorLists(listNum).CompItemNum({1, localCount});
+        } else if (compNum != 0) {
+            localCount = memberCount = 1;
+            if (!allocated(destArray)) {
+                destArray.allocate(1);
+            }
+            destArray(1) = compNum;
+        }
+    }
+
+    // Helper: look up a compressor-or-list name, validate that it resolves to exactly one item,
+    // report errors for missing or non-unique names, and delegate to assignCompressors.
+    template <typename ArrayType>
+    bool lookupAndAssignCompressors(EnergyPlusData &state,
+                                    bool &ErrorsFound,
+                                    std::string_view RoutineName,
+                                    std::string_view CurrentModuleObject,
+                                    const Array1D_string &Alphas,
+                                    const Array1D_string &cAlphaFieldNames,
+                                    const Array1D<CompressorListDef> &CompressorLists,
+                                    const Array1D<RefrigCompressorData> &Compressor,
+                                    int alphaNum,
+                                    int &numCompressorsSys,
+                                    int &memberCount,
+                                    ArrayType &destArray)
+    {
+        int ListNum = Util::FindItemInList(Alphas(alphaNum), CompressorLists);
+        int CompNum = Util::FindItemInList(Alphas(alphaNum), Compressor);
+        if ((ListNum == 0) && (CompNum == 0)) {
+            ShowSevereError(state,
+                            EnergyPlus::format(R"({}{}, "{}", has an invalid or undefined value="{}".)",
+                                               RoutineName,
+                                               CurrentModuleObject,
+                                               cAlphaFieldNames(alphaNum),
+                                               Alphas(alphaNum)));
+            ErrorsFound = true;
+            return false;
+        } else if ((ListNum != 0) && (CompNum != 0)) {
+            ShowSevereError(state,
+                            EnergyPlus::format("{}{} {}, has a non-unique name used for both Compressor and CompressorList name: \"{}\".",
+                                               RoutineName,
+                                               CurrentModuleObject,
+                                               cAlphaFieldNames(alphaNum),
+                                               Alphas(alphaNum)));
+            ErrorsFound = true;
+            return false;
+        }
+        assignCompressors(CompressorLists, ListNum, CompNum, numCompressorsSys, memberCount, destArray);
+        return true;
+    }
+
+    // Helper: resolve a CaseAndWalkInList/Case/WalkIn name (no coils) for one temperature
+    // level of a TranscriticalSystem and fill the destination arrays.
+    template <typename CaseArrayType, typename WalkInArrayType>
+    void resolveTransSysLoads(EnergyPlusData &state,
+                              bool &ErrorsFound,
+                              std::string_view RoutineName,
+                              std::string_view CurrentModuleObject,
+                              const Array1D_string &Alphas,
+                              const Array1D_bool &lAlphaBlanks,
+                              const Array1D_string &cAlphaFieldNames,
+                              int alphaNum,
+                              const std::string &sysName,
+                              int &numCasesOut,
+                              int &numWalkInsOut,
+                              CaseArrayType &caseNumArray,
+                              WalkInArrayType &walkInNumArray)
+    {
+        if (lAlphaBlanks(alphaNum)) {
+            return;
+        }
+        auto [CaseAndWalkInListNum, CaseNum, WalkInNum, CoilNum] = findLoadNames(state, Alphas(alphaNum), /*includeCoil=*/false);
+        int NumNameMatches = (CaseAndWalkInListNum != 0) + (CaseNum != 0) + (WalkInNum != 0);
+        if (NumNameMatches != 1) {
+            reportNameMatchError(
+                state, ErrorsFound, RoutineName, CurrentModuleObject, sysName, NumNameMatches, cAlphaFieldNames(alphaNum), Alphas(alphaNum));
+        } else if (CaseAndWalkInListNum != 0) {
+            auto &CaseAndWalkInList = state.dataRefrigCase->CaseAndWalkInList;
+            numCasesOut = CaseAndWalkInList(CaseAndWalkInListNum).NumCases;
+            numWalkInsOut = CaseAndWalkInList(CaseAndWalkInListNum).NumWalkIns;
+            if (numCasesOut > 0) {
+                if (!allocated(caseNumArray)) {
+                    caseNumArray.allocate(numCasesOut);
+                }
+                caseNumArray({1, numCasesOut}) = CaseAndWalkInList(CaseAndWalkInListNum).CaseItemNum({1, numCasesOut});
+            }
+            if (numWalkInsOut > 0) {
+                if (!allocated(walkInNumArray)) {
+                    walkInNumArray.allocate(numWalkInsOut);
+                }
+                walkInNumArray({1, numWalkInsOut}) = CaseAndWalkInList(CaseAndWalkInListNum).WalkInItemNum({1, numWalkInsOut});
+            }
+        } else if (CaseNum != 0) {
+            numCasesOut = 1;
+            if (!allocated(caseNumArray)) {
+                caseNumArray.allocate(1);
+            }
+            caseNumArray(1) = CaseNum;
+        } else if (WalkInNum != 0) {
+            numWalkInsOut = 1;
+            if (!allocated(walkInNumArray)) {
+                walkInNumArray.allocate(1);
+            }
+            walkInNumArray(1) = WalkInNum;
+        }
+    }
+
+    // Helper: resolve a CaseAndWalkInList/Case/WalkIn/Coil name (with coil support)
+    // for one load-assignment alpha field and populate the destination arrays.
+    template <typename CaseArrayType, typename WalkInArrayType, typename CoilArrayType>
+    bool resolveLoadsWithCoils(EnergyPlusData &state,
+                               bool &ErrorsFound,
+                               std::string_view RoutineName,
+                               std::string_view CurrentModuleObject,
+                               const Array1D_string &Alphas,
+                               const Array1D_bool &lAlphaBlanks,
+                               const Array1D_string &cAlphaFieldNames,
+                               int alphaNum,
+                               const std::string &objName,
+                               int &numCasesOut,
+                               int &numWalkInsOut,
+                               int &numCoilsOut,
+                               CaseArrayType &caseNumArray,
+                               WalkInArrayType &walkInNumArray,
+                               CoilArrayType &coilNumArray)
+    {
+        if (lAlphaBlanks(alphaNum)) {
+            return true; // blank is allowed; caller handles the check
+        }
+        auto [CaseAndWalkInListNum, CaseNum, WalkInNum, CoilNum] = findLoadNames(state, Alphas(alphaNum));
+        int NumNameMatches = (CaseAndWalkInListNum != 0) + (CaseNum != 0) + (WalkInNum != 0) + (CoilNum != 0);
+        if (NumNameMatches != 1) {
+            reportNameMatchError(
+                state, ErrorsFound, RoutineName, CurrentModuleObject, objName, NumNameMatches, cAlphaFieldNames(alphaNum), Alphas(alphaNum));
+            return false;
+        }
+        if (CaseAndWalkInListNum != 0) {
+            auto &CaseAndWalkInList = state.dataRefrigCase->CaseAndWalkInList;
+            numCasesOut = CaseAndWalkInList(CaseAndWalkInListNum).NumCases;
+            numWalkInsOut = CaseAndWalkInList(CaseAndWalkInListNum).NumWalkIns;
+            numCoilsOut = CaseAndWalkInList(CaseAndWalkInListNum).NumCoils;
+            if (numCasesOut > 0) {
+                if (!allocated(caseNumArray)) {
+                    caseNumArray.allocate(numCasesOut);
+                }
+                caseNumArray({1, numCasesOut}) = CaseAndWalkInList(CaseAndWalkInListNum).CaseItemNum({1, numCasesOut});
+            }
+            if (numWalkInsOut > 0) {
+                if (!allocated(walkInNumArray)) {
+                    walkInNumArray.allocate(numWalkInsOut);
+                }
+                walkInNumArray({1, numWalkInsOut}) = CaseAndWalkInList(CaseAndWalkInListNum).WalkInItemNum({1, numWalkInsOut});
+            }
+            if (numCoilsOut > 0) {
+                if (!allocated(coilNumArray)) {
+                    coilNumArray.allocate(numCoilsOut);
+                }
+                coilNumArray({1, numCoilsOut}) = CaseAndWalkInList(CaseAndWalkInListNum).CoilItemNum({1, numCoilsOut});
+            }
+        } else if (CaseNum != 0) {
+            numCasesOut = 1;
+            if (!allocated(caseNumArray)) {
+                caseNumArray.allocate(1);
+            }
+            caseNumArray(1) = CaseNum;
+        } else if (WalkInNum != 0) {
+            numWalkInsOut = 1;
+            if (!allocated(walkInNumArray)) {
+                walkInNumArray.allocate(1);
+            }
+            walkInNumArray(1) = WalkInNum;
+        } else if (CoilNum != 0) {
+            numCoilsOut = 1;
+            if (!allocated(coilNumArray)) {
+                coilNumArray.allocate(1);
+            }
+            coilNumArray(1) = CoilNum;
+        }
+        return true;
+    }
+
+} // anonymous namespace
+
+// Helper: compute capacity curve slope and minimum condenser load from rated capacity.
+static void computeCapCurveSlopeAndMin(EnergyPlusData &state,
+                                       bool &ErrorsFound,
+                                       std::string_view RoutineName,
+                                       std::string_view CurrentModuleObject,
+                                       int capCurvePtr,
+                                       const std::string &objName,
+                                       const Real64 &ratedCapacity,
+                                       Real64 &tempSlopeOut,
+                                       Real64 &minCondLoadOut)
+{
+    if (ratedCapacity > 0.0) {
+        Real64 DelTempMin, DelTempMax;
+        Curve::GetCurveMinMaxValues(state, capCurvePtr, DelTempMin, DelTempMax);
+        Real64 elevFactor = 1.0 - 7.17e-5 * state.dataEnvrn->Elevation;
+        Real64 Capmin = Curve::CurveValue(state, capCurvePtr, DelTempMin) * elevFactor;
+        Real64 Capmax = Curve::CurveValue(state, capCurvePtr, DelTempMax) * elevFactor;
+        tempSlopeOut = (DelTempMax - DelTempMin) / (Capmax - Capmin);
+        minCondLoadOut = Capmax - DelTempMax / tempSlopeOut;
+    } else {
+        ShowSevereError(state,
+                        EnergyPlus::format(
+                            "{}{}=\"{}\" Capacity curve must be input and must be greater than 0 Watts.", RoutineName, CurrentModuleObject, objName));
+        ErrorsFound = true;
+    }
+}
+
+// Helper: read defrost capacity and optional defrost energy fraction for walk-in and air-chiller coil objects.
+static void readDefrostCapAndEnergyFraction(EnergyPlusData &state,
+                                            bool &ErrorsFound,
+                                            std::string_view RoutineName,
+                                            std::string_view CurrentModuleObject,
+                                            const Array1D<Real64> &Numbers,
+                                            const Array1D_bool &lNumericBlanks,
+                                            const Array1D_string &cNumericFieldNames,
+                                            const Array1D_string &cAlphaFieldNames,
+                                            const Array1D_string &Alphas,
+                                            DefrostType defrostType,
+                                            const std::string &objName,
+                                            int capFieldNum,
+                                            int fracFieldNum,
+                                            int defTypeAlphaNum,
+                                            Real64 &defrostCapacity,
+                                            Real64 &defEnergyFraction)
+{
+    if (defrostType == DefrostType::OffCycle || defrostType == DefrostType::None) {
+        defrostCapacity = 0.0;
+    } else { // have electric or hot gas/brine defrost
+        if ((lNumericBlanks(capFieldNum)) || (Numbers(capFieldNum) <= 0.0)) {
+            ShowSevereError(state,
+                            EnergyPlus::format("{}{}=\"{}\", {} must be input and greater than or equal to 0 W for {} {}",
+                                               RoutineName,
+                                               CurrentModuleObject,
+                                               objName,
+                                               cNumericFieldNames(capFieldNum),
+                                               cAlphaFieldNames(defTypeAlphaNum),
+                                               Alphas(defTypeAlphaNum)));
+            ErrorsFound = true;
+        } else {
+            defrostCapacity = Numbers(capFieldNum);
+        }
+        if (defrostType == DefrostType::Elec) {
+            defEnergyFraction = 0.7;
+        }
+        if (defrostType == DefrostType::Fluid) {
+            defEnergyFraction = 0.3;
+        }
+        if (!lNumericBlanks(fracFieldNum)) {
+            if ((Numbers(fracFieldNum) > 1.0) || (Numbers(fracFieldNum) < 0.0)) {
+                ShowWarningError(state,
+                                 EnergyPlus::format("{}{}=\"{}\", {} must be between 0 and 1, default values will be used.",
+                                                    RoutineName,
+                                                    CurrentModuleObject,
+                                                    objName,
+                                                    cNumericFieldNames(fracFieldNum)));
+            } else {
+                defEnergyFraction = Numbers(fracFieldNum);
+            }
+        }
+    }
+}
+
+// Helper: read a walk-in door (glass or stock) for one zone.
+// NStart and AStart are the numeric/alpha field offset for the current zone.
+static bool readWalkInDoor(EnergyPlusData &state,
+                           bool &ErrorsFound,
+                           const ErrorObjectHeader &eoh,
+                           const Array1D<Real64> &Numbers,
+                           const Array1D_bool &lNumericBlanks,
+                           const Array1D_string &Alphas,
+                           const Array1D_bool &lAlphaBlanks,
+                           const Array1D_string &cAlphaFieldNames,
+                           int NStart,
+                           int AStart,
+                           int nArea,
+                           int nHeight,
+                           int nUValue,
+                           int aSchedule,
+                           Real64 defaultHeight,
+                           Real64 defaultUValue,
+                           Real64 &area,
+                           Real64 &height,
+                           Real64 &uvalue,
+                           Sched::Schedule *&schedOut)
+{
+    area = 0.0;
+    height = 0.0;
+    uvalue = 0.0;
+    if (lNumericBlanks(NStart + nArea)) {
+        return false;
+    }
+    area = Numbers(NStart + nArea);
+    height = defaultHeight;
+    if (!lNumericBlanks(NStart + nHeight)) {
+        height = Numbers(NStart + nHeight);
+    }
+    uvalue = defaultUValue;
+    if (!lNumericBlanks(NStart + nUValue)) {
+        uvalue = Numbers(NStart + nUValue);
+    }
+    if (!lAlphaBlanks(AStart + aSchedule)) {
+        if ((schedOut = Sched::GetSchedule(state, Alphas(AStart + aSchedule))) == nullptr) {
+            ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(AStart + aSchedule), Alphas(AStart + aSchedule));
+            ErrorsFound = true;
+        } else if (!schedOut->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
+            Sched::ShowSevereBadMinMax(
+                state, eoh, cAlphaFieldNames(AStart + aSchedule), Alphas(AStart + aSchedule), Clusive::In, 0.0, Clusive::In, 1.0);
+            ErrorsFound = true;
+        }
+    }
+    return true;
+}
+
+// Helper: read suction piping UA and zone heat-gain inputs (optional).
+static void readSuctionPiping(EnergyPlusData &state,
+                              bool &ErrorsFound,
+                              std::string_view RoutineName,
+                              std::string_view CurrentModuleObject,
+                              const Array1D<Real64> &Numbers,
+                              const Array1D_bool &lNumericBlanks,
+                              const Array1D_string &Alphas,
+                              const Array1D_bool &lAlphaBlanks,
+                              const Array1D_string &cAlphaFieldNames,
+                              const Array1D_string &cNumericFieldNames,
+                              int alphaFieldNum,
+                              int numericFieldNum,
+                              const std::string &objName,
+                              Real64 &sumUASuctionPiping,
+                              int &suctionPipeActualZoneNum,
+                              int &suctionPipeZoneNodeNum,
+                              std::string_view tempLevelLabel = "")
+{
+    sumUASuctionPiping = 0.0;
+    std::string levelPrefix = tempLevelLabel.empty() ? std::string("S") : EnergyPlus::format("  The {} s", tempLevelLabel);
+    if (!lNumericBlanks(numericFieldNum) && !lAlphaBlanks(alphaFieldNum)) {
+        sumUASuctionPiping = Numbers(numericFieldNum);
+        suctionPipeActualZoneNum = Util::FindItemInList(Alphas(alphaFieldNum), state.dataHeatBal->Zone);
+        suctionPipeZoneNodeNum = DataZoneEquipment::GetSystemNodeNumberForZone(state, suctionPipeActualZoneNum);
+        if (suctionPipeZoneNodeNum == 0) {
+            ShowSevereError(state,
+                            EnergyPlus::format("{}{}=\"{}\", System Node Number not found for {} = {} even though {} is greater than zero.",
+                                               RoutineName,
+                                               CurrentModuleObject,
+                                               objName,
+                                               cAlphaFieldNames(alphaFieldNum),
+                                               Alphas(alphaFieldNum),
+                                               cNumericFieldNames(numericFieldNum)));
+            ShowContinueError(state,
+                              EnergyPlus::format("{}uction piping heat gain cannot be calculated unless a Zone is defined to "
+                                                 "determine the environmental temperature surrounding the piping.",
+                                                 levelPrefix));
+            ErrorsFound = true;
+        } else {
+            state.dataRefrigCase->RefrigPresentInZone(suctionPipeActualZoneNum) = true;
+        }
+    } else if (!lNumericBlanks(numericFieldNum) && lAlphaBlanks(alphaFieldNum)) {
+        ShowWarningError(state,
+                         EnergyPlus::format("{}{}=\"{}\" {} not found even though {} is greater than zero.",
+                                            RoutineName,
+                                            CurrentModuleObject,
+                                            objName,
+                                            cAlphaFieldNames(alphaFieldNum),
+                                            cNumericFieldNames(numericFieldNum)));
+        ShowContinueError(state,
+                          EnergyPlus::format("{}uction piping heat gain will not be calculated unless a Zone is defined to "
+                                             "determine the environmental temperature surrounding the piping.",
+                                             levelPrefix));
+    } else if (lNumericBlanks(numericFieldNum) && !lAlphaBlanks(alphaFieldNum)) {
+        ShowWarningError(
+            state,
+            EnergyPlus::format("{}{}=\"{}\" {} will not be used and suction piping heat gain will not be calculated because {} was blank.",
+                               RoutineName,
+                               CurrentModuleObject,
+                               objName,
+                               cAlphaFieldNames(alphaFieldNum),
+                               cNumericFieldNames(numericFieldNum)));
+    }
+}
+
+// Helper: read the optional air-inlet node field for an air-cooled condenser or gas cooler.
+static void readAirInletNodeField(EnergyPlusData &state,
+                                  bool &ErrorsFound,
+                                  const ErrorObjectHeader &eoh,
+                                  const Array1D_string &Alphas,
+                                  const Array1D_bool &lAlphaBlanks,
+                                  const Array1D_string &cAlphaFieldNames,
+                                  int alphaNum,
+                                  Node::ConnectionObjectType connObjType,
+                                  int &inletAirNodeNum,
+                                  int &inletAirZoneNum,
+                                  bool &rejectHeatToZone)
+{
+    rejectHeatToZone = false;
+    if (lAlphaBlanks(alphaNum)) {
+        inletAirNodeNum = 0;
+        return;
+    }
+    inletAirZoneNum = Util::FindItemInList(Alphas(alphaNum), state.dataHeatBal->Zone);
+    if (inletAirZoneNum != 0) {
+        inletAirNodeNum = DataZoneEquipment::GetSystemNodeNumberForZone(state, inletAirZoneNum);
+        rejectHeatToZone = true;
+        state.dataRefrigCase->RefrigPresentInZone(inletAirZoneNum) = true;
+    } else {
+        inletAirNodeNum = Node::GetOnlySingleNode(state,
+                                                  Alphas(alphaNum),
+                                                  ErrorsFound,
+                                                  connObjType,
+                                                  Alphas(1),
+                                                  Node::FluidType::Air,
+                                                  Node::ConnectionType::OutsideAirReference,
+                                                  Node::CompFluidStream::Primary,
+                                                  Node::ObjectIsParent);
+        if (!OutAirNodeManager::CheckOutAirNodeNumber(state, inletAirNodeNum)) {
+            ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(alphaNum), Alphas(alphaNum));
+            ShowContinueError(state, "...does not appear in an OutdoorAir:NodeList or as an OutdoorAir:Node or as a Zone.");
+            ErrorsFound = true;
+        }
+    }
+}
+
+// Helper: read distribution piping or receiver UA and zone heat-gain inputs (optional) for secondary systems.
+static void readSecondaryPipingOrReceiver(EnergyPlusData &state,
+                                          bool &ErrorsFound,
+                                          std::string_view RoutineName,
+                                          std::string_view CurrentModuleObject,
+                                          const std::string &objName,
+                                          const Array1D<Real64> &Numbers,
+                                          const Array1D_bool &lNumericBlanks,
+                                          const Array1D_string &Alphas,
+                                          const Array1D_bool &lAlphaBlanks,
+                                          const Array1D_string &cAlphaFieldNames,
+                                          const Array1D_string &cNumericFieldNames,
+                                          int alphaFieldNum,
+                                          int numericFieldNum,
+                                          Real64 &sumUA,
+                                          int &zoneNum,
+                                          int &zoneNodeNum,
+                                          std::string_view heatGainLabel,
+                                          std::string_view surroundingLabel)
+{
+    sumUA = 0.0;
+    if (!lNumericBlanks(numericFieldNum) && !lAlphaBlanks(alphaFieldNum)) {
+        sumUA = Numbers(numericFieldNum);
+        zoneNum = Util::FindItemInList(Alphas(alphaFieldNum), state.dataHeatBal->Zone);
+        zoneNodeNum = DataZoneEquipment::GetSystemNodeNumberForZone(state, zoneNum);
+        if (zoneNum == 0) {
+            ShowSevereError(state,
+                            EnergyPlus::format("{}{}=\"{}\", invalid  {} not valid: {}",
+                                               RoutineName,
+                                               CurrentModuleObject,
+                                               objName,
+                                               cAlphaFieldNames(alphaFieldNum),
+                                               Alphas(alphaFieldNum)));
+            ErrorsFound = true;
+        } else {
+            state.dataRefrigCase->RefrigPresentInZone(zoneNum) = true;
+        }
+        if (zoneNodeNum == 0) {
+            ShowSevereError(
+                state,
+                EnergyPlus::format("{}{}=\"{}\" System Node Number not found for {} = {} even though {} is greater than zero. {} heat gain "
+                                   "cannot be calculated unless a controlled Zone (appear in a ZoneHVAC:EquipmentConnections object.) is "
+                                   "defined to determine the environmental temperature surrounding the {}.",
+                                   RoutineName,
+                                   CurrentModuleObject,
+                                   objName,
+                                   cAlphaFieldNames(alphaFieldNum),
+                                   Alphas(alphaFieldNum),
+                                   cNumericFieldNames(numericFieldNum),
+                                   heatGainLabel,
+                                   surroundingLabel));
+            ErrorsFound = true;
+        }
+    } else if (!lNumericBlanks(numericFieldNum) && lAlphaBlanks(alphaFieldNum)) {
+        ShowWarningError(
+            state,
+            EnergyPlus::format("{}{}=\"{}\", {} not found even though {} is greater than zero. {} heat gain will not be calculated unless "
+                               "a Zone is defined to determine the environmental temperature surrounding the {}.",
+                               RoutineName,
+                               CurrentModuleObject,
+                               objName,
+                               cAlphaFieldNames(alphaFieldNum),
+                               cNumericFieldNames(numericFieldNum),
+                               heatGainLabel,
+                               surroundingLabel));
+    } else if (lNumericBlanks(numericFieldNum) && !lAlphaBlanks(alphaFieldNum)) {
+        ShowWarningError(state,
+                         EnergyPlus::format("{}{}=\"{}\", {} will not be used and {} heat gain will not be calculated because {} was blank.",
+                                            RoutineName,
+                                            CurrentModuleObject,
+                                            objName,
+                                            cAlphaFieldNames(alphaFieldNum),
+                                            heatGainLabel,
+                                            cNumericFieldNames(numericFieldNum)));
+    }
+}
+
+// Helper: exactly one of two numeric fields must be supplied for compressor rating.
+static void readOneOfTwoRatingFields(EnergyPlusData &state,
+                                     bool &ErrorsFound,
+                                     std::string_view RoutineName,
+                                     std::string_view CurrentModuleObject,
+                                     const std::string &compName,
+                                     const Array1D<Real64> &Numbers,
+                                     const Array1D_bool &lNumericBlanks,
+                                     const Array1D_string &cNumericFieldNames,
+                                     int n1,
+                                     int n2,
+                                     CompRatingType type1,
+                                     CompRatingType type2,
+                                     CompRatingType &ratingType,
+                                     Real64 &ratedValue)
+{
+    if (((!lNumericBlanks(n1)) && (!lNumericBlanks(n2))) || (lNumericBlanks(n1) && lNumericBlanks(n2))) {
+        ShowSevereError(state,
+                        EnergyPlus::format("{}{}=\"{}\"One, and Only One of {} or {}",
+                                           RoutineName,
+                                           CurrentModuleObject,
+                                           compName,
+                                           cNumericFieldNames(n1),
+                                           cNumericFieldNames(n2)));
+        ShowContinueError(state, "Must Be Entered. Check input value choices.");
+        ErrorsFound = true;
+    } else if (!lNumericBlanks(n1)) {
+        ratingType = type1;
+        ratedValue = Numbers(n1);
+    } else {
+        ratingType = type2;
+        ratedValue = Numbers(n2);
+    }
+}
+
+namespace {
+
+    // Helper: iterate a 1-based collection checking NumSysAttach, counting unused components.
+    template <typename CollectionType, typename OnMultipleFn, typename WarnSummaryFn>
+    void checkUnusedComponents(EnergyPlusData &state,
+                               std::string_view RoutineName,
+                               CollectionType &collection,
+                               int numItems,
+                               int &unusedCount,
+                               std::string_view idfType,
+                               OnMultipleFn onMultiple,
+                               WarnSummaryFn warnSummary)
+    {
+        unusedCount = 0;
+        for (int i = 1; i <= numItems; ++i) {
+            if (collection(i).NumSysAttach == 1) {
+                continue;
+            }
+            if (collection(i).NumSysAttach < 1) {
+                ++unusedCount;
+                if (state.dataGlobal->DisplayExtraWarnings) {
+                    ShowWarningError(state, EnergyPlus::format("{}: {}=\"{}\" unused. ", RoutineName, idfType, collection(i).Name));
+                }
+            }
+            if (collection(i).NumSysAttach > 1) {
+                onMultiple(i);
+            }
+        }
+        if (unusedCount > 0 && !state.dataGlobal->DisplayExtraWarnings) {
+            warnSummary(unusedCount);
+        }
+    }
+
+} // anonymous namespace
+
 void GetRefrigerationInput(EnergyPlusData &state)
 {
 
@@ -479,8 +1108,6 @@ void GetRefrigerationInput(EnergyPlusData &state)
     int NumWalkIns(0);                     // Number of walk ins
     int RefrigSysNum(0);
     Real64 DeltaHPhaseChange(0.0);     // Secondary loop enthalpy change in condenser w overfeed system (J/g)
-    Real64 DelTempMin(0.0);            // min temperature for heat rej curve for air cooled condenser (C)
-    Real64 DelTempMax(0.0);            // max temperature for heat rej curve for air cooled condenser (C)
     Real64 DensityBrineRated(0.0);     // density of circ fluid in secondary loop
     Real64 DensityPhaseChange(0.0);    // Secondary loop density at condensing temperature w overfeed system (g/m3)
     Real64 NominalTotalCompCapLP(0.0); // Total of nominal low pressure compressor capacities, used for rough input check (W) (Transcritical CO2)
@@ -691,42 +1318,206 @@ void GetRefrigerationInput(EnergyPlusData &state)
     cNumericFieldNames.allocate(MaxNumNumbersAll);
     lAlphaBlanks.dimension(MaxNumAlphasAll, true);
     lNumericBlanks.dimension(MaxNumNumbersAll, true);
+
+    // Helper lambda to read the three optional refrigerant-inventory fields that appear on every
+    // condenser and gas-cooler object.  Zeros each field first, then overwrites from Numbers if
+    // the corresponding input field is not blank.
+    auto readRefrigInventory = [&](Real64 &refOpCharge, Real64 &refReceiverInv, Real64 &refPipingInv, int n1, int n2, int n3) {
+        refOpCharge = 0.0;
+        refReceiverInv = 0.0;
+        refPipingInv = 0.0;
+        if (!lNumericBlanks(n1)) {
+            refOpCharge = Numbers(n1);
+        }
+        if (!lNumericBlanks(n2)) {
+            refReceiverInv = Numbers(n2);
+        }
+        if (!lNumericBlanks(n3)) {
+            refPipingInv = Numbers(n3);
+        }
+    };
+
+    // Helper lambda that wraps the repeated 11-argument getObjectItem call.  The
+    // CurrentModuleObject string is captured by reference so each call site only
+    // needs to supply the 1-based item number.
+    auto getItem = [&](int itemNum) {
+        state.dataInputProcessing->inputProcessor->getObjectItem(state,
+                                                                 CurrentModuleObject,
+                                                                 itemNum,
+                                                                 Alphas,
+                                                                 NumAlphas,
+                                                                 Numbers,
+                                                                 NumNumbers,
+                                                                 IOStatus,
+                                                                 lNumericBlanks,
+                                                                 lAlphaBlanks,
+                                                                 cAlphaFieldNames,
+                                                                 cNumericFieldNames);
+    };
+
+    // Helper lambda to initialise the NumSysAttach counter and pre-allocate the SysNum
+    // array on each condenser / gas-cooler object.  Uses an abbreviated-function-template
+    // (C++20 auto parameter) so it works for both RefrigCondenserData and GasCoolerData
+    // without code duplication.
+    auto initSysAttach = [&](auto &obj, int numSystems) {
+        obj.NumSysAttach = 0;
+        if (!allocated(obj.SysNum)) {
+            obj.SysNum.allocate(numSystems);
+        }
+    };
+
+    // Helper lambda used in the System / TranscriticalSystem WalkIn assignment loops.
+    // For detailed systems, a DefrostCapacity of -99 is a sentinel meaning the field was
+    // left blank; blank input is only a warning for compressor racks but an error for
+    // detailed systems that need capacity for both fluid and electric defrost types.
+    auto checkWalkInDefrostCap = [&](int walkInID) {
+        if (WalkIn(walkInID).DefrostCapacity <= -98.0) {
+            ShowSevereError(state,
+                            EnergyPlus::format("{}Refrigeration:WalkIn=\"{}\", Defrost capacity must be greater than or equal to 0 W for "
+                                               "electric and hotfluid defrost types",
+                                               RoutineName,
+                                               WalkIn(walkInID).Name));
+            ErrorsFound = true;
+        }
+    };
+
+    // Helper lambda: accumulate case loads for one temperature level of a TranscriticalSystem.
+    // Iterates the supplied caseNumArray (1-based, length numCases), increments NumSysAttach,
+    // adds to nomCapAccum and to the system's RefInventory, and tracks the running minimum
+    // design evaporating temperature in TEvapDesign.
+    auto accumTransSysCases = [&](const auto &caseNumArray, int numCases, Real64 &nomCapAccum, Real64 &TEvapDesign, Real64 &refInventory) {
+        for (int caseIndex = 1; caseIndex <= numCases; ++caseIndex) {
+            int cn = caseNumArray(caseIndex);
+            ++RefrigCase(cn).NumSysAttach;
+            nomCapAccum += RefrigCase(cn).DesignRatedCap;
+            refInventory += RefrigCase(cn).DesignRefrigInventory;
+            if (caseIndex == 1) {
+                TEvapDesign = RefrigCase(cn).EvapTempDesign;
+            } else {
+                TEvapDesign = min(RefrigCase(cn).EvapTempDesign, TEvapDesign);
+            }
+        }
+    };
+
+    // Helper lambda: accumulate walkin loads for one temperature level of a TranscriticalSystem.
+    // numCasesOnLevel is the number of cases already assigned at this temperature level; when it
+    // is 0 and WalkInIndex == 1 the first walkin sets TEvapDesign rather than taking the min.
+    auto accumTransSysWalkIns =
+        [&](const auto &walkInNumArray, int numWalkIns, Real64 &nomCapAccum, Real64 &TEvapDesign, int numCasesOnLevel, Real64 &refInventory) {
+            for (int wi = 1; wi <= numWalkIns; ++wi) {
+                int wid = walkInNumArray(wi);
+                ++WalkIn(wid).NumSysAttach;
+                nomCapAccum += WalkIn(wid).DesignRatedCap;
+                refInventory += WalkIn(wid).DesignRefrigInventory;
+                checkWalkInDefrostCap(wid);
+                if ((wi == 1) && (numCasesOnLevel == 0)) {
+                    TEvapDesign = WalkIn(wid).TEvapDesign;
+                } else {
+                    TEvapDesign = min(WalkIn(wid).TEvapDesign, TEvapDesign);
+                }
+            }
+        };
+
+    // Helper lambda: look up and assign one subcooler slot for a detailed refrigeration system.
+    // alphaIdx is the 1-based index into Alphas[] for this subcooler field; subcoolerSlot is
+    // the 1-based slot in System(RefrigSysNum).SubcoolerNum to fill.  Does nothing when the
+    // alpha field is blank.  Sets ErrorsFound on a bad name; on a good name, copies the system's
+    // CoilFlag to the subcooler.  The RefrigSysNum variable is captured by reference so the lambda
+    // always operates on the current system being processed.
+    auto assignSubcoolerToSystem = [&](int alphaIdx, int subcoolerSlot) {
+        if (lAlphaBlanks(alphaIdx)) {
+            return;
+        }
+        System(RefrigSysNum).SubcoolerNum(subcoolerSlot) =
+            state.dataInputProcessing->inputProcessor->getObjectItemNum(state, "Refrigeration:Subcooler", Alphas(alphaIdx));
+        if (System(RefrigSysNum).SubcoolerNum(subcoolerSlot) <= 0) {
+            ShowSevereError(state,
+                            EnergyPlus::format(R"({}{}="{}", has an invalid {} defined as "{}".)",
+                                               RoutineName,
+                                               CurrentModuleObject,
+                                               System(RefrigSysNum).Name,
+                                               cAlphaFieldNames(alphaIdx),
+                                               Alphas(alphaIdx)));
+            ErrorsFound = true;
+        } else {
+            Subcooler(System(RefrigSysNum).SubcoolerNum(subcoolerSlot)).CoilFlag = System(RefrigSysNum).CoilFlag;
+        }
+    };
+
+    // Helper lambda: if alpha field n is blank assign the always-on schedule, otherwise look up the
+    // schedule by name, report a severe error if not found, and validate the 0-1 min/max range.
+    // eoh must be the ErrorObjectHeader for the current object being read (passed by const-ref so
+    // the lambda does not need to be redefined on each loop iteration).
+    auto getScheduleOrAlwaysOn = [&](const ErrorObjectHeader &eoh, int alphaNum, Sched::Schedule *&schedOut) {
+        if (lAlphaBlanks(alphaNum)) {
+            schedOut = Sched::GetScheduleAlwaysOn(state);
+        } else if ((schedOut = Sched::GetSchedule(state, Alphas(alphaNum))) == nullptr) {
+            ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(alphaNum), Alphas(alphaNum));
+            ErrorsFound = true;
+        } else if (!schedOut->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
+            Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(alphaNum), Alphas(alphaNum), Clusive::In, 0.0, Clusive::In, 1.0);
+            ErrorsFound = true;
+        }
+    };
+
+    // Helper lambda: required schedule field – blank is an error (ShowSevereEmptyField), otherwise look up by
+    // name, error if not found, and validate the 0-1 min/max range.
+    auto getRequiredSchedule = [&](const ErrorObjectHeader &eoh, int alphaNum, Sched::Schedule *&schedOut) {
+        if (lAlphaBlanks(alphaNum)) {
+            ShowSevereEmptyField(state, eoh, cAlphaFieldNames(alphaNum));
+            ErrorsFound = true;
+        } else if ((schedOut = Sched::GetSchedule(state, Alphas(alphaNum))) == nullptr) {
+            ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(alphaNum), Alphas(alphaNum));
+            ErrorsFound = true;
+        } else if (!schedOut->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
+            Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(alphaNum), Alphas(alphaNum), Clusive::In, 0.0, Clusive::In, 1.0);
+            ErrorsFound = true;
+        }
+    };
+
+    // Helper lambda: drip-down schedule field – if blank, reuse the defrost schedule pointer; otherwise look up by
+    // name, error if not found, and validate the 0-1 min/max range.
+    auto getDripDownScheduleOrDefault = [&](const ErrorObjectHeader &eoh, int alphaNum, Sched::Schedule *defrostSched, Sched::Schedule *&schedOut) {
+        if (lAlphaBlanks(alphaNum)) {
+            schedOut = defrostSched;
+        } else if ((schedOut = Sched::GetSchedule(state, Alphas(alphaNum))) == nullptr) {
+            ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(alphaNum), Alphas(alphaNum));
+            ErrorsFound = true;
+        } else if (!schedOut->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
+            Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(alphaNum), Alphas(alphaNum), Clusive::In, 0.0, Clusive::In, 1.0);
+            ErrorsFound = true;
+        }
+    };
+
     // bbb stovall note for future - for all curve entries, see if need fail on type or if can allow table input
     if (state.dataRefrigCase->NumSimulationCases > 0) {
         CurrentModuleObject = "Refrigeration:Case";
         int NumDisplayCases(0); // Counter for refrigerated cases in GetInput do loop
         for (int CaseNum = 1; CaseNum <= state.dataRefrigCase->NumSimulationCases; ++CaseNum) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CaseNum,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     lNumericBlanks,
-                                                                     lAlphaBlanks,
-                                                                     cAlphaFieldNames,
-                                                                     cNumericFieldNames);
+            getItem(CaseNum);
 
             ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
 
             ++NumDisplayCases;
+
+            // Lambda for the repeated "must be >= 0 <unit>" error in this loop.
+            auto showCaseRangeError = [&](int numNum, std::string_view units = "W/m") {
+                ShowSevereError(state,
+                                EnergyPlus::format("{}{}=\"{}\", {} must be greater than or equal to 0 {}",
+                                                   RoutineName,
+                                                   CurrentModuleObject,
+                                                   RefrigCase(CaseNum).Name,
+                                                   cNumericFieldNames(numNum),
+                                                   units));
+                ErrorsFound = true;
+            };
 
             AlphaNum = 1;
 
             RefrigCase(CaseNum).Name = Alphas(AlphaNum);
 
             AlphaNum = 2;
-            if (lAlphaBlanks(AlphaNum)) {
-                RefrigCase(CaseNum).availSched = Sched::GetScheduleAlwaysOn(state);
-            } else if ((RefrigCase(CaseNum).availSched = Sched::GetSchedule(state, Alphas(AlphaNum))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum));
-                ErrorsFound = true;
-            } else if (!RefrigCase(CaseNum).availSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum), Clusive::In, 0.0, Clusive::In, 1.0);
-                ErrorsFound = true;
-            }
+            getScheduleOrAlwaysOn(eoh, AlphaNum, RefrigCase(CaseNum).availSched);
 
             // Get the Zone node number from the zone name entered by the user
             RefrigCase(CaseNum).ZoneName = Alphas(3);
@@ -852,13 +1643,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
             if (!lNumericBlanks(NumNum)) {
                 RefrigCase(CaseNum).STDFanPower = Numbers(NumNum);
                 if (Numbers(NumNum) < 0.0) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}{}=\"{}\", {} must be greater than or equal to 0 W/m",
-                                                       RoutineName,
-                                                       CurrentModuleObject,
-                                                       RefrigCase(CaseNum).Name,
-                                                       cNumericFieldNames(NumNum)));
-                    ErrorsFound = true;
+                    showCaseRangeError(NumNum);
                 }
             } else { // blank use default of 75 W/m
                 RefrigCase(CaseNum).STDFanPower = 75.0;
@@ -868,13 +1653,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
             if (!lNumericBlanks(NumNum)) {
                 RefrigCase(CaseNum).OperatingFanPower = Numbers(NumNum);
                 if (Numbers(NumNum) < 0.0) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}{}=\"{}\", {} must be greater than or equal to 0 W/m",
-                                                       RoutineName,
-                                                       CurrentModuleObject,
-                                                       RefrigCase(CaseNum).Name,
-                                                       cNumericFieldNames(NumNum)));
-                    ErrorsFound = true;
+                    showCaseRangeError(NumNum);
                 }
             } else { // if blank set = to std fan power
                 RefrigCase(CaseNum).OperatingFanPower = RefrigCase(CaseNum).STDFanPower;
@@ -884,13 +1663,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
             if (!lNumericBlanks(NumNum)) {
                 RefrigCase(CaseNum).RatedLightingPower = Numbers(NumNum);
                 if (Numbers(NumNum) < 0.0) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}{}=\"{}\", {} must be greater than or equal to 0 W/m",
-                                                       RoutineName,
-                                                       CurrentModuleObject,
-                                                       RefrigCase(CaseNum).Name,
-                                                       cNumericFieldNames(NumNum)));
-                    ErrorsFound = true;
+                    showCaseRangeError(NumNum);
                 }
             } else { // blank input - use default of 90 W/m
                 RefrigCase(CaseNum).RatedLightingPower = 90.0;
@@ -900,27 +1673,13 @@ void GetRefrigerationInput(EnergyPlusData &state)
             if (!lNumericBlanks(NumNum)) {
                 RefrigCase(CaseNum).LightingPower = Numbers(NumNum);
                 if (Numbers(NumNum) < 0.0) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}{}=\"{}\", {} must be greater than or equal to 0 W/m",
-                                                       RoutineName,
-                                                       CurrentModuleObject,
-                                                       RefrigCase(CaseNum).Name,
-                                                       cNumericFieldNames(NumNum)));
-                    ErrorsFound = true;
+                    showCaseRangeError(NumNum);
                 }
             } else { // blank input so set lighting power equal to rated/std lighting power
                 RefrigCase(CaseNum).LightingPower = RefrigCase(CaseNum).RatedLightingPower;
             } // blank input
 
-            if (lAlphaBlanks(6)) {
-                RefrigCase(CaseNum).lightingSched = Sched::GetScheduleAlwaysOn(state); // Not an availability schedule, but defaults to constant-1.0
-            } else if ((RefrigCase(CaseNum).lightingSched = Sched::GetSchedule(state, Alphas(6))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(6), Alphas(6));
-                ErrorsFound = true;
-            } else if (!RefrigCase(CaseNum).lightingSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(6), Alphas(6), Clusive::In, 0.0, Clusive::In, 1.0);
-                ErrorsFound = true;
-            }
+            getScheduleOrAlwaysOn(eoh, 6, RefrigCase(CaseNum).lightingSched);
 
             NumNum = 12;
             RefrigCase(CaseNum).LightingFractionToCase = 1.0; // default value
@@ -942,25 +1701,13 @@ void GetRefrigerationInput(EnergyPlusData &state)
             NumNum = 13;
             RefrigCase(CaseNum).AntiSweatPower = Numbers(NumNum);
             if (Numbers(NumNum) < 0.0) {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}{}=\"{}\", {} must be greater than or equal to 0 W/m",
-                                                   RoutineName,
-                                                   CurrentModuleObject,
-                                                   RefrigCase(CaseNum).Name,
-                                                   cNumericFieldNames(NumNum)));
-                ErrorsFound = true;
+                showCaseRangeError(NumNum);
             }
 
             NumNum = 14;
             RefrigCase(CaseNum).MinimumASPower = Numbers(NumNum);
             if (Numbers(NumNum) < 0.0) {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}{}=\"{}\", {} must be greater than or equal to 0 W/m",
-                                                   RoutineName,
-                                                   CurrentModuleObject,
-                                                   RefrigCase(CaseNum).Name,
-                                                   cNumericFieldNames(NumNum)));
-                ErrorsFound = true;
+                showCaseRangeError(NumNum);
             }
 
             RefrigCase(CaseNum).AntiSweatControlType = static_cast<ASHtrCtrlType>(getEnumValue(asHtrCtrlTypeNamesUC, Alphas(7)));
@@ -1005,13 +1752,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
             NumNum = 16;
             RefrigCase(CaseNum).Height = Numbers(NumNum);
             if (Numbers(NumNum) < 0.0) {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}{}=\"{}\", {} must be greater than or equal to 0 m",
-                                                   RoutineName,
-                                                   CurrentModuleObject,
-                                                   RefrigCase(CaseNum).Name,
-                                                   cNumericFieldNames(NumNum)));
-                ErrorsFound = true;
+                showCaseRangeError(NumNum, "m");
             }
 
             if (RefrigCase(CaseNum).Height <= 0.0 && RefrigCase(CaseNum).AntiSweatControlType == ASHtrCtrlType::HeatBalance) {
@@ -1084,13 +1825,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
             if (!lNumericBlanks(NumNum)) {
                 RefrigCase(CaseNum).DefrostPower = Numbers(NumNum);
                 if (Numbers(NumNum) < 0.0) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}{}=\"{}\", {} must be greater than or equal to 0 W/m",
-                                                       RoutineName,
-                                                       CurrentModuleObject,
-                                                       RefrigCase(CaseNum).Name,
-                                                       cNumericFieldNames(NumNum)));
-                    ErrorsFound = true;
+                    showCaseRangeError(NumNum);
                 }
                 //   disregard defrost power for Off-Cycle or None defrost types
                 if ((DefType == RefCaseDefrostType::OffCycle || DefType == RefCaseDefrostType::None) && (RefrigCase(CaseNum).DefrostPower > 0.0)) {
@@ -1121,16 +1856,8 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 ErrorsFound = true;
             }
 
-            if (RefrigCase(CaseNum).defrostType == RefCaseDefrostType::None) {
-            } else if (lAlphaBlanks(9)) {
-                ShowSevereEmptyField(state, eoh, cAlphaFieldNames(9));
-                ErrorsFound = true;
-            } else if ((RefrigCase(CaseNum).defrostSched = Sched::GetSchedule(state, Alphas(9))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(9), Alphas(9));
-                ErrorsFound = true;
-            } else if (!RefrigCase(CaseNum).defrostSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(9), Alphas(9), Clusive::In, 0.0, Clusive::In, 1.0);
-                ErrorsFound = true;
+            if (RefrigCase(CaseNum).defrostType != RefCaseDefrostType::None) {
+                getRequiredSchedule(eoh, 9, RefrigCase(CaseNum).defrostSched);
             }
 
             //   Note that next section counting number cycles and setting maxkgfrost not used now, but may be in the future.
@@ -1163,15 +1890,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
             }
 
             //   some defrost types do not use drip-down schedules, use same defrost schedule pointer in that case
-            if (lAlphaBlanks(10)) {
-                RefrigCase(CaseNum).defrostDripDownSched = RefrigCase(CaseNum).defrostSched;
-            } else if ((RefrigCase(CaseNum).defrostDripDownSched = Sched::GetSchedule(state, Alphas(10))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(10), Alphas(10));
-                ErrorsFound = true;
-            } else if (!RefrigCase(CaseNum).defrostDripDownSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(10), Alphas(10), Clusive::In, 0.0, Clusive::In, 1.0);
-                ErrorsFound = true;
-            }
+            getDripDownScheduleOrDefault(eoh, 10, RefrigCase(CaseNum).defrostSched, RefrigCase(CaseNum).defrostDripDownSched);
 
             RefrigCase(CaseNum).DefrostEnergyCurveType = static_cast<EnergyEqnForm>(getEnumValue(energyEqnFormNamesUC, Alphas(11)));
             if (RefrigCase(CaseNum).DefrostEnergyCurveType == EnergyEqnForm::Invalid) {
@@ -1375,32 +2094,13 @@ void GetRefrigerationInput(EnergyPlusData &state)
     if (state.dataRefrigCase->NumSimulationWalkIns > 0) {
         CurrentModuleObject = "Refrigeration:WalkIn";
         for (int WalkInID = 1; WalkInID <= state.dataRefrigCase->NumSimulationWalkIns; ++WalkInID) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     WalkInID,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     lNumericBlanks,
-                                                                     lAlphaBlanks,
-                                                                     cAlphaFieldNames,
-                                                                     cNumericFieldNames);
+            getItem(WalkInID);
 
             ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
 
             WalkIn(WalkInID).Name = Alphas(1);
 
-            if (lAlphaBlanks(2)) {
-                WalkIn(WalkInID).availSched = Sched::GetScheduleAlwaysOn(state);
-            } else if ((WalkIn(WalkInID).availSched = Sched::GetSchedule(state, Alphas(2))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(2), Alphas(2));
-                ErrorsFound = true;
-            } else if (!WalkIn(WalkInID).availSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(2), Alphas(2), Clusive::In, 0.0, Clusive::In, 1.0);
-                ErrorsFound = true;
-            }
+            getScheduleOrAlwaysOn(eoh, 2, WalkIn(WalkInID).availSched);
 
             WalkIn(WalkInID).DesignRatedCap = Numbers(1);
             if (Numbers(1) <= 0.0) {
@@ -1433,15 +2133,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
             }
 
             AlphaNum = 3;
-            if (lAlphaBlanks(AlphaNum)) {
-                WalkIn(WalkInID).heaterSched = Sched::GetScheduleAlwaysOn(state); // Not an availability schedule, but defaults to constant-1.0
-            } else if ((WalkIn(WalkInID).heaterSched = Sched::GetSchedule(state, Alphas(AlphaNum))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum));
-                ErrorsFound = true;
-            } else if (!WalkIn(WalkInID).heaterSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum), Clusive::In, 0.0, Clusive::In, 1.0);
-                ErrorsFound = true;
-            }
+            getScheduleOrAlwaysOn(eoh, AlphaNum, WalkIn(WalkInID).heaterSched);
 
             if (!lNumericBlanks(5) && Numbers(5) > 0.0) {
                 WalkIn(WalkInID).CoilFanPower = Numbers(5);
@@ -1478,15 +2170,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
             }
 
             AlphaNum = 4;
-            if (lAlphaBlanks(AlphaNum)) {
-                WalkIn(WalkInID).lightingSched = Sched::GetScheduleAlwaysOn(state); // Not an availability schedule, but defaults to constant-1.0
-            } else if ((WalkIn(WalkInID).lightingSched = Sched::GetSchedule(state, Alphas(AlphaNum))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum));
-                ErrorsFound = true;
-            } else if (!WalkIn(WalkInID).lightingSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum), Clusive::In, 0.0, Clusive::In, 1.0);
-                ErrorsFound = true;
-            }
+            getScheduleOrAlwaysOn(eoh, AlphaNum, WalkIn(WalkInID).lightingSched);
 
             // Input walk-in cooler defrost information
             AlphaNum = 5;
@@ -1510,69 +2194,29 @@ void GetRefrigerationInput(EnergyPlusData &state)
             // convert defrost schedule name to pointer
             AlphaNum = 7;
 
-            if (lAlphaBlanks(AlphaNum)) {
-                ShowSevereEmptyField(state, eoh, cAlphaFieldNames(AlphaNum));
-                ErrorsFound = true;
-            } else if ((WalkIn(WalkInID).defrostSched = Sched::GetSchedule(state, Alphas(AlphaNum))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum));
-                ErrorsFound = true;
-            } else if (!WalkIn(WalkInID).defrostSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum), Clusive::In, 0.0, Clusive::In, 1.0);
-                ErrorsFound = true;
-            }
+            getRequiredSchedule(eoh, AlphaNum, WalkIn(WalkInID).defrostSched);
 
             // convert defrost drip-down schedule name to pointer
             // some defrost types do not use drip-down schedules, use same defrost schedule pointer in that case
             AlphaNum = 8;
-            if (lAlphaBlanks(AlphaNum)) { // blank input so use drip down schedule for defrost
-                WalkIn(WalkInID).defrostDripDownSched = WalkIn(WalkInID).defrostSched;
-            } else if ((WalkIn(WalkInID).defrostDripDownSched = Sched::GetSchedule(state, Alphas(AlphaNum))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum));
-                ErrorsFound = true;
-            } else if (!WalkIn(WalkInID).defrostDripDownSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum), Clusive::In, 0.0, Clusive::In, 1.0);
-                ErrorsFound = true;
-            }
+            getDripDownScheduleOrDefault(eoh, AlphaNum, WalkIn(WalkInID).defrostSched, WalkIn(WalkInID).defrostDripDownSched);
 
-            if (WalkIn(WalkInID).defrostType == DefrostType::OffCycle || WalkIn(WalkInID).defrostType == DefrostType::None) {
-                WalkIn(WalkInID).DefrostCapacity = 0.0;
-                // Don't even need to read N8 or N9 for those two defrost types.
-            } else { // have electric or hot gas/brine defrost
-                if ((lNumericBlanks(8)) || (Numbers(8) <= 0.0)) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}{}=\"{}\", {} must be input and greater than or equal to 0 W for {} {}",
-                                                       RoutineName,
-                                                       CurrentModuleObject,
-                                                       WalkIn(WalkInID).Name,
-                                                       cNumericFieldNames(8),
-                                                       cAlphaFieldNames(5),
-                                                       Alphas(5)));
-                    ErrorsFound = true;
-                } else {
-                    WalkIn(WalkInID).DefrostCapacity = Numbers(8);
-                } // Blank  or negative N8
-
-                // defaults for defrost energy fraction are 0.7 for elec defrost and 0.3 for warm fluid
-                // note this value is only used for temperature terminated defrost control type
-                if (WalkIn(WalkInID).defrostType == DefrostType::Elec) {
-                    WalkIn(WalkInID).DefEnergyFraction = 0.7;
-                }
-                if (WalkIn(WalkInID).defrostType == DefrostType::Fluid) {
-                    WalkIn(WalkInID).DefEnergyFraction = 0.3;
-                }
-                if (!lNumericBlanks(9)) {
-                    if ((Numbers(9) > 1.0) || (Numbers(9) < 0.0)) {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("{}{}=\"{}\", {} must be between 0 and 1, default values will be used.",
-                                                            RoutineName,
-                                                            CurrentModuleObject,
-                                                            WalkIn(WalkInID).Name,
-                                                            cNumericFieldNames(9)));
-                    } else {
-                        WalkIn(WalkInID).DefEnergyFraction = Numbers(9);
-                    } // number out of range
-                } // lnumericblanks
-            } // defrost type
+            readDefrostCapAndEnergyFraction(state,
+                                            ErrorsFound,
+                                            RoutineName,
+                                            CurrentModuleObject,
+                                            Numbers,
+                                            lNumericBlanks,
+                                            cNumericFieldNames,
+                                            cAlphaFieldNames,
+                                            Alphas,
+                                            WalkIn(WalkInID).defrostType,
+                                            WalkIn(WalkInID).Name,
+                                            /*capFieldNum=*/8,
+                                            /*fracFieldNum=*/9,
+                                            /*defTypeAlphaNum=*/5,
+                                            WalkIn(WalkInID).DefrostCapacity,
+                                            WalkIn(WalkInID).DefEnergyFraction);
 
             // convert restocking schedule name to pointer, default of 0.1 is assigned inside walkin subroutine if blank
             AlphaNum = 9;
@@ -1610,93 +2254,17 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 }
             }
 
-            // Calculate the number of zones exposed to walk-in based on number of input fields, all integer math,
-            // This approach used because last zone could have less than NumWIFieldsPerZone due to optional values
+            // Calculate the number of zones exposed to walk-in based on number of input fields, all integer math.
+            // Ceiling-divide total fields by fields-per-zone, capped at 6.  The last zone may supply fewer
+            // than NumWIFieldsPerZone fields because some per-zone inputs are optional.
             int NumWIFieldsPerZone = NumWIAlphaFieldsPerZone + NumWINumberFieldsPerZone;
             int NumWIFieldsTotal = NumNumbers + NumAlphas - NumWIAlphaFieldsBeforeZoneInput - NumWINumberFieldsBeforeZoneInput;
-            int NumZones = 1;
-            if (NumWIFieldsTotal > NumWIFieldsPerZone) {
-                NumZones = 2;
-            }
-            if (NumWIFieldsTotal > (2 * NumWIFieldsPerZone)) {
-                NumZones = 3;
-            }
-            if (NumWIFieldsTotal > (3 * NumWIFieldsPerZone)) {
-                NumZones = 4;
-            }
-            if (NumWIFieldsTotal > (4 * NumWIFieldsPerZone)) {
-                NumZones = 5;
-            }
-            if (NumWIFieldsTotal > (5 * NumWIFieldsPerZone)) {
-                NumZones = 6;
-            }
+            int NumZones = min(6, max(1, (NumWIFieldsTotal + NumWIFieldsPerZone - 1) / NumWIFieldsPerZone));
             WalkIn(WalkInID).NumZones = NumZones;
 
-            // All variables for walk-in/zone interactions need to be allocated after know number of zones
+            // Allocate all per-zone arrays (idempotent: skips any that are already allocated).
             // Autodesk Missing initialization added below: At least SensZoneCreditRate was used uninitialized
-            if (!allocated(WalkIn(WalkInID).ZoneName)) {
-                WalkIn(WalkInID).ZoneName.allocate(NumZones);
-            }
-            if (!allocated(WalkIn(WalkInID).ZoneNum)) {
-                WalkIn(WalkInID).ZoneNum.allocate(NumZones) = 0;
-            }
-            if (!allocated(WalkIn(WalkInID).ZoneNodeNum)) {
-                WalkIn(WalkInID).ZoneNodeNum.allocate(NumZones) = 0;
-            }
-            if (!allocated(WalkIn(WalkInID).SurfaceArea)) {
-                WalkIn(WalkInID).SurfaceArea.allocate(NumZones) = 0.0;
-            }
-            if (!allocated(WalkIn(WalkInID).UValue)) {
-                WalkIn(WalkInID).UValue.allocate(NumZones) = 0.0;
-            }
-            if (!allocated(WalkIn(WalkInID).UValueGlassDr)) {
-                WalkIn(WalkInID).UValueGlassDr.allocate(NumZones) = 0.0;
-            }
-            if (!allocated(WalkIn(WalkInID).glassDoorOpenScheds)) {
-                WalkIn(WalkInID).glassDoorOpenScheds.allocate(NumZones) = nullptr; // What is this?
-            }
-            if (!allocated(WalkIn(WalkInID).AreaGlassDr)) {
-                WalkIn(WalkInID).AreaGlassDr.allocate(NumZones) = 0.0;
-            }
-            if (!allocated(WalkIn(WalkInID).HeightGlassDr)) {
-                WalkIn(WalkInID).HeightGlassDr.allocate(NumZones) = 0.0;
-            }
-            if (!allocated(WalkIn(WalkInID).UValueStockDr)) {
-                WalkIn(WalkInID).UValueStockDr.allocate(NumZones) = 0.0;
-            }
-            if (!allocated(WalkIn(WalkInID).stockDoorOpenScheds)) {
-                WalkIn(WalkInID).stockDoorOpenScheds.allocate(NumZones) = nullptr; // What is this?
-            }
-            if (!allocated(WalkIn(WalkInID).StockDoorProtectType)) {
-                WalkIn(WalkInID).StockDoorProtectType.allocate(NumZones) = WIStockDoor::Invalid;
-            }
-            if (!allocated(WalkIn(WalkInID).AreaStockDr)) {
-                WalkIn(WalkInID).AreaStockDr.allocate(NumZones) = 0.0;
-            }
-            if (!allocated(WalkIn(WalkInID).HeightStockDr)) {
-                WalkIn(WalkInID).HeightStockDr.allocate(NumZones) = 0.0;
-            }
-            if (!allocated(WalkIn(WalkInID).SensZoneCreditRate)) {
-                WalkIn(WalkInID).SensZoneCreditRate.allocate(NumZones) = 0.0;
-            }
-            if (!allocated(WalkIn(WalkInID).SensZoneCreditCoolRate)) {
-                WalkIn(WalkInID).SensZoneCreditCoolRate.allocate(NumZones) = 0.0;
-            }
-            if (!allocated(WalkIn(WalkInID).SensZoneCreditCool)) {
-                WalkIn(WalkInID).SensZoneCreditCool.allocate(NumZones) = 0.0;
-            }
-            if (!allocated(WalkIn(WalkInID).SensZoneCreditHeatRate)) {
-                WalkIn(WalkInID).SensZoneCreditHeatRate.allocate(NumZones) = 0.0;
-            }
-            if (!allocated(WalkIn(WalkInID).SensZoneCreditHeat)) {
-                WalkIn(WalkInID).SensZoneCreditHeat.allocate(NumZones) = 0.0;
-            }
-            if (!allocated(WalkIn(WalkInID).LatZoneCreditRate)) {
-                WalkIn(WalkInID).LatZoneCreditRate.allocate(NumZones) = 0.0;
-            }
-            if (!allocated(WalkIn(WalkInID).LatZoneCredit)) {
-                WalkIn(WalkInID).LatZoneCredit.allocate(NumZones) = 0.0;
-            }
+            WalkIn(WalkInID).allocateZoneArrays(NumZones);
 
             int AStart = NumWIAlphaFieldsBeforeZoneInput + 1;
             int NStart = NumWINumberFieldsBeforeZoneInput + 1;
@@ -1750,61 +2318,57 @@ void GetRefrigerationInput(EnergyPlusData &state)
                     }
                 }
 
-                // start IF set for glass doors in this zone
-                WalkIn(WalkInID).AreaGlassDr(ZoneID) = 0.0;
-                WalkIn(WalkInID).HeightGlassDr(ZoneID) = 0.0;
-                WalkIn(WalkInID).UValueGlassDr(ZoneID) = 0.0;
-                if (!lNumericBlanks(NStart + 2)) {
-                    WalkIn(WalkInID).AreaGlassDr(ZoneID) = Numbers(NStart + 2);
+                // Helper lambda: read the common area/height/U-value/schedule fields for one
+                // door type in a walk-in zone.  nArea/nHeight/nUValue are numeric field offsets
+                // from NStart; aSchedule is the alpha field offset from AStart.
+                // defaultHeight and defaultUValue are the default values for that door type.
+                // schedOut is the schedule pointer member to fill; area/height/uvalue are the
+                // per-zone array members to fill.
+                // Returns true if the area field was present (i.e., this door type is present in
+                // this zone), allowing the caller to perform additional door-type-specific checks.
+                // Glass doors in this zone
+                readWalkInDoor(state,
+                               ErrorsFound,
+                               eoh,
+                               Numbers,
+                               lNumericBlanks,
+                               Alphas,
+                               lAlphaBlanks,
+                               cAlphaFieldNames,
+                               NStart,
+                               AStart,
+                               2,
+                               3,
+                               4,
+                               1,
+                               DefaultWIHeightGlassDr,
+                               DefaultWIUValueGlassDr,
+                               WalkIn(WalkInID).AreaGlassDr(ZoneID),
+                               WalkIn(WalkInID).HeightGlassDr(ZoneID),
+                               WalkIn(WalkInID).UValueGlassDr(ZoneID),
+                               WalkIn(WalkInID).glassDoorOpenScheds(ZoneID));
 
-                    WalkIn(WalkInID).HeightGlassDr(ZoneID) = DefaultWIHeightGlassDr;
-                    if (!lNumericBlanks(NStart + 3)) {
-                        WalkIn(WalkInID).HeightGlassDr(ZoneID) = Numbers(NStart + 3);
-                    }
-
-                    WalkIn(WalkInID).UValueGlassDr(ZoneID) = DefaultWIUValueGlassDr;
-                    if (!lNumericBlanks(NStart + 4)) {
-                        WalkIn(WalkInID).UValueGlassDr(ZoneID) = Numbers(NStart + 4);
-                    }
-
-                    // convert door opening schedule name to pointer, default of 0.1 is assigned inside walkin subroutine if blank
-                    if (lAlphaBlanks(AStart + 1)) {
-                    } else if ((WalkIn(WalkInID).glassDoorOpenScheds(ZoneID) = Sched::GetSchedule(state, Alphas(AStart + 1))) == nullptr) {
-                        ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(AStart + 1), Alphas(AStart + 1));
-                        ErrorsFound = true;
-                    } else if (!WalkIn(WalkInID).glassDoorOpenScheds(ZoneID)->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                        Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(AStart + 1), Alphas(AStart + 1), Clusive::In, 0.0, Clusive::In, 1.0);
-                        ErrorsFound = true;
-                    } // blank on door opening schedule (AStart + 1)
-                } // have glassdoor area facing zone (blank on lNumericBlanks(NStart+2))
-
-                // start IF set for stock doors in this zone
-                WalkIn(WalkInID).AreaStockDr(ZoneID) = 0.0;
-                WalkIn(WalkInID).HeightStockDr(ZoneID) = 0.0;
-                WalkIn(WalkInID).UValueStockDr(ZoneID) = 0.0;
-                if (!lNumericBlanks(NStart + 5)) {
-                    WalkIn(WalkInID).AreaStockDr(ZoneID) = Numbers(NStart + 5);
-
-                    WalkIn(WalkInID).HeightStockDr(ZoneID) = DefaultWIHeightStockDr;
-                    if (!lNumericBlanks(NStart + 6)) {
-                        WalkIn(WalkInID).HeightStockDr(ZoneID) = Numbers(NStart + 6);
-                    }
-
-                    WalkIn(WalkInID).UValueStockDr(ZoneID) = DefaultWIUValueStockDr;
-                    if (!lNumericBlanks(NStart + 7)) {
-                        WalkIn(WalkInID).UValueStockDr(ZoneID) = Numbers(NStart + 7);
-                    }
-
-                    // convert door opening schedule name to pointer, default of 0.1 is assigned inside walkin subroutine if blank
-                    if (lAlphaBlanks(AStart + 2)) {
-                    } else if ((WalkIn(WalkInID).stockDoorOpenScheds(ZoneID) = Sched::GetSchedule(state, Alphas(AStart + 2))) == nullptr) {
-                        ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(AStart + 2), Alphas(AStart + 2));
-                        ErrorsFound = true;
-                    } else if (!WalkIn(WalkInID).stockDoorOpenScheds(ZoneID)->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                        Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(AStart + 2), Alphas(AStart + 2), Clusive::In, 0.0, Clusive::In, 1.0);
-                        ErrorsFound = true;
-                    } // blank on door opening schedule (AStart + 2)
-
+                // Stock doors in this zone
+                if (readWalkInDoor(state,
+                                   ErrorsFound,
+                                   eoh,
+                                   Numbers,
+                                   lNumericBlanks,
+                                   Alphas,
+                                   lAlphaBlanks,
+                                   cAlphaFieldNames,
+                                   NStart,
+                                   AStart,
+                                   5,
+                                   6,
+                                   7,
+                                   2,
+                                   DefaultWIHeightStockDr,
+                                   DefaultWIUValueStockDr,
+                                   WalkIn(WalkInID).AreaStockDr(ZoneID),
+                                   WalkIn(WalkInID).HeightStockDr(ZoneID),
+                                   WalkIn(WalkInID).UValueStockDr(ZoneID),
+                                   WalkIn(WalkInID).stockDoorOpenScheds(ZoneID))) {
                     if (lAlphaBlanks(AStart + 3)) {
                         // default air curtain
                         WalkIn(WalkInID).StockDoorProtectType(ZoneID) = WIStockDoor::AirCurtain;
@@ -1813,7 +2377,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
                         ShowSevereInvalidKey(state, eoh, cAlphaFieldNames(AStart + 3), Alphas(AStart + 3));
                         ErrorsFound = true;
                     } // stock door protection (AStart + 3) blank
-                } // have Stockdoor area facing zone
+                } // have stock door area facing zone
 
                 AStart += NumWIAlphaFieldsPerZone;
                 NStart += NumWINumberFieldsPerZone;
@@ -1828,18 +2392,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
         for (int CoilID = 1; CoilID <= state.dataRefrigCase->NumSimulationRefrigAirChillers; ++CoilID) {
             // A1
             AlphaNum = 1;
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CoilID,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     lNumericBlanks,
-                                                                     lAlphaBlanks,
-                                                                     cAlphaFieldNames,
-                                                                     cNumericFieldNames);
+            getItem(CoilID);
 
             ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
 
@@ -1847,15 +2400,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
 
             // A2
             ++AlphaNum;
-            if (lAlphaBlanks(AlphaNum)) {
-                WarehouseCoil(CoilID).availSched = Sched::GetScheduleAlwaysOn(state);
-            } else if ((WarehouseCoil(CoilID).availSched = Sched::GetSchedule(state, Alphas(AlphaNum))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum));
-                ErrorsFound = true;
-            } else if (!WarehouseCoil(CoilID).availSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum), Clusive::In, 0.0, Clusive::In, 1.0);
-                ErrorsFound = true;
-            }
+            getScheduleOrAlwaysOn(eoh, AlphaNum, WarehouseCoil(CoilID).availSched);
 
             // Input capacity rating type
             // bbbbb input values (DT1 or DTM type)translate DT1 to DTm here because node will give avg temp?
@@ -1879,6 +2424,17 @@ void GetRefrigerationInput(EnergyPlusData &state)
 
             // Here have to do select case with one numeric field with units of W and the second with units of W/deltaC,
             //  (RatedRH field only used for RatedCapacityTotal type)
+            // Lambda used by every switch case below to issue the same "must be > 0" error.
+            auto showCoilCapError = [&](int numNum, std::string_view units = "W") {
+                ShowSevereError(state,
+                                EnergyPlus::format("{}{}=\"{}\", {} must be input and be greater than 0 {}",
+                                                   RoutineName,
+                                                   CurrentModuleObject,
+                                                   WarehouseCoil(CoilID).Name,
+                                                   cNumericFieldNames(numNum),
+                                                   units));
+                ErrorsFound = true;
+            };
             { // Why is this a new scope
                 switch (WarehouseCoil(CoilID).ratingType) {
                 case RatingType::UnitLoadFactorSens: {
@@ -1887,13 +2443,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
                     if (!lNumericBlanks(NumNum) && Numbers(NumNum) > 0.0) {
                         WarehouseCoil(CoilID).UnitLoadFactorSens = Numbers(NumNum);
                     } else {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} must be input and be greater than 0 W/C",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           WarehouseCoil(CoilID).Name,
-                                                           cNumericFieldNames(NumNum)));
-                        ErrorsFound = true;
+                        showCoilCapError(NumNum, "W/C");
                     }
                 } break;
 
@@ -1919,188 +2469,38 @@ void GetRefrigerationInput(EnergyPlusData &state)
                             WarehouseCoil(CoilID).RatedRH = Numbers(NumNum) / 100.0;
                         }
                     } else {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} must be input and be greater than 0 W",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           WarehouseCoil(CoilID).Name,
-                                                           cNumericFieldNames(NumNum)));
-                        ErrorsFound = true;
+                        showCoilCapError(NumNum);
                     }
                 } break;
 
-                case RatingType::EuropeanSC1Std: {
-                    // N2
-                    NumNum = 2; // advance past rating in W/C to rating in W at N2
-                    if (!lNumericBlanks(NumNum) && Numbers(NumNum) > 0.0) {
-                        WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum);
-                        WarehouseCoil(CoilID).SCIndex = 1;
-                    } else {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} must be input and be greater than 0 W",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           WarehouseCoil(CoilID).Name,
-                                                           cNumericFieldNames(NumNum)));
-                        ErrorsFound = true;
-                    }
-                } break;
-
-                case RatingType::EuropeanSC1Nom: {
-                    // N2
-                    NumNum = 2; // advance past rating in W/C to rating in W at N2
-                    if (!lNumericBlanks(NumNum) && Numbers(NumNum) > 0.0) {
-                        WarehouseCoil(CoilID).RatedCapTotal = Numbers(NumNum);
-                        WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum) / EuropeanWetCoilFactor[0];
-                        WarehouseCoil(CoilID).SCIndex = 1;
-                    } else {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} must be input and be greater than 0 W",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           WarehouseCoil(CoilID).Name,
-                                                           cNumericFieldNames(NumNum)));
-                        ErrorsFound = true;
-                    }
-                } break;
-
-                case RatingType::EuropeanSC2Std: {
-                    // N2
-                    NumNum = 2; // advance past rating in W/C to rating in W at N2
-                    if (!lNumericBlanks(NumNum) && Numbers(NumNum) > 0.0) {
-                        WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum);
-                        WarehouseCoil(CoilID).SCIndex = 2;
-                    } else {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} must be input and be greater than 0 W",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           WarehouseCoil(CoilID).Name,
-                                                           cNumericFieldNames(NumNum)));
-                        ErrorsFound = true;
-                    }
-                } break;
-
-                case RatingType::EuropeanSC2Nom: {
-                    // N2
-                    NumNum = 2; // advance past rating in W/C to rating in W at N2
-                    if (!lNumericBlanks(NumNum) && Numbers(NumNum) > 0.0) {
-                        WarehouseCoil(CoilID).RatedCapTotal = Numbers(NumNum);
-                        WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum) / EuropeanWetCoilFactor[1];
-                        WarehouseCoil(CoilID).SCIndex = 2;
-                    } else {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} must be input and be greater than 0 W",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           WarehouseCoil(CoilID).Name,
-                                                           cNumericFieldNames(NumNum)));
-                        ErrorsFound = true;
-                    }
-                } break;
-
-                case RatingType::EuropeanSC3Std: {
-                    // N2
-                    NumNum = 2; // advance past rating in W/C to rating in W at N2
-                    if (!lNumericBlanks(NumNum) && Numbers(NumNum) > 0.0) {
-                        WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum);
-                        WarehouseCoil(CoilID).SCIndex = 3;
-                    } else {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} must be input and be greater than 0 W",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           WarehouseCoil(CoilID).Name,
-                                                           cNumericFieldNames(NumNum)));
-                        ErrorsFound = true;
-                    }
-                } break;
-
-                case RatingType::EuropeanSC3Nom: {
-                    // N2
-                    NumNum = 2; // advance past rating in W/C to rating in W at N2
-                    if (!lNumericBlanks(NumNum) && Numbers(NumNum) > 0.0) {
-                        WarehouseCoil(CoilID).RatedCapTotal = Numbers(NumNum);
-                        WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum) / EuropeanWetCoilFactor[2];
-                        WarehouseCoil(CoilID).SCIndex = 3;
-                    } else {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} must be input and be greater than 0 W",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           WarehouseCoil(CoilID).Name,
-                                                           cNumericFieldNames(NumNum)));
-                        ErrorsFound = true;
-                    }
-                } break;
-
-                case RatingType::EuropeanSC4Std: {
-                    // N2
-                    NumNum = 2; // advance past rating in W/C to rating in W at N2
-                    if (!lNumericBlanks(NumNum) && Numbers(NumNum) > 0.0) {
-                        WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum);
-                        WarehouseCoil(CoilID).SCIndex = 4;
-                    } else {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} must be input and be greater than 0 W",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           WarehouseCoil(CoilID).Name,
-                                                           cNumericFieldNames(NumNum)));
-                        ErrorsFound = true;
-                    }
-                } break;
-
-                case RatingType::EuropeanSC4Nom: {
-                    // N2
-                    NumNum = 2; // advance past rating in W/C to rating in W at N2
-                    if (!lNumericBlanks(NumNum) && Numbers(NumNum) > 0.0) {
-                        WarehouseCoil(CoilID).RatedCapTotal = Numbers(NumNum);
-                        WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum) / EuropeanWetCoilFactor[3];
-                        WarehouseCoil(CoilID).SCIndex = 4;
-                    } else {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} must be input and be greater than 0 W",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           WarehouseCoil(CoilID).Name,
-                                                           cNumericFieldNames(NumNum)));
-                        ErrorsFound = true;
-                    }
-                } break;
-
-                case RatingType::EuropeanSC5Std: {
-                    // N2
-                    NumNum = 2; // advance past rating in W/C to rating in W at N2
-                    if (!lNumericBlanks(NumNum) && Numbers(NumNum) > 0.0) {
-                        WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum);
-                        WarehouseCoil(CoilID).SCIndex = 5;
-                    } else {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} must be input and be greater than 0 W",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           WarehouseCoil(CoilID).Name,
-                                                           cNumericFieldNames(NumNum)));
-                        ErrorsFound = true;
-                    }
-                } break;
-
+                case RatingType::EuropeanSC1Std:
+                case RatingType::EuropeanSC1Nom:
+                case RatingType::EuropeanSC2Std:
+                case RatingType::EuropeanSC2Nom:
+                case RatingType::EuropeanSC3Std:
+                case RatingType::EuropeanSC3Nom:
+                case RatingType::EuropeanSC4Std:
+                case RatingType::EuropeanSC4Nom:
+                case RatingType::EuropeanSC5Std:
                 case RatingType::EuropeanSC5Nom: {
-                    // N2
+                    // All EuropeanSCx types read N2, set SCIndex = 1..5.
+                    // For Nom types, also set RatedCapTotal and derive RatedSensibleCap via EuropeanWetCoilFactor.
+                    // Map: EuropeanSC1Std=0, EuropeanSC1Nom=1, ..., EuropeanSC5Std=8, EuropeanSC5Nom=9
+                    //      relative to the first European type enum value.
+                    int scOffset = static_cast<int>(WarehouseCoil(CoilID).ratingType) - static_cast<int>(RatingType::EuropeanSC1Std);
+                    int scIndex = scOffset / 2 + 1; // 1..5
+                    bool isNom = (scOffset % 2) != 0;
                     NumNum = 2; // advance past rating in W/C to rating in W at N2
                     if (!lNumericBlanks(NumNum) && Numbers(NumNum) > 0.0) {
-                        WarehouseCoil(CoilID).RatedCapTotal = Numbers(NumNum);
-                        WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum) / EuropeanWetCoilFactor[4];
-                        WarehouseCoil(CoilID).SCIndex = 5;
+                        if (isNom) {
+                            WarehouseCoil(CoilID).RatedCapTotal = Numbers(NumNum);
+                            WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum) / EuropeanWetCoilFactor[scIndex - 1];
+                        } else {
+                            WarehouseCoil(CoilID).RatedSensibleCap = Numbers(NumNum);
+                        }
+                        WarehouseCoil(CoilID).SCIndex = scIndex;
                     } else {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} must be input and be greater than 0 W",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           WarehouseCoil(CoilID).Name,
-                                                           cNumericFieldNames(NumNum)));
-                        ErrorsFound = true;
+                        showCoilCapError(NumNum);
                     }
                 } break;
 
@@ -2299,15 +2699,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
             }
 
             ++AlphaNum; // A6
-            if (lAlphaBlanks(AlphaNum)) {
-                WarehouseCoil(CoilID).heaterAvailSched = Sched::GetScheduleAlwaysOn(state);
-            } else if ((WarehouseCoil(CoilID).heaterAvailSched = Sched::GetSchedule(state, Alphas(AlphaNum))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum));
-                ErrorsFound = true;
-            } else if (!WarehouseCoil(CoilID).heaterAvailSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum), Clusive::In, 0.0, Clusive::In, 1.0);
-                ErrorsFound = true;
-            }
+            getScheduleOrAlwaysOn(eoh, AlphaNum, WarehouseCoil(CoilID).heaterAvailSched);
 
             // Input fan control type
             ++AlphaNum; // A7
@@ -2371,72 +2763,31 @@ void GetRefrigerationInput(EnergyPlusData &state)
 
             // convert defrost schedule name to pointer
             ++AlphaNum; // A10
-            if (lAlphaBlanks(AlphaNum)) {
-                ShowSevereEmptyField(state, eoh, cAlphaFieldNames(AlphaNum));
-                ErrorsFound = true;
-            } else if ((WarehouseCoil(CoilID).defrostSched = Sched::GetSchedule(state, Alphas(AlphaNum))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum));
-                ErrorsFound = true;
-            } else if (!WarehouseCoil(CoilID).defrostSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum), Clusive::In, 0.0, Clusive::In, 1.0);
-                ErrorsFound = true;
-            } // check for valid schedule name
+            getRequiredSchedule(eoh, AlphaNum, WarehouseCoil(CoilID).defrostSched);
 
             // convert defrost drip-down schedule name to pointer
             // some defrost types do not use drip-down schedules, use same defrost schedule pointer in that case
             ++AlphaNum; // A11
-            if (lAlphaBlanks(AlphaNum)) {
-                WarehouseCoil(CoilID).defrostDripDownSched = WarehouseCoil(CoilID).defrostSched;
-            } else if ((WarehouseCoil(CoilID).defrostDripDownSched = Sched::GetSchedule(state, Alphas(AlphaNum))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum));
-                ErrorsFound = true;
-            } else if (!WarehouseCoil(CoilID).defrostDripDownSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum), Clusive::In, 0.0, Clusive::In, 1.0);
-                ErrorsFound = true;
-            } // check for valid schedule name
+            getDripDownScheduleOrDefault(eoh, AlphaNum, WarehouseCoil(CoilID).defrostSched, WarehouseCoil(CoilID).defrostDripDownSched);
 
             ++NumNum; // N14
-            if (WarehouseCoil(CoilID).defrostType == DefrostType::OffCycle || WarehouseCoil(CoilID).defrostType == DefrostType::None) {
-                WarehouseCoil(CoilID).DefrostCapacity = 0.0;
-                // Don't even need to read Defrost capacity for those two defrost types.
-            } else { // have electric or hot gas/brine defrost
-                if ((lNumericBlanks(NumNum)) || (Numbers(NumNum) <= 0.0)) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}{}=\"{}\", {} must be input and greater than or equal to 0 W for {} {}",
-                                                       RoutineName,
-                                                       CurrentModuleObject,
-                                                       WarehouseCoil(CoilID).Name,
-                                                       cNumericFieldNames(NumNum),
-                                                       cAlphaFieldNames(AlphaNum),
-                                                       Alphas(AlphaNum)));
-                    ErrorsFound = true;
-                } else {
-                    WarehouseCoil(CoilID).DefrostCapacity = Numbers(NumNum);
-                } // Blank  or negative Defrost Capacity
-
-                // defaults for defrost energy fraction are 0.7 for elec defrost and 0.3 for warm fluid
-                // note this value is only used for temperature terminated defrost control type
-                if (WarehouseCoil(CoilID).defrostType == DefrostType::Elec) {
-                    WarehouseCoil(CoilID).DefEnergyFraction = 0.7;
-                }
-                if (WarehouseCoil(CoilID).defrostType == DefrostType::Fluid) {
-                    WarehouseCoil(CoilID).DefEnergyFraction = 0.3;
-                }
-
-                ++NumNum; // N15
-                if (!lNumericBlanks(NumNum)) {
-                    if ((Numbers(NumNum) > 1.0) || (Numbers(NumNum) < 0.0)) {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("{}{}=\"{}\", {} must be between 0 and 1, default values will be used.",
-                                                            RoutineName,
-                                                            CurrentModuleObject,
-                                                            WarehouseCoil(CoilID).Name,
-                                                            cNumericFieldNames(NumNum)));
-                    } else {
-                        WarehouseCoil(CoilID).DefEnergyFraction = Numbers(NumNum);
-                    } // number out of range
-                } // lnumericblanks
-            } // defrost type
+            readDefrostCapAndEnergyFraction(state,
+                                            ErrorsFound,
+                                            RoutineName,
+                                            CurrentModuleObject,
+                                            Numbers,
+                                            lNumericBlanks,
+                                            cNumericFieldNames,
+                                            cAlphaFieldNames,
+                                            Alphas,
+                                            WarehouseCoil(CoilID).defrostType,
+                                            WarehouseCoil(CoilID).Name,
+                                            /*capFieldNum=*/NumNum,
+                                            /*fracFieldNum=*/NumNum + 1,
+                                            /*defTypeAlphaNum=*/AlphaNum,
+                                            WarehouseCoil(CoilID).DefrostCapacity,
+                                            WarehouseCoil(CoilID).DefEnergyFraction);
+            ++NumNum; // N15
 
             ++AlphaNum; // A12
             if (lAlphaBlanks(AlphaNum)) {
@@ -2464,18 +2815,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
 
         CurrentModuleObject = "ZoneHVAC:RefrigerationChillerSet";
         for (int SetID = 1; SetID <= state.dataRefrigCase->NumRefrigChillerSets; ++SetID) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     SetID,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     lNumericBlanks,
-                                                                     lAlphaBlanks,
-                                                                     cAlphaFieldNames,
-                                                                     cNumericFieldNames);
+            getItem(SetID);
 
             ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
 
@@ -2484,15 +2824,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
             AirChillerSet(SetID).Name = Alphas(AlphaNum);
 
             AlphaNum = 2;
-            if (lAlphaBlanks(AlphaNum)) {
-                AirChillerSet(SetID).availSched = Sched::GetScheduleAlwaysOn(state);
-            } else if ((AirChillerSet(SetID).availSched = Sched::GetSchedule(state, Alphas(AlphaNum))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum));
-                ErrorsFound = true;
-            } else if (!AirChillerSet(SetID).availSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
-                Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(AlphaNum), Alphas(AlphaNum), Clusive::In, 0.0, Clusive::In, 1.0);
-                ErrorsFound = true;
-            }
+            getScheduleOrAlwaysOn(eoh, AlphaNum, AirChillerSet(SetID).availSched);
 
             ++AlphaNum;
             AirChillerSet(SetID).ZoneName = Alphas(AlphaNum);
@@ -2591,18 +2923,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
     if (state.dataRefrigCase->NumSimulationCaseAndWalkInLists > 0) {
         CurrentModuleObject = "Refrigeration:CaseAndWalkInList";
         for (int ListNum = 1; ListNum <= state.dataRefrigCase->NumSimulationCaseAndWalkInLists; ++ListNum) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     ListNum,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     lNumericBlanks,
-                                                                     lAlphaBlanks,
-                                                                     cAlphaFieldNames,
-                                                                     cNumericFieldNames);
+            getItem(ListNum);
 
             CaseAndWalkInList(ListNum).Name = Alphas(1);
 
@@ -2690,18 +3011,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
 
         for (int RackNum = 1; RackNum <= state.dataRefrigCase->NumRefrigeratedRacks; ++RackNum) {
 
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     RackNum,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     lNumericBlanks,
-                                                                     lAlphaBlanks,
-                                                                     cAlphaFieldNames,
-                                                                     cNumericFieldNames);
+            getItem(RackNum);
 
             ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
 
@@ -2996,97 +3306,24 @@ void GetRefrigerationInput(EnergyPlusData &state)
                                                    cAlphaFieldNames(14)));
                 ErrorsFound = true;
             } else { // (.NOT. lAlphaBlanks(AlphaNum))
-                // Entry for Alphas(AlphaNum) can be either a Case, WalkIn, Coil, or CaseAndWalkInList name
-                int CaseAndWalkInListNum = 0;
-                int CaseNum = 0;
-                int WalkInNum = 0;
-                int CoilNum = 0;
-                if (state.dataRefrigCase->NumSimulationCaseAndWalkInLists > 0) {
-                    CaseAndWalkInListNum = Util::FindItemInList(Alphas(AlphaNum), CaseAndWalkInList);
-                }
-                if (state.dataRefrigCase->NumSimulationCases > 0) {
-                    CaseNum = Util::FindItemInList(Alphas(AlphaNum), RefrigCase);
-                }
-                if (state.dataRefrigCase->NumSimulationWalkIns > 0) {
-                    WalkInNum = Util::FindItemInList(Alphas(AlphaNum), WalkIn);
-                }
-                if (state.dataRefrigCase->NumSimulationRefrigAirChillers > 0) {
-                    CoilNum = Util::FindItemInList(Alphas(AlphaNum), WarehouseCoil);
-                }
-                int NumNameMatches = 0;
-                if (CaseAndWalkInListNum != 0) {
-                    ++NumNameMatches;
-                }
-                if (CaseNum != 0) {
-                    ++NumNameMatches;
-                }
-                if (WalkInNum != 0) {
-                    ++NumNameMatches;
-                }
-                if (CoilNum != 0) {
-                    ++NumNameMatches;
-                }
-
-                if (NumNameMatches != 1) { // name must uniquely point to a list or a single case or walkin
-                    ErrorsFound = true;
-                    if (NumNameMatches == 0) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\" : has an invalid {}: {}",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           RefrigRack(RackNum).Name,
-                                                           cAlphaFieldNames(AlphaNum),
-                                                           Alphas(AlphaNum)));
-                    } else if (NumNameMatches > 1) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\" : has a non-unique name that could be either a {}: {}",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           RefrigRack(RackNum).Name,
-                                                           cAlphaFieldNames(AlphaNum),
-                                                           Alphas(AlphaNum)));
-                    } // num matches = 0 or > 1
-                } else if (CaseAndWalkInListNum != 0) { // Name points to a CaseAndWalkInList
-                    NumCoils = CaseAndWalkInList(CaseAndWalkInListNum).NumCoils;
-                    NumCases = CaseAndWalkInList(CaseAndWalkInListNum).NumCases;
-                    NumWalkIns = CaseAndWalkInList(CaseAndWalkInListNum).NumWalkIns;
-                    RefrigRack(RackNum).NumCoils = NumCoils;
-                    RefrigRack(RackNum).NumCases = NumCases;
-                    RefrigRack(RackNum).NumWalkIns = NumWalkIns;
-                    if (!allocated(RefrigRack(RackNum).CoilNum)) {
-                        RefrigRack(RackNum).CoilNum.allocate(NumCoils);
-                    }
-                    RefrigRack(RackNum).CoilNum({1, NumCoils}) = CaseAndWalkInList(CaseAndWalkInListNum).CoilItemNum({1, NumCoils});
-                    if (!allocated(RefrigRack(RackNum).CaseNum)) {
-                        RefrigRack(RackNum).CaseNum.allocate(NumCases);
-                    }
-                    RefrigRack(RackNum).CaseNum({1, NumCases}) = CaseAndWalkInList(CaseAndWalkInListNum).CaseItemNum({1, NumCases});
-                    if (!allocated(RefrigRack(RackNum).WalkInNum)) {
-                        RefrigRack(RackNum).WalkInNum.allocate(NumWalkIns);
-                    }
-                    RefrigRack(RackNum).WalkInNum({1, NumWalkIns}) = CaseAndWalkInList(CaseAndWalkInListNum).WalkInItemNum({1, NumWalkIns});
-                } else if (CoilNum != 0) { // Name points to a coil
-                    NumCoils = 1;
-                    RefrigRack(RackNum).NumCoils = 1;
-                    if (!allocated(RefrigRack(RackNum).CoilNum)) {
-                        RefrigRack(RackNum).CoilNum.allocate(NumCoils);
-                    }
-                    RefrigRack(RackNum).CoilNum(NumCoils) = CoilNum;
-                } else if (CaseNum != 0) { // Name points to a case
-                    NumCases = 1;
-                    RefrigRack(RackNum).NumCases = 1;
-                    if (!allocated(RefrigRack(RackNum).CaseNum)) {
-                        RefrigRack(RackNum).CaseNum.allocate(NumCases);
-                    }
-                    RefrigRack(RackNum).CaseNum(NumCases) = CaseNum;
-                } else if (WalkInNum != 0) { // Name points to a walkin
-                    NumWalkIns = 1;
-                    RefrigRack(RackNum).NumWalkIns = 1;
-                    if (!allocated(RefrigRack(RackNum).WalkInNum)) {
-                        RefrigRack(RackNum).WalkInNum.allocate(NumWalkIns);
-                    }
-                    RefrigRack(RackNum).WalkInNum(NumWalkIns) = WalkInNum;
-                } // NumNameMatches /= 1
+                resolveLoadsWithCoils(state,
+                                      ErrorsFound,
+                                      RoutineName,
+                                      CurrentModuleObject,
+                                      Alphas,
+                                      lAlphaBlanks,
+                                      cAlphaFieldNames,
+                                      AlphaNum,
+                                      RefrigRack(RackNum).Name,
+                                      NumCases,
+                                      NumWalkIns,
+                                      NumCoils,
+                                      RefrigRack(RackNum).CaseNum,
+                                      RefrigRack(RackNum).WalkInNum,
+                                      RefrigRack(RackNum).CoilNum);
+                RefrigRack(RackNum).NumCases = NumCases;
+                RefrigRack(RackNum).NumWalkIns = NumWalkIns;
+                RefrigRack(RackNum).NumCoils = NumCoils;
             } // blank input for loads on rack
 
             if (NumCases > 0) {
@@ -3190,6 +3427,14 @@ void GetRefrigerationInput(EnergyPlusData &state)
         state.dataRefrigCase->CheckEquipNameRackWaterCondenser.dimension(state.dataRefrigCase->NumRefrigeratedRacks, true);
     } //(NumRefrigeratedRacks > 0)
 
+    // Helper lambda: read one suction-piping UA + zone field pair.
+    // alphaFieldNum is the alpha field index for the zone name.
+    // numericFieldNum is the numeric field index for the UA value.
+    // objName is the parent object's name (for error messages).
+    // sumUASuctionPiping, suctionPipeActualZoneNum, suctionPipeZoneNodeNum are the output members.
+    // tempLevelLabel is an optional qualifier ("medium temperature", "low temperature", or "" for
+    // single-level systems) used in error/warning messages.
+
     if (state.dataRefrigCase->NumRefrigSystems > 0 || state.dataRefrigCase->NumTransRefrigSystems > 0) {
 
         if (state.dataRefrigCase->NumRefrigSystems > 0 && state.dataRefrigCase->NumRefrigCondensers == 0) {
@@ -3215,21 +3460,17 @@ void GetRefrigerationInput(EnergyPlusData &state)
 
         //************ START CONDENSER INPUT  **************
 
+        // Helper lambda: read the optional air-inlet node field (alphaNum) for an air-cooled
+        // condenser or gas cooler.  If blank, sets inletAirNodeNum=0.  Otherwise, first tries
+        // the name as a zone name; on match sets inletAirNodeNum via GetSystemNodeNumberForZone,
+        // sets rejectHeatToZone=true, and marks RefrigPresentInZone.  On no zone match, calls
+        // GetOnlySingleNode with the supplied ConnectionObjectType and verifies it is an
+        // OutsideAir node; reports a severe error + continue error if not found.
+        // The eoh argument is used only for the "not found" error message on the outside-air path.
         if (state.dataRefrigCase->NumSimulationCondAir > 0) {
             CurrentModuleObject = "Refrigeration:Condenser:AirCooled";
             for (int CondNum = 1; CondNum <= state.dataRefrigCase->NumSimulationCondAir; ++CondNum) {
-                state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                         CurrentModuleObject,
-                                                                         CondNum,
-                                                                         Alphas,
-                                                                         NumAlphas,
-                                                                         Numbers,
-                                                                         NumNumbers,
-                                                                         IOStatus,
-                                                                         lNumericBlanks,
-                                                                         lAlphaBlanks,
-                                                                         cAlphaFieldNames,
-                                                                         cNumericFieldNames);
+                getItem(CondNum);
 
                 ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
 
@@ -3250,10 +3491,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 }
 
                 // set start of count for number of systems attached to this condenser
-                Condenser(CondNum).NumSysAttach = 0;
-                if (!allocated(Condenser(CondNum).SysNum)) {
-                    Condenser(CondNum).SysNum.allocate(state.dataRefrigCase->NumRefrigSystems);
-                }
+                initSysAttach(Condenser(CondNum), state.dataRefrigCase->NumRefrigSystems);
 
                 // set CondenserType and rated temperature difference (51.7 - 35)C per ARI 460
                 Condenser(CondNum).CondenserType = DataHeatBalance::RefrigCondenserType::Air;
@@ -3265,25 +3503,15 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 }
                 // elevation capacity correction on air-cooled condensers, Carrier correlation more conservative than Trane
                 Condenser(CondNum).RatedCapacity *= (1.0 - 7.17e-5 * state.dataEnvrn->Elevation);
-                if (Condenser(CondNum).RatedCapacity > 0.0) {
-                    Curve::GetCurveMinMaxValues(state, Condenser(CondNum).CapCurvePtr, DelTempMin, DelTempMax);
-                    Real64 Capmin = Curve::CurveValue(state, Condenser(CondNum).CapCurvePtr, DelTempMin) *
-                                    (1.0 - 7.17e-5 * state.dataEnvrn->Elevation); // Mar 2011 bug fix
-                    Real64 Capmax = Curve::CurveValue(state, Condenser(CondNum).CapCurvePtr, DelTempMax) *
-                                    (1.0 - 7.17e-5 * state.dataEnvrn->Elevation); // Mar 2011 bug
-                    Condenser(CondNum).TempSlope =
-                        (DelTempMax - DelTempMin) / ((Capmax - Capmin)); // * ( 1.0 - 7.17e-5 * Elevation ) ) //Mar 2011 bug fix
-                    Condenser(CondNum).MinCondLoad = Capmax - DelTempMax / Condenser(CondNum).TempSlope;
-                } else {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format("{}{}=\"{}\" Condenser capacity curve per ARI 460 must be input and must be greater than 0 Watts at "
-                                           "16.7C temperature difference.",
+                computeCapCurveSlopeAndMin(state,
+                                           ErrorsFound,
                                            RoutineName,
                                            CurrentModuleObject,
-                                           Condenser(CondNum).Name));
-                    ErrorsFound = true;
-                }
+                                           Condenser(CondNum).CapCurvePtr,
+                                           Condenser(CondNum).Name,
+                                           Condenser(CondNum).RatedCapacity,
+                                           Condenser(CondNum).TempSlope,
+                                           Condenser(CondNum).MinCondLoad);
 
                 Condenser(CondNum).RatedSubcool = 0.0; // default value
                 if (!lNumericBlanks(1)) {
@@ -3319,60 +3547,25 @@ void GetRefrigerationInput(EnergyPlusData &state)
 
                 // Check condenser air inlet node connection
                 // Jan 2011 - added ability to reject heat to a zone from air-cooled condenser
-                Condenser(CondNum).CondenserRejectHeatToZone = false;
-                if (lAlphaBlanks(4)) {
-                    Condenser(CondNum).InletAirNodeNum = 0;
-                } else { // see if it's an outside air node name or an indoor zone name,
-                    // have to check inside first because outside check automatically generates an error message
-                    Condenser(CondNum).InletAirZoneNum = Util::FindItemInList(Alphas(4), state.dataHeatBal->Zone);
-                    // need to clearly id node number for air inlet conditions and zone number for casecredit assignment
-                    if (Condenser(CondNum).InletAirZoneNum != 0) {
-                        // set condenser flag (later used to set system flag) and zone flag
-                        Condenser(CondNum).InletAirNodeNum = DataZoneEquipment::GetSystemNodeNumberForZone(state, Condenser(CondNum).InletAirZoneNum);
-                        Condenser(CondNum).CondenserRejectHeatToZone = true;
-                        state.dataRefrigCase->RefrigPresentInZone(Condenser(CondNum).InletAirZoneNum) = true;
-                    } else { // not in a conditioned zone, so see if it's outside
-                        Condenser(CondNum).InletAirNodeNum = Node::GetOnlySingleNode(state,
-                                                                                     Alphas(4),
-                                                                                     ErrorsFound,
-                                                                                     Node::ConnectionObjectType::RefrigerationCondenserAirCooled,
-                                                                                     Alphas(1),
-                                                                                     Node::FluidType::Air,
-                                                                                     Node::ConnectionType::OutsideAirReference,
-                                                                                     Node::CompFluidStream::Primary,
-                                                                                     Node::ObjectIsParent);
-                        if (!OutAirNodeManager::CheckOutAirNodeNumber(state, Condenser(CondNum).InletAirNodeNum)) {
-                            // not outside and not a zone
-                            ShowSevereError(state,
-                                            EnergyPlus::format("{}{}=\"{}\", {} not found: {}",
-                                                               RoutineName,
-                                                               CurrentModuleObject,
-                                                               Condenser(CondNum).Name,
-                                                               cAlphaFieldNames(4),
-                                                               Alphas(4)));
-                            ShowContinueError(state, "...does not appear in an OutdoorAir:NodeList or as an OutdoorAir:Node or as a Zone.");
-                            ErrorsFound = true;
-                        } // checkoutairnodenumber
-                    } // InletAirZoneNum \=0
-                } // Condenser air inlet node connection
+                readAirInletNodeField(state,
+                                      ErrorsFound,
+                                      eoh,
+                                      Alphas,
+                                      lAlphaBlanks,
+                                      cAlphaFieldNames,
+                                      4,
+                                      Node::ConnectionObjectType::RefrigerationCondenserAirCooled,
+                                      Condenser(CondNum).InletAirNodeNum,
+                                      Condenser(CondNum).InletAirZoneNum,
+                                      Condenser(CondNum).CondenserRejectHeatToZone);
 
                 Condenser(CondNum).EndUseSubcategory = "";
                 if (!lAlphaBlanks(5)) {
                     Condenser(CondNum).EndUseSubcategory = Alphas(5);
                 }
 
-                Condenser(CondNum).RefOpCharge = 0.0;
-                Condenser(CondNum).RefReceiverInventory = 0.0;
-                Condenser(CondNum).RefPipingInventory = 0.0;
-                if (!lNumericBlanks(4)) {
-                    Condenser(CondNum).RefOpCharge = Numbers(4);
-                }
-                if (!lNumericBlanks(5)) {
-                    Condenser(CondNum).RefReceiverInventory = Numbers(5);
-                }
-                if (!lNumericBlanks(6)) {
-                    Condenser(CondNum).RefPipingInventory = Numbers(6);
-                }
+                readRefrigInventory(
+                    Condenser(CondNum).RefOpCharge, Condenser(CondNum).RefReceiverInventory, Condenser(CondNum).RefPipingInventory, 4, 5, 6);
 
             } // Read input for REFRIGERATION:Condenser:AirCooled
         } // NumSimulationCondAir > 0
@@ -3381,18 +3574,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
             CurrentModuleObject = "Refrigeration:Condenser:EvaporativeCooled";
             for (int CondIndex = 1; CondIndex <= state.dataRefrigCase->NumSimulationCondEvap; ++CondIndex) {
                 int CondNum = CondIndex + state.dataRefrigCase->NumSimulationCondAir;
-                state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                         CurrentModuleObject,
-                                                                         CondIndex,
-                                                                         Alphas,
-                                                                         NumAlphas,
-                                                                         Numbers,
-                                                                         NumNumbers,
-                                                                         IOStatus,
-                                                                         lNumericBlanks,
-                                                                         lAlphaBlanks,
-                                                                         cAlphaFieldNames,
-                                                                         cNumericFieldNames);
+                getItem(CondIndex);
 
                 ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
 
@@ -3402,10 +3584,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 state.dataHeatBal->HeatReclaimRefrigCondenser(CondNum).Name = Alphas(1);
 
                 // set start of count for number of systems attached to this condenser
-                Condenser(CondNum).NumSysAttach = 0;
-                if (!allocated(Condenser(CondNum).SysNum)) {
-                    Condenser(CondNum).SysNum.allocate(state.dataRefrigCase->NumRefrigSystems);
-                }
+                initSysAttach(Condenser(CondNum), state.dataRefrigCase->NumRefrigSystems);
 
                 // set CondenserType and rated Heat Rejection per ARI 490 rating
                 Condenser(CondNum).CondenserType = DataHeatBalance::RefrigCondenserType::Evap;
@@ -3466,78 +3645,33 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 Condenser(CondNum).EvapCoeff4 = -0.322;
                 Condenser(CondNum).MinCapFacEvap = 0.5;
                 Condenser(CondNum).MaxCapFacEvap = 5.0;
-                NumNum = 5; // added warnings if below not blank but unused due to limits
-                if (!lNumericBlanks(NumNum)) {
-                    if (Numbers(NumNum) >= 0.0) {
-                        Condenser(CondNum).EvapCoeff1 = Numbers(NumNum);
+
+                // Helper: if field n is not blank and value passes the bound check, assign to dest;
+                // otherwise emit a warning and leave dest at its default.  boundDesc is the text
+                // used in the "is <boundDesc> and was not used" warning message.
+                auto tryReadEvapCoeff = [&](int n, Real64 lowerBound, bool strict, std::string_view boundDesc, Real64 &dest) {
+                    if (lNumericBlanks(n)) {
+                        return;
+                    }
+                    bool ok = strict ? (Numbers(n) > lowerBound) : (Numbers(n) >= lowerBound);
+                    if (ok) {
+                        dest = Numbers(n);
                     } else {
                         ShowWarningError(state,
-                                         EnergyPlus::format("{}=\"{}\", {} is less than 0 and was not used. Default was used.",
+                                         EnergyPlus::format("{}=\"{}\", {} is {} and was not used. Default was used.",
                                                             CurrentModuleObject,
                                                             Condenser(CondNum).Name,
-                                                            cNumericFieldNames(NumNum)));
+                                                            cNumericFieldNames(n),
+                                                            boundDesc));
                     }
-                }
-                NumNum = 6; // EvapCoeff2 can't be equal to 0 because used in a denominator
-                if (!lNumericBlanks(NumNum)) {
-                    if (Numbers(NumNum) > 0.0) {
-                        Condenser(CondNum).EvapCoeff2 = Numbers(NumNum);
-                    } else {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("{}=\"{}\", {} is less than or equal to 0 and was not used. Default was used.",
-                                                            CurrentModuleObject,
-                                                            Condenser(CondNum).Name,
-                                                            cNumericFieldNames(NumNum)));
-                    }
-                }
-                NumNum = 7;
-                if (!lNumericBlanks(NumNum)) {
-                    if (Numbers(NumNum) >= 0.0) {
-                        Condenser(CondNum).EvapCoeff3 = Numbers(NumNum);
-                    } else {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("{}=\"{}\", {} is less than 0 and was not used. Default was used.",
-                                                            CurrentModuleObject,
-                                                            Condenser(CondNum).Name,
-                                                            cNumericFieldNames(NumNum)));
-                    }
-                }
-                NumNum = 8;
-                if (!lNumericBlanks(NumNum)) {
-                    if (Numbers(NumNum) >= -20.0) {
-                        Condenser(CondNum).EvapCoeff4 = Numbers(NumNum);
-                    } else {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("{}=\"{}\", {} is less than -20 and was not used. Default was used.",
-                                                            CurrentModuleObject,
-                                                            Condenser(CondNum).Name,
-                                                            cNumericFieldNames(NumNum)));
-                    }
-                }
-                NumNum = 9;
-                if (!lNumericBlanks(NumNum)) {
-                    if (Numbers(NumNum) >= 0.0) {
-                        Condenser(CondNum).MinCapFacEvap = Numbers(NumNum);
-                    } else {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("{}=\"{}\", {} is less than 0 and was not used. Default was used.",
-                                                            CurrentModuleObject,
-                                                            Condenser(CondNum).Name,
-                                                            cNumericFieldNames(NumNum)));
-                    }
-                }
-                NumNum = 10;
-                if (!lNumericBlanks(NumNum)) {
-                    if (Numbers(NumNum) >= 0.0) {
-                        Condenser(CondNum).MaxCapFacEvap = Numbers(NumNum);
-                    } else {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("{}=\"{}\", {} is less than 0 and was not used. Default was used.",
-                                                            CurrentModuleObject,
-                                                            Condenser(CondNum).Name,
-                                                            cNumericFieldNames(NumNum)));
-                    }
-                }
+                };
+
+                tryReadEvapCoeff(5, 0.0, false, "less than 0", Condenser(CondNum).EvapCoeff1); // EvapCoeff2 can't be 0 (denominator)
+                tryReadEvapCoeff(6, 0.0, true, "less than or equal to 0", Condenser(CondNum).EvapCoeff2);
+                tryReadEvapCoeff(7, 0.0, false, "less than 0", Condenser(CondNum).EvapCoeff3);
+                tryReadEvapCoeff(8, -20.0, false, "less than -20", Condenser(CondNum).EvapCoeff4);
+                tryReadEvapCoeff(9, 0.0, false, "less than 0", Condenser(CondNum).MinCapFacEvap);
+                tryReadEvapCoeff(10, 0.0, false, "less than 0", Condenser(CondNum).MaxCapFacEvap);
 
                 // Check condenser air inlet node connection
                 if (lAlphaBlanks(3)) {
@@ -3631,21 +3765,8 @@ void GetRefrigerationInput(EnergyPlusData &state)
                     Condenser(CondNum).EndUseSubcategory = Alphas(6);
                 }
 
-                Condenser(CondNum).RefOpCharge = 0.0;
-                Condenser(CondNum).RefReceiverInventory = 0.0;
-                Condenser(CondNum).RefPipingInventory = 0.0;
-                NumNum = 15;
-                if (!lNumericBlanks(NumNum)) {
-                    Condenser(CondNum).RefOpCharge = Numbers(NumNum);
-                }
-                NumNum = 16;
-                if (!lNumericBlanks(NumNum)) {
-                    Condenser(CondNum).RefReceiverInventory = Numbers(NumNum);
-                }
-                NumNum = 17;
-                if (!lNumericBlanks(NumNum)) {
-                    Condenser(CondNum).RefPipingInventory = Numbers(NumNum);
-                }
+                readRefrigInventory(
+                    Condenser(CondNum).RefOpCharge, Condenser(CondNum).RefReceiverInventory, Condenser(CondNum).RefPipingInventory, 15, 16, 17);
             } // Read input for CONDENSER:REFRIGERATION:EVAPorativeCooled
         } // If NumSimulationCondEvap > 0
 
@@ -3653,18 +3774,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
             CurrentModuleObject = "Refrigeration:Condenser:WaterCooled";
             for (int CondIndex = 1; CondIndex <= state.dataRefrigCase->NumSimulationCondWater; ++CondIndex) {
                 int CondNum = CondIndex + state.dataRefrigCase->NumSimulationCondAir + state.dataRefrigCase->NumSimulationCondEvap;
-                state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                         CurrentModuleObject,
-                                                                         CondIndex,
-                                                                         Alphas,
-                                                                         NumAlphas,
-                                                                         Numbers,
-                                                                         NumNumbers,
-                                                                         IOStatus,
-                                                                         lNumericBlanks,
-                                                                         lAlphaBlanks,
-                                                                         cAlphaFieldNames,
-                                                                         cNumericFieldNames);
+                getItem(CondIndex);
 
                 ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
 
@@ -3674,10 +3784,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 state.dataHeatBal->HeatReclaimRefrigCondenser(CondNum).Name = Alphas(1);
 
                 // set start of count for number of systems attached to this condenser
-                Condenser(CondNum).NumSysAttach = 0;
-                if (!allocated(Condenser(CondNum).SysNum)) {
-                    Condenser(CondNum).SysNum.allocate(state.dataRefrigCase->NumRefrigSystems);
-                }
+                initSysAttach(Condenser(CondNum), state.dataRefrigCase->NumRefrigSystems);
 
                 // set CondenserType and rated Heat Rejection per ARI 450 rating
                 Condenser(CondNum).CondenserType = DataHeatBalance::RefrigCondenserType::Water;
@@ -3824,18 +3931,8 @@ void GetRefrigerationInput(EnergyPlusData &state)
                     Condenser(CondNum).EndUseSubcategory = Alphas(6);
                 }
 
-                Condenser(CondNum).RefOpCharge = 0.0;
-                Condenser(CondNum).RefReceiverInventory = 0.0;
-                Condenser(CondNum).RefPipingInventory = 0.0;
-                if (!lNumericBlanks(9)) {
-                    Condenser(CondNum).RefOpCharge = Numbers(9);
-                }
-                if (!lNumericBlanks(10)) {
-                    Condenser(CondNum).RefReceiverInventory = Numbers(10);
-                }
-                if (!lNumericBlanks(11)) {
-                    Condenser(CondNum).RefPipingInventory = Numbers(11);
-                }
+                readRefrigInventory(
+                    Condenser(CondNum).RefOpCharge, Condenser(CondNum).RefReceiverInventory, Condenser(CondNum).RefPipingInventory, 9, 10, 11);
 
             } // Read input for CONDENSER:REFRIGERATION:WaterCooled
 
@@ -3848,18 +3945,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
             for (int CondIndex = 1; CondIndex <= state.dataRefrigCase->NumSimulationCascadeCondensers; ++CondIndex) {
                 int CondNum = CondIndex + state.dataRefrigCase->NumSimulationCondAir + state.dataRefrigCase->NumSimulationCondEvap +
                               state.dataRefrigCase->NumSimulationCondWater;
-                state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                         CurrentModuleObject,
-                                                                         CondIndex,
-                                                                         Alphas,
-                                                                         NumAlphas,
-                                                                         Numbers,
-                                                                         NumNumbers,
-                                                                         IOStatus,
-                                                                         lNumericBlanks,
-                                                                         lAlphaBlanks,
-                                                                         cAlphaFieldNames,
-                                                                         cNumericFieldNames);
+                getItem(CondIndex);
 
                 ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
 
@@ -3869,10 +3955,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 state.dataHeatBal->HeatReclaimRefrigCondenser(CondNum).Name = Alphas(1);
 
                 // set start of count for number of systems attached to this condenser
-                Condenser(CondNum).NumSysAttach = 0;
-                if (!allocated(Condenser(CondNum).SysNum)) {
-                    Condenser(CondNum).SysNum.allocate(state.dataRefrigCase->NumRefrigSystems);
-                }
+                initSysAttach(Condenser(CondNum), state.dataRefrigCase->NumRefrigSystems);
 
                 // set CondenserType
                 Condenser(CondNum).CondenserType = DataHeatBalance::RefrigCondenserType::Cascade;
@@ -3927,18 +4010,8 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 Condenser(CondNum).CascadeRatedEvapTemp = Condenser(CondNum).RatedTCondense - Condenser(CondNum).RatedApproachT;
 
                 // future - add refrigerant inventory on system side accepting reject heat (as was done for secondary)
-                Condenser(CondNum).RefOpCharge = 0.0;
-                Condenser(CondNum).RefReceiverInventory = 0.0;
-                Condenser(CondNum).RefPipingInventory = 0.0;
-                if (!lNumericBlanks(4)) {
-                    Condenser(CondNum).RefOpCharge = Numbers(4);
-                }
-                if (!lNumericBlanks(5)) {
-                    Condenser(CondNum).RefReceiverInventory = Numbers(5);
-                }
-                if (!lNumericBlanks(6)) {
-                    Condenser(CondNum).RefPipingInventory = Numbers(6);
-                }
+                readRefrigInventory(
+                    Condenser(CondNum).RefOpCharge, Condenser(CondNum).RefReceiverInventory, Condenser(CondNum).RefPipingInventory, 4, 5, 6);
 
             } // Read input for CONDENSER:REFRIGERATION:Cascade
         } // NumSimulationCascadeCondensers > 0
@@ -3950,18 +4023,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
         if (state.dataRefrigCase->NumSimulationGasCooler > 0) {
             CurrentModuleObject = "Refrigeration:GasCooler:AirCooled";
             for (int GCNum = 1; GCNum <= state.dataRefrigCase->NumSimulationGasCooler; ++GCNum) {
-                state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                         CurrentModuleObject,
-                                                                         GCNum,
-                                                                         Alphas,
-                                                                         NumAlphas,
-                                                                         Numbers,
-                                                                         NumNumbers,
-                                                                         IOStatus,
-                                                                         lNumericBlanks,
-                                                                         lAlphaBlanks,
-                                                                         cAlphaFieldNames,
-                                                                         cNumericFieldNames);
+                getItem(GCNum);
                 ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
 
                 GasCooler(GCNum).Name = Alphas(1);
@@ -3973,10 +4035,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 }
 
                 // set start of count for number of systems attached to this gas cooler
-                GasCooler(GCNum).NumSysAttach = 0;
-                if (!allocated(GasCooler(GCNum).SysNum)) {
-                    GasCooler(GCNum).SysNum.allocate(state.dataRefrigCase->NumTransRefrigSystems);
-                }
+                initSysAttach(GasCooler(GCNum), state.dataRefrigCase->NumTransRefrigSystems);
 
                 GasCooler(GCNum).RatedApproachT = 3.0; // rated CO2 gas cooler approach temperature
                 if (GasCooler(GCNum).CapCurvePtr > 0) {
@@ -3984,22 +4043,15 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 }
                 // elevation capacity correction on air-cooled condensers, Carrier correlation more conservative than Trane
                 GasCooler(GCNum).RatedCapacity *= (1.0 - 7.17e-5 * state.dataEnvrn->Elevation);
-                if (GasCooler(GCNum).RatedCapacity > 0.0) {
-                    Curve::GetCurveMinMaxValues(state, GasCooler(GCNum).CapCurvePtr, DelTempMin, DelTempMax);
-                    Real64 Capmin = Curve::CurveValue(state, GasCooler(GCNum).CapCurvePtr, DelTempMin) * (1.0 - 7.17e-5 * state.dataEnvrn->Elevation);
-                    Real64 Capmax = Curve::CurveValue(state, GasCooler(GCNum).CapCurvePtr, DelTempMax) * (1.0 - 7.17e-5 * state.dataEnvrn->Elevation);
-                    GasCooler(GCNum).TempSlope = (DelTempMax - DelTempMin) / ((Capmax - Capmin));
-                    GasCooler(GCNum).MinCondLoad = Capmax - DelTempMax / GasCooler(GCNum).TempSlope;
-                } else {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{}{}=\"{}\" Gas Cooler capacity curve must be input and must be greater than 0 Watts at 3C temperature difference.",
-                            RoutineName,
-                            CurrentModuleObject,
-                            GasCooler(GCNum).Name));
-                    ErrorsFound = true;
-                }
+                computeCapCurveSlopeAndMin(state,
+                                           ErrorsFound,
+                                           RoutineName,
+                                           CurrentModuleObject,
+                                           GasCooler(GCNum).CapCurvePtr,
+                                           GasCooler(GCNum).Name,
+                                           GasCooler(GCNum).RatedCapacity,
+                                           GasCooler(GCNum).TempSlope,
+                                           GasCooler(GCNum).MinCondLoad);
 
                 // Get fan control type
                 if (lAlphaBlanks(3)) {
@@ -4113,54 +4165,25 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 }
 
                 // Check GasCooler air inlet node connection
-                GasCooler(GCNum).GasCoolerRejectHeatToZone = false;
-                if (lAlphaBlanks(4)) {
-                    GasCooler(GCNum).InletAirNodeNum = 0;
-                } else { // see if it's an outside air node name or an indoor zone name,
-                    // have to check inside first because outside check automatically generates an error message
-                    GasCooler(GCNum).InletAirZoneNum = Util::FindItemInList(Alphas(4), state.dataHeatBal->Zone);
-                    // need to clearly id node number for air inlet conditions and zone number for casecredit assignment
-                    if (GasCooler(GCNum).InletAirZoneNum != 0) {
-                        // set condenser flag (later used to set system flag) and zone flag
-                        GasCooler(GCNum).InletAirNodeNum = DataZoneEquipment::GetSystemNodeNumberForZone(state, GasCooler(GCNum).InletAirZoneNum);
-                        GasCooler(GCNum).GasCoolerRejectHeatToZone = true;
-                        state.dataRefrigCase->RefrigPresentInZone(GasCooler(GCNum).InletAirZoneNum) = true;
-                    } else { // not in a conditioned zone, so see if it's outside
-                        GasCooler(GCNum).InletAirNodeNum = Node::GetOnlySingleNode(state,
-                                                                                   Alphas(4),
-                                                                                   ErrorsFound,
-                                                                                   Node::ConnectionObjectType::RefrigerationGasCoolerAirCooled,
-                                                                                   Alphas(1),
-                                                                                   Node::FluidType::Air,
-                                                                                   Node::ConnectionType::OutsideAirReference,
-                                                                                   Node::CompFluidStream::Primary,
-                                                                                   Node::ObjectIsParent);
-                        if (!OutAirNodeManager::CheckOutAirNodeNumber(state, GasCooler(GCNum).InletAirNodeNum)) {
-                            // not outside and not a zone
-                            ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(4), Alphas(4));
-                            ShowContinueError(state, "...does not appear in an OutdoorAir:NodeList or as an OutdoorAir:Node or as a Zone.");
-                            ErrorsFound = true;
-                        } // checkoutairnodenumber
-                    } // InletAirZoneNum \=0
-                } // Gas cooler air inlet node connection
+                readAirInletNodeField(state,
+                                      ErrorsFound,
+                                      eoh,
+                                      Alphas,
+                                      lAlphaBlanks,
+                                      cAlphaFieldNames,
+                                      4,
+                                      Node::ConnectionObjectType::RefrigerationGasCoolerAirCooled,
+                                      GasCooler(GCNum).InletAirNodeNum,
+                                      GasCooler(GCNum).InletAirZoneNum,
+                                      GasCooler(GCNum).GasCoolerRejectHeatToZone);
 
                 GasCooler(GCNum).EndUseSubcategory = "";
                 if (!lAlphaBlanks(5)) {
                     GasCooler(GCNum).EndUseSubcategory = Alphas(5);
                 }
 
-                GasCooler(GCNum).RefOpCharge = 0.0;
-                GasCooler(GCNum).RefReceiverInventory = 0.0;
-                GasCooler(GCNum).RefPipingInventory = 0.0;
-                if (!lNumericBlanks(7)) {
-                    GasCooler(GCNum).RefOpCharge = Numbers(7);
-                }
-                if (!lNumericBlanks(8)) {
-                    GasCooler(GCNum).RefReceiverInventory = Numbers(8);
-                }
-                if (!lNumericBlanks(9)) {
-                    GasCooler(GCNum).RefPipingInventory = Numbers(9);
-                }
+                readRefrigInventory(
+                    GasCooler(GCNum).RefOpCharge, GasCooler(GCNum).RefReceiverInventory, GasCooler(GCNum).RefPipingInventory, 7, 8, 9);
 
             } // Read input for REFRIGERATION:GasCooler:AirCooled
         } // NumSimulationGasCooler > 0
@@ -4171,18 +4194,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
         if (state.dataRefrigCase->NumSimulationSecondarySystems > 0) {
             CurrentModuleObject = "Refrigeration:SecondarySystem";
             for (int SecondaryNum = 1; SecondaryNum <= state.dataRefrigCase->NumSimulationSecondarySystems; ++SecondaryNum) {
-                state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                         CurrentModuleObject,
-                                                                         SecondaryNum,
-                                                                         Alphas,
-                                                                         NumAlphas,
-                                                                         Numbers,
-                                                                         NumNumbers,
-                                                                         IOStatus,
-                                                                         lNumericBlanks,
-                                                                         lAlphaBlanks,
-                                                                         cAlphaFieldNames,
-                                                                         cNumericFieldNames);
+                getItem(SecondaryNum);
 
                 ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
 
@@ -4209,98 +4221,24 @@ void GetRefrigerationInput(EnergyPlusData &state)
                                                        cAlphaFieldNames(AlphaNum)));
                     ErrorsFound = true;
                 } else { // (.NOT. lAlphaBlanks(AlphaNum))
-
-                    // Entry for Alphas(AlphaNum) can be either a Case, WalkIn Coil, or CaseAndWalkInList name
-                    int CaseAndWalkInListNum = 0;
-                    int CaseNum = 0;
-                    int WalkInNum = 0;
-                    int CoilNum = 0;
-                    if (state.dataRefrigCase->NumSimulationCaseAndWalkInLists > 0) {
-                        CaseAndWalkInListNum = Util::FindItemInList(Alphas(AlphaNum), CaseAndWalkInList);
-                    }
-                    if (state.dataRefrigCase->NumSimulationCases > 0) {
-                        CaseNum = Util::FindItemInList(Alphas(AlphaNum), RefrigCase);
-                    }
-                    if (state.dataRefrigCase->NumSimulationWalkIns > 0) {
-                        WalkInNum = Util::FindItemInList(Alphas(AlphaNum), WalkIn);
-                    }
-                    if (state.dataRefrigCase->NumSimulationRefrigAirChillers > 0) {
-                        CoilNum = Util::FindItemInList(Alphas(AlphaNum), WarehouseCoil);
-                    }
-                    int NumNameMatches = 0;
-                    if (CaseAndWalkInListNum != 0) {
-                        ++NumNameMatches;
-                    }
-                    if (CaseNum != 0) {
-                        ++NumNameMatches;
-                    }
-                    if (WalkInNum != 0) {
-                        ++NumNameMatches;
-                    }
-                    if (CoilNum != 0) {
-                        ++NumNameMatches;
-                    }
-
-                    if (NumNameMatches != 1) { // name must uniquely point to a list or a single case or walkin or coil
-                        ErrorsFound = true;
-                        if (NumNameMatches == 0) {
-                            ShowSevereError(state,
-                                            EnergyPlus::format("{}{}=\"{}\", has an invalid {}: {}",
-                                                               RoutineName,
-                                                               CurrentModuleObject,
-                                                               Secondary(SecondaryNum).Name,
-                                                               cAlphaFieldNames(AlphaNum),
-                                                               Alphas(AlphaNum)));
-                        } else if (NumNameMatches > 1) {
-                            ShowSevereError(state,
-                                            EnergyPlus::format("{}{}=\"{}\", has a non-unique name that could be either a {}: {}",
-                                                               RoutineName,
-                                                               CurrentModuleObject,
-                                                               Secondary(SecondaryNum).Name,
-                                                               cAlphaFieldNames(AlphaNum),
-                                                               Alphas(AlphaNum)));
-                        } // num matches = 0 or > 1
-                    } else if (CaseAndWalkInListNum != 0) { // Name points to a CaseAndWalkInList
-                        NumCoils = CaseAndWalkInList(CaseAndWalkInListNum).NumCoils;
-                        NumCases = CaseAndWalkInList(CaseAndWalkInListNum).NumCases;
-                        NumWalkIns = CaseAndWalkInList(CaseAndWalkInListNum).NumWalkIns;
-                        Secondary(SecondaryNum).NumCases = NumCases;
-                        Secondary(SecondaryNum).NumCoils = NumCoils;
-                        Secondary(SecondaryNum).NumWalkIns = NumWalkIns;
-                        if (!allocated(Secondary(SecondaryNum).CaseNum)) {
-                            Secondary(SecondaryNum).CaseNum.allocate(NumCases);
-                        }
-                        Secondary(SecondaryNum).CaseNum({1, NumCases}) = CaseAndWalkInList(CaseAndWalkInListNum).CaseItemNum({1, NumCases});
-                        if (!allocated(Secondary(SecondaryNum).CoilNum)) {
-                            Secondary(SecondaryNum).CoilNum.allocate(NumCoils);
-                        }
-                        Secondary(SecondaryNum).CoilNum({1, NumCoils}) = CaseAndWalkInList(CaseAndWalkInListNum).CoilItemNum({1, NumCoils});
-                        if (!allocated(Secondary(SecondaryNum).WalkInNum)) {
-                            Secondary(SecondaryNum).WalkInNum.allocate(NumWalkIns);
-                        }
-                        Secondary(SecondaryNum).WalkInNum({1, NumWalkIns}) = CaseAndWalkInList(CaseAndWalkInListNum).WalkInItemNum({1, NumWalkIns});
-                    } else if (CaseNum != 0) { // Name points to a case
-                        NumCases = 1;
-                        Secondary(SecondaryNum).NumCases = 1;
-                        if (!allocated(Secondary(SecondaryNum).CaseNum)) {
-                            Secondary(SecondaryNum).CaseNum.allocate(NumCases);
-                        }
-                        Secondary(SecondaryNum).CaseNum(NumCases) = CaseNum;
-                    } else if (CoilNum != 0) { // Name points to a coil
-                        NumCoils = 1;
-                        Secondary(SecondaryNum).NumCoils = 1;
-                        if (!allocated(Secondary(SecondaryNum).CoilNum)) {
-                            Secondary(SecondaryNum).CoilNum.allocate(NumCoils);
-                        }
-                        Secondary(SecondaryNum).CoilNum(NumCoils) = CoilNum;
-                    } else if (WalkInNum != 0) { // Name points to a walkin
-                        NumWalkIns = 1;
-                        Secondary(SecondaryNum).NumWalkIns = 1;
-                        if (!allocated(Secondary(SecondaryNum).WalkInNum)) {
-                            Secondary(SecondaryNum).WalkInNum.allocate(NumWalkIns);
-                        }
-                        Secondary(SecondaryNum).WalkInNum(NumWalkIns) = WalkInNum;
-                    } // NumNameMatches /= 1
+                    resolveLoadsWithCoils(state,
+                                          ErrorsFound,
+                                          RoutineName,
+                                          CurrentModuleObject,
+                                          Alphas,
+                                          lAlphaBlanks,
+                                          cAlphaFieldNames,
+                                          AlphaNum,
+                                          Secondary(SecondaryNum).Name,
+                                          NumCases,
+                                          NumWalkIns,
+                                          NumCoils,
+                                          Secondary(SecondaryNum).CaseNum,
+                                          Secondary(SecondaryNum).WalkInNum,
+                                          Secondary(SecondaryNum).CoilNum);
+                    Secondary(SecondaryNum).NumCases = NumCases;
+                    Secondary(SecondaryNum).NumWalkIns = NumWalkIns;
+                    Secondary(SecondaryNum).NumCoils = NumCoils;
                 } // blank input for loads on secondary
 
                 if (NumCases > 0) {
@@ -4667,132 +4605,48 @@ void GetRefrigerationInput(EnergyPlusData &state)
                     } // range of pump moter heat to fluid
                 } // blank input for pumppowertoheat
 
+                // Read distribution piping or receiver UA and zone heat-gain inputs (optional).
+                // The two blocks have identical structure; only field indices, member references,
+                // and message text differ, so they are handled by a single lambda.
                 // Distribution piping heat gain - optional
-                //  Input UA and Zone containing the bulk of the secondary coolant distribution piping
-                //  This Zone ID will be used to determine the temperature used for distribution piping heat gain.
-                //  Zone Id is only required if Sum UA Distribution Piping >0.0
-                //  Get the Zone node number from the zone name entered by the user
-                Secondary(SecondaryNum).SumUADistPiping = 0.0;
-                AlphaNum = 7;
-                NumNum = 12;
-                if (!lNumericBlanks(NumNum) && !lAlphaBlanks(AlphaNum)) {
-                    Secondary(SecondaryNum).SumUADistPiping = Numbers(NumNum);
-                    Secondary(SecondaryNum).DistPipeZoneNum = Util::FindItemInList(Alphas(AlphaNum), state.dataHeatBal->Zone);
-                    Secondary(SecondaryNum).DistPipeZoneNodeNum =
-                        DataZoneEquipment::GetSystemNodeNumberForZone(state, Secondary(SecondaryNum).DistPipeZoneNum);
-
-                    if (Secondary(SecondaryNum).DistPipeZoneNum == 0) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", invalid  {} not valid: {}",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           Secondary(SecondaryNum).Name,
-                                                           cAlphaFieldNames(AlphaNum),
-                                                           Alphas(AlphaNum)));
-                        ErrorsFound = true;
-                    } else {
-                        state.dataRefrigCase->RefrigPresentInZone(Secondary(SecondaryNum).DistPipeZoneNum) = true;
-                    }
-
-                    if (Secondary(SecondaryNum).DistPipeZoneNodeNum == 0) {
-                        ShowSevereError(
-                            state,
-                            EnergyPlus::format(
-                                "{}{}=\"{}\" System Node Number not found for {} = {} even though {} is greater than zero. Distribution "
-                                "piping heat gain cannot be calculated unless a controlled Zone (appear in a ZoneHVAC:EquipmentConnections "
-                                "object.) is defined to determine the environmental temperature surrounding the piping.",
-                                RoutineName,
-                                CurrentModuleObject,
-                                Secondary(SecondaryNum).Name,
-                                cAlphaFieldNames(AlphaNum),
-                                Alphas(AlphaNum),
-                                cNumericFieldNames(NumNum)));
-                        ErrorsFound = true;
-                    }
-                } else if (!lNumericBlanks(NumNum) && lAlphaBlanks(AlphaNum)) {
-                    ShowWarningError(
-                        state,
-                        EnergyPlus::format("{}{}=\"{}\", {} not found even though {} is greater than zero. Distribution piping heat gain will not be "
-                                           "calculated unless a Zone is defined to determine the environmental temperature surrounding the piping.",
-                                           RoutineName,
-                                           CurrentModuleObject,
-                                           Secondary(SecondaryNum).Name,
-                                           cAlphaFieldNames(AlphaNum),
-                                           cNumericFieldNames(NumNum)));
-                } else if (lNumericBlanks(NumNum) && !lAlphaBlanks(AlphaNum)) {
-                    ShowWarningError(
-                        state,
-                        EnergyPlus::format(
-                            "{}{}=\"{}\", {} will not be used and distribution piping heat gain will not be calculated because {} was blank.",
-                            RoutineName,
-                            CurrentModuleObject,
-                            Secondary(SecondaryNum).Name,
-                            cAlphaFieldNames(AlphaNum),
-                            cNumericFieldNames(NumNum)));
-                } // distribution piping
+                readSecondaryPipingOrReceiver(state,
+                                              ErrorsFound,
+                                              RoutineName,
+                                              CurrentModuleObject,
+                                              Secondary(SecondaryNum).Name,
+                                              Numbers,
+                                              lNumericBlanks,
+                                              Alphas,
+                                              lAlphaBlanks,
+                                              cAlphaFieldNames,
+                                              cNumericFieldNames,
+                                              7,
+                                              12,
+                                              Secondary(SecondaryNum).SumUADistPiping,
+                                              Secondary(SecondaryNum).DistPipeZoneNum,
+                                              Secondary(SecondaryNum).DistPipeZoneNodeNum,
+                                              "Distribution piping",
+                                              "piping");
 
                 // Separator/receiver heat gain - optional
-                //  Input UA and Zone containing the Separator/receiver
-                //  This Zone ID will be used to determine the temperature used for Separator/receiver heat gain.
-                //  Zone Id is only required if Sum UA Separator/receiver >0.0
-                //  Get the Zone node number from the zone name entered by the user
-                Secondary(SecondaryNum).SumUAReceiver = 0.0;
-                AlphaNum = 8;
-                NumNum = 13;
-                if (!lNumericBlanks(NumNum) && !lAlphaBlanks(AlphaNum)) {
-                    Secondary(SecondaryNum).SumUAReceiver = Numbers(NumNum);
-                    Secondary(SecondaryNum).ReceiverZoneNum = Util::FindItemInList(Alphas(AlphaNum), state.dataHeatBal->Zone);
-                    Secondary(SecondaryNum).ReceiverZoneNodeNum =
-                        DataZoneEquipment::GetSystemNodeNumberForZone(state, Secondary(SecondaryNum).ReceiverZoneNum);
-
-                    if (Secondary(SecondaryNum).ReceiverZoneNum == 0) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", invalid  {} not valid: {}",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           Secondary(SecondaryNum).Name,
-                                                           cAlphaFieldNames(AlphaNum),
-                                                           Alphas(AlphaNum)));
-                        ErrorsFound = true;
-                    } else {
-                        state.dataRefrigCase->RefrigPresentInZone(Secondary(SecondaryNum).ReceiverZoneNum) = true;
-                    }
-                    if (Secondary(SecondaryNum).ReceiverZoneNodeNum == 0) {
-                        ShowSevereError(
-                            state,
-                            EnergyPlus::format(
-                                "{}{}=\"{}\" System Node Number not found for {} = {} even though {} is greater than zero. Receiver heat gain "
-                                "cannot be calculated unless a controlled Zone (appear in a ZoneHVAC:EquipmentConnections object.) is defined "
-                                "to determine the environmental temperature surrounding the Receiver.",
-                                RoutineName,
-                                CurrentModuleObject,
-                                Secondary(SecondaryNum).Name,
-                                cAlphaFieldNames(AlphaNum),
-                                Alphas(AlphaNum),
-                                cNumericFieldNames(NumNum)));
-                        ErrorsFound = true;
-                    }
-                } else if (!lNumericBlanks(NumNum) && lAlphaBlanks(AlphaNum)) {
-                    ShowWarningError(
-                        state,
-                        EnergyPlus::format(
-                            "{}{}=\"{}\", {} not found even though {} is greater than zero. Receiver heat gain will not be calculated unless "
-                            "a Zone is defined to determine the environmental temperature surrounding the Receiver.",
-                            RoutineName,
-                            CurrentModuleObject,
-                            Secondary(SecondaryNum).Name,
-                            cAlphaFieldNames(AlphaNum),
-                            cNumericFieldNames(NumNum)));
-                } else if (lNumericBlanks(NumNum) && !lAlphaBlanks(AlphaNum)) {
-                    ShowWarningError(
-                        state,
-                        EnergyPlus::format("{}{}=\"{}\", {} will not be used and Receiver heat gain will not be calculated because {} was blank.",
-                                           RoutineName,
-                                           CurrentModuleObject,
-                                           Secondary(SecondaryNum).Name,
-                                           cAlphaFieldNames(AlphaNum),
-                                           cNumericFieldNames(NumNum)));
-                } // Receiver
+                readSecondaryPipingOrReceiver(state,
+                                              ErrorsFound,
+                                              RoutineName,
+                                              CurrentModuleObject,
+                                              Secondary(SecondaryNum).Name,
+                                              Numbers,
+                                              lNumericBlanks,
+                                              Alphas,
+                                              lAlphaBlanks,
+                                              cAlphaFieldNames,
+                                              cNumericFieldNames,
+                                              8,
+                                              13,
+                                              Secondary(SecondaryNum).SumUAReceiver,
+                                              Secondary(SecondaryNum).ReceiverZoneNum,
+                                              Secondary(SecondaryNum).ReceiverZoneNodeNum,
+                                              "Receiver",
+                                              "Receiver");
 
                 NumNum = 14;
                 Secondary(SecondaryNum).ChillerRefInventory = 0.0;
@@ -4908,18 +4762,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
 
         CurrentModuleObject = "Refrigeration:Compressor";
         for (int CompNum = 1; CompNum <= state.dataRefrigCase->NumSimulationCompressors; ++CompNum) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CompNum,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     lNumericBlanks,
-                                                                     lAlphaBlanks,
-                                                                     cAlphaFieldNames,
-                                                                     cNumericFieldNames);
+            getItem(CompNum);
             ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
 
             Compressor(CompNum).Name = Alphas(1);
@@ -4937,42 +4780,36 @@ void GetRefrigerationInput(EnergyPlusData &state)
             }
 
             // Get superheat rating type (Either N1 or N2 Must be input)
-            if (((!lNumericBlanks(1)) && (!lNumericBlanks(2))) || (lNumericBlanks(1) && lNumericBlanks(2))) {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}{}=\"{}\"One, and Only One of {} or {}",
-                                                   RoutineName,
-                                                   CurrentModuleObject,
-                                                   Compressor(CompNum).Name,
-                                                   cNumericFieldNames(1),
-                                                   cNumericFieldNames(2)));
-                ShowContinueError(state, "Must Be Entered. Check input value choices.");
-                ErrorsFound = true;
-            } else if (!lNumericBlanks(1)) {
-                Compressor(CompNum).SuperheatRatingType = CompRatingType::Superheat;
-                Compressor(CompNum).RatedSuperheat = Numbers(1);
-            } else if (!lNumericBlanks(2)) {
-                Compressor(CompNum).SuperheatRatingType = CompRatingType::ReturnGasTemperature;
-                Compressor(CompNum).RatedSuperheat = Numbers(2);
-            } // Set SuperheatRatingType
+            readOneOfTwoRatingFields(state,
+                                     ErrorsFound,
+                                     RoutineName,
+                                     CurrentModuleObject,
+                                     Compressor(CompNum).Name,
+                                     Numbers,
+                                     lNumericBlanks,
+                                     cNumericFieldNames,
+                                     1,
+                                     2,
+                                     CompRatingType::Superheat,
+                                     CompRatingType::ReturnGasTemperature,
+                                     Compressor(CompNum).SuperheatRatingType,
+                                     Compressor(CompNum).RatedSuperheat);
 
             // Get subcool rating type (Either N3 or N4 Must be input)
-            if (((!lNumericBlanks(3)) && (!lNumericBlanks(4))) || (lNumericBlanks(3) && lNumericBlanks(4))) {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}{}=\"{}\" One, and Only One of {} or {}",
-                                                   RoutineName,
-                                                   CurrentModuleObject,
-                                                   Compressor(CompNum).Name,
-                                                   cNumericFieldNames(3),
-                                                   cNumericFieldNames(4)));
-                ShowContinueError(state, "Must Be Entered. Check input value choices.");
-                ErrorsFound = true;
-            } else if (!lNumericBlanks(3)) {
-                Compressor(CompNum).SubcoolRatingType = CompRatingType::LiquidTemperature;
-                Compressor(CompNum).RatedSubcool = Numbers(3);
-            } else if (!lNumericBlanks(4)) {
-                Compressor(CompNum).SubcoolRatingType = CompRatingType::Subcooling;
-                Compressor(CompNum).RatedSubcool = Numbers(4);
-            } // Set SubcoolRatingType
+            readOneOfTwoRatingFields(state,
+                                     ErrorsFound,
+                                     RoutineName,
+                                     CurrentModuleObject,
+                                     Compressor(CompNum).Name,
+                                     Numbers,
+                                     lNumericBlanks,
+                                     cNumericFieldNames,
+                                     3,
+                                     4,
+                                     CompRatingType::LiquidTemperature,
+                                     CompRatingType::Subcooling,
+                                     Compressor(CompNum).SubcoolRatingType,
+                                     Compressor(CompNum).RatedSubcool);
 
             Compressor(CompNum).EndUseSubcategory = "General";
             if (!lAlphaBlanks(4)) {
@@ -5025,18 +4862,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
             CurrentModuleObject = "Refrigeration:Subcooler";
             state.dataRefrigCase->NumSimulationMechSubcoolers = 0;
             for (int SubcoolerNum = 1; SubcoolerNum <= state.dataRefrigCase->NumSimulationSubcoolers; ++SubcoolerNum) {
-                state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                         CurrentModuleObject,
-                                                                         SubcoolerNum,
-                                                                         Alphas,
-                                                                         NumAlphas,
-                                                                         Numbers,
-                                                                         NumNumbers,
-                                                                         IOStatus,
-                                                                         lNumericBlanks,
-                                                                         lAlphaBlanks,
-                                                                         cAlphaFieldNames,
-                                                                         cNumericFieldNames);
+                getItem(SubcoolerNum);
                 ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
                 Subcooler(SubcoolerNum).Name = Alphas(1);
 
@@ -5127,18 +4953,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
         if (state.dataRefrigCase->NumSimulationTransferLoadLists > 0) {
             CurrentModuleObject = "Refrigeration:TransferLoadList";
             for (int ListNum = 1; ListNum <= state.dataRefrigCase->NumSimulationTransferLoadLists; ++ListNum) {
-                state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                         CurrentModuleObject,
-                                                                         ListNum,
-                                                                         Alphas,
-                                                                         NumAlphas,
-                                                                         Numbers,
-                                                                         NumNumbers,
-                                                                         IOStatus,
-                                                                         lNumericBlanks,
-                                                                         lAlphaBlanks,
-                                                                         cAlphaFieldNames,
-                                                                         cNumericFieldNames);
+                getItem(ListNum);
 
                 TransferLoadList(ListNum).Name = Alphas(1);
 
@@ -5209,18 +5024,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
         //**** Read Compressor Lists **********************************************************
         CurrentModuleObject = "Refrigeration:CompressorList";
         for (int ListNum = 1; ListNum <= NumCompressorLists; ++ListNum) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     ListNum,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     lNumericBlanks,
-                                                                     lAlphaBlanks,
-                                                                     cAlphaFieldNames,
-                                                                     cNumericFieldNames);
+            getItem(ListNum);
             CompressorLists(ListNum).NumCompressors = NumAlphas - 1;
 
             CompressorLists(ListNum).Name = Alphas(1);
@@ -5252,18 +5056,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
         CurrentModuleObject = "Refrigeration:System";
         for (RefrigSysNum = 1; RefrigSysNum <= state.dataRefrigCase->NumRefrigSystems; ++RefrigSysNum) {
 
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     RefrigSysNum,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     lNumericBlanks,
-                                                                     lAlphaBlanks,
-                                                                     cAlphaFieldNames,
-                                                                     cNumericFieldNames);
+            getItem(RefrigSysNum);
 
             ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
 
@@ -5300,106 +5093,24 @@ void GetRefrigerationInput(EnergyPlusData &state)
 
             //   Check for case or walkin or CaseAndWalkInList names
             AlphaNum = 2;
-            if (!lAlphaBlanks(AlphaNum)) {
-
-                // Entry for Alphas(AlphaNum) can be either a Case, WalkIn or CaseAndWalkInList name
-                int CaseAndWalkInListNum = 0;
-                int CaseNum = 0;
-                int WalkInNum = 0;
-                int CoilNum = 0;
-                if (state.dataRefrigCase->NumSimulationCaseAndWalkInLists > 0) {
-                    CaseAndWalkInListNum = Util::FindItemInList(Alphas(AlphaNum), CaseAndWalkInList);
-                }
-                if (state.dataRefrigCase->NumSimulationCases > 0) {
-                    CaseNum = Util::FindItemInList(Alphas(AlphaNum), RefrigCase);
-                }
-                if (state.dataRefrigCase->NumSimulationWalkIns > 0) {
-                    WalkInNum = Util::FindItemInList(Alphas(AlphaNum), WalkIn);
-                }
-                if (state.dataRefrigCase->NumSimulationRefrigAirChillers > 0) {
-                    CoilNum = Util::FindItemInList(Alphas(AlphaNum), WarehouseCoil);
-                }
-                int NumNameMatches = 0;
-                if (CaseAndWalkInListNum != 0) {
-                    ++NumNameMatches;
-                }
-                if (CaseNum != 0) {
-                    ++NumNameMatches;
-                }
-                if (WalkInNum != 0) {
-                    ++NumNameMatches;
-                }
-                if (CoilNum != 0) {
-                    ++NumNameMatches;
-                }
-
-                if (NumNameMatches != 1) { // name must uniquely point to a list or a single case or walkin or coil
-                    ErrorsFound = true;
-                    if (NumNameMatches == 0) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", has an invalid {}: {}",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           System(RefrigSysNum).Name,
-                                                           cAlphaFieldNames(AlphaNum),
-                                                           Alphas(AlphaNum)));
-                    } else if (NumNameMatches > 1) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\",  has a non-unique name that could be either a {}: {}",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           System(RefrigSysNum).Name,
-                                                           cAlphaFieldNames(AlphaNum),
-                                                           Alphas(AlphaNum)));
-                    } // num matches = 0 or > 1
-                } else if (CaseAndWalkInListNum != 0) { // Name points to a CaseAndWalkInList
-                    NumCases = CaseAndWalkInList(CaseAndWalkInListNum).NumCases;
-                    NumWalkIns = CaseAndWalkInList(CaseAndWalkInListNum).NumWalkIns;
-                    NumCoils = CaseAndWalkInList(CaseAndWalkInListNum).NumCoils;
-                    System(RefrigSysNum).NumCases = NumCases;
-                    System(RefrigSysNum).NumWalkIns = NumWalkIns;
-                    System(RefrigSysNum).NumCoils = NumCoils;
-                    if (NumCases > 0) {
-                        if (!allocated(System(RefrigSysNum).CaseNum)) {
-                            System(RefrigSysNum).CaseNum.allocate(NumCases);
-                        }
-                        System(RefrigSysNum).CaseNum({1, NumCases}) = CaseAndWalkInList(CaseAndWalkInListNum).CaseItemNum({1, NumCases});
-                    }
-                    if (NumCoils > 0) {
-                        if (!allocated(System(RefrigSysNum).CoilNum)) {
-                            System(RefrigSysNum).CoilNum.allocate(NumCoils);
-                        }
-                        System(RefrigSysNum).CoilNum({1, NumCoils}) = CaseAndWalkInList(CaseAndWalkInListNum).CoilItemNum({1, NumCoils});
-                    }
-                    if (NumWalkIns > 0) {
-                        if (!allocated(System(RefrigSysNum).WalkInNum)) {
-                            System(RefrigSysNum).WalkInNum.allocate(NumWalkIns);
-                        }
-                        System(RefrigSysNum).WalkInNum({1, NumWalkIns}) = CaseAndWalkInList(CaseAndWalkInListNum).WalkInItemNum({1, NumWalkIns});
-                    }
-                } else if (CaseNum != 0) { // Name points to a case
-                    NumCases = 1;
-                    System(RefrigSysNum).NumCases = 1;
-                    if (!allocated(System(RefrigSysNum).CaseNum)) {
-                        System(RefrigSysNum).CaseNum.allocate(NumCases);
-                    }
-                    System(RefrigSysNum).CaseNum(NumCases) = CaseNum;
-                } else if (CoilNum != 0) { // Name points to a coil
-                    NumCoils = 1;
-                    System(RefrigSysNum).NumCoils = 1;
-                    if (!allocated(System(RefrigSysNum).CoilNum)) {
-                        System(RefrigSysNum).CoilNum.allocate(NumCoils);
-                    }
-                    System(RefrigSysNum).CoilNum(NumCoils) = CoilNum;
-                } else if (WalkInNum != 0) { // Name points to a walkin
-                    NumWalkIns = 1;
-                    System(RefrigSysNum).NumWalkIns = 1;
-                    if (!allocated(System(RefrigSysNum).WalkInNum)) {
-                        System(RefrigSysNum).WalkInNum.allocate(NumWalkIns);
-                    }
-                    System(RefrigSysNum).WalkInNum(NumWalkIns) = WalkInNum;
-                } // NumNameMatches /= 1
-            } // blank input for cases, walkins, or caseandwalkinlist
+            resolveLoadsWithCoils(state,
+                                  ErrorsFound,
+                                  RoutineName,
+                                  CurrentModuleObject,
+                                  Alphas,
+                                  lAlphaBlanks,
+                                  cAlphaFieldNames,
+                                  AlphaNum,
+                                  System(RefrigSysNum).Name,
+                                  NumCases,
+                                  NumWalkIns,
+                                  NumCoils,
+                                  System(RefrigSysNum).CaseNum,
+                                  System(RefrigSysNum).WalkInNum,
+                                  System(RefrigSysNum).CoilNum);
+            System(RefrigSysNum).NumCases = NumCases;
+            System(RefrigSysNum).NumWalkIns = NumWalkIns;
+            System(RefrigSysNum).NumCoils = NumCoils;
 
             if (NumCases > 0) {
                 // Find lowest design evap T
@@ -5444,19 +5155,9 @@ void GetRefrigerationInput(EnergyPlusData &state)
                     ++WalkIn(WalkInID).NumSysAttach;
                     NominalTotalWalkInCap += WalkIn(WalkInID).DesignRatedCap;
                     System(RefrigSysNum).RefInventory += WalkIn(WalkInID).DesignRefrigInventory;
-                    // Defrost capacity is treated differently by compressor racks and detailed systems,
-                    //  so this value may be adjusted (or warnings issued) after the walkin is assigned
-                    //  to either the rack or system.
-                    // for walkins served by detailed system, need capacity for both fluid and electric types.
-                    if (WalkIn(WalkInID).DefrostCapacity <= -98.0) {
-                        // - 99 used as a flag for blank input error message for detailed systems
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}Refrigeration:WalkIn=\"{}\", Defrost capacity must be greater than or equal to 0 W for "
-                                                           "electric and hotfluid defrost types",
-                                                           RoutineName,
-                                                           WalkIn(WalkInID).Name));
-                        ErrorsFound = true;
-                    }
+                    // Defrost capacity is treated differently by compressor racks and detailed systems;
+                    // for detailed systems, blank input is an error (flag value <= -98).
+                    checkWalkInDefrostCap(WalkInID);
                     // Find design evaporating temperature for system by getting min design evap for ALL loads
                     if ((WalkInIndex == 1) && (System(RefrigSysNum).NumCases == 0) && (System(RefrigSysNum).NumCoils == 0)) {
                         // note use walk in index, not walkinid here to get
@@ -5501,24 +5202,14 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 int NumCascadeLoad = 0;
 
                 if (NumNameMatches != 1) { // name must uniquely point to a list or a single transfer load
-                    ErrorsFound = true;
-                    if (NumNameMatches == 0) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", has an invalid {}: {}",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           System(RefrigSysNum).Name,
-                                                           cAlphaFieldNames(AlphaNum),
-                                                           Alphas(AlphaNum)));
-                    } else if (NumNameMatches > 1) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", has a non-unique name that could be either a {}: {}",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           System(RefrigSysNum).Name,
-                                                           cAlphaFieldNames(AlphaNum),
-                                                           Alphas(AlphaNum)));
-                    } // num matches = 0 or > 1
+                    reportNameMatchError(state,
+                                         ErrorsFound,
+                                         RoutineName,
+                                         CurrentModuleObject,
+                                         System(RefrigSysNum).Name,
+                                         NumNameMatches,
+                                         cAlphaFieldNames(AlphaNum),
+                                         Alphas(AlphaNum));
                 } else if (TransferLoadListNum != 0) { // Name points to a transferLoad list
                     NumSecondary = TransferLoadList(TransferLoadListNum).NumSecondarys;
                     NumCascadeLoad = TransferLoadList(TransferLoadListNum).NumCascadeLoads;
@@ -5726,50 +5417,19 @@ void GetRefrigerationInput(EnergyPlusData &state)
                 ShowSevereError(state,
                                 EnergyPlus::format("{}{} {}\" : must be input.", RoutineName, CurrentModuleObject, cAlphaFieldNames(AlphaNum)));
                 ErrorsFound = true;
-            } else { //     Entry for Alphas(AlphaNum) can be either a compressor name or a compressorlist name
-                int ListNum;
-                if (NumCompressorLists > 0) {
-                    ListNum = Util::FindItemInList(Alphas(AlphaNum), CompressorLists);
-                } else {
-                    ListNum = 0;
-                }
-                int CompNum;
-                if (state.dataRefrigCase->NumSimulationCompressors > 0) {
-                    CompNum = Util::FindItemInList(Alphas(AlphaNum), Compressor);
-                } else {
-                    CompNum = 0;
-                }
-                if ((ListNum == 0) && (CompNum == 0)) { // name doesn't match either a compressor or a compressor list
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}{} {}, has an invalid or undefined value=\"{}\".",
-                                                       RoutineName,
-                                                       CurrentModuleObject,
-                                                       cAlphaFieldNames(AlphaNum),
-                                                       Alphas(AlphaNum)));
-                    ErrorsFound = true;
-                } else if ((ListNum != 0) && (CompNum != 0)) { // have compressor list and compressor with same name
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}{} {}, has a non-unique name used for both Compressor and CompressorList name: \"{}\".",
-                                                       RoutineName,
-                                                       CurrentModuleObject,
-                                                       cAlphaFieldNames(AlphaNum),
-                                                       Alphas(AlphaNum)));
-                    ErrorsFound = true;
-                } else if (ListNum != 0) {
-                    NumCompressorsSys = CompressorLists(ListNum).NumCompressors;
-                    System(RefrigSysNum).NumCompressors = NumCompressorsSys;
-                    if (!allocated(System(RefrigSysNum).CompressorNum)) {
-                        System(RefrigSysNum).CompressorNum.allocate(NumCompressorsSys);
-                    }
-                    System(RefrigSysNum).CompressorNum({1, NumCompressorsSys}) = CompressorLists(ListNum).CompItemNum({1, NumCompressorsSys});
-                } else if (CompNum != 0) {
-                    NumCompressorsSys = 1;
-                    System(RefrigSysNum).NumCompressors = 1;
-                    if (!allocated(System(RefrigSysNum).CompressorNum)) {
-                        System(RefrigSysNum).CompressorNum.allocate(NumCompressorsSys);
-                    }
-                    System(RefrigSysNum).CompressorNum(NumCompressorsSys) = CompNum;
-                }
+            } else {
+                lookupAndAssignCompressors(state,
+                                           ErrorsFound,
+                                           RoutineName,
+                                           CurrentModuleObject,
+                                           Alphas,
+                                           cAlphaFieldNames,
+                                           CompressorLists,
+                                           Compressor,
+                                           AlphaNum,
+                                           NumCompressorsSys,
+                                           System(RefrigSysNum).NumCompressors,
+                                           System(RefrigSysNum).CompressorNum);
             }
 
             if (!lNumericBlanks(1)) {
@@ -5843,90 +5503,31 @@ void GetRefrigerationInput(EnergyPlusData &state)
                     System(RefrigSysNum).SubcoolerNum.allocate(System(RefrigSysNum).NumSubcoolers);
                 }
                 int NumSubcooler = 1;
+                assignSubcoolerToSystem(AlphaNum, NumSubcooler);
                 if (!lAlphaBlanks(AlphaNum)) {
-                    System(RefrigSysNum).SubcoolerNum(NumSubcooler) =
-                        state.dataInputProcessing->inputProcessor->getObjectItemNum(state, "Refrigeration:Subcooler", Alphas(AlphaNum));
-                    if (System(RefrigSysNum).SubcoolerNum(NumSubcooler) <= 0) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format(R"({}{}="{}", has an invalid {} defined as "{}".)",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           System(RefrigSysNum).Name,
-                                                           cAlphaFieldNames(AlphaNum),
-                                                           Alphas(AlphaNum)));
-                        ErrorsFound = true;
-                    } else {
-                        Subcooler(System(RefrigSysNum).SubcoolerNum(NumSubcooler)).CoilFlag = System(RefrigSysNum).CoilFlag;
-                    }
                     ++NumSubcooler;
                 }
-                if (!lAlphaBlanks(AlphaNum + 1)) {
-                    System(RefrigSysNum).SubcoolerNum(NumSubcooler) =
-                        state.dataInputProcessing->inputProcessor->getObjectItemNum(state, "Refrigeration:Subcooler", Alphas(AlphaNum + 1));
-                    if (System(RefrigSysNum).SubcoolerNum(NumSubcooler) <= 0) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format(R"({}{}="{}", has an invalid {} defined as "{}".)",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           System(RefrigSysNum).Name,
-                                                           cAlphaFieldNames(AlphaNum + 1),
-                                                           Alphas(AlphaNum + 1)));
-                        ErrorsFound = true;
-                    } else {
-                        Subcooler(System(RefrigSysNum).SubcoolerNum(NumSubcooler)).CoilFlag = System(RefrigSysNum).CoilFlag;
-                    }
-                }
+                assignSubcoolerToSystem(AlphaNum + 1, NumSubcooler);
             }
 
             // Suction piping heat gain - optional
-            //  Input UA and identify the Zone containing the bulk of the suction piping
-            //  This Zone ID will be used to determine the temperature used for suction piping heat gain.
-            //  The pipe heat gains are also counted as cooling credit for the zone.
-            //  Zone Id is only required if Sum UA Suction Piping >0.0
-            //  Get the Zone and zone node numbers from the zone name entered by the user
             AlphaNum = 10;
-            System(RefrigSysNum).SumUASuctionPiping = 0.0;
-            if (!lNumericBlanks(2) && !lAlphaBlanks(AlphaNum)) {
-                System(RefrigSysNum).SumUASuctionPiping = Numbers(2);
-                System(RefrigSysNum).SuctionPipeActualZoneNum = Util::FindItemInList(Alphas(AlphaNum), state.dataHeatBal->Zone);
-                System(RefrigSysNum).SuctionPipeZoneNodeNum =
-                    DataZoneEquipment::GetSystemNodeNumberForZone(state, System(RefrigSysNum).SuctionPipeActualZoneNum);
-                if (System(RefrigSysNum).SuctionPipeZoneNodeNum == 0) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(
-                            "{}{}=\"{}\", System Node Number not found for {} = {} even though {} is greater than zero. Suction piping heat gain "
-                            "cannot be calculated unless a Zone is defined to determine the environmental temperature surrounding the piping.",
-                            RoutineName,
-                            CurrentModuleObject,
-                            System(RefrigSysNum).Name,
-                            cAlphaFieldNames(AlphaNum),
-                            Alphas(AlphaNum),
-                            cNumericFieldNames(2)));
-                    ErrorsFound = true;
-                } else {
-                    state.dataRefrigCase->RefrigPresentInZone(System(RefrigSysNum).SuctionPipeActualZoneNum) = true;
-                }
-            } else if (!lNumericBlanks(2) && lAlphaBlanks(AlphaNum)) {
-                ShowWarningError(
-                    state,
-                    EnergyPlus::format("{}{}=\"{}\" {} not found even though {} is greater than zero. Suction piping heat gain will not be "
-                                       "calculated unless a Zone is defined to determine the environmental temperature surrounding the piping.",
-                                       RoutineName,
-                                       CurrentModuleObject,
-                                       System(RefrigSysNum).Name,
-                                       cAlphaFieldNames(AlphaNum),
-                                       cNumericFieldNames(2)));
-            } else if (lNumericBlanks(2) && !lAlphaBlanks(AlphaNum)) {
-                ShowWarningError(
-                    state,
-                    EnergyPlus::format("{}{}=\"{}\" {} will not be used and suction piping heat gain will not be calculated because {} was blank.",
-                                       RoutineName,
-                                       CurrentModuleObject,
-                                       System(RefrigSysNum).Name,
-                                       cAlphaFieldNames(AlphaNum),
-                                       cNumericFieldNames(2)));
-            } // suction piping heat gains
+            readSuctionPiping(state,
+                              ErrorsFound,
+                              RoutineName,
+                              CurrentModuleObject,
+                              Numbers,
+                              lNumericBlanks,
+                              Alphas,
+                              lAlphaBlanks,
+                              cAlphaFieldNames,
+                              cNumericFieldNames,
+                              AlphaNum,
+                              2,
+                              System(RefrigSysNum).Name,
+                              System(RefrigSysNum).SumUASuctionPiping,
+                              System(RefrigSysNum).SuctionPipeActualZoneNum,
+                              System(RefrigSysNum).SuctionPipeZoneNodeNum);
 
             AlphaNum = 11;
             if (!lAlphaBlanks(AlphaNum)) {
@@ -6010,44 +5611,19 @@ void GetRefrigerationInput(EnergyPlusData &state)
                                                        System(RefrigSysNum).Name,
                                                        cAlphaFieldNames(AlphaNum)));
                     ErrorsFound = true;
-                } else { //     Entry for Alphas(AlphaNum) can be either a compressor name or a compressorlist name
-                    int ListNum = Util::FindItemInList(Alphas(AlphaNum), CompressorLists);
-                    int CompNum = Util::FindItemInList(Alphas(AlphaNum), Compressor);
-                    if ((ListNum == 0) && (CompNum == 0)) { // name doesn't match either a compressor or a compressor list
-                        ShowSevereError(state,
-                                        EnergyPlus::format(R"({}{}="{}", {} has an invalid or undefined value="{}".)",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           System(RefrigSysNum).Name,
-                                                           cAlphaFieldNames(AlphaNum),
-                                                           Alphas(AlphaNum)));
-                        ErrorsFound = true;
-                    } else if ((ListNum != 0) && (CompNum != 0)) { // have compressor list and compressor with same name
-                        ShowSevereError(
-                            state,
-                            EnergyPlus::format(R"({}{}="{}", {} has a non-unique name used for both Compressor and CompressorList name: "{}".)",
+                } else {
+                    lookupAndAssignCompressors(state,
+                                               ErrorsFound,
                                                RoutineName,
                                                CurrentModuleObject,
-                                               System(RefrigSysNum).Name,
-                                               cAlphaFieldNames(AlphaNum),
-                                               Alphas(AlphaNum)));
-                        ErrorsFound = true;
-                    } else if (ListNum != 0) {
-                        NumHiStageCompressorsSys = CompressorLists(ListNum).NumCompressors;
-                        System(RefrigSysNum).NumHiStageCompressors = NumHiStageCompressorsSys;
-                        if (!allocated(System(RefrigSysNum).HiStageCompressorNum)) {
-                            System(RefrigSysNum).HiStageCompressorNum.allocate(NumHiStageCompressorsSys);
-                        }
-                        System(RefrigSysNum).HiStageCompressorNum({1, NumHiStageCompressorsSys}) =
-                            CompressorLists(ListNum).CompItemNum({1, NumHiStageCompressorsSys});
-                    } else if (CompNum != 0) {
-                        NumHiStageCompressorsSys = 1;
-                        System(RefrigSysNum).NumHiStageCompressors = 1;
-                        if (!allocated(System(RefrigSysNum).HiStageCompressorNum)) {
-                            System(RefrigSysNum).HiStageCompressorNum.allocate(NumHiStageCompressorsSys);
-                        }
-                        System(RefrigSysNum).HiStageCompressorNum(NumHiStageCompressorsSys) = CompNum;
-                    }
+                                               Alphas,
+                                               cAlphaFieldNames,
+                                               CompressorLists,
+                                               Compressor,
+                                               AlphaNum,
+                                               NumHiStageCompressorsSys,
+                                               System(RefrigSysNum).NumHiStageCompressors,
+                                               System(RefrigSysNum).HiStageCompressorNum);
                 }
             }
 
@@ -6293,18 +5869,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
     if (state.dataRefrigCase->NumTransRefrigSystems > 0) {
         CurrentModuleObject = "Refrigeration:TranscriticalSystem";
         for (int TransRefrigSysNum = 1; TransRefrigSysNum <= state.dataRefrigCase->NumTransRefrigSystems; ++TransRefrigSysNum) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     TransRefrigSysNum,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     lNumericBlanks,
-                                                                     lAlphaBlanks,
-                                                                     cAlphaFieldNames,
-                                                                     cNumericFieldNames);
+            getItem(TransRefrigSysNum);
 
             ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
 
@@ -6356,270 +5921,73 @@ void GetRefrigerationInput(EnergyPlusData &state)
 
             //   Check for Medium Temperature Case or Walk-In or CaseAndWalkInList names
             AlphaNum = 3;
-
-            if (!lAlphaBlanks(AlphaNum)) {
-
-                // Entry for Alphas(AlphaNum) can be either a Case, WalkIn or CaseAndWalkInList name
-                int CaseAndWalkInListNum = 0;
-                int CaseNum = 0;
-                int WalkInNum = 0;
-                if (state.dataRefrigCase->NumSimulationCaseAndWalkInLists > 0) {
-                    CaseAndWalkInListNum = Util::FindItemInList(Alphas(AlphaNum), CaseAndWalkInList);
-                }
-                if (state.dataRefrigCase->NumSimulationCases > 0) {
-                    CaseNum = Util::FindItemInList(Alphas(AlphaNum), RefrigCase);
-                }
-                if (state.dataRefrigCase->NumSimulationWalkIns > 0) {
-                    WalkInNum = Util::FindItemInList(Alphas(AlphaNum), WalkIn);
-                }
-                int NumNameMatches = 0;
-                if (CaseAndWalkInListNum != 0) {
-                    ++NumNameMatches;
-                }
-                if (CaseNum != 0) {
-                    ++NumNameMatches;
-                }
-                if (WalkInNum != 0) {
-                    ++NumNameMatches;
-                }
-
-                if (NumNameMatches != 1) { // name must uniquely point to a list or a single case or walkin or coil
-                    ErrorsFound = true;
-                    if (NumNameMatches == 0) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", has an invalid {}: {}",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           TransSystem(TransRefrigSysNum).Name,
-                                                           cAlphaFieldNames(AlphaNum),
-                                                           Alphas(AlphaNum)));
-                    } else if (NumNameMatches > 1) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\",  has a non-unique name that could be either a {}: {}",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           TransSystem(TransRefrigSysNum).Name,
-                                                           cAlphaFieldNames(AlphaNum),
-                                                           Alphas(AlphaNum)));
-                    } // num matches = 0 or > 1
-                } else if (CaseAndWalkInListNum != 0) { // Name points to a CaseAndWalkInList
-                    NumCasesMT = CaseAndWalkInList(CaseAndWalkInListNum).NumCases;
-                    NumWalkInsMT = CaseAndWalkInList(CaseAndWalkInListNum).NumWalkIns;
-                    TransSystem(TransRefrigSysNum).NumCasesMT = NumCasesMT;
-                    TransSystem(TransRefrigSysNum).NumWalkInsMT = NumWalkInsMT;
-                    if (NumCasesMT > 0) {
-                        if (!allocated(TransSystem(TransRefrigSysNum).CaseNumMT)) {
-                            TransSystem(TransRefrigSysNum).CaseNumMT.allocate(NumCasesMT);
-                        }
-                        TransSystem(TransRefrigSysNum).CaseNumMT({1, NumCasesMT}) =
-                            CaseAndWalkInList(CaseAndWalkInListNum).CaseItemNum({1, NumCasesMT});
-                    }
-                    if (NumWalkInsMT > 0) {
-                        if (!allocated(TransSystem(TransRefrigSysNum).WalkInNumMT)) {
-                            TransSystem(TransRefrigSysNum).WalkInNumMT.allocate(NumWalkInsMT);
-                        }
-                        TransSystem(TransRefrigSysNum).WalkInNumMT({1, NumWalkInsMT}) =
-                            CaseAndWalkInList(CaseAndWalkInListNum).WalkInItemNum({1, NumWalkInsMT});
-                    }
-                } else if (CaseNum != 0) { // Name points to a case
-                    NumCasesMT = 1;
-                    TransSystem(TransRefrigSysNum).NumCasesMT = 1;
-                    if (!allocated(TransSystem(TransRefrigSysNum).CaseNumMT)) {
-                        TransSystem(TransRefrigSysNum).CaseNumMT.allocate(NumCasesMT);
-                    }
-                    TransSystem(TransRefrigSysNum).CaseNumMT(NumCases) = CaseNum;
-                } else if (WalkInNum != 0) { // Name points to a walkin
-                    NumWalkInsMT = 1;
-                    TransSystem(TransRefrigSysNum).NumWalkInsMT = 1;
-                    if (!allocated(TransSystem(TransRefrigSysNum).WalkInNumMT)) {
-                        TransSystem(TransRefrigSysNum).WalkInNumMT.allocate(NumWalkInsMT);
-                    }
-                    TransSystem(TransRefrigSysNum).WalkInNumMT(NumWalkIns) = WalkInNum;
-                } // NumNameMatches /= 1
-            } // blank input for cases, walkins, or caseandwalkinlist
+            resolveTransSysLoads(state,
+                                 ErrorsFound,
+                                 RoutineName,
+                                 CurrentModuleObject,
+                                 Alphas,
+                                 lAlphaBlanks,
+                                 cAlphaFieldNames,
+                                 AlphaNum,
+                                 TransSystem(TransRefrigSysNum).Name,
+                                 NumCasesMT,
+                                 NumWalkInsMT,
+                                 TransSystem(TransRefrigSysNum).CaseNumMT,
+                                 TransSystem(TransRefrigSysNum).WalkInNumMT);
+            TransSystem(TransRefrigSysNum).NumCasesMT = NumCasesMT;
+            TransSystem(TransRefrigSysNum).NumWalkInsMT = NumWalkInsMT;
 
             if (NumCasesMT > 0) {
-                // Find lowest design evap T
-                // Sum rated capacity of all MT cases on system
-                for (int caseIndex = 1; caseIndex <= NumCasesMT; ++caseIndex) {
-                    // mark all cases on system as used by this system - checking for unused or non-unique cases
-                    int CaseNum = TransSystem(TransRefrigSysNum).CaseNumMT(caseIndex);
-                    ++RefrigCase(CaseNum).NumSysAttach;
-                    NominalTotalCaseCapMT += RefrigCase(CaseNum).DesignRatedCap;
-                    TransSystem(TransRefrigSysNum).RefInventory += RefrigCase(CaseNum).DesignRefrigInventory;
-                    if (caseIndex == 1) { // look for lowest case design evap T for system
-                        TransSystem(TransRefrigSysNum).TEvapDesignMT = RefrigCase(CaseNum).EvapTempDesign;
-                    } else {
-                        TransSystem(TransRefrigSysNum).TEvapDesignMT =
-                            min(RefrigCase(CaseNum).EvapTempDesign, TransSystem(TransRefrigSysNum).TEvapDesignMT);
-                    }
-                } // CaseIndex=1,NumCases
-            } // NumcasesMT > 0
+                accumTransSysCases(TransSystem(TransRefrigSysNum).CaseNumMT,
+                                   NumCasesMT,
+                                   NominalTotalCaseCapMT,
+                                   TransSystem(TransRefrigSysNum).TEvapDesignMT,
+                                   TransSystem(TransRefrigSysNum).RefInventory);
+            }
 
             if (NumWalkInsMT > 0) {
-                for (int WalkInIndex = 1; WalkInIndex <= NumWalkInsMT; ++WalkInIndex) {
-                    int WalkInID = TransSystem(TransRefrigSysNum).WalkInNumMT(WalkInIndex);
-                    // mark all WalkIns on rack as used by this system (checking for unused or non-unique WalkIns)
-                    ++WalkIn(WalkInID).NumSysAttach;
-                    NominalTotalWalkInCapMT += WalkIn(WalkInID).DesignRatedCap;
-                    TransSystem(TransRefrigSysNum).RefInventory += WalkIn(WalkInID).DesignRefrigInventory;
-                    // Defrost capacity is treated differently by compressor racks and detailed systems,
-                    //  so this value may be adjusted (or warnings issued) after the walkin is assigned
-                    //  to either the rack or system.
-                    // for walkins served by detailed system, need capacity for both fluid and electric types.
-                    if (WalkIn(WalkInID).DefrostCapacity <= -98.0) {
-                        // - 99 used as a flag for blank input error message for detailed systems
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}Refrigeration:WalkIn=\"{}\", Defrost capacity must be greater than or equal to 0 W for "
-                                                           "electric and hotfluid defrost types",
-                                                           RoutineName,
-                                                           WalkIn(WalkInID).Name));
-                        ErrorsFound = true;
-                    }
-                    // Find design evaporating temperature for system by getting min design evap for ALL loads
-                    if ((WalkInIndex == 1) && (TransSystem(TransRefrigSysNum).NumCasesMT == 0)) {
-                        // note use walk in index, not walkinid here to get
-                        // first walkin on this suction group/system
-                        TransSystem(TransRefrigSysNum).TEvapDesignMT = WalkIn(WalkInID).TEvapDesign;
-                    } else {
-                        TransSystem(TransRefrigSysNum).TEvapDesignMT =
-                            min(WalkIn(WalkInID).TEvapDesign, TransSystem(TransRefrigSysNum).TEvapDesignMT);
-                    }
-                } // WalkInIndex=1,NumWalkIns
-            } // NumWalkInsMT > 0
+                accumTransSysWalkIns(TransSystem(TransRefrigSysNum).WalkInNumMT,
+                                     NumWalkInsMT,
+                                     NominalTotalWalkInCapMT,
+                                     TransSystem(TransRefrigSysNum).TEvapDesignMT,
+                                     TransSystem(TransRefrigSysNum).NumCasesMT,
+                                     TransSystem(TransRefrigSysNum).RefInventory);
+            }
 
             //   Check for Low Temperature Case or Walk-In or CaseAndWalkInList names
             AlphaNum = 4;
-            if (!lAlphaBlanks(AlphaNum)) {
-
-                // Entry for Alphas(AlphaNum) can be either a Case, WalkIn or CaseAndWalkInList name
-                int CaseAndWalkInListNum = 0;
-                int CaseNum = 0;
-                int WalkInNum = 0;
-                if (state.dataRefrigCase->NumSimulationCaseAndWalkInLists > 0) {
-                    CaseAndWalkInListNum = Util::FindItemInList(Alphas(AlphaNum), CaseAndWalkInList);
-                }
-                if (state.dataRefrigCase->NumSimulationCases > 0) {
-                    CaseNum = Util::FindItemInList(Alphas(AlphaNum), RefrigCase);
-                }
-                if (state.dataRefrigCase->NumSimulationWalkIns > 0) {
-                    WalkInNum = Util::FindItemInList(Alphas(AlphaNum), WalkIn);
-                }
-                int NumNameMatches = 0;
-                if (CaseAndWalkInListNum != 0) {
-                    ++NumNameMatches;
-                }
-                if (CaseNum != 0) {
-                    ++NumNameMatches;
-                }
-                if (WalkInNum != 0) {
-                    ++NumNameMatches;
-                }
-
-                if (NumNameMatches != 1) { // name must uniquely point to a list or a single case or walkin or coil
-                    ErrorsFound = true;
-                    if (NumNameMatches == 0) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", has an invalid {}: {}",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           TransSystem(TransRefrigSysNum).Name,
-                                                           cAlphaFieldNames(AlphaNum),
-                                                           Alphas(AlphaNum)));
-                    } else if (NumNameMatches > 1) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\",  has a non-unique name that could be either a {}: {}",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           TransSystem(TransRefrigSysNum).Name,
-                                                           cAlphaFieldNames(AlphaNum),
-                                                           Alphas(AlphaNum)));
-                    } // num matches = 0 or > 1
-                } else if (CaseAndWalkInListNum != 0) { // Name points to a CaseAndWalkInList
-                    NumCasesLT = CaseAndWalkInList(CaseAndWalkInListNum).NumCases;
-                    NumWalkInsLT = CaseAndWalkInList(CaseAndWalkInListNum).NumWalkIns;
-                    TransSystem(TransRefrigSysNum).NumCasesLT = NumCasesLT;
-                    TransSystem(TransRefrigSysNum).NumWalkInsLT = NumWalkInsLT;
-                    if (NumCasesLT > 0) {
-                        if (!allocated(TransSystem(TransRefrigSysNum).CaseNumLT)) {
-                            TransSystem(TransRefrigSysNum).CaseNumLT.allocate(NumCasesLT);
-                        }
-                        TransSystem(TransRefrigSysNum).CaseNumLT({1, NumCasesLT}) =
-                            CaseAndWalkInList(CaseAndWalkInListNum).CaseItemNum({1, NumCasesLT});
-                    }
-                    if (NumWalkInsLT > 0) {
-                        if (!allocated(TransSystem(TransRefrigSysNum).WalkInNumLT)) {
-                            TransSystem(TransRefrigSysNum).WalkInNumLT.allocate(NumWalkInsLT);
-                        }
-                        TransSystem(TransRefrigSysNum).WalkInNumLT({1, NumWalkInsLT}) =
-                            CaseAndWalkInList(CaseAndWalkInListNum).WalkInItemNum({1, NumWalkInsLT});
-                    }
-                } else if (CaseNum != 0) { // Name points to a case
-                    NumCasesLT = 1;
-                    TransSystem(TransRefrigSysNum).NumCasesLT = 1;
-                    if (!allocated(TransSystem(TransRefrigSysNum).CaseNumLT)) {
-                        TransSystem(TransRefrigSysNum).CaseNumLT.allocate(NumCasesLT);
-                    }
-                    TransSystem(TransRefrigSysNum).CaseNumLT(NumCases) = CaseNum;
-                } else if (WalkInNum != 0) { // Name points to a walkin
-                    NumWalkInsLT = 1;
-                    TransSystem(TransRefrigSysNum).NumWalkInsLT = 1;
-                    if (!allocated(TransSystem(TransRefrigSysNum).WalkInNumLT)) {
-                        TransSystem(TransRefrigSysNum).WalkInNumLT.allocate(NumWalkInsLT);
-                    }
-                    TransSystem(TransRefrigSysNum).WalkInNumLT(NumWalkIns) = WalkInNum;
-                } // NumNameMatches /= 1
-            } // blank input for cases, walkins, or caseandwalkinlist
+            resolveTransSysLoads(state,
+                                 ErrorsFound,
+                                 RoutineName,
+                                 CurrentModuleObject,
+                                 Alphas,
+                                 lAlphaBlanks,
+                                 cAlphaFieldNames,
+                                 AlphaNum,
+                                 TransSystem(TransRefrigSysNum).Name,
+                                 NumCasesLT,
+                                 NumWalkInsLT,
+                                 TransSystem(TransRefrigSysNum).CaseNumLT,
+                                 TransSystem(TransRefrigSysNum).WalkInNumLT);
+            TransSystem(TransRefrigSysNum).NumCasesLT = NumCasesLT;
+            TransSystem(TransRefrigSysNum).NumWalkInsLT = NumWalkInsLT;
 
             if (NumCasesLT > 0) {
-                // Find lowest design evap T
-                // Sum rated capacity of all LT cases on system
-                for (int caseIndex = 1; caseIndex <= NumCasesLT; ++caseIndex) {
-                    // mark all cases on system as used by this system - checking for unused or non-unique cases
-                    int CaseNum = TransSystem(TransRefrigSysNum).CaseNumLT(caseIndex);
-                    ++RefrigCase(CaseNum).NumSysAttach;
-                    NominalTotalCaseCapLT += RefrigCase(CaseNum).DesignRatedCap;
-                    TransSystem(TransRefrigSysNum).RefInventory += RefrigCase(CaseNum).DesignRefrigInventory;
-                    if (caseIndex == 1) { // look for lowest case design evap T for system
-                        TransSystem(TransRefrigSysNum).TEvapDesignLT = RefrigCase(CaseNum).EvapTempDesign;
-                    } else {
-                        TransSystem(TransRefrigSysNum).TEvapDesignLT =
-                            min(RefrigCase(CaseNum).EvapTempDesign, TransSystem(TransRefrigSysNum).TEvapDesignLT);
-                    }
-                } // CaseIndex=1,NumCases
-            } // NumcasesLT > 0
+                accumTransSysCases(TransSystem(TransRefrigSysNum).CaseNumLT,
+                                   NumCasesLT,
+                                   NominalTotalCaseCapLT,
+                                   TransSystem(TransRefrigSysNum).TEvapDesignLT,
+                                   TransSystem(TransRefrigSysNum).RefInventory);
+            }
 
             if (NumWalkInsLT > 0) {
-                for (int WalkInIndex = 1; WalkInIndex <= NumWalkInsLT; ++WalkInIndex) {
-                    int WalkInID = TransSystem(TransRefrigSysNum).WalkInNumLT(WalkInIndex);
-                    // mark all WalkIns on rack as used by this system (checking for unused or non-unique WalkIns)
-                    ++WalkIn(WalkInID).NumSysAttach;
-                    NominalTotalWalkInCapLT += WalkIn(WalkInID).DesignRatedCap;
-                    TransSystem(TransRefrigSysNum).RefInventory += WalkIn(WalkInID).DesignRefrigInventory;
-                    // Defrost capacity is treated differently by compressor racks and detailed systems,
-                    //  so this value may be adjusted (or warnings issued) after the walkin is assigned
-                    //  to either the rack or system.
-                    // for walkins served by detailed system, need capacity for both fluid and electric types.
-                    if (WalkIn(WalkInID).DefrostCapacity <= -98.0) {
-                        // - 99 used as a flag for blank input error message for detailed systems
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}Refrigeration:WalkIn=\"{}\", Defrost capacity must be greater than or equal to 0 W for "
-                                                           "electric and hotfluid defrost types",
-                                                           RoutineName,
-                                                           WalkIn(WalkInID).Name));
-                        ErrorsFound = true;
-                    }
-                    // Find design evaporating temperature for system by getting min design evap for ALL loads
-                    if ((WalkInIndex == 1) && (TransSystem(TransRefrigSysNum).NumCasesLT == 0)) {
-                        // note use walk in index, not walkinid here to get
-                        // first walkin on this suction group/system
-                        TransSystem(TransRefrigSysNum).TEvapDesignLT = WalkIn(WalkInID).TEvapDesign;
-                    } else {
-                        TransSystem(TransRefrigSysNum).TEvapDesignLT =
-                            min(WalkIn(WalkInID).TEvapDesign, TransSystem(TransRefrigSysNum).TEvapDesignLT);
-                    }
-                } // WalkInIndex=1,NumWalkIns
-            } // NumWalkInsMT > 0
+                accumTransSysWalkIns(TransSystem(TransRefrigSysNum).WalkInNumLT,
+                                     NumWalkInsLT,
+                                     NominalTotalWalkInCapLT,
+                                     TransSystem(TransRefrigSysNum).TEvapDesignLT,
+                                     TransSystem(TransRefrigSysNum).NumCasesLT,
+                                     TransSystem(TransRefrigSysNum).RefInventory);
+            }
 
             NominalTotalCoolingCap = NominalTotalCaseCapMT + NominalTotalCaseCapLT + NominalTotalWalkInCapMT + NominalTotalWalkInCapLT;
 
@@ -6665,44 +6033,22 @@ void GetRefrigerationInput(EnergyPlusData &state)
                                 EnergyPlus::format("{}{} {}\" : must be input.", RoutineName, CurrentModuleObject, cAlphaFieldNames(AlphaNum)));
                 ErrorsFound = true;
             } else { //     Entry for Alphas(AlphaNum) can be either a compressor name or a compressorlist name
-                int ListNum = Util::FindItemInList(Alphas(AlphaNum), CompressorLists);
-                int CompNum = Util::FindItemInList(Alphas(AlphaNum), Compressor);
-                if ((ListNum == 0) && (CompNum == 0)) { // name doesn't match either a compressor or a compressor list
-                    ShowSevereError(state,
-                                    EnergyPlus::format(R"({}{}, "{}", has an invalid or undefined value="{}".)",
-                                                       RoutineName,
-                                                       CurrentModuleObject,
-                                                       cAlphaFieldNames(AlphaNum),
-                                                       Alphas(AlphaNum)));
-                    ErrorsFound = true;
-                } else if ((ListNum != 0) && (CompNum != 0)) { // have compressor list and compressor with same name
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}{} {}, has a non-unique name used for both Compressor and CompressorList name: \"{}\".",
-                                                       RoutineName,
-                                                       CurrentModuleObject,
-                                                       cAlphaFieldNames(AlphaNum),
-                                                       Alphas(AlphaNum)));
-                    ErrorsFound = true;
-                } else if (ListNum != 0) {
-                    NumCompressorsSys = CompressorLists(ListNum).NumCompressors;
-                    TransSystem(TransRefrigSysNum).NumCompressorsHP = NumCompressorsSys;
-                    if (!allocated(TransSystem(TransRefrigSysNum).CompressorNumHP)) {
-                        TransSystem(TransRefrigSysNum).CompressorNumHP.allocate(NumCompressorsSys);
-                    }
-                    TransSystem(TransRefrigSysNum).CompressorNumHP({1, NumCompressorsSys}) =
-                        CompressorLists(ListNum).CompItemNum({1, NumCompressorsSys});
-                } else if (CompNum != 0) {
-                    NumCompressorsSys = 1;
-                    TransSystem(TransRefrigSysNum).NumCompressorsHP = 1;
-                    if (!allocated(TransSystem(TransRefrigSysNum).CompressorNumHP)) {
-                        TransSystem(TransRefrigSysNum).CompressorNumHP.allocate(NumCompressorsSys);
-                    }
-                    TransSystem(TransRefrigSysNum).CompressorNumHP(NumCompressorsSys) = CompNum;
-                }
+                lookupAndAssignCompressors(state,
+                                           ErrorsFound,
+                                           RoutineName,
+                                           CurrentModuleObject,
+                                           Alphas,
+                                           cAlphaFieldNames,
+                                           CompressorLists,
+                                           Compressor,
+                                           AlphaNum,
+                                           NumCompressorsSys,
+                                           TransSystem(TransRefrigSysNum).NumCompressorsHP,
+                                           TransSystem(TransRefrigSysNum).CompressorNumHP);
                 // Sum rated capacity of all HP compressors on system
                 NominalTotalCompCapHP = 0.0;
                 for (int CompIndex = 1; CompIndex <= NumCompressorsSys; ++CompIndex) {
-                    CompNum = TransSystem(TransRefrigSysNum).CompressorNumHP(CompIndex);
+                    int CompNum = TransSystem(TransRefrigSysNum).CompressorNumHP(CompIndex);
 
                     if (Compressor(CompNum).TransFlag) { //  Calculate nominal capacity of transcritical Compressor
                         Real64 GCOutletH = TransSystem(TransRefrigSysNum)
@@ -6752,44 +6098,22 @@ void GetRefrigerationInput(EnergyPlusData &state)
                                        cAlphaFieldNames(AlphaNum)));
             } else if ((!(lAlphaBlanks(AlphaNum))) && (TransSystem(TransRefrigSysNum).transSysType == TransSysType::TwoStage)) {
                 // TwoStage system with low pressure compressors specified
-                int ListNum = Util::FindItemInList(Alphas(AlphaNum), CompressorLists);
-                int CompNum = Util::FindItemInList(Alphas(AlphaNum), Compressor);
-                if ((ListNum == 0) && (CompNum == 0)) { // name doesn't match either a compressor or a compressor list
-                    ShowSevereError(state,
-                                    EnergyPlus::format(R"({}{}, "{}", has an invalid or undefined value="{}".)",
-                                                       RoutineName,
-                                                       CurrentModuleObject,
-                                                       cAlphaFieldNames(AlphaNum),
-                                                       Alphas(AlphaNum)));
-                    ErrorsFound = true;
-                } else if ((ListNum != 0) && (CompNum != 0)) { // have compressor list and compressor with same name
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}{} {}, has a non-unique name used for both Compressor and CompressorList name: \"{}\".",
-                                                       RoutineName,
-                                                       CurrentModuleObject,
-                                                       cAlphaFieldNames(AlphaNum),
-                                                       Alphas(AlphaNum)));
-                    ErrorsFound = true;
-                } else if (ListNum != 0) {
-                    NumCompressorsSys = CompressorLists(ListNum).NumCompressors;
-                    TransSystem(TransRefrigSysNum).NumCompressorsLP = NumCompressorsSys;
-                    if (!allocated(TransSystem(TransRefrigSysNum).CompressorNumLP)) {
-                        TransSystem(TransRefrigSysNum).CompressorNumLP.allocate(NumCompressorsSys);
-                    }
-                    TransSystem(TransRefrigSysNum).CompressorNumLP({1, NumCompressorsSys}) =
-                        CompressorLists(ListNum).CompItemNum({1, NumCompressorsSys});
-                } else if (CompNum != 0) {
-                    NumCompressorsSys = 1;
-                    TransSystem(TransRefrigSysNum).NumCompressorsLP = 1;
-                    if (!allocated(TransSystem(TransRefrigSysNum).CompressorNumLP)) {
-                        TransSystem(TransRefrigSysNum).CompressorNumLP.allocate(NumCompressorsSys);
-                    }
-                    TransSystem(TransRefrigSysNum).CompressorNumLP(NumCompressorsSys) = CompNum;
-                }
+                lookupAndAssignCompressors(state,
+                                           ErrorsFound,
+                                           RoutineName,
+                                           CurrentModuleObject,
+                                           Alphas,
+                                           cAlphaFieldNames,
+                                           CompressorLists,
+                                           Compressor,
+                                           AlphaNum,
+                                           NumCompressorsSys,
+                                           TransSystem(TransRefrigSysNum).NumCompressorsLP,
+                                           TransSystem(TransRefrigSysNum).CompressorNumLP);
                 // Sum rated capacity of all LP compressors on system
                 NominalTotalCompCapLP = 0.0;
                 for (int CompIndex = 1; CompIndex <= NumCompressorsSys; ++CompIndex) {
-                    CompNum = TransSystem(TransRefrigSysNum).CompressorNumLP(CompIndex);
+                    int CompNum = TransSystem(TransRefrigSysNum).CompressorNumLP(CompIndex);
                     if (TransSystem(TransRefrigSysNum).transSysType == TransSysType::TwoStage) { //  Calculate capacity of LP compressors
                         Compressor(CompNum).NomCap = Curve::CurveValue(state,
                                                                        Compressor(CompNum).CapacityCurvePtr,
@@ -6887,97 +6211,44 @@ void GetRefrigerationInput(EnergyPlusData &state)
             //  The pipe heat gains are also counted as cooling credit for the zone.
             //  Zone Id is only required if Sum UA Suction Piping >0.0
             //  Get the Zone and zone node numbers from the zone name entered by the user
+
             AlphaNum = 9; // Medium temperature suction piping
-            TransSystem(TransRefrigSysNum).SumUASuctionPipingMT = 0.0;
-            if (!lNumericBlanks(3) && !lAlphaBlanks(AlphaNum)) {
-                TransSystem(TransRefrigSysNum).SumUASuctionPipingMT = Numbers(3);
-                TransSystem(TransRefrigSysNum).SuctionPipeActualZoneNumMT = Util::FindItemInList(Alphas(AlphaNum), state.dataHeatBal->Zone);
-                TransSystem(TransRefrigSysNum).SuctionPipeZoneNodeNumMT =
-                    DataZoneEquipment::GetSystemNodeNumberForZone(state, TransSystem(TransRefrigSysNum).SuctionPipeActualZoneNumMT);
-                if (TransSystem(TransRefrigSysNum).SuctionPipeZoneNodeNumMT == 0) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(R"({}{}="{}", System Node Number not found for {} = "{}" even though {} is greater than zero.)",
-                                           RoutineName,
-                                           CurrentModuleObject,
-                                           TransSystem(TransRefrigSysNum).Name,
-                                           cAlphaFieldNames(AlphaNum),
-                                           Alphas(AlphaNum),
-                                           cNumericFieldNames(3)));
-                    ShowContinueError(state,
-                                      "  The medium temperature suction piping heat gain cannot be calculated unless a Zone is defined to "
-                                      "determine the environmental temperature surrounding the piping.");
-                    ErrorsFound = true;
-                } else {
-                    state.dataRefrigCase->RefrigPresentInZone(TransSystem(TransRefrigSysNum).SuctionPipeActualZoneNumMT) = true;
-                }
-            } else if (!lNumericBlanks(3) && lAlphaBlanks(AlphaNum)) {
-                ShowWarningError(state,
-                                 EnergyPlus::format("{}{}=\"{}\" {} not found even though {} is greater than zero.",
-                                                    RoutineName,
-                                                    CurrentModuleObject,
-                                                    TransSystem(TransRefrigSysNum).Name,
-                                                    cAlphaFieldNames(AlphaNum),
-                                                    cNumericFieldNames(3)));
-                ShowContinueError(state,
-                                  "  The medium temperature suction piping heat gain will not be calculated unless a Zone is defined to "
-                                  "determine the environmental temperature surrounding the piping.");
-            } else if (lNumericBlanks(3) && !lAlphaBlanks(AlphaNum)) {
-                ShowWarningError(
-                    state,
-                    EnergyPlus::format("{}{}=\"{}\" {} will not be used and suction piping heat gain will not be calculated because {} was blank.",
-                                       RoutineName,
-                                       CurrentModuleObject,
-                                       TransSystem(TransRefrigSysNum).Name,
-                                       cAlphaFieldNames(AlphaNum),
-                                       cNumericFieldNames(3)));
-            } // Medium temperature suction piping heat gains
+            readSuctionPiping(state,
+                              ErrorsFound,
+                              RoutineName,
+                              CurrentModuleObject,
+                              Numbers,
+                              lNumericBlanks,
+                              Alphas,
+                              lAlphaBlanks,
+                              cAlphaFieldNames,
+                              cNumericFieldNames,
+                              AlphaNum,
+                              3,
+                              TransSystem(TransRefrigSysNum).Name,
+                              TransSystem(TransRefrigSysNum).SumUASuctionPipingMT,
+                              TransSystem(TransRefrigSysNum).SuctionPipeActualZoneNumMT,
+                              TransSystem(TransRefrigSysNum).SuctionPipeZoneNodeNumMT,
+                              "medium temperature");
 
             AlphaNum = 10; // Low temperature suction piping
-            TransSystem(TransRefrigSysNum).SumUASuctionPipingLT = 0.0;
-            if (!lNumericBlanks(4) && !lAlphaBlanks(AlphaNum)) {
-                TransSystem(TransRefrigSysNum).SumUASuctionPipingLT = Numbers(4);
-                TransSystem(TransRefrigSysNum).SuctionPipeActualZoneNumLT = Util::FindItemInList(Alphas(AlphaNum), state.dataHeatBal->Zone);
-                TransSystem(TransRefrigSysNum).SuctionPipeZoneNodeNumLT =
-                    DataZoneEquipment::GetSystemNodeNumberForZone(state, TransSystem(TransRefrigSysNum).SuctionPipeActualZoneNumLT);
-                if (TransSystem(TransRefrigSysNum).SuctionPipeZoneNodeNumLT == 0) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format(R"({}{}="{}", System Node Number not found for {} = "{}" even though {} is greater than zero.)",
-                                           RoutineName,
-                                           CurrentModuleObject,
-                                           TransSystem(TransRefrigSysNum).Name,
-                                           cAlphaFieldNames(AlphaNum),
-                                           Alphas(AlphaNum),
-                                           cNumericFieldNames(4)));
-                    ShowContinueError(state,
-                                      "  The low temperature suction piping heat gain cannot be calculated unless a Zone is defined to "
-                                      "determine the environmental temperature surrounding the piping.");
-                    ErrorsFound = true;
-                } else {
-                    state.dataRefrigCase->RefrigPresentInZone(TransSystem(TransRefrigSysNum).SuctionPipeActualZoneNumLT) = true;
-                }
-            } else if (!lNumericBlanks(4) && lAlphaBlanks(AlphaNum)) {
-                ShowWarningError(state,
-                                 EnergyPlus::format("{}{}=\"{}\" {} not found even though {} is greater than zero.",
-                                                    RoutineName,
-                                                    CurrentModuleObject,
-                                                    TransSystem(TransRefrigSysNum).Name,
-                                                    cAlphaFieldNames(AlphaNum),
-                                                    cNumericFieldNames(4)));
-                ShowContinueError(state,
-                                  "  The low temperature suction piping heat gain will not be calculated unless a Zone is defined to determine "
-                                  "the environmental temperature surrounding the piping.");
-            } else if (lNumericBlanks(4) && !lAlphaBlanks(AlphaNum)) {
-                ShowWarningError(
-                    state,
-                    EnergyPlus::format("{}{}=\"{}\" {} will not be used and suction piping heat gain will not be calculated because {} was blank.",
-                                       RoutineName,
-                                       CurrentModuleObject,
-                                       TransSystem(TransRefrigSysNum).Name,
-                                       cAlphaFieldNames(AlphaNum),
-                                       cNumericFieldNames(4)));
-            } // Low temperature suction piping heat gains
+            readSuctionPiping(state,
+                              ErrorsFound,
+                              RoutineName,
+                              CurrentModuleObject,
+                              Numbers,
+                              lNumericBlanks,
+                              Alphas,
+                              lAlphaBlanks,
+                              cAlphaFieldNames,
+                              cNumericFieldNames,
+                              AlphaNum,
+                              4,
+                              TransSystem(TransRefrigSysNum).Name,
+                              TransSystem(TransRefrigSysNum).SumUASuctionPipingLT,
+                              TransSystem(TransRefrigSysNum).SuctionPipeActualZoneNumLT,
+                              TransSystem(TransRefrigSysNum).SuctionPipeZoneNodeNumLT,
+                              "low temperature");
 
             AlphaNum = 11;
             if (!lAlphaBlanks(AlphaNum)) {
@@ -7014,6 +6285,11 @@ void GetRefrigerationInput(EnergyPlusData &state)
     lAlphaBlanks.deallocate();
     lNumericBlanks.deallocate();
 
+    // Helper lambda: iterate a 1-based Array1D collection checking NumSysAttach.
+    // Items with NumSysAttach < 1 are counted as unused and optionally listed.
+    // The caller supplies onMultiple (called with the item index when NumSysAttach > 1)
+    // and warnSummary (called with unusedCount when unusedCount > 0 and
+    // !DisplayExtraWarnings) so that per-type summary messages are preserved exactly.
     if (state.dataRefrigCase->NumSimulationCases > 0) {
         // Find unused and non-unique display case objects to report in eio and err file and sum
         //    all HVAC RA fractions and write error message if greater than 1 for any zone
@@ -7042,195 +6318,145 @@ void GetRefrigerationInput(EnergyPlusData &state)
         // check for cases not connected to systems and cases connected
         // more than once (twice in a system or to more than one system)
 
-        state.dataRefrigCase->NumUnusedRefrigCases = 0;
-        for (int CaseNum = 1; CaseNum <= state.dataRefrigCase->NumSimulationCases; ++CaseNum) {
-            if (RefrigCase(CaseNum).NumSysAttach == 1) {
-                continue;
-            }
-            if (RefrigCase(CaseNum).NumSysAttach < 1) {
-                ++state.dataRefrigCase->NumUnusedRefrigCases;
-                if (state.dataGlobal->DisplayExtraWarnings) {
-                    //  individual case names listed if DataGlobals::DisplayExtraWarnings option selected
-                    ShowWarningError(state, EnergyPlus::format("{}: Refrigeration:Case=\"{}\" unused. ", RoutineName, RefrigCase(CaseNum).Name));
-                } // display extra warnings - give a list of unused cases
-            } // unused case
-            if (RefrigCase(CaseNum).NumSysAttach > 1) {
+        checkUnusedComponents(
+            state,
+            RoutineName,
+            RefrigCase,
+            state.dataRefrigCase->NumSimulationCases,
+            state.dataRefrigCase->NumUnusedRefrigCases,
+            "Refrigeration:Case",
+            [&](int CaseNum) {
                 ErrorsFound = true;
                 ShowSevereError(state,
                                 EnergyPlus::format(
                                     "{}: Refrigeration:Case=\"{}\", Same refrigerated case name referenced ", RoutineName, RefrigCase(CaseNum).Name));
                 ShowContinueError(state, " by more than one refrigeration system and/or compressor rack.");
-            } // if looking for same case attached to multiple systems/racks
-        } // NumSimulationCases
-
-        if ((state.dataRefrigCase->NumUnusedRefrigCases > 0) && (!state.dataGlobal->DisplayExtraWarnings)) {
-            //  write to error file,
-            //  summary number of unused cases given if DataGlobals::DisplayExtraWarnings option not selected
-            ShowWarningError(state,
-                             EnergyPlus::format("Refrigeration:Case -> {} unused refrigerated case(s) found during input processing.",
-                                                state.dataRefrigCase->NumUnusedRefrigCases));
-            ShowContinueError(state, "  These refrigerated cases are in the input file but are not connected to a ");
-            ShowContinueError(state, "  Refrigeration:CompressorRack, Refrigeration:System, or Refrigeration:SecondarySystem object.");
-            ShowContinueError(state, "  These unused refrigeration cases will not be simulated.");
-            ShowContinueError(state, "  Use Output:Diagnostics,DisplayUnusedObjects; to see them. ");
-        } // NumUnusedRefrigCases
+            },
+            [&](int n) {
+                ShowWarningError(state, EnergyPlus::format("Refrigeration:Case -> {} unused refrigerated case(s) found during input processing.", n));
+                ShowContinueError(state, "  These refrigerated cases are in the input file but are not connected to a ");
+                ShowContinueError(state, "  Refrigeration:CompressorRack, Refrigeration:System, or Refrigeration:SecondarySystem object.");
+                ShowContinueError(state, "  These unused refrigeration cases will not be simulated.");
+                ShowContinueError(state, "  Use Output:Diagnostics,DisplayUnusedObjects; to see them. ");
+            });
     } // numsimulation cases > 0
 
     if (state.dataRefrigCase->NumSimulationCompressors > 0) {
         // check for compressors not connected to systems and compressors connected more than once
         // (twice in a system or to more than one system)
-        state.dataRefrigCase->NumUnusedCompressors = 0;
-        for (int CompNum = 1; CompNum <= state.dataRefrigCase->NumSimulationCompressors; ++CompNum) {
-            if (Compressor(CompNum).NumSysAttach == 1) {
-                continue;
-            }
-            if (Compressor(CompNum).NumSysAttach < 1) {
-                ++state.dataRefrigCase->NumUnusedCompressors;
-                if (state.dataGlobal->DisplayExtraWarnings) {
-                    //  individual compressor names listed if DataGlobals::DisplayExtraWarnings option selected
-                    ShowWarningError(state,
-                                     EnergyPlus::format("{}: Refrigeration:Compressor=\"{}\" unused. ", RoutineName, Compressor(CompNum).Name));
-                } // display extra warnings - give a list of unused compressors
-            } // unused compressor
-            if (Compressor(CompNum).NumSysAttach > 1) {
+        checkUnusedComponents(
+            state,
+            RoutineName,
+            Compressor,
+            state.dataRefrigCase->NumSimulationCompressors,
+            state.dataRefrigCase->NumUnusedCompressors,
+            "Refrigeration:Compressor",
+            [&](int CompNum) {
                 ErrorsFound = true;
                 ShowSevereError(state,
                                 EnergyPlus::format("{}: Refrigeration:Compressor=\"{}\", Same refrigeration compressor name referenced",
                                                    RoutineName,
                                                    Compressor(CompNum).Name));
                 ShowContinueError(state, " by more than one refrigeration system.");
-            } // looking for same compressor attached to multiple systems/racks
-        } // NumSimulationCompressors
-
-        if ((state.dataRefrigCase->NumUnusedCompressors > 0) && (!state.dataGlobal->DisplayExtraWarnings)) {
-            //  write to error file,
-            //  summary number of unused compressors given if DataGlobals::DisplayExtraWarnings option not selected
-            ShowWarningError(state,
-                             EnergyPlus::format("Refrigeration:Compressor -> {} unused refrigeration compressor(s) found during input processing.",
-                                                state.dataRefrigCase->NumUnusedCompressors));
-            ShowContinueError(state,
-                              "  Those refrigeration compressors are in the input file but are not connected to a Refrigeration:System object.");
-            ShowContinueError(state, "   These unused refrigeration compressors will not be simulated.");
-            ShowContinueError(state, "   Use Output:Diagnostics,DisplayUnusedObjects; to see them. ");
-        } // NumUnusedCompressors
+            },
+            [&](int n) {
+                ShowWarningError(
+                    state, EnergyPlus::format("Refrigeration:Compressor -> {} unused refrigeration compressor(s) found during input processing.", n));
+                ShowContinueError(state,
+                                  "  Those refrigeration compressors are in the input file but are not connected to a Refrigeration:System object.");
+                ShowContinueError(state, "   These unused refrigeration compressors will not be simulated.");
+                ShowContinueError(state, "   Use Output:Diagnostics,DisplayUnusedObjects; to see them. ");
+            });
     } // NumSimulationCompressors > 0
 
     int NumUnusedWalkIns = 0;
     if (state.dataRefrigCase->NumSimulationWalkIns > 0) {
         // check for refrigeration WalkIns not connected to any systems and
         //  refrigeration WalkIns connected more than once
-        for (int WalkInNum = 1; WalkInNum <= state.dataRefrigCase->NumSimulationWalkIns; ++WalkInNum) {
-            if (WalkIn(WalkInNum).NumSysAttach == 1) {
-                continue;
-            }
-            if (WalkIn(WalkInNum).NumSysAttach < 1) {
-                ++NumUnusedWalkIns;
-                if (state.dataGlobal->DisplayExtraWarnings) {
-                    //  individual walkin names listed if DataGlobals::DisplayExtraWarnings option selected
-                    ShowWarningError(state, EnergyPlus::format("{}: Refrigeration:WalkIn=\"{}\" unused. ", RoutineName, WalkIn(WalkInNum).Name));
-                } // display extra warnings - give a list of unused WalkIns
-            } // unused walkin
-            if (WalkIn(WalkInNum).NumSysAttach > 1) {
+        checkUnusedComponents(
+            state,
+            RoutineName,
+            WalkIn,
+            state.dataRefrigCase->NumSimulationWalkIns,
+            NumUnusedWalkIns,
+            "Refrigeration:WalkIn",
+            [&](int WalkInNum) {
                 ErrorsFound = true;
                 ShowSevereError(state,
                                 EnergyPlus::format("{}: Refrigeration:WalkIn=\"{}\", Same Refrigeration WalkIn name referenced",
                                                    RoutineName,
                                                    WalkIn(WalkInNum).Name));
                 ShowContinueError(state, " by more than one refrigeration system and/or compressor rack.");
-            } // if looking for same walk in attached to multiple systems/racks
-        } // NumSimulationWalkIns
-
-        if ((NumUnusedWalkIns > 0) && (!state.dataGlobal->DisplayExtraWarnings)) {
-            //  write to error file,
-            //  summary number of unused walkins given if DataGlobals::DisplayExtraWarnings option not selected
-            ShowWarningError(state,
-                             EnergyPlus::format("{}Refrigeration:WalkIn -> {} unused refrigeration WalkIns found during input processing.",
-                                                RoutineName,
-                                                NumUnusedWalkIns));
-            ShowContinueError(state, "   Those refrigeration WalkIns are in the input file but are not connected to a ");
-            ShowContinueError(state, "   Refrigeration:CompressorRack, Refrigeration:System or Refrigeration:SecondarySystem object.");
-            ShowContinueError(state, "   These unused refrigeration WalkIns will not be simulated.");
-            ShowContinueError(state, "   Use Output:Diagnostics,DisplayUnusedObjects; to see them. ");
-        } // NumUnusedWalkIns
+            },
+            [&](int n) {
+                ShowWarningError(
+                    state,
+                    EnergyPlus::format("{}Refrigeration:WalkIn -> {} unused refrigeration WalkIns found during input processing.", RoutineName, n));
+                ShowContinueError(state, "   Those refrigeration WalkIns are in the input file but are not connected to a ");
+                ShowContinueError(state, "   Refrigeration:CompressorRack, Refrigeration:System or Refrigeration:SecondarySystem object.");
+                ShowContinueError(state, "   These unused refrigeration WalkIns will not be simulated.");
+                ShowContinueError(state, "   Use Output:Diagnostics,DisplayUnusedObjects; to see them. ");
+            });
     } // NumSimulationWalkIns > 0
 
     if (state.dataRefrigCase->NumSimulationRefrigAirChillers > 0) {
         // check for air chillers not connected to any systems and
         //  air chillers connected more than once
-        state.dataRefrigCase->NumUnusedCoils = 0;
-        for (int CoilNum = 1; CoilNum <= state.dataRefrigCase->NumSimulationRefrigAirChillers; ++CoilNum) {
-            if (WarehouseCoil(CoilNum).NumSysAttach == 1) {
-                continue;
-            }
-            if (WarehouseCoil(CoilNum).NumSysAttach < 1) {
-                ++NumUnusedWalkIns;
-                if (state.dataGlobal->DisplayExtraWarnings) {
-                    //  individual walkin names listed if DataGlobals::DisplayExtraWarnings option selected
-                    ShowWarningError(state,
-                                     EnergyPlus::format("{}: Refrigeration:AirChiller=\"{}\" unused. ", RoutineName, WarehouseCoil(CoilNum).Name));
-                } // display extra warnings - give a list of unused chillers
-            } // unused chiller
-            if (WarehouseCoil(CoilNum).NumSysAttach > 1) {
+        checkUnusedComponents(
+            state,
+            RoutineName,
+            WarehouseCoil,
+            state.dataRefrigCase->NumSimulationRefrigAirChillers,
+            state.dataRefrigCase->NumUnusedCoils,
+            "Refrigeration:AirChiller",
+            [&](int CoilNum) {
                 ErrorsFound = true;
                 ShowSevereError(state,
                                 EnergyPlus::format("{}: Refrigeration:AirChiller=\"{}\", Same Refrigeration Air Chiller name referenced",
                                                    RoutineName,
                                                    WarehouseCoil(CoilNum).Name));
                 ShowContinueError(state, " by more than one refrigeration system and/or compressor rack.");
-            } // if looking for same walk in attached to multiple systems/racks
-        } // NumSimulationRefrigAirchillers
-
-        if ((state.dataRefrigCase->NumUnusedCoils > 0) && (!state.dataGlobal->DisplayExtraWarnings)) {
-            //  write to error file,
-            //  summary number of unused air chillers given if DataGlobals::DisplayExtraWarnings option not selected
-            ShowWarningError(state,
-                             EnergyPlus::format("{}Refrigeration:AirChiller -> {} unused refrigeration air chillers found during input processing.",
-                                                RoutineName,
-                                                state.dataRefrigCase->NumUnusedCoils));
-            ShowContinueError(state, "   Those refrigeration air chillers are in the input file but are not connected to a ");
-            ShowContinueError(state, "   Refrigeration:CompressorRack, Refrigeration:System or Refrigeration:SecondarySystem object.");
-            ShowContinueError(state, "   These unused refrigeration air chillers will not be simulated.");
-            ShowContinueError(state, "   Use Output:Diagnostics,DisplayUnusedObjects; to see them. ");
-        } // NumUnusedAirChllerss
+            },
+            [&](int n) {
+                ShowWarningError(
+                    state,
+                    EnergyPlus::format(
+                        "{}Refrigeration:AirChiller -> {} unused refrigeration air chillers found during input processing.", RoutineName, n));
+                ShowContinueError(state, "   Those refrigeration air chillers are in the input file but are not connected to a ");
+                ShowContinueError(state, "   Refrigeration:CompressorRack, Refrigeration:System or Refrigeration:SecondarySystem object.");
+                ShowContinueError(state, "   These unused refrigeration air chillers will not be simulated.");
+                ShowContinueError(state, "   Use Output:Diagnostics,DisplayUnusedObjects; to see them. ");
+            });
     } // NumSimulationAirChillers > 0
 
     if (state.dataRefrigCase->NumSimulationSecondarySystems > 0) {
         // check for refrigeration Secondarys not connected to detailed systems and
         //  refrigeration Secondarys connected more than once
-        state.dataRefrigCase->NumUnusedSecondarys = 0;
-        for (int SecondaryNum = 1; SecondaryNum <= state.dataRefrigCase->NumSimulationSecondarySystems; ++SecondaryNum) {
-            if (Secondary(SecondaryNum).NumSysAttach == 1) {
-                continue;
-            }
-            if (Secondary(SecondaryNum).NumSysAttach < 1) {
-                ++state.dataRefrigCase->NumUnusedSecondarys;
-                if (state.dataGlobal->DisplayExtraWarnings) {
-                    //  individual secondary names listed if DataGlobals::DisplayExtraWarnings option selected
-                    ShowWarningError(state,
-                                     EnergyPlus::format("{}: Refrigeration:Secondary=\"{}\" unused. ", RoutineName, Secondary(SecondaryNum).Name));
-                } // display extra warnings - give a list of unused Secondaries
-            } // unused secondary
-            if (Secondary(SecondaryNum).NumSysAttach > 1) {
+        checkUnusedComponents(
+            state,
+            RoutineName,
+            Secondary,
+            state.dataRefrigCase->NumSimulationSecondarySystems,
+            state.dataRefrigCase->NumUnusedSecondarys,
+            "Refrigeration:Secondary",
+            [&](int SecondaryNum) {
                 ErrorsFound = true;
                 ShowSevereError(state,
                                 EnergyPlus::format("{}: Refrigeration:Secondary=\"{}\", Same Refrigeration Secondary name referenced",
                                                    RoutineName,
                                                    Secondary(SecondaryNum).Name));
                 ShowContinueError(state, "   by more than one refrigeration system");
-            } // looking for same secondary loop attached to multiple systems/racks
-        } // NumSimulationSecondarys
-
-        if ((state.dataRefrigCase->NumUnusedSecondarys > 0) && (!state.dataGlobal->DisplayExtraWarnings)) {
-            //  write to error file,
-            //  summary number of unused secondaries given if DataGlobals::DisplayExtraWarnings option not selected
-            ShowWarningError(state,
-                             EnergyPlus::format("{}Refrigeration:Secondary -> {} unused refrigeration Secondary Loops found during input processing.",
-                                                RoutineName,
-                                                state.dataRefrigCase->NumUnusedSecondarys));
-            ShowContinueError(state, "  Those refrigeration Secondary Loops are in the input file but are not connected to a refrigeration system.");
-            ShowContinueError(state, "   These unused refrigeration secondaries will not be simulated.");
-            ShowContinueError(state, "   Use Output:Diagnostics,DisplayUnusedObjects; to see them. ");
-        } // NumUnusedSecondarys
+            },
+            [&](int n) {
+                ShowWarningError(
+                    state,
+                    EnergyPlus::format(
+                        "{}Refrigeration:Secondary -> {} unused refrigeration Secondary Loops found during input processing.", RoutineName, n));
+                ShowContinueError(state,
+                                  "  Those refrigeration Secondary Loops are in the input file but are not connected to a refrigeration system.");
+                ShowContinueError(state, "   These unused refrigeration secondaries will not be simulated.");
+                ShowContinueError(state, "   Use Output:Diagnostics,DisplayUnusedObjects; to see them. ");
+            });
     } // NumSimulationSecondarySystems > 0
 
     if (state.dataRefrigCase->NumRefrigCondensers > 0) {
@@ -7238,67 +6464,45 @@ void GetRefrigerationInput(EnergyPlusData &state)
         //     - determines number of loops through refrigeration simulation
         //       because of dependence of performance on total condenser load
         state.dataRefrigCase->NumSimulationSharedCondensers = 0;
-        state.dataRefrigCase->NumUnusedCondensers = 0;
-        for (int CondNum = 1; CondNum <= state.dataRefrigCase->NumRefrigCondensers; ++CondNum) {
-            if (Condenser(CondNum).NumSysAttach == 1) {
-                continue;
-            }
-            if (Condenser(CondNum).NumSysAttach < 1) {
-                ++state.dataRefrigCase->NumUnusedCondensers;
-                if (state.dataGlobal->DisplayExtraWarnings) {
-                    //  individual condenser names listed if DataGlobals::DisplayExtraWarnings option selected
-                    ShowWarningError(state, EnergyPlus::format("{}: Refrigeration:Condenser=\"{}\" unused. ", RoutineName, Condenser(CondNum).Name));
-                } // display extra warnings - give a list of unused condensers
-            } // unused condenser
-            if (Condenser(CondNum).NumSysAttach > 1) {
-                ++state.dataRefrigCase->NumSimulationSharedCondensers;
-            } // looking for shared condensers
-        } // CondNum
-
-        if ((state.dataRefrigCase->NumUnusedCondensers > 0) && (!state.dataGlobal->DisplayExtraWarnings)) {
-            //  write to error file,
-            //  summary number of unused condensers given if DataGlobals::DisplayExtraWarnings option not selected
-            ShowWarningError(state,
-                             EnergyPlus::format("{}Refrigeration condenser -> {} unused refrigeration condensers found during input processing.",
-                                                RoutineName,
-                                                state.dataRefrigCase->NumUnusedCondensers));
-            ShowContinueError(state, "  Those refrigeration condensers are in the input file but are not connected to a refrigeration system.");
-            ShowContinueError(state, "   These unused refrigeration condensers will not be simulated.");
-            ShowContinueError(state, "   Use Output:Diagnostics,DisplayUnusedObjects; to see them. ");
-        } // NumUnusedCondensers and displayextra warnings
+        checkUnusedComponents(
+            state,
+            RoutineName,
+            Condenser,
+            state.dataRefrigCase->NumRefrigCondensers,
+            state.dataRefrigCase->NumUnusedCondensers,
+            "Refrigeration:Condenser",
+            [&](int /*CondNum*/) { ++state.dataRefrigCase->NumSimulationSharedCondensers; },
+            [&](int n) {
+                ShowWarningError(state,
+                                 EnergyPlus::format("{}Refrigeration condenser -> {} unused refrigeration condensers found during input processing.",
+                                                    RoutineName,
+                                                    n));
+                ShowContinueError(state, "  Those refrigeration condensers are in the input file but are not connected to a refrigeration system.");
+                ShowContinueError(state, "   These unused refrigeration condensers will not be simulated.");
+                ShowContinueError(state, "   Use Output:Diagnostics,DisplayUnusedObjects; to see them. ");
+            });
     } // DataHeatBalance::NumRefrigCondensers > 0
 
     if (state.dataRefrigCase->NumSimulationGasCooler > 0) {
         // Check for presence of shared gas coolers and for unused gas coolers
         state.dataRefrigCase->NumSimulationSharedGasCoolers = 0;
-        state.dataRefrigCase->NumUnusedGasCoolers = 0;
-        for (int GCNum = 1; GCNum <= state.dataRefrigCase->NumSimulationGasCooler; ++GCNum) {
-            if (GasCooler(GCNum).NumSysAttach == 1) {
-                continue;
-            }
-            if (GasCooler(GCNum).NumSysAttach < 1) {
-                ++state.dataRefrigCase->NumUnusedGasCoolers;
-                if (state.dataGlobal->DisplayExtraWarnings) {
-                    //  individual gas cooler names listed if DataGlobals::DisplayExtraWarnings option selected
-                    ShowWarningError(state, EnergyPlus::format("{}: Refrigeration:GasCooler=\"{}\" unused. ", RoutineName, GasCooler(GCNum).Name));
-                } // display extra warnings - give a list of unused gas coolers
-            } // unused gas cooler
-            if (GasCooler(GCNum).NumSysAttach > 1) {
-                ++state.dataRefrigCase->NumSimulationSharedGasCoolers;
-            } // looking for shared gas coolers
-        } // GCNum
-
-        if ((state.dataRefrigCase->NumUnusedGasCoolers > 0) && (!state.dataGlobal->DisplayExtraWarnings)) {
-            //  write to error file,
-            //  summary number of unused gas coolers given if DataGlobals::DisplayExtraWarnings option not selected
-            ShowWarningError(state,
-                             EnergyPlus::format("{}Refrigeration gas cooler -> {} unused refrigeration gas cooler(s) found during input processing.",
-                                                RoutineName,
-                                                state.dataRefrigCase->NumUnusedGasCoolers));
-            ShowContinueError(state, "  These refrigeration gas coolers are in the input file but are not connected to a refrigeration system.");
-            ShowContinueError(state, "  These unused refrigeration gas coolers will not be simulated.");
-            ShowContinueError(state, "  Use Output:Diagnostics,DisplayUnusedObjects; to see them. ");
-        } // NumUnusedGasCoolers and displayextra warnings
+        checkUnusedComponents(
+            state,
+            RoutineName,
+            GasCooler,
+            state.dataRefrigCase->NumSimulationGasCooler,
+            state.dataRefrigCase->NumUnusedGasCoolers,
+            "Refrigeration:GasCooler",
+            [&](int /*GCNum*/) { ++state.dataRefrigCase->NumSimulationSharedGasCoolers; },
+            [&](int n) {
+                ShowWarningError(
+                    state,
+                    EnergyPlus::format(
+                        "{}Refrigeration gas cooler -> {} unused refrigeration gas cooler(s) found during input processing.", RoutineName, n));
+                ShowContinueError(state, "  These refrigeration gas coolers are in the input file but are not connected to a refrigeration system.");
+                ShowContinueError(state, "  These unused refrigeration gas coolers will not be simulated.");
+                ShowContinueError(state, "  Use Output:Diagnostics,DisplayUnusedObjects; to see them. ");
+            });
     } // NumSimulationGasCooler > 0
 
     // echo input to eio file.
@@ -7307,6 +6511,30 @@ void GetRefrigerationInput(EnergyPlusData &state)
     if (ErrorsFound) {
         ShowFatalError(state, EnergyPlus::format("{} Previous errors cause program termination", RoutineName));
     }
+}
+
+// Helper: set up the 5 standard output variables for a single refrigeration compressor.
+static void
+setupCompressorOutputVars(EnergyPlusData &state, RefrigCompressorData &comp, const std::string &prefix, OutputProcessor::TimeStepType tsType)
+{
+    SetupOutputVariable(state, prefix + " Electricity Rate", Constant::Units::W, comp.Power, tsType, OutputProcessor::StoreType::Average, comp.Name);
+    SetupOutputVariable(state,
+                        prefix + " Electricity Energy",
+                        Constant::Units::J,
+                        comp.ElecConsumption,
+                        tsType,
+                        OutputProcessor::StoreType::Sum,
+                        comp.Name,
+                        Constant::eResource::Electricity,
+                        OutputProcessor::Group::Plant,
+                        OutputProcessor::EndUseCat::Refrigeration,
+                        comp.EndUseSubcategory);
+    SetupOutputVariable(
+        state, prefix + " Heat Transfer Rate", Constant::Units::W, comp.Capacity, tsType, OutputProcessor::StoreType::Average, comp.Name);
+    SetupOutputVariable(
+        state, prefix + " Heat Transfer Energy", Constant::Units::J, comp.CoolingEnergy, tsType, OutputProcessor::StoreType::Sum, comp.Name);
+    SetupOutputVariable(
+        state, prefix + " Runtime Fraction", Constant::Units::None, comp.LoadFactor, tsType, OutputProcessor::StoreType::Average, comp.Name);
 }
 
 void SetupReportInput(EnergyPlusData &state)
@@ -8172,185 +7400,98 @@ void SetupReportInput(EnergyPlusData &state)
         for (int secondNum = 1; secondNum <= state.dataRefrigCase->NumSimulationSecondarySystems; ++secondNum) {
             auto &secondary = Secondary(secondNum);
             if (secondary.NumSysAttach == 1) {
-                if (secondary.CoilFlag) { // secondary system serves chillers and is solved on HVAC time step
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Secondary Loop Pump Electricity Rate",
-                                        Constant::Units::W,
-                                        secondary.PumpPowerTotal,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        secondary.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Secondary Loop Pump Electricity Energy",
-                                        Constant::Units::J,
-                                        secondary.PumpElecEnergyTotal,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        secondary.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        secondary.EndUseSubcategory);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Secondary Loop Load Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        secondary.TotalRefrigLoad,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        secondary.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Secondary Loop Load Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        secondary.TotalRefrigEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        secondary.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Secondary Loop Total Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        secondary.TotalCoolingLoad,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        secondary.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Secondary Loop Total Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        secondary.TotalCoolingEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        secondary.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Secondary Loop Estimated Refrigerant Inventory Mass",
-                                        Constant::Units::kg,
-                                        secondary.RefInventory,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        secondary.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Secondary Loop Volume Flow Rate",
-                                        Constant::Units::m3_s,
-                                        secondary.FlowVolActual,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        secondary.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Secondary Loop Pipe Heat Gain Rate",
-                                        Constant::Units::W,
-                                        secondary.DistPipeHeatGain,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        secondary.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Secondary Loop Pipe Heat Gain Energy",
-                                        Constant::Units::J,
-                                        secondary.DistPipeHeatGainEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        secondary.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Secondary Loop Receiver Heat Gain Rate",
-                                        Constant::Units::W,
-                                        secondary.ReceiverHeatGain,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        secondary.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Secondary Loop Receiver Heat Gain Energy",
-                                        Constant::Units::J,
-                                        secondary.ReceiverHeatGainEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        secondary.Name);
-                } else { // Secondary loop serves cases and walk-ins on zone(load) time step
-                    SetupOutputVariable(state,
-                                        "Refrigeration Secondary Loop Pump Electricity Rate",
-                                        Constant::Units::W,
-                                        secondary.PumpPowerTotal,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        secondary.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Secondary Loop Pump Electricity Energy",
-                                        Constant::Units::J,
-                                        secondary.PumpElecEnergyTotal,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        secondary.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        secondary.EndUseSubcategory);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Secondary Loop Load Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        secondary.TotalRefrigLoad,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        secondary.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Secondary Loop Load Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        secondary.TotalRefrigEnergy,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        secondary.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Secondary Loop Total Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        secondary.TotalCoolingLoad,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        secondary.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Secondary Loop Total Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        secondary.TotalCoolingEnergy,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        secondary.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Secondary Loop Estimated Refrigerant Inventory Mass",
-                                        Constant::Units::kg,
-                                        secondary.RefInventory,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        secondary.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Secondary Loop Volume Flow Rate",
-                                        Constant::Units::m3_s,
-                                        secondary.FlowVolActual,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        secondary.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Secondary Loop Pipe Heat Gain Rate",
-                                        Constant::Units::W,
-                                        secondary.DistPipeHeatGain,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        secondary.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Secondary Loop Pipe Heat Gain Energy",
-                                        Constant::Units::J,
-                                        secondary.DistPipeHeatGainEnergy,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        secondary.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Secondary Loop Receiver Heat Gain Rate",
-                                        Constant::Units::W,
-                                        secondary.ReceiverHeatGain,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        secondary.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Secondary Loop Receiver Heat Gain Energy",
-                                        Constant::Units::J,
-                                        secondary.ReceiverHeatGainEnergy,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        secondary.Name);
-                } // NOT coilflag so on Zone timestep
+                // CoilFlag: serves chillers on HVAC (System) time step; otherwise cases/walkins on Zone time step
+                const std::string secPrefix = secondary.CoilFlag ? "Refrigeration Air Chiller Secondary Loop" : "Refrigeration Secondary Loop";
+                const auto secTsType = secondary.CoilFlag ? OutputProcessor::TimeStepType::System : OutputProcessor::TimeStepType::Zone;
+
+                SetupOutputVariable(state,
+                                    secPrefix + " Pump Electricity Rate",
+                                    Constant::Units::W,
+                                    secondary.PumpPowerTotal,
+                                    secTsType,
+                                    OutputProcessor::StoreType::Average,
+                                    secondary.Name);
+                SetupOutputVariable(state,
+                                    secPrefix + " Pump Electricity Energy",
+                                    Constant::Units::J,
+                                    secondary.PumpElecEnergyTotal,
+                                    secTsType,
+                                    OutputProcessor::StoreType::Sum,
+                                    secondary.Name,
+                                    Constant::eResource::Electricity,
+                                    OutputProcessor::Group::Plant,
+                                    OutputProcessor::EndUseCat::Refrigeration,
+                                    secondary.EndUseSubcategory);
+                SetupOutputVariable(state,
+                                    secPrefix + " Load Heat Transfer Rate",
+                                    Constant::Units::W,
+                                    secondary.TotalRefrigLoad,
+                                    secTsType,
+                                    OutputProcessor::StoreType::Average,
+                                    secondary.Name);
+                SetupOutputVariable(state,
+                                    secPrefix + " Load Heat Transfer Energy",
+                                    Constant::Units::J,
+                                    secondary.TotalRefrigEnergy,
+                                    secTsType,
+                                    OutputProcessor::StoreType::Sum,
+                                    secondary.Name);
+                SetupOutputVariable(state,
+                                    secPrefix + " Total Heat Transfer Rate",
+                                    Constant::Units::W,
+                                    secondary.TotalCoolingLoad,
+                                    secTsType,
+                                    OutputProcessor::StoreType::Average,
+                                    secondary.Name);
+                SetupOutputVariable(state,
+                                    secPrefix + " Total Heat Transfer Energy",
+                                    Constant::Units::J,
+                                    secondary.TotalCoolingEnergy,
+                                    secTsType,
+                                    OutputProcessor::StoreType::Sum,
+                                    secondary.Name);
+                SetupOutputVariable(state,
+                                    secPrefix + " Estimated Refrigerant Inventory Mass",
+                                    Constant::Units::kg,
+                                    secondary.RefInventory,
+                                    secTsType,
+                                    OutputProcessor::StoreType::Average,
+                                    secondary.Name);
+                SetupOutputVariable(state,
+                                    secPrefix + " Volume Flow Rate",
+                                    Constant::Units::m3_s,
+                                    secondary.FlowVolActual,
+                                    secTsType,
+                                    OutputProcessor::StoreType::Average,
+                                    secondary.Name);
+                SetupOutputVariable(state,
+                                    secPrefix + " Pipe Heat Gain Rate",
+                                    Constant::Units::W,
+                                    secondary.DistPipeHeatGain,
+                                    secTsType,
+                                    OutputProcessor::StoreType::Average,
+                                    secondary.Name);
+                SetupOutputVariable(state,
+                                    secPrefix + " Pipe Heat Gain Energy",
+                                    Constant::Units::J,
+                                    secondary.DistPipeHeatGainEnergy,
+                                    secTsType,
+                                    OutputProcessor::StoreType::Sum,
+                                    secondary.Name);
+                SetupOutputVariable(state,
+                                    secPrefix + " Receiver Heat Gain Rate",
+                                    Constant::Units::W,
+                                    secondary.ReceiverHeatGain,
+                                    secTsType,
+                                    OutputProcessor::StoreType::Average,
+                                    secondary.Name);
+                SetupOutputVariable(state,
+                                    secPrefix + " Receiver Heat Gain Energy",
+                                    Constant::Units::J,
+                                    secondary.ReceiverHeatGainEnergy,
+                                    secTsType,
+                                    OutputProcessor::StoreType::Sum,
+                                    secondary.Name);
                 if (secondary.ReceiverZoneNum > 0) {
                     SetupZoneInternalGain(state,
                                           secondary.ReceiverZoneNum,
@@ -8375,19 +7516,80 @@ void SetupReportInput(EnergyPlusData &state)
         auto &RefrigRack = state.dataRefrigCase->RefrigRack;
         for (int rackNum = 1; rackNum <= state.dataRefrigCase->NumRefrigeratedRacks; ++rackNum) {
             auto &rack = RefrigRack(rackNum);
-            if (rack.CoilFlag) { // rack serves chillers and is solved on HVAC time step
+            // CoilFlag: serves chillers on HVAC (System) time step; otherwise cases/walkins on Zone time step
+            const std::string rackPrefix = rack.CoilFlag ? "Refrigeration Air Chiller Compressor Rack" : "Refrigeration Compressor Rack";
+            const auto rackTsType = rack.CoilFlag ? OutputProcessor::TimeStepType::System : OutputProcessor::TimeStepType::Zone;
+
+            SetupOutputVariable(state,
+                                rackPrefix + " Electricity Rate",
+                                Constant::Units::W,
+                                rack.RackCompressorPower,
+                                rackTsType,
+                                OutputProcessor::StoreType::Average,
+                                rack.Name);
+            SetupOutputVariable(state,
+                                rackPrefix + " Electricity Energy",
+                                Constant::Units::J,
+                                rack.RackElecConsumption,
+                                rackTsType,
+                                OutputProcessor::StoreType::Sum,
+                                rack.Name,
+                                Constant::eResource::Electricity,
+                                OutputProcessor::Group::Plant,
+                                OutputProcessor::EndUseCat::Refrigeration,
+                                rack.EndUseSubcategory);
+            SetupOutputVariable(state,
+                                rackPrefix + " Condenser Fan Electricity Rate",
+                                Constant::Units::W,
+                                rack.ActualCondenserFanPower,
+                                rackTsType,
+                                OutputProcessor::StoreType::Average,
+                                rack.Name);
+            SetupOutputVariable(state,
+                                rackPrefix + " Condenser Fan Electricity Energy",
+                                Constant::Units::J,
+                                rack.CondenserFanConsumption,
+                                rackTsType,
+                                OutputProcessor::StoreType::Sum,
+                                rack.Name,
+                                Constant::eResource::Electricity,
+                                OutputProcessor::Group::Plant,
+                                OutputProcessor::EndUseCat::Refrigeration,
+                                rack.EndUseSubcategory);
+            SetupOutputVariable(state,
+                                rackPrefix + " Total Heat Transfer Rate",
+                                Constant::Units::W,
+                                rack.RackCapacity,
+                                rackTsType,
+                                OutputProcessor::StoreType::Average,
+                                rack.Name);
+            SetupOutputVariable(state,
+                                rackPrefix + " Total Heat Transfer Energy",
+                                Constant::Units::J,
+                                rack.RackCoolingEnergy,
+                                rackTsType,
+                                OutputProcessor::StoreType::Sum,
+                                rack.Name,
+                                Constant::eResource::EnergyTransfer,
+                                OutputProcessor::Group::Plant,
+                                OutputProcessor::EndUseCat::Refrigeration,
+                                rack.EndUseSubcategory);
+            SetupOutputVariable(
+                state, rackPrefix + " COP", Constant::Units::W_W, rack.RackCompressorCOP, rackTsType, OutputProcessor::StoreType::Average, rack.Name);
+
+            if (rack.CondenserType == DataHeatBalance::RefrigCondenserType::Evap) {
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller Compressor Rack Electricity Rate",
+                                    rackPrefix + " Evaporative Condenser Pump Electricity Rate",
                                     Constant::Units::W,
-                                    rack.RackCompressorPower,
-                                    OutputProcessor::TimeStepType::System,
+                                    rack.ActualEvapPumpPower,
+                                    rackTsType,
                                     OutputProcessor::StoreType::Average,
                                     rack.Name);
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller Compressor Rack Electricity Energy",
+                                    rackPrefix + " Evaporative Condenser Pump Electricity Energy",
                                     Constant::Units::J,
-                                    rack.RackElecConsumption,
-                                    OutputProcessor::TimeStepType::System,
+                                    rack.EvapPumpConsumption,
+                                    rackTsType,
                                     OutputProcessor::StoreType::Sum,
                                     rack.Name,
                                     Constant::eResource::Electricity,
@@ -8395,17 +7597,17 @@ void SetupReportInput(EnergyPlusData &state)
                                     OutputProcessor::EndUseCat::Refrigeration,
                                     rack.EndUseSubcategory);
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller Compressor Rack Condenser Fan Electricity Rate",
+                                    rackPrefix + " Evaporative Condenser Basin Heater Electricity Rate",
                                     Constant::Units::W,
-                                    rack.ActualCondenserFanPower,
-                                    OutputProcessor::TimeStepType::System,
+                                    rack.BasinHeaterPower,
+                                    rackTsType,
                                     OutputProcessor::StoreType::Average,
                                     rack.Name);
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller Compressor Rack Condenser Fan Electricity Energy",
+                                    rackPrefix + " Evaporative Condenser Basin Heater Electricity Energy",
                                     Constant::Units::J,
-                                    rack.CondenserFanConsumption,
-                                    OutputProcessor::TimeStepType::System,
+                                    rack.BasinHeaterConsumption,
+                                    rackTsType,
                                     OutputProcessor::StoreType::Sum,
                                     rack.Name,
                                     Constant::eResource::Electricity,
@@ -8413,299 +7615,69 @@ void SetupReportInput(EnergyPlusData &state)
                                     OutputProcessor::EndUseCat::Refrigeration,
                                     rack.EndUseSubcategory);
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller Compressor Rack Total Heat Transfer Rate",
-                                    Constant::Units::W,
-                                    rack.RackCapacity,
-                                    OutputProcessor::TimeStepType::System,
+                                    rackPrefix + " Evaporative Condenser Water Volume Flow Rate",
+                                    Constant::Units::m3_s,
+                                    rack.EvapWaterConsumpRate,
+                                    rackTsType,
                                     OutputProcessor::StoreType::Average,
                                     rack.Name);
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller Compressor Rack Total Heat Transfer Energy",
-                                    Constant::Units::J,
-                                    rack.RackCoolingEnergy,
-                                    OutputProcessor::TimeStepType::System,
+                                    rackPrefix + " Evaporative Condenser Water Volume",
+                                    Constant::Units::m3,
+                                    rack.EvapWaterConsumption,
+                                    rackTsType,
                                     OutputProcessor::StoreType::Sum,
                                     rack.Name,
-                                    Constant::eResource::EnergyTransfer,
+                                    Constant::eResource::Water,
                                     OutputProcessor::Group::Plant,
                                     OutputProcessor::EndUseCat::Refrigeration,
                                     rack.EndUseSubcategory);
+            } // Evap condenser
+
+            if (rack.HeatRejectionLocation == HeatRejLocation::Zone) {
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller Compressor Rack COP",
-                                    Constant::Units::W_W,
-                                    rack.RackCompressorCOP,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    rack.Name);
-
-                if (rack.CondenserType == DataHeatBalance::RefrigCondenserType::Evap) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Compressor Rack Evaporative Condenser Pump Electricity Rate",
-                                        Constant::Units::W,
-                                        rack.ActualEvapPumpPower,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        rack.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Compressor Rack Evaporative Condenser Pump Electricity Energy",
-                                        Constant::Units::J,
-                                        rack.EvapPumpConsumption,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        rack.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        rack.EndUseSubcategory);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Compressor Rack Evaporative Condenser Basin Heater Electricity Rate",
-                                        Constant::Units::W,
-                                        rack.BasinHeaterPower,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        rack.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Compressor Rack Evaporative Condenser Basin Heater Electricity Energy",
-                                        Constant::Units::J,
-                                        rack.BasinHeaterConsumption,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        rack.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        rack.EndUseSubcategory);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Compressor Rack Evaporative Condenser Water Volume Flow Rate",
-                                        Constant::Units::m3_s,
-                                        rack.EvapWaterConsumpRate,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        rack.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Compressor Rack Evaporative Condenser Water Volume",
-                                        Constant::Units::m3,
-                                        rack.EvapWaterConsumption,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        rack.Name,
-                                        Constant::eResource::Water,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        rack.EndUseSubcategory);
-                } // Evap condenser
-
-                if (rack.HeatRejectionLocation == HeatRejLocation::Zone) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Compressor Rack Zone Sensible Heating Rate",
-                                        Constant::Units::W,
-                                        rack.SensZoneCreditHeatRate,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        rack.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Compressor Rack Zone Sensible Heating Energy",
-                                        Constant::Units::J,
-                                        rack.SensZoneCreditHeat,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        rack.Name);
-
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Compressor Rack Return Air Sensible Heating Rate",
-                                        Constant::Units::W,
-                                        rack.SensHVACCreditHeatRate,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        rack.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller Compressor Rack Return Air Sensible Heating Energy",
-                                        Constant::Units::J,
-                                        rack.SensHVACCreditHeat,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        rack.Name);
-
-                    // If CoilFlag is true and Location is Zone, GetRefrigerationInput ensures you must have a Heat Rejection Zone provided already
-                    SetupZoneInternalGain(state,
-                                          rack.HeatRejectionZoneNum,
-                                          rack.Name,
-                                          DataHeatBalance::IntGainType::RefrigerationCompressorRack,
-                                          &rack.SensZoneCreditHeatRate,
-                                          &rack.SensHVACCreditHeatRate);
-
-                } // LocationZone
-
-            } else { // Rack serves cases and walkins on zone (load) time step
-
-                SetupOutputVariable(state,
-                                    "Refrigeration Compressor Rack Electricity Rate",
+                                    rackPrefix + " Zone Sensible Heating Rate",
                                     Constant::Units::W,
-                                    rack.RackCompressorPower,
-                                    OutputProcessor::TimeStepType::Zone,
+                                    rack.SensZoneCreditHeatRate,
+                                    rackTsType,
                                     OutputProcessor::StoreType::Average,
                                     rack.Name);
                 SetupOutputVariable(state,
-                                    "Refrigeration Compressor Rack Electricity Energy",
+                                    rackPrefix + " Zone Sensible Heating Energy",
                                     Constant::Units::J,
-                                    rack.RackElecConsumption,
-                                    OutputProcessor::TimeStepType::Zone,
+                                    rack.SensZoneCreditHeat,
+                                    rackTsType,
                                     OutputProcessor::StoreType::Sum,
-                                    rack.Name,
-                                    Constant::eResource::Electricity,
-                                    OutputProcessor::Group::Plant,
-                                    OutputProcessor::EndUseCat::Refrigeration,
-                                    rack.EndUseSubcategory);
+                                    rack.Name);
+
                 SetupOutputVariable(state,
-                                    "Refrigeration Compressor Rack Condenser Fan Electricity Rate",
+                                    rackPrefix + " Return Air Sensible Heating Rate",
                                     Constant::Units::W,
-                                    rack.ActualCondenserFanPower,
-                                    OutputProcessor::TimeStepType::Zone,
+                                    rack.SensHVACCreditHeatRate,
+                                    rackTsType,
                                     OutputProcessor::StoreType::Average,
                                     rack.Name);
                 SetupOutputVariable(state,
-                                    "Refrigeration Compressor Rack Condenser Fan Electricity Energy",
+                                    rackPrefix + " Return Air Sensible Heating Energy",
                                     Constant::Units::J,
-                                    rack.CondenserFanConsumption,
-                                    OutputProcessor::TimeStepType::Zone,
+                                    rack.SensHVACCreditHeat,
+                                    rackTsType,
                                     OutputProcessor::StoreType::Sum,
-                                    rack.Name,
-                                    Constant::eResource::Electricity,
-                                    OutputProcessor::Group::Plant,
-                                    OutputProcessor::EndUseCat::Refrigeration,
-                                    rack.EndUseSubcategory);
-                SetupOutputVariable(state,
-                                    "Refrigeration Compressor Rack Total Heat Transfer Rate",
-                                    Constant::Units::W,
-                                    rack.RackCapacity,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    rack.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration Compressor Rack Total Heat Transfer Energy",
-                                    Constant::Units::J,
-                                    rack.RackCoolingEnergy,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    rack.Name,
-                                    Constant::eResource::EnergyTransfer,
-                                    OutputProcessor::Group::Plant,
-                                    OutputProcessor::EndUseCat::Refrigeration,
-                                    rack.EndUseSubcategory);
-                SetupOutputVariable(state,
-                                    "Refrigeration Compressor Rack COP",
-                                    Constant::Units::W_W,
-                                    rack.RackCompressorCOP,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
                                     rack.Name);
 
-                if (rack.CondenserType == DataHeatBalance::RefrigCondenserType::Evap) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Rack Evaporative Condenser Pump Electricity Rate",
-                                        Constant::Units::W,
-                                        rack.ActualEvapPumpPower,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        rack.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Rack Evaporative Condenser Pump Electricity Energy",
-                                        Constant::Units::J,
-                                        rack.EvapPumpConsumption,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        rack.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        rack.EndUseSubcategory);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Rack Evaporative Condenser Basin Heater Electricity Rate",
-                                        Constant::Units::W,
-                                        rack.BasinHeaterPower,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        rack.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Rack Evaporative Condenser Basin Heater Electricity Energy",
-                                        Constant::Units::J,
-                                        rack.BasinHeaterConsumption,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        rack.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        rack.EndUseSubcategory);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Rack Evaporative Condenser Water Volume Flow Rate",
-                                        Constant::Units::m3_s,
-                                        rack.EvapWaterConsumpRate,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        rack.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Rack Evaporative Condenser Water Volume",
-                                        Constant::Units::m3,
-                                        rack.EvapWaterConsumption,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        rack.Name,
-                                        Constant::eResource::Water,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        rack.EndUseSubcategory);
-                } // condenser evap
-
-                if (rack.HeatRejectionLocation == HeatRejLocation::Zone) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Rack Zone Sensible Heating Rate",
-                                        Constant::Units::W,
-                                        rack.SensZoneCreditHeatRate,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        rack.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Rack Zone Sensible Heating Energy",
-                                        Constant::Units::J,
-                                        rack.SensZoneCreditHeat,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        rack.Name);
-
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Rack Return Air Sensible Heating Rate",
-                                        Constant::Units::W,
-                                        rack.SensHVACCreditHeatRate,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        rack.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Rack Return Air Sensible Heating Energy",
-                                        Constant::Units::J,
-                                        rack.SensHVACCreditHeat,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        rack.Name);
-
-                    // if Location is Zone, GetRefrigerationInputEither checks that you have at least one load and that either:
-                    // * You have only cases, and they must be all in the same zone
-                    // * Or you must have a Heat Rejection Zone provided
-                    int rackZoneNum = -1;
-                    if (rack.HeatRejectionZoneNum > 0) {
-                        rackZoneNum = rack.HeatRejectionZoneNum;
-                    } else {
-                        rackZoneNum = RefrigCase(rack.CaseNum(1)).ActualZoneNum;
-                    }
-                    SetupZoneInternalGain(state,
-                                          rackZoneNum,
-                                          rack.Name,
-                                          DataHeatBalance::IntGainType::RefrigerationCompressorRack,
-                                          &rack.SensZoneCreditHeatRate,
-                                          &rack.SensHVACCreditHeatRate);
-
-                } // location zone
-            } // Serves coils or case/walkin loads
+                // When CoilFlag is true, GetRefrigerationInput ensures HeatRejectionZoneNum is provided.
+                // Otherwise, fall back to zone of first case if no explicit rejection zone.
+                int rackZoneNum = rack.HeatRejectionZoneNum;
+                if (!rack.CoilFlag && rackZoneNum <= 0) {
+                    rackZoneNum = RefrigCase(rack.CaseNum(1)).ActualZoneNum;
+                }
+                SetupZoneInternalGain(state,
+                                      rackZoneNum,
+                                      rack.Name,
+                                      DataHeatBalance::IntGainType::RefrigerationCompressorRack,
+                                      &rack.SensZoneCreditHeatRate,
+                                      &rack.SensHVACCreditHeatRate);
+            } // LocationZone
 
             if (rack.CondenserType == DataHeatBalance::RefrigCondenserType::Water) { // on HVAC time step no matter what
                 SetupOutputVariable(state,
@@ -8745,507 +7717,236 @@ void SetupReportInput(EnergyPlusData &state)
         auto &System = state.dataRefrigCase->System;
         for (int refrigSysNum = 1; refrigSysNum <= state.dataRefrigCase->NumRefrigSystems; ++refrigSysNum) {
             auto &sys = System(refrigSysNum);
-            if (sys.CoilFlag) { // system serves chillers and is solved on HVAC time step
-                if (sys.NumStages == 1) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Total Compressor Electricity Rate",
-                                        Constant::Units::W,
-                                        sys.TotCompPower,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Total Compressor Electricity Energy",
-                                        Constant::Units::J,
-                                        sys.TotCompElecConsump,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        sys.Name);
-                } else if (sys.NumStages == 2) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Total Low Stage Compressor Electricity Rate",
-                                        Constant::Units::W,
-                                        sys.TotCompPower,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Total Low Stage Compressor Electricity Energy",
-                                        Constant::Units::J,
-                                        sys.TotCompElecConsump,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Total High Stage Compressor Electricity Rate",
-                                        Constant::Units::W,
-                                        sys.TotHiStageCompPower,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Total High Stage Compressor Electricity Energy",
-                                        Constant::Units::J,
-                                        sys.TotHiStageCompElecConsump,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Total Low and High Stage Compressor Electricity Energy",
-                                        Constant::Units::J,
-                                        sys.TotCompElecConsumpTwoStage,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        sys.Name);
-                } // NumStages
+            // CoilFlag: system serves chillers on HVAC (System) time step; otherwise cases/walkins on Zone time step
+            const std::string sysPrefix = sys.CoilFlag ? "Refrigeration Air Chiller System" : "Refrigeration System";
+            const auto sysTsType = sys.CoilFlag ? OutputProcessor::TimeStepType::System : OutputProcessor::TimeStepType::Zone;
+            // A few output variable name suffixes differ between CoilFlag branches
+            const std::string_view coolingRateSuffix =
+                sys.CoilFlag ? "Total Air Chiller Heat Transfer Rate" : "Total Cases and Walk Ins Heat Transfer Rate";
+            const std::string_view coolingEnergySuffix =
+                sys.CoilFlag ? "Total Case and Walk In Heat Transfer Energy" : "Total Cases and Walk Ins Heat Transfer Energy";
+            const std::string_view suctionTempSuffix = sys.CoilFlag ? "Suction Temperature" : "Suction Pipe Suction Temperature";
+            const std::string_view txvTempSuffix = sys.CoilFlag ? "TXV Liquid Temperature" : "Thermostatic Expansion Valve Liquid Temperature";
+
+            // For 2-stage systems, the primary compressor labels use "Low Stage" instead of just "Total"
+            const std::string_view compStageLabel = (sys.NumStages == 2) ? "Total Low Stage Compressor" : "Total Compressor";
+
+            SetupOutputVariable(state,
+                                EnergyPlus::format("{} {} Electricity Rate", sysPrefix, compStageLabel),
+                                Constant::Units::W,
+                                sys.TotCompPower,
+                                sysTsType,
+                                OutputProcessor::StoreType::Average,
+                                sys.Name);
+            SetupOutputVariable(state,
+                                EnergyPlus::format("{} {} Electricity Energy", sysPrefix, compStageLabel),
+                                Constant::Units::J,
+                                sys.TotCompElecConsump,
+                                sysTsType,
+                                OutputProcessor::StoreType::Sum,
+                                sys.Name);
+            if (sys.NumStages == 2) {
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Average Compressor COP",
-                                    Constant::Units::W_W,
-                                    sys.AverageCompressorCOP,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Total Air Chiller Heat Transfer Rate",
+                                    sysPrefix + " Total High Stage Compressor Electricity Rate",
                                     Constant::Units::W,
-                                    sys.TotalCoolingLoad,
-                                    OutputProcessor::TimeStepType::System,
+                                    sys.TotHiStageCompPower,
+                                    sysTsType,
                                     OutputProcessor::StoreType::Average,
                                     sys.Name);
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Total Case and Walk In Heat Transfer Energy",
+                                    sysPrefix + " Total High Stage Compressor Electricity Energy",
                                     Constant::Units::J,
-                                    sys.TotalCoolingEnergy,
-                                    OutputProcessor::TimeStepType::System,
+                                    sys.TotHiStageCompElecConsump,
+                                    sysTsType,
                                     OutputProcessor::StoreType::Sum,
                                     sys.Name);
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Total Transferred Load Heat Transfer Rate",
-                                    Constant::Units::W,
-                                    sys.TotTransferLoad,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Total Transferred Load Heat Transfer Energy",
+                                    sysPrefix + " Total Low and High Stage Compressor Electricity Energy",
                                     Constant::Units::J,
-                                    sys.TotTransferEnergy,
-                                    OutputProcessor::TimeStepType::System,
+                                    sys.TotCompElecConsumpTwoStage,
+                                    sysTsType,
                                     OutputProcessor::StoreType::Sum,
                                     sys.Name);
+            } // NumStages == 2
+            SetupOutputVariable(state,
+                                sysPrefix + " Average Compressor COP",
+                                Constant::Units::W_W,
+                                sys.AverageCompressorCOP,
+                                sysTsType,
+                                OutputProcessor::StoreType::Average,
+                                sys.Name);
+            SetupOutputVariable(state,
+                                EnergyPlus::format("{} {}", sysPrefix, coolingRateSuffix),
+                                Constant::Units::W,
+                                sys.TotalCoolingLoad,
+                                sysTsType,
+                                OutputProcessor::StoreType::Average,
+                                sys.Name);
+            SetupOutputVariable(state,
+                                EnergyPlus::format("{} {}", sysPrefix, coolingEnergySuffix),
+                                Constant::Units::J,
+                                sys.TotalCoolingEnergy,
+                                sysTsType,
+                                OutputProcessor::StoreType::Sum,
+                                sys.Name);
+            SetupOutputVariable(state,
+                                sysPrefix + " Total Transferred Load Heat Transfer Rate",
+                                Constant::Units::W,
+                                sys.TotTransferLoad,
+                                sysTsType,
+                                OutputProcessor::StoreType::Average,
+                                sys.Name);
+            SetupOutputVariable(state,
+                                sysPrefix + " Total Transferred Load Heat Transfer Energy",
+                                Constant::Units::J,
+                                sys.TotTransferEnergy,
+                                sysTsType,
+                                OutputProcessor::StoreType::Sum,
+                                sys.Name);
+            SetupOutputVariable(state,
+                                sysPrefix + " Total Suction Pipe Heat Gain Rate",
+                                Constant::Units::W,
+                                sys.PipeHeatLoad,
+                                sysTsType,
+                                OutputProcessor::StoreType::Average,
+                                sys.Name);
+            SetupOutputVariable(state,
+                                sysPrefix + " Total Suction Pipe Heat Gain Energy",
+                                Constant::Units::J,
+                                sys.PipeHeatEnergy,
+                                sysTsType,
+                                OutputProcessor::StoreType::Sum,
+                                sys.Name);
+            // compStageLabel already computed above for the electricity block
+            SetupOutputVariable(state,
+                                EnergyPlus::format("{} {} Heat Transfer Rate", sysPrefix, compStageLabel),
+                                Constant::Units::W,
+                                sys.TotCompCapacity,
+                                sysTsType,
+                                OutputProcessor::StoreType::Average,
+                                sys.Name);
+            SetupOutputVariable(state,
+                                EnergyPlus::format("{} {} Heat Transfer Energy", sysPrefix, compStageLabel),
+                                Constant::Units::J,
+                                sys.TotCompCoolingEnergy,
+                                sysTsType,
+                                OutputProcessor::StoreType::Sum,
+                                sys.Name); // indiv compressors go to meter, not system sum
+            if (sys.NumStages == 2) {
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Total Suction Pipe Heat Gain Rate",
+                                    sysPrefix + " Total High Stage Compressor Heat Transfer Rate",
                                     Constant::Units::W,
-                                    sys.PipeHeatLoad,
-                                    OutputProcessor::TimeStepType::System,
+                                    sys.TotHiStageCompCapacity,
+                                    sysTsType,
                                     OutputProcessor::StoreType::Average,
                                     sys.Name);
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Total Suction Pipe Heat Gain Energy",
+                                    sysPrefix + " Total High Stage Compressor Heat Transfer Energy",
                                     Constant::Units::J,
-                                    sys.PipeHeatEnergy,
-                                    OutputProcessor::TimeStepType::System,
+                                    sys.TotHiStageCompCoolingEnergy,
+                                    sysTsType,
                                     OutputProcessor::StoreType::Sum,
-                                    sys.Name);
-                if (sys.NumStages == 1) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Total Compressor Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        sys.TotCompCapacity,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Total Compressor Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        sys.TotCompCoolingEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        sys.Name); // indiv compressors go to meter, not system sum
-                } else if (sys.NumStages == 2) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Total Low Stage Compressor Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        sys.TotCompCapacity,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Total Low Stage Compressor Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        sys.TotCompCoolingEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        sys.Name); // indiv compressors go to meter, not system sum
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Total High Stage Compressor Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        sys.TotHiStageCompCapacity,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Total High Stage Compressor Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        sys.TotHiStageCompCoolingEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        sys.Name); // indiv compressors go to meter, not system sum
-                } // NumStages
+                                    sys.Name); // indiv compressors go to meter, not system sum
+            } // NumStages == 2
+            SetupOutputVariable(state,
+                                sysPrefix + " Net Rejected Heat Transfer Rate",
+                                Constant::Units::W,
+                                sys.NetHeatRejectLoad,
+                                sysTsType,
+                                OutputProcessor::StoreType::Average,
+                                sys.Name);
+            SetupOutputVariable(state,
+                                sysPrefix + " Net Rejected Heat Transfer Energy",
+                                Constant::Units::J,
+                                sys.NetHeatRejectEnergy,
+                                sysTsType,
+                                OutputProcessor::StoreType::Sum,
+                                sys.Name);
+            SetupOutputVariable(state,
+                                sysPrefix + " Estimated Refrigerant Inventory Mass",
+                                Constant::Units::kg,
+                                sys.RefInventory,
+                                sysTsType,
+                                OutputProcessor::StoreType::Average,
+                                sys.Name);
+            {
+                const std::string_view massFlowLabel =
+                    (sys.NumStages == 2) ? "Estimated Low Stage Refrigerant Mass Flow Rate" : "Estimated Refrigerant Mass Flow Rate";
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Net Rejected Heat Transfer Rate",
-                                    Constant::Units::W,
-                                    sys.NetHeatRejectLoad,
-                                    OutputProcessor::TimeStepType::System,
+                                    EnergyPlus::format("{} {}", sysPrefix, massFlowLabel),
+                                    Constant::Units::kg_s,
+                                    sys.RefMassFlowComps,
+                                    sysTsType,
                                     OutputProcessor::StoreType::Average,
                                     sys.Name);
+            }
+            if (sys.NumStages == 2) {
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Net Rejected Heat Transfer Energy",
-                                    Constant::Units::J,
-                                    sys.NetHeatRejectEnergy,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Estimated Refrigerant Inventory Mass",
-                                    Constant::Units::kg,
-                                    sys.RefInventory,
-                                    OutputProcessor::TimeStepType::System,
+                                    sysPrefix + " Estimated High Stage Refrigerant Mass Flow Rate",
+                                    Constant::Units::kg_s,
+                                    sys.RefMassFlowHiStageComps,
+                                    sysTsType,
                                     OutputProcessor::StoreType::Average,
                                     sys.Name);
-                if (sys.NumStages == 1) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Estimated Refrigerant Mass Flow Rate",
-                                        Constant::Units::kg_s,
-                                        sys.RefMassFlowComps,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                } else if (sys.NumStages == 2) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Estimated Low Stage Refrigerant Mass Flow Rate",
-                                        Constant::Units::kg_s,
-                                        sys.RefMassFlowComps,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Estimated High Stage Refrigerant Mass Flow Rate",
-                                        Constant::Units::kg_s,
-                                        sys.RefMassFlowHiStageComps,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                } // NumStages
-                if (sys.NumStages == 2) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Intercooler Temperature",
-                                        Constant::Units::C,
-                                        sys.TIntercooler,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Intercooler Pressure",
-                                        Constant::Units::Pa,
-                                        sys.PIntercooler,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                }
+            }
+            if (sys.NumStages == 2) {
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Condensing Temperature",
+                                    sysPrefix + " Intercooler Temperature",
                                     Constant::Units::C,
-                                    sys.TCondense,
-                                    OutputProcessor::TimeStepType::System,
+                                    sys.TIntercooler,
+                                    sysTsType,
                                     OutputProcessor::StoreType::Average,
                                     sys.Name);
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Evaporating Temperature",
-                                    Constant::Units::C,
-                                    sys.TEvapNeeded,
-                                    OutputProcessor::TimeStepType::System,
+                                    sysPrefix + " Intercooler Pressure",
+                                    Constant::Units::Pa,
+                                    sys.PIntercooler,
+                                    sysTsType,
                                     OutputProcessor::StoreType::Average,
                                     sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Suction Temperature",
-                                    Constant::Units::C,
-                                    sys.TCompIn,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System TXV Liquid Temperature",
-                                    Constant::Units::C,
-                                    sys.TLiqInActual,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Liquid Suction Subcooler Heat Transfer Rate",
-                                    Constant::Units::W,
-                                    sys.LSHXTrans,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Liquid Suction Subcooler Heat Transfer Energy",
-                                    Constant::Units::J,
-                                    sys.LSHXTransEnergy,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    sys.Name);
-            } else { // NOT System(SysNum)%CoilFlag, so serving loads on zone timestep
-                if (sys.NumStages == 1) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Total Compressor Electricity Rate",
-                                        Constant::Units::W,
-                                        sys.TotCompPower,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Total Compressor Electricity Energy",
-                                        Constant::Units::J,
-                                        sys.TotCompElecConsump,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        sys.Name);
-                } else if (sys.NumStages == 2) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Total Low Stage Compressor Electricity Rate",
-                                        Constant::Units::W,
-                                        sys.TotCompPower,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Total Low Stage Compressor Electricity Energy",
-                                        Constant::Units::J,
-                                        sys.TotCompElecConsump,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Total High Stage Compressor Electricity Rate",
-                                        Constant::Units::W,
-                                        sys.TotHiStageCompPower,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Total High Stage Compressor Electricity Energy",
-                                        Constant::Units::J,
-                                        sys.TotHiStageCompElecConsump,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Total Low and High Stage Compressor Electricity Energy",
-                                        Constant::Units::J,
-                                        sys.TotCompElecConsumpTwoStage,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        sys.Name);
-                } // NumStages
-                SetupOutputVariable(state,
-                                    "Refrigeration System Average Compressor COP",
-                                    Constant::Units::W_W,
-                                    sys.AverageCompressorCOP,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration System Total Cases and Walk Ins Heat Transfer Rate",
-                                    Constant::Units::W,
-                                    sys.TotalCoolingLoad,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration System Total Cases and Walk Ins Heat Transfer Energy",
-                                    Constant::Units::J,
-                                    sys.TotalCoolingEnergy,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration System Total Transferred Load Heat Transfer Rate",
-                                    Constant::Units::W,
-                                    sys.TotTransferLoad,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration System Total Transferred Load Heat Transfer Energy",
-                                    Constant::Units::J,
-                                    sys.TotTransferEnergy,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration System Total Suction Pipe Heat Gain Rate",
-                                    Constant::Units::W,
-                                    sys.PipeHeatLoad,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration System Total Suction Pipe Heat Gain Energy",
-                                    Constant::Units::J,
-                                    sys.PipeHeatEnergy,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    sys.Name);
-                if (sys.NumStages == 1) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Total Compressor Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        sys.TotCompCapacity,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Total Compressor Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        sys.TotCompCoolingEnergy,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        sys.Name); // indiv compressors go to meter, not system sum
-                } else if (sys.NumStages == 2) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Total Low Stage Compressor Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        sys.TotCompCapacity,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Total Low Stage Compressor Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        sys.TotCompCoolingEnergy,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        sys.Name); // indiv compressors go to meter, not system sum
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Total High Stage Compressor Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        sys.TotHiStageCompCapacity,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Total High Stage Compressor Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        sys.TotHiStageCompCoolingEnergy,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        sys.Name); // indiv compressors go to meter, not system sum
-                } // NumStages
-                SetupOutputVariable(state,
-                                    "Refrigeration System Net Rejected Heat Transfer Rate",
-                                    Constant::Units::W,
-                                    sys.NetHeatRejectLoad,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration System Net Rejected Heat Transfer Energy",
-                                    Constant::Units::J,
-                                    sys.NetHeatRejectEnergy,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration System Estimated Refrigerant Inventory Mass",
-                                    Constant::Units::kg,
-                                    sys.RefInventory,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                if (sys.NumStages == 1) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Estimated Refrigerant Mass Flow Rate",
-                                        Constant::Units::kg_s,
-                                        sys.RefMassFlowComps,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                } else if (sys.NumStages == 2) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Estimated Low Stage Refrigerant Mass Flow Rate",
-                                        Constant::Units::kg_s,
-                                        sys.RefMassFlowComps,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Estimated High Stage Refrigerant Mass Flow Rate",
-                                        Constant::Units::kg_s,
-                                        sys.RefMassFlowHiStageComps,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                } // NumStages
-                if (sys.NumStages == 2) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Intercooler Temperature",
-                                        Constant::Units::C,
-                                        sys.TIntercooler,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Intercooler Pressure",
-                                        Constant::Units::Pa,
-                                        sys.PIntercooler,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        sys.Name);
-                }
-                SetupOutputVariable(state,
-                                    "Refrigeration System Condensing Temperature",
-                                    Constant::Units::C,
-                                    sys.TCondense,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration System Evaporating Temperature",
-                                    Constant::Units::C,
-                                    sys.TEvapNeeded,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration System Suction Pipe Suction Temperature",
-                                    Constant::Units::C,
-                                    sys.TCompIn,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration System Thermostatic Expansion Valve Liquid Temperature",
-                                    Constant::Units::C,
-                                    sys.TLiqInActual,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration System Liquid Suction Subcooler Heat Transfer Rate",
-                                    Constant::Units::W,
-                                    sys.LSHXTrans,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Average,
-                                    sys.Name);
-                SetupOutputVariable(state,
-                                    "Refrigeration System Liquid Suction Subcooler Heat Transfer Energy",
-                                    Constant::Units::J,
-                                    sys.LSHXTransEnergy,
-                                    OutputProcessor::TimeStepType::Zone,
-                                    OutputProcessor::StoreType::Sum,
-                                    sys.Name);
-            } // System(coilflag)
+            }
+            SetupOutputVariable(state,
+                                sysPrefix + " Condensing Temperature",
+                                Constant::Units::C,
+                                sys.TCondense,
+                                sysTsType,
+                                OutputProcessor::StoreType::Average,
+                                sys.Name);
+            SetupOutputVariable(state,
+                                sysPrefix + " Evaporating Temperature",
+                                Constant::Units::C,
+                                sys.TEvapNeeded,
+                                sysTsType,
+                                OutputProcessor::StoreType::Average,
+                                sys.Name);
+            SetupOutputVariable(state,
+                                EnergyPlus::format("{} {}", sysPrefix, suctionTempSuffix),
+                                Constant::Units::C,
+                                sys.TCompIn,
+                                sysTsType,
+                                OutputProcessor::StoreType::Average,
+                                sys.Name);
+            SetupOutputVariable(state,
+                                EnergyPlus::format("{} {}", sysPrefix, txvTempSuffix),
+                                Constant::Units::C,
+                                sys.TLiqInActual,
+                                sysTsType,
+                                OutputProcessor::StoreType::Average,
+                                sys.Name);
+            SetupOutputVariable(state,
+                                sysPrefix + " Liquid Suction Subcooler Heat Transfer Rate",
+                                Constant::Units::W,
+                                sys.LSHXTrans,
+                                sysTsType,
+                                OutputProcessor::StoreType::Average,
+                                sys.Name);
+            SetupOutputVariable(state,
+                                sysPrefix + " Liquid Suction Subcooler Heat Transfer Energy",
+                                Constant::Units::J,
+                                sys.LSHXTransEnergy,
+                                sysTsType,
+                                OutputProcessor::StoreType::Sum,
+                                sys.Name);
 
             if (sys.SystemRejectHeatToZone) {
                 if (Condenser(sys.CondenserNum(1)).InletAirZoneNum > 0) {
@@ -9269,433 +7970,171 @@ void SetupReportInput(EnergyPlusData &state)
         // Report Compressor ENERGY here, not on system level for meters.
         for (int compNum = 1; compNum <= state.dataRefrigCase->NumSimulationCompressors; ++compNum) {
             auto &comp = Compressor(compNum);
-            // CurrentModuleObject='Refrigeration:Compressor'
-            if (comp.NumSysAttach == 1) { // only set up reports for compressors that are used once and only once
-                if (comp.CoilFlag) {      // Compressor serving system with chillers on HVAC time step
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Compressor Electricity Rate",
-                                        Constant::Units::W,
-                                        comp.Power,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        comp.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Compressor Electricity Energy",
-                                        Constant::Units::J,
-                                        comp.ElecConsumption,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        comp.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        comp.EndUseSubcategory);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Compressor Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        comp.Capacity,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        comp.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Compressor Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        comp.CoolingEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        comp.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Compressor Runtime Fraction",
-                                        Constant::Units::None,
-                                        comp.LoadFactor,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        comp.Name);
-                } else { // serve cases/walkins on zone time step
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Electricity Rate",
-                                        Constant::Units::W,
-                                        comp.Power,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        comp.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Electricity Energy",
-                                        Constant::Units::J,
-                                        comp.ElecConsumption,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        comp.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        comp.EndUseSubcategory);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        comp.Capacity,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        comp.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        comp.CoolingEnergy,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        comp.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Runtime Fraction",
-                                        Constant::Units::None,
-                                        comp.LoadFactor,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        comp.Name);
-                } // Serve coils on HVAC time step or cases/walkins on Zone time step
-            } // NumSysAttach
+            if (comp.NumSysAttach == 1) {
+                const std::string compPrefix = comp.CoilFlag ? "Refrigeration Air Chiller System Compressor" : "Refrigeration Compressor";
+                const auto compTsType = comp.CoilFlag ? OutputProcessor::TimeStepType::System : OutputProcessor::TimeStepType::Zone;
+                setupCompressorOutputVars(state, comp, compPrefix, compTsType);
+            }
         } // CompNum on NumSimulationCompressors
 
         // Report Variables for Refrigeration Condensers
         for (int condNum = 1; condNum <= state.dataRefrigCase->NumRefrigCondensers; ++condNum) {
             auto &cond = Condenser(condNum);
             // CurrentModuleObject='Refrigeration:Condenser:*'
-            if (cond.CoilFlag) { // Condenser serving system with chillers on HVAC time step
+            // CoilFlag: serves chillers on HVAC (System) time step; otherwise cases/walkins on Zone time step
+            const std::string condPrefix = cond.CoilFlag ? "Refrigeration Air Chiller System Condenser" : "Refrigeration System Condenser";
+            const auto condTsType = cond.CoilFlag ? OutputProcessor::TimeStepType::System : OutputProcessor::TimeStepType::Zone;
+
+            SetupOutputVariable(state,
+                                condPrefix + " Heat Transfer Rate",
+                                Constant::Units::W,
+                                cond.CondLoad,
+                                condTsType,
+                                OutputProcessor::StoreType::Average,
+                                cond.Name);
+            SetupOutputVariable(state,
+                                condPrefix + " Heat Transfer Energy",
+                                Constant::Units::J,
+                                cond.CondEnergy,
+                                condTsType,
+                                OutputProcessor::StoreType::Sum,
+                                cond.Name);
+
+            if (cond.CondenserType != DataHeatBalance::RefrigCondenserType::Cascade) {
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Condenser Heat Transfer Rate",
+                                    condPrefix + " Total Recovered Heat Transfer Rate",
                                     Constant::Units::W,
-                                    cond.CondLoad,
-                                    OutputProcessor::TimeStepType::System,
+                                    cond.TotalHeatRecoveredLoad,
+                                    condTsType,
                                     OutputProcessor::StoreType::Average,
                                     cond.Name);
                 SetupOutputVariable(state,
-                                    "Refrigeration Air Chiller System Condenser Heat Transfer Energy",
+                                    condPrefix + " Total Recovered Heat Transfer Energy",
                                     Constant::Units::J,
-                                    cond.CondEnergy,
-                                    OutputProcessor::TimeStepType::System,
+                                    cond.TotalHeatRecoveredEnergy,
+                                    condTsType,
                                     OutputProcessor::StoreType::Sum,
                                     cond.Name);
-
-                if (cond.CondenserType != DataHeatBalance::RefrigCondenserType::Cascade) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Total Recovered Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        cond.TotalHeatRecoveredLoad,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Total Recovered Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        cond.TotalHeatRecoveredEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Non Refrigeration Recovered Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        cond.ExternalHeatRecoveredLoad,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Non Refrigeration Recovered Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        cond.ExternalEnergyRecovered,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Defrost Recovered Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        cond.InternalHeatRecoveredLoad,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Defrost Recovered Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        cond.InternalEnergyRecovered,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name);
-                } // not cascade because recovered energy on cascade systems passed up to higher temperature system
-
-                if (cond.CondenserType == DataHeatBalance::RefrigCondenserType::Air) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Fan Electricity Rate",
-                                        Constant::Units::W,
-                                        cond.ActualFanPower,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Fan Electricity Energy",
-                                        Constant::Units::J,
-                                        cond.FanElecEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        cond.EndUseSubcategory);
-                } // Air cooled
-
-                if (cond.CondenserType == DataHeatBalance::RefrigCondenserType::Evap) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Fan Electricity Rate",
-                                        Constant::Units::W,
-                                        cond.ActualFanPower,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Fan Electricity Energy",
-                                        Constant::Units::J,
-                                        cond.FanElecEnergy,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        cond.EndUseSubcategory);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Pump Electricity Rate",
-                                        Constant::Units::W,
-                                        cond.ActualEvapPumpPower,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Pump Electricity Energy",
-                                        Constant::Units::J,
-                                        cond.EvapPumpConsumption,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        cond.EndUseSubcategory);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Basin Heater Electricity Rate",
-                                        Constant::Units::W,
-                                        cond.BasinHeaterPower,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Basin Heater Electricity Energy",
-                                        Constant::Units::J,
-                                        cond.BasinHeaterConsumption,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        cond.EndUseSubcategory);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Evaporated Water Volume Flow Rate",
-                                        Constant::Units::m3_s,
-                                        cond.EvapWaterConsumpRate,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Evaporated Water Volume",
-                                        Constant::Units::m3,
-                                        cond.EvapWaterConsumption,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name,
-                                        Constant::eResource::Water,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        cond.EndUseSubcategory);
-                } // Evaporative Condenser Variables
-
-                if (cond.CondenserType == DataHeatBalance::RefrigCondenserType::Water) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration Air Chiller System Condenser Fluid Mass Flow Rate",
-                                        Constant::Units::kg_s,
-                                        cond.MassFlowRate,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-
-                } // Water-cooled Condenser variables
-
-            } else { // Serving loads/systems with cases and walkins on zone time step
-
                 SetupOutputVariable(state,
-                                    "Refrigeration System Condenser Heat Transfer Rate",
+                                    condPrefix + " Non Refrigeration Recovered Heat Transfer Rate",
                                     Constant::Units::W,
-                                    cond.CondLoad,
-                                    OutputProcessor::TimeStepType::Zone,
+                                    cond.ExternalHeatRecoveredLoad,
+                                    condTsType,
                                     OutputProcessor::StoreType::Average,
                                     cond.Name);
                 SetupOutputVariable(state,
-                                    "Refrigeration System Condenser Heat Transfer Energy",
+                                    condPrefix + " Non Refrigeration Recovered Heat Transfer Energy",
                                     Constant::Units::J,
-                                    cond.CondEnergy,
-                                    OutputProcessor::TimeStepType::Zone,
+                                    cond.ExternalEnergyRecovered,
+                                    condTsType,
                                     OutputProcessor::StoreType::Sum,
                                     cond.Name);
+                SetupOutputVariable(state,
+                                    condPrefix + " Defrost Recovered Heat Transfer Rate",
+                                    Constant::Units::W,
+                                    cond.InternalHeatRecoveredLoad,
+                                    condTsType,
+                                    OutputProcessor::StoreType::Average,
+                                    cond.Name);
+                SetupOutputVariable(state,
+                                    condPrefix + " Defrost Recovered Heat Transfer Energy",
+                                    Constant::Units::J,
+                                    cond.InternalEnergyRecovered,
+                                    condTsType,
+                                    OutputProcessor::StoreType::Sum,
+                                    cond.Name);
+            } // not cascade because recovered energy on cascade systems passed up to higher temperature system
 
-                if (cond.CondenserType != DataHeatBalance::RefrigCondenserType::Cascade) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Total Recovered Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        cond.TotalHeatRecoveredLoad,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Total Recovered Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        cond.TotalHeatRecoveredEnergy,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Non Refrigeration Recovered Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        cond.ExternalHeatRecoveredLoad,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Non Refrigeration Recovered Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        cond.ExternalEnergyRecovered,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Defrost Recovered Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        cond.InternalHeatRecoveredLoad,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Defrost Recovered Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        cond.InternalEnergyRecovered,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name);
-                } // not cascade because recovered energy on cascade systems passed up to higher temperature system
+            if (cond.CondenserType == DataHeatBalance::RefrigCondenserType::Air || cond.CondenserType == DataHeatBalance::RefrigCondenserType::Evap) {
+                // Fan electricity variables are common to both Air and Evap condensers
+                SetupOutputVariable(state,
+                                    condPrefix + " Fan Electricity Rate",
+                                    Constant::Units::W,
+                                    cond.ActualFanPower,
+                                    condTsType,
+                                    OutputProcessor::StoreType::Average,
+                                    cond.Name);
+                SetupOutputVariable(state,
+                                    condPrefix + " Fan Electricity Energy",
+                                    Constant::Units::J,
+                                    cond.FanElecEnergy,
+                                    condTsType,
+                                    OutputProcessor::StoreType::Sum,
+                                    cond.Name,
+                                    Constant::eResource::Electricity,
+                                    OutputProcessor::Group::Plant,
+                                    OutputProcessor::EndUseCat::Refrigeration,
+                                    cond.EndUseSubcategory);
+            } // Air or Evap cooled fan variables
 
-                if (cond.CondenserType == DataHeatBalance::RefrigCondenserType::Air) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Fan Electricity Rate",
-                                        Constant::Units::W,
-                                        cond.ActualFanPower,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Fan Electricity Energy",
-                                        Constant::Units::J,
-                                        cond.FanElecEnergy,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        cond.EndUseSubcategory);
-                } // Air cooled
+            if (cond.CondenserType == DataHeatBalance::RefrigCondenserType::Evap) {
+                SetupOutputVariable(state,
+                                    condPrefix + " Pump Electricity Rate",
+                                    Constant::Units::W,
+                                    cond.ActualEvapPumpPower,
+                                    condTsType,
+                                    OutputProcessor::StoreType::Average,
+                                    cond.Name);
+                SetupOutputVariable(state,
+                                    condPrefix + " Pump Electricity Energy",
+                                    Constant::Units::J,
+                                    cond.EvapPumpConsumption,
+                                    condTsType,
+                                    OutputProcessor::StoreType::Sum,
+                                    cond.Name,
+                                    Constant::eResource::Electricity,
+                                    OutputProcessor::Group::Plant,
+                                    OutputProcessor::EndUseCat::Refrigeration,
+                                    cond.EndUseSubcategory);
+                SetupOutputVariable(state,
+                                    condPrefix + " Basin Heater Electricity Rate",
+                                    Constant::Units::W,
+                                    cond.BasinHeaterPower,
+                                    condTsType,
+                                    OutputProcessor::StoreType::Average,
+                                    cond.Name);
+                SetupOutputVariable(state,
+                                    condPrefix + " Basin Heater Electricity Energy",
+                                    Constant::Units::J,
+                                    cond.BasinHeaterConsumption,
+                                    condTsType,
+                                    OutputProcessor::StoreType::Sum,
+                                    cond.Name,
+                                    Constant::eResource::Electricity,
+                                    OutputProcessor::Group::Plant,
+                                    OutputProcessor::EndUseCat::Refrigeration,
+                                    cond.EndUseSubcategory);
+                SetupOutputVariable(state,
+                                    condPrefix + " Evaporated Water Volume Flow Rate",
+                                    Constant::Units::m3_s,
+                                    cond.EvapWaterConsumpRate,
+                                    condTsType,
+                                    OutputProcessor::StoreType::Average,
+                                    cond.Name);
+                SetupOutputVariable(state,
+                                    condPrefix + " Evaporated Water Volume",
+                                    Constant::Units::m3,
+                                    cond.EvapWaterConsumption,
+                                    condTsType,
+                                    OutputProcessor::StoreType::Sum,
+                                    cond.Name,
+                                    Constant::eResource::Water,
+                                    OutputProcessor::Group::Plant,
+                                    OutputProcessor::EndUseCat::Refrigeration,
+                                    cond.EndUseSubcategory);
+            } // Evaporative Condenser Variables
 
-                if (cond.CondenserType == DataHeatBalance::RefrigCondenserType::Evap) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Fan Electricity Rate",
-                                        Constant::Units::W,
-                                        cond.ActualFanPower,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Fan Electricity Energy",
-                                        Constant::Units::J,
-                                        cond.FanElecEnergy,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        cond.EndUseSubcategory);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Pump Electricity Rate",
-                                        Constant::Units::W,
-                                        cond.ActualEvapPumpPower,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Pump Electricity Energy",
-                                        Constant::Units::J,
-                                        cond.EvapPumpConsumption,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        cond.EndUseSubcategory);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Basin Heater Electricity Rate",
-                                        Constant::Units::W,
-                                        cond.BasinHeaterPower,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Basin Heater Electricity Energy",
-                                        Constant::Units::J,
-                                        cond.BasinHeaterConsumption,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        cond.EndUseSubcategory);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Evaporated Water Volume Flow Rate",
-                                        Constant::Units::m3_s,
-                                        cond.EvapWaterConsumpRate,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Evaporated Water Volume",
-                                        Constant::Units::m3,
-                                        cond.EvapWaterConsumption,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        cond.Name,
-                                        Constant::eResource::Water,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        cond.EndUseSubcategory);
-                } // Evaporative Condenser Variables
-
-                if (cond.CondenserType == DataHeatBalance::RefrigCondenserType::Water) {
-                    SetupOutputVariable(state,
-                                        "Refrigeration System Condenser Water Mass Flow Rate",
-                                        Constant::Units::kg_s,
-                                        cond.MassFlowRate,
-                                        OutputProcessor::TimeStepType::System,
-                                        OutputProcessor::StoreType::Average,
-                                        cond.Name);
-
-                } // Water-cooled Condenser variables
-            } // Condenser%CoilFlag to distinguish HVAC vs Zone time steps
+            if (cond.CondenserType == DataHeatBalance::RefrigCondenserType::Water) {
+                // Water-cooled condensers always report on System time step; variable name differs by CoilFlag
+                const std::string waterCondVarName = cond.CoilFlag ? (condPrefix + " Fluid Mass Flow Rate") : (condPrefix + " Water Mass Flow Rate");
+                SetupOutputVariable(state,
+                                    waterCondVarName,
+                                    Constant::Units::kg_s,
+                                    cond.MassFlowRate,
+                                    OutputProcessor::TimeStepType::System,
+                                    OutputProcessor::StoreType::Average,
+                                    cond.Name);
+            } // Water-cooled Condenser variables
         } // CondNum on DataHeatBalance::NumRefrigCondensers
 
         if (state.dataRefrigCase->NumSimulationSubcoolers > 0) {
@@ -9703,41 +8142,26 @@ void SetupReportInput(EnergyPlusData &state)
             for (int subcoolNum = 1; subcoolNum <= state.dataRefrigCase->NumSimulationSubcoolers; ++subcoolNum) {
                 auto &cooler = Subcooler(subcoolNum);
                 // CurrentModuleObject='Refrigeration:Subcooler'
-                if (cooler.CoilFlag) { // Subcooler serving system with chillers on HVAC time step
-                    if (cooler.subcoolerType == SubcoolerType::Mechanical) {
-                        SetupOutputVariable(state,
-                                            "Refrigeration Air Chiller System Mechanical Subcooler Heat Transfer Rate",
-                                            Constant::Units::W,
-                                            cooler.MechSCTransLoad,
-                                            OutputProcessor::TimeStepType::Zone,
-                                            OutputProcessor::StoreType::Average,
-                                            cooler.Name);
-                        SetupOutputVariable(state,
-                                            "Refrigeration Air Chiller System Mechanical Subcooler Heat Transfer Energy",
-                                            Constant::Units::J,
-                                            cooler.MechSCTransEnergy,
-                                            OutputProcessor::TimeStepType::Zone,
-                                            OutputProcessor::StoreType::Sum,
-                                            cooler.Name);
-                    }
-                } else { // Subcooler on system serving cases and/or walkins
-                    if (cooler.subcoolerType == SubcoolerType::Mechanical) {
-                        SetupOutputVariable(state,
-                                            "Refrigeration System Mechanical Subcooler Heat Transfer Rate",
-                                            Constant::Units::W,
-                                            cooler.MechSCTransLoad,
-                                            OutputProcessor::TimeStepType::System,
-                                            OutputProcessor::StoreType::Average,
-                                            cooler.Name);
-                        SetupOutputVariable(state,
-                                            "Refrigeration System Mechanical Subcooler Heat Transfer Energy",
-                                            Constant::Units::J,
-                                            cooler.MechSCTransEnergy,
-                                            OutputProcessor::TimeStepType::System,
-                                            OutputProcessor::StoreType::Sum,
-                                            cooler.Name);
-                    }
-                } // Subcoolers on system serving chillers
+                if (cooler.subcoolerType == SubcoolerType::Mechanical) {
+                    // Note: timestep types here are as in the original code (CoilFlag->Zone, !CoilFlag->System)
+                    const std::string scPrefix = cooler.CoilFlag ? "Refrigeration Air Chiller System" : "Refrigeration System";
+                    const auto scTsType = cooler.CoilFlag ? OutputProcessor::TimeStepType::Zone : OutputProcessor::TimeStepType::System;
+
+                    SetupOutputVariable(state,
+                                        scPrefix + " Mechanical Subcooler Heat Transfer Rate",
+                                        Constant::Units::W,
+                                        cooler.MechSCTransLoad,
+                                        scTsType,
+                                        OutputProcessor::StoreType::Average,
+                                        cooler.Name);
+                    SetupOutputVariable(state,
+                                        scPrefix + " Mechanical Subcooler Heat Transfer Energy",
+                                        Constant::Units::J,
+                                        cooler.MechSCTransEnergy,
+                                        scTsType,
+                                        OutputProcessor::StoreType::Sum,
+                                        cooler.Name);
+                }
             } // Subcoolnum on NumSimulationSubcoolers
         } // NumSimulationSubcoolers > 0
 
@@ -9969,95 +8393,17 @@ void SetupReportInput(EnergyPlusData &state)
             // LP compressors
             for (int compIndex = 1; compIndex <= sys.NumCompressorsLP; ++compIndex) {
                 int compNum = sys.CompressorNumLP(compIndex);
-                // CurrentModuleObject='Refrigeration:Compressor'
-                if (Compressor(compNum).NumSysAttach == 1) { // only set up reports for compressors that are used once and only once
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Electricity Rate",
-                                        Constant::Units::W,
-                                        Compressor(compNum).Power,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        Compressor(compNum).Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Electricity Energy",
-                                        Constant::Units::J,
-                                        Compressor(compNum).ElecConsumption,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        Compressor(compNum).Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        Compressor(compNum).EndUseSubcategory);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        Compressor(compNum).Capacity,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        Compressor(compNum).Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        Compressor(compNum).CoolingEnergy,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        Compressor(compNum).Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Runtime Fraction",
-                                        Constant::Units::None,
-                                        Compressor(compNum).LoadFactor,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        Compressor(compNum).Name);
-                } // NumSysAttach
+                if (Compressor(compNum).NumSysAttach == 1) {
+                    setupCompressorOutputVars(state, Compressor(compNum), "Refrigeration Compressor", OutputProcessor::TimeStepType::Zone);
+                }
             } // sys%NumCompressorsLP
 
             // HP compressors
             for (int compIndex = 1; compIndex <= sys.NumCompressorsHP; ++compIndex) {
                 int compNum = sys.CompressorNumHP(compIndex);
-                // CurrentModuleObject='Refrigeration:Compressor'
-                if (Compressor(compNum).NumSysAttach == 1) { // only set up reports for compressors that are used once and only once
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Electricity Rate",
-                                        Constant::Units::W,
-                                        Compressor(compNum).Power,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        Compressor(compNum).Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Electricity Energy",
-                                        Constant::Units::J,
-                                        Compressor(compNum).ElecConsumption,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        Compressor(compNum).Name,
-                                        Constant::eResource::Electricity,
-                                        OutputProcessor::Group::Plant,
-                                        OutputProcessor::EndUseCat::Refrigeration,
-                                        Compressor(compNum).EndUseSubcategory);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Heat Transfer Rate",
-                                        Constant::Units::W,
-                                        Compressor(compNum).Capacity,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        Compressor(compNum).Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Heat Transfer Energy",
-                                        Constant::Units::J,
-                                        Compressor(compNum).CoolingEnergy,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Sum,
-                                        Compressor(compNum).Name);
-                    SetupOutputVariable(state,
-                                        "Refrigeration Compressor Runtime Fraction",
-                                        Constant::Units::None,
-                                        Compressor(compNum).LoadFactor,
-                                        OutputProcessor::TimeStepType::Zone,
-                                        OutputProcessor::StoreType::Average,
-                                        Compressor(compNum).Name);
-                } // NumSysAttach
+                if (Compressor(compNum).NumSysAttach == 1) {
+                    setupCompressorOutputVars(state, Compressor(compNum), "Refrigeration Compressor", OutputProcessor::TimeStepType::Zone);
+                }
             } // sys%NumCompressorsHP
 
         } // NumTransRefrigSystems
@@ -11477,130 +9823,130 @@ void RefrigCondenserData::onInitLoopEquip(EnergyPlusData &state, [[maybe_unused]
     InitRefrigerationPlantConnections(state);
 }
 
+// Common water-cooled condenser simulation logic shared by RefrigCondenserData and RefrigRackData.
+// Both classes have identical water-side simulation code; only the heat load source and type/error strings differ.
+struct WaterCooledCondenserParams
+{
+    std::string Name;
+    std::string TypeName;
+    std::string ErrIntro;
+    int InletNode;
+    int OutletNode;
+    PlantLocation plantLoc;
+    CndsrFlowType FlowType;
+    Sched::Schedule *outletTempSched;
+    Real64 InletTemp;
+    Real64 DesVolFlowRate;
+    Real64 MassFlowRateMax;
+    Real64 OutletTempMax;
+    // These are modified during simulation:
+    Real64 &OutletTemp;
+    Real64 &VolFlowRate;
+    Real64 &MassFlowRate;
+    int &HighInletWarnIndex;
+    int &HighFlowWarnIndex;
+    int &NoFlowWarnIndex;
+    int &HighTempWarnIndex;
+};
+
+static void simulateWaterCooledCondenser(EnergyPlusData &state, WaterCooledCondenserParams &p, bool FirstHVACIteration)
+{
+    static constexpr std::string_view RoutineName("SimRefrigCondenser");
+
+    Real64 rho = p.plantLoc.loop->glycol->getDensity(state, p.InletTemp, RoutineName);
+    Real64 Cp = p.plantLoc.loop->glycol->getSpecificHeat(state, p.InletTemp, RoutineName);
+
+    if (p.FlowType == CndsrFlowType::Variable && state.dataRefrigCase->TotalCondenserHeat > 0.0) {
+        p.OutletTemp = p.outletTempSched->getCurrentVal();
+
+        if (p.OutletTemp == p.InletTemp) {
+            if (p.HighInletWarnIndex == 0) {
+                ShowSevereError(state,
+                                EnergyPlus::format("{}, \"{}\" : has inlet water temp equal to desired outlet temp. Excessive flow resulting. ",
+                                                   p.ErrIntro,
+                                                   p.Name));
+                ShowContinueError(state, "cooling water is not cold enough to reach desired outlet temperature");
+            }
+            ShowRecurringWarningErrorAtEnd(
+                state, p.ErrIntro + ", \"" + p.Name + "\" : has inlet water temp equal to desired outlet temp.... continues. ", p.HighInletWarnIndex);
+            p.VolFlowRate = 9999.0;
+            p.MassFlowRate = p.VolFlowRate * rho;
+        } else {
+            Real64 DeltaT = p.OutletTemp - p.InletTemp;
+            p.MassFlowRate = state.dataRefrigCase->TotalCondenserHeat / Cp / DeltaT;
+            if (p.MassFlowRate > p.MassFlowRateMax) {
+                if (p.HighFlowWarnIndex == 0) {
+                    ShowWarningMessage(state, EnergyPlus::format("{}{}", p.TypeName, p.Name));
+                    ShowContinueError(state, "Requested condenser water mass flow rate greater than maximum allowed value. ");
+                    ShowContinueError(state, "Flow reset to maximum value.");
+                }
+                ShowRecurringWarningErrorAtEnd(
+                    state, p.ErrIntro + p.Name + " - Flow rate higher than maximum allowed ... continues", p.HighFlowWarnIndex);
+                p.MassFlowRate = p.MassFlowRateMax;
+            }
+        }
+    } else if (p.FlowType == CndsrFlowType::Constant && state.dataRefrigCase->TotalCondenserHeat > 0.0) {
+        p.VolFlowRate = p.DesVolFlowRate;
+        p.MassFlowRate = p.VolFlowRate * rho;
+    } else if (state.dataRefrigCase->TotalCondenserHeat == 0.0) {
+        p.MassFlowRate = 0.0;
+    }
+
+    PlantUtilities::SetComponentFlowRate(state, p.MassFlowRate, p.InletNode, p.OutletNode, p.plantLoc);
+    p.VolFlowRate = p.MassFlowRate / rho;
+
+    if (p.MassFlowRate > 0) {
+        p.OutletTemp = state.dataRefrigCase->TotalCondenserHeat / (p.MassFlowRate * Cp) + state.dataLoopNodes->Node(p.InletNode).Temp;
+    } else {
+        p.OutletTemp = p.InletTemp;
+        if ((state.dataRefrigCase->TotalCondenserHeat > 0.0) && (!FirstHVACIteration)) {
+            ShowRecurringWarningErrorAtEnd(
+                state,
+                p.TypeName + p.Name + "Water-cooled condenser has no cooling water flow. Heat is not being rejected from compressor rack condenser.",
+                p.NoFlowWarnIndex);
+        }
+    }
+    if (p.OutletTemp > p.OutletTempMax) {
+        if (p.HighTempWarnIndex == 0) {
+            ShowWarningMessage(state, EnergyPlus::format("{}{}", p.TypeName, p.Name));
+            ShowContinueError(state,
+                              "Water-cooled condenser outlet temp higher than maximum allowed temp. Check flow rates and/or temperature setpoints.");
+        }
+        ShowRecurringWarningErrorAtEnd(
+            state, p.ErrIntro + p.Name + " - Condenser outlet temp higher than maximum allowed ... continues", p.HighTempWarnIndex);
+    }
+}
+
 void RefrigCondenserData::simulate(EnergyPlusData &state,
                                    [[maybe_unused]] const PlantLocation &calledFromLocation,
                                    bool const FirstHVACIteration,
                                    [[maybe_unused]] Real64 &CurLoad,
                                    [[maybe_unused]] bool const RunFlag)
 {
-
-    // SUBROUTINE INFORMATION:
-    //       AUTHOR         Randy Hudson, ORNL
-    //       DATE WRITTEN   July 2007
-    //       MODIFIED       Therese Stovall, ORNL May 2008
-    //                      Brent Griffith, NREL Oct 2010, generalize fluid properties
-    //                        plant upgrades, moved where called from to SimPlantEquip from ManageNonZoneEquipment
-    //       RE-ENGINEERED  na
-
-    // PURPOSE OF THIS SUBROUTINE:
-    // Simulates the water-cooled refrigeration condenser object.
-    // Modified to add condensers for detailed refrigeration systems and to
-    // avoid double-counting heat rejection that has been used in desuperheater
-    // hvac coils or water heaters.
-
-    // METHODOLOGY EMPLOYED:
-    // Called from SimPlantEquip in PlantLoopEquipment , previously was called from Non-Zone Equipment Manager
-    // Flow is requested and the actual available flow is set.  The outlet temperature is calculated.
-
-    static constexpr std::string_view RoutineName("SimRefrigCondenser");
-    int PlantInletNode(0);
-    int PlantOutletNode(0);
-    PlantLocation PlantLoc{};
-
     InitRefrigerationPlantConnections(state);
 
-    std::string TypeName;
-    std::string ErrIntro;
-
-    // set variables depending upon system type
-    PlantInletNode = this->InletNode;
-    PlantOutletNode = this->OutletNode;
-    PlantLoc = this->plantLoc;
-
     state.dataRefrigCase->TotalCondenserHeat = this->CondLoad;
-    TypeName = "Refrigeration:Condenser:WaterCooled";
-    ErrIntro = "Condenser for refrigeration system ";
 
-    // Current condenser is water cooled
-    // Make demand request on first HVAC iteration
-
-    // get cooling fluid properties
-    Real64 rho = PlantLoc.loop->glycol->getDensity(state, this->InletTemp, RoutineName);
-    Real64 Cp = PlantLoc.loop->glycol->getSpecificHeat(state, this->InletTemp, RoutineName);
-
-    if (this->FlowType == CndsrFlowType::Variable && state.dataRefrigCase->TotalCondenserHeat > 0.0) {
-
-        this->OutletTemp = this->outletTempSched->getCurrentVal();
-
-        if (this->OutletTemp == this->InletTemp) {
-
-            if (this->HighInletWarnIndex == 0) {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}, \"{}\" : has inlet water temp equal to desired outlet temp. Excessive flow resulting. ",
-                                                   ErrIntro,
-                                                   this->Name));
-                ShowContinueError(state, "cooling water is not cold enough to reach desired outlet temperature");
-            }
-            ShowRecurringWarningErrorAtEnd(state,
-                                           ErrIntro + ", \"" + this->Name + "\" : has inlet water temp equal to desired outlet temp.... continues. ",
-                                           this->HighInletWarnIndex);
-            this->VolFlowRate = 9999.0;
-            this->MassFlowRate = this->VolFlowRate * rho;
-        } else {
-            Real64 DeltaT = this->OutletTemp - this->InletTemp;
-            this->MassFlowRate = state.dataRefrigCase->TotalCondenserHeat / Cp / DeltaT;
-            // Check for maximum flow in the component
-            if (this->MassFlowRate > this->MassFlowRateMax) {
-                if (this->HighFlowWarnIndex == 0) {
-                    ShowWarningMessage(state, EnergyPlus::format("{}{}", TypeName, this->Name));
-                    ShowContinueError(state, "Requested condenser water mass flow rate greater than maximum allowed value. ");
-                    ShowContinueError(state, "Flow reset to maximum value.");
-                } // HighFlowWarnIndex
-                ShowRecurringWarningErrorAtEnd(
-                    state, ErrIntro + this->Name + " - Flow rate higher than maximum allowed ... continues", this->HighFlowWarnIndex);
-                // END IF
-                this->MassFlowRate = this->MassFlowRateMax;
-            }
-        } // compare outlet T to inlet T
-
-    } else if (this->FlowType == CndsrFlowType::Constant && state.dataRefrigCase->TotalCondenserHeat > 0.0) {
-        // this part for constant flow condition
-        this->VolFlowRate = this->DesVolFlowRate;
-        this->MassFlowRate = this->VolFlowRate * rho;
-
-    } else if (state.dataRefrigCase->TotalCondenserHeat == 0.0) {
-        this->MassFlowRate = 0.0;
-
-    } // on flow type
-    // check against plant, might get changed.
-    PlantUtilities::SetComponentFlowRate(state, this->MassFlowRate, PlantInletNode, PlantOutletNode, PlantLoc);
-
-    this->VolFlowRate = this->MassFlowRate / rho;
-
-    if (this->MassFlowRate > 0) {
-        this->OutletTemp = state.dataRefrigCase->TotalCondenserHeat / (this->MassFlowRate * Cp) + state.dataLoopNodes->Node(PlantInletNode).Temp;
-    } else {
-        this->OutletTemp = this->InletTemp;
-        if ((state.dataRefrigCase->TotalCondenserHeat > 0.0) && (!FirstHVACIteration)) {
-
-            ShowRecurringWarningErrorAtEnd(
-                state,
-                TypeName + this->Name +
-                    "Water-cooled condenser has no cooling water flow. Heat is not being rejected from compressor rack condenser.",
-                this->NoFlowWarnIndex);
-        }
-    }
-    // Check outlet water temp for max value
-    if (this->OutletTemp > this->OutletTempMax) {
-        if (this->HighTempWarnIndex == 0) {
-            ShowWarningMessage(state, EnergyPlus::format("{}{}", TypeName, this->Name));
-            ShowContinueError(state,
-                              "Water-cooled condenser outlet temp higher than maximum allowed temp. Check flow rates and/or temperature setpoints.");
-        }
-        ShowRecurringWarningErrorAtEnd(
-            state, ErrIntro + this->Name + " - Condenser outlet temp higher than maximum allowed ... continues", this->HighTempWarnIndex);
-    }
-
+    WaterCooledCondenserParams params{this->Name,
+                                      "Refrigeration:Condenser:WaterCooled",
+                                      "Condenser for refrigeration system ",
+                                      this->InletNode,
+                                      this->OutletNode,
+                                      this->plantLoc,
+                                      this->FlowType,
+                                      this->outletTempSched,
+                                      this->InletTemp,
+                                      this->DesVolFlowRate,
+                                      this->MassFlowRateMax,
+                                      this->OutletTempMax,
+                                      this->OutletTemp,
+                                      this->VolFlowRate,
+                                      this->MassFlowRate,
+                                      this->HighInletWarnIndex,
+                                      this->HighFlowWarnIndex,
+                                      this->NoFlowWarnIndex,
+                                      this->HighTempWarnIndex};
+    simulateWaterCooledCondenser(state, params, FirstHVACIteration);
     this->UpdateCondenserOutletNode(state);
 }
 
@@ -11635,124 +9981,31 @@ void RefrigRackData::simulate(EnergyPlusData &state,
                               [[maybe_unused]] Real64 &CurLoad,
                               [[maybe_unused]] bool const RunFlag)
 {
-
-    // SUBROUTINE INFORMATION:
-    //       AUTHOR         Randy Hudson, ORNL
-    //       DATE WRITTEN   July 2007
-    //       MODIFIED       Therese Stovall, ORNL May 2008
-    //                      Brent Griffith, NREL Oct 2010, generalize fluid properties
-    //                        plant upgrades, moved where called from to SimPlantEquip from ManageNonZoneEquipment
-    //       RE-ENGINEERED  na
-
-    // PURPOSE OF THIS SUBROUTINE:
-    // Simulates the water-cooled refrigeration condenser object.
-    // Modified to add condensers for detailed refrigeration systems and to
-    // avoid double-counting heat rejection that has been used in desuperheater
-    // hvac coils or water heaters.
-
-    // METHODOLOGY EMPLOYED:
-    // Called from SimPlantEquip in PlantLoopEquipment , previously was called from Non-Zone Equipment Manager
-    // Flow is requested and the actual available flow is set.  The outlet temperature is calculated.
-
-    static constexpr std::string_view RoutineName("SimRefrigCondenser");
-    int PlantInletNode(0);
-    int PlantOutletNode(0);
-    PlantLocation PlantLoc{};
-
     InitRefrigerationPlantConnections(state);
-
-    std::string TypeName;
-    std::string ErrIntro;
-
-    // set variables depending upon system type
-    PlantInletNode = this->InletNode;
-    PlantOutletNode = this->OutletNode;
-    PlantLoc = this->plantLoc;
 
     state.dataRefrigCase->TotalCondenserHeat =
         state.dataHeatBal->HeatReclaimRefrigeratedRack(this->MyIdx).AvailCapacity - this->LaggedUsedWaterHeater - this->LaggedUsedHVACCoil;
-    TypeName = "Refrigeration:CompressorRack:";
-    ErrIntro = "Condenser for refrigeration rack ";
 
-    // Current condenser is water cooled
-    // Make demand request on first HVAC iteration
-
-    // get cooling fluid properties
-    Real64 rho = PlantLoc.loop->glycol->getDensity(state, this->InletTemp, RoutineName);
-    Real64 Cp = PlantLoc.loop->glycol->getSpecificHeat(state, this->InletTemp, RoutineName);
-
-    if (this->FlowType == CndsrFlowType::Variable && state.dataRefrigCase->TotalCondenserHeat > 0.0) {
-        this->OutletTemp = this->outletTempSched->getCurrentVal();
-
-        if (this->OutletTemp == this->InletTemp) {
-
-            if (this->HighInletWarnIndex == 0) {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}, \"{}\" : has inlet water temp equal to desired outlet temp. Excessive flow resulting. ",
-                                                   ErrIntro,
-                                                   this->Name));
-                ShowContinueError(state, "cooling water is not cold enough to reach desired outlet temperature");
-            }
-            ShowRecurringWarningErrorAtEnd(state,
-                                           ErrIntro + ", \"" + this->Name + "\" : has inlet water temp equal to desired outlet temp.... continues. ",
-                                           this->HighInletWarnIndex);
-            this->VolFlowRate = 9999.0;
-            this->MassFlowRate = this->VolFlowRate * rho;
-        } else {
-            Real64 DeltaT = this->OutletTemp - this->InletTemp;
-            this->MassFlowRate = state.dataRefrigCase->TotalCondenserHeat / Cp / DeltaT;
-            // Check for maximum flow in the component
-            if (this->MassFlowRate > this->MassFlowRateMax) {
-                if (this->HighFlowWarnIndex == 0) {
-                    ShowWarningMessage(state, EnergyPlus::format("{}{}", TypeName, this->Name));
-                    ShowContinueError(state, "Requested condenser water mass flow rate greater than maximum allowed value. ");
-                    ShowContinueError(state, "Flow reset to maximum value.");
-                } // HighFlowWarnIndex
-                ShowRecurringWarningErrorAtEnd(
-                    state, ErrIntro + this->Name + " - Flow rate higher than maximum allowed ... continues", this->HighFlowWarnIndex);
-                // END IF
-                this->MassFlowRate = this->MassFlowRateMax;
-            }
-        } // compare outlet T to inlet T
-
-    } else if (this->FlowType == CndsrFlowType::Constant && state.dataRefrigCase->TotalCondenserHeat > 0.0) {
-        // this part for constant flow condition
-        this->VolFlowRate = this->DesVolFlowRate;
-        this->MassFlowRate = this->VolFlowRate * rho;
-
-    } else if (state.dataRefrigCase->TotalCondenserHeat == 0.0) {
-        this->MassFlowRate = 0.0;
-
-    } // on flow type
-    // check against plant, might get changed.
-    PlantUtilities::SetComponentFlowRate(state, this->MassFlowRate, PlantInletNode, PlantOutletNode, PlantLoc);
-
-    this->VolFlowRate = this->MassFlowRate / rho;
-
-    if (this->MassFlowRate > 0) {
-        this->OutletTemp = state.dataRefrigCase->TotalCondenserHeat / (this->MassFlowRate * Cp) + state.dataLoopNodes->Node(PlantInletNode).Temp;
-    } else {
-        this->OutletTemp = this->InletTemp;
-        if ((state.dataRefrigCase->TotalCondenserHeat > 0.0) && (!FirstHVACIteration)) {
-
-            ShowRecurringWarningErrorAtEnd(
-                state,
-                TypeName + this->Name +
-                    "Water-cooled condenser has no cooling water flow. Heat is not being rejected from compressor rack condenser.",
-                this->NoFlowWarnIndex);
-        }
-    }
-    // Check outlet water temp for max value
-    if (this->OutletTemp > this->OutletTempMax) {
-        if (this->HighTempWarnIndex == 0) {
-            ShowWarningMessage(state, EnergyPlus::format("{}{}", TypeName, this->Name));
-            ShowContinueError(state,
-                              "Water-cooled condenser outlet temp higher than maximum allowed temp. Check flow rates and/or temperature setpoints.");
-        }
-        ShowRecurringWarningErrorAtEnd(
-            state, ErrIntro + this->Name + " - Condenser outlet temp higher than maximum allowed ... continues", HighTempWarnIndex);
-    }
-
+    WaterCooledCondenserParams params{this->Name,
+                                      "Refrigeration:CompressorRack:",
+                                      "Condenser for refrigeration rack ",
+                                      this->InletNode,
+                                      this->OutletNode,
+                                      this->plantLoc,
+                                      this->FlowType,
+                                      this->outletTempSched,
+                                      this->InletTemp,
+                                      this->DesVolFlowRate,
+                                      this->MassFlowRateMax,
+                                      this->OutletTempMax,
+                                      this->OutletTemp,
+                                      this->VolFlowRate,
+                                      this->MassFlowRate,
+                                      this->HighInletWarnIndex,
+                                      this->HighFlowWarnIndex,
+                                      this->NoFlowWarnIndex,
+                                      this->HighTempWarnIndex};
+    simulateWaterCooledCondenser(state, params, FirstHVACIteration);
     this->UpdateCondenserOutletNode(state);
 }
 
@@ -12272,88 +10525,63 @@ void SimulateDetailedTransRefrigSystems(EnergyPlusData &state)
     //  TransCritSysFlag = .TRUE.
     for (auto &thisSys : TransSystem) {
         // Only do those systems appropriate for this analysis, supermarket type on load time step
-        if (thisSys.NumCasesMT > 0) {
-            for (int CaseIndex = 1; CaseIndex <= thisSys.NumCasesMT; ++CaseIndex) {
-                int CaseID = thisSys.CaseNumMT(CaseIndex);
-                RefrigCase(CaseID).CalculateCase(state);
-                //  TEvapDesignMT calc in Get Input to meet lowest evap temp of any MT load on the system.
-                //  TEvapNeededMT is fixed at this design value.
-                thisSys.TEvapNeededMT = thisSys.TEvapDesignMT;
-                // increment TotalCoolingLoad for Compressors/gas cooler on each system and defrost gas cooler credits for heat recovery
-                thisSys.TotalCoolingLoadMT += RefrigCase(CaseID).TotalCoolingLoad;
-                thisSys.TotalCondDefrostCredit += RefrigCase(CaseID).HotDefrostCondCredit;
-            } // NumCasesMT
-        } // Num of MT cases > 0
+        // Calculate cases and walk-ins for both MT and LT temperature levels, accumulating loads
+        auto accumulateTransCaseLoads =
+            [&](int numCases, const Array1D_int &caseNums, Real64 &tEvapNeeded, Real64 tEvapDesign, Real64 &totalCoolingLoad) {
+                for (int CaseIndex = 1; CaseIndex <= numCases; ++CaseIndex) {
+                    int CaseID = caseNums(CaseIndex);
+                    RefrigCase(CaseID).CalculateCase(state);
+                    tEvapNeeded = tEvapDesign;
+                    totalCoolingLoad += RefrigCase(CaseID).TotalCoolingLoad;
+                    thisSys.TotalCondDefrostCredit += RefrigCase(CaseID).HotDefrostCondCredit;
+                }
+            };
+        auto accumulateTransWalkInLoads =
+            [&](int numWalkIns, const Array1D_int &walkInNums, Real64 &tEvapNeeded, Real64 tEvapDesign, Real64 &totalCoolingLoad) {
+                for (int WalkInIndex = 1; WalkInIndex <= numWalkIns; ++WalkInIndex) {
+                    int WalkInID = walkInNums(WalkInIndex);
+                    WalkIn(WalkInID).CalculateWalkIn(state);
+                    tEvapNeeded = tEvapDesign;
+                    totalCoolingLoad += WalkIn(WalkInID).TotalCoolingLoad;
+                    thisSys.TotalCondDefrostCredit += WalkIn(WalkInID).HotDefrostCondCredit;
+                }
+            };
 
-        if (thisSys.NumCasesLT > 0) {
-            for (int CaseIndex = 1; CaseIndex <= thisSys.NumCasesLT; ++CaseIndex) {
-                int CaseID = thisSys.CaseNumLT(CaseIndex);
-                RefrigCase(CaseID).CalculateCase(state);
-                //  TEvapDesignLT calc in Get Input to meet lowest evap temp of any LT load on the system.
-                //  TEvapNeededLT is fixed at this design value.
-                thisSys.TEvapNeededLT = thisSys.TEvapDesignLT;
-                // increment TotalCoolingLoad for Compressors/gas cooler on each system and defrost gas cooler credits for heat recovery
-                thisSys.TotalCoolingLoadLT += RefrigCase(CaseID).TotalCoolingLoad;
-                thisSys.TotalCondDefrostCredit += RefrigCase(CaseID).HotDefrostCondCredit;
-            } // NumCasesLT
-        } // Num of LT cases > 0
-
-        if (thisSys.NumWalkInsMT > 0) {
-            for (int WalkInIndex = 1; WalkInIndex <= thisSys.NumWalkInsMT; ++WalkInIndex) {
-                int WalkInID = thisSys.WalkInNumMT(WalkInIndex);
-                WalkIn(WalkInID).CalculateWalkIn(state);
-                //  TEvapDesignMT calc in Get Input to meet lowest evap temp of any MT load on the system.
-                //  TEvapNeededMT is fixed at this design value.
-                thisSys.TEvapNeededMT = thisSys.TEvapDesignMT;
-                // increment TotalCoolingLoad for Compressors/gas cooler on each system
-                thisSys.TotalCoolingLoadMT += WalkIn(WalkInID).TotalCoolingLoad;
-                thisSys.TotalCondDefrostCredit += WalkIn(WalkInID).HotDefrostCondCredit;
-            } // NumWalkInsMT systems
-        } // thisSys%NumWalkInsMT > 0
-
-        if (thisSys.NumWalkInsLT > 0) {
-            for (int WalkInIndex = 1; WalkInIndex <= thisSys.NumWalkInsLT; ++WalkInIndex) {
-                int WalkInID = thisSys.WalkInNumLT(WalkInIndex);
-                WalkIn(WalkInID).CalculateWalkIn(state);
-                //  TEvapDesignLT calc in Get Input to meet lowest evap temp of any LT load on the system.
-                //  TEvapNeeded is fixed at this design value.
-                thisSys.TEvapNeededLT = thisSys.TEvapDesignLT;
-                // increment TotalCoolingLoad for Compressors/gas cooler on each system
-                thisSys.TotalCoolingLoadLT += WalkIn(WalkInID).TotalCoolingLoad;
-                thisSys.TotalCondDefrostCredit += WalkIn(WalkInID).HotDefrostCondCredit;
-            } // NumWalkInsLT systems
-        } // thisSys%NumWalkInsLT > 0
+        accumulateTransCaseLoads(thisSys.NumCasesMT, thisSys.CaseNumMT, thisSys.TEvapNeededMT, thisSys.TEvapDesignMT, thisSys.TotalCoolingLoadMT);
+        accumulateTransCaseLoads(thisSys.NumCasesLT, thisSys.CaseNumLT, thisSys.TEvapNeededLT, thisSys.TEvapDesignLT, thisSys.TotalCoolingLoadLT);
+        accumulateTransWalkInLoads(
+            thisSys.NumWalkInsMT, thisSys.WalkInNumMT, thisSys.TEvapNeededMT, thisSys.TEvapDesignMT, thisSys.TotalCoolingLoadMT);
+        accumulateTransWalkInLoads(
+            thisSys.NumWalkInsLT, thisSys.WalkInNumLT, thisSys.TEvapNeededLT, thisSys.TEvapDesignLT, thisSys.TotalCoolingLoadLT);
 
         // add suction pipe heat gains (W) if input by user
         // Suction pipe heat gains aren't included in the reported total system load, but are heat gains that must be met in
         //  gas cooler and compressor loads.
-        thisSys.PipeHeatLoadMT = 0.0;
-        if (thisSys.SumUASuctionPipingMT > MySmallNumber) {
-            Real64 SuctionPipeZoneTemp = state.dataLoopNodes->Node(thisSys.SuctionPipeZoneNodeNumMT).Temp;
-            thisSys.PipeHeatLoadMT = thisSys.SumUASuctionPipingMT * (SuctionPipeZoneTemp - thisSys.TEvapNeededMT);
-            // pipe heat load is a positive number (ie. heat absorbed by pipe, so needs to be subtracted
-            //   from refrigcasecredit (- for cooling zone, + for heating zone)
-            int SuctionPipeActualZoneNum = thisSys.SuctionPipeActualZoneNumMT;
-            // Can arrive here when load call to refrigeration looks for cases/walkin systems and usetimestep is .FALSE.
-            if ((!state.dataRefrigCase->UseSysTimeStep) &&
-                ((state.dataRefrigCase->NumSimulationCases > 0) || (state.dataRefrigCase->NumSimulationWalkIns > 0))) {
-                state.dataHeatBal->RefrigCaseCredit(SuctionPipeActualZoneNum).SenCaseCreditToZone -= thisSys.PipeHeatLoadMT;
-            } // UseSysTimeStep
-        }
-
-        thisSys.PipeHeatLoadLT = 0.0;
-        if (thisSys.SumUASuctionPipingLT > MySmallNumber) {
-            Real64 SuctionPipeZoneTemp = state.dataLoopNodes->Node(thisSys.SuctionPipeZoneNodeNumLT).Temp;
-            thisSys.PipeHeatLoadLT = thisSys.SumUASuctionPipingLT * (SuctionPipeZoneTemp - thisSys.TEvapNeededLT);
-            // pipe heat load is a positive number (ie. heat absorbed by pipe, so needs to be subtracted
-            //   from refrigcasecredit (- for cooling zone, + for heating zone)
-            int SuctionPipeActualZoneNum = thisSys.SuctionPipeActualZoneNumLT;
-            // Can arrive here when load call to refrigeration looks for cases/walkin systems and usetimestep is .FALSE.
-            if ((!state.dataRefrigCase->UseSysTimeStep) &&
-                ((state.dataRefrigCase->NumSimulationCases > 0) || (state.dataRefrigCase->NumSimulationWalkIns > 0))) {
-                state.dataHeatBal->RefrigCaseCredit(SuctionPipeActualZoneNum).SenCaseCreditToZone -= thisSys.PipeHeatLoadLT;
-            } // UseSysTimeStep
-        }
+        // pipe heat load is a positive number (ie. heat absorbed by pipe, so needs to be subtracted
+        //   from refrigcasecredit (- for cooling zone, + for heating zone)
+        auto calcPipeHeatLoad =
+            [&](Real64 &pipeHeatLoad, Real64 sumUASuctionPiping, int suctionPipeZoneNodeNum, Real64 tEvapNeeded, int suctionPipeActualZoneNum) {
+                pipeHeatLoad = 0.0;
+                if (sumUASuctionPiping > MySmallNumber) {
+                    Real64 SuctionPipeZoneTemp = state.dataLoopNodes->Node(suctionPipeZoneNodeNum).Temp;
+                    pipeHeatLoad = sumUASuctionPiping * (SuctionPipeZoneTemp - tEvapNeeded);
+                    // Can arrive here when load call to refrigeration looks for cases/walkin systems and usetimestep is .FALSE.
+                    if ((!state.dataRefrigCase->UseSysTimeStep) &&
+                        ((state.dataRefrigCase->NumSimulationCases > 0) || (state.dataRefrigCase->NumSimulationWalkIns > 0))) {
+                        state.dataHeatBal->RefrigCaseCredit(suctionPipeActualZoneNum).SenCaseCreditToZone -= pipeHeatLoad;
+                    }
+                }
+            };
+        calcPipeHeatLoad(thisSys.PipeHeatLoadMT,
+                         thisSys.SumUASuctionPipingMT,
+                         thisSys.SuctionPipeZoneNodeNumMT,
+                         thisSys.TEvapNeededMT,
+                         thisSys.SuctionPipeActualZoneNumMT);
+        calcPipeHeatLoad(thisSys.PipeHeatLoadLT,
+                         thisSys.SumUASuctionPipingLT,
+                         thisSys.SuctionPipeZoneNodeNumLT,
+                         thisSys.TEvapNeededLT,
+                         thisSys.SuctionPipeActualZoneNumLT);
 
     } // SysNum
 
@@ -13276,20 +11504,9 @@ void RefrigSystemData::CalculateCompressors(EnergyPlusData &state)
         this->TotHiStageCompPower = 0.0;
     }
 
-    for (int CompIndex = 1; CompIndex <= this->NumCompressors; ++CompIndex) {
-        int CompID = this->CompressorNum(CompIndex);
-        auto &compressor = Compressor(CompID);
-        compressor.Power = 0.0;
-        compressor.MassFlow = 0.0;
-        compressor.Capacity = 0.0;
-        compressor.ElecConsumption = 0.0;
-        compressor.CoolingEnergy = 0.0;
-        compressor.LoadFactor = 0.0;
-    }
-    if (this->NumStages == 2) {
-        for (int CompIndex = 1; CompIndex <= this->NumHiStageCompressors; ++CompIndex) {
-            int CompID = this->HiStageCompressorNum(CompIndex);
-            auto &compressor = Compressor(CompID);
+    auto zeroCompressors = [&Compressor](const Array1D_int &compNums, int numComps) {
+        for (int CompIndex = 1; CompIndex <= numComps; ++CompIndex) {
+            auto &compressor = Compressor(compNums(CompIndex));
             compressor.Power = 0.0;
             compressor.MassFlow = 0.0;
             compressor.Capacity = 0.0;
@@ -13297,6 +11514,10 @@ void RefrigSystemData::CalculateCompressors(EnergyPlusData &state)
             compressor.CoolingEnergy = 0.0;
             compressor.LoadFactor = 0.0;
         }
+    };
+    zeroCompressors(this->CompressorNum, this->NumCompressors);
+    if (this->NumStages == 2) {
+        zeroCompressors(this->HiStageCompressorNum, this->NumHiStageCompressors);
     }
 
     // Determine properties at case inlet and compressor inlet
@@ -13396,52 +11617,33 @@ void RefrigSystemData::CalculateCompressors(EnergyPlusData &state)
             auto &compressor = Compressor(CompID);
 
             // need to use indiv compressor's rated subcool and superheat to adjust capacity to actual conditions
+            // Determine base enthalpies and temperatures for this stage
+            // For single-stage or two-stage high-stage: base enthalpy for subcool is HSatLiqCond, reference temp is TCondense
+            // For two-stage low-stage: base enthalpy is HCaseInRated_base (sat liquid at intercooler), reference temp is TIntercooler
+            Real64 const HSubcoolBase = (this->NumStages == 2 && StageIndex == 1) ? HCaseInRated_base : this->HSatLiqCond;
+            Real64 const TSubcoolRef = (this->NumStages == 2 && StageIndex == 1) ? this->TIntercooler : this->TCondense;
+            // For superheat: single-stage and low-stage use HsatVaporforTevapneeded/TEvapNeeded; high-stage uses HCompInRated_base/TIntercooler
+            Real64 const HSuperheatBase = (StageIndex == 2) ? HCompInRated_base : HsatVaporforTevapneeded;
+            Real64 const TSuperheatRef = (StageIndex == 2) ? this->TIntercooler : this->TEvapNeeded;
+
             switch (compressor.SubcoolRatingType) {
             case CompRatingType::Subcooling: {
-                if (this->NumStages == 1) { // Single-stage system
-                    HCaseInRated = this->HSatLiqCond - this->CpSatLiqCond * compressor.RatedSubcool;
-                } else if (this->NumStages == 2 && StageIndex == 1) { // Two-stage system, low-stage side
-                    HCaseInRated = HCaseInRated_base - this->CpSatLiqCond * compressor.RatedSubcool;
-                } else if (this->NumStages == 2 && StageIndex == 2) { // Two-stage system, high-stage side
-                    HCaseInRated = this->HSatLiqCond - this->CpSatLiqCond * compressor.RatedSubcool;
-                } // NumStages
+                HCaseInRated = HSubcoolBase - this->CpSatLiqCond * compressor.RatedSubcool;
             } break;
             case CompRatingType::LiquidTemperature: { // have rated liquid temperature stored in "RatedSubcool"
-                if (this->NumStages == 1) {           // Single-stage system
-                    HCaseInRated = this->HSatLiqCond - this->CpSatLiqCond * (this->TCondense - compressor.RatedSubcool);
-                } else if (this->NumStages == 2 && StageIndex == 1) { // Two-stage system, low-stage side
-                    HCaseInRated = HCaseInRated_base - this->CpSatLiqCond * (this->TIntercooler - compressor.RatedSubcool);
-                } else if (this->NumStages == 2 && StageIndex == 2) { // Two-stage system, high-stage side
-                    HCaseInRated = this->HSatLiqCond - this->CpSatLiqCond * (this->TCondense - compressor.RatedSubcool);
-                } // NumStages
+                HCaseInRated = HSubcoolBase - this->CpSatLiqCond * (TSubcoolRef - compressor.RatedSubcool);
             } break;
             default:
                 break;
             } // Compressor SubcoolRatingType
             switch (compressor.SuperheatRatingType) {
             case CompRatingType::Superheat: {
-                if (this->NumStages == 1) { // Single-stage system
-                    HCompInRated = HsatVaporforTevapneeded + this->CpSatVapEvap * compressor.RatedSuperheat;
-                    TempInRated = this->TEvapNeeded + compressor.RatedSuperheat;
-                } else if (this->NumStages == 2 && StageIndex == 1) { // Two-stage system, low-stage side
-                    HCompInRated = HsatVaporforTevapneeded + this->CpSatVapEvap * compressor.RatedSuperheat;
-                    TempInRated = this->TEvapNeeded + compressor.RatedSuperheat;
-                } else if (this->NumStages == 2 && StageIndex == 2) { // Two-stage system, high-stage side
-                    HCompInRated = HCompInRated_base + this->CpSatVapEvap * compressor.RatedSuperheat;
-                    TempInRated = this->TIntercooler + compressor.RatedSuperheat;
-                } // NumStages
+                HCompInRated = HSuperheatBase + this->CpSatVapEvap * compressor.RatedSuperheat;
+                TempInRated = TSuperheatRef + compressor.RatedSuperheat;
             } break;
             case CompRatingType::ReturnGasTemperature: { // have rated compressor inlet temperature stored in "RatedSuperheat"
-                if (this->NumStages == 1) {              // Single-stage system
-                    TempInRated = compressor.RatedSuperheat;
-                    HCompInRated = HsatVaporforTevapneeded + this->CpSatVapEvap * (TempInRated - this->TEvapNeeded);
-                } else if (this->NumStages == 2 && StageIndex == 1) { // Two-stage system, low-stage side
-                    TempInRated = compressor.RatedSuperheat;
-                    HCompInRated = HsatVaporforTevapneeded + this->CpSatVapEvap * (TempInRated - this->TEvapNeeded);
-                } else if (this->NumStages == 2 && StageIndex == 2) { // Two-stage system, high-stage side
-                    TempInRated = compressor.RatedSuperheat;
-                    HCompInRated = HsatVaporforTevapneeded + this->CpSatVapEvap * (TempInRated - this->TIntercooler);
-                } // NumStages
+                TempInRated = compressor.RatedSuperheat;
+                HCompInRated = HSuperheatBase + this->CpSatVapEvap * (TempInRated - TSuperheatRef);
             } break;
             default:
                 break;
@@ -13459,44 +11661,29 @@ void RefrigSystemData::CalculateCompressors(EnergyPlusData &state)
 
             // calculate load factor for last compressor added
             // assumes either cycling or part load eff = full load eff for last compressor
-            if (StageIndex == 1) { // Single-stage or low-stage compressors
-                if ((this->TotCompCapacity + compressor.Capacity) >= NeededCapacity) {
-                    LFLastComp = (NeededCapacity - this->TotCompCapacity) / compressor.Capacity;
-                    compressor.Power *= LFLastComp;
-                    compressor.MassFlow *= LFLastComp;
-                    compressor.Capacity *= LFLastComp;
-                    this->TotCompCapacity += compressor.Capacity;
-                    this->RefMassFlowComps += compressor.MassFlow;
-                    this->TotCompPower += compressor.Power;
-                    compressor.ElecConsumption = compressor.Power * localTimeStepSec;
-                    compressor.CoolingEnergy = compressor.Capacity * localTimeStepSec;
-                    compressor.LoadFactor = LFLastComp;
-                    break; // numcomps do
-                } //>= needed capacity
-                this->TotCompCapacity += compressor.Capacity;
-                this->RefMassFlowComps += compressor.MassFlow;
-                this->TotCompPower += compressor.Power;
-                //>= needed capacity
-            } else { // high-stage compressors (for two-stage systems only)
-                if ((this->TotHiStageCompCapacity + compressor.Capacity) >= NeededCapacity) {
-                    LFLastComp = (NeededCapacity - this->TotHiStageCompCapacity) / compressor.Capacity;
-                    compressor.Power *= LFLastComp;
-                    compressor.MassFlow *= LFLastComp;
-                    compressor.Capacity *= LFLastComp;
-                    this->TotHiStageCompCapacity += compressor.Capacity;
-                    this->RefMassFlowHiStageComps += compressor.MassFlow;
-                    this->TotHiStageCompPower += compressor.Power;
+            Real64 &totCapacity = (StageIndex == 1) ? this->TotCompCapacity : this->TotHiStageCompCapacity;
+            Real64 &refMassFlow = (StageIndex == 1) ? this->RefMassFlowComps : this->RefMassFlowHiStageComps;
+            Real64 &totPower = (StageIndex == 1) ? this->TotCompPower : this->TotHiStageCompPower;
+
+            if ((totCapacity + compressor.Capacity) >= NeededCapacity) {
+                LFLastComp = (NeededCapacity - totCapacity) / compressor.Capacity;
+                compressor.Power *= LFLastComp;
+                compressor.MassFlow *= LFLastComp;
+                compressor.Capacity *= LFLastComp;
+                totCapacity += compressor.Capacity;
+                refMassFlow += compressor.MassFlow;
+                totPower += compressor.Power;
+                if (StageIndex == 2) {
                     this->FlowRatioIntercooler = this->RefMassFlowComps / this->RefMassFlowHiStageComps;
-                    compressor.ElecConsumption = compressor.Power * localTimeStepSec;
-                    compressor.CoolingEnergy = compressor.Capacity * localTimeStepSec;
-                    compressor.LoadFactor = LFLastComp;
-                    break; // numcomps do
-                } //>= needed capacity
-                this->TotHiStageCompCapacity += compressor.Capacity;
-                this->RefMassFlowHiStageComps += compressor.MassFlow;
-                this->TotHiStageCompPower += compressor.Power;
-                //>= needed capacity
-            } // StageIndex
+                }
+                compressor.ElecConsumption = compressor.Power * localTimeStepSec;
+                compressor.CoolingEnergy = compressor.Capacity * localTimeStepSec;
+                compressor.LoadFactor = LFLastComp;
+                break; // numcomps do
+            } //>= needed capacity
+            totCapacity += compressor.Capacity;
+            refMassFlow += compressor.MassFlow;
+            totPower += compressor.Power;
             compressor.ElecConsumption = compressor.Power * localTimeStepSec;
             compressor.CoolingEnergy = compressor.Capacity * localTimeStepSec;
             compressor.LoadFactor = 1.0;
@@ -13619,7 +11806,6 @@ void TransRefrigSystemData::CalculateTransCompressors(EnergyPlusData &state)
     Real64 TotalRefMassFlow;            // Total mass flow through high pressure side of system, kg/s
     Real64 Xu;                          // Initial upper guess for iterative search
     Real64 Xl;                          // Initial lower guess for iterative search
-    Real64 Xnew(0.0);                   // New guess for iterative search
 
     auto &Compressor = state.dataRefrigCase->Compressor;
     auto &GasCooler = state.dataRefrigCase->GasCooler;
@@ -13646,6 +11832,18 @@ void TransRefrigSystemData::CalculateTransCompressors(EnergyPlusData &state)
     // Enthalpy at the receiver bypass, J/kg
     Real64 HReceiverBypass = this->refrig->getSatEnthalpy(state, this->TReceiver, 1.0, RoutineName);
 
+    auto zeroCompressors = [&Compressor](const Array1D_int &compNums, int numComps) {
+        for (int CompIndex = 1; CompIndex <= numComps; ++CompIndex) {
+            auto &comp = Compressor(compNums(CompIndex));
+            comp.Power = 0.0;
+            comp.MassFlow = 0.0;
+            comp.Capacity = 0.0;
+            comp.ElecConsumption = 0.0;
+            comp.CoolingEnergy = 0.0;
+            comp.LoadFactor = 0.0;
+        }
+    };
+
     // Determine refrigerant properties at low temperature (LT) loads (if present)
     // Dispatch low pressure (LP) compressors as necessary
     if (this->transSysType == TransSysType::TwoStage) { // LT side of TwoStage transcritical system
@@ -13666,16 +11864,7 @@ void TransRefrigSystemData::CalculateTransCompressors(EnergyPlusData &state)
         this->TotCompCapacityLP = 0.0;
         this->RefMassFlowCompsLP = 0.0;
         this->TotCompPowerLP = 0.0;
-
-        for (int CompIndex = 1; CompIndex <= this->NumCompressorsLP; ++CompIndex) {
-            int CompID = this->CompressorNumLP(CompIndex);
-            Compressor(CompID).Power = 0.0;
-            Compressor(CompID).MassFlow = 0.0;
-            Compressor(CompID).Capacity = 0.0;
-            Compressor(CompID).ElecConsumption = 0.0;
-            Compressor(CompID).CoolingEnergy = 0.0;
-            Compressor(CompID).LoadFactor = 0.0;
-        }
+        zeroCompressors(this->CompressorNumLP, this->NumCompressorsLP);
 
         for (int CompIndex = 1; CompIndex <= this->NumCompressorsLP; ++CompIndex) {
             int CompID = this->CompressorNumLP(CompIndex);
@@ -13788,22 +11977,28 @@ void TransRefrigSystemData::CalculateTransCompressors(EnergyPlusData &state)
     this->HCompInHP = (HCaseOutLTMT * (this->RefMassFlowtoLTLoads + this->RefMassFlowtoMTLoads) + HReceiverBypass * this->RefMassFlowReceiverBypass) /
                       (this->RefMassFlowtoLTLoads + this->RefMassFlowtoMTLoads + this->RefMassFlowReceiverBypass);
 
+    // Bisection search to find temperature from enthalpy at a given suction pressure
+    auto findTempFromEnthalpy = [&](Real64 targetH) -> Real64 {
+        Real64 lo = this->refrig->getSatTemperature(state, PSuctionMT, RoutineName);
+        Real64 hi = lo + 50.0;
+        Real64 result = lo;
+        for (int iter = 1; iter <= 15; ++iter) {
+            result = (hi + lo) / 2.0;
+            Real64 Hnew = this->refrig->getSupHeatEnthalpy(state, result, PSuctionMT, RoutineName);
+            if (Hnew > targetH) {
+                hi = result;
+            } else {
+                lo = result;
+            }
+            if (std::abs((Hnew - targetH) / Hnew) < ErrorTol) {
+                break;
+            }
+        }
+        return result;
+    };
+
     // Iterate to find the suction temperature entering subcooler
-    Xl = this->refrig->getSatTemperature(state, PSuctionMT, RoutineName);
-    Xu = Xl + 50.0;
-    for (Iter = 1; Iter <= 15; ++Iter) { // Maximum of 15 iterations
-        Xnew = (Xu + Xl) / 2.0;
-        Real64 Hnew = this->refrig->getSupHeatEnthalpy(state, Xnew, PSuctionMT, RoutineName);
-        if (Hnew > this->HCompInHP) { // xnew is too high
-            Xu = Xnew;
-        } else { // xnew is too low
-            Xl = Xnew;
-        }
-        if (std::abs((Hnew - this->HCompInHP) / Hnew) < ErrorTol) {
-            break;
-        }
-    }
-    TSubcoolerColdIn = Xnew;
+    TSubcoolerColdIn = findTempFromEnthalpy(this->HCompInHP);
 
     // Modify receiver inlet enthalpy and HP compressor inlet enthalpy to account for subcooler
     HIdeal = this->refrig->getSupHeatEnthalpy(state, GasCooler(this->GasCoolerNum(1)).TGasCoolerOut, PSuctionMT, RoutineName);
@@ -13818,21 +12013,7 @@ void TransRefrigSystemData::CalculateTransCompressors(EnergyPlusData &state)
     this->DelHSubcoolerDis = -this->DelHSubcoolerSuc;
 
     // Iterate to find the temperature at the inlet of the high pressure (HP) compressors
-    Xl = this->refrig->getSatTemperature(state, PSuctionMT, RoutineName);
-    Xu = Xl + 50.0;
-    for (Iter = 1; Iter <= 15; ++Iter) { // Maximum of 15 iterations
-        Xnew = (Xu + Xl) / 2.0;
-        Real64 Hnew = this->refrig->getSupHeatEnthalpy(state, Xnew, PSuctionMT, RoutineName);
-        if (Hnew > this->HCompInHP) { // xnew is too high
-            Xu = Xnew;
-        } else { // xnew is too low
-            Xl = Xnew;
-        }
-        if (std::abs((Hnew - this->HCompInHP) / Hnew) < ErrorTol) {
-            break;
-        }
-    }
-    this->TCompInHP = Xnew;
+    this->TCompInHP = findTempFromEnthalpy(this->HCompInHP);
 
     //  For capacity correction of HP compressors, consider subcooler, receiver, MT loads, LT loads and LP compressors
     //  to constitute the "load".  The actual and rated conditions at the exit of the gas cooler and the inlet of the
@@ -13845,17 +12026,7 @@ void TransRefrigSystemData::CalculateTransCompressors(EnergyPlusData &state)
     this->TotCompCapacityHP = 0.0;
     this->RefMassFlowCompsHP = 0.0;
     this->TotCompPowerHP = 0.0;
-
-    for (int CompIndex = 1; CompIndex <= this->NumCompressorsHP; ++CompIndex) {
-        int CompID = this->CompressorNumHP(CompIndex);
-        auto &compressor = Compressor(CompID);
-        compressor.Power = 0.0;
-        compressor.MassFlow = 0.0;
-        compressor.Capacity = 0.0;
-        compressor.ElecConsumption = 0.0;
-        compressor.CoolingEnergy = 0.0;
-        compressor.LoadFactor = 0.0;
-    }
+    zeroCompressors(this->CompressorNumHP, this->NumCompressorsHP);
 
     // Dispatch High Pressure compressors to meet load, note they were listed in compressor list in dispatch order
     for (int CompIndex = 1; CompIndex <= this->NumCompressorsHP; ++CompIndex) {
@@ -13976,25 +12147,31 @@ void RefrigSystemData::CalculateSubcoolers(EnergyPlusData &state)
 
     // HCaseIn has to be recalculated as the starting point for the subcoolers here because
     //  of the multiple number of iterations through this subroutine and because Tcondense is evolving.
+    // HSatLiqCond and CpSatLiqCond are always based on TCondense regardless of stage/intercooler configuration
+    this->HSatLiqCond = this->refrig->getSatEnthalpy(state, this->TCondense, 0.0, RoutineName);
+    this->CpSatLiqCond = this->refrig->getSatSpecificHeat(state, this->TCondense, 0.0, RoutineName);
+
+    // Compute the actual liquid inlet temperature based on stage/intercooler configuration
+    // This helper is used both for HCaseIn initialization and inside the subcooler loop
+    auto calcTLiqInActual = [&]() -> Real64 {
+        if (this->NumStages == 1) { // Single-stage compression system
+            return this->TCondense - Condenser(this->CondenserNum(1)).RatedSubcool;
+        } else if (this->intercoolerType == IntercoolerType::Flash) { // Two-stage with flash intercooler
+            return this->TIntercooler;
+        } else { // Two-stage with shell-and-coil intercooler
+            return this->TCondense - Condenser(this->CondenserNum(1)).RatedSubcool -
+                   this->IntercoolerEffectiveness * (this->TCondense - Condenser(this->CondenserNum(1)).RatedSubcool - this->TIntercooler);
+        }
+    };
+
     if (this->NumStages == 1) { // Single-stage compression system
-        this->HSatLiqCond = this->refrig->getSatEnthalpy(state, this->TCondense, 0.0, RoutineName);
-        this->CpSatLiqCond = this->refrig->getSatSpecificHeat(state, this->TCondense, 0.0, RoutineName);
         this->HCaseIn = this->HSatLiqCond - this->CpSatLiqCond * Condenser(this->CondenserNum(1)).RatedSubcool;
-
-        // Two-stage compression with flash intercooler
-    } else if (this->NumStages == 2 && this->intercoolerType == IntercoolerType::Flash) {
-        this->HSatLiqCond = this->refrig->getSatEnthalpy(state, this->TCondense, 0.0, RoutineName);
-        this->CpSatLiqCond = this->refrig->getSatSpecificHeat(state, this->TCondense, 0.0, RoutineName);
+    } else if (this->intercoolerType == IntercoolerType::Flash) { // Two-stage with flash intercooler
         this->HCaseIn = this->refrig->getSatEnthalpy(state, this->TIntercooler, 0.0, RoutineName);
-
-        // Two-stage compression with shell-and-coil intercooler
-    } else if (this->NumStages == 2 && this->intercoolerType == IntercoolerType::ShellAndCoil) {
-        TLiqInActualLocal = this->TCondense - Condenser(this->CondenserNum(1)).RatedSubcool -
-                            this->IntercoolerEffectiveness * (this->TCondense - Condenser(this->CondenserNum(1)).RatedSubcool - this->TIntercooler);
-        this->HSatLiqCond = this->refrig->getSatEnthalpy(state, this->TCondense, 0.0, RoutineName);
-        this->CpSatLiqCond = this->refrig->getSatSpecificHeat(state, this->TCondense, 0.0, RoutineName);
+    } else { // Two-stage with shell-and-coil intercooler
+        TLiqInActualLocal = calcTLiqInActual();
         this->HCaseIn = this->HSatLiqCond - this->CpSatLiqCond * (this->TCondense - TLiqInActualLocal);
-    } // NumStages and IntercoolerType
+    }
 
     for (int SubcoolerIndex = 1; SubcoolerIndex <= this->NumSubcoolers; ++SubcoolerIndex) {
         int SubcoolerID = this->SubcoolerNum(SubcoolerIndex);
@@ -14006,19 +12183,7 @@ void RefrigSystemData::CalculateSubcoolers(EnergyPlusData &state)
         Real64 ControlTLiqOut = cooler.MechControlTliqOut;
         Real64 CpLiquid = this->CpSatLiqCond;
         Real64 CpVapor = this->CpSatVapEvap;
-        if (this->NumStages == 1) { // Single-stage compression system
-            TLiqInActualLocal = this->TCondense - Condenser(this->CondenserNum(1)).RatedSubcool;
-
-            // Two-stage compression with flash intercooler
-        } else if (this->NumStages == 2 && this->intercoolerType == IntercoolerType::Flash) {
-            TLiqInActualLocal = this->TIntercooler;
-
-            // Two-stage compression with shell-and-coil intercooler
-        } else if (this->NumStages == 2 && this->intercoolerType == IntercoolerType::ShellAndCoil) {
-            TLiqInActualLocal =
-                this->TCondense - Condenser(this->CondenserNum(1)).RatedSubcool -
-                this->IntercoolerEffectiveness * (this->TCondense - Condenser(this->CondenserNum(1)).RatedSubcool - this->TIntercooler);
-        } // NumStages and IntercoolerType
+        TLiqInActualLocal = calcTLiqInActual();
 
         switch (cooler.subcoolerType) {
             // Mechanical subcoolers required to come first in order to take advantage of delT
@@ -14223,6 +12388,29 @@ void ReportRefrigerationComponents(EnergyPlusData &state)
         } //(NumSimulationGasCooler > 0)
     } //(NumTransRefrigSystems > 0)
 
+    // Helper to print refrigeration case details - used by racks, detailed systems, trans systems, and secondary loops
+    auto printCaseReport = [&](std::string_view label, int CaseID) {
+        auto const &c = RefrigCase(CaseID);
+        if (c.ZoneNodeNum > 0) {
+            print(state.files.eio,
+                  "   {},{},{},{},{},{},{:.1R},{:.2R},{:.1R},{:.1R},{:.1R},{:.1R},{:.1R},{:.1R}\n",
+                  label,
+                  CaseID,
+                  c.Name,
+                  c.ZoneName,
+                  c.ZoneNodeNum,
+                  state.dataLoopNodes->NodeID(c.ZoneNodeNum),
+                  c.RateTotCapPerLength,
+                  c.RatedLHR,
+                  c.Temperature,
+                  c.Length,
+                  c.OperatingFanPower,
+                  c.LightingPower,
+                  c.AntiSweatPower,
+                  c.DefrostPower);
+        }
+    };
+
     if (state.dataRefrigCase->NumRefrigeratedRacks > 0) {
         print(state.files.eio, "#Refrigeration Compressor Racks, {}\n", state.dataRefrigCase->NumRefrigeratedRacks);
         std::string ChrOut2;
@@ -14255,24 +12443,7 @@ void ReportRefrigerationComponents(EnergyPlusData &state)
                   ChrOut2,
                   RefrigRack(RackNum).RatedCOP);
             for (int CaseNum = 1; CaseNum <= RefrigRack(RackNum).NumCases; ++CaseNum) {
-                int CaseID = RefrigRack(RackNum).CaseNum(CaseNum);
-                if (RefrigCase(CaseID).ZoneNodeNum > 0) {
-                    print(state.files.eio,
-                          "   Refrigeration Case,{},{},{},{},{},{:.1R},{:.2R},{:.1R},{:.1R},{:.1R},{:.1R},{:.1R},{:.1R}\n",
-                          CaseID,
-                          RefrigCase(CaseID).Name,
-                          RefrigCase(CaseID).ZoneName,
-                          RefrigCase(CaseID).ZoneNodeNum,
-                          state.dataLoopNodes->NodeID(RefrigCase(CaseID).ZoneNodeNum),
-                          RefrigCase(CaseID).RateTotCapPerLength,
-                          RefrigCase(CaseID).RatedLHR,
-                          RefrigCase(CaseID).Temperature,
-                          RefrigCase(CaseID).Length,
-                          RefrigCase(CaseID).OperatingFanPower,
-                          RefrigCase(CaseID).LightingPower,
-                          RefrigCase(CaseID).AntiSweatPower,
-                          RefrigCase(CaseID).DefrostPower); // Installed lighting power, may not be rated power
-                }
+                printCaseReport("Refrigeration Case", RefrigRack(RackNum).CaseNum(CaseNum));
             } // numcases
 
             for (int WalkInNum = 1; WalkInNum <= RefrigRack(RackNum).NumWalkIns; ++WalkInNum) {
@@ -14336,24 +12507,7 @@ void ReportRefrigerationComponents(EnergyPlusData &state)
                   System(SystemNum).TCondenseMin);
 
             for (int CaseNum = 1; CaseNum <= System(SystemNum).NumCases; ++CaseNum) {
-                int CaseID = System(SystemNum).CaseNum(CaseNum);
-                if (RefrigCase(CaseID).ZoneNodeNum > 0) {
-                    print(state.files.eio,
-                          "   Refrigeration Case,{},{},{},{},{},{:.1R},{:.2R},{:.1R},{:.1R},{:.1R},{:.1R},{:.1R},{:.1R}\n",
-                          CaseID,
-                          RefrigCase(CaseID).Name,
-                          RefrigCase(CaseID).ZoneName,
-                          RefrigCase(CaseID).ZoneNodeNum,
-                          state.dataLoopNodes->NodeID(RefrigCase(CaseID).ZoneNodeNum),
-                          RefrigCase(CaseID).RateTotCapPerLength,
-                          RefrigCase(CaseID).RatedLHR,
-                          RefrigCase(CaseID).Temperature,
-                          RefrigCase(CaseID).Length,
-                          RefrigCase(CaseID).OperatingFanPower,
-                          RefrigCase(CaseID).LightingPower,
-                          RefrigCase(CaseID).AntiSweatPower,
-                          RefrigCase(CaseID).DefrostPower);
-                }
+                printCaseReport("Refrigeration Case", System(SystemNum).CaseNum(CaseNum));
             } // NumCases on system
             for (int WalkInNum = 1; WalkInNum <= System(SystemNum).NumWalkIns; ++WalkInNum) {
                 int WalkInID = System(SystemNum).WalkInNum(WalkInNum);
@@ -14536,44 +12690,10 @@ void ReportRefrigerationComponents(EnergyPlusData &state)
                   GasCooler(TransSystem(TransSystemNum).GasCoolerNum(1)).MinCondTemp);
 
             for (int CaseNum = 1; CaseNum <= TransSystem(TransSystemNum).NumCasesMT; ++CaseNum) {
-                int CaseID = TransSystem(TransSystemNum).CaseNumMT(CaseNum);
-                if (RefrigCase(CaseID).ZoneNodeNum > 0) {
-                    print(state.files.eio,
-                          "   Medium Temperature Refrigeration Case,{},{},{},{},{},{:.1R},{:.2R},{:.1R},{:.1R},{:.1R},{:.1R},{:.1R},{:.1R}\n",
-                          CaseID,
-                          RefrigCase(CaseID).Name,
-                          RefrigCase(CaseID).ZoneName,
-                          RefrigCase(CaseID).ZoneNodeNum,
-                          state.dataLoopNodes->NodeID(RefrigCase(CaseID).ZoneNodeNum),
-                          RefrigCase(CaseID).RateTotCapPerLength,
-                          RefrigCase(CaseID).RatedLHR,
-                          RefrigCase(CaseID).Temperature,
-                          RefrigCase(CaseID).Length,
-                          RefrigCase(CaseID).OperatingFanPower,
-                          RefrigCase(CaseID).LightingPower,
-                          RefrigCase(CaseID).AntiSweatPower,
-                          RefrigCase(CaseID).DefrostPower);
-                }
+                printCaseReport("Medium Temperature Refrigeration Case", TransSystem(TransSystemNum).CaseNumMT(CaseNum));
             } // NumCasesMT on system
             for (int CaseNum = 1; CaseNum <= TransSystem(TransSystemNum).NumCasesLT; ++CaseNum) {
-                int CaseID = TransSystem(TransSystemNum).CaseNumLT(CaseNum);
-                if (RefrigCase(CaseID).ZoneNodeNum > 0) {
-                    print(state.files.eio,
-                          "   Low Temperature Refrigeration Case,{},{},{},{},{},{:.1R},{:.2R},{:.1R},{:.1R},{:.1R},{:.1R},{:.1R},{:.1R}\n",
-                          CaseID,
-                          RefrigCase(CaseID).Name,
-                          RefrigCase(CaseID).ZoneName,
-                          RefrigCase(CaseID).ZoneNodeNum,
-                          state.dataLoopNodes->NodeID(RefrigCase(CaseID).ZoneNodeNum),
-                          RefrigCase(CaseID).RateTotCapPerLength,
-                          RefrigCase(CaseID).RatedLHR,
-                          RefrigCase(CaseID).Temperature,
-                          RefrigCase(CaseID).Length,
-                          RefrigCase(CaseID).OperatingFanPower,
-                          RefrigCase(CaseID).LightingPower,
-                          RefrigCase(CaseID).AntiSweatPower,
-                          RefrigCase(CaseID).DefrostPower);
-                }
+                printCaseReport("Low Temperature Refrigeration Case", TransSystem(TransSystemNum).CaseNumLT(CaseNum));
             } // NumCasesLT on system
             for (int WalkInNum = 1; WalkInNum <= TransSystem(TransSystemNum).NumWalkInsMT; ++WalkInNum) {
                 int WalkInID = TransSystem(TransSystemNum).WalkInNumMT(WalkInNum);
@@ -14701,24 +12821,7 @@ void ReportRefrigerationComponents(EnergyPlusData &state)
                 break;
             }
             for (int CaseNum = 1; CaseNum <= Secondary(SecondaryID).NumCases; ++CaseNum) {
-                int CaseID = Secondary(SecondaryID).CaseNum(CaseNum);
-                if (RefrigCase(CaseID).ZoneNodeNum > 0) {
-                    print(state.files.eio,
-                          "  Refrigeration Case,{},{},{},{},{},{:.1R},{:.2R},{:.1R},{:.1R},{:.1R},{:.1R},{:.1R},{:.1R}\n",
-                          CaseID,
-                          RefrigCase(CaseID).Name,
-                          RefrigCase(CaseID).ZoneName,
-                          RefrigCase(CaseID).ZoneNodeNum,
-                          state.dataLoopNodes->NodeID(RefrigCase(CaseID).ZoneNodeNum),
-                          RefrigCase(CaseID).RateTotCapPerLength,
-                          RefrigCase(CaseID).RatedLHR,
-                          RefrigCase(CaseID).Temperature,
-                          RefrigCase(CaseID).Length,
-                          RefrigCase(CaseID).OperatingFanPower,
-                          RefrigCase(CaseID).LightingPower,
-                          RefrigCase(CaseID).AntiSweatPower,
-                          RefrigCase(CaseID).DefrostPower);
-                }
+                printCaseReport("Refrigeration Case", Secondary(SecondaryID).CaseNum(CaseNum));
             } // NumCases on secondary on secondary system
 
             for (int WalkInNum = 1; WalkInNum <= Secondary(SecondaryID).NumWalkIns; ++WalkInNum) {

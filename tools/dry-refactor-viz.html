@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRY Refactor Dashboard — EnergyPlus</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --text: #c9d1d9;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --red: #f85149;
+    --orange: #d29922;
+    --glow-blue: rgba(88,166,255,0.4);
+    --glow-green: rgba(63,185,80,0.4);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    overflow-x: hidden;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Hero Stats */
+  .hero {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    padding: 1.5rem 2rem;
+    background: linear-gradient(180deg, #161b22 0%, #0d1117 100%);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .stat-card {
+    text-align: center;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    min-width: 180px;
+  }
+  .stat-card .value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+  }
+  .stat-card .label {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 0.25rem;
+  }
+  .stat-card.primary .value {
+    color: var(--green);
+    text-shadow: 0 0 20px var(--glow-green);
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+  @keyframes pulse-glow {
+    0%, 100% { text-shadow: 0 0 20px var(--glow-green); }
+    50% { text-shadow: 0 0 40px var(--glow-green), 0 0 60px rgba(63,185,80,0.2); }
+  }
+
+  /* Main content area */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem 2rem;
+    min-height: 0;
+    position: relative;
+  }
+  .section-title {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    margin-bottom: 0.5rem;
+  }
+
+  /* Treemap */
+  #treemap-container {
+    flex: 1;
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    min-height: 300px;
+  }
+  #treemap-svg { width: 100%; height: 100%; display: block; }
+  #particle-canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+  }
+  .treemap-cell rect {
+    stroke: var(--bg);
+    stroke-width: 2;
+    transition: filter 0.3s;
+  }
+  .treemap-cell.active rect {
+    filter: drop-shadow(0 0 8px var(--accent));
+    animation: cell-pulse 0.8s ease-in-out;
+  }
+  @keyframes cell-pulse {
+    0% { filter: drop-shadow(0 0 4px var(--accent)); }
+    50% { filter: drop-shadow(0 0 16px var(--accent)); }
+    100% { filter: drop-shadow(0 0 8px var(--accent)); }
+  }
+  .treemap-label {
+    fill: white;
+    font-size: 11px;
+    pointer-events: none;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  }
+  .treemap-delta {
+    fill: var(--green);
+    font-size: 10px;
+    font-weight: 600;
+    pointer-events: none;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  }
+
+  /* Zoom overlay for function view */
+  #zoom-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(13,17,23,0.95);
+    display: none;
+    flex-direction: column;
+    padding: 1.5rem;
+    border-radius: 8px;
+    z-index: 10;
+  }
+  #zoom-overlay.visible { display: flex; }
+  #zoom-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  #zoom-close {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.3rem 0.8rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  #zoom-close:hover { background: var(--surface); }
+  #zoom-chart { flex: 1; overflow-y: auto; }
+
+  /* Timeline */
+  .timeline {
+    flex-shrink: 0;
+    padding: 1rem 0;
+    border-top: 1px solid var(--border);
+    margin-top: 1rem;
+  }
+  .timeline-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+  .btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.4rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .btn:hover { border-color: var(--accent); }
+  .btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .speed-btns { display: flex; gap: 0.25rem; }
+  .speed-btns .btn { padding: 0.3rem 0.6rem; font-size: 0.75rem; }
+  .commit-info {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-left: auto;
+    max-width: 50%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .commit-info .hash {
+    color: var(--accent);
+    font-family: monospace;
+  }
+  #timeline-svg {
+    width: 100%;
+    height: 100px;
+    display: block;
+  }
+
+  /* Back to top / title bar */
+  .page-title {
+    text-align: center;
+    padding: 1rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 0.02em;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .page-title span { color: var(--accent); }
+
+  /* Loading state */
+  .loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    font-size: 1.2rem;
+    color: var(--text-dim);
+  }
+  .loading::after {
+    content: '';
+    width: 20px; height: 20px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-left: 0.75rem;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="loading" id="loading">Loading data</div>
+
+<div id="app" style="display:none; flex-direction:column; min-height:100vh;">
+  <div class="page-title"><span>DRY</span> Refactor Dashboard — EnergyPlus</div>
+
+  <div class="hero">
+    <div class="stat-card primary">
+      <div class="value" id="stat-lines">0</div>
+      <div class="label">Lines Eliminated</div>
+    </div>
+    <div class="stat-card">
+      <div class="value" id="stat-files" style="color:var(--accent)">0</div>
+      <div class="label">Files Touched</div>
+    </div>
+    <div class="stat-card">
+      <div class="value" id="stat-commits" style="color:var(--orange)">0</div>
+      <div class="label">Commits</div>
+    </div>
+    <div class="stat-card">
+      <div class="value" id="stat-insertions" style="color:var(--text-dim)">0</div>
+      <div class="label">Lines Added</div>
+    </div>
+    <div class="stat-card">
+      <div class="value" id="stat-deletions" style="color:var(--red)">0</div>
+      <div class="label">Lines Deleted</div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="section-title">File Treemap — sized by current LOC, colored by reduction</div>
+    <div id="treemap-container">
+      <svg id="treemap-svg"></svg>
+      <canvas id="particle-canvas"></canvas>
+      <div id="zoom-overlay">
+        <div id="zoom-title">
+          <span id="zoom-file-name"></span>
+          <button id="zoom-close" onclick="closeZoom()">Close</button>
+        </div>
+        <div id="zoom-chart"><svg id="zoom-svg" width="100%" height="100%"></svg></div>
+      </div>
+    </div>
+
+    <div class="timeline">
+      <div class="timeline-controls">
+        <button class="btn" id="btn-play" onclick="togglePlay()">
+          <span id="play-icon">&#9654;</span> Play
+        </button>
+        <button class="btn" id="btn-reset" onclick="resetTimeline()">Reset</button>
+        <div class="speed-btns">
+          <button class="btn active" onclick="setSpeed(1, this)">1x</button>
+          <button class="btn" onclick="setSpeed(2, this)">2x</button>
+          <button class="btn" onclick="setSpeed(5, this)">5x</button>
+          <button class="btn" onclick="setSpeed(10, this)">10x</button>
+        </div>
+        <div class="commit-info" id="commit-info">Click Play to begin</div>
+      </div>
+      <svg id="timeline-svg"></svg>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script>
+// ── Globals ──
+let DATA = null;
+let currentCommitIdx = -1;
+let playing = false;
+let playTimer = null;
+let speed = 1;
+let fileSizes = {};   // running file sizes
+let particles = [];
+let animFrame = null;
+
+// Cumulative stats up to current commit
+let cumIns = 0, cumDel = 0, cumFiles = new Set(), cumCommits = 0;
+
+// ── Load Data ──
+fetch('dry-refactor-data.json')
+  .then(r => r.json())
+  .then(data => { DATA = data; init(); })
+  .catch(e => {
+    document.getElementById('loading').textContent =
+      'Failed to load dry-refactor-data.json — run: bash tools/generate-dry-data.sh';
+  });
+
+function init() {
+  document.getElementById('loading').style.display = 'none';
+  const app = document.getElementById('app');
+  app.style.display = 'flex';
+
+  // Initialize file sizes to baseline
+  for (const [path, info] of Object.entries(DATA.files)) {
+    fileSizes[path] = info.baselineSize;
+  }
+
+  // Show final stats immediately (will animate when playing)
+  updateStats(DATA.totalCommits);
+
+  buildTreemap();
+  buildTimeline();
+  initParticleCanvas();
+
+  window.addEventListener('resize', () => {
+    buildTreemap();
+    buildTimeline();
+    resizeParticleCanvas();
+  });
+
+  // Jump to end initially to show the full picture
+  jumpToCommit(DATA.commits.length - 1);
+}
+
+// ── Stats ──
+function updateStats(upToIdx) {
+  cumIns = 0; cumDel = 0; cumFiles = new Set(); cumCommits = 0;
+  for (let i = 0; i <= upToIdx && i < DATA.commits.length; i++) {
+    const c = DATA.commits[i];
+    cumCommits++;
+    for (const f of c.files) {
+      cumIns += f.ins;
+      cumDel += f.del;
+      cumFiles.add(f.path);
+    }
+  }
+  animateCounter('stat-lines', cumDel - cumIns);
+  animateCounter('stat-files', cumFiles.size);
+  animateCounter('stat-commits', cumCommits);
+  animateCounter('stat-insertions', cumIns);
+  animateCounter('stat-deletions', cumDel);
+}
+
+function animateCounter(id, target) {
+  const el = document.getElementById(id);
+  const current = parseInt(el.textContent.replace(/,/g, '')) || 0;
+  if (current === target) return;
+
+  const duration = 400;
+  const start = performance.now();
+  const from = current;
+
+  function tick(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - t, 3);
+    const val = Math.round(from + (target - from) * ease);
+    el.textContent = val.toLocaleString();
+    if (t < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+// ── Treemap ──
+function getTreemapData() {
+  const children = Object.entries(DATA.files).map(([path, info]) => {
+    const size = fileSizes[path] || 1;
+    const reduction = info.baselineSize - size;
+    const reductionPct = info.baselineSize > 0 ? reduction / info.baselineSize : 0;
+    const shortName = path.split('/').pop();
+    return { path, shortName, size: Math.max(size, 50), reduction, reductionPct };
+  });
+  return { children };
+}
+
+const treemapColorScale = d3.scaleSequential()
+  .domain([0, 0.5])
+  .interpolator(d3.interpolateRgbBasis(['#1f3a5f', '#2d6a4f', '#d29922', '#f85149']));
+
+let treemapNodes = [];
+
+function buildTreemap() {
+  const container = document.getElementById('treemap-container');
+  const width = container.clientWidth;
+  const height = container.clientHeight;
+  const svg = d3.select('#treemap-svg').attr('viewBox', `0 0 ${width} ${height}`);
+  svg.selectAll('*').remove();
+
+  const root = d3.hierarchy(getTreemapData())
+    .sum(d => d.size)
+    .sort((a, b) => b.value - a.value);
+
+  d3.treemap()
+    .size([width, height])
+    .padding(3)
+    .round(true)(root);
+
+  treemapNodes = root.leaves();
+
+  const cells = svg.selectAll('g.treemap-cell')
+    .data(treemapNodes, d => d.data.path)
+    .join('g')
+    .attr('class', 'treemap-cell')
+    .attr('transform', d => `translate(${d.x0},${d.y0})`)
+    .style('cursor', 'pointer')
+    .on('click', (e, d) => showZoom(d.data.path));
+
+  cells.append('rect')
+    .attr('width', d => Math.max(d.x1 - d.x0, 0))
+    .attr('height', d => Math.max(d.y1 - d.y0, 0))
+    .attr('rx', 3)
+    .attr('fill', d => treemapColorScale(d.data.reductionPct));
+
+  // Labels — only if cell is large enough
+  cells.each(function(d) {
+    const w = d.x1 - d.x0;
+    const h = d.y1 - d.y0;
+    const g = d3.select(this);
+    if (w > 60 && h > 30) {
+      g.append('text')
+        .attr('class', 'treemap-label')
+        .attr('x', 6).attr('y', 16)
+        .text(d.data.shortName);
+    }
+    if (w > 50 && h > 45 && d.data.reduction !== 0) {
+      g.append('text')
+        .attr('class', 'treemap-delta')
+        .attr('x', 6).attr('y', 30)
+        .text((d.data.reduction > 0 ? '-' : '+') + Math.abs(d.data.reduction).toLocaleString());
+    }
+  });
+}
+
+function updateTreemap(activeFiles) {
+  const container = document.getElementById('treemap-container');
+  const width = container.clientWidth;
+  const height = container.clientHeight;
+  const svg = d3.select('#treemap-svg');
+
+  const root = d3.hierarchy(getTreemapData())
+    .sum(d => d.size)
+    .sort((a, b) => b.value - a.value);
+
+  d3.treemap()
+    .size([width, height])
+    .padding(3)
+    .round(true)(root);
+
+  treemapNodes = root.leaves();
+
+  const cells = svg.selectAll('g.treemap-cell')
+    .data(treemapNodes, d => d.data.path);
+
+  // Update existing
+  cells.transition().duration(600).ease(d3.easeCubicOut)
+    .attr('transform', d => `translate(${d.x0},${d.y0})`);
+
+  cells.select('rect')
+    .transition().duration(600).ease(d3.easeCubicOut)
+    .attr('width', d => Math.max(d.x1 - d.x0, 0))
+    .attr('height', d => Math.max(d.y1 - d.y0, 0))
+    .attr('fill', d => treemapColorScale(d.data.reductionPct));
+
+  // Mark active files
+  cells.classed('active', d => activeFiles.has(d.data.path));
+
+  // Update labels
+  cells.selectAll('.treemap-label, .treemap-delta').remove();
+  cells.each(function(d) {
+    const w = d.x1 - d.x0;
+    const h = d.y1 - d.y0;
+    const g = d3.select(this);
+    if (w > 60 && h > 30) {
+      g.append('text')
+        .attr('class', 'treemap-label')
+        .attr('x', 6).attr('y', 16)
+        .text(d.data.shortName);
+    }
+    if (w > 50 && h > 45 && d.data.reduction !== 0) {
+      g.append('text')
+        .attr('class', 'treemap-delta')
+        .attr('x', 6).attr('y', 30)
+        .text((d.data.reduction > 0 ? '-' : '+') + Math.abs(d.data.reduction).toLocaleString());
+    }
+  });
+}
+
+// ── Timeline ──
+function buildTimeline() {
+  const svg = d3.select('#timeline-svg');
+  const rect = svg.node().getBoundingClientRect();
+  const width = rect.width;
+  const height = rect.height || 100;
+  svg.attr('viewBox', `0 0 ${width} ${height}`);
+  svg.selectAll('*').remove();
+
+  const margin = { top: 10, right: 20, bottom: 20, left: 40 };
+  const w = width - margin.left - margin.right;
+  const h = height - margin.top - margin.bottom;
+
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const x = d3.scaleLinear().domain([0, DATA.commits.length - 1]).range([0, w]);
+  const commits = DATA.commits;
+
+  // Compute cumulative net reduction for area chart
+  let runningNet = 0;
+  const cumData = commits.map((c, i) => {
+    let cDel = 0, cIns = 0;
+    for (const f of c.files) { cIns += f.ins; cDel += f.del; }
+    runningNet += (cDel - cIns);
+    return { idx: i, net: runningNet, totalChanged: cIns + cDel };
+  });
+
+  const yNet = d3.scaleLinear().domain([0, d3.max(cumData, d => d.net)]).range([h, 0]);
+
+  // Area chart
+  const area = d3.area()
+    .x(d => x(d.idx))
+    .y0(h)
+    .y1(d => yNet(d.net))
+    .curve(d3.curveMonotoneX);
+
+  g.append('path')
+    .datum(cumData)
+    .attr('d', area)
+    .attr('fill', 'rgba(63,185,80,0.15)')
+    .attr('stroke', 'none');
+
+  g.append('path')
+    .datum(cumData)
+    .attr('d', d3.line().x(d => x(d.idx)).y(d => yNet(d.net)).curve(d3.curveMonotoneX))
+    .attr('fill', 'none')
+    .attr('stroke', 'var(--green)')
+    .attr('stroke-width', 1.5)
+    .attr('opacity', 0.6);
+
+  // Commit dots
+  const dotSizeScale = d3.scaleSqrt()
+    .domain([0, d3.max(cumData, d => d.totalChanged)])
+    .range([1.5, 5]);
+
+  g.selectAll('circle.commit-dot')
+    .data(cumData)
+    .join('circle')
+    .attr('class', 'commit-dot')
+    .attr('cx', d => x(d.idx))
+    .attr('cy', d => yNet(d.net))
+    .attr('r', d => dotSizeScale(d.totalChanged))
+    .attr('fill', 'var(--accent)')
+    .attr('opacity', 0.5)
+    .style('cursor', 'pointer')
+    .on('click', (e, d) => { jumpToCommit(d.idx); });
+
+  // Playhead
+  g.append('line')
+    .attr('id', 'playhead')
+    .attr('x1', 0).attr('x2', 0)
+    .attr('y1', 0).attr('y2', h)
+    .attr('stroke', 'var(--accent)')
+    .attr('stroke-width', 2)
+    .attr('opacity', 0.8);
+
+  // X axis
+  g.append('g')
+    .attr('transform', `translate(0,${h})`)
+    .call(d3.axisBottom(x).ticks(10).tickFormat(d => `#${Math.round(d)}`))
+    .selectAll('text').attr('fill', 'var(--text-dim)').attr('font-size', '10px');
+
+  g.selectAll('.domain, .tick line').attr('stroke', 'var(--border)');
+
+  // Store scale for playhead updates
+  svg.node().__xScale = x;
+  svg.node().__g = g;
+}
+
+function updatePlayhead(idx) {
+  const svg = document.getElementById('timeline-svg');
+  const x = svg.__xScale;
+  if (!x) return;
+  d3.select('#playhead')
+    .transition().duration(200)
+    .attr('x1', x(idx)).attr('x2', x(idx));
+}
+
+// ── Playback ──
+function jumpToCommit(idx) {
+  if (idx < -1) idx = -1;
+  if (idx >= DATA.commits.length) idx = DATA.commits.length - 1;
+  currentCommitIdx = idx;
+
+  // Reset file sizes and rebuild up to this commit
+  for (const [path, info] of Object.entries(DATA.files)) {
+    fileSizes[path] = info.baselineSize;
+  }
+
+  const activeFiles = new Set();
+  for (let i = 0; i <= idx; i++) {
+    const c = DATA.commits[i];
+    for (const f of c.files) {
+      fileSizes[f.path] = (fileSizes[f.path] || 0) + f.ins - f.del;
+      if (i === idx) activeFiles.add(f.path);
+    }
+  }
+
+  updateTreemap(activeFiles);
+  updateStats(idx);
+  updatePlayhead(idx);
+
+  // Commit info
+  if (idx >= 0 && idx < DATA.commits.length) {
+    const c = DATA.commits[idx];
+    document.getElementById('commit-info').innerHTML =
+      `<span class="hash">${c.hash}</span> ${escHtml(c.subject)}`;
+  } else {
+    document.getElementById('commit-info').textContent = 'Baseline (pre-refactor)';
+  }
+}
+
+function stepForward() {
+  if (currentCommitIdx >= DATA.commits.length - 1) {
+    stopPlay();
+    return;
+  }
+  const nextIdx = currentCommitIdx + 1;
+  const c = DATA.commits[nextIdx];
+  const activeFiles = new Set();
+
+  // Update file sizes incrementally
+  for (const f of c.files) {
+    const oldSize = fileSizes[f.path] || 0;
+    fileSizes[f.path] = oldSize + f.ins - f.del;
+    activeFiles.add(f.path);
+
+    // Spawn particles for big deletions
+    if (f.del - f.ins > 10) {
+      spawnParticles(f.path, f.del - f.ins);
+    }
+  }
+
+  currentCommitIdx = nextIdx;
+  updateTreemap(activeFiles);
+  updateStats(nextIdx);
+  updatePlayhead(nextIdx);
+
+  document.getElementById('commit-info').innerHTML =
+    `<span class="hash">${c.hash}</span> ${escHtml(c.subject)}`;
+}
+
+function togglePlay() {
+  if (playing) {
+    stopPlay();
+  } else {
+    if (currentCommitIdx >= DATA.commits.length - 1) {
+      resetTimeline();
+    }
+    playing = true;
+    document.getElementById('btn-play').classList.add('active');
+    document.getElementById('play-icon').innerHTML = '&#9646;&#9646;';
+    scheduleNext();
+  }
+}
+
+function stopPlay() {
+  playing = false;
+  if (playTimer) clearTimeout(playTimer);
+  playTimer = null;
+  document.getElementById('btn-play').classList.remove('active');
+  document.getElementById('play-icon').innerHTML = '&#9654;';
+}
+
+function scheduleNext() {
+  if (!playing) return;
+  const delay = Math.max(100, 800 / speed);
+  playTimer = setTimeout(() => {
+    stepForward();
+    if (playing) scheduleNext();
+  }, delay);
+}
+
+function resetTimeline() {
+  stopPlay();
+  // Reset file sizes
+  for (const [path, info] of Object.entries(DATA.files)) {
+    fileSizes[path] = info.baselineSize;
+  }
+  currentCommitIdx = -1;
+  updateTreemap(new Set());
+  updateStats(-1);
+  updatePlayhead(0);
+  document.getElementById('commit-info').textContent = 'Click Play to begin';
+}
+
+function setSpeed(s, btn) {
+  speed = s;
+  document.querySelectorAll('.speed-btns .btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ── Function Zoom View ──
+function showZoom(filePath) {
+  const funcs = DATA.functions[filePath];
+  if (!funcs || funcs.length === 0) {
+    // No function data; show file stats instead
+    showFileStats(filePath);
+    return;
+  }
+
+  const overlay = document.getElementById('zoom-overlay');
+  overlay.classList.add('visible');
+  const shortName = filePath.split('/').pop();
+  const info = DATA.files[filePath];
+  document.getElementById('zoom-file-name').textContent =
+    `${shortName} (${info.baselineSize.toLocaleString()} → ${info.currentSize.toLocaleString()} LOC)`;
+
+  // Sort functions by net deletion
+  const sorted = [...funcs].sort((a, b) => (b.totalDel - b.totalIns) - (a.totalDel - a.totalIns));
+
+  const container = document.getElementById('zoom-chart');
+  const cRect = container.getBoundingClientRect();
+  const width = cRect.width;
+  const barHeight = 28;
+  const margin = { top: 10, right: 20, bottom: 30, left: 200 };
+  const h = sorted.length * barHeight + margin.top + margin.bottom;
+
+  const svg = d3.select('#zoom-svg')
+    .attr('viewBox', `0 0 ${width} ${h}`)
+    .attr('height', h);
+  svg.selectAll('*').remove();
+
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+  const w = width - margin.left - margin.right;
+
+  const maxVal = d3.max(sorted, d => Math.max(d.totalDel, d.totalIns));
+  const x = d3.scaleLinear().domain([0, maxVal]).range([0, w]);
+  const y = d3.scaleBand().domain(sorted.map(d => d.name)).range([0, sorted.length * barHeight]).padding(0.2);
+
+  // Deletion bars (red)
+  g.selectAll('.bar-del')
+    .data(sorted)
+    .join('rect')
+    .attr('class', 'bar-del')
+    .attr('x', 0)
+    .attr('y', d => y(d.name))
+    .attr('width', d => x(d.totalDel))
+    .attr('height', y.bandwidth())
+    .attr('fill', 'var(--red)')
+    .attr('opacity', 0.7)
+    .attr('rx', 3);
+
+  // Insertion bars (overlaid, green, smaller opacity)
+  g.selectAll('.bar-ins')
+    .data(sorted)
+    .join('rect')
+    .attr('class', 'bar-ins')
+    .attr('x', 0)
+    .attr('y', d => y(d.name))
+    .attr('width', d => x(d.totalIns))
+    .attr('height', y.bandwidth())
+    .attr('fill', 'var(--green)')
+    .attr('opacity', 0.5)
+    .attr('rx', 3);
+
+  // Labels
+  g.selectAll('.func-label')
+    .data(sorted)
+    .join('text')
+    .attr('class', 'func-label')
+    .attr('x', -6)
+    .attr('y', d => y(d.name) + y.bandwidth() / 2)
+    .attr('text-anchor', 'end')
+    .attr('dominant-baseline', 'central')
+    .attr('fill', 'var(--text)')
+    .attr('font-size', '11px')
+    .text(d => d.name.length > 30 ? d.name.slice(0, 28) + '...' : d.name);
+
+  // Net labels on bars
+  g.selectAll('.net-label')
+    .data(sorted)
+    .join('text')
+    .attr('x', d => x(Math.max(d.totalDel, d.totalIns)) + 5)
+    .attr('y', d => y(d.name) + y.bandwidth() / 2)
+    .attr('dominant-baseline', 'central')
+    .attr('fill', d => d.totalDel > d.totalIns ? 'var(--green)' : 'var(--red)')
+    .attr('font-size', '10px')
+    .attr('font-weight', '600')
+    .text(d => {
+      const net = d.totalDel - d.totalIns;
+      return net > 0 ? `-${net}` : `+${Math.abs(net)}`;
+    });
+
+  // Commit dots along bars
+  g.selectAll('.commit-dots')
+    .data(sorted)
+    .join('g')
+    .attr('class', 'commit-dots')
+    .each(function(d) {
+      const group = d3.select(this);
+      const yPos = y(d.name) + y.bandwidth() + 2;
+      d.commits.forEach(ci => {
+        group.append('circle')
+          .attr('cx', x(d.totalDel) * (ci / DATA.commits.length))
+          .attr('cy', yPos)
+          .attr('r', 2)
+          .attr('fill', 'var(--accent)')
+          .attr('opacity', 0.6);
+      });
+    });
+}
+
+function showFileStats(filePath) {
+  const overlay = document.getElementById('zoom-overlay');
+  overlay.classList.add('visible');
+  const shortName = filePath.split('/').pop();
+  const info = DATA.files[filePath];
+  document.getElementById('zoom-file-name').textContent =
+    `${shortName} (${info.baselineSize.toLocaleString()} → ${info.currentSize.toLocaleString()} LOC)`;
+
+  const svg = d3.select('#zoom-svg');
+  svg.selectAll('*').remove();
+
+  // Show snapshot timeline
+  const container = document.getElementById('zoom-chart');
+  const cRect = container.getBoundingClientRect();
+  const width = cRect.width;
+  const height = 200;
+  svg.attr('viewBox', `0 0 ${width} ${height}`).attr('height', height);
+
+  const margin = { top: 20, right: 20, bottom: 30, left: 60 };
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+  const w = width - margin.left - margin.right;
+  const h = height - margin.top - margin.bottom;
+
+  const snapshots = info.snapshots;
+  const x = d3.scaleLinear()
+    .domain([snapshots[0].commitIdx, snapshots[snapshots.length-1].commitIdx])
+    .range([0, w]);
+  const y = d3.scaleLinear()
+    .domain([0, d3.max(snapshots, d => d.size) * 1.1])
+    .range([h, 0]);
+
+  const area = d3.area()
+    .x(d => x(d.commitIdx))
+    .y0(h)
+    .y1(d => y(d.size))
+    .curve(d3.curveStepAfter);
+
+  g.append('path')
+    .datum(snapshots)
+    .attr('d', area)
+    .attr('fill', 'rgba(88,166,255,0.15)');
+
+  g.append('path')
+    .datum(snapshots)
+    .attr('d', d3.line().x(d => x(d.commitIdx)).y(d => y(d.size)).curve(d3.curveStepAfter))
+    .attr('fill', 'none')
+    .attr('stroke', 'var(--accent)')
+    .attr('stroke-width', 2);
+
+  g.selectAll('circle')
+    .data(snapshots)
+    .join('circle')
+    .attr('cx', d => x(d.commitIdx))
+    .attr('cy', d => y(d.size))
+    .attr('r', 3)
+    .attr('fill', 'var(--accent)');
+
+  g.append('g')
+    .attr('transform', `translate(0,${h})`)
+    .call(d3.axisBottom(x).ticks(6).tickFormat(d => `#${Math.round(d)}`))
+    .selectAll('text').attr('fill', 'var(--text-dim)');
+  g.append('g')
+    .call(d3.axisLeft(y).ticks(5))
+    .selectAll('text').attr('fill', 'var(--text-dim)');
+  g.selectAll('.domain, .tick line').attr('stroke', 'var(--border)');
+
+  g.append('text')
+    .attr('x', w/2).attr('y', h + 25)
+    .attr('text-anchor', 'middle')
+    .attr('fill', 'var(--text-dim)')
+    .attr('font-size', '11px')
+    .text('Commit index');
+
+  g.append('text')
+    .attr('transform', 'rotate(-90)')
+    .attr('x', -h/2).attr('y', -45)
+    .attr('text-anchor', 'middle')
+    .attr('fill', 'var(--text-dim)')
+    .attr('font-size', '11px')
+    .text('Lines of code');
+}
+
+function closeZoom() {
+  document.getElementById('zoom-overlay').classList.remove('visible');
+}
+
+// ── Particle System ──
+function initParticleCanvas() {
+  resizeParticleCanvas();
+  animFrame = requestAnimationFrame(renderParticles);
+}
+
+function resizeParticleCanvas() {
+  const canvas = document.getElementById('particle-canvas');
+  const container = document.getElementById('treemap-container');
+  canvas.width = container.clientWidth;
+  canvas.height = container.clientHeight;
+}
+
+function spawnParticles(filePath, magnitude) {
+  // Find the treemap node for this file
+  const node = treemapNodes.find(n => n.data.path === filePath);
+  if (!node) return;
+
+  const cx = (node.x0 + node.x1) / 2;
+  const cy = (node.y0 + node.y1) / 2;
+  const count = Math.min(Math.max(magnitude / 2, 5), 60);
+
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 1 + Math.random() * 3;
+    particles.push({
+      x: cx + (Math.random() - 0.5) * (node.x1 - node.x0) * 0.5,
+      y: cy + (Math.random() - 0.5) * (node.y1 - node.y0) * 0.5,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - 1,
+      life: 1,
+      decay: 0.01 + Math.random() * 0.02,
+      size: 1 + Math.random() * 2.5,
+      color: Math.random() > 0.5 ? '#3fb950' : '#58a6ff'
+    });
+  }
+}
+
+function renderParticles() {
+  const canvas = document.getElementById('particle-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.05; // gravity
+    p.life -= p.decay;
+
+    if (p.life <= 0) {
+      particles.splice(i, 1);
+      continue;
+    }
+
+    ctx.globalAlpha = p.life;
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.globalAlpha = 1;
+  animFrame = requestAnimationFrame(renderParticles);
+}
+
+// ── Utilities ──
+function escHtml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+</script>
+</body>
+</html>

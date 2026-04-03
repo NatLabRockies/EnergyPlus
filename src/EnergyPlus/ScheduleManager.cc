@@ -326,6 +326,121 @@ namespace Sched {
         missingDaySchedule->isUsed = true;
     }
 
+    // Helper: check day-schedule values for limit violations and bad integers, issuing warnings.
+    static void warnDayScheduleValueIssues(EnergyPlusData &state,
+                                           ErrorObjectHeader const &eoh,
+                                           DaySchedule const *daySched,
+                                           Array1D_string const &Alphas,
+                                           Array1D_string const &cAlphaFields,
+                                           std::string_view badIntPreposition = "in")
+    {
+        if (daySched->checkValsForLimitViolations(state)) {
+            ShowWarningCustom(state, eoh, EnergyPlus::format("Values are outside of range for {}={}", cAlphaFields(2), Alphas(2)));
+        }
+        if (daySched->checkValsForBadIntegers(state)) {
+            ShowWarningCustom(
+                state, eoh, EnergyPlus::format("One or more values are not integer {} {}={}", badIntPreposition, cAlphaFields(2), Alphas(2)));
+        }
+    }
+
+    // Helper: validate ScheduleType for a schedule or day-schedule object.
+    // Sets schedTypeNumOut to the type index if valid, or leaves it unchanged if blank/invalid.
+    // Returns true if valid, false if blank or not found (warnings are issued either way).
+    static void validateScheduleType(EnergyPlusData &state,
+                                     ErrorObjectHeader const &eoh,
+                                     Array1D_string const &Alphas,
+                                     Array1D_string const &cAlphaFields,
+                                     Array1D_bool const &lAlphaBlanks,
+                                     int &schedTypeNumOut)
+    {
+        if (lAlphaBlanks(2)) {
+            ShowWarningEmptyField(state, eoh, cAlphaFields(2));
+            ShowContinueError(state, "Schedule will not be validated.");
+        } else if ((schedTypeNumOut = GetScheduleTypeNum(state, Alphas(2))) == SchedNum_Invalid) {
+            ShowWarningItemNotFound(state, eoh, cAlphaFields(2), Alphas(2));
+            ShowContinueError(state, "Schedule will not be validated.");
+        }
+    }
+
+    // Helper: process one ExternalInterface schedule object within ProcessScheduleInput.
+    // All three ExternalInterface schedule types (basic, FMU-Import, FMU-Export) share
+    // identical logic for creating the schedule, day-schedule, week-schedule, and
+    // filling weekScheds for all 366 days.
+    static void processExternalInterfaceSchedule(EnergyPlusData &state,
+                                                 std::string_view routineName,
+                                                 std::string const &CurrentModuleObject,
+                                                 int numItems,
+                                                 bool showDuplicateDetail, // true for FMU Import/Export types
+                                                 int NumExternalInterfaceSchedules,
+                                                 Array1D_string &Alphas,
+                                                 Array1D_string &cAlphaFields,
+                                                 Array1D_string &cNumericFields,
+                                                 Array1D<Real64> &Numbers,
+                                                 Array1D_bool &lAlphaBlanks,
+                                                 Array1D_bool &lNumericBlanks,
+                                                 bool &ErrorsFound,
+                                                 bool &NumErrorFlag)
+    {
+        auto const &s_ip = state.dataInputProcessing->inputProcessor;
+        auto const &s_sched = state.dataSched;
+        int NumAlphas;
+        int NumNumbers;
+        int Status;
+
+        for (int Loop = 1; Loop <= numItems; ++Loop) {
+            s_ip->getObjectItem(state,
+                                CurrentModuleObject,
+                                Loop,
+                                Alphas,
+                                NumAlphas,
+                                Numbers,
+                                NumNumbers,
+                                Status,
+                                lNumericBlanks,
+                                lAlphaBlanks,
+                                cAlphaFields,
+                                cNumericFields);
+
+            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
+
+            if (s_sched->scheduleMap.find(Alphas(1)) != s_sched->scheduleMap.end()) {
+                ShowSevereDuplicateName(state, eoh);
+                if (showDuplicateDetail && NumExternalInterfaceSchedules >= 1) {
+                    ShowContinueError(
+                        state,
+                        EnergyPlus::format("{} defined as an ExternalInterface:Schedule and ExternalInterface:FunctionalMockupUnitImport:To:Schedule."
+                                           "This will cause the schedule to be overwritten by PtolemyServer and FunctionalMockUpUnitImport)",
+                                           cAlphaFields(1)));
+                }
+                ErrorsFound = true;
+                continue;
+            }
+
+            auto *sched = AddScheduleDetailed(state, Alphas(1));
+            sched->type = SchedType::External;
+
+            validateScheduleType(state, eoh, Alphas, cAlphaFields, lAlphaBlanks, sched->schedTypeNum);
+
+            auto *daySched = AddDaySchedule(state, EnergyPlus::format("{}_xi_dy_", Alphas(1)));
+            daySched->isUsed = true;
+            daySched->schedTypeNum = sched->schedTypeNum;
+
+            if (NumNumbers < 1) {
+                ShowWarningCustom(state, eoh, "Initial value is not numeric or is missing. Fix idf file.");
+                NumErrorFlag = true;
+            }
+            ExternalInterfaceSetSchedule(state, daySched->Num, Numbers(1));
+
+            auto *weekSched = AddWeekSchedule(state, EnergyPlus::format("{}_xi_wk_", Alphas(1)));
+            weekSched->isUsed = true;
+            for (int iDayType = 1; iDayType < (int)DayType::Num; ++iDayType) {
+                weekSched->dayScheds[iDayType] = daySched;
+            }
+
+            std::fill(sched->weekScheds.begin() + 1, sched->weekScheds.end(), weekSched);
+        } // for (Loop)
+    }
+
     void ProcessScheduleInput(EnergyPlusData &state)
     {
         // SUBROUTINE INFORMATION:
@@ -416,105 +531,58 @@ namespace Sched {
         int MaxNums = 1; // Need at least 1 number because it's used as a local variable in the Schedule Types loop
         int MaxAlps = 0;
 
-        std::string CurrentModuleObject = "ScheduleTypeLimits";
-        int NumScheduleTypes = s_ip->getNumObjectsFound(state, CurrentModuleObject);
-        if (NumScheduleTypes > 0) {
-            s_ip->getObjectDefMaxArgs(state, CurrentModuleObject, Count, NumAlphas, NumNumbers);
-            MaxNums = max(MaxNums, NumNumbers);
-            MaxAlps = max(MaxAlps, NumAlphas);
-        }
-        CurrentModuleObject = "Schedule:Day:Hourly";
-        int NumHrDaySchedules = s_ip->getNumObjectsFound(state, CurrentModuleObject);
-        if (NumHrDaySchedules > 0) {
-            s_ip->getObjectDefMaxArgs(state, CurrentModuleObject, Count, NumAlphas, NumNumbers);
-            MaxNums = max(MaxNums, NumNumbers);
-            MaxAlps = max(MaxAlps, NumAlphas);
-        }
-        CurrentModuleObject = "Schedule:Day:Interval";
-        int NumIntDaySchedules = s_ip->getNumObjectsFound(state, CurrentModuleObject);
-        if (NumIntDaySchedules > 0) {
-            s_ip->getObjectDefMaxArgs(state, CurrentModuleObject, Count, NumAlphas, NumNumbers);
-            MaxNums = max(MaxNums, NumNumbers);
-            MaxAlps = max(MaxAlps, NumAlphas);
-        }
-        CurrentModuleObject = "Schedule:Day:List";
-        int NumLstDaySchedules = s_ip->getNumObjectsFound(state, CurrentModuleObject);
-        if (NumLstDaySchedules > 0) {
-            s_ip->getObjectDefMaxArgs(state, CurrentModuleObject, Count, NumAlphas, NumNumbers);
-            MaxNums = max(MaxNums, NumNumbers);
-            MaxAlps = max(MaxAlps, NumAlphas);
-        }
-        CurrentModuleObject = "Schedule:Week:Daily";
-        int NumRegWeekSchedules = s_ip->getNumObjectsFound(state, CurrentModuleObject);
-        if (NumRegWeekSchedules > 0) {
-            s_ip->getObjectDefMaxArgs(state, CurrentModuleObject, Count, NumAlphas, NumNumbers);
-            MaxNums = max(MaxNums, NumNumbers);
-            MaxAlps = max(MaxAlps, NumAlphas);
-        }
-        CurrentModuleObject = "Schedule:Week:Compact";
-        int NumCptWeekSchedules = s_ip->getNumObjectsFound(state, CurrentModuleObject);
-        if (NumCptWeekSchedules > 0) {
-            s_ip->getObjectDefMaxArgs(state, CurrentModuleObject, Count, NumAlphas, NumNumbers);
-            MaxNums = max(MaxNums, NumNumbers);
-            MaxAlps = max(MaxAlps, NumAlphas);
-        }
-        CurrentModuleObject = "Schedule:Year";
-        int NumRegSchedules = s_ip->getNumObjectsFound(state, CurrentModuleObject);
-        if (NumRegSchedules > 0) {
-            s_ip->getObjectDefMaxArgs(state, CurrentModuleObject, Count, NumAlphas, NumNumbers);
-            MaxNums = max(MaxNums, NumNumbers);
-            MaxAlps = max(MaxAlps, NumAlphas);
-        }
-        CurrentModuleObject = "Schedule:Compact";
-        int NumCptSchedules = s_ip->getNumObjectsFound(state, CurrentModuleObject);
-        if (NumCptSchedules > 0) {
-            s_ip->getObjectDefMaxArgs(state, CurrentModuleObject, Count, NumAlphas, NumNumbers);
-            MaxNums = max(MaxNums, NumNumbers);
-            MaxAlps = max(MaxAlps, NumAlphas + 1);
-        }
-        CurrentModuleObject = "Schedule:File";
-        int NumCommaFileSchedules = s_ip->getNumObjectsFound(state, CurrentModuleObject);
-        if (NumCommaFileSchedules > 0) {
-            s_ip->getObjectDefMaxArgs(state, CurrentModuleObject, Count, NumAlphas, NumNumbers);
-            MaxNums = max(MaxNums, NumNumbers);
-            MaxAlps = max(MaxAlps, NumAlphas);
+        // Count objects and determine max alphas/numbers for all schedule object types
+        int NumScheduleTypes = 0;
+        int NumHrDaySchedules = 0;
+        int NumIntDaySchedules = 0;
+        int NumLstDaySchedules = 0;
+        int NumRegWeekSchedules = 0;
+        int NumCptWeekSchedules = 0;
+        int NumRegSchedules = 0;
+        int NumCptSchedules = 0;
+        int NumCommaFileSchedules = 0;
+        int NumConstantSchedules = 0;
+        int NumExternalInterfaceSchedules = 0;
+        int NumExternalInterfaceFunctionalMockupUnitImportSchedules = 0;
+        int NumExternalInterfaceFunctionalMockupUnitExportSchedules = 0;
+
+        struct SchedObjInfo
+        {
+            const char *name;
+            int *count;
+            int alphaAdj; // added to NumAlphas for MaxAlps calculation
+        };
+
+        std::array<SchedObjInfo, 14> schedObjs = {{
+            {"ScheduleTypeLimits", &NumScheduleTypes, 0},
+            {"Schedule:Day:Hourly", &NumHrDaySchedules, 0},
+            {"Schedule:Day:Interval", &NumIntDaySchedules, 0},
+            {"Schedule:Day:List", &NumLstDaySchedules, 0},
+            {"Schedule:Week:Daily", &NumRegWeekSchedules, 0},
+            {"Schedule:Week:Compact", &NumCptWeekSchedules, 0},
+            {"Schedule:Year", &NumRegSchedules, 0},
+            {"Schedule:Compact", &NumCptSchedules, 1},
+            {"Schedule:File", &NumCommaFileSchedules, 0},
+            {"Schedule:Constant", &NumConstantSchedules, 0},
+            {"ExternalInterface:Schedule", &NumExternalInterfaceSchedules, 1},
+            {"ExternalInterface:FunctionalMockupUnitImport:To:Schedule", &NumExternalInterfaceFunctionalMockupUnitImportSchedules, 1},
+            {"ExternalInterface:FunctionalMockupUnitExport:To:Schedule", &NumExternalInterfaceFunctionalMockupUnitExportSchedules, 1},
+            {"Output:Schedules", nullptr, 0},
+        }};
+
+        for (auto &obj : schedObjs) {
+            int numFound = s_ip->getNumObjectsFound(state, obj.name);
+            if (obj.count != nullptr) {
+                *obj.count = numFound;
+            }
+            if (numFound > 0 || obj.count == nullptr) {
+                s_ip->getObjectDefMaxArgs(state, obj.name, Count, NumAlphas, NumNumbers);
+                MaxNums = max(MaxNums, NumNumbers);
+                MaxAlps = max(MaxAlps, NumAlphas + obj.alphaAdj);
+            }
         }
 
-        CurrentModuleObject = "Schedule:Constant";
-        int NumConstantSchedules = s_ip->getNumObjectsFound(state, CurrentModuleObject);
-        if (NumConstantSchedules > 0) {
-            s_ip->getObjectDefMaxArgs(state, CurrentModuleObject, Count, NumAlphas, NumNumbers);
-            MaxNums = max(MaxNums, NumNumbers);
-            MaxAlps = max(MaxAlps, NumAlphas);
-        }
-        CurrentModuleObject = "ExternalInterface:Schedule";
-        int NumExternalInterfaceSchedules = s_ip->getNumObjectsFound(state, CurrentModuleObject);
-        // added for FMI
-        if (NumExternalInterfaceSchedules > 0) {
-            s_ip->getObjectDefMaxArgs(state, CurrentModuleObject, Count, NumAlphas, NumNumbers);
-            MaxNums = max(MaxNums, NumNumbers);
-            MaxAlps = max(MaxAlps, NumAlphas + 1);
-        }
-        // added for FMU Import
-        CurrentModuleObject = "ExternalInterface:FunctionalMockupUnitImport:To:Schedule";
-        int NumExternalInterfaceFunctionalMockupUnitImportSchedules = s_ip->getNumObjectsFound(state, CurrentModuleObject);
-        if (NumExternalInterfaceFunctionalMockupUnitImportSchedules > 0) {
-            s_ip->getObjectDefMaxArgs(state, CurrentModuleObject, Count, NumAlphas, NumNumbers);
-            MaxNums = max(MaxNums, NumNumbers);
-            MaxAlps = max(MaxAlps, NumAlphas + 1);
-        }
-        // added for FMU Export
-        CurrentModuleObject = "ExternalInterface:FunctionalMockupUnitExport:To:Schedule";
-        int NumExternalInterfaceFunctionalMockupUnitExportSchedules = s_ip->getNumObjectsFound(state, CurrentModuleObject);
-        if (NumExternalInterfaceFunctionalMockupUnitExportSchedules > 0) {
-            s_ip->getObjectDefMaxArgs(state, CurrentModuleObject, Count, NumAlphas, NumNumbers);
-            MaxNums = max(MaxNums, NumNumbers);
-            MaxAlps = max(MaxAlps, NumAlphas + 1);
-        }
-        CurrentModuleObject = "Output:Schedules";
-        s_ip->getObjectDefMaxArgs(state, CurrentModuleObject, Count, NumAlphas, NumNumbers);
-        MaxNums = max(MaxNums, NumNumbers);
-        MaxAlps = max(MaxAlps, NumAlphas);
+        std::string CurrentModuleObject;
 
         Alphas.allocate(MaxAlps); // Maximum Alphas possible
         cAlphaFields.allocate(MaxAlps);
@@ -825,14 +893,7 @@ namespace Sched {
 
             auto *daySched = AddDaySchedule(state, Alphas(1));
 
-            // Validate ScheduleType
-            if (lAlphaBlanks(2)) {
-                ShowWarningEmptyField(state, eoh, cAlphaFields(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            } else if ((daySched->schedTypeNum = GetScheduleTypeNum(state, Alphas(2))) == SchedNum_Invalid) {
-                ShowWarningItemNotFound(state, eoh, cAlphaFields(2), Alphas(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            }
+            validateScheduleType(state, eoh, Alphas, cAlphaFields, lAlphaBlanks, daySched->schedTypeNum);
 
             daySched->interpolation = Interpolation::No;
 
@@ -843,13 +904,7 @@ namespace Sched {
                 }
             }
 
-            if (daySched->checkValsForLimitViolations(state)) {
-                ShowWarningCustom(state, eoh, EnergyPlus::format("Values are outside of range for {}={}", cAlphaFields(2), Alphas(2)));
-            }
-
-            if (daySched->checkValsForBadIntegers(state)) {
-                ShowWarningCustom(state, eoh, EnergyPlus::format("One or more values are not integer in {}={}", cAlphaFields(2), Alphas(2)));
-            }
+            warnDayScheduleValueIssues(state, eoh, daySched, Alphas, cAlphaFields);
 
         } // for (Loop)
 
@@ -880,14 +935,7 @@ namespace Sched {
 
             auto *daySched = AddDaySchedule(state, Alphas(1));
 
-            // Validate ScheduleType
-            if (lAlphaBlanks(2)) {
-                ShowWarningEmptyField(state, eoh, cAlphaFields(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            } else if ((daySched->schedTypeNum = GetScheduleTypeNum(state, Alphas(2))) == SchedNum_Invalid) {
-                ShowWarningItemNotFound(state, eoh, cAlphaFields(2), Alphas(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            }
+            validateScheduleType(state, eoh, Alphas, cAlphaFields, lAlphaBlanks, daySched->schedTypeNum);
 
             NumFields = NumAlphas - 3;
             // check to see if numfield=0
@@ -922,13 +970,7 @@ namespace Sched {
             // Now parcel into TS Value.... tsVals.resize() was called in AddDaySchedule()
             daySched->populateFromMinuteVals(state, minuteVals);
 
-            if (daySched->checkValsForLimitViolations(state)) {
-                ShowWarningCustom(state, eoh, EnergyPlus::format("Values are outside of range for {}={}", cAlphaFields(2), Alphas(2)));
-            }
-
-            if (daySched->checkValsForBadIntegers(state)) {
-                ShowWarningCustom(state, eoh, EnergyPlus::format("One or more values are not integer in {}={}", cAlphaFields(2), Alphas(2)));
-            }
+            warnDayScheduleValueIssues(state, eoh, daySched, Alphas, cAlphaFields);
         }
 
         //!! Get "DaySchedule:List"
@@ -958,14 +1000,7 @@ namespace Sched {
 
             auto *daySched = AddDaySchedule(state, Alphas(1));
 
-            // Validate ScheduleType
-            if (lAlphaBlanks(2)) {
-                ShowWarningEmptyField(state, eoh, cAlphaFields(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            } else if ((daySched->schedTypeNum = GetScheduleTypeNum(state, Alphas(2))) == SchedNum_Invalid) {
-                ShowWarningItemNotFound(state, eoh, cAlphaFields(2), Alphas(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            }
+            validateScheduleType(state, eoh, Alphas, cAlphaFields, lAlphaBlanks, daySched->schedTypeNum);
 
             // Depending on value of "Interpolate" field, the value for each time step in each hour gets processed:
             daySched->interpolation = static_cast<Interpolation>(getEnumValue(interpolationNamesUC, Alphas(3)));
@@ -1032,13 +1067,7 @@ namespace Sched {
             // Now parcel into TS Value.... tsVals.resize() was called in AddDaySchedule()
             daySched->populateFromMinuteVals(state, minuteVals);
 
-            if (daySched->checkValsForLimitViolations(state)) {
-                ShowWarningCustom(state, eoh, EnergyPlus::format("Values are outside of range for {}={}", cAlphaFields(2), Alphas(2)));
-            }
-
-            if (daySched->checkValsForBadIntegers(state)) {
-                ShowWarningCustom(state, eoh, EnergyPlus::format("One or more values are not integer for {}={}", cAlphaFields(2), Alphas(2)));
-            }
+            warnDayScheduleValueIssues(state, eoh, daySched, Alphas, cAlphaFields, "for");
         }
 
         //!! Get Week Schedules - regular
@@ -1172,13 +1201,7 @@ namespace Sched {
             auto *sched = AddScheduleDetailed(state, Alphas(1));
 
             // Validate ScheduleType
-            if (lAlphaBlanks(2)) {
-                ShowWarningEmptyField(state, eoh, cAlphaFields(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            } else if ((sched->schedTypeNum = GetScheduleTypeNum(state, Alphas(2))) == SchedNum_Invalid) {
-                ShowWarningItemNotFound(state, eoh, cAlphaFields(2), Alphas(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            }
+            validateScheduleType(state, eoh, Alphas, cAlphaFields, lAlphaBlanks, sched->schedTypeNum);
 
             int NumPointer = 0;
 
@@ -1295,14 +1318,7 @@ namespace Sched {
             auto *sched = AddScheduleDetailed(state, Alphas(1));
             sched->type = SchedType::Compact;
 
-            // Validate ScheduleType
-            if (lAlphaBlanks(2)) {
-                ShowWarningEmptyField(state, eoh, cAlphaFields(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            } else if ((sched->schedTypeNum = GetScheduleTypeNum(state, Alphas(2))) == SchedNum_Invalid) {
-                ShowWarningItemNotFound(state, eoh, cAlphaFields(2), Alphas(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            }
+            validateScheduleType(state, eoh, Alphas, cAlphaFields, lAlphaBlanks, sched->schedTypeNum);
 
             std::array<int, 367> daysInYear;
             std::fill(daysInYear.begin() + 1, daysInYear.end(), 0);
@@ -1596,14 +1612,7 @@ namespace Sched {
             auto *sched = AddScheduleDetailed(state, Alphas(1));
             sched->type = SchedType::File;
 
-            // Validate ScheduleType
-            if (lAlphaBlanks(2)) {
-                ShowWarningEmptyField(state, eoh, cAlphaFields(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            } else if ((sched->schedTypeNum = GetScheduleTypeNum(state, Alphas(2))) == SchedNum_Invalid) {
-                ShowWarningItemNotFound(state, eoh, cAlphaFields(2), Alphas(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            }
+            validateScheduleType(state, eoh, Alphas, cAlphaFields, lAlphaBlanks, sched->schedTypeNum);
 
             // Numbers(1) - which column
             curcolCount = Numbers(1);
@@ -1985,13 +1994,7 @@ namespace Sched {
             auto *sched = AddScheduleConstant(state, Alphas(1), Numbers(1));
 
             // Validate ScheduleType
-            if (lAlphaBlanks(2)) { // No warning here for constant schedules
-                ShowWarningEmptyField(state, eoh, cAlphaFields(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            } else if ((sched->schedTypeNum = GetScheduleTypeNum(state, Alphas(2))) == SchedNum_Invalid) {
-                ShowWarningItemNotFound(state, eoh, cAlphaFields(2), Alphas(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            }
+            validateScheduleType(state, eoh, Alphas, cAlphaFields, lAlphaBlanks, sched->schedTypeNum);
 
             if (s_glob->AnyEnergyManagementSystemInModel) { // setup constant schedules as actuators
                 SetupEMSActuator(state, "Schedule:Constant", sched->Name, "Schedule Value", "[ ]", sched->EMSActuatedOn, sched->EMSVal);
@@ -2001,199 +2004,50 @@ namespace Sched {
         static_cast<ScheduleConstant *>(s_sched->schedules[SchedNum_AlwaysOff])->tsVals.assign(Constant::iHoursInDay * s_glob->TimeStepsInHour, 0.0);
         static_cast<ScheduleConstant *>(s_sched->schedules[SchedNum_AlwaysOn])->tsVals.assign(Constant::iHoursInDay * s_glob->TimeStepsInHour, 1.0);
 
-        CurrentModuleObject = "ExternalInterface:Schedule";
-        for (int Loop = 1; Loop <= NumExternalInterfaceSchedules; ++Loop) {
-            s_ip->getObjectItem(state,
-                                CurrentModuleObject,
-                                Loop,
-                                Alphas,
-                                NumAlphas,
-                                Numbers,
-                                NumNumbers,
-                                Status,
-                                lNumericBlanks,
-                                lAlphaBlanks,
-                                cAlphaFields,
-                                cNumericFields);
+        processExternalInterfaceSchedule(state,
+                                         routineName,
+                                         "ExternalInterface:Schedule",
+                                         NumExternalInterfaceSchedules,
+                                         false,
+                                         NumExternalInterfaceSchedules,
+                                         Alphas,
+                                         cAlphaFields,
+                                         cNumericFields,
+                                         Numbers,
+                                         lAlphaBlanks,
+                                         lNumericBlanks,
+                                         ErrorsFound,
+                                         NumErrorFlag);
 
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
+        processExternalInterfaceSchedule(state,
+                                         routineName,
+                                         "ExternalInterface:FunctionalMockupUnitImport:To:Schedule",
+                                         NumExternalInterfaceFunctionalMockupUnitImportSchedules,
+                                         true,
+                                         NumExternalInterfaceSchedules,
+                                         Alphas,
+                                         cAlphaFields,
+                                         cNumericFields,
+                                         Numbers,
+                                         lAlphaBlanks,
+                                         lNumericBlanks,
+                                         ErrorsFound,
+                                         NumErrorFlag);
 
-            if (s_sched->scheduleMap.find(Alphas(1)) != s_sched->scheduleMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                ErrorsFound = true;
-                continue;
-            }
-
-            auto *sched = AddScheduleDetailed(state, Alphas(1));
-            sched->type = SchedType::External;
-
-            // Validate ScheduleType
-            if (lAlphaBlanks(2)) {
-                ShowWarningEmptyField(state, eoh, cAlphaFields(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            } else if ((sched->schedTypeNum = GetScheduleTypeNum(state, Alphas(2))) == SchedNum_Invalid) {
-                ShowWarningItemNotFound(state, eoh, cAlphaFields(2), Alphas(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            }
-
-            // TODO: I'm not sure this Jazz is necessary
-            // Add day schedule
-            auto *daySched = AddDaySchedule(state, EnergyPlus::format("{}_xi_dy_", Alphas(1)));
-            daySched->isUsed = true;
-            daySched->schedTypeNum = sched->schedTypeNum;
-
-            //   Initialize the ExternalInterface day schedule for the ExternalInterface compact schedule.
-            //   It will be overwritten during run time stepping after the warm up period
-            if (NumNumbers < 1) {
-                ShowWarningCustom(state, eoh, "Initial value is not numeric or is missing. Fix idf file.");
-                NumErrorFlag = true;
-            }
-            ExternalInterfaceSetSchedule(state, daySched->Num, Numbers(1));
-
-            auto *weekSched = AddWeekSchedule(state, EnergyPlus::format("{}_xi_wk_", Alphas(1)));
-            weekSched->isUsed = true;
-            for (int iDayType = 1; iDayType < (int)DayType::Num; ++iDayType) {
-                weekSched->dayScheds[iDayType] = daySched;
-            }
-
-            for (int iDay = 1; iDay <= 366; ++iDay) {
-                sched->weekScheds[iDay] = weekSched;
-            }
-        } // for (Loop)
-
-        // added for FMU Import
-        CurrentModuleObject = "ExternalInterface:FunctionalMockupUnitImport:To:Schedule";
-        for (int Loop = 1; Loop <= NumExternalInterfaceFunctionalMockupUnitImportSchedules; ++Loop) {
-            s_ip->getObjectItem(state,
-                                CurrentModuleObject,
-                                Loop,
-                                Alphas,
-                                NumAlphas,
-                                Numbers,
-                                NumNumbers,
-                                Status,
-                                lNumericBlanks,
-                                lAlphaBlanks,
-                                cAlphaFields,
-                                cNumericFields);
-
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (s_sched->scheduleMap.find(Alphas(1)) != s_sched->scheduleMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                if (NumExternalInterfaceSchedules >= 1) {
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("{} defined as an ExternalInterface:Schedule and ExternalInterface:FunctionalMockupUnitImport:To:Schedule."
-                                           "This will cause the schedule to be overwritten by PtolemyServer and FunctionalMockUpUnitImport)",
-                                           cAlphaFields(1)));
-                }
-                ErrorsFound = true;
-                continue;
-            }
-
-            auto *sched = AddScheduleDetailed(state, Alphas(1));
-            sched->type = SchedType::External;
-
-            // Validate ScheduleType
-            if (lAlphaBlanks(2)) {
-                ShowWarningEmptyField(state, eoh, cAlphaFields(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            } else if ((sched->schedTypeNum = GetScheduleTypeNum(state, Alphas(2))) == SchedNum_Invalid) {
-                ShowWarningItemNotFound(state, eoh, cAlphaFields(2), Alphas(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            }
-
-            // TODO: I'm not sure this Jazz is necessary
-            // Add day schedule
-            auto *daySched = AddDaySchedule(state, EnergyPlus::format("{}_xi_dy_", Alphas(1)));
-            daySched->isUsed = true;
-            daySched->schedTypeNum = sched->schedTypeNum;
-
-            //   Initialize the ExternalInterface day schedule for the ExternalInterface compact schedule.
-            //   It will be overwritten during run time stepping after the warm up period
-            if (NumNumbers < 1) {
-                ShowWarningCustom(state, eoh, "Initial value is not numeric or is missing. Fix idf file.");
-                NumErrorFlag = true;
-            }
-            ExternalInterfaceSetSchedule(state, daySched->Num, Numbers(1));
-
-            auto *weekSched = AddWeekSchedule(state, EnergyPlus::format("{}_xi_wk_", Alphas(1)));
-            weekSched->isUsed = true;
-            for (int iDayType = 1; iDayType < (int)DayType::Num; ++iDayType) {
-                weekSched->dayScheds[iDayType] = daySched;
-            }
-
-            for (int iDay = 1; iDay <= 366; ++iDay) {
-                sched->weekScheds[iDay] = weekSched;
-            }
-        }
-
-        // added for FMU Export
-        CurrentModuleObject = "ExternalInterface:FunctionalMockupUnitExport:To:Schedule";
-        for (int Loop = 1; Loop <= NumExternalInterfaceFunctionalMockupUnitExportSchedules; ++Loop) {
-            s_ip->getObjectItem(state,
-                                CurrentModuleObject,
-                                Loop,
-                                Alphas,
-                                NumAlphas,
-                                Numbers,
-                                NumNumbers,
-                                Status,
-                                lNumericBlanks,
-                                lAlphaBlanks,
-                                cAlphaFields,
-                                cNumericFields);
-
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            if (s_sched->scheduleMap.find(Alphas(1)) != s_sched->scheduleMap.end()) {
-                ShowSevereDuplicateName(state, eoh);
-                if (NumExternalInterfaceSchedules >= 1) {
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("{} defined as an ExternalInterface:Schedule and ExternalInterface:FunctionalMockupUnitImport:To:Schedule."
-                                           "This will cause the schedule to be overwritten by PtolemyServer and FunctionalMockUpUnitImport)",
-                                           cAlphaFields(1)));
-                }
-                ErrorsFound = true;
-                continue;
-            }
-
-            auto *sched = AddScheduleDetailed(state, Alphas(1));
-            sched->type = SchedType::External;
-
-            // Validate ScheduleType
-            if (lAlphaBlanks(2)) {
-                ShowWarningEmptyField(state, eoh, cAlphaFields(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            } else if ((sched->schedTypeNum = GetScheduleTypeNum(state, Alphas(2))) == SchedNum_Invalid) {
-                ShowWarningItemNotFound(state, eoh, cAlphaFields(2), Alphas(2));
-                ShowContinueError(state, "Schedule will not be validated.");
-            }
-
-            // TODO: I'm not sure this Jazz is necessary
-            // Add day schedule
-            auto *daySched = AddDaySchedule(state, EnergyPlus::format("{}_xi_dy_", Alphas(1)));
-            daySched->isUsed = true;
-            daySched->schedTypeNum = sched->schedTypeNum;
-
-            //   Initialize the ExternalInterface day schedule for the ExternalInterface compact schedule.
-            //   It will be overwritten during run time stepping after the warm up period
-            if (NumNumbers < 1) {
-                ShowWarningCustom(state, eoh, "Initial value is not numeric or is missing. Fix idf file.");
-                NumErrorFlag = true;
-            }
-            ExternalInterfaceSetSchedule(state, daySched->Num, Numbers(1));
-
-            auto *weekSched = AddWeekSchedule(state, EnergyPlus::format("{}_xi_wk_", Alphas(1)));
-            weekSched->isUsed = true;
-            for (int iDayType = 1; iDayType < (int)DayType::Num; ++iDayType) {
-                weekSched->dayScheds[iDayType] = daySched;
-            }
-
-            std::fill(sched->weekScheds.begin() + 1, sched->weekScheds.end(), weekSched);
-        } // for (Loop)
+        processExternalInterfaceSchedule(state,
+                                         routineName,
+                                         "ExternalInterface:FunctionalMockupUnitExport:To:Schedule",
+                                         NumExternalInterfaceFunctionalMockupUnitExportSchedules,
+                                         true,
+                                         NumExternalInterfaceSchedules,
+                                         Alphas,
+                                         cAlphaFields,
+                                         cNumericFields,
+                                         Numbers,
+                                         lAlphaBlanks,
+                                         lNumericBlanks,
+                                         ErrorsFound,
+                                         NumErrorFlag);
 
         // Validate by ScheduleLimitsType
         for (auto *sched : s_sched->schedules) {

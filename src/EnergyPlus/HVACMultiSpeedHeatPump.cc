@@ -446,6 +446,106 @@ namespace HVACMultiSpeedHeatPump {
 
     //******************************************************************************
 
+    // Helper: validate that speed-level volume flow rates are positive and in ascending order.
+    // Used for both heating and cooling flow rate arrays.
+    static void validateSpeedFlowRates(EnergyPlusData &state,
+                                       std::string_view objName,
+                                       Array1D<Real64> const &flowRates,
+                                       int numSpeeds,
+                                       int numericOffset,
+                                       Array1D_string const &cNumericFields,
+                                       bool alwaysValidatePositive,
+                                       bool &ErrorsFound)
+    {
+        // Validate positive flow rates
+        for (int i = 1; i <= numSpeeds; ++i) {
+            if (alwaysValidatePositive) {
+                if (flowRates(i) <= 0.0 && flowRates(i) != DataSizing::AutoSize) {
+                    ShowSevereError(state,
+                                    EnergyPlus::format("{}, \"{}\", {} must be greater than zero.",
+                                                       state.dataHVACMultiSpdHP->CurrentModuleObject,
+                                                       objName,
+                                                       cNumericFields(numericOffset + i)));
+                    ErrorsFound = true;
+                }
+            }
+        }
+        // Ensure flow rate at high speed is >= flow rate at low speed
+        for (int i = 2; i <= numSpeeds; ++i) {
+            if (flowRates(i) == DataSizing::AutoSize) {
+                continue;
+            }
+            bool Found = false;
+            int j = 0;
+            for (j = i - 1; j >= 1; --j) {
+                if (flowRates(i) != DataSizing::AutoSize) {
+                    Found = true;
+                    break;
+                }
+            }
+            if (Found) {
+                if (flowRates(i) < flowRates(j)) {
+                    ShowSevereError(state,
+                                    EnergyPlus::format(
+                                        "{}, \"{}\", {}", state.dataHVACMultiSpdHP->CurrentModuleObject, objName, cNumericFields(numericOffset + i)));
+                    ShowContinueError(state, EnergyPlus::format(" cannot be less than {}", cNumericFields(numericOffset + j)));
+                    ErrorsFound = true;
+                }
+            }
+        }
+    }
+
+    // Helper: read supplemental heating coil data for Fuel or Electric coil types.
+    // Both branches share the same logic differing only in the HVAC type constant and coil type string.
+    static void readSuppHeatingCoilFuelOrElectric(EnergyPlusData &state,
+                                                  MSHeatPumpData &thisMSHP,
+                                                  int suppHeatCoilHVACType,
+                                                  std::string_view coilTypeStr,
+                                                  Array1D_string const &Alphas,
+                                                  Array1D_string const &cAlphaFields,
+                                                  bool &ErrorsFound,
+                                                  int &SuppHeatCoilInletNode,
+                                                  int &SuppHeatCoilOutletNode)
+    {
+        thisMSHP.SuppHeatCoilType = suppHeatCoilHVACType;
+        bool errFlag = false;
+        thisMSHP.SuppHeatCoilNum = HeatingCoils::GetHeatingCoilIndex(state, std::string{coilTypeStr}, Alphas(15), errFlag);
+        if (thisMSHP.SuppHeatCoilNum <= 0 || errFlag) {
+            ShowContinueError(state,
+                              EnergyPlus::format("Configuration error in {} \"{}\"", state.dataHVACMultiSpdHP->CurrentModuleObject, Alphas(1)));
+            ShowContinueError(state, EnergyPlus::format("{} of type {} \"{}\" not found.", cAlphaFields(15), coilTypeStr, Alphas(15)));
+            ErrorsFound = true;
+        }
+
+        // Get the Supplemental Heating Coil Node Numbers
+        bool LocalError = false;
+        SuppHeatCoilInletNode = HeatingCoils::GetCoilInletNode(state, Alphas(14), Alphas(15), LocalError);
+        if (LocalError) {
+            ShowSevereError(state, EnergyPlus::format("The inlet node number of {} is not found \"{}\"", cAlphaFields(15), Alphas(15)));
+            ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", state.dataHVACMultiSpdHP->CurrentModuleObject, Alphas(1)));
+            ErrorsFound = true;
+            LocalError = false;
+        }
+        SuppHeatCoilOutletNode = HeatingCoils::GetCoilOutletNode(state, Alphas(14), Alphas(15), LocalError);
+        if (LocalError) {
+            ShowSevereError(state, EnergyPlus::format("The outlet node number of {} is not found \"{}\"", cAlphaFields(15), Alphas(15)));
+            ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", state.dataHVACMultiSpdHP->CurrentModuleObject, Alphas(1)));
+            ErrorsFound = true;
+            LocalError = false;
+        }
+
+        // Get supplemental heating coil capacity to see if it is autosize
+        thisMSHP.DesignSuppHeatingCapacity = HeatingCoils::GetCoilCapacity(state, Alphas(14), Alphas(15), LocalError);
+        if (LocalError) {
+            ShowSevereError(state, EnergyPlus::format("The capacity {} is not found \"{}\"", cAlphaFields(15), Alphas(15)));
+            ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", state.dataHVACMultiSpdHP->CurrentModuleObject, Alphas(1)));
+            ErrorsFound = true;
+            LocalError = false;
+        }
+        Node::SetUpCompSets(
+            state, state.dataHVACMultiSpdHP->CurrentModuleObject, thisMSHP.Name, coilTypeStr, thisMSHP.SuppHeatCoilName, "UNDEFINED", "UNDEFINED");
+    }
+
     void GetMSHeatPumpInput(EnergyPlusData &state)
     {
         // SUBROUTINE INFORMATION:
@@ -470,8 +570,6 @@ namespace HVACMultiSpeedHeatPump {
         bool AirNodeFound;             // True when an air node is found
         bool AirLoopFound;             // True when an air loop is found
         int i;                         // Index to speeds
-        int j;                         // Index to speeds
-        bool Found;                    // Flag to find autosize
         bool LocalError;               // Local error flag
         Array1D_string Alphas;         // Alpha input items for object
         Array1D_string cAlphaFields;   // Alpha field names
@@ -763,44 +861,23 @@ namespace HVACMultiSpeedHeatPump {
             } else if (Util::SameString(Alphas(10), "Coil:Heating:Electric:MultiStage") ||
                        Util::SameString(Alphas(10), "Coil:Heating:Gas:MultiStage")) {
 
-                if (Util::SameString(Alphas(10), "Coil:Heating:Electric:MultiStage")) {
-                    thisMSHP.HeatCoilType = HVAC::Coil_HeatingElectric_MultiStage;
-                    thisMSHP.HeatCoilNum =
-                        state.dataInputProcessing->inputProcessor->getObjectItemNum(state, "Coil:Heating:Electric:MultiStage", Alphas(11));
-                    if (thisMSHP.HeatCoilNum <= 0) {
-                        ShowSevereError(
-                            state, EnergyPlus::format("Configuration error in {} \"{}\"", state.dataHVACMultiSpdHP->CurrentModuleObject, Alphas(1)));
-                        ShowContinueError(state, EnergyPlus::format("{} \"{}\" not found.", cAlphaFields(11), Alphas(11)));
-                        ShowContinueError(state, EnergyPlus::format("{} must be Coil:Heating:Electric:MultiStage ", cAlphaFields(10)));
-                        ShowFatalError(state,
-                                       EnergyPlus::format("{}Errors found in getting {} input. Preceding condition(s) causes termination.",
-                                                          RoutineName,
-                                                          state.dataHVACMultiSpdHP->CurrentModuleObject));
-                        ErrorsFound = true;
-                    }
-                } else {
-                    thisMSHP.HeatCoilType = HVAC::Coil_HeatingGas_MultiStage;
-                    thisMSHP.HeatCoilNum =
-                        state.dataInputProcessing->inputProcessor->getObjectItemNum(state, "Coil:Heating:Gas:MultiStage", Alphas(11));
-                    if (thisMSHP.HeatCoilNum <= 0) {
-                        ShowSevereError(
-                            state, EnergyPlus::format("Configuration error in {} \"{}\"", state.dataHVACMultiSpdHP->CurrentModuleObject, Alphas(1)));
-                        ShowContinueError(state, EnergyPlus::format("{} \"{}\" not found.", cAlphaFields(11), Alphas(11)));
-                        ShowContinueError(state, EnergyPlus::format("{} must be Coil:Heating:Gas:MultiStage ", cAlphaFields(10)));
-                        ShowFatalError(state,
-                                       EnergyPlus::format("{}Errors found in getting {} input. Preceding condition(s) causes termination.",
-                                                          RoutineName,
-                                                          state.dataHVACMultiSpdHP->CurrentModuleObject));
-                        ErrorsFound = true;
-                    }
+                thisMSHP.HeatCoilType = Util::SameString(Alphas(10), "Coil:Heating:Electric:MultiStage") ? HVAC::Coil_HeatingElectric_MultiStage
+                                                                                                         : HVAC::Coil_HeatingGas_MultiStage;
+                thisMSHP.HeatCoilNum = state.dataInputProcessing->inputProcessor->getObjectItemNum(state, Alphas(10), Alphas(11));
+                if (thisMSHP.HeatCoilNum <= 0) {
+                    ShowSevereError(state,
+                                    EnergyPlus::format("Configuration error in {} \"{}\"", state.dataHVACMultiSpdHP->CurrentModuleObject, Alphas(1)));
+                    ShowContinueError(state, EnergyPlus::format("{} \"{}\" not found.", cAlphaFields(11), Alphas(11)));
+                    ShowContinueError(state, EnergyPlus::format("{} must be {} ", cAlphaFields(10), Alphas(10)));
+                    ShowFatalError(state,
+                                   EnergyPlus::format("{}Errors found in getting {} input. Preceding condition(s) causes termination.",
+                                                      RoutineName,
+                                                      state.dataHVACMultiSpdHP->CurrentModuleObject));
+                    ErrorsFound = true;
                 }
                 thisMSHP.HeatCoilName = Alphas(11);
                 LocalError = false;
-                if (Util::SameString(Alphas(10), "Coil:Heating:Electric:MultiStage")) {
-                    HeatingCoils::GetCoilIndex(state, thisMSHP.HeatCoilName, thisMSHP.HeatCoilIndex, LocalError);
-                } else {
-                    HeatingCoils::GetCoilIndex(state, thisMSHP.HeatCoilName, thisMSHP.HeatCoilIndex, LocalError);
-                }
+                HeatingCoils::GetCoilIndex(state, thisMSHP.HeatCoilName, thisMSHP.HeatCoilIndex, LocalError);
                 if (LocalError) {
                     ShowSevereError(state, EnergyPlus::format("The index of {} is not found \"{}\"", cAlphaFields(11), Alphas(11)));
                     ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", state.dataHVACMultiSpdHP->CurrentModuleObject, Alphas(1)));
@@ -821,23 +898,8 @@ namespace HVACMultiSpeedHeatPump {
                     ErrorsFound = true;
                     LocalError = false;
                 }
-                if (Util::SameString(Alphas(10), "Coil:Heating:Electric:MultiStage")) {
-                    Node::SetUpCompSets(state,
-                                        state.dataHVACMultiSpdHP->CurrentModuleObject,
-                                        thisMSHP.Name,
-                                        "Coil:Heating:Electric:MultiStage",
-                                        thisMSHP.HeatCoilName,
-                                        "UNDEFINED",
-                                        "UNDEFINED");
-                } else {
-                    Node::SetUpCompSets(state,
-                                        state.dataHVACMultiSpdHP->CurrentModuleObject,
-                                        thisMSHP.Name,
-                                        "Coil:Heating:Gas:MultiStage",
-                                        thisMSHP.HeatCoilName,
-                                        "UNDEFINED",
-                                        "UNDEFINED");
-                }
+                Node::SetUpCompSets(
+                    state, state.dataHVACMultiSpdHP->CurrentModuleObject, thisMSHP.Name, Alphas(10), thisMSHP.HeatCoilName, "UNDEFINED", "UNDEFINED");
             } else if (Util::SameString(Alphas(10), "Coil:Heating:Water")) {
                 thisMSHP.HeatCoilType = HVAC::Coil_HeatingWater;
                 ValidateComponent(state, Alphas(10), Alphas(11), IsNotOK, state.dataHVACMultiSpdHP->CurrentModuleObject);
@@ -1030,93 +1092,26 @@ namespace HVACMultiSpeedHeatPump {
             // Get supplemental heating coil data
             thisMSHP.SuppHeatCoilName = Alphas(15);
             if (Util::SameString(Alphas(14), "Coil:Heating:Fuel")) {
-                thisMSHP.SuppHeatCoilType = HVAC::Coil_HeatingGasOrOtherFuel;
-                errFlag = false;
-                thisMSHP.SuppHeatCoilNum = HeatingCoils::GetHeatingCoilIndex(state, "Coil:Heating:Fuel", Alphas(15), errFlag);
-                if (thisMSHP.SuppHeatCoilNum <= 0 || errFlag) {
-                    ShowContinueError(
-                        state, EnergyPlus::format("Configuration error in {} \"{}\"", state.dataHVACMultiSpdHP->CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state, EnergyPlus::format("{} of type Coil:Heating:Fuel \"{}\" not found.", cAlphaFields(15), Alphas(15)));
-                    ErrorsFound = true;
-                }
-
-                // Get the Supplemental Heating Coil Node Numbers
-                LocalError = false;
-                SuppHeatCoilInletNode = HeatingCoils::GetCoilInletNode(state, Alphas(14), Alphas(15), LocalError);
-                if (LocalError) {
-                    ShowSevereError(state, EnergyPlus::format("The inlet node number of {} is not found \"{}\"", cAlphaFields(15), Alphas(15)));
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", state.dataHVACMultiSpdHP->CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                    LocalError = false;
-                }
-                SuppHeatCoilOutletNode = HeatingCoils::GetCoilOutletNode(state, Alphas(14), Alphas(15), LocalError);
-                if (LocalError) {
-                    ShowSevereError(state, EnergyPlus::format("The outlet node number of {} is not found \"{}\"", cAlphaFields(15), Alphas(15)));
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", state.dataHVACMultiSpdHP->CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                    LocalError = false;
-                }
-
-                // Get supplemental heating coil capacity to see if it is autosize
-                thisMSHP.DesignSuppHeatingCapacity = HeatingCoils::GetCoilCapacity(state, Alphas(14), Alphas(15), LocalError);
-                if (LocalError) {
-                    ShowSevereError(state, EnergyPlus::format("The capacity {} is not found \"{}\"", cAlphaFields(15), Alphas(15)));
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", state.dataHVACMultiSpdHP->CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                    LocalError = false;
-                }
-                Node::SetUpCompSets(state,
-                                    state.dataHVACMultiSpdHP->CurrentModuleObject,
-                                    thisMSHP.Name,
-                                    "Coil:Heating:Fuel",
-                                    thisMSHP.SuppHeatCoilName,
-                                    "UNDEFINED",
-                                    "UNDEFINED");
+                readSuppHeatingCoilFuelOrElectric(state,
+                                                  thisMSHP,
+                                                  HVAC::Coil_HeatingGasOrOtherFuel,
+                                                  "Coil:Heating:Fuel",
+                                                  Alphas,
+                                                  cAlphaFields,
+                                                  ErrorsFound,
+                                                  SuppHeatCoilInletNode,
+                                                  SuppHeatCoilOutletNode);
             }
             if (Util::SameString(Alphas(14), "Coil:Heating:Electric")) {
-                thisMSHP.SuppHeatCoilType = HVAC::Coil_HeatingElectric;
-                errFlag = false;
-                thisMSHP.SuppHeatCoilNum = HeatingCoils::GetHeatingCoilIndex(state, "Coil:Heating:Electric", Alphas(15), errFlag);
-                if (thisMSHP.SuppHeatCoilNum <= 0 || errFlag) {
-                    ShowContinueError(
-                        state, EnergyPlus::format("Configuration error in {} \"{}\"", state.dataHVACMultiSpdHP->CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state, EnergyPlus::format("{} of type Coil:Heating:Electric \"{}\" not found.", cAlphaFields(15), Alphas(15)));
-                    ErrorsFound = true;
-                }
-
-                // Get the Supplemental Heating Coil Node Numbers
-                LocalError = false;
-                SuppHeatCoilInletNode = HeatingCoils::GetCoilInletNode(state, Alphas(14), Alphas(15), LocalError);
-                if (LocalError) {
-                    ShowSevereError(state, EnergyPlus::format("The inlet node number of {} is not found \"{}\"", cAlphaFields(15), Alphas(15)));
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", state.dataHVACMultiSpdHP->CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                    LocalError = false;
-                }
-                SuppHeatCoilOutletNode = HeatingCoils::GetCoilOutletNode(state, Alphas(14), Alphas(15), LocalError);
-                if (LocalError) {
-                    ShowSevereError(state, EnergyPlus::format("The outlet node number of {} is not found \"{}\"", cAlphaFields(15), Alphas(15)));
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", state.dataHVACMultiSpdHP->CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                    LocalError = false;
-                }
-
-                // Get supplemental heating coil capacity to see if it is autosize
-                thisMSHP.DesignSuppHeatingCapacity = HeatingCoils::GetCoilCapacity(state, Alphas(14), Alphas(15), LocalError);
-                if (LocalError) {
-                    ShowSevereError(state, EnergyPlus::format("The capacity {} is not found \"{}\"", cAlphaFields(15), Alphas(15)));
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", state.dataHVACMultiSpdHP->CurrentModuleObject, Alphas(1)));
-                    ErrorsFound = true;
-                    LocalError = false;
-                }
-
-                Node::SetUpCompSets(state,
-                                    state.dataHVACMultiSpdHP->CurrentModuleObject,
-                                    thisMSHP.Name,
-                                    "Coil:Heating:Electric",
-                                    thisMSHP.SuppHeatCoilName,
-                                    "UNDEFINED",
-                                    "UNDEFINED");
+                readSuppHeatingCoilFuelOrElectric(state,
+                                                  thisMSHP,
+                                                  HVAC::Coil_HeatingElectric,
+                                                  "Coil:Heating:Electric",
+                                                  Alphas,
+                                                  cAlphaFields,
+                                                  ErrorsFound,
+                                                  SuppHeatCoilInletNode,
+                                                  SuppHeatCoilOutletNode);
             }
 
             if (Util::SameString(Alphas(14), "Coil:Heating:Water")) {
@@ -1410,40 +1405,16 @@ namespace HVACMultiSpeedHeatPump {
                 thisMSHP.HeatingSpeedRatio = 1.0;
                 for (i = 1; i <= thisMSHP.NumOfSpeedHeating; ++i) {
                     thisMSHP.HeatVolumeFlowRate(i) = Numbers(10 + i);
-                    if (thisMSHP.HeatCoilType == HVAC::CoilDX_MultiSpeedHeating) {
-                        if (thisMSHP.HeatVolumeFlowRate(i) <= 0.0 && thisMSHP.HeatVolumeFlowRate(i) != DataSizing::AutoSize) {
-                            ShowSevereError(state,
-                                            EnergyPlus::format("{}, \"{}\", {} must be greater than zero.",
-                                                               state.dataHVACMultiSpdHP->CurrentModuleObject,
-                                                               thisMSHP.Name,
-                                                               cNumericFields(10 + i)));
-                            ErrorsFound = true;
-                        }
-                    }
                 }
-                // Ensure flow rate at high speed should be greater or equal to the flow rate at low speed
-                for (i = 2; i <= thisMSHP.NumOfSpeedHeating; ++i) {
-                    if (thisMSHP.HeatVolumeFlowRate(i) == DataSizing::AutoSize) {
-                        continue;
-                    }
-                    Found = false;
-                    for (j = i - 1; j >= 1; --j) {
-                        if (thisMSHP.HeatVolumeFlowRate(i) != DataSizing::AutoSize) {
-                            Found = true;
-                            break;
-                        }
-                    }
-                    if (Found) {
-                        if (thisMSHP.HeatVolumeFlowRate(i) < thisMSHP.HeatVolumeFlowRate(j)) {
-                            ShowSevereError(
-                                state,
-                                EnergyPlus::format(
-                                    "{}, \"{}\", {}", state.dataHVACMultiSpdHP->CurrentModuleObject, thisMSHP.Name, cNumericFields(10 + i)));
-                            ShowContinueError(state, EnergyPlus::format(" cannot be less than {}", cNumericFields(10 + j)));
-                            ErrorsFound = true;
-                        }
-                    }
-                }
+                bool alwaysValidatePositive = (thisMSHP.HeatCoilType == HVAC::CoilDX_MultiSpeedHeating);
+                validateSpeedFlowRates(state,
+                                       thisMSHP.Name,
+                                       thisMSHP.HeatVolumeFlowRate,
+                                       thisMSHP.NumOfSpeedHeating,
+                                       10,
+                                       cNumericFields,
+                                       alwaysValidatePositive,
+                                       ErrorsFound);
             }
 
             if (state.dataGlobal->DoCoilDirectSolutions) {
@@ -1459,38 +1430,9 @@ namespace HVACMultiSpeedHeatPump {
                 thisMSHP.CoolingSpeedRatio = 1.0;
                 for (i = 1; i <= thisMSHP.NumOfSpeedCooling; ++i) {
                     thisMSHP.CoolVolumeFlowRate(i) = Numbers(14 + i);
-                    if (thisMSHP.CoolVolumeFlowRate(i) <= 0.0 && thisMSHP.CoolVolumeFlowRate(i) != DataSizing::AutoSize) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}, \"{}\", {} must be greater than zero.",
-                                                           state.dataHVACMultiSpdHP->CurrentModuleObject,
-                                                           thisMSHP.Name,
-                                                           cNumericFields(14 + i)));
-                        ErrorsFound = true;
-                    }
                 }
-                // Ensure flow rate at high speed should be greater or equal to the flow rate at low speed
-                for (i = 2; i <= thisMSHP.NumOfSpeedCooling; ++i) {
-                    if (thisMSHP.CoolVolumeFlowRate(i) == DataSizing::AutoSize) {
-                        continue;
-                    }
-                    Found = false;
-                    for (j = i - 1; j >= 1; --j) {
-                        if (thisMSHP.CoolVolumeFlowRate(i) != DataSizing::AutoSize) {
-                            Found = true;
-                            break;
-                        }
-                    }
-                    if (Found) {
-                        if (thisMSHP.CoolVolumeFlowRate(i) < thisMSHP.CoolVolumeFlowRate(j)) {
-                            ShowSevereError(
-                                state,
-                                EnergyPlus::format(
-                                    "{}, \"{}\", {}", state.dataHVACMultiSpdHP->CurrentModuleObject, thisMSHP.Name, cNumericFields(14 + i)));
-                            ShowContinueError(state, EnergyPlus::format(" cannot be less than {}", cNumericFields(14 + j)));
-                            ErrorsFound = true;
-                        }
-                    }
-                }
+                validateSpeedFlowRates(
+                    state, thisMSHP.Name, thisMSHP.CoolVolumeFlowRate, thisMSHP.NumOfSpeedCooling, 14, cNumericFields, true, ErrorsFound);
             }
 
             // Check node integrity
