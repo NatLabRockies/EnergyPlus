@@ -65,6 +65,7 @@
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
 #include <EnergyPlus/ZoneTempPredictorCorrector.hh>
+#include "InputEnumsAirflowNetwork.hxx"
 
 namespace EnergyPlus::EarthTube {
 // Module containing the data for Earth Tube system

@@ -105,6 +105,7 @@
 #include <EnergyPlus/WaterThermalTanks.hh>
 #include <EnergyPlus/ZoneDehumidifier.hh>
 #include <EnergyPlus/ZoneTempPredictorCorrector.hh>
+//#include "InputEnumsAirflowNetwork.hxx"
 
 namespace EnergyPlus {
 

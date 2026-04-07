@@ -66,6 +66,7 @@
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/InputProcessing/AutomaticObjects.hh>
 #include <EnergyPlus/InputProcessing/DataStorage.hh>
 #include <EnergyPlus/InputProcessing/IdfParser.hh>
 #include <EnergyPlus/InputProcessing/InputValidation.hh>
@@ -329,6 +330,7 @@ private:
 
 public:
     json epJSON;
+    Automatics automatics;
 
 private:
     // Maps OBJECTTYPE to ObjectType (example entry: {"ZONEHVAC:EQUIPMENTLIST", "ZoneHVAC:EquipmentList"})

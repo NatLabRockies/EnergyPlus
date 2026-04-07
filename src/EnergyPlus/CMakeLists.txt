@@ -391,8 +391,11 @@ set(SRC
     InputProcessing/DataStorage.hh
     InputProcessing/EmbeddedEpJSONSchema.hh
     "${CMAKE_CURRENT_BINARY_DIR}/EmbeddedEpJSONSchema.cc"
+    "${CMAKE_CURRENT_BINARY_DIR}/InputEnumsAirflowNetwork.hxx"
+    "${CMAKE_CURRENT_BINARY_DIR}/InputObjectsAirflowNetwork.hxx"
     IOFiles.cc
     IOFiles.hh
+    InputProcessing/AutomaticObjects.hh
     InputProcessing/IdfParser.cc
     InputProcessing/IdfParser.hh
     InputProcessing/InputProcessor.cc
@@ -782,6 +785,8 @@ target_link_libraries(
          ssc
          cpgfunctionEP
          libtk205)
+
+include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
 target_link_libraries(energypluslib PRIVATE project_options project_fp_options project_warnings cpp_pch_files)
 
