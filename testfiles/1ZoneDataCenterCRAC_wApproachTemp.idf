@@ -164,7 +164,7 @@
   Material:NoMass,
     R13LAYER,                !- Name
     Rough,                   !- Roughness
-    2.290965,                !- Thermal Resistance {m2-K/W}
+    1.290965,                !- Thermal Resistance {m2-K/W}
     0.9000000,               !- Thermal Absorptance
     0.7500000,               !- Solar Absorptance
     0.7500000;               !- Visible Absorptance
@@ -172,7 +172,7 @@
   Material:NoMass,
     R31LAYER,                !- Name
     Rough,                   !- Roughness
-    5.456,                   !- Thermal Resistance {m2-K/W}
+    4.456,                   !- Thermal Resistance {m2-K/W}
     0.9000000,               !- Thermal Absorptance
     0.7500000,               !- Solar Absorptance
     0.7500000;               !- Visible Absorptance
