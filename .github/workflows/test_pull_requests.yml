@@ -23,13 +23,13 @@ jobs:
           macos_dev_target: 14.0
           arch: arm64
           python-arch: arm64
-          enable_pch: ON
+          enable_pch: OFF
           run_regressions: true
           pretty: "Mac arm64"
         - os: ubuntu-24.04
           arch: x86_64
           python-arch: x64
-          enable_pch: ON
+          enable_pch: OFF
           run_regressions: true
           pretty: "Ubuntu 24.04"
         - os: windows-2022
@@ -76,11 +76,11 @@ jobs:
 
         echo "GitHub synthetic merge commit SHA is '${GITHUB_SHA}'"
         echo "::endgroup::"
-        # Default PCH behavior is per-platform, then regression-cache hits may override it.
+        # Keep PCH off in PR builds so baseline and branch builds share the same ccache signatures.
         echo "ENABLE_PCH=${{ matrix.enable_pch }}" >> $GITHUB_ENV
 
-    - name: Baseline Regression Testing caching
-      uses: actions/cache@v5
+    - name: Restore Baseline Regression Testing cache
+      uses: actions/cache/restore@v5
       id: cachebaselineregression
       with:
         path: |
@@ -92,8 +92,6 @@ jobs:
       shell: bash
       run: |
         echo "Found the regression tests!"
-        # We turn off the PCH in that case, since that's how develop builds it
-        echo "ENABLE_PCH=OFF" >> $GITHUB_ENV
 
     - name: Restore Cache CCACHE
       uses: actions/cache/restore@v5
@@ -101,10 +99,12 @@ jobs:
       with:
         path: |
           ${{ steps.setup-runner.outputs.ccache-dir }}
-        key: ccache-${{ matrix.os }}-${{ steps.setup-runner.outputs.compiler-id }}-${{ github.head_ref }}-pch=${{ env.ENABLE_PCH }}
+        key: ccache-${{ matrix.os }}-${{ steps.setup-runner.outputs.compiler-id }}-pch=${{ env.ENABLE_PCH }}-${{ github.head_ref }}-${{ env.CURRENT_HEAD_SHA }}
         restore-keys: |
-          ccache-${{ matrix.os }}-${{ steps.setup-runner.outputs.compiler-id }}-${{ github.head_ref }}
+          ccache-${{ matrix.os }}-${{ steps.setup-runner.outputs.compiler-id }}-pch=${{ env.ENABLE_PCH }}-${{ github.head_ref }}-
+          ccache-${{ matrix.os }}-${{ steps.setup-runner.outputs.compiler-id }}-pch=${{ env.ENABLE_PCH }}-
           ccache-${{ matrix.os }}-${{ steps.setup-runner.outputs.compiler-id }}-${{ env.DEVELOP_SHA }}
+          ccache-${{ matrix.os }}-${{ steps.setup-runner.outputs.compiler-id }}-
 
     - name: Did restoring the CCache-cache work?
       shell: bash
@@ -159,7 +159,7 @@ jobs:
       if: matrix.run_regressions && steps.cachebaselineregression.outputs.cache-hit != 'true'
       uses: ./.github/actions/configure-and-build
       with:
-        enable-pch: ${{ env.ENABLE_PCH }} # this is 'ON' in this case
+        enable-pch: ${{ env.ENABLE_PCH }}
         minimal-targets: true
         build-directory: ./build
         nproc: ${{ steps.setup-runner.outputs.nproc }}
@@ -167,6 +167,7 @@ jobs:
         python-root-dir: ${{ steps.setup-runner.outputs.python-root-dir }}
 
     - name: Baseline Test
+      id: baseline_test
       if: matrix.run_regressions && steps.cachebaselineregression.outputs.cache-hit != 'true'
       working-directory: ./build
       shell: bash
@@ -191,6 +192,14 @@ jobs:
           echo "::endgroup::"
         fi;
         mv testfiles testfiles-develop
+
+    - name: Save Baseline Regression Testing cache
+      if: always() && matrix.run_regressions && steps.cachebaselineregression.outputs.cache-hit != 'true' && steps.baseline_test.outcome == 'success'
+      uses: actions/cache/save@v5
+      with:
+        path: |
+          ./build/testfiles-develop
+        key: baselineregression-${{ matrix.os }}-${{ env.DEVELOP_SHA }}
 
     - name: Checkout Branch again
       if: matrix.run_regressions && steps.cachebaselineregression.outputs.cache-hit != 'true'
