@@ -676,7 +676,7 @@ namespace StandardRatings {
                             bool const AHRI2023StandardRatings = false); // True if required AHRI/ANSI 210/240 Std. 2023 SEER2,HSPF2 Ratings.
 
     void ReportDXCoolCoilDataCenterApplication(EnergyPlusData &state,
-                                               std::string_view CompName,             // Name of component
+                                               std::string_view const &CompName,      // Name of component
                                                HVAC::CoilType const CompType,         // TypeNum of component
                                                Array1D<Real64> &NetCoolingCapRated,   // net cooling capacity of single speed DX cooling coil
                                                Array1D<Real64> &TotElectricPowerRated // total electric power including supply fan

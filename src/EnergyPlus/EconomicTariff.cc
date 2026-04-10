@@ -4515,7 +4515,7 @@ void showWarningsBasedOnTotal(EnergyPlusData &state)
     }
 }
 
-void getMaxAndSum(EnergyPlusData &state, int const varPointer, Real64 &sumResult, Real64 &maxResult)
+void getMaxAndSum(EnergyPlusData const &state, int const varPointer, Real64 &sumResult, Real64 &maxResult)
 {
     //    AUTHOR         Jason Glazer of GARD Analytics, Inc.
     //    DATE WRITTEN   July 2004
@@ -4864,7 +4864,7 @@ void selectTariff(EnergyPlusData &state)
     MinTariffIndex.deallocate();
 }
 
-void GetMonthlyCostForResource(EnergyPlusData &state, Constant::eResource const inResourceNumber, Array1A<Real64> outMonthlyCosts)
+void GetMonthlyCostForResource(EnergyPlusData const &state, Constant::eResource const inResourceNumber, Array1A<Real64> outMonthlyCosts)
 {
     //       AUTHOR         Jason Glazer
     //       DATE WRITTEN   May 2010

@@ -4138,7 +4138,7 @@ Real64 GetCurrentMeterValue(EnergyPlusData const &state, int const MeterNumber) 
     return (MeterNumber != -1) ? state.dataOutputProcessor->meters[MeterNumber]->CurTSValue : 0.0;
 } // GetCurrentMeterValue()
 
-Real64 GetInstantMeterValue(EnergyPlusData &state,
+Real64 GetInstantMeterValue(EnergyPlusData const &state,
                             int const meterNum,                              // Which Meter Number (from GetMeterIndex)
                             OutputProcessor::TimeStepType const timeStepType // Whether this is zone of HVAC
 )
@@ -4568,7 +4568,7 @@ void GetVariableKeys(EnergyPlusData &state,
     }
 } // GetVariableKeys()
 
-bool ReportingThisVariable(EnergyPlusData &state, std::string const &RepVarName)
+bool ReportingThisVariable(EnergyPlusData const &state, std::string const &RepVarName)
 {
 
     // FUNCTION INFORMATION:

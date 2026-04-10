@@ -623,7 +623,7 @@ namespace EconomicTariff {
 
     void showWarningsBasedOnTotal(EnergyPlusData &state);
 
-    void getMaxAndSum(EnergyPlusData &state, int const varPointer, Real64 &sumResult, Real64 &maxResult);
+    void getMaxAndSum(EnergyPlusData const &state, int const varPointer, Real64 &sumResult, Real64 &maxResult);
 
     void ReportEconomicVariable(EnergyPlusData &state,
                                 std::string const &titleString,
@@ -634,7 +634,7 @@ namespace EconomicTariff {
 
     void selectTariff(EnergyPlusData &state);
 
-    void GetMonthlyCostForResource(EnergyPlusData &state, Constant::eResource const inResourceNumber, Array1A<Real64> outMonthlyCosts);
+    void GetMonthlyCostForResource(EnergyPlusData const &state, Constant::eResource const inResourceNumber, Array1A<Real64> outMonthlyCosts);
 
 } // namespace EconomicTariff
 

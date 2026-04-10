@@ -382,7 +382,7 @@ namespace Sched {
     // Uses EMS value if actuated, otherwise calls LookUpScheduleValue with ThisHour=DataGlobals::HourOfDay, ThisTimeStep=DataGlobals::TimeStep
     void UpdateScheduleVals(EnergyPlusData &state);
 
-    int GetScheduleTypeNum(EnergyPlusData &state, std::string const &name);
+    int GetScheduleTypeNum(EnergyPlusData const &state, std::string const &name);
 
     int GetDayScheduleNum(EnergyPlusData &state, std::string const &name);
     DaySchedule *GetDaySchedule(EnergyPlusData &state, std::string const &name);
@@ -392,8 +392,8 @@ namespace Sched {
 
     int GetScheduleNum(EnergyPlusData &state, std::string const &name);
     Schedule *GetSchedule(EnergyPlusData &state, std::string const &name);
-    Schedule *GetScheduleAlwaysOn(EnergyPlusData &state);
-    Schedule *GetScheduleAlwaysOff(EnergyPlusData &state);
+    Schedule *GetScheduleAlwaysOn(EnergyPlusData const &state);
+    Schedule *GetScheduleAlwaysOff(EnergyPlusData const &state);
 
     void ExternalInterfaceSetSchedule(EnergyPlusData &state,
                                       int schedNum,

@@ -21,7 +21,7 @@
 ! Note, this file was completely changed from Ver. 1.1.1 to 1.2 to add tests for different PV generators
 ! note  this file was changed for Ver. 1.2.2 to add new strategies for ventilated mounting configurations
 
-  Version,26.1;
+  Version,26.2;
 
   Timestep,4;
 

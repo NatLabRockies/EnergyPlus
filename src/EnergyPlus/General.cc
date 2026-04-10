@@ -828,7 +828,7 @@ bool BetweenDates(int const TestDate,  // Date to test
     return BetweenDates;
 }
 
-std::string CreateSysTimeIntervalString(EnergyPlusData &state)
+std::string CreateSysTimeIntervalString(EnergyPlusData const &state)
 {
 
     // FUNCTION INFORMATION:

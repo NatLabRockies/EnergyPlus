@@ -11265,7 +11265,7 @@ TEST_F(SQLiteFixture, WriteVeriSumSpaceTables_Test)
 TEST_F(SQLiteFixture, DOASDirectToZone_ZoneMultiplierRemoved)
 {
     std::string const idf_objects_1 = R"IDF(
-  Version,26.1;
+  Version,26.2;
 
   Timestep,4;
 
@@ -12109,7 +12109,7 @@ TEST_F(SQLiteFixture, DOASDirectToZone_ZoneMultiplierRemoved)
 TEST_F(SQLiteFixture, UpdateSizing_EndSysSizingCalc)
 {
     std::string const idf_objects_1 = R"IDF(
-  Version,26.1;
+  Version,26.2;
 
   Timestep,4;
 

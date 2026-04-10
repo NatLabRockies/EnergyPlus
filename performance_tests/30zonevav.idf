@@ -95,7 +95,7 @@
 ! ZONE_TERMINAL_FAN_STATIC_PRESSURE=  298.69
 ! End WebInterface Parameters
 
-  Version,26.1;
+  Version,26.2;
 
   Timestep,4;
 

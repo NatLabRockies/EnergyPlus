@@ -14336,7 +14336,7 @@ void CalcMultiSpeedDXCoilHeating(EnergyPlusData &state,
             thisDXCoil.CrankcaseHeaterPower = 0.0;
 
             // Stage 1
-        } else if (CycRatio > 0.0 || (CycRatio > 0.0 && SingleMode == 1)) { // cppCheck Redundant Condition flag
+        } else if (CycRatio > 0.0) {
 
             // for cycling fan, reset mass flow to full on rate
             if (fanOp == HVAC::FanOp::Cycling) {

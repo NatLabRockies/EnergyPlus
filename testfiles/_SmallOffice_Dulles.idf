@@ -126,7 +126,7 @@
 ! Report Variables:            All available in RDD (442 requested, monthly and annual results)
 !
 
-  Version,26.1;
+  Version,26.2;
 
   Building,
     Small Office 2 Story 4 zone 550 m2,  !- Name

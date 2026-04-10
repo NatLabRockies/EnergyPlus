@@ -3137,7 +3137,7 @@ namespace Curve {
         return "";
     }
 
-    int GetCurveIndex(EnergyPlusData &state, std::string const &CurveName) // name of the curve
+    int GetCurveIndex(EnergyPlusData const &state, std::string const &CurveName) // name of the curve
     {
 
         // FUNCTION INFORMATION:

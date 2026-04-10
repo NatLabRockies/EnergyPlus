@@ -501,7 +501,7 @@ namespace WaterCoils {
                                              const DataPlant::LoopSideLocation LoopSide, // Plant loop side index for where called from
                                              int &CompIndex,                             // Chiller number pointer
                                              bool const FirstHVACIteration,
-                                             bool &InitLoopEquip // If not zero, calculate the max load for operating conditions
+                                             bool const &InitLoopEquip // If not zero, calculate the max load for operating conditions
     );
 
     Sched::Schedule *GetWaterCoilAvailSched(EnergyPlusData &state,

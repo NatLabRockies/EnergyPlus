@@ -15893,7 +15893,7 @@ void computeSpaceZoneCompLoads(EnergyPlusData &state,
                                Array1D<Real64> &feneSolarDelaySeq,
                                std::vector<OutputReportTabular::componentLoadsSpZn> &szCompLoadLoc,
                                Array2D<Real64> &surfDelaySeq,
-                               ZompComponentAreasType &componentAreas,
+                               ZompComponentAreasType const &componentAreas,
                                int const iZone,
                                int const iSpace)
 {

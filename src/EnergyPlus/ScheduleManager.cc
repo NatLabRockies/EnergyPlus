@@ -92,7 +92,7 @@ namespace Sched {
     // Proposal for Schedule Manager in EnergyPlus (Rick Strand)
 
     // MODULE PARAMETER DEFINITIONS
-    int GetScheduleTypeNum(EnergyPlusData &state, std::string const &name)
+    int GetScheduleTypeNum(EnergyPlusData const &state, std::string const &name)
     {
         auto const &s_sched = state.dataSched;
         for (int i = 0; i < (int)s_sched->scheduleTypes.size(); ++i) {
@@ -2546,12 +2546,12 @@ namespace Sched {
         return this->tsVals.front();
     } // ScheduleConstant::getHrTsVal()
 
-    Sched::Schedule *GetScheduleAlwaysOn(EnergyPlusData &state)
+    Sched::Schedule *GetScheduleAlwaysOn(EnergyPlusData const &state)
     {
         return state.dataSched->schedules[SchedNum_AlwaysOn];
     }
 
-    Sched::Schedule *GetScheduleAlwaysOff(EnergyPlusData &state)
+    Sched::Schedule *GetScheduleAlwaysOff(EnergyPlusData const &state)
     {
         return state.dataSched->schedules[SchedNum_AlwaysOff];
     }

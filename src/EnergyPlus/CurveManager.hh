@@ -328,7 +328,7 @@ namespace Curve {
 
     Real64 GetNormalPoint(int CurveIndex);
 
-    int GetCurveIndex(EnergyPlusData &state, std::string const &CurveName); // name of the curve
+    int GetCurveIndex(EnergyPlusData const &state, std::string const &CurveName); // name of the curve
 
     Curve *GetCurve(EnergyPlusData &state, std::string const &curveName);
 
