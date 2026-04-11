@@ -592,6 +592,9 @@ void EnergyPlusData::init_constant_state(EnergyPlusData &state)
     this->dataSched->init_constant_state(state);
     this->dataCurveManager->init_constant_state(state);
 
+    // Init weather
+    this->dataWeather->init_constant_state(state);
+
     // Read coils
     this->dataHeatingCoils->init_constant_state(state);
     this->dataSteamCoils->init_constant_state(state);
@@ -820,7 +823,6 @@ void EnergyPlusData::init_constant_state(EnergyPlusData &state)
     this->dataWaterToAirHeatPump->init_constant_state(state);
     this->dataWaterToAirHeatPumpSimple->init_constant_state(state);
     this->dataWaterUse->init_constant_state(state);
-    this->dataWeather->init_constant_state(state);
     this->dataWindTurbine->init_constant_state(state);
     this->dataWindowAC->init_constant_state(state);
     this->dataWindowComplexManager->init_constant_state(state);
@@ -857,6 +859,8 @@ void EnergyPlusData::init_state(EnergyPlusData &state)
     this->dataFluid->init_state(state);             // GetFluidPropertiesData
     this->dataSched->init_state(state);             // GetScheduleData
     this->dataCurveManager->init_state(state);      // GetCurveInput
+
+    this->dataWeather->init_state(state);           // ReportOutputFileHeaders
 
     // Read coils
     this->dataHeatingCoils->init_state(state);      // GetHeatingCoilInput
@@ -1086,7 +1090,6 @@ void EnergyPlusData::init_state(EnergyPlusData &state)
     this->dataWaterToAirHeatPump->init_state(state);
     this->dataWaterToAirHeatPumpSimple->init_state(state);
     this->dataWaterUse->init_state(state);
-    this->dataWeather->init_state(state);
     this->dataWindTurbine->init_state(state);
     this->dataWindowAC->init_state(state);
     this->dataWindowComplexManager->init_state(state);

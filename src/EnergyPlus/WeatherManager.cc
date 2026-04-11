@@ -368,7 +368,7 @@ namespace Weather {
 
             state.dataReportFlag->PrintEndDataDictionary = true;
 
-            ReportOutputFileHeaders(state); // Write the output file header information
+            // ReportOutputFileHeaders(state); // Moved to init_state()
 
             // Setup Output Variables, CurrentModuleObject='All Simulations'
 

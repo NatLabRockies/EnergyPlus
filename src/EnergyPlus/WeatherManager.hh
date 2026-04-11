@@ -935,6 +935,7 @@ struct WeatherManagerData : BaseGlobalStruct
 
     void init_state([[maybe_unused]] EnergyPlusData &state) override
     {
+        Weather::ReportOutputFileHeaders(state);
     }
 
     void clear_state() override

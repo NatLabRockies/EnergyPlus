@@ -235,8 +235,7 @@ namespace VariableSpeedCoils {
         int DXCoilNum = 0;
 
         if (state.dataVariableSpeedCoils->NumVarSpeedCoils <= 0) {
-            ShowSevereError(state, "No Equipment found in GetVarSpeedCoilInput");
-            ErrorsFound = true;
+            return;
         }
 
         // Allocate Arrays

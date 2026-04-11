@@ -114,8 +114,9 @@ void CoilCoolingDX::getInput(EnergyPlusData &state)
 {
     int numCoolingCoilDXs = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, state.dataCoilCoolingDX->coilCoolingDXObjectName);
     if (numCoolingCoilDXs <= 0) {
-        ShowFatalError(state, R"(No "Coil:Cooling:DX" objects in input file)");
+        return;
     }
+    
     for (int coilNum = 1; coilNum <= numCoolingCoilDXs; ++coilNum) {
         int NumAlphas;  // Number of Alphas for each GetObjectItem call
         int NumNumbers; // Number of Numbers for each GetObjectItem call
