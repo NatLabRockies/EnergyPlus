@@ -945,8 +945,6 @@ namespace DXCoils {
 
 struct DXCoilsData : BaseGlobalStruct
 {
-
-    bool GetCoilsInputFlag = true; // First time, input is "gotten"
     bool MyOneTimeFlag = true;     // One time flag used to allocate MyEnvrnFlag and MySizeFlag
     bool CalcTwoSpeedDXCoilStandardRatingOneTimeEIOHeaderWrite = true;
     bool CrankcaseHeaterReportVarFlag = true;
@@ -1000,6 +998,7 @@ struct DXCoilsData : BaseGlobalStruct
 
     void init_state([[maybe_unused]] EnergyPlusData &state) override
     {
+        DXCoils::GetDXCoils(state);
     }
 
     void clear_state() override

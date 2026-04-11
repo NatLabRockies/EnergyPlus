@@ -562,7 +562,6 @@ struct WaterCoilsData : BaseGlobalStruct
     Array1D_bool CoilWarningOnceFlag;
     Array1D_int WaterTempCoolCoilErrs;        // error counting for detailed coils
     Array1D_int PartWetCoolCoilErrs;          // error counting for detailed coils
-    bool GetWaterCoilsInputFlag;              // Flag set to make sure you get input once
     bool WaterCoilControllerCheckOneTimeFlag; // flg used to check water coil controller
     Array1D_bool CheckEquipName;
 
@@ -601,6 +600,7 @@ struct WaterCoilsData : BaseGlobalStruct
 
     void init_state([[maybe_unused]] EnergyPlusData &state) override
     {
+        WaterCoils::GetWaterCoilInput(state);
     }
 
     void clear_state() override
@@ -613,7 +613,6 @@ struct WaterCoilsData : BaseGlobalStruct
         this->CoilWarningOnceFlag.deallocate();
         this->WaterTempCoolCoilErrs.deallocate();
         this->PartWetCoolCoilErrs.deallocate();
-        this->GetWaterCoilsInputFlag = true;
         this->CheckEquipName.deallocate();
         this->WaterCoil.deallocate();
         this->WaterCoilNumericFields.deallocate();
@@ -646,7 +645,7 @@ struct WaterCoilsData : BaseGlobalStruct
     // Default Constructor
     WaterCoilsData()
         : CounterFlow(1), CrossFlow(2), SimpleAnalysis(1), DetailedAnalysis(2), CondensateDiscarded(1001), CondensateToTank(1002), UAandFlow(1),
-          NomCap(2), DesignCalc(1), SimCalc(2), NumWaterCoils(0), GetWaterCoilsInputFlag(true), WaterCoilControllerCheckOneTimeFlag(true),
+          NomCap(2), DesignCalc(1), SimCalc(2), NumWaterCoils(0), WaterCoilControllerCheckOneTimeFlag(true),
           InitWaterCoilOneTimeFlag(true)
     {
     }

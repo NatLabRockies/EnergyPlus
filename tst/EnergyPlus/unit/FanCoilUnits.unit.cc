@@ -116,7 +116,6 @@ TEST_F(EnergyPlusFixture, MultiStage4PipeFanCoilHeatingTest)
 
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = 1.20;
-    state->dataWaterCoils->GetWaterCoilsInputFlag = true;
     state->dataGlobalNames->NumCoils = 0;
     state->dataGlobal->TimeStepsInHour = 1;
     state->dataGlobal->TimeStep = 1;
@@ -436,7 +435,6 @@ TEST_F(EnergyPlusFixture, MultiStage4PipeFanCoilCoolingTest)
 
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = 1.20;
-    state->dataWaterCoils->GetWaterCoilsInputFlag = true;
     state->dataGlobalNames->NumCoils = 0;
     state->dataGlobal->TimeStepsInHour = 1;
     state->dataGlobal->TimeStep = 1;
@@ -754,7 +752,6 @@ TEST_F(EnergyPlusFixture, ConstantFanVariableFlowFanCoilHeatingTest)
 
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = 1.20;
-    state->dataWaterCoils->GetWaterCoilsInputFlag = true;
     state->dataGlobalNames->NumCoils = 0;
     state->dataGlobal->TimeStepsInHour = 1;
     state->dataGlobal->TimeStep = 1;
@@ -1161,7 +1158,6 @@ TEST_F(EnergyPlusFixture, ElectricCoilFanCoilHeatingTest)
 
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = 1.20;
-    state->dataWaterCoils->GetWaterCoilsInputFlag = true;
     state->dataGlobalNames->NumCoils = 0;
     state->dataGlobal->TimeStepsInHour = 1;
     state->dataGlobal->TimeStep = 1;
@@ -1478,7 +1474,6 @@ TEST_F(EnergyPlusFixture, ConstantFanVariableFlowFanCoilCoolingTest)
 
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = 1.20;
-    state->dataWaterCoils->GetWaterCoilsInputFlag = true;
     state->dataGlobalNames->NumCoils = 0;
     state->dataGlobal->TimeStepsInHour = 1;
     state->dataGlobal->TimeStep = 1;
@@ -1846,7 +1841,6 @@ TEST_F(EnergyPlusFixture, FanCoil_ASHRAE90VariableFan)
 
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = 1.20;
-    state->dataWaterCoils->GetWaterCoilsInputFlag = true;
     state->dataGlobalNames->NumCoils = 0;
     state->dataGlobal->TimeStepsInHour = 1;
     state->dataGlobal->TimeStep = 1;
@@ -2263,7 +2257,6 @@ TEST_F(EnergyPlusFixture, Test_TightenWaterFlowLimits)
     state->dataPlnt->TotNumLoops = 2;
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = 1.20;
-    state->dataWaterCoils->GetWaterCoilsInputFlag = true;
     state->dataGlobalNames->NumCoils = 0;
     state->dataGlobal->TimeStepsInHour = 1;
     state->dataGlobal->TimeStep = 1;
@@ -2562,7 +2555,6 @@ TEST_F(EnergyPlusFixture, FanCoil_CyclingFanMode)
 
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = 1.20;
-    state->dataWaterCoils->GetWaterCoilsInputFlag = true;
     state->dataGlobalNames->NumCoils = 0;
     state->dataGlobal->TimeStepsInHour = 1;
     state->dataGlobal->TimeStep = 1;
@@ -2991,7 +2983,6 @@ TEST_F(EnergyPlusFixture, FanCoil_FanSystemModelCyclingFanMode)
 
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = 1.20;
-    state->dataWaterCoils->GetWaterCoilsInputFlag = true;
     state->dataGlobalNames->NumCoils = 0;
     state->dataGlobal->TimeStepsInHour = 1;
     state->dataGlobal->TimeStep = 1;
@@ -3393,7 +3384,6 @@ TEST_F(EnergyPlusFixture, FanCoil_ElecHeatCoilMultiSpeedFanCyclingFanMode)
 
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = 1.20;
-    state->dataWaterCoils->GetWaterCoilsInputFlag = true;
     state->dataGlobalNames->NumCoils = 0;
     state->dataGlobal->TimeStepsInHour = 1;
     state->dataGlobal->TimeStep = 1;
@@ -3759,7 +3749,6 @@ TEST_F(EnergyPlusFixture, FanCoil_ElecHeatCoilMultiSpeedFanContFanMode)
 
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = 1.20;
-    state->dataWaterCoils->GetWaterCoilsInputFlag = true;
     state->dataGlobalNames->NumCoils = 0;
     state->dataGlobal->TimeStepsInHour = 1;
     state->dataGlobal->TimeStep = 1;
@@ -4124,7 +4113,6 @@ TEST_F(EnergyPlusFixture, FanCoil_CalcFanCoilElecHeatCoilPLRResidual)
 
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = 1.20;
-    state->dataWaterCoils->GetWaterCoilsInputFlag = true;
     state->dataGlobalNames->NumCoils = 0;
     state->dataGlobal->TimeStepsInHour = 1;
     state->dataGlobal->TimeStep = 1;
@@ -4585,7 +4573,6 @@ TEST_F(EnergyPlusFixture, FanCoil_ElectricHeatingCoilASHRAE90VariableFan)
 
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = 1.20;
-    state->dataWaterCoils->GetWaterCoilsInputFlag = true;
     // NumCoils = 0;
     state->dataGlobal->TimeStepsInHour = 1;
     state->dataGlobal->TimeStep = 1;

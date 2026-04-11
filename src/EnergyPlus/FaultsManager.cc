@@ -857,11 +857,7 @@ namespace FaultsManager {
             case CoilType::CoilHeatingElectric:
             case CoilType::CoilHeatingFuel:
             case CoilType::CoilHeatingDesuperheater: {
-                // Read in coil input if not done yet
-                if (state.dataHeatingCoils->GetCoilsInputFlag) {
-                    HeatingCoils::GetHeatingCoilInput(state);
-                    state.dataHeatingCoils->GetCoilsInputFlag = false;
-                }
+
                 // Check the coil name and coil type
                 int CoilNum = Util::FindItemInList(faultsCoilSATFouling.CoilName, state.dataHeatingCoils->HeatingCoil);
                 if (CoilNum <= 0) {
@@ -877,11 +873,7 @@ namespace FaultsManager {
                 }
             } break;
             case CoilType::CoilHeatingSteam: {
-                // Read in coil input if not done yet
-                if (state.dataSteamCoils->GetSteamCoilsInputFlag) {
-                    SteamCoils::GetSteamCoilInput(state);
-                    state.dataSteamCoils->GetSteamCoilsInputFlag = false;
-                }
+
                 // Check the coil name and coil type
                 int CoilNum = Util::FindItemInList(faultsCoilSATFouling.CoilName, state.dataSteamCoils->SteamCoil);
                 if (CoilNum <= 0) {
@@ -912,11 +904,7 @@ namespace FaultsManager {
             case CoilType::CoilHeatingWater:
             case CoilType::CoilCoolingWater:
             case CoilType::CoilCoolingWaterDetailedgeometry: {
-                // Read in coil input if not done yet
-                if (state.dataWaterCoils->GetWaterCoilsInputFlag) {
-                    WaterCoils::GetWaterCoilInput(state);
-                    state.dataWaterCoils->GetWaterCoilsInputFlag = false;
-                }
+
                 // Check the coil name and coil type
                 int CoilNum = Util::FindItemInList(faultsCoilSATFouling.CoilName, state.dataWaterCoils->WaterCoil);
                 if (CoilNum <= 0) {
@@ -1718,12 +1706,6 @@ namespace FaultsManager {
 
             // Coil check and link
             {
-                // Obtains and Allocates WaterCoil related parameters from input file
-                if (state.dataWaterCoils->GetWaterCoilsInputFlag) {
-                    WaterCoils::GetWaterCoilInput(state);
-                    state.dataWaterCoils->GetWaterCoilsInputFlag = false;
-                }
-
                 // Check the coil name and type
                 int CoilNum = Util::FindItemInList(faultsFoulCoil.FouledCoilName, state.dataWaterCoils->WaterCoil);
                 if (CoilNum <= 0) {

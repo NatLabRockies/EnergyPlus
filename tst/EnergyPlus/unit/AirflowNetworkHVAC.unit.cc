@@ -6540,7 +6540,6 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_ValidateDistCoils)
     state->afn->DisSysCompCoilData(2).EPlusType = "COIL:HEATING:DX:VARIABLESPEED";
     state->afn->DisSysCompCoilData(2).name = "Super Heating Coil";
 
-    state->dataVariableSpeedCoils->GetCoilsInputFlag = false;
     state->dataVariableSpeedCoils->VarSpeedCoil.allocate(2);
     state->dataVariableSpeedCoils->VarSpeedCoil(1).Name = "Super Coil";
     state->dataVariableSpeedCoils->VarSpeedCoil(2).Name = "Super Heating Coil";
@@ -16941,7 +16940,6 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_CheckMultistageHeatingCoil)
     state->afn->DisSysCompCoilData(1).AirLoopNum = 1;
     state->afn->DisSysCompCoilData(2).AirLoopNum = 2;
 
-    state->dataHeatingCoils->GetCoilsInputFlag = false;
     state->dataHeatingCoils->HeatingCoil.allocate(2);
     state->dataHeatingCoils->HeatingCoil(1).Name = "ElectricCoil";
     state->dataHeatingCoils->HeatingCoil(2).Name = "GasCoil";

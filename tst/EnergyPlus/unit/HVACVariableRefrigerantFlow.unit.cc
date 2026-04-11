@@ -525,7 +525,6 @@ TEST_F(AirLoopFixture, VRF_SysModel_inAirloop)
 
     // turn off GetInput for AirLoopFixture unit tests, everything is set up in fixture
     state->dataHVACVarRefFlow->GetVRFInputFlag = false;
-    state->dataDXCoils->GetCoilsInputFlag = false;
     // trigger a mining function (will bypass GetInput)
     int ZoneInletAirNode = GetVRFTUZoneInletAirNode(*state, 1);
     auto &thisTU(state->dataHVACVarRefFlow->VRFTU(curTUNum));
@@ -8227,7 +8226,6 @@ TEST_F(EnergyPlusFixture, VRFTU_CalcVRFSupplementalHeatingCoilElectric)
     int CoilNum(1);
     state->dataLoopNodes->Node.allocate(2);
     state->dataHeatingCoils->NumHeatingCoils = 1;
-    state->dataHeatingCoils->GetCoilsInputFlag = false;
     state->dataHeatingCoils->HeatingCoil.allocate(state->dataHeatingCoils->NumHeatingCoils);
     state->dataHeatingCoils->CoilIsSuppHeater = true;
     state->dataHeatingCoils->HeatingCoil(CoilNum).Name = thisVRFTU.SuppHeatCoilName;
@@ -8291,7 +8289,6 @@ TEST_F(EnergyPlusFixture, VRFTU_CalcVRFSupplementalHeatingCoilFuel)
     int CoilNum(1);
     state->dataLoopNodes->Node.allocate(2);
     state->dataHeatingCoils->NumHeatingCoils = 1;
-    state->dataHeatingCoils->GetCoilsInputFlag = false;
     state->dataHeatingCoils->HeatingCoil.allocate(state->dataHeatingCoils->NumHeatingCoils);
     state->dataHeatingCoils->CoilIsSuppHeater = true;
     state->dataHeatingCoils->HeatingCoil(CoilNum).Name = thisVRFTU.SuppHeatCoilName;
@@ -8374,8 +8371,6 @@ TEST_F(EnergyPlusFixture, VRFTU_CalcVRFSupplementalHeatingCoilWater)
 
     state->dataWaterCoils->WaterCoil(CoilNum).UACoil = 1000;
     state->dataWaterCoils->WaterCoil(CoilNum).MaxWaterVolFlowRate = 0.001;
-
-    state->dataWaterCoils->GetWaterCoilsInputFlag = false;
 
     state->dataWaterCoils->WaterCoil(CoilNum).WaterPlantLoc.loopNum = 1;
     state->dataWaterCoils->WaterCoil(CoilNum).WaterPlantLoc.loopSideNum = DataPlant::LoopSideLocation::Demand;
@@ -8500,7 +8495,6 @@ TEST_F(EnergyPlusFixture, VRFTU_CalcVRFSupplementalHeatingCoilSteam)
 
     state->dataSteamCoils->SteamCoil(CoilNum).steam = Fluid::GetSteam(*state);
 
-    state->dataSteamCoils->GetSteamCoilsInputFlag = false;
     state->dataSteamCoils->CheckEquipName.dimension(state->dataSteamCoils->NumSteamCoils, true);
     state->dataSteamCoils->MySizeFlag.allocate(CoilNum);
     state->dataSteamCoils->MySizeFlag(CoilNum) = true;

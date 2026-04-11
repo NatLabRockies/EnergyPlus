@@ -514,7 +514,6 @@ TEST_F(AirloopUnitarySysTest, MultipleWaterCoolingCoilSizing)
     mySys->m_CoolingCoilName = "Test Water Cooling Coil";
     mySys->m_heatCoilType = HVAC::CoilType::HeatingWater;
     mySys->m_HeatingCoilName = "Test Water Heating Coil";
-    state->dataWaterCoils->GetWaterCoilsInputFlag = false;             // don't overwrite these coil data
     state->dataWaterCoils->MySizeFlag = true;                          // need to size again for UnitarySystem
     state->dataWaterCoils->WaterCoil(1).DesWaterCoolingCoilRate = 0.0; // reset these to be sure they get recalculated
     state->dataWaterCoils->WaterCoil(2).DesWaterHeatingCoilRate = 0.0;
@@ -8334,7 +8333,6 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_CalcUnitaryHeatingSystem)
 
     state->dataWaterCoils->CheckEquipName.allocate(1);
     state->dataWaterCoils->NumWaterCoils = 1;
-    state->dataWaterCoils->GetWaterCoilsInputFlag = false;
     state->dataWaterCoils->WaterCoil(1).availSched = Sched::GetScheduleAlwaysOn(*state);
     state->dataWaterCoils->WaterCoil(1).Name = "Water Heating Coil";
     state->dataWaterCoils->WaterCoil(1).WaterCoilType = DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
@@ -8475,7 +8473,6 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_CalcUnitaryCoolingSystem)
 
     state->dataWaterCoils->CheckEquipName.allocate(1);
     state->dataWaterCoils->NumWaterCoils = 1;
-    state->dataWaterCoils->GetWaterCoilsInputFlag = false;
     state->dataWaterCoils->WaterCoil(1).availSched = Sched::GetScheduleAlwaysOn(*state);
     state->dataWaterCoils->WaterCoil(1).Name = "Water Cooling Coil";
     state->dataWaterCoils->WaterCoil(1).WaterCoilType = DataPlant::PlantEquipmentType::CoilWaterCooling;
@@ -22262,7 +22259,6 @@ TEST_F(EnergyPlusFixture, CoilSystemCoolingWater_ControlStatusTest)
     thisSys.m_CoolingSpeedNum = 1;
 
     state->dataWaterCoils->CheckEquipName.allocate(1);
-    state->dataWaterCoils->GetWaterCoilsInputFlag = false;
     state->dataWaterCoils->WaterCoil(1).availSched = Sched::GetScheduleAlwaysOn(*state);
     state->dataWaterCoils->WaterCoil(1).WaterCoilType = DataPlant::PlantEquipmentType::CoilWaterCooling;
     state->dataWaterCoils->WaterCoil(1).WaterCoilModel = WaterCoils::CoilModel::CoolingSimple;
@@ -22512,7 +22508,6 @@ TEST_F(EnergyPlusFixture, CoilSystemCoolingWater_CalcTest)
     thisSys.m_CoolingSpeedNum = 1;
 
     state->dataWaterCoils->CheckEquipName.allocate(1);
-    state->dataWaterCoils->GetWaterCoilsInputFlag = false;
     state->dataWaterCoils->WaterCoil(1).availSched = Sched::GetScheduleAlwaysOn(*state);
     state->dataWaterCoils->WaterCoil(1).WaterCoilType = DataPlant::PlantEquipmentType::CoilWaterCooling;
     state->dataWaterCoils->WaterCoil(1).WaterCoilModel = WaterCoils::CoilModel::CoolingSimple;
@@ -22778,7 +22773,6 @@ TEST_F(EnergyPlusFixture, CoilSystemCoolingWater_HeatRecoveryLoop)
     thisSys.m_CoolingSpeedNum = 1;
 
     state->dataWaterCoils->CheckEquipName.allocate(2);
-    state->dataWaterCoils->GetWaterCoilsInputFlag = false;
     for (int i = 1; i <= 2; ++i) {
         state->dataWaterCoils->WaterCoil(i).availSched = Sched::GetScheduleAlwaysOn(*state);
         state->dataWaterCoils->WaterCoil(i).WaterCoilType = DataPlant::PlantEquipmentType::CoilWaterCooling;
@@ -22998,7 +22992,6 @@ TEST_F(AirloopUnitarySysTest, WSHPVariableSpeedCoilSizing)
     state->dataVariableSpeedCoils->VarSpeedCoil.allocate(2);
     state->dataVariableSpeedCoils->NumVarSpeedCoils = 2;
     int CoilNum1 = 1;
-    state->dataVariableSpeedCoils->GetCoilsInputFlag = false;
     state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).Name = "WSHPVSCooling";
     state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).coilType = HVAC::CoilType::CoolingWAHPVariableSpeedEquationFit;
     state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).NumOfSpeeds = 10;

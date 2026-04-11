@@ -516,7 +516,6 @@ TEST_F(EnergyPlusFixture, SZVAV_FanCoilUnit_Testing)
 
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = 1.20;
-    state->dataWaterCoils->GetWaterCoilsInputFlag = true;
     state->dataGlobal->TimeStepsInHour = 1;
     state->dataGlobal->TimeStep = 1;
     state->dataGlobal->MinutesInTimeStep = 60;
@@ -647,7 +646,6 @@ TEST_F(EnergyPlusFixture, SZVAV_FanCoilUnit_Testing)
 
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = 1.20;
-    state->dataWaterCoils->GetWaterCoilsInputFlag = true;
     state->dataGlobal->TimeStep = 1;
     state->dataSize->CurZoneEqNum = 1;
     GetZoneData(*state, ErrorsFound);

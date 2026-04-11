@@ -206,7 +206,6 @@ protected:
         state->dataDXCoils->DXCoil(1).coilType = HVAC::CoilType::CoolingDXSingleSpeed;
         state->dataDXCoils->NumDXCoils = 1;
         state->dataDXCoils->CheckEquipName.dimension(1, true);
-        state->dataDXCoils->GetCoilsInputFlag = false;
         state->dataDXCoils->DXCoil(1).CCapFFlow.allocate(1);
         state->dataDXCoils->DXCoil(1).CCapFFlow(1) = 1;
         state->dataDXCoils->DXCoil(1).CCapFTemp.allocate(1);
@@ -244,7 +243,6 @@ protected:
         state->dataHeatingCoils->HeatingCoil(1).heatCoilType = HVAC::CoilType::HeatingElectric;
         state->dataHeatingCoils->NumHeatingCoils = 1;
         state->dataHeatingCoils->ValidSourceType.dimension(state->dataHeatingCoils->NumHeatingCoils, false);
-        state->dataHeatingCoils->GetCoilsInputFlag = false;
         state->dataSize->UnitarySysEqSizing.allocate(1);
         cbvav.HeatCoilName = "MyHeatingCoil";
         cbvav.coolCoilType = HVAC::CoilType::CoolingDXSingleSpeed;

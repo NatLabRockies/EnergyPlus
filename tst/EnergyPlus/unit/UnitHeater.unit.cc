@@ -1293,7 +1293,6 @@ TEST_F(EnergyPlusFixture, UnitHeater_SimUnitHeaterTest)
     ErrorsFound = false;
     GetWaterCoilInput(*state);
     EXPECT_FALSE(ErrorsFound);
-    state->dataWaterCoils->GetWaterCoilsInputFlag = false;
 
     ErrorsFound = false;
     GetFanInput(*state);

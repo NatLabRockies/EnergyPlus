@@ -6956,9 +6956,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_Coil_Defrost_Power_Fix_Test)
     // Get coil inputs
     VariableSpeedCoils::GetVarSpeedCoilInput(*state);
 
-    // Set input processing flag
-    state->dataVariableSpeedCoils->GetCoilsInputFlag = false;
-
     // Setting predefined tables is needed though
     OutputReportPredefined::SetPredefinedTables(*state);
     // Set up some environmental parameters

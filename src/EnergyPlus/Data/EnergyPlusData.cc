@@ -592,6 +592,15 @@ void EnergyPlusData::init_constant_state(EnergyPlusData &state)
     this->dataSched->init_constant_state(state);
     this->dataCurveManager->init_constant_state(state);
 
+    // Read coils
+    this->dataHeatingCoils->init_constant_state(state);
+    this->dataSteamCoils->init_constant_state(state);
+    this->dataWaterCoils->init_constant_state(state);
+    this->dataDXCoils->init_constant_state(state);
+    this->dataVariableSpeedCoils->init_constant_state(state);
+    this->dataHVACAssistedCC->init_constant_state(state);
+    this->dataCoilCoolingDX->init_constant_state(state);
+    
     this->dataAirLoop->init_constant_state(state);
     this->dataAirLoopHVACDOAS->init_constant_state(state);
     this->dataAirSystemsData->init_constant_state(state);
@@ -616,7 +625,6 @@ void EnergyPlusData::init_constant_state(EnergyPlusData &state)
     this->dataChillerIndirectAbsorption->init_constant_state(state);
     this->dataChillerReformulatedEIR->init_constant_state(state);
     this->dataChillerElectricASHRAE205->init_constant_state(state);
-    this->dataCoilCoolingDX->init_constant_state(state);
     this->dataCondenserLoopTowers->init_constant_state(state);
     this->dataConstruction->init_constant_state(state);
     this->dataContaminantBalance->init_constant_state(state);
@@ -625,7 +633,6 @@ void EnergyPlusData::init_constant_state(EnergyPlusData &state)
     this->dataCoolTower->init_constant_state(state);
     this->dataCostEstimateManager->init_constant_state(state);
     this->dataCrossVentMgr->init_constant_state(state);
-    this->dataDXCoils->init_constant_state(state);
     this->dataDXFEarClipping->init_constant_state(state);
     this->dataDaylightingDevices->init_constant_state(state);
     this->dataDaylightingDevicesData->init_constant_state(state);
@@ -668,7 +675,6 @@ void EnergyPlusData::init_constant_state(EnergyPlusData &state)
     this->dataHPWaterToWaterClg->init_constant_state(state);
     this->dataHPWaterToWaterHtg->init_constant_state(state);
     this->dataHPWaterToWaterSimple->init_constant_state(state);
-    this->dataHVACAssistedCC->init_constant_state(state);
     this->dataHVACControllers->init_constant_state(state);
     this->dataHVACCooledBeam->init_constant_state(state);
     this->dataHVACCtrl->init_constant_state(state);
@@ -695,7 +701,6 @@ void EnergyPlusData::init_constant_state(EnergyPlusData &state)
     this->dataHeatBalSurf->init_constant_state(state);
     this->dataHeatBalSurfMgr->init_constant_state(state);
     this->dataHeatRecovery->init_constant_state(state);
-    this->dataHeatingCoils->init_constant_state(state);
     this->dataHighTempRadSys->init_constant_state(state);
     this->dataHumidifiers->init_constant_state(state);
     this->dataHybridModel->init_constant_state(state);
@@ -779,7 +784,6 @@ void EnergyPlusData::init_constant_state(EnergyPlusData &state)
     this->dataSolarShading->init_constant_state(state);
     this->dataSplitterComponent->init_constant_state(state);
     this->dataSteamBaseboardRadiator->init_constant_state(state);
-    this->dataSteamCoils->init_constant_state(state);
     this->dataStrGlobals->init_constant_state(state);
     this->dataSurfColor->init_constant_state(state);
     this->dataSurfLists->init_constant_state(state);
@@ -807,11 +811,9 @@ void EnergyPlusData::init_constant_state(EnergyPlusData &state)
     this->dataUnitarySystems->init_constant_state(state);
     this->dataUserDefinedComponents->init_constant_state(state);
     this->dataUtilityRoutines->init_constant_state(state);
-    this->dataVariableSpeedCoils->init_constant_state(state);
     this->dataVectors->init_constant_state(state);
     this->dataVentilatedSlab->init_constant_state(state);
     this->dataViewFactor->init_constant_state(state);
-    this->dataWaterCoils->init_constant_state(state);
     this->dataWaterData->init_constant_state(state);
     this->dataWaterManager->init_constant_state(state);
     this->dataWaterThermalTanks->init_constant_state(state);
@@ -856,6 +858,15 @@ void EnergyPlusData::init_state(EnergyPlusData &state)
     this->dataSched->init_state(state);             // GetScheduleData
     this->dataCurveManager->init_state(state);      // GetCurveInput
 
+    // Read coils
+    this->dataHeatingCoils->init_state(state);      // GetHeatingCoilInput
+    this->dataSteamCoils->init_state(state);        // GetSteamCoilInput
+    this->dataWaterCoils->init_state(state);        // GetWaterCoilInput
+    this->dataDXCoils->init_state(state);           // GetDXCoilInput
+    this->dataVariableSpeedCoils->init_state(state);// GetVariableSpeedCoilInput
+    this->dataHVACAssistedCC->init_state(state);    // GetHXAssistedCoolingCoilInput
+    this->dataCoilCoolingDX->init_state(state);     // CoolingCoilDX::getInput
+
     this->dataAirLoop->init_state(state);
     this->dataAirLoopHVACDOAS->init_state(state);
     this->dataAirSystemsData->init_state(state);
@@ -880,7 +891,6 @@ void EnergyPlusData::init_state(EnergyPlusData &state)
     this->dataChillerIndirectAbsorption->init_state(state);
     this->dataChillerReformulatedEIR->init_state(state);
     this->dataChillerElectricASHRAE205->init_state(state);
-    this->dataCoilCoolingDX->init_state(state);
     this->dataCondenserLoopTowers->init_state(state);
     this->dataConstruction->init_state(state);
     this->dataContaminantBalance->init_state(state);
@@ -889,7 +899,6 @@ void EnergyPlusData::init_state(EnergyPlusData &state)
     this->dataCoolTower->init_state(state);
     this->dataCostEstimateManager->init_state(state);
     this->dataCrossVentMgr->init_state(state);
-    this->dataDXCoils->init_state(state);
     this->dataDXFEarClipping->init_state(state);
     this->dataDaylightingDevices->init_state(state);
     this->dataDaylightingDevicesData->init_state(state);
@@ -932,7 +941,6 @@ void EnergyPlusData::init_state(EnergyPlusData &state)
     this->dataHPWaterToWaterClg->init_state(state);
     this->dataHPWaterToWaterHtg->init_state(state);
     this->dataHPWaterToWaterSimple->init_state(state);
-    this->dataHVACAssistedCC->init_state(state);
     this->dataHVACControllers->init_state(state);
     this->dataHVACCooledBeam->init_state(state);
     this->dataHVACCtrl->init_state(state);
@@ -959,7 +967,6 @@ void EnergyPlusData::init_state(EnergyPlusData &state)
     this->dataHeatBalSurf->init_state(state);
     this->dataHeatBalSurfMgr->init_state(state);
     this->dataHeatRecovery->init_state(state);
-    this->dataHeatingCoils->init_state(state);
     this->dataHighTempRadSys->init_state(state);
     this->dataHumidifiers->init_state(state);
     this->dataHybridModel->init_state(state);
@@ -1043,7 +1050,6 @@ void EnergyPlusData::init_state(EnergyPlusData &state)
     this->dataSolarShading->init_state(state);
     this->dataSplitterComponent->init_state(state);
     this->dataSteamBaseboardRadiator->init_state(state);
-    this->dataSteamCoils->init_state(state);
     this->dataStrGlobals->init_state(state);
     this->dataSurfColor->init_state(state);
     this->dataSurfLists->init_state(state);
@@ -1071,11 +1077,9 @@ void EnergyPlusData::init_state(EnergyPlusData &state)
     this->dataUnitarySystems->init_state(state);
     this->dataUserDefinedComponents->init_state(state);
     this->dataUtilityRoutines->init_state(state);
-    this->dataVariableSpeedCoils->init_state(state);
     this->dataVectors->init_state(state);
     this->dataVentilatedSlab->init_state(state);
     this->dataViewFactor->init_state(state);
-    this->dataWaterCoils->init_state(state);
     this->dataWaterData->init_state(state);
     this->dataWaterManager->init_state(state);
     this->dataWaterThermalTanks->init_state(state);

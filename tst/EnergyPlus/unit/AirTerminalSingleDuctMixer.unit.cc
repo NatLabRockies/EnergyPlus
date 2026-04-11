@@ -7710,7 +7710,6 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_SimFCU_ATMInletSideTest)
 
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = Psychrometrics::PsyRhoAirFnPbTdbW(*state, state->dataEnvrn->OutBaroPress, 20.0, 0.0);
-    state->dataWaterCoils->GetWaterCoilsInputFlag = true;
     OutputReportPredefined::SetPredefinedTables(*state);
     GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
@@ -8129,7 +8128,6 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_FCU_NightCycleTest)
     state->dataSize->CurZoneEqNum = 1;
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = Psychrometrics::PsyRhoAirFnPbTdbW(*state, state->dataEnvrn->OutBaroPress, 20.0, 0.0);
-    state->dataWaterCoils->GetWaterCoilsInputFlag = true;
     state->dataGlobal->TimeStepsInHour = 1;
     state->dataGlobal->TimeStep = 1;
     state->dataGlobal->MinutesInTimeStep = 60;

@@ -7676,12 +7676,6 @@ bool CheckWaterCoilSystemOnAirLoopOrOASystem(EnergyPlusData &state, SimAirServin
     // Return value
     bool CheckWaterCoilSystemIsOnAirLoopOASystem(false);
 
-    if (state.dataHVACAssistedCC->GetCoilsInputFlag) {
-        // Get the HXAssistedCoolingCoil input
-        GetHXAssistedCoolingCoilInput(state);
-        state.dataHVACAssistedCC->GetCoilsInputFlag = false;
-    }
-
     bool WaterCoilIsOnWaterCoilSystem = false;
     std::string CoilSystemName = CompName;
     CompType CoilSystemTypeNum = CompTypeNum;

@@ -153,12 +153,6 @@ void SimDXCoil(EnergyPlusData &state,
     Real64 AirFlowRatio; // ratio of compressor on airflow to compressor off airflow
     Real64 CompCycRatio; // compressor cycling ratio of VRF condenser
 
-    // First time SimDXCoil is called, get the input for all the DX coils (condensing units)
-    if (state.dataDXCoils->GetCoilsInputFlag) {
-        GetDXCoils(state);
-        state.dataDXCoils->GetCoilsInputFlag = false; // Set GetInputFlag false so you don't get coil inputs again
-    }
-
     if (CompIndex == 0) {
         DXCoilNum = Util::FindItemInList(CompName, state.dataDXCoils->DXCoil);
         if (DXCoilNum == 0) {
@@ -278,12 +272,6 @@ void SimDXCoilMultiSpeed(EnergyPlusData &state,
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     int DXCoilNum;      // index of fan coil unit being simulated
     int SingleModeOper; // SingleMode Operation
-
-    // First time SimDXCoil is called, get the input for all the DX coils (condensing units)
-    if (state.dataDXCoils->GetCoilsInputFlag) {
-        GetDXCoils(state);
-        state.dataDXCoils->GetCoilsInputFlag = false; // Set GetInputFlag false so you don't get coil inputs again
-    }
 
     //  find correct DX Coil
 
@@ -431,12 +419,6 @@ void SimDXCoilMultiMode(EnergyPlusData &state,
     //           steady-state sensible cooling capacity
     Real64 TSat;      // calculation to avoid calling psych routines twice
     Real64 NodePress; // Pressure at condenser inlet node (Pa)
-
-    // First time SimDXCoil is called, get the input for all the DX coils (condensing units)
-    if (state.dataDXCoils->GetCoilsInputFlag) {
-        GetDXCoils(state);
-        state.dataDXCoils->GetCoilsInputFlag = false; // Set GetInputFlag false so you don't get coil inputs again
-    }
 
     //  find correct DX Coil
     if (CompIndex == 0) {
@@ -15573,11 +15555,6 @@ void GetDXCoilIndex(EnergyPlusData &state,
     // This subroutine sets an index for a given DX Coil -- issues error message if that
     // DX Coil is not a legal DX Coil.
 
-    if (state.dataDXCoils->GetCoilsInputFlag) {
-        GetDXCoils(state);
-        state.dataDXCoils->GetCoilsInputFlag = false;
-    }
-
     DXCoilIndex = Util::FindItemInList(DXCoilName, state.dataDXCoils->DXCoil);
     if (DXCoilIndex == 0) {
         if (!SuppressWarning) {
@@ -15603,11 +15580,6 @@ GetDXCoilName(EnergyPlusData &state, int &DXCoilIndex, bool &ErrorsFound, std::s
     // PURPOSE OF THIS SUBROUTINE:
     // This subroutine gets a name for a given DX Coil -- issues error message if that
     // DX Coil is not a legal DX Coil.
-
-    if (state.dataDXCoils->GetCoilsInputFlag) {
-        GetDXCoils(state);
-        state.dataDXCoils->GetCoilsInputFlag = false;
-    }
 
     if (DXCoilIndex == 0) {
         if (!SuppressWarning) {
@@ -15645,12 +15617,6 @@ Real64 GetCoilCapacity(EnergyPlusData &state,
 
     // FUNCTION LOCAL VARIABLE DECLARATIONS:
     int WhichCoil;
-
-    // Obtains and Allocates DXCoils
-    if (state.dataDXCoils->GetCoilsInputFlag) {
-        GetDXCoils(state);
-        state.dataDXCoils->GetCoilsInputFlag = false;
-    }
 
     if (Util::SameString(CoilType, "Coil:Heating:DX:SingleSpeed") || Util::SameString(CoilType, "Coil:Cooling:DX:SingleSpeed")) {
         WhichCoil = Util::FindItem(CoilName, state.dataDXCoils->DXCoil);
@@ -15705,12 +15671,6 @@ Real64 GetCoilCapacityByIndexType(EnergyPlusData &state,
     // Return value
     Real64 CoilCapacity; // returned capacity of matched coil
 
-    // Obtains and Allocates DXCoils
-    if (state.dataDXCoils->GetCoilsInputFlag) {
-        GetDXCoils(state);
-        state.dataDXCoils->GetCoilsInputFlag = false;
-    }
-
     if (CoilIndex == 0) {
         ShowSevereError(state, "GetCoilCapacityByIndexType: Invalid index passed = 0");
         ShowContinueError(state, "... returning capacity as -1000.");
@@ -15763,12 +15723,6 @@ HVAC::CoilType GetCoilTypeNum(EnergyPlusData &state,
     int WhichCoil;
     bool PrintMessage;
 
-    // Obtains and Allocates DXCoils
-    if (state.dataDXCoils->GetCoilsInputFlag) {
-        GetDXCoils(state);
-        state.dataDXCoils->GetCoilsInputFlag = false;
-    }
-
     if (present(PrintWarning)) {
         PrintMessage = PrintWarning;
     } else {
@@ -15794,13 +15748,6 @@ Real64 GetMinOATCompressor(EnergyPlusData &state,
                            bool &ErrorsFound    // set to true if problem
 )
 {
-
-    // Obtains and Allocates DXCoils
-    if (state.dataDXCoils->GetCoilsInputFlag) {
-        GetDXCoils(state);
-        state.dataDXCoils->GetCoilsInputFlag = false;
-    }
-
     if (CoilIndex == 0) {
         ShowSevereError(state, "GetMinOATCompressor: Index passed = 0");
         ShowContinueError(state, "... returning Min OAT for compressor operation as -1000.");
@@ -15832,12 +15779,6 @@ int GetCoilInletNode(EnergyPlusData &state,
     // FUNCTION LOCAL VARIABLE DECLARATIONS:
     int WhichCoil;
 
-    // Obtains and Allocates DXCoils
-    if (state.dataDXCoils->GetCoilsInputFlag) {
-        GetDXCoils(state);
-        state.dataDXCoils->GetCoilsInputFlag = false;
-    }
-
     WhichCoil = Util::FindItemInList(CoilName, state.dataDXCoils->DXCoil);
     if (WhichCoil != 0) {
         NodeNumber = state.dataDXCoils->DXCoil(WhichCoil).AirInNode;
@@ -15857,12 +15798,6 @@ int getCoilInNodeIndex(EnergyPlusData &state,
 {
 
     int NodeNumber; // returned node number of matched coil
-
-    // Obtains and Allocates DXCoils
-    if (state.dataDXCoils->GetCoilsInputFlag) {
-        GetDXCoils(state);
-        state.dataDXCoils->GetCoilsInputFlag = false;
-    }
 
     if (CoilIndex != 0) {
         NodeNumber = state.dataDXCoils->DXCoil(CoilIndex).AirInNode;
@@ -15897,12 +15832,6 @@ int GetCoilOutletNode(EnergyPlusData &state,
     // FUNCTION LOCAL VARIABLE DECLARATIONS:
     int WhichCoil;
 
-    // Obtains and Allocates DXCoils
-    if (state.dataDXCoils->GetCoilsInputFlag) {
-        GetDXCoils(state);
-        state.dataDXCoils->GetCoilsInputFlag = false;
-    }
-
     WhichCoil = Util::FindItemInList(CoilName, state.dataDXCoils->DXCoil);
     if (WhichCoil != 0) {
         NodeNumber = state.dataDXCoils->DXCoil(WhichCoil).AirOutNode;
@@ -15925,12 +15854,6 @@ int getCoilOutNodeIndex(EnergyPlusData &state,
 {
 
     int NodeNumber; // returned node number of matched coil
-
-    // Obtains and Allocates DXCoils
-    if (state.dataDXCoils->GetCoilsInputFlag) {
-        GetDXCoils(state);
-        state.dataDXCoils->GetCoilsInputFlag = false;
-    }
 
     if (CoilIndex != 0) {
         NodeNumber = state.dataDXCoils->DXCoil(CoilIndex).AirOutNode;
@@ -15963,12 +15886,6 @@ int GetCoilCondenserInletNode(EnergyPlusData &state,
 
     // FUNCTION LOCAL VARIABLE DECLARATIONS:
     int WhichCoil;
-
-    // Obtains and Allocates DXCoils
-    if (state.dataDXCoils->GetCoilsInputFlag) {
-        GetDXCoils(state);
-        state.dataDXCoils->GetCoilsInputFlag = false;
-    }
 
     WhichCoil = Util::FindItemInList(CoilName, state.dataDXCoils->DXCoil);
     if (WhichCoil != 0) {
@@ -16003,12 +15920,6 @@ Real64 GetDXCoilBypassedFlowFrac(EnergyPlusData &state,
 
     // FUNCTION LOCAL VARIABLE DECLARATIONS:
     int WhichCoil;
-
-    // Obtains and Allocates DXCoils
-    if (state.dataDXCoils->GetCoilsInputFlag) {
-        GetDXCoils(state);
-        state.dataDXCoils->GetCoilsInputFlag = false;
-    }
 
     WhichCoil = Util::FindItemInList(CoilName, state.dataDXCoils->DXCoil);
     if (WhichCoil != 0) {
@@ -16164,12 +16075,6 @@ int GetDXCoilNumberOfSpeeds(EnergyPlusData &state,
     // FUNCTION LOCAL VARIABLE DECLARATIONS:
     int WhichCoil;
 
-    // Obtains and Allocates DXCoils
-    if (state.dataDXCoils->GetCoilsInputFlag) {
-        GetDXCoils(state);
-        state.dataDXCoils->GetCoilsInputFlag = false;
-    }
-
     WhichCoil = Util::FindItemInList(CoilName, state.dataDXCoils->DXCoil);
     if (WhichCoil != 0) {
         NumberOfSpeeds = state.dataDXCoils->DXCoil(WhichCoil).NumOfSpeeds;
@@ -16201,12 +16106,6 @@ Sched::Schedule *GetDXCoilAvailSched(EnergyPlusData &state,
 
     // FUNCTION LOCAL VARIABLE DECLARATIONS:
     int WhichCoil;
-
-    // Obtains and Allocates DXCoils
-    if (state.dataDXCoils->GetCoilsInputFlag) {
-        GetDXCoils(state);
-        state.dataDXCoils->GetCoilsInputFlag = false;
-    }
 
     if (present(CoilIndex)) {
         if (CoilIndex == 0) {
@@ -16255,12 +16154,6 @@ Real64 GetDXCoilAirFlow(EnergyPlusData &state,
 
     // FUNCTION LOCAL VARIABLE DECLARATIONS:
     int WhichCoil;
-
-    // Obtains and Allocates DXCoils
-    if (state.dataDXCoils->GetCoilsInputFlag) {
-        GetDXCoils(state);
-        state.dataDXCoils->GetCoilsInputFlag = false;
-    }
 
     WhichCoil = Util::FindItemInList(CoilName, state.dataDXCoils->DXCoil);
     if (WhichCoil != 0) {
@@ -16312,12 +16205,6 @@ int GetDXCoilCapFTCurveIndex(EnergyPlusData &state,
 
     // Return value
     int CapFTCurveIndex; // returned coil CapFT curve index
-
-    // Obtains and Allocates DXCoils
-    if (state.dataDXCoils->GetCoilsInputFlag) {
-        GetDXCoils(state);
-        state.dataDXCoils->GetCoilsInputFlag = false;
-    }
 
     if (CoilIndex != 0) {
         switch (state.dataDXCoils->DXCoil(CoilIndex).coilType) {
@@ -16390,12 +16277,6 @@ void SetDXCoolingCoilData(
     // Also, this is an illustration of setting Data from an outside source.
 
     // Using/Aliasing
-
-    // Obtains and Allocates DXCoils
-    if (state.dataDXCoils->GetCoilsInputFlag) {
-        GetDXCoils(state);
-        state.dataDXCoils->GetCoilsInputFlag = false;
-    }
 
     if (DXCoilNum <= 0 || DXCoilNum > state.dataDXCoils->NumDXCoils) {
         ShowSevereError(state,
@@ -16524,12 +16405,6 @@ void SetCoilSystemHeatingDXFlag(EnergyPlusData &state,
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     int WhichCoil;
 
-    // Obtains and Allocates DXCoils
-    if (state.dataDXCoils->GetCoilsInputFlag) {
-        GetDXCoils(state);
-        state.dataDXCoils->GetCoilsInputFlag = false;
-    }
-
     WhichCoil = Util::FindItemInList(CoilName, state.dataDXCoils->DXCoil);
     if (WhichCoil != 0) {
         state.dataDXCoils->DXCoil(WhichCoil).FindCompanionUpStreamCoil = false;
@@ -16552,11 +16427,6 @@ void SetCoilSystemCoolingData(EnergyPlusData &state,
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     int WhichCoil;
-
-    if (state.dataDXCoils->GetCoilsInputFlag) {
-        GetDXCoils(state);
-        state.dataDXCoils->GetCoilsInputFlag = false;
-    }
 
     WhichCoil = Util::FindItemInList(CoilName, state.dataDXCoils->DXCoil);
     if (WhichCoil != 0) {
@@ -16644,11 +16514,6 @@ void SetDXCoilTypeData(EnergyPlusData &state, std::string const &CoilName) // mu
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     int WhichCoil;
-
-    if (state.dataDXCoils->GetCoilsInputFlag) {
-        GetDXCoils(state);
-        state.dataDXCoils->GetCoilsInputFlag = false;
-    }
 
     WhichCoil = Util::FindItemInList(CoilName, state.dataDXCoils->DXCoil);
     if (WhichCoil != 0) {
@@ -18338,11 +18203,6 @@ void SetDXCoilAirLoopNumber(EnergyPlusData &state, std::string const &CoilName, 
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     int WhichCoil;
-
-    if (state.dataDXCoils->GetCoilsInputFlag) {
-        GetDXCoils(state);
-        state.dataDXCoils->GetCoilsInputFlag = false;
-    }
 
     WhichCoil = Util::FindItemInList(CoilName, state.dataDXCoils->DXCoil);
     if (WhichCoil != 0) {

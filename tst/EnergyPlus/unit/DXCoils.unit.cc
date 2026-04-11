@@ -5404,8 +5404,6 @@ TEST_F(EnergyPlusFixture, DXCoils_GetDXCoilCapFTCurveIndexTest)
     bool ErrorsFound;
     int DataTotCapCurveIndex = 0;
 
-    state->dataDXCoils->GetCoilsInputFlag = false;
-
     // dx cooling coil
     int CoilIndex = 1;
     EXPECT_ENUM_EQ(HVAC::CoilType::CoolingDXMultiSpeed, state->dataDXCoils->DXCoil(CoilIndex).coilType);

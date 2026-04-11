@@ -107,7 +107,6 @@ TEST_F(EnergyPlusFixture, ExerciseHVACDXHeatPumpSystem)
 
     // manually add a dx coil
     state->dataDXCoils->NumDXCoils = 1;
-    state->dataDXCoils->GetCoilsInputFlag = false;
     state->dataDXCoils->DXCoil.allocate(1);
     state->dataDXCoils->DXCoil(1).Name = "HEAT PUMP DX HEATING COIL 1";
     state->dataDXCoils->DXCoil(1).availSched = Sched::GetScheduleAlwaysOn(*state);

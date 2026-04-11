@@ -1932,11 +1932,9 @@ TEST_F(EnergyPlusFixture, Furnaces_SetMinOATCompressor)
     state->dataFurnaces->Furnace(1).CoolingCoilIndex = 1;
     state->dataFurnaces->Furnace(1).HeatingCoilIndex = 2;
     state->dataVariableSpeedCoils->VarSpeedCoil.allocate(2);
-    state->dataVariableSpeedCoils->GetCoilsInputFlag = false;
     state->dataVariableSpeedCoils->VarSpeedCoil(1).MinOATCompressor = 30.0;
     state->dataVariableSpeedCoils->VarSpeedCoil(2).MinOATCompressor = 30.0;
     state->dataDXCoils->DXCoil.allocate(2);
-    state->dataDXCoils->GetCoilsInputFlag = false;
     state->dataDXCoils->DXCoil(1).MinOATCompressor = 30.0;
     state->dataDXCoils->DXCoil(2).MinOATCompressor = 30.0;
 
@@ -1944,7 +1942,6 @@ TEST_F(EnergyPlusFixture, Furnaces_SetMinOATCompressor)
     state->dataHVACAssistedCC->HXAssistedCoil(1).coolCoilType = HVAC::CoilType::CoolingDX;
     state->dataHVACAssistedCC->HXAssistedCoil(1).CoolingCoilName = "Dummy_Name";
 
-    state->dataCoilCoolingDX->coilCoolingDXGetInputFlag = false;
     CoilCoolingDX thisCoil;
     thisCoil.name = "Dummy_Name";
     thisCoil.performance = std::make_shared<CoilCoolingDXCurveFitPerformance>();
