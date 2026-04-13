@@ -128,6 +128,17 @@ namespace OutputReportTabular {
     constexpr std::array<std::string_view, static_cast<int>(UnitsStyle::Num) - 1> UnitsStyleNamesUC{
         "NONE", "JTOKWH", "JTOMJ", "JTOGJ", "INCHPOUND", "INCHPOUNDEXCEPTELECTRICITY"};
 
+    enum class SortOption
+    {
+        Invalid = -1,
+        Name,
+        Unsorted,
+        NotFound,
+        Num
+    };
+    constexpr std::array<std::string_view, static_cast<int>(SortOption::Num) - 1> SortOptionNamesUC{
+        "NAME", "UNSORTED"};
+
     enum class EndUseSubTableType
     {
         Invalid = -1,
@@ -612,6 +623,10 @@ namespace OutputReportTabular {
 
     UnitsStyle SetUnitsStyleFromString(std::string const &unitStringIn);
 
+    SortOption SetSortOptionFromString(std::string const &sortStringIn);
+
+    Array2D_string SortTableByName(EnergyPlusData &state, Array2D_string body, const Array1D_string &columnLabels, int rowsBody, int colsBody);
+
     void GetInputOutputTableSummaryReports(EnergyPlusData &state);
 
     bool isCompLoadRepReq(EnergyPlusData &state);
@@ -1089,6 +1104,7 @@ struct OutputReportTabularData : BaseGlobalStruct
     OutputReportTabular::UnitsStyle unitsStyle_Tabular = OutputReportTabular::UnitsStyle::None;
     OutputReportTabular::UnitsStyle unitsStyle_SQLite = OutputReportTabular::UnitsStyle::NotFound;
     OutputReportTabular::UnitsStyle unitsStyle_JSON = OutputReportTabular::UnitsStyle::NotFound;
+    OutputReportTabular::SortOption sortOption = OutputReportTabular::SortOption::Unsorted;
 
     bool ip() const
     {
@@ -1415,6 +1431,7 @@ struct OutputReportTabularData : BaseGlobalStruct
     {
         this->unitsStyle_Tabular = OutputReportTabular::UnitsStyle::None;
         this->unitsStyle_SQLite = OutputReportTabular::UnitsStyle::NotFound;
+        this->sortOption = OutputReportTabular::SortOption::Unsorted;
         this->OutputTableBinnedCount = 0;
         this->BinResultsTableCount = 0;
         this->BinResultsIntervalCount = 0;

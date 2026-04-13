@@ -1280,6 +1280,8 @@ void GetInputTabularStyle(EnergyPlusData &state)
         AlphArray(2) = "None";
         ort->unitsStyle_Tabular = UnitsStyle::None;
         ort->formatReals_Tabular = true;
+        AlphArray(4) = "UNSORTED";
+        ort->sortOption = SortOption::Unsorted;
     } else if (NumTabularStyle == 1) {
         state.dataInputProcessing->inputProcessor->getObjectItem(state,
                                                                  CurrentModuleObject,
@@ -1363,8 +1365,8 @@ void GetInputTabularStyle(EnergyPlusData &state)
             ort->del(1) = DataStringGlobals::CharComma; // comma
             AlphArray(1) = "COMMA";
         }
-        // MonthlyUnitConversion
         if (NumAlphas >= 2) {
+            // UnitConversion
             ort->unitsStyle_Tabular = SetUnitsStyleFromString(AlphArray(2));
             if (ort->unitsStyle_Tabular == UnitsStyle::NotFound) {
                 ShowWarningError(state,
@@ -1373,9 +1375,19 @@ void GetInputTabularStyle(EnergyPlusData &state)
                                                     state.dataIPShortCut->cAlphaFieldNames(2),
                                                     AlphArray(2)));
             }
+            ort->sortOption = SetSortOptionFromString(AlphArray(4));
+            if (ort->sortOption == SortOption::NotFound) {
+                ShowWarningError(state,
+                                 EnergyPlus::format("{}: Invalid {}=\"{}\". No sorting will be performed.",
+                                                    CurrentModuleObject,
+                                                    state.dataIPShortCut->cAlphaFieldNames(4),
+                                                    AlphArray(4)));
+            }
         } else {
             ort->unitsStyle_Tabular = UnitsStyle::None;
             AlphArray(2) = "None";
+            AlphArray(4) = "UNSORTED";
+            ort->sortOption = SortOption::Unsorted;
         }
     } else if (NumTabularStyle > 1) {
         ShowWarningError(state, EnergyPlus::format("{}: Only one instance of this object is allowed. Commas will be used.", CurrentModuleObject));
@@ -1385,6 +1397,8 @@ void GetInputTabularStyle(EnergyPlusData &state)
         ort->unitsStyle_Tabular = UnitsStyle::None;
         AlphArray(2) = "None";
         ort->formatReals_Tabular = getYesNoValue(AlphArray(3)) == BooleanSwitch::Yes;
+        AlphArray(4) = "UNSORTED";
+        ort->sortOption = SortOption::Unsorted;
     }
 
     print(state.files.eio, "! <Tabular Report>,Style,Unit Conversion, Format Reals\n");
@@ -1399,6 +1413,50 @@ UnitsStyle SetUnitsStyleFromString(std::string const &unitStringIn)
     }
 
     return unitsStyleReturn;
+}
+
+SortOption SetSortOptionFromString(std::string const &sortStringIn)
+{
+    SortOption sortOptionReturn = static_cast<SortOption>(getEnumValue(SortOptionNamesUC, Util::makeUPPER(sortStringIn)));
+    if (sortOptionReturn == SortOption::Invalid) {
+        sortOptionReturn = SortOption::NotFound;
+    }
+
+    return sortOptionReturn;
+}
+
+Array2D_string SortTableByName(EnergyPlusData &state,
+                               Array2D_string body,
+                               const Array1D_string &columnLabels,
+                               int rowsBody,
+                               int colsBody)
+{
+    int index = 0;
+    auto it = std::find(std::begin(columnLabels), std::end(columnLabels), "Name");
+    if (it != std::end(columnLabels)) {
+        index = std::distance(std::begin(columnLabels), it) + 1;
+    }
+
+    if (index > 0) {
+        Array1D_int rowHeadSorted;
+        rowHeadSorted.allocate(rowsBody);
+        for (int jRow = 1; jRow <= rowsBody; ++jRow) {
+            rowHeadSorted(jRow) = jRow;
+        }
+        std::sort(rowHeadSorted.begin(), rowHeadSorted.end(), [&](int a, int b) {
+            return body(index, a) < body(index, b);
+        });
+
+        Array2D_string bodySorted;
+        bodySorted.allocate(colsBody, rowsBody);
+        for (int jRow = 1; jRow <= rowsBody; ++jRow) {
+            for (int iCol = 1; iCol <= colsBody; ++iCol) {
+                bodySorted(iCol, jRow) = body(iCol, rowHeadSorted(jRow));
+            }
+        }
+        body = bodySorted;
+    }
+    return body;
 }
 
 void GetInputOutputTableSummaryReports(EnergyPlusData &state)
@@ -14731,6 +14789,12 @@ void WriteEioTables(EnergyPlusData &state)
                 }
 
                 if (currentStyle.produceTabular) {
+                    if (tableName == "ScheduleTypeLimits") {
+                        // optionally sort
+                        if (ort->sortOption == SortOption::Name) {
+                            tableBody = SortTableByName(state, tableBody, columnHead, numRows, numCols);
+                        }
+                    }
                     WriteSubtitle(state, tableName);
                     std::string footnote;
                     WriteTable(state, tableBody, rowHead, columnHead, columnWidth, false, footnote);
