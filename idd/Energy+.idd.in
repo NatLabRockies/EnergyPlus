@@ -108304,13 +108304,18 @@ OutputControl:Table:Style,
        \key InchPound
        \key InchPoundExceptElectricity
        \default None
-   A3; \field Format Numeric Values
+   A3, \field Format Numeric Values
        \note If No, all digits are shown after the decimal point without any rounding (23.238769213).
        \note If Yes, values are rounded for readability (23.24).
        \type choice
        \key Yes
        \key No
        \default Yes
+   A4; \field Sort Option
+       \type choice
+       \key Name
+       \key Unsorted
+       \default Unsorted
 
 
 OutputControl:ReportingTolerances,
