@@ -2357,7 +2357,10 @@
 !-   ===========  ALL OBJECTS IN CLASS: OUTPUTCONTROL:TABLE:STYLE ===========
 
   OutputControl:Table:Style,
-    HTML;                    !- Column Separator
+    HTML,                    !- Column Separator
+    ,                        !- Unit Conversion
+    ,                        !- Format Numeric Values
+    Name;                    !- Sort Option
 
 !-   ===========  ALL OBJECTS IN CLASS: OUTPUT:VARIABLE ===========
 
