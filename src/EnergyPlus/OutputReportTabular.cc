@@ -1401,8 +1401,8 @@ void GetInputTabularStyle(EnergyPlusData &state)
         ort->sortOption = SortOption::Unsorted;
     }
 
-    print(state.files.eio, "! <Tabular Report>,Style,Unit Conversion, Format Reals\n");
-    print(state.files.eio, "Tabular Report,{},{},{}\n", AlphArray(1), AlphArray(2), ort->formatReals_Tabular ? "Yes" : "No");
+    print(state.files.eio, "! <Tabular Report>,Style,Unit Conversion,Format Reals,Sort Option\n");
+    print(state.files.eio, "Tabular Report,{},{},{},{}\n", AlphArray(1), AlphArray(2), ort->formatReals_Tabular ? "Yes" : "No", AlphArray(4));
 }
 
 UnitsStyle SetUnitsStyleFromString(std::string const &unitStringIn)
@@ -1425,27 +1425,29 @@ SortOption SetSortOptionFromString(std::string const &sortStringIn)
     return sortOptionReturn;
 }
 
-Array2D_string SortTableByName(EnergyPlusData &state,
-                               Array2D_string body,
-                               const Array1D_string &columnLabels,
-                               int rowsBody,
-                               int colsBody)
+Array2D_string SortTableByName(EnergyPlusData &state, Array2D_string body, const Array1D_string &cLabels, int rowsBody, int colsBody)
 {
-    int index = 0;
-    auto it = std::find(std::begin(columnLabels), std::end(columnLabels), "Name");
-    if (it != std::end(columnLabels)) {
-        index = std::distance(std::begin(columnLabels), it) + 1;
+    // starting from the left most column, find the first one that contains the Name substring
+    std::string sCol = "Name";
+    auto it = std::find_if(cLabels.begin(), cLabels.end(), [&sCol](const std::string& s) { return s.find(sCol) != std::string::npos; });
+    if (it != cLabels.end()) {
+        sCol = *it;
     }
 
+    int index = 0;
+    it = std::find(cLabels.begin(), cLabels.end(), sCol);
+    if (it != cLabels.end()) {
+        index = std::distance(cLabels.begin(), it) + 1;
+    }
+
+    // if no column with Name found, just return the original unsorted table
     if (index > 0) {
         Array1D_int rowHeadSorted;
         rowHeadSorted.allocate(rowsBody);
         for (int jRow = 1; jRow <= rowsBody; ++jRow) {
             rowHeadSorted(jRow) = jRow;
         }
-        std::sort(rowHeadSorted.begin(), rowHeadSorted.end(), [&](int a, int b) {
-            return body(index, a) < body(index, b);
-        });
+        std::sort(rowHeadSorted.begin(), rowHeadSorted.end(), [&](int a, int b) { return body(index, a) < body(index, b); });
 
         Array2D_string bodySorted;
         bodySorted.allocate(colsBody, rowsBody);
@@ -14789,11 +14791,8 @@ void WriteEioTables(EnergyPlusData &state)
                 }
 
                 if (currentStyle.produceTabular) {
-                    if (tableName == "ScheduleTypeLimits") {
-                        // optionally sort
-                        if (ort->sortOption == SortOption::Name) {
-                            tableBody = SortTableByName(state, tableBody, columnHead, numRows, numCols);
-                        }
+                    if (ort->sortOption == SortOption::Name) { // optionally sort
+                        tableBody = SortTableByName(state, tableBody, columnHead, numRows, numCols);
                     }
                     WriteSubtitle(state, tableName);
                     std::string footnote;

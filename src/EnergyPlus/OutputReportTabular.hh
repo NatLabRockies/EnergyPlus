@@ -136,8 +136,7 @@ namespace OutputReportTabular {
         NotFound,
         Num
     };
-    constexpr std::array<std::string_view, static_cast<int>(SortOption::Num) - 1> SortOptionNamesUC{
-        "NAME", "UNSORTED"};
+    constexpr std::array<std::string_view, static_cast<int>(SortOption::Num) - 1> SortOptionNamesUC{"NAME", "UNSORTED"};
 
     enum class EndUseSubTableType
     {
@@ -625,7 +624,7 @@ namespace OutputReportTabular {
 
     SortOption SetSortOptionFromString(std::string const &sortStringIn);
 
-    Array2D_string SortTableByName(EnergyPlusData &state, Array2D_string body, const Array1D_string &columnLabels, int rowsBody, int colsBody);
+    Array2D_string SortTableByName(EnergyPlusData &state, Array2D_string body, const Array1D_string &cLabels, int rowsBody, int colsBody);
 
     void GetInputOutputTableSummaryReports(EnergyPlusData &state);
 
