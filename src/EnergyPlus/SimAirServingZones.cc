@@ -2402,10 +2402,8 @@ void ConnectReturnNodes(EnergyPlusData &state)
                         continue;
                     }
                     for (int zoneOutNum = 1; zoneOutNum <= thisZoneEquip.NumReturnNodes; ++zoneOutNum) {
-                        bool returnFound = false;
                         if (thisZoneEquip.ReturnNode(zoneOutNum) == zeqReturnNodeNum) {
                             thisZoneEquip.ReturnNodeAirLoopNum(zoneOutNum) = airLoopNum;
-                            returnFound = true;
                             // Find matching inlet node connected to the same air loop
                             for (int inletNum = 1; inletNum <= thisZoneEquip.NumInletNodes; ++inletNum) {
                                 if (thisZoneEquip.InletNodeAirLoopNum(inletNum) == airLoopNum) {
@@ -2414,9 +2412,6 @@ void ConnectReturnNodes(EnergyPlusData &state)
                                 }
                             }
                             break; // leave zone return node loop
-                        }
-                        if (returnFound) {
-                            break; // leave controlled zone loop
                         }
                     }
                 }
@@ -6750,6 +6745,31 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
                     state.dataSize->CalcSysSizing(AirLoopNum).NonCoinHeatMassFlow / state.dataEnvrn->StdRhoAir;
                 state.dataSize->CalcSysSizing(AirLoopNum).DesMainVolFlow =
                     max(state.dataSize->CalcSysSizing(AirLoopNum).DesCoolVolFlow, state.dataSize->CalcSysSizing(AirLoopNum).DesHeatVolFlow);
+            }
+        }
+        for (AirLoopNum = 1; AirLoopNum <= state.dataHVACGlobal->NumPrimaryAirSys; ++AirLoopNum) {
+            if (state.dataSize->CalcSysSizing(AirLoopNum).HeatCap <= 0.0) {
+                // HeatMixHumRat isn't calculated correctly when there is no heating load but heating mass flow rate > 0
+                // use min HeatMixHumRat for sizing certain objects, e.g., humidifiers
+                if (state.dataSize->CalcSysSizing(AirLoopNum).HeatOAOption == DataSizing::OAControl::MinOA) {
+                    OutAirFrac = (state.dataSize->CalcSysSizing(AirLoopNum).NonCoinHeatMassFlow > 0.0)
+                                     ? RhoAir * state.dataSize->CalcSysSizing(AirLoopNum).DesOutAirVolFlow /
+                                           state.dataSize->CalcSysSizing(AirLoopNum).NonCoinHeatMassFlow
+                                     : 1.0;
+                    OutAirFrac = min(1.0, max(0.0, OutAirFrac));
+                } else {
+                    OutAirFrac = 1.0;
+                }
+                for (int curSimDay = 1; curSimDay <= state.dataSize->SysSizing.u1(); ++curSimDay) {
+                    for (int ts = 1; ts <= Constant::iHoursInDay * state.dataGlobal->TimeStepsInHour; ++ts) {
+                        SysHeatRetHumRat = state.dataSize->SysSizing(curSimDay, AirLoopNum).SysHeatRetHumRatSeq(ts);
+                        OutAirHumRat = state.dataSize->SysSizing(curSimDay, AirLoopNum).SysHeatOutHumRatSeq(ts);
+                        SysHeatMixHumRat = OutAirHumRat * OutAirFrac + SysHeatRetHumRat * (1.0 - OutAirFrac);
+                        if (OutAirHumRat < SysHeatMixHumRat) {
+                            state.dataSize->CalcSysSizing(AirLoopNum).HeatMixHumRat = OutAirHumRat;
+                        }
+                    }
+                }
             }
         }
 

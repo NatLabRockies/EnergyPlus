@@ -23,30 +23,22 @@ jobs:
           macos_dev_target: 14.0
           arch: arm64
           python-arch: arm64
-          enable_pch: ON
           run_regressions: true
           pretty: "Mac arm64"
         - os: ubuntu-24.04
           arch: x86_64
           python-arch: x64
-          enable_pch: ON
           run_regressions: true
           pretty: "Ubuntu 24.04"
         - os: windows-2022
           arch: x86_64
           python-arch: x64
-          enable_pch: OFF
           run_regressions: false
           pretty: "Windows x64"
 
     steps:
 
-    - name: Checkout PR head
-      uses: actions/checkout@v6
-      with:
-        repository: ${{ github.event.pull_request.head.repo.full_name }}
-        ref: ${{ github.event.pull_request.head.sha }}
-        fetch-depth: 0
+    - uses: actions/checkout@v6
 
     - name: Setup System
       id: setup-runner
@@ -58,26 +50,21 @@ jobs:
     - name: Get Develop and Branch Git SHA
       shell: bash
       run: |
-        echo "Figuring out the develop GIT SHA already merged into the PR branch"
-        BASE_BRANCH="${{ github.base_ref }}"
-        if git remote get-url upstream >/dev/null 2>&1; then
-          git remote set-url upstream "https://github.com/$GITHUB_REPOSITORY.git"
-        else
-          git remote add upstream "https://github.com/$GITHUB_REPOSITORY.git"
-        fi
-        git fetch --no-tags upstream "refs/heads/${BASE_BRANCH}:refs/remotes/upstream/${BASE_BRANCH}"
-        DEVELOP_SHA=$(git merge-base HEAD "upstream/${BASE_BRANCH}")
-        echo "Develop GIT SHA merged into this branch is '${DEVELOP_SHA}'"
+        echo "Figuring out the develop GIT SHA"
+        # github.event.pull_request.base.sha points to develop at the time the PR was created, not the current one
+        DEVELOP_SHA=$(git ls-remote https://github.com/$GITHUB_REPOSITORY.git develop | cut -f1 | cut -c1-10)
+        echo "Develop GIT SHA is '${DEVELOP_SHA}'"
         echo "DEVELOP_SHA=$DEVELOP_SHA" >> $GITHUB_ENV
 
         CURRENT_HEAD_SHA=${{ github.event.pull_request.head.sha }}
         echo "Current Branch HEAD SHA is '${CURRENT_HEAD_SHA}'"
-        echo "CURRENT_HEAD_SHA=$CURRENT_HEAD_SHA" >> $GITHUB_ENV
+        echo "CURRENT_HEAD_SHA=$DEVELOP_SHA" >> $GITHUB_ENV
 
-        echo "GitHub synthetic merge commit SHA is '${GITHUB_SHA}'"
+        echo "Current merge commit SHA is '${GITHUB_SHA}'"
         echo "::endgroup::"
-        # Default PCH behavior is per-platform, then regression-cache hits may override it.
-        echo "ENABLE_PCH=${{ matrix.enable_pch }}" >> $GITHUB_ENV
+        # We default to using PCH, in case we don't find the baseline reg tests,
+        # since it speeds up the build significantly and we'll build TWICE
+        echo "ENABLE_PCH=ON" >> $GITHUB_ENV
 
     - name: Baseline Regression Testing caching
       uses: actions/cache@v5
@@ -105,6 +92,8 @@ jobs:
         restore-keys: |
           ccache-${{ matrix.os }}-${{ steps.setup-runner.outputs.compiler-id }}-${{ github.head_ref }}
           ccache-${{ matrix.os }}-${{ steps.setup-runner.outputs.compiler-id }}-${{ env.DEVELOP_SHA }}
+          ccache-${{ matrix.os }}-${{ steps.setup-runner.outputs.compiler-id }}-
+          ccache-${{ matrix.os }}-
 
     - name: Did restoring the CCache-cache work?
       shell: bash
@@ -151,8 +140,7 @@ jobs:
       if: matrix.run_regressions && steps.cachebaselineregression.outputs.cache-hit != 'true'
       uses: actions/checkout@v6
       with:
-        repository: ${{ github.repository }}
-        ref: ${{ env.DEVELOP_SHA }}
+        ref: develop
         clean: false # Do NOT wipe the build/ and .ccache folder (`git clean -ffdx && git reset --hard HEAD`)
 
     - name: Baseline Configure and Build
@@ -196,8 +184,6 @@ jobs:
       if: matrix.run_regressions && steps.cachebaselineregression.outputs.cache-hit != 'true'
       uses: actions/checkout@v6
       with:
-        repository: ${{ github.event.pull_request.head.repo.full_name }}
-        ref: ${{ env.CURRENT_HEAD_SHA }}
         clean: false # Do NOT wipe the build/ and .ccache folder (`git clean -ffdx && git reset --hard HEAD`)
 
     - name: Install problem matcher

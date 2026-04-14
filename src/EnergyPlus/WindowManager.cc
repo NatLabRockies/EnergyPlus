@@ -1673,7 +1673,7 @@ namespace Window {
             std::fill(constr.AbsBeamShadeCoef.begin(), constr.AbsBeamShadeCoef.end(), 0.0);
             std::fill(constr.TransSolBeamCoef.begin(), constr.TransSolBeamCoef.end(), 0.0);
             std::fill(constr.ReflSolBeamFrontCoef.begin(), constr.ReflSolBeamFrontCoef.end(), 0.0);
-            std::fill(constr.ReflSolBeamBackCoef.begin(), constr.ReflSolBeamBackCoef.begin(), 0.0);
+            std::fill(constr.ReflSolBeamBackCoef.begin(), constr.ReflSolBeamBackCoef.end(), 0.0);
             std::fill(constr.TransVisBeamCoef.begin(), constr.TransVisBeamCoef.end(), 0.0);
             constr.AbsDiff = 0.0;
             constr.AbsDiffBack = 0.0;
