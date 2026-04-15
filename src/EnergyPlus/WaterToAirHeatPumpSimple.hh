@@ -162,6 +162,7 @@ namespace WaterToAirHeatPumpSimple {
         Real64 LatentCapacityTimeConstant = 0.0; // Latent capcacity time constant [s]
         Real64 FanDelayTime = 0.0;               // Fan delay time, time delay for the HP's fan to
         bool reportCoilFinalSizes = true;        // one time report of sizes to coil report
+        bool LowFlowFlag = true;                 // one time low flow warning for coil in cycling fan mode
     };
 
     void SimWatertoAirHPSimple(EnergyPlusData &state,
@@ -190,7 +191,8 @@ namespace WaterToAirHeatPumpSimple {
                                 Real64 const LatentLoad,        // Control zone latent load[W]
                                 HVAC::FanOp const fanOp,        // fan operating mode
                                 Real64 const OnOffAirFlowRatio, // ratio of compressor on flow to average flow over time step
-                                bool const FirstHVACIteration   // Iteration flag
+                                bool const FirstHVACIteration,  // Iteration flag
+                                Real64 const PartLoadRatio      // compressor part load ratio
     );
 
     void SizeHVACWaterToAir(EnergyPlusData &state, int const HPNum);
@@ -237,15 +239,15 @@ namespace WaterToAirHeatPumpSimple {
     );
 
     Real64 GetCoilCapacity(EnergyPlusData &state,
-                           std::string const &CoilType, // must match coil types in this module
-                           std::string const &CoilName, // must match coil names for the coil type
-                           bool &ErrorsFound            // set to true if problem
+                           std::string_view const coilType, // must match coil types in this module
+                           std::string const &CoilName,     // must match coil names for the coil type
+                           bool &ErrorsFound                // set to true if problem
     );
 
     Real64 GetCoilAirFlowRate(EnergyPlusData &state,
-                              std::string const &CoilType, // must match coil types in this module
-                              std::string const &CoilName, // must match coil names for the coil type
-                              bool &ErrorsFound            // set to true if problem
+                              std::string_view const coilType, // must match coil types in this module
+                              std::string const &CoilName,     // must match coil names for the coil type
+                              bool &ErrorsFound                // set to true if problem
     );
 
     int GetCoilInletNode(EnergyPlusData &state,

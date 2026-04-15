@@ -13300,6 +13300,382 @@ TEST_F(EnergyPlusFixture, CalculateZoneVolume_WithAirBoundaries)
     EXPECT_EQ(zone3.CeilingHeight, 2.0);
     EXPECT_EQ(zone3.Volume, 8.0);
 }
+
+TEST_F(EnergyPlusFixture, CalculateZoneVolume_IgnoresSameZonePartitionSurfaces)
+{
+    // A single zone made of three adjacent spaces. One partition is a regular wall pair and one is an air-boundary pair.
+    // The outer shell is fully enclosed, so the zone volume check should ignore the same-zone partitions and not warn.
+    std::string_view constexpr idf_objects = R"IDF(
+        Zone,
+        Zone 1;             !- Name
+
+        Space,
+        Space 1,            !- Name
+        Zone 1;             !- Zone Name
+
+        Space,
+        Space 2,            !- Name
+        Zone 1;             !- Zone Name
+
+        Space,
+        Space 3,            !- Name
+        Zone 1;             !- Zone Name
+
+        Material,
+            Some Material,         !- Name
+            VeryRough,             !- Roughness
+            0.006,                 !- Thickness {m}
+            0.815,                 !- Conductivity {W/m-K}
+            929,                   !- Density {kg/m3}
+            3140,                  !- Specific Heat {J/kg-K}
+            0.9,                   !- Thermal Absorptance
+            0.7,                   !- Solar Absorptance
+            0.7;                   !- Visible Absorptance
+
+        Construction,
+            Some Construction,     !- Name
+            Some Material;         !- Outside Layer
+
+        Construction:AirBoundary,
+            Air Boundary,          !- Name
+            None;                  !- Air Exchange Method
+
+        BuildingSurface:Detailed,
+            Space1-Floor,          !- Name
+            Floor,                 !- Surface Type
+            Some Construction,     !- Construction Name
+            Zone 1,                !- Zone Name
+            Space 1,               !- Space Name
+            Ground,                !- Outside Boundary Condition
+            ,                      !- Outside Boundary Condition Object
+            NoSun,                 !- Sun Exposure
+            NoWind,                !- Wind Exposure
+            ,                      !- View Factor to Ground
+            4,                     !- Number of Vertices
+            0,0,0,
+            0,1,0,
+            1,1,0,
+            1,0,0;
+
+        BuildingSurface:Detailed,
+            Space2-Floor,          !- Name
+            Floor,                 !- Surface Type
+            Some Construction,     !- Construction Name
+            Zone 1,                !- Zone Name
+            Space 2,               !- Space Name
+            Ground,                !- Outside Boundary Condition
+            ,                      !- Outside Boundary Condition Object
+            NoSun,                 !- Sun Exposure
+            NoWind,                !- Wind Exposure
+            ,                      !- View Factor to Ground
+            4,                     !- Number of Vertices
+            1,0,0,
+            1,1,0,
+            2,1,0,
+            2,0,0;
+
+        BuildingSurface:Detailed,
+            Space3-Floor,          !- Name
+            Floor,                 !- Surface Type
+            Some Construction,     !- Construction Name
+            Zone 1,                !- Zone Name
+            Space 3,               !- Space Name
+            Ground,                !- Outside Boundary Condition
+            ,                      !- Outside Boundary Condition Object
+            NoSun,                 !- Sun Exposure
+            NoWind,                !- Wind Exposure
+            ,                      !- View Factor to Ground
+            4,                     !- Number of Vertices
+            2,0,0,
+            2,1,0,
+            3,1,0,
+            3,0,0;
+
+        BuildingSurface:Detailed,
+            Space1-Roof,           !- Name
+            Roof,                  !- Surface Type
+            Some Construction,     !- Construction Name
+            Zone 1,                !- Zone Name
+            Space 1,               !- Space Name
+            Outdoors,              !- Outside Boundary Condition
+            ,                      !- Outside Boundary Condition Object
+            SunExposed,            !- Sun Exposure
+            WindExposed,           !- Wind Exposure
+            ,                      !- View Factor to Ground
+            4,                     !- Number of Vertices
+            1,0,2,
+            1,1,2,
+            0,1,2,
+            0,0,2;
+
+        BuildingSurface:Detailed,
+            Space2-Roof,           !- Name
+            Roof,                  !- Surface Type
+            Some Construction,     !- Construction Name
+            Zone 1,                !- Zone Name
+            Space 2,               !- Space Name
+            Outdoors,              !- Outside Boundary Condition
+            ,                      !- Outside Boundary Condition Object
+            SunExposed,            !- Sun Exposure
+            WindExposed,           !- Wind Exposure
+            ,                      !- View Factor to Ground
+            4,                     !- Number of Vertices
+            2,0,2,
+            2,1,2,
+            1,1,2,
+            1,0,2;
+
+        BuildingSurface:Detailed,
+            Space3-Roof,           !- Name
+            Roof,                  !- Surface Type
+            Some Construction,     !- Construction Name
+            Zone 1,                !- Zone Name
+            Space 3,               !- Space Name
+            Outdoors,              !- Outside Boundary Condition
+            ,                      !- Outside Boundary Condition Object
+            SunExposed,            !- Sun Exposure
+            WindExposed,           !- Wind Exposure
+            ,                      !- View Factor to Ground
+            4,                     !- Number of Vertices
+            3,0,2,
+            3,1,2,
+            2,1,2,
+            2,0,2;
+
+        BuildingSurface:Detailed,
+            Space1-South,          !- Name
+            Wall,                  !- Surface Type
+            Some Construction,     !- Construction Name
+            Zone 1,                !- Zone Name
+            Space 1,               !- Space Name
+            Outdoors,              !- Outside Boundary Condition
+            ,                      !- Outside Boundary Condition Object
+            SunExposed,            !- Sun Exposure
+            WindExposed,           !- Wind Exposure
+            ,                      !- View Factor to Ground
+            4,                     !- Number of Vertices
+            1,0,2,
+            0,0,2,
+            0,0,0,
+            1,0,0;
+
+        BuildingSurface:Detailed,
+            Space2-South,          !- Name
+            Wall,                  !- Surface Type
+            Some Construction,     !- Construction Name
+            Zone 1,                !- Zone Name
+            Space 2,               !- Space Name
+            Outdoors,              !- Outside Boundary Condition
+            ,                      !- Outside Boundary Condition Object
+            SunExposed,            !- Sun Exposure
+            WindExposed,           !- Wind Exposure
+            ,                      !- View Factor to Ground
+            4,                     !- Number of Vertices
+            2,0,2,
+            1,0,2,
+            1,0,0,
+            2,0,0;
+
+        BuildingSurface:Detailed,
+            Space3-South,          !- Name
+            Wall,                  !- Surface Type
+            Some Construction,     !- Construction Name
+            Zone 1,                !- Zone Name
+            Space 3,               !- Space Name
+            Outdoors,              !- Outside Boundary Condition
+            ,                      !- Outside Boundary Condition Object
+            SunExposed,            !- Sun Exposure
+            WindExposed,           !- Wind Exposure
+            ,                      !- View Factor to Ground
+            4,                     !- Number of Vertices
+            3,0,2,
+            2,0,2,
+            2,0,0,
+            3,0,0;
+
+        BuildingSurface:Detailed,
+            Space1-North,          !- Name
+            Wall,                  !- Surface Type
+            Some Construction,     !- Construction Name
+            Zone 1,                !- Zone Name
+            Space 1,               !- Space Name
+            Outdoors,              !- Outside Boundary Condition
+            ,                      !- Outside Boundary Condition Object
+            SunExposed,            !- Sun Exposure
+            WindExposed,           !- Wind Exposure
+            ,                      !- View Factor to Ground
+            4,                     !- Number of Vertices
+            0,1,2,
+            1,1,2,
+            1,1,0,
+            0,1,0;
+
+        BuildingSurface:Detailed,
+            Space2-North,          !- Name
+            Wall,                  !- Surface Type
+            Some Construction,     !- Construction Name
+            Zone 1,                !- Zone Name
+            Space 2,               !- Space Name
+            Outdoors,              !- Outside Boundary Condition
+            ,                      !- Outside Boundary Condition Object
+            SunExposed,            !- Sun Exposure
+            WindExposed,           !- Wind Exposure
+            ,                      !- View Factor to Ground
+            4,                     !- Number of Vertices
+            1,1,2,
+            2,1,2,
+            2,1,0,
+            1,1,0;
+
+        BuildingSurface:Detailed,
+            Space3-North,          !- Name
+            Wall,                  !- Surface Type
+            Some Construction,     !- Construction Name
+            Zone 1,                !- Zone Name
+            Space 3,               !- Space Name
+            Outdoors,              !- Outside Boundary Condition
+            ,                      !- Outside Boundary Condition Object
+            SunExposed,            !- Sun Exposure
+            WindExposed,           !- Wind Exposure
+            ,                      !- View Factor to Ground
+            4,                     !- Number of Vertices
+            2,1,2,
+            3,1,2,
+            3,1,0,
+            2,1,0;
+
+        BuildingSurface:Detailed,
+            Space1-West,           !- Name
+            Wall,                  !- Surface Type
+            Some Construction,     !- Construction Name
+            Zone 1,                !- Zone Name
+            Space 1,               !- Space Name
+            Outdoors,              !- Outside Boundary Condition
+            ,                      !- Outside Boundary Condition Object
+            SunExposed,            !- Sun Exposure
+            WindExposed,           !- Wind Exposure
+            ,                      !- View Factor to Ground
+            4,                     !- Number of Vertices
+            0,0,2,
+            0,1,2,
+            0,1,0,
+            0,0,0;
+
+        BuildingSurface:Detailed,
+            Space3-East,           !- Name
+            Wall,                  !- Surface Type
+            Some Construction,     !- Construction Name
+            Zone 1,                !- Zone Name
+            Space 3,               !- Space Name
+            Outdoors,              !- Outside Boundary Condition
+            ,                      !- Outside Boundary Condition Object
+            SunExposed,            !- Sun Exposure
+            WindExposed,           !- Wind Exposure
+            ,                      !- View Factor to Ground
+            4,                     !- Number of Vertices
+            3,1,2,
+            3,0,2,
+            3,0,0,
+            3,1,0;
+
+        BuildingSurface:Detailed,
+            Space1-Partition,      !- Name
+            Wall,                  !- Surface Type
+            Some Construction,     !- Construction Name
+            Zone 1,                !- Zone Name
+            Space 1,               !- Space Name
+            Surface,               !- Outside Boundary Condition
+            Space2-Partition,      !- Outside Boundary Condition Object
+            NoSun,                 !- Sun Exposure
+            NoWind,                !- Wind Exposure
+            ,                      !- View Factor to Ground
+            4,                     !- Number of Vertices
+            1,1,2,
+            1,0,2,
+            1,0,0,
+            1,1,0;
+
+        BuildingSurface:Detailed,
+            Space2-Partition,      !- Name
+            Wall,                  !- Surface Type
+            Some Construction,     !- Construction Name
+            Zone 1,                !- Zone Name
+            Space 2,               !- Space Name
+            Surface,               !- Outside Boundary Condition
+            Space1-Partition,      !- Outside Boundary Condition Object
+            NoSun,                 !- Sun Exposure
+            NoWind,                !- Wind Exposure
+            ,                      !- View Factor to Ground
+            4,                     !- Number of Vertices
+            1,0,2,
+            1,1,2,
+            1,1,0,
+            1,0,0;
+
+        BuildingSurface:Detailed,
+            Space2-AirBoundary,    !- Name
+            Wall,                  !- Surface Type
+            Air Boundary,          !- Construction Name
+            Zone 1,                !- Zone Name
+            Space 2,               !- Space Name
+            Surface,               !- Outside Boundary Condition
+            Space3-AirBoundary,    !- Outside Boundary Condition Object
+            NoSun,                 !- Sun Exposure
+            NoWind,                !- Wind Exposure
+            ,                      !- View Factor to Ground
+            4,                     !- Number of Vertices
+            2,1,2,
+            2,0,2,
+            2,0,0,
+            2,1,0;
+
+        BuildingSurface:Detailed,
+            Space3-AirBoundary,    !- Name
+            Wall,                  !- Surface Type
+            Air Boundary,          !- Construction Name
+            Zone 1,                !- Zone Name
+            Space 3,               !- Space Name
+            Surface,               !- Outside Boundary Condition
+            Space2-AirBoundary,    !- Outside Boundary Condition Object
+            NoSun,                 !- Sun Exposure
+            NoWind,                !- Wind Exposure
+            ,                      !- View Factor to Ground
+            4,                     !- Number of Vertices
+            2,0,2,
+            2,1,2,
+            2,1,0,
+            2,0,0;
+    )IDF";
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    bool ErrorsFound = false;
+    state->init_state(*state);
+
+    GetMaterialData(*state, ErrorsFound);
+    EXPECT_FALSE(ErrorsFound);
+
+    GetConstructData(*state, ErrorsFound);
+    EXPECT_FALSE(ErrorsFound);
+
+    GetZoneData(*state, ErrorsFound);
+    EXPECT_FALSE(ErrorsFound);
+
+    state->dataSurfaceGeometry->NoGroundTempObjWarning = false;
+
+    EXPECT_NO_THROW(SetupZoneGeometry(*state, ErrorsFound));
+    EXPECT_TRUE(compare_err_stream(""));
+    EXPECT_FALSE(ErrorsFound);
+
+    auto const &zone1 = state->dataHeatBal->Zone(1);
+    EXPECT_EQ(zone1.geometricFloorArea, 3.0);
+    EXPECT_EQ(zone1.CeilingHeight, 2.0);
+    EXPECT_EQ(zone1.Volume, 6.0);
+
+    EXPECT_EQ(state->dataHeatBal->space(1).Volume, 2.0);
+    EXPECT_EQ(state->dataHeatBal->space(2).Volume, 2.0);
+    EXPECT_EQ(state->dataHeatBal->space(3).Volume, 2.0);
+}
+
 TEST_F(EnergyPlusFixture, CalculatZoneVolume_WithoutAirBoundaries)
 {
     // Test floor area and volume without air boundary surfaces

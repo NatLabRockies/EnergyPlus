@@ -21,7 +21,7 @@
 !                     4.      Standard electric water heater (WATER HEATER:STRATIFIED) with typical ratings and two
 !                             electric heating elements in a master-slave configuration.
 
-  Version,26.1;
+  Version,26.2;
 
   Building,
     Water Heater Stand-Alone Example,  !- Name

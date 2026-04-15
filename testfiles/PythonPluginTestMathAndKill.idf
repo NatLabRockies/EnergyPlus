@@ -45,7 +45,7 @@
 ! RoofConstruction=Attic and Other
 ! ExtWallConstruction=Mass
 
-  Version,26.1;
+  Version,26.2;
 
   Timestep,6;
 

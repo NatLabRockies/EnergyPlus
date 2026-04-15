@@ -55,7 +55,6 @@
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
-#include <EnergyPlus/DataIPShortCuts.hh>
 #include <EnergyPlus/DataPrecisionGlobals.hh>
 #include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/General.hh>
@@ -283,52 +282,63 @@ CoilCoolingDXCurveFitSpeed::CoilCoolingDXCurveFitSpeed(EnergyPlus::EnergyPlusDat
       DryCoilOutletHumRatioMin(0.00001) // dry coil outlet minimum hum ratio kgH2O/kgdry air
 
 {
-    int numSpeeds = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, CoilCoolingDXCurveFitSpeed::object_name);
-    if (numSpeeds <= 0) {
+    auto *inputProcessor = state.dataInputProcessing->inputProcessor.get();
+    auto const speedInstances = inputProcessor->epJSON.find(CoilCoolingDXCurveFitSpeed::object_name);
+    if (speedInstances == inputProcessor->epJSON.end()) {
         // error
     }
+    auto const &speedSchemaProps = inputProcessor->getObjectSchemaProps(state, CoilCoolingDXCurveFitSpeed::object_name);
     bool found_it = false;
-    for (int speedNum = 1; speedNum <= numSpeeds; ++speedNum) {
-        int NumAlphas;  // Number of Alphas for each GetObjectItem call
-        int NumNumbers; // Number of Numbers for each GetObjectItem call
-        int IOStatus;
-        state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                 CoilCoolingDXCurveFitSpeed::object_name,
-                                                                 speedNum,
-                                                                 state.dataIPShortCut->cAlphaArgs,
-                                                                 NumAlphas,
-                                                                 state.dataIPShortCut->rNumericArgs,
-                                                                 NumNumbers,
-                                                                 IOStatus);
-        if (!Util::SameString(name_to_find, state.dataIPShortCut->cAlphaArgs(1))) {
+    for (auto const &speedInstance : speedInstances.value().items()) {
+        auto const speedName = Util::makeUPPER(speedInstance.key());
+        auto const &speedFields = speedInstance.value();
+        if (!Util::SameString(name_to_find, speedName)) {
             continue;
         }
         found_it = true;
 
         CoilCoolingDXCurveFitSpeedInputSpecification input_specs;
 
-        input_specs.name = state.dataIPShortCut->cAlphaArgs(1);
-        input_specs.gross_rated_total_cooling_capacity_ratio_to_nominal = state.dataIPShortCut->rNumericArgs(1);
-        input_specs.evaporator_air_flow_fraction = state.dataIPShortCut->rNumericArgs(2);
-        input_specs.condenser_air_flow_fraction = state.dataIPShortCut->rNumericArgs(3);
-        input_specs.gross_rated_sensible_heat_ratio = state.dataIPShortCut->rNumericArgs(4);
-        input_specs.gross_rated_cooling_COP = state.dataIPShortCut->rNumericArgs(5);
-        input_specs.active_fraction_of_coil_face_area = state.dataIPShortCut->rNumericArgs(6);
-        input_specs.rated_evaporator_fan_power_per_volume_flow_rate = state.dataIPShortCut->rNumericArgs(7);
-        input_specs.rated_evaporator_fan_power_per_volume_flow_rate_2023 = state.dataIPShortCut->rNumericArgs(8);
-        input_specs.rated_evaporative_condenser_pump_power_fraction = state.dataIPShortCut->rNumericArgs(9);
-        input_specs.evaporative_condenser_effectiveness = state.dataIPShortCut->rNumericArgs(10);
-        input_specs.total_cooling_capacity_function_of_temperature_curve_name = state.dataIPShortCut->cAlphaArgs(2);
-        input_specs.total_cooling_capacity_function_of_air_flow_fraction_curve_name = state.dataIPShortCut->cAlphaArgs(3);
-        input_specs.energy_input_ratio_function_of_temperature_curve_name = state.dataIPShortCut->cAlphaArgs(4);
-        input_specs.energy_input_ratio_function_of_air_flow_fraction_curve_name = state.dataIPShortCut->cAlphaArgs(5);
-        input_specs.part_load_fraction_correlation_curve_name = state.dataIPShortCut->cAlphaArgs(6);
-        input_specs.rated_waste_heat_fraction_of_power_input = state.dataIPShortCut->rNumericArgs(11);
-        input_specs.waste_heat_function_of_temperature_curve_name = state.dataIPShortCut->cAlphaArgs(7);
-        input_specs.sensible_heat_ratio_modifier_function_of_temperature_curve_name = state.dataIPShortCut->cAlphaArgs(8);
-        input_specs.sensible_heat_ratio_modifier_function_of_flow_fraction_curve_name = state.dataIPShortCut->cAlphaArgs(9);
+        input_specs.name = speedName;
+        input_specs.gross_rated_total_cooling_capacity_ratio_to_nominal =
+            inputProcessor->getRealFieldValue(speedFields, speedSchemaProps, "gross_total_cooling_capacity_fraction");
+        input_specs.evaporator_air_flow_fraction =
+            inputProcessor->getRealFieldValue(speedFields, speedSchemaProps, "evaporator_air_flow_rate_fraction");
+        input_specs.condenser_air_flow_fraction =
+            inputProcessor->getRealFieldValue(speedFields, speedSchemaProps, "condenser_air_flow_rate_fraction");
+        input_specs.gross_rated_sensible_heat_ratio = inputProcessor->getRealFieldValue(speedFields, speedSchemaProps, "gross_sensible_heat_ratio");
+        input_specs.gross_rated_cooling_COP = inputProcessor->getRealFieldValue(speedFields, speedSchemaProps, "gross_cooling_cop");
+        input_specs.active_fraction_of_coil_face_area =
+            inputProcessor->getRealFieldValue(speedFields, speedSchemaProps, "active_fraction_of_coil_face_area");
+        input_specs.rated_evaporator_fan_power_per_volume_flow_rate =
+            inputProcessor->getRealFieldValue(speedFields, speedSchemaProps, "2017_rated_evaporator_fan_power_per_volume_flow_rate");
+        input_specs.rated_evaporator_fan_power_per_volume_flow_rate_2023 =
+            inputProcessor->getRealFieldValue(speedFields, speedSchemaProps, "2023_rated_evaporator_fan_power_per_volume_flow_rate");
+        input_specs.rated_evaporative_condenser_pump_power_fraction =
+            inputProcessor->getRealFieldValue(speedFields, speedSchemaProps, "evaporative_condenser_pump_power_fraction");
+        input_specs.evaporative_condenser_effectiveness =
+            inputProcessor->getRealFieldValue(speedFields, speedSchemaProps, "evaporative_condenser_effectiveness");
+        input_specs.total_cooling_capacity_function_of_temperature_curve_name =
+            inputProcessor->getAlphaFieldValue(speedFields, speedSchemaProps, "total_cooling_capacity_modifier_function_of_temperature_curve_name");
+        input_specs.total_cooling_capacity_function_of_air_flow_fraction_curve_name = inputProcessor->getAlphaFieldValue(
+            speedFields, speedSchemaProps, "total_cooling_capacity_modifier_function_of_air_flow_fraction_curve_name");
+        input_specs.energy_input_ratio_function_of_temperature_curve_name =
+            inputProcessor->getAlphaFieldValue(speedFields, speedSchemaProps, "energy_input_ratio_modifier_function_of_temperature_curve_name");
+        input_specs.energy_input_ratio_function_of_air_flow_fraction_curve_name =
+            inputProcessor->getAlphaFieldValue(speedFields, speedSchemaProps, "energy_input_ratio_modifier_function_of_air_flow_fraction_curve_name");
+        input_specs.part_load_fraction_correlation_curve_name =
+            inputProcessor->getAlphaFieldValue(speedFields, speedSchemaProps, "part_load_fraction_correlation_curve_name");
+        input_specs.rated_waste_heat_fraction_of_power_input =
+            inputProcessor->getRealFieldValue(speedFields, speedSchemaProps, "rated_waste_heat_fraction_of_power_input");
+        input_specs.waste_heat_function_of_temperature_curve_name =
+            inputProcessor->getAlphaFieldValue(speedFields, speedSchemaProps, "waste_heat_modifier_function_of_temperature_curve_name");
+        input_specs.sensible_heat_ratio_modifier_function_of_temperature_curve_name =
+            inputProcessor->getAlphaFieldValue(speedFields, speedSchemaProps, "sensible_heat_ratio_modifier_function_of_temperature_curve_name");
+        input_specs.sensible_heat_ratio_modifier_function_of_flow_fraction_curve_name =
+            inputProcessor->getAlphaFieldValue(speedFields, speedSchemaProps, "sensible_heat_ratio_modifier_function_of_flow_fraction_curve_name");
 
         this->instantiateFromInputSpec(state, input_specs);
+        inputProcessor->markObjectAsUsed(CoilCoolingDXCurveFitSpeed::object_name, speedInstance.key());
         break;
     }
 

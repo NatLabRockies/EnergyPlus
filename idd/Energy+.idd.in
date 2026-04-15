@@ -35261,15 +35261,21 @@ ZoneControl:Humidistat,
        \required-field
        \type object-list
        \object-list ZoneNames
-  A3 , \field Humidifying Relative Humidity Setpoint Schedule Name
+  A3 , \field Humidifying Setpoint Schedule Name
        \required-field
-       \note hourly schedule values should be in Relative Humidity (percent)
+       \note Hourly schedule values should be in relative humidity (percent) or dew-point temperatures (deg. C).
        \type object-list
        \object-list ScheduleNames
-  A4 ; \field Dehumidifying Relative Humidity Setpoint Schedule Name
-       \note hourly schedule values should be in Relative Humidity (percent)
+  A4 , \field Dehumidifying Setpoint Schedule Name
+       \note Hourly schedule values should be in relative humidity (percent) or dew-point temperatures (deg. C).
        \type object-list
        \object-list ScheduleNames
+  A5 ; \field Control Variable
+       \note When using RelativeHumidity, the schedule values should be in percentages.
+       \type choice
+       \key RelativeHumidity
+       \key Dewpoint
+       \default RelativeHumidity
 
 ZoneControl:Thermostat,
    \memo Define the Thermostat settings for a zone or list of zones.
@@ -52276,12 +52282,17 @@ Coil:Cooling:DX:CurveFit:OperatingMode,
        \minimum 0.0
        \maximum 3000.0
        \default 0.0
-   A2, \field Apply Latent Degradation to Speeds Greater than 1
+   A2, \field Apply Part Load Fraction to Speeds Greater than 1
        \type choice
        \key Yes
        \key No
        \default No
-   A3, \field Condenser Type
+   A3, \field Apply Latent Degradation to Speeds Greater than 1
+       \type choice
+       \key Yes
+       \key No
+       \default No
+   A4, \field Condenser Type
        \type choice
        \key AirCooled
        \key EvaporativelyCooled
@@ -52297,35 +52308,35 @@ Coil:Cooling:DX:CurveFit:OperatingMode,
        \note Must be lower than or equal to the highest speed number.
        \note If blank, defaults to the highest speed number used.
        \type integer
-   A4, \field Speed 1 Name
+   A5, \field Speed 1 Name
        \required-field
        \type object-list
        \object-list DXCoolingSpeedNames
-   A5, \field Speed 2 Name
+   A6, \field Speed 2 Name
        \type object-list
        \object-list DXCoolingSpeedNames
-   A6, \field Speed 3 Name
+   A7, \field Speed 3 Name
        \type object-list
        \object-list DXCoolingSpeedNames
-   A7, \field Speed 4 Name
+   A8, \field Speed 4 Name
        \type object-list
        \object-list DXCoolingSpeedNames
-   A8, \field Speed 5 Name
+   A9, \field Speed 5 Name
        \type object-list
        \object-list DXCoolingSpeedNames
-  A9, \field Speed 6 Name
+  A10, \field Speed 6 Name
        \type object-list
        \object-list DXCoolingSpeedNames
-  A10, \field Speed 7 Name
+  A11, \field Speed 7 Name
        \type object-list
        \object-list DXCoolingSpeedNames
-  A11, \field Speed 8 Name
+  A12, \field Speed 8 Name
        \type object-list
        \object-list DXCoolingSpeedNames
-  A12, \field Speed 9 Name
+  A13, \field Speed 9 Name
        \type object-list
        \object-list DXCoolingSpeedNames
-  A13; \field Speed 10 Name
+  A14; \field Speed 10 Name
        \type object-list
        \object-list DXCoolingSpeedNames
 

@@ -93,7 +93,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,26.1;
+  Version,26.2;
 
   Output:Diagnostics,
     DisplayAllWarnings;      !- Key 1
@@ -1925,8 +1925,6 @@
     Through: 12/31,          !- Field 1
     For: AllDays,            !- Field 2
     Until: 24:00,117.239997864; !- Field 3
-
-                             !- Field 4
 
   Schedule:Compact,
     ShadeTransSch,           !- Name

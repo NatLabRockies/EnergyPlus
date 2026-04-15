@@ -488,9 +488,9 @@ namespace WaterCoils {
     int GetCompIndex(EnergyPlusData &state, CoilModel coilType, std::string_view const coilName);
 
     Real64 GetWaterCoilCapacity(EnergyPlusData &state,
-                                std::string const &CoilType, // must match coil types in this module
-                                std::string const &CoilName, // must match coil names for the coil type
-                                bool &ErrorsFound            // set to true if problem
+                                std::string_view const CoilType, // must match coil types in this module
+                                std::string const &CoilName,     // must match coil names for the coil type
+                                bool &ErrorsFound                // set to true if problem
     );
 
     void UpdateWaterToAirCoilPlantConnection(EnergyPlusData &state,
@@ -501,13 +501,13 @@ namespace WaterCoils {
                                              const DataPlant::LoopSideLocation LoopSide, // Plant loop side index for where called from
                                              int &CompIndex,                             // Chiller number pointer
                                              bool const FirstHVACIteration,
-                                             bool &InitLoopEquip // If not zero, calculate the max load for operating conditions
+                                             bool const &InitLoopEquip // If not zero, calculate the max load for operating conditions
     );
 
     Sched::Schedule *GetWaterCoilAvailSched(EnergyPlusData &state,
-                                            std::string const &CoilType, // must match coil types in this module
-                                            std::string const &CoilName, // must match coil names for the coil type
-                                            bool &ErrorsFound            // set to true if problem
+                                            std::string_view const coilType, // must match coil types in this module
+                                            std::string const &CoilName,     // must match coil names for the coil type
+                                            bool &ErrorsFound                // set to true if problem
     );
 
     // sets data to a coil that is used as a regeneration air heating coil in

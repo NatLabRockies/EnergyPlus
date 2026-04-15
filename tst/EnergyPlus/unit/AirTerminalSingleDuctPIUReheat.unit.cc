@@ -187,10 +187,9 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctSeriesPIUReheat_GetInputtest)
     GetPIUs(*state);
 
     ASSERT_EQ(1, state->dataPowerInductionUnits->NumSeriesPIUs);
-    EXPECT_EQ("SPACE1-1 ZONE COIL", state->dataPowerInductionUnits->PIU(1).HCoil); // heating coil name
-    EXPECT_EQ("COIL:HEATING:WATER",
-              HCoilNamesUC[static_cast<int>(state->dataPowerInductionUnits->PIU(1).HCoilType)]); // hot water heating coil
-    EXPECT_GT(state->dataPowerInductionUnits->PIU(1).HotControlNode, 0);                         // none zero integer node index is expected
+    EXPECT_EQ("SPACE1-1 ZONE COIL", state->dataPowerInductionUnits->PIU(1).HCoil);                     // heating coil name
+    EXPECT_ENUM_EQ(state->dataPowerInductionUnits->PIU(1).heatCoilType, HVAC::CoilType::HeatingWater); // hot water heating coil
+    EXPECT_GT(state->dataPowerInductionUnits->PIU(1).HotControlNode, 0);                               // none zero integer node index is expected
 }
 
 TEST_F(EnergyPlusFixture, AirTerminalSingleDuctSeriesPIU_SetADUInletNodeTest)

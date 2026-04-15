@@ -544,7 +544,7 @@ PluginManager::PluginManager(EnergyPlusData &state) : eplusRunningViaPythonAPI(s
             std::string workingDirFlagUC = "YES";
             try {
                 workingDirFlagUC = EnergyPlus::Util::makeUPPER(fields.at("add_current_working_directory_to_search_path").get<std::string>());
-            } catch ([[maybe_unused]] nlohmann::json::out_of_range &e) {
+            } catch ([[maybe_unused]] const nlohmann::json::out_of_range &e) {
                 // defaulted to YES
             }
             if (workingDirFlagUC == "YES") {
@@ -553,7 +553,7 @@ PluginManager::PluginManager(EnergyPlusData &state) : eplusRunningViaPythonAPI(s
             std::string inputFileDirFlagUC = "YES";
             try {
                 inputFileDirFlagUC = EnergyPlus::Util::makeUPPER(fields.at("add_input_file_directory_to_search_path").get<std::string>());
-            } catch ([[maybe_unused]] nlohmann::json::out_of_range &e) {
+            } catch ([[maybe_unused]] const nlohmann::json::out_of_range &e) {
                 // defaulted to YES
             }
             if (inputFileDirFlagUC == "YES") {
@@ -563,7 +563,7 @@ PluginManager::PluginManager(EnergyPlusData &state) : eplusRunningViaPythonAPI(s
             std::string epInDirFlagUC = "YES";
             try {
                 epInDirFlagUC = EnergyPlus::Util::makeUPPER(fields.at("add_epin_environment_variable_to_search_path").get<std::string>());
-            } catch ([[maybe_unused]] nlohmann::json::out_of_range &e) {
+            } catch ([[maybe_unused]] const nlohmann::json::out_of_range &e) {
                 // defaulted to YES
             }
             if (epInDirFlagUC == "YES") {
@@ -591,11 +591,11 @@ PluginManager::PluginManager(EnergyPlusData &state) : eplusRunningViaPythonAPI(s
                 for (const auto &var : vars) {
                     try {
                         addToPythonPath(state, fs::path(var.at("search_path").get<std::string>()), true);
-                    } catch ([[maybe_unused]] nlohmann::json::out_of_range &e) {
+                    } catch ([[maybe_unused]] const nlohmann::json::out_of_range &e) {
                         // empty entry
                     }
                 }
-            } catch ([[maybe_unused]] nlohmann::json::out_of_range &e) {
+            } catch ([[maybe_unused]] const nlohmann::json::out_of_range &e) {
                 // catch when no paths are passed
                 // nothing to do here
             }
@@ -1324,7 +1324,7 @@ int PluginManager::getTrendVariableHandle(const EnergyPlusData &state, const std
 {
     std::string const varNameUC = Util::makeUPPER(name);
     for (size_t i = 0; i < state.dataPluginManager->trends.size(); i++) {
-        auto &thisTrend = state.dataPluginManager->trends[i];
+        const auto &thisTrend = state.dataPluginManager->trends[i];
         if (thisTrend.name == varNameUC) {
             return static_cast<int>(i);
         }

@@ -3084,7 +3084,7 @@ void ConvergenceErrors(EnergyPlusData &state,
 
     std::string_view const CaseName = ConvErrorCallString[(int)callType];
 
-    auto &arrayRef = HVACNotConverged;
+    const auto &arrayRef = HVACNotConverged;
     if (std::any_of(std::begin(arrayRef), std::end(arrayRef), [](bool i) { return i; })) {
 
         ShowContinueError(state,

@@ -487,7 +487,7 @@ void setActuatorValue(EnergyPlusState state, const int handle, const Real64 valu
 {
     auto *thisState = static_cast<EnergyPlus::EnergyPlusData *>(state);
     if (handle >= 1 && handle <= thisState->dataRuntimeLang->numEMSActuatorsAvailable) {
-        auto &theActuator(thisState->dataRuntimeLang->EMSActuatorAvailable(handle));
+        const auto &theActuator(thisState->dataRuntimeLang->EMSActuatorAvailable(handle));
         if (theActuator.RealValue != nullptr) {
             *theActuator.RealValue = value;
         } else if (theActuator.IntValue != nullptr) {

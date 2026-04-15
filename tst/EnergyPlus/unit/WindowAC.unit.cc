@@ -484,7 +484,7 @@ TEST_F(EnergyPlusFixture, WindowAC_VStest1)
 
     EXPECT_EQ(windowAC.HVACSizingIndex, 0);
 
-    EXPECT_EQ(windowAC.DXCoilType_Num, HVAC::Coil_CoolingAirToAirVariableSpeed);
+    EXPECT_ENUM_EQ(windowAC.coilType, HVAC::CoilType::CoolingDXVariableSpeed);
     ASSERT_GT(windowAC.DXCoilIndex, 0);
     auto const &varSpeedCoil = state->dataVariableSpeedCoils->VarSpeedCoil(windowAC.DXCoilIndex);
 
@@ -966,7 +966,7 @@ TEST_F(EnergyPlusFixture, WindowAC_DesignSpecificationZoneHVACSizing)
     EXPECT_EQ(DataSizing::FractionOfAutosizedCoolingCapacity, zoneHVACSizing.CoolingCapMethod);
     EXPECT_EQ(scaler_cooling_cap, zoneHVACSizing.ScaledCoolingCapacity);
 
-    EXPECT_EQ(windowAC.DXCoilType_Num, HVAC::Coil_CoolingAirToAirVariableSpeed);
+    EXPECT_ENUM_EQ(windowAC.coilType, HVAC::CoilType::CoolingDXVariableSpeed);
     ASSERT_GT(windowAC.DXCoilIndex, 0);
     auto const &varSpeedCoil = state->dataVariableSpeedCoils->VarSpeedCoil(windowAC.DXCoilIndex);
 

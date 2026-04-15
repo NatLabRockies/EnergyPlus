@@ -825,7 +825,7 @@ namespace CostEstimateManager {
                     if (WildcardObjNames) {
                         Real64 Qty(0.0);
                         for (auto const &e : state.dataHeatingCoils->HeatingCoil) {
-                            if (e.HCoilType_Num == 1) {
+                            if (e.heatCoilType == HVAC::CoilType::HeatingDXSingleSpeed) {
                                 Qty += e.NominalCapacity;
                             }
                         }
@@ -862,7 +862,7 @@ namespace CostEstimateManager {
                     if (WildcardObjNames) {
                         Real64 Qty(0.0);
                         for (auto const &e : state.dataHeatingCoils->HeatingCoil) {
-                            if (e.HCoilType_Num == 1) {
+                            if (e.heatCoilType == HVAC::CoilType::HeatingDXSingleSpeed) {
                                 Qty += e.Efficiency * e.NominalCapacity;
                             }
                         }

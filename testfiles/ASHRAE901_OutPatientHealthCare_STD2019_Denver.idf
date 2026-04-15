@@ -4,7 +4,7 @@
 !-      Use '!' comments if they need to be retained when using the IDFEditor.
 !-   ===========  ALL OBJECTS IN CLASS: VERSION ===========
 
-  Version,26.1;
+  Version,26.2;
 
 !-   ===========  ALL OBJECTS IN CLASS: SIMULATIONCONTROL ===========
 
@@ -1383,19 +1383,6 @@
     Until: 17:00,0.066,      !- Field 57
     Until: 24:00,0.033;      !- Field 59
 
-                             !- Field 4
-                             !- Field 6
-                             !- Field 8
-                             !- Field 10
-                             !- Field 12
-                             !- Field 37
-                             !- Field 39
-                             !- Field 41
-                             !- Field 43
-                             !- Field 45
-                             !- Field 48
-                             !- Field 50
-
   Schedule:Compact,
     BLDG_EQUIP_SCH,          !- Name
     Fraction,                !- Schedule Type Limits Name
@@ -1428,8 +1415,6 @@
     Until: 08:00,0.2971381545, !- Field 47
     Until: 17:00,0.4952302575, !- Field 49
     Until: 24:00,0.2971381545; !- Field 51
-
-                             !- Field 52
 
   Schedule:Compact,
     BLDG_EQUIP_SCH_BASE,     !- Name
@@ -1674,18 +1659,6 @@
     For: Sunday Holidays AllOtherDays, !- Field 38
     Until: 24:00,18.3;       !- Field 39
 
-                             !- Field 24
-                             !- Field 26
-                             !- Field 32
-                             !- Field 77
-                             !- Field 79
-                             !- Field 81
-                             !- Field 83
-                             !- Field 85
-                             !- Field 87
-                             !- Field 89
-                             !- Field 91
-
   Schedule:Compact,
     HTGSETP_SCH_YES_OPTIMUM_MR_w_SB,  !- Name
     Temperature,             !- Schedule Type Limits Name
@@ -1750,11 +1723,6 @@
     Until: 24:00,18.3,       !- Field 112
     For: Sunday Holidays AllOtherDays, !- Field 114
     Until: 24:00,18.3;       !- Field 115
-
-                             !- Field 28
-                             !- Field 32
-                             !- Field 75
-                             !- Field 81
 
   Schedule:Compact,
     HTGSETP_SCH_YES_OPTIMUM_OFF_w_SB,  !- Name
@@ -1875,18 +1843,6 @@
     For: Sunday Holidays AllOtherDays, !- Field 38
     Until: 24:00,25.0;       !- Field 39
 
-                             !- Field 24
-                             !- Field 26
-                             !- Field 32
-                             !- Field 77
-                             !- Field 79
-                             !- Field 81
-                             !- Field 83
-                             !- Field 85
-                             !- Field 87
-                             !- Field 89
-                             !- Field 91
-
   Schedule:Compact,
     CLGSETP_SCH_YES_OPTIMUM_MR_w_SB,  !- Name
     Temperature,             !- Schedule Type Limits Name
@@ -1951,11 +1907,6 @@
     Until: 24:00,25.0,       !- Field 112
     For: Sunday Holidays AllOtherDays, !- Field 114
     Until: 24:00,25.0;       !- Field 115
-
-                             !- Field 28
-                             !- Field 32
-                             !- Field 75
-                             !- Field 81
 
   Schedule:Compact,
     CLGSETP_SCH_YES_OPTIMUM_OFF_w_SB,  !- Name
@@ -26010,10 +25961,6 @@
     0.0000,3.3528,1.2192,  !- X,Y,Z ==> Vertex 3 {m}
     0.0000,3.3528,2.4384;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     5E66D1,                  !- Name
     Door,                    !- Surface Type
@@ -26028,11 +25975,6 @@
     0.000000000000,0.609600000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,3.657600000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,3.657600000000,2.438400000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     E14DAE,                  !- Name
@@ -26049,8 +25991,6 @@
     0.000000000000,4.876800000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,4.876800000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-
   FenestrationSurface:Detailed,
     B1F5EE,                  !- Name
     Window,                  !- Surface Type
@@ -26066,10 +26006,6 @@
     0.0000,2.5908,1.2192,  !- X,Y,Z ==> Vertex 3 {m}
     0.0000,2.5908,2.4384;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     84A1D5,                  !- Name
     Door,                    !- Surface Type
@@ -26084,8 +26020,6 @@
     0.000000000000,-0.914400000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,-1.828800000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,-1.828800000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
 
   FenestrationSurface:Detailed,
     F52F3D,                  !- Name
@@ -26972,10 +26906,6 @@
     0.0000,1.3716,1.2192,  !- X,Y,Z ==> Vertex 3 {m}
     0.0000,1.3716,2.4384;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     9CB8E5,                  !- Name
     Door,                    !- Surface Type
@@ -26990,8 +26920,6 @@
     -5.181599340000,2.133600000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     -6.096000000000,2.133600000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     -6.096000000000,2.133600000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
 
   FenestrationSurface:Detailed,
     9BC521,                  !- Name
@@ -27023,10 +26951,6 @@
     -5.4864,2.1336,3.9624,  !- X,Y,Z ==> Vertex 3 {m}
     -5.4864,2.1336,5.4864;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     EDE769,                  !- Name
     Door,                    !- Surface Type
@@ -27041,8 +26965,6 @@
     -8.839200000000,1.524000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     -8.839200000000,0.609600000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     -8.839200000000,0.609600000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
 
   FenestrationSurface:Detailed,
     E74902,                  !- Name
@@ -27089,10 +27011,6 @@
     3.5052,-2.4384,1.2192,  !- X,Y,Z ==> Vertex 3 {m}
     3.5052,-2.4384,2.4384;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     3C44F9,                  !- Name
     Door,                    !- Surface Type
@@ -27107,11 +27025,6 @@
     0.332149508990,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     -0.582250491010,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     -0.582250491010,0.000000000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     49526E,                  !- Name
@@ -27128,11 +27041,6 @@
     -4.166063578822,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     -4.166063578822,0.000000000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     865AE8,                  !- Name
     Door,                    !- Surface Type
@@ -27147,11 +27055,6 @@
     -6.843642449399,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     -7.758042449399,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     -7.758042449399,0.000000000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     7EB6E7,                  !- Name
@@ -27168,11 +27071,6 @@
     -1.444188491608,2.133600000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     -1.444188491608,2.133600000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     E4A528,                  !- Name
     Door,                    !- Surface Type
@@ -27187,11 +27085,6 @@
     -0.852260978031,2.133600000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     -1.766660978031,2.133600000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     -1.766660978031,2.133600000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     D18914,                  !- Name
@@ -27208,11 +27101,6 @@
     -1.235405657422,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     -1.235405657422,0.000000000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     1C9872,                  !- Name
     Door,                    !- Surface Type
@@ -27227,11 +27115,6 @@
     -6.165282257085,2.438400000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     -7.079682257085,2.438400000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     -7.079682257085,2.438400000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     F67E1F,                  !- Name
@@ -27248,11 +27131,6 @@
     0.000000000000,-7.450484367549,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,-7.450484367549,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     F402E9,                  !- Name
     Door,                    !- Surface Type
@@ -27267,11 +27145,6 @@
     1.219200000000,-0.693305528848,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     1.219200000000,-1.607705528848,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     1.219200000000,-1.607705528848,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     24BAF7,                  !- Name
@@ -27288,11 +27161,6 @@
     1.497980901044,-6.096000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     1.497980901044,-6.096000000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     62B5AF,                  !- Name
     Door,                    !- Surface Type
@@ -27307,11 +27175,6 @@
     0.722547134444,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     1.636947134444,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     1.636947134444,0.000000000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     D2D3BC,                  !- Name
@@ -27328,11 +27191,6 @@
     12.523845087100,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     12.523845087100,0.000000000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     C528DA,                  !- Name
     Door,                    !- Surface Type
@@ -27347,11 +27205,6 @@
     5.348024528725,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     6.262424528725,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     6.262424528725,0.000000000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     EFD3F9,                  !- Name
@@ -27368,11 +27221,6 @@
     18.760591534115,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     18.760591534115,0.000000000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     D4B39B,                  !- Name
     Door,                    !- Surface Type
@@ -27387,11 +27235,6 @@
     5.791200000000,3.034639920911,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     5.791200000000,3.949039920911,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     5.791200000000,3.949039920911,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     19E57D,                  !- Name
@@ -27408,11 +27251,6 @@
     0.000000000000,-1.916541792669,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,-1.916541792669,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     BA05F7,                  !- Name
     Door,                    !- Surface Type
@@ -27428,7 +27266,6 @@
     -3.962400000000,-1.504697247822,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     -3.962400000000,-1.504697247822,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
 !-   ===========  ALL OBJECTS IN CLASS: INTERNALMASS ===========
 
   InternalMass,

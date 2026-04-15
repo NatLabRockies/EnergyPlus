@@ -10720,7 +10720,7 @@ void RefrigRackData::CalcRackSystem(EnergyPlusData &state)
     }
 
     if (this->NumCoils > 0) {
-        auto &WarehouseCoil = state.dataRefrigCase->WarehouseCoil;
+        const auto &WarehouseCoil = state.dataRefrigCase->WarehouseCoil;
         for (int CoilIndex = 1; CoilIndex <= this->NumCoils; ++CoilIndex) {
             int CoilID = this->CoilNum(CoilIndex);
             // already CALLed CalculateCoil(CoilID) in CoilSet specified order
@@ -15336,7 +15336,7 @@ void SecondaryLoopData::CalculateSecondary(EnergyPlusData &state, int const Seco
     } // Secondary(SecondaryNum)%NumWalkIns > 0
 
     if (this->NumCoils > 0) {
-        auto &WarehouseCoil = state.dataRefrigCase->WarehouseCoil;
+        const auto &WarehouseCoil = state.dataRefrigCase->WarehouseCoil;
         for (int CoilIndex = 1; CoilIndex <= this->NumCoils; ++CoilIndex) {
             int CoilID = this->CoilNum(CoilIndex);
             // already CALL CalculateCoil(CoilID) for each coil, dispatched in coilset order for each zone
@@ -16352,7 +16352,7 @@ void ZeroHVACValues(EnergyPlusData &state)
     if (state.dataRefrigCase->HaveRefrigRacks) {
         // HaveRefrigRacks is TRUE when NumRefrigeratedRAcks > 0
         // RefrigRack ALLOCATED to NumRefrigeratedRacks
-        auto &RefrigRack = state.dataRefrigCase->RefrigRack;
+        const auto &RefrigRack = state.dataRefrigCase->RefrigRack;
         for (int RackNum = 1; RackNum <= state.dataRefrigCase->NumRefrigeratedRacks; ++RackNum) {
             if (RefrigRack(RackNum).CondenserType == DataHeatBalance::RefrigCondenserType::Water) {
                 Real64 MassFlowRate = 0.0;
@@ -16371,7 +16371,7 @@ void ZeroHVACValues(EnergyPlusData &state)
 
     if (state.dataRefrigCase->NumRefrigCondensers > 0) {
         // Condenser ALLOCATED to DataHeatBalance::NumRefrigCondensers
-        auto &Condenser = state.dataRefrigCase->Condenser;
+        const auto &Condenser = state.dataRefrigCase->Condenser;
         for (int CondID = 1; CondID <= state.dataRefrigCase->NumRefrigCondensers; ++CondID) {
             if (Condenser(CondID).CondenserType == DataHeatBalance::RefrigCondenserType::Water) {
                 Real64 MassFlowRate = 0.0;

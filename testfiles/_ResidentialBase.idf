@@ -10,7 +10,7 @@
 !
 !-   ===========  ALL OBJECTS IN CLASS: VERSION ===========
 
-  Version,26.1;
+  Version,26.2;
 
 !-   ===========  ALL OBJECTS IN CLASS: SIMULATIONCONTROL ===========
 
@@ -7786,9 +7786,9 @@
     natural_vent_program_Qwhf;  !- Erl Variable 1 Name
 
   EnergyManagementSystem:GlobalVariable,
-    Qducts,    !- Erl Variable 1 Name
-    Qsupply,   !- Erl Variable 2 Name
-    Qexhaust;  !- Erl Variable 3 Name
+    Qducts,                  !- Erl Variable 1 Name
+    Qsupply,                 !- Erl Variable 2 Name
+    Qexhaust;                !- Erl Variable 3 Name
 
 !-   ===========  ALL OBJECTS IN CLASS: ENERGYMANAGEMENTSYSTEM:OUTPUTVARIABLE ===========
 

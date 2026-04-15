@@ -139,7 +139,7 @@ struct BaseSizer
     bool sizingDesValueFromParent = false;
     bool airLoopSysFlag = false;
     bool oaSysFlag = false;
-    int coilType_Num = 0;
+    HVAC::CoilType coilType = HVAC::CoilType::Invalid;
     std::string compType;
     std::string compName;
     bool isEpJSON = false;

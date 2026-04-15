@@ -1178,7 +1178,7 @@ void SizeEvapCooler(EnergyPlusData &state, int const EvapCoolNum)
 
     auto &CurSysNum(state.dataSize->CurSysNum);
     auto &CurZoneEqNum(state.dataSize->CurZoneEqNum);
-    auto &FinalSysSizing(state.dataSize->FinalSysSizing);
+    const auto &FinalSysSizing(state.dataSize->FinalSysSizing);
     auto &EvapCond(state.dataEvapCoolers->EvapCond);
     auto &thisEvapCond(EvapCond(EvapCoolNum));
 

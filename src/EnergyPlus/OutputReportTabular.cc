@@ -4342,7 +4342,7 @@ void CalcHeatEmissionReport(EnergyPlusData &state)
     }
 
     // Water / steam boiler
-    for (auto &boiler : state.dataBoilers->Boiler) {
+    for (const auto &boiler : state.dataBoilers->Boiler) {
         state.dataHeatBal->SysTotalHVACRejectHeatLoss +=
             boiler.FuelConsumed + boiler.ParasiticFuelConsumption + boiler.ParasiticElecConsumption - boiler.BoilerEnergy;
     }
@@ -4351,8 +4351,8 @@ void CalcHeatEmissionReport(EnergyPlusData &state)
     for (int iCoil = 1; iCoil <= state.dataDXCoils->NumDXCoils; ++iCoil) {
         auto const &thisDXCoil = state.dataDXCoils->DXCoil(iCoil);
 
-        if (thisDXCoil.DXCoilType_Num == HVAC::CoilDX_CoolingSingleSpeed || thisDXCoil.DXCoilType_Num == HVAC::CoilDX_CoolingTwoSpeed ||
-            thisDXCoil.DXCoilType_Num == HVAC::CoilDX_MultiSpeedCooling || thisDXCoil.DXCoilType_Num == HVAC::CoilDX_CoolingTwoStageWHumControl) {
+        if (thisDXCoil.coilType == HVAC::CoilType::CoolingDXSingleSpeed || thisDXCoil.coilType == HVAC::CoilType::CoolingDXTwoSpeed ||
+            thisDXCoil.coilType == HVAC::CoilType::CoolingDXMultiSpeed || thisDXCoil.coilType == HVAC::CoilType::CoolingDXTwoStageWHumControl) {
             if (thisDXCoil.CondenserType(1) == DataHeatBalance::RefrigCondenserType::Air) {
                 state.dataHeatBal->SysTotalHVACRejectHeatLoss += thisDXCoil.ElecCoolingConsumption + thisDXCoil.DefrostConsumption +
                                                                  thisDXCoil.CrankcaseHeaterConsumption + thisDXCoil.TotalCoolingEnergy;
@@ -4363,7 +4363,7 @@ void CalcHeatEmissionReport(EnergyPlusData &state)
             if (thisDXCoil.FuelType != Constant::eFuel::Electricity) {
                 state.dataHeatBal->SysTotalHVACRejectHeatLoss += thisDXCoil.MSFuelWasteHeat * TimeStepSysSec;
             }
-        } else if (thisDXCoil.DXCoilType_Num == HVAC::CoilDX_HeatingEmpirical || thisDXCoil.DXCoilType_Num == HVAC::CoilDX_MultiSpeedHeating) {
+        } else if (thisDXCoil.coilType == HVAC::CoilType::HeatingDXSingleSpeed || thisDXCoil.coilType == HVAC::CoilType::HeatingDXMultiSpeed) {
             state.dataHeatBal->SysTotalHVACRejectHeatLoss += thisDXCoil.ElecHeatingConsumption + thisDXCoil.DefrostConsumption +
                                                              thisDXCoil.FuelConsumed + thisDXCoil.CrankcaseHeaterConsumption -
                                                              thisDXCoil.TotalHeatingEnergy;
@@ -4373,7 +4373,7 @@ void CalcHeatEmissionReport(EnergyPlusData &state)
     for (int iCoil = 1; iCoil <= state.dataVariableSpeedCoils->NumVarSpeedCoils; ++iCoil) {
         auto const &thisCoil = state.dataVariableSpeedCoils->VarSpeedCoil(iCoil);
 
-        if (thisCoil.VSCoilType == HVAC::Coil_CoolingAirToAirVariableSpeed) {
+        if (thisCoil.coilType == HVAC::CoilType::CoolingDXVariableSpeed) {
             if (thisCoil.CondenserType == DataHeatBalance::RefrigCondenserType::Air) {
                 state.dataHeatBal->SysTotalHVACRejectHeatLoss +=
                     thisCoil.Energy + thisCoil.CrankcaseHeaterConsumption + thisCoil.DefrostConsumption + thisCoil.EnergyLoadTotal;
@@ -4381,7 +4381,7 @@ void CalcHeatEmissionReport(EnergyPlusData &state)
                 state.dataHeatBal->SysTotalHVACRejectHeatLoss +=
                     thisCoil.EvapCondPumpElecConsumption + thisCoil.BasinHeaterConsumption + thisCoil.EvapWaterConsump * RhoWater * H2OHtOfVap_HVAC;
             }
-        } else if (thisCoil.VSCoilType == HVAC::Coil_HeatingAirToAirVariableSpeed) {
+        } else if (thisCoil.coilType == HVAC::CoilType::HeatingDXVariableSpeed) {
             state.dataHeatBal->SysTotalHVACRejectHeatLoss +=
                 thisCoil.Energy + thisCoil.CrankcaseHeaterConsumption + thisCoil.DefrostConsumption - thisCoil.EnergyLoadTotal;
         }
@@ -4391,7 +4391,7 @@ void CalcHeatEmissionReport(EnergyPlusData &state)
     for (int iCoil = 1; iCoil <= state.dataHeatingCoils->NumHeatingCoils; ++iCoil) {
         auto const &thisCoil = state.dataHeatingCoils->HeatingCoil(iCoil);
 
-        if (thisCoil.HCoilType_Num == HVAC::Coil_HeatingGas_MultiStage || thisCoil.HCoilType_Num == HVAC::Coil_HeatingGasOrOtherFuel) {
+        if (thisCoil.heatCoilType == HVAC::CoilType::HeatingGasMultiStage || thisCoil.heatCoilType == HVAC::CoilType::HeatingGasOrOtherFuel) {
             state.dataHeatBal->SysTotalHVACRejectHeatLoss += thisCoil.FuelUseLoad + thisCoil.ParasiticFuelConsumption - thisCoil.HeatingCoilLoad;
         }
     }
@@ -5297,7 +5297,7 @@ void WriteTabularReports(EnergyPlusData &state)
 void setTabularReportStyles(EnergyPlusData &state)
 {
     OutputReportTabular::tabularReportStyle currentStyle;
-    auto &ort = state.dataOutRptTab;
+    const auto &ort = state.dataOutRptTab;
     ort->tabularReportPasses.clear(); // In case this is called multiple times from unit tests
 
     // Set style for outputs controlled by OutputControl:Table:Style (Comma, Tab, Fixed, HTML, XML)
@@ -10873,7 +10873,7 @@ void WriteCompCostTable(EnergyPlusData &state)
         DetermineBuildingFloorArea(state);
     }
 
-    for (auto &currentStyle : ort->tabularReportPasses) {
+    for (const auto &currentStyle : ort->tabularReportPasses) {
 
         // 1st sub-table with total Costs and normalized with area
         rowHead.allocate(10);
@@ -11159,7 +11159,7 @@ void WriteVeriSumTable(EnergyPlusData &state)
     zoneGlassArea.allocate(state.dataGlobal->NumOfZones);
     // zoneGlassArea = 0.0;
 
-    for (auto &currentStyle : ort->tabularReportPasses) {
+    for (const auto &currentStyle : ort->tabularReportPasses) {
 
         // show the headers of the report
         if (currentStyle.produceTabular) {
@@ -13982,7 +13982,7 @@ void WritePredefinedTables(EnergyPlusData &state)
     Array1D_int colUnitConv;
     auto const &ort = state.dataOutRptTab;
 
-    for (auto &currentStyle : ort->tabularReportPasses) {
+    for (const auto &currentStyle : ort->tabularReportPasses) {
 
         // loop through the entries and associate them with the subtable and create
         // list of unique object names
@@ -14242,7 +14242,7 @@ void WriteComponentSizing(EnergyPlusData &state)
 
     WriteReportHeaders(state, "Component Sizing Summary", "Entire Facility", OutputProcessor::StoreType::Average);
 
-    for (auto &currentStyle : ort->tabularReportPasses) {
+    for (const auto &currentStyle : ort->tabularReportPasses) {
         // clear written flags
         for (auto &e : state.dataOutRptPredefined->CompSizeTableEntry) {
             e.written = false;
@@ -14650,7 +14650,7 @@ void WriteEioTables(EnergyPlusData &state)
         }
     }
 
-    for (auto &currentStyle : ort->tabularReportPasses) {
+    for (const auto &currentStyle : ort->tabularReportPasses) {
 
         // now go through each header and create a report for each one
         for (std::string const &headerLine : headerLines) {
@@ -14979,7 +14979,7 @@ void ComputeLoadComponentDecayCurve(EnergyPlusData &state)
             }
             for (int timeStep = timeOfPulse; timeStep <= state.dataGlobal->TimeStepsInHour * Constant::rHoursInDay; ++timeStep) {
                 if (ort->radiantPulseReceived(coolDesSelected, surfNum) != 0.0) {
-                    auto &surfClDayTS = surfCLClDay.ts[timeStep - 1].surf[surfNum - 1];
+                    const auto &surfClDayTS = surfCLClDay.ts[timeStep - 1].surf[surfNum - 1];
                     diff = surfClDayTS.loadConvectedWithPulse - surfClDayTS.loadConvectedNormal;
                     ort->decayCurveCool(timeStep - timeOfPulse + 1, surfNum) = -diff / ort->radiantPulseReceived(coolDesSelected, surfNum);
                 } else {
@@ -15005,7 +15005,7 @@ void ComputeLoadComponentDecayCurve(EnergyPlusData &state)
             }
             for (int timeStep = timeOfPulse; timeStep <= state.dataGlobal->TimeStepsInHour * Constant::rHoursInDay; ++timeStep) {
                 if (ort->radiantPulseReceived(heatDesSelected, surfNum) != 0.0) {
-                    auto &surfHtDayTS = surfCLHtDay.ts[timeStep - 1].surf[surfNum - 1];
+                    const auto &surfHtDayTS = surfCLHtDay.ts[timeStep - 1].surf[surfNum - 1];
                     diff = surfHtDayTS.loadConvectedWithPulse - surfHtDayTS.loadConvectedNormal;
                     ort->decayCurveHeat(timeStep - timeOfPulse + 1, surfNum) = -diff / ort->radiantPulseReceived(heatDesSelected, surfNum);
                 } else {
@@ -15893,7 +15893,7 @@ void computeSpaceZoneCompLoads(EnergyPlusData &state,
                                Array1D<Real64> &feneSolarDelaySeq,
                                std::vector<OutputReportTabular::componentLoadsSpZn> &szCompLoadLoc,
                                Array2D<Real64> &surfDelaySeq,
-                               ZompComponentAreasType &componentAreas,
+                               ZompComponentAreasType const &componentAreas,
                                int const iZone,
                                int const iSpace)
 {
@@ -16072,7 +16072,7 @@ void GetDelaySequences(EnergyPlusData &state,
                     // determine the remaining convective heat from the surfaces that are not based
                     // on any of these other loads
                     // negative because heat from surface should be positive
-                    auto &surfCLDaykTS = surfCLDay.ts[kTimeStep - 1].surf[jSurf - 1];
+                    const auto &surfCLDaykTS = surfCLDay.ts[kTimeStep - 1].surf[jSurf - 1];
                     surfDelaySeq(kTimeStep, jSurf) =
                         -surfCLDaykTS.loadConvectedNormal - surfCLDaykTS.netSurfRadSeq -
                         (peopleConvFromSurf + equipConvFromSurf + hvacLossConvFromSurf + powerGenConvFromSurf + lightLWConvFromSurf +
@@ -16134,7 +16134,7 @@ void ComputeTableBodyUsingMovingAvg(EnergyPlusData &state,
     if (desDaySelected != 0 && timeOfMax != 0) {
         // Don't update/average original array data
         // PEOPLE
-        auto &compLoadDay = szCompLoadLoc[desDaySelected - 1];
+        const auto &compLoadDay = szCompLoadLoc[desDaySelected - 1];
         for (int iTS = 1; iTS <= numTSinDay; ++iTS) {
             AvgData(iTS) = compLoadDay.ts[iTS - 1].spacezone[szNumMinus1].peopleInstantSeq;
         }

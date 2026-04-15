@@ -80,7 +80,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,26.1;
+  Version,26.2;
 
 !-   ===========  ALL OBJECTS IN CLASS: SIMULATIONCONTROL ===========
 
@@ -361,9 +361,6 @@
     46.739768982;            !- Volume {m3}
 
 !-   ===========  ALL OBJECTS IN CLASS: BUILDINGSURFACE:DETAILED ===========
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Room102 South Wall,      !- Name
@@ -382,11 +379,6 @@
     0.000000000000,4.572000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,4.572000000000,3.352800000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Room102 Floor,           !- Name
     FLOOR,                   !- Surface Type
@@ -403,11 +395,6 @@
     0.000000000000,4.572000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     3.048000000000,4.572000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     3.048000000000,0.000000000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Room102 West Wall,       !- Name
@@ -426,11 +413,6 @@
     3.048000000000,4.572000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     3.048000000000,4.572000000000,3.352800000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Room102 North Wall,      !- Name
     WALL,                    !- Surface Type
@@ -447,11 +429,6 @@
     0.000000000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     3.048000000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     3.048000000000,0.000000000000,3.352800000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Room102 East Wall,       !- Name
@@ -470,11 +447,6 @@
     0.000000000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,3.352800000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Room102 Ceiling,         !- Name
     CEILING,                 !- Surface Type
@@ -492,11 +464,7 @@
     0.000000000000,4.572000000000,3.352800000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,3.352800000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
 !-   ===========  ALL OBJECTS IN CLASS: FENESTRATIONSURFACE:DETAILED ===========
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Room 102 Window,         !- Name
@@ -513,7 +481,6 @@
     0.167481250000,4.572000000000,0.231775000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.167481250000,4.572000000000,3.260725000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
 !-   ===========  ALL OBJECTS IN CLASS: OUTPUT:VARIABLEDICTIONARY ===========
 
   Output:VariableDictionary,regular;

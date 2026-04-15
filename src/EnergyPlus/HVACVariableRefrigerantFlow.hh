@@ -647,75 +647,75 @@ namespace HVACVariableRefrigerantFlow {
     struct VRFTerminalUnitEquipment
     {
         // Members
-        std::string Name;                                  // Name of the VRF Terminal Unit
-        TUType type = TUType::Invalid;                     // DataHVACGlobals VRF Terminal Unit type
-        Sched::Schedule *availSched = nullptr;             // Pointer to the correct schedule // LOL // avail?
-        int VRFSysNum = 0;                                 // index to VRF Condenser
-        int TUListIndex = 0;                               // index to VRF Terminal Unit List
-        int IndexToTUInTUList = 0;                         // index to TU in VRF Terminal Unit List
-        int ZoneNum = 0;                                   // index to zone where VRF Terminal Unit resides
-        int ZoneAirNode = 0;                               // zone air node number
-        int VRFTUInletNodeNum = 0;                         // VRF Terminal Unit inlet node number
-        int VRFTUOutletNodeNum = 0;                        // VRF Terminal Unit outlet node number
-        int VRFTUOAMixerOANodeNum = 0;                     // OA node number for this TU's OA mixer
-        int VRFTUOAMixerRelNodeNum = 0;                    // Relief node number for this TU's OA mixer
-        int VRFTUOAMixerRetNodeNum = 0;                    // Return node number for this TU's OA mixer
-        int VRFTUOAMixerMixedNodeNum = 0;                  // Mixed node number for this TU's OA mixer
-        Real64 MaxCoolAirVolFlow = 0.0;                    // supply air volumetric flow rate during cooling operation [m3/s]
-        Real64 MaxHeatAirVolFlow = 0.0;                    // supply air volumetric flow rate during heating operation [m3/s]
-        Real64 MaxNoCoolAirVolFlow = 0.0;                  // supply air volumetric flow rate when no cooling [m3/s]
-        Real64 MaxNoHeatAirVolFlow = 0.0;                  // supply air volumetric flow rate when no heating [m3/s]
-        Real64 MaxCoolAirMassFlow = 0.0;                   // supply air mass flow rate during cooling operation [kg/s]
-        Real64 MaxHeatAirMassFlow = 0.0;                   // supply air mass flow rate during heating operation [kg/s]
-        Real64 MaxNoCoolAirMassFlow = 0.0;                 // supply air mass flow rate when no cooling [kg/s]
-        Real64 MaxNoHeatAirMassFlow = 0.0;                 // supply air mass flow rate when no heating [kg/s]
-        Real64 CoolOutAirVolFlow = 0.0;                    // OA volumetric flow rate during cooling operation [m3/s]
-        Real64 HeatOutAirVolFlow = 0.0;                    // OA volumetric flow rate during heating operation [m3/s]
-        Real64 NoCoolHeatOutAirVolFlow = 0.0;              // OA volumetric flow rate when no cooling or heating [m3/s]
-        Real64 CoolOutAirMassFlow = 0.0;                   // OA mass flow rate during cooling operation [kg/s]
-        Real64 HeatOutAirMassFlow = 0.0;                   // OA mass flow rate during heating operation [kg/s]
-        Real64 NoCoolHeatOutAirMassFlow = 0.0;             // OA mass flow rate when no cooling or heating [kg/s]
-        Real64 MinOperatingPLR = 1.0E-20;                  // minimum part-load ratio for operating of fan/coil
-        Real64 SuppHeatCoilFluidMaxFlow = 0.0;             // supplemental heating coil fluid (hot water or steam) maximum flow rate [kg/s]
-        Real64 DesignSuppHeatingCapacity = 0.0;            // supplemental heating coil design capacity  [W]
-        Real64 MaxSATFromSuppHeatCoil = 0.0;               // maximum supply air temperature from supplemental heating coil [C]
-        Real64 MaxOATSuppHeatingCoil = 0.0;                // maximum outdoor dry-bulb temperature for supplemental heating coil [C]
-        Real64 SuppHeatPartLoadRatio = 0.0;                // supplemental heating coil part load ratio
-        Real64 SuppHeatingCoilLoad = 0.0;                  // supplemental heating coil heating load
-        HVAC::FanType fanType = HVAC::FanType::Invalid;    // index to fan type
-        Sched::Schedule *fanOpModeSched = nullptr;         // Pointer to the correct fan operating mode schedule
-        Sched::Schedule *fanAvailSched = nullptr;          // Pointer to the correct fan availability schedule
-        int FanIndex = 0;                                  // Index to fan object
-        Real64 FanPower = 0.0;                             // power reported by fan component
-        HVAC::FanOp fanOp = HVAC::FanOp::Invalid;          // operation mode: 1 = cycling fan, cycling coil 2 = constant fan, cycling coil
-        HVAC::FanPlace fanPlace = HVAC::FanPlace::Invalid; // fan placement; 1=blow through, 2=draw through
-        Real64 ActualFanVolFlowRate = 0.0;                 // volumetric flow rate from fan object
-        std::string SuppHeatCoilType;                      // type of supplemental heating coil
-        std::string SuppHeatCoilName;                      // name of supplemental heating coil
-        std::string OAMixerName;                           // name of outside air mixer
-        int OAMixerIndex = 0;                              // index to outside air mixer
-        bool OAMixerUsed = false;                          // true if OA Mixer object is used
-        int CoolCoilIndex = 0;                             // index to terminal unit cooling coil
-        int HeatCoilIndex = 0;                             // index to terminal unit heating coil
-        int SuppHeatCoilIndex = 0;                         // index to terminal unit supplemental heating coil
-        int DXCoolCoilType_Num = 0;                        // type of VRF cooling coil
-        int DXHeatCoilType_Num = 0;                        // type of VRF heating coil
-        int SuppHeatCoilType_Num = 0;                      // type of VRF supplemental heating coil
-        Real64 ParasiticElec = 0.0;                        // parasitic electric for VRF terminal unit
-        Real64 ParasiticOffElec = 0.0;                     // parasitic electric for VRF terminal unit when off
-        Real64 HeatingSpeedRatio = 1.0;                    // Fan speed ratio in heating mode
-        Real64 NoHeatingSpeedRatio = 0.0;                  // Fan speed ratio when no heating
-        Real64 HeatingCapacitySizeRatio = 1.0;             // Ratio of heating to cooling when autosizing
-        Real64 CoolingSpeedRatio = 1.0;                    // Fan speed ratio in cooling mode
-        Real64 NoCoolingSpeedRatio = 1.0;                  // Fan speed ratio when no cooling
-        Real64 ParasiticCoolElecPower = 0.0;               // Terminal unit cooling parasitic electric power [W]
-        Real64 ParasiticHeatElecPower = 0.0;               // Terminal unit heating parasitic electric power [W]
-        Real64 ParasiticElecCoolConsumption = 0.0;         // Terminal unit parasitic electric consumption in cooling [J]
-        Real64 ParasiticElecHeatConsumption = 0.0;         // Terminal unit parasitic electric consumption in heating [J]
-        bool CoolingCoilPresent = true;                    // FALSE if coil not present
-        bool HeatingCoilPresent = true;                    // FALSE if coil not present
-        bool SuppHeatingCoilPresent = false;               // FALSE if coil not present
-        std::string AvailManagerListName;                  // Name of an availability manager list object
+        std::string Name;                                          // Name of the VRF Terminal Unit
+        TUType type = TUType::Invalid;                             // DataHVACGlobals VRF Terminal Unit type
+        Sched::Schedule *availSched = nullptr;                     // Pointer to the correct schedule // LOL // avail?
+        int VRFSysNum = 0;                                         // index to VRF Condenser
+        int TUListIndex = 0;                                       // index to VRF Terminal Unit List
+        int IndexToTUInTUList = 0;                                 // index to TU in VRF Terminal Unit List
+        int ZoneNum = 0;                                           // index to zone where VRF Terminal Unit resides
+        int ZoneAirNode = 0;                                       // zone air node number
+        int VRFTUInletNodeNum = 0;                                 // VRF Terminal Unit inlet node number
+        int VRFTUOutletNodeNum = 0;                                // VRF Terminal Unit outlet node number
+        int VRFTUOAMixerOANodeNum = 0;                             // OA node number for this TU's OA mixer
+        int VRFTUOAMixerRelNodeNum = 0;                            // Relief node number for this TU's OA mixer
+        int VRFTUOAMixerRetNodeNum = 0;                            // Return node number for this TU's OA mixer
+        int VRFTUOAMixerMixedNodeNum = 0;                          // Mixed node number for this TU's OA mixer
+        Real64 MaxCoolAirVolFlow = 0.0;                            // supply air volumetric flow rate during cooling operation [m3/s]
+        Real64 MaxHeatAirVolFlow = 0.0;                            // supply air volumetric flow rate during heating operation [m3/s]
+        Real64 MaxNoCoolAirVolFlow = 0.0;                          // supply air volumetric flow rate when no cooling [m3/s]
+        Real64 MaxNoHeatAirVolFlow = 0.0;                          // supply air volumetric flow rate when no heating [m3/s]
+        Real64 MaxCoolAirMassFlow = 0.0;                           // supply air mass flow rate during cooling operation [kg/s]
+        Real64 MaxHeatAirMassFlow = 0.0;                           // supply air mass flow rate during heating operation [kg/s]
+        Real64 MaxNoCoolAirMassFlow = 0.0;                         // supply air mass flow rate when no cooling [kg/s]
+        Real64 MaxNoHeatAirMassFlow = 0.0;                         // supply air mass flow rate when no heating [kg/s]
+        Real64 CoolOutAirVolFlow = 0.0;                            // OA volumetric flow rate during cooling operation [m3/s]
+        Real64 HeatOutAirVolFlow = 0.0;                            // OA volumetric flow rate during heating operation [m3/s]
+        Real64 NoCoolHeatOutAirVolFlow = 0.0;                      // OA volumetric flow rate when no cooling or heating [m3/s]
+        Real64 CoolOutAirMassFlow = 0.0;                           // OA mass flow rate during cooling operation [kg/s]
+        Real64 HeatOutAirMassFlow = 0.0;                           // OA mass flow rate during heating operation [kg/s]
+        Real64 NoCoolHeatOutAirMassFlow = 0.0;                     // OA mass flow rate when no cooling or heating [kg/s]
+        Real64 MinOperatingPLR = 1.0E-20;                          // minimum part-load ratio for operating of fan/coil
+        Real64 SuppHeatCoilFluidMaxFlow = 0.0;                     // supplemental heating coil fluid (hot water or steam) maximum flow rate [kg/s]
+        Real64 DesignSuppHeatingCapacity = 0.0;                    // supplemental heating coil design capacity  [W]
+        Real64 MaxSATFromSuppHeatCoil = 0.0;                       // maximum supply air temperature from supplemental heating coil [C]
+        Real64 MaxOATSuppHeatingCoil = 0.0;                        // maximum outdoor dry-bulb temperature for supplemental heating coil [C]
+        Real64 SuppHeatPartLoadRatio = 0.0;                        // supplemental heating coil part load ratio
+        Real64 SuppHeatingCoilLoad = 0.0;                          // supplemental heating coil heating load
+        HVAC::FanType fanType = HVAC::FanType::Invalid;            // index to fan type
+        Sched::Schedule *fanOpModeSched = nullptr;                 // Pointer to the correct fan operating mode schedule
+        Sched::Schedule *fanAvailSched = nullptr;                  // Pointer to the correct fan availability schedule
+        int FanIndex = 0;                                          // Index to fan object
+        Real64 FanPower = 0.0;                                     // power reported by fan component
+        HVAC::FanOp fanOp = HVAC::FanOp::Invalid;                  // operation mode: 1 = cycling fan, cycling coil 2 = constant fan, cycling coil
+        HVAC::FanPlace fanPlace = HVAC::FanPlace::Invalid;         // fan placement; 1=blow through, 2=draw through
+        Real64 ActualFanVolFlowRate = 0.0;                         // volumetric flow rate from fan object
+        std::string SuppHeatCoilType;                              // type of supplemental heating coil
+        std::string SuppHeatCoilName;                              // name of supplemental heating coil
+        std::string OAMixerName;                                   // name of outside air mixer
+        int OAMixerIndex = 0;                                      // index to outside air mixer
+        bool OAMixerUsed = false;                                  // true if OA Mixer object is used
+        int CoolCoilIndex = 0;                                     // index to terminal unit cooling coil
+        int HeatCoilIndex = 0;                                     // index to terminal unit heating coil
+        int SuppHeatCoilIndex = 0;                                 // index to terminal unit supplemental heating coil
+        HVAC::CoilType coolCoilType = HVAC::CoilType::Invalid;     // type of VRF cooling coil
+        HVAC::CoilType heatCoilType = HVAC::CoilType::Invalid;     // type of VRF heating coil
+        HVAC::CoilType suppHeatCoilType = HVAC::CoilType::Invalid; // type of VRF supplemental heating coil
+        Real64 ParasiticElec = 0.0;                                // parasitic electric for VRF terminal unit
+        Real64 ParasiticOffElec = 0.0;                             // parasitic electric for VRF terminal unit when off
+        Real64 HeatingSpeedRatio = 1.0;                            // Fan speed ratio in heating mode
+        Real64 NoHeatingSpeedRatio = 0.0;                          // Fan speed ratio when no heating
+        Real64 HeatingCapacitySizeRatio = 1.0;                     // Ratio of heating to cooling when autosizing
+        Real64 CoolingSpeedRatio = 1.0;                            // Fan speed ratio in cooling mode
+        Real64 NoCoolingSpeedRatio = 1.0;                          // Fan speed ratio when no cooling
+        Real64 ParasiticCoolElecPower = 0.0;                       // Terminal unit cooling parasitic electric power [W]
+        Real64 ParasiticHeatElecPower = 0.0;                       // Terminal unit heating parasitic electric power [W]
+        Real64 ParasiticElecCoolConsumption = 0.0;                 // Terminal unit parasitic electric consumption in cooling [J]
+        Real64 ParasiticElecHeatConsumption = 0.0;                 // Terminal unit parasitic electric consumption in heating [J]
+        bool CoolingCoilPresent = true;                            // FALSE if coil not present
+        bool HeatingCoilPresent = true;                            // FALSE if coil not present
+        bool SuppHeatingCoilPresent = false;                       // FALSE if coil not present
+        std::string AvailManagerListName;                          // Name of an availability manager list object
         Avail::Status availStatus = Avail::Status::NoAction;
         Real64 TerminalUnitSensibleRate = 0.0;                  // sensible cooling/heating rate of VRF terminal unit (W)
         Real64 TerminalUnitLatentRate = 0.0;                    // latent dehumidification/humidification rate of VRF terminal unit (W)

@@ -808,11 +808,11 @@ void SimOAController(EnergyPlusData &state, std::string const &CtrlName, int &Ct
                                 unitarySystemName, state.dataUnitarySystems->unitarySys, state.dataUnitarySystems->numUnitarySystems);
                             if (state.dataUnitarySystems->unitarySys[unitarySystemNum - 1].m_ControlType ==
                                 UnitarySystems::UnitarySys::UnitarySysCtrlType::Load) {
-                                if (state.dataUnitarySystems->unitarySys[unitarySystemNum - 1].m_CoolingCoilType_Num ==
-                                        HVAC::CoilDX_MultiSpeedCooling ||
-                                    state.dataUnitarySystems->unitarySys[unitarySystemNum - 1].m_CoolingCoilType_Num ==
-                                        HVAC::Coil_CoolingAirToAirVariableSpeed ||
-                                    state.dataUnitarySystems->unitarySys[unitarySystemNum - 1].m_CoolingCoilType_Num == HVAC::CoilDX_Cooling) {
+                                if (state.dataUnitarySystems->unitarySys[unitarySystemNum - 1].m_coolCoilType ==
+                                        HVAC::CoilType::CoolingDXMultiSpeed ||
+                                    state.dataUnitarySystems->unitarySys[unitarySystemNum - 1].m_coolCoilType ==
+                                        HVAC::CoilType::CoolingDXVariableSpeed ||
+                                    state.dataUnitarySystems->unitarySys[unitarySystemNum - 1].m_coolCoilType == HVAC::CoilType::CoolingDX) {
                                     sensLoadCtrlUnitarySystemFound = true;
                                     break;
                                 }

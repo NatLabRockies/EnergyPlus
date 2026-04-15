@@ -7,6 +7,9 @@ on:
     branches: [ develop ]
   workflow_dispatch:
 
+env:
+  Python_REQUIRED_VERSION: 3.12.3  # 3.12.2 not available on Ubuntu 24 GHA
+
 jobs:
   code_integrity_checks:
     name: Static Code Analysis
@@ -16,10 +19,15 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: Set up Python ${{ env.Python_REQUIRED_VERSION }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.Python_REQUIRED_VERSION }}
+
       - name: Pip install dependencies
         if: always()
         run: |
-          pip install pre-commit tabulate
+          python -m pip install pre-commit tabulate
 
       - name: Run pre-commit
         id: pre_commit
@@ -202,7 +210,7 @@ jobs:
           -D__cppcheck__ -UEP_Count_Calls -DEP_NO_OPENGL -UGROUND_PLOT -DLINK_WITH_PYTHON -DMSVC_DEBUG -DSKYLINE_MATRIX_REMOVE_ZERO_COLUMNS -U_OPENMP -Ugeneratetestdata
           -DEP_cache_GlycolSpecificHeat -DEP_cache_PsyTsatFnPb -UEP_nocache_Psychrometrics -UEP_psych_errors -UEP_psych_stats
           --force
-          --std=c++17
+          --std=c++20
           --inline-suppr
           --suppress=missingInclude
           --suppress=missingIncludeSystem
@@ -215,35 +223,6 @@ jobs:
           --enable=all
           -j $(nproc)
           --template='[{file}:{line}]:({severity}),[{id}],{message}'
-          --suppress="uninitvar:*" \
-          --suppress="arrayIndexThenCheck:*" \
-          --suppress="checkLevelNormal:*" \
-          --suppress="constParameterPointer:*" \
-          --suppress="constParameterReference:*" \
-          --suppress="constVariable:*" \
-          --suppress="constVariablePointer:*" \
-          --suppress="constVariableReference:*" \
-          --suppress="cstyleCast:*" \
-          --suppress="duplicateCondition:*" \
-          --suppress="duplicateExpression:*" \
-          --suppress="knownConditionTrueFalse:*" \
-          --suppress="multiCondition:*" \
-          --suppress="noExplicitConstructor:*" \
-          --suppress="passedByValueCallback:*" \
-          --suppress="redundantAssignment:*" \
-          --suppress="redundantCondition:*" \
-          --suppress="redundantInitialization:*" \
-          --suppress="sameIteratorExpression:*" \
-          --suppress="shadowFunction:*" \
-          --suppress="shadowVariable:*" \
-          --suppress="unassignedVariable:*" \
-          --suppress="unmatchedSuppression:*" \
-          --suppress="unpreciseMathCall:*" \
-          --suppress="unreadVariable:*" \
-          --suppress="useInitializationList:*" \
-          --suppress="useStlAlgorithm:*" \
-          --suppress="uselessAssignmentArg:*" \
-          --suppress="uselessCallsSubstr:*" \
           ./src
           3>&1 1>&2 2>&3 | tee cppcheck.txt
 

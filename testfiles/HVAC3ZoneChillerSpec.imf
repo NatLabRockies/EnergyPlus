@@ -1,3 +1,9 @@
+!  Version,
+!    26.1;                   !- Version Identifier
+
+!  Version,
+!    26.1;                   !- Version Identifier
+
   DistrictCooling,
     Purchased Cooling,       !- Name
     Purchased Cooling Inlet Node,  !- Chilled Water Inlet Node Name

@@ -220,51 +220,44 @@ namespace SplitterComponent {
                                                                      cAlphaFields,
                                                                      cNumericFields);
 
-            state.dataSplitterComponent->SplitterCond(SplitterNum).SplitterName = AlphArray(1);
-            state.dataSplitterComponent->SplitterCond(SplitterNum).InletNode = GetOnlySingleNode(state,
-                                                                                                 AlphArray(2),
-                                                                                                 ErrorsFound,
-                                                                                                 Node::ConnectionObjectType::AirLoopHVACZoneSplitter,
-                                                                                                 AlphArray(1),
-                                                                                                 Node::FluidType::Air,
-                                                                                                 Node::ConnectionType::Inlet,
-                                                                                                 Node::CompFluidStream::Primary,
-                                                                                                 Node::ObjectIsNotParent);
-            state.dataSplitterComponent->SplitterCond(SplitterNum).NumOutletNodes = NumAlphas - 2;
+            auto &splitter = state.dataSplitterComponent->SplitterCond(SplitterNum);
 
-            state.dataSplitterComponent->SplitterCond(SplitterNum)
-                .OutletNode.allocate(state.dataSplitterComponent->SplitterCond(SplitterNum).NumOutletNodes);
-            state.dataSplitterComponent->SplitterCond(SplitterNum)
-                .OutletMassFlowRate.allocate(state.dataSplitterComponent->SplitterCond(SplitterNum).NumOutletNodes);
-            state.dataSplitterComponent->SplitterCond(SplitterNum)
-                .OutletMassFlowRateMaxAvail.allocate(state.dataSplitterComponent->SplitterCond(SplitterNum).NumOutletNodes);
-            state.dataSplitterComponent->SplitterCond(SplitterNum)
-                .OutletMassFlowRateMinAvail.allocate(state.dataSplitterComponent->SplitterCond(SplitterNum).NumOutletNodes);
-            state.dataSplitterComponent->SplitterCond(SplitterNum)
-                .OutletTemp.allocate(state.dataSplitterComponent->SplitterCond(SplitterNum).NumOutletNodes);
-            state.dataSplitterComponent->SplitterCond(SplitterNum)
-                .OutletHumRat.allocate(state.dataSplitterComponent->SplitterCond(SplitterNum).NumOutletNodes);
-            state.dataSplitterComponent->SplitterCond(SplitterNum)
-                .OutletEnthalpy.allocate(state.dataSplitterComponent->SplitterCond(SplitterNum).NumOutletNodes);
-            state.dataSplitterComponent->SplitterCond(SplitterNum)
-                .OutletPressure.allocate(state.dataSplitterComponent->SplitterCond(SplitterNum).NumOutletNodes);
+            splitter.SplitterName = AlphArray(1);
+            splitter.InletNode = GetOnlySingleNode(state,
+                                                   AlphArray(2),
+                                                   ErrorsFound,
+                                                   Node::ConnectionObjectType::AirLoopHVACZoneSplitter,
+                                                   AlphArray(1),
+                                                   Node::FluidType::Air,
+                                                   Node::ConnectionType::Inlet,
+                                                   Node::CompFluidStream::Primary,
+                                                   Node::ObjectIsNotParent);
+            splitter.NumOutletNodes = NumAlphas - 2;
 
-            state.dataSplitterComponent->SplitterCond(SplitterNum).InletMassFlowRate = 0.0;
-            state.dataSplitterComponent->SplitterCond(SplitterNum).InletMassFlowRateMaxAvail = 0.0;
-            state.dataSplitterComponent->SplitterCond(SplitterNum).InletMassFlowRateMinAvail = 0.0;
+            state.dataSplitterComponent->SplitterCond(SplitterNum).OutletNode.allocate(splitter.NumOutletNodes);
+            state.dataSplitterComponent->SplitterCond(SplitterNum).OutletMassFlowRate.allocate(splitter.NumOutletNodes);
+            state.dataSplitterComponent->SplitterCond(SplitterNum).OutletMassFlowRateMaxAvail.allocate(splitter.NumOutletNodes);
+            state.dataSplitterComponent->SplitterCond(SplitterNum).OutletMassFlowRateMinAvail.allocate(splitter.NumOutletNodes);
+            state.dataSplitterComponent->SplitterCond(SplitterNum).OutletTemp.allocate(splitter.NumOutletNodes);
+            state.dataSplitterComponent->SplitterCond(SplitterNum).OutletHumRat.allocate(splitter.NumOutletNodes);
+            state.dataSplitterComponent->SplitterCond(SplitterNum).OutletEnthalpy.allocate(splitter.NumOutletNodes);
+            state.dataSplitterComponent->SplitterCond(SplitterNum).OutletPressure.allocate(splitter.NumOutletNodes);
 
-            for (NodeNum = 1; NodeNum <= state.dataSplitterComponent->SplitterCond(SplitterNum).NumOutletNodes; ++NodeNum) {
+            splitter.InletMassFlowRate = 0.0;
+            splitter.InletMassFlowRateMaxAvail = 0.0;
+            splitter.InletMassFlowRateMinAvail = 0.0;
 
-                state.dataSplitterComponent->SplitterCond(SplitterNum).OutletNode(NodeNum) =
-                    GetOnlySingleNode(state,
-                                      AlphArray(2 + NodeNum),
-                                      ErrorsFound,
-                                      Node::ConnectionObjectType::AirLoopHVACZoneSplitter,
-                                      AlphArray(1),
-                                      Node::FluidType::Air,
-                                      Node::ConnectionType::Outlet,
-                                      Node::CompFluidStream::Primary,
-                                      Node::ObjectIsNotParent);
+            for (NodeNum = 1; NodeNum <= splitter.NumOutletNodes; ++NodeNum) {
+
+                splitter.OutletNode(NodeNum) = GetOnlySingleNode(state,
+                                                                 AlphArray(2 + NodeNum),
+                                                                 ErrorsFound,
+                                                                 Node::ConnectionObjectType::AirLoopHVACZoneSplitter,
+                                                                 AlphArray(1),
+                                                                 Node::FluidType::Air,
+                                                                 Node::ConnectionType::Outlet,
+                                                                 Node::CompFluidStream::Primary,
+                                                                 Node::ObjectIsNotParent);
                 if (lAlphaBlanks(2 + NodeNum)) {
                     ShowSevereError(state, EnergyPlus::format("{} is Blank, {} = {}", cAlphaFields(2 + NodeNum), CurrentModuleObject, AlphArray(1)));
                     ErrorsFound = true;
@@ -275,30 +268,28 @@ namespace SplitterComponent {
 
         // Check for duplicate names specified in Zone Splitter
         for (SplitterNum = 1; SplitterNum <= state.dataSplitterComponent->NumSplitters; ++SplitterNum) {
-            NodeNum = state.dataSplitterComponent->SplitterCond(SplitterNum).InletNode;
-            for (OutNodeNum1 = 1; OutNodeNum1 <= state.dataSplitterComponent->SplitterCond(SplitterNum).NumOutletNodes; ++OutNodeNum1) {
-                if (NodeNum != state.dataSplitterComponent->SplitterCond(SplitterNum).OutletNode(OutNodeNum1)) {
+            auto &splitter = state.dataSplitterComponent->SplitterCond(SplitterNum);
+            NodeNum = splitter.InletNode;
+            for (OutNodeNum1 = 1; OutNodeNum1 <= splitter.NumOutletNodes; ++OutNodeNum1) {
+                if (NodeNum != splitter.OutletNode(OutNodeNum1)) {
                     continue;
                 }
                 ShowSevereError(state,
-                                EnergyPlus::format("{} = {} specifies an outlet node name the same as the inlet node.",
-                                                   CurrentModuleObject,
-                                                   state.dataSplitterComponent->SplitterCond(SplitterNum).SplitterName));
+                                EnergyPlus::format(
+                                    "{} = {} specifies an outlet node name the same as the inlet node.", CurrentModuleObject, splitter.SplitterName));
                 ShowContinueError(state, EnergyPlus::format("..{}={}", cAlphaFields(2), state.dataLoopNodes->NodeID(NodeNum)));
                 ShowContinueError(state, EnergyPlus::format("..Outlet Node #{} is duplicate.", OutNodeNum1));
                 ErrorsFound = true;
             }
-            for (OutNodeNum1 = 1; OutNodeNum1 <= state.dataSplitterComponent->SplitterCond(SplitterNum).NumOutletNodes; ++OutNodeNum1) {
-                for (OutNodeNum2 = OutNodeNum1 + 1; OutNodeNum2 <= state.dataSplitterComponent->SplitterCond(SplitterNum).NumOutletNodes;
-                     ++OutNodeNum2) {
-                    if (state.dataSplitterComponent->SplitterCond(SplitterNum).OutletNode(OutNodeNum1) !=
-                        state.dataSplitterComponent->SplitterCond(SplitterNum).OutletNode(OutNodeNum2)) {
+            for (OutNodeNum1 = 1; OutNodeNum1 <= splitter.NumOutletNodes; ++OutNodeNum1) {
+                for (OutNodeNum2 = OutNodeNum1 + 1; OutNodeNum2 <= splitter.NumOutletNodes; ++OutNodeNum2) {
+                    if (splitter.OutletNode(OutNodeNum1) != splitter.OutletNode(OutNodeNum2)) {
                         continue;
                     }
                     ShowSevereError(state,
                                     EnergyPlus::format("{} = {} specifies duplicate outlet nodes in its outlet node list.",
                                                        CurrentModuleObject,
-                                                       state.dataSplitterComponent->SplitterCond(SplitterNum).SplitterName));
+                                                       splitter.SplitterName));
                     ShowContinueError(state, EnergyPlus::format("..Outlet Node #{} Name={}", OutNodeNum1, state.dataLoopNodes->NodeID(OutNodeNum1)));
                     ShowContinueError(state, EnergyPlus::format("..Outlet Node #{} is duplicate.", OutNodeNum2));
                     ErrorsFound = true;
@@ -335,10 +326,10 @@ namespace SplitterComponent {
 
         using Psychrometrics::PsyHFnTdbW;
 
-        int InletNode;
-        int OutletNode;
         int NodeNum;
         Real64 AirEnthalpy; // [J/kg]
+
+        auto &splitter = state.dataSplitterComponent->SplitterCond(SplitterNum);
 
         // Do the Begin Environment initializations
         if (state.dataGlobal->BeginEnvrnFlag && state.dataSplitterComponent->MyEnvrnFlag) {
@@ -348,16 +339,16 @@ namespace SplitterComponent {
 
             // Initialize the inlet node to s standard set of conditions so that the
             //  flows match around the loop & do not cause convergence problems.
-            InletNode = state.dataSplitterComponent->SplitterCond(SplitterNum).InletNode;
-            state.dataLoopNodes->Node(InletNode).Temp = 20.0;
-            state.dataLoopNodes->Node(InletNode).HumRat = state.dataEnvrn->OutHumRat;
-            state.dataLoopNodes->Node(InletNode).Enthalpy = AirEnthalpy;
-            state.dataLoopNodes->Node(InletNode).Press = state.dataEnvrn->OutBaroPress;
+            auto &inletNode = state.dataLoopNodes->Node(splitter.InletNode);
+            inletNode.Temp = 20.0;
+            inletNode.HumRat = state.dataEnvrn->OutHumRat;
+            inletNode.Enthalpy = AirEnthalpy;
+            inletNode.Press = state.dataEnvrn->OutBaroPress;
             if (state.dataContaminantBalance->Contaminant.CO2Simulation) {
-                state.dataLoopNodes->Node(InletNode).CO2 = state.dataContaminantBalance->OutdoorCO2;
+                inletNode.CO2 = state.dataContaminantBalance->OutdoorCO2;
             }
             if (state.dataContaminantBalance->Contaminant.GenericContamSimulation) {
-                state.dataLoopNodes->Node(InletNode).GenContam = state.dataContaminantBalance->OutdoorGC;
+                inletNode.GenContam = state.dataContaminantBalance->OutdoorGC;
             }
 
             state.dataSplitterComponent->MyEnvrnFlag = false;
@@ -368,7 +359,7 @@ namespace SplitterComponent {
         }
 
         // Set the inlet node for the Splitter
-        InletNode = state.dataSplitterComponent->SplitterCond(SplitterNum).InletNode;
+        auto &inletNode = state.dataLoopNodes->Node(splitter.InletNode);
 
         // Do the following initializations (every time step): This should be the info from
         // the previous components outlets or the node data in this section.
@@ -384,19 +375,16 @@ namespace SplitterComponent {
         // iteration through and the splitter first pass.  After the first iteration the ADU sets the
         // correct flow and that is used and passed back upstream.
         if (FirstHVACIteration && FirstCall) {
-            if (state.dataLoopNodes->Node(InletNode).MassFlowRate > 0.0) {
-                for (NodeNum = 1; NodeNum <= state.dataSplitterComponent->SplitterCond(SplitterNum).NumOutletNodes; ++NodeNum) {
-                    OutletNode = state.dataSplitterComponent->SplitterCond(SplitterNum).OutletNode(NodeNum);
-                    state.dataLoopNodes->Node(OutletNode).MassFlowRate =
-                        state.dataLoopNodes->Node(InletNode).MassFlowRate / state.dataSplitterComponent->SplitterCond(SplitterNum).NumOutletNodes;
+            if (inletNode.MassFlowRate > 0.0) {
+                for (NodeNum = 1; NodeNum <= splitter.NumOutletNodes; ++NodeNum) {
+                    auto &outletNode = state.dataLoopNodes->Node(splitter.OutletNode(NodeNum));
+                    outletNode.MassFlowRate = inletNode.MassFlowRate / splitter.NumOutletNodes;
                 }
             }
-            if (state.dataLoopNodes->Node(InletNode).MassFlowRateMaxAvail > 0.0) {
-                for (NodeNum = 1; NodeNum <= state.dataSplitterComponent->SplitterCond(SplitterNum).NumOutletNodes; ++NodeNum) {
-                    OutletNode = state.dataSplitterComponent->SplitterCond(SplitterNum).OutletNode(NodeNum);
-                    state.dataLoopNodes->Node(OutletNode).MassFlowRateMaxAvail =
-                        state.dataLoopNodes->Node(InletNode).MassFlowRateMaxAvail /
-                        state.dataSplitterComponent->SplitterCond(SplitterNum).NumOutletNodes;
+            if (inletNode.MassFlowRateMaxAvail > 0.0) {
+                for (NodeNum = 1; NodeNum <= splitter.NumOutletNodes; ++NodeNum) {
+                    auto &outletNode = state.dataLoopNodes->Node(splitter.OutletNode(NodeNum));
+                    outletNode.MassFlowRateMaxAvail = inletNode.MassFlowRateMaxAvail / splitter.NumOutletNodes;
                 }
             }
 
@@ -407,36 +395,31 @@ namespace SplitterComponent {
             // for some operational or algorithm dependency.  This IF block should catch that condition
             // and then pass the NO flow condition downstream to the waiting ADU's.  Most of the time
             // this IF is jumped over.
-            if (state.dataLoopNodes->Node(InletNode).MassFlowRateMaxAvail == 0.0) {
+            if (inletNode.MassFlowRateMaxAvail == 0.0) {
 
-                for (NodeNum = 1; NodeNum <= state.dataSplitterComponent->SplitterCond(SplitterNum).NumOutletNodes; ++NodeNum) {
-
-                    OutletNode = state.dataSplitterComponent->SplitterCond(SplitterNum).OutletNode(NodeNum);
-                    state.dataLoopNodes->Node(OutletNode).MassFlowRate = 0.0;
-                    state.dataLoopNodes->Node(OutletNode).MassFlowRateMaxAvail = 0.0;
-                    state.dataLoopNodes->Node(OutletNode).MassFlowRateMinAvail = 0.0;
+                for (NodeNum = 1; NodeNum <= splitter.NumOutletNodes; ++NodeNum) {
+                    auto &outletNode = state.dataLoopNodes->Node(splitter.OutletNode(NodeNum));
+                    outletNode.MassFlowRate = 0.0;
+                    outletNode.MassFlowRateMaxAvail = 0.0;
+                    outletNode.MassFlowRateMinAvail = 0.0;
                 }
             } // For Node inlet Max Avail = 0.0
 
             // Pass the State Properties through every time.  This is what mainly happens each time
             // through the splitter,
-            InletNode = state.dataSplitterComponent->SplitterCond(SplitterNum).InletNode;
-            state.dataSplitterComponent->SplitterCond(SplitterNum).InletTemp = state.dataLoopNodes->Node(InletNode).Temp;
-            state.dataSplitterComponent->SplitterCond(SplitterNum).InletHumRat = state.dataLoopNodes->Node(InletNode).HumRat;
-            state.dataSplitterComponent->SplitterCond(SplitterNum).InletEnthalpy = state.dataLoopNodes->Node(InletNode).Enthalpy;
-            state.dataSplitterComponent->SplitterCond(SplitterNum).InletPressure = state.dataLoopNodes->Node(InletNode).Press;
+            splitter.InletTemp = inletNode.Temp;
+            splitter.InletHumRat = inletNode.HumRat;
+            splitter.InletEnthalpy = inletNode.Enthalpy;
+            splitter.InletPressure = inletNode.Press;
 
         } else { // On the second call from the ZoneEquipManager this is where the flows are passed back to
             // the splitter inlet.
-            for (NodeNum = 1; NodeNum <= state.dataSplitterComponent->SplitterCond(SplitterNum).NumOutletNodes; ++NodeNum) {
+            for (NodeNum = 1; NodeNum <= splitter.NumOutletNodes; ++NodeNum) {
 
-                OutletNode = state.dataSplitterComponent->SplitterCond(SplitterNum).OutletNode(NodeNum);
-                state.dataSplitterComponent->SplitterCond(SplitterNum).OutletMassFlowRate(NodeNum) =
-                    state.dataLoopNodes->Node(OutletNode).MassFlowRate;
-                state.dataSplitterComponent->SplitterCond(SplitterNum).OutletMassFlowRateMaxAvail(NodeNum) =
-                    state.dataLoopNodes->Node(OutletNode).MassFlowRateMaxAvail;
-                state.dataSplitterComponent->SplitterCond(SplitterNum).OutletMassFlowRateMinAvail(NodeNum) =
-                    state.dataLoopNodes->Node(OutletNode).MassFlowRateMinAvail;
+                auto &outletNode = state.dataLoopNodes->Node(splitter.OutletNode(NodeNum));
+                splitter.OutletMassFlowRate(NodeNum) = outletNode.MassFlowRate;
+                splitter.OutletMassFlowRateMaxAvail(NodeNum) = outletNode.MassFlowRateMaxAvail;
+                splitter.OutletMassFlowRateMinAvail(NodeNum) = outletNode.MassFlowRateMinAvail;
             }
 
         } // For FirstCall
@@ -459,30 +442,28 @@ namespace SplitterComponent {
 
         int OutletNodeNum;
 
+        auto &splitter = state.dataSplitterComponent->SplitterCond(SplitterNum);
+
         // The first time through the State properties are split and passed through
         if (FirstCall) {
             // Moisture balance to get outlet air humidity ratio
-            for (OutletNodeNum = 1; OutletNodeNum <= state.dataSplitterComponent->SplitterCond(SplitterNum).NumOutletNodes; ++OutletNodeNum) {
-                state.dataSplitterComponent->SplitterCond(SplitterNum).OutletHumRat(OutletNodeNum) =
-                    state.dataSplitterComponent->SplitterCond(SplitterNum).InletHumRat;
+            for (OutletNodeNum = 1; OutletNodeNum <= splitter.NumOutletNodes; ++OutletNodeNum) {
+                splitter.OutletHumRat(OutletNodeNum) = splitter.InletHumRat;
             }
 
             // "Momentum balance" to get outlet air pressure
-            for (OutletNodeNum = 1; OutletNodeNum <= state.dataSplitterComponent->SplitterCond(SplitterNum).NumOutletNodes; ++OutletNodeNum) {
-                state.dataSplitterComponent->SplitterCond(SplitterNum).OutletPressure(OutletNodeNum) =
-                    state.dataSplitterComponent->SplitterCond(SplitterNum).InletPressure;
+            for (OutletNodeNum = 1; OutletNodeNum <= splitter.NumOutletNodes; ++OutletNodeNum) {
+                splitter.OutletPressure(OutletNodeNum) = splitter.InletPressure;
             }
 
             // Energy balance to get outlet air enthalpy
-            for (OutletNodeNum = 1; OutletNodeNum <= state.dataSplitterComponent->SplitterCond(SplitterNum).NumOutletNodes; ++OutletNodeNum) {
-                state.dataSplitterComponent->SplitterCond(SplitterNum).OutletEnthalpy(OutletNodeNum) =
-                    state.dataSplitterComponent->SplitterCond(SplitterNum).InletEnthalpy;
+            for (OutletNodeNum = 1; OutletNodeNum <= splitter.NumOutletNodes; ++OutletNodeNum) {
+                splitter.OutletEnthalpy(OutletNodeNum) = splitter.InletEnthalpy;
             }
 
             // Set outlet temperatures equal to inlet temperature
-            for (OutletNodeNum = 1; OutletNodeNum <= state.dataSplitterComponent->SplitterCond(SplitterNum).NumOutletNodes; ++OutletNodeNum) {
-                state.dataSplitterComponent->SplitterCond(SplitterNum).OutletTemp(OutletNodeNum) =
-                    state.dataSplitterComponent->SplitterCond(SplitterNum).InletTemp;
+            for (OutletNodeNum = 1; OutletNodeNum <= splitter.NumOutletNodes; ++OutletNodeNum) {
+                splitter.OutletTemp(OutletNodeNum) = splitter.InletTemp;
             }
 
         } else {
@@ -490,18 +471,15 @@ namespace SplitterComponent {
             // summed and then assigned upstream to the inlet node.
             // Overall Mass Continuity Equation to get inlet mass flow rates
             // Zero the inlet Totals before the Inlets are summed
-            state.dataSplitterComponent->SplitterCond(SplitterNum).InletMassFlowRate = 0.0;
-            state.dataSplitterComponent->SplitterCond(SplitterNum).InletMassFlowRateMaxAvail = 0.0;
-            state.dataSplitterComponent->SplitterCond(SplitterNum).InletMassFlowRateMinAvail = 0.0;
+            splitter.InletMassFlowRate = 0.0;
+            splitter.InletMassFlowRateMaxAvail = 0.0;
+            splitter.InletMassFlowRateMinAvail = 0.0;
 
-            for (OutletNodeNum = 1; OutletNodeNum <= state.dataSplitterComponent->SplitterCond(SplitterNum).NumOutletNodes; ++OutletNodeNum) {
-                state.dataSplitterComponent->SplitterCond(SplitterNum).InletMassFlowRate +=
-                    state.dataSplitterComponent->SplitterCond(SplitterNum).OutletMassFlowRate(OutletNodeNum);
+            for (OutletNodeNum = 1; OutletNodeNum <= splitter.NumOutletNodes; ++OutletNodeNum) {
+                splitter.InletMassFlowRate += splitter.OutletMassFlowRate(OutletNodeNum);
 
-                state.dataSplitterComponent->SplitterCond(SplitterNum).InletMassFlowRateMaxAvail +=
-                    state.dataSplitterComponent->SplitterCond(SplitterNum).OutletMassFlowRateMaxAvail(OutletNodeNum);
-                state.dataSplitterComponent->SplitterCond(SplitterNum).InletMassFlowRateMinAvail +=
-                    state.dataSplitterComponent->SplitterCond(SplitterNum).OutletMassFlowRateMinAvail(OutletNodeNum);
+                splitter.InletMassFlowRateMaxAvail += splitter.OutletMassFlowRateMaxAvail(OutletNodeNum);
+                splitter.InletMassFlowRateMinAvail += splitter.OutletMassFlowRateMinAvail(OutletNodeNum);
             }
 
             // What happens if Splitter inlet mass flow rate is greater than max available
@@ -524,25 +502,27 @@ namespace SplitterComponent {
 
         Real64 constexpr FlowRateToler(0.01); // Tolerance for mass flow rate convergence (in kg/s)
 
+        auto &splitter = state.dataSplitterComponent->SplitterCond(SplitterNum);
+
         // Set the inlet node for this splitter to be used throughout subroutine for either case
-        int InletNode = state.dataSplitterComponent->SplitterCond(SplitterNum).InletNode;
+        auto &inletNode = state.dataLoopNodes->Node(splitter.InletNode);
 
         // On the FirstCall the State properties are passed through and the mass flows are not dealt with
         // except for NO flow conditions
         if (FirstCall) {
             // Set the outlet nodes for properties that just pass through & not used
-            for (int NodeNum = 1; NodeNum <= state.dataSplitterComponent->SplitterCond(SplitterNum).NumOutletNodes; ++NodeNum) {
-                int OutletNode = state.dataSplitterComponent->SplitterCond(SplitterNum).OutletNode(NodeNum);
-                state.dataLoopNodes->Node(OutletNode).Temp = state.dataSplitterComponent->SplitterCond(SplitterNum).OutletTemp(NodeNum);
-                state.dataLoopNodes->Node(OutletNode).HumRat = state.dataSplitterComponent->SplitterCond(SplitterNum).OutletHumRat(NodeNum);
-                state.dataLoopNodes->Node(OutletNode).Enthalpy = state.dataSplitterComponent->SplitterCond(SplitterNum).OutletEnthalpy(NodeNum);
-                state.dataLoopNodes->Node(OutletNode).Quality = state.dataLoopNodes->Node(InletNode).Quality;
-                state.dataLoopNodes->Node(OutletNode).Press = state.dataSplitterComponent->SplitterCond(SplitterNum).OutletPressure(NodeNum);
+            for (int NodeNum = 1; NodeNum <= splitter.NumOutletNodes; ++NodeNum) {
+                auto &outletNode = state.dataLoopNodes->Node(splitter.OutletNode(NodeNum));
+                outletNode.Temp = splitter.OutletTemp(NodeNum);
+                outletNode.HumRat = splitter.OutletHumRat(NodeNum);
+                outletNode.Enthalpy = splitter.OutletEnthalpy(NodeNum);
+                outletNode.Quality = inletNode.Quality;
+                outletNode.Press = splitter.OutletPressure(NodeNum);
                 if (state.dataContaminantBalance->Contaminant.CO2Simulation) {
-                    state.dataLoopNodes->Node(OutletNode).CO2 = state.dataLoopNodes->Node(InletNode).CO2;
+                    outletNode.CO2 = inletNode.CO2;
                 }
                 if (state.dataContaminantBalance->Contaminant.GenericContamSimulation) {
-                    state.dataLoopNodes->Node(OutletNode).GenContam = state.dataLoopNodes->Node(InletNode).GenContam;
+                    outletNode.GenContam = inletNode.GenContam;
                 }
             }
 
@@ -554,15 +534,12 @@ namespace SplitterComponent {
 
             // Set the outlet air nodes of the Splitter if the splitter results have changed
             //  beyond the tolerance.
-            if (std::abs(state.dataLoopNodes->Node(InletNode).MassFlowRate -
-                         state.dataSplitterComponent->SplitterCond(SplitterNum).InletMassFlowRate) > FlowRateToler) {
+            if (std::abs(inletNode.MassFlowRate - splitter.InletMassFlowRate) > FlowRateToler) {
                 SplitterInletChanged = true;
             }
-            state.dataLoopNodes->Node(InletNode).MassFlowRate = state.dataSplitterComponent->SplitterCond(SplitterNum).InletMassFlowRate;
-            state.dataLoopNodes->Node(InletNode).MassFlowRateMaxAvail =
-                state.dataSplitterComponent->SplitterCond(SplitterNum).InletMassFlowRateMaxAvail;
-            state.dataLoopNodes->Node(InletNode).MassFlowRateMinAvail =
-                state.dataSplitterComponent->SplitterCond(SplitterNum).InletMassFlowRateMinAvail;
+            inletNode.MassFlowRate = splitter.InletMassFlowRate;
+            inletNode.MassFlowRateMaxAvail = splitter.InletMassFlowRateMaxAvail;
+            inletNode.MassFlowRateMinAvail = splitter.InletMassFlowRateMinAvail;
 
         } // The FirstCall END IF
     }

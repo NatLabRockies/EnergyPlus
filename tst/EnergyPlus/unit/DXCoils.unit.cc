@@ -215,10 +215,8 @@ TEST_F(EnergyPlusFixture, DXCoils_Test1)
 
     state->dataDXCoils->NumDXCoils = 2;
     state->dataDXCoils->DXCoil.allocate(state->dataDXCoils->NumDXCoils);
-    state->dataDXCoils->DXCoil(1).DXCoilType_Num = HVAC::CoilDX_MultiSpeedCooling;
-    state->dataDXCoils->DXCoil(1).DXCoilType = "Coil:Cooling:DX:MultiSpeed";
-    state->dataDXCoils->DXCoil(2).DXCoilType_Num = HVAC::CoilDX_MultiSpeedHeating;
-    state->dataDXCoils->DXCoil(2).DXCoilType = "Coil:Heating:DX:MultiSpeed";
+    state->dataDXCoils->DXCoil(1).coilType = HVAC::CoilType::CoolingDXMultiSpeed;
+    state->dataDXCoils->DXCoil(2).coilType = HVAC::CoilType::HeatingDXMultiSpeed;
     state->dataDXCoils->DXCoil(1).MSRatedTotCap.allocate(2);
     state->dataDXCoils->DXCoil(2).MSRatedTotCap.allocate(2);
     state->dataDXCoils->DXCoil(2).CompanionUpstreamDXCoil = 1;
@@ -349,9 +347,8 @@ TEST_F(EnergyPlusFixture, DXCoils_Test2)
     DXCoilNum = 2;
     state->dataSize->UnitarySysEqSizing.allocate(1);
     state->dataDXCoils->DXCoil.allocate(state->dataDXCoils->NumDXCoils);
-    state->dataDXCoils->DXCoil(1).DXCoilType_Num = HVAC::CoilDX_CoolingSingleSpeed;
-    state->dataDXCoils->DXCoil(2).DXCoilType_Num = HVAC::CoilDX_HeatingEmpirical;
-    state->dataDXCoils->DXCoil(DXCoilNum).DXCoilType = "Coil:Heating:DX:SingleSpeed";
+    state->dataDXCoils->DXCoil(1).coilType = HVAC::CoilType::CoolingDXSingleSpeed;
+    state->dataDXCoils->DXCoil(2).coilType = HVAC::CoilType::HeatingDXSingleSpeed;
     state->dataDXCoils->DXCoil(2).CompanionUpstreamDXCoil = 1;
 
     state->dataDXCoils->DXCoilNumericFields.allocate(state->dataDXCoils->NumDXCoils);
@@ -454,8 +451,7 @@ TEST_F(EnergyPlusFixture, TestMultiSpeedDefrostCOP)
     state->dataDXCoils->DXCoil.allocate(state->dataDXCoils->NumDXCoils);
     DXCoilData &Coil = state->dataDXCoils->DXCoil(DXCoilNum);
 
-    Coil.DXCoilType = "Coil:Heating:DX:MultiSpeed";
-    Coil.DXCoilType_Num = HVAC::CoilDX_MultiSpeedHeating;
+    Coil.coilType = HVAC::CoilType::HeatingDXMultiSpeed;
     Coil.availSched = Sched::GetScheduleAlwaysOn(*state);
 
     state->dataDXCoils->DXCoilNumericFields.allocate(state->dataDXCoils->NumDXCoils);
@@ -938,8 +934,7 @@ TEST_F(EnergyPlusFixture, TestSingleSpeedDefrostCOP)
     DXCoilData &Coil = state->dataDXCoils->DXCoil(DXCoilNum);
 
     Coil.Name = "DX Single Speed Heating Coil";
-    Coil.DXCoilType = "Coil:Heating:DX:SingleSpeed";
-    Coil.DXCoilType_Num = HVAC::CoilDX_HeatingEmpirical;
+    Coil.coilType = HVAC::CoilType::HeatingDXSingleSpeed;
     Coil.availSched = Sched::GetScheduleAlwaysOn(*state);
     state->dataLoopNodes->Node.allocate(1);
     Coil.AirOutNode = 1;
@@ -2122,43 +2117,43 @@ TEST_F(EnergyPlusFixture, TestReadingCoilCoolingHeatingDX)
     state->dataEnvrn->StdRhoAir = Psychrometrics::PsyRhoAirFnPbTdbW(*state, state->dataEnvrn->OutBaroPress, 20.0, 0.0);
 
     // Coil:Cooling:DX:SingleSpeed
-    EXPECT_EQ(state->dataDXCoils->DXCoil(1).DXCoilType_Num, HVAC::CoilDX_CoolingSingleSpeed);
+    EXPECT_EQ(state->dataDXCoils->DXCoil(1).coilType, HVAC::CoilType::CoolingDXSingleSpeed);
     EXPECT_EQ("HEATERCAPCURVE", Curve::GetCurveName(*state, state->dataDXCoils->DXCoil(1).CrankcaseHeaterCapacityCurveIndex));
 
     // Coil:Cooling:DX:TwoStageWithHumidityControlMode
-    EXPECT_EQ(state->dataDXCoils->DXCoil(2).DXCoilType_Num, HVAC::CoilDX_CoolingTwoStageWHumControl);
+    EXPECT_EQ(state->dataDXCoils->DXCoil(2).coilType, HVAC::CoilType::CoolingDXTwoStageWHumControl);
     EXPECT_EQ("HEATERCAPCURVE7", Curve::GetCurveName(*state, state->dataDXCoils->DXCoil(2).CrankcaseHeaterCapacityCurveIndex));
 
     // Coil:Heating:DX:SingleSpeed
-    EXPECT_EQ(state->dataDXCoils->DXCoil(3).DXCoilType_Num, HVAC::CoilDX_HeatingEmpirical);
+    EXPECT_EQ(state->dataDXCoils->DXCoil(3).coilType, HVAC::CoilType::HeatingDXSingleSpeed);
     EXPECT_EQ("HEATERCAPCURVE2", Curve::GetCurveName(*state, state->dataDXCoils->DXCoil(3).CrankcaseHeaterCapacityCurveIndex));
 
     // Coil:WaterHeating:AirToWaterHeatPump:Pumped
-    EXPECT_EQ(state->dataDXCoils->DXCoil(4).DXCoilType_Num, HVAC::CoilDX_HeatPumpWaterHeaterPumped);
+    EXPECT_EQ(state->dataDXCoils->DXCoil(4).coilType, HVAC::CoilType::WaterHeatingDXPumped);
     EXPECT_EQ("HEATERCAPCURVE9", Curve::GetCurveName(*state, state->dataDXCoils->DXCoil(4).CrankcaseHeaterCapacityCurveIndex));
 
     // Coil:WaterHeating:AirToWaterHeatPump:Wrapped
-    EXPECT_EQ(state->dataDXCoils->DXCoil(5).DXCoilType_Num, HVAC::CoilDX_HeatPumpWaterHeaterWrapped);
+    EXPECT_EQ(state->dataDXCoils->DXCoil(5).coilType, HVAC::CoilType::WaterHeatingDXWrapped);
     EXPECT_EQ("HEATERCAPCURVE8", Curve::GetCurveName(*state, state->dataDXCoils->DXCoil(5).CrankcaseHeaterCapacityCurveIndex));
 
     // Coil:Cooling:DX:MultiSpeed
-    EXPECT_EQ(state->dataDXCoils->DXCoil(6).DXCoilType_Num, HVAC::CoilDX_MultiSpeedCooling);
+    EXPECT_EQ(state->dataDXCoils->DXCoil(6).coilType, HVAC::CoilType::CoolingDXMultiSpeed);
     EXPECT_EQ("HEATERCAPCURVE3", Curve::GetCurveName(*state, state->dataDXCoils->DXCoil(6).CrankcaseHeaterCapacityCurveIndex));
 
     // Coil:Heating:DX:MultiSpeed
-    EXPECT_EQ(state->dataDXCoils->DXCoil(7).DXCoilType_Num, HVAC::CoilDX_MultiSpeedHeating);
+    EXPECT_EQ(state->dataDXCoils->DXCoil(7).coilType, HVAC::CoilType::HeatingDXMultiSpeed);
     EXPECT_EQ("HEATERCAPCURVE4", Curve::GetCurveName(*state, state->dataDXCoils->DXCoil(7).CrankcaseHeaterCapacityCurveIndex));
 
     // Coil:Cooling:DX:VariableSpeed
-    EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(1).VSCoilType, HVAC::Coil_CoolingAirToAirVariableSpeed);
+    EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(1).coilType, HVAC::CoilType::CoolingDXVariableSpeed);
     EXPECT_EQ("HEATERCAPCURVE5", Curve::GetCurveName(*state, state->dataVariableSpeedCoils->VarSpeedCoil(1).CrankcaseHeaterCapacityCurveIndex));
 
     // Coil:Heating:DX:VariableSpeed
-    EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(2).VSCoilType, HVAC::Coil_HeatingAirToAirVariableSpeed);
+    EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(2).coilType, HVAC::CoilType::HeatingDXVariableSpeed);
     EXPECT_EQ("HEATERCAPCURVE6", Curve::GetCurveName(*state, state->dataVariableSpeedCoils->VarSpeedCoil(2).CrankcaseHeaterCapacityCurveIndex));
 
     // Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed
-    EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(3).VSCoilType, HVAC::CoilDX_HeatPumpWaterHeaterVariableSpeed);
+    EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(3).coilType, HVAC::CoilType::WaterHeatingAWHPVariableSpeed);
     EXPECT_EQ("HEATERCAPCURVE10", Curve::GetCurveName(*state, state->dataVariableSpeedCoils->VarSpeedCoil(3).CrankcaseHeaterCapacityCurveIndex));
 
     state->dataEnvrn->OutDryBulbTemp = -5.0;
@@ -2561,7 +2556,7 @@ TEST_F(EnergyPlusFixture, DXCoil_ValidateADPFunctionAlone)
     Real64 constexpr RatedInletAirTemp(26.666699999999999);
     Real64 constexpr RatedInletAirHumRat(0.011184700000000001);
     state->dataDXCoils->DXCoil.allocate(1);
-    state->dataDXCoils->DXCoil(1).DXCoilType = "Coil:Cooling:DX:SingleSpeed";
+    state->dataDXCoils->DXCoil(1).coilType = HVAC::CoilType::CoolingDXSingleSpeed;
     state->dataDXCoils->DXCoil(1).Name = "Test Coil";
     state->dataDXCoils->DXCoil(1).RatedTotCap(1) = 4480.6580719394560;
     state->dataDXCoils->DXCoil(1).RatedAirVolFlowRate(1) = 0.23519298920287324;
@@ -2570,7 +2565,7 @@ TEST_F(EnergyPlusFixture, DXCoil_ValidateADPFunctionAlone)
 
     // Calculate new SHR
     Real64 newSHR = ValidateADP(*state,
-                                state->dataDXCoils->DXCoil(1).DXCoilType,
+                                HVAC::coilTypeNames[(int)state->dataDXCoils->DXCoil(1).coilType],
                                 state->dataDXCoils->DXCoil(1).Name,
                                 RatedInletAirTemp,
                                 RatedInletAirHumRat,
@@ -2724,7 +2719,7 @@ TEST_F(EnergyPlusFixture, DXCoil_ValidateADPFunction)
     std::string const CallingRoutine("DXCoil_ValidateADPFunction");
 
     Real64 CBF_calculated = CalcCBF(*state,
-                                    state->dataDXCoils->DXCoil(1).DXCoilType,
+                                    HVAC::coilTypeNames[(int)state->dataDXCoils->DXCoil(1).coilType],
                                     state->dataDXCoils->DXCoil(1).Name,
                                     RatedInletAirTemp,
                                     RatedInletAirHumRat,
@@ -2741,7 +2736,7 @@ TEST_F(EnergyPlusFixture, DXCoil_ValidateADPFunction)
 
     SizeDXCoil(*state, 1);
     CBF_calculated = CalcCBF(*state,
-                             state->dataDXCoils->DXCoil(1).DXCoilType,
+                             HVAC::coilTypeNames[(int)state->dataDXCoils->DXCoil(1).coilType],
                              state->dataDXCoils->DXCoil(1).Name,
                              RatedInletAirTemp,
                              RatedInletAirHumRat,
@@ -2758,7 +2753,7 @@ TEST_F(EnergyPlusFixture, DXCoil_ValidateADPFunction)
 
     SizeDXCoil(*state, 1);
     CBF_calculated = CalcCBF(*state,
-                             state->dataDXCoils->DXCoil(1).DXCoilType,
+                             HVAC::coilTypeNames[(int)state->dataDXCoils->DXCoil(1).coilType],
                              state->dataDXCoils->DXCoil(1).Name,
                              RatedInletAirTemp,
                              RatedInletAirHumRat,
@@ -3690,8 +3685,8 @@ TEST_F(SQLiteFixture, DXCoils_TestComponentSizingOutput_TwoSpeed)
     // OutputReportTabular::WriteEioTables();
 
     // Now check output tables / EIO
-    const std::string compType = state->dataDXCoils->DXCoil(1).DXCoilType;
-    EXPECT_EQ(compType, "Coil:Cooling:DX:TwoSpeed");
+    HVAC::CoilType compType = state->dataDXCoils->DXCoil(1).coilType;
+    EXPECT_ENUM_EQ(compType, HVAC::CoilType::CoolingDXTwoSpeed);
     const std::string compName = state->dataDXCoils->DXCoil(1).Name;
     EXPECT_EQ(compName, "MAIN COOLING COIL 1");
 
@@ -3721,7 +3716,7 @@ TEST_F(SQLiteFixture, DXCoils_TestComponentSizingOutput_TwoSpeed)
 
         std::string query("SELECT Value From ComponentSizes"
                           "  WHERE CompType = '" +
-                          compType +
+                          std::string{HVAC::coilTypeNames[(int)compType]} +
                           "'"
                           "  AND CompName = '" +
                           compName +
@@ -3911,8 +3906,8 @@ TEST_F(SQLiteFixture, DXCoils_TestComponentSizingOutput_SingleSpeed)
     // OutputReportTabular::WriteEioTables();
 
     // Now check output tables / EIO
-    const std::string compType = state->dataDXCoils->DXCoil(1).DXCoilType;
-    EXPECT_EQ(compType, "Coil:Cooling:DX:SingleSpeed");
+    HVAC::CoilType compType = state->dataDXCoils->DXCoil(1).coilType;
+    EXPECT_ENUM_EQ(compType, HVAC::CoilType::CoolingDXSingleSpeed);
     const std::string compName = state->dataDXCoils->DXCoil(1).Name;
     EXPECT_EQ(compName, "FURNACE ACDXCOIL 1");
 
@@ -3940,7 +3935,7 @@ TEST_F(SQLiteFixture, DXCoils_TestComponentSizingOutput_SingleSpeed)
 
         std::string query("SELECT Value From ComponentSizes"
                           "  WHERE CompType = '" +
-                          compType +
+                          std::string{HVAC::coilTypeNames[(int)compType]} +
                           "'"
                           "  AND CompName = '" +
                           compName +
@@ -4345,7 +4340,7 @@ TEST_F(EnergyPlusFixture, TestMultiSpeedHeatingCoilSizingOutput)
     SetPredefinedTables(*state);
     // check multi-speed DX cooling coil
     EXPECT_EQ("ASHP CLG COIL", state->dataDXCoils->DXCoil(1).Name);
-    EXPECT_EQ("Coil:Cooling:DX:MultiSpeed", state->dataDXCoils->DXCoil(1).DXCoilType);
+    EXPECT_ENUM_EQ(HVAC::CoilType::CoolingDXMultiSpeed, state->dataDXCoils->DXCoil(1).coilType);
     SizeDXCoil(*state, 1);
     EXPECT_EQ(14067.4113682534, state->dataDXCoils->DXCoil(1).MSRatedTotCap(2));
     EXPECT_EQ(10128.5361851424, state->dataDXCoils->DXCoil(1).MSRatedTotCap(1));
@@ -4354,7 +4349,7 @@ TEST_F(EnergyPlusFixture, TestMultiSpeedHeatingCoilSizingOutput)
 
     // check multi-speed DX heating coil
     EXPECT_EQ("ASHP HTG COIL", state->dataDXCoils->DXCoil(2).Name);
-    EXPECT_EQ("Coil:Heating:DX:MultiSpeed", state->dataDXCoils->DXCoil(2).DXCoilType);
+    EXPECT_ENUM_EQ(HVAC::CoilType::HeatingDXMultiSpeed, state->dataDXCoils->DXCoil(2).coilType);
     SizeDXCoil(*state, 2);
     EXPECT_EQ(14067.4113682534, state->dataDXCoils->DXCoil(2).MSRatedTotCap(2));
     EXPECT_EQ(10128.5361851424, state->dataDXCoils->DXCoil(2).MSRatedTotCap(1));
@@ -4565,7 +4560,7 @@ TEST_F(EnergyPlusFixture, TestMultiSpeedCoolingCoilTabularReporting)
     EnergyPlus::OutputReportPredefined::SetPredefinedTables(*state);
     // check multi-speed DX cooling coil
     EXPECT_EQ("ASHP CLG COIL", state->dataDXCoils->DXCoil(1).Name);
-    EXPECT_EQ("Coil:Cooling:DX:MultiSpeed", state->dataDXCoils->DXCoil(1).DXCoilType);
+    EXPECT_ENUM_EQ(HVAC::CoilType::CoolingDXMultiSpeed, state->dataDXCoils->DXCoil(1).coilType);
     // coils are in an airloop
     state->dataSize->CurSysNum = 1;
     state->dataSize->UnitarySysEqSizing.allocate(state->dataSize->CurSysNum);
@@ -4985,7 +4980,7 @@ TEST_F(EnergyPlusFixture, TestMultiSpeedCoilsAutoSizingOutput)
     SetPredefinedTables(*state);
     // check multi-speed DX cooling coil
     EXPECT_EQ("ASHP CLG COIL", state->dataDXCoils->DXCoil(1).Name);
-    EXPECT_EQ("Coil:Cooling:DX:MultiSpeed", state->dataDXCoils->DXCoil(1).DXCoilType);
+    EXPECT_ENUM_EQ(HVAC::CoilType::CoolingDXMultiSpeed, state->dataDXCoils->DXCoil(1).coilType);
 
     state->dataEnvrn->StdBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = 1.2;
@@ -5044,7 +5039,7 @@ TEST_F(EnergyPlusFixture, TestMultiSpeedCoilsAutoSizingOutput)
 
     // check multi-speed DX heating coil
     EXPECT_EQ("ASHP HTG COIL", state->dataDXCoils->DXCoil(2).Name);
-    EXPECT_EQ("Coil:Heating:DX:MultiSpeed", state->dataDXCoils->DXCoil(2).DXCoilType);
+    EXPECT_ENUM_EQ(HVAC::CoilType::HeatingDXMultiSpeed, state->dataDXCoils->DXCoil(2).coilType);
     // set companion dx cooling coil
     state->dataDXCoils->DXCoil(2).CompanionUpstreamDXCoil = 1;
     SizeDXCoil(*state, 2);
@@ -5272,7 +5267,7 @@ TEST_F(EnergyPlusFixture, TestMultiSpeedCoolingCoilPartialAutoSizeOutput)
     SetPredefinedTables(*state);
     // check multi-speed DX cooling coil
     EXPECT_EQ("ASHP CLG COIL", state->dataDXCoils->DXCoil(1).Name);
-    EXPECT_EQ("Coil:Cooling:DX:MultiSpeed", state->dataDXCoils->DXCoil(1).DXCoilType);
+    EXPECT_ENUM_EQ(HVAC::CoilType::CoolingDXMultiSpeed, state->dataDXCoils->DXCoil(1).coilType);
 
     state->dataEnvrn->StdBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = 1.2;
@@ -5338,10 +5333,8 @@ TEST_F(EnergyPlusFixture, DXCoils_GetDXCoilCapFTCurveIndexTest)
 
     state->dataDXCoils->NumDXCoils = 2;
     state->dataDXCoils->DXCoil.allocate(state->dataDXCoils->NumDXCoils);
-    state->dataDXCoils->DXCoil(1).DXCoilType_Num = HVAC::CoilDX_MultiSpeedCooling;
-    state->dataDXCoils->DXCoil(1).DXCoilType = "Coil:Cooling:DX:MultiSpeed";
-    state->dataDXCoils->DXCoil(2).DXCoilType_Num = HVAC::CoilDX_MultiSpeedHeating;
-    state->dataDXCoils->DXCoil(2).DXCoilType = "Coil:Heating:DX:MultiSpeed";
+    state->dataDXCoils->DXCoil(1).coilType = HVAC::CoilType::CoolingDXMultiSpeed;
+    state->dataDXCoils->DXCoil(2).coilType = HVAC::CoilType::HeatingDXMultiSpeed;
 
     for (DXCoilNum = 1; DXCoilNum <= 2; ++DXCoilNum) {
         state->dataDXCoils->DXCoil(DXCoilNum).NumOfSpeeds = 2;
@@ -5415,7 +5408,7 @@ TEST_F(EnergyPlusFixture, DXCoils_GetDXCoilCapFTCurveIndexTest)
 
     // dx cooling coil
     int CoilIndex = 1;
-    EXPECT_EQ(state->dataDXCoils->DXCoil(CoilIndex).DXCoilType, "Coil:Cooling:DX:MultiSpeed");
+    EXPECT_ENUM_EQ(HVAC::CoilType::CoolingDXMultiSpeed, state->dataDXCoils->DXCoil(CoilIndex).coilType);
     DataTotCapCurveIndex = DXCoils::GetDXCoilCapFTCurveIndex(*state, CoilIndex, ErrorsFound);
     EXPECT_EQ(2, DataTotCapCurveIndex);
     // evaluate dx cooling coil curves to show impacts of incorrect curve index
@@ -5432,7 +5425,7 @@ TEST_F(EnergyPlusFixture, DXCoils_GetDXCoilCapFTCurveIndexTest)
 
     // dx heating coil
     CoilIndex = 2;
-    EXPECT_EQ(state->dataDXCoils->DXCoil(CoilIndex).DXCoilType, "Coil:Heating:DX:MultiSpeed");
+    EXPECT_ENUM_EQ(state->dataDXCoils->DXCoil(CoilIndex).coilType, HVAC::CoilType::HeatingDXMultiSpeed);
     DataTotCapCurveIndex = DXCoils::GetDXCoilCapFTCurveIndex(*state, CoilIndex, ErrorsFound);
     EXPECT_EQ(4, DataTotCapCurveIndex);
     // evaluate dx heating coil curves to show impacts of incorrect curve index
@@ -5481,7 +5474,7 @@ TEST_F(EnergyPlusFixture, SingleSpeedDXCoolingCoilOutputTest)
     auto &AirInletNode = state->dataLoopNodes->Node(1);
     auto &AirOutletNode = state->dataLoopNodes->Node(2);
     // set coil parameters
-    Coil.DXCoilType_Num = HVAC::CoilDX_CoolingSingleSpeed;
+    Coil.coilType = HVAC::CoilType::CoolingDXSingleSpeed;
     Coil.availSched = Sched::GetScheduleAlwaysOn(*state);
     Coil.RatedTotCap(1) = 17580.0;
     Coil.RatedCOP(1) = 3.0;
@@ -5601,7 +5594,7 @@ TEST_F(EnergyPlusFixture, SingleSpeedDXCoolingCoilOutputTest)
     // calculate condensate vol flow rate
     Real64 waterDensity = Psychrometrics::RhoH2O((Coil.InletAirTemp + Coil.OutletAirTemp) / 2.0);
     Real64 results_condenstateVdot = Coil.InletAirMassFlowRate * (Coil.InletAirHumRat - Coil.OutletAirHumRat) / waterDensity;
-    Coil.DXCoilType = "Coil:Cooling:DX:SingleSpeed";
+    Coil.coilType = HVAC::CoilType::CoolingDXSingleSpeed;
     ReportDXCoil(*state, DXCoilNum);
     // check condensate volume flow rate
     EXPECT_NEAR(results_condenstateVdot, Coil.CondensateVdot, 1.0E-11);
@@ -5630,8 +5623,7 @@ TEST_F(EnergyPlusFixture, MultiSpeedDXCoolingCoilOutputTest)
     auto &AirInletNode = state->dataLoopNodes->Node(1);
     auto &AirOutletNode = state->dataLoopNodes->Node(2);
 
-    Coil.DXCoilType_Num = HVAC::CoilDX_MultiSpeedCooling;
-    Coil.DXCoilType = "Coil:Cooling:DX:MultiSpeed";
+    Coil.coilType = HVAC::CoilType::CoolingDXMultiSpeed;
     Coil.availSched = Sched::GetScheduleAlwaysOn(*state);
 
     Coil.NumOfSpeeds = 2;
@@ -5936,8 +5928,7 @@ TEST_F(EnergyPlusFixture, TwoSpeedDXCoilStandardRatingsTest)
     // test 1: using internal static and fan pressure rise
     CalcTwoSpeedDXCoilStandardRating(*state, dXCoilIndex);
     EXPECT_EQ(coolcoilTwoSpeed.Name, "CCOOLING DX TWO SPEED");
-    EXPECT_EQ(coolcoilTwoSpeed.DXCoilType, "Coil:Cooling:DX:TwoSpeed");
-    EXPECT_EQ(coolcoilTwoSpeed.DXCoilType_Num, HVAC::CoilDX_CoolingTwoSpeed);
+    EXPECT_ENUM_EQ(coolcoilTwoSpeed.coilType, HVAC::CoilType::CoolingDXTwoSpeed);
     EXPECT_EQ(coolcoilTwoSpeed.InternalStaticPressureDrop, 400.0);
     EXPECT_TRUE(coolcoilTwoSpeed.RateWithInternalStaticAndFanObject);
     EXPECT_EQ("8.77", RetrievePreDefTableEntry(*state, state->dataOutRptPredefined->pdchDXCoolCoilEERIP, coolcoilTwoSpeed.Name));
@@ -6183,8 +6174,7 @@ TEST_F(EnergyPlusFixture, TwoSpeedDXCoilStandardRatings_Curve_Fix_Test)
 
     CalcTwoSpeedDXCoilStandardRating(*state, dXCoilIndex);
     EXPECT_EQ(coolcoilTwoSpeed.Name, "CCOOLING DX TWO SPEED");
-    EXPECT_EQ(coolcoilTwoSpeed.DXCoilType, "Coil:Cooling:DX:TwoSpeed");
-    EXPECT_EQ(coolcoilTwoSpeed.DXCoilType_Num, HVAC::CoilDX_CoolingTwoSpeed);
+    EXPECT_ENUM_EQ(coolcoilTwoSpeed.coilType, HVAC::CoilType::CoolingDXTwoSpeed);
     EXPECT_EQ(coolcoilTwoSpeed.InternalStaticPressureDrop, 400.0);
     EXPECT_TRUE(coolcoilTwoSpeed.RateWithInternalStaticAndFanObject);
     EXPECT_EQ("8.77", RetrievePreDefTableEntry(*state, state->dataOutRptPredefined->pdchDXCoolCoilEERIP, coolcoilTwoSpeed.Name));
@@ -7498,7 +7488,7 @@ TEST_F(EnergyPlusFixture, MultiSpeedDXHeatingCoilsHSPF2Test)
     auto thisHtgDXCoil = state->dataDXCoils->DXCoil(1);
     // check multi-speed DX heating coil
     EXPECT_EQ("ASHP HTG COIL", thisHtgDXCoil.Name);
-    EXPECT_EQ("Coil:Heating:DX:MultiSpeed", thisHtgDXCoil.DXCoilType);
+    EXPECT_ENUM_EQ(HVAC::CoilType::HeatingDXMultiSpeed, thisHtgDXCoil.coilType);
     EXPECT_EQ(-8.0, thisHtgDXCoil.MinOATCompressor);
     EXPECT_EQ(-6.0, thisHtgDXCoil.OATempCompressorOn);
     EXPECT_EQ(773.3, thisHtgDXCoil.MSFanPowerPerEvapAirFlowRate(1));
@@ -7758,7 +7748,7 @@ TEST_F(EnergyPlusFixture, MultiSpeedDXHeatingCoilsHSPF2Test1)
     auto thisHtgDXCoil = state->dataDXCoils->DXCoil(1);
     // check multi-speed DX heating coil
     EXPECT_EQ("ASHP HTG COIL", thisHtgDXCoil.Name);
-    EXPECT_EQ("Coil:Heating:DX:MultiSpeed", thisHtgDXCoil.DXCoilType);
+    EXPECT_ENUM_EQ(HVAC::CoilType::HeatingDXMultiSpeed, thisHtgDXCoil.coilType);
     EXPECT_EQ(-8.0, thisHtgDXCoil.MinOATCompressor);
     EXPECT_EQ(-6.0, thisHtgDXCoil.OATempCompressorOn);
     EXPECT_EQ(773.3, thisHtgDXCoil.MSFanPowerPerEvapAirFlowRate(1));
@@ -8020,7 +8010,7 @@ TEST_F(EnergyPlusFixture, MultiSpeedDXHeatingCoilsHSPF2Test2)
     auto thisHtgDXCoil = state->dataDXCoils->DXCoil(1);
     // check multi-speed DX heating coil
     EXPECT_EQ("ASHP HTG COIL", thisHtgDXCoil.Name);
-    EXPECT_EQ("Coil:Heating:DX:MultiSpeed", thisHtgDXCoil.DXCoilType);
+    EXPECT_ENUM_EQ(HVAC::CoilType::HeatingDXMultiSpeed, thisHtgDXCoil.coilType);
     EXPECT_EQ(-10.0, thisHtgDXCoil.MinOATCompressor);
     EXPECT_EQ(-8.0, thisHtgDXCoil.OATempCompressorOn);
     EXPECT_EQ(773.3, thisHtgDXCoil.MSFanPowerPerEvapAirFlowRate(1));

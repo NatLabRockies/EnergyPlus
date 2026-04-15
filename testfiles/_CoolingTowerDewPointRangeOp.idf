@@ -100,7 +100,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,26.1;
+  Version,26.2;
 
   Building,
     Building,                !- Name
@@ -605,8 +605,6 @@
     Through: 12/31,          !- Field 1
     For: AllDays,            !- Field 2
     Until: 24:00,117.239997864; !- Field 3
-
-                             !- Field 4
 
   Schedule:Constant,ShadeTransSch,Fraction,0.0;
 

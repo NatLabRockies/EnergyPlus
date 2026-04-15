@@ -203,7 +203,7 @@ protected:
         state->dataDXCoils->DXCoilNumericFields(1).PerfMode.allocate(1);
         state->dataDXCoils->DXCoilNumericFields(1).PerfMode(1).FieldNames.allocate(20);
         state->dataDXCoils->DXCoil(1).Name = "MyDXCoolCoil";
-        state->dataDXCoils->DXCoil(1).DXCoilType = "COIL:COOLING:DX:SINGLESPEED";
+        state->dataDXCoils->DXCoil(1).coilType = HVAC::CoilType::CoolingDXSingleSpeed;
         state->dataDXCoils->NumDXCoils = 1;
         state->dataDXCoils->CheckEquipName.dimension(1, true);
         state->dataDXCoils->GetCoilsInputFlag = false;
@@ -236,19 +236,19 @@ protected:
         state->dataHeatBal->HeatReclaimDXCoil.allocate(1);
 
         cbvav.DXCoolCoilName = "MyDXCoolCoil";
-        state->dataDXCoils->DXCoil(1).DXCoilType_Num = HVAC::CoilDX_CoolingSingleSpeed;
+        state->dataDXCoils->DXCoil(1).coilType = HVAC::CoilType::CoolingDXSingleSpeed;
         state->dataHeatingCoils->HeatingCoil.allocate(1);
         state->dataHeatingCoils->HeatingCoilNumericFields.allocate(1);
         state->dataHeatingCoils->HeatingCoilNumericFields(1).FieldNames.allocate(20);
         state->dataHeatingCoils->HeatingCoil(1).Name = "MyHeatingCoil";
-        state->dataHeatingCoils->HeatingCoil(1).HCoilType_Num = HVAC::Coil_HeatingElectric;
+        state->dataHeatingCoils->HeatingCoil(1).heatCoilType = HVAC::CoilType::HeatingElectric;
         state->dataHeatingCoils->NumHeatingCoils = 1;
         state->dataHeatingCoils->ValidSourceType.dimension(state->dataHeatingCoils->NumHeatingCoils, false);
         state->dataHeatingCoils->GetCoilsInputFlag = false;
         state->dataSize->UnitarySysEqSizing.allocate(1);
         cbvav.HeatCoilName = "MyHeatingCoil";
-        cbvav.CoolCoilType = HVAC::CoilType::DXCoolingSingleSpeed;
-        cbvav.HeatCoilType = HVAC::CoilType::HeatingElectric;
+        cbvav.coolCoilType = HVAC::CoilType::CoolingDXSingleSpeed;
+        cbvav.heatCoilType = HVAC::CoilType::HeatingElectric;
         cbvav.minModeChangeTime = 0.0;
         cbvav.AirInNode = 1;
         cbvav.AirOutNode = 2;

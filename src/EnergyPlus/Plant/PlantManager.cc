@@ -3274,8 +3274,8 @@ void SizePlantLoop(EnergyPlusData &state,
         bool heat = false;
         bool cool = false;
         auto &supplySide = loop.LoopSide(LoopSideLocation::Supply);
-        for (auto &branch : supplySide.Branch) {
-            for (auto &comp : branch.Comp) {
+        for (const auto &branch : supplySide.Branch) {
+            for (const auto &comp : branch.Comp) {
                 DataPlant::CtrlType type = DataPlant::PlantEquipmentCtrlType[static_cast<int>(comp.Type)];
                 if (type == DataPlant::CtrlType::CoolingOp || type == DataPlant::CtrlType::DualOp) {
                     cool = true;
@@ -4635,7 +4635,7 @@ void ReportPlantCompWaterFlowData(EnergyPlusData &state, bool const reportFlag)
         state.dataPlnt->PlantLoop(LoopNum).plantDesWaterFlowRate.resize(size_t(24 * state.dataGlobal->TimeStepsInHour));
         for (size_t ts = 0; ts < state.dataPlnt->PlantLoop(LoopNum).plantDesWaterFlowRate.size(); ++ts) {
             state.dataPlnt->PlantLoop(LoopNum).plantDesWaterFlowRate[ts] = 0.0;
-            for (auto &thisCoil : state.dataPlnt->PlantLoop(LoopNum).compDesWaterFlowRate) {
+            for (const auto &thisCoil : state.dataPlnt->PlantLoop(LoopNum).compDesWaterFlowRate) {
                 state.dataPlnt->PlantLoop(LoopNum).plantDesWaterFlowRate[ts] += thisCoil.tsDesWaterFlowRate[ts];
             }
         }

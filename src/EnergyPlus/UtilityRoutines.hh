@@ -369,6 +369,22 @@ void ShowWarningCustom(EnergyPlusData &state, ErrorObjectHeader const &eoh, std:
 void ShowWarningCustomField(
     EnergyPlusData &state, ErrorObjectHeader const &eoh, std::string_view fieldName, std::string_view fieldValue, std::string_view msg);
 
+void ShowWarningBadMax(EnergyPlusData &state,
+                       ErrorObjectHeader const &eoh,
+                       std::string_view fieldName,
+                       Real64 fieldVal,
+                       Clusive cluMax,
+                       Real64 maxVal,
+                       std::string_view msg = "");
+
+void ShowWarningBadMin(EnergyPlusData &state,
+                       ErrorObjectHeader const &eoh,
+                       std::string_view fieldName,
+                       Real64 fieldVal,
+                       Clusive cluMax,
+                       Real64 minVal,
+                       std::string_view msg = "");
+
 namespace Util {
 
     static constexpr std::array<std::string_view, 12> MonthNamesCC{

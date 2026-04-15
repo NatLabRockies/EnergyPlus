@@ -139,7 +139,7 @@ Real64 CoolingWaterflowSizer::size(EnergyPlusData &state, Real64 _originalValue,
     }
     // override sizing string for detailed coil model
     if (this->overrideSizeString) {
-        if (this->coilType_Num == HVAC::Coil_CoolingWaterDetailed) {
+        if (this->coilType == HVAC::CoilType::CoolingWaterDetailed) {
             if (this->isEpJSON) {
                 this->sizingString = "maximum_water_flow_rate [m3/s]";
             } else {

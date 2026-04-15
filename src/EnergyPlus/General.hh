@@ -146,7 +146,7 @@ namespace General {
                       int EndDate    // End date in sequence
     );
 
-    std::string CreateSysTimeIntervalString(EnergyPlusData &state);
+    std::string CreateSysTimeIntervalString(EnergyPlusData const &state);
 
     int nthDayOfWeekOfMonth(const EnergyPlusData &state,
                             int dayOfWeek,  // day of week (Sunday=1, Monday=2, ...)

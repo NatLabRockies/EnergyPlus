@@ -128,17 +128,17 @@ namespace HeatRecovery {
         "WhenFansOn", "Scheduled", "WhenOutsideEconomizerLimits", "WhenMinimumOutdoorAir"};
 
     void SimHeatRecovery(EnergyPlusData &state,
-                         std::string_view CompName,                          // name of the heat exchanger unit
-                         bool const FirstHVACIteration,                      // TRUE if 1st HVAC simulation of system timestep
-                         int &CompIndex,                                     // Pointer to Component
-                         HVAC::FanOp const fanOp,                            // Supply air fan operating mode
-                         ObjexxFCL::Optional<Real64 const> HXPartLoadRatio,  // Part load ratio requested of DX compressor
-                         ObjexxFCL::Optional_bool_const HXUnitEnable,        // Flag to operate heat exchanger
-                         ObjexxFCL::Optional_int_const CompanionCoilIndex,   // index of companion cooling coil
-                         ObjexxFCL::Optional_bool_const RegenInletIsOANode,  // flag to determine if supply inlet is OA node, if so air flow cycles
-                         ObjexxFCL::Optional_bool_const EconomizerFlag,      // economizer operation flag passed by airloop or OA sys
-                         ObjexxFCL::Optional_bool_const HighHumCtrlFlag,     // high humidity control flag passed by airloop or OA sys
-                         ObjexxFCL::Optional_int_const CompanionCoilType_Num // cooling coil type of coil
+                         std::string_view CompName,                         // name of the heat exchanger unit
+                         bool const FirstHVACIteration,                     // TRUE if 1st HVAC simulation of system timestep
+                         int &CompIndex,                                    // Pointer to Component
+                         HVAC::FanOp const fanOp,                           // Supply air fan operating mode
+                         ObjexxFCL::Optional<Real64 const> HXPartLoadRatio, // Part load ratio requested of DX compressor
+                         ObjexxFCL::Optional_bool_const HXUnitEnable,       // Flag to operate heat exchanger
+                         ObjexxFCL::Optional_int_const CompanionCoilIndex,  // index of companion cooling coil
+                         ObjexxFCL::Optional_bool_const RegenInletIsOANode, // flag to determine if supply inlet is OA node, if so air flow cycles
+                         ObjexxFCL::Optional_bool_const EconomizerFlag,     // economizer operation flag passed by airloop or OA sys
+                         ObjexxFCL::Optional_bool_const HighHumCtrlFlag,    // high humidity control flag passed by airloop or OA sys
+                         ObjexxFCL::Optional<HVAC::CoilType const> companionCoilTypeOpt // cooling coil type of coil
     )
     {
 
@@ -187,7 +187,8 @@ namespace HeatRecovery {
         }
 
         int CompanionCoilNum = present(CompanionCoilIndex) ? int(CompanionCoilIndex) : -1; // Index to companion cooling coil
-        int companionCoilType = present(CompanionCoilType_Num) ? int(CompanionCoilType_Num) : -1;
+        HVAC::CoilType companionCoilType =
+            present(companionCoilTypeOpt) ? static_cast<HVAC::CoilType>(companionCoilTypeOpt()) : HVAC::CoilType::Invalid;
 
         bool HXUnitOn; // flag to enable heat exchanger
         if (present(HXUnitEnable)) {
@@ -1191,7 +1192,7 @@ namespace HeatRecovery {
         }
     }
 
-    void HeatExchCond::initialize(EnergyPlusData &state, int const CompanionCoilIndex, int const CompanionCoilType_Num)
+    void HeatExchCond::initialize(EnergyPlusData &state, int const CompanionCoilIndex, HVAC::CoilType const companionCoilType)
     {
 
         // SUBROUTINE INFORMATION:
@@ -1479,10 +1480,10 @@ namespace HeatRecovery {
             }
 
             if ((CompanionCoilIndex > -1) &&
-                ((CompanionCoilType_Num == HVAC::CoilDX_CoolingSingleSpeed) || (CompanionCoilType_Num == HVAC::Coil_CoolingAirToAirVariableSpeed) ||
-                 (CompanionCoilType_Num == HVAC::CoilDX_Cooling))) {
+                ((companionCoilType == HVAC::CoilType::CoolingDXSingleSpeed) || (companionCoilType == HVAC::CoilType::CoolingDXVariableSpeed) ||
+                 (companionCoilType == HVAC::CoilType::CoolingDX))) {
 
-                if (CompanionCoilType_Num == HVAC::CoilDX_CoolingSingleSpeed || CompanionCoilType_Num == HVAC::CoilDX_CoolingTwoStageWHumControl) {
+                if (companionCoilType == HVAC::CoilType::CoolingDXSingleSpeed || companionCoilType == HVAC::CoilType::CoolingDXTwoStageWHumControl) {
                     if (state.dataDXCoils->DXCoilFullLoadOutAirTemp(CompanionCoilIndex) == 0.0 ||
                         state.dataDXCoils->DXCoilFullLoadOutAirHumRat(CompanionCoilIndex) == 0.0) {
                         //       DX Coil is OFF, read actual inlet conditions
@@ -1493,11 +1494,11 @@ namespace HeatRecovery {
                         state.dataHeatRecovery->FullLoadOutAirTemp = state.dataDXCoils->DXCoilFullLoadOutAirTemp(CompanionCoilIndex);
                         state.dataHeatRecovery->FullLoadOutAirHumRat = state.dataDXCoils->DXCoilFullLoadOutAirHumRat(CompanionCoilIndex);
                     }
-                } else if (CompanionCoilType_Num == HVAC::Coil_CoolingAirToAirVariableSpeed) {
+                } else if (companionCoilType == HVAC::CoilType::CoolingDXVariableSpeed) {
                     // how to support VS dx coil here?
                     state.dataHeatRecovery->FullLoadOutAirTemp = state.dataVariableSpeedCoils->VarSpeedCoil(CompanionCoilIndex).OutletAirDBTemp;
                     state.dataHeatRecovery->FullLoadOutAirHumRat = state.dataVariableSpeedCoils->VarSpeedCoil(CompanionCoilIndex).OutletAirHumRat;
-                } else if (CompanionCoilType_Num == HVAC::CoilDX_Cooling) {
+                } else if (companionCoilType == HVAC::CoilType::CoolingDX) {
                     // Use the new coil option:
                     state.dataHeatRecovery->FullLoadOutAirTemp = state.dataCoilCoolingDX->coilCoolingDXs[CompanionCoilIndex].outletAirDryBulbTemp;
                     state.dataHeatRecovery->FullLoadOutAirHumRat = state.dataCoilCoolingDX->coilCoolingDXs[CompanionCoilIndex].outletAirHumRat;
@@ -1712,7 +1713,7 @@ namespace HeatRecovery {
                 // no OAcontroller is directly applicable to HX in airLoopDOAS system
             } else {
                 if (oaSys.OAControllerIndex > 0) {
-                    auto &oaCntrlr = state.dataMixedAir->OAController(oaSys.OAControllerIndex);
+                    const auto &oaCntrlr = state.dataMixedAir->OAController(oaSys.OAControllerIndex);
                     if (oaCntrlr.Econo != MixedAir::EconoOp::NoEconomizer) {
                         hasEconomizerControl = true;
                         hxBypassControlType = oaCntrlr.HeatRecoveryBypassControlType;
@@ -2490,7 +2491,7 @@ namespace HeatRecovery {
         HVAC::FanOp const fanOp,                       // Supply air fan operating mode (1=cycling, 2=constant)
         Real64 const PartLoadRatio,                    // Part load ratio requested of DX compressor
         int const CompanionCoilIndex,                  // index of companion cooling coil
-        int const CompanionCoilType,                   // type of cooling coil
+        HVAC::CoilType const companionCoilType,        // type of cooling coil
         bool const RegenInletIsOANode,                 // Flag to determine if regen side inlet is OANode, if so this air stream cycles
         ObjexxFCL::Optional_bool_const EconomizerFlag, // economizer flag pass by air loop or OA sys
         ObjexxFCL::Optional_bool_const HighHumCtrlFlag // high humidity control flag passed by airloop or OA sys
@@ -2729,10 +2730,10 @@ namespace HeatRecovery {
                 HXPartLoadRatio = max(0.0, HXPartLoadRatio);
                 HXPartLoadRatio = min(1.0, HXPartLoadRatio);
 
-            } else if (CompanionCoilType > 0 && CompanionCoilIndex > -1) {
-                if (CompanionCoilType == HVAC::CoilDX_Cooling) {
+            } else if (companionCoilType != HVAC::CoilType::Invalid && CompanionCoilIndex > -1) {
+                if (companionCoilType == HVAC::CoilType::CoolingDX) {
                     HXPartLoadRatio = state.dataCoilCoolingDX->coilCoolingDXs[CompanionCoilIndex].partLoadRatioReport;
-                } else if (CompanionCoilType == HVAC::Coil_CoolingAirToAirVariableSpeed) {
+                } else if (companionCoilType == HVAC::CoilType::CoolingDXVariableSpeed) {
                     HXPartLoadRatio = state.dataVariableSpeedCoils->VarSpeedCoil(CompanionCoilIndex).PartLoadRatio;
                 } else {
                     HXPartLoadRatio = state.dataDXCoils->DXCoilPartLoadRatio(CompanionCoilIndex);

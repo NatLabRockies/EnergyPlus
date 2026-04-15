@@ -135,7 +135,7 @@ void CoolingSHRSizer::updateSizingString(EnergyPlusData &state)
         return;
     }
     // override sizingString to match existing text
-    if (this->coilType_Num == HVAC::CoilDX_CoolingTwoSpeed) {
+    if (this->coilType == HVAC::CoilType::CoolingDXTwoSpeed) {
         if (this->dataDXSpeedNum == 1) { // mode 1 is high speed in DXCoils loop
             if (this->isEpJSON) {
                 this->sizingString = "high_speed_rated_sensible_heat_ratio";
@@ -149,19 +149,19 @@ void CoolingSHRSizer::updateSizingString(EnergyPlusData &state)
                 this->sizingString = "Low Speed Gross Rated Sensible Heat Ratio";
             }
         }
-    } else if (this->coilType_Num == HVAC::CoilDX_MultiSpeedCooling) {
+    } else if (this->coilType == HVAC::CoilType::CoolingDXMultiSpeed) {
         if (this->isEpJSON) {
             this->sizingString = fmt::format("speed_{}_rated_sensible_heat_ratio", state.dataSize->DataDXSpeedNum);
         } else {
             this->sizingString = fmt::format("Speed {} Rated Sensible Heat Ratio", state.dataSize->DataDXSpeedNum);
         }
-    } else if (this->coilType_Num == HVAC::CoilVRF_FluidTCtrl_Cooling) {
+    } else if (this->coilType == HVAC::CoilType::CoolingVRFFluidTCtrl) {
         if (this->isEpJSON) {
             this->sizingString = "rated_sensible_heat_ratio";
         } else {
             this->sizingString = "Rated Sensible Heat Ratio";
         }
-    } else if (this->coilType_Num == HVAC::CoilDX_CurveFit_Speed) {
+    } else if (this->coilType == HVAC::CoilType::CoolingDXCurveFit) {
         if (this->isEpJSON) {
             this->sizingString = "gross_sensible_heat_ratio";
         } else {

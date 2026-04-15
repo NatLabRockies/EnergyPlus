@@ -4343,7 +4343,7 @@ void CLIPPOLY(EnergyPlusData &state,
     Real64 W; // Normalization factor
     Real64 HFunct;
 
-    auto &s_surf = state.dataSurface;
+    const auto &s_surf = state.dataSurface;
 
 #ifdef EP_Count_Calls
     ++state.dataTimingsData->NumClipPoly_Calls;
@@ -4642,7 +4642,7 @@ void ORDER(EnergyPlusData &state,
     int P; // Location of first slope to be sorted
 
     if (state.dataSolarShading->ORDERFirstTimeFlag) {
-        auto &s_surf = state.dataSurface;
+        const auto &s_surf = state.dataSurface;
         state.dataSolarShading->SLOPE.allocate(max(10, s_surf->MaxVerticesPerSurface + 1));
         state.dataSolarShading->ORDERFirstTimeFlag = false;
     }
@@ -5962,7 +5962,7 @@ void SHDBKS(EnergyPlusData &state,
     assert(equal_dimensions(state.dataSolarShading->HCX, state.dataSolarShading->HCA));
 
     if (state.dataSolarShading->SHDBKSOneTimeFlag) {
-        auto &s_surf = state.dataSurface;
+        const auto &s_surf = state.dataSurface;
         state.dataSolarShading->XVrtx.allocate(s_surf->MaxVerticesPerSurface + 1);
         state.dataSolarShading->YVrtx.allocate(s_surf->MaxVerticesPerSurface + 1);
         state.dataSolarShading->ZVrtx.allocate(s_surf->MaxVerticesPerSurface + 1);
@@ -8995,7 +8995,7 @@ void PerformSolarCalculations(EnergyPlusData &state)
     Real64 EqTime;
     // not used INTEGER SurfNum
 
-    auto &s_surf = state.dataSurface;
+    const auto &s_surf = state.dataSurface;
     // Calculate sky diffuse shading
 
     if (state.dataGlobal->BeginSimFlag) {
@@ -10596,7 +10596,7 @@ void SkyDifSolarShading(EnergyPlusData &state)
             state.dataSolarShading->SUNCOS(2) = state.dataSolarShading->cos_Phi[IPhi] * state.dataSolarShading->sin_Theta[ITheta];
 
             for (int SurfNum : s_surf->AllExtSolAndShadingSurfaceList) {
-                auto &surf = s_surf->Surface(SurfNum);
+                const auto &surf = s_surf->Surface(SurfNum);
 
                 // Cosine of angle of incidence on surface of solar radiation from patch
                 state.dataSolarShading->SurfSunCosTheta(SurfNum) = state.dataSolarShading->SUNCOS.x * surf.OutNormVec.x +
@@ -10607,7 +10607,7 @@ void SkyDifSolarShading(EnergyPlusData &state)
             SHADOW(state, 24, 0);
 
             for (int SurfNum : s_surf->AllExtSolAndShadingSurfaceList) {
-                auto &surf = s_surf->Surface(SurfNum);
+                const auto &surf = s_surf->Surface(SurfNum);
 
                 if (state.dataSolarShading->SurfSunCosTheta(SurfNum) < 0.0) {
                     continue;

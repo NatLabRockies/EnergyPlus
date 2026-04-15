@@ -176,7 +176,7 @@ class EnumScopeEvaluator:
             self.all_enum_declarations.extend(s.enum_declarations)
         if self.verbose:
             print(f"Found {len(self.all_enum_declarations)} enum declarations")
-            print(f"Processing header files took {time.time()-start:.2f} seconds")
+            print(f"Processing header files took {time.time() - start:.2f} seconds")
 
     def process_source_file_contents(self) -> None:
         if self.verbose:
@@ -195,7 +195,7 @@ class EnumScopeEvaluator:
                 new_lines.append(line.strip())
             self.all_source_file_contents[file] = new_lines
         if self.verbose:
-            print(f"Processing source files took {time.time()-start:.2f} seconds")
+            print(f"Processing source files took {time.time() - start:.2f} seconds")
 
     def run(self) -> None:
 
@@ -206,7 +206,7 @@ class EnumScopeEvaluator:
             for line_num, line in enumerate(file_lines, start=1):
                 self.check_single_line_for_usage(filepath, line_num, line)
         if self.verbose:
-            print(f"Checking source files took {time.time()-start:.2f} seconds")
+            print(f"Checking source files took {time.time() - start:.2f} seconds")
 
     def check_single_line_for_usage(self, filepath: Path, line_num: int, line: str) -> None:
         # search for usages of Enum:: first
@@ -241,7 +241,7 @@ class EnumScopeEvaluator:
                 if e.enum_name == u.scope:
                     e.usages.append(u)
         if self.verbose:
-            print(f"Reconciling usages took {time.time()-start:.2f} seconds")
+            print(f"Reconciling usages took {time.time() - start:.2f} seconds")
 
     def find_problems_and_report(self) -> None:
         if self.verbose:
@@ -251,16 +251,16 @@ class EnumScopeEvaluator:
         for e in self.all_enum_declarations:
             if len(e.usages) == 0:
                 apparent_enums_in_zero_source_files.append(e.describe())
-            unique_files_in_usages: Set[str] = set()
+            unique_files_in_usages: Set[Path] = set()
             # exceptions listed by <FILE>:<ENUM NAME>
             exceptions = ["DataGlobalConstants.hh:ePollutant", "RefrigeratedCase.hh:CriticalType"]
             if f"{e.filepath.name}:{e.enum_name}" not in exceptions:
                 for u in e.usages:
-                    unique_files_in_usages.add(u.filepath.name)
+                    unique_files_in_usages.add(u.filepath)
                 if len(unique_files_in_usages) == 1:
-                    apparent_enums_in_only_one_source_file.append(
-                        f"{e.describe()} in {next(iter(unique_files_in_usages))}"
-                    )
+                    only_usage_file = next(iter(unique_files_in_usages))
+                    if not self.has_non_declaration_usage_in_declaration_file(e, only_usage_file):
+                        apparent_enums_in_only_one_source_file.append(f"{e.describe()} in {only_usage_file.name}")
 
         if self.verbose:
             print("Reporting results")
@@ -276,6 +276,17 @@ class EnumScopeEvaluator:
             total_usages = sum([len(e.usages) for e in self.all_enum_declarations])
             print(f"\nTotal enum usages found: {total_usages} in {len(self.all_enum_declarations)} enum declarations")
         self.error_count = len(apparent_enums_in_zero_source_files) + len(apparent_enums_in_only_one_source_file)
+
+    @staticmethod
+    def has_non_declaration_usage_in_declaration_file(enum_declaration: EnumDeclaration, only_usage_file: Path) -> bool:
+        if only_usage_file != enum_declaration.filepath:
+            return False
+
+        declaration_line = enum_declaration.line_number + 1
+        return any(
+            usage.filepath == enum_declaration.filepath and usage.line_number != declaration_line
+            for usage in enum_declaration.usages
+        )
 
     @staticmethod
     def collect_enum_usages_for_file(filepath: Path, known_enum_names: set[str]) -> List[PotentialUsage]:
@@ -349,6 +360,26 @@ class TestEnumStuff(unittest.TestCase):
         h.process_lines(contents)
         self.assertEqual(3, len(h.enum_declarations))
 
+    def test_single_file_warning_for_declaration_only_usage(self):
+        e = EnumScopeEvaluator([], [])
+        enum_declaration = EnumDeclaration(Path("Example.hh"), 9, "Mode")
+        enum_declaration.usages = [PotentialUsage("Mode", Path("Example.hh"), 10, "enum class Mode : int {")]
+        e.all_enum_declarations = [enum_declaration]
+        e.find_problems_and_report()
+        self.assertEqual(1, e.error_count)
+
+    def test_single_file_warning_suppressed_for_same_header_usage(self):
+        e = EnumScopeEvaluator([], [])
+        enum_declaration = EnumDeclaration(Path("Example.hh"), 9, "Mode")
+        enum_declaration.usages = [
+            PotentialUsage("Mode", Path("Example.hh"), 10, "enum class Mode : int {"),
+            PotentialUsage("Mode", Path("Example.hh"), 24, "Mode mode;"),
+        ]
+        e.all_enum_declarations = [enum_declaration]
+        e.find_problems_and_report()
+
+        self.assertEqual(0, e.error_count)
+
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "test":
@@ -420,7 +451,7 @@ if __name__ == "__main__":
         )
         usages = flatten_list_of_lists(list_of_lists=usage_list_of_lists)
         if args.verbose:
-            print(f"Finding usages in parallel took {time.time()-start:.2f} seconds")
+            print(f"Finding usages in parallel took {time.time() - start:.2f} seconds")
         if args.debug:
             print(f"Found {len(usages)} potential enum usages")
             [print(x) for x in usages[:100]]

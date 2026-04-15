@@ -136,4 +136,24 @@ jobs:
       # Not running test on alternate build yet, I need to test things
       if: matrix.alternate == false
       working-directory: ./build
-      run: ctest -C Release -j ${{ matrix.nproc }}
+      run: |
+        begin_group() { echo -e "::group::\033[93m$1\033[0m"; }
+
+        Color_Off='\033[0m'       # Text Reset
+
+        # Regular Colors
+        Red='\033[0;31m'
+        Green='\033[0;32m'
+
+        begin_group "Running CTests"
+        if ctest -C Release -j ${{ matrix.nproc }}; then
+          echo "::endgroup::"
+          echo -e "✅ ${Green}All tests passed${Color_Off}"
+        else
+          echo "::endgroup::"
+          echo -e "❌ ${Red}Some Tests Failed${Color_Off}"
+          begin_group "Re-running failed tests verbosely..."
+          ctest -C Release --rerun-failed -VV || true
+          echo "::endgroup::"
+          exit 1
+        fi;

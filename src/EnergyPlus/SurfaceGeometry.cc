@@ -1450,7 +1450,7 @@ namespace SurfaceGeometry {
 
         // Move all shading Surfaces to Front
         for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
-            auto &surfTemp = state.dataSurfaceGeometry->SurfaceTmp(SurfNum);
+            const auto &surfTemp = state.dataSurfaceGeometry->SurfaceTmp(SurfNum);
             if (surfTemp.Class != SurfaceClass::Detached_F && surfTemp.Class != SurfaceClass::Detached_B && surfTemp.Class != SurfaceClass::Shading) {
                 continue;
             }
@@ -1506,7 +1506,7 @@ namespace SurfaceGeometry {
                 for (const DataSurfaces::SurfaceClass Loop : state.dataSurfaceGeometry->BaseSurfIDs) {
 
                     for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
-                        auto &surfTemp = state.dataSurfaceGeometry->SurfaceTmp(SurfNum);
+                        const auto &surfTemp = state.dataSurfaceGeometry->SurfaceTmp(SurfNum);
 
                         if (SurfaceTmpClassMoved(SurfNum)) {
                             continue;
@@ -1554,7 +1554,7 @@ namespace SurfaceGeometry {
                         continue;
                     }
 
-                    auto &surfTemp = state.dataSurfaceGeometry->SurfaceTmp(SurfNum);
+                    const auto &surfTemp = state.dataSurfaceGeometry->SurfaceTmp(SurfNum);
                     if (surfTemp.spaceNum != spaceNum) {
                         continue;
                     }
@@ -12068,6 +12068,20 @@ namespace SurfaceGeometry {
                     ++notused;
                     surfacenotused(notused) = SurfNum;
                     continue;
+                }
+
+                // Same-zone paired surfaces that separate different spaces are interior partitions within a
+                // multi-space zone. Including both sides here would count partition edges four times in the
+                // enclosure check, which can falsely report that the zone is not fully enclosed even though
+                // the outer shell is valid. Exclude only these cross-space same-zone pairs from the volume shell.
+                if (thisZone.numSpaces > 1 && thisSurface.ExtBoundCond > 0 && thisSurface.ExtBoundCond != SurfNum) {
+                    auto const &adjacentSurface = state.dataSurface->Surface(thisSurface.ExtBoundCond);
+                    if ((adjacentSurface.Zone == thisSurface.Zone) && (adjacentSurface.spaceNum > 0) &&
+                        (adjacentSurface.spaceNum != thisSurface.spaceNum)) {
+                        ++notused;
+                        surfacenotused(notused) = SurfNum;
+                        continue;
+                    }
                 }
 
                 ++NActFaces;

@@ -1941,7 +1941,7 @@ TEST_F(EnergyPlusFixture, Furnaces_SetMinOATCompressor)
     state->dataDXCoils->DXCoil(2).MinOATCompressor = 30.0;
 
     state->dataHVACAssistedCC->HXAssistedCoil.allocate(1);
-    state->dataHVACAssistedCC->HXAssistedCoil(1).CoolingCoilType = "COIL:COOLING:DX";
+    state->dataHVACAssistedCC->HXAssistedCoil(1).coolCoilType = HVAC::CoilType::CoolingDX;
     state->dataHVACAssistedCC->HXAssistedCoil(1).CoolingCoilName = "Dummy_Name";
 
     state->dataCoilCoolingDX->coilCoolingDXGetInputFlag = false;
@@ -1955,7 +1955,7 @@ TEST_F(EnergyPlusFixture, Furnaces_SetMinOATCompressor)
     bool ErrFound = false;
 
     // Test HXAsssisted type with new coil
-    state->dataFurnaces->Furnace(1).CoolingCoilType_Num = HVAC::CoilDX_CoolingHXAssisted;
+    state->dataFurnaces->Furnace(1).coolCoilType = HVAC::CoilType::CoolingDXHXAssisted;
     SetMinOATCompressor(*state, FurnaceNum, cCurModObj, ErrFound);
     EXPECT_FALSE(ErrFound);
     EXPECT_NEAR(state->dataFurnaces->Furnace(1).MinOATCompressorCooling, 0.0, 1e-6);
@@ -1965,8 +1965,8 @@ TEST_F(EnergyPlusFixture, Furnaces_SetMinOATCompressor)
     state->dataFurnaces->Furnace(1).MinOATCompressorHeating = -999.0;
 
     // Check that each coil type returns correctly
-    state->dataFurnaces->Furnace(1).CoolingCoilType_Num = HVAC::Coil_CoolingAirToAirVariableSpeed;
-    state->dataFurnaces->Furnace(1).HeatingCoilType_Num = HVAC::Coil_HeatingElectric;
+    state->dataFurnaces->Furnace(1).coolCoilType = HVAC::CoilType::CoolingDXVariableSpeed;
+    state->dataFurnaces->Furnace(1).heatCoilType = HVAC::CoilType::HeatingElectric;
     // Each test should return 30 for cooling coil (limited) and -1000 for heating coil (no limit)
     SetMinOATCompressor(*state, FurnaceNum, cCurModObj, ErrFound);
     EXPECT_FALSE(ErrFound);
@@ -1976,7 +1976,7 @@ TEST_F(EnergyPlusFixture, Furnaces_SetMinOATCompressor)
     state->dataFurnaces->Furnace(1).MinOATCompressorCooling = -999.0;
     state->dataFurnaces->Furnace(1).MinOATCompressorHeating = -999.0;
 
-    state->dataFurnaces->Furnace(1).CoolingCoilType_Num = HVAC::CoilDX_CoolingSingleSpeed;
+    state->dataFurnaces->Furnace(1).coolCoilType = HVAC::CoilType::CoolingDXSingleSpeed;
     SetMinOATCompressor(*state, FurnaceNum, cCurModObj, ErrFound);
     EXPECT_FALSE(ErrFound);
     EXPECT_NEAR(state->dataFurnaces->Furnace(1).MinOATCompressorCooling, 30.0, 1e-6);
@@ -1984,13 +1984,13 @@ TEST_F(EnergyPlusFixture, Furnaces_SetMinOATCompressor)
 
     // check heating coil types
     // should return 30 in each case since cooling and heating coil now have limit
-    state->dataFurnaces->Furnace(1).HeatingCoilType_Num = HVAC::Coil_HeatingAirToAirVariableSpeed;
+    state->dataFurnaces->Furnace(1).heatCoilType = HVAC::CoilType::HeatingDXVariableSpeed;
     SetMinOATCompressor(*state, FurnaceNum, cCurModObj, ErrFound);
     EXPECT_FALSE(ErrFound);
     EXPECT_NEAR(state->dataFurnaces->Furnace(1).MinOATCompressorCooling, 30.0, 1e-6); // same as above
     EXPECT_NEAR(state->dataFurnaces->Furnace(1).MinOATCompressorHeating, 30.0, 1e-6); // now returns 30
 
-    state->dataFurnaces->Furnace(1).HeatingCoilType_Num = HVAC::CoilDX_HeatingEmpirical;
+    state->dataFurnaces->Furnace(1).heatCoilType = HVAC::CoilType::HeatingDXSingleSpeed;
     SetMinOATCompressor(*state, FurnaceNum, cCurModObj, ErrFound);
     EXPECT_FALSE(ErrFound);
     EXPECT_NEAR(state->dataFurnaces->Furnace(1).MinOATCompressorCooling, 30.0, 1e-6);

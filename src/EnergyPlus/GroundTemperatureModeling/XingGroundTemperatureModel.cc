@@ -51,7 +51,6 @@
 // EnergyPlus headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataGlobalConstants.hh>
-#include <EnergyPlus/DataIPShortCuts.hh>
 #include <EnergyPlus/GroundTemperatureModeling/XingGroundTemperatureModel.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
@@ -73,42 +72,42 @@ namespace GroundTemp {
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         bool found = false;
-        int NumNums;
-        int NumAlphas;
-        int IOStat;
-
         // New shared pointer for this model object
         auto *thisModel = new XingGroundTempsModel();
 
         ModelType modelType = ModelType::Xing;
 
-        std::string_view const cCurrentModuleObject = GroundTemp::modelTypeNamesUC[(int)modelType];
-        const int numCurrModels = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
+        std::string_view const cCurrentModuleObject = GroundTemp::modelTypeNames[(int)modelType];
+        std::string const currentModuleObject(cCurrentModuleObject);
+        auto *inputProcessor = state.dataInputProcessing->inputProcessor.get();
+        auto const modelInstances = inputProcessor->epJSON.find(currentModuleObject);
+        if (modelInstances == inputProcessor->epJSON.end()) {
+            ShowFatalError(state, fmt::format("{}--Errors getting input for ground temperature model", GroundTemp::modelTypeNames[(int)modelType]));
+        }
+        auto const &modelSchemaProps = inputProcessor->getObjectSchemaProps(state, currentModuleObject);
 
         thisModel->modelType = modelType;
         thisModel->Name = objectName;
 
-        for (int modelNum = 1; modelNum <= numCurrModels; ++modelNum) {
+        for (auto const &modelInstance : modelInstances.value().items()) {
+            auto const modelName = Util::makeUPPER(modelInstance.key());
+            auto const &modelFields = modelInstance.value();
 
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     cCurrentModuleObject,
-                                                                     modelNum,
-                                                                     state.dataIPShortCut->cAlphaArgs,
-                                                                     NumAlphas,
-                                                                     state.dataIPShortCut->rNumericArgs,
-                                                                     NumNums,
-                                                                     IOStat);
-
-            if (thisModel->Name == state.dataIPShortCut->cAlphaArgs(1)) {
+            if (thisModel->Name == modelName) {
                 // Read remaining input into object here
-                thisModel->groundThermalDiffusivity = state.dataIPShortCut->rNumericArgs(1) /
-                                                      (state.dataIPShortCut->rNumericArgs(2) * state.dataIPShortCut->rNumericArgs(3)) *
+                inputProcessor->markObjectAsUsed(currentModuleObject, modelInstance.key());
+                thisModel->Name = modelName;
+                thisModel->groundThermalDiffusivity = inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "soil_thermal_conductivity") /
+                                                      (inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "soil_density") *
+                                                       inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "soil_specific_heat")) *
                                                       Constant::rSecsInDay;
-                thisModel->aveGroundTemp = state.dataIPShortCut->rNumericArgs(4);
-                thisModel->surfTempAmplitude_1 = state.dataIPShortCut->rNumericArgs(5);
-                thisModel->surfTempAmplitude_2 = state.dataIPShortCut->rNumericArgs(6);
-                thisModel->phaseShift_1 = state.dataIPShortCut->rNumericArgs(7);
-                thisModel->phaseShift_2 = state.dataIPShortCut->rNumericArgs(8);
+                thisModel->aveGroundTemp = inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "average_soil_surface_temperature");
+                thisModel->surfTempAmplitude_1 =
+                    inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "soil_surface_temperature_amplitude_1");
+                thisModel->surfTempAmplitude_2 =
+                    inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "soil_surface_temperature_amplitude_2");
+                thisModel->phaseShift_1 = inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "phase_shift_of_temperature_amplitude_1");
+                thisModel->phaseShift_2 = inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "phase_shift_of_temperature_amplitude_2");
 
                 found = true;
                 break;

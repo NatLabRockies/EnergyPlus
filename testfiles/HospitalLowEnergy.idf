@@ -73,7 +73,7 @@
 ! ExtWallConstruction=Steel-Framed
 ! Number of Zones: 130
 
-  Version,26.1;
+  Version,26.2;
 
   Timestep,4;
 
@@ -4777,7 +4777,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Elevator Heat Pump Heat Coil,  !- Name
-    ,                                      !- Availability Schedule Name
+    ,                        !- Availability Schedule Name
     Floor 1 Elevator Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Elevator Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Elevator Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -5886,7 +5886,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Food Storage Heat Pump Cool Coil,  !- Name
-    ,                                          !- Availability Schedule Name
+    ,                        !- Availability Schedule Name
     Floor 1 Food Storage Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Food Storage Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Food Storage Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name

@@ -29,7 +29,7 @@
 !         Systems are set to Night Cycle during setup/setback.
 !
 
-  Version,26.1;
+  Version,26.2;
 
   Timestep,6;
 

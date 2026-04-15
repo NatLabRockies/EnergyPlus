@@ -339,7 +339,7 @@ Real64 CoolingAirFlowSizer::size(EnergyPlusData &state, Real64 _originalValue, b
                 if (this->isEpJSON) {
                     this->sizingString = "maximum_supply_air_flow_rate [m3/s]";
                 }
-            } else if (this->coilType_Num == HVAC::CoilDX_CoolingTwoSpeed) {
+            } else if (this->coilType == HVAC::CoilType::CoolingDXTwoSpeed) {
                 if (this->dataDXSpeedNum == 1) { // mode 1 is high speed in DXCoils loop
                     if (this->isEpJSON) {
                         this->sizingString = "high_speed_rated_air_flow_rate [m3/s]";

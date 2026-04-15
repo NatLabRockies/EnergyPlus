@@ -79,23 +79,7 @@ namespace UnitVentilator {
         Cooling,
         Num
     };
-    enum class HeatCoilType
-    {
-        Invalid = -1,
-        Electric,
-        Gas,
-        Water,
-        Steam,
-        Num
-    };
-    enum class CoolCoilType
-    {
-        Invalid = -1,
-        Water,
-        Detailed,
-        HXAssisted,
-        Num
-    };
+
     enum class OAControl
     {
         Invalid = -1,
@@ -127,18 +111,18 @@ namespace UnitVentilator {
         Sched::Schedule *minOASched = nullptr;
         Sched::Schedule *maxOASched = nullptr;
         Sched::Schedule *tempSched = nullptr;
-        int OutsideAirNode = 0;                         // outside air node number
-        int AirReliefNode = 0;                          // relief air node number
-        int OAMixerOutNode = 0;                         // outlet node after the outside air mixer (inlet to coils if present)
-        Real64 OutAirVolFlow = 0.0;                     // m3/s
-        Real64 OutAirMassFlow = 0.0;                    // kg/s
-        Real64 MinOutAirVolFlow = 0.0;                  // m3/s
-        Real64 MinOutAirMassFlow = 0.0;                 // kg/s
-        CoilsUsed CoilOption = CoilsUsed::Invalid;      // type of coil option; options are BOTH, HEATING, COOLING, AND NONE
-        bool HCoilPresent = false;                      // .TRUE. if unit ventilator has a heating coil
-        HeatCoilType HCoilType = HeatCoilType::Invalid; // type of heating coil (water, gas, electric, etc.)
-        std::string HCoilName;                          // name of heating coil
-        std::string HCoilTypeCh;                        // type of heating coil character string (same as type on idf file).
+        int OutsideAirNode = 0;                                // outside air node number
+        int AirReliefNode = 0;                                 // relief air node number
+        int OAMixerOutNode = 0;                                // outlet node after the outside air mixer (inlet to coils if present)
+        Real64 OutAirVolFlow = 0.0;                            // m3/s
+        Real64 OutAirMassFlow = 0.0;                           // kg/s
+        Real64 MinOutAirVolFlow = 0.0;                         // m3/s
+        Real64 MinOutAirMassFlow = 0.0;                        // kg/s
+        CoilsUsed CoilOption = CoilsUsed::Invalid;             // type of coil option; options are BOTH, HEATING, COOLING, AND NONE
+        bool HCoilPresent = false;                             // .TRUE. if unit ventilator has a heating coil
+        HVAC::CoilType heatCoilType = HVAC::CoilType::Invalid; // type of heating coil (water, gas, electric, etc.)
+        std::string HCoilName;                                 // name of heating coil
+        std::string HCoilTypeCh;                               // type of heating coil character string (same as type on idf file).
         int HCoil_Index = 0;
         DataPlant::PlantEquipmentType HeatingCoilType = DataPlant::PlantEquipmentType::Invalid;
 
@@ -165,7 +149,7 @@ namespace UnitVentilator {
         std::string CCoilPlantName; // name of cooling coil for plant
         std::string CCoilPlantType; // type of cooling coil for plant
         DataPlant::PlantEquipmentType CoolingCoilType = DataPlant::PlantEquipmentType::Invalid;
-        CoolCoilType CCoilType = CoolCoilType::Invalid;
+        HVAC::CoilType coolCoilType = HVAC::CoilType::Invalid;
         Sched::Schedule *cCoilSched = nullptr;
         Real64 CCoilSchedValue = 0.0;
         Real64 MaxVolColdWaterFlow = 0.0; // m3/s

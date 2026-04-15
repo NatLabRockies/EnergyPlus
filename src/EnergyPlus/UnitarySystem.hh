@@ -260,7 +260,7 @@ namespace UnitarySystems {
         int m_ZoneSequenceHeatingNum = 0;
         bool m_HeatCoilExists = false;
         Real64 m_HeatingSizingRatio = 1.0;
-        int m_HeatingCoilType_Num = 0;
+        HVAC::CoilType m_heatCoilType = HVAC::CoilType::Invalid;
         bool m_DXHeatingCoil = false;
         int m_HeatingCoilIndex = 0;
         Sched::Schedule *m_heatingCoilAvailSched = nullptr;
@@ -272,7 +272,7 @@ namespace UnitarySystems {
         bool m_VarSpeedHeatingCoil = false;
         int HeatCtrlNode = 0;
         bool m_CoolCoilExists = false;
-        int m_CoolingCoilType_Num = 0;
+        HVAC::CoilType m_coolCoilType = HVAC::CoilType::Invalid;
         int m_NumOfSpeedCooling = 0;
         Sched::Schedule *m_coolingCoilAvailSched = nullptr;
         Real64 m_DesignCoolingCapacity = 0.0;
@@ -291,7 +291,7 @@ namespace UnitarySystems {
         bool m_RunOnLatentLoad = false;
         bool m_RunOnLatentOnlyWithSensible = false;
         HVAC::CoilMode m_DehumidificationMode = HVAC::CoilMode::Normal; // Only explicitly initialized if something other than Normal
-        int m_SuppHeatCoilType_Num = 0;
+        HVAC::CoilType m_suppHeatCoilType = HVAC::CoilType::Invalid;
         bool m_SuppCoilExists = false;
         Real64 m_DesignSuppHeatingCapacity = 0.0;
         int m_SuppCoilAirInletNode = 0;

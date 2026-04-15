@@ -89,6 +89,7 @@ idf_folders = [
     Path("performance_tests"),
     Path("datasets"),
     Path("testfiles") / "BasicsFiles",
+    Path("tst") / "EnergyPlus" / "unit" / "Resources",
 ]
 
 # walk across the idf and imf files

@@ -16,7 +16,7 @@
 !           chillers and purchased cooling.  Priority based controls determine which piece of equipment
 !           tries to meet the load.
 
-  Version,26.1;
+  Version,26.2;
 
   Timestep,6;
 

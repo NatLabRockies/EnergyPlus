@@ -148,7 +148,7 @@ std::string IdfParser::encode(json const &root, json const &schema)
                 continue;
             }
 
-            auto &extensions = obj_in.value()[extension_key];
+            const auto &extensions = obj_in.value()[extension_key];
             for (const auto &cur_extension_obj : extensions) {
                 auto const &extensible = schema["properties"][obj.key()]["legacy_idd"]["extensibles"];
                 for (const auto &i : extensible) {

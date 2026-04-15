@@ -84,7 +84,7 @@
 ! Utility Tariffs:
 !-   ===========  ALL OBJECTS IN CLASS: VERSION ===========
 
-  Version,26.1;
+  Version,26.2;
 
 !-   ===========  ALL OBJECTS IN CLASS: BUILDING ===========
 
@@ -401,8 +401,6 @@
     1.706880,0.0000000E+00,0.6705600,  !- X,Y,Z ==> Vertex 2 {m}
     4.419600,0.0000000E+00,0.6705600,  !- X,Y,Z ==> Vertex 3 {m}
     4.419600,0.0000000E+00,2.743200;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  2 {m}
 
   BuildingSurface:Detailed,
     Zn001:Wall002,           !- Name
@@ -741,8 +739,6 @@
     15.24000,21.70176,3.0480001E-02,  !- X,Y,Z ==> Vertex 3 {m}
     15.24000,21.70176,3.017520;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Zn001:Wall013,           !- Name
     Wall,                    !- Surface Type
@@ -775,9 +771,6 @@
     11.85672,37.97808,0.5791200,  !- X,Y,Z ==> Vertex 3 {m}
     11.85672,37.97808,3.017520;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Zn001:Wall014,           !- Name
     Wall,                    !- Surface Type
@@ -794,10 +787,6 @@
     0.0000000E+00,37.97808,0.0000000E+00,  !- X,Y,Z ==> Vertex 2 {m}
     0.0000000E+00,0.0000000E+00,0.0000000E+00,  !- X,Y,Z ==> Vertex 3 {m}
     0.0000000E+00,0.0000000E+00,3.048000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Zn001:Wall014:Win001,    !- Name

@@ -99,7 +99,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,26.1;
+  Version,26.2;
 
   Building,
     Building,                !- Name
@@ -590,8 +590,6 @@
     Through: 12/31,          !- Field 1
     For: AllDays,            !- Field 2
     Until: 24:00,117.239997864; !- Field 3
-
-                             !- Field 4
 
   Schedule:Compact,
     ShadeTransSch,           !- Name
@@ -2531,6 +2529,7 @@
     ,                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
     ,                        !- Latent Capacity Time Constant {s}
     ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ,                        !- Apply Part Load Fraction to Speeds Greater than 1
     Yes,                     !- Apply Latent Degradation to Speeds Greater than 1
     ,                        !- Condenser Type
     ,                        !- Nominal Evaporative Condenser Pump Power {W}
@@ -2934,6 +2933,7 @@
     ,                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
     ,                        !- Latent Capacity Time Constant {s}
     ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ,                        !- Apply Part Load Fraction to Speeds Greater than 1
     Yes,                     !- Apply Latent Degradation to Speeds Greater than 1
     ,                        !- Condenser Type
     ,                        !- Nominal Evaporative Condenser Pump Power {W}
@@ -3324,6 +3324,7 @@
     ,                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
     ,                        !- Latent Capacity Time Constant {s}
     ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ,                        !- Apply Part Load Fraction to Speeds Greater than 1
     Yes,                     !- Apply Latent Degradation to Speeds Greater than 1
     ,                        !- Condenser Type
     ,                        !- Nominal Evaporative Condenser Pump Power {W}
@@ -3802,6 +3803,7 @@
     ,                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
     ,                        !- Latent Capacity Time Constant {s}
     ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ,                        !- Apply Part Load Fraction to Speeds Greater than 1
     Yes,                     !- Apply Latent Degradation to Speeds Greater than 1
     ,                        !- Condenser Type
     ,                        !- Nominal Evaporative Condenser Pump Power {W}
@@ -4274,6 +4276,7 @@
     ,                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
     ,                        !- Latent Capacity Time Constant {s}
     ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ,                        !- Apply Part Load Fraction to Speeds Greater than 1
     Yes,                     !- Apply Latent Degradation to Speeds Greater than 1
     ,                        !- Condenser Type
     ,                        !- Nominal Evaporative Condenser Pump Power {W}

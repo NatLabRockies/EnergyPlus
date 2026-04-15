@@ -10,7 +10,7 @@
 ! Modified: Conforms with Beta 4 input
 ! 2 design days to facilitate reverse DD testing.
 
-  Version,26.1;
+  Version,26.2;
 
   Site:Location,
     ATLANTA,                 !- Name

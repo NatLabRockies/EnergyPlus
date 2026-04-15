@@ -855,9 +855,9 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_SimPTAC_HeatingCoilTest)
 
     //// get input test for terminal air single duct mixer on inlet side of PTAC
     ASSERT_EQ(1, state->dataUnitarySystems->numUnitarySystems);
-    EXPECT_EQ("ZoneHVAC:PackagedTerminalAirConditioner", thisSys.UnitType);                             // zoneHVAC equipment type
-    EXPECT_EQ("COIL:HEATING:FUEL", thisSys.m_HeatingCoilTypeName);                                      // PTAC heating coil type
-    EXPECT_EQ(state->dataHeatingCoils->HeatingCoil(1).HCoilType_Num, HVAC::Coil_HeatingGasOrOtherFuel); // gas heating coil type
+    EXPECT_EQ("ZoneHVAC:PackagedTerminalAirConditioner", thisSys.UnitType);                                 // zoneHVAC equipment type
+    EXPECT_EQ("COIL:HEATING:FUEL", thisSys.m_HeatingCoilTypeName);                                          // PTAC heating coil type
+    EXPECT_EQ(state->dataHeatingCoils->HeatingCoil(1).heatCoilType, HVAC::CoilType::HeatingGasOrOtherFuel); // gas heating coil type
 
     state->dataGlobal->BeginEnvrnFlag = false;
 
@@ -4914,7 +4914,7 @@ TEST_F(EnergyPlusFixture, PTAC_AvailabilityManagerTest)
     ASSERT_EQ(1, state->dataUnitarySystems->numUnitarySystems);
     EXPECT_EQ("ZoneHVAC:PackagedTerminalAirConditioner", thisSys.UnitType);
     EXPECT_EQ("COIL:HEATING:FUEL", thisSys.m_HeatingCoilTypeName);
-    EXPECT_EQ(state->dataHeatingCoils->HeatingCoil(1).HCoilType_Num, HVAC::Coil_HeatingGasOrOtherFuel);
+    EXPECT_EQ(state->dataHeatingCoils->HeatingCoil(1).heatCoilType, HVAC::CoilType::HeatingGasOrOtherFuel);
     EXPECT_FALSE(thisSys.m_useNoLoadLowSpeedAirFlow);
     // set input variables
     state->dataEnvrn->OutBaroPress = 101325.0;

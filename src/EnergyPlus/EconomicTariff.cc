@@ -224,7 +224,7 @@ void UpdateUtilityBills(EnergyPlusData &state)
     //    Single routine used to call all get input
     //    routines for economics.
 
-    auto &s_econ = state.dataEconTariff;
+    const auto &s_econ = state.dataEconTariff;
 
     if (s_econ->Update_GetInput) {
         bool ErrorsFound = false;
@@ -3915,7 +3915,7 @@ void LEEDtariffReporting(EnergyPlusData &state)
         std::string distHeatSteamTariffNames;
         std::string othrTariffNames;
         for (int iTariff = 1; iTariff <= s_econ->numTariff; ++iTariff) {
-            auto &tariff = s_econ->tariff(iTariff);
+            const auto &tariff = s_econ->tariff(iTariff);
             if (tariff.isSelected) {
                 allTotalCost += tariff.totalAnnualCost;
                 if (tariff.kindMtr == MeterType::ElecSimple || tariff.kindMtr == MeterType::ElecProduced ||
@@ -4515,7 +4515,7 @@ void showWarningsBasedOnTotal(EnergyPlusData &state)
     }
 }
 
-void getMaxAndSum(EnergyPlusData &state, int const varPointer, Real64 &sumResult, Real64 &maxResult)
+void getMaxAndSum(EnergyPlusData const &state, int const varPointer, Real64 &sumResult, Real64 &maxResult)
 {
     //    AUTHOR         Jason Glazer of GARD Analytics, Inc.
     //    DATE WRITTEN   July 2004
@@ -4864,7 +4864,7 @@ void selectTariff(EnergyPlusData &state)
     MinTariffIndex.deallocate();
 }
 
-void GetMonthlyCostForResource(EnergyPlusData &state, Constant::eResource const inResourceNumber, Array1A<Real64> outMonthlyCosts)
+void GetMonthlyCostForResource(EnergyPlusData const &state, Constant::eResource const inResourceNumber, Array1A<Real64> outMonthlyCosts)
 {
     //       AUTHOR         Jason Glazer
     //       DATE WRITTEN   May 2010

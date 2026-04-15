@@ -682,9 +682,8 @@ nlohmann::json GLHEVert::getCommonGHEDesignerInputs(EnergyPlusData &state) const
 
 fs::path GLHEVert::runGHEDesigner(EnergyPlusData &state, nlohmann::json const &inputs)
 {
-    // we'll drop the ghedesigner input file and output directory in the same folder as the input file
-    auto ghe_designer_input_file_path = state.dataStrGlobals->inputDirPath / "eplus_ghedesigner_input.json";
-    auto ghe_designer_output_directory = state.dataStrGlobals->inputDirPath / "eplus_ghedesigner_outputs";
+    auto ghe_designer_input_file_path = state.dataStrGlobals->outDirPath / "eplus_ghedesigner_input.json";
+    auto ghe_designer_output_directory = state.dataStrGlobals->outDirPath / "eplus_ghedesigner_outputs";
     try {
         // If file already exists, try removing it
         if (fs::exists(ghe_designer_input_file_path)) {

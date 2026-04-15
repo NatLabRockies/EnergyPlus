@@ -79,6 +79,12 @@ VALID_NULL_ENUM_VALUE_NAMES = ["INVALID"]
 VALID_NUM_ENUM_VALUE_NAMES = ["NUM"]
 
 
+def strip_preprocessor_directives(input_str: str) -> str:
+    """Remove preprocessor directive lines while preserving enum entries inside conditional blocks."""
+
+    return "\n".join([line for line in input_str.splitlines() if not line.strip().startswith("#")])
+
+
 def process_enum_str(input_str: str, filepath: Path, line_no: int) -> list[LogMessage]:
     """Process enum string."""
 
@@ -92,16 +98,17 @@ def process_enum_str(input_str: str, filepath: Path, line_no: int) -> list[LogMe
 
     input_str = input_str.replace("enum class", "")
     input_str = input_str.replace("};", "")
-    tokens = input_str.split("{")
+    tokens = input_str.split("{", 1)
     if ":" in tokens[0]:
         tokens[0] = tokens[0].replace(" ", "").split(":")[0]
 
     name = tokens[0].strip()
-    tokens = tokens[1].split(",")
+    tokens = strip_preprocessor_directives(tokens[1]).split(",")
     tokens = [x.strip() for x in tokens]
+    tokens = [x for x in tokens if x]
 
-    if tokens[-1] == "":
-        tokens.pop(-1)
+    if not tokens:
+        return log_messages
 
     # split into names and integer values, in present
     keys = []
@@ -309,7 +316,7 @@ def check_for_malformed_enums(filepath: Path) -> list[LogMessage]:
             end_found = True
 
         if start_found:
-            enum_str += line
+            enum_str += line + "\n"
 
         if end_found:
             log_messages += process_enum_str(input_str=enum_str, filepath=filepath, line_no=start_line)
@@ -346,6 +353,22 @@ class TestProcessEnums(unittest.TestCase):
         log_messages = process_enum_str(input_str=s, filepath=dummy_file, line_no=1)
         self.assertEqual(len(log_messages), 1)
         self.assertEqual(log_messages[0].message, "Malformed 'enum class' 'SomeType' - Missing 'Num' at position N")
+
+        # ignore embedded preprocessor directives inside enum bodies
+        s = """enum class CoilType
+        {
+            Invalid = -1,
+            CoolingDXSingleSpeed,
+            // skip these
+        #ifdef GET_OUT
+            IHPAirSource,
+            CoolingSystemDX,
+            HeatingSystemDX,
+        #endif // GET_OUT
+            Num
+        };"""
+        log_messages = process_enum_str(input_str=s, filepath=dummy_file, line_no=1)
+        self.assertEqual(len(log_messages), 0)
 
 
 if __name__ == "__main__":

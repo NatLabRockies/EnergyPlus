@@ -92,16 +92,7 @@ namespace SingleDuct {
         SingleDuctCBVAVNoReheat,
         Num,
     };
-    enum class HeatingCoilType : int
-    {
-        Invalid = -1,
-        None,
-        Gas,
-        Electric,
-        SimpleHeating,
-        SteamAirHeating,
-        Num,
-    };
+
     enum class MinFlowFraction
     {
         Invalid = -1,
@@ -132,18 +123,18 @@ namespace SingleDuct {
     struct SingleDuctAirTerminal
     {
         // Members
-        int SysNum;                                         // index to single duct air terminal unit
-        std::string SysName;                                // Name of the Sys
-        std::string sysType;                                // Type of Sys ie. VAV, Mixing, Inducing, etc.
-        SysType SysType_Num;                                // Numeric Equivalent for System type
-        Sched::Schedule *availSched = nullptr;              // availability schedule
-        std::string ReheatComp;                             // Type of the Reheat Coil Object
-        HeatingCoilType ReheatComp_Num;                     // Numeric Equivalent in this module for Coil type
-        int ReheatComp_Index;                               // Returned Index number from other routines
-        std::string ReheatName;                             // name of reheat coil
-        DataPlant::PlantEquipmentType ReheatComp_PlantType; // typeOf_ number for plant type of heating coil
-        HVAC::FanType fanType;                              // Numeric Equivalent in this module for fan type
-        int Fan_Index;                                      // Returned Index number from other routines
+        int SysNum;                                              // index to single duct air terminal unit
+        std::string SysName;                                     // Name of the Sys
+        std::string sysType;                                     // Type of Sys ie. VAV, Mixing, Inducing, etc.
+        SysType SysType_Num;                                     // Numeric Equivalent for System type
+        Sched::Schedule *availSched = nullptr;                   // availability schedule
+        std::string ReheatComp;                                  // Type of the Reheat Coil Object
+        HVAC::CoilType reheatCoilType = HVAC::CoilType::Invalid; // Numeric Equivalent in this module for Coil type
+        int ReheatComp_Index;                                    // Returned Index number from other routines
+        std::string ReheatName;                                  // name of reheat coil
+        DataPlant::PlantEquipmentType ReheatComp_PlantType;      // typeOf_ number for plant type of heating coil
+        HVAC::FanType fanType;                                   // Numeric Equivalent in this module for fan type
+        int Fan_Index;                                           // Returned Index number from other routines
         int ControlCompTypeNum;
         int CompErrIndex;
         std::string FanName;                  // name of fan
@@ -222,21 +213,20 @@ namespace SingleDuct {
         General::SolveRootStats solveRootStats;
         // Default Constructor
         SingleDuctAirTerminal()
-            : SysNum(-1), SysType_Num(SysType::Invalid), ReheatComp_Num(HeatingCoilType::None), ReheatComp_Index(0),
-              ReheatComp_PlantType(DataPlant::PlantEquipmentType::Invalid), fanType(HVAC::FanType::Invalid), Fan_Index(0), ControlCompTypeNum(0),
-              CompErrIndex(0), MaxAirVolFlowRate(0.0), AirMassFlowRateMax(0.0), MaxHeatAirVolFlowRate(0.0), HeatAirMassFlowRateMax(0.0),
-              ZoneMinAirFracMethod(MinFlowFraction::Constant), ZoneMinAirFracDes(0.0), ZoneMinAirFrac(0.0), ZoneMinAirFracReport(0.0),
-              ZoneFixedMinAir(0.0), ConstantMinAirFracSetByUser(false), FixedMinAirSetByUser(false), DesignMinAirFrac(0.0), DesignFixedMinAir(0.0),
-              InletNodeNum(0), OutletNodeNum(0), ReheatControlNode(0), ReheatCoilOutletNode(0), ReheatCoilMaxCapacity(0.0), ReheatAirOutletNode(0),
-              MaxReheatWaterVolFlow(0.0), MaxReheatSteamVolFlow(0.0), MaxReheatWaterFlow(0.0), MaxReheatSteamFlow(0.0), MinReheatWaterVolFlow(0.0),
-              MinReheatSteamVolFlow(0.0), MinReheatWaterFlow(0.0), MinReheatSteamFlow(0.0), ControllerOffset(0.0), MaxReheatTemp(0.0),
-              MaxReheatTempSetByUser(false), DamperHeatingAction(Action::HeatingNotUsed), DamperPosition(0.0), ADUNum(0), ErrCount1(0), ErrCount1c(0),
-              ErrCount2(0), ZoneFloorArea(0.0), CtrlZoneNum(0), CtrlZoneInNodeIndex(0), MaxAirVolFlowRateDuringReheat(0.0),
-              MaxAirVolFractionDuringReheat(0.0), AirMassFlowDuringReheatMax(0.0), ZoneOutdoorAirMethod(0), OutdoorAirFlowRate(0.0),
-              NoOAFlowInputFromUser(true), OARequirementsPtr(0), AirLoopNum(0), HWplantLoc{}, SecInNode(0), IterationLimit(0), IterationFailed(0),
-              OAPerPersonMode(DataZoneEquipment::PerPersonVentRateMode::Invalid), EMSOverrideAirFlow(false), EMSMassFlowRateValue(0.0),
-              ZoneTurndownMinAirFrac(1.0), MyEnvrnFlag(true), MySizeFlag(true), GetGasElecHeatCoilCap(true), PlantLoopScanFlag(true), MassFlow1(0.0),
-              MassFlow2(0.0), MassFlow3(0.0), MassFlowDiff(0.0)
+            : SysNum(-1), SysType_Num(SysType::Invalid), ReheatComp_Index(0), ReheatComp_PlantType(DataPlant::PlantEquipmentType::Invalid),
+              fanType(HVAC::FanType::Invalid), Fan_Index(0), ControlCompTypeNum(0), CompErrIndex(0), MaxAirVolFlowRate(0.0), AirMassFlowRateMax(0.0),
+              MaxHeatAirVolFlowRate(0.0), HeatAirMassFlowRateMax(0.0), ZoneMinAirFracMethod(MinFlowFraction::Constant), ZoneMinAirFracDes(0.0),
+              ZoneMinAirFrac(0.0), ZoneMinAirFracReport(0.0), ZoneFixedMinAir(0.0), ConstantMinAirFracSetByUser(false), FixedMinAirSetByUser(false),
+              DesignMinAirFrac(0.0), DesignFixedMinAir(0.0), InletNodeNum(0), OutletNodeNum(0), ReheatControlNode(0), ReheatCoilOutletNode(0),
+              ReheatCoilMaxCapacity(0.0), ReheatAirOutletNode(0), MaxReheatWaterVolFlow(0.0), MaxReheatSteamVolFlow(0.0), MaxReheatWaterFlow(0.0),
+              MaxReheatSteamFlow(0.0), MinReheatWaterVolFlow(0.0), MinReheatSteamVolFlow(0.0), MinReheatWaterFlow(0.0), MinReheatSteamFlow(0.0),
+              ControllerOffset(0.0), MaxReheatTemp(0.0), MaxReheatTempSetByUser(false), DamperHeatingAction(Action::HeatingNotUsed),
+              DamperPosition(0.0), ADUNum(0), ErrCount1(0), ErrCount1c(0), ErrCount2(0), ZoneFloorArea(0.0), CtrlZoneNum(0), CtrlZoneInNodeIndex(0),
+              MaxAirVolFlowRateDuringReheat(0.0), MaxAirVolFractionDuringReheat(0.0), AirMassFlowDuringReheatMax(0.0), ZoneOutdoorAirMethod(0),
+              OutdoorAirFlowRate(0.0), NoOAFlowInputFromUser(true), OARequirementsPtr(0), AirLoopNum(0), HWplantLoc{}, SecInNode(0),
+              IterationLimit(0), IterationFailed(0), OAPerPersonMode(DataZoneEquipment::PerPersonVentRateMode::Invalid), EMSOverrideAirFlow(false),
+              EMSMassFlowRateValue(0.0), ZoneTurndownMinAirFrac(1.0), MyEnvrnFlag(true), MySizeFlag(true), GetGasElecHeatCoilCap(true),
+              PlantLoopScanFlag(true), MassFlow1(0.0), MassFlow2(0.0), MassFlow3(0.0), MassFlowDiff(0.0)
         {
         }
 

@@ -1475,7 +1475,7 @@ bool getHPWaterHeaterInput(EnergyPlusData &state)
             }
 
             bIsVScoil = true;
-            HPWH.DXCoilTypeNum = 0;
+            HPWH.coilType = HVAC::CoilType::Invalid;
             if (HPWH.bIsIHP) {
                 HPWH.DXCoilType = "COILSYSTEM:INTEGRATEDHEATPUMP:AIRSOURCE";
                 int VSCoilNum = state.dataIntegratedHP->IntegratedHeatPumps(HPWH.DXCoilNum).SCWHCoilIndex;
@@ -1487,13 +1487,14 @@ bool getHPWaterHeaterInput(EnergyPlusData &state)
         } else {
             // this is a single speed coil
             DXCoils::DXCoilData &Coil = state.dataDXCoils->DXCoil(HPWH.DXCoilNum);
-            if (!Util::SameString(HPWH.DXCoilType, Coil.DXCoilType)) {
+            if (!Util::SameString(HPWH.DXCoilType, HVAC::coilTypeNames[(int)Coil.coilType])) {
                 ShowSevereError(state, EnergyPlus::format("{}=\"{}\", ", state.dataIPShortCut->cCurrentModuleObject, HPWH.Name));
                 ShowContinueError(state, EnergyPlus::format("specifies the coil {}=\"{}\".", HPWH.DXCoilType, HPWH.DXCoilName));
-                ShowContinueError(state, EnergyPlus::format("However, {} is a coil of type {}.", HPWH.DXCoilName, Coil.DXCoilType));
+                ShowContinueError(state,
+                                  EnergyPlus::format("However, {} is a coil of type {}.", HPWH.DXCoilName, HVAC::coilTypeNames[(int)Coil.coilType]));
                 ErrorsFound = true;
             }
-            HPWH.DXCoilTypeNum = Coil.DXCoilType_Num;
+            HPWH.coilType = Coil.coilType;
             HPWH.dxCoilAvailSched = Coil.availSched;
         }
 
@@ -1507,16 +1508,16 @@ bool getHPWaterHeaterInput(EnergyPlusData &state)
                 ErrorsFound = true;
             }
         } else {
-            if (!((HPWH.DXCoilTypeNum == HVAC::CoilDX_HeatPumpWaterHeaterPumped &&
+            if (!((HPWH.coilType == HVAC::CoilType::WaterHeatingDXPumped &&
                    HPWH.HPWHType == DataPlant::PlantEquipmentType::HeatPumpWtrHeaterPumped) ||
-                  (HPWH.DXCoilTypeNum == HVAC::CoilDX_HeatPumpWaterHeaterWrapped &&
+                  (HPWH.coilType == HVAC::CoilType::WaterHeatingDXWrapped &&
                    HPWH.HPWHType == DataPlant::PlantEquipmentType::HeatPumpWtrHeaterWrapped))) {
                 ShowSevereError(state, EnergyPlus::format("{}=\"{}\":", state.dataIPShortCut->cCurrentModuleObject, HPWH.Name));
                 std::string ExpectedCoilType;
                 if (HPWH.HPWHType == DataPlant::PlantEquipmentType::HeatPumpWtrHeaterPumped) {
-                    ExpectedCoilType = HVAC::cAllCoilTypes(HVAC::CoilDX_HeatPumpWaterHeaterPumped);
+                    ExpectedCoilType = HVAC::coilTypeNames[(int)HVAC::CoilType::WaterHeatingDXPumped];
                 } else if (HPWH.HPWHType == DataPlant::PlantEquipmentType::HeatPumpWtrHeaterWrapped) {
-                    ExpectedCoilType = HVAC::cAllCoilTypes(HVAC::CoilDX_HeatPumpWaterHeaterWrapped);
+                    ExpectedCoilType = HVAC::coilTypeNames[(int)HVAC::CoilType::WaterHeatingDXWrapped];
                 } else {
                     assert(0);
                 }
@@ -1526,7 +1527,7 @@ bool getHPWaterHeaterInput(EnergyPlusData &state)
         }
 
         // Dummy condenser Inlet/Outlet Nodes for wrapped tanks
-        if (HPWH.DXCoilTypeNum == HVAC::CoilDX_HeatPumpWaterHeaterWrapped) {
+        if (HPWH.coilType == HVAC::CoilType::WaterHeatingDXWrapped) {
             DXCoils::DXCoilData &Coil = state.dataDXCoils->DXCoil(HPWH.DXCoilNum);
 
             HPWH.InletNodeName1 = "DUMMY CONDENSER INLET " + Coil.Name;
@@ -1694,7 +1695,7 @@ bool getHPWaterHeaterInput(EnergyPlusData &state)
                     state,
                     EnergyPlus::format(
                         "{}= {}{}",
-                        state.dataDXCoils->DXCoil(HPWH.DXCoilNum).DXCoilType,
+                        HVAC::coilTypeNames[(int)state.dataDXCoils->DXCoil(HPWH.DXCoilNum).coilType],
                         state.dataDXCoils->DXCoil(HPWH.DXCoilNum).Name,
                         EnergyPlus::format(
                             ": Rated condenser pump power per watt of rated heating capacity has exceeded the recommended maximum of 0.1422 "

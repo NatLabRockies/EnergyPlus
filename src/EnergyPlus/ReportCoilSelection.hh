@@ -231,26 +231,26 @@ public: // methods
     void finishCoilSummaryReportTable(EnergyPlusData &state);
 
     void setCoilFinalSizes(EnergyPlusData &state,
-                           std::string const &coilName,    // user-defined name of the coil
-                           std::string const &coilObjName, //  coil object name, e.g., Coil:Cooling:Water
-                           Real64 const totGrossCap,       // total capacity [W]
-                           Real64 const sensGrossCap,      // sensible capacity [W]
-                           Real64 const airFlowRate,       // design or reference or rated air flow rate [m3/s]
-                           Real64 const waterFlowRate      // design or reference or rated water flow rate [m3/s]
+                           std::string const &coilName,        // user-defined name of the coil
+                           std::string_view const coilObjName, //  coil object name, e.g., Coil:Cooling:Water
+                           Real64 const totGrossCap,           // total capacity [W]
+                           Real64 const sensGrossCap,          // sensible capacity [W]
+                           Real64 const airFlowRate,           // design or reference or rated air flow rate [m3/s]
+                           Real64 const waterFlowRate          // design or reference or rated water flow rate [m3/s]
     );
 
     void setRatedCoilConditions(EnergyPlusData &state,
-                                std::string const &coilName,     // ! user-defined name of the coil
-                                std::string const &coilObjName,  //  coil object name, e.g., Coil:Cooling:Water
-                                Real64 const RatedCoilTotCap,    // ! rated coil total capacity [W]
-                                Real64 const RatedCoilSensCap,   // rated coil sensible capacity [W]
-                                Real64 const RatedAirMassFlow,   // rated coil design air mass flow rate [m3/s]
-                                Real64 const RatedCoilInDb,      // rated coil inlet air dry bulb at time of peak [C]
-                                Real64 const RatedCoilInHumRat,  // rated coil inlet air humidity ratio [kgWater/kgDryAir]
-                                Real64 const RatedCoilInWb,      // rated coil inlet air wet bulb [C]
-                                Real64 const RatedCoilOutDb,     // rated coil outlet air dry bulb [C]
-                                Real64 const RatedCoilOutHumRat, // rated coil outlet air humidity ratio, [kgWater/kgDryAir]
-                                Real64 const RatedCoilOutWb,     // rated coil outlet air wet bulb [C]
+                                std::string const &coilName,        // ! user-defined name of the coil
+                                std::string_view const coilObjName, //  coil object name, e.g., Coil:Cooling:Water
+                                Real64 const RatedCoilTotCap,       // ! rated coil total capacity [W]
+                                Real64 const RatedCoilSensCap,      // rated coil sensible capacity [W]
+                                Real64 const RatedAirMassFlow,      // rated coil design air mass flow rate [m3/s]
+                                Real64 const RatedCoilInDb,         // rated coil inlet air dry bulb at time of peak [C]
+                                Real64 const RatedCoilInHumRat,     // rated coil inlet air humidity ratio [kgWater/kgDryAir]
+                                Real64 const RatedCoilInWb,         // rated coil inlet air wet bulb [C]
+                                Real64 const RatedCoilOutDb,        // rated coil outlet air dry bulb [C]
+                                Real64 const RatedCoilOutHumRat,    // rated coil outlet air humidity ratio, [kgWater/kgDryAir]
+                                Real64 const RatedCoilOutWb,        // rated coil outlet air wet bulb [C]
 
                                 Real64 const RatedCoilOadbRef,  // rated DX coil outside air dry bulb reference [C]
                                 Real64 const RatedCoilOawbRef,  // rated DX coil outside air wet bulb reference [C]
@@ -400,8 +400,8 @@ public: // methods
                                  Real64 const multiplierReheatLoad);
 
     void setCoilSupplyFanInfo(EnergyPlusData &state,
-                              std::string const &coilName, // user-defined name of the coil
-                              std::string const &coilType, // idf input object class name of coil
+                              std::string const &coilName,     // user-defined name of the coil
+                              std::string_view const coilType, // idf input object class name of coil
                               std::string const &fanName,
                               HVAC::FanType fanType,
                               int fanIndex);
@@ -437,8 +437,8 @@ private: // methods
     void writeCoilSelectionOutput2(EnergyPlusData &state);
 
     int getIndexForOrCreateDataObjFromCoilName(EnergyPlusData &state,
-                                               std::string const &coilName, // user-defined name of the coil
-                                               std::string const &coilType  // idf input object class name of coil
+                                               std::string const &coilName,    // user-defined name of the coil
+                                               std::string_view const coilType // idf input object class name of coil
     );
 
     void associateZoneCoilWithParent(EnergyPlusData &state, std::unique_ptr<CoilSelectionData> &c);

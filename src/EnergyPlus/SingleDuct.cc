@@ -367,14 +367,14 @@ void GetSysInput(EnergyPlusData &state)
 
         airTerm.ReheatComp = Alphas(7);
         if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Fuel")) {
-            airTerm.ReheatComp_Num = HeatingCoilType::Gas;
+            airTerm.reheatCoilType = HVAC::CoilType::HeatingGasOrOtherFuel;
         } else if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Electric")) {
-            airTerm.ReheatComp_Num = HeatingCoilType::Electric;
+            airTerm.reheatCoilType = HVAC::CoilType::HeatingElectric;
         } else if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Water")) {
-            airTerm.ReheatComp_Num = HeatingCoilType::SimpleHeating;
+            airTerm.reheatCoilType = HVAC::CoilType::HeatingWater;
             airTerm.ReheatComp_PlantType = DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
         } else if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Steam")) {
-            airTerm.ReheatComp_Num = HeatingCoilType::SteamAirHeating;
+            airTerm.reheatCoilType = HVAC::CoilType::HeatingSteam;
             airTerm.ReheatComp_PlantType = DataPlant::PlantEquipmentType::CoilSteamAirHeating;
         } else if (!airTerm.ReheatComp.empty()) {
             ShowSevereError(state, EnergyPlus::format("Illegal {} = {}.", cAlphaFields(8), airTerm.ReheatComp));
@@ -383,19 +383,19 @@ void GetSysInput(EnergyPlusData &state)
         }
 
         airTerm.ReheatName = Alphas(8);
-        if (airTerm.ReheatComp_Num == HeatingCoilType::Gas || airTerm.ReheatComp_Num == HeatingCoilType::Electric) {
+        if (airTerm.reheatCoilType == HVAC::CoilType::HeatingGasOrOtherFuel || airTerm.reheatCoilType == HVAC::CoilType::HeatingElectric) {
             HeatingCoils::GetCoilIndex(state, airTerm.ReheatName, airTerm.ReheatComp_Index, ErrorsFound);
             if (airTerm.ReheatComp_Index == 0) {
                 ShowSevereItemNotFound(state, eoh, cAlphaFields(8), Alphas(8));
                 ErrorsFound = true;
             }
-        } else if (airTerm.ReheatComp_Num == HeatingCoilType::SimpleHeating) {
+        } else if (airTerm.reheatCoilType == HVAC::CoilType::HeatingWater) {
             airTerm.ReheatComp_Index = WaterCoils::GetWaterCoilIndex(state, airTerm.ReheatComp, airTerm.ReheatName, ErrorsFound);
             if (airTerm.ReheatComp_Index == 0) {
                 ShowSevereItemNotFound(state, eoh, cAlphaFields(8), Alphas(8));
                 ErrorsFound = true;
             }
-        } else if (airTerm.ReheatComp_Num == HeatingCoilType::SteamAirHeating) {
+        } else if (airTerm.reheatCoilType == HVAC::CoilType::HeatingSteam) {
             airTerm.ReheatComp_Index = SteamCoils::GetSteamCoilIndex(state, airTerm.ReheatComp, airTerm.ReheatName, ErrorsFound);
             if (airTerm.ReheatComp_Index == 0) {
                 ShowSevereItemNotFound(state, eoh, cAlphaFields(8), Alphas(8));
@@ -490,8 +490,8 @@ void GetSysInput(EnergyPlusData &state)
 
         // The reheat coil control node is necessary for hot water and steam reheat, but not necessary for
         // electric or gas reheat.
-        if (airTerm.ReheatComp_Num != HeatingCoilType::Gas && airTerm.ReheatComp_Num != HeatingCoilType::Electric) {
-            if (airTerm.ReheatComp_Num == HeatingCoilType::SteamAirHeating) {
+        if (airTerm.reheatCoilType != HVAC::CoilType::HeatingGasOrOtherFuel && airTerm.reheatCoilType != HVAC::CoilType::HeatingElectric) {
+            if (airTerm.reheatCoilType == HVAC::CoilType::HeatingSteam) {
                 IsNotOK = false;
                 airTerm.ReheatControlNode = GetCoilSteamInletNode(state, airTerm.ReheatComp, airTerm.ReheatName, IsNotOK);
                 if (IsNotOK) {
@@ -517,7 +517,7 @@ void GetSysInput(EnergyPlusData &state)
                                                         Node::CompFluidStream::Primary,
                                                         Node::ObjectIsParent,
                                                         cAlphaFields(9));
-        if (airTerm.ReheatComp_Num == HeatingCoilType::SteamAirHeating) {
+        if (airTerm.reheatCoilType == HVAC::CoilType::HeatingSteam) {
             airTerm.MaxReheatSteamVolFlow = Numbers(4);
             airTerm.MinReheatSteamVolFlow = Numbers(5);
         } else {
@@ -702,14 +702,14 @@ void GetSysInput(EnergyPlusData &state)
         airTerm.SysType_Num = SysType::SingleDuctCBVAVReheat;
         airTerm.ReheatComp = Alphas(5);
         if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Fuel")) {
-            airTerm.ReheatComp_Num = HeatingCoilType::Gas;
+            airTerm.reheatCoilType = HVAC::CoilType::HeatingGasOrOtherFuel;
         } else if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Electric")) {
-            airTerm.ReheatComp_Num = HeatingCoilType::Electric;
+            airTerm.reheatCoilType = HVAC::CoilType::HeatingElectric;
         } else if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Water")) {
-            airTerm.ReheatComp_Num = HeatingCoilType::SimpleHeating;
+            airTerm.reheatCoilType = HVAC::CoilType::HeatingWater;
             airTerm.ReheatComp_PlantType = DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
         } else if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Steam")) {
-            airTerm.ReheatComp_Num = HeatingCoilType::SteamAirHeating;
+            airTerm.reheatCoilType = HVAC::CoilType::HeatingSteam;
             airTerm.ReheatComp_PlantType = DataPlant::PlantEquipmentType::CoilSteamAirHeating;
         } else if (!airTerm.ReheatComp.empty()) {
             ShowSevereError(state, EnergyPlus::format("Illegal {} = {}.", cAlphaFields(5), airTerm.ReheatComp));
@@ -717,19 +717,19 @@ void GetSysInput(EnergyPlusData &state)
             ErrorsFound = true;
         }
         airTerm.ReheatName = Alphas(6);
-        if (airTerm.ReheatComp_Num == HeatingCoilType::Gas || airTerm.ReheatComp_Num == HeatingCoilType::Electric) {
+        if (airTerm.reheatCoilType == HVAC::CoilType::HeatingGasOrOtherFuel || airTerm.reheatCoilType == HVAC::CoilType::HeatingElectric) {
             HeatingCoils::GetCoilIndex(state, airTerm.ReheatName, airTerm.ReheatComp_Index, ErrorsFound);
             if (airTerm.ReheatComp_Index == 0) {
                 ShowSevereItemNotFound(state, eoh, cAlphaFields(6), Alphas(6));
                 ErrorsFound = true;
             }
-        } else if (airTerm.ReheatComp_Num == HeatingCoilType::SimpleHeating) {
+        } else if (airTerm.reheatCoilType == HVAC::CoilType::HeatingWater) {
             airTerm.ReheatComp_Index = WaterCoils::GetWaterCoilIndex(state, airTerm.ReheatComp, airTerm.ReheatName, ErrorsFound);
             if (airTerm.ReheatComp_Index == 0) {
                 ShowSevereItemNotFound(state, eoh, cAlphaFields(6), Alphas(6));
                 ErrorsFound = true;
             }
-        } else if (airTerm.ReheatComp_Num == HeatingCoilType::SteamAirHeating) {
+        } else if (airTerm.reheatCoilType == HVAC::CoilType::HeatingSteam) {
             airTerm.ReheatComp_Index = SteamCoils::GetSteamCoilIndex(state, airTerm.ReheatComp, airTerm.ReheatName, ErrorsFound);
             if (airTerm.ReheatComp_Index == 0) {
                 ShowSevereItemNotFound(state, eoh, cAlphaFields(6), Alphas(6));
@@ -782,9 +782,9 @@ void GetSysInput(EnergyPlusData &state)
         }
         // The reheat coil control node is necessary for hot water and steam reheat, but not necessary for
         // electric or gas reheat.
-        if (airTerm.ReheatComp_Num == HeatingCoilType::Gas || airTerm.ReheatComp_Num == HeatingCoilType::Electric) {
+        if (airTerm.reheatCoilType == HVAC::CoilType::HeatingGasOrOtherFuel || airTerm.reheatCoilType == HVAC::CoilType::HeatingElectric) {
         } else {
-            if (airTerm.ReheatComp_Num == HeatingCoilType::SteamAirHeating) {
+            if (airTerm.reheatCoilType == HVAC::CoilType::HeatingSteam) {
                 IsNotOK = false;
                 airTerm.ReheatControlNode = GetCoilSteamInletNode(state, airTerm.ReheatComp, airTerm.ReheatName, IsNotOK);
                 if (IsNotOK) {
@@ -811,7 +811,7 @@ void GetSysInput(EnergyPlusData &state)
                                                         Node::CompFluidStream::Primary,
                                                         Node::ObjectIsParent,
                                                         cAlphaFields(7));
-        if (airTerm.ReheatComp_Num == HeatingCoilType::SteamAirHeating) {
+        if (airTerm.reheatCoilType == HVAC::CoilType::HeatingSteam) {
             airTerm.MaxReheatSteamVolFlow = Numbers(3);
             airTerm.MinReheatSteamVolFlow = Numbers(4);
         } else {
@@ -948,14 +948,14 @@ void GetSysInput(EnergyPlusData &state)
         airTerm.SysType_Num = SysType::SingleDuctConstVolReheat;
         airTerm.ReheatComp = Alphas(5);
         if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Fuel")) {
-            airTerm.ReheatComp_Num = HeatingCoilType::Gas;
+            airTerm.reheatCoilType = HVAC::CoilType::HeatingGasOrOtherFuel;
         } else if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Electric")) {
-            airTerm.ReheatComp_Num = HeatingCoilType::Electric;
+            airTerm.reheatCoilType = HVAC::CoilType::HeatingElectric;
         } else if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Water")) {
-            airTerm.ReheatComp_Num = HeatingCoilType::SimpleHeating;
+            airTerm.reheatCoilType = HVAC::CoilType::HeatingWater;
             airTerm.ReheatComp_PlantType = DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
         } else if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Steam")) {
-            airTerm.ReheatComp_Num = HeatingCoilType::SteamAirHeating;
+            airTerm.reheatCoilType = HVAC::CoilType::HeatingSteam;
             airTerm.ReheatComp_PlantType = DataPlant::PlantEquipmentType::CoilSteamAirHeating;
         } else {
             ShowSevereError(state, EnergyPlus::format("Illegal {} = {}.", cAlphaFields(5), airTerm.ReheatComp));
@@ -963,19 +963,19 @@ void GetSysInput(EnergyPlusData &state)
             ErrorsFound = true;
         }
         airTerm.ReheatName = Alphas(6);
-        if (airTerm.ReheatComp_Num == HeatingCoilType::Gas || airTerm.ReheatComp_Num == HeatingCoilType::Electric) {
+        if (airTerm.reheatCoilType == HVAC::CoilType::HeatingGasOrOtherFuel || airTerm.reheatCoilType == HVAC::CoilType::HeatingElectric) {
             HeatingCoils::GetCoilIndex(state, airTerm.ReheatName, airTerm.ReheatComp_Index, ErrorsFound);
             if (airTerm.ReheatComp_Index == 0) {
                 ShowSevereItemNotFound(state, eoh, cAlphaFields(6), Alphas(6));
                 ErrorsFound = true;
             }
-        } else if (airTerm.ReheatComp_Num == HeatingCoilType::SimpleHeating) {
+        } else if (airTerm.reheatCoilType == HVAC::CoilType::HeatingWater) {
             airTerm.ReheatComp_Index = WaterCoils::GetWaterCoilIndex(state, airTerm.ReheatComp, airTerm.ReheatName, ErrorsFound);
             if (airTerm.ReheatComp_Index == 0) {
                 ShowSevereItemNotFound(state, eoh, cAlphaFields(6), Alphas(6));
                 ErrorsFound = true;
             }
-        } else if (airTerm.ReheatComp_Num == HeatingCoilType::SteamAirHeating) {
+        } else if (airTerm.reheatCoilType == HVAC::CoilType::HeatingSteam) {
             airTerm.ReheatComp_Index = SteamCoils::GetSteamCoilIndex(state, airTerm.ReheatComp, airTerm.ReheatName, ErrorsFound);
             if (airTerm.ReheatComp_Index == 0) {
                 ShowSevereItemNotFound(state, eoh, cAlphaFields(6), Alphas(6));
@@ -1012,9 +1012,9 @@ void GetSysInput(EnergyPlusData &state)
                                                  cAlphaFields(4));
         // The reheat coil control node is necessary for hot water reheat, but not necessary for
         // electric or gas reheat.
-        if (airTerm.ReheatComp_Num == HeatingCoilType::Gas || airTerm.ReheatComp_Num == HeatingCoilType::Electric) {
+        if (airTerm.reheatCoilType == HVAC::CoilType::HeatingGasOrOtherFuel || airTerm.reheatCoilType == HVAC::CoilType::HeatingElectric) {
         } else {
-            if (airTerm.ReheatComp_Num == HeatingCoilType::SteamAirHeating) {
+            if (airTerm.reheatCoilType == HVAC::CoilType::HeatingSteam) {
                 IsNotOK = false;
                 airTerm.ReheatControlNode = GetCoilSteamInletNode(state, airTerm.ReheatComp, airTerm.ReheatName, IsNotOK);
                 if (IsNotOK) {
@@ -1035,7 +1035,7 @@ void GetSysInput(EnergyPlusData &state)
         airTerm.ZoneMinAirFracDes = 0.0;
         airTerm.ZoneMinAirFracMethod = MinFlowFraction::MinFracNotUsed;
         airTerm.DamperHeatingAction = Action::HeatingNotUsed;
-        if (airTerm.ReheatComp_Num == HeatingCoilType::SteamAirHeating) {
+        if (airTerm.reheatCoilType == HVAC::CoilType::HeatingSteam) {
             airTerm.MaxReheatSteamVolFlow = Numbers(2);
             airTerm.MinReheatSteamVolFlow = Numbers(3);
         } else {
@@ -1709,24 +1709,24 @@ void GetSysInput(EnergyPlusData &state)
         airTerm.ReheatName = Alphas(8);
         IsNotOK = false;
         if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Fuel")) {
-            airTerm.ReheatComp_Num = HeatingCoilType::Gas;
+            airTerm.reheatCoilType = HVAC::CoilType::HeatingGasOrOtherFuel;
             airTerm.ReheatAirOutletNode = GetHeatingCoilOutletNode(state, airTerm.ReheatComp, airTerm.ReheatName, IsNotOK);
             airTerm.ReheatCoilMaxCapacity = GetHeatingCoilCapacity(state, airTerm.ReheatComp, airTerm.ReheatName, IsNotOK);
             if (IsNotOK) {
                 ShowContinueError(state, EnergyPlus::format("Occurs for terminal unit {} = {}", airTerm.sysType, airTerm.SysName));
             }
         } else if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Electric")) {
-            airTerm.ReheatComp_Num = HeatingCoilType::Electric;
+            airTerm.reheatCoilType = HVAC::CoilType::HeatingElectric;
             airTerm.ReheatAirOutletNode = GetHeatingCoilOutletNode(state, airTerm.ReheatComp, airTerm.ReheatName, IsNotOK);
             airTerm.ReheatCoilMaxCapacity = GetHeatingCoilCapacity(state, airTerm.ReheatComp, airTerm.ReheatName, IsNotOK);
             if (IsNotOK) {
                 ShowContinueError(state, EnergyPlus::format("Occurs for terminal unit {} = {}", airTerm.sysType, airTerm.SysName));
             }
         } else if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Water")) {
-            airTerm.ReheatComp_Num = HeatingCoilType::SimpleHeating;
+            airTerm.reheatCoilType = HVAC::CoilType::HeatingWater;
             airTerm.ReheatComp_PlantType = DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
         } else if (Util::SameString(airTerm.ReheatComp, "Coil:Heating:Steam")) {
-            airTerm.ReheatComp_Num = HeatingCoilType::SteamAirHeating;
+            airTerm.reheatCoilType = HVAC::CoilType::HeatingSteam;
             airTerm.ReheatComp_PlantType = DataPlant::PlantEquipmentType::CoilSteamAirHeating;
         } else if (!airTerm.ReheatComp.empty()) {
             ShowSevereError(state, EnergyPlus::format("Illegal {} = {}.", cAlphaFields(7), airTerm.ReheatComp));
@@ -1734,19 +1734,19 @@ void GetSysInput(EnergyPlusData &state)
             ErrorsFound = true;
         }
 
-        if (airTerm.ReheatComp_Num == HeatingCoilType::Gas || airTerm.ReheatComp_Num == HeatingCoilType::Electric) {
+        if (airTerm.reheatCoilType == HVAC::CoilType::HeatingGasOrOtherFuel || airTerm.reheatCoilType == HVAC::CoilType::HeatingElectric) {
             HeatingCoils::GetCoilIndex(state, airTerm.ReheatName, airTerm.ReheatComp_Index, ErrorsFound);
             if (airTerm.ReheatComp_Index == 0) {
                 ShowSevereItemNotFound(state, eoh, cAlphaFields(8), Alphas(8));
                 ErrorsFound = true;
             }
-        } else if (airTerm.ReheatComp_Num == HeatingCoilType::SimpleHeating) {
+        } else if (airTerm.reheatCoilType == HVAC::CoilType::HeatingWater) {
             airTerm.ReheatComp_Index = WaterCoils::GetWaterCoilIndex(state, airTerm.ReheatComp, airTerm.ReheatName, ErrorsFound);
             if (airTerm.ReheatComp_Index == 0) {
                 ShowSevereItemNotFound(state, eoh, cAlphaFields(8), Alphas(8));
                 ErrorsFound = true;
             }
-        } else if (airTerm.ReheatComp_Num == HeatingCoilType::SteamAirHeating) {
+        } else if (airTerm.reheatCoilType == HVAC::CoilType::HeatingSteam) {
             airTerm.ReheatComp_Index = SteamCoils::GetSteamCoilIndex(state, airTerm.ReheatComp, airTerm.ReheatName, ErrorsFound);
             if (airTerm.ReheatComp_Index == 0) {
                 ShowSevereItemNotFound(state, eoh, cAlphaFields(8), Alphas(8));
@@ -1798,7 +1798,7 @@ void GetSysInput(EnergyPlusData &state)
         airTerm.ZoneMinAirFracDes = Numbers(3);
         // The reheat coil control node is necessary for hot water reheat, but not necessary for
         // electric or gas reheat.
-        if (airTerm.ReheatComp_Num == HeatingCoilType::Gas || airTerm.ReheatComp_Num == HeatingCoilType::Electric) {
+        if (airTerm.reheatCoilType == HVAC::CoilType::HeatingGasOrOtherFuel || airTerm.reheatCoilType == HVAC::CoilType::HeatingElectric) {
             //          IF(.NOT. lAlphaBlanks(6)) THEN
             //            CALL ShowWarningError(state, 'In '//TRIM(sd_airterminal(SysNum)%SysType)//' = ' // TRIM(sd_airterminal(SysNum)%SysName) &
             //                                 // ' the '//TRIM(cAlphaFields(6))//' is not needed and will be ignored.')
@@ -1810,7 +1810,7 @@ void GetSysInput(EnergyPlusData &state)
             //                                 // ' the '//TRIM(cAlphaFields(6))//' is undefined')
             //            ErrorsFound=.TRUE.
             //          END IF
-            if (airTerm.ReheatComp_Num == HeatingCoilType::SteamAirHeating) {
+            if (airTerm.reheatCoilType == HVAC::CoilType::HeatingSteam) {
                 IsNotOK = false;
                 airTerm.ReheatControlNode = GetCoilSteamInletNode(state, airTerm.ReheatComp, airTerm.ReheatName, IsNotOK);
                 if (IsNotOK) {
@@ -1869,7 +1869,7 @@ void GetSysInput(EnergyPlusData &state)
             // ErrorsFound = true;
         }
 
-        if (airTerm.ReheatComp_Num == HeatingCoilType::SteamAirHeating) {
+        if (airTerm.reheatCoilType == HVAC::CoilType::HeatingSteam) {
             airTerm.MaxReheatSteamVolFlow = Numbers(4);
             airTerm.MinReheatSteamVolFlow = Numbers(5);
         } else {
@@ -2130,7 +2130,7 @@ void SingleDuctAirTerminal::InitSys(EnergyPlusData &state, bool const FirstHVACI
     }
 
     if (this->GetGasElecHeatCoilCap) {
-        if (this->ReheatComp_Num == HeatingCoilType::Electric || this->ReheatComp_Num == HeatingCoilType::Gas) {
+        if (this->reheatCoilType == HVAC::CoilType::HeatingElectric || this->reheatCoilType == HVAC::CoilType::HeatingGasOrOtherFuel) {
             if (this->ReheatCoilMaxCapacity == AutoSize) {
                 errFlag = false;
                 this->ReheatCoilMaxCapacity = GetHeatingCoilCapacity(state, this->ReheatComp, this->ReheatName, errFlag);
@@ -2158,7 +2158,7 @@ void SingleDuctAirTerminal::InitSys(EnergyPlusData &state, bool const FirstHVACI
         state.dataLoopNodes->Node(InletNode).MassFlowRateMax = this->MaxAirVolFlowRate * state.dataEnvrn->StdRhoAir;
         this->MassFlowDiff = 1.0e-10 * this->AirMassFlowRateMax;
 
-        if (this->HWplantLoc.loopNum > 0 && this->ReheatComp_Num != HeatingCoilType::SteamAirHeating) { // protect early calls before plant is setup
+        if (this->HWplantLoc.loopNum > 0 && this->reheatCoilType != HVAC::CoilType::HeatingSteam) { // protect early calls before plant is setup
             rho = this->HWplantLoc.loop->glycol->getDensity(state, Constant::HWInitConvTemp, RoutineName);
         } else {
             rho = 1000.0;
@@ -2171,7 +2171,7 @@ void SingleDuctAirTerminal::InitSys(EnergyPlusData &state, bool const FirstHVACI
 
         // set the upstream leakage flowrate - remove from here - done in ZoneAirLoopEquipmentManager::SimZoneAirLoopEquipment
 
-        if (this->ReheatComp_Num == HeatingCoilType::SteamAirHeating) {
+        if (this->reheatCoilType == HVAC::CoilType::HeatingSteam) {
             SteamTemp = 100.0;
             SteamDensity = Fluid::GetSteam(state)->getSatDensity(state, SteamTemp, 1.0, RoutineNameFull);
             this->MaxReheatSteamFlow = SteamDensity * this->MaxReheatSteamVolFlow;
@@ -2198,7 +2198,7 @@ void SingleDuctAirTerminal::InitSys(EnergyPlusData &state, bool const FirstHVACI
             state.dataLoopNodes->Node(InletNode).MassFlowRateMin = 0.0;
         }
         if ((this->ReheatControlNode > 0) && !this->PlantLoopScanFlag) {
-            if (this->ReheatComp_Num == HeatingCoilType::SteamAirHeating) {
+            if (this->reheatCoilType == HVAC::CoilType::HeatingSteam) {
                 InitComponentNodes(state, this->MinReheatSteamFlow, this->MaxReheatSteamFlow, this->ReheatControlNode, this->ReheatCoilOutletNode);
             } else {
                 InitComponentNodes(state, this->MinReheatWaterFlow, this->MaxReheatWaterFlow, this->ReheatControlNode, this->ReheatCoilOutletNode);
@@ -3348,7 +3348,7 @@ void SingleDuctAirTerminal::SizeSys(EnergyPlusData &state)
         TermUnitSizing(state.dataSize->CurTermUnitSizingNum).MaxHWVolFlow = this->MaxReheatWaterVolFlow;
         TermUnitSizing(state.dataSize->CurTermUnitSizingNum).MaxSTVolFlow = this->MaxReheatSteamVolFlow;
         TermUnitSizing(state.dataSize->CurTermUnitSizingNum).DesHeatingLoad = state.dataSingleDuct->DesCoilLoadSS; // Coil Summary report
-        if (this->ReheatComp_Num == HeatingCoilType::SimpleHeating) {
+        if (this->reheatCoilType == HVAC::CoilType::HeatingWater) {
             if (this->DamperHeatingAction == Action::Normal) {
                 SetCoilDesFlow(state, this->ReheatComp, this->ReheatName, this->ZoneMinAirFracDes * this->MaxAirVolFlowRate, ErrorsFound);
             } else {
@@ -3655,9 +3655,9 @@ void SingleDuctAirTerminal::SimVAV(EnergyPlusData &state, bool const FirstHVACIt
         this->UpdateSys(state);
 
         // Now do the heating coil calculation for each heating coil type
-        switch (this->ReheatComp_Num) { // Reverse damper option is working only for water coils for now.
+        switch (this->reheatCoilType) { // Reverse damper option is working only for water coils for now.
             // hot water heating coil
-        case HeatingCoilType::SimpleHeating: { // COIL:WATER:SIMPLEHEATING
+        case HVAC::CoilType::HeatingWater: { // COIL:WATER:SIMPLEHEATING
             // Determine the load required to pass to the Component controller
             // Although this equation looks strange (using temp instead of deltaT), it is corrected later in ControlCompOutput
             // and is working as-is, temperature setpoints are maintained as expected.
@@ -3792,7 +3792,7 @@ void SingleDuctAirTerminal::SimVAV(EnergyPlusData &state, bool const FirstHVACIt
                 this->ZoneMinAirFracReport = this->ZoneMinAirFrac;
             }
         } break;
-        case HeatingCoilType::SteamAirHeating: { // ! COIL:STEAM:AIRHEATING
+        case HVAC::CoilType::HeatingSteam: { // ! COIL:STEAM:AIRHEATING
             // Determine the load required to pass to the Component controller
             QZnReq =
                 state.dataSingleDuct->QZoneMax2SDAT - MassFlow * CpAirAvg * (this->sd_airterminalInlet.AirTemp - state.dataSingleDuct->ZoneTempSDAT);
@@ -3800,7 +3800,7 @@ void SingleDuctAirTerminal::SimVAV(EnergyPlusData &state, bool const FirstHVACIt
             // Simulate reheat coil for the VAV system
             SimulateSteamCoilComponents(state, this->ReheatName, FirstHVACIteration, this->ReheatComp_Index, QZnReq);
         } break;
-        case HeatingCoilType::Electric: { // COIL:ELECTRIC:HEATING
+        case HVAC::CoilType::HeatingElectric: { // COIL:ELECTRIC:HEATING
             // Determine the load required to pass to the Component controller
             QZnReq =
                 state.dataSingleDuct->QZoneMax2SDAT - MassFlow * CpAirAvg * (this->sd_airterminalInlet.AirTemp - state.dataSingleDuct->ZoneTempSDAT);
@@ -3808,7 +3808,7 @@ void SingleDuctAirTerminal::SimVAV(EnergyPlusData &state, bool const FirstHVACIt
             // Simulate reheat coil for the VAV system
             SimulateHeatingCoilComponents(state, this->ReheatName, FirstHVACIteration, QZnReq, this->ReheatComp_Index);
         } break;
-        case HeatingCoilType::Gas: { // COIL:GAS:HEATING
+        case HVAC::CoilType::HeatingGasOrOtherFuel: { // COIL:GAS:HEATING
             // Determine the load required to pass to the Component controller
             QZnReq =
                 state.dataSingleDuct->QZoneMax2SDAT - MassFlow * CpAirAvg * (this->sd_airterminalInlet.AirTemp - state.dataSingleDuct->ZoneTempSDAT);
@@ -3816,19 +3816,18 @@ void SingleDuctAirTerminal::SimVAV(EnergyPlusData &state, bool const FirstHVACIt
             // Simulate reheat coil for the VAV system
             SimulateHeatingCoilComponents(state, this->ReheatName, FirstHVACIteration, QZnReq, this->ReheatComp_Index, QHeatingDelivered);
         } break;
-        case HeatingCoilType::None: { // blank
-                                      // I no reheat is defined then assume that the damper is the only component.
+        case HVAC::CoilType::Invalid: { // blank
+                                        // I no reheat is defined then assume that the damper is the only component.
             // If something else is there that is not a reheat coil or a blank then give the error message
         } break;
         default: {
-            ShowFatalError(state, EnergyPlus::format("Invalid Reheat Component={}", this->ReheatComp));
         } break;
         }
 
         // the COIL is OFF the properties are calculated for this special case.
     } else {
-        switch (this->ReheatComp_Num) {
-        case HeatingCoilType::SimpleHeating: { // COIL:WATER:SIMPLEHEATING
+        switch (this->reheatCoilType) {
+        case HVAC::CoilType::HeatingWater: { // COIL:WATER:SIMPLEHEATING
             // Simulate reheat coil for the Const Volume system
             DummyMdot = 0.0;
             SetActuatedBranchFlowRate(state, DummyMdot, this->ReheatControlNode, this->HWplantLoc, true);
@@ -3836,24 +3835,23 @@ void SingleDuctAirTerminal::SimVAV(EnergyPlusData &state, bool const FirstHVACIt
             // are passed through to the coil outlet correctly
             SimulateWaterCoilComponents(state, this->ReheatName, FirstHVACIteration, this->ReheatComp_Index);
         } break;
-        case HeatingCoilType::SteamAirHeating: { // COIL:STEAM:AIRHEATING
+        case HVAC::CoilType::HeatingSteam: { // COIL:STEAM:AIRHEATING
             // Simulate reheat coil for the VAV system
             SimulateSteamCoilComponents(state, this->ReheatName, FirstHVACIteration, this->ReheatComp_Index, 0.0);
         } break;
-        case HeatingCoilType::Electric: { // COIL:ELECTRIC:HEATING
+        case HVAC::CoilType::HeatingElectric: { // COIL:ELECTRIC:HEATING
             // Simulate reheat coil for the VAV system
             SimulateHeatingCoilComponents(state, this->ReheatName, FirstHVACIteration, 0.0, this->ReheatComp_Index);
         } break;
-        case HeatingCoilType::Gas: { // COIL:GAS:HEATING
+        case HVAC::CoilType::HeatingGasOrOtherFuel: { // COIL:GAS:HEATING
             // Simulate reheat coil for the VAV system
             SimulateHeatingCoilComponents(state, this->ReheatName, FirstHVACIteration, 0.0, this->ReheatComp_Index);
         } break;
-        case HeatingCoilType::None: { // blank
-                                      // If no reheat is defined then assume that the damper is the only component.
-                                      // If something else is that is not a reheat coil or a blank then give the error message
+        case HVAC::CoilType::Invalid: { // blank
+                                        // If no reheat is defined then assume that the damper is the only component.
+                                        // If something else is that is not a reheat coil or a blank then give the error message
         } break;
         default: {
-            ShowFatalError(state, EnergyPlus::format("Invalid Reheat Component={}", this->ReheatComp));
         } break;
         }
     }
@@ -4078,8 +4076,8 @@ void SingleDuctAirTerminal::SimCBVAV(EnergyPlusData &state, bool const FirstHVAC
 
         this->UpdateSys(state);
 
-        switch (this->ReheatComp_Num) {        // hot water heating coil
-        case HeatingCoilType::SimpleHeating: { // COIL:WATER:SIMPLEHEATING
+        switch (this->reheatCoilType) {      // hot water heating coil
+        case HVAC::CoilType::HeatingWater: { // COIL:WATER:SIMPLEHEATING
             // Determine the load required to pass to the Component controller
             // Although this equation looks strange (using temp instead of deltaT), it is corrected later in ControlCompOutput
             // and is working as-is, temperature setpoints are maintained as expected.
@@ -4184,7 +4182,7 @@ void SingleDuctAirTerminal::SimCBVAV(EnergyPlusData &state, bool const FirstHVAC
                 }
             }
         } break;
-        case HeatingCoilType::SteamAirHeating: { // ! COIL:STEAM:AIRHEATING
+        case HVAC::CoilType::HeatingSteam: { // ! COIL:STEAM:AIRHEATING
             // Determine the load required to pass to the Component controller
             QZnReq = state.dataSingleDuct->QZoneMax2SCBVAV -
                      MassFlow * CpAirZn * (this->sd_airterminalInlet.AirTemp - state.dataSingleDuct->ZoneTempSCBVAV);
@@ -4195,7 +4193,7 @@ void SingleDuctAirTerminal::SimCBVAV(EnergyPlusData &state, bool const FirstHVAC
             // Simulate reheat coil for the VAV system
             SimulateSteamCoilComponents(state, this->ReheatName, FirstHVACIteration, this->ReheatComp_Index, QZnReq);
         } break;
-        case HeatingCoilType::Electric: { // COIL:ELECTRIC:HEATING
+        case HVAC::CoilType::HeatingElectric: { // COIL:ELECTRIC:HEATING
             // Determine the load required to pass to the Component controller
             QSupplyAir = MassFlow * CpAirZn * (this->sd_airterminalInlet.AirTemp - state.dataSingleDuct->ZoneTempSCBVAV);
             QZnReq = state.dataSingleDuct->QZoneMax2SCBVAV - QSupplyAir;
@@ -4206,7 +4204,7 @@ void SingleDuctAirTerminal::SimCBVAV(EnergyPlusData &state, bool const FirstHVAC
             // Simulate reheat coil for the VAV system
             SimulateHeatingCoilComponents(state, this->ReheatName, FirstHVACIteration, QZnReq, this->ReheatComp_Index);
         } break;
-        case HeatingCoilType::Gas: { // COIL:GAS:HEATING
+        case HVAC::CoilType::HeatingGasOrOtherFuel: { // COIL:GAS:HEATING
             // Determine the load required to pass to the Component controller
             QZnReq = state.dataSingleDuct->QZoneMax2SCBVAV -
                      MassFlow * CpAirZn * (this->sd_airterminalInlet.AirTemp - state.dataSingleDuct->ZoneTempSCBVAV);
@@ -4217,19 +4215,18 @@ void SingleDuctAirTerminal::SimCBVAV(EnergyPlusData &state, bool const FirstHVAC
             // Simulate reheat coil for the VAV system
             SimulateHeatingCoilComponents(state, this->ReheatName, FirstHVACIteration, QZnReq, this->ReheatComp_Index);
         } break;
-        case HeatingCoilType::None: { // blank
-                                      // If no reheat is defined then assume that the damper is the only component.
+        case HVAC::CoilType::Invalid: { // blank
+                                        // If no reheat is defined then assume that the damper is the only component.
             // If something else is there that is not a reheat coil then give the error message below.
         } break;
         default: {
-            ShowFatalError(state, EnergyPlus::format("Invalid Reheat Component={}", this->ReheatComp));
         } break;
         }
 
         // the COIL is OFF the properties are calculated for this special case.
     } else {
-        switch (this->ReheatComp_Num) {
-        case HeatingCoilType::SimpleHeating: { // COIL:WATER:SIMPLEHEATING
+        switch (this->reheatCoilType) {
+        case HVAC::CoilType::HeatingWater: { // COIL:WATER:SIMPLEHEATING
             // Simulate reheat coil for the Const Volume system
             // Node(sd_airterminal(SysNum)%ReheatControlNode)%MassFlowRate = 0.0D0
             // Initialize hot water flow rate to zero.
@@ -4240,24 +4237,23 @@ void SingleDuctAirTerminal::SimCBVAV(EnergyPlusData &state, bool const FirstHVAC
             // are passed through to the coil outlet correctly
             SimulateWaterCoilComponents(state, this->ReheatName, FirstHVACIteration, this->ReheatComp_Index);
         } break;
-        case HeatingCoilType::SteamAirHeating: { // COIL:STEAM:AIRHEATING
+        case HVAC::CoilType::HeatingSteam: { // COIL:STEAM:AIRHEATING
             // Simulate reheat coil for the VAV system
             SimulateSteamCoilComponents(state, this->ReheatName, FirstHVACIteration, this->ReheatComp_Index, 0.0);
         } break;
-        case HeatingCoilType::Electric: { // COIL:ELECTRIC:HEATING
+        case HVAC::CoilType::HeatingElectric: { // COIL:ELECTRIC:HEATING
             // Simulate reheat coil for the VAV system
             SimulateHeatingCoilComponents(state, this->ReheatName, FirstHVACIteration, 0.0, this->ReheatComp_Index);
         } break;
-        case HeatingCoilType::Gas: { // COIL:GAS:HEATING
+        case HVAC::CoilType::HeatingGasOrOtherFuel: { // COIL:GAS:HEATING
             // Simulate reheat coil for the VAV system
             SimulateHeatingCoilComponents(state, this->ReheatName, FirstHVACIteration, 0.0, this->ReheatComp_Index);
         } break;
-        case HeatingCoilType::None: { // blank
-                                      // If no reheat is defined then assume that the damper is the only component.
-                                      // If something else is there that is not a reheat coil then give the error message
+        case HVAC::CoilType::Invalid: { // blank
+                                        // If no reheat is defined then assume that the damper is the only component.
+                                        // If something else is there that is not a reheat coil then give the error message
         } break;
         default: {
-            ShowFatalError(state, EnergyPlus::format("Invalid Reheat Component={}", this->ReheatComp));
         } break;
         }
     }
@@ -4301,24 +4297,24 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
     int SysInletNode;     // the node number of the terminal unit inlet node
     int WaterControlNode; // This is the Actuated Reheat Control Node
     int SteamControlNode;
-    Real64 MaxFlowWater;    // This is the value passed to the Controller depending if FirstHVACIteration or not
-    Real64 MinFlowWater;    // This is the value passed to the Controller depending if FirstHVACIteration or not
-    Real64 MaxFlowSteam;    // This is the value passed to the Controller depending if FirstHVACIteration or not
-    Real64 MinFlowSteam;    // This is the value passed to the Controller depending if FirstHVACIteration or not
-    Real64 HWFlow;          // the hot water flow rate [kg/s]
-    Real64 QCoolFanOnMax;   // max cooling - fan at max flow; note that cooling is always < 0. [W]
-    Real64 QCoolFanOnMin;   // min active cooling with fan on - fan at lowest speed. [W]
-    Real64 QHeatFanOnMax;   // max heating - fan at heat flow max, hot water flow at max [W]
-    Real64 QHeatFanOnMin;   // min heating - fan at min flow, hot water at max flow [W]
-    Real64 QHeatFanOffMax;  // max heating - fan off, hot water flow at max [W]
-    Real64 QNoHeatFanOff;   // min heating - fan off, hot water at min flow [W]
-    HeatingCoilType HCType; // heating coil type
-    HVAC::FanType fanType;  // fan type (as a number)
-    int FanOp;              // 1 if fan is on; 0 if off.
-    Real64 MaxCoolMassFlow; // air flow at max cooling [kg/s]
-    Real64 MaxHeatMassFlow; // air flow at max heating [kg/s]
-    Real64 MinMassFlow;     // minimum air flow rate [kg/s]
-    Real64 UnitFlowToler;   // flow rate tolerance
+    Real64 MaxFlowWater;         // This is the value passed to the Controller depending if FirstHVACIteration or not
+    Real64 MinFlowWater;         // This is the value passed to the Controller depending if FirstHVACIteration or not
+    Real64 MaxFlowSteam;         // This is the value passed to the Controller depending if FirstHVACIteration or not
+    Real64 MinFlowSteam;         // This is the value passed to the Controller depending if FirstHVACIteration or not
+    Real64 HWFlow;               // the hot water flow rate [kg/s]
+    Real64 QCoolFanOnMax;        // max cooling - fan at max flow; note that cooling is always < 0. [W]
+    Real64 QCoolFanOnMin;        // min active cooling with fan on - fan at lowest speed. [W]
+    Real64 QHeatFanOnMax;        // max heating - fan at heat flow max, hot water flow at max [W]
+    Real64 QHeatFanOnMin;        // min heating - fan at min flow, hot water at max flow [W]
+    Real64 QHeatFanOffMax;       // max heating - fan off, hot water flow at max [W]
+    Real64 QNoHeatFanOff;        // min heating - fan off, hot water at min flow [W]
+    HVAC::CoilType heatCoilType; // heating coil type
+    HVAC::FanType fanType;       // fan type (as a number)
+    int FanOp;                   // 1 if fan is on; 0 if off.
+    Real64 MaxCoolMassFlow;      // air flow at max cooling [kg/s]
+    Real64 MaxHeatMassFlow;      // air flow at max heating [kg/s]
+    Real64 MinMassFlow;          // minimum air flow rate [kg/s]
+    Real64 UnitFlowToler;        // flow rate tolerance
     Real64 QDelivered;
     Real64 FracDelivered;
     int SolFlag;
@@ -4330,7 +4326,7 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
     SysOutletNode = this->ReheatAirOutletNode;
     SysInletNode = this->InletNodeNum;
     CpAirZn = PsyCpAirFnW(state.dataLoopNodes->Node(ZoneNodeNum).HumRat);
-    HCType = this->ReheatComp_Num;
+    heatCoilType = this->reheatCoilType;
     fanType = this->fanType;
     MaxCoolMassFlow = this->sd_airterminalInlet.AirMassFlowRateMaxAvail;
     MaxHeatMassFlow = min(this->HeatAirMassFlowRateMax, this->sd_airterminalInlet.AirMassFlowRateMaxAvail);
@@ -4345,7 +4341,7 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
         return;
     }
 
-    if (HCType == HeatingCoilType::SimpleHeating) {
+    if (heatCoilType == HVAC::CoilType::HeatingWater) {
         WaterControlNode = this->ReheatControlNode;
         if (FirstHVACIteration) {
             MaxFlowWater = this->MaxReheatWaterFlow;
@@ -4361,7 +4357,7 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
         MinFlowWater = 0.0;
     }
 
-    if (HCType == HeatingCoilType::SteamAirHeating) {
+    if (heatCoilType == HVAC::CoilType::HeatingSteam) {
         SteamControlNode = this->ReheatControlNode;
         if (FirstHVACIteration) {
             MaxFlowSteam = this->MaxReheatSteamFlow;
@@ -4379,7 +4375,7 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
     // define 3 load regions and assign the current load to the correct region.
     // region 1: active cooling with fan on
     FanOp = 1;
-    if (HCType == HeatingCoilType::SteamAirHeating) {
+    if (heatCoilType == HVAC::CoilType::HeatingSteam) {
         bool ErrorsFound; // returned from mining function call
         this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MinFlowSteam, 0.0, fanType, MaxCoolMassFlow, FanOp, QCoolFanOnMax);
         this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MinFlowSteam, 0.0, fanType, MinMassFlow, FanOp, QCoolFanOnMin);
@@ -4409,7 +4405,7 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
         // check that it can meet the load
         FanOp = 1;
         if (QCoolFanOnMax < QTotLoad - SmallLoad) {
-            Real64 MinHWFlow = (HCType == HeatingCoilType::SteamAirHeating) ? MinFlowSteam : MinFlowWater;
+            Real64 MinHWFlow = (heatCoilType == HVAC::CoilType::HeatingSteam) ? MinFlowSteam : MinFlowWater;
 
             auto f = [&state, this, FirstHVACIteration, ZoneNodeNum, MinHWFlow, fanType, FanOp, QTotLoad](Real64 const SupplyAirMassFlow) {
                 Real64 UnitOutput = 0.0; // cooling output [W] (cooling is negative)
@@ -4447,7 +4443,7 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
 
             MassFlow = MaxCoolMassFlow;
 
-            if (HCType == HeatingCoilType::SteamAirHeating) {
+            if (heatCoilType == HVAC::CoilType::HeatingSteam) {
                 this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MinFlowSteam, 0.0, fanType, MassFlow, FanOp, QDelivered);
             } else {
                 this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MinFlowWater, 0.0, fanType, MassFlow, FanOp, QDelivered);
@@ -4460,7 +4456,7 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
                (this->sd_airterminalInlet.AirMassFlowRateMaxAvail > 0.0 && state.dataZoneEnergyDemand->CurDeadBandOrSetback(ZoneNum))) {
         MassFlow = MinMassFlow;
         FanOp = 0;
-        if (HCType == HeatingCoilType::SteamAirHeating) {
+        if (heatCoilType == HVAC::CoilType::HeatingSteam) {
             this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MinFlowSteam, QTotLoad, fanType, MassFlow, FanOp, QNoHeatFanOff);
         } else {
             this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MinFlowWater, 0.0, fanType, MassFlow, FanOp, QNoHeatFanOff);
@@ -4470,7 +4466,7 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
     } else if (QTotLoad > QNoHeatFanOff + SmallLoad && this->sd_airterminalInlet.AirMassFlowRateMaxAvail > 0.0 &&
                !state.dataZoneEnergyDemand->CurDeadBandOrSetback(ZoneNum)) {
         // hot water coil
-        if (HCType == HeatingCoilType::SimpleHeating) {
+        if (heatCoilType == HVAC::CoilType::HeatingWater) {
             if (QTotLoad < QHeatFanOffMax - SmallLoad) {
                 // vary HW flow, leave air flow at minimum
                 ErrTolerance = this->ControllerOffset / 2; // Added /2 to try to eliminate a "big" diff
@@ -4547,7 +4543,7 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
                 FanOp = 1;
                 this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MaxFlowWater, 0.0, fanType, MassFlow, FanOp, QDelivered);
             }
-        } else if (HCType == HeatingCoilType::SteamAirHeating) {
+        } else if (heatCoilType == HVAC::CoilType::HeatingSteam) {
             //      IF (QTotLoad > QNoHeatFanOff + SmallLoad .AND. QTotLoad < QHeatFanOffMax - SmallLoad) THEN
             if (QTotLoad < QHeatFanOffMax - SmallLoad) {
                 ErrTolerance = this->ControllerOffset;
@@ -4632,7 +4628,7 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
                 FanOp = 1;
                 this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, QTotLoad, QTotLoad, fanType, MassFlow, FanOp, QDelivered);
             }
-        } else if (HCType == HeatingCoilType::Gas || HCType == HeatingCoilType::Electric) {
+        } else if (heatCoilType == HVAC::CoilType::HeatingGasOrOtherFuel || heatCoilType == HVAC::CoilType::HeatingElectric) {
             if (QTotLoad <= QHeatFanOnMin + SmallLoad) {
                 // vary heating coil power, leave mass flow at minimum
                 MassFlow = MinMassFlow;
@@ -4770,8 +4766,8 @@ void SingleDuctAirTerminal::SimConstVol(EnergyPlusData &state, bool const FirstH
 
         Real64 QZnReq;
 
-        switch (this->ReheatComp_Num) {
-        case HeatingCoilType::SimpleHeating: { // COIL:WATER:SIMPLEHEATING
+        switch (this->reheatCoilType) {
+        case HVAC::CoilType::HeatingWater: { // COIL:WATER:SIMPLEHEATING
             // Determine the load required to pass to the Component controller
             QZnReq = state.dataSingleDuct->QMax2SCV + MassFlow * CpAir * state.dataSingleDuct->ZoneTempSCV;
 
@@ -4815,14 +4811,14 @@ void SingleDuctAirTerminal::SimConstVol(EnergyPlusData &state, bool const FirstH
                               this->HWplantLoc);
 
         } break;
-        case HeatingCoilType::SteamAirHeating: { // COIL:STEAM:STEAMAIRHEATING
+        case HVAC::CoilType::HeatingSteam: { // COIL:STEAM:STEAMAIRHEATING
             // Determine the load required to pass to the Component controller
             QZnReq = state.dataSingleDuct->QMax2SCV - MassFlow * CpAir * (this->sd_airterminalInlet.AirTemp - state.dataSingleDuct->ZoneTempSCV);
 
             // Simulate reheat coil for the VAV system
             SimulateSteamCoilComponents(state, this->ReheatName, FirstHVACIteration, this->ReheatComp_Index, QZnReq);
         } break;
-        case HeatingCoilType::Electric: { // COIL:ELECTRIC:HEATING
+        case HVAC::CoilType::HeatingElectric: { // COIL:ELECTRIC:HEATING
             // Determine the load required to pass to the Component controller
             QZnReq = state.dataSingleDuct->QMax2SCV - MassFlow * CpAir * (this->sd_airterminalInlet.AirTemp - state.dataSingleDuct->ZoneTempSCV);
 
@@ -4830,7 +4826,7 @@ void SingleDuctAirTerminal::SimConstVol(EnergyPlusData &state, bool const FirstH
             SimulateHeatingCoilComponents(state, this->ReheatName, FirstHVACIteration, QZnReq, this->ReheatComp_Index);
 
         } break;
-        case HeatingCoilType::Gas: { // COIL:GAS:HEATING
+        case HVAC::CoilType::HeatingGasOrOtherFuel: { // COIL:GAS:HEATING
             // Determine the load required to pass to the Component controller
             QZnReq = state.dataSingleDuct->QMax2SCV - MassFlow * CpAir * (this->sd_airterminalInlet.AirTemp - state.dataSingleDuct->ZoneTempSCV);
 
@@ -4844,8 +4840,8 @@ void SingleDuctAirTerminal::SimConstVol(EnergyPlusData &state, bool const FirstH
 
         // the COIL is OFF the properties are calculated for this special case.
     } else {
-        switch (this->ReheatComp_Num) {
-        case HeatingCoilType::SimpleHeating: { // COIL:WATER:SIMPLEHEATING
+        switch (this->reheatCoilType) {
+        case HVAC::CoilType::HeatingWater: { // COIL:WATER:SIMPLEHEATING
             // Simulate reheat coil for the Const Volume system
             // Node(sd_airterminal(SysNum)%ReheatControlNode)%MassFlowRate = 0.0D0
             // Initialize hot water flow rate to zero.
@@ -4856,15 +4852,15 @@ void SingleDuctAirTerminal::SimConstVol(EnergyPlusData &state, bool const FirstH
             // are passed through to the coil outlet correctly
             SimulateWaterCoilComponents(state, this->ReheatName, FirstHVACIteration, this->ReheatComp_Index);
         } break;
-        case HeatingCoilType::SteamAirHeating: { // COIL:STEAM:AIRHEATING
+        case HVAC::CoilType::HeatingSteam: { // COIL:STEAM:AIRHEATING
             // Simulate reheat coil for the Const Volume system
             SimulateSteamCoilComponents(state, this->ReheatName, FirstHVACIteration, this->ReheatComp_Index, 0.0);
         } break;
-        case HeatingCoilType::Electric: { // COIL:ELECTRIC:HEATING
+        case HVAC::CoilType::HeatingElectric: { // COIL:ELECTRIC:HEATING
             // Simulate reheat coil for the Const Volume system
             SimulateHeatingCoilComponents(state, this->ReheatName, FirstHVACIteration, 0.0, this->ReheatComp_Index);
         } break;
-        case HeatingCoilType::Gas: { // COIL:GAS:HEATING
+        case HVAC::CoilType::HeatingGasOrOtherFuel: { // COIL:GAS:HEATING
             // Simulate reheat coil for the Const Volume system
             SimulateHeatingCoilComponents(state, this->ReheatName, FirstHVACIteration, 0.0, this->ReheatComp_Index);
         } break;
@@ -4944,8 +4940,8 @@ void SingleDuctAirTerminal::CalcVAVVS(EnergyPlusData &state,
         state.dataLoopNodes->Node(FanOutNode).MassFlowRateMaxAvail = state.dataLoopNodes->Node(FanInNode).MassFlowRateMaxAvail;
         state.dataLoopNodes->Node(FanOutNode).MassFlowRateMinAvail = state.dataLoopNodes->Node(FanInNode).MassFlowRateMinAvail;
     }
-    switch (this->ReheatComp_Num) {
-    case HeatingCoilType::SimpleHeating: { // COIL:WATER:SIMPLEHEATING
+    switch (this->reheatCoilType) {
+    case HVAC::CoilType::HeatingWater: { // COIL:WATER:SIMPLEHEATING
         mdot = HWFlow;
         if (this->HWplantLoc.loopNum > 0) {
             SetComponentFlowRate(state, mdot, this->ReheatControlNode, this->ReheatCoilOutletNode, this->HWplantLoc);
@@ -4953,17 +4949,17 @@ void SingleDuctAirTerminal::CalcVAVVS(EnergyPlusData &state,
 
         SimulateWaterCoilComponents(state, this->ReheatName, FirstHVACIteration, this->ReheatComp_Index);
     } break;
-    case HeatingCoilType::SteamAirHeating: { // HW Flow is steam mass flow here
+    case HVAC::CoilType::HeatingSteam: { // HW Flow is steam mass flow here
         mdot = HWFlow;
         if (this->HWplantLoc.loopNum > 0) {
             SetComponentFlowRate(state, mdot, this->ReheatControlNode, this->ReheatCoilOutletNode, this->HWplantLoc);
         }
         SimulateSteamCoilComponents(state, this->ReheatName, FirstHVACIteration, this->ReheatComp_Index, HCoilReq);
     } break;
-    case HeatingCoilType::Electric: { // COIL:ELECTRIC:HEATING
+    case HVAC::CoilType::HeatingElectric: { // COIL:ELECTRIC:HEATING
         SimulateHeatingCoilComponents(state, this->ReheatName, FirstHVACIteration, HCoilReq, this->ReheatComp_Index);
     } break;
-    case HeatingCoilType::Gas: { // COIL:GAS:HEATING
+    case HVAC::CoilType::HeatingGasOrOtherFuel: { // COIL:GAS:HEATING
         SimulateHeatingCoilComponents(state, this->ReheatName, FirstHVACIteration, HCoilReq, this->ReheatComp_Index);
     } break;
     default: {

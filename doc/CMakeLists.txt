@@ -61,6 +61,24 @@ if(EXISTS ${XELATEX})
   add_subdirectory(plant-application-guide)
   add_subdirectory(using-energyplus-for-compliance)
 
+  if(NOT hasParent)
+    # Standalone build of the doc/ folder: package the generated PDFs into a TGZ/ZIP archive
+    if(WIN32)
+      set(CPACK_GENERATOR "ZIP")
+    else()
+      set(CPACK_GENERATOR "TGZ")
+    endif()
+
+    set(CPACK_PACKAGE_FILE_NAME
+      "EnergyPlus-PDFDocumentation-${CMAKE_VERSION_MAJOR}.${CMAKE_VERSION_MINOR}.${CMAKE_VERSION_PATCH}-${CMAKE_VERSION_BUILD}")
+
+    message("Installer name is set to '${CPACK_PACKAGE_FILE_NAME}'")
+
+    install(DIRECTORY "${PROJECT_BINARY_DIR}/pdf/" DESTINATION ".")
+
+    include(CPack)
+  endif()
+
 else()
   # and if it doesn't, clearly state why it fails
   message(FATAL_ERROR "Expected to find xelatex at: ${XELATEX} ; check your LaTeX installation")

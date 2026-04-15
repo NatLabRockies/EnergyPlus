@@ -508,7 +508,7 @@ namespace Fluid {
 
     void InitConstantFluidPropertiesData(EnergyPlusData &state)
     {
-        auto &df = state.dataFluid;
+        const auto &df = state.dataFluid;
         bool ErrorsFound = false;
 
         // Where are these things initialized?
@@ -4740,7 +4740,7 @@ namespace Fluid {
         return state.dataFluid->glycols(GlycolNum_Water);
     }
 
-    int GetGlycolRawNum(EnergyPlusData &state, std::string_view const glycolRawName) // carries in substance name
+    int GetGlycolRawNum(EnergyPlusData const &state, std::string_view const glycolRawName) // carries in substance name
     {
         auto const &df = state.dataFluid;
 

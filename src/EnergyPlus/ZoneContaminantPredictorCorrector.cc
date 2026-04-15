@@ -2400,7 +2400,7 @@ void CorrectZoneContaminants(EnergyPlusData &state,
             state.dataContaminantBalance->ZoneAirCO2(ZoneNum) = zoneAirCO2Temp;
 
             if (state.dataHybridModel->FlagHybridModel) {
-                auto &hmZone = state.dataHybridModel->hybridModelZones(ZoneNum);
+                const auto &hmZone = state.dataHybridModel->hybridModelZones(ZoneNum);
                 if ((hmZone.InfiltrationCalc_C || hmZone.PeopleCountCalc_C) && (!state.dataGlobal->WarmupFlag) && (!state.dataGlobal->DoingSizing)) {
                     InverseModelCO2(state, ZoneNum, CO2Gain, CO2GainExceptPeople, ZoneMassFlowRate, CO2MassFlowRate, RhoAir);
                 }

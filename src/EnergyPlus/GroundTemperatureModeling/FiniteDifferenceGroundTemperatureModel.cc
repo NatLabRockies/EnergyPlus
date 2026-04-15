@@ -55,7 +55,6 @@
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataGlobals.hh>
-#include <EnergyPlus/DataIPShortCuts.hh>
 #include <EnergyPlus/DataReportingFlags.hh>
 #include <EnergyPlus/General.hh>
 #include <EnergyPlus/GroundTemperatureModeling/FiniteDifferenceGroundTemperatureModel.hh>
@@ -81,41 +80,40 @@ namespace GroundTemp {
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         bool found = false;
-        int NumNums;
-        int NumAlphas;
-        int IOStat;
-
         // New shared pointer for this model object
         auto *thisModel = new FiniteDiffGroundTempsModel();
 
         GroundTemp::ModelType modelType = GroundTemp::ModelType::FiniteDiff;
 
         // Search through finite diff models here
-        std::string_view const cCurrentModuleObject = GroundTemp::modelTypeNamesUC[(int)modelType];
-        const int numCurrModels = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
+        std::string_view const cCurrentModuleObject = GroundTemp::modelTypeNames[(int)modelType];
+        std::string const currentModuleObject(cCurrentModuleObject);
+        auto *inputProcessor = state.dataInputProcessing->inputProcessor.get();
+        auto const modelInstances = inputProcessor->epJSON.find(currentModuleObject);
+        if (modelInstances == inputProcessor->epJSON.end()) {
+            ShowFatalError(state, fmt::format("{}--Errors getting input for ground temperature model", GroundTemp::modelTypeNames[(int)modelType]));
+        }
+        auto const &modelSchemaProps = inputProcessor->getObjectSchemaProps(state, currentModuleObject);
 
-        for (int modelNum = 1; modelNum <= numCurrModels; ++modelNum) {
+        for (auto const &modelInstance : modelInstances.value().items()) {
+            auto const modelName = Util::makeUPPER(modelInstance.key());
+            auto const &modelFields = modelInstance.value();
 
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     cCurrentModuleObject,
-                                                                     modelNum,
-                                                                     state.dataIPShortCut->cAlphaArgs,
-                                                                     NumAlphas,
-                                                                     state.dataIPShortCut->rNumericArgs,
-                                                                     NumNums,
-                                                                     IOStat);
-
-            if (objectName == state.dataIPShortCut->cAlphaArgs(1)) {
+            if (objectName == modelName) {
                 // Read input into object here
+                inputProcessor->markObjectAsUsed(currentModuleObject, modelInstance.key());
 
                 thisModel->modelType = modelType;
-                thisModel->Name = state.dataIPShortCut->cAlphaArgs(1);
-                thisModel->baseConductivity = state.dataIPShortCut->rNumericArgs(1);
-                thisModel->baseDensity = state.dataIPShortCut->rNumericArgs(2);
-                thisModel->baseSpecificHeat = state.dataIPShortCut->rNumericArgs(3);
-                thisModel->waterContent = state.dataIPShortCut->rNumericArgs(4) / 100.0;
-                thisModel->saturatedWaterContent = state.dataIPShortCut->rNumericArgs(5) / 100.0;
-                thisModel->evapotransCoeff = state.dataIPShortCut->rNumericArgs(6);
+                thisModel->Name = modelName;
+                thisModel->baseConductivity = inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "soil_thermal_conductivity");
+                thisModel->baseDensity = inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "soil_density");
+                thisModel->baseSpecificHeat = inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "soil_specific_heat");
+                thisModel->waterContent =
+                    inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "soil_moisture_content_volume_fraction") / 100.0;
+                thisModel->saturatedWaterContent =
+                    inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "soil_moisture_content_volume_fraction_at_saturation") / 100.0;
+                thisModel->evapotransCoeff =
+                    inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "evapotranspiration_ground_cover_parameter");
 
                 found = true;
                 break;

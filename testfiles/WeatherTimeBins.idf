@@ -61,7 +61,7 @@
 ! BUILDING, SURFACEGEOMETRY, LOCATION and DESIGNDAY (or RUNPERIOD) are the absolute minimal required input objects.
 ! This file illustrates using EnergyPlus to create a "bin" report for weather data.
 
-  Version,26.1;
+  Version,26.2;
 
   Building,
     None,                    !- Name

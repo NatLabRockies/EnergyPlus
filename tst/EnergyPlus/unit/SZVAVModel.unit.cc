@@ -242,8 +242,8 @@ TEST_F(EnergyPlusFixture, SZVAV_PTUnit_Testing)
     thisUnit.m_FanType = HVAC::FanType::OnOff;
     thisUnit.m_CoolingCoilName = "COOLINGCOIL";
     thisUnit.m_HeatingCoilName = "HEATINGCOIL";
-    thisUnit.m_CoolingCoilType_Num = HVAC::CoilDX_CoolingSingleSpeed;
-    thisUnit.m_HeatingCoilType_Num = HVAC::CoilDX_HeatingEmpirical;
+    thisUnit.m_coolCoilType = HVAC::CoilType::CoolingDXSingleSpeed;
+    thisUnit.m_heatCoilType = HVAC::CoilType::HeatingDXSingleSpeed;
     thisUnit.m_CoolingCoilIndex = 1;
     thisUnit.m_HeatingCoilIndex = 2;
     thisUnit.m_FanIndex = 1;

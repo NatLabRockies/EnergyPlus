@@ -1284,7 +1284,7 @@ namespace ThermalComfort {
 
     void CalcCoolingEffectAdjustedPMV(EnergyPlusData &state, Real64 &CoolingEffect, Real64 &CoolingEffectAdjustedPMV)
     {
-        auto &people = state.dataHeatBal->People(state.dataThermalComforts->PeopleNum);
+        const auto &people = state.dataHeatBal->People(state.dataThermalComforts->PeopleNum);
 
         // Calculate SET without cooling effect.
         Real64 RelAirVel = CalcRelativeAirVelocity(state.dataThermalComforts->AirVel, state.dataThermalComforts->ActMet);

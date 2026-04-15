@@ -5300,7 +5300,7 @@ void DayltgExtHorizIllum(EnergyPlusData &state,
     // The contribution in lumens/m2 from a patch of sky at altitude PH and azimuth TH
     // is L(TH,PH)*SIN(PH)*COS(PH)*DTH*DPH, where L(TH,PH) is the luminance
     // of the patch in cd/m2.
-    auto &dl = state.dataDayltg;
+    const auto &dl = state.dataDayltg;
 
     //  Init
     if (dl->DayltgExtHorizIllum_firstTime) {

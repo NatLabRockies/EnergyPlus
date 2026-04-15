@@ -165,7 +165,7 @@ Real64 CoolingCapacitySizer::size(EnergyPlusData &state, Real64 _originalValue, 
                             if (DDNum > 0 && TimeStepNumAtMax > 0) {
                                 OutTemp = state.dataSize->DesDayWeath(DDNum).Temp(TimeStepNumAtMax);
                             }
-                            if (this->dataCoolCoilType == HVAC::Coil_CoolingWaterToAirHPVSEquationFit) {
+                            if (this->dataCoolCoilType == HVAC::CoilType::CoolingWAHPVariableSpeedEquationFit) {
                                 OutTemp = VariableSpeedCoils::GetVSCoilRatedSourceTemp(state, this->dataCoolCoilIndex);
                             }
                             Real64 CoilInEnth = Psychrometrics::PsyHFnTdbW(CoilInTemp, CoilInHumRat);
@@ -386,7 +386,7 @@ Real64 CoolingCapacitySizer::size(EnergyPlusData &state, Real64 _originalValue, 
                             }
                         }
                         Real64 OutTemp = thisFinalSysSizing.OutTempAtCoolPeak;
-                        if (this->dataCoolCoilType == HVAC::Coil_CoolingWaterToAirHPVSEquationFit) {
+                        if (this->dataCoolCoilType == HVAC::CoilType::CoolingWAHPVariableSpeedEquationFit) {
                             OutTemp = VariableSpeedCoils::GetVSCoilRatedSourceTemp(state, this->dataCoolCoilIndex);
                         }
                         CoilOutTemp = min(CoilInTemp, CoilOutTemp);

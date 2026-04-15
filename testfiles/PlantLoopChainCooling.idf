@@ -12,7 +12,7 @@
 ! System:   None.
 ! Plant:    A chain of 3 plant loops that connect a LoadProfile:Plant to DistrictCooling by heat exchangers
 
-  Version,26.1;
+  Version,26.2;
 
   Building,
     Plant Load Profile Example,  !- Name

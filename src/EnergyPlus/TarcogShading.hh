@@ -71,7 +71,7 @@ namespace TarcogShading {
                  Array1D<Real64> const &gap,
                  Array1D<Real64> &hgas,
                  Array1D<Real64> &hcgas,
-                 Array1D<Real64> &hrgas,
+                 Array1D<Real64> const &hrgas,
                  Array2<Real64> const &frct,
                  Array2_int const &iprop,
                  Array1D<Real64> const &pressure,

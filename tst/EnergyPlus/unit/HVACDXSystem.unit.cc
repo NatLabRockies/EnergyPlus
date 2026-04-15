@@ -437,7 +437,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_DOASDXCoilTest)
     EXPECT_EQ(thisSys->Name, "DX COOLING COIL SYSTEM");
     EXPECT_FALSE(thisSys->m_ISHundredPercentDOASDXCoil);
     EXPECT_EQ(thisSys->UnitType, "CoilSystem:Cooling:DX");
-    EXPECT_EQ(thisSys->m_CoolingCoilType_Num, HVAC::Coil_CoolingAirToAirVariableSpeed);
+    EXPECT_ENUM_EQ(thisSys->m_coolCoilType, HVAC::CoilType::CoolingDXVariableSpeed);
 }
 
 TEST_F(EnergyPlusFixture, VariableSpeedCoils_RHControl)
@@ -598,7 +598,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_RHControl)
     EXPECT_EQ(thisSys->Name, "DX COOLING COIL SYSTEM");
     EXPECT_FALSE(thisSys->m_ISHundredPercentDOASDXCoil);
     EXPECT_EQ(thisSys->UnitType, "CoilSystem:Cooling:DX");
-    EXPECT_EQ(thisSys->m_CoolingCoilType_Num, HVAC::Coil_CoolingAirToAirVariableSpeed);
+    EXPECT_EQ(thisSys->m_coolCoilType, HVAC::CoilType::CoolingDXVariableSpeed);
     EXPECT_EQ(2, thisSys->CoolCtrlNode);
 
     // set up outdoor environment
@@ -928,6 +928,7 @@ TEST_F(EnergyPlusFixture, NewDXCoilModel_RHControl)
         "    0,                       !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}",
         "    0,                       !- Latent Capacity Time Constant {s}",
         "    0,                       !- Nominal Time for Condensate Removal to Begin {s}",
+        "    Yes,                     !- Apply Part Load Fraction to Speeds Greater than 1",
         "    ,                        !- Apply Latent Degradation to Speeds Greater than 1",
         "    AirCooled,               !- Condenser Type",
         "    0,                       !- Nominal Evaporative Condenser Pump Power {W}",
@@ -988,6 +989,7 @@ TEST_F(EnergyPlusFixture, NewDXCoilModel_RHControl)
         "    0,                       !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}",
         "    0,                       !- Latent Capacity Time Constant {s}",
         "    0,                       !- Nominal Time for Condensate Removal to Begin {s}",
+        "    Yes,                     !- Apply Part Load Fraction to Speeds Greater than 1",
         "    ,                        !- Apply Latent Degradation to Speeds Greater than 1",
         "    AirCooled,               !- Condenser Type",
         "    0,                       !- Nominal Evaporative Condenser Pump Power {W}",
@@ -1091,7 +1093,7 @@ TEST_F(EnergyPlusFixture, NewDXCoilModel_RHControl)
     EXPECT_EQ(thisSys->Name, "DX COOLING COIL SYSTEM");
     EXPECT_FALSE(thisSys->m_ISHundredPercentDOASDXCoil);
     EXPECT_EQ(thisSys->UnitType, "CoilSystem:Cooling:DX");
-    EXPECT_EQ(thisSys->m_CoolingCoilType_Num, HVAC::CoilDX_Cooling);
+    EXPECT_ENUM_EQ(thisSys->m_coolCoilType, HVAC::CoilType::CoolingDX);
     EXPECT_EQ(2, thisSys->CoolCtrlNode);
 
     // set up outdoor environment

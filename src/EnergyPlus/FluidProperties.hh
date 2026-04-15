@@ -541,7 +541,7 @@ namespace Fluid {
     RefrigProps *GetRefrig(EnergyPlusData &state, std::string_view name);
     RefrigProps *GetSteam(EnergyPlusData &state);
 
-    int GetGlycolRawNum(EnergyPlusData &state, std::string_view name);
+    int GetGlycolRawNum(EnergyPlusData const &state, std::string_view name);
     GlycolRawProps *GetGlycolRaw(EnergyPlusData &state, std::string_view name);
 
     int GetGlycolNum(EnergyPlusData &state, std::string_view name);

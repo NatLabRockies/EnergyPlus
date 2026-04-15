@@ -1039,14 +1039,14 @@ void InitWaterCoil(EnergyPlusData &state, int const CoilNum, bool const FirstHVA
                 std::string const &CompName = state.dataWaterCoils->WaterCoil(tempCoilNum).Name;
                 if (state.dataWaterCoils->WaterCoil(tempCoilNum).WaterCoilType == DataPlant::PlantEquipmentType::CoilWaterCooling) {
                     CoilTypeNum = SimAirServingZones::CompType::WaterCoil_Cooling;
-                    CompType = HVAC::cAllCoilTypes(HVAC::Coil_CoolingWater);
+                    CompType = HVAC::coilTypeNames[(int)HVAC::CoilType::CoolingWater];
                 } else if (state.dataWaterCoils->WaterCoil(tempCoilNum).WaterCoilType ==
                            DataPlant::PlantEquipmentType::CoilWaterDetailedFlatCooling) {
                     CoilTypeNum = SimAirServingZones::CompType::WaterCoil_DetailedCool;
-                    CompType = HVAC::cAllCoilTypes(HVAC::Coil_CoolingWaterDetailed);
+                    CompType = HVAC::coilTypeNames[(int)HVAC::CoilType::CoolingWaterDetailed];
                 } else if (state.dataWaterCoils->WaterCoil(tempCoilNum).WaterCoilType == DataPlant::PlantEquipmentType::CoilWaterSimpleHeating) {
                     CoilTypeNum = SimAirServingZones::CompType::WaterCoil_SimpleHeat;
-                    CompType = HVAC::cAllCoilTypes(HVAC::Coil_HeatingWater);
+                    CompType = HVAC::coilTypeNames[(int)HVAC::CoilType::HeatingWater];
                 }
                 WaterCoilOnAirLoop = true;
                 SimAirServingZones::CheckWaterCoilIsOnAirLoop(state, CoilTypeNum, CompType, CompName, WaterCoilOnAirLoop);
@@ -1285,9 +1285,9 @@ void InitWaterCoil(EnergyPlusData &state, int const CoilNum, bool const FirstHVA
                             // update outlet air conditions used for sizing
                             std::string CompType;
                             if (waterCoil.WaterCoilModel == CoilModel::CoolingDetailed) {
-                                CompType = HVAC::cAllCoilTypes(HVAC::Coil_CoolingWaterDetailed);
+                                CompType = HVAC::coilTypeNames[(int)HVAC::CoilType::CoolingWaterDetailed];
                             } else {
-                                CompType = HVAC::cAllCoilTypes(HVAC::Coil_CoolingWater);
+                                CompType = HVAC::coilTypeNames[(int)HVAC::CoilType::CoolingWater];
                             }
                             state.dataRptCoilSelection->coilSelectionReportObj->setCoilLvgAirTemp(
                                 state, waterCoil.Name, CompType, state.dataWaterCoils->TOutNew);
@@ -2101,10 +2101,10 @@ void SizeWaterCoil(EnergyPlusData &state, int const CoilNum)
             state.dataSize->DataPltSizCoolNum = PltSizCoolNum;
             state.dataSize->DataWaterLoopNum = waterCoil.WaterPlantLoc.loopNum;
 
-            if (waterCoil.WaterCoilModel == CoilModel::CoolingDetailed) {        // 'DETAILED FLAT FIN'
-                CompType = HVAC::cAllCoilTypes(HVAC::Coil_CoolingWaterDetailed); // Coil:Cooling:Water:DetailedGeometry
+            if (waterCoil.WaterCoilModel == CoilModel::CoolingDetailed) {                  // 'DETAILED FLAT FIN'
+                CompType = HVAC::coilTypeNames[(int)HVAC::CoilType::CoolingWaterDetailed]; // Coil:Cooling:Water:DetailedGeometry
             } else {
-                CompType = HVAC::cAllCoilTypes(HVAC::Coil_CoolingWater); // Coil:Cooling:Water
+                CompType = HVAC::coilTypeNames[(int)HVAC::CoilType::CoolingWater]; // Coil:Cooling:Water
             }
 
             bool bPRINT = false; // do not print this sizing request since the autosized value is needed and this input may not be autosized (we
@@ -2501,10 +2501,10 @@ void SizeWaterCoil(EnergyPlusData &state, int const CoilNum)
             } else {
                 NomCapUserInp = false;
             }
-            bool bPRINT = false;                                     // do not print this sizing request
-            TempSize = DataSizing::AutoSize;                         // get the autosized air volume flow rate for use in other calculations
-            SizingString.clear();                                    // doesn't matter
-            CompType = HVAC::cAllCoilTypes(HVAC::Coil_HeatingWater); // "Coil:Heating:Water"
+            bool bPRINT = false;                                               // do not print this sizing request
+            TempSize = DataSizing::AutoSize;                                   // get the autosized air volume flow rate for use in other calculations
+            SizingString.clear();                                              // doesn't matter
+            CompType = HVAC::coilTypeNames[(int)HVAC::CoilType::HeatingWater]; // "Coil:Heating:Water"
             std::string const &CompName = waterCoil.Name;
             if (waterCoil.DesiccantRegenerationCoil) {
                 state.dataSize->DataDesicRegCoil = true;
@@ -6030,9 +6030,9 @@ int GetCompIndex(EnergyPlusData &state, CoilModel compType, std::string_view con
 }
 
 Real64 GetWaterCoilCapacity(EnergyPlusData &state,
-                            std::string const &CoilType, // must match coil types in this module
-                            std::string const &CoilName, // must match coil names for the coil type
-                            bool &ErrorsFound            // set to true if problem
+                            std::string_view const CoilType, // must match coil types in this module
+                            std::string const &CoilName,     // must match coil names for the coil type
+                            bool &ErrorsFound                // set to true if problem
 )
 {
 
@@ -6083,7 +6083,7 @@ void UpdateWaterToAirCoilPlantConnection(EnergyPlusData &state,
                                          const DataPlant::LoopSideLocation LoopSide, // Plant loop side index for where called from
                                          int &CompIndex,                             // Chiller number pointer
                                          [[maybe_unused]] bool const FirstHVACIteration,
-                                         bool &InitLoopEquip // If not zero, calculate the max load for operating conditions
+                                         bool const &InitLoopEquip // If not zero, calculate the max load for operating conditions
 )
 {
 
@@ -6183,9 +6183,9 @@ void UpdateWaterToAirCoilPlantConnection(EnergyPlusData &state,
 }
 
 Sched::Schedule *GetWaterCoilAvailSched(EnergyPlusData &state,
-                                        std::string const &CoilType, // must match coil types in this module
-                                        std::string const &CoilName, // must match coil names for the coil type
-                                        bool &ErrorsFound            // set to true if problem
+                                        std::string_view const CoilType, // must match coil types in this module
+                                        std::string const &CoilName,     // must match coil names for the coil type
+                                        bool &ErrorsFound                // set to true if problem
 )
 {
 

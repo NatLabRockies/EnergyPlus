@@ -177,7 +177,7 @@ void ValidateComponent(EnergyPlusData &state,
 );
 
 // Why is this in GeneralRoutines? Asking for a friend
-void CalcBasinHeaterPower(EnergyPlusData &state,
+void CalcBasinHeaterPower(EnergyPlusData const &state,
                           Real64 const Capacity,     // Basin heater capacity per degree C below setpoint (W/C)
                           Sched::Schedule *sched,    // Pointer to basin heater schedule
                           Real64 const SetPointTemp, // setpoint temperature for basin heater operation (C)

@@ -7451,7 +7451,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_UpdateVarSpeedCoil_Test)
     thisInletNode.GenContam = 12.345;
     thisOutletNode.GenContam = 0.0;
     thisVarSpeedCoil.reportCoilFinalSizes = false;
-    thisVarSpeedCoil.VSCoilType = HVAC::Coil_CoolingAirToAirVariableSpeed;
+    thisVarSpeedCoil.coilType = HVAC::CoilType::CoolingDXVariableSpeed;
 
     // Run the test
     VariableSpeedCoils::UpdateVarSpeedCoil(*state, coilNum);

@@ -266,37 +266,15 @@
               <h5 class="card-title">Some objects require transition</h5>
               There have been changes in the following objects which require conversion. Either read and follow the
               "Rules" document or use the IDFVersionUpdater utility. The "INSTALL
-              DIRECTORY\PreProcess\IDFVersionUpdater\Rules25-1-0-to-25-2-0.md" document contains information on exact
+              DIRECTORY\PreProcess\IDFVersionUpdater\Rules25-2-0-to-26-1-0.md" document contains information on exact
               object changes that you can do by hand. The updater program is described more fully in the Auxiliary
               Programs document.
               <ul class="list-group">
-                <li class="list-group-item transition-object-name">AirLoopHVAC:UnitaryHeatPump:AirToAir:MultiSpeed</li>
-                <li class="list-group-item transition-object-name">Coil:Cooling:VariableSpeed</li>
-                <li class="list-group-item transition-object-name">Coil:Cooling:WaterToAirHeatPump:EquationFit</li>
-                <li class="list-group-item transition-object-name">
-                  Coil:Cooling:WaterToAirHeatPump:ParameterEstimation
-                </li>
-                <li class="list-group-item transition-object-name">
-                  Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit
-                </li>
-                <li class="list-group-item transition-object-name">Coil:Heating:VariableSpeed</li>
-                <li class="list-group-item transition-object-name">Coil:Heating:WaterToAirHeatPump:EquationFit</li>
-                <li class="list-group-item transition-object-name">
-                  Coil:Heating:WaterToAirHeatPump:ParameterEstimation
-                </li>
-                <li class="list-group-item transition-object-name">
-                  Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit
-                </li>
-                <li class="list-group-item transition-object-name">Coil:WaterHeating:AirToWaterHeatPump:Pumped</li>
-                <li class="list-group-item transition-object-name">
-                  Coil:WaterHeating:AirToWaterHeatPump:VariableSpeedEquationFit
-                </li>
-                <li class="list-group-item transition-object-name">Coil:WaterHeating:AirToWaterHeatPump:Wrapped</li>
-                <li class="list-group-item transition-object-name">GroundHeatExchanger:System</li>
-                <li class="list-group-item transition-object-name">ZoneHVAC:IdealLoadsAirSystem</li>
+                <li class="list-group-item transition-object-name">AirTerminal:SingleDuct:ParallelPIU:Reheat</li>
+                <li class="list-group-item transition-object-name">AirTerminal:SingleDuct:SeriesPIU:Reheat</li>
               </ul>
               For output variable changes, check the output rules file and the "INSTALL
-              DIRECTORY\PreProcess\IDFVersionUpdater\Report Variables 25-1-0-to-25-2-0.csv" document for details, or
+              DIRECTORY\PreProcess\IDFVersionUpdater\Report Variables 25-2-0-to-26-1-0.csv" document for details, or
               just let the transition program run to automatically update them in your input file.
             </div>
           </div>
