@@ -98,6 +98,10 @@ std::shared_ptr<CoilCoolingDXPerformanceBase> CoilCoolingDX::makePerformanceSubc
 
 int CoilCoolingDX::factory(EnergyPlus::EnergyPlusData &state, std::string const &coilName)
 {
+    if (state.dataCoilCoolingDX->GetInputFlag) {
+        CoilCoolingDX::getInput(state);
+        state.dataCoilCoolingDX->GetInputFlag = false;
+    }
     int handle = -1;
     std::string coilNameUpper = Util::makeUPPER(coilName);
     for (auto const &thisCoil : state.dataCoilCoolingDX->coilCoolingDXs) {
