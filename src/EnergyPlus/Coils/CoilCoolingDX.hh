@@ -187,20 +187,25 @@ struct CoilCoolingDXData : BaseGlobalStruct
     std::vector<CoilCoolingDX> coilCoolingDXs;
     std::string const coilCoolingDXObjectName = "Coil:Cooling:DX";
     bool stillNeedToReportStandardRatings = true; // standard ratings flag for all coils to report at the same time
-
+    bool GetInputFlag = true;
+  
     void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
     {
     }
 
     void init_state([[maybe_unused]] EnergyPlusData &state) override
     {
-        CoilCoolingDX::getInput(state);
+        if (this->GetInputFlag) {
+            CoilCoolingDX::getInput(state);
+            this->GetInputFlag = false;
+        }
     }
 
     void clear_state() override
     {
         coilCoolingDXs.clear();
         stillNeedToReportStandardRatings = true;
+        GetInputFlag = true;
     }
 };
 
