@@ -6770,8 +6770,11 @@ void GetDXCoils(EnergyPlusData &state)
     Numbers2.deallocate();
     lAlphaBlanks2.deallocate();
     lNumericBlanks2.deallocate();
+#ifdef GET_OUT
+    // What is this randomly doing here?
     bool anyEMSRan;
     ManageEMS(state, EMSManager::EMSCallFrom::ComponentGetInput, anyEMSRan, ObjexxFCL::Optional_int_const());
+#endif // GET_OUT
 }
 
 void InitDXCoil(EnergyPlusData &state, int const DXCoilNum) // number of the current DX coil unit being simulated

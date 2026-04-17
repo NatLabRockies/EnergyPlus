@@ -1074,7 +1074,7 @@ TEST_F(EnergyPlusFixture, ConstantFanVariableFlowFanCoilHeatingTest)
     // Simulate with flow lock on and locked flow > demand flow; bypass extra flow
     Sim4PipeFanCoil(*state, FanCoilNum, ZoneNum, FirstHVACIteration, QUnitOut, LatOutputProvided);
     EXPECT_NEAR(QZnReq, QUnitOut, 5.0);
-    EXPECT_NEAR(55.31, state->dataLoopNodes->Node(10).Temp, 0.1);
+    EXPECT_NEAR(55.31, state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE1FANCOILHWOUTLETNODE")).Temp, 0.1); // Was node-10, should be a node name
     // expect inlet and outlet node air mass flow rates are equal
     EXPECT_EQ(state->dataLoopNodes->Node(state->dataFanCoilUnits->FanCoil(1).AirInNode).MassFlowRate,
               state->dataLoopNodes->Node(state->dataFanCoilUnits->FanCoil(1).AirOutNode).MassFlowRate);
@@ -1800,7 +1800,7 @@ TEST_F(EnergyPlusFixture, ConstantFanVariableFlowFanCoilCoolingTest)
     // cooling simulation with flow lock on and locked flow > flow that meets load; bypass extra flow
     Sim4PipeFanCoil(*state, FanCoilNum, ZoneNum, FirstHVACIteration, QUnitOut, LatOutputProvided);
     EXPECT_NEAR(QZnReq, QUnitOut, 5.0);
-    EXPECT_NEAR(10.86, state->dataLoopNodes->Node(13).Temp, 0.1);
+    EXPECT_NEAR(10.86, state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE1FANCOILCHWOUTLETNODE")).Temp, 0.1);
     // expect inlet and outlet node air mass flow rates are equal
     EXPECT_EQ(state->dataLoopNodes->Node(state->dataFanCoilUnits->FanCoil(1).AirInNode).MassFlowRate,
               state->dataLoopNodes->Node(state->dataFanCoilUnits->FanCoil(1).AirOutNode).MassFlowRate);
@@ -2370,8 +2370,8 @@ TEST_F(EnergyPlusFixture, Test_TightenWaterFlowLimits)
     state->dataLoopNodes->Node(state->dataFanCoilUnits->FanCoil(FanCoilNum).AirInNode).Enthalpy = 48228.946;
     state->dataLoopNodes->Node(state->dataFanCoilUnits->FanCoil(FanCoilNum).AirInNode).MassFlowRate = 0.719999999;
     state->dataLoopNodes->Node(state->dataFanCoilUnits->FanCoil(FanCoilNum).AirInNode).MassFlowRateMax = 0.719999999;
-    state->dataLoopNodes->Node(6).MassFlowRateMaxAvail = 0.72;
-    state->dataLoopNodes->Node(5).MassFlowRateMaxAvail = 0.72;
+    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE1FCFANOUT")).MassFlowRateMaxAvail = 0.72;
+    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE1OAMIXOUT")).MassFlowRateMaxAvail = 0.72;
     state->dataFanCoilUnits->FanCoil(FanCoilNum).CCoilName_Index = 2;
     state->dataGlobal->BeginEnvrnFlag = true;
     state->dataEnvrn->DayOfYear_Schedule = 1;
@@ -2521,7 +2521,7 @@ TEST_F(EnergyPlusFixture, Test_TightenWaterFlowLimits)
         int ControlledZoneNum = 1;
         bool FirstHVACIteration = false;
         Real64 QUnitOut;
-        this->state->dataLoopNodes->Node(12).MassFlowRate = mdot;
+        this->state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE1FCCHWIN")).MassFlowRate = mdot;
         Calc4PipeFanCoil(*this->state, FanCoilNum, ControlledZoneNum, FirstHVACIteration, QUnitOut);
         return (QUnitOut - QZnReq2) / QZnReq2;
     };

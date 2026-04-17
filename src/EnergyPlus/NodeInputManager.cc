@@ -737,6 +737,11 @@ int AssignNodeNumber(EnergyPlusData &state,
     return AssignNodeNumber;
 }
 
+int GetNodeIndex(EnergyPlusData &state, std::string const &name)
+{
+    return Util::FindItemInList(name, state.dataLoopNodes->NodeID, state.dataLoopNodes->NumOfNodes);
+}
+  
 int GetOnlySingleNode(EnergyPlusData &state,
                       std::string const &NodeName,
                       bool &errFlag,

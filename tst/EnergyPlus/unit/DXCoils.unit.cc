@@ -1233,7 +1233,6 @@ TEST_F(EnergyPlusFixture, DXCoilEvapCondPumpSizingTest)
 
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
-    GetDXCoils(*state);
 
     ASSERT_EQ(1, state->dataDXCoils->NumDXCoils);
     EXPECT_EQ(DataSizing::AutoSize, state->dataDXCoils->DXCoil(1).EvapCondPumpElecNomPower(1));
@@ -2107,9 +2106,6 @@ TEST_F(EnergyPlusFixture, TestReadingCoilCoolingHeatingDX)
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
-    GetDXCoils(*state);
-    VariableSpeedCoils::GetVarSpeedCoilInput(*state);
-
     state->dataEnvrn->StdBaroPress = DataEnvironment::StdPressureSeaLevel;
     state->dataEnvrn->OutBaroPress = DataEnvironment::StdPressureSeaLevel;
     state->dataEnvrn->OutDryBulbTemp = 20.0;
@@ -2288,10 +2284,6 @@ TEST_F(EnergyPlusFixture, TestDXCoilIndoorOrOutdoor)
     int NumCoils;  // total number of coils
     int DXCoilNum; // index to the current coil
 
-    // Allocate
-    NumCoils = 3;
-    state->dataDXCoils->DXCoil.allocate(NumCoils);
-
     // IDF snippets
     std::string const idf_objects = delimited_string({
         "OutdoorAir:Node,                                      ",
@@ -2305,6 +2297,10 @@ TEST_F(EnergyPlusFixture, TestDXCoilIndoorOrOutdoor)
 
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
+
+    // Allocate
+    NumCoils = 3;
+    state->dataDXCoils->DXCoil.allocate(NumCoils);
 
     // Run
     DXCoilNum = 1;
@@ -2500,18 +2496,16 @@ TEST_F(EnergyPlusFixture, TestMultiSpeedWasteHeat)
         "  1.0;                     !- Maximum Value of x",
     });
 
-    ASSERT_TRUE(process_idf(idf_objects));
-    state->init_state(*state);
-
-    // Case 1 test
     state->dataEnvrn->OutDryBulbTemp = 35;
     state->dataEnvrn->OutHumRat = 0.0128;
     state->dataEnvrn->OutBaroPress = 101325;
     state->dataEnvrn->OutWetBulbTemp =
         PsyTwbFnTdbWPb(*state, state->dataEnvrn->OutDryBulbTemp, state->dataEnvrn->OutHumRat, state->dataEnvrn->OutBaroPress);
 
-    GetDXCoils(*state);
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
 
+    // Case 1 test
     EXPECT_ENUM_EQ(Constant::eFuel::Electricity, state->dataDXCoils->DXCoil(1).FuelType);
     EXPECT_EQ(0, state->dataDXCoils->DXCoil(1).MSWasteHeat(2));
 
@@ -2691,7 +2685,6 @@ TEST_F(EnergyPlusFixture, DXCoil_ValidateADPFunction)
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
-    GetDXCoils(*state);
     SetPredefinedTables(*state);
     state->dataSize->CurZoneEqNum = 1;
 
@@ -2943,8 +2936,6 @@ TEST_F(EnergyPlusFixture, TestMultiSpeedCoolingCrankcaseOutput)
     state->init_state(*state);
 
     // Case 1 test
-    GetDXCoils(*state);
-
     state->dataAirLoop->AirLoopInputsFilled = true;
 
     state->dataGlobal->SysSizingCalc = true;
@@ -3031,8 +3022,6 @@ TEST_F(EnergyPlusFixture, BlankDefrostEIRCurveInput)
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
-    GetDXCoils(*state);
-
     ASSERT_EQ(1, state->dataDXCoils->NumDXCoils);
     ASSERT_ENUM_EQ(state->dataDXCoils->DXCoil(1).DefrostStrategy, StandardRatings::DefrostStrat::ReverseCycle);
     ASSERT_ENUM_EQ(state->dataDXCoils->DXCoil(1).DefrostControl, StandardRatings::HPdefrostControl::Timed);
@@ -3096,8 +3085,6 @@ TEST_F(EnergyPlusFixture, CurveOutputLimitWarning)
 
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
-
-    GetDXCoils(*state);
 
     // TODO: FIXME: Should this still have cerr output?
     // EXPECT_TRUE( has_cerr_output() ); // capacity as a function of temperature inputs will give output above 1.0 +- 10% and trip warning message
@@ -3202,8 +3189,6 @@ TEST_F(EnergyPlusFixture, CoilHeatingDXSingleSpeed_MinOADBTempCompOperLimit)
 
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
-
-    GetDXCoils(*state);
 
     ASSERT_EQ("HEATING COIL SINGLESPEED", state->dataDXCoils->DXCoil(1).Name); // Heating Coil Single Speed
     ASSERT_EQ(-30.0, state->dataDXCoils->DXCoil(1).MinOATCompressor);          // removed the minimum limit of -20.0C
@@ -3315,8 +3300,6 @@ TEST_F(EnergyPlusFixture, CoilCoolingDXTwoSpeed_MinOADBTempCompOperLimit)
 
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
-
-    GetDXCoils(*state);
 
     ASSERT_EQ("MAIN COOLING COIL 1", state->dataDXCoils->DXCoil(1).Name); // Cooling Coil Two Speed
     ASSERT_EQ(-25.0, state->dataDXCoils->DXCoil(1).MinOATCompressor);     // use default value at -25C
@@ -3462,7 +3445,6 @@ TEST_F(EnergyPlusFixture, CoilCoolingDXTwoSpeed_CondensateVariables)
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
-    EXPECT_NO_THROW(GetDXCoils(*state));
     compare_err_stream("");
 
     auto &dxCoil = state->dataDXCoils->DXCoil(1);
@@ -3613,7 +3595,6 @@ TEST_F(SQLiteFixture, DXCoils_TestComponentSizingOutput_TwoSpeed)
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
-    DXCoils::GetDXCoils(*state);
     EXPECT_EQ(1, state->dataDXCoils->NumDXCoils);
 
     state->dataSize->CurZoneEqNum = 0;
@@ -3842,7 +3823,6 @@ TEST_F(SQLiteFixture, DXCoils_TestComponentSizingOutput_SingleSpeed)
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
-    DXCoils::GetDXCoils(*state);
     EXPECT_EQ(1, state->dataDXCoils->NumDXCoils);
 
     // All of this is to basically manage to get RatedTotCap to be autosized
@@ -4336,7 +4316,6 @@ TEST_F(EnergyPlusFixture, TestMultiSpeedHeatingCoilSizingOutput)
     state->init_state(*state);
 
     // get input
-    GetDXCoils(*state);
     SetPredefinedTables(*state);
     // check multi-speed DX cooling coil
     EXPECT_EQ("ASHP CLG COIL", state->dataDXCoils->DXCoil(1).Name);
@@ -4554,8 +4533,6 @@ TEST_F(EnergyPlusFixture, TestMultiSpeedCoolingCoilTabularReporting)
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
-    // get input
-    GetDXCoils(*state);
     // Setup the predefined tables
     EnergyPlus::OutputReportPredefined::SetPredefinedTables(*state);
     // check multi-speed DX cooling coil
@@ -4975,8 +4952,6 @@ TEST_F(EnergyPlusFixture, TestMultiSpeedCoilsAutoSizingOutput)
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
-    // get input
-    GetDXCoils(*state);
     SetPredefinedTables(*state);
     // check multi-speed DX cooling coil
     EXPECT_EQ("ASHP CLG COIL", state->dataDXCoils->DXCoil(1).Name);
@@ -5263,7 +5238,6 @@ TEST_F(EnergyPlusFixture, TestMultiSpeedCoolingCoilPartialAutoSizeOutput)
     state->init_state(*state);
 
     // get input
-    GetDXCoils(*state);
     SetPredefinedTables(*state);
     // check multi-speed DX cooling coil
     EXPECT_EQ("ASHP CLG COIL", state->dataDXCoils->DXCoil(1).Name);
@@ -5897,7 +5871,6 @@ TEST_F(EnergyPlusFixture, TwoSpeedDXCoilStandardRatingsTest)
     state->dataEnvrn->OutBaroPress = 101325.0;
 
     Fans::GetFanInput(*state);
-    GetDXCoils(*state);
     int dXCoilIndex = Util::FindItemInList("CCOOLING DX TWO SPEED", state->dataDXCoils->DXCoil);
     int fanIndex = Fans::GetFanIndex(*state, "FAN VARIABLE VOLUME");
     auto &coolcoilTwoSpeed = state->dataDXCoils->DXCoil(dXCoilIndex);
@@ -6141,7 +6114,6 @@ TEST_F(EnergyPlusFixture, TwoSpeedDXCoilStandardRatings_Curve_Fix_Test)
     state->dataEnvrn->OutBaroPress = 101325.0;
 
     Fans::GetFanInput(*state);
-    GetDXCoils(*state);
     int dXCoilIndex = Util::FindItemInList("CCOOLING DX TWO SPEED", state->dataDXCoils->DXCoil);
     int fanIndex = Fans::GetFanIndex(*state, "FAN VARIABLE VOLUME");
     auto &coolcoilTwoSpeed = state->dataDXCoils->DXCoil(dXCoilIndex);
@@ -6365,9 +6337,8 @@ TEST_F(EnergyPlusFixture, MSCoolingCoil_TestErrorMessageWithoutPLRobjects)
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
-    state->init_state(*state);
+    ASSERT_THROW(state->init_state(*state), std::runtime_error);
 
-    ASSERT_THROW(GetDXCoils(*state), std::runtime_error);
     std::string const error_string = delimited_string({
         "   ** Warning ** ProcessScheduleInput: Schedule:Compact = FANANDCOILAVAILSCHED",
         "   **   ~~~   ** Schedule Type Limits Name = FRACTION, item not found.",
@@ -7248,9 +7219,6 @@ TEST_F(EnergyPlusFixture, Test_DHW_End_Use_Cat_Removal)
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
-    GetDXCoils(*state);
-    VariableSpeedCoils::GetVarSpeedCoilInput(*state);
-
     EXPECT_EQ(24, state->dataOutputProcessor->meters.size());
     EXPECT_EQ(state->dataOutputProcessor->meters[19]->Name, "WaterSystems:Electricity");
     EXPECT_EQ((int)state->dataOutputProcessor->meters[19]->resource, (int)Constant::eResource::Electricity);
@@ -7455,7 +7423,6 @@ TEST_F(EnergyPlusFixture, MultiSpeedDXHeatingCoilsHSPF2Test)
     state->init_state(*state);
 
     // get input
-    GetDXCoils(*state);
     SetPredefinedTables(*state);
     state->dataEnvrn->StdBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = 1.2;
@@ -7715,7 +7682,6 @@ TEST_F(EnergyPlusFixture, MultiSpeedDXHeatingCoilsHSPF2Test1)
     state->init_state(*state);
 
     // get input
-    GetDXCoils(*state);
     SetPredefinedTables(*state);
     state->dataEnvrn->StdBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = 1.2;
@@ -7977,7 +7943,6 @@ TEST_F(EnergyPlusFixture, MultiSpeedDXHeatingCoilsHSPF2Test2)
     state->init_state(*state);
 
     // get input
-    GetDXCoils(*state);
     SetPredefinedTables(*state);
     state->dataEnvrn->StdBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = 1.2;
@@ -8144,9 +8109,9 @@ TEST_F(EnergyPlusFixture, InitDXCoil_GetHPCoolingCoilIndex)
         ,                                 !- 2023 Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
         ,                                 !- Speed 1 Reference Unit Rated Condenser Air Flow Rate {m3/s}
         ,                                 !- Speed 1 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
-        Dummy Curve,                      !- Speed 1 Total Cooling Capacity Function of Temperature Curve Name
+        Dummy Curve 2,                    !- Speed 1 Total Cooling Capacity Function of Temperature Curve Name
         Dummy Curve,                      !- Speed 1 Total Cooling Capacity Function of Air Flow Fraction Curve Name
-        Dummy Curve,                      !- Speed 1 Energy Input Ratio Function of Temperature Curve Name
+        Dummy Curve 2,                    !- Speed 1 Energy Input Ratio Function of Temperature Curve Name
         Dummy Curve,                      !- Speed 1 Energy Input Ratio Function of Air Flow Fraction Curve Name
         27219.4,                          !- Speed 2 Reference Unit Gross Rated Total Cooling Capacity {W}
         0.730,                            !- Speed 2 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
@@ -8156,9 +8121,9 @@ TEST_F(EnergyPlusFixture, InitDXCoil_GetHPCoolingCoilIndex)
         ,                                 !- 2023 Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
         ,                                 !- Speed 2 Reference Unit Rated Condenser Air Flow Rate {m3/s}
         ,                                 !- Speed 2 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
-        Dummy Curve,                      !- Speed 2 Total Cooling Capacity Function of Temperature Curve Name
+        Dummy Curve 2,                    !- Speed 2 Total Cooling Capacity Function of Temperature Curve Name
         Dummy Curve,                      !- Speed 2 Total Cooling Capacity Function of Air Flow Fraction Curve Name
-        Dummy Curve,                      !- Speed 2 Energy Input Ratio Function of Temperature Curve Name
+        Dummy Curve 2,                    !- Speed 2 Energy Input Ratio Function of Temperature Curve Name
         Dummy Curve;                      !- Speed 2 Energy Input Ratio Function of Air Flow Fraction Curve Name
 
       Coil:Heating:DX:SingleSpeed,
@@ -8201,12 +8166,23 @@ TEST_F(EnergyPlusFixture, InitDXCoil_GetHPCoolingCoilIndex)
         0.5,                              !- Minimum Value of x
         1.5;                              !- Maximum Value of x
 
+      Curve:Biquadratic,
+        Dummy Curve 2,
+        0.8,
+        0.2,
+        0.0,
+        0.2,
+        0.0,
+        0.0,
+        0.5,
+        1.5,
+        0.5,
+        1.5;
     )IDF";
 
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
-    GetDXCoils(*state);
     state->dataGlobal->SysSizingCalc = true;
     state->dataBranchNodeConnections->CompSets(1).ParentObjectType = Node::ConnectionObjectType::AirLoopHVACUnitarySystem;
     InitDXCoil(*state, 1);

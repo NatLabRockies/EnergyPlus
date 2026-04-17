@@ -16828,7 +16828,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_CheckMultistageHeatingCoil)
     std::string const idf_objects = delimited_string({
         "Coil:Heating:Electric:MultiStage,",
         " ElectricCoil, !-Name",
-        " always_avail, !-Availability Schedule Name",
+        " Constant-1.0, !-Availability Schedule Name",
         " heating coil air inlet node_unit1, !-Air Inlet Node Name",
         " Supp Heating Coil Air Inlet Node_unit1, !-Air Outlet Node Name,",
         " !-Temperature Setpoint Node Name",
@@ -16840,7 +16840,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_CheckMultistageHeatingCoil)
 
         "Coil:Heating:Gas:MultiStage,",
         " GasCoil, !-Name",
-        " always_avail, !-Availability Schedule Name",
+        " Constant-1.0, !-Availability Schedule Name",
         " heating coil air inlet node_unit1-1, !-Air Inlet Node Name",
         " Supp Heating Coil Air Inlet Node_unit1-1, !-Air Outlet Node Name,",
         " , !-Temperature Setpoint Node Name",
@@ -16856,8 +16856,9 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_CheckMultistageHeatingCoil)
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
-
     state->init_state(*state);
+#ifdef GET_OUT    
+#endif // GET_OUT
 
     state->dataGlobal->NumOfZones = 1;
     state->dataHeatBal->Zone.allocate(1);
