@@ -79,7 +79,7 @@ TEST_F(EnergyPlusFixture, HXAssistCCUnitarySystem_VStest1)
     Real64 ZoneTemp(0.0);  // control zone temperature
     int InletNode(0);      // UnitarySystem inlet node number
     int OutletNode(0);     // UnitarySystem outlet node number
-    int ControlZoneNum(0); // index to control zone
+    int ControlZoneNode(0); // index to control zone
 
     std::string const idf_objects = delimited_string({
         "Zone,",
@@ -467,7 +467,7 @@ TEST_F(EnergyPlusFixture, HXAssistCCUnitarySystem_VStest1)
 
     InletNode = thisSys->AirInNode;
     OutletNode = thisSys->AirOutNode;
-    ControlZoneNum = thisSys->NodeNumOfControlledZone;
+    ControlZoneNode = thisSys->NodeNumOfControlledZone;
 
     // set up unitary system inlet conditions
     state->dataLoopNodes->Node(InletNode).Temp = 26.666667;             // AHRI condition 80F dry-bulb temp
@@ -476,7 +476,7 @@ TEST_F(EnergyPlusFixture, HXAssistCCUnitarySystem_VStest1)
         Psychrometrics::PsyHFnTdbW(state->dataLoopNodes->Node(InletNode).Temp, state->dataLoopNodes->Node(InletNode).HumRat);
 
     // set zone temperature
-    state->dataLoopNodes->Node(ControlZoneNum).Temp = 20.0; // set zone temperature during heating season used to determine system delivered capacity
+    state->dataLoopNodes->Node(ControlZoneNode).Temp = 20.0; // set zone temperature during heating season used to determine system delivered capacity
     state->dataEnvrn->OutDryBulbTemp = 35.0;                // initialize weather
     state->dataEnvrn->OutHumRat = 0.1;
     state->dataEnvrn->OutBaroPress = 101325.0;
@@ -486,23 +486,23 @@ TEST_F(EnergyPlusFixture, HXAssistCCUnitarySystem_VStest1)
     state->dataSize->CurZoneEqNum = 1;
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand.allocate(1);
     state->dataZoneEnergyDemand->ZoneSysMoistureDemand.allocate(1);
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputRequired = 1000.0; // heating load
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputReqToCoolSP = 2000.0;
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputReqToHeatSP = 1000.0;
-    state->dataZoneEnergyDemand->ZoneSysMoistureDemand(ControlZoneNum).OutputRequiredToDehumidifyingSP = 0.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputRequired = 1000.0; // heating load // was ControlZoneNum which is a node number
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputReqToCoolSP = 2000.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputReqToHeatSP = 1000.0;
+    state->dataZoneEnergyDemand->ZoneSysMoistureDemand(1).OutputRequiredToDehumidifyingSP = 0.0;
 
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).SequencedOutputRequired.allocate(1);
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).SequencedOutputRequiredToCoolingSP.allocate(1);
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).SequencedOutputRequiredToHeatingSP.allocate(1);
-    state->dataZoneEnergyDemand->ZoneSysMoistureDemand(ControlZoneNum).SequencedOutputRequiredToDehumidSP.allocate(1);
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).SequencedOutputRequired(1) =
-        state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputRequired;
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).SequencedOutputRequiredToCoolingSP(1) =
-        state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).OutputRequiredToCoolingSP;
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).SequencedOutputRequiredToHeatingSP(1) =
-        state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).OutputRequiredToHeatingSP;
-    state->dataZoneEnergyDemand->ZoneSysMoistureDemand(ControlZoneNum).SequencedOutputRequiredToDehumidSP(1) =
-        state->dataZoneEnergyDemand->ZoneSysMoistureDemand(ControlZoneNum).OutputRequiredToDehumidifyingSP;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).SequencedOutputRequired.allocate(1);
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).SequencedOutputRequiredToCoolingSP.allocate(1);
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).SequencedOutputRequiredToHeatingSP.allocate(1);
+    state->dataZoneEnergyDemand->ZoneSysMoistureDemand(1).SequencedOutputRequiredToDehumidSP.allocate(1);
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).SequencedOutputRequired(1) =
+        state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputRequired;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).SequencedOutputRequiredToCoolingSP(1) =
+        state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).OutputRequiredToCoolingSP;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).SequencedOutputRequiredToHeatingSP(1) =
+        state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).OutputRequiredToHeatingSP;
+    state->dataZoneEnergyDemand->ZoneSysMoistureDemand(1).SequencedOutputRequiredToDehumidSP(1) =
+        state->dataZoneEnergyDemand->ZoneSysMoistureDemand(1).OutputRequiredToDehumidifyingSP;
 
     state->dataHeatBalFanSys->TempControlType.allocate(1);
     state->dataHeatBalFanSys->TempControlType(1) = HVAC::SetptType::DualHeatCool;
@@ -527,27 +527,27 @@ TEST_F(EnergyPlusFixture, HXAssistCCUnitarySystem_VStest1)
                       sensOut,
                       latOut);
 
-    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNum).Temp;
+    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNode).Temp;
     Qsens_sys = state->dataLoopNodes->Node(InletNode).MassFlowRate *
                 Psychrometrics::PsyDeltaHSenFnTdb2W2Tdb1W1(state->dataLoopNodes->Node(OutletNode).Temp,
                                                            state->dataLoopNodes->Node(OutletNode).HumRat,
                                                            ZoneTemp,
-                                                           state->dataLoopNodes->Node(ControlZoneNum).HumRat);
+                                                           state->dataLoopNodes->Node(ControlZoneNode).HumRat);
 
-    EXPECT_NEAR(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputRequired, Qsens_sys, 1.0); // Watts
+    EXPECT_NEAR(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputRequired, Qsens_sys, 1.0); // Watts
 
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputRequired = -1000.0; // cooling load
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputReqToCoolSP = -1000.0;
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputReqToHeatSP = -2000.0;
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).SequencedOutputRequired(1) =
-        state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputRequired;
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).SequencedOutputRequiredToCoolingSP(1) =
-        state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).OutputRequiredToCoolingSP;
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).SequencedOutputRequiredToHeatingSP(1) =
-        state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).OutputRequiredToHeatingSP;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputRequired = -1000.0; // cooling load
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputReqToCoolSP = -1000.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputReqToHeatSP = -2000.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).SequencedOutputRequired(1) =
+        state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputRequired;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).SequencedOutputRequiredToCoolingSP(1) =
+        state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).OutputRequiredToCoolingSP;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).SequencedOutputRequiredToHeatingSP(1) =
+        state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).OutputRequiredToHeatingSP;
 
     // set zone temperature
-    state->dataLoopNodes->Node(ControlZoneNum).Temp = 24.0; // set zone temperature during cooling season used to determine system delivered capacity
+    state->dataLoopNodes->Node(ControlZoneNode).Temp = 24.0; // set zone temperature during cooling season used to determine system delivered capacity
     state->dataEnvrn->OutDryBulbTemp = 35.0;                // initialize weather
     state->dataEnvrn->OutHumRat = 0.1;
     state->dataEnvrn->OutBaroPress = 101325.0;
@@ -566,15 +566,15 @@ TEST_F(EnergyPlusFixture, HXAssistCCUnitarySystem_VStest1)
                       sensOut,
                       latOut);
 
-    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNum).Temp;
+    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNode).Temp;
     Qsens_sys = state->dataLoopNodes->Node(InletNode).MassFlowRate *
                 Psychrometrics::PsyDeltaHSenFnTdb2W2Tdb1W1(state->dataLoopNodes->Node(OutletNode).Temp,
                                                            state->dataLoopNodes->Node(OutletNode).HumRat,
                                                            ZoneTemp,
-                                                           state->dataLoopNodes->Node(ControlZoneNum).HumRat);
+                                                           state->dataLoopNodes->Node(ControlZoneNode).HumRat);
 
     // Test 1: HX is off, cooling load is met, dehumidification control mode = None
-    EXPECT_NEAR(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputRequired, Qsens_sys, 1.0); // Watts
+    EXPECT_NEAR(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputRequired, Qsens_sys, 1.0); // Watts
     EXPECT_DOUBLE_EQ(state->dataLoopNodes->Node(InletNode).MassFlowRate, state->dataLoopNodes->Node(OutletNode).MassFlowRate);
     EXPECT_ENUM_EQ(thisSys->m_DehumidControlType_Num, UnitarySystems::UnitarySys::DehumCtrlType::None);
     // coil system delta T > 0, coil system inlet node = 8, outlet node = 4
@@ -605,7 +605,7 @@ TEST_F(EnergyPlusFixture, HXAssistCCUnitarySystem_VStest1)
                       sensOut,
                       latOut);
 
-    EXPECT_NEAR(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputRequired, Qsens_sys, 1.0); // Watts
+    EXPECT_NEAR(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputRequired, Qsens_sys, 1.0); // Watts
     EXPECT_DOUBLE_EQ(state->dataLoopNodes->Node(InletNode).MassFlowRate, state->dataLoopNodes->Node(OutletNode).MassFlowRate);
     EXPECT_ENUM_EQ(thisSys->m_DehumidControlType_Num, UnitarySystems::UnitarySys::DehumCtrlType::CoolReheat);
     // coil system delta T > 0, cooling coil inlet node = 8, outlet node = 4
@@ -632,7 +632,7 @@ TEST_F(EnergyPlusFixture, HXAssistCCUnitarySystem_VStest1)
                       sensOut,
                       latOut);
 
-    EXPECT_NEAR(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputRequired, Qsens_sys, 1.0); // Watts
+    EXPECT_NEAR(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputRequired, Qsens_sys, 1.0); // Watts
     EXPECT_DOUBLE_EQ(state->dataLoopNodes->Node(InletNode).MassFlowRate, state->dataLoopNodes->Node(OutletNode).MassFlowRate);
     EXPECT_ENUM_EQ(thisSys->m_DehumidControlType_Num, UnitarySystems::UnitarySys::DehumCtrlType::Multimode);
     // coil system delta T > 0, cooling coil inlet node = 8, outlet node = 4
@@ -649,7 +649,7 @@ TEST_F(EnergyPlusFixture, HXAssistCCUnitarySystem_VStest1)
     thisSys->m_RunOnLatentLoad = true;
     thisSys->m_Humidistat = true;
     state->dataLoopNodes->Node(thisSys->NodeNumOfControlledZone).HumRat = 0.009; // set zone humidity ratio as reference for latent met
-    state->dataZoneEnergyDemand->ZoneSysMoistureDemand(ControlZoneNum).RemainingOutputReqToDehumidSP = -0.000001; // -2 W
+    state->dataZoneEnergyDemand->ZoneSysMoistureDemand(1).RemainingOutputReqToDehumidSP = -0.000001; // -2 W
     thisSys->simulate(*state,
                       compName,
                       FirstHVACIteration,
@@ -663,7 +663,7 @@ TEST_F(EnergyPlusFixture, HXAssistCCUnitarySystem_VStest1)
                       sensOut,
                       latOut);
 
-    EXPECT_NEAR(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputRequired, Qsens_sys, 1.0); // Watts
+    EXPECT_NEAR(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputRequired, Qsens_sys, 1.0); // Watts
     EXPECT_DOUBLE_EQ(state->dataLoopNodes->Node(InletNode).MassFlowRate, state->dataLoopNodes->Node(OutletNode).MassFlowRate);
     EXPECT_ENUM_EQ(thisSys->m_DehumidControlType_Num, UnitarySystems::UnitarySys::DehumCtrlType::Multimode);
     // coil system delta T > 0, cooling coil inlet node = 8, outlet node = 4
@@ -692,7 +692,7 @@ TEST_F(EnergyPlusFixture, HXAssistCCUnitarySystem_VStest1)
                       sensOut,
                       latOut);
 
-    EXPECT_NEAR(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputRequired, Qsens_sys, 1.0); // Watts
+    EXPECT_NEAR(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputRequired, Qsens_sys, 1.0); // Watts
     EXPECT_DOUBLE_EQ(state->dataLoopNodes->Node(InletNode).MassFlowRate, state->dataLoopNodes->Node(OutletNode).MassFlowRate);
     EXPECT_ENUM_EQ(thisSys->m_DehumidControlType_Num, UnitarySystems::UnitarySys::DehumCtrlType::CoolReheat);
     // coil system delta T > 0, cooling coil inlet node = 8, outlet node = 4
@@ -707,7 +707,7 @@ TEST_F(EnergyPlusFixture, HXAssistCCUnitarySystem_VStest1)
     // Test 6: HX is on, cooling load is met, dehumidification control mode = CoolReheat and moisture load exists
     // Adjust moisture load to be greater than the latent capacity to meet the sensible load
     state->dataLoopNodes->Node(thisSys->NodeNumOfControlledZone).HumRat = 0.01; // set zone humidity ratio as reference for latent met
-    state->dataZoneEnergyDemand->ZoneSysMoistureDemand(ControlZoneNum).RemainingOutputReqToDehumidSP = -0.0002; // -400 W
+    state->dataZoneEnergyDemand->ZoneSysMoistureDemand(1).RemainingOutputReqToDehumidSP = -0.0002; // -400 W
     thisSys->m_DehumidControlType_Num = UnitarySystems::UnitarySys::DehumCtrlType::CoolReheat;
     thisSys->simulate(*state,
                       compName,
@@ -722,7 +722,7 @@ TEST_F(EnergyPlusFixture, HXAssistCCUnitarySystem_VStest1)
                       sensOut,
                       latOut);
 
-    EXPECT_NEAR(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputRequired, Qsens_sys, 1.0); // Watts
+    EXPECT_NEAR(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputRequired, Qsens_sys, 1.0); // Watts
     EXPECT_DOUBLE_EQ(state->dataLoopNodes->Node(InletNode).MassFlowRate, state->dataLoopNodes->Node(OutletNode).MassFlowRate);
     EXPECT_ENUM_EQ(thisSys->m_DehumidControlType_Num, UnitarySystems::UnitarySys::DehumCtrlType::CoolReheat);
     // coil system delta T > 0, cooling coil inlet node = 8, outlet node = 4

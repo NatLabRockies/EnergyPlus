@@ -2898,9 +2898,6 @@ TEST_F(EnergyPlusFixture, VRF_FluidTCtrl_GetCoilInput)
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
-    // Run the method
-    GetDXCoils(*state);
-
     // Check the results
     ASSERT_EQ(1, state->dataDXCoils->NumDXCoils);
     EXPECT_ENUM_EQ(state->dataDXCoils->DXCoil(1).coilType, HVAC::CoilType::CoolingVRFFluidTCtrl);

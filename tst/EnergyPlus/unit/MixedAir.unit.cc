@@ -499,10 +499,10 @@ TEST_F(EnergyPlusFixture, MixedAir_HXBypassOptionTest)
     state->init_state(*state);
 
     GetOAControllerInputs(*state);
-    EXPECT_EQ(2, state->dataMixedAir->OAController(1).OANode);
+    EXPECT_EQ(Node::GetNodeIndex(*state, "OUTSIDE AIR INLET NODE 1"), state->dataMixedAir->OAController(1).OANode);
     EXPECT_TRUE(OutAirNodeManager::CheckOutAirNodeNumber(*state, state->dataMixedAir->OAController(1).OANode));
 
-    EXPECT_EQ(6, state->dataMixedAir->OAController(2).OANode);
+    EXPECT_EQ(Node::GetNodeIndex(*state, "OUTSIDE AIR INLET NODE 2"), state->dataMixedAir->OAController(2).OANode);
     EXPECT_FALSE(OutAirNodeManager::CheckOutAirNodeNumber(*state, state->dataMixedAir->OAController(2).OANode));
 
     int OAControllerNum;
@@ -5804,7 +5804,7 @@ TEST_F(EnergyPlusFixture, MixedAir_MiscGetsPart2)
 
     EXPECT_EQ(6, GetNumOAMixers(*state));
     EXPECT_EQ(1, GetNumOAControllers(*state));
-    EXPECT_EQ(18, GetOAMixerReliefNodeNumber(*state, 1));
+    EXPECT_EQ(Node::GetNodeIndex(*state, "SPACE1-1 RELIEF AIR OUTLET"), GetOAMixerReliefNodeNumber(*state, 1));
 
     // indexes can be found in  OAMixer array for these field names
     EXPECT_EQ(1, GetOAMixerIndex(*state, "SPACE1-1 OA Mixing Box"));
@@ -6926,7 +6926,7 @@ TEST_F(EnergyPlusFixture, MixedAir_OAControllerOrderInControllersListTest)
 
         "  Coil:Heating:Water,",
         "    OA Heating Coil 1,       !- Name",
-        "    CoolingCoilAvailSched,   !- Availability Schedule Name",
+        "    Constant-1.0,            !- Availability Schedule Name",
         "    autosize,                !- U-Factor Times Area Value {W/K}",
         "    autosize,                !- Maximum Water Flow Rate {m3/s}",
         "    OA Heating Coil 1 Water Inlet Node,  !- Water Inlet Node Name",
@@ -6943,7 +6943,7 @@ TEST_F(EnergyPlusFixture, MixedAir_OAControllerOrderInControllersListTest)
 
         "  Coil:Cooling:Water,",
         "    OA Cooling Coil 1,       !- Name",
-        "    CoolingCoilAvailSched,   !- Availability Schedule Name",
+        "    Constant-1.0,            !- Availability Schedule Name",
         "    autosize,                !- Design Water Flow Rate {m3/s}",
         "    autosize,                !- Design Air Flow Rate {m3/s}",
         "    autosize,                !- Design Inlet Water Temperature {C}",
@@ -6967,7 +6967,7 @@ TEST_F(EnergyPlusFixture, MixedAir_OAControllerOrderInControllersListTest)
 
         "  Coil:Cooling:Water,",
         "    Main Cooling Coil 1,     !- Name",
-        "    CoolingCoilAvailSched,   !- Availability Schedule Name",
+        "    Constant-1.0,            !- Availability Schedule Name",
         "    autosize,                !- Design Water Flow Rate {m3/s}",
         "    autosize,                !- Design Air Flow Rate {m3/s}",
         "    autosize,                !- Design Inlet Water Temperature {C}",
@@ -6984,7 +6984,7 @@ TEST_F(EnergyPlusFixture, MixedAir_OAControllerOrderInControllersListTest)
 
         "  Coil:Heating:Water,",
         "    Main Heating Coil 1,     !- Name",
-        "    ReheatCoilAvailSched,    !- Availability Schedule Name",
+        "    Constant-1.0,            !- Availability Schedule Name",
         "    autosize,                !- U-Factor Times Area Value {W/K}",
         "    autosize,                !- Maximum Water Flow Rate {m3/s}",
         "    Main Heating Coil 1 Water Inlet Node,  !- Water Inlet Node Name",

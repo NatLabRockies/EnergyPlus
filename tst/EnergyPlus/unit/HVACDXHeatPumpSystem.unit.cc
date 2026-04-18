@@ -72,7 +72,7 @@ TEST_F(EnergyPlusFixture, ExerciseHVACDXHeatPumpSystem)
                           "    Heat Pump DX Heating Coil 1;  !- Heating Coil Name",
                           "Coil:Heating:DX:SingleSpeed,",
                           "    Heat Pump DX Heating Coil 1,  !- Name",
-                          "    FanAndCoilAvailSched,    !- Availability Schedule Name",
+                          "    Constant-1.0,    !- Availability Schedule Name",
                           "    autosize,                !- Gross Rated Heating Capacity {W}",
                           "    2.75,                    !- Gross Rated Heating COP {W/W}",
                           "    autosize,                !- Rated Air Flow Rate {m3/s}",
@@ -80,11 +80,11 @@ TEST_F(EnergyPlusFixture, ExerciseHVACDXHeatPumpSystem)
                           "    ,                        !- 2023 Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}",
                           "    Heating Coil Air Inlet Node,  !- Air Inlet Node Name",
                           "    SuppHeating Coil Air Inlet Node,  !- Air Outlet Node Name",
-                          "    HPACHeatCapFT,           !- Heating Capacity Function of Temperature Curve Name",
-                          "    HPACHeatCapFFF,          !- Heating Capacity Function of Flow Fraction Curve Name",
-                          "    HPACHeatEIRFT,           !- Energy Input Ratio Function of Temperature Curve Name",
-                          "    HPACHeatEIRFFF,          !- Energy Input Ratio Function of Flow Fraction Curve Name",
-                          "    HPACCOOLPLFFPLR,         !- Part Load Fraction Correlation Curve Name",
+                          "    Dummy Curve 1,           !- Heating Capacity Function of Temperature Curve Name",
+                          "    Dummy Curve 1,           !- Heating Capacity Function of Flow Fraction Curve Name",
+                          "    Dummy Curve 1,           !- Energy Input Ratio Function of Temperature Curve Name",
+                          "    Dummy Curve 1,           !- Energy Input Ratio Function of Flow Fraction Curve Name",
+                          "    Dummy Curve 1,           !- Part Load Fraction Correlation Curve Name",
                           "    ,                        !- Defrost Energy Input Ratio Function of Temperature Curve Name",
                           "    -8.0,                    !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}",
                           "    ,                        !- Outdoor Dry-Bulb Temperature to Turn On Compressor {C}",
@@ -97,7 +97,15 @@ TEST_F(EnergyPlusFixture, ExerciseHVACDXHeatPumpSystem)
                           "    0.166667,                !- Defrost Time Period Fraction",
                           "    autosize,                !- Resistive Defrost Heater Capacity {W}",
                           "    ,                        !- Region number for calculating HSPF",
-                          "    Heat Pump 1 Evaporator Node;  !- Evaporator Air Inlet Node Name"});
+                          "    Heat Pump 1 Evaporator Node;  !- Evaporator Air Inlet Node Name",
+                          "",
+                          "Curve:Quadratic,",
+                          "    Dummy Curve 1,",
+                          "    0.8,",
+                          "    0.2,",
+                          "    0.0,",
+                          "    0.5,",
+                          "    1.5;"});
 
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
@@ -110,8 +118,8 @@ TEST_F(EnergyPlusFixture, ExerciseHVACDXHeatPumpSystem)
     state->dataDXCoils->DXCoil.allocate(1);
     state->dataDXCoils->DXCoil(1).Name = "HEAT PUMP DX HEATING COIL 1";
     state->dataDXCoils->DXCoil(1).availSched = Sched::GetScheduleAlwaysOn(*state);
-    state->dataDXCoils->DXCoil(1).AirInNode = 1;
-    state->dataDXCoils->DXCoil(1).AirOutNode = 2;
+    state->dataDXCoils->DXCoil(1).AirInNode = 1; // This is not ideal, but these are unnamed
+    state->dataDXCoils->DXCoil(1).AirOutNode = 2; // This is not ideal, but these are unnamed
     state->dataDXCoils->DXCoil(1).coilType = HVAC::CoilType::HeatingDXSingleSpeed;
     state->dataDXCoils->DXCoil(1).RatedTotCap(1) = 1;
     state->dataDXCoils->DXCoil(1).RatedCOP(1) = 1;

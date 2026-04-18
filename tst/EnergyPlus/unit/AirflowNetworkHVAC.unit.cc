@@ -8068,7 +8068,67 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_DuplicatedNodeNameTest)
         "    Heating Coil Air Inlet Node,  !- Node 1 Name",
         "    Air Loop Outlet Node;    !- Node 2 Name",
 
-    });
+       "  Curve:Biquadratic,",
+        "    WindACCoolCapFT,         !- Name",
+        "    0.942587793,             !- Coefficient1 Constant",
+        "    0.009543347,             !- Coefficient2 x",
+        "    0.000683770,             !- Coefficient3 x**2",
+        "    -0.011042676,            !- Coefficient4 y",
+        "    0.000005249,             !- Coefficient5 y**2",
+        "    -0.000009720,            !- Coefficient6 x*y",
+        "    12.77778,                !- Minimum Value of x",
+        "    23.88889,                !- Maximum Value of x",
+        "    18.0,                    !- Minimum Value of y",
+        "    46.11111,                !- Maximum Value of y",
+        "    ,                        !- Minimum Curve Output",
+        "    ,                        !- Maximum Curve Output",
+        "    Temperature,             !- Input Unit Type for X",
+        "    Temperature,             !- Input Unit Type for Y",
+        "    Dimensionless;           !- Output Unit Type",
+
+        "  Curve:Biquadratic,",
+        "    WindACEIRFT,             !- Name",
+        "    0.342414409,             !- Coefficient1 Constant",
+        "    0.034885008,             !- Coefficient2 x",
+        "    -0.000623700,            !- Coefficient3 x**2",
+        "    0.004977216,             !- Coefficient4 y",
+        "    0.000437951,             !- Coefficient5 y**2",
+        "    -0.000728028,            !- Coefficient6 x*y",
+        "    12.77778,                !- Minimum Value of x",
+        "    23.88889,                !- Maximum Value of x",
+        "    18.0,                    !- Minimum Value of y",
+        "    46.11111,                !- Maximum Value of y",
+        "    ,                        !- Minimum Curve Output",
+        "    ,                        !- Maximum Curve Output",
+        "    Temperature,             !- Input Unit Type for X",
+        "    Temperature,             !- Input Unit Type for Y",
+        "    Dimensionless;           !- Output Unit Type",
+
+        "  Curve:Quadratic,",
+        "    WindACCoolCapFFF,        !- Name",
+        "    0.8,                     !- Coefficient1 Constant",
+        "    0.2,                     !- Coefficient2 x",
+        "    0.0,                     !- Coefficient3 x**2",
+        "    0.5,                     !- Minimum Value of x",
+        "    1.5;                     !- Maximum Value of x",
+
+        "  Curve:Quadratic,",
+        "    WindACEIRFFF,            !- Name",
+        "    1.1552,                  !- Coefficient1 Constant",
+        "    -0.1808,                 !- Coefficient2 x",
+        "    0.0256,                  !- Coefficient3 x**2",
+        "    0.5,                     !- Minimum Value of x",
+        "    1.5;                     !- Maximum Value of x",
+
+        "  Curve:Quadratic,",
+        "    WindACPLFFPLR,           !- Name",
+        "    0.85,                    !- Coefficient1 Constant",
+        "    0.15,                    !- Coefficient2 x",
+        "    0.0,                     !- Coefficient3 x**2",
+        "    0.0,                     !- Minimum Value of x",
+        "    1.0;                     !- Maximum Value of x",
+
+     });
 
     ASSERT_TRUE(process_idf(idf_objects));
 
@@ -16757,6 +16817,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_DuctSizingTest)
         thisZoneHB.airHumRat = 0.0008400;
     }
 
+    // I don't know what's going on here
     state->dataZoneEquip->ZoneEquipList(1).EquipIndex(1) = 1;
     state->dataDefineEquipment->AirDistUnit(1).MassFlowRateTU = 1.23;
     state->afn->AirflowNetworkNodeData(8).EPlusNodeNum = 8;
@@ -16857,8 +16918,6 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_CheckMultistageHeatingCoil)
 
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
-#ifdef GET_OUT    
-#endif // GET_OUT
 
     state->dataGlobal->NumOfZones = 1;
     state->dataHeatBal->Zone.allocate(1);

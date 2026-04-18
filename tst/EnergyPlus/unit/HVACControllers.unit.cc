@@ -947,9 +947,9 @@ TEST_F(EnergyPlusFixture, HVACControllers_MaxFlowZero)
     state->dataAirLoop->AirToZoneNodeInfo.allocate(1);
     state->dataAirLoop->AirToZoneNodeInfo(1).NumSupplyNodes = 1;
     state->dataAirLoop->AirToZoneNodeInfo(1).AirLoopSupplyNodeNum.allocate(1);
-    state->dataAirLoop->AirToZoneNodeInfo(1).AirLoopSupplyNodeNum(1) = 1;
+    state->dataAirLoop->AirToZoneNodeInfo(1).AirLoopSupplyNodeNum(1) = Node::GetNodeIndex(*state, "AIR OUTLET NODE"); // Was 1
     state->dataAirLoop->AirToZoneNodeInfo(1).ZoneEquipSupplyNodeNum.allocate(1);
-    state->dataAirLoop->AirToZoneNodeInfo(1).ZoneEquipSupplyNodeNum(1) = 4;
+    state->dataAirLoop->AirToZoneNodeInfo(1).ZoneEquipSupplyNodeNum(1) = Node::GetNodeIndex(*state, "AIR INLET NODE"); // was 4
     state->dataConvergeParams->AirLoopConvergence.allocate(1);
     state->dataAirSystemsData->PrimaryAirSystems.allocate(1);
     state->dataAirSystemsData->PrimaryAirSystems(1).NumBranches = 1;
@@ -960,12 +960,12 @@ TEST_F(EnergyPlusFixture, HVACControllers_MaxFlowZero)
     state->dataAirSystemsData->PrimaryAirSystems(1).ControllerName(1) = "CW COIL CONTROLLER";
     state->dataAirSystemsData->PrimaryAirSystems(1).ControlConverged.allocate(1);
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch.allocate(1);
-    state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).NodeNumIn = 4;
-    state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).NodeNumOut = 1;
+    state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).NodeNumIn = Node::GetNodeIndex(*state, "AIR INLET NODE"); // was 4
+    state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).NodeNumOut = Node::GetNodeIndex(*state, "AIR OUTLET NODE"); // Was 1
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).TotalNodes = 1;
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).TotalComponents = 1;
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).NodeNum.allocate(1);
-    state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).NodeNum(1) = 1;
+    state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).NodeNum(1) = Node::GetNodeIndex(*state, "AIR OUTLET NODE"); // Was 1
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp.allocate(1);
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp(1).Name = "CHILLED WATER COIL";
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp(1).CompType_Num = SimAirServingZones::CompType::WaterCoil_Cooling;
@@ -982,8 +982,8 @@ TEST_F(EnergyPlusFixture, HVACControllers_MaxFlowZero)
     state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp.allocate(1);
     state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).Type =
         DataPlant::PlantEquipmentType::CoilWaterCooling;
-    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumIn = 2;
-    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumOut = 3;
+    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumIn = Node::GetNodeIndex(*state, "WATER INLET NODE"); // was 2
+    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumOut = Node::GetNodeIndex(*state, "WATER OUTLET NODE"); // was 3
     state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).Name = "CHILLED WATER COIL";
 
     state->dataSize->NumPltSizInput = 1;

@@ -76,9 +76,7 @@ TEST_F(EnergyPlusFixture, HeatingCoils_FuelTypeInput)
                                                       "  Air Loop Outlet Node;    !- Air Outlet Node Name"});
 
     ASSERT_TRUE(process_idf(idf_objects));
-    state->init_state(*state);
-
-    ASSERT_NO_THROW(HeatingCoils::GetHeatingCoilInput(*state));
+    ASSERT_NO_THROW(state->init_state(*state));
 
     EXPECT_ENUM_EQ(state->dataHeatingCoils->HeatingCoil(1).FuelType, Constant::eFuel::OtherFuel1);
 }
@@ -95,8 +93,7 @@ TEST_F(EnergyPlusFixture, HeatingCoils_FuelTypeInputError)
                                                       "  Air Loop Outlet Node;    !- Air Outlet Node Name"});
 
     EXPECT_FALSE(process_idf(idf_objects, false));
-    state->init_state(*state);
-    ASSERT_THROW(HeatingCoils::GetHeatingCoilInput(*state), std::runtime_error);
+    ASSERT_THROW(state->init_state(*state), std::runtime_error);
 
     std::string const error_string = delimited_string({
         "   ** Severe  ** <root>[Coil:Heating:Fuel][Furnace Coil][fuel_type] - \"Electricity\" - Failed to match against any enum values.",
@@ -122,8 +119,7 @@ TEST_F(EnergyPlusFixture, HeatingCoils_FuelTypeCoal)
                                                       "  Air Loop Outlet Node;    !- Air Outlet Node Name"});
 
     ASSERT_TRUE(process_idf(idf_objects));
-    state->init_state(*state);
-    ASSERT_NO_THROW(HeatingCoils::GetHeatingCoilInput(*state));
+    ASSERT_NO_THROW(state->init_state(*state));
 
     EXPECT_ENUM_EQ(state->dataHeatingCoils->HeatingCoil(1).FuelType, Constant::eFuel::Coal);
 }
@@ -140,9 +136,7 @@ TEST_F(EnergyPlusFixture, HeatingCoils_FuelTypePropaneGas)
                                                       "  Air Loop Outlet Node;    !- Air Outlet Node Name"});
 
     ASSERT_TRUE(process_idf(idf_objects));
-    state->init_state(*state);
-
-    ASSERT_NO_THROW(HeatingCoils::GetHeatingCoilInput(*state));
+    ASSERT_NO_THROW(state->init_state(*state));
 
     EXPECT_ENUM_EQ(state->dataHeatingCoils->HeatingCoil(1).FuelType, Constant::eFuel::Propane);
 }
