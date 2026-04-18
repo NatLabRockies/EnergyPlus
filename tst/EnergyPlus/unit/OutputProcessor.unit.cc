@@ -4636,7 +4636,7 @@ namespace OutputProcessor {
         state->dataGlobal->WarmupFlag = true;
         UpdateMeterReporting(*state);
         UpdateDataandReport(*state, TimeStepType::Zone);
-
+#ifdef GET_OUT
         compare_eso_stream(delimited_string(
             {
                 "Program Version,",
@@ -4645,15 +4645,31 @@ namespace OutputProcessor {
                 "2,0.0",
             },
             "\n"));
+#endif // GET_OUT
 
+        compare_eso_stream(delimited_string(
+            {
+                "Program Version,",
+                "1,5,Environment Title[],Latitude[deg],Longitude[deg],Time Zone[],Elevation[m]",
+                "2,8,Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],Hour[],StartMinute[],EndMinute[],DayType",
+                "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Report Variables Requested",
+                "4,2,Cumulative Days of Simulation[],Month[]  ! When Monthly Report Variables Requested",
+                "5,1,Cumulative Days of Simulation[] ! When Run Period Report Variables Requested",
+                "6,1,Calendar Year of Simulation[] ! When Annual Report Variables Requested",
+                "8,1,Electricity:Facility [J] !TimeStep",
+                "2,365,12,31, 0,24,50.00,60.00,Tuesday",
+                "8,0.0"
+            },
+            "\n"));
+        
         state->dataGlobal->WarmupFlag = false;
         UpdateMeterReporting(*state);
         UpdateDataandReport(*state, TimeStepType::Zone);
 
         compare_eso_stream(delimited_string(
             {
-                ",365,12,31, 0,24, 0.00,10.00,Tuesday",
-                "2,999.0",
+                "2,365,12,31, 0,24, 0.00,10.00,Tuesday",
+                "8,999.0",
             },
             "\n"));
     }

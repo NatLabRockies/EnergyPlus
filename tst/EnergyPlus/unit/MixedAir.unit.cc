@@ -7569,7 +7569,7 @@ TEST_F(EnergyPlusFixture, OAController_HighExhaustMassFlowTest)
     EXPECT_EQ("OA MIXER", state->dataAirLoop->OutsideAirSys(1).ComponentName(3));
 
     GetOAControllerInputs(*state);
-    EXPECT_EQ(5, state->dataMixedAir->OAController(1).OANode);
+    EXPECT_EQ(Node::GetNodeIndex(*state, "OUTSIDE AIR INLET NODE"), state->dataMixedAir->OAController(1).OANode);
     EXPECT_TRUE(OutAirNodeManager::CheckOutAirNodeNumber(*state, state->dataMixedAir->OAController(1).OANode));
 
     int OAControllerNum(1);
@@ -7820,7 +7820,7 @@ TEST_F(EnergyPlusFixture, OAController_LowExhaustMassFlowTest)
     EXPECT_EQ("OA MIXER", state->dataAirLoop->OutsideAirSys(1).ComponentName(3));
 
     GetOAControllerInputs(*state);
-    EXPECT_EQ(5, state->dataMixedAir->OAController(1).OANode);
+    EXPECT_EQ(Node::GetNodeIndex(*state, "OUTSIDE AIR INLET NODE"), state->dataMixedAir->OAController(1).OANode);
     EXPECT_TRUE(OutAirNodeManager::CheckOutAirNodeNumber(*state, state->dataMixedAir->OAController(1).OANode));
 
     int OAControllerNum(1);

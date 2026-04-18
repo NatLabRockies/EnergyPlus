@@ -1994,7 +1994,9 @@ TEST_F(EnergyPlusFixture, PIU_InducedAir_Plenums)
     state->dataGlobal->DoingSizing = true;
     state->dataGlobal->BeginEnvrnFlag = true;
     state->dataGlobal->ZoneSizingCalc = true;
-    EXPECT_FALSE(has_err_output(true));
+
+    EXPECT_TRUE(has_err_output(true)); // Some init_state() warnings
+
     EXPECT_NO_THROW(SizingManager::ManageSizing(*state));
 
     std::string const expectedError = delimited_string({
@@ -2147,7 +2149,7 @@ TEST_F(EnergyPlusFixture, VSParallelPIUStagedHeat)
     // Setup
     int ZoneNum = 1;
     int SysNum = 1;
-    int ZoneNodeNum = 1;
+    int ZoneNodeNum = Node::GetNodeIndex(*state, "SPACE2-1 AIR NODE"); // was 1
     bool FirstHVACIteration = true;
     state->dataGlobal->BeginEnvrnFlag = true; // Must be true for initial pass thru InitPIU for this terminal unit
     FirstHVACIteration = true;
@@ -2166,9 +2168,9 @@ TEST_F(EnergyPlusFixture, VSParallelPIUStagedHeat)
     // - primary air flow rate: minimum value
     // - secondary air flow rate: modulating between minimum and maximum value
     state->dataLoopNodes->Node(PriNodeNum).MassFlowRate = PriMinMassFlow;
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputRequired = 500.0;
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputReqToHeatSP = 500.0;
-    state->dataZoneEnergyDemand->CurDeadBandOrSetback(ZoneNodeNum) = false;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).RemainingOutputRequired = 500.0; // Was ZoneNodeNum
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).RemainingOutputReqToHeatSP = 500.0;
+    state->dataZoneEnergyDemand->CurDeadBandOrSetback(ZoneNum) = false;
     state->dataLoopNodes->Node(ZoneNodeNum).Temp = 15.0;
     state->dataLoopNodes->Node(ZoneNodeNum).HumRat = 0.0085;
     state->dataLoopNodes->Node(ZoneNodeNum).Enthalpy =
@@ -2186,8 +2188,8 @@ TEST_F(EnergyPlusFixture, VSParallelPIUStagedHeat)
     state->dataLoopNodes->Node(SecNodeNum).MassFlowRateMaxAvail = thisPIU.MaxSecAirMassFlow;
     state->dataLoopNodes->Node(SecNodeNum).MassFlowRateMinAvail = thisPIU.MinSecAirMassFlow;
     state->dataHVACGlobal->TurnFansOn = true;
-    state->dataLoopNodes->Node(7).MassFlowRateMax = thisPIU.MaxSecAirMassFlow; // Fan node
-    state->dataLoopNodes->Node(7).MassFlowRateMin = thisPIU.MinSecAirMassFlow;
+    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "SPACE2-1 ZONE COIL AIR IN NODE")).MassFlowRateMax = thisPIU.MaxSecAirMassFlow; // Fan node
+    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "SPACE2-1 ZONE COIL AIR IN NODE")).MassFlowRateMin = thisPIU.MinSecAirMassFlow;
     PoweredInductionUnits::CalcParallelPIU(*state, SysNum, ZoneNum, ZoneNodeNum, FirstHVACIteration);
     EXPECT_ENUM_EQ(thisPIU.heatingOperatingMode, PoweredInductionUnits::HeatOpModeType::StagedHeatFirstStage);
     EXPECT_EQ(thisPIU.PriMassFlowRate, PriMinMassFlow);
@@ -2198,8 +2200,8 @@ TEST_F(EnergyPlusFixture, VSParallelPIUStagedHeat)
     // - reheat: yes
     // - primary air flow rate: minimum value
     // - secondary air flow rate: maximum value
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputRequired = 1000.0;
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputReqToHeatSP = 1000.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).RemainingOutputRequired = 1000.0; // Was ZoneNodeNum
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).RemainingOutputReqToHeatSP = 1000.0;
     PoweredInductionUnits::CalcParallelPIU(*state, SysNum, ZoneNum, ZoneNodeNum, FirstHVACIteration);
     EXPECT_ENUM_EQ(thisPIU.heatingOperatingMode, PoweredInductionUnits::HeatOpModeType::StagedHeatSecondStage);
     EXPECT_EQ(thisPIU.PriMassFlowRate, PriMinMassFlow);
@@ -2349,7 +2351,7 @@ TEST_F(EnergyPlusFixture, VSParallelPIUModulatedHeat)
     // Setup
     int ZoneNum = 1;
     int SysNum = 1;
-    int ZoneNodeNum = 1;
+    int ZoneNodeNum = Node::GetNodeIndex(*state, "SPACE2-1 AIR NODE");
     bool FirstHVACIteration = true;
     state->dataGlobal->BeginEnvrnFlag = true; // Must be true for initial pass thru InitPIU for this terminal unit
     FirstHVACIteration = true;
@@ -2369,9 +2371,9 @@ TEST_F(EnergyPlusFixture, VSParallelPIUModulatedHeat)
     // - primary air flow rate: minimum value
     // - secondary air flow rate: minimum value
     state->dataLoopNodes->Node(PriNodeNum).MassFlowRate = PriMinMassFlow;
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputRequired = 500.0;
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputReqToHeatSP = 500.0;
-    state->dataZoneEnergyDemand->CurDeadBandOrSetback(ZoneNodeNum) = false;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).RemainingOutputRequired = 500.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).RemainingOutputReqToHeatSP = 500.0;
+    state->dataZoneEnergyDemand->CurDeadBandOrSetback(ZoneNum) = false;
     state->dataLoopNodes->Node(ZoneNodeNum).Temp = 15.0;
     state->dataLoopNodes->Node(ZoneNodeNum).HumRat = 0.0085;
     state->dataLoopNodes->Node(ZoneNodeNum).Enthalpy =
@@ -2389,8 +2391,8 @@ TEST_F(EnergyPlusFixture, VSParallelPIUModulatedHeat)
     state->dataLoopNodes->Node(SecNodeNum).MassFlowRateMaxAvail = thisPIU.MaxSecAirMassFlow;
     state->dataLoopNodes->Node(SecNodeNum).MassFlowRateMinAvail = thisPIU.MinSecAirMassFlow;
     state->dataHVACGlobal->TurnFansOn = true;
-    state->dataLoopNodes->Node(7).MassFlowRateMax = thisPIU.MaxSecAirMassFlow; // Fan node
-    state->dataLoopNodes->Node(7).MassFlowRateMin = thisPIU.MinSecAirMassFlow;
+    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "SPACE2-1 ZONE COIL AIR IN NODE")).MassFlowRateMax = thisPIU.MaxSecAirMassFlow; // Fan node
+    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "SPACE2-1 ZONE COIL AIR IN NODE")).MassFlowRateMin = thisPIU.MinSecAirMassFlow;
     PoweredInductionUnits::CalcParallelPIU(*state, SysNum, ZoneNum, ZoneNodeNum, FirstHVACIteration);
     EXPECT_ENUM_EQ(thisPIU.heatingOperatingMode, PoweredInductionUnits::HeatOpModeType::ModulatedHeatFirstStage);
     EXPECT_EQ(thisPIU.PriMassFlowRate, PriMinMassFlow);
@@ -2402,8 +2404,8 @@ TEST_F(EnergyPlusFixture, VSParallelPIUModulatedHeat)
     // - discharge air temperature: design heating DAT
     // - primary air flow rate: minimum value
     // - secondary air flow rate: modulating between minimum and maximum value
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputRequired = 1000.0;
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputReqToHeatSP = 1000.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).RemainingOutputRequired = 1000.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).RemainingOutputReqToHeatSP = 1000.0;
     PoweredInductionUnits::CalcParallelPIU(*state, SysNum, ZoneNum, ZoneNodeNum, FirstHVACIteration);
     EXPECT_ENUM_EQ(thisPIU.heatingOperatingMode, PoweredInductionUnits::HeatOpModeType::ModulatedHeatSecondStage);
     EXPECT_EQ(thisPIU.PriMassFlowRate, PriMinMassFlow);
@@ -2416,8 +2418,8 @@ TEST_F(EnergyPlusFixture, VSParallelPIUModulatedHeat)
     // - discharge air temperature: modulating between design heating DAT and high limit DAT
     // - primary air flow rate: minimum value
     // - secondary air flow rate: maximum value
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputRequired = 1500.0;
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputReqToHeatSP = 1500.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).RemainingOutputRequired = 1500.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).RemainingOutputReqToHeatSP = 1500.0;
     PoweredInductionUnits::CalcParallelPIU(*state, SysNum, ZoneNum, ZoneNodeNum, FirstHVACIteration);
     EXPECT_ENUM_EQ(thisPIU.heatingOperatingMode, PoweredInductionUnits::HeatOpModeType::ModulatedHeatThirdStage);
     EXPECT_EQ(thisPIU.PriMassFlowRate, PriMinMassFlow);
@@ -2442,8 +2444,8 @@ TEST_F(EnergyPlusFixture, VSParallelPIUModulatedHeat)
     state->dataLoopNodes->Node(PriNodeNum).MassFlowRateMinAvail = PriMinMassFlow;
     state->dataLoopNodes->Node(SecNodeNum).MassFlowRateMaxAvail = thisPIU.MaxSecAirMassFlow;
     state->dataLoopNodes->Node(SecNodeNum).MassFlowRateMinAvail = thisPIU.MinSecAirMassFlow;
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputRequired = 2000.0;
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputReqToHeatSP = 2000.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).RemainingOutputRequired = 2000.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).RemainingOutputReqToHeatSP = 2000.0;
     PoweredInductionUnits::CalcParallelPIU(*state, SysNum, ZoneNum, ZoneNodeNum, FirstHVACIteration);
     EXPECT_ENUM_EQ(thisPIU.heatingOperatingMode, PoweredInductionUnits::HeatOpModeType::ModulatedHeatThirdStage);
     EXPECT_NEAR(thisPIU.DischargeAirTemp, thisPIU.highLimitDAT, 0.0001);
@@ -2591,7 +2593,7 @@ TEST_F(EnergyPlusFixture, VSSeriesPIUStagedHeat)
     // Setup
     int ZoneNum = 1;
     int SysNum = 1;
-    int ZoneNodeNum = 1;
+    int ZoneNodeNum = Node::GetNodeIndex(*state, "SPACE2-1 AIR NODE"); // was 1
     bool FirstHVACIteration = true;
     // Real64 SecMaxMassFlow = 0.05 * state->dataEnvrn->StdRhoAir;
     state->dataGlobal->BeginEnvrnFlag = true; // Must be true for initial pass thru InitPIU for this terminal unit
@@ -2612,9 +2614,9 @@ TEST_F(EnergyPlusFixture, VSSeriesPIUStagedHeat)
     // - primary air flow rate: minimum value
     // - secondary air flow rate: modulating between minimum and maximum value
     state->dataLoopNodes->Node(PriNodeNum).MassFlowRate = PriMinMassFlow;
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputRequired = 500.0;
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputReqToHeatSP = 500.0;
-    state->dataZoneEnergyDemand->CurDeadBandOrSetback(ZoneNodeNum) = false;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).RemainingOutputRequired = 500.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).RemainingOutputReqToHeatSP = 500.0;
+    state->dataZoneEnergyDemand->CurDeadBandOrSetback(ZoneNum) = false;
     state->dataLoopNodes->Node(ZoneNodeNum).Temp = 15.0;
     state->dataLoopNodes->Node(ZoneNodeNum).HumRat = 0.0085;
     state->dataLoopNodes->Node(ZoneNodeNum).Enthalpy =
@@ -2632,8 +2634,8 @@ TEST_F(EnergyPlusFixture, VSSeriesPIUStagedHeat)
     state->dataLoopNodes->Node(SecNodeNum).MassFlowRateMaxAvail = thisPIU.MaxTotAirMassFlow - thisPIU.MinPriAirMassFlow;
     state->dataLoopNodes->Node(SecNodeNum).MassFlowRateMinAvail = thisPIU.MinTotAirMassFlow - thisPIU.MinPriAirMassFlow;
     state->dataHVACGlobal->TurnFansOn = true;
-    state->dataLoopNodes->Node(7).MassFlowRateMax = thisPIU.MaxTotAirMassFlow; // Fan node
-    state->dataLoopNodes->Node(7).MassFlowRateMin = thisPIU.MinTotAirMassFlow;
+    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "SPACE2-1 ZONE COIL AIR IN NODE")).MassFlowRateMax = thisPIU.MaxTotAirMassFlow; // Fan node
+    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "SPACE2-1 ZONE COIL AIR IN NODE")).MassFlowRateMin = thisPIU.MinTotAirMassFlow;
     PoweredInductionUnits::CalcSeriesPIU(*state, SysNum, ZoneNum, ZoneNodeNum, FirstHVACIteration);
     EXPECT_ENUM_EQ(thisPIU.heatingOperatingMode, PoweredInductionUnits::HeatOpModeType::StagedHeatFirstStage);
     EXPECT_EQ(thisPIU.PriMassFlowRate, PriMinMassFlow);
@@ -2645,8 +2647,8 @@ TEST_F(EnergyPlusFixture, VSSeriesPIUStagedHeat)
     // - reheat: yes
     // - primary air flow rate: minimum value
     // - secondary air flow rate: maximum value
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputRequired = 2500.0;
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputReqToHeatSP = 2500.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).RemainingOutputRequired = 2500.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).RemainingOutputReqToHeatSP = 2500.0;
     PoweredInductionUnits::CalcSeriesPIU(*state, SysNum, ZoneNum, ZoneNodeNum, FirstHVACIteration);
     EXPECT_ENUM_EQ(thisPIU.heatingOperatingMode, PoweredInductionUnits::HeatOpModeType::StagedHeatSecondStage);
     EXPECT_EQ(thisPIU.PriMassFlowRate, PriMinMassFlow);
@@ -2797,7 +2799,7 @@ TEST_F(EnergyPlusFixture, VSSeriesPIUModulatedHeat)
     // Setup
     int ZoneNum = 1;
     int SysNum = 1;
-    int ZoneNodeNum = 1;
+    int ZoneNodeNum = Node::GetNodeIndex(*state, "SPACE2-1 AIR NODE");
     bool FirstHVACIteration = true;
     // Real64 SecMaxMassFlow = 0.05 * state->dataEnvrn->StdRhoAir;
     state->dataGlobal->BeginEnvrnFlag = true; // Must be true for initial pass thru InitPIU for this terminal unit
@@ -2819,9 +2821,9 @@ TEST_F(EnergyPlusFixture, VSSeriesPIUModulatedHeat)
     // - primary air flow rate: minimum value
     // - secondary air flow rate: minimum value
     state->dataLoopNodes->Node(PriNodeNum).MassFlowRate = PriMinMassFlow;
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputRequired = 500.0;
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputReqToHeatSP = 500.0;
-    state->dataZoneEnergyDemand->CurDeadBandOrSetback(ZoneNodeNum) = false;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).RemainingOutputRequired = 500.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).RemainingOutputReqToHeatSP = 500.0;
+    state->dataZoneEnergyDemand->CurDeadBandOrSetback(ZoneNum) = false;
     state->dataLoopNodes->Node(ZoneNodeNum).Temp = 15.0;
     state->dataLoopNodes->Node(ZoneNodeNum).HumRat = 0.0085;
     state->dataLoopNodes->Node(ZoneNodeNum).Enthalpy =
@@ -2839,8 +2841,8 @@ TEST_F(EnergyPlusFixture, VSSeriesPIUModulatedHeat)
     state->dataLoopNodes->Node(SecNodeNum).MassFlowRateMaxAvail = thisPIU.MaxTotAirMassFlow - thisPIU.MinPriAirMassFlow;
     state->dataLoopNodes->Node(SecNodeNum).MassFlowRateMinAvail = thisPIU.MinTotAirMassFlow - thisPIU.MinPriAirMassFlow;
     state->dataHVACGlobal->TurnFansOn = true;
-    state->dataLoopNodes->Node(7).MassFlowRateMax = thisPIU.MaxTotAirMassFlow; // Fan node
-    state->dataLoopNodes->Node(7).MassFlowRateMin = thisPIU.MinTotAirMassFlow;
+    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "SPACE2-1 ZONE COIL AIR IN NODE")).MassFlowRateMax = thisPIU.MaxTotAirMassFlow; // Fan node
+    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "SPACE2-1 ZONE COIL AIR IN NODE")).MassFlowRateMin = thisPIU.MinTotAirMassFlow;
     PoweredInductionUnits::CalcSeriesPIU(*state, SysNum, ZoneNum, ZoneNodeNum, FirstHVACIteration);
     EXPECT_ENUM_EQ(thisPIU.heatingOperatingMode, PoweredInductionUnits::HeatOpModeType::ModulatedHeatFirstStage);
     EXPECT_EQ(thisPIU.PriMassFlowRate, PriMinMassFlow);
@@ -2852,8 +2854,8 @@ TEST_F(EnergyPlusFixture, VSSeriesPIUModulatedHeat)
     // - discharge air temperature: design heating DAT
     // - primary air flow rate: minimum value
     // - secondary air flow rate: modulating between minimum and maximum value
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputRequired = 1500.0;
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputReqToHeatSP = 1500.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).RemainingOutputRequired = 1500.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).RemainingOutputReqToHeatSP = 1500.0;
     PoweredInductionUnits::CalcSeriesPIU(*state, SysNum, ZoneNum, ZoneNodeNum, FirstHVACIteration);
     EXPECT_ENUM_EQ(thisPIU.heatingOperatingMode, PoweredInductionUnits::HeatOpModeType::ModulatedHeatSecondStage);
     EXPECT_EQ(thisPIU.PriMassFlowRate, PriMinMassFlow);
@@ -2866,8 +2868,8 @@ TEST_F(EnergyPlusFixture, VSSeriesPIUModulatedHeat)
     // - discharge air temperature: modulating between design heating DAT and high limit DAT
     // - primary air flow rate: minimum value
     // - secondary air flow rate: maximum value
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputRequired = 3300.0;
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputReqToHeatSP = 3300.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).RemainingOutputRequired = 3300.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).RemainingOutputReqToHeatSP = 3300.0;
     PoweredInductionUnits::CalcSeriesPIU(*state, SysNum, ZoneNum, ZoneNodeNum, FirstHVACIteration);
     EXPECT_ENUM_EQ(thisPIU.heatingOperatingMode, PoweredInductionUnits::HeatOpModeType::ModulatedHeatThirdStage);
     EXPECT_EQ(thisPIU.PriMassFlowRate, PriMinMassFlow);
@@ -2888,8 +2890,8 @@ TEST_F(EnergyPlusFixture, VSSeriesPIUModulatedHeat)
     state->dataLoopNodes->Node(PriNodeNum).HumRat = 0.0085;
     state->dataLoopNodes->Node(PriNodeNum).Enthalpy =
         Psychrometrics::PsyHFnTdbW(state->dataLoopNodes->Node(PriNodeNum).Temp, state->dataLoopNodes->Node(PriNodeNum).HumRat);
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputRequired = 4800.0;
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputReqToHeatSP = 4800.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).RemainingOutputRequired = 4800.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).RemainingOutputReqToHeatSP = 4800.0;
     PoweredInductionUnits::CalcSeriesPIU(*state, SysNum, ZoneNum, ZoneNodeNum, FirstHVACIteration);
     EXPECT_ENUM_EQ(thisPIU.heatingOperatingMode, PoweredInductionUnits::HeatOpModeType::ModulatedHeatThirdStage);
     EXPECT_NEAR(thisPIU.DischargeAirTemp, thisPIU.highLimitDAT, 0.0001);
@@ -3037,7 +3039,7 @@ TEST_F(EnergyPlusFixture, VSSeriesPIUCool)
     // Setup
     int ZoneNum = 1;
     int SysNum = 1;
-    int ZoneNodeNum = 1;
+    int ZoneNodeNum = Node::GetNodeIndex(*state, "SPACE2-1 AIR NODE");
     bool FirstHVACIteration = true;
     state->dataGlobal->BeginEnvrnFlag = true; // Must be true for initial pass thru InitPIU for this terminal unit
     FirstHVACIteration = true;
@@ -3055,9 +3057,9 @@ TEST_F(EnergyPlusFixture, VSSeriesPIUCool)
     // first stage cooling, expects:
     // - total flow rate: modulating between minimum and maximum value
     state->dataLoopNodes->Node(PriNodeNum).MassFlowRate = PriMinMassFlow;
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputRequired = -400.0;
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputReqToCoolSP = -400.0;
-    state->dataZoneEnergyDemand->CurDeadBandOrSetback(ZoneNodeNum) = false;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).RemainingOutputRequired = -400.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).RemainingOutputReqToCoolSP = -400.0;
+    state->dataZoneEnergyDemand->CurDeadBandOrSetback(ZoneNum) = false;
     state->dataLoopNodes->Node(ZoneNodeNum).Temp = 19.0;
     state->dataLoopNodes->Node(ZoneNodeNum).HumRat = 0.0085;
     state->dataLoopNodes->Node(ZoneNodeNum).Enthalpy =
@@ -3075,16 +3077,16 @@ TEST_F(EnergyPlusFixture, VSSeriesPIUCool)
     state->dataLoopNodes->Node(SecNodeNum).MassFlowRateMaxAvail = thisPIU.MaxTotAirMassFlow - thisPIU.MinPriAirMassFlow;
     state->dataLoopNodes->Node(SecNodeNum).MassFlowRateMinAvail = thisPIU.MinTotAirMassFlow - thisPIU.MinPriAirMassFlow;
     state->dataHVACGlobal->TurnFansOn = true;
-    state->dataLoopNodes->Node(7).MassFlowRateMax = thisPIU.MaxTotAirMassFlow; // Fan node
-    state->dataLoopNodes->Node(7).MassFlowRateMin = thisPIU.MinTotAirMassFlow;
+    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "SPACE2-1 ZONE COIL AIR IN NODE")).MassFlowRateMax = thisPIU.MaxTotAirMassFlow; // Fan node
+    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "SPACE2-1 ZONE COIL AIR IN NODE")).MassFlowRateMin = thisPIU.MinTotAirMassFlow;
     PoweredInductionUnits::CalcSeriesPIU(*state, SysNum, ZoneNum, ZoneNodeNum, FirstHVACIteration);
     EXPECT_ENUM_EQ(thisPIU.coolingOperatingMode, PoweredInductionUnits::CoolOpModeType::CoolFirstStage);
     EXPECT_LT(state->dataLoopNodes->Node(thisPIU.OutAirNode).MassFlowRate, thisPIU.MaxTotAirMassFlow);
 
     // second stage cooling, expects:
     // - total flow rate: maximum value
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputRequired = -800.0;
-    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputReqToCoolSP = -800.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).RemainingOutputRequired = -800.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).RemainingOutputReqToCoolSP = -800.0;
     PoweredInductionUnits::CalcSeriesPIU(*state, SysNum, ZoneNum, ZoneNodeNum, FirstHVACIteration);
     EXPECT_ENUM_EQ(thisPIU.coolingOperatingMode, PoweredInductionUnits::CoolOpModeType::CoolSecondStage);
     EXPECT_EQ(state->dataLoopNodes->Node(thisPIU.OutAirNode).MassFlowRate, thisPIU.MaxTotAirMassFlow);
