@@ -8566,6 +8566,7 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_GetInput)
     int InletNode(0);      // UnitarySystem inlet node number
     int OutletNode(0);     // UnitarySystem outlet node number
     int ControlZoneNum(0); // index to control zone
+    int ControlZoneNode(0); // index to control zone
 
     std::string_view constexpr idf_objects = R"IDF(
 Zone,
@@ -8798,7 +8799,8 @@ Curve:Biquadratic,
 
     InletNode = thisSys->AirInNode;
     OutletNode = thisSys->AirOutNode;
-    ControlZoneNum = thisSys->NodeNumOfControlledZone;
+    ControlZoneNode = thisSys->NodeNumOfControlledZone;
+    ControlZoneNum = 1;
 
     // set up unitary system inlet conditions
     state->dataLoopNodes->Node(InletNode).Temp = 26.666667;             // AHRI condition 80F dry-bulb temp
@@ -8807,7 +8809,7 @@ Curve:Biquadratic,
         Psychrometrics::PsyHFnTdbW(state->dataLoopNodes->Node(InletNode).Temp, state->dataLoopNodes->Node(InletNode).HumRat);
 
     // set zone temperature
-    state->dataLoopNodes->Node(ControlZoneNum).Temp = 20.0; // set zone temperature during heating season used to determine system delivered capacity
+    state->dataLoopNodes->Node(ControlZoneNode).Temp = 20.0; // set zone temperature during heating season used to determine system delivered capacity
 
     // initialize other incidentals that are used within the UnitarySystem module during calculations
     state->dataSize->CurZoneEqNum = 1;
@@ -8866,12 +8868,12 @@ Curve:Biquadratic,
                       sensOut,
                       latOut);
 
-    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNum).Temp;
+    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNode).Temp;
     Qsens_sys = state->dataLoopNodes->Node(InletNode).MassFlowRate *
                 Psychrometrics::PsyDeltaHSenFnTdb2W2Tdb1W1(state->dataLoopNodes->Node(OutletNode).Temp,
                                                            state->dataLoopNodes->Node(OutletNode).HumRat,
                                                            ZoneTemp,
-                                                           state->dataLoopNodes->Node(ControlZoneNum).HumRat);
+                                                           state->dataLoopNodes->Node(ControlZoneNode).HumRat);
 
     // test model performance
     EXPECT_NEAR(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputRequired, thisSys->m_SensibleLoadMet, 0.01); // Watts
@@ -8892,8 +8894,8 @@ Curve:Biquadratic,
         state->dataZoneEnergyDemand->ZoneSysMoistureDemand(ControlZoneNum).OutputRequiredToDehumidifyingSP;
 
     // set zone temperature
-    state->dataLoopNodes->Node(ControlZoneNum).Temp = 24.0; // set zone temperature during cooling season used to determine system delivered capacity
-    state->dataLoopNodes->Node(ControlZoneNum).HumRat = 0.01; // set zone humrat during cooling season used to determine system delivered capacity
+    state->dataLoopNodes->Node(ControlZoneNode).Temp = 24.0; // set zone temperature during cooling season used to determine system delivered capacity
+    state->dataLoopNodes->Node(ControlZoneNode).HumRat = 0.01; // set zone humrat during cooling season used to determine system delivered capacity
     state->dataEnvrn->OutDryBulbTemp = 35.0;                  // initialize weather
     state->dataEnvrn->OutHumRat = 0.1;
     state->dataEnvrn->OutBaroPress = 101325.0;
@@ -8915,12 +8917,12 @@ Curve:Biquadratic,
                       sensOut,
                       latOut);
 
-    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNum).Temp;
+    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNode).Temp;
     Qsens_sys = state->dataLoopNodes->Node(InletNode).MassFlowRate *
                 Psychrometrics::PsyDeltaHSenFnTdb2W2Tdb1W1(state->dataLoopNodes->Node(OutletNode).Temp,
                                                            state->dataLoopNodes->Node(OutletNode).HumRat,
                                                            ZoneTemp,
-                                                           state->dataLoopNodes->Node(ControlZoneNum).HumRat);
+                                                           state->dataLoopNodes->Node(ControlZoneNode).HumRat);
 
     // test model performance
     EXPECT_NEAR(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputRequired, thisSys->m_SensibleLoadMet, 0.025); // Watts
@@ -8982,7 +8984,7 @@ Curve:Biquadratic,
     EXPECT_NEAR(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputRequired, thisSys->m_SensibleLoadMet, 11.0); // Watts
     // test simulate function return value for sysOutputRequired
     EXPECT_NEAR(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputRequired, sensOut, 11.0); // Watts
-    Real64 HgAir = Psychrometrics::PsyHgAirFnWTdb(state->dataLoopNodes->Node(ControlZoneNum).HumRat, state->dataLoopNodes->Node(ControlZoneNum).Temp);
+    Real64 HgAir = Psychrometrics::PsyHgAirFnWTdb(state->dataLoopNodes->Node(ControlZoneNode).HumRat, state->dataLoopNodes->Node(ControlZoneNode).Temp);
     EXPECT_NEAR(
         state->dataZoneEnergyDemand->ZoneSysMoistureDemand(ControlZoneNum).RemainingOutputReqToDehumidSP, -0.0006, 0.00001); // kg moisture per sec
     EXPECT_NEAR(state->dataZoneEnergyDemand->ZoneSysMoistureDemand(ControlZoneNum).RemainingOutputReqToDehumidSP * HgAir, latOut, 55.0); // Watts
@@ -8994,14 +8996,14 @@ Curve:Biquadratic,
     EXPECT_NEAR(thisSys->m_MoistureLoadPredicted, -1467.1, 0.1);       // dehumidification control type = CoolReheat so MoistureLoad < 0
 
     // results using hand calcs
-    Real64 CpAir = Psychrometrics::PsyCpAirFnW(state->dataLoopNodes->Node(ControlZoneNum).HumRat);
+    Real64 CpAir = Psychrometrics::PsyCpAirFnW(state->dataLoopNodes->Node(ControlZoneNode).HumRat);
     Real64 DeliveredSensibleCapacity = state->dataLoopNodes->Node(thisSys->AirOutNode).MassFlowRate * CpAir *
-                                       (state->dataLoopNodes->Node(thisSys->AirOutNode).Temp - state->dataLoopNodes->Node(ControlZoneNum).Temp);
+                                       (state->dataLoopNodes->Node(thisSys->AirOutNode).Temp - state->dataLoopNodes->Node(ControlZoneNode).Temp);
     EXPECT_NEAR(DeliveredSensibleCapacity, 1010.6, 0.001);                     // actual delivered capacity
     EXPECT_NEAR(DeliveredSensibleCapacity, thisSys->m_SensibleLoadMet, 0.001); // Watts - heating
 
-    Real64 RoomDeltaW = state->dataLoopNodes->Node(thisSys->AirOutNode).HumRat - state->dataLoopNodes->Node(ControlZoneNum).HumRat;
-    Real64 OutDeltaW = state->dataLoopNodes->Node(thisSys->CoolCoilOutletNodeNum).HumRat - state->dataLoopNodes->Node(ControlZoneNum).HumRat;
+    Real64 RoomDeltaW = state->dataLoopNodes->Node(thisSys->AirOutNode).HumRat - state->dataLoopNodes->Node(ControlZoneNode).HumRat;
+    Real64 OutDeltaW = state->dataLoopNodes->Node(thisSys->CoolCoilOutletNodeNum).HumRat - state->dataLoopNodes->Node(ControlZoneNode).HumRat;
     Real64 OutMassFlow = state->dataLoopNodes->Node(thisSys->AirOutNode).MassFlowRate;
     Real64 LatentOutput = OutDeltaW * OutMassFlow * HgAir;
     EXPECT_NEAR(OutDeltaW, -0.0003193, 0.0000001);
@@ -9010,7 +9012,7 @@ Curve:Biquadratic,
 
     Real64 ExcessSensibleCapacity =
         state->dataLoopNodes->Node(thisSys->AirOutNode).MassFlowRate * CpAir *
-        (state->dataLoopNodes->Node(thisSys->CoolCoilOutletNodeNum).Temp - state->dataLoopNodes->Node(ControlZoneNum).Temp);
+        (state->dataLoopNodes->Node(thisSys->CoolCoilOutletNodeNum).Temp - state->dataLoopNodes->Node(ControlZoneNode).Temp);
     EXPECT_NEAR(ExcessSensibleCapacity, -17268.1, 0.1);
     EXPECT_NEAR(state->dataHeatingCoils->HeatingCoil(thisSys->m_HeatingCoilIndex).HeatingCoilRate, 0.0, 0.1);
     EXPECT_NEAR(state->dataHeatingCoils->HeatingCoil(thisSys->m_SuppHeatCoilIndex).HeatingCoilRate, 18268.1, 0.1);
@@ -9036,7 +9038,7 @@ Curve:Biquadratic,
                       latOut);
     Real64 SaveDeliveredSensibleCapacity = DeliveredSensibleCapacity;
     DeliveredSensibleCapacity = state->dataLoopNodes->Node(thisSys->AirOutNode).MassFlowRate * CpAir *
-                                (state->dataLoopNodes->Node(thisSys->AirOutNode).Temp - state->dataLoopNodes->Node(ControlZoneNum).Temp);
+                                (state->dataLoopNodes->Node(thisSys->AirOutNode).Temp - state->dataLoopNodes->Node(ControlZoneNode).Temp);
     // same answers as above, without heating coil present, and no crash
     EXPECT_NEAR(DeliveredSensibleCapacity, SaveDeliveredSensibleCapacity, 0.0001);                                 // actual delivered capacity
     EXPECT_NEAR(DeliveredSensibleCapacity, 1010.6, 0.001);                                                         // actual delivered capacity
@@ -9450,7 +9452,7 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_VarSpeedCoils)
     int InletNode(0);      // UnitarySystem inlet node number
     int OutletNode(0);     // UnitarySystem outlet node number
     int ControlZoneNum(0); // index to control zone
-
+    int ControlZoneNode(0);
     std::string_view constexpr idf_objects = R"IDF(
 Zone,
   EAST ZONE,              !- Name
@@ -9808,7 +9810,8 @@ Curve:Biquadratic,
 
     InletNode = thisSys->AirInNode;
     OutletNode = thisSys->AirOutNode;
-    ControlZoneNum = thisSys->NodeNumOfControlledZone;
+    ControlZoneNode = thisSys->NodeNumOfControlledZone;
+    ControlZoneNum = 1;
 
     // set up unitary system inlet conditions
     state->dataLoopNodes->Node(InletNode).Temp = 26.666667;             // AHRI condition 80F dry-bulb temp
@@ -9817,9 +9820,9 @@ Curve:Biquadratic,
         Psychrometrics::PsyHFnTdbW(state->dataLoopNodes->Node(InletNode).Temp, state->dataLoopNodes->Node(InletNode).HumRat);
 
     // set zone temperature
-    state->dataLoopNodes->Node(ControlZoneNum).Temp =
+    state->dataLoopNodes->Node(ControlZoneNode).Temp =
         state->dataLoopNodes->Node(InletNode).Temp; // set zone temperature, used to determine system delivered capacity
-    state->dataLoopNodes->Node(ControlZoneNum).HumRat =
+    state->dataLoopNodes->Node(ControlZoneNode).HumRat =
         state->dataLoopNodes->Node(InletNode).HumRat; // set zone humidity ratio, used to determine system delivered capacity
     state->dataEnvrn->OutDryBulbTemp = 35.0;          // initialize weather
     state->dataEnvrn->OutHumRat = 0.1;
@@ -9883,12 +9886,12 @@ Curve:Biquadratic,
                       sensOut,
                       latOut);
 
-    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNum).Temp;
+    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNode).Temp;
     Qsens_sys = state->dataLoopNodes->Node(InletNode).MassFlowRate *
                 Psychrometrics::PsyDeltaHSenFnTdb2W2Tdb1W1(state->dataLoopNodes->Node(OutletNode).Temp,
                                                            state->dataLoopNodes->Node(OutletNode).HumRat,
                                                            ZoneTemp,
-                                                           state->dataLoopNodes->Node(ControlZoneNum).HumRat);
+                                                           state->dataLoopNodes->Node(ControlZoneNode).HumRat);
 
     // test model performance
     EXPECT_NEAR(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputRequired, Qsens_sys, 0.01); // Watts
@@ -9906,7 +9909,7 @@ Curve:Biquadratic,
         state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).OutputRequiredToHeatingSP;
 
     // set zone temperature
-    state->dataLoopNodes->Node(ControlZoneNum).Temp = 24.0; // set zone temperature during cooling season used to determine system delivered capacity
+    state->dataLoopNodes->Node(ControlZoneNode).Temp = 24.0; // set zone temperature during cooling season used to determine system delivered capacity
     state->dataEnvrn->OutDryBulbTemp = 35.0;                // initialize weather
     state->dataEnvrn->OutHumRat = 0.1;
     state->dataEnvrn->OutBaroPress = 101325.0;
@@ -9925,12 +9928,12 @@ Curve:Biquadratic,
                       sensOut,
                       latOut);
 
-    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNum).Temp;
+    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNode).Temp;
     Qsens_sys = state->dataLoopNodes->Node(InletNode).MassFlowRate *
                 Psychrometrics::PsyDeltaHSenFnTdb2W2Tdb1W1(state->dataLoopNodes->Node(OutletNode).Temp,
                                                            state->dataLoopNodes->Node(OutletNode).HumRat,
                                                            ZoneTemp,
-                                                           state->dataLoopNodes->Node(ControlZoneNum).HumRat);
+                                                           state->dataLoopNodes->Node(ControlZoneNode).HumRat);
 
     // test model performance
     EXPECT_NEAR(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputRequired, Qsens_sys, 1.0); // Watts
@@ -9948,6 +9951,7 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_VarSpeedCoils_CyclingFan)
     int InletNode(0);      // UnitarySystem inlet node number
     int OutletNode(0);     // UnitarySystem outlet node number
     int ControlZoneNum(0); // index to control zone
+    int ControlZoneNode(0);
 
     std::string_view constexpr idf_objects = R"IDF(
 
@@ -10307,7 +10311,8 @@ Curve:Biquadratic,
 
     InletNode = thisSys->AirInNode;
     OutletNode = thisSys->AirOutNode;
-    ControlZoneNum = thisSys->NodeNumOfControlledZone;
+    ControlZoneNode = thisSys->NodeNumOfControlledZone;
+    ControlZoneNum = 1;
 
     // set up unitary system inlet conditions
     state->dataLoopNodes->Node(InletNode).Temp = 26.666667;             // AHRI condition 80F dry-bulb temp
@@ -10316,7 +10321,7 @@ Curve:Biquadratic,
         Psychrometrics::PsyHFnTdbW(state->dataLoopNodes->Node(InletNode).Temp, state->dataLoopNodes->Node(InletNode).HumRat);
 
     // set zone temperature
-    state->dataLoopNodes->Node(ControlZoneNum).Temp = 20.0; // set zone temperature during heating season used to determine system delivered capacity
+    state->dataLoopNodes->Node(ControlZoneNode).Temp = 20.0; // set zone temperature during heating season used to determine system delivered capacity
     state->dataEnvrn->OutDryBulbTemp = 35.0;                // initialize weather
     state->dataEnvrn->OutHumRat = 0.1;
     state->dataEnvrn->OutBaroPress = 101325.0;
@@ -10377,12 +10382,12 @@ Curve:Biquadratic,
                       sensOut,
                       latOut);
 
-    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNum).Temp;
+    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNode).Temp;
     Qsens_sys = state->dataLoopNodes->Node(InletNode).MassFlowRate *
                 Psychrometrics::PsyDeltaHSenFnTdb2W2Tdb1W1(state->dataLoopNodes->Node(OutletNode).Temp,
                                                            state->dataLoopNodes->Node(OutletNode).HumRat,
                                                            ZoneTemp,
-                                                           state->dataLoopNodes->Node(ControlZoneNum).HumRat);
+                                                           state->dataLoopNodes->Node(ControlZoneNode).HumRat);
 
     // test model performance
     EXPECT_NEAR(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputRequired, Qsens_sys, 0.01);      // Watts
@@ -10410,7 +10415,7 @@ Curve:Biquadratic,
         state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).OutputRequiredToHeatingSP;
 
     // set zone temperature
-    state->dataLoopNodes->Node(ControlZoneNum).Temp = 24.0; // set zone temperature during cooling season used to determine system delivered capacity
+    state->dataLoopNodes->Node(ControlZoneNode).Temp = 24.0; // set zone temperature during cooling season used to determine system delivered capacity
     state->dataEnvrn->OutDryBulbTemp = 35.0;                // initialize weather
     state->dataEnvrn->OutHumRat = 0.1;
     state->dataEnvrn->OutBaroPress = 101325.0;
@@ -10429,12 +10434,12 @@ Curve:Biquadratic,
                       sensOut,
                       latOut);
 
-    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNum).Temp;
+    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNode).Temp;
     Qsens_sys = state->dataLoopNodes->Node(InletNode).MassFlowRate *
                 Psychrometrics::PsyDeltaHSenFnTdb2W2Tdb1W1(state->dataLoopNodes->Node(OutletNode).Temp,
                                                            state->dataLoopNodes->Node(OutletNode).HumRat,
                                                            ZoneTemp,
-                                                           state->dataLoopNodes->Node(ControlZoneNum).HumRat);
+                                                           state->dataLoopNodes->Node(ControlZoneNode).HumRat);
 
     // test model performance
     EXPECT_NEAR(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputRequired, Qsens_sys, 1.0); // Watts
@@ -10836,6 +10841,7 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_ReportingTest)
     int InletNode(0);      // UnitarySystem inlet node number
     int OutletNode(0);     // UnitarySystem outlet node number
     int ControlZoneNum(0); // index to control zone
+    int ControlZoneNode(0);
     int AirLoopNum(0);     // UnitarySystem airloop index
 
     std::string_view constexpr idf_objects = R"IDF(
@@ -11267,7 +11273,8 @@ OutdoorAir:NodeList,
 
     InletNode = thisSys->AirInNode;
     OutletNode = thisSys->AirOutNode;
-    ControlZoneNum = thisSys->NodeNumOfControlledZone;
+    ControlZoneNode = thisSys->NodeNumOfControlledZone;
+    ControlZoneNum = 1;
 
     AirLoopNum = 0;
     state->dataUnitarySystems->HeatingLoad = false;
@@ -11289,10 +11296,10 @@ OutdoorAir:NodeList,
         Psychrometrics::PsyHFnTdbW(state->dataLoopNodes->Node(OutletNode).Temp, state->dataLoopNodes->Node(OutletNode).HumRat);
     state->dataLoopNodes->Node(OutletNode).MassFlowRate = 0.25;
     // set zone conditions
-    state->dataLoopNodes->Node(ControlZoneNum).Temp = 23.0;
-    state->dataLoopNodes->Node(ControlZoneNum).HumRat = 0.0070;
-    state->dataLoopNodes->Node(ControlZoneNum).Enthalpy =
-        Psychrometrics::PsyHFnTdbW(state->dataLoopNodes->Node(ControlZoneNum).Temp, state->dataLoopNodes->Node(ControlZoneNum).HumRat);
+    state->dataLoopNodes->Node(ControlZoneNode).Temp = 23.0;
+    state->dataLoopNodes->Node(ControlZoneNode).HumRat = 0.0070;
+    state->dataLoopNodes->Node(ControlZoneNode).Enthalpy =
+        Psychrometrics::PsyHFnTdbW(state->dataLoopNodes->Node(ControlZoneNode).Temp, state->dataLoopNodes->Node(ControlZoneNode).HumRat);
 
     // calculate the "Unitary System Total Cooling/Heating Rate" report variables
     thisSys->reportUnitarySystem(*state, AirLoopNum);
@@ -12166,7 +12173,7 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_WaterToAirHeatPump_LoadControl)
     int InletNode(0);      // UnitarySystem inlet node number
     int OutletNode(0);     // UnitarySystem outlet node number
     int ControlZoneNum(0); // index to control zone
-
+    int ControlZoneNode(0);
     std::string_view constexpr idf_objects = R"IDF(
 
 Zone,
@@ -12529,7 +12536,8 @@ Curve:QuadLinear,
 
     InletNode = thisSys->AirInNode;
     OutletNode = thisSys->AirOutNode;
-    ControlZoneNum = thisSys->NodeNumOfControlledZone;
+    ControlZoneNode = thisSys->NodeNumOfControlledZone;
+    ControlZoneNum = 1;
 
     // set up unitary system inlet conditions
     state->dataLoopNodes->Node(InletNode).Temp = 26.666667;             // AHRI condition 80F dry-bulb temp
@@ -12539,7 +12547,7 @@ Curve:QuadLinear,
     state->dataLoopNodes->Node(InletNode).MassFlowRateMaxAvail = thisSys->m_DesignMassFlowRate;
 
     // set zone temperature
-    state->dataLoopNodes->Node(ControlZoneNum).Temp = 20.0; // set zone temperature during heating season used to determine system delivered capacity
+    state->dataLoopNodes->Node(ControlZoneNode).Temp = 20.0; // set zone temperature during heating season used to determine system delivered capacity
     state->dataEnvrn->OutDryBulbTemp = 35.0;                // initialize weather
     state->dataEnvrn->OutHumRat = 0.1;
     state->dataEnvrn->OutBaroPress = 101325.0;
@@ -12601,12 +12609,12 @@ Curve:QuadLinear,
                       sensOut,
                       latOut);
 
-    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNum).Temp;
+    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNode).Temp;
     Qsens_sys = state->dataLoopNodes->Node(InletNode).MassFlowRate *
                 Psychrometrics::PsyDeltaHSenFnTdb2W2Tdb1W1(state->dataLoopNodes->Node(OutletNode).Temp,
                                                            state->dataLoopNodes->Node(OutletNode).HumRat,
                                                            ZoneTemp,
-                                                           state->dataLoopNodes->Node(ControlZoneNum).HumRat);
+                                                           state->dataLoopNodes->Node(ControlZoneNode).HumRat);
 
     // test model performance
     EXPECT_NEAR(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputRequired, Qsens_sys, 0.01);      // Watts
@@ -12624,7 +12632,7 @@ Curve:QuadLinear,
         state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).OutputRequiredToHeatingSP;
 
     // set zone temperature
-    state->dataLoopNodes->Node(ControlZoneNum).Temp = 24.0; // set zone temperature during cooling season used to determine system delivered capacity
+    state->dataLoopNodes->Node(ControlZoneNode).Temp = 24.0; // set zone temperature during cooling season used to determine system delivered capacity
     state->dataEnvrn->OutDryBulbTemp = 35.0;                // initialize weather
     state->dataEnvrn->OutHumRat = 0.1;
     state->dataEnvrn->OutBaroPress = 101325.0;
@@ -12644,12 +12652,12 @@ Curve:QuadLinear,
                       sensOut,
                       latOut);
 
-    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNum).Temp;
+    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNode).Temp;
     Qsens_sys = state->dataLoopNodes->Node(InletNode).MassFlowRate *
                 Psychrometrics::PsyDeltaHSenFnTdb2W2Tdb1W1(state->dataLoopNodes->Node(OutletNode).Temp,
                                                            state->dataLoopNodes->Node(OutletNode).HumRat,
                                                            ZoneTemp,
-                                                           state->dataLoopNodes->Node(ControlZoneNum).HumRat);
+                                                           state->dataLoopNodes->Node(ControlZoneNode).HumRat);
 
     // test model performance
     EXPECT_NEAR(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputRequired, Qsens_sys, 1.0); // Watts
@@ -12673,6 +12681,7 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_ASHRAEModel_WaterCoils)
     int InletNode(0);      // UnitarySystem inlet node number
     int OutletNode(0);     // UnitarySystem outlet node number
     int ControlZoneNum(0); // index to control zone
+    int ControlZoneNode(0);
 
     std::string_view constexpr idf_objects = R"IDF(
 
@@ -12872,7 +12881,8 @@ Schedule:Compact,
 
     InletNode = thisSys->AirInNode;
     OutletNode = thisSys->AirOutNode;
-    ControlZoneNum = thisSys->NodeNumOfControlledZone;
+    ControlZoneNode = thisSys->NodeNumOfControlledZone;
+    ControlZoneNum = 1;
 
     // set up unitary system inlet conditions
     state->dataLoopNodes->Node(InletNode).Temp = 20.0;    // zone winter dry-bulb temp
@@ -12882,7 +12892,7 @@ Schedule:Compact,
     state->dataLoopNodes->Node(InletNode).MassFlowRateMaxAvail = thisSys->m_DesignMassFlowRate;
 
     // set zone temperature
-    state->dataLoopNodes->Node(ControlZoneNum).Temp = 20.0; // set zone temperature during heating season used to determine system delivered capacity
+    state->dataLoopNodes->Node(ControlZoneNode).Temp = 20.0; // set zone temperature during heating season used to determine system delivered capacity
     state->dataEnvrn->OutDryBulbTemp = 35.0;                // initialize weather
     state->dataEnvrn->OutHumRat = 0.1;
     state->dataEnvrn->OutBaroPress = 101325.0;
@@ -12968,12 +12978,12 @@ Schedule:Compact,
                       sensOut,
                       latOut);
 
-    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNum).Temp;
+    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNode).Temp;
     Qsens_sys = state->dataLoopNodes->Node(InletNode).MassFlowRate *
                 Psychrometrics::PsyDeltaHSenFnTdb2W2Tdb1W1(state->dataLoopNodes->Node(OutletNode).Temp,
                                                            state->dataLoopNodes->Node(OutletNode).HumRat,
                                                            ZoneTemp,
-                                                           state->dataLoopNodes->Node(ControlZoneNum).HumRat);
+                                                           state->dataLoopNodes->Node(ControlZoneNode).HumRat);
 
     // test model performance
     EXPECT_NEAR(
@@ -13045,12 +13055,12 @@ Schedule:Compact,
                       sensOut,
                       latOut);
 
-    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNum).Temp;
+    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNode).Temp;
     Qsens_sys = state->dataLoopNodes->Node(InletNode).MassFlowRate *
                 Psychrometrics::PsyDeltaHSenFnTdb2W2Tdb1W1(state->dataLoopNodes->Node(OutletNode).Temp,
                                                            state->dataLoopNodes->Node(OutletNode).HumRat,
                                                            ZoneTemp,
-                                                           state->dataLoopNodes->Node(ControlZoneNum).HumRat);
+                                                           state->dataLoopNodes->Node(ControlZoneNode).HumRat);
 
     // test model performance
     EXPECT_NEAR(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputRequired, Qsens_sys, 6.0); // Watts
@@ -13090,12 +13100,12 @@ Schedule:Compact,
                       sensOut,
                       latOut);
 
-    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNum).Temp;
+    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNode).Temp;
     Qsens_sys = state->dataLoopNodes->Node(InletNode).MassFlowRate *
                 Psychrometrics::PsyDeltaHSenFnTdb2W2Tdb1W1(state->dataLoopNodes->Node(OutletNode).Temp,
                                                            state->dataLoopNodes->Node(OutletNode).HumRat,
                                                            ZoneTemp,
-                                                           state->dataLoopNodes->Node(ControlZoneNum).HumRat);
+                                                           state->dataLoopNodes->Node(ControlZoneNode).HumRat);
 
     // test model performance
     EXPECT_NEAR(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputRequired, Qsens_sys, 10.0); // Watts
@@ -13131,12 +13141,12 @@ Schedule:Compact,
                       sensOut,
                       latOut);
 
-    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNum).Temp;
+    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNode).Temp;
     Qsens_sys = state->dataLoopNodes->Node(InletNode).MassFlowRate *
                 Psychrometrics::PsyDeltaHSenFnTdb2W2Tdb1W1(state->dataLoopNodes->Node(OutletNode).Temp,
                                                            state->dataLoopNodes->Node(OutletNode).HumRat,
                                                            ZoneTemp,
-                                                           state->dataLoopNodes->Node(ControlZoneNum).HumRat);
+                                                           state->dataLoopNodes->Node(ControlZoneNode).HumRat);
 
     // test model performance
     EXPECT_GT(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputRequired, Qsens_sys); // Watts - system CANNOT meet load
@@ -13165,7 +13175,7 @@ Schedule:Compact,
         state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputReqToHeatSP;
 
     // set zone temperature
-    state->dataLoopNodes->Node(ControlZoneNum).Temp = 24.0; // zone summer dry-bulb temp
+    state->dataLoopNodes->Node(ControlZoneNode).Temp = 24.0; // zone summer dry-bulb temp
     state->dataLoopNodes->Node(InletNode).Temp = 24.0;      // system inlet node dry-bulb temp
     state->dataLoopNodes->Node(InletNode).Enthalpy =
         Psychrometrics::PsyHFnTdbW(state->dataLoopNodes->Node(InletNode).Temp, state->dataLoopNodes->Node(InletNode).HumRat);
@@ -13189,12 +13199,12 @@ Schedule:Compact,
                       sensOut,
                       latOut);
 
-    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNum).Temp;
+    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNode).Temp;
     Qsens_sys = state->dataLoopNodes->Node(InletNode).MassFlowRate *
                 Psychrometrics::PsyDeltaHSenFnTdb2W2Tdb1W1(state->dataLoopNodes->Node(OutletNode).Temp,
                                                            state->dataLoopNodes->Node(OutletNode).HumRat,
                                                            ZoneTemp,
-                                                           state->dataLoopNodes->Node(ControlZoneNum).HumRat);
+                                                           state->dataLoopNodes->Node(ControlZoneNode).HumRat);
 
     // test model performance
     EXPECT_NEAR(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputRequired, Qsens_sys, 3.0); // Watts
@@ -13231,12 +13241,12 @@ Schedule:Compact,
                       sensOut,
                       latOut);
 
-    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNum).Temp;
+    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNode).Temp;
     Qsens_sys = state->dataLoopNodes->Node(InletNode).MassFlowRate *
                 Psychrometrics::PsyDeltaHSenFnTdb2W2Tdb1W1(state->dataLoopNodes->Node(OutletNode).Temp,
                                                            state->dataLoopNodes->Node(OutletNode).HumRat,
                                                            ZoneTemp,
-                                                           state->dataLoopNodes->Node(ControlZoneNum).HumRat);
+                                                           state->dataLoopNodes->Node(ControlZoneNode).HumRat);
 
     // test model performance
     EXPECT_NEAR(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputRequired, Qsens_sys, 9.0); // Watts
@@ -13301,12 +13311,12 @@ Schedule:Compact,
                       sensOut,
                       latOut);
 
-    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNum).Temp;
+    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNode).Temp;
     Qsens_sys = state->dataLoopNodes->Node(InletNode).MassFlowRate *
                 Psychrometrics::PsyDeltaHSenFnTdb2W2Tdb1W1(state->dataLoopNodes->Node(OutletNode).Temp,
                                                            state->dataLoopNodes->Node(OutletNode).HumRat,
                                                            ZoneTemp,
-                                                           state->dataLoopNodes->Node(ControlZoneNum).HumRat);
+                                                           state->dataLoopNodes->Node(ControlZoneNode).HumRat);
 
     // test model performance
     EXPECT_NEAR(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputRequired, Qsens_sys, 18.0); // Watts
@@ -13342,12 +13352,12 @@ Schedule:Compact,
                       sensOut,
                       latOut);
 
-    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNum).Temp;
+    ZoneTemp = state->dataLoopNodes->Node(ControlZoneNode).Temp;
     Qsens_sys = state->dataLoopNodes->Node(InletNode).MassFlowRate *
                 Psychrometrics::PsyDeltaHSenFnTdb2W2Tdb1W1(state->dataLoopNodes->Node(OutletNode).Temp,
                                                            state->dataLoopNodes->Node(OutletNode).HumRat,
                                                            ZoneTemp,
-                                                           state->dataLoopNodes->Node(ControlZoneNum).HumRat);
+                                                           state->dataLoopNodes->Node(ControlZoneNode).HumRat);
 
     // test model performance
     EXPECT_LT(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputRequired, Qsens_sys); // Watts - system CANNOT meet load
@@ -14720,7 +14730,8 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_MultiSpeedCoils_SingleMode)
 
     InletNode = thisSys->AirInNode;
     OutletNode = thisSys->AirOutNode;
-    int ControlZoneNodeNum = thisSys->NodeNumOfControlledZone;
+    int ControlZoneNode = thisSys->NodeNumOfControlledZone;
+    ControlZoneNum = 1;
 
     // set up unitary system inlet conditions
     state->dataLoopNodes->Node(InletNode).Temp = 26.666667;             // AHRI condition 80F dry-bulb temp
@@ -14729,9 +14740,9 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_MultiSpeedCoils_SingleMode)
         Psychrometrics::PsyHFnTdbW(state->dataLoopNodes->Node(InletNode).Temp, state->dataLoopNodes->Node(InletNode).HumRat);
 
     // set zone temperature
-    state->dataLoopNodes->Node(ControlZoneNodeNum).Temp =
+    state->dataLoopNodes->Node(ControlZoneNode).Temp =
         24.0; // set zone temperature during cooling season used to determine system delivered capacity
-    state->dataLoopNodes->Node(ControlZoneNodeNum).HumRat =
+    state->dataLoopNodes->Node(ControlZoneNode).HumRat =
         0.001; // set zone temperature during cooling season used to determine system delivered capacity
 
     state->dataAirLoop->AirLoopControlInfo.allocate(1);
@@ -21932,7 +21943,6 @@ TEST_F(EnergyPlusFixture, WaterCoil_getCoilWaterSystemInputDataTest)
 
     state->dataHVACGlobal->NumPrimaryAirSys = 1;
     state->dataAirSystemsData->PrimaryAirSystems.allocate(1);
-    state->dataLoopNodes->Node.allocate(2);
 
     state->dataAirSystemsData->PrimaryAirSystems(1).NumBranches = 1;
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch.allocate(1);
@@ -22123,7 +22133,6 @@ TEST_F(EnergyPlusFixture, HXAssistedWaterCoil_getCoilWaterSystemInputDataTest)
 
     state->dataHVACGlobal->NumPrimaryAirSys = 1;
     state->dataAirSystemsData->PrimaryAirSystems.allocate(1);
-    state->dataLoopNodes->Node.allocate(2);
 
     state->dataAirSystemsData->PrimaryAirSystems(1).NumBranches = 1;
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch.allocate(1);
@@ -24088,7 +24097,9 @@ Schedule:Constant,
     state->dataGlobal->SysSizingCalc = true;
     InletNode = thisSys->AirInNode;
     OutletNode = thisSys->AirOutNode;
-    ControlZoneNum = thisSys->NodeNumOfControlledZone;
+    int ControlZoneNode = thisSys->NodeNumOfControlledZone;
+    ControlZoneNum = 1;
+    
     // set up unitary system inlet conditions
     state->dataLoopNodes->Node(InletNode).Temp = 22.0;
     state->dataLoopNodes->Node(InletNode).HumRat = 0.010;
@@ -24125,8 +24136,8 @@ Schedule:Constant,
     state->dataLoopNodes->Node(InletNode).MassFlowRateMaxAvail = thisSys->m_MaxCoolAirVolFlow * state->dataEnvrn->StdRhoAir;
 
     // set zone air conditions
-    state->dataLoopNodes->Node(ControlZoneNum).Temp = 22.0;
-    state->dataLoopNodes->Node(ControlZoneNum).HumRat = 0.010;
+    state->dataLoopNodes->Node(ControlZoneNode).Temp = 22.0;
+    state->dataLoopNodes->Node(ControlZoneNode).HumRat = 0.010;
     state->dataEnvrn->OutDryBulbTemp = 15.0;
     state->dataEnvrn->OutHumRat = 0.1;
     state->dataEnvrn->OutBaroPress = 101325.0;
@@ -26516,7 +26527,8 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_MultiSpeedFanWSHP_Test)
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand[0].RemainingOutputRequired = 2000.0;
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand[0].RemainingOutputReqToCoolSP = 2000.0;
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand[0].RemainingOutputReqToHeatSP = 2000.0;
-    state->dataLoopNodes->Node(5).MassFlowRate = state->dataLoopNodes->Node(5).MassFlowRateMax;
+    int waterInletNode = Node::GetNodeIndex(*state, "SPACE1-1 HP HEATING WATER INLET");
+    state->dataLoopNodes->Node(waterInletNode).MassFlowRate = state->dataLoopNodes->Node(waterInletNode).MassFlowRateMax;
 
     int AirLoopNum = 0;
     int CompIndex = 1;

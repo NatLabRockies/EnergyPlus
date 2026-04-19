@@ -391,12 +391,14 @@ TEST_F(EnergyPlusFixture, SZVAV_PTUnit_Testing)
 
     // test fails, expected MaxCoolAirMassFlow, only got 87% of that, issue 9090
     // test here should be EXPECT_EQ or EXPECT_NEAR thisUnit.MaxCoolAirMassFlow
-    EXPECT_GT(state->dataLoopNodes->Node(1).MassFlowRate, thisUnit.MaxNoCoolHeatAirMassFlow); // high speed air flow rate
-    EXPECT_LT(state->dataLoopNodes->Node(4).Temp, state->dataLoopNodes->Node(1).Temp);        // active cooling
+    int fanInNode = Node::GetNodeIndex(*state, "FAN IN NODE");
+    int coilOutNode = Node::GetNodeIndex(*state, "HEATING COIL OUT NODE");
+    EXPECT_GT(state->dataLoopNodes->Node(fanInNode).MassFlowRate, thisUnit.MaxNoCoolHeatAirMassFlow); // high speed air flow rate
+    EXPECT_LT(state->dataLoopNodes->Node(coilOutNode).Temp, state->dataLoopNodes->Node(fanInNode).Temp);        // active cooling
 
-    MinHumRat = min(state->dataLoopNodes->Node(4).HumRat, state->dataLoopNodes->Node(1).HumRat);
-    OutletTemp = state->dataLoopNodes->Node(4).Temp;
-    InletTemp = state->dataLoopNodes->Node(1).Temp;
+    MinHumRat = min(state->dataLoopNodes->Node(coilOutNode).HumRat, state->dataLoopNodes->Node(fanInNode).HumRat);
+    OutletTemp = state->dataLoopNodes->Node(coilOutNode).Temp;
+    InletTemp = state->dataLoopNodes->Node(fanInNode).Temp;
     LoadMet = thisUnit.MaxCoolAirMassFlow * (Psychrometrics::PsyHFnTdbW(OutletTemp, MinHumRat) - Psychrometrics::PsyHFnTdbW(InletTemp, MinHumRat));
     EXPECT_NEAR(LoadMet, QZnReq, 1600.0); // coil could not meet load, not a failure just issue with testing results
     EXPECT_NEAR(LoadMet, -2859.0, 500.0);
@@ -407,12 +409,13 @@ TEST_F(EnergyPlusFixture, SZVAV_PTUnit_Testing)
     state->dataUnitarySystems->HeatingLoad = HeatingLoad;
 
     // set unit inlet node conditions for heating
-    state->dataLoopNodes->Node(1).Temp = 21.0;
-    state->dataLoopNodes->Node(1).HumRat = 0.008;
-    state->dataLoopNodes->Node(1).Enthalpy = 41431.0;
-    state->dataLoopNodes->Node(5).Temp = 21.0;
-    state->dataLoopNodes->Node(5).HumRat = 0.008;
-    state->dataLoopNodes->Node(5).Enthalpy = 41431.0;
+    int zoneNode = Node::GetNodeIndex(*state, "ZoneNode");
+    state->dataLoopNodes->Node(fanInNode).Temp = 21.0;
+    state->dataLoopNodes->Node(fanInNode).HumRat = 0.008;
+    state->dataLoopNodes->Node(fanInNode).Enthalpy = 41431.0;
+    state->dataLoopNodes->Node(zoneNode).Temp = 21.0;
+    state->dataLoopNodes->Node(zoneNode).HumRat = 0.008;
+    state->dataLoopNodes->Node(zoneNode).Enthalpy = 41431.0;
 
     // Region 1 of control, low air flow rate, modulate coil capacity
     QZnReq = 200.0;
@@ -429,12 +432,12 @@ TEST_F(EnergyPlusFixture, SZVAV_PTUnit_Testing)
                                PLR,
                                CompressorOnFlag);
 
-    EXPECT_NEAR(state->dataLoopNodes->Node(1).MassFlowRate, thisUnit.MaxNoCoolHeatAirMassFlow, 0.00000001); // high speed air flow rate
-    EXPECT_GT(state->dataLoopNodes->Node(4).Temp, state->dataLoopNodes->Node(1).Temp);                      // active heating
+    EXPECT_NEAR(state->dataLoopNodes->Node(fanInNode).MassFlowRate, thisUnit.MaxNoCoolHeatAirMassFlow, 0.00000001); // high speed air flow rate
+    EXPECT_GT(state->dataLoopNodes->Node(coilOutNode).Temp, state->dataLoopNodes->Node(fanInNode).Temp);                      // active heating
 
-    MinHumRat = min(state->dataLoopNodes->Node(4).HumRat, state->dataLoopNodes->Node(1).HumRat);
-    OutletTemp = state->dataLoopNodes->Node(4).Temp;
-    InletTemp = state->dataLoopNodes->Node(1).Temp;
+    MinHumRat = min(state->dataLoopNodes->Node(coilOutNode).HumRat, state->dataLoopNodes->Node(fanInNode).HumRat);
+    OutletTemp = state->dataLoopNodes->Node(coilOutNode).Temp;
+    InletTemp = state->dataLoopNodes->Node(fanInNode).Temp;
     LoadMet =
         thisUnit.MaxNoCoolHeatAirMassFlow * (Psychrometrics::PsyHFnTdbW(OutletTemp, MinHumRat) - Psychrometrics::PsyHFnTdbW(InletTemp, MinHumRat));
     EXPECT_NEAR(LoadMet, QZnReq, 0.0001);
@@ -455,14 +458,14 @@ TEST_F(EnergyPlusFixture, SZVAV_PTUnit_Testing)
                                PLR,
                                CompressorOnFlag);
 
-    EXPECT_GT(state->dataLoopNodes->Node(1).MassFlowRate, thisUnit.MaxNoCoolHeatAirMassFlow); // air flow higher than low speed
-    EXPECT_LT(state->dataLoopNodes->Node(1).MassFlowRate, thisUnit.MaxHeatAirMassFlow);       // air flow lower than high speed
-    EXPECT_GT(state->dataLoopNodes->Node(4).Temp, state->dataLoopNodes->Node(1).Temp);        // active heating
+    EXPECT_GT(state->dataLoopNodes->Node(fanInNode).MassFlowRate, thisUnit.MaxNoCoolHeatAirMassFlow); // air flow higher than low speed
+    EXPECT_LT(state->dataLoopNodes->Node(fanInNode).MassFlowRate, thisUnit.MaxHeatAirMassFlow);       // air flow lower than high speed
+    EXPECT_GT(state->dataLoopNodes->Node(coilOutNode).Temp, state->dataLoopNodes->Node(fanInNode).Temp);        // active heating
 
-    AirMassFlow = state->dataLoopNodes->Node(4).MassFlowRate;
-    MinHumRat = min(state->dataLoopNodes->Node(4).HumRat, state->dataLoopNodes->Node(1).HumRat);
-    OutletTemp = state->dataLoopNodes->Node(4).Temp;
-    InletTemp = state->dataLoopNodes->Node(1).Temp;
+    AirMassFlow = state->dataLoopNodes->Node(coilOutNode).MassFlowRate;
+    MinHumRat = min(state->dataLoopNodes->Node(coilOutNode).HumRat, state->dataLoopNodes->Node(fanInNode).HumRat);
+    OutletTemp = state->dataLoopNodes->Node(coilOutNode).Temp;
+    InletTemp = state->dataLoopNodes->Node(fanInNode).Temp;
     LoadMet = AirMassFlow * (Psychrometrics::PsyHFnTdbW(OutletTemp, MinHumRat) - Psychrometrics::PsyHFnTdbW(InletTemp, MinHumRat));
     EXPECT_NEAR(LoadMet, QZnReq, 0.0001);
     EXPECT_NEAR(LoadMet, 1200.0, 0.0001);
@@ -482,12 +485,12 @@ TEST_F(EnergyPlusFixture, SZVAV_PTUnit_Testing)
                                PLR,
                                CompressorOnFlag);
 
-    EXPECT_NEAR(state->dataLoopNodes->Node(1).MassFlowRate, thisUnit.MaxHeatAirMassFlow, 0.00000001); // high speed air flow rate
-    EXPECT_GT(state->dataLoopNodes->Node(4).Temp, state->dataLoopNodes->Node(1).Temp);                // active heating
+    EXPECT_NEAR(state->dataLoopNodes->Node(fanInNode).MassFlowRate, thisUnit.MaxHeatAirMassFlow, 0.00000001); // high speed air flow rate
+    EXPECT_GT(state->dataLoopNodes->Node(coilOutNode).Temp, state->dataLoopNodes->Node(fanInNode).Temp);                // active heating
 
-    MinHumRat = min(state->dataLoopNodes->Node(4).HumRat, state->dataLoopNodes->Node(1).HumRat);
-    OutletTemp = state->dataLoopNodes->Node(4).Temp;
-    InletTemp = state->dataLoopNodes->Node(1).Temp;
+    MinHumRat = min(state->dataLoopNodes->Node(coilOutNode).HumRat, state->dataLoopNodes->Node(fanInNode).HumRat);
+    OutletTemp = state->dataLoopNodes->Node(coilOutNode).Temp;
+    InletTemp = state->dataLoopNodes->Node(fanInNode).Temp;
     LoadMet = thisUnit.MaxHeatAirMassFlow * (Psychrometrics::PsyHFnTdbW(OutletTemp, MinHumRat) - Psychrometrics::PsyHFnTdbW(InletTemp, MinHumRat));
     EXPECT_NEAR(LoadMet, QZnReq, 0.0001);
     EXPECT_NEAR(LoadMet, 2000.0, 0.0001);

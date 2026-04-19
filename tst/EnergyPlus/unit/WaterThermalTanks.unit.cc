@@ -3963,7 +3963,8 @@ TEST_F(EnergyPlusFixture, Desuperheater_WAHP_VSEQ_Coil_Test)
 
     state->dataPlnt->PlantLoop(PlantLoopNum).glycol = Fluid::GetWater(*state);
     state->dataPlnt->PlantLoop(PlantLoopNum).FluidName = "WATER";
-    state->dataLoopNodes->Node(5).MassFlowRate = state->dataVariableSpeedCoils->VarSpeedCoil(1).MSRatedAirMassFlowRate(2);
+    int coolCoilNode = Node::GetNodeIndex(*state, "GROUND SOURCE HEAT PUMP UNITARY SYSTEM FAN - COOLING COIL NODE");
+    state->dataLoopNodes->Node(coolCoilNode).MassFlowRate = state->dataVariableSpeedCoils->VarSpeedCoil(1).MSRatedAirMassFlowRate(2);
     state->dataVariableSpeedCoils->VarSpeedCoil(1).MSRatedCBF(1) =
         DXCoils::CalcCBF(*state,
                          state->dataVariableSpeedCoils->VarSpeedCoil(1).VarSpeedCoilType,

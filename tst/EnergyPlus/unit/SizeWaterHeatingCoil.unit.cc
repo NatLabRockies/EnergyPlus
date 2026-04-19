@@ -244,7 +244,7 @@ TEST_F(EnergyPlusFixture, TestSizingRoutineForHotWaterCoils1)
     GetZoneSizingInput(*state);
     GetZoneEquipmentData(*state);
     GetZoneAirLoopEquipment(*state);
-    GetWaterCoilInput(*state);
+
     state->dataWaterCoils->MySizeFlag(1) = true;
     state->dataWaterCoils->MyUAAndFlowCalcFlag(1) = false;
     GetSysInput(*state);
@@ -494,7 +494,7 @@ TEST_F(EnergyPlusFixture, TestSizingRoutineForHotWaterCoils2)
     GetZoneSizingInput(*state);
     GetZoneEquipmentData(*state);
     GetZoneAirLoopEquipment(*state);
-    GetWaterCoilInput(*state);
+
     state->dataWaterCoils->MySizeFlag(1) = true;
     state->dataWaterCoils->MyUAAndFlowCalcFlag(1) = false;
     GetSysInput(*state);
@@ -743,7 +743,7 @@ TEST_F(EnergyPlusFixture, TestSizingRoutineForHotWaterCoils3)
     GetZoneSizingInput(*state);
     GetZoneEquipmentData(*state);
     GetZoneAirLoopEquipment(*state);
-    GetWaterCoilInput(*state);
+
     state->dataWaterCoils->MySizeFlag(1) = true;
     state->dataWaterCoils->MyUAAndFlowCalcFlag(1) = false;
     GetSysInput(*state);
@@ -993,7 +993,7 @@ TEST_F(EnergyPlusFixture, TestSizingRoutineForHotWaterCoils4)
     GetZoneSizingInput(*state);
     GetZoneEquipmentData(*state);
     GetZoneAirLoopEquipment(*state);
-    GetWaterCoilInput(*state);
+
     state->dataWaterCoils->MySizeFlag(1) = true;
     state->dataWaterCoils->MyUAAndFlowCalcFlag(1) = false;
     GetSysInput(*state);
@@ -1201,7 +1201,7 @@ TEST_F(EnergyPlusFixture, TestSizingRoutineForHotWaterCoils5)
     }
     GetZoneData(*state, ErrorsFound);
     EXPECT_EQ("SPACE1-1", state->dataHeatBal->Zone(1).Name);
-    GetWaterCoilInput(*state);
+
     state->dataWaterCoils->MySizeFlag(1) = true;
     state->dataWaterCoils->MyUAAndFlowCalcFlag(1) = false;
     state->dataSize->TermUnitSingDuct = true;
@@ -1414,7 +1414,7 @@ TEST_F(EnergyPlusFixture, TestSizingRoutineForHotWaterCoils6)
     GetZoneSizingInput(*state);
     GetZoneEquipmentData(*state);
     GetZoneAirLoopEquipment(*state);
-    GetWaterCoilInput(*state);
+
     state->dataWaterCoils->MySizeFlag(1) = true;
     state->dataWaterCoils->MyUAAndFlowCalcFlag(1) = false;
     GetSysInput(*state);
