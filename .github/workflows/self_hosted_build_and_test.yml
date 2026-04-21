@@ -14,6 +14,8 @@ env:
   PYTHON_REQUIRED_VERSION: "3.12.2"
   FC: gfortran-13
   BUILD_DIR: build-coverage
+  ANNUAL_SIMULATION_EXCLUDE_REGEX: >-
+    ^integration\.(GSHP-GLHE-BoreholeFieldDesign|PythonPluginSolarHeating|_5ZoneAirCooled_annual|_5ZoneAirCooled_LeapYear_annual|UnitarySystem_MultiSpeedDX_EconoStaging|UnitarySystem_VariableSpeedDX_SZVAV|_ResidentialBase|_ExternalInterface-functionalmockupunit-to-actuator|_ExternalInterface-functionalmockupunit-to-schedule|_ExternalInterface-functionalmockupunit-to-variable)$
   INTEGRATION_EXCLUDE_REGEX: >-
     ^integration\.(UnitaryHybridAC_DedicatedOutsideAir|HospitalLowEnergy|GSHP-GLHE-CalcGFunctions|HospitalBaselineReheatReportEMS|HospitalBaseline|RefBldgOutPatientNew2004_Chicago|ASHRAE901_ApartmentHighRise_STD2019_Denver|UnitarySystem_VariableSpeedDX_SZVAV|ASHRAE901_OutPatientHealthCare_STD2019_Denver|UnitarySystem_MultiSpeedDX_EconoStaging|RefBldgSecondarySchoolNew2004_Chicago|RefrigeratedWarehouse|HeatPumpWaterHeaterStratified|ASHRAE901_OfficeLarge_STD2019_Denver_Chiller205|ASHRAE901_OfficeLarge_STD2019_Denver_Chiller205_Detailed|_5ZoneAirCooled_LeapYear_annual|_5ZoneAirCooled_annual|_SmallOffice_Dulles|EcoroofOrlando|EcoroofOrlando_NoSitePrec)$
 
@@ -26,6 +28,11 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: ${{ github.event.inputs.ref || github.ref }}
+
+      - name: Resolve checked out SHA
+        id: checkout-sha
+        shell: bash
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Setup runner
         id: setup-runner
@@ -40,9 +47,8 @@ jobs:
         with:
           path: |
             ${{ steps.setup-runner.outputs.ccache-dir }}
-          key: ccache-self-hosted-linux-${{ steps.setup-runner.outputs.compiler-id }}-${{ github.event.pull_request.head.ref || github.event.inputs.ref || github.ref_name }}-coverage
+          key: ccache-self-hosted-linux-${{ steps.setup-runner.outputs.compiler-id }}-${{ steps.checkout-sha.outputs.sha }}-coverage
           restore-keys: |
-            ccache-self-hosted-linux-${{ steps.setup-runner.outputs.compiler-id }}-${{ github.event.pull_request.head.ref || github.event.inputs.ref || github.ref_name }}
             ccache-self-hosted-linux-${{ steps.setup-runner.outputs.compiler-id }}-
             ccache-self-hosted-linux-
 
@@ -72,6 +78,7 @@ jobs:
           -DBUILD_PACKAGE=OFF
           -DDOCUMENTATION_BUILD=DoNotBuild
           -DENABLE_REGRESSION_TESTING:BOOL=OFF
+          -DTEST_ANNUAL_SIMULATION:BOOL=OFF
           -DENABLE_COVERAGE:BOOL=ON
           -DENABLE_GTEST_DEBUG_MODE:BOOL=OFF
           -DENABLE_PCH:BOOL=OFF
@@ -99,11 +106,13 @@ jobs:
 
       - name: Generate raw unit test coverage results
         working-directory: ${{ env.BUILD_DIR }}
-        run: lcov -c -d . -o coverage/unit/lcov.output --no-external --base-directory ../src/EnergyPlus/
+        run: lcov -c -d . -o coverage/unit/lcov.output --no-external --base-directory ../src/EnergyPlus/ --ignore-errors source
 
       - name: Generate filtered unit test coverage results
         working-directory: ${{ env.BUILD_DIR }}
-        run: lcov -r coverage/unit/lcov.output "${{ github.workspace }}/${{ env.BUILD_DIR }}/*" -o coverage/unit/lcov.output.filtered
+        run: |
+          lcov -e coverage/unit/lcov.output "${{ github.workspace }}/src/EnergyPlus/*" -o coverage/unit/lcov.output.srconly
+          lcov -r coverage/unit/lcov.output.srconly "*/ConfiguredFunctions.cc" "*/DataStringGlobals.cc" -o coverage/unit/lcov.output.filtered
 
       - name: Generate HTML unit test coverage results
         working-directory: ${{ env.BUILD_DIR }}
@@ -119,22 +128,24 @@ jobs:
       - name: Clear coverage counters before integration tests
         run: python ${{ github.workspace }}/scripts/dev/clear_coverage_results.py ${{ env.BUILD_DIR }}
 
-      - name: Run integration tests excluding top 20 slowest tests
+      - name: Run integration tests excluding slowest and annual-only tests
         run: >
           ctest
           --test-dir ${{ env.BUILD_DIR }}
           -R "integration.*"
-          -E "${{ env.INTEGRATION_EXCLUDE_REGEX }}"
+          -E "${{ env.INTEGRATION_EXCLUDE_REGEX }}|${{ env.ANNUAL_SIMULATION_EXCLUDE_REGEX }}"
           --output-on-failure
           -j "${{ steps.setup-runner.outputs.nproc }}"
 
       - name: Generate raw integration test coverage results
         working-directory: ${{ env.BUILD_DIR }}
-        run: lcov -c -d . -o coverage/integration/lcov.output --no-external --base-directory ../src/EnergyPlus/
+        run: lcov -c -d . -o coverage/integration/lcov.output --no-external --base-directory ../src/EnergyPlus/ --ignore-errors source
 
       - name: Generate filtered integration test coverage results
         working-directory: ${{ env.BUILD_DIR }}
-        run: lcov -r coverage/integration/lcov.output "${{ github.workspace }}/${{ env.BUILD_DIR }}/*" -o coverage/integration/lcov.output.filtered
+        run: |
+          lcov -e coverage/integration/lcov.output "${{ github.workspace }}/src/EnergyPlus/*" -o coverage/integration/lcov.output.srconly
+          lcov -r coverage/integration/lcov.output.srconly "*/ConfiguredFunctions.cc" "*/DataStringGlobals.cc" -o coverage/integration/lcov.output.filtered
 
       - name: Generate HTML integration test coverage results
         working-directory: ${{ env.BUILD_DIR }}
