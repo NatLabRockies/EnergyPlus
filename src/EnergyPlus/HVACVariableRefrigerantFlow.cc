@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <array>
 #include <cassert>
 #include <cmath>
@@ -74,6 +75,7 @@
 #include <EnergyPlus/DataHeatBalFanSys.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataIPShortCuts.hh>
+#include <EnergyPlus/DataErrorTracking.hh>
 #include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/DataZoneControls.hh>
@@ -1408,9 +1410,8 @@ void GetVRFInput(EnergyPlusData &state)
     if (ErrorsFound) {
         ShowFatalError(
             state,
-            EnergyPlus::format(
-                "{}Errors found in getting AirConditioner:VariableRefrigerantFlow system input. Preceding condition(s) causes termination.",
-                RoutineName));
+            EnergyPlus::format("{}Errors found in getting AirConditioner:VariableRefrigerantFlow system input. Preceding condition(s) causes termination.",
+                               RoutineName));
     }
 }
 
@@ -1462,7 +1463,6 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
     int NumParams = 0; // Number of arguments
     int NumAlphas = 0; // Number of alpha arguments
     int NumNums = 0;   // Number of real arguments
-    int IOStat;        // Status
     bool errFlag;      // error flag for mining functions
     bool IsNotOK;      // Flag to verify name
 
@@ -1564,55 +1564,411 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
     Array1D_bool lNumericFieldBlanks;
     lNumericFieldBlanks.dimension(MaxNumbers, false);
 
+    auto *inputProcessor = state.dataInputProcessing->inputProcessor.get();
+
+    auto populateLegacyArgsFromKeyedObject =
+        [&](std::string const &objectType, std::string const &objectKey, InputProcessor::json const &objectFields, int &outNumAlphas, int &outNumNums) {
+            auto const &schemaObjProps = inputProcessor->getObjectSchemaProps(state, objectType);
+
+            cAlphaArgs = "";
+            rNumericArgs = 0.0;
+            lAlphaFieldBlanks = false;
+            lNumericFieldBlanks = false;
+            cAlphaFieldNames = "";
+            cNumericFieldNames = "";
+            outNumAlphas = 0;
+            outNumNums = 0;
+
+            int alphaIndex = 1;
+            int numericIndex = 1;
+
+            auto addAlpha = [&](char const *fieldName, InputProcessor::json const &fieldSchemaProps, InputProcessor::json const &fieldObject, bool useObjectKey = false) {
+                auto const fieldIt = fieldObject.find(fieldName);
+                bool const fieldMissing = fieldIt == fieldObject.end();
+                std::string fieldValue =
+                    (useObjectKey && fieldMissing) ? Util::makeUPPER(objectKey) : inputProcessor->getAlphaFieldValue(fieldObject, fieldSchemaProps, fieldName);
+                cAlphaArgs(alphaIndex) = fieldValue;
+                cAlphaFieldNames(alphaIndex) = fieldName;
+                lAlphaFieldBlanks(alphaIndex) = fieldValue.empty();
+                ++alphaIndex;
+                ++outNumAlphas;
+            };
+
+            auto addNumeric = [&](char const *fieldName, InputProcessor::json const &fieldSchemaProps, InputProcessor::json const &fieldObject) {
+                auto fieldIt = fieldObject.find(fieldName);
+                rNumericArgs(numericIndex) = inputProcessor->getRealFieldValue(fieldObject, fieldSchemaProps, fieldName);
+                cNumericFieldNames(numericIndex) = fieldName;
+                lNumericFieldBlanks(numericIndex) =
+                    (fieldIt == fieldObject.end()) || (fieldIt->is_string() && fieldIt->get<std::string>().empty());
+                ++numericIndex;
+                ++outNumNums;
+            };
+
+            auto addFieldSet = [&](auto const &fieldSet, auto const &fieldSchemaProps, auto const &fieldObject, std::string_view nameFieldKey = {}) {
+                for (auto const fieldName : fieldSet) {
+                    addAlpha(fieldName.data(), fieldSchemaProps, fieldObject, fieldName == nameFieldKey);
+                }
+            };
+
+            auto addNumericFieldSet = [&](auto const &fieldSet, auto const &fieldSchemaProps, auto const &fieldObject) {
+                for (auto const fieldName : fieldSet) {
+                    addNumeric(fieldName.data(), fieldSchemaProps, fieldObject);
+                }
+            };
+
+            auto addExtensibleFieldSet =
+                [&](char const *extensionKey, auto const &numericFields, auto const &alphaFields) {
+                    auto extIt = objectFields.find(extensionKey);
+                    if (extIt == objectFields.end()) return;
+
+                    auto const &extensionSchemaProps = schemaObjProps.at(extensionKey).at("items").at("properties");
+                    for (auto const &extensibleObject : extIt.value()) {
+                        addNumericFieldSet(numericFields, extensionSchemaProps, extensibleObject);
+                        addFieldSet(alphaFields, extensionSchemaProps, extensibleObject);
+                    }
+                };
+
+            auto recalcCounts = [&](auto const &legacyFields,
+                                    auto const &numericFields,
+                                    std::string_view nameFieldKey,
+                                    char const *extensionKey = nullptr,
+                                    std::size_t extensibleNumericCount = 0,
+                                    std::size_t extensibleAlphaCount = 0) {
+                auto isNumeric = [&](std::string_view fieldName) {
+                    return std::find(numericFields.begin(), numericFields.end(), fieldName) != numericFields.end();
+                };
+
+                std::size_t maxBaseFieldCount = 0;
+                for (std::size_t i = 0; i < legacyFields.size(); ++i) {
+                    auto const fieldName = legacyFields[i];
+                    if (fieldName == nameFieldKey || objectFields.find(fieldName.data()) != objectFields.end()) {
+                        maxBaseFieldCount = i + 1;
+                    }
+                }
+
+                outNumAlphas = 0;
+                outNumNums = 0;
+                for (std::size_t i = 0; i < maxBaseFieldCount; ++i) {
+                    if (isNumeric(legacyFields[i])) {
+                        ++outNumNums;
+                    } else {
+                        ++outNumAlphas;
+                    }
+                }
+
+                if (extensionKey != nullptr) {
+                    auto extIt = objectFields.find(extensionKey);
+                    if (extIt != objectFields.end()) {
+                        auto const extensibleGroupCount = extIt.value().size();
+                        outNumNums += static_cast<int>(extensibleGroupCount * extensibleNumericCount);
+                        outNumAlphas += static_cast<int>(extensibleGroupCount * extensibleAlphaCount);
+                    }
+                }
+            };
+
+            static constexpr std::array<std::string_view, 1> zoneTerminalUnitListAlphaFields = {"zone_terminal_unit_list_name"};
+            static constexpr std::array<std::string_view, 1> zoneTerminalUnitListExtensibleAlphaFields = {"zone_terminal_unit_name"};
+            static constexpr std::array<std::string_view, 0> noNumericFields = {};
+            static constexpr std::array<std::string_view, 1> zoneTerminalUnitListLegacyFields = {"zone_terminal_unit_list_name"};
+            static constexpr std::array<std::string_view, 43> vrfSysCurveAlphaFields = {
+                "name", "availability_schedule_name", "cooling_capacity_ratio_modifier_function_of_low_temperature_curve_name",
+                "cooling_capacity_ratio_boundary_curve_name", "cooling_capacity_ratio_modifier_function_of_high_temperature_curve_name",
+                "cooling_energy_input_ratio_modifier_function_of_low_temperature_curve_name", "cooling_energy_input_ratio_boundary_curve_name",
+                "cooling_energy_input_ratio_modifier_function_of_high_temperature_curve_name",
+                "cooling_energy_input_ratio_modifier_function_of_low_part_load_ratio_curve_name",
+                "cooling_energy_input_ratio_modifier_function_of_high_part_load_ratio_curve_name",
+                "cooling_combination_ratio_correction_factor_curve_name", "cooling_part_load_fraction_correlation_curve_name",
+                "heating_capacity_ratio_modifier_function_of_low_temperature_curve_name", "heating_capacity_ratio_boundary_curve_name",
+                "heating_capacity_ratio_modifier_function_of_high_temperature_curve_name",
+                "heating_energy_input_ratio_modifier_function_of_low_temperature_curve_name", "heating_energy_input_ratio_boundary_curve_name",
+                "heating_energy_input_ratio_modifier_function_of_high_temperature_curve_name", "heating_performance_curve_outdoor_temperature_type",
+                "heating_energy_input_ratio_modifier_function_of_low_part_load_ratio_curve_name",
+                "heating_energy_input_ratio_modifier_function_of_high_part_load_ratio_curve_name",
+                "heating_combination_ratio_correction_factor_curve_name", "heating_part_load_fraction_correlation_curve_name",
+                "zone_name_for_master_thermostat_location", "master_thermostat_priority_control_type", "thermostat_priority_schedule_name",
+                "zone_terminal_unit_list_name", "heat_pump_waste_heat_recovery", "piping_correction_factor_for_length_in_cooling_mode_curve_name",
+                "piping_correction_factor_for_length_in_heating_mode_curve_name", "defrost_strategy", "defrost_control",
+                "defrost_energy_input_ratio_modifier_function_of_temperature_curve_name", "condenser_type", "condenser_inlet_node_name",
+                "condenser_outlet_node_name", "supply_water_storage_tank_name", "basin_heater_operating_schedule_name", "fuel_type",
+                "heat_recovery_cooling_capacity_modifier_curve_name", "heat_recovery_cooling_energy_modifier_curve_name",
+                "heat_recovery_heating_capacity_modifier_curve_name", "heat_recovery_heating_energy_modifier_curve_name"};
+            static constexpr std::array<std::string_view, 81> vrfSysCurveLegacyFields = {
+                "name", "availability_schedule_name", "gross_rated_total_cooling_capacity", "gross_rated_cooling_cop",
+                "minimum_condenser_inlet_node_temperature_in_cooling_mode", "maximum_condenser_inlet_node_temperature_in_cooling_mode",
+                "cooling_capacity_ratio_modifier_function_of_low_temperature_curve_name", "cooling_capacity_ratio_boundary_curve_name",
+                "cooling_capacity_ratio_modifier_function_of_high_temperature_curve_name",
+                "cooling_energy_input_ratio_modifier_function_of_low_temperature_curve_name", "cooling_energy_input_ratio_boundary_curve_name",
+                "cooling_energy_input_ratio_modifier_function_of_high_temperature_curve_name",
+                "cooling_energy_input_ratio_modifier_function_of_low_part_load_ratio_curve_name",
+                "cooling_energy_input_ratio_modifier_function_of_high_part_load_ratio_curve_name",
+                "cooling_combination_ratio_correction_factor_curve_name", "cooling_part_load_fraction_correlation_curve_name",
+                "gross_rated_heating_capacity", "rated_heating_capacity_sizing_ratio", "gross_rated_heating_cop",
+                "minimum_condenser_inlet_node_temperature_in_heating_mode", "maximum_condenser_inlet_node_temperature_in_heating_mode",
+                "heating_capacity_ratio_modifier_function_of_low_temperature_curve_name", "heating_capacity_ratio_boundary_curve_name",
+                "heating_capacity_ratio_modifier_function_of_high_temperature_curve_name",
+                "heating_energy_input_ratio_modifier_function_of_low_temperature_curve_name", "heating_energy_input_ratio_boundary_curve_name",
+                "heating_energy_input_ratio_modifier_function_of_high_temperature_curve_name", "heating_performance_curve_outdoor_temperature_type",
+                "heating_energy_input_ratio_modifier_function_of_low_part_load_ratio_curve_name",
+                "heating_energy_input_ratio_modifier_function_of_high_part_load_ratio_curve_name",
+                "heating_combination_ratio_correction_factor_curve_name", "heating_part_load_fraction_correlation_curve_name",
+                "minimum_heat_pump_part_load_ratio", "zone_name_for_master_thermostat_location", "master_thermostat_priority_control_type",
+                "thermostat_priority_schedule_name", "zone_terminal_unit_list_name", "heat_pump_waste_heat_recovery",
+                "equivalent_piping_length_used_for_piping_correction_factor_in_cooling_mode", "vertical_height_used_for_piping_correction_factor",
+                "piping_correction_factor_for_length_in_cooling_mode_curve_name", "piping_correction_factor_for_height_in_cooling_mode_coefficient",
+                "equivalent_piping_length_used_for_piping_correction_factor_in_heating_mode",
+                "piping_correction_factor_for_length_in_heating_mode_curve_name", "piping_correction_factor_for_height_in_heating_mode_coefficient",
+                "crankcase_heater_power_per_compressor", "number_of_compressors", "ratio_of_compressor_size_to_total_compressor_capacity",
+                "maximum_outdoor_dry_bulb_temperature_for_crankcase_heater", "defrost_strategy", "defrost_control",
+                "defrost_energy_input_ratio_modifier_function_of_temperature_curve_name", "defrost_time_period_fraction",
+                "resistive_defrost_heater_capacity", "maximum_outdoor_dry_bulb_temperature_for_defrost_operation", "condenser_type",
+                "condenser_inlet_node_name", "condenser_outlet_node_name", "water_condenser_volume_flow_rate", "evaporative_condenser_effectiveness",
+                "evaporative_condenser_air_flow_rate", "evaporative_condenser_pump_rated_power_consumption", "supply_water_storage_tank_name",
+                "basin_heater_capacity", "basin_heater_setpoint_temperature", "basin_heater_operating_schedule_name", "fuel_type",
+                "minimum_condenser_inlet_node_temperature_in_heat_recovery_mode", "maximum_condenser_inlet_node_temperature_in_heat_recovery_mode",
+                "heat_recovery_cooling_capacity_modifier_curve_name", "initial_heat_recovery_cooling_capacity_fraction",
+                "heat_recovery_cooling_capacity_time_constant", "heat_recovery_cooling_energy_modifier_curve_name",
+                "initial_heat_recovery_cooling_energy_fraction", "heat_recovery_cooling_energy_time_constant",
+                "heat_recovery_heating_capacity_modifier_curve_name", "initial_heat_recovery_heating_capacity_fraction",
+                "heat_recovery_heating_capacity_time_constant", "heat_recovery_heating_energy_modifier_curve_name",
+                "initial_heat_recovery_heating_energy_fraction", "heat_recovery_heating_energy_time_constant"};
+            static constexpr std::array<std::string_view, 38> vrfSysCurveNumericFields = {
+                "gross_rated_total_cooling_capacity", "gross_rated_cooling_cop", "minimum_condenser_inlet_node_temperature_in_cooling_mode",
+                "maximum_condenser_inlet_node_temperature_in_cooling_mode", "gross_rated_heating_capacity", "rated_heating_capacity_sizing_ratio",
+                "gross_rated_heating_cop", "minimum_condenser_inlet_node_temperature_in_heating_mode",
+                "maximum_condenser_inlet_node_temperature_in_heating_mode", "minimum_heat_pump_part_load_ratio",
+                "equivalent_piping_length_used_for_piping_correction_factor_in_cooling_mode", "vertical_height_used_for_piping_correction_factor",
+                "piping_correction_factor_for_height_in_cooling_mode_coefficient",
+                "equivalent_piping_length_used_for_piping_correction_factor_in_heating_mode",
+                "piping_correction_factor_for_height_in_heating_mode_coefficient", "crankcase_heater_power_per_compressor", "number_of_compressors",
+                "ratio_of_compressor_size_to_total_compressor_capacity", "maximum_outdoor_dry_bulb_temperature_for_crankcase_heater",
+                "defrost_time_period_fraction", "resistive_defrost_heater_capacity", "maximum_outdoor_dry_bulb_temperature_for_defrost_operation",
+                "water_condenser_volume_flow_rate", "evaporative_condenser_effectiveness", "evaporative_condenser_air_flow_rate",
+                "evaporative_condenser_pump_rated_power_consumption", "basin_heater_capacity", "basin_heater_setpoint_temperature",
+                "minimum_condenser_inlet_node_temperature_in_heat_recovery_mode", "maximum_condenser_inlet_node_temperature_in_heat_recovery_mode",
+                "initial_heat_recovery_cooling_capacity_fraction", "heat_recovery_cooling_capacity_time_constant",
+                "initial_heat_recovery_cooling_energy_fraction", "heat_recovery_cooling_energy_time_constant",
+                "initial_heat_recovery_heating_capacity_fraction", "heat_recovery_heating_capacity_time_constant",
+                "initial_heat_recovery_heating_energy_fraction", "heat_recovery_heating_energy_time_constant"};
+            static constexpr std::array<std::string_view, 10> vrfFluidCtrlAlphaFields = {
+                "heat_pump_name", "availability_schedule_name", "zone_terminal_unit_list_name", "refrigerant_type",
+                "refrigerant_temperature_control_algorithm_for_indoor_unit",
+                "outdoor_unit_evaporating_temperature_function_of_superheating_curve_name",
+                "outdoor_unit_condensing_temperature_function_of_subcooling_curve_name", "defrost_strategy", "defrost_control",
+                "defrost_energy_input_ratio_modifier_function_of_temperature_curve_name"};
+            static constexpr std::array<std::string_view, 41> vrfFluidCtrlLegacyFields = {
+                "heat_pump_name", "availability_schedule_name", "zone_terminal_unit_list_name", "refrigerant_type",
+                "rated_evaporative_capacity", "rated_compressor_power_per_unit_of_rated_evaporative_capacity",
+                "minimum_outdoor_air_temperature_in_cooling_mode", "maximum_outdoor_air_temperature_in_cooling_mode",
+                "minimum_outdoor_air_temperature_in_heating_mode", "maximum_outdoor_air_temperature_in_heating_mode",
+                "reference_outdoor_unit_superheating", "reference_outdoor_unit_subcooling",
+                "refrigerant_temperature_control_algorithm_for_indoor_unit", "reference_evaporating_temperature_for_indoor_unit",
+                "reference_condensing_temperature_for_indoor_unit", "variable_evaporating_temperature_minimum_for_indoor_unit",
+                "variable_evaporating_temperature_maximum_for_indoor_unit", "variable_condensing_temperature_minimum_for_indoor_unit",
+                "variable_condensing_temperature_maximum_for_indoor_unit", "outdoor_unit_fan_power_per_unit_of_rated_evaporative_capacity",
+                "outdoor_unit_fan_flow_rate_per_unit_of_rated_evaporative_capacity",
+                "outdoor_unit_evaporating_temperature_function_of_superheating_curve_name",
+                "outdoor_unit_condensing_temperature_function_of_subcooling_curve_name",
+                "diameter_of_main_pipe_connecting_outdoor_unit_to_the_first_branch_joint",
+                "length_of_main_pipe_connecting_outdoor_unit_to_the_first_branch_joint",
+                "equivalent_length_of_main_pipe_connecting_outdoor_unit_to_the_first_branch_joint",
+                "height_difference_between_outdoor_unit_and_indoor_units", "main_pipe_insulation_thickness",
+                "main_pipe_insulation_thermal_conductivity", "crankcase_heater_power_per_compressor", "number_of_compressors",
+                "ratio_of_compressor_size_to_total_compressor_capacity", "maximum_outdoor_dry_bulb_temperature_for_crankcase_heater",
+                "defrost_strategy", "defrost_control", "defrost_energy_input_ratio_modifier_function_of_temperature_curve_name",
+                "defrost_time_period_fraction", "resistive_defrost_heater_capacity", "maximum_outdoor_dry_bulb_temperature_for_defrost_operation",
+                "compressor_maximum_delta_pressure", "number_of_compressor_loading_index_entries"};
+            static constexpr std::array<std::string_view, 31> vrfFluidCtrlNumericFields = {
+                "rated_evaporative_capacity", "rated_compressor_power_per_unit_of_rated_evaporative_capacity",
+                "minimum_outdoor_air_temperature_in_cooling_mode", "maximum_outdoor_air_temperature_in_cooling_mode",
+                "minimum_outdoor_air_temperature_in_heating_mode", "maximum_outdoor_air_temperature_in_heating_mode",
+                "reference_outdoor_unit_superheating", "reference_outdoor_unit_subcooling", "reference_evaporating_temperature_for_indoor_unit",
+                "reference_condensing_temperature_for_indoor_unit", "variable_evaporating_temperature_minimum_for_indoor_unit",
+                "variable_evaporating_temperature_maximum_for_indoor_unit", "variable_condensing_temperature_minimum_for_indoor_unit",
+                "variable_condensing_temperature_maximum_for_indoor_unit", "outdoor_unit_fan_power_per_unit_of_rated_evaporative_capacity",
+                "outdoor_unit_fan_flow_rate_per_unit_of_rated_evaporative_capacity",
+                "diameter_of_main_pipe_connecting_outdoor_unit_to_the_first_branch_joint",
+                "length_of_main_pipe_connecting_outdoor_unit_to_the_first_branch_joint",
+                "equivalent_length_of_main_pipe_connecting_outdoor_unit_to_the_first_branch_joint",
+                "height_difference_between_outdoor_unit_and_indoor_units", "main_pipe_insulation_thickness",
+                "main_pipe_insulation_thermal_conductivity", "crankcase_heater_power_per_compressor", "number_of_compressors",
+                "ratio_of_compressor_size_to_total_compressor_capacity", "maximum_outdoor_dry_bulb_temperature_for_crankcase_heater",
+                "defrost_time_period_fraction", "resistive_defrost_heater_capacity", "maximum_outdoor_dry_bulb_temperature_for_defrost_operation",
+                "compressor_maximum_delta_pressure", "number_of_compressor_loading_index_entries"};
+            static constexpr std::array<std::string_view, 1> vrfFluidCtrlExtensibleNumericFields = {"compressor_speed_at_loading_index"};
+            static constexpr std::array<std::string_view, 2> vrfFluidCtrlExtensibleAlphaFields = {
+                "loading_index_evaporative_capacity_multiplier_function_of_temperature_curve_name",
+                "loading_index_compressor_power_multiplier_function_of_temperature_curve_name"};
+            static constexpr std::array<std::string_view, 10> vrfFluidCtrlHRAlphaFields = {
+                "name", "availability_schedule_name", "zone_terminal_unit_list_name", "refrigerant_type",
+                "refrigerant_temperature_control_algorithm_for_indoor_unit",
+                "outdoor_unit_evaporating_temperature_function_of_superheating_curve_name",
+                "outdoor_unit_condensing_temperature_function_of_subcooling_curve_name", "defrost_strategy", "defrost_control",
+                "defrost_energy_input_ratio_modifier_function_of_temperature_curve_name"};
+            static constexpr std::array<std::string_view, 58> vrfFluidCtrlHRLegacyFields = {
+                "name", "availability_schedule_name", "zone_terminal_unit_list_name", "refrigerant_type", "rated_evaporative_capacity",
+                "rated_compressor_power_per_unit_of_rated_evaporative_capacity", "minimum_outdoor_air_temperature_in_cooling_only_mode",
+                "maximum_outdoor_air_temperature_in_cooling_only_mode", "minimum_outdoor_air_temperature_in_heating_only_mode",
+                "maximum_outdoor_air_temperature_in_heating_only_mode", "minimum_outdoor_temperature_in_heat_recovery_mode",
+                "maximum_outdoor_temperature_in_heat_recovery_mode", "refrigerant_temperature_control_algorithm_for_indoor_unit",
+                "reference_evaporating_temperature_for_indoor_unit", "reference_condensing_temperature_for_indoor_unit",
+                "variable_evaporating_temperature_minimum_for_indoor_unit", "variable_evaporating_temperature_maximum_for_indoor_unit",
+                "variable_condensing_temperature_minimum_for_indoor_unit", "variable_condensing_temperature_maximum_for_indoor_unit",
+                "outdoor_unit_evaporator_reference_superheating", "outdoor_unit_condenser_reference_subcooling",
+                "outdoor_unit_evaporator_rated_bypass_factor", "outdoor_unit_condenser_rated_bypass_factor",
+                "difference_between_outdoor_unit_evaporating_temperature_and_outdoor_air_temperature_in_heat_recovery_mode",
+                "outdoor_unit_heat_exchanger_capacity_ratio", "outdoor_unit_fan_power_per_unit_of_rated_evaporative_capacity",
+                "outdoor_unit_fan_flow_rate_per_unit_of_rated_evaporative_capacity",
+                "outdoor_unit_evaporating_temperature_function_of_superheating_curve_name",
+                "outdoor_unit_condensing_temperature_function_of_subcooling_curve_name", "diameter_of_main_pipe_for_suction_gas",
+                "diameter_of_main_pipe_for_discharge_gas", "length_of_main_pipe_connecting_outdoor_unit_to_the_first_branch_joint",
+                "equivalent_length_of_main_pipe_connecting_outdoor_unit_to_the_first_branch_joint",
+                "height_difference_between_outdoor_unit_and_indoor_units", "main_pipe_insulation_thickness",
+                "main_pipe_insulation_thermal_conductivity", "crankcase_heater_power_per_compressor", "number_of_compressors",
+                "ratio_of_compressor_size_to_total_compressor_capacity", "maximum_outdoor_dry_bulb_temperature_for_crankcase_heater",
+                "defrost_strategy", "defrost_control", "defrost_energy_input_ratio_modifier_function_of_temperature_curve_name",
+                "defrost_time_period_fraction", "resistive_defrost_heater_capacity", "maximum_outdoor_dry_bulb_temperature_for_defrost_operation",
+                "initial_heat_recovery_cooling_capacity_fraction", "heat_recovery_cooling_capacity_time_constant",
+                "initial_heat_recovery_cooling_energy_fraction", "heat_recovery_cooling_energy_time_constant",
+                "initial_heat_recovery_heating_capacity_fraction", "heat_recovery_heating_capacity_time_constant",
+                "initial_heat_recovery_heating_energy_fraction", "heat_recovery_heating_energy_time_constant", "compressor_maximum_delta_pressure",
+                "compressor_inverter_efficiency", "compressor_evaporative_capacity_correction_factor", "number_of_compressor_loading_index_entries"};
+            static constexpr std::array<std::string_view, 48> vrfFluidCtrlHRNumericFields = {
+                "rated_evaporative_capacity", "rated_compressor_power_per_unit_of_rated_evaporative_capacity",
+                "minimum_outdoor_air_temperature_in_cooling_only_mode", "maximum_outdoor_air_temperature_in_cooling_only_mode",
+                "minimum_outdoor_air_temperature_in_heating_only_mode", "maximum_outdoor_air_temperature_in_heating_only_mode",
+                "minimum_outdoor_temperature_in_heat_recovery_mode", "maximum_outdoor_temperature_in_heat_recovery_mode",
+                "reference_evaporating_temperature_for_indoor_unit", "reference_condensing_temperature_for_indoor_unit",
+                "variable_evaporating_temperature_minimum_for_indoor_unit", "variable_evaporating_temperature_maximum_for_indoor_unit",
+                "variable_condensing_temperature_minimum_for_indoor_unit", "variable_condensing_temperature_maximum_for_indoor_unit",
+                "outdoor_unit_evaporator_reference_superheating", "outdoor_unit_condenser_reference_subcooling",
+                "outdoor_unit_evaporator_rated_bypass_factor", "outdoor_unit_condenser_rated_bypass_factor",
+                "difference_between_outdoor_unit_evaporating_temperature_and_outdoor_air_temperature_in_heat_recovery_mode",
+                "outdoor_unit_heat_exchanger_capacity_ratio", "outdoor_unit_fan_power_per_unit_of_rated_evaporative_capacity",
+                "outdoor_unit_fan_flow_rate_per_unit_of_rated_evaporative_capacity", "diameter_of_main_pipe_for_suction_gas",
+                "diameter_of_main_pipe_for_discharge_gas", "length_of_main_pipe_connecting_outdoor_unit_to_the_first_branch_joint",
+                "equivalent_length_of_main_pipe_connecting_outdoor_unit_to_the_first_branch_joint",
+                "height_difference_between_outdoor_unit_and_indoor_units", "main_pipe_insulation_thickness",
+                "main_pipe_insulation_thermal_conductivity", "crankcase_heater_power_per_compressor", "number_of_compressors",
+                "ratio_of_compressor_size_to_total_compressor_capacity", "maximum_outdoor_dry_bulb_temperature_for_crankcase_heater",
+                "defrost_time_period_fraction", "resistive_defrost_heater_capacity", "maximum_outdoor_dry_bulb_temperature_for_defrost_operation",
+                "initial_heat_recovery_cooling_capacity_fraction", "heat_recovery_cooling_capacity_time_constant",
+                "initial_heat_recovery_cooling_energy_fraction", "heat_recovery_cooling_energy_time_constant",
+                "initial_heat_recovery_heating_capacity_fraction", "heat_recovery_heating_capacity_time_constant",
+                "initial_heat_recovery_heating_energy_fraction", "heat_recovery_heating_energy_time_constant",
+                "compressor_maximum_delta_pressure", "compressor_inverter_efficiency", "compressor_evaporative_capacity_correction_factor",
+                "number_of_compressor_loading_index_entries"};
+            static constexpr std::array<std::string_view, 21> vrfTerminalUnitAlphaFields = {
+                "name", "terminal_unit_availability_schedule", "terminal_unit_air_inlet_node_name", "terminal_unit_air_outlet_node_name",
+                "supply_air_fan_operating_mode_schedule_name", "supply_air_fan_placement", "supply_air_fan_object_type",
+                "supply_air_fan_object_name", "outside_air_mixer_object_type", "outside_air_mixer_object_name", "cooling_coil_object_type",
+                "cooling_coil_object_name", "heating_coil_object_type", "heating_coil_object_name", "availability_manager_list_name",
+                "design_specification_zonehvac_sizing_object_name", "supplemental_heating_coil_object_type", "supplemental_heating_coil_name",
+                "controlling_zone_or_thermostat_location", "design_specification_multispeed_object_type",
+                "design_specification_multispeed_object_name"};
+            static constexpr std::array<std::string_view, 33> vrfTerminalUnitLegacyFields = {
+                "name", "terminal_unit_availability_schedule", "terminal_unit_air_inlet_node_name", "terminal_unit_air_outlet_node_name",
+                "cooling_supply_air_flow_rate", "no_cooling_supply_air_flow_rate", "heating_supply_air_flow_rate", "no_heating_supply_air_flow_rate",
+                "cooling_outdoor_air_flow_rate", "heating_outdoor_air_flow_rate", "no_load_outdoor_air_flow_rate",
+                "supply_air_fan_operating_mode_schedule_name", "supply_air_fan_placement", "supply_air_fan_object_type", "supply_air_fan_object_name",
+                "outside_air_mixer_object_type", "outside_air_mixer_object_name", "cooling_coil_object_type", "cooling_coil_object_name",
+                "heating_coil_object_type", "heating_coil_object_name", "zone_terminal_unit_on_parasitic_electric_energy_use",
+                "zone_terminal_unit_off_parasitic_electric_energy_use", "rated_heating_capacity_sizing_ratio", "availability_manager_list_name",
+                "design_specification_zonehvac_sizing_object_name", "supplemental_heating_coil_object_type", "supplemental_heating_coil_name",
+                "maximum_supply_air_temperature_from_supplemental_heater", "maximum_outdoor_dry_bulb_temperature_for_supplemental_heater_operation",
+                "controlling_zone_or_thermostat_location", "design_specification_multispeed_object_type", "design_specification_multispeed_object_name"};
+            static constexpr std::array<std::string_view, 12> vrfTerminalUnitNumericFields = {
+                "cooling_supply_air_flow_rate", "no_cooling_supply_air_flow_rate", "heating_supply_air_flow_rate", "no_heating_supply_air_flow_rate",
+                "cooling_outdoor_air_flow_rate", "heating_outdoor_air_flow_rate", "no_load_outdoor_air_flow_rate",
+                "zone_terminal_unit_on_parasitic_electric_energy_use", "zone_terminal_unit_off_parasitic_electric_energy_use",
+                "rated_heating_capacity_sizing_ratio", "maximum_supply_air_temperature_from_supplemental_heater",
+                "maximum_outdoor_dry_bulb_temperature_for_supplemental_heater_operation"};
+
+            if (objectType == "ZoneTerminalUnitList") {
+                addFieldSet(zoneTerminalUnitListAlphaFields, schemaObjProps, objectFields, "zone_terminal_unit_list_name");
+                addExtensibleFieldSet("terminal_units", noNumericFields, zoneTerminalUnitListExtensibleAlphaFields);
+                recalcCounts(zoneTerminalUnitListLegacyFields,
+                             noNumericFields,
+                             "zone_terminal_unit_list_name",
+                             "terminal_units",
+                             0,
+                             zoneTerminalUnitListExtensibleAlphaFields.size());
+            } else if (objectType == "AirConditioner:VariableRefrigerantFlow") {
+                addFieldSet(vrfSysCurveAlphaFields, schemaObjProps, objectFields, "name");
+                addNumericFieldSet(vrfSysCurveNumericFields, schemaObjProps, objectFields);
+                recalcCounts(vrfSysCurveLegacyFields, vrfSysCurveNumericFields, "name");
+            } else if (objectType == "AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl") {
+                addFieldSet(vrfFluidCtrlAlphaFields, schemaObjProps, objectFields, "heat_pump_name");
+                addNumericFieldSet(vrfFluidCtrlNumericFields, schemaObjProps, objectFields);
+                addExtensibleFieldSet("loading_indices", vrfFluidCtrlExtensibleNumericFields, vrfFluidCtrlExtensibleAlphaFields);
+                recalcCounts(vrfFluidCtrlLegacyFields,
+                             vrfFluidCtrlNumericFields,
+                             "heat_pump_name",
+                             "loading_indices",
+                             vrfFluidCtrlExtensibleNumericFields.size(),
+                             vrfFluidCtrlExtensibleAlphaFields.size());
+            } else if (objectType == "AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl:HR") {
+                addFieldSet(vrfFluidCtrlHRAlphaFields, schemaObjProps, objectFields, "name");
+                addNumericFieldSet(vrfFluidCtrlHRNumericFields, schemaObjProps, objectFields);
+                addExtensibleFieldSet("loading_indices", vrfFluidCtrlExtensibleNumericFields, vrfFluidCtrlExtensibleAlphaFields);
+                recalcCounts(vrfFluidCtrlHRLegacyFields,
+                             vrfFluidCtrlHRNumericFields,
+                             "name",
+                             "loading_indices",
+                             vrfFluidCtrlExtensibleNumericFields.size(),
+                             vrfFluidCtrlExtensibleAlphaFields.size());
+            } else if (objectType == "ZoneHVAC:TerminalUnit:VariableRefrigerantFlow") {
+                addFieldSet(vrfTerminalUnitAlphaFields, schemaObjProps, objectFields, "name");
+                addNumericFieldSet(vrfTerminalUnitNumericFields, schemaObjProps, objectFields);
+                recalcCounts(vrfTerminalUnitLegacyFields, vrfTerminalUnitNumericFields, "name");
+            } else {
+                ShowFatalError(state, fmt::format("Unsupported keyed-object VRF refactor path for {}", objectType));
+            }
+        };
+
     // read all terminal unit list objects
     cCurrentModuleObject = "ZoneTerminalUnitList";
-    for (int TUListNum = 1; TUListNum <= state.dataHVACVarRefFlow->NumVRFTULists; ++TUListNum) {
-        state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                 cCurrentModuleObject,
-                                                                 TUListNum,
-                                                                 cAlphaArgs,
-                                                                 NumAlphas,
-                                                                 rNumericArgs,
-                                                                 NumNums,
-                                                                 IOStat,
-                                                                 lNumericFieldBlanks,
-                                                                 lAlphaFieldBlanks,
-                                                                 cAlphaFieldNames,
-                                                                 cNumericFieldNames);
+    auto const terminalUnitLists = inputProcessor->epJSON.find(cCurrentModuleObject);
+    int TUListNum = 0;
+    if (terminalUnitLists != inputProcessor->epJSON.end()) {
+        for (auto const &terminalUnitListInstance : terminalUnitLists.value().items()) {
+            ++TUListNum;
+            inputProcessor->markObjectAsUsed(cCurrentModuleObject, terminalUnitListInstance.key());
+            populateLegacyArgsFromKeyedObject(cCurrentModuleObject, terminalUnitListInstance.key(), terminalUnitListInstance.value(), NumAlphas, NumNums);
 
-        auto &thisTUList = state.dataHVACVarRefFlow->TerminalUnitList(TUListNum);
-        thisTUList.Name = cAlphaArgs(1);
-        thisTUList.NumTUInList = NumAlphas - 1;
-        thisTUList.ZoneTUPtr.allocate(thisTUList.NumTUInList);
-        thisTUList.ZoneTUName.allocate(thisTUList.NumTUInList);
-        thisTUList.IsSimulated.allocate(thisTUList.NumTUInList);
-        thisTUList.TotalCoolLoad.allocate(thisTUList.NumTUInList);
-        thisTUList.TotalHeatLoad.allocate(thisTUList.NumTUInList);
-        thisTUList.CoolingCoilPresent.allocate(thisTUList.NumTUInList);
-        thisTUList.HeatingCoilPresent.allocate(thisTUList.NumTUInList);
-        thisTUList.TerminalUnitNotSizedYet.allocate(thisTUList.NumTUInList);
-        thisTUList.HRHeatRequest.allocate(thisTUList.NumTUInList);
-        thisTUList.HRCoolRequest.allocate(thisTUList.NumTUInList);
-        thisTUList.CoolingCoilAvailable.allocate(thisTUList.NumTUInList);
-        thisTUList.HeatingCoilAvailable.allocate(thisTUList.NumTUInList);
-        thisTUList.coolingCoilAvailScheds.allocate(thisTUList.NumTUInList);
-        thisTUList.heatingCoilAvailScheds.allocate(thisTUList.NumTUInList);
-        thisTUList.ZoneTUPtr = 0;
-        thisTUList.IsSimulated = false;
-        thisTUList.TotalCoolLoad = 0.0;
-        thisTUList.TotalHeatLoad = 0.0;
-        thisTUList.CoolingCoilPresent = true;
-        thisTUList.HeatingCoilPresent = true;
-        thisTUList.TerminalUnitNotSizedYet = true;
-        thisTUList.HRHeatRequest = false;
-        thisTUList.HRCoolRequest = false;
-        thisTUList.CoolingCoilAvailable = false;
-        thisTUList.HeatingCoilAvailable = false;
-        thisTUList.coolingCoilAvailScheds = nullptr;
-        thisTUList.heatingCoilAvailScheds = nullptr;
+            auto &thisTUList = state.dataHVACVarRefFlow->TerminalUnitList(TUListNum);
+            thisTUList.Name = cAlphaArgs(1);
+            thisTUList.NumTUInList = NumAlphas - 1;
+            thisTUList.ZoneTUPtr.allocate(thisTUList.NumTUInList);
+            thisTUList.ZoneTUName.allocate(thisTUList.NumTUInList);
+            thisTUList.IsSimulated.allocate(thisTUList.NumTUInList);
+            thisTUList.TotalCoolLoad.allocate(thisTUList.NumTUInList);
+            thisTUList.TotalHeatLoad.allocate(thisTUList.NumTUInList);
+            thisTUList.CoolingCoilPresent.allocate(thisTUList.NumTUInList);
+            thisTUList.HeatingCoilPresent.allocate(thisTUList.NumTUInList);
+            thisTUList.TerminalUnitNotSizedYet.allocate(thisTUList.NumTUInList);
+            thisTUList.HRHeatRequest.allocate(thisTUList.NumTUInList);
+            thisTUList.HRCoolRequest.allocate(thisTUList.NumTUInList);
+            thisTUList.CoolingCoilAvailable.allocate(thisTUList.NumTUInList);
+            thisTUList.HeatingCoilAvailable.allocate(thisTUList.NumTUInList);
+            thisTUList.coolingCoilAvailScheds.allocate(thisTUList.NumTUInList);
+            thisTUList.heatingCoilAvailScheds.allocate(thisTUList.NumTUInList);
+            thisTUList.ZoneTUPtr = 0;
+            thisTUList.IsSimulated = false;
+            thisTUList.TotalCoolLoad = 0.0;
+            thisTUList.TotalHeatLoad = 0.0;
+            thisTUList.CoolingCoilPresent = true;
+            thisTUList.HeatingCoilPresent = true;
+            thisTUList.TerminalUnitNotSizedYet = true;
+            thisTUList.HRHeatRequest = false;
+            thisTUList.HRCoolRequest = false;
+            thisTUList.CoolingCoilAvailable = false;
+            thisTUList.HeatingCoilAvailable = false;
+            thisTUList.coolingCoilAvailScheds = nullptr;
+            thisTUList.heatingCoilAvailScheds = nullptr;
 
-        for (int TUNum = 1; TUNum <= thisTUList.NumTUInList; ++TUNum) {
-            thisTUList.ZoneTUName(TUNum) = cAlphaArgs(TUNum + 1);
+            for (int TUNum = 1; TUNum <= thisTUList.NumTUInList; ++TUNum) {
+                thisTUList.ZoneTUName(TUNum) = cAlphaArgs(TUNum + 1);
+            }
         }
     }
 
@@ -1639,28 +1995,22 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
 
     // read all VRF condenser objects: Algorithm Type 1_system curve based model
     cCurrentModuleObject = "AirConditioner:VariableRefrigerantFlow";
-    for (int VRFNum = 1; VRFNum <= state.dataHVACVarRefFlow->NumVRFCond_SysCurve; ++VRFNum) {
-        state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                 cCurrentModuleObject,
-                                                                 VRFNum,
-                                                                 cAlphaArgs,
-                                                                 NumAlphas,
-                                                                 rNumericArgs,
-                                                                 NumNums,
-                                                                 IOStat,
-                                                                 lNumericFieldBlanks,
-                                                                 lAlphaFieldBlanks,
-                                                                 cAlphaFieldNames,
-                                                                 cNumericFieldNames);
+    auto const vrfSysCurveObjects = inputProcessor->epJSON.find(cCurrentModuleObject);
+    int VRFNum = 0;
+    if (vrfSysCurveObjects != inputProcessor->epJSON.end()) {
+        for (auto const &vrfInstance : vrfSysCurveObjects.value().items()) {
+            ++VRFNum;
+            inputProcessor->markObjectAsUsed(cCurrentModuleObject, vrfInstance.key());
+            populateLegacyArgsFromKeyedObject(cCurrentModuleObject, vrfInstance.key(), vrfInstance.value(), NumAlphas, NumNums);
 
-        ErrorObjectHeader eoh{routineName, cCurrentModuleObject, cAlphaArgs(1)};
-        GlobalNames::VerifyUniqueInterObjectName(
-            state, state.dataHVACVarRefFlow->VrfUniqueNames, cAlphaArgs(1), cCurrentModuleObject, cAlphaFieldNames(1), ErrorsFound);
+            ErrorObjectHeader eoh{routineName, cCurrentModuleObject, cAlphaArgs(1)};
+            GlobalNames::VerifyUniqueInterObjectName(
+                state, state.dataHVACVarRefFlow->VrfUniqueNames, cAlphaArgs(1), cCurrentModuleObject, cAlphaFieldNames(1), ErrorsFound);
 
-        auto &thisVrfSys = state.dataHVACVarRefFlow->VRF(VRFNum);
-        thisVrfSys.Name = cAlphaArgs(1);
-        thisVrfSys.VRFSystemTypeNum = VRF_HeatPump;
-        thisVrfSys.VRFAlgorithmType = AlgorithmType::SysCurve;
+            auto &thisVrfSys = state.dataHVACVarRefFlow->VRF(VRFNum);
+            thisVrfSys.Name = cAlphaArgs(1);
+            thisVrfSys.VRFSystemTypeNum = VRF_HeatPump;
+            thisVrfSys.VRFAlgorithmType = AlgorithmType::SysCurve;
 
         if (lAlphaFieldBlanks(2)) {
             thisVrfSys.availSched = Sched::GetScheduleAlwaysOn(state);
@@ -2479,23 +2829,17 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
             thisVrfSys.HRHeatEIRTC = rNumericArgs(38);
         }
     }
+    }
 
     // Read all VRF condenser objects: Algorithm Type 2_physics based model (VRF-FluidTCtrl-HP)
     cCurrentModuleObject = "AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl";
-    for (int thisNum = 1; thisNum <= state.dataHVACVarRefFlow->NumVRFCond_FluidTCtrl_HP; ++thisNum) {
-
-        state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                 cCurrentModuleObject,
-                                                                 thisNum,
-                                                                 cAlphaArgs,
-                                                                 NumAlphas,
-                                                                 rNumericArgs,
-                                                                 NumNums,
-                                                                 IOStat,
-                                                                 lNumericFieldBlanks,
-                                                                 lAlphaFieldBlanks,
-                                                                 cAlphaFieldNames,
-                                                                 cNumericFieldNames);
+    auto const vrfFluidControlObjects = inputProcessor->epJSON.find(cCurrentModuleObject);
+    int thisNum = 0;
+    if (vrfFluidControlObjects != inputProcessor->epJSON.end()) {
+        for (auto const &vrfInstance : vrfFluidControlObjects.value().items()) {
+            ++thisNum;
+            inputProcessor->markObjectAsUsed(cCurrentModuleObject, vrfInstance.key());
+            populateLegacyArgsFromKeyedObject(cCurrentModuleObject, vrfInstance.key(), vrfInstance.value(), NumAlphas, NumNums);
 
         ErrorObjectHeader eoh{routineName, cCurrentModuleObject, cAlphaArgs(1)};
 
@@ -2877,23 +3221,17 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
             }
         }
     }
+    }
 
     // Read all VRF condenser objects: Algorithm Type 2_physics based model (VRF-FluidTCtrl-HR)
     cCurrentModuleObject = "AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl:HR";
-    for (int thisNum = 1; thisNum <= state.dataHVACVarRefFlow->NumVRFCond_FluidTCtrl_HR; ++thisNum) {
-
-        state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                 cCurrentModuleObject,
-                                                                 thisNum,
-                                                                 cAlphaArgs,
-                                                                 NumAlphas,
-                                                                 rNumericArgs,
-                                                                 NumNums,
-                                                                 IOStat,
-                                                                 lNumericFieldBlanks,
-                                                                 lAlphaFieldBlanks,
-                                                                 cAlphaFieldNames,
-                                                                 cNumericFieldNames);
+    auto const vrfFluidControlHRObjects = inputProcessor->epJSON.find(cCurrentModuleObject);
+    thisNum = 0;
+    if (vrfFluidControlHRObjects != inputProcessor->epJSON.end()) {
+        for (auto const &vrfInstance : vrfFluidControlHRObjects.value().items()) {
+            ++thisNum;
+            inputProcessor->markObjectAsUsed(cCurrentModuleObject, vrfInstance.key());
+            populateLegacyArgsFromKeyedObject(cCurrentModuleObject, vrfInstance.key(), vrfInstance.value(), NumAlphas, NumNums);
 
         ErrorObjectHeader eoh{routineName, cCurrentModuleObject, cAlphaArgs(1)};
 
@@ -3325,9 +3663,16 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
             }
         }
     }
+    }
 
     cCurrentModuleObject = "ZoneHVAC:TerminalUnit:VariableRefrigerantFlow";
-    for (int VRFTUNum = 1; VRFTUNum <= state.dataHVACVarRefFlow->NumVRFTU; ++VRFTUNum) {
+    auto const vrfTerminalUnitObjects = inputProcessor->epJSON.find(cCurrentModuleObject);
+    int VRFTUNum = 0;
+    if (vrfTerminalUnitObjects != inputProcessor->epJSON.end()) {
+        for (auto const &vrfTUInstance : vrfTerminalUnitObjects.value().items()) {
+            ++VRFTUNum;
+            inputProcessor->markObjectAsUsed(cCurrentModuleObject, vrfTUInstance.key());
+            populateLegacyArgsFromKeyedObject(cCurrentModuleObject, vrfTUInstance.key(), vrfTUInstance.value(), NumAlphas, NumNums);
 
         //     initialize local node number variables
         int CCoilInletNodeNum = 0;
@@ -3335,19 +3680,6 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         int HCoilInletNodeNum = 0;
         int HCoilOutletNodeNum = 0;
         OANodeNums = 0;
-
-        state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                 cCurrentModuleObject,
-                                                                 VRFTUNum,
-                                                                 cAlphaArgs,
-                                                                 NumAlphas,
-                                                                 rNumericArgs,
-                                                                 NumNums,
-                                                                 IOStat,
-                                                                 lNumericFieldBlanks,
-                                                                 lAlphaFieldBlanks,
-                                                                 cAlphaFieldNames,
-                                                                 cNumericFieldNames);
 
         ErrorObjectHeader eoh{routineName, cCurrentModuleObject, cAlphaArgs(1)};
 
@@ -3368,7 +3700,7 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
             }
         }
         if (thisVrfTU.TUListIndex == 0) {
-            ShowSevereError(state, cCurrentModuleObject + " = " + thisVrfTU.Name);
+            ShowSevereError(state, cCurrentModuleObject + " = " + thisVrfTU.Name + " [TU list lookup]");
             ShowContinueError(state, "Terminal unit not found on any ZoneTerminalUnitList.");
             ErrorsFound = true;
         }
@@ -3448,7 +3780,7 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
                 ErrorsFound = true;
 
             } else if (thisVrfTU.fanType != state.dataFans->fans(thisVrfTU.FanIndex)->type) {
-                ShowSevereError(state, cCurrentModuleObject + " = " + thisVrfTU.Name);
+                ShowSevereError(state, cCurrentModuleObject + " = " + thisVrfTU.Name + " [fan type mismatch]");
                 ShowContinueError(state, "Fan type specified = " + cAlphaArgs(7));
                 ShowContinueError(state, EnergyPlus::format("Actual type of fan {} = {}", FanName, HVAC::fanTypeNames[(int)thisVrfTU.fanType]));
                 ErrorsFound = true;
@@ -3458,7 +3790,7 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
                 // VRFTU Supply Air Fan Object Type must be Fan:VariableVolume if VRF Algorithm Type is AlgorithmTypeFluidTCtrl
                 if (state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).VRFAlgorithmType == AlgorithmType::FluidTCtrl &&
                     !(thisVrfTU.fanType == HVAC::FanType::VAV || thisVrfTU.fanType == HVAC::FanType::SystemModel)) {
-                    ShowSevereError(state, cCurrentModuleObject + " = " + thisVrfTU.Name);
+                    ShowSevereError(state, cCurrentModuleObject + " = " + thisVrfTU.Name + " [fluid control fan type]");
                     ShowContinueError(state, "Fan type specified = " + cAlphaArgs(7));
                     ShowContinueError(
                         state, "Fan Object Type must be Fan:VariableVolume if VRF AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl");
@@ -3469,7 +3801,7 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
                 if (state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).VRFAlgorithmType == AlgorithmType::SysCurve &&
                     !(thisVrfTU.fanType == HVAC::FanType::OnOff || thisVrfTU.fanType == HVAC::FanType::Constant ||
                       thisVrfTU.fanType == HVAC::FanType::SystemModel)) {
-                    ShowSevereError(state, cCurrentModuleObject + " = " + thisVrfTU.Name);
+                    ShowSevereError(state, cCurrentModuleObject + " = " + thisVrfTU.Name + " [sys curve fan type]");
                     ShowContinueError(state, "Fan type specified = " + cAlphaArgs(7));
                     ShowContinueError(state,
                                       "Fan Object Type must be Fan:SystemModel, Fan:OnOff, or Fan:ConstantVolume if VRF "
@@ -4708,6 +5040,7 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
                 }
             }
         }
+    }
     }
 
     //   warn when number of ZoneTerminalUnitList different from number of AirConditioner:VariableRefrigerantFlow
