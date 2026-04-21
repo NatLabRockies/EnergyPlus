@@ -1,7 +1,7 @@
 name: Self-Hosted Build and Test
 
 on:
-  push:
+  pull_request:
     branches: [ develop ]
   workflow_dispatch:
     inputs:
@@ -10,32 +10,127 @@ on:
         required: false
         default: ""
 
+env:
+  PYTHON_REQUIRED_VERSION: "3.12.2"
+  FC: gfortran-13
+
 jobs:
-  build_and_test:
-    name: Build and Test (Ubuntu matrix)
+  coverage:
+    name: Coverage (${{ matrix.coverage.name }})
     strategy:
       fail-fast: false
       matrix:
         runner:
           - [self-hosted, linux, x64, ubuntu-24.04]
+        coverage:
+          - name: "Unit Tests"
+            build_dir: build-unit-coverage
+            ctest_selection_flag: -E
+            ctest_selection_pattern: "integration.*"
+            coveralls_flag: unit-tests
+            artifact_name: unit_test_coverage_results
+          - name: "Integration Tests"
+            build_dir: build-integration-coverage
+            ctest_selection_flag: -R
+            ctest_selection_pattern: "integration.*"
+            coveralls_flag: integration-tests
+            artifact_name: integration_test_coverage_results
     runs-on: ${{ matrix.runner }}
     steps:
+      - name: Set up Python ${{ env.PYTHON_REQUIRED_VERSION }}
+        id: setup-python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_REQUIRED_VERSION }}
+
+      - name: Install Linux coverage dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxkbcommon-x11-0 xorg-dev libgl1-mesa-dev lcov gcovr
+          echo "FC=gfortran-13" >> "$GITHUB_ENV"
+
       - name: Checkout EnergyPlus
         uses: actions/checkout@v6
         with:
           ref: ${{ github.event.inputs.ref || github.ref }}
 
-      - name: Configure
+      - name: Configure ${{ matrix.coverage.name }}
         run: >
-          cmake -S . -B build
+          cmake -S . -B ${{ matrix.coverage.build_dir }}
           -G "Unix Makefiles"
-          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          -DLINK_WITH_PYTHON:BOOL=ON
+          -DPYTHON_CLI:BOOL=OFF
+          -DPython_REQUIRED_VERSION:STRING=${{ steps.setup-python.outputs.python-version }}
+          -DPython_ROOT_DIR:PATH=$RUNNER_TOOL_CACHE/Python/${{ steps.setup-python.outputs.python-version }}/x64/
+          -DBUILD_FORTRAN:BOOL=ON
           -DBUILD_TESTING=ON
           -DBUILD_PACKAGE=OFF
           -DDOCUMENTATION_BUILD=DoNotBuild
+          -DENABLE_REGRESSION_TESTING:BOOL=OFF
+          -DENABLE_COVERAGE:BOOL=ON
+          -DENABLE_GTEST_DEBUG_MODE:BOOL=OFF
+          -DENABLE_PCH:BOOL=OFF
+          -DFORCE_DEBUG_ARITHM_GCC_OR_CLANG:BOOL=ON
+          -DCOMMIT_SHA:STRING=$(git rev-parse HEAD)
 
-      - name: Build
-        run: cmake --build build -j "$(nproc)"
+      - name: Build ${{ matrix.coverage.name }}
+        run: cmake --build ${{ matrix.coverage.build_dir }} -j "$(nproc)"
 
-      - name: Run tests
-        run: ctest --test-dir build -j "$(nproc)"
+      - name: Run ${{ matrix.coverage.name }}
+        run: >
+          ctest
+          --test-dir ${{ matrix.coverage.build_dir }}
+          ${{ matrix.coverage.ctest_selection_flag }} "${{ matrix.coverage.ctest_selection_pattern }}"
+          --output-on-failure
+          -j "$(nproc)"
+
+      - name: Generate raw ${{ matrix.coverage.name }} coverage results
+        working-directory: ${{ matrix.coverage.build_dir }}
+        run: lcov -c -d . -o ./lcov.output --no-external --base-directory ../src/EnergyPlus/
+
+      - name: Generate filtered ${{ matrix.coverage.name }} coverage results
+        working-directory: ${{ matrix.coverage.build_dir }}
+        run: lcov -r ./lcov.output "${{ github.workspace }}/${{ matrix.coverage.build_dir }}/*" -o lcov.output.filtered
+
+      - name: Generate HTML ${{ matrix.coverage.name }} coverage results
+        working-directory: ${{ matrix.coverage.build_dir }}
+        run: genhtml ./lcov.output.filtered -o lcov-html --demangle-cpp --function-coverage | tee cover.txt
+
+      - name: Process ${{ matrix.coverage.name }} coverage summary
+        working-directory: ${{ matrix.coverage.build_dir }}
+        run: python ${{ github.workspace }}/scripts/dev/gha_coverage_summary.py
+
+      - name: Add ${{ matrix.coverage.name }} coverage summary to job summary
+        run: echo "$(cat ${{ github.workspace }}/${{ matrix.coverage.build_dir }}/cover.md)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload ${{ matrix.coverage.name }} coverage to Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          file: ${{ github.workspace }}/${{ matrix.coverage.build_dir }}/lcov.output.filtered
+          format: lcov
+          flag-name: ${{ matrix.coverage.coveralls_flag }}
+          parallel: true
+          build-number: ${{ github.run_id }}
+
+      - name: Upload ${{ matrix.coverage.name }} coverage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.coverage.artifact_name }}
+          path: |
+            ${{ github.workspace }}/${{ matrix.coverage.build_dir }}/lcov.output.filtered
+            ${{ github.workspace }}/${{ matrix.coverage.build_dir }}/lcov-html
+
+  coveralls_finish:
+    name: Finish Coveralls Coverage Build
+    needs: coverage
+    if: ${{ always() }}
+    runs-on: [self-hosted, linux, x64, ubuntu-24.04]
+    steps:
+      - name: Close Coveralls parallel build
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          parallel-finished: true
+          build-number: ${{ github.run_id }}
