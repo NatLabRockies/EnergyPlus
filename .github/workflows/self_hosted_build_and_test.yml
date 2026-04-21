@@ -105,11 +105,27 @@ jobs:
         run: mkdir -p coverage/unit coverage/integration
 
       - name: Stage generated EnergyPlus sources for coverage
+        working-directory: ${{ env.BUILD_DIR }}
         run: |
           install -d "${{ github.workspace }}/src/EnergyPlus/embedded"
-          cp -f "${{ github.workspace }}/${{ env.BUILD_DIR }}/src/EnergyPlus/ConfiguredFunctions.cc" "${{ github.workspace }}/src/EnergyPlus/ConfiguredFunctions.cc"
-          cp -f "${{ github.workspace }}/${{ env.BUILD_DIR }}/src/EnergyPlus/DataStringGlobals.cc" "${{ github.workspace }}/src/EnergyPlus/DataStringGlobals.cc"
-          cp -f "${{ github.workspace }}/${{ env.BUILD_DIR }}/idd/embedded/EmbeddedEpJSONSchema.cc" "${{ github.workspace }}/src/EnergyPlus/embedded/EmbeddedEpJSONSchema.cc"
+          : > coverage/generated-source-patterns.txt
+          for generated in src/EnergyPlus/*.cc; do
+            [[ -e "${generated}" ]] || continue
+            target="${{ github.workspace }}/src/EnergyPlus/$(basename "${generated}")"
+            if [[ ! -e "${target}" ]]; then
+              cp -f "${generated}" "${target}"
+              echo "*/$(basename "${generated}")" >> coverage/generated-source-patterns.txt
+            fi
+          done
+          for generated in idd/embedded/*.cc; do
+            [[ -e "${generated}" ]] || continue
+            target="${{ github.workspace }}/src/EnergyPlus/embedded/$(basename "${generated}")"
+            if [[ ! -e "${target}" ]]; then
+              cp -f "${generated}" "${target}"
+              echo "*/embedded/$(basename "${generated}")" >> coverage/generated-source-patterns.txt
+            fi
+          done
+          sort -u -o coverage/generated-source-patterns.txt coverage/generated-source-patterns.txt
 
       - name: Generate raw unit test coverage results
         working-directory: ${{ env.BUILD_DIR }}
@@ -119,7 +135,12 @@ jobs:
         working-directory: ${{ env.BUILD_DIR }}
         run: |
           lcov -e coverage/unit/lcov.output "${{ github.workspace }}/src/EnergyPlus/*" -o coverage/unit/lcov.output.srconly
-          lcov -r coverage/unit/lcov.output.srconly "*/ConfiguredFunctions.cc" "*/DataStringGlobals.cc" -o coverage/unit/lcov.output.filtered
+          if [[ -s coverage/generated-source-patterns.txt ]]; then
+            mapfile -t generated_patterns < coverage/generated-source-patterns.txt
+            lcov -r coverage/unit/lcov.output.srconly "${generated_patterns[@]}" -o coverage/unit/lcov.output.filtered
+          else
+            cp -f coverage/unit/lcov.output.srconly coverage/unit/lcov.output.filtered
+          fi
 
       - name: Generate HTML unit test coverage results
         working-directory: ${{ env.BUILD_DIR }}
@@ -152,7 +173,12 @@ jobs:
         working-directory: ${{ env.BUILD_DIR }}
         run: |
           lcov -e coverage/integration/lcov.output "${{ github.workspace }}/src/EnergyPlus/*" -o coverage/integration/lcov.output.srconly
-          lcov -r coverage/integration/lcov.output.srconly "*/ConfiguredFunctions.cc" "*/DataStringGlobals.cc" -o coverage/integration/lcov.output.filtered
+          if [[ -s coverage/generated-source-patterns.txt ]]; then
+            mapfile -t generated_patterns < coverage/generated-source-patterns.txt
+            lcov -r coverage/integration/lcov.output.srconly "${generated_patterns[@]}" -o coverage/integration/lcov.output.filtered
+          else
+            cp -f coverage/integration/lcov.output.srconly coverage/integration/lcov.output.filtered
+          fi
 
       - name: Generate HTML integration test coverage results
         working-directory: ${{ env.BUILD_DIR }}
