@@ -13,56 +13,60 @@ on:
 env:
   PYTHON_REQUIRED_VERSION: "3.12.2"
   FC: gfortran-13
+  BUILD_DIR: build-coverage
+  INTEGRATION_EXCLUDE_REGEX: >-
+    ^integration\.(UnitaryHybridAC_DedicatedOutsideAir|HospitalLowEnergy|GSHP-GLHE-CalcGFunctions|HospitalBaselineReheatReportEMS|HospitalBaseline|RefBldgOutPatientNew2004_Chicago|ASHRAE901_ApartmentHighRise_STD2019_Denver|UnitarySystem_VariableSpeedDX_SZVAV|ASHRAE901_OutPatientHealthCare_STD2019_Denver|UnitarySystem_MultiSpeedDX_EconoStaging|RefBldgSecondarySchoolNew2004_Chicago|RefrigeratedWarehouse|HeatPumpWaterHeaterStratified|ASHRAE901_OfficeLarge_STD2019_Denver_Chiller205|ASHRAE901_OfficeLarge_STD2019_Denver_Chiller205_Detailed|_5ZoneAirCooled_LeapYear_annual|_5ZoneAirCooled_annual|_SmallOffice_Dulles|EcoroofOrlando|EcoroofOrlando_NoSitePrec)$
 
 jobs:
   coverage:
-    name: Coverage (${{ matrix.coverage.name }})
-    strategy:
-      fail-fast: false
-      matrix:
-        runner:
-          - [self-hosted, linux, x64, ubuntu-24.04]
-        coverage:
-          - name: "Unit Tests"
-            build_dir: build-unit-coverage
-            ctest_selection_flag: -E
-            ctest_selection_pattern: "integration.*"
-            coveralls_flag: unit-tests
-            artifact_name: unit_test_coverage_results
-          - name: "Integration Tests"
-            build_dir: build-integration-coverage
-            ctest_selection_flag: -R
-            ctest_selection_pattern: "integration.*"
-            coveralls_flag: integration-tests
-            artifact_name: integration_test_coverage_results
-    runs-on: ${{ matrix.runner }}
+    name: Coverage
+    runs-on: [self-hosted, linux, x64, ubuntu-24.04]
     steps:
-      - name: Set up Python ${{ env.PYTHON_REQUIRED_VERSION }}
-        id: setup-python
-        uses: actions/setup-python@v6
-        with:
-          python-version: ${{ env.PYTHON_REQUIRED_VERSION }}
-
-      - name: Install Linux coverage dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libxkbcommon-x11-0 xorg-dev libgl1-mesa-dev lcov gcovr
-          echo "FC=gfortran-13" >> "$GITHUB_ENV"
-
       - name: Checkout EnergyPlus
         uses: actions/checkout@v6
         with:
           ref: ${{ github.event.inputs.ref || github.ref }}
 
-      - name: Configure ${{ matrix.coverage.name }}
+      - name: Setup runner
+        id: setup-runner
+        uses: ./.github/actions/setup-runner
+        with:
+          python-version: ${{ env.PYTHON_REQUIRED_VERSION }}
+          python-arch: x64
+
+      - name: Restore ccache
+        uses: actions/cache/restore@v5
+        id: cacheccache-restore
+        with:
+          path: |
+            ${{ steps.setup-runner.outputs.ccache-dir }}
+          key: ccache-self-hosted-linux-${{ steps.setup-runner.outputs.compiler-id }}-${{ github.event.pull_request.head.ref || github.event.inputs.ref || github.ref_name }}-coverage
+          restore-keys: |
+            ccache-self-hosted-linux-${{ steps.setup-runner.outputs.compiler-id }}-${{ github.event.pull_request.head.ref || github.event.inputs.ref || github.ref_name }}
+            ccache-self-hosted-linux-${{ steps.setup-runner.outputs.compiler-id }}-
+            ccache-self-hosted-linux-
+
+      - name: Install Linux coverage tools
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get -qq install -y lcov gcovr
+
+      - name: Show restored ccache stats
+        shell: bash
+        run: |
+          ccache --show-stats -vv || ccache --show-stats
+          ccache --zero-stats
+          ccache -p
+
+      - name: Configure coverage build
         run: >
-          cmake -S . -B ${{ matrix.coverage.build_dir }}
+          cmake -S . -B ${{ env.BUILD_DIR }}
           -G "Unix Makefiles"
           -DCMAKE_BUILD_TYPE=RelWithDebInfo
           -DLINK_WITH_PYTHON:BOOL=ON
           -DPYTHON_CLI:BOOL=OFF
-          -DPython_REQUIRED_VERSION:STRING=${{ steps.setup-python.outputs.python-version }}
-          -DPython_ROOT_DIR:PATH=$RUNNER_TOOL_CACHE/Python/${{ steps.setup-python.outputs.python-version }}/x64/
+          -DPython_REQUIRED_VERSION:STRING=${{ env.PYTHON_REQUIRED_VERSION }}
+          -DPython_ROOT_DIR:PATH=${{ steps.setup-runner.outputs.python-root-dir }}
           -DBUILD_FORTRAN:BOOL=ON
           -DBUILD_TESTING=ON
           -DBUILD_PACKAGE=OFF
@@ -72,65 +76,129 @@ jobs:
           -DENABLE_GTEST_DEBUG_MODE:BOOL=OFF
           -DENABLE_PCH:BOOL=OFF
           -DFORCE_DEBUG_ARITHM_GCC_OR_CLANG:BOOL=ON
-          -DCOMMIT_SHA:STRING=$(git rev-parse HEAD)
+          -DCOMMIT_SHA:STRING="$(git rev-parse HEAD)"
 
-      - name: Build ${{ matrix.coverage.name }}
-        run: cmake --build ${{ matrix.coverage.build_dir }} -j "$(nproc)"
+      - name: Build coverage targets
+        run: cmake --build ${{ env.BUILD_DIR }} -j "${{ steps.setup-runner.outputs.nproc }}"
 
-      - name: Run ${{ matrix.coverage.name }}
+      - name: Show post-build ccache stats
+        shell: bash
+        run: ccache --show-stats -vv || ccache --show-stats
+
+      - name: Run unit tests
         run: >
           ctest
-          --test-dir ${{ matrix.coverage.build_dir }}
-          ${{ matrix.coverage.ctest_selection_flag }} "${{ matrix.coverage.ctest_selection_pattern }}"
+          --test-dir ${{ env.BUILD_DIR }}
+          -E "integration.*"
           --output-on-failure
-          -j "$(nproc)"
+          -j "${{ steps.setup-runner.outputs.nproc }}"
 
-      - name: Generate raw ${{ matrix.coverage.name }} coverage results
-        working-directory: ${{ matrix.coverage.build_dir }}
-        run: lcov -c -d . -o ./lcov.output --no-external --base-directory ../src/EnergyPlus/
+      - name: Create coverage output directories
+        working-directory: ${{ env.BUILD_DIR }}
+        run: mkdir -p coverage/unit coverage/integration
 
-      - name: Generate filtered ${{ matrix.coverage.name }} coverage results
-        working-directory: ${{ matrix.coverage.build_dir }}
-        run: lcov -r ./lcov.output "${{ github.workspace }}/${{ matrix.coverage.build_dir }}/*" -o lcov.output.filtered
+      - name: Generate raw unit test coverage results
+        working-directory: ${{ env.BUILD_DIR }}
+        run: lcov -c -d . -o coverage/unit/lcov.output --no-external --base-directory ../src/EnergyPlus/
 
-      - name: Generate HTML ${{ matrix.coverage.name }} coverage results
-        working-directory: ${{ matrix.coverage.build_dir }}
-        run: genhtml ./lcov.output.filtered -o lcov-html --demangle-cpp --function-coverage | tee cover.txt
+      - name: Generate filtered unit test coverage results
+        working-directory: ${{ env.BUILD_DIR }}
+        run: lcov -r coverage/unit/lcov.output "${{ github.workspace }}/${{ env.BUILD_DIR }}/*" -o coverage/unit/lcov.output.filtered
 
-      - name: Process ${{ matrix.coverage.name }} coverage summary
-        working-directory: ${{ matrix.coverage.build_dir }}
+      - name: Generate HTML unit test coverage results
+        working-directory: ${{ env.BUILD_DIR }}
+        run: genhtml coverage/unit/lcov.output.filtered -o coverage/unit/lcov-html --demangle-cpp --function-coverage | tee coverage/unit/cover.txt
+
+      - name: Process unit test coverage summary
+        working-directory: ${{ env.BUILD_DIR }}/coverage/unit
         run: python ${{ github.workspace }}/scripts/dev/gha_coverage_summary.py
 
-      - name: Add ${{ matrix.coverage.name }} coverage summary to job summary
-        run: echo "$(cat ${{ github.workspace }}/${{ matrix.coverage.build_dir }}/cover.md)" >> "$GITHUB_STEP_SUMMARY"
+      - name: Add unit test coverage summary to job summary
+        run: cat ${{ github.workspace }}/${{ env.BUILD_DIR }}/coverage/unit/cover.md >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Upload ${{ matrix.coverage.name }} coverage to Coveralls
+      - name: Clear coverage counters before integration tests
+        run: python ${{ github.workspace }}/scripts/dev/clear_coverage_results.py ${{ env.BUILD_DIR }}
+
+      - name: Run integration tests excluding top 20 slowest tests
+        run: >
+          ctest
+          --test-dir ${{ env.BUILD_DIR }}
+          -R "integration.*"
+          -E "${{ env.INTEGRATION_EXCLUDE_REGEX }}"
+          --output-on-failure
+          -j "${{ steps.setup-runner.outputs.nproc }}"
+
+      - name: Generate raw integration test coverage results
+        working-directory: ${{ env.BUILD_DIR }}
+        run: lcov -c -d . -o coverage/integration/lcov.output --no-external --base-directory ../src/EnergyPlus/
+
+      - name: Generate filtered integration test coverage results
+        working-directory: ${{ env.BUILD_DIR }}
+        run: lcov -r coverage/integration/lcov.output "${{ github.workspace }}/${{ env.BUILD_DIR }}/*" -o coverage/integration/lcov.output.filtered
+
+      - name: Generate HTML integration test coverage results
+        working-directory: ${{ env.BUILD_DIR }}
+        run: genhtml coverage/integration/lcov.output.filtered -o coverage/integration/lcov-html --demangle-cpp --function-coverage | tee coverage/integration/cover.txt
+
+      - name: Process integration test coverage summary
+        working-directory: ${{ env.BUILD_DIR }}/coverage/integration
+        run: python ${{ github.workspace }}/scripts/dev/gha_coverage_summary.py
+
+      - name: Add integration test coverage summary to job summary
+        run: cat ${{ github.workspace }}/${{ env.BUILD_DIR }}/coverage/integration/cover.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload unit test coverage to Coveralls
+        if: ${{ always() && hashFiles(format('{0}/{1}/coverage/unit/lcov.output.filtered', github.workspace, env.BUILD_DIR)) != '' }}
         uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ github.workspace }}/${{ matrix.coverage.build_dir }}/lcov.output.filtered
+          file: ${{ github.workspace }}/${{ env.BUILD_DIR }}/coverage/unit/lcov.output.filtered
           format: lcov
-          flag-name: ${{ matrix.coverage.coveralls_flag }}
+          flag-name: unit-tests
           parallel: true
           build-number: ${{ github.run_id }}
 
-      - name: Upload ${{ matrix.coverage.name }} coverage artifacts
-        uses: actions/upload-artifact@v4
+      - name: Upload integration test coverage to Coveralls
+        if: ${{ always() && hashFiles(format('{0}/{1}/coverage/integration/lcov.output.filtered', github.workspace, env.BUILD_DIR)) != '' }}
+        uses: coverallsapp/github-action@v2
         with:
-          name: ${{ matrix.coverage.artifact_name }}
-          path: |
-            ${{ github.workspace }}/${{ matrix.coverage.build_dir }}/lcov.output.filtered
-            ${{ github.workspace }}/${{ matrix.coverage.build_dir }}/lcov-html
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          file: ${{ github.workspace }}/${{ env.BUILD_DIR }}/coverage/integration/lcov.output.filtered
+          format: lcov
+          flag-name: integration-tests
+          parallel: true
+          build-number: ${{ github.run_id }}
 
-  coveralls_finish:
-    name: Finish Coveralls Coverage Build
-    needs: coverage
-    if: ${{ always() }}
-    runs-on: [self-hosted, linux, x64, ubuntu-24.04]
-    steps:
-      - name: Close Coveralls parallel build
+      - name: Finish Coveralls coverage build
+        if: always()
         uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel-finished: true
           build-number: ${{ github.run_id }}
+
+      - name: Upload unit test coverage artifacts
+        if: ${{ always() && hashFiles(format('{0}/{1}/coverage/unit/lcov.output.filtered', github.workspace, env.BUILD_DIR)) != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit_test_coverage_results
+          path: |
+            ${{ github.workspace }}/${{ env.BUILD_DIR }}/coverage/unit/lcov.output.filtered
+            ${{ github.workspace }}/${{ env.BUILD_DIR }}/coverage/unit/lcov-html
+
+      - name: Upload integration test coverage artifacts
+        if: ${{ always() && hashFiles(format('{0}/{1}/coverage/integration/lcov.output.filtered', github.workspace, env.BUILD_DIR)) != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration_test_coverage_results
+          path: |
+            ${{ github.workspace }}/${{ env.BUILD_DIR }}/coverage/integration/lcov.output.filtered
+            ${{ github.workspace }}/${{ env.BUILD_DIR }}/coverage/integration/lcov-html
+
+      - name: Save ccache
+        if: always() && steps.cacheccache-restore.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            ${{ steps.setup-runner.outputs.ccache-dir }}
+          key: ${{ steps.cacheccache-restore.outputs.cache-primary-key }}
