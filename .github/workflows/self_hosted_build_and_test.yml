@@ -104,9 +104,16 @@ jobs:
         working-directory: ${{ env.BUILD_DIR }}
         run: mkdir -p coverage/unit coverage/integration
 
+      - name: Stage generated EnergyPlus sources for coverage
+        run: |
+          install -d "${{ github.workspace }}/src/EnergyPlus/embedded"
+          cp -f "${{ github.workspace }}/${{ env.BUILD_DIR }}/src/EnergyPlus/ConfiguredFunctions.cc" "${{ github.workspace }}/src/EnergyPlus/ConfiguredFunctions.cc"
+          cp -f "${{ github.workspace }}/${{ env.BUILD_DIR }}/src/EnergyPlus/DataStringGlobals.cc" "${{ github.workspace }}/src/EnergyPlus/DataStringGlobals.cc"
+          cp -f "${{ github.workspace }}/${{ env.BUILD_DIR }}/idd/embedded/EmbeddedEpJSONSchema.cc" "${{ github.workspace }}/src/EnergyPlus/embedded/EmbeddedEpJSONSchema.cc"
+
       - name: Generate raw unit test coverage results
         working-directory: ${{ env.BUILD_DIR }}
-        run: lcov -c -d . -o coverage/unit/lcov.output --no-external --base-directory ../src/EnergyPlus/ --ignore-errors source
+        run: lcov -c -d ./src/EnergyPlus -o coverage/unit/lcov.output --no-external --base-directory ../src/EnergyPlus/ --ignore-errors source
 
       - name: Generate filtered unit test coverage results
         working-directory: ${{ env.BUILD_DIR }}
@@ -139,7 +146,7 @@ jobs:
 
       - name: Generate raw integration test coverage results
         working-directory: ${{ env.BUILD_DIR }}
-        run: lcov -c -d . -o coverage/integration/lcov.output --no-external --base-directory ../src/EnergyPlus/ --ignore-errors source
+        run: lcov -c -d ./src/EnergyPlus -o coverage/integration/lcov.output --no-external --base-directory ../src/EnergyPlus/ --ignore-errors source
 
       - name: Generate filtered integration test coverage results
         working-directory: ${{ env.BUILD_DIR }}
