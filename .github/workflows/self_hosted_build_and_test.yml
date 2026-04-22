@@ -47,8 +47,10 @@ jobs:
         with:
           path: |
             ${{ steps.setup-runner.outputs.ccache-dir }}
-          key: ccache-self-hosted-linux-${{ steps.setup-runner.outputs.compiler-id }}-${{ steps.checkout-sha.outputs.sha }}-coverage
+          key: ccache-self-hosted-linux-${{ steps.setup-runner.outputs.compiler-id }}-coverage-${{ github.event.pull_request.number || github.event.inputs.ref || github.ref_name }}-${{ github.event.pull_request.head.sha || steps.checkout-sha.outputs.sha }}
           restore-keys: |
+            ccache-self-hosted-linux-${{ steps.setup-runner.outputs.compiler-id }}-coverage-${{ github.event.pull_request.number || github.event.inputs.ref || github.ref_name }}-
+            ccache-self-hosted-linux-${{ steps.setup-runner.outputs.compiler-id }}-coverage-
             ccache-self-hosted-linux-${{ steps.setup-runner.outputs.compiler-id }}-
             ccache-self-hosted-linux-
 
@@ -104,41 +106,22 @@ jobs:
         working-directory: ${{ env.BUILD_DIR }}
         run: mkdir -p coverage/unit coverage/integration
 
-      - name: Stage generated EnergyPlus sources for coverage
-        working-directory: ${{ env.BUILD_DIR }}
-        run: |
-          for generated in src/EnergyPlus/*.cc; do
-            [[ -e "${generated}" ]] || continue
-            target="${{ github.workspace }}/src/EnergyPlus/$(basename "${generated}")"
-            if [[ ! -e "${target}" ]]; then
-              cp -f "${generated}" "${target}"
-            fi
-          done
-
       - name: Generate raw unit test coverage results
         working-directory: ${{ env.BUILD_DIR }}
-        run: lcov -c -d ./src/EnergyPlus -o coverage/unit/lcov.output --no-external --base-directory ../src/EnergyPlus/ --ignore-errors source
+        run: lcov -c -d . -o coverage/unit/lcov.output --no-external --base-directory ../src/EnergyPlus/ --ignore-errors source,source
 
       - name: Generate filtered unit test coverage results
         working-directory: ${{ env.BUILD_DIR }}
         run: |
-          lcov -e coverage/unit/lcov.output "${{ github.workspace }}/src/EnergyPlus/*" -o coverage/unit/lcov.output.srconly
-          awk -F: '/^SF:/{print $2}' coverage/unit/lcov.output.srconly | while read -r source_file; do
-            rel_path="${source_file#${{ github.workspace }}/}"
-            if [[ "${source_file}" == "${{ github.workspace }}/src/EnergyPlus/"* ]] && ! git -C "${{ github.workspace }}" ls-files --error-unmatch -- "${rel_path}" >/dev/null 2>&1; then
-              printf '%s\n' "${source_file}"
-            fi
-          done | sort -u > coverage/unit/excluded-generated-files.txt
-          if [[ -s coverage/unit/excluded-generated-files.txt ]]; then
-            mapfile -t excluded_generated_files < coverage/unit/excluded-generated-files.txt
-            lcov -r coverage/unit/lcov.output.srconly "${excluded_generated_files[@]}" -o coverage/unit/lcov.output.filtered --ignore-errors unused
-          else
-            cp -f coverage/unit/lcov.output.srconly coverage/unit/lcov.output.filtered
+          if ! lcov -r coverage/unit/lcov.output "${{ github.workspace }}/${{ env.BUILD_DIR }}/*" -o coverage/unit/lcov.output.filtered --ignore-errors unused,unused,empty,empty; then
+            cp -f coverage/unit/lcov.output coverage/unit/lcov.output.filtered
+          elif ! grep -q '^SF:' coverage/unit/lcov.output.filtered; then
+            cp -f coverage/unit/lcov.output coverage/unit/lcov.output.filtered
           fi
 
       - name: Generate HTML unit test coverage results
         working-directory: ${{ env.BUILD_DIR }}
-        run: genhtml coverage/unit/lcov.output.filtered -o coverage/unit/lcov-html --demangle-cpp --function-coverage | tee coverage/unit/cover.txt
+        run: genhtml coverage/unit/lcov.output.filtered -o coverage/unit/lcov-html --demangle-cpp --function-coverage --ignore-errors source,source | tee coverage/unit/cover.txt
 
       - name: Process unit test coverage summary
         working-directory: ${{ env.BUILD_DIR }}/coverage/unit
@@ -161,28 +144,20 @@ jobs:
 
       - name: Generate raw integration test coverage results
         working-directory: ${{ env.BUILD_DIR }}
-        run: lcov -c -d ./src/EnergyPlus -o coverage/integration/lcov.output --no-external --base-directory ../src/EnergyPlus/ --ignore-errors source
+        run: lcov -c -d . -o coverage/integration/lcov.output --no-external --base-directory ../src/EnergyPlus/ --ignore-errors source,source
 
       - name: Generate filtered integration test coverage results
         working-directory: ${{ env.BUILD_DIR }}
         run: |
-          lcov -e coverage/integration/lcov.output "${{ github.workspace }}/src/EnergyPlus/*" -o coverage/integration/lcov.output.srconly
-          awk -F: '/^SF:/{print $2}' coverage/integration/lcov.output.srconly | while read -r source_file; do
-            rel_path="${source_file#${{ github.workspace }}/}"
-            if [[ "${source_file}" == "${{ github.workspace }}/src/EnergyPlus/"* ]] && ! git -C "${{ github.workspace }}" ls-files --error-unmatch -- "${rel_path}" >/dev/null 2>&1; then
-              printf '%s\n' "${source_file}"
-            fi
-          done | sort -u > coverage/integration/excluded-generated-files.txt
-          if [[ -s coverage/integration/excluded-generated-files.txt ]]; then
-            mapfile -t excluded_generated_files < coverage/integration/excluded-generated-files.txt
-            lcov -r coverage/integration/lcov.output.srconly "${excluded_generated_files[@]}" -o coverage/integration/lcov.output.filtered --ignore-errors unused
-          else
-            cp -f coverage/integration/lcov.output.srconly coverage/integration/lcov.output.filtered
+          if ! lcov -r coverage/integration/lcov.output "${{ github.workspace }}/${{ env.BUILD_DIR }}/*" -o coverage/integration/lcov.output.filtered --ignore-errors unused,unused,empty,empty; then
+            cp -f coverage/integration/lcov.output coverage/integration/lcov.output.filtered
+          elif ! grep -q '^SF:' coverage/integration/lcov.output.filtered; then
+            cp -f coverage/integration/lcov.output coverage/integration/lcov.output.filtered
           fi
 
       - name: Generate HTML integration test coverage results
         working-directory: ${{ env.BUILD_DIR }}
-        run: genhtml coverage/integration/lcov.output.filtered -o coverage/integration/lcov-html --demangle-cpp --function-coverage | tee coverage/integration/cover.txt
+        run: genhtml coverage/integration/lcov.output.filtered -o coverage/integration/lcov-html --demangle-cpp --function-coverage --ignore-errors source,source | tee coverage/integration/cover.txt
 
       - name: Process integration test coverage summary
         working-directory: ${{ env.BUILD_DIR }}/coverage/integration
