@@ -111,30 +111,30 @@ jobs:
 
       - name: Generate raw unit test coverage results
         working-directory: ${{ env.BUILD_DIR }}
-        run: lcov -c -d . -o coverage/unit/lcov.output --no-external --base-directory ../src/EnergyPlus/ --ignore-errors source,source
+        run: lcov -c -d . -o coverage/unit/lcov.output --no-external --base-directory ${{ github.workspace }} --ignore-errors source,source
 
       - name: Generate filtered unit test coverage results
         working-directory: ${{ env.BUILD_DIR }}
         run: |
-          if ! lcov -r coverage/unit/lcov.output "${{ github.workspace }}/${{ env.BUILD_DIR }}/*" -o coverage/unit/lcov.output.filtered --ignore-errors unused,unused,empty,empty; then
-            cp -f coverage/unit/lcov.output coverage/unit/lcov.output.filtered
-          elif ! grep -q '^SF:' coverage/unit/lcov.output.filtered; then
+          if ! lcov -e coverage/unit/lcov.output "${{ github.workspace }}/src/EnergyPlus/*" -o coverage/unit/lcov.output.filtered --ignore-errors unused,unused,empty,empty; then
             cp -f coverage/unit/lcov.output coverage/unit/lcov.output.filtered
           fi
 
       - name: Generate HTML unit test coverage results
         working-directory: ${{ env.BUILD_DIR }}
-        run: genhtml coverage/unit/lcov.output.filtered -o coverage/unit/lcov-html --demangle-cpp --function-coverage --ignore-errors source,source | tee coverage/unit/cover.txt
+        run: genhtml coverage/unit/lcov.output.filtered -o coverage/unit/lcov-html --demangle-cpp --function-coverage --synthesize-missing --ignore-errors source,source | tee coverage/unit/cover.txt
 
       - name: Process unit test coverage summary
         working-directory: ${{ env.BUILD_DIR }}/coverage/unit
-        run: python ${{ github.workspace }}/scripts/dev/gha_coverage_summary.py
+        continue-on-error: true
+        run: ${{ steps.setup-runner.outputs.python-root-dir }}/bin/python ${{ github.workspace }}/scripts/dev/gha_coverage_summary.py
 
       - name: Add unit test coverage summary to job summary
+        if: ${{ always() && hashFiles(format('{0}/{1}/coverage/unit/cover.md', github.workspace, env.BUILD_DIR)) != '' }}
         run: cat ${{ github.workspace }}/${{ env.BUILD_DIR }}/coverage/unit/cover.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Clear coverage counters before integration tests
-        run: python ${{ github.workspace }}/scripts/dev/clear_coverage_results.py ${{ env.BUILD_DIR }}
+        run: ${{ steps.setup-runner.outputs.python-root-dir }}/bin/python ${{ github.workspace }}/scripts/dev/clear_coverage_results.py ${{ env.BUILD_DIR }}
 
       - name: Run integration tests excluding slowest and annual-only tests
         run: >
@@ -147,26 +147,26 @@ jobs:
 
       - name: Generate raw integration test coverage results
         working-directory: ${{ env.BUILD_DIR }}
-        run: lcov -c -d . -o coverage/integration/lcov.output --no-external --base-directory ../src/EnergyPlus/ --ignore-errors source,source
+        run: lcov -c -d . -o coverage/integration/lcov.output --no-external --base-directory ${{ github.workspace }} --ignore-errors source,source
 
       - name: Generate filtered integration test coverage results
         working-directory: ${{ env.BUILD_DIR }}
         run: |
-          if ! lcov -r coverage/integration/lcov.output "${{ github.workspace }}/${{ env.BUILD_DIR }}/*" -o coverage/integration/lcov.output.filtered --ignore-errors unused,unused,empty,empty; then
-            cp -f coverage/integration/lcov.output coverage/integration/lcov.output.filtered
-          elif ! grep -q '^SF:' coverage/integration/lcov.output.filtered; then
+          if ! lcov -e coverage/integration/lcov.output "${{ github.workspace }}/src/EnergyPlus/*" -o coverage/integration/lcov.output.filtered --ignore-errors unused,unused,empty,empty; then
             cp -f coverage/integration/lcov.output coverage/integration/lcov.output.filtered
           fi
 
       - name: Generate HTML integration test coverage results
         working-directory: ${{ env.BUILD_DIR }}
-        run: genhtml coverage/integration/lcov.output.filtered -o coverage/integration/lcov-html --demangle-cpp --function-coverage --ignore-errors source,source | tee coverage/integration/cover.txt
+        run: genhtml coverage/integration/lcov.output.filtered -o coverage/integration/lcov-html --demangle-cpp --function-coverage --synthesize-missing --ignore-errors source,source | tee coverage/integration/cover.txt
 
       - name: Process integration test coverage summary
         working-directory: ${{ env.BUILD_DIR }}/coverage/integration
-        run: python ${{ github.workspace }}/scripts/dev/gha_coverage_summary.py
+        continue-on-error: true
+        run: ${{ steps.setup-runner.outputs.python-root-dir }}/bin/python ${{ github.workspace }}/scripts/dev/gha_coverage_summary.py
 
       - name: Add integration test coverage summary to job summary
+        if: ${{ always() && hashFiles(format('{0}/{1}/coverage/integration/cover.md', github.workspace, env.BUILD_DIR)) != '' }}
         run: cat ${{ github.workspace }}/${{ env.BUILD_DIR }}/coverage/integration/cover.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload unit test coverage to Coveralls
@@ -182,6 +182,7 @@ jobs:
           build-number: ${{ github.run_id }}
           git-branch: ${{ github.head_ref || github.ref_name }}
           git-commit: ${{ github.event.pull_request.head.sha || steps.checkout-sha.outputs.sha }}
+          fail-on-error: false
 
       - name: Upload integration test coverage to Coveralls
         id: coveralls-integration
@@ -196,6 +197,7 @@ jobs:
           build-number: ${{ github.run_id }}
           git-branch: ${{ github.head_ref || github.ref_name }}
           git-commit: ${{ github.event.pull_request.head.sha || steps.checkout-sha.outputs.sha }}
+          fail-on-error: false
 
       - name: Finish Coveralls coverage build
         if: ${{ always() && (steps.coveralls-unit.conclusion == 'success' || steps.coveralls-integration.conclusion == 'success') }}
@@ -206,6 +208,7 @@ jobs:
           build-number: ${{ github.run_id }}
           git-branch: ${{ github.head_ref || github.ref_name }}
           git-commit: ${{ github.event.pull_request.head.sha || steps.checkout-sha.outputs.sha }}
+          fail-on-error: false
 
       - name: Upload unit test coverage artifacts
         if: ${{ always() && hashFiles(format('{0}/{1}/coverage/unit/lcov.output.filtered', github.workspace, env.BUILD_DIR)) != '' }}
