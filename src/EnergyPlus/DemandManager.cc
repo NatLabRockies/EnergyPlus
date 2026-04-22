@@ -670,7 +670,7 @@ void GetDemandManagerInput(EnergyPlusData &state)
                 demandMgr.Load.allocate(demandMgr.NumOfLoads);
 
                 for (int LoadNum = 1; LoadNum <= demandMgr.NumOfLoads; ++LoadNum) {
-                    int LoadPtr = Util::FindItemInList(AlphArray(LoadNum + 4), state.dataExteriorEnergyUse->ExteriorLights);
+                    int LoadPtr = Util::FindItemInList(Util::makeUPPER(AlphArray(LoadNum + 4)), state.dataExteriorEnergyUse->ExteriorLights);
 
                     if (LoadPtr > 0) {
                         demandMgr.Load(LoadNum) = LoadPtr;

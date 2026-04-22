@@ -53,7 +53,6 @@
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
-#include <EnergyPlus/DataIPShortCuts.hh>
 #include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/DataZoneEnergyDemands.hh>
@@ -170,14 +169,13 @@ namespace BaseboardElectric {
         // SUBROUTINE PARAMETER DEFINITIONS:
         static constexpr std::string_view RoutineName("GetBaseboardInput: "); // include trailing blank space
         static constexpr std::string_view routineName = "GetBaseboardInput";
-        int constexpr iHeatCAPMAlphaNum(3);                   // get input index to baseboard heating capacity sizing method
         int constexpr iHeatDesignCapacityNumericNum(1);       // get input index to baseboard heating capacity
         int constexpr iHeatCapacityPerFloorAreaNumericNum(2); // get input index to baseboard heating capacity per floor area sizing
         int constexpr iHeatFracOfAutosizedCapacityNumericNum(
             3); //  get input index to baseboard heating capacity sizing as fraction of autosized heating capacity
 
         auto &baseboard = state.dataBaseboardElectric;
-        std::string_view cCurrentModuleObject = cCMO_BBRadiator_Electric;
+        std::string const cCurrentModuleObject{cCMO_BBRadiator_Electric};
 
         int NumConvElecBaseboards = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
 
@@ -185,139 +183,141 @@ namespace BaseboardElectric {
 
         if (NumConvElecBaseboards > 0) { // Get the data for cooling schemes
             bool ErrorsFound(false);     // If errors detected in input
-            int NumAlphas = 0;
-            int NumNums = 0;
-            int IOStat = 0;
             int BaseboardNum = 0;
-            auto &s_ipsc = state.dataIPShortCut;
-            for (int ConvElecBBNum = 1; ConvElecBBNum <= NumConvElecBaseboards; ++ConvElecBBNum) {
-                state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                         cCurrentModuleObject,
-                                                                         ConvElecBBNum,
-                                                                         s_ipsc->cAlphaArgs,
-                                                                         NumAlphas,
-                                                                         s_ipsc->rNumericArgs,
-                                                                         NumNums,
-                                                                         IOStat,
-                                                                         s_ipsc->lNumericFieldBlanks,
-                                                                         s_ipsc->lAlphaFieldBlanks,
-                                                                         s_ipsc->cAlphaFieldNames,
-                                                                         s_ipsc->cNumericFieldNames);
+            auto *inputProcessor = state.dataInputProcessing->inputProcessor.get();
+            auto const &baseboardSchemaProps = inputProcessor->getObjectSchemaProps(state, cCurrentModuleObject);
+            auto const baseboardObjects = inputProcessor->epJSON.find(cCurrentModuleObject);
+            auto const orderedBaseboardKeys = inputProcessor->getIDFOrderedKeys(state, cCurrentModuleObject);
+            static constexpr std::array<std::string_view, 4> numericFieldNames = {
+                "Heating Design Capacity", "Heating Design Capacity Per Floor Area", "Fraction of Autosized Heating Design Capacity", "Efficiency"};
+            static constexpr std::string_view availabilityScheduleFieldName = "Availability Schedule Name";
+            static constexpr std::string_view heatingDesignCapacityMethodFieldName = "Heating Design Capacity Method";
 
-                baseboard->baseboards(ConvElecBBNum).FieldNames.assign(s_ipsc->cNumericFieldNames.begin(), s_ipsc->cNumericFieldNames.end());
+            if (baseboardObjects != inputProcessor->epJSON.end()) {
+                for (auto const &baseboardKey : orderedBaseboardKeys) {
+                    auto const baseboardInstance = baseboardObjects.value().find(baseboardKey);
+                    if (baseboardInstance == baseboardObjects.value().end()) {
+                        continue;
+                    }
 
-                ErrorObjectHeader eoh{routineName, cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
+                    auto const &baseboardFields = baseboardInstance.value();
+                    auto const baseboardName = Util::makeUPPER(baseboardKey);
+                    auto const availabilityScheduleName =
+                        inputProcessor->getAlphaFieldValue(baseboardFields, baseboardSchemaProps, "availability_schedule_name");
+                    auto const heatingDesignCapacityMethod =
+                        inputProcessor->getAlphaFieldValue(baseboardFields, baseboardSchemaProps, "heating_design_capacity_method");
 
-                // ErrorsFound will be set to True if problem was found, left untouched otherwise
-                VerifyUniqueBaseboardName(
-                    state, cCurrentModuleObject, s_ipsc->cAlphaArgs(1), ErrorsFound, EnergyPlus::format("{} Name", cCurrentModuleObject));
+                    inputProcessor->markObjectAsUsed(cCurrentModuleObject, baseboardKey);
 
-                ++BaseboardNum;
-                auto &thisBaseboard = baseboard->baseboards(BaseboardNum);
-                thisBaseboard.EquipName = s_ipsc->cAlphaArgs(1);                 // name of this baseboard
-                thisBaseboard.EquipType = Util::makeUPPER(cCurrentModuleObject); // the type of baseboard-rename change
-                thisBaseboard.Schedule = s_ipsc->cAlphaArgs(2);
-                if (s_ipsc->lAlphaFieldBlanks(2)) {
-                    thisBaseboard.availSched = Sched::GetScheduleAlwaysOn(state);
-                } else if ((thisBaseboard.availSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(2))) == nullptr) {
-                    ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2));
-                    ErrorsFound = true;
-                }
-                // get inlet node number
-                thisBaseboard.BaseboardEfficiency = s_ipsc->rNumericArgs(4);
+                    baseboard->baseboards(BaseboardNum + 1).FieldNames.assign(numericFieldNames.begin(), numericFieldNames.end());
 
-                // Determine baseboard electric heating design capacity sizing method
-                if (Util::SameString(s_ipsc->cAlphaArgs(iHeatCAPMAlphaNum), "HeatingDesignCapacity")) {
-                    thisBaseboard.HeatingCapMethod = HeatingDesignCapacity;
-                    if (!s_ipsc->lNumericFieldBlanks(iHeatDesignCapacityNumericNum)) {
-                        thisBaseboard.ScaledHeatingCapacity = s_ipsc->rNumericArgs(iHeatDesignCapacityNumericNum);
-                        if (thisBaseboard.ScaledHeatingCapacity < 0.0 && thisBaseboard.ScaledHeatingCapacity != AutoSize) {
-                            ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
-                            ShowContinueError(state,
-                                              EnergyPlus::format("Illegal {} = {:.7T}",
-                                                                 s_ipsc->cNumericFieldNames(iHeatDesignCapacityNumericNum),
-                                                                 s_ipsc->rNumericArgs(iHeatDesignCapacityNumericNum)));
-                            ErrorsFound = true;
-                        }
-                    } else {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Input for {} = {}",
-                                                             s_ipsc->cAlphaFieldNames(iHeatCAPMAlphaNum),
-                                                             s_ipsc->cAlphaArgs(iHeatCAPMAlphaNum)));
-                        ShowContinueError(
-                            state, EnergyPlus::format("Blank field not allowed for {}", s_ipsc->cNumericFieldNames(iHeatDesignCapacityNumericNum)));
+                    ErrorObjectHeader eoh{routineName, cCurrentModuleObject, baseboardName};
+
+                    VerifyUniqueBaseboardName(
+                        state, cCurrentModuleObject, baseboardName, ErrorsFound, EnergyPlus::format("{} Name", cCurrentModuleObject));
+
+                    ++BaseboardNum;
+                    auto &thisBaseboard = baseboard->baseboards(BaseboardNum);
+                    thisBaseboard.EquipName = baseboardName;
+                    thisBaseboard.EquipType = Util::makeUPPER(cCurrentModuleObject);
+                    thisBaseboard.Schedule = availabilityScheduleName;
+                    if (availabilityScheduleName.empty()) {
+                        thisBaseboard.availSched = Sched::GetScheduleAlwaysOn(state);
+                    } else if ((thisBaseboard.availSched = Sched::GetSchedule(state, availabilityScheduleName)) == nullptr) {
+                        ShowSevereItemNotFound(state, eoh, availabilityScheduleFieldName, availabilityScheduleName);
                         ErrorsFound = true;
                     }
-                } else if (Util::SameString(s_ipsc->cAlphaArgs(iHeatCAPMAlphaNum), "CapacityPerFloorArea")) {
-                    thisBaseboard.HeatingCapMethod = CapacityPerFloorArea;
-                    if (!s_ipsc->lNumericFieldBlanks(iHeatCapacityPerFloorAreaNumericNum)) {
-                        thisBaseboard.ScaledHeatingCapacity = s_ipsc->rNumericArgs(iHeatCapacityPerFloorAreaNumericNum);
-                        if (thisBaseboard.ScaledHeatingCapacity <= 0.0) {
+                    thisBaseboard.BaseboardEfficiency = inputProcessor->getRealFieldValue(baseboardFields, baseboardSchemaProps, "efficiency");
+
+                    if (Util::SameString(heatingDesignCapacityMethod, "HeatingDesignCapacity")) {
+                        thisBaseboard.HeatingCapMethod = HeatingDesignCapacity;
+                        auto const heatingDesignCapacityField = baseboardFields.find("heating_design_capacity");
+                        if (heatingDesignCapacityField != baseboardFields.end()) {
+                            thisBaseboard.ScaledHeatingCapacity =
+                                inputProcessor->getRealFieldValue(baseboardFields, baseboardSchemaProps, "heating_design_capacity");
+                            if (thisBaseboard.ScaledHeatingCapacity < 0.0 && thisBaseboard.ScaledHeatingCapacity != AutoSize) {
+                                ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
+                                ShowContinueError(state,
+                                                  EnergyPlus::format("Illegal {} = {:.7T}",
+                                                                     numericFieldNames[iHeatDesignCapacityNumericNum - 1],
+                                                                     thisBaseboard.ScaledHeatingCapacity));
+                                ErrorsFound = true;
+                            }
+                        } else {
                             ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
-                            ShowContinueError(state,
-                                              EnergyPlus::format("Input for {} = {}",
-                                                                 s_ipsc->cAlphaFieldNames(iHeatCAPMAlphaNum),
-                                                                 s_ipsc->cAlphaArgs(iHeatCAPMAlphaNum)));
-                            ShowContinueError(state,
-                                              EnergyPlus::format("Illegal {} = {:.7T}",
-                                                                 s_ipsc->cNumericFieldNames(iHeatCapacityPerFloorAreaNumericNum),
-                                                                 s_ipsc->rNumericArgs(iHeatCapacityPerFloorAreaNumericNum)));
-                            ErrorsFound = true;
-                        } else if (thisBaseboard.ScaledHeatingCapacity == AutoSize) {
-                            ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
-                            ShowContinueError(state,
-                                              EnergyPlus::format("Input for {} = {}",
-                                                                 s_ipsc->cAlphaFieldNames(iHeatCAPMAlphaNum),
-                                                                 s_ipsc->cAlphaArgs(iHeatCAPMAlphaNum)));
                             ShowContinueError(
-                                state, EnergyPlus::format("Illegal {} = AutoSize", s_ipsc->cNumericFieldNames(iHeatCapacityPerFloorAreaNumericNum)));
+                                state, EnergyPlus::format("Input for {} = {}", heatingDesignCapacityMethodFieldName, heatingDesignCapacityMethod));
+                            ShowContinueError(
+                                state, EnergyPlus::format("Blank field not allowed for {}", numericFieldNames[iHeatDesignCapacityNumericNum - 1]));
                             ErrorsFound = true;
                         }
-                    } else {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Input for {} = {}",
-                                                             s_ipsc->cAlphaFieldNames(iHeatCAPMAlphaNum),
-                                                             s_ipsc->cAlphaArgs(iHeatCAPMAlphaNum)));
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format("Blank field not allowed for {}", s_ipsc->cNumericFieldNames(iHeatCapacityPerFloorAreaNumericNum)));
-                        ErrorsFound = true;
-                    }
-                } else if (Util::SameString(s_ipsc->cAlphaArgs(iHeatCAPMAlphaNum), "FractionOfAutosizedHeatingCapacity")) {
-                    thisBaseboard.HeatingCapMethod = FractionOfAutosizedHeatingCapacity;
-                    if (!s_ipsc->lNumericFieldBlanks(iHeatFracOfAutosizedCapacityNumericNum)) {
-                        thisBaseboard.ScaledHeatingCapacity = s_ipsc->rNumericArgs(iHeatFracOfAutosizedCapacityNumericNum);
-                        if (thisBaseboard.ScaledHeatingCapacity < 0.0) {
+                    } else if (Util::SameString(heatingDesignCapacityMethod, "CapacityPerFloorArea")) {
+                        thisBaseboard.HeatingCapMethod = CapacityPerFloorArea;
+                        auto const heatingDesignCapacityPerFloorAreaField = baseboardFields.find("heating_design_capacity_per_floor_area");
+                        if (heatingDesignCapacityPerFloorAreaField != baseboardFields.end()) {
+                            thisBaseboard.ScaledHeatingCapacity =
+                                inputProcessor->getRealFieldValue(baseboardFields, baseboardSchemaProps, "heating_design_capacity_per_floor_area");
+                            if (thisBaseboard.ScaledHeatingCapacity <= 0.0) {
+                                ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
+                                ShowContinueError(
+                                    state,
+                                    EnergyPlus::format("Input for {} = {}", heatingDesignCapacityMethodFieldName, heatingDesignCapacityMethod));
+                                ShowContinueError(state,
+                                                  EnergyPlus::format("Illegal {} = {:.7T}",
+                                                                     numericFieldNames[iHeatCapacityPerFloorAreaNumericNum - 1],
+                                                                     thisBaseboard.ScaledHeatingCapacity));
+                                ErrorsFound = true;
+                            } else if (thisBaseboard.ScaledHeatingCapacity == AutoSize) {
+                                ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
+                                ShowContinueError(
+                                    state,
+                                    EnergyPlus::format("Input for {} = {}", heatingDesignCapacityMethodFieldName, heatingDesignCapacityMethod));
+                                ShowContinueError(
+                                    state, EnergyPlus::format("Illegal {} = AutoSize", numericFieldNames[iHeatCapacityPerFloorAreaNumericNum - 1]));
+                                ErrorsFound = true;
+                            }
+                        } else {
                             ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
-                            ShowContinueError(state,
-                                              EnergyPlus::format("Illegal {} = {:.7T}",
-                                                                 s_ipsc->cNumericFieldNames(iHeatFracOfAutosizedCapacityNumericNum),
-                                                                 s_ipsc->rNumericArgs(iHeatFracOfAutosizedCapacityNumericNum)));
+                            ShowContinueError(
+                                state, EnergyPlus::format("Input for {} = {}", heatingDesignCapacityMethodFieldName, heatingDesignCapacityMethod));
+                            ShowContinueError(
+                                state,
+                                EnergyPlus::format("Blank field not allowed for {}", numericFieldNames[iHeatCapacityPerFloorAreaNumericNum - 1]));
+                            ErrorsFound = true;
+                        }
+                    } else if (Util::SameString(heatingDesignCapacityMethod, "FractionOfAutosizedHeatingCapacity")) {
+                        thisBaseboard.HeatingCapMethod = FractionOfAutosizedHeatingCapacity;
+                        auto const fractionOfAutosizedHeatingCapacityField = baseboardFields.find("fraction_of_autosized_heating_design_capacity");
+                        if (fractionOfAutosizedHeatingCapacityField != baseboardFields.end()) {
+                            thisBaseboard.ScaledHeatingCapacity = inputProcessor->getRealFieldValue(
+                                baseboardFields, baseboardSchemaProps, "fraction_of_autosized_heating_design_capacity");
+                            if (thisBaseboard.ScaledHeatingCapacity < 0.0) {
+                                ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
+                                ShowContinueError(state,
+                                                  EnergyPlus::format("Illegal {} = {:.7T}",
+                                                                     numericFieldNames[iHeatFracOfAutosizedCapacityNumericNum - 1],
+                                                                     thisBaseboard.ScaledHeatingCapacity));
+                                ErrorsFound = true;
+                            }
+                        } else {
+                            ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
+                            ShowContinueError(
+                                state, EnergyPlus::format("Input for {} = {}", heatingDesignCapacityMethodFieldName, heatingDesignCapacityMethod));
+                            ShowContinueError(
+                                state,
+                                EnergyPlus::format("Blank field not allowed for {}", numericFieldNames[iHeatFracOfAutosizedCapacityNumericNum - 1]));
                             ErrorsFound = true;
                         }
                     } else {
                         ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
                         ShowContinueError(state,
-                                          EnergyPlus::format("Input for {} = {}",
-                                                             s_ipsc->cAlphaFieldNames(iHeatCAPMAlphaNum),
-                                                             s_ipsc->cAlphaArgs(iHeatCAPMAlphaNum)));
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format("Blank field not allowed for {}", s_ipsc->cNumericFieldNames(iHeatFracOfAutosizedCapacityNumericNum)));
+                                          EnergyPlus::format("Illegal {} = {}", heatingDesignCapacityMethodFieldName, heatingDesignCapacityMethod));
                         ErrorsFound = true;
                     }
-                } else {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Illegal {} = {}", s_ipsc->cAlphaFieldNames(iHeatCAPMAlphaNum), s_ipsc->cAlphaArgs(iHeatCAPMAlphaNum)));
-                    ErrorsFound = true;
-                }
 
-                thisBaseboard.ZonePtr = DataZoneEquipment::GetZoneEquipControlledZoneNum(
-                    state, DataZoneEquipment::ZoneEquipType::BaseboardConvectiveElectric, thisBaseboard.EquipName);
+                    thisBaseboard.ZonePtr = DataZoneEquipment::GetZoneEquipControlledZoneNum(
+                        state, DataZoneEquipment::ZoneEquipType::BaseboardConvectiveElectric, thisBaseboard.EquipName);
+                }
             }
 
             if (ErrorsFound) {

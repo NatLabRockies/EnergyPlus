@@ -49,7 +49,6 @@
 
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
-#include <EnergyPlus/DataIPShortCuts.hh>
 #include <EnergyPlus/EnergyPlus.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
 #include <EnergyPlus/PhaseChangeModeling/HysteresisModel.hh>
@@ -299,50 +298,40 @@ namespace Material {
     {
         static constexpr std::string_view routineName = "GetHysteresisData";
 
-        auto &s_ipsc = state.dataIPShortCut;
         auto &s_ip = state.dataInputProcessing->inputProcessor;
         auto &s_mat = state.dataMaterial;
 
         // convenience variables
-        s_ipsc->cCurrentModuleObject = "MaterialProperty:PhaseChangeHysteresis";
-        int numPhaseChangeModels = s_ip->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
+        std::string const currentModuleObject = "MaterialProperty:PhaseChangeHysteresis";
+        auto const &hysteresisSchemaProps = s_ip->getObjectSchemaProps(state, currentModuleObject);
+        auto const hysteresisObjects = s_ip->epJSON.find(currentModuleObject);
+        static constexpr std::string_view nameFieldName = "Name";
 
         // loop over all hysteresis input instances, if zero, this will simply not do anything
-        for (int hmNum = 1; hmNum <= numPhaseChangeModels; ++hmNum) {
+        if (hysteresisObjects == s_ip->epJSON.end()) {
+            return;
+        }
 
-            // just a few vars to pass in and out to GetObjectItem
-            int ioStatus;
-            int numAlphas;
-            int numNumbers;
+        for (auto const &hysteresisInstance : hysteresisObjects.value().items()) {
+            auto const &hysteresisFields = hysteresisInstance.value();
+            auto const materialName = Util::makeUPPER(hysteresisInstance.key());
 
-            // get the input data and store it in the Shortcuts structures
-            s_ip->getObjectItem(state,
-                                s_ipsc->cCurrentModuleObject,
-                                hmNum,
-                                s_ipsc->cAlphaArgs,
-                                numAlphas,
-                                s_ipsc->rNumericArgs,
-                                numNumbers,
-                                ioStatus,
-                                s_ipsc->lNumericFieldBlanks,
-                                s_ipsc->lAlphaFieldBlanks,
-                                s_ipsc->cAlphaFieldNames,
-                                s_ipsc->cNumericFieldNames);
+            s_ip->markObjectAsUsed(currentModuleObject, hysteresisInstance.key());
 
-            ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
+            ErrorObjectHeader eoh{routineName, currentModuleObject, materialName};
             // the input processor validates the numeric inputs based on the IDD definition
             // still validate the name to make sure there aren't any duplicates or blanks
             // blanks are easy: fatal if blank
 
-            if (s_ipsc->lAlphaFieldBlanks(1)) {
-                ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(1), s_ipsc->cAlphaArgs(1));
+            if (materialName.empty()) {
+                ShowSevereEmptyField(state, eoh, nameFieldName, materialName);
                 ErrorsFound = true;
                 continue;
             }
 
-            int matNum = GetMaterialNum(state, s_ipsc->cAlphaArgs(1));
+            int matNum = GetMaterialNum(state, materialName);
             if (matNum == 0) {
-                ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(1), s_ipsc->cAlphaArgs(1));
+                ShowSevereItemNotFound(state, eoh, nameFieldName, materialName);
                 ErrorsFound = true;
                 continue;
             }
@@ -355,8 +344,7 @@ namespace Material {
             }
 
             if (mat->hasPCM) {
-                ShowSevereCustom(
-                    state, eoh, EnergyPlus::format("Material {} already has {} properties defined.", mat->Name, s_ipsc->cCurrentModuleObject));
+                ShowSevereCustom(state, eoh, EnergyPlus::format("Material {} already has {} properties defined.", mat->Name, currentModuleObject));
                 ErrorsFound = true;
                 continue;
             }
@@ -381,19 +369,26 @@ namespace Material {
             s_mat->materials(matNum) = matPC;
 
             // now build out a new hysteresis instance and add it to the vector
-            matPC->totalLatentHeat = s_ipsc->rNumericArgs(1);
-            matPC->fullyLiquidThermalConductivity = s_ipsc->rNumericArgs(2);
-            matPC->fullyLiquidDensity = s_ipsc->rNumericArgs(3);
-            matPC->specificHeatLiquid = s_ipsc->rNumericArgs(4);
-            matPC->deltaTempMeltingHigh = s_ipsc->rNumericArgs(5);
-            matPC->peakTempMelting = s_ipsc->rNumericArgs(6);
-            matPC->deltaTempMeltingLow = s_ipsc->rNumericArgs(7);
-            matPC->fullySolidThermalConductivity = s_ipsc->rNumericArgs(8);
-            matPC->fullySolidDensity = s_ipsc->rNumericArgs(9);
-            matPC->specificHeatSolid = s_ipsc->rNumericArgs(10);
-            matPC->deltaTempFreezingHigh = s_ipsc->rNumericArgs(11);
-            matPC->peakTempFreezing = s_ipsc->rNumericArgs(12);
-            matPC->deltaTempFreezingLow = s_ipsc->rNumericArgs(13);
+            matPC->totalLatentHeat =
+                s_ip->getRealFieldValue(hysteresisFields, hysteresisSchemaProps, "latent_heat_during_the_entire_phase_change_process");
+            matPC->fullyLiquidThermalConductivity =
+                s_ip->getRealFieldValue(hysteresisFields, hysteresisSchemaProps, "liquid_state_thermal_conductivity");
+            matPC->fullyLiquidDensity = s_ip->getRealFieldValue(hysteresisFields, hysteresisSchemaProps, "liquid_state_density");
+            matPC->specificHeatLiquid = s_ip->getRealFieldValue(hysteresisFields, hysteresisSchemaProps, "liquid_state_specific_heat");
+            matPC->deltaTempMeltingHigh =
+                s_ip->getRealFieldValue(hysteresisFields, hysteresisSchemaProps, "high_temperature_difference_of_melting_curve");
+            matPC->peakTempMelting = s_ip->getRealFieldValue(hysteresisFields, hysteresisSchemaProps, "peak_melting_temperature");
+            matPC->deltaTempMeltingLow =
+                s_ip->getRealFieldValue(hysteresisFields, hysteresisSchemaProps, "low_temperature_difference_of_melting_curve");
+            matPC->fullySolidThermalConductivity =
+                s_ip->getRealFieldValue(hysteresisFields, hysteresisSchemaProps, "solid_state_thermal_conductivity");
+            matPC->fullySolidDensity = s_ip->getRealFieldValue(hysteresisFields, hysteresisSchemaProps, "solid_state_density");
+            matPC->specificHeatSolid = s_ip->getRealFieldValue(hysteresisFields, hysteresisSchemaProps, "solid_state_specific_heat");
+            matPC->deltaTempFreezingHigh =
+                s_ip->getRealFieldValue(hysteresisFields, hysteresisSchemaProps, "high_temperature_difference_of_freezing_curve");
+            matPC->peakTempFreezing = s_ip->getRealFieldValue(hysteresisFields, hysteresisSchemaProps, "peak_freezing_temperature");
+            matPC->deltaTempFreezingLow =
+                s_ip->getRealFieldValue(hysteresisFields, hysteresisSchemaProps, "low_temperature_difference_of_freezing_curve");
             matPC->specHeatTransition = (matPC->specificHeatSolid + matPC->specificHeatLiquid) / 2.0;
             matPC->CpOld = matPC->specificHeatSolid;
             matPC->hasPCM = true;

@@ -147,175 +147,159 @@ namespace CoolTower {
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         bool ErrorsFound(false); // If errors detected in input
-        int NumAlphas;           // Number of Alphas for each GetobjectItem call
-        int NumNumbers;          // Number of Numbers for each GetobjectItem call
-        int NumArgs;
-        int IOStat;
-        Array1D_string cAlphaArgs;     // Alpha input items for object
-        Array1D_string cAlphaFields;   // Alpha field names
-        Array1D_string cNumericFields; // Numeric field names
-        Array1D<Real64> rNumericArgs;  // Numeric input items for object
-        Array1D_bool lAlphaBlanks;     // Logical array, alpha field input BLANK = .TRUE.
-        Array1D_bool lNumericBlanks;   // Logical array, numeric field input BLANK = .TRUE.
-
-        // Initializations and allocations
-        state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state, CurrentModuleObject, NumArgs, NumAlphas, NumNumbers);
-        cAlphaArgs.allocate(NumAlphas);
-        cAlphaFields.allocate(NumAlphas);
-        cNumericFields.allocate(NumNumbers);
-        rNumericArgs.dimension(NumNumbers, 0.0);
-        lAlphaBlanks.dimension(NumAlphas, true);
-        lNumericBlanks.dimension(NumNumbers, true);
-
-        auto &s_ipsc = state.dataIPShortCut;
-
-        int NumCoolTowers = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, CurrentModuleObject);
+        auto *inputProcessor = state.dataInputProcessing->inputProcessor.get();
+        int NumCoolTowers = inputProcessor->getNumObjectsFound(state, CurrentModuleObject);
 
         state.dataCoolTower->CoolTowerSys.allocate(NumCoolTowers);
+        auto const &objectSchemaProps = inputProcessor->getObjectSchemaProps(state, CurrentModuleObject);
+        auto const coolTowerObjects = inputProcessor->epJSON.find(CurrentModuleObject);
 
         // Obtain inputs
-        for (int CoolTowerNum = 1; CoolTowerNum <= NumCoolTowers; ++CoolTowerNum) {
+        if (coolTowerObjects != inputProcessor->epJSON.end()) {
+            int CoolTowerNum = 1;
+            for (auto const &coolTowerInstance : coolTowerObjects.value().items()) {
+                auto const &coolTowerFields = coolTowerInstance.value();
+                auto const coolTowerName = Util::makeUPPER(coolTowerInstance.key());
+                auto const availabilityScheduleName =
+                    inputProcessor->getAlphaFieldValue(coolTowerFields, objectSchemaProps, "availability_schedule_name");
+                auto const zoneOrSpaceName = inputProcessor->getAlphaFieldValue(coolTowerFields, objectSchemaProps, "zone_or_space_name");
+                auto const waterSupplyStorageTankName =
+                    inputProcessor->getAlphaFieldValue(coolTowerFields, objectSchemaProps, "water_supply_storage_tank_name");
+                auto const flowControlType = inputProcessor->getAlphaFieldValue(coolTowerFields, objectSchemaProps, "flow_control_type");
+                auto const pumpFlowRateScheduleName =
+                    inputProcessor->getAlphaFieldValue(coolTowerFields, objectSchemaProps, "pump_flow_rate_schedule_name");
 
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     CoolTowerNum,
-                                                                     s_ipsc->cAlphaArgs,
-                                                                     NumAlphas,
-                                                                     s_ipsc->rNumericArgs,
-                                                                     NumNumbers,
-                                                                     IOStat,
-                                                                     lNumericBlanks,
-                                                                     lAlphaBlanks,
-                                                                     cAlphaFields,
-                                                                     cNumericFields);
+                inputProcessor->markObjectAsUsed(CurrentModuleObject, coolTowerInstance.key());
 
-            ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
+                ErrorObjectHeader eoh{routineName, CurrentModuleObject, coolTowerName};
 
-            auto &coolTower = state.dataCoolTower->CoolTowerSys(CoolTowerNum);
+                auto &coolTower = state.dataCoolTower->CoolTowerSys(CoolTowerNum);
 
-            coolTower.Name = s_ipsc->cAlphaArgs(1); // Name of cooltower
-            if (lAlphaBlanks(2)) {
-                coolTower.availSched = Sched::GetScheduleAlwaysOn(state);
-            } else if ((coolTower.availSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(2))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFields(2), s_ipsc->cAlphaArgs(2));
-                ErrorsFound = true;
-            }
+                coolTower.Name = coolTowerName; // Name of cooltower
+                if (availabilityScheduleName.empty()) {
+                    coolTower.availSched = Sched::GetScheduleAlwaysOn(state);
+                } else if ((coolTower.availSched = Sched::GetSchedule(state, availabilityScheduleName)) == nullptr) {
+                    ShowSevereItemNotFound(state, eoh, "Availability Schedule Name", availabilityScheduleName);
+                    ErrorsFound = true;
+                }
 
-            if (lAlphaBlanks(3)) {
-                ShowSevereEmptyField(state, eoh, cAlphaFields(3));
-                ErrorsFound = true;
-            } else if ((coolTower.ZonePtr = Util::FindItemInList(s_ipsc->cAlphaArgs(3), state.dataHeatBal->Zone)) == 0 &&
-                       (coolTower.spacePtr = Util::FindItemInList(s_ipsc->cAlphaArgs(3), state.dataHeatBal->space)) == 0) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFields(3), s_ipsc->cAlphaArgs(3));
-                ErrorsFound = true;
-            } else if (coolTower.ZonePtr == 0) {
-                coolTower.ZonePtr = state.dataHeatBal->space(coolTower.spacePtr).zoneNum;
-            }
+                if (zoneOrSpaceName.empty()) {
+                    ShowSevereEmptyField(state, eoh, "Zone or Space Name");
+                    ErrorsFound = true;
+                } else if ((coolTower.ZonePtr = Util::FindItemInList(zoneOrSpaceName, state.dataHeatBal->Zone)) == 0 &&
+                           (coolTower.spacePtr = Util::FindItemInList(zoneOrSpaceName, state.dataHeatBal->space)) == 0) {
+                    ShowSevereItemNotFound(state, eoh, "Zone or Space Name", zoneOrSpaceName);
+                    ErrorsFound = true;
+                } else if (coolTower.ZonePtr == 0) {
+                    coolTower.ZonePtr = state.dataHeatBal->space(coolTower.spacePtr).zoneNum;
+                }
 
-            coolTower.CoolTWaterSupplyName = s_ipsc->cAlphaArgs(4); // Name of water storage tank
-            if (lAlphaBlanks(4)) {
-                coolTower.CoolTWaterSupplyMode = WaterSupplyMode::FromMains;
-            } else if (coolTower.CoolTWaterSupplyMode == WaterSupplyMode::FromTank) {
-                WaterManager::SetupTankDemandComponent(state,
-                                                       coolTower.Name,
-                                                       CurrentModuleObject,
-                                                       coolTower.CoolTWaterSupplyName,
-                                                       ErrorsFound,
-                                                       coolTower.CoolTWaterSupTankID,
-                                                       coolTower.CoolTWaterTankDemandARRID);
-            }
+                coolTower.CoolTWaterSupplyName = waterSupplyStorageTankName; // Name of water storage tank
+                if (waterSupplyStorageTankName.empty()) {
+                    coolTower.CoolTWaterSupplyMode = WaterSupplyMode::FromMains;
+                } else if (coolTower.CoolTWaterSupplyMode == WaterSupplyMode::FromTank) {
+                    WaterManager::SetupTankDemandComponent(state,
+                                                           coolTower.Name,
+                                                           CurrentModuleObject,
+                                                           coolTower.CoolTWaterSupplyName,
+                                                           ErrorsFound,
+                                                           coolTower.CoolTWaterSupTankID,
+                                                           coolTower.CoolTWaterTankDemandARRID);
+                }
 
-            coolTower.FlowCtrlType = static_cast<FlowCtrl>(getEnumValue(FlowCtrlNamesUC, s_ipsc->cAlphaArgs(5))); // Type of flow control
-            if (coolTower.FlowCtrlType == FlowCtrl::Invalid) {
-                ShowSevereInvalidKey(state, eoh, cAlphaFields(5), s_ipsc->cAlphaArgs(5));
-                ErrorsFound = true;
-            }
+                coolTower.FlowCtrlType = static_cast<FlowCtrl>(getEnumValue(FlowCtrlNamesUC, flowControlType)); // Type of flow control
+                if (coolTower.FlowCtrlType == FlowCtrl::Invalid) {
+                    ShowSevereInvalidKey(state, eoh, "Flow Control Type", flowControlType);
+                    ErrorsFound = true;
+                }
 
-            if ((coolTower.pumpSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(6))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFields(6), s_ipsc->cAlphaArgs(6));
-                ErrorsFound = true;
-            }
+                if ((coolTower.pumpSched = Sched::GetSchedule(state, pumpFlowRateScheduleName)) == nullptr) {
+                    ShowSevereItemNotFound(state, eoh, "Pump Flow Rate Schedule Name", pumpFlowRateScheduleName);
+                    ErrorsFound = true;
+                }
 
-            coolTower.MaxWaterFlowRate = s_ipsc->rNumericArgs(1); // Maximum limit of water supply
-            if (coolTower.MaxWaterFlowRate > MaximumWaterFlowRate) {
-                coolTower.MaxWaterFlowRate = MaximumWaterFlowRate;
-                ShowWarningBadMax(state, eoh, cNumericFields(1), s_ipsc->rNumericArgs(1), Clusive::In, MaximumWaterFlowRate);
-            }
-            if (coolTower.MaxWaterFlowRate < MinimumWaterFlowRate) {
-                coolTower.MaxWaterFlowRate = MinimumWaterFlowRate;
-                ShowWarningBadMin(state, eoh, cNumericFields(1), s_ipsc->rNumericArgs(1), Clusive::In, MinimumWaterFlowRate);
-            }
+                coolTower.MaxWaterFlowRate = inputProcessor->getRealFieldValue(coolTowerFields, objectSchemaProps, "maximum_water_flow_rate");
+                if (coolTower.MaxWaterFlowRate > MaximumWaterFlowRate) {
+                    coolTower.MaxWaterFlowRate = MaximumWaterFlowRate;
+                    ShowWarningBadMax(state, eoh, "Maximum Water Flow Rate", coolTower.MaxWaterFlowRate, Clusive::In, MaximumWaterFlowRate);
+                }
+                if (coolTower.MaxWaterFlowRate < MinimumWaterFlowRate) {
+                    coolTower.MaxWaterFlowRate = MinimumWaterFlowRate;
+                    ShowWarningBadMin(state, eoh, "Maximum Water Flow Rate", coolTower.MaxWaterFlowRate, Clusive::In, MinimumWaterFlowRate);
+                }
 
-            coolTower.TowerHeight = s_ipsc->rNumericArgs(2); // Get effective tower height
-            if (coolTower.TowerHeight > MaxHeight) {
-                coolTower.TowerHeight = MaxHeight;
-                ShowWarningBadMax(state, eoh, cNumericFields(2), s_ipsc->rNumericArgs(2), Clusive::In, MaxHeight);
-            }
+                coolTower.TowerHeight =
+                    inputProcessor->getRealFieldValue(coolTowerFields, objectSchemaProps, "effective_tower_height"); // Get effective tower height
+                if (coolTower.TowerHeight > MaxHeight) {
+                    coolTower.TowerHeight = MaxHeight;
+                    ShowWarningBadMax(state, eoh, "Effective Tower Height", coolTower.TowerHeight, Clusive::In, MaxHeight);
+                }
 
-            if (coolTower.TowerHeight < MinHeight) {
-                coolTower.TowerHeight = MinHeight;
-                ShowWarningBadMin(state, eoh, cNumericFields(2), s_ipsc->rNumericArgs(2), Clusive::In, MinHeight);
-            }
+                if (coolTower.TowerHeight < MinHeight) {
+                    coolTower.TowerHeight = MinHeight;
+                    ShowWarningBadMin(state, eoh, "Effective Tower Height", coolTower.TowerHeight, Clusive::In, MinHeight);
+                }
 
-            coolTower.OutletArea = s_ipsc->rNumericArgs(3); // Get outlet area
-            if (coolTower.OutletArea > MaxValue) {
-                coolTower.OutletArea = MaxValue;
-                ShowWarningBadMax(state, eoh, cNumericFields(3), s_ipsc->rNumericArgs(3), Clusive::In, MaxValue);
-            }
-            if (coolTower.OutletArea < MinValue) {
-                coolTower.OutletArea = MinValue;
-                ShowWarningBadMin(state, eoh, cNumericFields(3), s_ipsc->rNumericArgs(3), Clusive::In, MinValue);
-            }
+                coolTower.OutletArea =
+                    inputProcessor->getRealFieldValue(coolTowerFields, objectSchemaProps, "airflow_outlet_area"); // Get outlet area
+                if (coolTower.OutletArea > MaxValue) {
+                    coolTower.OutletArea = MaxValue;
+                    ShowWarningBadMax(state, eoh, "Airflow Outlet Area", coolTower.OutletArea, Clusive::In, MaxValue);
+                }
+                if (coolTower.OutletArea < MinValue) {
+                    coolTower.OutletArea = MinValue;
+                    ShowWarningBadMin(state, eoh, "Airflow Outlet Area", coolTower.OutletArea, Clusive::In, MinValue);
+                }
 
-            coolTower.MaxAirVolFlowRate = s_ipsc->rNumericArgs(4); // Maximum limit of air flow to the space
-            if (coolTower.MaxAirVolFlowRate > MaxValue) {
-                coolTower.MaxAirVolFlowRate = MaxValue;
-                ShowWarningBadMax(state, eoh, cNumericFields(4), s_ipsc->rNumericArgs(4), Clusive::In, MaxValue);
-            }
-            if (coolTower.MaxAirVolFlowRate < MinValue) {
-                coolTower.MaxAirVolFlowRate = MinValue;
-                ShowWarningBadMin(state, eoh, cNumericFields(4), s_ipsc->rNumericArgs(4), Clusive::In, MinValue);
-            }
+                coolTower.MaxAirVolFlowRate = inputProcessor->getRealFieldValue(
+                    coolTowerFields, objectSchemaProps, "maximum_air_flow_rate"); // Maximum limit of air flow to the space
+                if (coolTower.MaxAirVolFlowRate > MaxValue) {
+                    coolTower.MaxAirVolFlowRate = MaxValue;
+                    ShowWarningBadMax(state, eoh, "Maximum Air Flow Rate", coolTower.MaxAirVolFlowRate, Clusive::In, MaxValue);
+                }
+                if (coolTower.MaxAirVolFlowRate < MinValue) {
+                    coolTower.MaxAirVolFlowRate = MinValue;
+                    ShowWarningBadMin(state, eoh, "Maximum Air Flow Rate", coolTower.MaxAirVolFlowRate, Clusive::In, MinValue);
+                }
 
-            coolTower.MinZoneTemp = s_ipsc->rNumericArgs(5); // Get minimum temp limit which gets this cooltower off
-            if (coolTower.MinZoneTemp > MaxValue) {
-                coolTower.MinZoneTemp = MaxValue;
-                ShowWarningBadMax(state, eoh, cNumericFields(5), s_ipsc->rNumericArgs(5), Clusive::In, MaxValue);
-            }
-            if (coolTower.MinZoneTemp < MinValue) {
-                coolTower.MinZoneTemp = MinValue;
-                ShowWarningBadMin(state, eoh, cNumericFields(5), s_ipsc->rNumericArgs(5), Clusive::In, MinValue);
-            }
+                coolTower.MinZoneTemp = inputProcessor->getRealFieldValue(
+                    coolTowerFields, objectSchemaProps, "minimum_indoor_temperature"); // Get minimum temp limit which gets this cooltower off
+                if (coolTower.MinZoneTemp > MaxValue) {
+                    coolTower.MinZoneTemp = MaxValue;
+                    ShowWarningBadMax(state, eoh, "Minimum Indoor Temperature", coolTower.MinZoneTemp, Clusive::In, MaxValue);
+                }
+                if (coolTower.MinZoneTemp < MinValue) {
+                    coolTower.MinZoneTemp = MinValue;
+                    ShowWarningBadMin(state, eoh, "Minimum Indoor Temperature", coolTower.MinZoneTemp, Clusive::In, MinValue);
+                }
 
-            coolTower.FracWaterLoss = s_ipsc->rNumericArgs(6); // Fraction of water loss
-            if (coolTower.FracWaterLoss > MaxFrac) {
-                coolTower.FracWaterLoss = MaxFrac;
-                ShowWarningBadMax(state, eoh, cNumericFields(6), s_ipsc->rNumericArgs(6), Clusive::In, MaxFrac);
-            }
-            if (coolTower.FracWaterLoss < MinFrac) {
-                coolTower.FracWaterLoss = MinFrac;
-                ShowWarningBadMin(state, eoh, cNumericFields(6), s_ipsc->rNumericArgs(6), Clusive::In, MinFrac);
-            }
+                coolTower.FracWaterLoss =
+                    inputProcessor->getRealFieldValue(coolTowerFields, objectSchemaProps, "fraction_of_water_loss"); // Fraction of water loss
+                if (coolTower.FracWaterLoss > MaxFrac) {
+                    coolTower.FracWaterLoss = MaxFrac;
+                    ShowWarningBadMax(state, eoh, "Fraction of Water Loss", coolTower.FracWaterLoss, Clusive::In, MaxFrac);
+                }
+                if (coolTower.FracWaterLoss < MinFrac) {
+                    coolTower.FracWaterLoss = MinFrac;
+                    ShowWarningBadMin(state, eoh, "Fraction of Water Loss", coolTower.FracWaterLoss, Clusive::In, MinFrac);
+                }
 
-            coolTower.FracFlowSched = s_ipsc->rNumericArgs(7); // Fraction of loss of air flow
-            if (coolTower.FracFlowSched > MaxFrac) {
-                coolTower.FracFlowSched = MaxFrac;
-                ShowWarningBadMax(state, eoh, cNumericFields(7), s_ipsc->rNumericArgs(7), Clusive::In, MaxFrac);
-            }
-            if (coolTower.FracFlowSched < MinFrac) {
-                coolTower.FracFlowSched = MinFrac;
-                ShowWarningBadMin(state, eoh, cNumericFields(7), s_ipsc->rNumericArgs(7), Clusive::In, MinFrac);
-            }
+                coolTower.FracFlowSched = inputProcessor->getRealFieldValue(
+                    coolTowerFields, objectSchemaProps, "fraction_of_flow_schedule"); // Fraction of loss of air flow
+                if (coolTower.FracFlowSched > MaxFrac) {
+                    coolTower.FracFlowSched = MaxFrac;
+                    ShowWarningBadMax(state, eoh, "Fraction of Flow Schedule", coolTower.FracFlowSched, Clusive::In, MaxFrac);
+                }
+                if (coolTower.FracFlowSched < MinFrac) {
+                    coolTower.FracFlowSched = MinFrac;
+                    ShowWarningBadMin(state, eoh, "Fraction of Flow Schedule", coolTower.FracFlowSched, Clusive::In, MinFrac);
+                }
 
-            coolTower.RatedPumpPower = s_ipsc->rNumericArgs(8); // Get rated pump power
+                coolTower.RatedPumpPower =
+                    inputProcessor->getRealFieldValue(coolTowerFields, objectSchemaProps, "rated_power_consumption"); // Get rated pump power
+                ++CoolTowerNum;
+            }
         }
-
-        cAlphaArgs.deallocate();
-        cAlphaFields.deallocate();
-        cNumericFields.deallocate();
-        rNumericArgs.deallocate();
-        lAlphaBlanks.deallocate();
-        lNumericBlanks.deallocate();
 
         if (ErrorsFound) {
             ShowFatalError(state, EnergyPlus::format("{} errors occurred in input.  Program terminates.", CurrentModuleObject));

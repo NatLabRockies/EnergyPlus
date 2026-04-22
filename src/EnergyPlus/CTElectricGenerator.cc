@@ -149,15 +149,11 @@ namespace CTElectricGenerator {
         // required by the CT Generator models.
         static constexpr std::string_view routineName = "GetCTGeneratorInput";
 
-        int NumAlphas;                // Number of elements in the alpha array
-        int NumNums;                  // Number of elements in the numeric array
-        int IOStat;                   // IO Status when calling get input subroutine
-        Array1D_string AlphArray(12); // character string data
-        Array1D<Real64> NumArray(12); // numeric data
-        bool ErrorsFound(false);      // error flag
+        bool ErrorsFound(false); // error flag
 
         state.dataIPShortCut->cCurrentModuleObject = "Generator:CombustionTurbine";
-        int NumCTGenerators = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, state.dataIPShortCut->cCurrentModuleObject);
+        auto *inputProcessor = state.dataInputProcessing->inputProcessor.get();
+        int NumCTGenerators = inputProcessor->getNumObjectsFound(state, state.dataIPShortCut->cCurrentModuleObject);
 
         if (NumCTGenerators <= 0) {
             ShowSevereError(state, EnergyPlus::format("No {} equipment specified in input file", state.dataIPShortCut->cCurrentModuleObject));
@@ -168,183 +164,229 @@ namespace CTElectricGenerator {
         state.dataCTElectricGenerator->CTGenerator.allocate(NumCTGenerators);
 
         // LOAD ARRAYS WITH CT CURVE FIT Generator DATA
-        for (int genNum = 1; genNum <= NumCTGenerators; ++genNum) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     state.dataIPShortCut->cCurrentModuleObject,
-                                                                     genNum,
-                                                                     AlphArray,
-                                                                     NumAlphas,
-                                                                     NumArray,
-                                                                     NumNums,
-                                                                     IOStat,
-                                                                     _,
-                                                                     state.dataIPShortCut->lAlphaFieldBlanks,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
+        auto const &objectSchemaProps = inputProcessor->getObjectSchemaProps(state, state.dataIPShortCut->cCurrentModuleObject);
+        auto const generatorObjects = inputProcessor->epJSON.find(state.dataIPShortCut->cCurrentModuleObject);
+        if (generatorObjects != inputProcessor->epJSON.end()) {
+            int genNum = 1;
+            for (auto const &generatorInstance : generatorObjects.value().items()) {
+                auto const &generatorFields = generatorInstance.value();
+                auto const generatorName = Util::makeUPPER(generatorInstance.key());
+                auto const electricCircuitNodeName =
+                    inputProcessor->getAlphaFieldValue(generatorFields, objectSchemaProps, "electric_circuit_node_name");
+                auto const partLoadBasedFuelInputCurveName =
+                    inputProcessor->getAlphaFieldValue(generatorFields, objectSchemaProps, "part_load_based_fuel_input_curve_name");
+                auto const temperatureBasedFuelInputCurveName =
+                    inputProcessor->getAlphaFieldValue(generatorFields, objectSchemaProps, "temperature_based_fuel_input_curve_name");
+                auto const exhaustFlowCurveName = inputProcessor->getAlphaFieldValue(generatorFields, objectSchemaProps, "exhaust_flow_curve_name");
+                auto const partLoadBasedExhaustTemperatureCurveName =
+                    inputProcessor->getAlphaFieldValue(generatorFields, objectSchemaProps, "part_load_based_exhaust_temperature_curve_name");
+                auto const temperatureBasedExhaustTemperatureCurveName =
+                    inputProcessor->getAlphaFieldValue(generatorFields, objectSchemaProps, "temperature_based_exhaust_temperature_curve_name");
+                auto const heatRecoveryLubeEnergyCurveName =
+                    inputProcessor->getAlphaFieldValue(generatorFields, objectSchemaProps, "heat_recovery_lube_energy_curve_name");
+                auto const heatRecoveryInletNodeName =
+                    generatorFields.contains("heat_recovery_inlet_node_name")
+                        ? inputProcessor->getAlphaFieldValue(generatorFields, objectSchemaProps, "heat_recovery_inlet_node_name")
+                        : std::string();
+                auto const heatRecoveryOutletNodeName =
+                    generatorFields.contains("heat_recovery_outlet_node_name")
+                        ? inputProcessor->getAlphaFieldValue(generatorFields, objectSchemaProps, "heat_recovery_outlet_node_name")
+                        : std::string();
+                auto const fuelType = generatorFields.contains("fuel_type")
+                                          ? inputProcessor->getAlphaFieldValue(generatorFields, objectSchemaProps, "fuel_type")
+                                          : std::string("NaturalGas");
+                auto const outdoorAirInletNodeName =
+                    generatorFields.contains("outdoor_air_inlet_node_name")
+                        ? inputProcessor->getAlphaFieldValue(generatorFields, objectSchemaProps, "outdoor_air_inlet_node_name")
+                        : std::string();
 
-            ErrorObjectHeader eoh{routineName, state.dataIPShortCut->cCurrentModuleObject, AlphArray(1)};
+                inputProcessor->markObjectAsUsed(state.dataIPShortCut->cCurrentModuleObject, generatorInstance.key());
 
-            state.dataCTElectricGenerator->CTGenerator(genNum).Name = AlphArray(1);
+                ErrorObjectHeader eoh{routineName, state.dataIPShortCut->cCurrentModuleObject, generatorName};
 
-            state.dataCTElectricGenerator->CTGenerator(genNum).RatedPowerOutput = NumArray(1);
-            if (NumArray(1) == 0.0) {
-                ShowSevereError(state, EnergyPlus::format("Invalid {}={:.2R}", state.dataIPShortCut->cNumericFieldNames(1), NumArray(1)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, AlphArray(1)));
-                ErrorsFound = true;
-            }
+                state.dataCTElectricGenerator->CTGenerator(genNum).Name = generatorName;
 
-            // Not sure what to do with electric nodes, so do not use optional arguments
-            state.dataCTElectricGenerator->CTGenerator(genNum).ElectricCircuitNode =
-                Node::GetOnlySingleNode(state,
-                                        AlphArray(2),
-                                        ErrorsFound,
-                                        Node::ConnectionObjectType::GeneratorCombustionTurbine,
-                                        AlphArray(1),
-                                        Node::FluidType::Electric,
-                                        Node::ConnectionType::Electric,
-                                        Node::CompFluidStream::Primary,
-                                        Node::ObjectIsNotParent);
-
-            state.dataCTElectricGenerator->CTGenerator(genNum).MinPartLoadRat = NumArray(2);
-            state.dataCTElectricGenerator->CTGenerator(genNum).MaxPartLoadRat = NumArray(3);
-            state.dataCTElectricGenerator->CTGenerator(genNum).OptPartLoadRat = NumArray(4);
-
-            // Load Special CT Generator Input
-
-            state.dataCTElectricGenerator->CTGenerator(genNum).PLBasedFuelInputCurve = Curve::GetCurve(state, AlphArray(3));
-            if (state.dataCTElectricGenerator->CTGenerator(genNum).PLBasedFuelInputCurve == 0) {
-                ShowSevereItemNotFound(state, eoh, state.dataIPShortCut->cAlphaFieldNames(3), AlphArray(3));
-                ErrorsFound = true;
-            }
-
-            state.dataCTElectricGenerator->CTGenerator(genNum).TempBasedFuelInputCurve = Curve::GetCurve(state, AlphArray(4));
-            if (state.dataCTElectricGenerator->CTGenerator(genNum).TempBasedFuelInputCurve == nullptr) {
-                ShowSevereItemNotFound(state, eoh, state.dataIPShortCut->cAlphaFieldNames(4), AlphArray(4));
-                ErrorsFound = true;
-            }
-
-            state.dataCTElectricGenerator->CTGenerator(genNum).ExhaustFlowCurve = Curve::GetCurve(state, AlphArray(5));
-            if (state.dataCTElectricGenerator->CTGenerator(genNum).ExhaustFlowCurve == nullptr) {
-                ShowSevereItemNotFound(state, eoh, state.dataIPShortCut->cAlphaFieldNames(5), AlphArray(5));
-                ErrorsFound = true;
-            }
-
-            state.dataCTElectricGenerator->CTGenerator(genNum).PLBasedExhaustTempCurve = Curve::GetCurve(state, AlphArray(6));
-            if (state.dataCTElectricGenerator->CTGenerator(genNum).PLBasedExhaustTempCurve == nullptr) {
-                ShowSevereItemNotFound(state, eoh, state.dataIPShortCut->cAlphaFieldNames(6), AlphArray(6));
-                ErrorsFound = true;
-            }
-
-            state.dataCTElectricGenerator->CTGenerator(genNum).TempBasedExhaustTempCurve = Curve::GetCurve(state, AlphArray(7));
-            if (state.dataCTElectricGenerator->CTGenerator(genNum).TempBasedExhaustTempCurve == nullptr) {
-                ShowSevereItemNotFound(state, eoh, state.dataIPShortCut->cAlphaFieldNames(7), AlphArray(7));
-                ErrorsFound = true;
-            }
-
-            state.dataCTElectricGenerator->CTGenerator(genNum).QLubeOilRecoveredCurve = Curve::GetCurve(state, AlphArray(8));
-            if (state.dataCTElectricGenerator->CTGenerator(genNum).QLubeOilRecoveredCurve == nullptr) {
-                ShowSevereItemNotFound(state, eoh, state.dataIPShortCut->cAlphaFieldNames(8), AlphArray(8));
-                ErrorsFound = true;
-            }
-
-            state.dataCTElectricGenerator->CTGenerator(genNum).UACoef[0] = NumArray(5);
-            state.dataCTElectricGenerator->CTGenerator(genNum).UACoef[1] = NumArray(6);
-
-            state.dataCTElectricGenerator->CTGenerator(genNum).MaxExhaustperCTPower = NumArray(7);
-            state.dataCTElectricGenerator->CTGenerator(genNum).DesignMinExitGasTemp = NumArray(8);
-            state.dataCTElectricGenerator->CTGenerator(genNum).DesignAirInletTemp = NumArray(9);
-            state.dataCTElectricGenerator->CTGenerator(genNum).FuelHeatingValue = NumArray(10);
-            state.dataCTElectricGenerator->CTGenerator(genNum).DesignHeatRecVolFlowRate = NumArray(11);
-
-            if (state.dataCTElectricGenerator->CTGenerator(genNum).DesignHeatRecVolFlowRate > 0.0) {
-                state.dataCTElectricGenerator->CTGenerator(genNum).HeatRecActive = true;
-                state.dataCTElectricGenerator->CTGenerator(genNum).HeatRecInletNodeNum =
-                    Node::GetOnlySingleNode(state,
-                                            AlphArray(9),
-                                            ErrorsFound,
-                                            Node::ConnectionObjectType::GeneratorCombustionTurbine,
-                                            AlphArray(1),
-                                            Node::FluidType::Water,
-                                            Node::ConnectionType::Inlet,
-                                            Node::CompFluidStream::Primary,
-                                            Node::ObjectIsNotParent);
-                if (state.dataCTElectricGenerator->CTGenerator(genNum).HeatRecInletNodeNum == 0) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("Missing Node Name, Heat Recovery Inlet, for {}={}",
-                                                       state.dataIPShortCut->cCurrentModuleObject,
-                                                       AlphArray(1)));
-                    ErrorsFound = true;
-                }
-                state.dataCTElectricGenerator->CTGenerator(genNum).HeatRecOutletNodeNum =
-                    Node::GetOnlySingleNode(state,
-                                            AlphArray(10),
-                                            ErrorsFound,
-                                            Node::ConnectionObjectType::GeneratorCombustionTurbine,
-                                            AlphArray(1),
-                                            Node::FluidType::Water,
-                                            Node::ConnectionType::Outlet,
-                                            Node::CompFluidStream::Primary,
-                                            Node::ObjectIsNotParent);
-                if (state.dataCTElectricGenerator->CTGenerator(genNum).HeatRecOutletNodeNum == 0) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("Missing Node Name, Heat Recovery Outlet, for {}={}",
-                                                       state.dataIPShortCut->cCurrentModuleObject,
-                                                       AlphArray(1)));
+                state.dataCTElectricGenerator->CTGenerator(genNum).RatedPowerOutput =
+                    inputProcessor->getRealFieldValue(generatorFields, objectSchemaProps, "rated_power_output");
+                if (state.dataCTElectricGenerator->CTGenerator(genNum).RatedPowerOutput == 0.0) {
+                    ShowSevereError(state, EnergyPlus::format("Invalid {}={:.2R}", "rated_power_output", 0.0));
+                    ShowContinueError(state, EnergyPlus::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, generatorName));
                     ErrorsFound = true;
                 }
 
-                Node::TestCompSet(
-                    state, state.dataIPShortCut->cCurrentModuleObject, AlphArray(1), AlphArray(9), AlphArray(10), "Heat Recovery Nodes");
-                PlantUtilities::RegisterPlantCompDesignFlow(state,
-                                                            state.dataCTElectricGenerator->CTGenerator(genNum).HeatRecInletNodeNum,
-                                                            state.dataCTElectricGenerator->CTGenerator(genNum).DesignHeatRecVolFlowRate);
-            } else {
-                state.dataCTElectricGenerator->CTGenerator(genNum).HeatRecActive = false;
-                state.dataCTElectricGenerator->CTGenerator(genNum).HeatRecInletNodeNum = 0;
-                state.dataCTElectricGenerator->CTGenerator(genNum).HeatRecOutletNodeNum = 0;
-                if (!state.dataIPShortCut->lAlphaFieldBlanks(9) || !state.dataIPShortCut->lAlphaFieldBlanks(10)) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("Since Design Heat Flow Rate = 0.0, Heat Recovery inactive for {}={}",
-                                                        state.dataIPShortCut->cCurrentModuleObject,
-                                                        AlphArray(1)));
-                    ShowContinueError(state, "However, Node names were specified for Heat Recovery inlet or outlet nodes");
-                }
-            }
-
-            // Validate fuel type input
-            state.dataCTElectricGenerator->CTGenerator(genNum).FuelType =
-                static_cast<Constant::eFuel>(getEnumValue(Constant::eFuelNamesUC, AlphArray(11)));
-            if (state.dataCTElectricGenerator->CTGenerator(genNum).FuelType == Constant::eFuel::Invalid) {
-                ShowSevereError(state, EnergyPlus::format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(11), AlphArray(11)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, AlphArray(1)));
-                ErrorsFound = true;
-            }
-
-            state.dataCTElectricGenerator->CTGenerator(genNum).HeatRecMaxTemp = NumArray(12);
-
-            // begin CR7021
-            if (state.dataIPShortCut->lAlphaFieldBlanks(12)) {
-                state.dataCTElectricGenerator->CTGenerator(genNum).OAInletNode = 0;
-            } else {
-                state.dataCTElectricGenerator->CTGenerator(genNum).OAInletNode =
+                // Not sure what to do with electric nodes, so do not use optional arguments
+                state.dataCTElectricGenerator->CTGenerator(genNum).ElectricCircuitNode =
                     Node::GetOnlySingleNode(state,
-                                            AlphArray(12),
+                                            electricCircuitNodeName,
                                             ErrorsFound,
                                             Node::ConnectionObjectType::GeneratorCombustionTurbine,
-                                            AlphArray(1),
-                                            Node::FluidType::Air,
-                                            Node::ConnectionType::OutsideAirReference,
+                                            generatorName,
+                                            Node::FluidType::Electric,
+                                            Node::ConnectionType::Electric,
                                             Node::CompFluidStream::Primary,
                                             Node::ObjectIsNotParent);
-                if (!OutAirNodeManager::CheckOutAirNodeNumber(state, state.dataCTElectricGenerator->CTGenerator(genNum).OAInletNode)) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}, \"{}\" Outdoor Air Inlet Node Name not valid Outdoor Air Node= {}",
-                                                       state.dataIPShortCut->cCurrentModuleObject,
-                                                       state.dataCTElectricGenerator->CTGenerator(genNum).Name,
-                                                       AlphArray(12)));
-                    ShowContinueError(state, "...does not appear in an OutdoorAir:NodeList or as an OutdoorAir:Node.");
+
+                state.dataCTElectricGenerator->CTGenerator(genNum).MinPartLoadRat =
+                    inputProcessor->getRealFieldValue(generatorFields, objectSchemaProps, "minimum_part_load_ratio");
+                state.dataCTElectricGenerator->CTGenerator(genNum).MaxPartLoadRat =
+                    inputProcessor->getRealFieldValue(generatorFields, objectSchemaProps, "maximum_part_load_ratio");
+                state.dataCTElectricGenerator->CTGenerator(genNum).OptPartLoadRat =
+                    inputProcessor->getRealFieldValue(generatorFields, objectSchemaProps, "optimum_part_load_ratio");
+
+                // Load Special CT Generator Input
+
+                state.dataCTElectricGenerator->CTGenerator(genNum).PLBasedFuelInputCurve = Curve::GetCurve(state, partLoadBasedFuelInputCurveName);
+                if (state.dataCTElectricGenerator->CTGenerator(genNum).PLBasedFuelInputCurve == 0) {
+                    ShowSevereItemNotFound(state, eoh, "part_load_based_fuel_input_curve_name", partLoadBasedFuelInputCurveName);
                     ErrorsFound = true;
                 }
+
+                state.dataCTElectricGenerator->CTGenerator(genNum).TempBasedFuelInputCurve =
+                    Curve::GetCurve(state, temperatureBasedFuelInputCurveName);
+                if (state.dataCTElectricGenerator->CTGenerator(genNum).TempBasedFuelInputCurve == nullptr) {
+                    ShowSevereItemNotFound(state, eoh, "temperature_based_fuel_input_curve_name", temperatureBasedFuelInputCurveName);
+                    ErrorsFound = true;
+                }
+
+                state.dataCTElectricGenerator->CTGenerator(genNum).ExhaustFlowCurve = Curve::GetCurve(state, exhaustFlowCurveName);
+                if (state.dataCTElectricGenerator->CTGenerator(genNum).ExhaustFlowCurve == nullptr) {
+                    ShowSevereItemNotFound(state, eoh, "exhaust_flow_curve_name", exhaustFlowCurveName);
+                    ErrorsFound = true;
+                }
+
+                state.dataCTElectricGenerator->CTGenerator(genNum).PLBasedExhaustTempCurve =
+                    Curve::GetCurve(state, partLoadBasedExhaustTemperatureCurveName);
+                if (state.dataCTElectricGenerator->CTGenerator(genNum).PLBasedExhaustTempCurve == nullptr) {
+                    ShowSevereItemNotFound(state, eoh, "part_load_based_exhaust_temperature_curve_name", partLoadBasedExhaustTemperatureCurveName);
+                    ErrorsFound = true;
+                }
+
+                state.dataCTElectricGenerator->CTGenerator(genNum).TempBasedExhaustTempCurve =
+                    Curve::GetCurve(state, temperatureBasedExhaustTemperatureCurveName);
+                if (state.dataCTElectricGenerator->CTGenerator(genNum).TempBasedExhaustTempCurve == nullptr) {
+                    ShowSevereItemNotFound(
+                        state, eoh, "temperature_based_exhaust_temperature_curve_name", temperatureBasedExhaustTemperatureCurveName);
+                    ErrorsFound = true;
+                }
+
+                state.dataCTElectricGenerator->CTGenerator(genNum).QLubeOilRecoveredCurve = Curve::GetCurve(state, heatRecoveryLubeEnergyCurveName);
+                if (state.dataCTElectricGenerator->CTGenerator(genNum).QLubeOilRecoveredCurve == nullptr) {
+                    ShowSevereItemNotFound(state, eoh, "heat_recovery_lube_energy_curve_name", heatRecoveryLubeEnergyCurveName);
+                    ErrorsFound = true;
+                }
+
+                state.dataCTElectricGenerator->CTGenerator(genNum).UACoef[0] =
+                    inputProcessor->getRealFieldValue(generatorFields, objectSchemaProps, "coefficient_1_of_u_factor_times_area_curve");
+                state.dataCTElectricGenerator->CTGenerator(genNum).UACoef[1] =
+                    inputProcessor->getRealFieldValue(generatorFields, objectSchemaProps, "coefficient_2_of_u_factor_times_area_curve");
+
+                state.dataCTElectricGenerator->CTGenerator(genNum).MaxExhaustperCTPower =
+                    inputProcessor->getRealFieldValue(generatorFields, objectSchemaProps, "maximum_exhaust_flow_per_unit_of_power_output");
+                state.dataCTElectricGenerator->CTGenerator(genNum).DesignMinExitGasTemp =
+                    inputProcessor->getRealFieldValue(generatorFields, objectSchemaProps, "design_minimum_exhaust_temperature");
+                state.dataCTElectricGenerator->CTGenerator(genNum).DesignAirInletTemp =
+                    inputProcessor->getRealFieldValue(generatorFields, objectSchemaProps, "design_air_inlet_temperature");
+                state.dataCTElectricGenerator->CTGenerator(genNum).FuelHeatingValue =
+                    inputProcessor->getRealFieldValue(generatorFields, objectSchemaProps, "fuel_higher_heating_value");
+                state.dataCTElectricGenerator->CTGenerator(genNum).DesignHeatRecVolFlowRate =
+                    inputProcessor->getRealFieldValue(generatorFields, objectSchemaProps, "design_heat_recovery_water_flow_rate");
+
+                if (state.dataCTElectricGenerator->CTGenerator(genNum).DesignHeatRecVolFlowRate > 0.0) {
+                    state.dataCTElectricGenerator->CTGenerator(genNum).HeatRecActive = true;
+                    state.dataCTElectricGenerator->CTGenerator(genNum).HeatRecInletNodeNum =
+                        Node::GetOnlySingleNode(state,
+                                                heatRecoveryInletNodeName,
+                                                ErrorsFound,
+                                                Node::ConnectionObjectType::GeneratorCombustionTurbine,
+                                                generatorName,
+                                                Node::FluidType::Water,
+                                                Node::ConnectionType::Inlet,
+                                                Node::CompFluidStream::Primary,
+                                                Node::ObjectIsNotParent);
+                    if (state.dataCTElectricGenerator->CTGenerator(genNum).HeatRecInletNodeNum == 0) {
+                        ShowSevereError(state,
+                                        EnergyPlus::format("Missing Node Name, Heat Recovery Inlet, for {}={}",
+                                                           state.dataIPShortCut->cCurrentModuleObject,
+                                                           generatorName));
+                        ErrorsFound = true;
+                    }
+                    state.dataCTElectricGenerator->CTGenerator(genNum).HeatRecOutletNodeNum =
+                        Node::GetOnlySingleNode(state,
+                                                heatRecoveryOutletNodeName,
+                                                ErrorsFound,
+                                                Node::ConnectionObjectType::GeneratorCombustionTurbine,
+                                                generatorName,
+                                                Node::FluidType::Water,
+                                                Node::ConnectionType::Outlet,
+                                                Node::CompFluidStream::Primary,
+                                                Node::ObjectIsNotParent);
+                    if (state.dataCTElectricGenerator->CTGenerator(genNum).HeatRecOutletNodeNum == 0) {
+                        ShowSevereError(state,
+                                        EnergyPlus::format("Missing Node Name, Heat Recovery Outlet, for {}={}",
+                                                           state.dataIPShortCut->cCurrentModuleObject,
+                                                           generatorName));
+                        ErrorsFound = true;
+                    }
+
+                    Node::TestCompSet(state,
+                                      state.dataIPShortCut->cCurrentModuleObject,
+                                      generatorName,
+                                      heatRecoveryInletNodeName,
+                                      heatRecoveryOutletNodeName,
+                                      "Heat Recovery Nodes");
+                    PlantUtilities::RegisterPlantCompDesignFlow(state,
+                                                                state.dataCTElectricGenerator->CTGenerator(genNum).HeatRecInletNodeNum,
+                                                                state.dataCTElectricGenerator->CTGenerator(genNum).DesignHeatRecVolFlowRate);
+                } else {
+                    state.dataCTElectricGenerator->CTGenerator(genNum).HeatRecActive = false;
+                    state.dataCTElectricGenerator->CTGenerator(genNum).HeatRecInletNodeNum = 0;
+                    state.dataCTElectricGenerator->CTGenerator(genNum).HeatRecOutletNodeNum = 0;
+                    if (!heatRecoveryInletNodeName.empty() || !heatRecoveryOutletNodeName.empty()) {
+                        ShowWarningError(state,
+                                         EnergyPlus::format("Since Design Heat Flow Rate = 0.0, Heat Recovery inactive for {}={}",
+                                                            state.dataIPShortCut->cCurrentModuleObject,
+                                                            generatorName));
+                        ShowContinueError(state, "However, Node names were specified for Heat Recovery inlet or outlet nodes");
+                    }
+                }
+
+                // Validate fuel type input
+                state.dataCTElectricGenerator->CTGenerator(genNum).FuelType =
+                    static_cast<Constant::eFuel>(getEnumValue(Constant::eFuelNamesUC, fuelType));
+                if (state.dataCTElectricGenerator->CTGenerator(genNum).FuelType == Constant::eFuel::Invalid) {
+                    ShowSevereError(state, EnergyPlus::format("Invalid {}={}", "fuel_type", fuelType));
+                    ShowContinueError(state, EnergyPlus::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, generatorName));
+                    ErrorsFound = true;
+                }
+
+                state.dataCTElectricGenerator->CTGenerator(genNum).HeatRecMaxTemp =
+                    inputProcessor->getRealFieldValue(generatorFields, objectSchemaProps, "heat_recovery_maximum_temperature");
+
+                // begin CR7021
+                if (outdoorAirInletNodeName.empty()) {
+                    state.dataCTElectricGenerator->CTGenerator(genNum).OAInletNode = 0;
+                } else {
+                    state.dataCTElectricGenerator->CTGenerator(genNum).OAInletNode =
+                        Node::GetOnlySingleNode(state,
+                                                outdoorAirInletNodeName,
+                                                ErrorsFound,
+                                                Node::ConnectionObjectType::GeneratorCombustionTurbine,
+                                                generatorName,
+                                                Node::FluidType::Air,
+                                                Node::ConnectionType::OutsideAirReference,
+                                                Node::CompFluidStream::Primary,
+                                                Node::ObjectIsNotParent);
+                    if (!OutAirNodeManager::CheckOutAirNodeNumber(state, state.dataCTElectricGenerator->CTGenerator(genNum).OAInletNode)) {
+                        ShowSevereError(state,
+                                        EnergyPlus::format("{}, \"{}\" Outdoor Air Inlet Node Name not valid Outdoor Air Node= {}",
+                                                           state.dataIPShortCut->cCurrentModuleObject,
+                                                           state.dataCTElectricGenerator->CTGenerator(genNum).Name,
+                                                           outdoorAirInletNodeName));
+                        ShowContinueError(state, "...does not appear in an OutdoorAir:NodeList or as an OutdoorAir:Node.");
+                        ErrorsFound = true;
+                    }
+                }
+                ++genNum;
             }
         }
 
