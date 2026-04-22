@@ -64,13 +64,25 @@
 #   lines......: 7.9% (28765 of 364658 lines)
 #   functions......: 19.6% (2224 of 11327 functions)
 
+import re
 from pathlib import Path
 
+
+def find_coverage_summary(lines: list[str], label: str) -> str:
+    pattern = re.compile(rf"^\s*{label}\.*:\s*(.+)$")
+    for line in reversed(lines):
+        match = pattern.match(line)
+        if match:
+            return match.group(1).strip()
+    tail = "\n".join(lines[-10:])
+    raise RuntimeError(f"Could not find {label} coverage summary in cover.txt. Recent output:\n{tail}")
+
+
 cover_input = Path.cwd() / "cover.txt"
-lines = cover_input.read_text().strip().split("\n")
-line_coverage = lines[-2].strip().split(":")[1].strip()
-line_percent = line_coverage.split(" ")[0]
-function_coverage = lines[-1].strip().split(":")[1].strip()
+lines = cover_input.read_text().splitlines()
+line_coverage = find_coverage_summary(lines, "lines")
+line_percent = line_coverage.split()[0]
+function_coverage = find_coverage_summary(lines, "functions")
 cover_output = Path.cwd() / "cover.md"
 content = f"""
 <details>

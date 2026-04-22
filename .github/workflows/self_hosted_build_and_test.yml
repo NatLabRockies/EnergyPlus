@@ -23,6 +23,9 @@ jobs:
   coverage:
     name: Coverage
     runs-on: [self-hosted, linux, x64, ubuntu-24.04]
+    permissions:
+      contents: read
+      statuses: write
     steps:
       - name: Checkout EnergyPlus
         uses: actions/checkout@v6
@@ -167,6 +170,7 @@ jobs:
         run: cat ${{ github.workspace }}/${{ env.BUILD_DIR }}/coverage/integration/cover.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload unit test coverage to Coveralls
+        id: coveralls-unit
         if: ${{ always() && hashFiles(format('{0}/{1}/coverage/unit/lcov.output.filtered', github.workspace, env.BUILD_DIR)) != '' }}
         uses: coverallsapp/github-action@v2
         with:
@@ -176,8 +180,11 @@ jobs:
           flag-name: unit-tests
           parallel: true
           build-number: ${{ github.run_id }}
+          git-branch: ${{ github.head_ref || github.ref_name }}
+          git-commit: ${{ github.event.pull_request.head.sha || steps.checkout-sha.outputs.sha }}
 
       - name: Upload integration test coverage to Coveralls
+        id: coveralls-integration
         if: ${{ always() && hashFiles(format('{0}/{1}/coverage/integration/lcov.output.filtered', github.workspace, env.BUILD_DIR)) != '' }}
         uses: coverallsapp/github-action@v2
         with:
@@ -187,14 +194,18 @@ jobs:
           flag-name: integration-tests
           parallel: true
           build-number: ${{ github.run_id }}
+          git-branch: ${{ github.head_ref || github.ref_name }}
+          git-commit: ${{ github.event.pull_request.head.sha || steps.checkout-sha.outputs.sha }}
 
       - name: Finish Coveralls coverage build
-        if: always()
+        if: ${{ always() && (steps.coveralls-unit.conclusion == 'success' || steps.coveralls-integration.conclusion == 'success') }}
         uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel-finished: true
           build-number: ${{ github.run_id }}
+          git-branch: ${{ github.head_ref || github.ref_name }}
+          git-commit: ${{ github.event.pull_request.head.sha || steps.checkout-sha.outputs.sha }}
 
       - name: Upload unit test coverage artifacts
         if: ${{ always() && hashFiles(format('{0}/{1}/coverage/unit/lcov.output.filtered', github.workspace, env.BUILD_DIR)) != '' }}
