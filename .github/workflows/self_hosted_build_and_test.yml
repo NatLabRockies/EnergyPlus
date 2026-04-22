@@ -107,25 +107,13 @@ jobs:
       - name: Stage generated EnergyPlus sources for coverage
         working-directory: ${{ env.BUILD_DIR }}
         run: |
-          install -d "${{ github.workspace }}/src/EnergyPlus/embedded"
-          : > coverage/generated-source-patterns.txt
           for generated in src/EnergyPlus/*.cc; do
             [[ -e "${generated}" ]] || continue
             target="${{ github.workspace }}/src/EnergyPlus/$(basename "${generated}")"
             if [[ ! -e "${target}" ]]; then
               cp -f "${generated}" "${target}"
-              echo "*/$(basename "${generated}")" >> coverage/generated-source-patterns.txt
             fi
           done
-          for generated in idd/embedded/*.cc; do
-            [[ -e "${generated}" ]] || continue
-            target="${{ github.workspace }}/src/EnergyPlus/embedded/$(basename "${generated}")"
-            if [[ ! -e "${target}" ]]; then
-              cp -f "${generated}" "${target}"
-              echo "*/embedded/$(basename "${generated}")" >> coverage/generated-source-patterns.txt
-            fi
-          done
-          sort -u -o coverage/generated-source-patterns.txt coverage/generated-source-patterns.txt
 
       - name: Generate raw unit test coverage results
         working-directory: ${{ env.BUILD_DIR }}
@@ -135,9 +123,15 @@ jobs:
         working-directory: ${{ env.BUILD_DIR }}
         run: |
           lcov -e coverage/unit/lcov.output "${{ github.workspace }}/src/EnergyPlus/*" -o coverage/unit/lcov.output.srconly
-          if [[ -s coverage/generated-source-patterns.txt ]]; then
-            mapfile -t generated_patterns < coverage/generated-source-patterns.txt
-            lcov -r coverage/unit/lcov.output.srconly "${generated_patterns[@]}" -o coverage/unit/lcov.output.filtered
+          awk -F: '/^SF:/{print $2}' coverage/unit/lcov.output.srconly | while read -r source_file; do
+            rel_path="${source_file#${{ github.workspace }}/}"
+            if [[ "${source_file}" == "${{ github.workspace }}/src/EnergyPlus/"* ]] && ! git -C "${{ github.workspace }}" ls-files --error-unmatch -- "${rel_path}" >/dev/null 2>&1; then
+              printf '%s\n' "${source_file}"
+            fi
+          done | sort -u > coverage/unit/excluded-generated-files.txt
+          if [[ -s coverage/unit/excluded-generated-files.txt ]]; then
+            mapfile -t excluded_generated_files < coverage/unit/excluded-generated-files.txt
+            lcov -r coverage/unit/lcov.output.srconly "${excluded_generated_files[@]}" -o coverage/unit/lcov.output.filtered --ignore-errors unused
           else
             cp -f coverage/unit/lcov.output.srconly coverage/unit/lcov.output.filtered
           fi
@@ -173,9 +167,15 @@ jobs:
         working-directory: ${{ env.BUILD_DIR }}
         run: |
           lcov -e coverage/integration/lcov.output "${{ github.workspace }}/src/EnergyPlus/*" -o coverage/integration/lcov.output.srconly
-          if [[ -s coverage/generated-source-patterns.txt ]]; then
-            mapfile -t generated_patterns < coverage/generated-source-patterns.txt
-            lcov -r coverage/integration/lcov.output.srconly "${generated_patterns[@]}" -o coverage/integration/lcov.output.filtered
+          awk -F: '/^SF:/{print $2}' coverage/integration/lcov.output.srconly | while read -r source_file; do
+            rel_path="${source_file#${{ github.workspace }}/}"
+            if [[ "${source_file}" == "${{ github.workspace }}/src/EnergyPlus/"* ]] && ! git -C "${{ github.workspace }}" ls-files --error-unmatch -- "${rel_path}" >/dev/null 2>&1; then
+              printf '%s\n' "${source_file}"
+            fi
+          done | sort -u > coverage/integration/excluded-generated-files.txt
+          if [[ -s coverage/integration/excluded-generated-files.txt ]]; then
+            mapfile -t excluded_generated_files < coverage/integration/excluded-generated-files.txt
+            lcov -r coverage/integration/lcov.output.srconly "${excluded_generated_files[@]}" -o coverage/integration/lcov.output.filtered --ignore-errors unused
           else
             cp -f coverage/integration/lcov.output.srconly coverage/integration/lcov.output.filtered
           fi
