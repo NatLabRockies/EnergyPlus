@@ -303,7 +303,7 @@ public:
 
 TEST_F(AirloopUnitarySysTest, MultipleWaterCoolingCoilSizing)
 {
-    state->init_state(*state);
+    // state->init_state(*state);
 
     // Set up raw water coil sizes as coil-on-branch configuration then
     // test against sizing of same water coils in UnitarySystem
@@ -780,6 +780,10 @@ TEST_F(ZoneUnitarySysTest, Test_UnitarySystemModel_factory)
     UnitarySystems::UnitarySys::factory(*state, HVAC::UnitarySysType::Unitary_AnyCoilType, compName, zoneEquipment, 0);
     UnitarySystems::UnitarySys *thisSys = &state->dataUnitarySystems->unitarySys[0];
 
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
+
     state->dataZoneEquip->ZoneEquipInputsFilled = true;
     thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
 
@@ -794,23 +798,27 @@ TEST_F(ZoneUnitarySysTest, Test_UnitarySystemModel_factory)
 
     state->dataGlobal->BeginEnvrnFlag = true; // act as if simulation is beginning
 
+    int zoneExhaustNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    int zoneInletNode = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
+    int coilInletNode = Node::GetNodeIndex(*state, "COOLING COIL AIR INLET NODE");
+
     // set up node conditions to test UnitarySystem set point based control
     // Unitary system air inlet node = 1
-    state->dataLoopNodes->Node(1).MassFlowRate = 1.0;
-    state->dataLoopNodes->Node(1).MassFlowRateMaxAvail = 1.0;
+    state->dataLoopNodes->Node(zoneExhaustNode).MassFlowRate = 1.0;
+    state->dataLoopNodes->Node(zoneExhaustNode).MassFlowRateMaxAvail = 1.0;
     // state->dataLoopNodes->Node(1).MassFlowRate = thisSys->designMassFlowRate;
     // state->dataLoopNodes->Node(1).MassFlowRateMaxAvail = thisSys->designMassFlowRate; // max avail at fan inlet so fan won't limit flow
 
     // test COOLING condition
-    state->dataLoopNodes->Node(1).Temp = 24.0;         // 24C db
-    state->dataLoopNodes->Node(1).HumRat = 0.00922;    // 17C wb
-    state->dataLoopNodes->Node(1).Enthalpy = 47597.03; // www.sugartech.com/psychro/index.php
+    state->dataLoopNodes->Node(zoneExhaustNode).Temp = 24.0;         // 24C db
+    state->dataLoopNodes->Node(zoneExhaustNode).HumRat = 0.00922;    // 17C wb
+    state->dataLoopNodes->Node(zoneExhaustNode).Enthalpy = 47597.03; // www.sugartech.com/psychro/index.php
 
     // Cooling coil air inlet node = 3
-    state->dataLoopNodes->Node(3).MassFlowRateMax = 1.0; // max at fan outlet so fan won't limit flow
+    state->dataLoopNodes->Node(coilInletNode).MassFlowRateMax = 1.0; // max at fan outlet so fan won't limit flow
     // state->dataLoopNodes->Node(3).MassFlowRateMax = thisSys->designMassFlowRate; // max at fan outlet so fan won't limit flow
     // Cooling coil air outlet node = 2
-    state->dataLoopNodes->Node(2).TempSetPoint = 17.0;
+    state->dataLoopNodes->Node(zoneInletNode).TempSetPoint = 17.0;
 
     // test calling the sim routine
     int AirLoopNum = 0;
@@ -985,6 +993,10 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_TwoSpeedDXCoolCoil_Only)
     UnitarySystems::UnitarySys::factory(*state, HVAC::UnitarySysType::Unitary_AnyCoilType, compName, zoneEquipment, 0);
     UnitarySystems::UnitarySys *thisSys = &state->dataUnitarySystems->unitarySys[0];
 
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
+
     state->dataZoneEquip->ZoneEquipInputsFilled = true;                                  // indicate zone data is available
     thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
     EXPECT_FALSE(ErrorsFound);                                                           // expect no errors
@@ -1029,18 +1041,23 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_TwoSpeedDXCoolCoil_Only)
 
     // set up node conditions to test UnitarySystem set point based control
     // Unitary system air inlet node = 1
-    state->dataLoopNodes->Node(1).MassFlowRate = thisSys->m_DesignMassFlowRate;
-    state->dataLoopNodes->Node(1).MassFlowRateMaxAvail = thisSys->m_DesignMassFlowRate; // max avail at fan inlet so fan won't limit flow
+
+    int zoneExhaustNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    int zoneInletNode = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
+    int coilInletNode = Node::GetNodeIndex(*state, "COOLING COIL AIR INLET NODE");
+    
+    state->dataLoopNodes->Node(zoneExhaustNode).MassFlowRate = thisSys->m_DesignMassFlowRate;
+    state->dataLoopNodes->Node(zoneExhaustNode).MassFlowRateMaxAvail = thisSys->m_DesignMassFlowRate; // max avail at fan inlet so fan won't limit flow
 
     // test COOLING condition
-    state->dataLoopNodes->Node(1).Temp = 24.0;         // 24C db
-    state->dataLoopNodes->Node(1).HumRat = 0.00922;    // 17C wb
-    state->dataLoopNodes->Node(1).Enthalpy = 47597.03; // www.sugartech.com/psychro/index.php
+    state->dataLoopNodes->Node(zoneExhaustNode).Temp = 24.0;         // 24C db
+    state->dataLoopNodes->Node(zoneExhaustNode).HumRat = 0.00922;    // 17C wb
+    state->dataLoopNodes->Node(zoneExhaustNode).Enthalpy = 47597.03; // www.sugartech.com/psychro/index.php
 
     // Cooling coil air inlet node = 3
-    state->dataLoopNodes->Node(3).MassFlowRateMax = thisSys->m_DesignMassFlowRate; // max at fan outlet so fan won't limit flow
+    state->dataLoopNodes->Node(coilInletNode).MassFlowRateMax = thisSys->m_DesignMassFlowRate; // max at fan outlet so fan won't limit flow
     // Cooling coil air outlet node = 2
-    state->dataLoopNodes->Node(2).TempSetPoint = 17.0;
+    state->dataLoopNodes->Node(zoneInletNode).TempSetPoint = 17.0;
 
     state->dataGlobal->BeginEnvrnFlag = true; // act as if simulation is beginning
 
@@ -1059,9 +1076,9 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_TwoSpeedDXCoolCoil_Only)
                       latOut);
 
     // check that cooling coil air outlet node is at set point
-    EXPECT_NEAR(state->dataLoopNodes->Node(2).Temp, state->dataLoopNodes->Node(2).TempSetPoint, 0.001);
+    EXPECT_NEAR(state->dataLoopNodes->Node(zoneInletNode).Temp, state->dataLoopNodes->Node(zoneInletNode).TempSetPoint, 0.001);
     // cooling coil air inlet node temp is greater than cooling coil air outlet node temp
-    EXPECT_GT(state->dataLoopNodes->Node(3).Temp, state->dataLoopNodes->Node(2).Temp);
+    EXPECT_GT(state->dataLoopNodes->Node(coilInletNode).Temp, state->dataLoopNodes->Node(zoneInletNode).Temp);
     EXPECT_TRUE(thisSys->m_useNoLoadLowSpeedAirFlow);
 }
 
@@ -1259,6 +1276,10 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_MultiSpeedDXCoolCoil_Only)
     UnitarySystems::UnitarySys::factory(*state, HVAC::UnitarySysType::Unitary_AnyCoilType, compName, zoneEquipment, 0);
     UnitarySystems::UnitarySys *thisSys = &state->dataUnitarySystems->unitarySys[0];
 
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
+
     state->dataZoneEquip->ZoneEquipInputsFilled = true;                                  // indicate zone data is available
     thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
     EXPECT_FALSE(ErrorsFound);                                                           // expect no errors
@@ -1303,20 +1324,24 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_MultiSpeedDXCoolCoil_Only)
                       sensOut,
                       latOut);
 
+    int zoneExhaustNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    int zoneInletNode = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
+    int coilInletNode = Node::GetNodeIndex(*state, "COOLING COIL AIR INLET NODE");
+    
     // set up node conditions to test UnitarySystem set point based control
     // Unitary system air inlet node = 1
-    state->dataLoopNodes->Node(1).MassFlowRate = thisSys->m_DesignMassFlowRate;
-    state->dataLoopNodes->Node(1).MassFlowRateMaxAvail = thisSys->m_DesignMassFlowRate; // max avail at fan inlet so fan won't limit flow
+    state->dataLoopNodes->Node(zoneExhaustNode).MassFlowRate = thisSys->m_DesignMassFlowRate;
+    state->dataLoopNodes->Node(zoneExhaustNode).MassFlowRateMaxAvail = thisSys->m_DesignMassFlowRate; // max avail at fan inlet so fan won't limit flow
 
     // test COOLING condition
-    state->dataLoopNodes->Node(1).Temp = 24.0;         // 24C db
-    state->dataLoopNodes->Node(1).HumRat = 0.00922;    // 17C wb
-    state->dataLoopNodes->Node(1).Enthalpy = 47597.03; // www.sugartech.com/psychro/index.php
+    state->dataLoopNodes->Node(zoneExhaustNode).Temp = 24.0;         // 24C db
+    state->dataLoopNodes->Node(zoneExhaustNode).HumRat = 0.00922;    // 17C wb
+    state->dataLoopNodes->Node(zoneExhaustNode).Enthalpy = 47597.03; // www.sugartech.com/psychro/index.php
 
     // Cooling coil air inlet node = 3
-    state->dataLoopNodes->Node(3).MassFlowRateMax = thisSys->m_DesignMassFlowRate; // max at fan outlet so fan won't limit flow
+    state->dataLoopNodes->Node(coilInletNode).MassFlowRateMax = thisSys->m_DesignMassFlowRate; // max at fan outlet so fan won't limit flow
                                                                                    // Cooling coil air outlet node = 2
-    state->dataLoopNodes->Node(2).TempSetPoint = 17.0;
+    state->dataLoopNodes->Node(zoneInletNode).TempSetPoint = 17.0;
 
     state->dataGlobal->BeginEnvrnFlag = true; // act as if simulation is beginning
 
@@ -1335,9 +1360,9 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_MultiSpeedDXCoolCoil_Only)
                       latOut);
 
     // check that cooling coil air outlet node is at set point
-    EXPECT_NEAR(state->dataLoopNodes->Node(2).Temp, state->dataLoopNodes->Node(2).TempSetPoint, 0.001);
+    EXPECT_NEAR(state->dataLoopNodes->Node(zoneInletNode).Temp, state->dataLoopNodes->Node(zoneInletNode).TempSetPoint, 0.001);
     // cooling coil air inlet node temp is greater than cooling coil air outlet node temp
-    EXPECT_GT(state->dataLoopNodes->Node(3).Temp, state->dataLoopNodes->Node(2).Temp);
+    EXPECT_GT(state->dataLoopNodes->Node(coilInletNode).Temp, state->dataLoopNodes->Node(zoneInletNode).Temp);
     EXPECT_NEAR(thisSys->m_CoolingCycRatio, 0.690072, 0.001);
     EXPECT_EQ(thisSys->m_CoolingSpeedRatio, 0);
     EXPECT_EQ(thisSys->m_CoolingSpeedNum, 1);
@@ -1363,10 +1388,10 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_MultiSpeedDXCoolCoil_Only)
     EXPECT_EQ(thisSys->m_CoolingSpeedNum, 1);   // ceiling of override value
 
     // check that cooling coil air outlet node is at set point, same cycling ratio and speed level with non-ems value
-    EXPECT_NEAR(state->dataLoopNodes->Node(2).Temp, state->dataLoopNodes->Node(2).TempSetPoint, 0.001);
+    EXPECT_NEAR(state->dataLoopNodes->Node(zoneInletNode).Temp, state->dataLoopNodes->Node(zoneInletNode).TempSetPoint, 0.001);
     // cooling coil air inlet node temp is greater than cooling coil air outlet node temp
-    EXPECT_GT(state->dataLoopNodes->Node(3).Temp, state->dataLoopNodes->Node(2).Temp);
-    Real64 CoolingCoilAirOutletTempAtSpeedOne = state->dataLoopNodes->Node(2).Temp;
+    EXPECT_GT(state->dataLoopNodes->Node(coilInletNode).Temp, state->dataLoopNodes->Node(zoneInletNode).Temp);
+    Real64 CoolingCoilAirOutletTempAtSpeedOne = state->dataLoopNodes->Node(zoneInletNode).Temp;
 
     state->dataGlobal->BeginEnvrnFlag = true; // act as if simulation is beginning
     thisSys->m_EMSOverrideCoilSpeedNumValue = 1.2;
@@ -1388,11 +1413,11 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_MultiSpeedDXCoolCoil_Only)
     EXPECT_NEAR(thisSys->m_CoolingSpeedRatio, 0.2, 0.001); // EMSOverrideCoilSpeedNumValue - floor(EMSOverrideCoilSpeedNumValue);
 
     // check that cooling coil air outlet node temperature is lower than the set point
-    EXPECT_LT(state->dataLoopNodes->Node(2).Temp, state->dataLoopNodes->Node(2).TempSetPoint);
+    EXPECT_LT(state->dataLoopNodes->Node(zoneInletNode).Temp, state->dataLoopNodes->Node(zoneInletNode).TempSetPoint);
     // check that cooling coil air outlet node temperature at speed 1.2 is lower than that at speed 0.71
-    EXPECT_LT(state->dataLoopNodes->Node(2).Temp, CoolingCoilAirOutletTempAtSpeedOne);
+    EXPECT_LT(state->dataLoopNodes->Node(zoneInletNode).Temp, CoolingCoilAirOutletTempAtSpeedOne);
     // cooling coil air inlet node temp is greater than cooling coil air outlet node temp
-    EXPECT_GT(state->dataLoopNodes->Node(3).Temp, state->dataLoopNodes->Node(2).Temp);
+    EXPECT_GT(state->dataLoopNodes->Node(coilInletNode).Temp, state->dataLoopNodes->Node(zoneInletNode).Temp);
 
     state->dataGlobal->BeginEnvrnFlag = true; // act as if simulation is beginning
     thisSys->m_EMSOverrideCoilSpeedNumValue = 2.2;
@@ -1618,6 +1643,10 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_MultiSpeedDXCoolCoil_Only_NoFan)
         SimAirServingZones::CompType::UnitarySystemModel;
     state->dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).Name = thisSys->Name;
 
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
+
     state->dataZoneEquip->ZoneEquipInputsFilled = true;                                  // indicate zone data is available
     thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
     compare_err_stream("");
@@ -1675,14 +1704,16 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_MultiSpeedDXCoolCoil_Only_NoFan)
     // Test System behavior with no supply fan
     EXPECT_FALSE(thisSys->m_FanExists);
 
+    int zoneExhaustNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    
     // set up node conditions to test UnitarySystem set point based control
     // Unitary system air inlet node = 1
     state->dataLoopNodes->Node(thisSys->AirInNode).MassFlowRate = 1.2;
 
     // test COOLING condition
-    state->dataLoopNodes->Node(1).Temp = 24.0;         // 24C db
-    state->dataLoopNodes->Node(1).HumRat = 0.00922;    // 17C wb
-    state->dataLoopNodes->Node(1).Enthalpy = 47597.03; // www.sugartech.com/psychro/index.php
+    state->dataLoopNodes->Node(zoneExhaustNode).Temp = 24.0;         // 24C db
+    state->dataLoopNodes->Node(zoneExhaustNode).HumRat = 0.00922;    // 17C wb
+    state->dataLoopNodes->Node(zoneExhaustNode).Enthalpy = 47597.03; // www.sugartech.com/psychro/index.php
 
     // ScheduleManager::ProcessScheduleInput(*state); // read schedules
 
@@ -1865,6 +1896,10 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_MultiStageGasHeatCoil_Only)
     UnitarySystems::UnitarySys::factory(*state, HVAC::UnitarySysType::Unitary_AnyCoilType, compName, zoneEquipment, 0);
     UnitarySystems::UnitarySys *thisSys = &state->dataUnitarySystems->unitarySys[0];
 
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
+
     state->dataZoneEquip->ZoneEquipInputsFilled = true;                                  // indicate zone data is available
     thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
     EXPECT_FALSE(ErrorsFound);                                                           // expect no errors
@@ -1901,20 +1936,24 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_MultiStageGasHeatCoil_Only)
                       sensOut,
                       latOut);
 
+    int zoneExhaustNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    int zoneInletNode = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
+    int coilInletNode = Node::GetNodeIndex(*state, "HEATING COIL AIR INLET NODE");
+
     // set up node conditions to test UnitarySystem set point based control
     // Unitary system air inlet node = 1
-    state->dataLoopNodes->Node(1).MassFlowRate = thisSys->m_DesignMassFlowRate;
-    state->dataLoopNodes->Node(1).MassFlowRateMaxAvail = thisSys->m_DesignMassFlowRate; // max avail at fan inlet so fan won't limit flow
+    state->dataLoopNodes->Node(zoneExhaustNode).MassFlowRate = thisSys->m_DesignMassFlowRate;
+    state->dataLoopNodes->Node(zoneExhaustNode).MassFlowRateMaxAvail = thisSys->m_DesignMassFlowRate; // max avail at fan inlet so fan won't limit flow
 
     // test HEATING condition
-    state->dataLoopNodes->Node(1).Temp = 24.0;         // 24C db
-    state->dataLoopNodes->Node(1).HumRat = 0.00922;    // 17C wb
-    state->dataLoopNodes->Node(1).Enthalpy = 47597.03; // www.sugartech.com/psychro/index.php
+    state->dataLoopNodes->Node(zoneExhaustNode).Temp = 24.0;         // 24C db
+    state->dataLoopNodes->Node(zoneExhaustNode).HumRat = 0.00922;    // 17C wb
+    state->dataLoopNodes->Node(zoneExhaustNode).Enthalpy = 47597.03; // www.sugartech.com/psychro/index.php
 
     // Heating coil air inlet node = 3
-    state->dataLoopNodes->Node(3).MassFlowRateMax = thisSys->m_DesignMassFlowRate; // max at fan outlet so fan won't limit flow
+    state->dataLoopNodes->Node(coilInletNode).MassFlowRateMax = thisSys->m_DesignMassFlowRate; // max at fan outlet so fan won't limit flow
                                                                                    // Heating coil air outlet node = 2
-    state->dataLoopNodes->Node(2).TempSetPoint = 25.0;
+    state->dataLoopNodes->Node(zoneInletNode).TempSetPoint = 25.0;
 
     state->dataGlobal->BeginEnvrnFlag = true; // act as if simulation is beginning
 
@@ -1933,16 +1972,16 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_MultiStageGasHeatCoil_Only)
                       latOut);
 
     // check that heating coil air outlet node is at set point
-    EXPECT_NEAR(state->dataLoopNodes->Node(2).Temp, state->dataLoopNodes->Node(2).TempSetPoint, 0.001);
+    EXPECT_NEAR(state->dataLoopNodes->Node(zoneInletNode).Temp, state->dataLoopNodes->Node(zoneInletNode).TempSetPoint, 0.001);
     // heating coil air inlet node temp is less than heating coil air outlet node temp
-    EXPECT_GT(state->dataLoopNodes->Node(2).Temp, state->dataLoopNodes->Node(3).Temp);
+    EXPECT_GT(state->dataLoopNodes->Node(zoneInletNode).Temp, state->dataLoopNodes->Node(coilInletNode).Temp);
     // no load air flow rate in UnitarySystemPerformance:Multispeed equals 0
     EXPECT_EQ(0.0, thisSys->MaxNoCoolHeatAirMassFlow);
     // make sure control works at speed = 1
     EXPECT_EQ(thisSys->m_HeatingSpeedNum, 1);
 
     // Heating coil air outlet node = 2
-    state->dataLoopNodes->Node(2).TempSetPoint = 34.0;
+    state->dataLoopNodes->Node(zoneInletNode).TempSetPoint = 34.0;
 
     // Heating mode
     thisSys->simulate(*state,
@@ -1959,9 +1998,9 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_MultiStageGasHeatCoil_Only)
                       latOut);
 
     // check that heating coil air outlet node is at set point
-    EXPECT_NEAR(state->dataLoopNodes->Node(2).Temp, state->dataLoopNodes->Node(2).TempSetPoint, 0.001);
+    EXPECT_NEAR(state->dataLoopNodes->Node(zoneInletNode).Temp, state->dataLoopNodes->Node(zoneInletNode).TempSetPoint, 0.001);
     // heating coil air inlet node temp is less than heating coil air outlet node temp
-    EXPECT_GT(state->dataLoopNodes->Node(2).Temp, state->dataLoopNodes->Node(3).Temp);
+    EXPECT_GT(state->dataLoopNodes->Node(zoneInletNode).Temp, state->dataLoopNodes->Node(coilInletNode).Temp);
     // make sure control works at speed = 2
     EXPECT_EQ(thisSys->m_HeatingSpeedNum, 2);
 }
@@ -2092,6 +2131,10 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_MultiStageElecHeatCoil_Only)
     UnitarySystems::UnitarySys::factory(*state, HVAC::UnitarySysType::Unitary_AnyCoilType, compName, zoneEquipment, 0);
     UnitarySystems::UnitarySys *thisSys = &state->dataUnitarySystems->unitarySys[0];
 
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
+
     state->dataZoneEquip->ZoneEquipInputsFilled = true;                                  // indicate zone data is available
     thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
     EXPECT_FALSE(ErrorsFound);                                                           // expect no errors
@@ -2132,20 +2175,24 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_MultiStageElecHeatCoil_Only)
     EXPECT_EQ(0.0, sensOut);
     EXPECT_EQ(0.0, thisSys->m_SensibleLoadMet);
 
+    int zoneExhaustNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    int zoneInletNode = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
+    int coilInletNode = Node::GetNodeIndex(*state, "HEATING COIL AIR INLET NODE");
+
     // set up node conditions to test UnitarySystem set point based control
     // Unitary system air inlet node = 1
-    state->dataLoopNodes->Node(1).MassFlowRate = thisSys->m_DesignMassFlowRate;
-    state->dataLoopNodes->Node(1).MassFlowRateMaxAvail = thisSys->m_DesignMassFlowRate; // max avail at fan inlet so fan won't limit flow
+    state->dataLoopNodes->Node(zoneExhaustNode).MassFlowRate = thisSys->m_DesignMassFlowRate;
+    state->dataLoopNodes->Node(zoneExhaustNode).MassFlowRateMaxAvail = thisSys->m_DesignMassFlowRate; // max avail at fan inlet so fan won't limit flow
 
     // test HEATING condition
-    state->dataLoopNodes->Node(1).Temp = 24.0;         // 24C db
-    state->dataLoopNodes->Node(1).HumRat = 0.00922;    // 17C wb
-    state->dataLoopNodes->Node(1).Enthalpy = 47597.03; // www.sugartech.com/psychro/index.php
+    state->dataLoopNodes->Node(zoneExhaustNode).Temp = 24.0;         // 24C db
+    state->dataLoopNodes->Node(zoneExhaustNode).HumRat = 0.00922;    // 17C wb
+    state->dataLoopNodes->Node(zoneExhaustNode).Enthalpy = 47597.03; // www.sugartech.com/psychro/index.php
 
     // Heating coil air inlet node = 3
-    state->dataLoopNodes->Node(3).MassFlowRateMax = thisSys->m_DesignMassFlowRate; // max at fan outlet so fan won't limit flow
+    state->dataLoopNodes->Node(coilInletNode).MassFlowRateMax = thisSys->m_DesignMassFlowRate; // max at fan outlet so fan won't limit flow
                                                                                    // Heating coil air outlet node = 2
-    state->dataLoopNodes->Node(2).TempSetPoint = 25.0;
+    state->dataLoopNodes->Node(zoneInletNode).TempSetPoint = 25.0;
 
     state->dataGlobal->BeginEnvrnFlag = true; // act as if simulation is beginning
 
@@ -2164,9 +2211,9 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_MultiStageElecHeatCoil_Only)
                       latOut);
 
     // check that heating coil air outlet node is at set point
-    EXPECT_NEAR(state->dataLoopNodes->Node(2).Temp, state->dataLoopNodes->Node(2).TempSetPoint, 0.001);
+    EXPECT_NEAR(state->dataLoopNodes->Node(zoneInletNode).Temp, state->dataLoopNodes->Node(zoneInletNode).TempSetPoint, 0.001);
     // heating coil air inlet node temp is less than heating coil air outlet node temp
-    EXPECT_GT(state->dataLoopNodes->Node(2).Temp, state->dataLoopNodes->Node(3).Temp);
+    EXPECT_GT(state->dataLoopNodes->Node(zoneInletNode).Temp, state->dataLoopNodes->Node(coilInletNode).Temp);
     // no load air flow rate in UnitarySystemPerformance:Multispeed equals 0
     EXPECT_EQ(0.0, thisSys->MaxNoCoolHeatAirMassFlow);
     // make sure control works at speed = 1
@@ -2180,7 +2227,7 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_MultiStageElecHeatCoil_Only)
     EXPECT_EQ(thisSys->m_SensHeatEnergyRate, thisSys->m_SensibleLoadMet);
 
     // Heating coil air outlet node = 2
-    state->dataLoopNodes->Node(2).TempSetPoint = 34.0;
+    state->dataLoopNodes->Node(zoneInletNode).TempSetPoint = 34.0;
 
     thisSys->simulate(*state,
                       thisSys->Name,
@@ -2196,9 +2243,9 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_MultiStageElecHeatCoil_Only)
                       latOut);
 
     // check that heating coil air outlet node is at set point
-    EXPECT_NEAR(state->dataLoopNodes->Node(2).Temp, state->dataLoopNodes->Node(2).TempSetPoint, 0.001);
+    EXPECT_NEAR(state->dataLoopNodes->Node(zoneInletNode).Temp, state->dataLoopNodes->Node(zoneInletNode).TempSetPoint, 0.001);
     // heating coil air inlet node temp is less than heating coil air outlet node temp
-    EXPECT_GT(state->dataLoopNodes->Node(2).Temp, state->dataLoopNodes->Node(3).Temp);
+    EXPECT_GT(state->dataLoopNodes->Node(zoneInletNode).Temp, state->dataLoopNodes->Node(coilInletNode).Temp);
     // make sure control works at speed = 2
     EXPECT_EQ(thisSys->m_HeatingSpeedNum, 2);
 }
@@ -2328,6 +2375,10 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_MultiStageElecHeatCoil_Backup_Load
     UnitarySystems::UnitarySys::factory(*state, HVAC::UnitarySysType::Unitary_AnyCoilType, compName, zoneEquipment, 0);
     UnitarySystems::UnitarySys *thisSys = &state->dataUnitarySystems->unitarySys[0];
 
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
+
     state->dataZoneEquip->ZoneEquipInputsFilled = true;                                  // indicate zone data is available
     thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
     EXPECT_FALSE(ErrorsFound);                                                           // expect no errors
@@ -2391,18 +2442,21 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_MultiStageElecHeatCoil_Backup_Load
     EXPECT_EQ(0.0, thisSys->m_SuppHeatingCycRatio);
     EXPECT_EQ(0.0, thisSys->m_SuppHeatingSpeedRatio);
 
+    int zoneExhaustNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    int coilInletNode = Node::GetNodeIndex(*state, "HEATING COIL AIR INLET NODE");
+
     // set up node conditions to test UnitarySystem set point based control
     // Unitary system air inlet node = 1
-    state->dataLoopNodes->Node(1).MassFlowRate = thisSys->m_DesignMassFlowRate;
-    state->dataLoopNodes->Node(1).MassFlowRateMaxAvail = thisSys->m_DesignMassFlowRate; // max avail at fan inlet so fan won't limit flow
+    state->dataLoopNodes->Node(zoneExhaustNode).MassFlowRate = thisSys->m_DesignMassFlowRate;
+    state->dataLoopNodes->Node(zoneExhaustNode).MassFlowRateMaxAvail = thisSys->m_DesignMassFlowRate; // max avail at fan inlet so fan won't limit flow
 
     // test HEATING condition
-    state->dataLoopNodes->Node(1).Temp = 24.0;         // 24C db
-    state->dataLoopNodes->Node(1).HumRat = 0.00922;    // 17C wb
-    state->dataLoopNodes->Node(1).Enthalpy = 47597.03; // www.sugartech.com/psychro/index.php
+    state->dataLoopNodes->Node(zoneExhaustNode).Temp = 24.0;         // 24C db
+    state->dataLoopNodes->Node(zoneExhaustNode).HumRat = 0.00922;    // 17C wb
+    state->dataLoopNodes->Node(zoneExhaustNode).Enthalpy = 47597.03; // www.sugartech.com/psychro/index.php
 
     // Heating coil air inlet node = 3
-    state->dataLoopNodes->Node(3).MassFlowRateMax = thisSys->m_DesignMassFlowRate; // max at fan outlet so fan won't limit flow
+    state->dataLoopNodes->Node(coilInletNode).MassFlowRateMax = thisSys->m_DesignMassFlowRate; // max at fan outlet so fan won't limit flow
                                                                                    // Heating coil air outlet node = 2
 
     state->dataGlobal->BeginEnvrnFlag = true; // act as if simulation is beginning
@@ -2663,6 +2717,10 @@ Curve:Quadratic,
     UnitarySystems::UnitarySys::factory(*state, HVAC::UnitarySysType::Unitary_AnyCoilType, compName, zoneEquipment, 0);
     UnitarySystems::UnitarySys *thisSys = &state->dataUnitarySystems->unitarySys[0];
 
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
+
     state->dataZoneEquip->ZoneEquipInputsFilled = true;                                  // indicate zone data is available
     thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
     EXPECT_FALSE(ErrorsFound);                                                           // expect no errors
@@ -2703,20 +2761,25 @@ Curve:Quadratic,
     EXPECT_EQ(0.0, sensOut);
     EXPECT_EQ(0.0, thisSys->m_SensibleLoadMet);
 
+    int zoneExhaustNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    int zoneInletNode = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
+    int coilInletNode = Node::GetNodeIndex(*state, "HEATING COIL AIR INLET NODE");
+    int coilOutletNode = Node::GetNodeIndex(*state, "HEATING COIL AIR OUTLET NODE");
+
     // set up node conditions to test UnitarySystem set point based control
     // Unitary system air inlet node = 1
-    state->dataLoopNodes->Node(1).MassFlowRate = thisSys->m_DesignMassFlowRate;
-    state->dataLoopNodes->Node(1).MassFlowRateMaxAvail = thisSys->m_DesignMassFlowRate; // max avail at fan inlet so fan won't limit flow
+    state->dataLoopNodes->Node(zoneExhaustNode).MassFlowRate = thisSys->m_DesignMassFlowRate;
+    state->dataLoopNodes->Node(zoneExhaustNode).MassFlowRateMaxAvail = thisSys->m_DesignMassFlowRate; // max avail at fan inlet so fan won't limit flow
 
     // test HEATING condition
-    state->dataLoopNodes->Node(1).Temp = 24.0;         // 24C db
-    state->dataLoopNodes->Node(1).HumRat = 0.00922;    // 17C wb
-    state->dataLoopNodes->Node(1).Enthalpy = 47597.03; // www.sugartech.com/psychro/index.php
+    state->dataLoopNodes->Node(zoneExhaustNode).Temp = 24.0;         // 24C db
+    state->dataLoopNodes->Node(zoneExhaustNode).HumRat = 0.00922;    // 17C wb
+    state->dataLoopNodes->Node(zoneExhaustNode).Enthalpy = 47597.03; // www.sugartech.com/psychro/index.php
 
     // Heating coil air inlet node = 3
-    state->dataLoopNodes->Node(3).MassFlowRateMax = thisSys->m_DesignMassFlowRate; // max at fan outlet so fan won't limit flow
+    state->dataLoopNodes->Node(coilInletNode).MassFlowRateMax = thisSys->m_DesignMassFlowRate; // max at fan outlet so fan won't limit flow
                                                                                    // Heating coil air outlet node = 2
-    state->dataLoopNodes->Node(2).TempSetPoint = 25.0;
+    state->dataLoopNodes->Node(zoneInletNode).TempSetPoint = 25.0;
 
     state->dataGlobal->BeginEnvrnFlag = true; // act as if simulation is beginning
 
@@ -2735,9 +2798,9 @@ Curve:Quadratic,
                       latOut);
 
     // check that backup heating coil air outlet node is at set point
-    EXPECT_NEAR(state->dataLoopNodes->Node(2).Temp, state->dataLoopNodes->Node(2).TempSetPoint, 0.001);
+    EXPECT_NEAR(state->dataLoopNodes->Node(zoneInletNode).Temp, state->dataLoopNodes->Node(zoneInletNode).TempSetPoint, 0.001);
     // heating coil air inlet node temp is less than heating coil air outlet node temp
-    EXPECT_GT(state->dataLoopNodes->Node(4).Temp, state->dataLoopNodes->Node(3).Temp);
+    EXPECT_GT(state->dataLoopNodes->Node(coilOutletNode).Temp, state->dataLoopNodes->Node(coilInletNode).Temp);
     // no load air flow rate in UnitarySystemPerformance:Multispeed equals 0
     EXPECT_EQ(0.0, thisSys->MaxNoCoolHeatAirMassFlow);
     // make sure control works at speed = 1
@@ -2751,7 +2814,7 @@ Curve:Quadratic,
     EXPECT_EQ(thisSys->m_SensHeatEnergyRate, thisSys->m_SensibleLoadMet);
 
     // Backup Heating coil air outlet node = 2
-    state->dataLoopNodes->Node(2).TempSetPoint = 33.0;
+    state->dataLoopNodes->Node(zoneInletNode).TempSetPoint = 33.0;
 
     thisSys->simulate(*state,
                       thisSys->Name,
@@ -2767,16 +2830,16 @@ Curve:Quadratic,
                       latOut);
 
     // check that heating coil air outlet node is at set point
-    EXPECT_NEAR(state->dataLoopNodes->Node(2).Temp, state->dataLoopNodes->Node(2).TempSetPoint, 0.001);
+    EXPECT_NEAR(state->dataLoopNodes->Node(zoneInletNode).Temp, state->dataLoopNodes->Node(zoneInletNode).TempSetPoint, 0.001);
     // heating coil air inlet node temp is less than heating coil air outlet node temp
-    EXPECT_GT(state->dataLoopNodes->Node(4).Temp, state->dataLoopNodes->Node(3).Temp);
+    EXPECT_GT(state->dataLoopNodes->Node(coilOutletNode).Temp, state->dataLoopNodes->Node(coilInletNode).Temp);
     // backup heating coil air inlet node temp is less than heating coil air outlet node temp
-    EXPECT_GT(state->dataLoopNodes->Node(2).Temp, state->dataLoopNodes->Node(4).Temp);
+    EXPECT_GT(state->dataLoopNodes->Node(zoneInletNode).Temp, state->dataLoopNodes->Node(coilOutletNode).Temp);
     // make sure control works at speed = 2
     EXPECT_EQ(thisSys->m_HeatingSpeedNum, 2);
 
     // Backup Heating coil air outlet node = 2
-    state->dataLoopNodes->Node(2).TempSetPoint = 33.0;
+    state->dataLoopNodes->Node(zoneInletNode).TempSetPoint = 33.0;
     // test maximum supply air temperature lower than supp coil outlet temperature
     thisSys->DesignMaxOutletTemp = 32;
 
@@ -2794,11 +2857,11 @@ Curve:Quadratic,
                       latOut);
 
     // check that heating coil air outlet node is at maximum supply air temperature
-    EXPECT_NEAR(state->dataLoopNodes->Node(2).Temp, 32, 0.001);
+    EXPECT_NEAR(state->dataLoopNodes->Node(zoneInletNode).Temp, 32, 0.001);
     // heating coil air inlet node temp is less than heating coil air outlet node temp
-    EXPECT_GT(state->dataLoopNodes->Node(4).Temp, state->dataLoopNodes->Node(3).Temp);
+    EXPECT_GT(state->dataLoopNodes->Node(coilOutletNode).Temp, state->dataLoopNodes->Node(coilInletNode).Temp);
     // backup heating coil air inlet node temp is less than heating coil air outlet node temp
-    EXPECT_GT(state->dataLoopNodes->Node(2).Temp, state->dataLoopNodes->Node(4).Temp);
+    EXPECT_GT(state->dataLoopNodes->Node(zoneInletNode).Temp, state->dataLoopNodes->Node(coilOutletNode).Temp);
     // make sure control works at speed = 2
     EXPECT_EQ(thisSys->m_HeatingSpeedNum, 2);
 }
@@ -2928,6 +2991,10 @@ Curve:Quadratic,
     UnitarySystems::UnitarySys::factory(*state, HVAC::UnitarySysType::Unitary_AnyCoilType, compName, zoneEquipment, 0);
     UnitarySystems::UnitarySys *thisSys = &state->dataUnitarySystems->unitarySys[0];
 
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
+
     state->dataZoneEquip->ZoneEquipInputsFilled = true;                                  // indicate zone data is available
     thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
     EXPECT_FALSE(ErrorsFound);                                                           // expect no errors
@@ -2958,18 +3025,21 @@ Curve:Quadratic,
     state->dataZoneEnergyDemand->ZoneSysMoistureDemand(ControlZoneNum).RemainingOutputReqToDehumidSP = 0;
     state->dataHeatBalFanSys->TempControlType(ControlZoneNum) = HVAC::SetptType::SingleHeat;
 
+    int zoneExhaustNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    int coilInletNode = Node::GetNodeIndex(*state, "HEATING COIL AIR INLET NODE");
+
     // set up node conditions to test UnitarySystem set point based control
     // Unitary system air inlet node = 1
-    state->dataLoopNodes->Node(1).MassFlowRate = thisSys->m_DesignMassFlowRate;
-    state->dataLoopNodes->Node(1).MassFlowRateMaxAvail = thisSys->m_DesignMassFlowRate; // max avail at fan inlet so fan won't limit flow
+    state->dataLoopNodes->Node(zoneExhaustNode).MassFlowRate = thisSys->m_DesignMassFlowRate;
+    state->dataLoopNodes->Node(zoneExhaustNode).MassFlowRateMaxAvail = thisSys->m_DesignMassFlowRate; // max avail at fan inlet so fan won't limit flow
 
     // test HEATING condition
-    state->dataLoopNodes->Node(1).Temp = 24.0;         // 24C db
-    state->dataLoopNodes->Node(1).HumRat = 0.00922;    // 17C wb
-    state->dataLoopNodes->Node(1).Enthalpy = 47597.03; // www.sugartech.com/psychro/index.php
+    state->dataLoopNodes->Node(zoneExhaustNode).Temp = 24.0;         // 24C db
+    state->dataLoopNodes->Node(zoneExhaustNode).HumRat = 0.00922;    // 17C wb
+    state->dataLoopNodes->Node(zoneExhaustNode).Enthalpy = 47597.03; // www.sugartech.com/psychro/index.php
 
     // Heating coil air inlet node = 3
-    state->dataLoopNodes->Node(3).MassFlowRateMax = thisSys->m_DesignMassFlowRate; // max at fan outlet so fan won't limit flow
+    state->dataLoopNodes->Node(coilInletNode).MassFlowRateMax = thisSys->m_DesignMassFlowRate; // max at fan outlet so fan won't limit flow
                                                                                    // Heating coil air outlet node = 2
 
     state->dataGlobal->BeginEnvrnFlag = true; // act as if simulation is beginning
@@ -3177,6 +3247,10 @@ Curve:Quadratic,
     UnitarySystems::UnitarySys::factory(*state, HVAC::UnitarySysType::Unitary_AnyCoilType, compName, zoneEquipment, 0);
     UnitarySystems::UnitarySys *thisSys = &state->dataUnitarySystems->unitarySys[0];
 
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
+
     state->dataZoneEquip->ZoneEquipInputsFilled = true;                                  // indicate zone data is available
     thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
     EXPECT_FALSE(ErrorsFound);                                                           // expect no errors
@@ -3216,23 +3290,28 @@ Curve:Quadratic,
     EXPECT_EQ(0.0, sensOut);
     EXPECT_EQ(0.0, thisSys->m_SensibleLoadMet);
 
+    int zoneExhaustNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    int zoneInletNode = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
+    int coilInletNode = Node::GetNodeIndex(*state, "HEATING COIL AIR INLET NODE");
+    int coilOutletNode = Node::GetNodeIndex(*state, "HEATING COIL AIR OUTLET NODE");
+
     // set up node conditions to test UnitarySystem set point based control
     // Unitary system air inlet node = 1
-    state->dataLoopNodes->Node(1).MassFlowRate = thisSys->m_DesignMassFlowRate;
-    state->dataLoopNodes->Node(1).MassFlowRateMaxAvail = thisSys->m_DesignMassFlowRate; // max avail at fan inlet so fan won't limit flow
+    state->dataLoopNodes->Node(zoneExhaustNode).MassFlowRate = thisSys->m_DesignMassFlowRate;
+    state->dataLoopNodes->Node(zoneExhaustNode).MassFlowRateMaxAvail = thisSys->m_DesignMassFlowRate; // max avail at fan inlet so fan won't limit flow
 
     // test HEATING condition
-    state->dataLoopNodes->Node(1).Temp = 24.0;         // 24C db
-    state->dataLoopNodes->Node(1).HumRat = 0.00922;    // 17C wb
-    state->dataLoopNodes->Node(1).Enthalpy = 47597.03; // www.sugartech.com/psychro/index.php
+    state->dataLoopNodes->Node(zoneExhaustNode).Temp = 24.0;         // 24C db
+    state->dataLoopNodes->Node(zoneExhaustNode).HumRat = 0.00922;    // 17C wb
+    state->dataLoopNodes->Node(zoneExhaustNode).Enthalpy = 47597.03; // www.sugartech.com/psychro/index.php
 
     // Heating coil air inlet node = 3
-    state->dataLoopNodes->Node(3).MassFlowRateMax = thisSys->m_DesignMassFlowRate; // max at fan outlet so fan won't limit flow
+    state->dataLoopNodes->Node(coilInletNode).MassFlowRateMax = thisSys->m_DesignMassFlowRate; // max at fan outlet so fan won't limit flow
                                                                                    // Heating coil air outlet node = 2
     state->dataGlobal->BeginEnvrnFlag = true;                                      // act as if simulation is beginning
 
     // Backup Heating coil air outlet node = 2
-    state->dataLoopNodes->Node(2).TempSetPoint = 33.0;
+    state->dataLoopNodes->Node(zoneInletNode).TempSetPoint = 33.0;
     thisSys->m_EMSOverrideSuppCoilSpeedNumOn = true;
     thisSys->m_EMSOverrideSuppCoilSpeedNumValue = 1.4;
 
@@ -3250,9 +3329,9 @@ Curve:Quadratic,
                       latOut);
 
     // heating coil air inlet node temp is less than heating coil air outlet node temp
-    EXPECT_GT(state->dataLoopNodes->Node(4).Temp, state->dataLoopNodes->Node(3).Temp);
+    EXPECT_GT(state->dataLoopNodes->Node(coilOutletNode).Temp, state->dataLoopNodes->Node(coilInletNode).Temp);
     // backup heating coil air inlet node temp is less than heating coil air outlet node temp
-    EXPECT_GT(state->dataLoopNodes->Node(2).Temp, state->dataLoopNodes->Node(4).Temp);
+    EXPECT_GT(state->dataLoopNodes->Node(zoneInletNode).Temp, state->dataLoopNodes->Node(coilOutletNode).Temp);
     // make sure control works at speed = 2
     EXPECT_EQ(thisSys->m_HeatingSpeedNum, 2);
 
@@ -3262,15 +3341,15 @@ Curve:Quadratic,
     EXPECT_NEAR(thisSys->m_SuppHeatingSpeedRatio, 0.4, 0.001);
 
     // test HEATING condition
-    state->dataLoopNodes->Node(1).Temp = 24.0;
-    state->dataLoopNodes->Node(2).Temp = 24.0;
-    state->dataLoopNodes->Node(3).Temp = 24.0;
-    state->dataLoopNodes->Node(4).Temp = 24.0;
-    state->dataLoopNodes->Node(1).HumRat = 0.00922;    // 17C wb
-    state->dataLoopNodes->Node(1).Enthalpy = 47597.03; // www.sugartech.com/psychro/index.php
+    state->dataLoopNodes->Node(zoneExhaustNode).Temp = 24.0;
+    state->dataLoopNodes->Node(zoneInletNode).Temp = 24.0;
+    state->dataLoopNodes->Node(coilInletNode).Temp = 24.0;
+    state->dataLoopNodes->Node(coilOutletNode).Temp = 24.0;
+    state->dataLoopNodes->Node(zoneExhaustNode).HumRat = 0.00922;    // 17C wb
+    state->dataLoopNodes->Node(zoneExhaustNode).Enthalpy = 47597.03; // www.sugartech.com/psychro/index.php
     state->dataGlobal->BeginEnvrnFlag = true;          // act as if simulation is beginning
     // Backup Heating coil air outlet node = 2
-    state->dataLoopNodes->Node(2).TempSetPoint = 33.0;
+    state->dataLoopNodes->Node(zoneInletNode).TempSetPoint = 33.0;
     thisSys->m_EMSOverrideSuppCoilSpeedNumOn = true;
     thisSys->m_EMSOverrideSuppCoilSpeedNumValue = 2.0;
 
@@ -3288,9 +3367,9 @@ Curve:Quadratic,
                       latOut);
 
     // heating coil air inlet node temp is less than heating coil air outlet node temp
-    EXPECT_GT(state->dataLoopNodes->Node(4).Temp, state->dataLoopNodes->Node(3).Temp);
+    EXPECT_GT(state->dataLoopNodes->Node(coilOutletNode).Temp, state->dataLoopNodes->Node(coilInletNode).Temp);
     // backup heating coil air inlet node temp is less than heating coil air outlet node temp
-    EXPECT_GT(state->dataLoopNodes->Node(2).Temp, state->dataLoopNodes->Node(4).Temp);
+    EXPECT_GT(state->dataLoopNodes->Node(zoneInletNode).Temp, state->dataLoopNodes->Node(coilOutletNode).Temp);
     // make sure control works at speed = 2
     EXPECT_EQ(thisSys->m_HeatingSpeedNum, 2);
 
@@ -3412,6 +3491,10 @@ Curve:Quadratic,
     UnitarySystems::UnitarySys::factory(*state, HVAC::UnitarySysType::Unitary_AnyCoilType, compName, zoneEquipment, 0);
     UnitarySystems::UnitarySys *thisSys = &state->dataUnitarySystems->unitarySys[0];
 
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
+
     state->dataZoneEquip->ZoneEquipInputsFilled = true;                                  // indicate zone data is available
     thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
     EXPECT_FALSE(ErrorsFound);                                                           // expect no errors
@@ -3448,20 +3531,24 @@ Curve:Quadratic,
                       sensOut,
                       latOut);
 
+    int zoneExhaustNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    int zoneInletNode = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
+    int coilInletNode = Node::GetNodeIndex(*state, "HEATING COIL AIR INLET NODE");
+
     // set up node conditions to test UnitarySystem set point based control
     // Unitary system air inlet node = 1
-    state->dataLoopNodes->Node(1).MassFlowRate = thisSys->m_DesignMassFlowRate;
-    state->dataLoopNodes->Node(1).MassFlowRateMaxAvail = thisSys->m_DesignMassFlowRate; // max avail at fan inlet so fan won't limit flow
+    state->dataLoopNodes->Node(zoneExhaustNode).MassFlowRate = thisSys->m_DesignMassFlowRate;
+    state->dataLoopNodes->Node(zoneExhaustNode).MassFlowRateMaxAvail = thisSys->m_DesignMassFlowRate; // max avail at fan inlet so fan won't limit flow
 
     // test HEATING condition
-    state->dataLoopNodes->Node(1).Temp = 24.0;         // 24C db
-    state->dataLoopNodes->Node(1).HumRat = 0.00922;    // 17C wb
-    state->dataLoopNodes->Node(1).Enthalpy = 47597.03; // www.sugartech.com/psychro/index.php
+    state->dataLoopNodes->Node(zoneExhaustNode).Temp = 24.0;         // 24C db
+    state->dataLoopNodes->Node(zoneExhaustNode).HumRat = 0.00922;    // 17C wb
+    state->dataLoopNodes->Node(zoneExhaustNode).Enthalpy = 47597.03; // www.sugartech.com/psychro/index.php
 
     // Heating coil air inlet node = 3
-    state->dataLoopNodes->Node(3).MassFlowRateMax = thisSys->m_DesignMassFlowRate; // max at fan outlet so fan won't limit flow
+    state->dataLoopNodes->Node(coilInletNode).MassFlowRateMax = thisSys->m_DesignMassFlowRate; // max at fan outlet so fan won't limit flow
                                                                                    // Heating coil air outlet node = 2
-    state->dataLoopNodes->Node(2).TempSetPoint = 25.0;
+    state->dataLoopNodes->Node(zoneInletNode).TempSetPoint = 25.0;
 
     state->dataGlobal->BeginEnvrnFlag = true; // act as if simulation is beginning
 
@@ -3480,9 +3567,9 @@ Curve:Quadratic,
                       latOut);
 
     // check that heating coil air outlet node is at set point
-    EXPECT_NEAR(state->dataLoopNodes->Node(2).Temp, state->dataLoopNodes->Node(2).TempSetPoint, 0.001);
+    EXPECT_NEAR(state->dataLoopNodes->Node(zoneInletNode).Temp, state->dataLoopNodes->Node(zoneInletNode).TempSetPoint, 0.001);
     // heating coil air inlet node temp is less than heating coil air outlet node temp
-    EXPECT_GT(state->dataLoopNodes->Node(2).Temp, state->dataLoopNodes->Node(3).Temp);
+    EXPECT_GT(state->dataLoopNodes->Node(zoneInletNode).Temp, state->dataLoopNodes->Node(coilInletNode).Temp);
     // #6282 idle air flow rate for electric heating coils should equal 0
     EXPECT_EQ(0.0, thisSys->MaxNoCoolHeatAirMassFlow);
 }
@@ -3617,6 +3704,10 @@ Curve:Quadratic,
     UnitarySystems::UnitarySys::factory(*state, HVAC::UnitarySysType::Unitary_AnyCoilType, compName, zoneEquipment, 0);
     UnitarySystems::UnitarySys *thisSys = &state->dataUnitarySystems->unitarySys[0];
 
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
+
     state->dataZoneEquip->ZoneEquipInputsFilled = true;                                  // indicate zone data is available
     thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
     EXPECT_FALSE(ErrorsFound);                                                           // expect no errors
@@ -3653,20 +3744,24 @@ Curve:Quadratic,
                       sensOut,
                       latOut);
 
+    int zoneExhaustNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    int zoneInletNode = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
+    int coilInletNode = Node::GetNodeIndex(*state, "HEATING COIL AIR INLET NODE");
+
     // set up node conditions to test UnitarySystem set point based control
     // Unitary system air inlet node = 1
-    state->dataLoopNodes->Node(1).MassFlowRate = thisSys->m_DesignMassFlowRate;
-    state->dataLoopNodes->Node(1).MassFlowRateMaxAvail = thisSys->m_DesignMassFlowRate; // max avail at fan inlet so fan won't limit flow
+    state->dataLoopNodes->Node(zoneExhaustNode).MassFlowRate = thisSys->m_DesignMassFlowRate;
+    state->dataLoopNodes->Node(zoneExhaustNode).MassFlowRateMaxAvail = thisSys->m_DesignMassFlowRate; // max avail at fan inlet so fan won't limit flow
 
     // test HEATING condition
-    state->dataLoopNodes->Node(1).Temp = 24.0;         // 24C db
-    state->dataLoopNodes->Node(1).HumRat = 0.00922;    // 17C wb
-    state->dataLoopNodes->Node(1).Enthalpy = 47597.03; // www.sugartech.com/psychro/index.php
+    state->dataLoopNodes->Node(zoneExhaustNode).Temp = 24.0;         // 24C db
+    state->dataLoopNodes->Node(zoneExhaustNode).HumRat = 0.00922;    // 17C wb
+    state->dataLoopNodes->Node(zoneExhaustNode).Enthalpy = 47597.03; // www.sugartech.com/psychro/index.php
 
     // Heating coil air inlet node = 3
-    state->dataLoopNodes->Node(3).MassFlowRateMax = thisSys->m_DesignMassFlowRate; // max at fan outlet so fan won't limit flow
+    state->dataLoopNodes->Node(coilInletNode).MassFlowRateMax = thisSys->m_DesignMassFlowRate; // max at fan outlet so fan won't limit flow
                                                                                    // Heating coil air outlet node = 2
-    state->dataLoopNodes->Node(2).TempSetPoint = 25.0;
+    state->dataLoopNodes->Node(zoneInletNode).TempSetPoint = 25.0;
 
     state->dataGlobal->BeginEnvrnFlag = true; // act as if simulation is beginning
 
@@ -3685,9 +3780,9 @@ Curve:Quadratic,
                       latOut);
 
     // check that heating coil air outlet node is at set point
-    EXPECT_NEAR(state->dataLoopNodes->Node(2).Temp, state->dataLoopNodes->Node(2).TempSetPoint, 0.001);
+    EXPECT_NEAR(state->dataLoopNodes->Node(zoneInletNode).Temp, state->dataLoopNodes->Node(zoneInletNode).TempSetPoint, 0.001);
     // heating coil air inlet node temp is less than heating coil air outlet node temp
-    EXPECT_GT(state->dataLoopNodes->Node(2).Temp, state->dataLoopNodes->Node(3).Temp);
+    EXPECT_GT(state->dataLoopNodes->Node(zoneInletNode).Temp, state->dataLoopNodes->Node(coilInletNode).Temp);
     // no load air flow rate in UnitarySystemPerformance:Multispeed is blank (DS no load flow ratio defaults to 1) so idle mass flow rate = speed 1
     // heating flow
     EXPECT_EQ(thisSys->m_HeatMassFlowRate[1], thisSys->MaxNoCoolHeatAirMassFlow);
@@ -3695,7 +3790,7 @@ Curve:Quadratic,
     EXPECT_EQ(thisSys->m_HeatingSpeedNum, 1);
 
     // Heating coil air outlet node = 2
-    state->dataLoopNodes->Node(2).TempSetPoint = 34.0;
+    state->dataLoopNodes->Node(zoneInletNode).TempSetPoint = 34.0;
 
     // Heating mode
     thisSys->simulate(*state,
@@ -3712,9 +3807,9 @@ Curve:Quadratic,
                       latOut);
 
     // check that heating coil air outlet node is at set point
-    EXPECT_NEAR(state->dataLoopNodes->Node(2).Temp, state->dataLoopNodes->Node(2).TempSetPoint, 0.001);
+    EXPECT_NEAR(state->dataLoopNodes->Node(zoneInletNode).Temp, state->dataLoopNodes->Node(zoneInletNode).TempSetPoint, 0.001);
     // heating coil air inlet node temp is less than heating coil air outlet node temp
-    EXPECT_GT(state->dataLoopNodes->Node(2).Temp, state->dataLoopNodes->Node(3).Temp);
+    EXPECT_GT(state->dataLoopNodes->Node(zoneInletNode).Temp, state->dataLoopNodes->Node(coilInletNode).Temp);
     // make sure control works at speed = 2
     EXPECT_EQ(thisSys->m_HeatingSpeedNum, 2);
 }
@@ -4154,6 +4249,10 @@ Curve:Biquadratic,
     UnitarySystems::UnitarySys::factory(*state, HVAC::UnitarySysType::Unitary_AnyCoilType, compName, zoneEquipment, 0);
     UnitarySystems::UnitarySys *thisSys = &state->dataUnitarySystems->unitarySys[0];
 
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
+
     state->dataZoneEquip->ZoneEquipInputsFilled = true;                                  // indicate zone data is available
     thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
     EXPECT_FALSE(ErrorsFound);                                                           // expect no errors
@@ -4199,23 +4298,28 @@ Curve:Biquadratic,
                       sensOut,
                       latOut);
 
+    int zoneExhaustNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    int zoneInletNode = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
+    int coolCoilInletNode = Node::GetNodeIndex(*state, "COOLING COIL AIR INLET NODE");
+    int heatCoilInletNode = Node::GetNodeIndex(*state, "HEATING COIL AIR INLET NODE");
+
     // set up node conditions to test UnitarySystem set point based control
     // Unitary system air inlet node = 1
-    state->dataLoopNodes->Node(1).MassFlowRate = thisSys->m_DesignMassFlowRate;
-    state->dataLoopNodes->Node(1).MassFlowRateMaxAvail = thisSys->m_DesignMassFlowRate; // max avail at fan inlet so fan won't limit flow
+    state->dataLoopNodes->Node(zoneExhaustNode).MassFlowRate = thisSys->m_DesignMassFlowRate;
+    state->dataLoopNodes->Node(zoneExhaustNode).MassFlowRateMaxAvail = thisSys->m_DesignMassFlowRate; // max avail at fan inlet so fan won't limit flow
 
     // test COOLING condition
-    state->dataLoopNodes->Node(1).Temp = 24.0;         // 24C db
-    state->dataLoopNodes->Node(1).HumRat = 0.00922;    // 17C wb
-    state->dataLoopNodes->Node(1).Enthalpy = 47597.03; // www.sugartech.com/psychro/index.php
+    state->dataLoopNodes->Node(zoneExhaustNode).Temp = 24.0;         // 24C db
+    state->dataLoopNodes->Node(zoneExhaustNode).HumRat = 0.00922;    // 17C wb
+    state->dataLoopNodes->Node(zoneExhaustNode).Enthalpy = 47597.03; // www.sugartech.com/psychro/index.php
 
     // Cooling coil air inlet node = 3
-    state->dataLoopNodes->Node(3).MassFlowRateMax = thisSys->m_DesignMassFlowRate; // max at fan outlet so fan won't limit flow
+    state->dataLoopNodes->Node(coolCoilInletNode).MassFlowRateMax = thisSys->m_DesignMassFlowRate; // max at fan outlet so fan won't limit flow
                                                                                    // Cooling coil air outlet node = 4
-    state->dataLoopNodes->Node(4).TempSetPoint = 20.0;
+    state->dataLoopNodes->Node(heatCoilInletNode).TempSetPoint = 20.0;
     // Heating coil air inlet node = 4
     // Heating coil air outlet node = 2
-    state->dataLoopNodes->Node(2).TempSetPoint = 16.0;
+    state->dataLoopNodes->Node(zoneInletNode).TempSetPoint = 16.0;
 
     state->dataGlobal->BeginEnvrnFlag = true; // act as if simulation is beginning
 
@@ -4234,19 +4338,19 @@ Curve:Biquadratic,
                       latOut);
 
     // check that cooling coil air outlet node is at set point
-    EXPECT_NEAR(state->dataLoopNodes->Node(4).Temp, state->dataLoopNodes->Node(4).TempSetPoint, 0.001);
+    EXPECT_NEAR(state->dataLoopNodes->Node(heatCoilInletNode).Temp, state->dataLoopNodes->Node(heatCoilInletNode).TempSetPoint, 0.001);
     // cooling coil air inlet node temp is greater than cooling coil air outlet node temp
-    EXPECT_GT(state->dataLoopNodes->Node(3).Temp, state->dataLoopNodes->Node(4).Temp);
+    EXPECT_GT(state->dataLoopNodes->Node(coolCoilInletNode).Temp, state->dataLoopNodes->Node(heatCoilInletNode).Temp);
     // heating coil air inlet and outlet nodes are at same temp since the heating coil is off
-    EXPECT_EQ(state->dataLoopNodes->Node(4).MassFlowRate, state->dataLoopNodes->Node(2).MassFlowRate);
+    EXPECT_EQ(state->dataLoopNodes->Node(heatCoilInletNode).MassFlowRate, state->dataLoopNodes->Node(zoneInletNode).MassFlowRate);
     // expect heating coil outlet air temp to be greater than heating coil outlet air temp set point
-    EXPECT_GT(state->dataLoopNodes->Node(2).Temp, state->dataLoopNodes->Node(2).TempSetPoint);
+    EXPECT_GT(state->dataLoopNodes->Node(zoneInletNode).Temp, state->dataLoopNodes->Node(zoneInletNode).TempSetPoint);
 
     // HEATING mode
     // Unitary system air inlet node = 1
-    state->dataLoopNodes->Node(1).Temp = 14.0;      // 14C db
-    state->dataLoopNodes->Node(1).HumRat = 0.00693; // 11C wb
-    state->dataLoopNodes->Node(1).Enthalpy = 31598.76;
+    state->dataLoopNodes->Node(zoneExhaustNode).Temp = 14.0;      // 14C db
+    state->dataLoopNodes->Node(zoneExhaustNode).HumRat = 0.00693; // 11C wb
+    state->dataLoopNodes->Node(zoneExhaustNode).Enthalpy = 31598.76;
 
     thisSys->simulate(*state,
                       thisSys->Name,
@@ -4262,10 +4366,10 @@ Curve:Biquadratic,
                       latOut);
 
     // cooling coil air inlet node temp is equal to cooling coil air outlet node temp since cooling coil is off
-    EXPECT_EQ(state->dataLoopNodes->Node(3).Temp, state->dataLoopNodes->Node(4).Temp);
+    EXPECT_EQ(state->dataLoopNodes->Node(coolCoilInletNode).Temp, state->dataLoopNodes->Node(heatCoilInletNode).Temp);
     // check that heating coil outlet node is at set point
-    EXPECT_NEAR(state->dataLoopNodes->Node(2).Temp, state->dataLoopNodes->Node(2).TempSetPoint, 0.001);
-    EXPECT_NEAR(state->dataLoopNodes->Node(2).Temp, 16.0, 0.001);
+    EXPECT_NEAR(state->dataLoopNodes->Node(zoneInletNode).Temp, state->dataLoopNodes->Node(zoneInletNode).TempSetPoint, 0.001);
+    EXPECT_NEAR(state->dataLoopNodes->Node(zoneInletNode).Temp, 16.0, 0.001);
 
     // expect design spec data to match inputs
     EXPECT_NEAR(state->dataUnitarySystems->designSpecMSHP[0].coolingVolFlowRatio[0], 0.1000, 0.00001);
@@ -4826,6 +4930,10 @@ Curve:Biquadratic,
     UnitarySystems::UnitarySys::factory(*state, HVAC::UnitarySysType::Unitary_AnyCoilType, compName, zoneEquipment, 0);
     UnitarySystems::UnitarySys *thisSys = &state->dataUnitarySystems->unitarySys[0];
 
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
+
     state->dataZoneEquip->ZoneEquipInputsFilled = true;                                  // indicate zone data is available
     thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
     EXPECT_FALSE(ErrorsFound);                                                           // expect no errors
@@ -5101,6 +5209,10 @@ SetpointManager:Scheduled,
     bool FirstHVACIteration = true;
     UnitarySystems::UnitarySys::factory(*state, HVAC::UnitarySysType::Unitary_AnyCoilType, compName, zoneEquipment, 0);
     UnitarySystems::UnitarySys *thisSys = &state->dataUnitarySystems->unitarySys[0];
+
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
 
     state->dataZoneEquip->ZoneEquipInputsFilled = true;                                  // indicate zone data is available
     thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
@@ -5484,6 +5596,10 @@ SetpointManager:Scheduled,
     bool FirstHVACIteration = true;
     UnitarySystems::UnitarySys::factory(*state, HVAC::UnitarySysType::Unitary_AnyCoilType, compName, zoneEquipment, 0);
     UnitarySystems::UnitarySys *thisSys = &state->dataUnitarySystems->unitarySys[0];
+
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
 
     state->dataZoneEquip->ZoneEquipInputsFilled = true;                                  // indicate zone data is available
     thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
@@ -16269,6 +16385,11 @@ Coil:Heating:Electric,
     bool zoneEquipment = true;
     UnitarySys mySys;
     HVACSystemData *thisSys = state->dataZoneEquip->ZoneEquipList(1).compPointer[2];  // UnitarySystem is the 2nd in the zone equipment list
+
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
+
     state->dataZoneEquip->ZoneEquipInputsFilled = true;                               // indicate zone data is available
     mySys.getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
     mySys = state->dataUnitarySystems->unitarySys[0];
@@ -16416,6 +16537,7 @@ Coil:Heating:Electric,
     bool zoneEquipment = true;
     UnitarySys mySys;
     HVACSystemData *thisSys = state->dataZoneEquip->ZoneEquipList(1).compPointer[2];  // UnitarySystem is the 2nd in the zone equipment list
+
     state->dataZoneEquip->ZoneEquipInputsFilled = true;                               // indicate zone data is available
     mySys.getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
     mySys = state->dataUnitarySystems->unitarySys[0];
@@ -16665,6 +16787,7 @@ Coil:Heating:Electric,
 
     std::string compName = "UNITARY SYSTEM MODEL";
     bool zoneEquipment = true;
+
     state->dataZoneEquip->ZoneEquipInputsFilled = true;                                 // indicate zone data is available
     thisSys.getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input
     EXPECT_TRUE(ErrorsFound); // expect errors when control zone name is blank and Control Type = Load
@@ -16780,6 +16903,10 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_FractionOfAutoSizedCoolingValueTes
     std::string compName = "UNITARY SYSTEM MODEL";
     UnitarySystems::UnitarySys::factory(*state, HVAC::UnitarySysType::Unitary_AnyCoilType, compName, zoneEquipment, 0);
     UnitarySystems::UnitarySys *thisSys = &state->dataUnitarySystems->unitarySys[0];
+
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
 
     state->dataZoneEquip->ZoneEquipInputsFilled = true;                                  // indicate zone data is available
     thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
@@ -16932,6 +17059,10 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_FlowPerCoolingCapacityTest)
     std::string compName = "UNITARY SYSTEM MODEL";
     UnitarySystems::UnitarySys::factory(*state, HVAC::UnitarySysType::Unitary_AnyCoilType, compName, zoneEquipment, 0);
     UnitarySystems::UnitarySys *thisSys = &state->dataUnitarySystems->unitarySys[0];
+
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
 
     state->dataZoneEquip->ZoneEquipInputsFilled = true;                                  // indicate zone data is available
     thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
@@ -17109,6 +17240,10 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_getUnitarySystemInputDataTest)
     std::string compName = "UNITARY SYSTEM MODEL";
     UnitarySystems::UnitarySys::factory(*state, HVAC::UnitarySysType::Unitary_AnyCoilType, compName, zoneEquipment, 0);
     UnitarySystems::UnitarySys *thisSys = &state->dataUnitarySystems->unitarySys[0];
+
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
 
     state->dataZoneEquip->ZoneEquipInputsFilled = true;                                  // indicate zone data is available
     thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
@@ -17383,6 +17518,7 @@ Curve:Biquadratic,
     UnitarySystems::UnitarySys *thisSys = &state->dataUnitarySystems->unitarySys[0];
 
     state->dataGlobal->DoCoilDirectSolutions = true;
+
     state->dataZoneEquip->ZoneEquipInputsFilled = true;                                  // indicate zone data is available
     thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
     EXPECT_FALSE(ErrorsFound);                                                           // expect no errors
@@ -17616,6 +17752,7 @@ Curve:Biquadratic,
     bool zoneEquipment(true);
     UnitarySystems::UnitarySys::factory(*state, HVAC::UnitarySysType::Unitary_AnyCoilType, compName, zoneEquipment, 0);
     UnitarySystems::UnitarySys *thisSys = &state->dataUnitarySystems->unitarySys[0];
+
     state->dataZoneEquip->ZoneEquipInputsFilled = true;
     thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound);
     EXPECT_FALSE(ErrorsFound);
@@ -19820,6 +19957,10 @@ Curve:Biquadratic,
     UnitarySystems::UnitarySys::factory(*state, HVAC::UnitarySysType::Unitary_AnyCoilType, compName, zoneEquipment, 0);
     UnitarySystems::UnitarySys *thisSys = &state->dataUnitarySystems->unitarySys[0];
 
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
+
     state->dataZoneEquip->ZoneEquipInputsFilled = true;                                  // indicate zone data is available
     thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
     EXPECT_FALSE(ErrorsFound);                                                           // expect no errors
@@ -20129,6 +20270,10 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_MultiSpeedDXCoilsNoLoadFlowRateSiz
     UnitarySystems::UnitarySys::factory(*state, HVAC::UnitarySysType::Unitary_AnyCoilType, compName, zoneEquipment, 0);
     UnitarySystems::UnitarySys *thisSys = &state->dataUnitarySystems->unitarySys[0];
     state->dataEnvrn->OutBaroPress = 101325.0;
+
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
 
     state->dataZoneEquip->ZoneEquipInputsFilled = true;                                  // indicate zone data is available
     thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
@@ -20524,6 +20669,10 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_MultiSpeedDXCoilsDirectSolutionTes
     bool FirstHVACIteration = true;
     UnitarySystems::UnitarySys::factory(*state, HVAC::UnitarySysType::Unitary_AnyCoilType, compName, zoneEquipment, 0);
     UnitarySystems::UnitarySys *thisSys = &state->dataUnitarySystems->unitarySys[0];
+
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
 
     state->dataZoneEquip->ZoneEquipInputsFilled = true;                                  // indicate zone data is available
     thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
@@ -21071,6 +21220,11 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_CheckBadInputOutputNodes)
     UnitarySys mySys;
     mySys.Name = "Bath_ZN_1_FLR_1 ZN-PTAC Unitary";
     state->dataUnitarySystems->unitarySys.push_back(mySys);
+
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
+
     state->dataZoneEquip->ZoneEquipInputsFilled = true;
     state->dataGlobal->NumOfZones = 1;
     state->dataZoneEquip->ZoneEquipConfig.allocate(1);
@@ -21216,6 +21370,11 @@ Curve:Biquadratic,
 
     state->dataGlobal->TimeStepsInHour = 1;
     state->dataGlobal->MinutesInTimeStep = 60;
+
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
+
     state->dataZoneEquip->ZoneEquipInputsFilled = true;                                  // indicate zone data is available
     thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
     std::string const error_string = delimited_string(
@@ -21334,6 +21493,10 @@ Curve:Quadratic,
     bool FirstHVACIteration = true;
     UnitarySystems::UnitarySys::factory(*state, HVAC::UnitarySysType::Unitary_AnyCoilType, compName, zoneEquipment, 0);
     UnitarySystems::UnitarySys *thisSys = &state->dataUnitarySystems->unitarySys[0];
+
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
 
     state->dataZoneEquip->ZoneEquipInputsFilled = true;                                  // indicate zone data is available
     thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
@@ -21527,6 +21690,10 @@ Curve:Quadratic,
     bool FirstHVACIteration = true;
     UnitarySystems::UnitarySys::factory(*state, HVAC::UnitarySysType::Unitary_AnyCoilType, compName, zoneEquipment, 0);
     UnitarySystems::UnitarySys *thisSys = &state->dataUnitarySystems->unitarySys[0];
+
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
 
     state->dataZoneEquip->ZoneEquipInputsFilled = true;                                  // indicate zone data is available
     thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
@@ -21812,6 +21979,11 @@ Schedule:Compact,
 
     ASSERT_TRUE(process_idf(idf_objects)); // read idf objects
     state->init_state(*state);
+
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
+
     state->dataZoneEquip->ZoneEquipInputsFilled = true;
     InternalHeatGains::ManageInternalHeatGains(*state, true);
     std::string compName = "UNITARY SYSTEM MODEL";
@@ -23342,6 +23514,11 @@ Curve:Biquadratic, EIRFT, 1, 0, 0, 0, 0, 0, 0, 100, 0, 100, , , Temperature, Tem
     UnitarySystems::UnitarySys *thisSys = &state->dataUnitarySystems->unitarySys[0];
     int coilIndex = CoilCoolingDX::factory(*state, "DX ClgCoil");
     auto &this_dx_clg_coil = state->dataCoilCoolingDX->coilCoolingDXs[coilIndex];
+
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
+
     state->dataZoneEquip->ZoneEquipInputsFilled = true;
     thisSys->getUnitarySystemInputData(*state, UnitarySysName, zoneEquipment, 0, ErrorsFound);
     EXPECT_FALSE(ErrorsFound);
@@ -23608,6 +23785,10 @@ Coil:Heating:Gas:MultiStage,
     bool FirstHVACIteration = true;
     UnitarySystems::UnitarySys::factory(*state, HVAC::UnitarySysType::Unitary_AnyCoilType, compName, zoneEquipment, 0);
     UnitarySystems::UnitarySys *thisSys = &state->dataUnitarySystems->unitarySys[0];
+
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
 
     state->dataZoneEquip->ZoneEquipInputsFilled = true;                                  // indicate zone data is available
     thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
