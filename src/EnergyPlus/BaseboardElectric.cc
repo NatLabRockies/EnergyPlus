@@ -187,21 +187,27 @@ namespace BaseboardElectric {
             auto *inputProcessor = state.dataInputProcessing->inputProcessor.get();
             auto const &baseboardSchemaProps = inputProcessor->getObjectSchemaProps(state, cCurrentModuleObject);
             auto const baseboardObjects = inputProcessor->epJSON.find(cCurrentModuleObject);
+            auto const orderedBaseboardKeys = inputProcessor->getIDFOrderedKeys(state, cCurrentModuleObject);
             static constexpr std::array<std::string_view, 4> numericFieldNames = {
                 "Heating Design Capacity", "Heating Design Capacity Per Floor Area", "Fraction of Autosized Heating Design Capacity", "Efficiency"};
             static constexpr std::string_view availabilityScheduleFieldName = "Availability Schedule Name";
             static constexpr std::string_view heatingDesignCapacityMethodFieldName = "Heating Design Capacity Method";
 
             if (baseboardObjects != inputProcessor->epJSON.end()) {
-                for (auto const &baseboardInstance : baseboardObjects.value().items()) {
+                for (auto const &baseboardKey : orderedBaseboardKeys) {
+                    auto const baseboardInstance = baseboardObjects.value().find(baseboardKey);
+                    if (baseboardInstance == baseboardObjects.value().end()) {
+                        continue;
+                    }
+
                     auto const &baseboardFields = baseboardInstance.value();
-                    auto const baseboardName = Util::makeUPPER(baseboardInstance.key());
+                    auto const baseboardName = Util::makeUPPER(baseboardKey);
                     auto const availabilityScheduleName =
                         inputProcessor->getAlphaFieldValue(baseboardFields, baseboardSchemaProps, "availability_schedule_name");
                     auto const heatingDesignCapacityMethod =
                         inputProcessor->getAlphaFieldValue(baseboardFields, baseboardSchemaProps, "heating_design_capacity_method");
 
-                    inputProcessor->markObjectAsUsed(cCurrentModuleObject, baseboardInstance.key());
+                    inputProcessor->markObjectAsUsed(cCurrentModuleObject, baseboardKey);
 
                     baseboard->baseboards(BaseboardNum + 1).FieldNames.assign(numericFieldNames.begin(), numericFieldNames.end());
 
