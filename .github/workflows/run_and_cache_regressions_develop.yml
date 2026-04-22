@@ -20,29 +20,29 @@ jobs:
       matrix:
         include:
         - os: macos-14
-          macos_dev_target: 13.0
+          macos_dev_target: 14.0
           arch: arm64
           python-arch: arm64
           pretty: "Mac arm64"
-          python-version: 3.12.3  # 3.12.2 not available on Ubuntu 24 GHA
+          python-version: 3.12.3
           allow_failure: false
         - os: ubuntu-24.04
           arch: x86_64
           python-arch: x64
           pretty: "Ubuntu 24.04"
-          python-version: 3.12.3  # 3.12.2 not available on Ubuntu 24 GHA
+          python-version: 3.12.3
           allow_failure: false
         - os: windows-2022
           arch: x86_64
           python-arch: x64
           pretty: "Windows x64"
-          python-version: 3.12.3  # 3.12.2 not available on Ubuntu 24 GHA
+          python-version: 3.12.3
           allow_failure: false
         - os: ubuntu-24.04-arm
           arch: arm64
           python-arch: arm64
           pretty: "Ubuntu 24.04 arm64"
-          python-version: 3.12.3  # 3.12.2 not available on Ubuntu 24 GHA
+          python-version: 3.12.3
           allow_failure: true
         - os: windows-11-arm
           arch: arm64

@@ -280,8 +280,7 @@ Real64 HeatingAirFlowSizer::size(EnergyPlusData &state, Real64 _originalValue, b
 
     if (this->isCoilReportObject) {
         // SizingResult is airflow in m3/s
-        state.dataRptCoilSelection->coilSelectionReportObj->setCoilAirFlow(
-            state, this->compName, this->compType, this->autoSizedValue, this->wasAutoSized);
+        ReportCoilSelection::setCoilAirFlow(state, this->coilReportNum, this->autoSizedValue, this->wasAutoSized);
     }
     if (this->isFanReportObject) {
         //  fill fan peak day and time here

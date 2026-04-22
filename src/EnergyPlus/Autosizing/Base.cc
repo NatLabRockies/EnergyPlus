@@ -108,6 +108,7 @@ void BaseSizer::initializeWithinEP(EnergyPlusData &state,
     this->airloopDOAS = state.dataAirLoopHVACDOAS->airloopDOAS;
     if (EnergyPlus::BaseSizer::isValidCoilType(this->compType)) { // coil reports fail if compType is not one of HVAC::cAllCoilTypes
         this->isCoilReportObject = true;
+        this->coilReportNum = ReportCoilSelection::getReportIndex(state, this->compName, this->coilType);
     }
     if (EnergyPlus::BaseSizer::isValidFanType(this->compType)) { // fan reports fail if compType is not a valid fan type
         this->isFanReportObject = true;

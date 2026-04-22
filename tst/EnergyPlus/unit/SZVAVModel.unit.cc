@@ -270,7 +270,6 @@ TEST_F(EnergyPlusFixture, SZVAV_PTUnit_Testing)
     state->dataEnvrn->OutDryBulbTemp = 30.0;
     state->dataEnvrn->OutBaroPress = 101325.0;
     OutputReportPredefined::SetPredefinedTables(*state);
-    createCoilSelectionReportObj(*state);
 
     int UnitNum = 0;
     bool FirstHVACIteration = true;

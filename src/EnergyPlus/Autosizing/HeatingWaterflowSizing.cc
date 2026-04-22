@@ -145,14 +145,13 @@ Real64 HeatingWaterflowSizer::size(EnergyPlusData &state, Real64 _originalValue,
     }
     this->selectSizerOutput(state, errorsFound);
     if (this->isCoilReportObject) {
-        state.dataRptCoilSelection->coilSelectionReportObj->setCoilWaterFlowPltSizNum(
-            state, this->compName, this->compType, this->autoSizedValue, this->wasAutoSized, this->dataPltSizHeatNum, this->dataWaterLoopNum);
-        state.dataRptCoilSelection->coilSelectionReportObj->setCoilEntWaterTemp(state, this->compName, this->compType, Constant::HWInitConvTemp);
+        ReportCoilSelection::setCoilWaterFlowPltSizNum(
+            state, this->coilReportNum, this->autoSizedValue, this->wasAutoSized, this->dataPltSizHeatNum, this->dataWaterLoopNum);
+        ReportCoilSelection::setCoilEntWaterTemp(state, this->coilReportNum, Constant::HWInitConvTemp);
         if (!this->plantSizData.empty() && this->dataPltSizHeatNum > 0) {
-            state.dataRptCoilSelection->coilSelectionReportObj->setCoilWaterDeltaT(
-                state, this->compName, this->compType, this->plantSizData(this->dataPltSizHeatNum).DeltaT);
-            state.dataRptCoilSelection->coilSelectionReportObj->setCoilLvgWaterTemp(
-                state, this->compName, this->compType, Constant::HWInitConvTemp - this->plantSizData(this->dataPltSizHeatNum).DeltaT);
+            ReportCoilSelection::setCoilWaterDeltaT(state, this->coilReportNum, this->plantSizData(this->dataPltSizHeatNum).DeltaT);
+            ReportCoilSelection::setCoilLvgWaterTemp(
+                state, this->coilReportNum, Constant::HWInitConvTemp - this->plantSizData(this->dataPltSizHeatNum).DeltaT);
         }
         this->calcCoilWaterFlowRates(state,
                                      this->compName,

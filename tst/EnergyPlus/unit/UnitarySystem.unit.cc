@@ -391,7 +391,6 @@ TEST_F(AirloopUnitarySysTest, MultipleWaterCoolingCoilSizing)
         state->dataWaterCoils->WaterCoil(CoilNum).Name;
     state->dataSize->DataWaterLoopNum = 1;
 
-    createCoilSelectionReportObj(*state);
     WaterCoils::SizeWaterCoil(*state, CoilNum);
 
     EXPECT_DOUBLE_EQ(0.159, state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate);
@@ -23003,49 +23002,47 @@ TEST_F(AirloopUnitarySysTest, WSHPVariableSpeedCoilSizing)
     state->dataVariableSpeedCoils->VarSpeedCoil.allocate(2);
     state->dataVariableSpeedCoils->NumVarSpeedCoils = 2;
     int CoilNum1 = 1;
+    auto &vsCoil1 = state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1);
     state->dataVariableSpeedCoils->GetCoilsInputFlag = false;
-    state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).Name = "WSHPVSCooling";
-    state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).coilType = HVAC::CoilType::CoolingWAHPVariableSpeedEquationFit;
-    state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).NumOfSpeeds = 10;
-    state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).NormSpedLevel = 10;
-    state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).VarSpeedCoilType = "Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit";
-    state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).CondenserType = DataHeatBalance::RefrigCondenserType::Water;
-    state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).CoolHeatType = "Cooling";
-    state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).MSRatedWaterVolFlowPerRatedTotCap(10) = 0.00000001;
-    state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).AirInletNodeNum = 1;
-    state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).AirOutletNodeNum = 2;
-    state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).WaterInletNodeNum = 3;
-    state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).WaterOutletNodeNum = 4;
-    state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).availSched = Sched::GetScheduleAlwaysOn(*state);
+    vsCoil1.Name = "WSHPVSCooling";
+    vsCoil1.coilType = HVAC::CoilType::CoolingWAHPVariableSpeedEquationFit;
+    vsCoil1.coilReportNum = ReportCoilSelection::getReportIndex(*state, vsCoil1.Name, vsCoil1.coilType);
+    vsCoil1.NumOfSpeeds = 10;
+    vsCoil1.NormSpedLevel = 10;
+    vsCoil1.VarSpeedCoilType = "Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit";
+    vsCoil1.CondenserType = DataHeatBalance::RefrigCondenserType::Water;
+    vsCoil1.CoolHeatType = "Cooling";
+    vsCoil1.MSRatedWaterVolFlowPerRatedTotCap(10) = 0.00000001;
+    vsCoil1.AirInletNodeNum = 1;
+    vsCoil1.AirOutletNodeNum = 2;
+    vsCoil1.WaterInletNodeNum = 3;
+    vsCoil1.WaterOutletNodeNum = 4;
+    vsCoil1.availSched = Sched::GetScheduleAlwaysOn(*state);
 
     for (int spdNum = 1; spdNum <= 10; ++spdNum) {
         // all speeds have same flow per capacity ratio
-        state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).MSRatedAirVolFlowPerRatedTotCap(spdNum) = 0.000036791;
+        vsCoil1.MSRatedAirVolFlowPerRatedTotCap(spdNum) = 0.000036791;
         // each speed as a percentage of total capacity, spd 1 = 0.1, spd 2 = 0.2, spd 10 = 1.0
-        state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).MSRatedPercentTotCap(spdNum) =
-            spdNum / Real64(state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).NumOfSpeeds);
+        vsCoil1.MSRatedPercentTotCap(spdNum) = spdNum / Real64(vsCoil1.NumOfSpeeds);
         // all speeds have same parameters
-        state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).MSRatedCOP(spdNum) = 3.0;
-        state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).MSRatedWaterVolFlowPerRatedTotCap(spdNum) = 1.0E-7;
-        state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).MSRatedSHR(spdNum) = 0.67;
-        state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).MSCCapFTemp(spdNum) = 1;
-        state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).MSRatedTotCap(spdNum) = 2;
-        state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).MSCCapAirFFlow(spdNum) = 2;
-        state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).MSCCapWaterFFlow(spdNum) = 2;
-        state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).MSEIRFTemp(spdNum) = 2;
-        state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).MSEIRAirFFlow(spdNum) = 2;
-        state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).MSEIRWaterFFlow(spdNum) = 2;
-        state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).MSWasteHeat(spdNum) = 2;
+        vsCoil1.MSRatedCOP(spdNum) = 3.0;
+        vsCoil1.MSRatedWaterVolFlowPerRatedTotCap(spdNum) = 1.0E-7;
+        vsCoil1.MSRatedSHR(spdNum) = 0.67;
+        vsCoil1.MSCCapFTemp(spdNum) = 1;
+        vsCoil1.MSRatedTotCap(spdNum) = 2;
+        vsCoil1.MSCCapAirFFlow(spdNum) = 2;
+        vsCoil1.MSCCapWaterFFlow(spdNum) = 2;
+        vsCoil1.MSEIRFTemp(spdNum) = 2;
+        vsCoil1.MSEIRAirFFlow(spdNum) = 2;
+        vsCoil1.MSEIRWaterFFlow(spdNum) = 2;
+        vsCoil1.MSWasteHeat(spdNum) = 2;
     }
 
     state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).Type =
         DataPlant::PlantEquipmentType::CoilVSWAHPCoolingEquationFit;
-    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).Name =
-        state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).Name;
-    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumIn =
-        state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).WaterInletNodeNum;
-    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumOut =
-        state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).WaterOutletNodeNum;
+    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).Name = vsCoil1.Name;
+    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumIn = vsCoil1.WaterInletNodeNum;
+    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumOut = vsCoil1.WaterOutletNodeNum;
     // use pseudo real CapFT curve, use unity curves for all others
     auto *curve1 = Curve::AddCurve(*state, "Curve1");
     curve1->curveType = Curve::CurveType::BiQuadratic;
@@ -23070,7 +23067,7 @@ TEST_F(AirloopUnitarySysTest, WSHPVariableSpeedCoilSizing)
     thisSys.m_sysType = UnitarySys::SysType::Unitary;
     thisSys.Name = compName;
     thisSys.m_CoolCoilExists = true;
-    thisSys.m_CoolingCoilName = state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).Name;
+    thisSys.m_CoolingCoilName = vsCoil1.Name;
     thisSys.m_coolCoilType = HVAC::CoilType::CoolingWAHPVariableSpeedEquationFit;
     thisSys.m_CoolingCoilIndex = CoilNum1;
     thisSys.m_CoolingSAFMethod = DataSizing::SupplyAirFlowRate;
@@ -23100,18 +23097,14 @@ TEST_F(AirloopUnitarySysTest, WSHPVariableSpeedCoilSizing)
     // now prove the correct CapFT value was used
     Real64 MixWetBulb = Psychrometrics::PsyTwbFnTdbWPb(*state, MixTemp, MixHumRat, state->dataEnvrn->StdBaroPress);
     Real64 constexpr RatedInletWaterTemp = 29.4444; // 85 F cooling mode
-    Real64 capFT_water =
-        Curve::CurveValue(*state, state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).MSCCapFTemp(10), MixWetBulb, RatedInletWaterTemp);
+    Real64 capFT_water = Curve::CurveValue(*state, vsCoil1.MSCCapFTemp(10), MixWetBulb, RatedInletWaterTemp);
 
     // these curve results are very near 1
     EXPECT_NEAR(state->dataSize->DataCoilSizingCapFT, capFT_water, 0.0001);
     EXPECT_NEAR(capFT_water, 0.9994, 0.0001);
 
     // OAT at cooling peak was set = 0 C
-    Real64 capFT_OAT = Curve::CurveValue(*state,
-                                         state->dataVariableSpeedCoils->VarSpeedCoil(CoilNum1).MSCCapFTemp(10),
-                                         MixWetBulb,
-                                         state->dataSize->FinalSysSizing(1).OutTempAtCoolPeak);
+    Real64 capFT_OAT = Curve::CurveValue(*state, vsCoil1.MSCCapFTemp(10), MixWetBulb, state->dataSize->FinalSysSizing(1).OutTempAtCoolPeak);
     // this value is certainly not used in the capacity calculation as shown below
     EXPECT_NEAR(capFT_OAT, 1.5, 0.0001);
 

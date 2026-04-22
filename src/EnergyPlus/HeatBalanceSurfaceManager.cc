@@ -9922,13 +9922,15 @@ void InitSurfacePropertyViewFactors(EnergyPlusData &state)
                 auto &SrdSurfsProperty = state.dataSurface->SurroundingSurfsProperty(SrdSurfsNum);
                 SurfsSkyViewFactor = SrdSurfsProperty.SkyViewFactor;
                 IsSkyViewFactorSet = SrdSurfsProperty.IsSkyViewFactorSet;
-                if (SurfsSkyViewFactor > 0.0) {
+                if (SurfsSkyViewFactor != DataSizing::AutoSize) {
                     SrdSurfsViewFactor += SurfsSkyViewFactor;
                 }
                 if (!Surface.IsSurfPropertyGndSurfacesDefined) {
-                    SrdSurfsViewFactor += SrdSurfsProperty.GroundViewFactor;
-                    IsGroundViewFactorSet = SrdSurfsProperty.IsGroundViewFactorSet;
                     GroundSurfsViewFactor = SrdSurfsProperty.GroundViewFactor;
+                    IsGroundViewFactorSet = SrdSurfsProperty.IsGroundViewFactorSet;
+                    if (GroundSurfsViewFactor != DataSizing::AutoSize) {
+                        SrdSurfsViewFactor += GroundSurfsViewFactor;
+                    }
                 }
                 for (int SrdSurfNum = 1; SrdSurfNum <= SrdSurfsProperty.TotSurroundingSurface; SrdSurfNum++) {
                     SrdSurfsViewFactor += SrdSurfsProperty.SurroundingSurfs(SrdSurfNum).ViewFactor;
@@ -9936,8 +9938,9 @@ void InitSurfacePropertyViewFactors(EnergyPlusData &state)
             }
             if (Surface.IsSurfPropertyGndSurfacesDefined) {
                 GndSurfsNum = Surface.SurfPropertyGndSurfIndex;
-                IsGroundViewFactorSet = state.dataSurface->GroundSurfsProperty(GndSurfsNum).IsGroundViewFactorSet;
-                GroundSurfsViewFactor = state.dataSurface->GroundSurfsProperty(GndSurfsNum).SurfsViewFactorSum;
+                auto &GrndSurfsProperty = state.dataSurface->GroundSurfsProperty(GndSurfsNum);
+                GroundSurfsViewFactor = GrndSurfsProperty.SurfsViewFactorSum;
+                IsGroundViewFactorSet = GrndSurfsProperty.IsGroundViewFactorSet;
                 SrdSurfsViewFactor += GroundSurfsViewFactor;
             }
 

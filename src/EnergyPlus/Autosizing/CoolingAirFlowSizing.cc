@@ -378,8 +378,7 @@ Real64 CoolingAirFlowSizer::size(EnergyPlusData &state, Real64 _originalValue, b
 
     if (this->isCoilReportObject) {
         // SizingResult is airflow in m3/s
-        state.dataRptCoilSelection->coilSelectionReportObj->setCoilAirFlow(
-            state, this->compName, this->compType, this->autoSizedValue, this->wasAutoSized);
+        ReportCoilSelection::setCoilAirFlow(state, this->coilReportNum, this->autoSizedValue, this->wasAutoSized);
     }
     if (this->isFanReportObject) {
         //  fill fan peak day and time here
@@ -397,8 +396,7 @@ Real64 CoolingAirFlowSizer::size(EnergyPlusData &state, Real64 _originalValue, b
                         EnergyPlus::format("{}/{} {}",
                                            state.dataWeather->DesDayInput(this->finalZoneSizing(this->curZoneEqNum).CoolDDNum).Month,
                                            state.dataWeather->DesDayInput(this->finalZoneSizing(this->curZoneEqNum).CoolDDNum).DayOfMonth,
-                                           state.dataRptCoilSelection->coilSelectionReportObj->getTimeText(
-                                               state, this->finalZoneSizing(this->curZoneEqNum).TimeStepNumAtCoolMax));
+                                           ReportCoilSelection::getTimeText(state, this->finalZoneSizing(this->curZoneEqNum).TimeStepNumAtCoolMax));
                 }
             } else if (heatingFlow) {
                 if (this->finalZoneSizing(this->curZoneEqNum).HeatDDNum > 0 &&
@@ -408,8 +406,7 @@ Real64 CoolingAirFlowSizer::size(EnergyPlusData &state, Real64 _originalValue, b
                         EnergyPlus::format("{}/{} {}",
                                            state.dataWeather->DesDayInput(this->finalZoneSizing(this->curZoneEqNum).HeatDDNum).Month,
                                            state.dataWeather->DesDayInput(this->finalZoneSizing(this->curZoneEqNum).HeatDDNum).DayOfMonth,
-                                           state.dataRptCoilSelection->coilSelectionReportObj->getTimeText(
-                                               state, this->finalZoneSizing(this->curZoneEqNum).TimeStepNumAtHeatMax));
+                                           ReportCoilSelection::getTimeText(state, this->finalZoneSizing(this->curZoneEqNum).TimeStepNumAtHeatMax));
                 }
             }
         }

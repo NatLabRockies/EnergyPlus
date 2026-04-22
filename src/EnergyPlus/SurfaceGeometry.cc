@@ -8183,8 +8183,8 @@ namespace SurfaceGeometry {
                 SrdSurfsProp.Name = s_ipsc->cAlphaArgs(1);
 
                 // N1: sky view factor
-                if (!s_ipsc->lNumericFieldBlanks(1)) {
-                    SrdSurfsProp.SkyViewFactor = s_ipsc->rNumericArgs(1);
+                SrdSurfsProp.SkyViewFactor = s_ipsc->rNumericArgs(1);
+                if (SrdSurfsProp.SkyViewFactor != DataSizing::AutoSize) {
                     SrdSurfsProp.IsSkyViewFactorSet = true;
                 }
 
@@ -8195,8 +8195,8 @@ namespace SurfaceGeometry {
                 }
 
                 // N2: ground view factor
-                if (!s_ipsc->lNumericFieldBlanks(2)) {
-                    SrdSurfsProp.GroundViewFactor = s_ipsc->rNumericArgs(2);
+                SrdSurfsProp.GroundViewFactor = s_ipsc->rNumericArgs(2);
+                if (SrdSurfsProp.GroundViewFactor != DataSizing::AutoSize) {
                     SrdSurfsProp.IsGroundViewFactorSet = true;
                 }
 

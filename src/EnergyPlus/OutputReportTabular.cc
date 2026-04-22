@@ -4391,7 +4391,7 @@ void CalcHeatEmissionReport(EnergyPlusData &state)
     for (int iCoil = 1; iCoil <= state.dataHeatingCoils->NumHeatingCoils; ++iCoil) {
         auto const &thisCoil = state.dataHeatingCoils->HeatingCoil(iCoil);
 
-        if (thisCoil.heatCoilType == HVAC::CoilType::HeatingGasMultiStage || thisCoil.heatCoilType == HVAC::CoilType::HeatingGasOrOtherFuel) {
+        if (thisCoil.coilType == HVAC::CoilType::HeatingGasMultiStage || thisCoil.coilType == HVAC::CoilType::HeatingGasOrOtherFuel) {
             state.dataHeatBal->SysTotalHVACRejectHeatLoss += thisCoil.FuelUseLoad + thisCoil.ParasiticFuelConsumption - thisCoil.HeatingCoilLoad;
         }
     }
@@ -5262,9 +5262,8 @@ void WriteTabularReports(EnergyPlusData &state)
             WriteVisualResilienceTablesRepPeriod(state, i);
         }
 
-        state.dataRptCoilSelection->coilSelectionReportObj->finishCoilSummaryReportTable(
-            state);                   // call to write out the coil selection summary table data
-        WritePredefinedTables(state); // moved to come after zone load components is finished
+        ReportCoilSelection::finishCoilSummaryReportTable(state); // call to write out the coil selection summary table data
+        WritePredefinedTables(state);                             // moved to come after zone load components is finished
 
         if (state.dataGlobal->DoWeathSim) {
             WriteMonthlyTables(state);
@@ -15932,8 +15931,7 @@ void computeSpaceZoneCompLoads(EnergyPlusData &state,
                                    iSpace);
     CollectPeakZoneConditions(state, coolCompLoadTables, coolDesSelected, timeCoolMax, iZone, true, iSpace);
     // send latent load info to coil summary report
-    state.dataRptCoilSelection->coilSelectionReportObj->setZoneLatentLoadCoolingIdealPeak(
-        iZone, coolCompLoadTables.cells(LoadCompCol::Latent, LoadCompRow::GrdTot));
+    ReportCoilSelection::setZoneLatentLoadCoolingIdealPeak(state, iZone, coolCompLoadTables.cells(LoadCompCol::Latent, LoadCompRow::GrdTot));
 
     int heatDesSelected = calcFinalSizing.HeatDDNum;
     heatCompLoadTables.desDayNum = heatDesSelected;
@@ -15971,8 +15969,7 @@ void computeSpaceZoneCompLoads(EnergyPlusData &state,
     CollectPeakZoneConditions(state, heatCompLoadTables, heatDesSelected, timeHeatMax, iZone, false, iSpace);
 
     // send latent load info to coil summary report
-    state.dataRptCoilSelection->coilSelectionReportObj->setZoneLatentLoadHeatingIdealPeak(
-        iZone, heatCompLoadTables.cells(LoadCompCol::Latent, LoadCompRow::GrdTot));
+    ReportCoilSelection::setZoneLatentLoadHeatingIdealPeak(state, iZone, heatCompLoadTables.cells(LoadCompCol::Latent, LoadCompRow::GrdTot));
 
     AddAreaColumnForZone(componentAreas, coolCompLoadTables);
     AddAreaColumnForZone(componentAreas, heatCompLoadTables);
@@ -16432,7 +16429,7 @@ void CollectPeakZoneConditions(EnergyPlusData &state,
                 compLoad.peakDateHrMin = EnergyPlus::format("{}/{} {}",
                                                             state.dataWeather->DesDayInput(desDaySelected).Month,
                                                             state.dataWeather->DesDayInput(desDaySelected).DayOfMonth,
-                                                            state.dataRptCoilSelection->coilSelectionReportObj->getTimeText(state, timeOfMax));
+                                                            ReportCoilSelection::getTimeText(state, timeOfMax));
             } else {
                 compLoad.peakDateHrMin = szCalcFinalSizing.CoolPeakDateHrMin;
             }
@@ -16484,7 +16481,7 @@ void CollectPeakZoneConditions(EnergyPlusData &state,
                 compLoad.peakDateHrMin = EnergyPlus::format("{}/{} {}",
                                                             state.dataWeather->DesDayInput(desDaySelected).Month,
                                                             state.dataWeather->DesDayInput(desDaySelected).DayOfMonth,
-                                                            state.dataRptCoilSelection->coilSelectionReportObj->getTimeText(state, timeOfMax));
+                                                            ReportCoilSelection::getTimeText(state, timeOfMax));
             } else {
                 compLoad.peakDateHrMin = szCalcFinalSizing.HeatPeakDateHrMin;
             }

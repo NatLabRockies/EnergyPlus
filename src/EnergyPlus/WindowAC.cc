@@ -678,8 +678,11 @@ namespace WindowAC {
         }
         for (WindACNum = 1; WindACNum <= state.dataWindowAC->NumWindAC; ++WindACNum) {
             auto &windAC = state.dataWindowAC->WindAC(WindACNum);
-            state.dataRptCoilSelection->coilSelectionReportObj->setCoilSupplyFanInfo(
-                state, windAC.DXCoilName, windAC.DXCoilType, windAC.FanName, windAC.fanType, windAC.FanIndex);
+            ReportCoilSelection::setCoilSupplyFanInfo(state,
+                                                      ReportCoilSelection::getReportIndex(state, windAC.DXCoilName, windAC.coilType),
+                                                      windAC.FanName,
+                                                      windAC.fanType,
+                                                      windAC.FanIndex);
         }
     }
 

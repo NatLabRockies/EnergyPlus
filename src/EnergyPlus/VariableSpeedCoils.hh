@@ -75,15 +75,17 @@ namespace VariableSpeedCoils {
         std::string Name;                      // Name of the  Coil
         Sched::Schedule *availSched = nullptr; // availability schedule
         std::string VarSpeedCoilType;          // type of coil
-        int NumOfSpeeds;                       // Number of speeds
-        int NormSpedLevel;                     // Nominal speed level
-        Real64 RatedWaterVolFlowRate;          // Rated/Ref Water Volumetric Flow Rate [m3/s]
-        Real64 RatedWaterMassFlowRate;         // Rated/Ref Water Volumetric Flow Rate [m3/s]
-        Real64 RatedAirVolFlowRate;            // Rated/Ref Air Volumetric Flow Rate [m3/s]
-        Real64 RatedCapHeat;                   // Rated/Ref Heating Capacity [W]
-        Real64 RatedCapCoolTotal;              // Rated/Ref Total Cooling Capacity [W]
-        Real64 MaxONOFFCyclesperHour;          // Maximum ON/OFF cycles per hour for the compressor (cycles/hour)
-        Real64 Twet_Rated;                     // Nominal time for condensate to begin leaving the coil's
+
+        int coilReportNum = -1;
+        int NumOfSpeeds;               // Number of speeds
+        int NormSpedLevel;             // Nominal speed level
+        Real64 RatedWaterVolFlowRate;  // Rated/Ref Water Volumetric Flow Rate [m3/s]
+        Real64 RatedWaterMassFlowRate; // Rated/Ref Water Volumetric Flow Rate [m3/s]
+        Real64 RatedAirVolFlowRate;    // Rated/Ref Air Volumetric Flow Rate [m3/s]
+        Real64 RatedCapHeat;           // Rated/Ref Heating Capacity [W]
+        Real64 RatedCapCoolTotal;      // Rated/Ref Total Cooling Capacity [W]
+        Real64 MaxONOFFCyclesperHour;  // Maximum ON/OFF cycles per hour for the compressor (cycles/hour)
+        Real64 Twet_Rated;             // Nominal time for condensate to begin leaving the coil's
         // condensate drain line (sec)
         Real64 Gamma_Rated; // Initial moisture evaporation rate divided by steady-state
         // AC latent capacity (dimensionless)

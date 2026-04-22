@@ -1812,10 +1812,15 @@ namespace HeatBalanceManager {
         // METHODOLOGY EMPLOYED:
         // The GetObjectItem routines are employed to retrieve the data.
 
-        SolarShading::GetShadowingInput(state);
-
         GetZoneData(state, ErrorsFound); // Read Zone data from input file
 
+        // ShadowCalculation settings affect geometry-time validation, such as the
+        // convexity warning path for PolygonClipping + ConvexWeilerAtherton, so
+        // this happens before SetupZoneGeometry.
+        SolarShading::GetShadowingInput(state);
+
+        // SetupZoneGeometry includes the call to GetSurfaceData for
+        // populating surfData = state.dataSurface.
         SurfaceGeometry::SetupZoneGeometry(state, ErrorsFound);
     }
 

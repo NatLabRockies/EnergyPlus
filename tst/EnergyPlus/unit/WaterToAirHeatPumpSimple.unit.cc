@@ -65,6 +65,7 @@
 #include <EnergyPlus/Plant/DataPlant.hh>
 #include <EnergyPlus/PlantUtilities.hh>
 #include <EnergyPlus/Psychrometrics.hh>
+#include <EnergyPlus/ReportCoilSelection.hh>
 #include <EnergyPlus/WaterToAirHeatPumpSimple.hh>
 
 using namespace EnergyPlus;
@@ -96,13 +97,17 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimpleTest_SizeHVACWaterToAir)
     state->dataSize->DesDayWeath.allocate(1);
     state->dataSize->DesDayWeath(1).Temp.allocate(24);
 
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum).WAHPType = WatertoAirHP::Cooling;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum).RatedAirVolFlowRate = AutoSize;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum).RatedCapCoolTotal = AutoSize;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum).RatedCapCoolSens = AutoSize;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum).RatedWaterVolFlowRate = 0.0;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum).WaterInletNodeNum = 1;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum).WaterOutletNodeNum = 2;
+    auto &wahpSimple1 = state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum);
+    wahpSimple1.WAHPType = WatertoAirHP::Cooling;
+    wahpSimple1.coilType = HVAC::CoilType::CoolingWAHPSimple;
+    wahpSimple1.coilReportNum = ReportCoilSelection::getReportIndex(*state, wahpSimple1.Name, wahpSimple1.coilType);
+
+    wahpSimple1.RatedAirVolFlowRate = AutoSize;
+    wahpSimple1.RatedCapCoolTotal = AutoSize;
+    wahpSimple1.RatedCapCoolSens = AutoSize;
+    wahpSimple1.RatedWaterVolFlowRate = 0.0;
+    wahpSimple1.WaterInletNodeNum = 1;
+    wahpSimple1.WaterOutletNodeNum = 2;
 
     state->dataSize->FinalZoneSizing(state->dataSize->CurZoneEqNum).DesCoolVolFlow = 0.20;
     state->dataSize->FinalZoneSizing(state->dataSize->CurZoneEqNum).DesHeatVolFlow = 0.20;
@@ -168,11 +173,11 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimpleTest_SizeHVACWaterToAir)
     curve3->inputLimits[3].max = 38;
 
     // performance curve coefficients
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum).TotalCoolCapCurve = curve1;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum).SensCoolCapCurve = curve2;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum).CoolPowCurve = curve3;
+    wahpSimple1.TotalCoolCapCurve = curve1;
+    wahpSimple1.SensCoolCapCurve = curve2;
+    wahpSimple1.CoolPowCurve = curve3;
 
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum).RatedCOPCoolAtRatedCdts = 5.12;
+    wahpSimple1.RatedCOPCoolAtRatedCdts = 5.12;
 
     state->dataSize->DesDayWeath(1).Temp(15) = 32.0;
     state->dataEnvrn->StdBaroPress = 101325.0;
@@ -190,14 +195,11 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimpleTest_SizeHVACWaterToAir)
     auto &loopsidebranch(state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1));
     loopsidebranch.TotalComponents = 1;
     loopsidebranch.Comp.allocate(1);
-    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).Name =
-        state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum).Name;
-    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).Type =
-        state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum).WAHPPlantType;
-    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumIn =
-        state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum).WaterInletNodeNum;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum).plantLoc.loopNum = 1;
-    PlantUtilities::SetPlantLocationLinks(*state, state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum).plantLoc);
+    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).Name = wahpSimple1.Name;
+    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).Type = wahpSimple1.WAHPPlantType;
+    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumIn = wahpSimple1.WaterInletNodeNum;
+    wahpSimple1.plantLoc.loopNum = 1;
+    PlantUtilities::SetPlantLocationLinks(*state, wahpSimple1.plantLoc);
 
     // plant loop design leaving water temperature (design entering water temperature for WAHP coil)
     state->dataSize->PlantSizData.allocate(1);
@@ -209,14 +211,12 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimpleTest_SizeHVACWaterToAir)
     EXPECT_DOUBLE_EQ(0.0075, state->dataSize->FinalZoneSizing(state->dataSize->CurZoneEqNum).CoolDesHumRat);
 
     // check that the total cooling capacity is >= the sensible cooling capacity
-    EXPECT_GE(state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum).RatedCapCoolTotal,
-              state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum).RatedCapCoolSens);
+    EXPECT_GE(wahpSimple1.RatedCapCoolTotal, wahpSimple1.RatedCapCoolSens);
 
-    if (state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum).RatedCapCoolTotal != 0.0) {
-        ShowMessage(*state,
-                    format("SizeHVACWaterToAir: Rated Sensible Heat Ratio = {:.2R} [-]",
-                           state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum).RatedCapCoolSens /
-                               state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum).RatedCapCoolTotal));
+    if (wahpSimple1.RatedCapCoolTotal != 0.0) {
+        ShowMessage(
+            *state,
+            format("SizeHVACWaterToAir: Rated Sensible Heat Ratio = {:.2R} [-]", wahpSimple1.RatedCapCoolSens / wahpSimple1.RatedCapCoolTotal));
     }
     EXPECT_TRUE(compare_eio_stream_substring("Design Size Rated Air Flow Rate", false));
     EXPECT_TRUE(compare_eio_stream_substring("Design Size Rated Total Cooling Capacity", false));
@@ -1145,32 +1145,38 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimpleTest_SizeHVACWaterToAirRatedCo
     state->dataSize->DesDayWeath.allocate(1);
     state->dataSize->DesDayWeath(1).Temp.allocate(24);
 
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).WAHPType = WatertoAirHP::Cooling;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).RatedAirVolFlowRate = AutoSize;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).RatedCapCoolTotal = AutoSize;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).RatedCapCoolSens = AutoSize;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).RatedWaterVolFlowRate = AutoSize;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).WaterInletNodeNum = 1;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).WaterOutletNodeNum = 2;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).RatedEntWaterTemp = 30.0;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).RatedEntAirWetbulbTemp = 19.0;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).RatedEntAirDrybulbTemp = 27.0;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).CompanionHeatingCoilNum = 2;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).WAHPPlantType = DataPlant::PlantEquipmentType::CoilWAHPCoolingEquationFit;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).availSched = Sched::GetScheduleAlwaysOn(*state);
+    auto &wahpSimple1 = state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1);
+    wahpSimple1.WAHPType = WatertoAirHP::Cooling;
+    wahpSimple1.coilType = HVAC::CoilType::CoolingWAHPSimple;
+    wahpSimple1.coilReportNum = ReportCoilSelection::getReportIndex(*state, wahpSimple1.Name, wahpSimple1.coilType);
+    wahpSimple1.RatedAirVolFlowRate = AutoSize;
+    wahpSimple1.RatedCapCoolTotal = AutoSize;
+    wahpSimple1.RatedCapCoolSens = AutoSize;
+    wahpSimple1.RatedWaterVolFlowRate = AutoSize;
+    wahpSimple1.WaterInletNodeNum = 1;
+    wahpSimple1.WaterOutletNodeNum = 2;
+    wahpSimple1.RatedEntWaterTemp = 30.0;
+    wahpSimple1.RatedEntAirWetbulbTemp = 19.0;
+    wahpSimple1.RatedEntAirDrybulbTemp = 27.0;
+    wahpSimple1.CompanionHeatingCoilNum = 2;
+    wahpSimple1.WAHPPlantType = DataPlant::PlantEquipmentType::CoilWAHPCoolingEquationFit;
+    wahpSimple1.availSched = Sched::GetScheduleAlwaysOn(*state);
 
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).WAHPType = WatertoAirHP::Heating;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).RatedAirVolFlowRate = AutoSize;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).RatedCapHeat = AutoSize;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).RatedWaterVolFlowRate = AutoSize;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).WaterInletNodeNum = 3;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).WaterOutletNodeNum = 4;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).RatedEntWaterTemp = 20.0;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).RatedEntAirDrybulbTemp = 20.0;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).CompanionCoolingCoilNum = 1;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).WAHPPlantType = DataPlant::PlantEquipmentType::CoilWAHPHeatingEquationFit;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).RatioRatedHeatRatedTotCoolCap = 1.23;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).availSched = Sched::GetScheduleAlwaysOn(*state);
+    auto &wahpSimple2 = state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2);
+    wahpSimple2.WAHPType = WatertoAirHP::Heating;
+    wahpSimple2.coilType = HVAC::CoilType::HeatingWAHPSimple;
+    wahpSimple2.coilReportNum = ReportCoilSelection::getReportIndex(*state, wahpSimple2.Name, wahpSimple2.coilType);
+    wahpSimple2.RatedAirVolFlowRate = AutoSize;
+    wahpSimple2.RatedCapHeat = AutoSize;
+    wahpSimple2.RatedWaterVolFlowRate = AutoSize;
+    wahpSimple2.WaterInletNodeNum = 3;
+    wahpSimple2.WaterOutletNodeNum = 4;
+    wahpSimple2.RatedEntWaterTemp = 20.0;
+    wahpSimple2.RatedEntAirDrybulbTemp = 20.0;
+    wahpSimple2.CompanionCoolingCoilNum = 1;
+    wahpSimple2.WAHPPlantType = DataPlant::PlantEquipmentType::CoilWAHPHeatingEquationFit;
+    wahpSimple2.RatioRatedHeatRatedTotCoolCap = 1.23;
+    wahpSimple2.availSched = Sched::GetScheduleAlwaysOn(*state);
 
     state->dataSize->FinalZoneSizing(state->dataSize->CurZoneEqNum).DesCoolVolFlow = 0.20;
     state->dataSize->FinalZoneSizing(state->dataSize->CurZoneEqNum).DesHeatVolFlow = 0.20;
@@ -1274,14 +1280,14 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimpleTest_SizeHVACWaterToAirRatedCo
     curve5->inputLimits[3].max = 38;
 
     // performance curve coefficients
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).TotalCoolCapCurve = curve1;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).SensCoolCapCurve = curve2;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).CoolPowCurve = curve3;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).HeatCapCurve = curve4;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).HeatPowCurve = curve5;
+    wahpSimple1.TotalCoolCapCurve = curve1;
+    wahpSimple1.SensCoolCapCurve = curve2;
+    wahpSimple1.CoolPowCurve = curve3;
+    wahpSimple2.HeatCapCurve = curve4;
+    wahpSimple2.HeatPowCurve = curve5;
 
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).RatedCOPCoolAtRatedCdts = 5.12;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).RatedCOPHeatAtRatedCdts = 3.0;
+    wahpSimple1.RatedCOPCoolAtRatedCdts = 5.12;
+    wahpSimple2.RatedCOPHeatAtRatedCdts = 3.0;
 
     state->dataSize->DesDayWeath(1).Temp(15) = 32.0;
     state->dataEnvrn->StdBaroPress = 101325.0;
@@ -1304,14 +1310,12 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimpleTest_SizeHVACWaterToAirRatedCo
     branch.TotalComponents = 2;
     branch.Comp.allocate(2);
 
-    auto &wahpSimple1 = state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1);
     branch.Comp(1).Name = wahpSimple1.Name;
     branch.Comp(1).Type = wahpSimple1.WAHPPlantType;
     branch.Comp(1).NodeNumIn = wahpSimple1.WaterInletNodeNum;
     wahpSimple1.plantLoc.loopNum = 1;
     PlantUtilities::SetPlantLocationLinks(*state, wahpSimple1.plantLoc);
 
-    auto &wahpSimple2 = state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2);
     branch.Comp(2).Name = wahpSimple2.Name;
     branch.Comp(2).Type = wahpSimple2.WAHPPlantType;
     branch.Comp(2).NodeNumIn = wahpSimple2.WaterInletNodeNum;
@@ -1366,6 +1370,8 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimpleTest_SizeHVACWaterToAirRatedCo
 
     auto &wahpSimple1 = state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1);
     wahpSimple1.WAHPType = WatertoAirHP::Cooling;
+    wahpSimple1.coilType = HVAC::CoilType::CoolingWAHPSimple;
+    wahpSimple1.coilReportNum = ReportCoilSelection::getReportIndex(*state, wahpSimple1.Name, wahpSimple1.coilType);
     wahpSimple1.RatedAirVolFlowRate = AutoSize;
     wahpSimple1.RatedCapCoolTotal = AutoSize;
     wahpSimple1.RatedCapCoolSens = AutoSize;
@@ -1380,6 +1386,8 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimpleTest_SizeHVACWaterToAirRatedCo
 
     auto &wahpSimple2 = state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2);
     wahpSimple2.WAHPType = WatertoAirHP::Heating;
+    wahpSimple2.coilType = HVAC::CoilType::CoolingWAHPSimple;
+    wahpSimple2.coilReportNum = ReportCoilSelection::getReportIndex(*state, wahpSimple2.Name, wahpSimple2.coilType);
     wahpSimple2.RatedAirVolFlowRate = AutoSize;
     wahpSimple2.RatedCapHeat = AutoSize;
     wahpSimple2.RatedWaterVolFlowRate = 0.000185;

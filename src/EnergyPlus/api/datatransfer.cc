@@ -386,12 +386,7 @@ int getMeterHandle(EnergyPlusState state, const char *meterName)
 {
     auto *thisState = static_cast<EnergyPlus::EnergyPlusData *>(state);
     std::string const meterNameUC = EnergyPlus::Util::makeUPPER(meterName);
-    const int i = EnergyPlus::GetMeterIndex(*thisState, meterNameUC);
-    if (i == 0) {
-        // inside E+, zero is meaningful, but through the API, I want to use negative one as a signal of a bad lookup
-        return -1;
-    }
-    return i;
+    return EnergyPlus::GetMeterIndex(*thisState, meterNameUC);
 }
 
 Real64 getMeterValue(EnergyPlusState state, int handle)

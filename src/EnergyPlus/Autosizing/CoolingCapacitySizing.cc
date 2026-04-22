@@ -275,12 +275,11 @@ Real64 CoolingCapacitySizer::size(EnergyPlusData &state, Real64 _originalValue, 
                     CoilOutHumRat = state.dataSize->DataCoilSizingAirOutHumRat;
                     FanCoolLoad = state.dataSize->DataCoilSizingFanCoolLoad;
                     TotCapTempModFac = state.dataSize->DataCoilSizingCapFT;
-                    if (state.dataRptCoilSelection->coilSelectionReportObj->isCompTypeCoil(this->compType)) {
-                        state.dataRptCoilSelection->coilSelectionReportObj->setCoilEntAirHumRat(state, this->compName, this->compType, CoilInHumRat);
-                        state.dataRptCoilSelection->coilSelectionReportObj->setCoilEntAirTemp(
-                            state, this->compName, this->compType, CoilInTemp, this->curSysNum, this->curZoneEqNum);
-                        state.dataRptCoilSelection->coilSelectionReportObj->setCoilLvgAirTemp(state, this->compName, this->compType, CoilOutTemp);
-                        state.dataRptCoilSelection->coilSelectionReportObj->setCoilLvgAirHumRat(state, this->compName, this->compType, CoilOutHumRat);
+                    if (ReportCoilSelection::isCompTypeCoil(this->compType)) {
+                        ReportCoilSelection::setCoilEntAirHumRat(state, this->coilReportNum, CoilInHumRat);
+                        ReportCoilSelection::setCoilEntAirTemp(state, this->coilReportNum, CoilInTemp, this->curSysNum, this->curZoneEqNum);
+                        ReportCoilSelection::setCoilLvgAirTemp(state, this->coilReportNum, CoilOutTemp);
+                        ReportCoilSelection::setCoilLvgAirHumRat(state, this->coilReportNum, CoilOutHumRat);
                     }
                 } else if (this->curOASysNum > 0 && this->outsideAirSys(this->curOASysNum).AirLoopDOASNum > -1) {
                     auto &thisAirloopDOAS = this->airloopDOAS[this->outsideAirSys(this->curOASysNum).AirLoopDOASNum];
@@ -569,26 +568,24 @@ Real64 CoolingCapacitySizer::size(EnergyPlusData &state, Real64 _originalValue, 
 
     if (this->isCoilReportObject && this->curSysNum <= state.dataHVACGlobal->NumPrimaryAirSys) {
         if (CoilInTemp > -999.0) { // set inlet air properties used during capacity sizing if available, allow for negative winter temps
-            state.dataRptCoilSelection->coilSelectionReportObj->setCoilEntAirTemp(
-                state, this->compName, this->compType, CoilInTemp, this->curSysNum, this->curZoneEqNum);
-            state.dataRptCoilSelection->coilSelectionReportObj->setCoilEntAirHumRat(state, this->compName, this->compType, CoilInHumRat);
+            ReportCoilSelection::setCoilEntAirTemp(state, this->coilReportNum, CoilInTemp, this->curSysNum, this->curZoneEqNum);
+            ReportCoilSelection::setCoilEntAirHumRat(state, this->coilReportNum, CoilInHumRat);
         }
         if (CoilOutTemp > -999.0) { // set outlet air properties used during capacity sizing if available
-            state.dataRptCoilSelection->coilSelectionReportObj->setCoilLvgAirTemp(state, this->compName, this->compType, CoilOutTemp);
-            state.dataRptCoilSelection->coilSelectionReportObj->setCoilLvgAirHumRat(state, this->compName, this->compType, CoilOutHumRat);
+            ReportCoilSelection::setCoilLvgAirTemp(state, this->coilReportNum, CoilOutTemp);
+            ReportCoilSelection::setCoilLvgAirHumRat(state, this->coilReportNum, CoilOutHumRat);
         }
-        state.dataRptCoilSelection->coilSelectionReportObj->setCoilCoolingCapacity(state,
-                                                                                   this->compName,
-                                                                                   this->compType,
-                                                                                   this->autoSizedValue,
-                                                                                   this->wasAutoSized,
-                                                                                   this->curSysNum,
-                                                                                   this->curZoneEqNum,
-                                                                                   this->curOASysNum,
-                                                                                   FanCoolLoad,
-                                                                                   TotCapTempModFac,
-                                                                                   DXFlowPerCapMinRatio,
-                                                                                   DXFlowPerCapMaxRatio);
+        ReportCoilSelection::setCoilCoolingCapacity(state,
+                                                    this->coilReportNum,
+                                                    this->autoSizedValue,
+                                                    this->wasAutoSized,
+                                                    this->curSysNum,
+                                                    this->curZoneEqNum,
+                                                    this->curOASysNum,
+                                                    FanCoolLoad,
+                                                    TotCapTempModFac,
+                                                    DXFlowPerCapMinRatio,
+                                                    DXFlowPerCapMaxRatio);
     }
     return this->autoSizedValue;
 }

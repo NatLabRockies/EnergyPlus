@@ -72,6 +72,7 @@
 #include <EnergyPlus/OutputProcessor.hh>
 #include <EnergyPlus/OutputReportPredefined.hh>
 #include <EnergyPlus/Psychrometrics.hh>
+#include <EnergyPlus/ReportCoilSelection.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/VariableSpeedCoils.hh>
 #include <EnergyPlus/WaterManager.hh>
@@ -5595,6 +5596,7 @@ TEST_F(EnergyPlusFixture, SingleSpeedDXCoolingCoilOutputTest)
     Real64 waterDensity = Psychrometrics::RhoH2O((Coil.InletAirTemp + Coil.OutletAirTemp) / 2.0);
     Real64 results_condenstateVdot = Coil.InletAirMassFlowRate * (Coil.InletAirHumRat - Coil.OutletAirHumRat) / waterDensity;
     Coil.coilType = HVAC::CoilType::CoolingDXSingleSpeed;
+    Coil.coilReportNum = ReportCoilSelection::getReportIndex(*state, Coil.Name, Coil.coilType);
     ReportDXCoil(*state, DXCoilNum);
     // check condensate volume flow rate
     EXPECT_NEAR(results_condenstateVdot, Coil.CondensateVdot, 1.0E-11);
@@ -5624,6 +5626,7 @@ TEST_F(EnergyPlusFixture, MultiSpeedDXCoolingCoilOutputTest)
     auto &AirOutletNode = state->dataLoopNodes->Node(2);
 
     Coil.coilType = HVAC::CoilType::CoolingDXMultiSpeed;
+    Coil.coilReportNum = ReportCoilSelection::getReportIndex(*state, Coil.Name, Coil.coilType);
     Coil.availSched = Sched::GetScheduleAlwaysOn(*state);
 
     Coil.NumOfSpeeds = 2;

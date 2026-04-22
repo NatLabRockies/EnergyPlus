@@ -4365,9 +4365,9 @@ TEST_F(InputProcessorFixture, reportIDFRecordsStats_extensible_fields)
         // 1 fields defaulted    , 0 Autosizable, 0 Autocalculatable
         "SurfaceProperty:SurroundingSurfaces,",
         "  SrdSurfs:Living:East,        !- Name",
-        "  0.3,                         !- Sky View Factor", // Has numeric default
+        "  0.3,                         !- Sky View Factor", // Has autocalculate default
         "  ,                            !- Sky Temperature Schedule Name",
-        "  0.1,                         !- Ground View Factor", // Has numeric default
+        "  0.1,                         !- Ground View Factor", // Has autocalculate default
         "  ,                            !- Ground Temperature Schedule Name",
         "  SurroundingSurface1,         !- Surrounding Surface 1 Name",        // (begin extensible)
         "  0.6,                         !- Surrounding Surface 1 View Factor", // Has numeric default
@@ -4386,13 +4386,13 @@ TEST_F(InputProcessorFixture, reportIDFRecordsStats_extensible_fields)
     state->dataInputProcessing->inputProcessor->reportIDFRecordsStats(*state);
 
     // TOTAL:
-    // 16 fields with defaults, 0 Autosizable, 0 Autocalculatable
+    // 16 fields with defaults, 0 Autosizable, 2 Autocalculatable
     // 2  fields defaulted    , 0 Autosized  , 0 Autocalculated
 
     EXPECT_EQ(5, state->dataOutput->iNumberOfRecords);             // Number of IDF Records (=Objects)
     EXPECT_EQ(16, state->dataOutput->iTotalFieldsWithDefaults);    // Total number of fields that could be defaulted
     EXPECT_EQ(0, state->dataOutput->iTotalAutoSizableFields);      // Total number of autosizeable fields
-    EXPECT_EQ(0, state->dataOutput->iTotalAutoCalculatableFields); // Total number of autocalculatable fields
+    EXPECT_EQ(2, state->dataOutput->iTotalAutoCalculatableFields); // Total number of autocalculatable fields
     EXPECT_EQ(2, state->dataOutput->iNumberOfDefaultedFields);     // Number of defaulted fields in IDF
     EXPECT_EQ(0, state->dataOutput->iNumberOfAutoSizedFields);     // Number of autosized fields in IDF
     EXPECT_EQ(0, state->dataOutput->iNumberOfAutoCalcedFields);    // Number of autocalculated fields

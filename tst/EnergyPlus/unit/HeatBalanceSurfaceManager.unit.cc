@@ -6518,7 +6518,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfPropertyViewFactorsI
     EXPECT_TRUE(SrdSurfsProperty_2.IsSkyViewFactorSet);
     EXPECT_DOUBLE_EQ(0.0, GndSurfsProperty_2.GndSurfs(1).ViewFactor);
     EXPECT_FALSE(GndSurfsProperty_2.IsGroundViewFactorSet);
-    EXPECT_DOUBLE_EQ(0.0, SrdSurfsProperty_3.SkyViewFactor);
+    EXPECT_EQ(DataSizing::AutoSize, SrdSurfsProperty_3.SkyViewFactor);
     EXPECT_FALSE(SrdSurfsProperty_3.IsSkyViewFactorSet);
     EXPECT_DOUBLE_EQ(0.0, GndSurfsProperty_3.GndSurfs(1).ViewFactor);
     EXPECT_FALSE(GndSurfsProperty_3.IsGroundViewFactorSet);
@@ -8404,7 +8404,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfPropertyViewFactorsR
     auto &GndSurfsProperty_3 = state->dataSurface->GroundSurfsProperty(GndSurfsNum);
 
     // check user input sky view factor is blank
-    EXPECT_DOUBLE_EQ(0.0, SrdSurfsProperty_1.SkyViewFactor);
+    EXPECT_EQ(DataSizing::AutoSize, SrdSurfsProperty_1.SkyViewFactor);
     EXPECT_FALSE(SrdSurfsProperty_1.IsSkyViewFactorSet);
     EXPECT_DOUBLE_EQ(0.2, SrdSurfsProperty_1.SurroundingSurfs(1).ViewFactor);
     // check user input ground view factor is not blank
@@ -8419,7 +8419,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfPropertyViewFactorsR
     EXPECT_DOUBLE_EQ(0.0, GndSurfsProperty_2.GndSurfs(1).ViewFactor);
     EXPECT_FALSE(GndSurfsProperty_2.IsGroundViewFactorSet);
     // check user input sky and ground view factors are blank
-    EXPECT_DOUBLE_EQ(0.0, SrdSurfsProperty_3.SkyViewFactor);
+    EXPECT_EQ(DataSizing::AutoSize, SrdSurfsProperty_3.SkyViewFactor);
     EXPECT_FALSE(SrdSurfsProperty_3.IsSkyViewFactorSet);
     EXPECT_DOUBLE_EQ(0.4, SrdSurfsProperty_3.SurroundingSurfs(1).ViewFactor);
     EXPECT_DOUBLE_EQ(0.0, GndSurfsProperty_3.GndSurfs(1).ViewFactor);
