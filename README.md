@@ -65,3 +65,19 @@ If you are interested in contributing, please start there, but feel free to reac
 
 A detailed description of compiling EnergyPlus on multiple platforms is available on the [wiki](https://github.com/NatLabRockies/EnergyPlus/wiki/Building-EnergyPlus).
 Also, as we are adapting to using GitHub Actions, the recipes for building EnergyPlus can be found in our [workflow files](https://github.com/NatLabRockies/EnergyPlus/tree/develop/.github/workflows).
+
+```bash
+git clone https://github.com/NREL/EnergyPlus
+
+mkdir build
+
+cd build
+
+cmake ..
+
+cmake -S . -B build -DBUILD_TESTING=ON
+
+cmake --build build --config Release -j
+
+./build/Products/Release/energyplus.exe -w ./weather/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw -d out_run ./testfiles/DirDiffShadingOverrideTestIdf_25_2.idf
+```

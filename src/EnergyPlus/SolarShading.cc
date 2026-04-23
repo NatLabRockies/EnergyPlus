@@ -10889,8 +10889,8 @@ void SkyDifSolarShading(EnergyPlusData &state)
         }
     }
 
-    // CSV dump (extended) — this should remain wherever you already had it
-    // (keep your existing dump block, but make sure it is OUTSIDE the !loadedImportedSched block)
+    // CSV dump (extended)
+    // (keep existing dump block, but make sure it is OUTSIDE the !loadedImportedSched block)
 
     // ESL edit start - Add CSV output for computed surface attributes (extended)
     if (!loadedImportedSched && state.dataSysVars->ReportExtShadingSunlitFrac) {
