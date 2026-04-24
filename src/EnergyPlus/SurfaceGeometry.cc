@@ -10994,17 +10994,10 @@ namespace SurfaceGeometry {
                 int numF = 1;
                 int alpF = 1;
 
-                bool ErrorInName = false;
-
                 HeatBalanceKivaManager::FoundationKiva fndInput;
 
                 fndInput.name = s_ipsc->cAlphaArgs(alpF);
                 alpF++;
-
-                if (ErrorInName) {
-                    ErrorsFound = true;
-                    continue;
-                }
 
                 // Start with copy of default
                 auto &fnd = fndInput.foundation;

@@ -953,8 +953,11 @@ struct DXCoilsData : BaseGlobalStruct
     bool MyOneTimeFlag = true;     // One time flag used to allocate MyEnvrnFlag and MySizeFlag
     bool CalcTwoSpeedDXCoilStandardRatingOneTimeEIOHeaderWrite = true;
     bool CrankcaseHeaterReportVarFlag = true;
-    int NumVRFHeatingCoils = 0;                   // number of VRF heat pump heating coils
-    int NumVRFCoolingCoils = 0;                   // number of VRF heat pump cooling coils
+    int NumVRFHeatingCoils = 0; // number of VRF heat pump heating coils
+    int NumVRFCoolingCoils = 0; // number of VRF heat pump cooling coils
+    // Shared DXCoil array layout: GetDXCoils parses each category in a fixed order and appends via
+    // a shared ++DXCoilNum counter, so indices are grouped by category in parse order — cooling
+    // single-speed (NumDoe2DXCoils) at [1..N], heating single-speed (NumDXHeatingCoils) next, etc.
     int NumDXCoils = 0;                           // Total number of DX coils
     int NumVRFHeatingFluidTCtrlCoils = 0;         // number of VRF heat pump heating coils for FluidTCtrl Model
     int NumVRFCoolingFluidTCtrlCoils = 0;         // number of VRF heat pump cooling coils for FluidTCtrl Model

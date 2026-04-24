@@ -550,9 +550,7 @@ Real64 CoolingCapacitySizer::size(EnergyPlusData &state, Real64 _originalValue, 
 
     // override sizing string
     if (this->overrideSizeString) {
-        if (this->isEpJSON) {
-            this->sizingString = "cooling_design_capacity [W]";
-        }
+        this->sizingString = "Cooling Design Capacity [W]";
     }
     if (this->dataScalableCapSizingON) {
         int const SELECT_CASE_var(this->zoneEqSizing(this->curZoneEqNum).SizingMethod(HVAC::CoolingCapacitySizing));

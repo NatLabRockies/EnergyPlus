@@ -12,12 +12,28 @@ The input object EvaporativeCooler:Direct:CelDekPad provides a model of a direct
 \caption{Direct Stage Evaporative Cooler \protect \label{fig:direct-stage-evaporative-cooler}}
 \end{figure}
 
-The thermodynamic process is a simultaneous heat and mass transfer, or adiabatic cooling, and follows a constant enthalpy line on the psychrometric chart; it is shown in the figure below as a process from A to B.~ Since the deviation of the constant wet-bulb line and the constant enthalpy line is small, it is assumed that the wet-bulb temperature is constant across the direct evaporative stage.
+The thermodynamic process is a simultaneous, adiabatic heat and mass transfer.~ On the psychrometric chart, the process follows a line of constant wet-bulb temperature -- this is in fact the process that defines the thermodynamic wet-bulb temperature -- and is shown in the figure below as a process from A to B.~ The moist-air enthalpy changes slightly between inlet and outlet to account for the enthalpy of the liquid water just prior to evaporation:
+
+\begin{equation}
+{h_{sup,out}} = {h_{sup,in}} + {h_{water}} \cdot \left( {{w_{sup,out}} - {w_{sup,in}}} \right)
+\end{equation}
+
+where
+
+\({h_{sup,out}}\) is the specific enthalpy of the moist air leaving the direct evaporative cooler (J/kg\({_{dry \, air}}\)),
+
+\({h_{sup,in}}\) is the specific enthalpy of the moist air entering the direct evaporative cooler (J/kg\({_{dry \, air}}\)),
+
+\({h_{water}}\) is the specific enthalpy of the liquid water being evaporated (J/kg\({_{water\,liquid}}\)),
+
+\({w_{sup,out}}\) is the humidity ratio of the air leaving the direct evaporative cooler (kg\({_{water\,vapor}}\)/kg\({_{dry \, air}}\)), and
+
+\({w_{sup,in}}\) is the humidity ratio of the air entering the direct evaporative cooler (kg\({_{water\,vapor}}\)/kg\({_{dry \, air}}\)).
 
 \begin{figure}[hbtp] % fig 198
 \centering
 \includegraphics[width=0.9\textwidth, height=0.9\textheight, keepaspectratio=true]{media/image4790.png}
-\caption{Psychrometric Chart -- Constant Enthalpy \protect \label{fig:psychrometric-chart-constant-enthalpy}}
+\caption{Psychrometric Chart -- Constant Wet-Bulb Temperature \protect \label{fig:psychrometric-chart-constant-wetbulb}}
 \end{figure}
 
 If the direct evaporative process were 100\% efficient, the leaving dry-bulb temperature would equal the entering wet-bulb temperature.~ The efficiency of the direct evaporative process is less than 100\% and by defining saturation efficiency (\(\varepsilon_{se}\)) for the direct stage or evaporative pad, the leaving dry-bulb temperature can be expressed by the following equation.
@@ -38,7 +54,7 @@ The saturation efficiency is determined from manufacturer's data, and the least 
 
 Using the saturation efficiency (\(\varepsilon_{se}\)) for the direct stage evaporative pad, the leaving dry-bulb temperature can be determined directly.~ The evaporative process approximately follows a constant wet-bulb line.~ Therefore, with the leaving dry-bulb temperature and assuming adiabatic heat transfer across the direct stage, the outlet conditions for the direct stage are known.
 
-The saturation efficiency of the direct evaporative cooler is a function of the pad geometry and airflow rate.~ The pad geometry is constant throughout the simulation, but the airflow rate can change from hour to hour when the evaporative cooler is used with an air economizer.~ The saturation efficiency would then be determined from the flow for that hour with the geometry of the direct evaporative cooler.~ This gives the dry-bulb temperature leaving the evaporative cooler.~ Assuming adiabatic heat transfer across the direct stage, the evaporative process follows the constant wet-bulb line or the constant enthalpy line on the psychrometric chart, therefore the wet-bulb temperature is constant from inlet to outlet.
+The saturation efficiency of the direct evaporative cooler is a function of the pad geometry and airflow rate.~ The pad geometry is constant throughout the simulation, but the airflow rate can change from hour to hour when the evaporative cooler is used with an air economizer.~ The saturation efficiency would then be determined from the flow for that hour with the geometry of the direct evaporative cooler.~ This gives the dry-bulb temperature leaving the evaporative cooler.~ Assuming adiabatic heat transfer across the direct stage, the evaporative process follows the constant wet-bulb line on the psychrometric chart, therefore the wet-bulb temperature is constant from inlet to outlet.
 
 Some things that can cause departure from the ideal adiabatic saturation process in the direct evaporative cooler are:
 
@@ -123,7 +139,7 @@ The input object EvaporativeCooler:Indirect:WetCoil provides a model for a wette
 \caption{Wet Coil Indirect Evaporative Cooler \protect \label{fig:wet-coil-indirect-evaporative-cooler}}
 \end{figure}
 
-The process that the secondary air goes through, A to C on the following figure, is a path of simultaneous heat and mass transfer, but it does not follow a line of constant enthalpy as in the direct stage.~ The process is not adiabatic due to the heat gain from the supply air flowing through the tubes of the heat exchanger.
+The process that the secondary air goes through, A to C on the following figure, is a path of simultaneous heat and mass transfer, but it does not follow the constant wet-bulb-temperature path of the direct stage.~ The process is not adiabatic due to the heat gain from the supply air flowing through the tubes of the heat exchanger.
 
 \begin{figure}[hbtp] % fig 203
 \centering
@@ -197,7 +213,7 @@ A two stage cooler can be modeled by combining either a wet coil or the dry coil
 \caption{Two Stage Evaporative Cooler \protect \label{fig:two-stage-evaporative-cooler}}
 \end{figure}
 
-The thermodynamic process for the supply air is shown below, going from A to B to C.~ The process from A to B is sensible cooling in the indirect stage.~ The process from B to C is simultaneous heat and mass transfer following a constant enthalpy line.~ The air leaving the final stage has a lower dry-bulb and wet-bulb temperature, and an increase in moisture from the direct stage.
+The thermodynamic process for the supply air is shown below, going from A to B to C.~ The process from A to B is sensible cooling in the indirect stage.~ The process from B to C is simultaneous heat and mass transfer following a constant wet-bulb temperature line.~ The air leaving the final stage has a lower dry-bulb and wet-bulb temperature, and an increase in moisture from the direct stage.
 
 \begin{figure}[hbtp] % fig 205
 \centering

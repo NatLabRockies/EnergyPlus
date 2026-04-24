@@ -2055,6 +2055,12 @@ AfterComponentInputReadIn.
 DX Heating Coils
 ~~~~~~~~~~~~~~~~
 
+An actuator is available for overriding the autosize value of the gross
+rated heating capacity of the Coil:Heating:DX:SingleSpeed object.  The
+actuator is called “Coil:Heating:DX:SingleSpeed” with control type
+“Autosized Rated Total Heating Capacity” (in W).  It is only useful from
+the calling point named AfterComponentInputReadIn.
+
 Actuators are available for overriding the input power and heating capacity
 frost adjustment factors of the Coil:Heating:DX objects.  Actuators called
 “Coil:Heating:DX:SingleSpeed”, “Coil:Heating:DX:MultiSpeed”,

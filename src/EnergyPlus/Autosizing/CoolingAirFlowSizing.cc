@@ -336,25 +336,14 @@ Real64 CoolingAirFlowSizer::size(EnergyPlusData &state, Real64 _originalValue, b
         if (this->overrideSizeString) {
             if (Util::SameString(this->compType, "ZoneHVAC:FourPipeFanCoil")) {
                 this->sizingString = "Maximum Supply Air Flow Rate [m3/s]";
-                if (this->isEpJSON) {
-                    this->sizingString = "maximum_supply_air_flow_rate [m3/s]";
-                }
             } else if (this->coilType == HVAC::CoilType::CoolingDXTwoSpeed) {
                 if (this->dataDXSpeedNum == 1) { // mode 1 is high speed in DXCoils loop
-                    if (this->isEpJSON) {
-                        this->sizingString = "high_speed_rated_air_flow_rate [m3/s]";
-                    } else {
-                        this->sizingString = "High Speed Rated Air Flow Rate [m3/s]";
-                    }
+                    this->sizingString = "High Speed Rated Air Flow Rate [m3/s]";
                 } else if (this->dataDXSpeedNum == 2) {
-                    if (this->isEpJSON) {
-                        this->sizingString = "low_speed_rated_air_flow_rate [m3/s]";
-                    } else {
-                        this->sizingString = "Low Speed Rated Air Flow Rate [m3/s]";
-                    }
+                    this->sizingString = "Low Speed Rated Air Flow Rate [m3/s]";
                 }
             } else if (this->isEpJSON) {
-                this->sizingString = "cooling_supply_air_flow_rate [m3/s]";
+                this->sizingString = "Cooling Supply Air Flow Rate [m3/s]";
             }
         }
         if (this->dataScalableSizingON) {

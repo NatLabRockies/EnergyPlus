@@ -1255,7 +1255,7 @@ namespace FanCoilUnits {
                 int SAFMethod; // supply air flow rate sizing method (SupplyAirFlowRate, FlowPerFloorArea, FractionOfAutosizedCoolingAirflow,
                 SizingString = state.dataFanCoilUnits->FanCoilNumericFields(FanCoilNum).FieldNames(FieldNum) + " [m3/s]";
                 if (state.dataGlobal->isEpJSON) {
-                    SizingString = "maximum_supply_air_flow_rate [m3/s]";
+                    SizingString = "Maximum Supply Air Flow Rate [m3/s]";
                 }
                 if (state.dataSize->ZoneHVACSizing(zoneHVACIndex).CoolingSAFMethod > 0) {
                     SizingMethod = HVAC::CoolingAirflowSizing;

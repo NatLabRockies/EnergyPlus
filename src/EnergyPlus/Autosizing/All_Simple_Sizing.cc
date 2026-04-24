@@ -283,7 +283,7 @@ Real64 DesiccantDehumidifierBFPerfDataFaceVelocitySizer::size(EnergyPlusData &st
         this->autoSizedValue = min(6.0, this->autoSizedValue);
     }
     if (this->isEpJSON) {
-        this->sizingString = "nominal_air_face_velocity [m/s]";
+        this->sizingString = "Nominal Air Face Velocity [m/s]";
     }
     this->selectSizerOutput(state, errorsFound);
     return this->autoSizedValue;

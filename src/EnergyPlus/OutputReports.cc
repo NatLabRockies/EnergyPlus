@@ -107,18 +107,14 @@ void ReportSurfaces(EnergyPlusData &state)
 
     General::ScanForReports(state, "Surfaces", DoReport, "Vertices");
     if (DoReport) {
-        if (!SurfVert) {
-            ++SurfDetails;
-            SurfVert = true;
-        }
+        ++SurfDetails;
+        SurfVert = true;
     }
 
     General::ScanForReports(state, "Surfaces", DoReport, "Details");
     if (DoReport) {
-        if (!SurfDet) {
-            SurfDetails += 10;
-            SurfDet = true;
-        }
+        SurfDetails += 10;
+        SurfDet = true;
     }
 
     General::ScanForReports(state, "Surfaces", DoReport, "DetailsWithVertices");
@@ -135,16 +131,11 @@ void ReportSurfaces(EnergyPlusData &state)
 
     General::ScanForReports(state, "Surfaces", DoReport, "DXF", Option1, Option2);
     if (DoReport) {
-        if (!DXFDone) {
-            if (!Option2.empty()) {
-                DataSurfaceColors::SetUpSchemeColors(state, Option2, "DXF");
-            }
-            DXFOut(state, Option1, Option2);
-            DXFDone = true;
-        } else {
-            ShowWarningError(
-                state, EnergyPlus::format("ReportSurfaces: DXF output already generated.  DXF with option=[{}] will not be generated.", Option1));
+        if (!Option2.empty()) {
+            DataSurfaceColors::SetUpSchemeColors(state, Option2, "DXF");
         }
+        DXFOut(state, Option1, Option2);
+        DXFDone = true;
     }
 
     General::ScanForReports(state, "Surfaces", DoReport, "DXF:WireFrame", Option1, Option2);
@@ -161,13 +152,7 @@ void ReportSurfaces(EnergyPlusData &state)
 
     General::ScanForReports(state, "Surfaces", DoReport, "VRML", Option1, Option2);
     if (DoReport) {
-        bool VRMLDone = false;
-        if (!VRMLDone) {
-            VRMLOut(state, Option1, Option2);
-        } else {
-            ShowWarningError(
-                state, EnergyPlus::format("ReportSurfaces: VRML output already generated.  VRML with option=[{}] will not be generated.", Option1));
-        }
+        VRMLOut(state, Option1, Option2);
     }
 
     General::ScanForReports(state, "Surfaces", DoReport, "CostInfo");

@@ -1084,15 +1084,15 @@ namespace SteamBaseboardRadiator {
         //                    SteamBaseboard(BaseboardNum)%SteamInletNode, &
         //                    SteamBaseboard(BaseboardNum)%SteamOutletNode, ErrorsFound)
 
+        if (state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).SteamVolFlowRateMax == AutoSize) {
+            IsAutoSize = true;
+        }
+
         if (PltSizSteamNum > 0) {
 
             state.dataSize->DataScalableCapSizingON = false;
             int &CurZoneEqNum = state.dataSize->CurZoneEqNum;
             if (CurZoneEqNum > 0) {
-
-                if (state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).SteamVolFlowRateMax == AutoSize) {
-                    IsAutoSize = true;
-                }
                 if (!IsAutoSize && !state.dataSize->ZoneSizingRunDone) {
                     if (state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).SteamVolFlowRateMax > 0.0) {
                         BaseSizer::reportSizerOutput(state,

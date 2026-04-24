@@ -6831,9 +6831,8 @@ void WaterThermalTankData::initialize(EnergyPlusData &state, bool const FirstHVA
             state.dataWaterThermalTanks->HPWaterHeater(HPNum).OperatingAirMassFlowRate =
                 state.dataWaterThermalTanks->HPWaterHeater(HPNum).OperatingAirFlowRate * state.dataEnvrn->StdRhoAir;
             if (state.dataSize->CurZoneEqNum > 0) {
-                auto &ZoneEqSizing = state.dataSize->ZoneEqSizing;
-                ZoneEqSizing(state.dataSize->CurZoneEqNum).CoolingAirFlow = true;
-                ZoneEqSizing(state.dataSize->CurZoneEqNum).CoolingAirVolFlow = state.dataSize->DataNonZoneNonAirloopValue;
+                state.dataSize->ZoneEqSizing(state.dataSize->CurZoneEqNum).CoolingAirFlow = true;
+                state.dataSize->ZoneEqSizing(state.dataSize->CurZoneEqNum).CoolingAirVolFlow = state.dataSize->DataNonZoneNonAirloopValue;
             }
             if (state.dataPlnt->PlantFirstSizesOkayToReport || !state.dataGlobal->AnyPlantInModel || this->AlreadyRated) {
                 this->MyHPSizeFlag = false;
@@ -10947,15 +10946,14 @@ bool WaterThermalTankData::SourceHeatNeed([[maybe_unused]] EnergyPlusData &state
         if (this->IsPassiveWaterTank || this->SourceSideControlMode == SourceSideControl::IndirectHeatPrimarySetpoint) {
             if (OutletTemp < DeadBandTemp) {
                 NeedsHeatOrCool = true;
-            } else if ((OutletTemp >= DeadBandTemp) && (OutletTemp < SetPointTemp_loc)) {
+            } else if (OutletTemp < SetPointTemp_loc) {
                 // inside the deadband, use saved mode from water heater calcs
                 if (this->SavedMode == TankOperatingMode::Heating) {
                     NeedsHeatOrCool = true;
                 } else if (this->SavedMode == TankOperatingMode::Floating) {
                     NeedsHeatOrCool = false;
                 }
-
-            } else if (OutletTemp >= SetPointTemp_loc) {
+            } else {
                 NeedsHeatOrCool = false;
             }
         } else if (this->SourceSideControlMode == SourceSideControl::IndirectHeatAltSetpoint) {
@@ -10964,15 +10962,14 @@ bool WaterThermalTankData::SourceHeatNeed([[maybe_unused]] EnergyPlusData &state
             Real64 const AltDeadBandTemp = AltSetpointTemp - this->DeadBandDeltaTemp;
             if (OutletTemp < AltDeadBandTemp) {
                 NeedsHeatOrCool = true;
-            } else if ((OutletTemp >= AltDeadBandTemp) && (OutletTemp < AltSetpointTemp)) {
+            } else if (OutletTemp < AltSetpointTemp) {
                 // inside the deadband, use saved mode from water heater calcs
                 if (this->SavedMode == TankOperatingMode::Heating) {
                     NeedsHeatOrCool = true;
                 } else if (this->SavedMode == TankOperatingMode::Floating) {
                     NeedsHeatOrCool = false;
                 }
-
-            } else if (OutletTemp >= AltSetpointTemp) {
+            } else {
                 NeedsHeatOrCool = false;
             }
         } else if (this->SourceSideControlMode == SourceSideControl::StorageTank) {
@@ -10985,7 +10982,7 @@ bool WaterThermalTankData::SourceHeatNeed([[maybe_unused]] EnergyPlusData &state
     } else { // is a chilled water tank so flip logic
         if (OutletTemp > DeadBandTemp) {
             NeedsHeatOrCool = true;
-        } else if ((OutletTemp <= DeadBandTemp) && (OutletTemp > SetPointTemp_loc)) {
+        } else if (OutletTemp > SetPointTemp_loc) {
             // inside the deadband, use saved mode from water thermal tank calcs (modes only for mixed)
             if (this->WaterThermalTankType == DataPlant::PlantEquipmentType::ChilledWaterTankMixed) {
                 if (this->SavedMode == TankOperatingMode::Cooling) {
@@ -10996,8 +10993,7 @@ bool WaterThermalTankData::SourceHeatNeed([[maybe_unused]] EnergyPlusData &state
             } else if (this->WaterThermalTankType == DataPlant::PlantEquipmentType::ChilledWaterTankStratified) {
                 NeedsHeatOrCool = true;
             }
-
-        } else if (OutletTemp <= SetPointTemp_loc) {
+        } else {
             NeedsHeatOrCool = false;
         }
     }

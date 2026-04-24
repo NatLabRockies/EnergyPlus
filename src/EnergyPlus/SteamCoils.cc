@@ -716,9 +716,8 @@ namespace SteamCoils {
                         state.dataSize->DataDesOutletAirTemp = sizerHeatingDesOutletTemp.size(state, DataSizing::AutoSize, localErrorsFound);
 
                         if (state.dataSize->CurOASysNum > 0) {
-                            auto &OASysEqSizing = state.dataSize->OASysEqSizing;
-                            OASysEqSizing(state.dataSize->CurOASysNum).AirFlow = true;
-                            OASysEqSizing(state.dataSize->CurOASysNum).AirVolFlow = finalSysSizing.DesOutAirVolFlow;
+                            state.dataSize->OASysEqSizing(state.dataSize->CurOASysNum).AirFlow = true;
+                            state.dataSize->OASysEqSizing(state.dataSize->CurOASysNum).AirVolFlow = finalSysSizing.DesOutAirVolFlow;
                         }
                         TempSize = AutoSize; // reset back
                     }

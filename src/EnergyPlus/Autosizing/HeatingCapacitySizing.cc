@@ -441,9 +441,7 @@ Real64 HeatingCapacitySizer::size(EnergyPlusData &state, Real64 _originalValue, 
 
     // override sizing string
     if (this->overrideSizeString) {
-        if (this->isEpJSON) {
-            this->sizingString = "nominal_capacity [W]";
-        }
+        this->sizingString = "Heating Capacity [W]";
     }
     if (this->dataScalableCapSizingON) {
         switch (this->zoneEqSizing(this->curZoneEqNum).SizingMethod(HVAC::HeatingCapacitySizing)) {

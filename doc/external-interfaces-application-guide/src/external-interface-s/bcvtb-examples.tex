@@ -107,7 +107,7 @@ where NAME needs to be the EnergyPlus actuator name. For ExternalInterface:Varia
 
 where NAME needs to be the EnergyPlus Energy Runtime Language (Erl) variable name.
 
-The external interface can also read data from any Output:Variable and EnergyManagementSystem:OutputVariable. For these objects, set the ``source'' attribute to ``EnergyPlus,'' because they are computed by EnergyPlus. The read an Output:Variable, use
+The external interface can also read data from any Output:Variable and EnergyManagementSystem:OutputVariable. For these objects, set the ``source'' attribute to ``EnergyPlus,'' because they are computed by EnergyPlus. To read an Output:Variable, use
 
 ~ \textless{}variable source = ``EnergyPlus''\textgreater{}
 
@@ -115,7 +115,7 @@ The external interface can also read data from any Output:Variable and EnergyMan
 
 ~ \textless{}/variable\textgreater{}
 
-where NAME needs to be the EnergyPlus ``Variable Name'' (such as ZONE/SYS AIR TEMP) and TYPE needs to be the EnergyPlus ``Key Value'' (such as ZONE ONE). To read an EnergyManagementSystem:OutputVariable, use
+where NAME needs to be the EnergyPlus ``Key Value'' (such as ZONE ONE) and TYPE needs to be the EnergyPlus ``Variable Name'' (such as Zone Air Temperature). To read an EnergyManagementSystem:OutputVariable, use
 
 \textless{}variable source = ``EnergyPlus''\textgreater{}
 

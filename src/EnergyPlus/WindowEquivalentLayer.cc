@@ -7485,34 +7485,30 @@ void FinalizeCFSLAYER(EnergyPlusData &state, CFSLAYER &L) // layer, input: LTYPE
     //          geometry (per LTYPE)
     //   output: LWP_EL, SWP_EL
 
-    bool LOK;
-    bool DOK;
-    bool BOK;
-
     if (IsVBLayer(L)) {
-        LOK = VB_LWP(state, L, L.LWP_EL);
-        DOK = VB_SWP(state, L, L.SWP_EL);      // SW diffuse
-        BOK = VB_SWP(state, L, L.SWP_EL, 0.0); // SW properties w/ profile ang = 0
+        VB_LWP(state, L, L.LWP_EL);
+        VB_SWP(state, L, L.SWP_EL);      // SW diffuse
+        VB_SWP(state, L, L.SWP_EL, 0.0); // SW properties w/ profile ang = 0
     } else {
         L.PHI_DEG = 0.0; // phi, C, CNTRL are VB only
         L.C = 0.0;
         L.CNTRL = state.dataWindowEquivalentLayer->lscNONE;
         if (L.LTYPE == LayerType::DRAPE) {
-            LOK = PD_LWP(state, L, L.LWP_EL);
-            DOK = PD_SWP(state, L, L.SWP_EL);           // SW diffuse
-            BOK = PD_SWP(state, L, L.SWP_EL, 0.0, 0.0); // SW properties w/ profile angs = 0
+            PD_LWP(state, L, L.LWP_EL);
+            PD_SWP(state, L, L.SWP_EL);           // SW diffuse
+            PD_SWP(state, L, L.SWP_EL, 0.0, 0.0); // SW properties w/ profile angs = 0
         } else if (L.LTYPE == LayerType::INSCRN) {
-            LOK = IS_LWP(L, L.LWP_EL);             // LW
-            DOK = IS_SWP(state, L, L.SWP_EL);      // SW diffuse
-            BOK = IS_SWP(state, L, L.SWP_EL, 0.0); // SW beam w/ theta = 0
+            IS_LWP(L, L.LWP_EL);             // LW
+            IS_SWP(state, L, L.SWP_EL);      // SW diffuse
+            IS_SWP(state, L, L.SWP_EL, 0.0); // SW beam w/ theta = 0
         } else {
             L.S = 0.0; // geometry mbrs unused
             L.W = 0.0;
             if (L.LTYPE == LayerType::ROLLB) {
-                LOK = RB_LWP(L, L.LWP_EL);             // LW
-                DOK = RB_SWP(state, L, L.SWP_EL);      // SW diffuse
-                BOK = RB_SWP(state, L, L.SWP_EL, 0.0); // SW beam w/ theta = 0
-                                                       // ELSE IF (ISGZSLayer( L)) THEN
+                RB_LWP(L, L.LWP_EL);             // LW
+                RB_SWP(state, L, L.SWP_EL);      // SW diffuse
+                RB_SWP(state, L, L.SWP_EL, 0.0); // SW beam w/ theta = 0
+                                                 // ELSE IF (ISGZSLayer( L)) THEN
                 // spectral glazing. Set layer xxx_MAT from GZS file data
                 //    BOK = GZSLayerInit( L) .EQ. 0
                 //    L%SWP_EL = L%SWP_MAT
@@ -7523,9 +7519,6 @@ void FinalizeCFSLAYER(EnergyPlusData &state, CFSLAYER &L) // layer, input: LTYPE
                 // glazing
                 L.SWP_EL = L.SWP_MAT;
                 L.LWP_EL = L.LWP_MAT;
-                LOK = true;
-                DOK = true;
-                BOK = true;
             }
         }
     }

@@ -1240,7 +1240,6 @@ namespace Avail {
         state.dataAvail->NumAvailManagerLists = ip->getNumObjectsFound(state, cCurrentModuleObject);
 
         if (state.dataAvail->NumAvailManagerLists > 0) {
-            bool ErrorsFound = false;
             state.dataAvail->ListData.allocate(state.dataAvail->NumAvailManagerLists);
             auto const instances = ip->epJSON.find(cCurrentModuleObject);
             auto const &objectSchemaProps = ip->getObjectSchemaProps(state, cCurrentModuleObject);
@@ -1282,10 +1281,6 @@ namespace Avail {
                         // these are validated individually in the GetPlant, GetSystem and GetZoneEq lists
                     }
                 }
-            }
-
-            if (ErrorsFound) {
-                ShowFatalError(state, "GetSysAvailManagerListInputs: Program terminates due to preceding conditions.");
             }
         }
     } // GetSysAvailManagerListInputs()

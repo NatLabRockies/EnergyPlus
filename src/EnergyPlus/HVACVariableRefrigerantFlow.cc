@@ -7670,9 +7670,6 @@ void SizeVRF(EnergyPlusData &state, int const VRFTUNum)
 
             CoolingAirFlowSizer sizingCoolingAirFlow;
             std::string stringOverride = "Cooling Supply Air Flow Rate [m3/s]";
-            if (state.dataGlobal->isEpJSON) {
-                stringOverride = "cooling_supply_air_flow_rate [m3/s]";
-            }
             sizingCoolingAirFlow.overrideSizingString(stringOverride);
             // sizingCoolingAirFlow.setHVACSizingIndexData(FanCoil(FanCoilNum).HVACSizingIndex);
             sizingCoolingAirFlow.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
@@ -7695,9 +7692,6 @@ void SizeVRF(EnergyPlusData &state, int const VRFTUNum)
             TempSize = AutoSize;
             CoolingAirFlowSizer sizingCoolingAirFlow;
             std::string stringOverride = "Cooling Supply Air Flow Rate [m3/s]";
-            if (state.dataGlobal->isEpJSON) {
-                stringOverride = "cooling_supply_air_flow_rate [m3/s]";
-            }
             sizingCoolingAirFlow.overrideSizingString(stringOverride);
             // sizingCoolingAirFlow.setHVACSizingIndexData(FanCoil(FanCoilNum).HVACSizingIndex);
             sizingCoolingAirFlow.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
@@ -7837,9 +7831,6 @@ void SizeVRF(EnergyPlusData &state, int const VRFTUNum)
             }
             CoolingAirFlowSizer sizingCoolingAirFlow;
             std::string stringOverride = "No Cooling Supply Air Flow Rate [m3/s]";
-            if (state.dataGlobal->isEpJSON) {
-                stringOverride = "no_cooling_supply_air_flow_rate [m3/s]";
-            }
             sizingCoolingAirFlow.overrideSizingString(stringOverride);
             // sizingCoolingAirFlow.setHVACSizingIndexData(FanCoil(FanCoilNum).HVACSizingIndex);
             sizingCoolingAirFlow.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
@@ -7934,9 +7925,6 @@ void SizeVRF(EnergyPlusData &state, int const VRFTUNum)
         bool errorsFound = false;
         CoolingAirFlowSizer sizingCoolingAirFlow;
         std::string stringOverride = "Cooling Supply Air Flow Rate [m3/s]";
-        if (state.dataGlobal->isEpJSON) {
-            stringOverride = "cooling_supply_air_flow_rate [m3/s]";
-        }
         sizingCoolingAirFlow.overrideSizingString(stringOverride);
         // sizingCoolingAirFlow.setHVACSizingIndexData(FanCoil(FanCoilNum).HVACSizingIndex);
         sizingCoolingAirFlow.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
@@ -8257,9 +8245,6 @@ void SizeVRF(EnergyPlusData &state, int const VRFTUNum)
         TempSize = vrfTU.MaxSATFromSuppHeatCoil;
         MaxHeaterOutletTempSizer sizerMaxHeaterOutTemp;
         std::string stringOverride = "Maximum Supply Air Temperature from Supplemental Heater [C]";
-        if (state.dataGlobal->isEpJSON) {
-            stringOverride = "maximum_supply_air_temperature_from_supplemental_heater [C]";
-        }
         sizerMaxHeaterOutTemp.overrideSizingString(stringOverride);
         sizerMaxHeaterOutTemp.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
         vrfTU.MaxSATFromSuppHeatCoil = sizerMaxHeaterOutTemp.size(state, TempSize, ErrorsFound);
@@ -8281,9 +8266,6 @@ void SizeVRF(EnergyPlusData &state, int const VRFTUNum)
                 WaterHeatingCapacitySizer sizerWaterHeatingCapacity;
                 bool ErrorsFound = false;
                 std::string stringOverride = "Supplemental Heating Coil Nominal Capacity [W]";
-                if (state.dataGlobal->isEpJSON) {
-                    stringOverride = "supplemental_heating_coil_nominal_capacity [W]";
-                }
                 sizerWaterHeatingCapacity.overrideSizingString(stringOverride);
                 sizerWaterHeatingCapacity.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
                 vrfTU.DesignSuppHeatingCapacity = sizerWaterHeatingCapacity.size(state, TempSize, ErrorsFound);
@@ -11013,7 +10995,6 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
 
     // Following for VRF FluidTCtrl Only
     int Counter;                     // index for iterations [-]
-    int NumIteHIUIn;                 // index for HIU calculation iterations [-]
     int NumOfCompSpdInput;           // Number of compressor speed input by the user [-]
     Real64 CompSpdActual;            // Actual compressor running speed [rps]
     Real64 C_cap_operation;          // Compressor capacity modification algorithm_modified Cap [-]
@@ -11267,7 +11248,7 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
         h_IU_evap_in_up = this->refrig->getSatEnthalpy(state, CapMaxTc - this->SC, 0.0, RoutineName);         // Tc = CapMaxTc
         h_IU_evap_in = this->refrig->getSatEnthalpy(state, OutdoorDryBulb + 10 - this->SC, 0.0, RoutineName); // Tc = Tamb+10
 
-        NumIteHIUIn = 1;
+        int NumIteHIUIn = 1; // index for HIU calculation iterations [-]
         bool converged_12;
         do {
             m_ref_IU_evap = 0;

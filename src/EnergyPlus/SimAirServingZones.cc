@@ -2235,7 +2235,7 @@ void InitAirLoops(EnergyPlusData &state, bool const FirstHVACIteration) // TRUE 
             // Need to make sure that flows are greater than zero
             if (MassFlowSet >= 0.0) {
                 state.dataLoopNodes->Node(NodeNumOut).MassFlowRateSetPoint = MassFlowSet;
-            } else if (MassFlowSet < 0.0) {
+            } else {
                 state.dataLoopNodes->Node(NodeNumOut).MassFlowRateSetPoint = 0.0;
             }
 

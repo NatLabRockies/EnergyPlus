@@ -11856,9 +11856,8 @@ void SimulateDetailedRefrigerationSystems(EnergyPlusData &state)
     // however, be repeated when the last chiller set is called from ZoneEquipmentManager
     // that's why important where init goes, don't want to zero out data should keep
     if (state.dataRefrigCase->UseSysTimeStep) {
-        auto &AirChillerSet = state.dataRefrigCase->AirChillerSet;
         for (int CoilSetIndex = 1; CoilSetIndex <= state.dataRefrigCase->NumRefrigChillerSets; ++CoilSetIndex) {
-            AirChillerSet(CoilSetIndex).CalculateAirChillerSets(state);
+            state.dataRefrigCase->AirChillerSet(CoilSetIndex).CalculateAirChillerSets(state);
         }
     }
 
@@ -15315,23 +15314,21 @@ void SecondaryLoopData::CalculateSecondary(EnergyPlusData &state, int const Seco
 
     // Sum up all the case and walk-in loads served by the secondary loop
     if (this->NumCases > 0) {
-        auto &RefrigCase = state.dataRefrigCase->RefrigCase;
         for (int caseNum = 1; caseNum <= this->NumCases; ++caseNum) {
             int CaseID = this->CaseNum(caseNum);
-            RefrigCase(CaseID).CalculateCase(state);
+            state.dataRefrigCase->RefrigCase(CaseID).CalculateCase(state);
             // increment TotalCoolingLoad Hot gas/brine defrost credits for each secondary loop
-            RefrigerationLoad += RefrigCase(CaseID).TotalCoolingLoad;
-            TotalHotDefrostCondCredit += RefrigCase(CaseID).HotDefrostCondCredit;
+            RefrigerationLoad += state.dataRefrigCase->RefrigCase(CaseID).TotalCoolingLoad;
+            TotalHotDefrostCondCredit += state.dataRefrigCase->RefrigCase(CaseID).HotDefrostCondCredit;
         } // CaseNum
     } // NumCases > 0
     if (this->NumWalkIns > 0) {
-        auto &WalkIn = state.dataRefrigCase->WalkIn;
         for (int WalkInIndex = 1; WalkInIndex <= this->NumWalkIns; ++WalkInIndex) {
             int WalkInID = this->WalkInNum(WalkInIndex);
-            WalkIn(WalkInID).CalculateWalkIn(state);
+            state.dataRefrigCase->WalkIn(WalkInID).CalculateWalkIn(state);
             // increment TotalCoolingLoad for  each system
-            RefrigerationLoad += WalkIn(WalkInID).TotalCoolingLoad;
-            TotalHotDefrostCondCredit += WalkIn(WalkInID).HotDefrostCondCredit;
+            RefrigerationLoad += state.dataRefrigCase->WalkIn(WalkInID).TotalCoolingLoad;
+            TotalHotDefrostCondCredit += state.dataRefrigCase->WalkIn(WalkInID).HotDefrostCondCredit;
         } // NumWalkIns systems
     } // Secondary(SecondaryNum)%NumWalkIns > 0
 
@@ -16313,10 +16310,9 @@ void FigureRefrigerationZoneGains(EnergyPlusData &state)
         }
 
         if (state.dataRefrigCase->NumSimulationWalkIns > 0) {
-            auto &WalkIn = state.dataRefrigCase->WalkIn;
             for (int loop = 1; loop <= state.dataRefrigCase->NumSimulationWalkIns; ++loop) {
-                WalkIn(loop).SensZoneCreditRate = 0.0;
-                WalkIn(loop).LatZoneCreditRate = 0.0;
+                state.dataRefrigCase->WalkIn(loop).SensZoneCreditRate = 0.0;
+                state.dataRefrigCase->WalkIn(loop).LatZoneCreditRate = 0.0;
             }
         }
         if (state.dataRefrigCase->NumSimulationCases > 0) {

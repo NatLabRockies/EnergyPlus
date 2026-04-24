@@ -10141,12 +10141,6 @@
     0.0000,                  !- On Cycle Parasitic Electric Load {W}
     1.0000;                  !- Sizing Factor
 
-  EnergyManagementSystem:Actuator,
-    HeatSys1_Boiler_Setpoint,!- Name
-    HeatSys1 Supply Equipment Outlet Node,  !- Actuated Component Unique Name
-    System Node Setpoint,    !- Actuated Component Type
-    Temperature Setpoint;    !- Actuated Component Control Type
-
   Branch,
     HeatSys1 Supply Equipment Bypass Branch,  !- Name
     ,                        !- Pressure Drop Curve Name

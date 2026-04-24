@@ -144,9 +144,7 @@ Real64 WaterHeatingCapacitySizer::size(EnergyPlusData &state, Real64 _originalVa
         }
     }
     if (this->overrideSizeString) {
-        if (this->isEpJSON) {
-            this->sizingString = "rated_capacity";
-        }
+        this->sizingString = "Rated Capacity [W]";
     }
     this->selectSizerOutput(state, errorsFound);
     if (this->isCoilReportObject) {

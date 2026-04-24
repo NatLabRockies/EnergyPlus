@@ -437,15 +437,13 @@ void IterateRootFinder(EnergyPlusData &state,
             return;
         }
 
-        if (RootFinderData.MinPoint.DefinedFlag) {
-            if (CheckMinConstraint(state, RootFinderData)) {
-                RootFinderData.StatusFlag = RootFinderStatus::OKMin;
-                RootFinderData.XCandidate = RootFinderData.MinPoint.X;
+        if (CheckMinConstraint(state, RootFinderData)) {
+            RootFinderData.StatusFlag = RootFinderStatus::OKMin;
+            RootFinderData.XCandidate = RootFinderData.MinPoint.X;
 
-                // Solution found: No need to continue iterating
-                IsDoneFlag = true;
-                return;
-            }
+            // Solution found: No need to continue iterating
+            IsDoneFlag = true;
+            return;
         }
 
         // Check singularity condition between min and max points

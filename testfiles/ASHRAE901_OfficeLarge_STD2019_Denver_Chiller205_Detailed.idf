@@ -13947,12 +13947,6 @@
     On/Off Supervisory;      !- Actuated Component Control Type
 
   EnergyManagementSystem:Actuator,
-    Chiller1PumpFlow,        !- Name
-    COOLSYS1 CHILLER1 PUMP,  !- Actuated Component Unique Name
-    Pump,                    !- Actuated Component Type
-    Pump Mass Flow Rate;     !- Actuated Component Control Type
-
-  EnergyManagementSystem:Actuator,
     Chiller2PumpFlow,        !- Name
     COOLSYS1 CHILLER2 PUMP,  !- Actuated Component Unique Name
     Pump,                    !- Actuated Component Type

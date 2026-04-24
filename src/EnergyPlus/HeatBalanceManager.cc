@@ -3367,33 +3367,31 @@ namespace HeatBalanceManager {
                 state.dataEnvrn->PrintEnvrnStampWarmupPrinted = false;
             }
             if (state.dataEnvrn->PrintEnvrnStampWarmup) {
-                if (state.dataReportFlag->PrintEndDataDictionary && state.dataGlobal->DoOutputReporting) {
+                if (state.dataReportFlag->PrintEndDataDictionary) {
                     constexpr const char *EndOfHeaderString("End of Data Dictionary"); // End of data dictionary marker
                     print(state.files.eso, "{}\n", EndOfHeaderString);
                     print(state.files.mtr, "{}\n", EndOfHeaderString);
                     state.dataReportFlag->PrintEndDataDictionary = false;
                 }
-                if (state.dataGlobal->DoOutputReporting) {
-                    constexpr const char *EnvironmentStampFormatStr("{},{},{:7.2F},{:7.2F},{:7.2F},{:7.2F}\n"); // Format descriptor for environ stamp
-                    print(state.files.eso,
-                          EnvironmentStampFormatStr,
-                          "1",
-                          "Warmup {" + state.dataReportFlag->cWarmupDay + "} " + state.dataEnvrn->EnvironmentName,
-                          state.dataEnvrn->Latitude,
-                          state.dataEnvrn->Longitude,
-                          state.dataEnvrn->TimeZoneNumber,
-                          state.dataEnvrn->Elevation);
+                constexpr const char *EnvironmentStampFormatStr("{},{},{:7.2F},{:7.2F},{:7.2F},{:7.2F}\n"); // Format descriptor for environ stamp
+                print(state.files.eso,
+                      EnvironmentStampFormatStr,
+                      "1",
+                      "Warmup {" + state.dataReportFlag->cWarmupDay + "} " + state.dataEnvrn->EnvironmentName,
+                      state.dataEnvrn->Latitude,
+                      state.dataEnvrn->Longitude,
+                      state.dataEnvrn->TimeZoneNumber,
+                      state.dataEnvrn->Elevation);
 
-                    print(state.files.mtr,
-                          EnvironmentStampFormatStr,
-                          "1",
-                          "Warmup {" + state.dataReportFlag->cWarmupDay + "} " + state.dataEnvrn->EnvironmentName,
-                          state.dataEnvrn->Latitude,
-                          state.dataEnvrn->Longitude,
-                          state.dataEnvrn->TimeZoneNumber,
-                          state.dataEnvrn->Elevation);
-                    state.dataEnvrn->PrintEnvrnStampWarmup = false;
-                }
+                print(state.files.mtr,
+                      EnvironmentStampFormatStr,
+                      "1",
+                      "Warmup {" + state.dataReportFlag->cWarmupDay + "} " + state.dataEnvrn->EnvironmentName,
+                      state.dataEnvrn->Latitude,
+                      state.dataEnvrn->Longitude,
+                      state.dataEnvrn->TimeZoneNumber,
+                      state.dataEnvrn->Elevation);
+                state.dataEnvrn->PrintEnvrnStampWarmup = false;
             }
             if (!state.dataGlobal->DoingSizing) {
                 CalcMoreNodeInfo(state);

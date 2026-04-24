@@ -1281,8 +1281,6 @@ namespace OutdoorAirUnit {
         Real64 ExtAirVolFlowDes = 0.0;  // Autosized exhaust air flow for reporting
         Real64 ExtAirVolFlowUser = 0.0; // Hardsized exhaust air flow for reporting
 
-        bool ErrorsFound = false;
-
         auto &thisOutAirUnit = state.dataOutdoorAirUnit->OutAirUnit(OAUnitNum);
 
         state.dataSize->DataFanType = thisOutAirUnit.supFanType;
@@ -1418,10 +1416,6 @@ namespace OutdoorAirUnit {
                         state, thisOAEquip.ComponentName, true, HVAC::CompressorOp::On, 0.0, thisOAEquip.ComponentIndex, HVAC::FanOp::Continuous);
                 }
             }
-        }
-
-        if (ErrorsFound) {
-            ShowFatalError(state, "Preceding sizing errors cause program termination");
         }
     }
 

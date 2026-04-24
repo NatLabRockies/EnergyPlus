@@ -3464,7 +3464,7 @@ namespace PlantPipingSystemsManager {
                             if (CellXIndex <= MinXIndex || CellZIndex <= MinZIndex) { // Ground surface
                                 cellType = CellType::GroundSurface;
                                 ++NumGroundSurfaceCells;
-                            } else if (CellXIndex >= MinXIndex || CellZIndex >= MinZIndex) { // Zone-ground interface
+                            } else { // Zone-ground interface
                                 cellType = CellType::ZoneGroundInterface;
                             }
                         }

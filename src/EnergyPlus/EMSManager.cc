@@ -325,7 +325,7 @@ namespace EMSManager {
                                      state.dataRuntimeLang->NumExternalInterfaceFunctionalMockupUnitImportActuatorsUsed +
                                      state.dataRuntimeLang->NumExternalInterfaceFunctionalMockupUnitExportActuatorsUsed;
              ++ActuatorUsedLoop) {
-            auto const &thisActuatorUsed = state.dataRuntimeLang->EMSActuatorUsed(ActuatorUsedLoop);
+            auto &thisActuatorUsed = state.dataRuntimeLang->EMSActuatorUsed(ActuatorUsedLoop);
 
             int ErlVariableNum = thisActuatorUsed.ErlVariableNum;
             if (ErlVariableNum <= 0) {
@@ -451,10 +451,19 @@ namespace EMSManager {
             if ((ErlVariableNum > 0) && (state.dataRuntimeLang->Sensor(SensorNum).Index > -1)) {
                 if (state.dataRuntimeLang->Sensor(SensorNum).sched == nullptr) { // not a schedule so get from output processor
 
-                    state.dataRuntimeLang->ErlVariable(ErlVariableNum).Value = RuntimeLanguageProcessor::SetErlValueNumber(
-                        GetInternalVariableValue(
-                            state, state.dataRuntimeLang->Sensor(SensorNum).VariableType, state.dataRuntimeLang->Sensor(SensorNum).Index),
-                        state.dataRuntimeLang->ErlVariable(ErlVariableNum).Value);
+                    Real64 sensorValue;
+                    if (state.dataRuntimeLang->Sensor(SensorNum).VariableType == OutputProcessor::VariableType::Meter) {
+                        // Issue #7563: for meter sensors, sum live source-var contributions instead of reading
+                        // meter->CurTSValue (refreshed inside UpdateDataandReport, i.e. AFTER most EMS calling points).
+                        sensorValue =
+                            GetInstantMeterValue(state, state.dataRuntimeLang->Sensor(SensorNum).Index, OutputProcessor::TimeStepType::Zone) +
+                            GetInstantMeterValue(state, state.dataRuntimeLang->Sensor(SensorNum).Index, OutputProcessor::TimeStepType::System);
+                    } else {
+                        sensorValue = GetInternalVariableValue(
+                            state, state.dataRuntimeLang->Sensor(SensorNum).VariableType, state.dataRuntimeLang->Sensor(SensorNum).Index);
+                    }
+                    state.dataRuntimeLang->ErlVariable(ErlVariableNum).Value =
+                        RuntimeLanguageProcessor::SetErlValueNumber(sensorValue, state.dataRuntimeLang->ErlVariable(ErlVariableNum).Value);
                 } else { // schedule so use schedule service
 
                     state.dataRuntimeLang->ErlVariable(ErlVariableNum).Value = RuntimeLanguageProcessor::SetErlValueNumber(
@@ -1983,9 +1992,9 @@ namespace EMSManager {
     void checkForUnusedActuatorsAtEnd(EnergyPlusData &state)
     {
         // call at end of simulation to check if any of the user's actuators were never initialized.
-        // Could be a mistake we want to help users catch // Issue #4404.
+        // Could be a mistake we want to help users catch // Issues #4404, #10944.
         for (int actuatorUsedLoop = 1; actuatorUsedLoop <= state.dataRuntimeLang->numActuatorsUsed; ++actuatorUsedLoop) {
-            if (!state.dataRuntimeLang->ErlVariable(state.dataRuntimeLang->EMSActuatorUsed(actuatorUsedLoop).ErlVariableNum).Value.initialized) {
+            if (!state.dataRuntimeLang->EMSActuatorUsed(actuatorUsedLoop).wasActuated) {
                 ShowWarningError(state,
                                  "checkForUnusedActuatorsAtEnd: Unused EMS Actuator detected, suggesting possible unintended programming error or "
                                  "spelling mistake.");

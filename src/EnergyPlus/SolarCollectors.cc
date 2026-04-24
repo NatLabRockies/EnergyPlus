@@ -1905,7 +1905,7 @@ namespace SolarCollectors {
                               TempOutdoorAir * (hConvCoefC2O + hRadCoefC2O) + TempInnerCover * (hConvCoefC2C + hRadCoefC2C);
                     tempdenom = (hConvCoefC2O + hRadCoefC2O) + (hConvCoefC2C + hRadCoefC2C);
                     TempOuterCover = tempnom / tempdenom;
-                } else if (Num == 1) {
+                } else {
                     tempnom = this->CoverAbs[Num] * state.dataHeatBal->SurfQRadSWOutIncident(SurfNum) + TempAbsPlate * (hConvCoefA2C + hRadCoefA2C) +
                               TempOuterCover * (hConvCoefC2C + hRadCoefC2C);
                     tempdenom = (hConvCoefC2C + hRadCoefC2C + hConvCoefA2C + hRadCoefA2C);
