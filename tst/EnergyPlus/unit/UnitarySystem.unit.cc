@@ -2525,6 +2525,247 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_MultiStageElecHeatCoil_Backup_Load
     // EXPECT_NEAR(state->dataLoopNodes->Node(2).Temp, 25, 0.001);
 }
 
+// Issue #11039: supplemental heating blocked when QToHeatSetPt is negative
+// despite zone being below heating setpoint and primary coil at max capacity.
+// The supplemental check at controlUnitarySystemtoLoad line ~8125 compares
+// FullSensibleOutput against QToHeatSetPt — if QToHeatSetPt < 0 (zone predictor
+// thinks zone is above heating setpoint), backup never fires even when the
+// primary coil output is insufficient to meet the actual zone demand.
+TEST_F(ZoneUnitarySysTest, UnitarySystemModel_SuppHeatBlocked_NegativeQToHeatSetPt)
+{
+    std::string_view constexpr idf_objects = R"IDF(
+
+        AirLoopHVAC:UnitarySystem,
+          Unitary System Model,           !- Name
+          Load,                           !- Control Type
+          East Zone,                      !- Controlling Zone or Thermostat Location
+          None,                           !- Dehumidification Control Type
+          Constant-1.0,                      !- Availability Schedule Name
+          Zone Exhaust Node,              !- Air Inlet Node Name
+          Zone 2 Inlet Node,              !- Air Outlet Node Name
+          Fan:OnOff,                      !- Supply Fan Object Type
+          Supply Fan 1,                   !- Supply Fan Name
+          BlowThrough,                    !- Fan Placement
+          ,                               !- Supply Air Fan Operating Mode Schedule Name
+          Coil:Heating:Electric:MultiStage,!- Heating Coil Object Type
+          Electric Heating Coil,          !- Heating Coil Name
+          ,                               !- DX Heating Coil Sizing Ratio
+          ,                               !- Cooling Coil Object Type
+          ,                               !- Cooling Coil Name
+          No,                             !- Use DOAS DX Cooling Coil
+          2.0,                            !- DOAS DX Cooling Coil Leaving Minimum Air Temperature{ C }
+          SensibleOnlyLoadControl,        !- Latent Load Control
+          Coil:Heating:Electric:MultiStage,!- Supplemental Heating Coil Object Type
+          Electric Backup Heating Coil,   !- Supplemental Heating Coil Name
+          ,                               !- Supply Air Flow Rate Method During Cooling Operation
+          autosize,                       !- Supply Air Flow Rate During Cooling Operation{ m3/s }
+          ,                               !- Supply Air Flow Rate Per Floor Area During Cooling Operation{ m3/s-m2 }
+          ,                               !- Fraction of Autosized Design Cooling Supply Air Flow Rate
+          ,                               !- Design Supply Air Flow Rate Per Unit of Capacity During Cooling Operation{ m3/s-W }
+          SupplyAirFlowRate,              !- Supply air Flow Rate Method During Heating Operation
+          autosize,                       !- Supply Air Flow Rate During Heating Operation{ m3/s }
+          ,                               !- Supply Air Flow Rate Per Floor Area during Heating Operation{ m3/s-m2 }
+          ,                               !- Fraction of Autosized Design Heating Supply Air Flow Rate
+          ,                               !- Design Supply Air Flow Rate Per Unit of Capacity During Heating Operation{ m3/s-W }
+          ,                               !- Supply Air Flow Rate Method When No Cooling or Heating is Required
+          autosize,                       !- Supply Air Flow Rate When No Cooling or Heating is Required{ m3/s }
+          ,                               !- Supply Air Flow Rate Per Floor Area When No Cooling or Heating is Required{ m3/s-m2 }
+          ,                               !- Fraction of Autosized Design Cooling Supply Air Flow Rate
+          ,                               !- Fraction of Autosized Design Heating Supply Air Flow Rate
+          ,                               !- Design Supply Air Flow Rate Per Unit of Capacity During Cooling Operation{ m3/s-W }
+          ,                               !- Design Supply Air Flow Rate Per Unit of Capacity During Heating Operation{ m3/s-W }
+          ,                               !- No Load Supply Air Flow Rate Control Set To Low Speed
+          80.0,                           !- Maximum Supply Air Temperature{ C }
+          ,                               !- Maximum Outdoor Dry-Bulb Temperature for Supplemental Heater Operation {C}
+          ,                               !- Outdoor Dry-Bulb Temperature Sensor Node Name
+          ,                               !- Ancilliary On-Cycle Electric Power
+          ,                               !- Ancilliary Off-Cycle Electric Power
+          ,                               !- Design Heat Recovery Water Flow Rate
+          ,                               !- Maximum Temperature for Heat Recovery
+          ,                               !- Heat Recovery Water Inlet Node Name
+          ,                               !- Heat Recovery Water Outlet Node Name
+          UnitarySystemPerformance:Multispeed,                     !- Design Specification Multispeed Object Type
+          DX Heat MultiSpd Unitary System MultiSpeed Performance;  !- Design Specification Multispeed Object Name
+
+        UnitarySystemPerformance:Multispeed,
+          DX Heat MultiSpd Unitary System MultiSpeed Performance,  !- Name
+          2,                              !- Number of Speeds for Heating
+          1,                              !- Number of Speeds for Cooling
+          No,                             !- Single Mode Operation
+          0,                              !- No Load Supply Air Flow Rate Ratio
+          1,                              !- Heating Speed 1 Supply Air Flow Ratio
+          1,                              !- Cooling Speed 1 Supply Air Flow Ratio
+          1,                              !- Heating Speed 2 Supply Air Flow Ratio
+          1;                              !- Cooling Speed 2 Supply Air Flow Ratio
+
+        Fan:OnOff,
+          Supply Fan 1,                   !- Name
+          Constant-1.0,                      !- Availability Schedule Name
+          0.7,                            !- Fan Total Efficiency
+          0.0,                          !- Pressure Rise{ Pa }
+          autosize,                       !- Maximum Flow Rate{ m3 / s }
+          0.9,                            !- Motor Efficiency
+          1.0,                            !- Motor In Airstream Fraction
+          Zone Exhaust Node,              !- Air Inlet Node Name
+          Heating Coil Air Inlet Node;    !- Air Outlet Node Name
+
+        Coil:Heating:Electric:MultiStage,
+          Electric Heating Coil,               !- Name
+          Constant-1.0,                      !- Availability Schedule Name
+          Heating Coil Air Inlet Node,    !- Air Inlet Node Name
+          Heating Coil Air Outlet Node,   !- Air Outlet Node Name
+          ,                               !- Temperature Setpoint Node Name
+          2,                              !- Number of Stages
+          1.0,                            !- Stage 1 Efficiency
+          2000,                           !- Stage 1 Nominal Capacity
+          1.0,                            !- Stage 2 Efficency
+          5000;                           !- Stage 2 Nominal Capacity
+
+        Coil:Heating:Electric:MultiStage,
+          Electric Backup Heating Coil,               !- Name
+          Constant-1.0,                      !- Availability Schedule Name
+          Heating Coil Air Outlet Node,   !- Air Inlet Node Name
+          Zone 2 Inlet Node,              !- Air Outlet Node Name
+          ,                               !- Temperature Setpoint Node Name
+          2,                              !- Number of Stages
+          1.0,                            !- Stage 1 Efficiency
+          1000,                       !- Stage 1 Nominal Capacity
+          1.0,                            !- Stage 2 Efficency
+          4000;                       !- Stage 2 Nominal Capacity
+
+        ScheduleTypeLimits,
+          Any Number;                     !- Name
+
+        Curve:Quadratic,
+          Quadratic,                      !- Name
+          0.8,                            !- Coefficient1 Constant
+          0.2,                            !- Coefficient2 x
+          0.0,                            !- Coefficient3 x**2
+          0.5,                            !- Minimum Value of x
+          1.5;                            !- Maximum Value of x
+
+    )IDF";
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+
+    std::string compName = "UNITARY SYSTEM MODEL";
+    bool zoneEquipment = true;
+    bool FirstHVACIteration = true;
+    UnitarySystems::UnitarySys::factory(*state, HVAC::UnitarySysType::Unitary_AnyCoilType, compName, zoneEquipment, 0);
+    UnitarySystems::UnitarySys *thisSys = &state->dataUnitarySystems->unitarySys[0];
+
+    state->dataZoneEquip->ZoneEquipInputsFilled = true;
+    thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound);
+    EXPECT_FALSE(ErrorsFound);
+
+    OutputReportPredefined::SetPredefinedTables(*state);
+
+    FirstHVACIteration = false;
+    state->dataGlobal->BeginEnvrnFlag = false;
+
+    int AirLoopNum = 0;
+    int CompIndex = 1;
+    bool HeatActive = false;
+    bool CoolActive = true;
+    int constexpr ZoneOAUnitNum = 0;
+    Real64 constexpr OAUCoilOutTemp = 0.0;
+    bool const ZoneEquipment = true;
+    Real64 sensOut = 0.0;
+    Real64 latOut = 0.0;
+    int ControlZoneNum = 1;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand.allocate(1);
+    state->dataZoneEnergyDemand->ZoneSysMoistureDemand.allocate(1);
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).SequencedOutputRequired.allocate(1);
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).SequencedOutputRequiredToCoolingSP.allocate(1);
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).SequencedOutputRequiredToHeatingSP.allocate(1);
+    state->dataZoneEnergyDemand->ZoneSysMoistureDemand(ControlZoneNum).SequencedOutputRequiredToDehumidSP.allocate(1);
+    state->dataHeatBalFanSys->TempControlType.allocate(1);
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputRequired = 0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputReqToCoolSP = 0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputReqToHeatSP = 0;
+    state->dataZoneEnergyDemand->ZoneSysMoistureDemand(ControlZoneNum).RemainingOutputReqToDehumidSP = 0;
+    state->dataHeatBalFanSys->TempControlType(ControlZoneNum) = HVAC::SetptType::SingleHeat;
+
+    // Initialize with a no-load call
+    thisSys->simulate(*state,
+                      thisSys->Name,
+                      FirstHVACIteration,
+                      AirLoopNum,
+                      CompIndex,
+                      HeatActive,
+                      CoolActive,
+                      ZoneOAUnitNum,
+                      OAUCoilOutTemp,
+                      ZoneEquipment,
+                      sensOut,
+                      latOut);
+
+    // Set up node conditions
+    state->dataLoopNodes->Node(1).MassFlowRate = thisSys->m_DesignMassFlowRate;
+    state->dataLoopNodes->Node(1).MassFlowRateMaxAvail = thisSys->m_DesignMassFlowRate;
+    state->dataLoopNodes->Node(1).Temp = 24.0;
+    state->dataLoopNodes->Node(1).HumRat = 0.00922;
+    state->dataLoopNodes->Node(1).Enthalpy = 47597.03;
+    state->dataLoopNodes->Node(3).MassFlowRateMax = thisSys->m_DesignMassFlowRate;
+    state->dataGlobal->BeginEnvrnFlag = true;
+
+    // ---- Baseline: verify supplemental fires when QToHeatSetPt is positive ----
+    // Zone demands 5500W, main coil max is 5000W → supplemental must provide 500W
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputRequired = 5500;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputReqToHeatSP = 5500;
+    thisSys->simulate(*state,
+                      thisSys->Name,
+                      FirstHVACIteration,
+                      AirLoopNum,
+                      CompIndex,
+                      HeatActive,
+                      CoolActive,
+                      ZoneOAUnitNum,
+                      OAUCoilOutTemp,
+                      ZoneEquipment,
+                      sensOut,
+                      latOut);
+    // Baseline: system meets demand, supplemental is ON
+    EXPECT_NEAR(sensOut, 5500, 0.001 * 5500);
+    EXPECT_EQ(2, thisSys->m_HeatingSpeedNum);
+    EXPECT_EQ(1.0, thisSys->m_HeatingSpeedRatio);
+    EXPECT_GT(thisSys->m_SuppHeatPartLoadFrac, 0.0); // backup IS on
+
+    // ---- Bug scenario: same total zone demand but QToHeatSetPt is negative ----
+    // This simulates what happens when the zone predictor underestimates the
+    // heating deficit (e.g., high internal gains make predictor think zone is
+    // above heating setpoint). RemainingOutputRequired stays at 5500W (the
+    // actual demand), but RemainingOutputReqToHeatSP is negative (predictor
+    // error). The supplemental check at line ~8125 uses QToHeatSetPt, not
+    // the actual zone demand, so backup is blocked.
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputRequired = 5500;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlZoneNum).RemainingOutputReqToHeatSP = -500;
+    thisSys->simulate(*state,
+                      thisSys->Name,
+                      FirstHVACIteration,
+                      AirLoopNum,
+                      CompIndex,
+                      HeatActive,
+                      CoolActive,
+                      ZoneOAUnitNum,
+                      OAUCoilOutTemp,
+                      ZoneEquipment,
+                      sensOut,
+                      latOut);
+
+    // Main coil still runs at max capacity since RemainingOutputRequired = 5500
+    EXPECT_EQ(2, thisSys->m_HeatingSpeedNum);
+    EXPECT_EQ(1.0, thisSys->m_HeatingSpeedRatio);
+
+    // Issue #11039: supplemental heating should fire here — the zone
+    // demands 5500W and the primary coil maxes out at 5000W.
+    // The negative QToHeatSetPt is a predictor error; the actual zone
+    // demand (RemainingOutputRequired = 5500) is the ground truth.
+    EXPECT_GT(thisSys->m_SuppHeatPartLoadFrac, 0.0);
+    EXPECT_NEAR(sensOut, 5500, 0.05 * 5500);
+}
+
 TEST_F(ZoneUnitarySysTest, UnitarySystemModel_MultiStageElecHeatCoil_Backup_SetpointBased)
 {
 
