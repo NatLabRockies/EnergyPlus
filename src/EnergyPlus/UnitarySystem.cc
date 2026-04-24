@@ -209,7 +209,7 @@ namespace UnitarySystems {
             case HVAC::CoilType::HeatingSteam:
             case HVAC::CoilType::HeatingWater:
             case HVAC::CoilType::UserDefined: {
-                heatingCoilRTF = 1.0;
+                heatingCoilRTF = this->m_HeatingPartLoadFrac;
             } break;
             default:;
             }
@@ -282,7 +282,7 @@ namespace UnitarySystems {
             case HVAC::CoilType::UserDefined:
             case HVAC::CoilType::CoolingDXHXAssisted:
             case HVAC::CoilType::CoolingWaterHXAssisted: {
-                coolingCoilRTF = 1.0;
+                coolingCoilRTF = this->m_CoolingPartLoadFrac;
             } break;
             default:;
             }
