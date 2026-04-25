@@ -1632,11 +1632,6 @@ namespace FuelCellElectricGenerator {
             }
         }
 
-        // TODO deal with things when jump out if not running?
-        if (!RunFlag) {
-            return;
-        }
-
         // Note: MyLoad (input) is Pdemand (electrical Power requested)
         Real64 Pdemand = MyLoad;
         Real64 PacAncillariesTotal = 0.0;

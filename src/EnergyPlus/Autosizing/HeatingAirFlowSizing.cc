@@ -258,9 +258,7 @@ Real64 HeatingAirFlowSizer::size(EnergyPlusData &state, Real64 _originalValue, b
         }
         // override sizing string
         if (this->overrideSizeString) {
-            if (this->isEpJSON) {
-                this->sizingString = "heating_supply_air_flow_rate [m3/s]";
-            }
+            this->sizingString = "Heating Supply Air Flow Rate [m3/s]";
         }
         if (this->dataScalableSizingON) {
             if (this->zoneAirFlowSizMethod == DataSizing::SupplyAirFlowRate || this->zoneAirFlowSizMethod == DataSizing::None) {
@@ -280,8 +278,7 @@ Real64 HeatingAirFlowSizer::size(EnergyPlusData &state, Real64 _originalValue, b
 
     if (this->isCoilReportObject) {
         // SizingResult is airflow in m3/s
-        state.dataRptCoilSelection->coilSelectionReportObj->setCoilAirFlow(
-            state, this->compName, this->compType, this->autoSizedValue, this->wasAutoSized);
+        ReportCoilSelection::setCoilAirFlow(state, this->coilReportNum, this->autoSizedValue, this->wasAutoSized);
     }
     if (this->isFanReportObject) {
         //  fill fan peak day and time here

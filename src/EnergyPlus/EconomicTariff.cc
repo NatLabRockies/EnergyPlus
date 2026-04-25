@@ -2354,7 +2354,7 @@ void CreateDefaultComputation(EnergyPlusData &state)
             //   counter.
             int numNoDepend = -1;
             int loopCount = 0;
-            while ((numNoDepend != 0) || (loopCount > 100000)) {
+            while ((numNoDepend != 0) && (loopCount < 100000)) {
                 numNoDepend = 0;
                 for (int iVar = 1; iVar <= s_econ->numEconVar; ++iVar) {
                     if (s_econ->econVar(iVar).activeNow) {
@@ -2408,7 +2408,7 @@ void CreateDefaultComputation(EnergyPlusData &state)
                 }
                 ++loopCount;
             }
-            if (loopCount > 100000) {
+            if (loopCount >= 100000) {
                 ShowWarningError(
                     state, EnergyPlus::format("UtilityCost:Tariff: Loop count exceeded when counting dependencies in tariff: {}", tariff.tariffName));
             }

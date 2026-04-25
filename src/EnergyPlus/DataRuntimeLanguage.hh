@@ -327,6 +327,7 @@ namespace DataRuntimeLanguage {
         bool CheckedOkay;              // set to true once matched to available actuator
         int ErlVariableNum;            // points to global Erl variable, matches Name
         int ActuatorVariableNum;       // points to index match in EMSActuatorAvailable structure
+        bool wasActuated = false;      // issue #10944: true once any Erl program has set this actuator
 
         // Default Constructor
         ActuatorUsedType() : CheckedOkay(false), ErlVariableNum(0), ActuatorVariableNum(0)

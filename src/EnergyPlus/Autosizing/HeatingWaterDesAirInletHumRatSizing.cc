@@ -111,13 +111,11 @@ Real64 HeatingWaterDesAirInletHumRatSizer::size(EnergyPlusData &state, Real64 _o
         }
     }
     if (this->overrideSizeString) {
-        if (this->isEpJSON) {
-            this->sizingString = "design_inlet_air_humidity_ratio [kgWater/kgDryAir]";
-        }
+        this->sizingString = "Design Inlet Air Humidity Ratio [kgWater/kgDryAir]";
     }
     this->selectSizerOutput(state, errorsFound);
     if (this->isCoilReportObject) {
-        state.dataRptCoilSelection->coilSelectionReportObj->setCoilEntAirHumRat(state, this->compName, this->compType, this->autoSizedValue);
+        ReportCoilSelection::setCoilEntAirHumRat(state, this->coilReportNum, this->autoSizedValue);
     }
     return this->autoSizedValue;
 }

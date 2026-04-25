@@ -1497,7 +1497,7 @@ namespace CondenserLoopTowers {
                 tower.TowerNominalCapacityWasAutoSized = true;
             }
             tower.TowerFreeConvNomCap = NumArray(3);
-            if (tower.TowerFreeConvNomCap == DataSizing::AutoSize) {
+            if (s_ipsc->lNumericFieldBlanks(3) || tower.TowerFreeConvNomCap == DataSizing::AutoSize) {
                 tower.TowerFreeConvNomCapWasAutoSized = true;
             }
             tower.TowerFreeConvNomCapSizingFactor = NumArray(4);
@@ -4094,7 +4094,7 @@ namespace CondenserLoopTowers {
                         ShowSevereError(state, "Bad starting values for UA");
                         ShowFatalError(state, EnergyPlus::format("Autosizing of cooling tower UA failed for free convection tower {}", this->Name));
                     }
-                    this->LowSpeedTowerUA = UA;
+                    this->FreeConvTowerUA = UA;
                     if (state.dataPlnt->PlantFinalSizesOkayToReport) {
                         BaseSizer::reportSizerOutput(state,
                                                      DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)],

@@ -485,12 +485,12 @@ void ManageHVAC(EnergyPlusData &state)
                 state.dataEnvrn->PrintEnvrnStampWarmupPrinted = false;
             }
             if (state.dataEnvrn->PrintEnvrnStampWarmup) {
-                if (state.dataReportFlag->PrintEndDataDictionary && state.dataGlobal->DoOutputReporting && !state.dataHVACMgr->PrintedWarmup) {
+                if (state.dataReportFlag->PrintEndDataDictionary && !state.dataHVACMgr->PrintedWarmup) {
                     print(state.files.eso, "{}\n", EndOfHeaderString);
                     print(state.files.mtr, "{}\n", EndOfHeaderString);
                     state.dataReportFlag->PrintEndDataDictionary = false;
                 }
-                if (state.dataGlobal->DoOutputReporting && !state.dataHVACMgr->PrintedWarmup) {
+                if (!state.dataHVACMgr->PrintedWarmup) {
 
                     print(state.files.eso,
                           EnvironmentStampFormatStr,

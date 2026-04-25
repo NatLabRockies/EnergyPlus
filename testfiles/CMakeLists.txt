@@ -384,6 +384,7 @@ add_simulation_test(IDF_FILE HeatPumpWaterToAirEquationFit.idf EPW_FILE USA_IL_C
 add_simulation_test(IDF_FILE HeatPumpWaterToAirWithAntifreezeAndLatentModel.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE HeatPumpWaterToAirWithAntifreezeAndLatentModel2.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE HeatPumpWaterToAirWithRHControl.idf EPW_FILE USA_FL_Miami.Intl.AP.722020_TMY3.epw)
+add_simulation_test(IDF_FILE HeatPumpWaterToAirWithHumControlDewPoint.idf EPW_FILE USA_FL_Miami.Intl.AP.722020_TMY3.epw)
 add_simulation_test(IDF_FILE HeatPumpwithBiquadraticCurves.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE HeatRecoveryElectricChiller.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE HeatRecoveryPlantLoop.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)

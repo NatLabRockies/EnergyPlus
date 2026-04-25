@@ -51,7 +51,6 @@
 #include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataGlobalConstants.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
-#include <EnergyPlus/DataIPShortCuts.hh>
 #include <EnergyPlus/Fans.hh>
 #include <EnergyPlus/General.hh>
 #include <EnergyPlus/GeneralRoutines.hh>
@@ -155,58 +154,51 @@ void CoilCoolingDXCurveFitPerformance::instantiateFromInputSpec(EnergyPlus::Ener
 CoilCoolingDXCurveFitPerformance::CoilCoolingDXCurveFitPerformance(EnergyPlus::EnergyPlusData &state, const std::string &name_to_find)
     : CoilCoolingDXPerformanceBase()
 {
-    int numPerformances = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, CoilCoolingDXCurveFitPerformance::object_name);
-    if (numPerformances <= 0) {
+    std::string const objectName{CoilCoolingDXCurveFitPerformance::object_name};
+    auto *inputProcessor = state.dataInputProcessing->inputProcessor.get();
+    auto const performanceInstances = inputProcessor->epJSON.find(objectName);
+    if (performanceInstances == inputProcessor->epJSON.end()) {
         // error
     }
+    auto const &performanceSchemaProps = inputProcessor->getObjectSchemaProps(state, objectName);
     bool found_it = false;
-    for (int perfNum = 1; perfNum <= numPerformances; ++perfNum) {
-        int NumAlphas;  // Number of Alphas for each GetObjectItem call
-        int NumNumbers; // Number of Numbers for each GetObjectItem call
-        int IOStatus;
-        state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                 CoilCoolingDXCurveFitPerformance::object_name,
-                                                                 perfNum,
-                                                                 state.dataIPShortCut->cAlphaArgs,
-                                                                 NumAlphas,
-                                                                 state.dataIPShortCut->rNumericArgs,
-                                                                 NumNumbers,
-                                                                 IOStatus,
-                                                                 _,
-                                                                 state.dataIPShortCut->lAlphaFieldBlanks);
-        if (!Util::SameString(name_to_find, state.dataIPShortCut->cAlphaArgs(1))) {
+    for (auto const &performanceInstance : performanceInstances.value().items()) {
+        auto const performanceName = Util::makeUPPER(performanceInstance.key());
+        auto const &performanceFields = performanceInstance.value();
+        if (!Util::SameString(name_to_find, performanceName)) {
             continue;
         }
         found_it = true;
 
         CoilCoolingDXCurveFitPerformanceInputSpecification input_specs;
 
-        input_specs.name = state.dataIPShortCut->cAlphaArgs(1);
-        input_specs.crankcase_heater_capacity = state.dataIPShortCut->rNumericArgs(1);
-        input_specs.minimum_outdoor_dry_bulb_temperature_for_compressor_operation = state.dataIPShortCut->rNumericArgs(2);
-        input_specs.maximum_outdoor_dry_bulb_temperature_for_crankcase_heater_operation = state.dataIPShortCut->rNumericArgs(3);
-        if (state.dataIPShortCut->lNumericFieldBlanks(4)) {
-            input_specs.unit_internal_static_air_pressure = 0.0;
-        } else {
-            input_specs.unit_internal_static_air_pressure = state.dataIPShortCut->rNumericArgs(4);
-        }
-        if (!state.dataIPShortCut->lAlphaFieldBlanks(2)) {
-            input_specs.outdoor_temperature_dependent_crankcase_heater_capacity_curve_name = state.dataIPShortCut->cAlphaArgs(2);
-        }
-        input_specs.capacity_control = state.dataIPShortCut->cAlphaArgs(3);
-        input_specs.basin_heater_capacity = state.dataIPShortCut->rNumericArgs(5);
-        input_specs.basin_heater_setpoint_temperature = state.dataIPShortCut->rNumericArgs(6);
-        input_specs.basin_heater_operating_schedule_name = state.dataIPShortCut->cAlphaArgs(4);
-        input_specs.compressor_fuel_type = state.dataIPShortCut->cAlphaArgs(5);
-        input_specs.base_operating_mode_name = state.dataIPShortCut->cAlphaArgs(6);
-        if (!state.dataIPShortCut->lAlphaFieldBlanks(6)) {
-            input_specs.alternate_operating_mode_name = state.dataIPShortCut->cAlphaArgs(7);
-        }
-        if (!state.dataIPShortCut->lAlphaFieldBlanks(8)) {
-            input_specs.alternate_operating_mode2_name = state.dataIPShortCut->cAlphaArgs(8);
-        }
+        input_specs.name = performanceName;
+        input_specs.crankcase_heater_capacity =
+            inputProcessor->getRealFieldValue(performanceFields, performanceSchemaProps, "crankcase_heater_capacity");
+        input_specs.minimum_outdoor_dry_bulb_temperature_for_compressor_operation = inputProcessor->getRealFieldValue(
+            performanceFields, performanceSchemaProps, "minimum_outdoor_dry_bulb_temperature_for_compressor_operation");
+        input_specs.maximum_outdoor_dry_bulb_temperature_for_crankcase_heater_operation = inputProcessor->getRealFieldValue(
+            performanceFields, performanceSchemaProps, "maximum_outdoor_dry_bulb_temperature_for_crankcase_heater_operation");
+        input_specs.unit_internal_static_air_pressure =
+            inputProcessor->getRealFieldValue(performanceFields, performanceSchemaProps, "unit_internal_static_air_pressure");
+        input_specs.outdoor_temperature_dependent_crankcase_heater_capacity_curve_name = inputProcessor->getAlphaFieldValue(
+            performanceFields, performanceSchemaProps, "crankcase_heater_capacity_function_of_temperature_curve_name");
+        input_specs.capacity_control = inputProcessor->getAlphaFieldValue(performanceFields, performanceSchemaProps, "capacity_control_method");
+        input_specs.basin_heater_capacity =
+            inputProcessor->getRealFieldValue(performanceFields, performanceSchemaProps, "evaporative_condenser_basin_heater_capacity");
+        input_specs.basin_heater_setpoint_temperature =
+            inputProcessor->getRealFieldValue(performanceFields, performanceSchemaProps, "evaporative_condenser_basin_heater_setpoint_temperature");
+        input_specs.basin_heater_operating_schedule_name = inputProcessor->getAlphaFieldValue(
+            performanceFields, performanceSchemaProps, "evaporative_condenser_basin_heater_operating_schedule_name");
+        input_specs.compressor_fuel_type = inputProcessor->getAlphaFieldValue(performanceFields, performanceSchemaProps, "compressor_fuel_type");
+        input_specs.base_operating_mode_name = inputProcessor->getAlphaFieldValue(performanceFields, performanceSchemaProps, "base_operating_mode");
+        input_specs.alternate_operating_mode_name =
+            inputProcessor->getAlphaFieldValue(performanceFields, performanceSchemaProps, "alternative_operating_mode_1");
+        input_specs.alternate_operating_mode2_name =
+            inputProcessor->getAlphaFieldValue(performanceFields, performanceSchemaProps, "alternative_operating_mode_2");
 
         this->instantiateFromInputSpec(state, input_specs);
+        inputProcessor->markObjectAsUsed(objectName, performanceInstance.key());
         break;
     }
 

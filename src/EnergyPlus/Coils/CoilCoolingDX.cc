@@ -60,7 +60,6 @@
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
-#include <EnergyPlus/DataIPShortCuts.hh>
 #include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/DataWater.hh>
 #include <EnergyPlus/Fans.hh>
@@ -116,36 +115,32 @@ int CoilCoolingDX::factory(EnergyPlus::EnergyPlusData &state, std::string const 
 
 void CoilCoolingDX::getInput(EnergyPlusData &state)
 {
-    int numCoolingCoilDXs = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, state.dataCoilCoolingDX->coilCoolingDXObjectName);
-    if (numCoolingCoilDXs <= 0) {
-        return;
+
+    auto *inputProcessor = state.dataInputProcessing->inputProcessor.get();
+    auto const coilInstances = inputProcessor->epJSON.find(state.dataCoilCoolingDX->coilCoolingDXObjectName);
+    if (coilInstances == inputProcessor->epJSON.end() || coilInstances->empty()) {
+        return; // Was fatal error
     }
-    
-    for (int coilNum = 1; coilNum <= numCoolingCoilDXs; ++coilNum) {
-        int NumAlphas;  // Number of Alphas for each GetObjectItem call
-        int NumNumbers; // Number of Numbers for each GetObjectItem call
-        int IOStatus;
-        state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                 state.dataCoilCoolingDX->coilCoolingDXObjectName,
-                                                                 coilNum,
-                                                                 state.dataIPShortCut->cAlphaArgs,
-                                                                 NumAlphas,
-                                                                 state.dataIPShortCut->rNumericArgs,
-                                                                 NumNumbers,
-                                                                 IOStatus);
+    auto const &coilSchemaProps = inputProcessor->getObjectSchemaProps(state, state.dataCoilCoolingDX->coilCoolingDXObjectName);
+
+    for (auto const &coilInstance : coilInstances.value().items()) {
+        auto const &coilFields = coilInstance.value();
         CoilCoolingDXInputSpecification input_specs;
-        input_specs.name = state.dataIPShortCut->cAlphaArgs(1);
-        input_specs.evaporator_inlet_node_name = state.dataIPShortCut->cAlphaArgs(2);
-        input_specs.evaporator_outlet_node_name = state.dataIPShortCut->cAlphaArgs(3);
-        input_specs.availability_schedule_name = state.dataIPShortCut->cAlphaArgs(4);
-        input_specs.condenser_zone_name = state.dataIPShortCut->cAlphaArgs(5);
-        input_specs.condenser_inlet_node_name = state.dataIPShortCut->cAlphaArgs(6);
-        input_specs.condenser_outlet_node_name = state.dataIPShortCut->cAlphaArgs(7);
-        input_specs.performance_object_name = state.dataIPShortCut->cAlphaArgs(8);
-        input_specs.condensate_collection_water_storage_tank_name = state.dataIPShortCut->cAlphaArgs(9);
-        input_specs.evaporative_condenser_supply_water_storage_tank_name = state.dataIPShortCut->cAlphaArgs(10);
+        input_specs.name = Util::makeUPPER(coilInstance.key());
+        input_specs.evaporator_inlet_node_name = inputProcessor->getAlphaFieldValue(coilFields, coilSchemaProps, "evaporator_inlet_node_name");
+        input_specs.evaporator_outlet_node_name = inputProcessor->getAlphaFieldValue(coilFields, coilSchemaProps, "evaporator_outlet_node_name");
+        input_specs.availability_schedule_name = inputProcessor->getAlphaFieldValue(coilFields, coilSchemaProps, "availability_schedule_name");
+        input_specs.condenser_zone_name = inputProcessor->getAlphaFieldValue(coilFields, coilSchemaProps, "condenser_zone_name");
+        input_specs.condenser_inlet_node_name = inputProcessor->getAlphaFieldValue(coilFields, coilSchemaProps, "condenser_inlet_node_name");
+        input_specs.condenser_outlet_node_name = inputProcessor->getAlphaFieldValue(coilFields, coilSchemaProps, "condenser_outlet_node_name");
+        input_specs.performance_object_name = inputProcessor->getAlphaFieldValue(coilFields, coilSchemaProps, "performance_object_name");
+        input_specs.condensate_collection_water_storage_tank_name =
+            inputProcessor->getAlphaFieldValue(coilFields, coilSchemaProps, "condensate_collection_water_storage_tank_name");
+        input_specs.evaporative_condenser_supply_water_storage_tank_name =
+            inputProcessor->getAlphaFieldValue(coilFields, coilSchemaProps, "evaporative_condenser_supply_water_storage_tank_name");
         CoilCoolingDX thisCoil;
         thisCoil.instantiateFromInputSpec(state, input_specs);
+        inputProcessor->markObjectAsUsed(state.dataCoilCoolingDX->coilCoolingDXObjectName, coilInstance.key());
         state.dataCoilCoolingDX->coilCoolingDXs.push_back(thisCoil);
     }
 }
@@ -154,11 +149,13 @@ void CoilCoolingDX::instantiateFromInputSpec(EnergyPlusData &state, const CoilCo
 {
     static constexpr std::string_view routineName = "CoilCoolingDX::instantiateFromInputSpec";
 
-    ErrorObjectHeader eoh{routineName, "CoilCoolingDX", input_data.name};
+    ErrorObjectHeader eoh{routineName, "Coil:Cooling:DX", input_data.name};
 
     this->original_input_specs = input_data;
     bool errorsFound = false;
     this->name = input_data.name;
+    this->coilType = HVAC::CoilType::CoolingDX;
+    this->coilReportNum = ReportCoilSelection::getReportIndex(state, this->name, this->coilType);
 
     // initialize reclaim heat parameters
     this->reclaimHeat.Name = this->name;
@@ -804,23 +801,21 @@ void CoilCoolingDX::simulate(EnergyPlusData &state,
             // report out final coil sizing info
             Real64 ratedSensCap(0.0);
             ratedSensCap = this->performance->ratedGrossTotalCap() * this->performance->grossRatedSHR(state);
-            state.dataRptCoilSelection->coilSelectionReportObj->setCoilFinalSizes(state,
-                                                                                  this->name,
-                                                                                  state.dataCoilCoolingDX->coilCoolingDXObjectName,
-                                                                                  this->performance->ratedGrossTotalCap(),
-                                                                                  ratedSensCap,
-                                                                                  this->performance->ratedEvapAirFlowRate(state),
-                                                                                  -999.0);
+            ReportCoilSelection::setCoilFinalSizes(state,
+                                                   this->coilReportNum,
+                                                   this->performance->ratedGrossTotalCap(),
+                                                   ratedSensCap,
+                                                   this->performance->ratedEvapAirFlowRate(state),
+                                                   -999.0);
 
             // report out fan information
             // should work for all fan types
             if (this->supplyFanIndex > 0) {
-                state.dataRptCoilSelection->coilSelectionReportObj->setCoilSupplyFanInfo(state,
-                                                                                         this->name,
-                                                                                         state.dataCoilCoolingDX->coilCoolingDXObjectName,
-                                                                                         state.dataFans->fans(this->supplyFanIndex)->Name,
-                                                                                         state.dataFans->fans(this->supplyFanIndex)->type,
-                                                                                         this->supplyFanIndex);
+                ReportCoilSelection::setCoilSupplyFanInfo(state,
+                                                          this->coilReportNum,
+                                                          state.dataFans->fans(this->supplyFanIndex)->Name,
+                                                          state.dataFans->fans(this->supplyFanIndex)->type,
+                                                          this->supplyFanIndex);
             }
 
             // report out coil rating conditions, just create a set of dummy nodes and run calculate on them
@@ -900,22 +895,21 @@ void CoilCoolingDX::simulate(EnergyPlusData &state,
 
             Real64 const ratedOutletWetBulb = Psychrometrics::PsyTwbFnTdbWPb(
                 state, dummyEvapOutlet.Temp, dummyEvapOutlet.HumRat, DataEnvironment::StdPressureSeaLevel, "Coil:Cooling:DX::simulate");
-            state.dataRptCoilSelection->coilSelectionReportObj->setRatedCoilConditions(state,
-                                                                                       this->name,
-                                                                                       state.dataCoilCoolingDX->coilCoolingDXObjectName,
-                                                                                       coolingRate,
-                                                                                       sensCoolingRate,
-                                                                                       ratedInletEvapMassFlowRate,
-                                                                                       RatedInletAirTemp,
-                                                                                       dummyInletAirHumRat,
-                                                                                       RatedInletWetBulbTemp,
-                                                                                       dummyEvapOutlet.Temp,
-                                                                                       dummyEvapOutlet.HumRat,
-                                                                                       ratedOutletWetBulb,
-                                                                                       RatedOutdoorAirTemp,
-                                                                                       ratedOutdoorAirWetBulb,
-                                                                                       this->performance->ratedCBF(state),
-                                                                                       -999.0);
+            ReportCoilSelection::setRatedCoilConditions(state,
+                                                        this->coilReportNum,
+                                                        coolingRate,
+                                                        sensCoolingRate,
+                                                        ratedInletEvapMassFlowRate,
+                                                        RatedInletAirTemp,
+                                                        dummyInletAirHumRat,
+                                                        RatedInletWetBulbTemp,
+                                                        dummyEvapOutlet.Temp,
+                                                        dummyEvapOutlet.HumRat,
+                                                        ratedOutletWetBulb,
+                                                        RatedOutdoorAirTemp,
+                                                        ratedOutdoorAirWetBulb,
+                                                        this->performance->ratedCBF(state),
+                                                        -999.0);
 
             this->reportCoilFinalSizes = false;
         }

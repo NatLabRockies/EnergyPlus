@@ -9,7 +9,7 @@ CONTAINS
 
 SUBROUTINE SetThisVersionVariables()
       ! TODO: Update this section as appropriate
-      VerString='Conversion 26.1 => 26.1'
+      VerString='Conversion 26.1 => 26.2'
       VersionNum=26.2
       ! Starting with version 22.1, the version string requires 4 characters
       ! The original sVersionNum variable is a 3 character length string
@@ -384,6 +384,14 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
               ! If your original object starts with A, insert the rules here
 
               ! If your original object starts with C, insert the rules here
+
+              CASE('COIL:COOLING:DX:CURVEFIT:OPERATINGMODE')
+                  CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
+                  nodiff=.false.
+                  OutArgs(1:8)=InArgs(1:8)
+                  OutArgs(9) = ''  ! new Apply Part Load Fraction to Speeds Greater than 1 field
+                  OutArgs(10:CurArgs+1)=InArgs(9:CurArgs)
+                  CurArgs = CurArgs + 1
 
               ! If your original object starts with D, insert the rules here
 

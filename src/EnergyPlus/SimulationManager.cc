@@ -220,7 +220,6 @@ namespace SimulationManager {
         OutputProcessor::SetupTimePointers(state, OutputProcessor::TimeStepType::System, state.dataHVACGlobal->TimeStepSys);
 
         createFacilityElectricPowerServiceObject(state);
-        createCoilSelectionReportObj(state);
         // read object information early in simulation
         isInputObjectUsed(state);
 

@@ -125,15 +125,12 @@ Real64 CoolingWaterDesAirInletTempSizer::size(EnergyPlusData &state, Real64 _ori
     }
     // override sizing string
     if (this->overrideSizeString) {
-        if (this->isEpJSON) {
-            this->sizingString = "design_inlet_air_temperature [C]";
-        }
+        this->sizingString = "Design Inlet Air Temperature [C]";
     }
     this->selectSizerOutput(state, errorsFound);
     if (this->isCoilReportObject) {
         if (this->curSysNum <= this->numPrimaryAirSys) {
-            state.dataRptCoilSelection->coilSelectionReportObj->setCoilEntAirTemp(
-                state, this->compName, this->compType, this->autoSizedValue, this->curSysNum, this->curZoneEqNum);
+            ReportCoilSelection::setCoilEntAirTemp(state, this->coilReportNum, this->autoSizedValue, this->curSysNum, this->curZoneEqNum);
         }
     }
     return this->autoSizedValue;

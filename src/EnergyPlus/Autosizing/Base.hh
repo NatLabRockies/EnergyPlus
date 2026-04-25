@@ -123,6 +123,7 @@ struct BaseSizer
     bool dataScalableSizingON = false;
     bool dataScalableCapSizingON = false;
     bool isCoilReportObject = false; // provides access to coil reporting
+    int coilReportNum = -1;          // Coil report number for direct access
     bool isFanReportObject = false;  // provides access to fan reporting
     bool initialized = false;        // indicates initializeWithinEP was called
     AutoSizingResultType errorType = AutoSizingResultType::NoError;

@@ -58,6 +58,7 @@
 #include <EnergyPlus/DataErrorTracking.hh>
 #include <EnergyPlus/DataHeatBalSurface.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
+#include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/DataSurfaces.hh>
 #include <EnergyPlus/DataViewFactorInformation.hh>
 #include <EnergyPlus/ElectricPowerServiceManager.hh>
@@ -12686,7 +12687,7 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_GetSurfaceGroundSurfsTest)
     auto &GndSurfsProperty = state->dataSurface->GroundSurfsProperty(GndSurfsNum);
     // check sky view factors
     EXPECT_DOUBLE_EQ(0.5, SrdSurfsProperty.SkyViewFactor);
-    EXPECT_DOUBLE_EQ(0.0, SrdSurfsProperty.GroundViewFactor);
+    EXPECT_EQ(DataSizing::AutoSize, SrdSurfsProperty.GroundViewFactor);
     // check surrounding surfaces view factors
     EXPECT_DOUBLE_EQ(0.1, SrdSurfsProperty.SurroundingSurfs(1).ViewFactor);
     // check ground surfaces view factors

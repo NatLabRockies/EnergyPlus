@@ -1556,16 +1556,14 @@ namespace HybridEvapCoolingModel {
                             PreviousMaxiumHumidOrDehumidOutput = latentRoomORZone;
                         }
                     } else {
-                        if (!DidWeMeetLoad) {
-                            if (CoolingRequested && (SensibleRoomORZone > PreviousMaxiumConditioningOutput)) {
-                                store_best_attempt = true;
-                            }
-                            if (HeatingRequested && (SensibleRoomORZone < PreviousMaxiumConditioningOutput)) {
-                                store_best_attempt = true;
-                            }
-                            if (store_best_attempt) {
-                                PreviousMaxiumConditioningOutput = SensibleRoomORZone;
-                            }
+                        if (CoolingRequested && (SensibleRoomORZone > PreviousMaxiumConditioningOutput)) {
+                            store_best_attempt = true;
+                        }
+                        if (HeatingRequested && (SensibleRoomORZone < PreviousMaxiumConditioningOutput)) {
+                            store_best_attempt = true;
+                        }
+                        if (store_best_attempt) {
+                            PreviousMaxiumConditioningOutput = SensibleRoomORZone;
                         }
                     }
                     if (store_best_attempt) {
@@ -1603,7 +1601,7 @@ namespace HybridEvapCoolingModel {
             CurrentOperatingSettings[1] = oStandBy;
         } else {
             // if we partly met the load then do the best we can and run full out in that optimal setting.
-            if (!DidWeMeetLoad && DidWePartlyMeetLoad) {
+            if (DidWePartlyMeetLoad) {
                 ErrorCode = 0;
                 count_DidWeNotMeetLoad++;
                 if (OptimalSetting.ElectricalPower == IMPLAUSIBLE_POWER) {

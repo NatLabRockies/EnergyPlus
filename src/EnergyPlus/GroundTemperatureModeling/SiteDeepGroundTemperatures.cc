@@ -46,13 +46,13 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <array>
 #include <memory>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataGlobals.hh>
-#include <EnergyPlus/DataIPShortCuts.hh>
 #include <EnergyPlus/GroundTemperatureModeling/SiteDeepGroundTemperatures.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
@@ -73,6 +73,7 @@ namespace GroundTemp {
         // Reads input and creates instance of Site:GroundTemperature:Deep object
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
+        constexpr int numMonths = 12;
         bool errorsFound = false;
 
         // New shared pointer for this model object
@@ -80,30 +81,37 @@ namespace GroundTemp {
 
         ModelType modelType = ModelType::SiteDeep;
 
-        std::string_view const cCurrentModuleObject = GroundTemp::modelTypeNamesUC[(int)modelType];
-        const int numCurrObjects = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
+        std::string_view const cCurrentModuleObject = GroundTemp::modelTypeNames[(int)modelType];
+        std::string const currentModuleObject(cCurrentModuleObject);
+        auto *inputProcessor = state.dataInputProcessing->inputProcessor.get();
+        const int numCurrObjects = inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
 
         thisModel->modelType = modelType;
         thisModel->Name = objectName;
 
         if (numCurrObjects == 1) {
-
-            int NumNums;
-            int NumAlphas;
-            int IOStat;
-
-            // Get the object names for each construction from the input processor
-            state.dataInputProcessing->inputProcessor->getObjectItem(
-                state, cCurrentModuleObject, 1, state.dataIPShortCut->cAlphaArgs, NumAlphas, state.dataIPShortCut->rNumericArgs, NumNums, IOStat);
-
-            if (NumNums < 12) {
-                ShowSevereError(state, fmt::format("{}: Less than 12 values entered.", GroundTemp::modelTypeNames[(int)modelType]));
-                errorsFound = true;
-            }
+            auto const &groundTempsInstances = inputProcessor->epJSON.at(currentModuleObject);
+            auto const groundTempsInstance = groundTempsInstances.begin();
+            auto const &groundTempsFields = groundTempsInstance.value();
+            auto const &groundTempsSchemaProps = inputProcessor->getObjectSchemaProps(state, currentModuleObject);
+            inputProcessor->markObjectAsUsed(currentModuleObject, groundTempsInstance.key());
+            static constexpr std::array<std::string_view, numMonths> fieldNames = {"january_deep_ground_temperature",
+                                                                                   "february_deep_ground_temperature",
+                                                                                   "march_deep_ground_temperature",
+                                                                                   "april_deep_ground_temperature",
+                                                                                   "may_deep_ground_temperature",
+                                                                                   "june_deep_ground_temperature",
+                                                                                   "july_deep_ground_temperature",
+                                                                                   "august_deep_ground_temperature",
+                                                                                   "september_deep_ground_temperature",
+                                                                                   "october_deep_ground_temperature",
+                                                                                   "november_deep_ground_temperature",
+                                                                                   "december_deep_ground_temperature"};
 
             // overwrite values read from weather file for the 0.5m set ground temperatures
-            for (int i = 1; i <= 12; ++i) {
-                thisModel->deepGroundTemps[i - 1] = state.dataIPShortCut->rNumericArgs(i);
+            for (int i = 0; i < numMonths; ++i) {
+                thisModel->deepGroundTemps[i] =
+                    inputProcessor->getRealFieldValue(groundTempsFields, groundTempsSchemaProps, std::string(fieldNames[i]));
             }
 
             state.dataEnvrn->GroundTempInputs[static_cast<int>(DataEnvironment::GroundTempType::Deep)] = true;

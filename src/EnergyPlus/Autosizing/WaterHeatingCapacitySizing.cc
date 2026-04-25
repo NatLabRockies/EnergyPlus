@@ -144,14 +144,12 @@ Real64 WaterHeatingCapacitySizer::size(EnergyPlusData &state, Real64 _originalVa
         }
     }
     if (this->overrideSizeString) {
-        if (this->isEpJSON) {
-            this->sizingString = "rated_capacity";
-        }
+        this->sizingString = "Rated Capacity [W]";
     }
     this->selectSizerOutput(state, errorsFound);
     if (this->isCoilReportObject) {
-        state.dataRptCoilSelection->coilSelectionReportObj->setCoilWaterHeaterCapacityPltSizNum(
-            state, this->compName, this->compType, this->autoSizedValue, this->wasAutoSized, this->dataPltSizHeatNum, this->dataWaterLoopNum);
+        ReportCoilSelection::setCoilWaterHeaterCapacityPltSizNum(
+            state, this->coilReportNum, this->autoSizedValue, this->wasAutoSized, this->dataPltSizHeatNum, this->dataWaterLoopNum);
     }
     return this->autoSizedValue;
 }

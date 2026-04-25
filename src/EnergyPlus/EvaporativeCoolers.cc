@@ -1179,8 +1179,7 @@ void SizeEvapCooler(EnergyPlusData &state, int const EvapCoolNum)
     auto &CurSysNum(state.dataSize->CurSysNum);
     auto &CurZoneEqNum(state.dataSize->CurZoneEqNum);
     const auto &FinalSysSizing(state.dataSize->FinalSysSizing);
-    auto &EvapCond(state.dataEvapCoolers->EvapCond);
-    auto &thisEvapCond(EvapCond(EvapCoolNum));
+    auto &thisEvapCond(state.dataEvapCoolers->EvapCond(EvapCoolNum));
 
     bool HardSizeNoDesRun = !((state.dataSize->SysSizingRunDone || state.dataSize->ZoneSizingRunDone));
     bool SizingDesRunThisAirSys = false; // true if a particular air system had a Sizing:System object and system sizing done
@@ -3974,9 +3973,6 @@ void SizeZoneEvaporativeCoolerUnit(EnergyPlusData &state, int const UnitNum) // 
 
                 CoolingAirFlowSizer sizingCoolingAirFlow;
                 std::string stringOverride = "Design Supply Air Flow Rate [m3/s]";
-                if (state.dataGlobal->isEpJSON) {
-                    stringOverride = "design_supply_air_flow_rate [m3/s]";
-                }
                 sizingCoolingAirFlow.overrideSizingString(stringOverride);
                 sizingCoolingAirFlow.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
                 zoneEvapUnit.DesignAirVolumeFlowRate = sizingCoolingAirFlow.size(state, TempSize, errorsFound);
@@ -3999,9 +3995,6 @@ void SizeZoneEvaporativeCoolerUnit(EnergyPlusData &state, int const UnitNum) // 
 
                 CoolingAirFlowSizer sizingCoolingAirFlow;
                 std::string stringOverride = "Design Supply Air Flow Rate [m3/s]";
-                if (state.dataGlobal->isEpJSON) {
-                    stringOverride = "design_supply_air_flow_rate [m3/s]";
-                }
                 sizingCoolingAirFlow.overrideSizingString(stringOverride);
                 sizingCoolingAirFlow.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
                 zoneEvapUnit.DesignAirVolumeFlowRate = sizingCoolingAirFlow.size(state, TempSize, errorsFound);
@@ -4019,9 +4012,6 @@ void SizeZoneEvaporativeCoolerUnit(EnergyPlusData &state, int const UnitNum) // 
             TempSize = zoneEvapUnit.DesignAirVolumeFlowRate;
             CoolingAirFlowSizer sizingCoolingAirFlow;
             std::string stringOverride = "Design Supply Air Flow Rate [m3/s]";
-            if (state.dataGlobal->isEpJSON) {
-                stringOverride = "design_supply_air_flow_rate [m3/s]";
-            }
             sizingCoolingAirFlow.overrideSizingString(stringOverride);
             sizingCoolingAirFlow.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
             zoneEvapUnit.DesignAirVolumeFlowRate = sizingCoolingAirFlow.size(state, TempSize, errorsFound);

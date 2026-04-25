@@ -429,28 +429,26 @@ namespace UnitarySystems {
                     if (state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).supFanType != HVAC::FanType::Invalid) {
                         auto &primaryAirSystems = state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum);
                         if (this->m_CoolCoilExists) {
-                            state.dataRptCoilSelection->coilSelectionReportObj->setCoilSupplyFanInfo(
+
+                            ReportCoilSelection::setCoilSupplyFanInfo(
                                 state,
-                                this->m_CoolingCoilName,
-                                HVAC::coilTypeNames[(int)this->m_coolCoilType],
+                                ReportCoilSelection::getReportIndex(state, this->m_CoolingCoilName, this->m_coolCoilType),
                                 state.dataFans->fans(primaryAirSystems.supFanNum)->Name,
                                 state.dataFans->fans(primaryAirSystems.supFanNum)->type,
                                 primaryAirSystems.supFanNum);
                         }
                         if (this->m_HeatCoilExists) {
-                            state.dataRptCoilSelection->coilSelectionReportObj->setCoilSupplyFanInfo(
+                            ReportCoilSelection::setCoilSupplyFanInfo(
                                 state,
-                                this->m_HeatingCoilName,
-                                HVAC::coilTypeNames[(int)this->m_heatCoilType],
+                                ReportCoilSelection::getReportIndex(state, this->m_HeatingCoilName, this->m_heatCoilType),
                                 state.dataFans->fans(primaryAirSystems.supFanNum)->Name,
                                 state.dataFans->fans(primaryAirSystems.supFanNum)->type,
                                 primaryAirSystems.supFanNum);
                         }
                         if (this->m_SuppCoilExists) {
-                            state.dataRptCoilSelection->coilSelectionReportObj->setCoilSupplyFanInfo(
+                            ReportCoilSelection::setCoilSupplyFanInfo(
                                 state,
-                                this->m_SuppHeatCoilName,
-                                HVAC::coilTypeNames[(int)this->m_suppHeatCoilType],
+                                ReportCoilSelection::getReportIndex(state, this->m_SuppHeatCoilName, this->m_suppHeatCoilType),
                                 state.dataFans->fans(primaryAirSystems.supFanNum)->Name,
                                 state.dataFans->fans(primaryAirSystems.supFanNum)->type,
                                 primaryAirSystems.supFanNum);
@@ -2120,9 +2118,6 @@ namespace UnitarySystems {
                 bool errorsFound = false;
                 CoolingAirFlowSizer sizingCoolingAirFlow;
                 std::string stringOverride = "Cooling Supply Air Flow Rate [m3/s]";
-                if (state.dataGlobal->isEpJSON) {
-                    stringOverride = "cooling_supply_air_flow_rate [m3/s]";
-                }
                 sizingCoolingAirFlow.overrideSizingString(stringOverride);
                 // sizingCoolingAirFlow.setHVACSizingIndexData(FanCoil(FanCoilNum).HVACSizingIndex);
                 sizingCoolingAirFlow.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
@@ -2203,9 +2198,6 @@ namespace UnitarySystems {
                 bool errorsFound = false;
                 CoolingAirFlowSizer sizingCoolingAirFlow;
                 std::string stringOverride = "Cooling Supply Air Flow Rate [m3/s]";
-                if (state.dataGlobal->isEpJSON) {
-                    stringOverride = "cooling_supply_air_flow_rate [m3/s]";
-                }
                 sizingCoolingAirFlow.overrideSizingString(stringOverride);
                 // sizingCoolingAirFlow.setHVACSizingIndexData(FanCoil(FanCoilNum).HVACSizingIndex);
                 sizingCoolingAirFlow.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
@@ -3662,9 +3654,6 @@ namespace UnitarySystems {
             state.dataSize->DataFlowUsedForSizing = this->m_MaxNoCoolHeatAirVolFlow;
             ASHRAEMinSATCoolingSizer sizerASHRAEMinSATCooling;
             std::string stringOverride = "Minimum Supply Air Temperature [C]";
-            if (state.dataGlobal->isEpJSON) {
-                stringOverride = "minimum_supply_air_temperature [C]";
-            }
             sizerASHRAEMinSATCooling.overrideSizingString(stringOverride);
             sizerASHRAEMinSATCooling.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
             this->DesignMinOutletTemp = sizerASHRAEMinSATCooling.size(state, this->DesignMinOutletTemp, ErrFound);
@@ -3678,9 +3667,6 @@ namespace UnitarySystems {
             state.dataSize->DataFlowUsedForSizing = this->m_MaxNoCoolHeatAirVolFlow;
             ASHRAEMaxSATHeatingSizer sizerASHRAEMaxSATHeating;
             stringOverride = "Maximum Supply Air Temperature [C]";
-            if (state.dataGlobal->isEpJSON) {
-                stringOverride = "maximum_supply_air_temperature [C]";
-            }
             sizerASHRAEMaxSATHeating.overrideSizingString(stringOverride);
             sizerASHRAEMaxSATHeating.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
             this->DesignMaxOutletTemp = sizerASHRAEMaxSATHeating.size(state, this->DesignMaxOutletTemp, ErrFound);
@@ -4822,10 +4808,9 @@ namespace UnitarySystems {
                             thisCoolCoil.SupplyFanIndex = this->m_FanIndex;
                             thisCoolCoil.supplyFanType = this->m_FanType;
                             if (this->m_FanType != HVAC::FanType::Invalid) {
-                                state.dataRptCoilSelection->coilSelectionReportObj->setCoilSupplyFanInfo(
+                                ReportCoilSelection::setCoilSupplyFanInfo(
                                     state,
-                                    thisCoolCoil.Name,
-                                    HVAC::coilTypeNames[(int)thisCoolCoil.coilType],
+                                    ReportCoilSelection::getReportIndex(state, thisCoolCoil.Name, thisCoolCoil.coilType),
                                     state.dataFans->fans(thisCoolCoil.SupplyFanIndex)->Name,
                                     this->m_FanType,
                                     thisCoolCoil.SupplyFanIndex);
@@ -5776,8 +5761,11 @@ namespace UnitarySystems {
 
         // set fan info for supplemental heating coils
         if (this->m_SuppCoilExists && this->m_FanExists) {
-            state.dataRptCoilSelection->coilSelectionReportObj->setCoilSupplyFanInfo(
-                state, this->m_SuppHeatCoilName, this->m_SuppHeatCoilTypeName, this->m_FanName, this->m_FanType, this->m_FanIndex);
+            ReportCoilSelection::setCoilSupplyFanInfo(state,
+                                                      ReportCoilSelection::getReportIndex(state, this->m_SuppHeatCoilName, this->m_suppHeatCoilType),
+                                                      this->m_FanName,
+                                                      this->m_FanType,
+                                                      this->m_FanIndex);
         }
 
         // Users may not provide SA flow input fields (below) and leave them blank. Check if other coil is AutoSized first to
@@ -6399,8 +6387,11 @@ namespace UnitarySystems {
                     }
                 }
                 // set fan info for cooling coils
-                state.dataRptCoilSelection->coilSelectionReportObj->setCoilSupplyFanInfo(
-                    state, this->m_CoolingCoilName, input_data.cooling_coil_object_type, this->m_FanName, this->m_FanType, this->m_FanIndex);
+                ReportCoilSelection::setCoilSupplyFanInfo(state,
+                                                          ReportCoilSelection::getReportIndex(state, this->m_CoolingCoilName, this->m_coolCoilType),
+                                                          this->m_FanName,
+                                                          this->m_FanType,
+                                                          this->m_FanIndex);
             }
             if (this->m_HeatCoilExists) {
                 if (loc_m_HeatingSAFMethod.empty()) {
@@ -6421,8 +6412,11 @@ namespace UnitarySystems {
                     }
                 }
                 // set fan info for heating coils
-                state.dataRptCoilSelection->coilSelectionReportObj->setCoilSupplyFanInfo(
-                    state, this->m_HeatingCoilName, this->m_HeatingCoilTypeName, this->m_FanName, this->m_FanType, this->m_FanIndex);
+                ReportCoilSelection::setCoilSupplyFanInfo(state,
+                                                          ReportCoilSelection::getReportIndex(state, this->m_HeatingCoilName, this->m_heatCoilType),
+                                                          this->m_FanName,
+                                                          this->m_FanType,
+                                                          this->m_FanIndex);
             }
         }
 

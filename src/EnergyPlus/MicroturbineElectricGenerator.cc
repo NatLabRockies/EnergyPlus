@@ -1191,7 +1191,7 @@ void MTGeneratorSpecs::InitMTGenerators(EnergyPlusData &state,
         if (!RunFlag) {
             DesiredMassFlowRate = 0.0;
 
-        } else if (RunFlag && this->InternalFlowControl) {
+        } else if (this->InternalFlowControl) {
             // assume dispatch power in MyLoad is what gets produced (future, reset during calc routine and iterate)
             if (this->HeatRecFlowFTempPowCurveNum != 0) {
                 DesiredMassFlowRate =
@@ -1203,7 +1203,7 @@ void MTGeneratorSpecs::InitMTGenerators(EnergyPlusData &state,
 
             DesiredMassFlowRate = max(DataPrecisionGlobals::constant_zero, DesiredMassFlowRate); // protect from neg. curve result
 
-        } else if (RunFlag && (!this->InternalFlowControl)) {
+        } else {
             DesiredMassFlowRate = this->DesignHeatRecMassFlowRate;
         }
 
@@ -1215,7 +1215,7 @@ void MTGeneratorSpecs::InitMTGenerators(EnergyPlusData &state,
             state.dataLoopNodes->Node(this->HeatRecInletNodeNum).MassFlowRate =
                 max(DataPrecisionGlobals::constant_zero, state.dataLoopNodes->Node(this->HeatRecInletNodeNum).MassFlowRateMinAvail);
 
-        } else if (RunFlag && this->InternalFlowControl) {
+        } else if (this->InternalFlowControl) {
             // assume dispatch power in MyLoad is what gets produced (future, reset during calc routine and iterate)
             if (this->HeatRecFlowFTempPowCurveNum != 0) {
                 Real64 DesiredMassFlowRate =
@@ -1227,7 +1227,7 @@ void MTGeneratorSpecs::InitMTGenerators(EnergyPlusData &state,
                 PlantUtilities::SetComponentFlowRate(
                     state, this->HeatRecMdot, this->HeatRecInletNodeNum, this->HeatRecOutletNodeNum, this->HRPlantLoc);
             }
-        } else if (RunFlag && (!this->InternalFlowControl)) {
+        } else {
             PlantUtilities::SetComponentFlowRate(state, this->HeatRecMdot, this->HeatRecInletNodeNum, this->HeatRecOutletNodeNum, this->HRPlantLoc);
         }
     }

@@ -921,6 +921,7 @@ TEST_F(EnergyPlusFixture, HXAssistCCUnitarySystem_NewDXCoil_Processing_Test)
         "    0.0,                     !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}",
         "    ,                        !- Latent Capacity Time Constant {s}",
         "    0.0,                     !- Nominal Time for Condensate Removal to Begin {s}",
+        "    Yes,                     !- Apply Part Load Fraction to Speeds Greater than 1",
         "    ,                        !- Apply Latent Degradation to Speeds Greater than 1",
         "    AirCooled,               !- Condenser Type",
         "    ,                        !- Nominal Evaporative Condenser Pump Power {W}",

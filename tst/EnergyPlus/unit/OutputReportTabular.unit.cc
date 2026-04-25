@@ -6549,7 +6549,6 @@ TEST_F(EnergyPlusFixture, OutputReportTabularMonthly_invalidAggregationOrder)
 TEST_F(EnergyPlusFixture, OutputReportTabularTest_CollectPeakZoneConditions_test)
 {
     state->init_state(*state);
-    createCoilSelectionReportObj(*state);
 
     CompLoadTablesType compLoad;
     int timeOfMax = 63;
@@ -7044,8 +7043,6 @@ TEST_F(SQLiteFixture, OutputReportTabular_WriteLoadComponentSummaryTables_AirLoo
     state->dataOutRptTab->displayZoneComponentLoadSummary = true;
     state->dataOutRptTab->displayFacilityComponentLoadSummary = true;
     state->dataGlobal->CompLoadReportIsReq = true;
-
-    createCoilSelectionReportObj(*state);
 
     // Two design days
     int numDesDays = 2;

@@ -96,7 +96,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXAlternateModePerformance)
                                                 "    Coil Mode 1,",
                                                 "    5000,   !- Rated Gross Total Cooling Capacity {W}",
                                                 "    0.25,   !- Rated Evaporator Air Flow Rate {m3/s}",
-                                                "    ,,,,,,,,",
+                                                "    ,,,,,,,,,",
                                                 "    2,Coil Mode 1 Speed 1,Coil Mode 1 Speed 2;",
 
                                                 "  Coil:Cooling:DX:CurveFit:Speed,",
@@ -123,7 +123,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXAlternateModePerformance)
                                                 "    Coil Mode 2,",
                                                 "    5000,   !- Rated Gross Total Cooling Capacity {W}",
                                                 "    0.25,   !- Rated Evaporator Air Flow Rate {m3/s}",
-                                                "    ,,,,,,,,",
+                                                "    ,,,,,,,,,",
                                                 "    2,Coil Mode 2 Speed 1,Coil Mode 2 Speed 2;",
 
                                                 "  Coil:Cooling:DX:CurveFit:Speed,",
@@ -232,7 +232,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXAlternateModePerformanceHitsSaturation)
                                                 "    Coil Mode 1,",
                                                 "    10000,   !- Rated Gross Total Cooling Capacity {W}",
                                                 "    0.25,   !- Rated Evaporator Air Flow Rate {m3/s}",
-                                                "    ,,,,,,,,",
+                                                "    ,,,,,,,,,",
                                                 "    2,Coil Mode 1 Speed 1,Coil Mode 1 Speed 2;",
 
                                                 "  Coil:Cooling:DX:CurveFit:Speed,",
@@ -259,7 +259,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXAlternateModePerformanceHitsSaturation)
                                                 "    Coil Mode 2,",
                                                 "    10000,   !- Rated Gross Total Cooling Capacity {W}",
                                                 "    0.25,   !- Rated Evaporator Air Flow Rate {m3/s}",
-                                                "    ,,,,,,,,",
+                                                "    ,,,,,,,,,",
                                                 "    2,Coil Mode 2 Speed 1,Coil Mode 2 Speed 2;",
 
                                                 "  Coil:Cooling:DX:CurveFit:Speed,",
@@ -1714,6 +1714,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDX_LowerSpeedFlowSizingTest)
         "    0,                       !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}",
         "    0,                       !- Latent Capacity Time Constant {s}",
         "    0,                       !- Nominal Time for Condensate Removal to Begin {s}",
+        "    ,                        !- Apply Part Load Fraction to Speeds Greater than 1",
         "    ,                        !- Apply Latent Degradation to Speeds Greater than 1",
         "    AirCooled,               !- Condenser Type",
         "    0,                       !- Nominal Evaporative Condenser Pump Power {W}",

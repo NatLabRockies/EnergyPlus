@@ -1744,6 +1744,7 @@
     ,                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
     ,                        !- Latent Capacity Time Constant {s}
     ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ,                        !- Apply Part Load Fraction to Speeds Greater than 1
     ,                        !- Apply Latent Degradation to Speeds Greater than 1
     ,                        !- Condenser Type
     ,                        !- Nominal Evaporative Condenser Pump Power {W}

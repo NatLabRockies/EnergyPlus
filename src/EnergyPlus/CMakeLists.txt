@@ -798,7 +798,8 @@ target_link_libraries(
          ssc
          libtk205)
 
-target_link_libraries(energypluslib PRIVATE project_options project_fp_options project_warnings cpp_pch_files)
+target_link_libraries(energypluslib PRIVATE project_options project_fp_options project_warnings)
+ep_enable_pch(energypluslib)
 
 if(OPENGL_FOUND)
   target_link_libraries(energypluslib PUBLIC penumbra)

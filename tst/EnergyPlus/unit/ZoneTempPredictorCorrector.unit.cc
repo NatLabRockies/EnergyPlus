@@ -301,6 +301,40 @@ TEST_F(EnergyPlusFixture, ZoneTempPredictorCorrector_ReportingTest)
         "  ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type",
         "  Core_top HeatSPSched;    !- Control 1 Name",
         " ",
+        "ZoneControl:Humidistat,",
+        "  Core_top Humidistat,     !- Name",
+        "  Core_top,                !- Zone Name",
+        "  Humidification Seasonal Dew-Point Temperature Sch,    !- Humidifying Setpoint Schedule Name",
+        "  Dehumidification Seasonal Dew-Point Temperature Sch,  !- Dehumidifying Setpoint Schedule Name",
+        "  Dewpoint;                                             !- Control Variable",
+        " ",
+        "ZoneControl:Humidistat,",
+        "  Core_bottom Humidistat,     !- Name",
+        "  Core_bottom,                !- Zone Name",
+        "  Humidification Seasonal Dew-Point Temperature Sch,    !- Humidifying Setpoint Schedule Name",
+        "  Dehumidification Seasonal Dew-Point Temperature Sch,  !- Dehumidifying Setpoint Schedule Name",
+        "  Dewpoint;                                             !- Control Variable",
+        " ",
+        "ZoneControl:Humidistat,",
+        "  Core_middle Humidistat,     !- Name",
+        "  Core_middle,                !- Zone Name",
+        "  Humidification Seasonal Dew-Point Temperature Sch,    !- Humidifying Setpoint Schedule Name",
+        "  Dehumidification Seasonal Dew-Point Temperature Sch,  !- Dehumidifying Setpoint Schedule Name",
+        "  Dewpoint;                                             !- Control Variable",
+        " ",
+        "ZoneControl:Humidistat,",
+        "  Core_basement Humidistat,     !- Name",
+        "  Core_basement,                !- Zone Name",
+        "  Humidification Seasonal Dew-Point Temperature Sch,    !- Humidifying Setpoint Schedule Name",
+        "  Dehumidification Seasonal Dew-Point Temperature Sch,  !- Dehumidifying Setpoint Schedule Name",
+        "  Dewpoint;                                             !- Control Variable",
+        " ",
+        "Schedule:Constant,",
+        "  Dehumidification Seasonal Dew-Point Temperature Sch,,14.0;",
+        " ",
+        "Schedule:Constant,",
+        "  Humidification Seasonal Dew-Point Temperature Sch,,10.0;",
+        " ",
         "Schedule:Compact,",
         "  Single Heating Control Type Sched,  !- Name",
         "  Control Type,            !- Schedule Type Limits Name",
@@ -452,6 +486,8 @@ TEST_F(EnergyPlusFixture, ZoneTempPredictorCorrector_ReportingTest)
 
     state->dataGlobal->TimeStepsInHour = 1;    // must initialize this to get schedules initialized
     state->dataGlobal->MinutesInTimeStep = 60; // must initialize this to get schedules initialized
+    state->dataEnvrn->OutBaroPress = 101325.0;
+    state->dataHVACGlobal->TimeStepSysSec = 6;
     state->init_state(*state);
 
     bool ErrorsFound(false); // If errors detected in input
@@ -481,6 +517,26 @@ TEST_F(EnergyPlusFixture, ZoneTempPredictorCorrector_ReportingTest)
     state->dataHeatBalFanSys->LoadCorrectionFactor(CoolZoneNum) = 1.0;
     state->dataHeatBalFanSys->LoadCorrectionFactor(CoolHeatZoneNum) = 1.0;
     state->dataHeatBalFanSys->LoadCorrectionFactor(DualZoneNum) = 1.0;
+
+    state->dataHeatBalFanSys->SumLatentHTRadSys.allocate(state->dataZoneCtrls->NumTempControlledZones);
+    state->dataHeatBalFanSys->SumLatentHTRadSys(HeatZoneNum) = 0.0;
+    state->dataHeatBalFanSys->SumLatentHTRadSys(CoolZoneNum) = 0.0;
+    state->dataHeatBalFanSys->SumLatentHTRadSys(CoolHeatZoneNum) = 0.0;
+    state->dataHeatBalFanSys->SumLatentHTRadSys(DualZoneNum) = 0.0;
+
+    state->dataHeatBalFanSys->SumLatentPool.allocate(state->dataZoneCtrls->NumTempControlledZones);
+    state->dataHeatBalFanSys->SumLatentPool(HeatZoneNum) = 0.0;
+    state->dataHeatBalFanSys->SumLatentPool(CoolZoneNum) = 0.0;
+    state->dataHeatBalFanSys->SumLatentPool(CoolHeatZoneNum) = 0.0;
+    state->dataHeatBalFanSys->SumLatentPool(DualZoneNum) = 0.0;
+
+    state->dataZoneEnergyDemand->ZoneSysMoistureDemand.allocate(state->dataZoneCtrls->NumTempControlledZones);
+
+    state->dataRoomAir->AirModel.allocate(state->dataZoneCtrls->NumTempControlledZones);
+    state->dataRoomAir->AirModel(HeatZoneNum).AirModel = RoomAirModel::Mixing;
+    state->dataRoomAir->AirModel(CoolZoneNum).AirModel = RoomAirModel::Mixing;
+    state->dataRoomAir->AirModel(CoolHeatZoneNum).AirModel = RoomAirModel::Mixing;
+    state->dataRoomAir->AirModel(DualZoneNum).AirModel = RoomAirModel::Mixing;
 
     // The following parameters describe the setpoint types in TempControlType(ActualZoneNum)
     //	extern int const SingleHeatingSetPoint; = 1
@@ -566,8 +622,14 @@ TEST_F(EnergyPlusFixture, ZoneTempPredictorCorrector_ReportingTest)
                   .TotalOutputRequired); // TotalOutputRequired gets updated in CalcPredictedSystemLoad based on the load
 
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(CoolHeatZoneNum).calcPredictedSystemLoad(*state, 1.0, CoolHeatZoneNum);
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(CoolHeatZoneNum).calcPredictedHumidityRatio(*state, 1.0, CoolHeatZoneNum);
 
     ASSERT_EQ(22.0, state->dataHeatBalFanSys->zoneTstatSetpts(CoolHeatZoneNum).setpt);
+    ASSERT_EQ(10.0, state->dataZoneCtrls->HumidityControlZone(CoolHeatZoneNum).humidifyingSched->getCurrentVal());
+    ASSERT_EQ(14.0, state->dataZoneCtrls->HumidityControlZone(CoolHeatZoneNum).dehumidifyingSched->getCurrentVal());
+    EXPECT_NEAR(-357.443,
+                state->dataZoneEnergyDemand->ZoneSysMoistureDemand(CoolHeatZoneNum).OutputRequiredToDehumidifyingSP,
+                0.001); // calculated based on 14 deg. C dew-point temperature
     EXPECT_FALSE(
         state->dataZoneEnergyDemand->CurDeadBandOrSetback(CoolHeatZoneNum)); // Tstat should show there is load on a single heating or cooling SP
     EXPECT_EQ(-4000.0,

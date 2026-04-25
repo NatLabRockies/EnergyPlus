@@ -1574,9 +1574,6 @@ void SizePurchasedAir(EnergyPlusData &state, int const PurchAirNum)
                         state.dataSize->DataScalableSizingON = true;
                         CoolingAirFlowSizer sizingCoolingAirFlow;
                         std::string stringOverride = "Maximum Cooling Air Flow Rate [m3/s]";
-                        if (state.dataGlobal->isEpJSON) {
-                            stringOverride = "maximum_cooling_air_flow_rate [m3/s]";
-                        }
                         sizingCoolingAirFlow.overrideSizingString(stringOverride);
                         // sizingCoolingAirFlow.setHVACSizingIndexData(FanCoil(FanCoilNum).HVACSizingIndex);
                         sizingCoolingAirFlow.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
@@ -1590,9 +1587,6 @@ void SizePurchasedAir(EnergyPlusData &state, int const PurchAirNum)
                             state.dataSize->DataScalableSizingON = true;
                             CoolingAirFlowSizer sizingCoolingAirFlow;
                             std::string stringOverride = "Maximum Cooling Air Flow Rate [m3/s]";
-                            if (state.dataGlobal->isEpJSON) {
-                                stringOverride = "maximum_cooling_air_flow_rate [m3/s]";
-                            }
                             sizingCoolingAirFlow.overrideSizingString(stringOverride);
                             // sizingCoolingAirFlow.setHVACSizingIndexData(FanCoil(FanCoilNum).HVACSizingIndex);
                             sizingCoolingAirFlow.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
@@ -1617,9 +1611,6 @@ void SizePurchasedAir(EnergyPlusData &state, int const PurchAirNum)
                         state.dataSize->DataScalableSizingON = true;
                         CoolingAirFlowSizer sizingCoolingAirFlow;
                         std::string stringOverride = "Maximum Cooling Air Flow Rate [m3/s]";
-                        if (state.dataGlobal->isEpJSON) {
-                            stringOverride = "maximum_cooling_air_flow_rate [m3/s]";
-                        }
                         sizingCoolingAirFlow.overrideSizingString(stringOverride);
                         // sizingCoolingAirFlow.setHVACSizingIndexData(FanCoil(FanCoilNum).HVACSizingIndex);
                         sizingCoolingAirFlow.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
@@ -1806,9 +1797,6 @@ void SizePurchasedAir(EnergyPlusData &state, int const PurchAirNum)
                 if (PurchAir.MaxCoolVolFlowRate > 0.0) {
                     CoolingAirFlowSizer sizingCoolingAirFlow;
                     std::string stringOverride = "Maximum Cooling Air Flow Rate [m3/s]";
-                    if (state.dataGlobal->isEpJSON) {
-                        stringOverride = "maximum_cooling_air_flow_rate [m3/s]";
-                    }
                     sizingCoolingAirFlow.overrideSizingString(stringOverride);
                     // sizingCoolingAirFlow.setHVACSizingIndexData(FanCoil(FanCoilNum).HVACSizingIndex);
                     sizingCoolingAirFlow.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
@@ -1819,9 +1807,6 @@ void SizePurchasedAir(EnergyPlusData &state, int const PurchAirNum)
                 TempSize = PurchAir.MaxCoolVolFlowRate;
                 CoolingAirFlowSizer sizingCoolingAirFlow;
                 std::string stringOverride = "Maximum Cooling Air Flow Rate [m3/s]";
-                if (state.dataGlobal->isEpJSON) {
-                    stringOverride = "maximum_cooling_air_flow_rate [m3/s]";
-                }
                 sizingCoolingAirFlow.overrideSizingString(stringOverride);
                 // sizingCoolingAirFlow.setHVACSizingIndexData(FanCoil(FanCoilNum).HVACSizingIndex);
                 sizingCoolingAirFlow.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);

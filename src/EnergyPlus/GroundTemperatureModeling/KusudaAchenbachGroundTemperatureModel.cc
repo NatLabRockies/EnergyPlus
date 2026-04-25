@@ -45,9 +45,11 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
+#include <array>
+
 // EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
-#include <EnergyPlus/DataIPShortCuts.hh>
 #include <EnergyPlus/GroundTemperatureModeling/KusudaAchenbachGroundTemperatureModel.hh>
 #include <EnergyPlus/GroundTemperatureModeling/SiteShallowGroundTemperatures.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
@@ -72,53 +74,53 @@ namespace GroundTemp {
         // Locals
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         bool found = false;
-        int NumNums;
-        int NumAlphas;
-        int IOStat;
-
         // New shared pointer for this model object
         auto *thisModel = new KusudaGroundTempsModel();
 
-        // There was some **spooky** behavior here.  One of the calling sites for this factory was passing in a reference
-        //  to a dataIPShortCuts item as the objectName argument.  Inside here, we make a second call to getObjectItem
-        //  which then overwrites the value.  So objectName gets overwritten.  I made a copy of the string here to ensure
-        //  it persists.
+        // There was some **spooky** behavior here. One of the calling sites for this factory was passing in a reference
+        // to a shared input buffer item as the objectName argument. Taking a local copy ensures the sought name persists.
         const std::string lookingForName = objectName; // NOLINT(*-unnecessary-copy-initialization)
 
         ModelType modelType = ModelType::Kusuda;
 
-        std::string_view const cCurrentModuleObject = GroundTemp::modelTypeNamesUC[(int)modelType];
-        const int numCurrModels = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
+        std::string_view const cCurrentModuleObject = GroundTemp::modelTypeNames[(int)modelType];
+        std::string const currentModuleObject(cCurrentModuleObject);
+        auto *inputProcessor = state.dataInputProcessing->inputProcessor.get();
+        auto const modelInstances = inputProcessor->epJSON.find(currentModuleObject);
+        if (modelInstances == inputProcessor->epJSON.end()) {
+            ShowFatalError(state, fmt::format("{}--Errors getting input for ground temperature model", GroundTemp::modelTypeNames[(int)modelType]));
+        }
+        auto const &modelSchemaProps = inputProcessor->getObjectSchemaProps(state, currentModuleObject);
 
-        for (int modelNum = 1; modelNum <= numCurrModels; ++modelNum) {
+        for (auto const &modelInstance : modelInstances.value().items()) {
+            auto const modelName = Util::makeUPPER(modelInstance.key());
+            auto const &modelFields = modelInstance.value();
 
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     cCurrentModuleObject,
-                                                                     modelNum,
-                                                                     state.dataIPShortCut->cAlphaArgs,
-                                                                     NumAlphas,
-                                                                     state.dataIPShortCut->rNumericArgs,
-                                                                     NumNums,
-                                                                     IOStat);
-
-            if (lookingForName == state.dataIPShortCut->cAlphaArgs(1)) {
+            if (lookingForName == modelName) {
+                inputProcessor->markObjectAsUsed(currentModuleObject, modelInstance.key());
 
                 // Read input into object here
-                thisModel->Name = state.dataIPShortCut->cAlphaArgs(1);
+                thisModel->Name = modelName;
                 thisModel->modelType = modelType;
-                thisModel->groundThermalDiffusivity =
-                    state.dataIPShortCut->rNumericArgs(1) / (state.dataIPShortCut->rNumericArgs(2) * state.dataIPShortCut->rNumericArgs(3));
+                thisModel->groundThermalDiffusivity = inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "soil_thermal_conductivity") /
+                                                      (inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "soil_density") *
+                                                       inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "soil_specific_heat"));
 
                 std::array<Real64, 3> flags = {
-                    state.dataIPShortCut->rNumericArgs(4), state.dataIPShortCut->rNumericArgs(5), state.dataIPShortCut->rNumericArgs(6)};
+                    inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "average_soil_surface_temperature"),
+                    inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "average_amplitude_of_surface_temperature"),
+                    inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "phase_shift_of_minimum_surface_temperature")};
                 const bool useGroundTempDataForKusuda =
                     std::any_of(flags.begin(), flags.end(), [](Real64 const flag) { return static_cast<bool>(flag); });
 
                 if (useGroundTempDataForKusuda) {
                     // Use Kusuda Parameters
-                    thisModel->aveGroundTemp = state.dataIPShortCut->rNumericArgs(4);
-                    thisModel->aveGroundTempAmplitude = state.dataIPShortCut->rNumericArgs(5);
-                    thisModel->phaseShiftInSecs = state.dataIPShortCut->rNumericArgs(6) * Constant::rSecsInDay;
+                    thisModel->aveGroundTemp = inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "average_soil_surface_temperature");
+                    thisModel->aveGroundTempAmplitude =
+                        inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "average_amplitude_of_surface_temperature");
+                    thisModel->phaseShiftInSecs =
+                        inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "phase_shift_of_minimum_surface_temperature") *
+                        Constant::rSecsInDay;
                 } else {
                     // Use data from Site:GroundTemperature:Shallow to generate parameters
 

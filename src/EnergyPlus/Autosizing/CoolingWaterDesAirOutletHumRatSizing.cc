@@ -155,13 +155,11 @@ Real64 CoolingWaterDesAirOutletHumRatSizer::size(EnergyPlusData &state, Real64 _
         }
     }
     if (this->overrideSizeString) {
-        if (this->isEpJSON) {
-            this->sizingString = "design_outlet_air_humidity_ratio [kgWater/kgDryAir]";
-        }
+        this->sizingString = "Design Outlet Air Humidity Ratio [kgWater/kgDryAir]";
     }
     this->selectSizerOutput(state, errorsFound);
     if (this->isCoilReportObject) {
-        state.dataRptCoilSelection->coilSelectionReportObj->setCoilLvgAirHumRat(state, this->compName, this->compType, this->autoSizedValue);
+        ReportCoilSelection::setCoilLvgAirHumRat(state, this->coilReportNum, this->autoSizedValue);
     }
     return this->autoSizedValue;
 }

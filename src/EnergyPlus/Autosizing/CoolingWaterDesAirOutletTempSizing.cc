@@ -169,13 +169,11 @@ Real64 CoolingWaterDesAirOutletTempSizer::size(EnergyPlusData &state, Real64 _or
     }
     // override sizing string
     if (this->overrideSizeString) {
-        if (this->isEpJSON) {
-            this->sizingString = "design_outlet_air_temperature [C]";
-        }
+        this->sizingString = "Design Outlet Air Temperature [C]";
     }
     this->selectSizerOutput(state, errorsFound);
     if (this->isCoilReportObject) {
-        state.dataRptCoilSelection->coilSelectionReportObj->setCoilLvgAirTemp(state, this->compName, this->compType, this->autoSizedValue);
+        ReportCoilSelection::setCoilLvgAirTemp(state, this->coilReportNum, this->autoSizedValue);
     }
     return this->autoSizedValue;
 }

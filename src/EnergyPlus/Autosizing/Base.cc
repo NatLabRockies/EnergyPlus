@@ -108,6 +108,7 @@ void BaseSizer::initializeWithinEP(EnergyPlusData &state,
     this->airloopDOAS = state.dataAirLoopHVACDOAS->airloopDOAS;
     if (EnergyPlus::BaseSizer::isValidCoilType(this->compType)) { // coil reports fail if compType is not one of HVAC::cAllCoilTypes
         this->isCoilReportObject = true;
+        this->coilReportNum = ReportCoilSelection::getReportIndex(state, this->compName, this->coilType);
     }
     if (EnergyPlus::BaseSizer::isValidFanType(this->compType)) { // fan reports fail if compType is not a valid fan type
         this->isFanReportObject = true;
@@ -651,7 +652,29 @@ bool BaseSizer::checkInitialized(EnergyPlusData &state, bool &errorsFound)
 
 void BaseSizer::overrideSizingString(std::string_view const string)
 {
-    this->sizingString = string;
+    // some strings are set inside loops where field names are read in and change slightly.
+    // (e.g., at Speed 1, at Speed 2, or high_speed vs low_speed)
+    // these cannot easily be set in a component model's sizing function
+    // for those corner cases convert snake_case to Camel Case here:
+    std::string word, result;
+    std::string str{string.data(), string.size()}; // convert string_view to string
+    std::istringstream iss(str);
+    // blank strings will jump to end, Camel Case strings will pass through loop once
+    while (std::getline(iss, word, '_')) {
+        if (word == "for" || word == "per" || word == "at") { // don't Capitalize certain words
+            result += word;
+        } else if (word == "ua") { // Capitalize all letters of certain words
+            std::transform(word.begin(), word.end(), word.begin(), ::toupper);
+            result += word;
+        } else {
+            result += toupper(word[0]); // Capitalize the first letter
+            result += word.substr(1);   // Append the rest of the word
+        }
+        if (result.size() != str.size()) {
+            result.insert(result.size(), " "); // insert space between words but not at end of string
+        }
+    }
+    this->sizingString = result;
     this->overrideSizeString = false;
 }
 

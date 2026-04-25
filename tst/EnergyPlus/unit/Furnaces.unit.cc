@@ -68,6 +68,7 @@
 #include <EnergyPlus/IOFiles.hh>
 #include <EnergyPlus/OutputProcessor.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
+#include <EnergyPlus/ReportCoilSelection.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/SimulationManager.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
@@ -278,42 +279,51 @@ TEST_F(EnergyPlusFixture, SetVSHPAirFlowTest_VSFurnaceFlowTest)
     firstHVACIteration = false; // now the coils will be called
     state->dataFurnaces->Furnace(FurnaceNum).CoolingCoilIndex = 1;
     state->dataFurnaces->Furnace(FurnaceNum).HeatingCoilIndex = 2;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP.allocate(2);
     state->dataWaterToAirHeatPumpSimple->NumWatertoAirHPs = 2;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).Name = "WATERCOOLINGCOIL";
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).WAHPPlantType = DataPlant::PlantEquipmentType::CoilWAHPCoolingEquationFit;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).WAHPType = WaterToAirHeatPumpSimple::WatertoAirHP::Cooling;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).availSched = Sched::GetScheduleAlwaysOn(*state);
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).Name = "WATERHEATINGCOIL";
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).WAHPPlantType = DataPlant::PlantEquipmentType::CoilWAHPHeatingEquationFit;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).WAHPType = WaterToAirHeatPumpSimple::WatertoAirHP::Heating;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).availSched = Sched::GetScheduleAlwaysOn(*state);
-    state->dataWaterToAirHeatPumpSimple->SimpleHPTimeStepFlag.allocate(2);
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).AirInletNodeNum = 1;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).AirOutletNodeNum = 3;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).WaterInletNodeNum = 5;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).WaterOutletNodeNum = 6;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).plantLoc.loopNum = 1;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).plantLoc.loopSideNum = DataPlant::LoopSideLocation::Demand;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).plantLoc.branchNum = 1;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).plantLoc.compNum = 1;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).RatedCapCoolTotal = 30000.0;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).RatedCOPCoolAtRatedCdts = 3.0;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).RatedCapHeat = 30000.0;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).RatedCOPHeatAtRatedCdts = 3.0;
+    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP.allocate(2);
 
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).AirInletNodeNum = 3;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).AirOutletNodeNum = 2;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).WaterInletNodeNum = 7;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).WaterOutletNodeNum = 8;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).plantLoc.loopNum = 2;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).plantLoc.loopSideNum = DataPlant::LoopSideLocation::Demand;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).plantLoc.branchNum = 1;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).plantLoc.compNum = 1;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).RatedCapCoolTotal = 30000.0;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).RatedCOPCoolAtRatedCdts = 3.0;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).RatedCapHeat = 30000.0;
-    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).RatedCOPHeatAtRatedCdts = 3.0;
+    auto &wahpSimple1 = state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1);
+    wahpSimple1.Name = "WATERCOOLINGCOIL";
+    wahpSimple1.WAHPPlantType = DataPlant::PlantEquipmentType::CoilWAHPCoolingEquationFit;
+    wahpSimple1.WAHPType = WaterToAirHeatPumpSimple::WatertoAirHP::Cooling;
+    wahpSimple1.coilType = HVAC::CoilType::CoolingWAHPSimple;
+    wahpSimple1.coilReportNum = ReportCoilSelection::getReportIndex(*state, wahpSimple1.Name, wahpSimple1.coilType);
+    wahpSimple1.availSched = Sched::GetScheduleAlwaysOn(*state);
+
+    auto &wahpSimple2 = state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2);
+    wahpSimple2.Name = "WATERHEATINGCOIL";
+    wahpSimple2.WAHPPlantType = DataPlant::PlantEquipmentType::CoilWAHPHeatingEquationFit;
+    wahpSimple2.WAHPType = WaterToAirHeatPumpSimple::WatertoAirHP::Heating;
+    wahpSimple2.coilType = HVAC::CoilType::HeatingWAHPSimple;
+    wahpSimple2.coilReportNum = ReportCoilSelection::getReportIndex(*state, wahpSimple2.Name, wahpSimple2.coilType);
+    wahpSimple2.availSched = Sched::GetScheduleAlwaysOn(*state);
+
+    state->dataWaterToAirHeatPumpSimple->SimpleHPTimeStepFlag.allocate(2);
+    wahpSimple1.AirInletNodeNum = 1;
+    wahpSimple1.AirOutletNodeNum = 3;
+    wahpSimple1.WaterInletNodeNum = 5;
+    wahpSimple1.WaterOutletNodeNum = 6;
+    wahpSimple1.plantLoc.loopNum = 1;
+    wahpSimple1.plantLoc.loopSideNum = DataPlant::LoopSideLocation::Demand;
+    wahpSimple1.plantLoc.branchNum = 1;
+    wahpSimple1.plantLoc.compNum = 1;
+    wahpSimple1.RatedCapCoolTotal = 30000.0;
+    wahpSimple1.RatedCOPCoolAtRatedCdts = 3.0;
+    wahpSimple1.RatedCapHeat = 30000.0;
+    wahpSimple1.RatedCOPHeatAtRatedCdts = 3.0;
+
+    wahpSimple2.AirInletNodeNum = 3;
+    wahpSimple2.AirOutletNodeNum = 2;
+    wahpSimple2.WaterInletNodeNum = 7;
+    wahpSimple2.WaterOutletNodeNum = 8;
+    wahpSimple2.plantLoc.loopNum = 2;
+    wahpSimple2.plantLoc.loopSideNum = DataPlant::LoopSideLocation::Demand;
+    wahpSimple2.plantLoc.branchNum = 1;
+    wahpSimple2.plantLoc.compNum = 1;
+    wahpSimple2.RatedCapCoolTotal = 30000.0;
+    wahpSimple2.RatedCOPCoolAtRatedCdts = 3.0;
+    wahpSimple2.RatedCapHeat = 30000.0;
+    wahpSimple2.RatedCOPHeatAtRatedCdts = 3.0;
 
     // set up plant loop
     state->dataPlnt->TotNumLoops = 2;

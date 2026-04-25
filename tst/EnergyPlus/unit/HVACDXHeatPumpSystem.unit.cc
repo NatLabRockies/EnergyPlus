@@ -58,6 +58,7 @@
 #include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/HVACDXHeatPumpSystem.hh>
 #include <EnergyPlus/OutputReportPredefined.hh>
+#include <EnergyPlus/ReportCoilSelection.hh>
 
 namespace EnergyPlus {
 
@@ -121,6 +122,8 @@ TEST_F(EnergyPlusFixture, ExerciseHVACDXHeatPumpSystem)
     state->dataDXCoils->DXCoil(1).AirInNode = 1; // This is not ideal, but these are unnamed
     state->dataDXCoils->DXCoil(1).AirOutNode = 2; // This is not ideal, but these are unnamed
     state->dataDXCoils->DXCoil(1).coilType = HVAC::CoilType::HeatingDXSingleSpeed;
+    state->dataDXCoils->DXCoil(1).coilReportNum =
+        ReportCoilSelection::getReportIndex(*state, state->dataDXCoils->DXCoil(1).Name, state->dataDXCoils->DXCoil(1).coilType);
     state->dataDXCoils->DXCoil(1).RatedTotCap(1) = 1;
     state->dataDXCoils->DXCoil(1).RatedCOP(1) = 1;
     state->dataDXCoils->DXCoil(1).CCapFFlow(1) = 1;

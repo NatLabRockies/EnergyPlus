@@ -86,7 +86,10 @@ namespace HeatingCoils {
         std::string Name;             // Name of the HeatingCoil
         std::string HeatingCoilType;  // Type of HeatingCoil ie. Heating or Cooling
         std::string HeatingCoilModel; // Type of HeatingCoil ie. Simple, Detailed, etc.
-        HVAC::CoilType heatCoilType = HVAC::CoilType::Invalid;
+
+        HVAC::CoilType coilType = HVAC::CoilType::Invalid;
+        int coilReportNum = -1;
+
         Constant::eFuel FuelType = Constant::eFuel::Invalid; // Type of fuel used, reference resource type integers
         Sched::Schedule *availSched = nullptr;               // availability schedule
         int InsuffTemperatureWarn = 0;                       // Used for recurring error message

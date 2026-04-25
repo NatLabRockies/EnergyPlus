@@ -819,7 +819,7 @@ namespace TarcogShading {
                 A2eqout = Abot + 0.5 * Atop * (Al + Ar + Ah) / (Abot + Atop);
                 A1eqout = Atop + 0.5 * Abot * (Al + Ar + Ah) / (Abot + Atop);
                 A2eqin = Atop + 0.5 * Abot * (Al + Ar + Ah) / (Abot + Atop);
-            } else if (Tgap1 < Tgap2) {
+            } else {
                 A1eqout = Abot + 0.5 * Atop * (Al + Ar + Ah) / (Abot + Atop);
                 A2eqin = Abot + 0.5 * Atop * (Al + Ar + Ah) / (Abot + Atop);
                 A1eqin = Atop + 0.5 * Abot * (Al + Ar + Ah) / (Abot + Atop);
@@ -857,7 +857,7 @@ namespace TarcogShading {
             if (Tgap1 > Tgap2) {
                 Tup = (alpha1 * Tav1 + beta1 * alpha2 * Tav2) / (1.0 - beta1 * beta2);
                 Tdown = alpha2 * Tav2 + beta2 * Tup;
-            } else if (Tgap2 >= Tgap1) {
+            } else {
                 Tdown = (alpha1 * Tav1 + beta1 * alpha2 * Tav2) / (1.0 - beta1 * beta2);
                 Tup = alpha2 * Tav2 + beta2 * Tdown;
             }
@@ -868,7 +868,7 @@ namespace TarcogShading {
             if (Tgap1 > Tgap2) {
                 Temp1 = Tav1 - (H01 / H) * (Tup - Tdown);
                 Temp2 = Tav2 - (H02 / H) * (Tdown - Tup);
-            } else if (Tgap2 >= Tgap1) {
+            } else {
                 Temp1 = Tav1 - (H01 / H) * (Tdown - Tup);
                 Temp2 = Tav2 - (H02 / H) * (Tup - Tdown);
             }
@@ -890,7 +890,7 @@ namespace TarcogShading {
         if (Tgap2 >= Tgap1) {
             qv1 = -dens1 * cp1 * speed1 * s1 * L * (Tdown - Tup) / (H * L);
             qv2 = -dens2 * cp2 * speed2 * s2 * L * (Tup - Tdown) / (H * L);
-        } else if (Tgap2 < Tgap1) {
+        } else {
             qv1 = dens1 * cp1 * speed1 * s1 * L * (Tdown - Tup) / (H * L);
             qv2 = dens2 * cp2 * speed2 * s2 * L * (Tup - Tdown) / (H * L);
         }
@@ -1113,7 +1113,7 @@ namespace TarcogShading {
             if (Tgap > Tenv) {
                 A1eqin = Abot + 0.5 * Atop * (Al + Ar + Ah) / (Abot + Atop);
                 A1eqout = Atop + 0.5 * Abot * (Al + Ar + Ah) / (Abot + Atop);
-            } else if (Tgap <= Tenv) {
+            } else {
                 A1eqout = Abot + 0.5 * Atop * (Al + Ar + Ah) / (Abot + Atop);
                 A1eqin = Atop + 0.5 * Abot * (Al + Ar + Ah) / (Abot + Atop);
             }

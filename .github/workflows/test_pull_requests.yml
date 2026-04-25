@@ -265,7 +265,7 @@ jobs:
         ${{ github.run_id }}
         ${{ steps.upload_regressions.outputs.artifact-url }}
 
-    - uses: actions/github-script@v8
+    - uses: actions/github-script@v9
       if: always() && matrix.run_regressions && steps.regressions.outcome == 'failure' && github.event.pull_request.head.repo.full_name == 'NatLabRockies/EnergyPlus'
       with:
         script: |

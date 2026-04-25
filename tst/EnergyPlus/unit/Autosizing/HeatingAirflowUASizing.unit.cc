@@ -126,7 +126,7 @@ TEST_F(AutoSizingFixture, HeatingAirflowUASizingGauntlet)
 
     std::string eiooutput =
         std::string("! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value\n"
-                    " Component Sizing Information, Coil:Heating:Water, MyWaterCoil, User-Specified Heating Coil Airflow For UA, 5.00000\n");
+                    " Component Sizing Information, Coil:Heating:Water, MyWaterCoil, User-Specified Heating Coil Airflow for UA [m3/s], 5.00000\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
@@ -156,7 +156,8 @@ TEST_F(AutoSizingFixture, HeatingAirflowUASizingGauntlet)
     EXPECT_NEAR(0.0008, state->dataSize->TermUnitSizing(1).AirVolFlow, 0.0001);
     EXPECT_NEAR(1.2, state->dataEnvrn->StdRhoAir, 0.01);
 
-    eiooutput = std::string(" Component Sizing Information, Coil:Heating:Water, MyWaterCoil, Design Size Heating Coil Airflow For UA, 0.00000\n");
+    eiooutput =
+        std::string(" Component Sizing Information, Coil:Heating:Water, MyWaterCoil, Design Size Heating Coil Airflow for UA [m3/s], 0.00000\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
@@ -319,7 +320,8 @@ TEST_F(AutoSizingFixture, HeatingAirflowUASizingGauntlet)
     sizer.autoSizedValue = 0.0; // reset for next test
 
     // <Component Sizing Information> header already reported above (and flag set false). Only coil sizing information reported here.
-    eiooutput = std::string(" Component Sizing Information, Coil:Heating:Water, MyWaterCoil, Design Size Heating Coil Airflow For UA, 6.00000\n");
+    eiooutput =
+        std::string(" Component Sizing Information, Coil:Heating:Water, MyWaterCoil, Design Size Heating Coil Airflow for UA [m3/s], 6.00000\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
@@ -459,8 +461,9 @@ TEST_F(AutoSizingFixture, HeatingAirflowUASizingGauntlet)
     EXPECT_FALSE(errorsFound);
 
     // <Component Sizing Information> header already reported above (and flag set false). Only coil sizing information reported here.
-    eiooutput = std::string(" Component Sizing Information, Coil:Heating:Water, MyWaterCoil, Design Size Heating Coil Airflow For UA, 3.00000\n"
-                            " Component Sizing Information, Coil:Heating:Water, MyWaterCoil, User-Specified Heating Coil Airflow For UA, 5.00000\n");
+    eiooutput =
+        std::string(" Component Sizing Information, Coil:Heating:Water, MyWaterCoil, Design Size Heating Coil Airflow for UA [m3/s], 3.00000\n"
+                    " Component Sizing Information, Coil:Heating:Water, MyWaterCoil, User-Specified Heating Coil Airflow for UA [m3/s], 5.00000\n");
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 }
 

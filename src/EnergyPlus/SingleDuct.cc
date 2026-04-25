@@ -3130,8 +3130,9 @@ void SingleDuctAirTerminal::SizeSys(EnergyPlusData &state)
             TermUnitSizing(state.dataSize->CurTermUnitSizingNum).ReheatLoadMult = 1.0;
         }
         if (this->ReheatComp_Index > 0) {
-            state.dataRptCoilSelection->coilSelectionReportObj->setCoilReheatMultiplier(
-                state, this->ReheatName, this->ReheatComp, TermUnitSizing(state.dataSize->CurTermUnitSizingNum).ReheatLoadMult);
+            ReportCoilSelection::setCoilReheatMultiplier(state,
+                                                         ReportCoilSelection::getReportIndex(state, this->ReheatName, this->reheatCoilType),
+                                                         TermUnitSizing(state.dataSize->CurTermUnitSizingNum).ReheatLoadMult);
         }
     }
 

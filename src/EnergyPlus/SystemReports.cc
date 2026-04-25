@@ -4634,48 +4634,46 @@ void FindDemandSideMatch(EnergyPlusData const &state,
     MatchFound = false;
     MatchLoopType = 0;
     MatchLoop = 0;
-    MatchLoop = 0;
     MatchBranch = 0;
     MatchComp = 0;
 
     // Now cycle through all of the demand side loops to see if we can find
     // a match for the component type and name.  Once a match is found,
     // record the type of loop and the loop, branch, and component numbers.
-    if (!MatchFound) { // Go through the plant demand side loops
-        for (int PassLoopNum = 1; PassLoopNum <= state.dataHVACGlobal->NumPlantLoops; ++PassLoopNum) {
-            for (int PassBranchNum = 1;
-                 PassBranchNum <= state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Demand)](PassLoopNum).TotalBranches;
-                 ++PassBranchNum) {
-                for (int PassCompNum = 1;
-                     PassCompNum <=
-                     state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Demand)](PassLoopNum).Branch(PassBranchNum).TotalComponents;
-                     ++PassCompNum) {
-                    if (Util::SameString(CompType,
-                                         state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Demand)](PassLoopNum)
-                                             .Branch(PassBranchNum)
-                                             .Comp(PassCompNum)
-                                             .TypeOf) &&
-                        Util::SameString(CompName,
-                                         state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Demand)](PassLoopNum)
-                                             .Branch(PassBranchNum)
-                                             .Comp(PassCompNum)
-                                             .Name)) {
-                        // Found a match on the plant demand side--increment the counter
-                        MatchFound = true;
-                        MatchLoopType = 1;
-                        MatchLoop = PassLoopNum;
-                        MatchBranch = PassBranchNum;
-                        MatchComp = PassCompNum;
-                        break; // PassCompNum DO loop
-                    }
-                }
-                if (MatchFound) {
-                    break; // PassBranchNum DO loop
+    // Go through the plant demand side loops
+    for (int PassLoopNum = 1; PassLoopNum <= state.dataHVACGlobal->NumPlantLoops; ++PassLoopNum) {
+        for (int PassBranchNum = 1;
+             PassBranchNum <= state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Demand)](PassLoopNum).TotalBranches;
+             ++PassBranchNum) {
+            for (int PassCompNum = 1;
+                 PassCompNum <=
+                 state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Demand)](PassLoopNum).Branch(PassBranchNum).TotalComponents;
+                 ++PassCompNum) {
+                if (Util::SameString(CompType,
+                                     state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Demand)](PassLoopNum)
+                                         .Branch(PassBranchNum)
+                                         .Comp(PassCompNum)
+                                         .TypeOf) &&
+                    Util::SameString(CompName,
+                                     state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Demand)](PassLoopNum)
+                                         .Branch(PassBranchNum)
+                                         .Comp(PassCompNum)
+                                         .Name)) {
+                    // Found a match on the plant demand side--increment the counter
+                    MatchFound = true;
+                    MatchLoopType = 1;
+                    MatchLoop = PassLoopNum;
+                    MatchBranch = PassBranchNum;
+                    MatchComp = PassCompNum;
+                    break; // PassCompNum DO loop
                 }
             }
             if (MatchFound) {
-                break; // PassLoopNum DO loop
+                break; // PassBranchNum DO loop
             }
+        }
+        if (MatchFound) {
+            break; // PassLoopNum DO loop
         }
     }
 

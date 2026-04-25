@@ -107,9 +107,12 @@ namespace DXCoils {
         // Members
         //          Some variables in this type are arrays (dimension=MaxModes) to support coil type
         //          COIL:DX:MultiMode:CoolingEmpirical.  Other coil types only use the first element.
+
         std::string Name;                                  // Name of the DX Coil
         HVAC::CoilType coilType = HVAC::CoilType::Invalid; // Integer equivalent to DXCoilType
-        Sched::Schedule *availSched = nullptr;             // availability schedule
+        int coilReportNum = -1;
+        Sched::Schedule *availSched = nullptr; // availability schedule
+
         //          RatedCoolCap, RatedSHR and RatedCOP do not include the thermal or electrical
         //          effects due to the supply air fan
         Array1D<Real64> RatedTotCap;                      // Gross total cooling capacity at rated conditions [watts]

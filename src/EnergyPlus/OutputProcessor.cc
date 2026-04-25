@@ -4102,8 +4102,8 @@ int GetMeterIndex(EnergyPlusData const &state, std::string const &name)
     //       DATE WRITTEN   August 2002
 
     // PURPOSE OF THIS FUNCTION:
-    // This function returns a index to the meter "number" (aka assigned report number)
-    // for the meter name.  If none active for this run, a zero is returned.  This is used later to
+    // This function returns an index to the meter "number" (aka assigned report number)
+    // for the meter name. If none is active for this run, -1 is returned. This is used later to
     // obtain a meter "value".
 
     auto const &op = state.dataOutputProcessor;

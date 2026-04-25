@@ -869,6 +869,10 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
             ErrorsFound = true;
         }
 
+        // Control variable
+        humidControlledZone.humidityControlVariableType =
+            static_cast<DataZoneControls::HumidityCtrlVarType>(getEnumValue(DataZoneControls::humidityCtrlVarTypeNamesUC, s_ipsc->cAlphaArgs(5)));
+
     } // HumidControlledZoneNum
 
     // Start to read Thermal comfort control objects
@@ -3491,8 +3495,24 @@ void ZoneSpaceHeatBalanceData::calcPredictedHumidityRatio(EnergyPlusData &state,
     if (thisZone.humidityControlZoneIndex > 0) {
         auto &humidityControlZone = state.dataZoneCtrls->HumidityControlZone(thisZone.humidityControlZoneIndex);
         assert(humidityControlZone.ActualZoneNum == zoneNum);
-        ZoneRHHumidifyingSetPoint = humidityControlZone.humidifyingSched->getCurrentVal();
-        ZoneRHDehumidifyingSetPoint = humidityControlZone.dehumidifyingSched->getCurrentVal();
+        if (humidityControlZone.humidityControlVariableType == DataZoneControls::HumidityCtrlVarType::RelativeHumidity) {
+            ZoneRHHumidifyingSetPoint = humidityControlZone.humidifyingSched->getCurrentVal();
+            ZoneRHDehumidifyingSetPoint = humidityControlZone.dehumidifyingSched->getCurrentVal();
+        } else if (humidityControlZone.humidityControlVariableType ==
+                   DataZoneControls::HumidityCtrlVarType::DewPoint) { // Recalculate RH setpoint from DP
+            ZoneRHHumidifyingSetPoint =
+                100 * Psychrometrics::PsyRhFnTdbWPb(
+                          state,
+                          this->ZT,
+                          Psychrometrics::PsyWFnTdpPb(state, humidityControlZone.humidifyingSched->getCurrentVal(), state.dataEnvrn->OutBaroPress),
+                          state.dataEnvrn->OutBaroPress);
+            ZoneRHDehumidifyingSetPoint =
+                100 * Psychrometrics::PsyRhFnTdbWPb(
+                          state,
+                          this->ZT,
+                          Psychrometrics::PsyWFnTdpPb(state, humidityControlZone.dehumidifyingSched->getCurrentVal(), state.dataEnvrn->OutBaroPress),
+                          state.dataEnvrn->OutBaroPress);
+        }
 
         // Apply EMS values to overwrite the humidistat values
         if (humidityControlZone.EMSOverrideHumidifySetPointOn) {

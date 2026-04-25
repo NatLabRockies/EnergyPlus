@@ -119,7 +119,6 @@ void EnergyPlusFixture::SetUp()
     state->dataUtilityRoutines->outputErrorHeader = false;
 
     state->init_constant_state(*state);
-    createCoilSelectionReportObj(*state); // So random
     state->dataEnvrn->StdRhoAir = 1.2;
 }
 

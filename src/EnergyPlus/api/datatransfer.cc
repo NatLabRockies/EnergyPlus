@@ -386,12 +386,7 @@ int getMeterHandle(EnergyPlusState state, const char *meterName)
 {
     auto *thisState = static_cast<EnergyPlus::EnergyPlusData *>(state);
     std::string const meterNameUC = EnergyPlus::Util::makeUPPER(meterName);
-    const int i = EnergyPlus::GetMeterIndex(*thisState, meterNameUC);
-    if (i == 0) {
-        // inside E+, zero is meaningful, but through the API, I want to use negative one as a signal of a bad lookup
-        return -1;
-    }
-    return i;
+    return EnergyPlus::GetMeterIndex(*thisState, meterNameUC);
 }
 
 Real64 getMeterValue(EnergyPlusState state, int handle)
@@ -426,6 +421,14 @@ int getActuatorHandle(EnergyPlusState state, const char *componentType, const ch
         std::string const actuatorIDUC = EnergyPlus::Util::makeUPPER(availActuator.UniqueIDName);
         std::string const actuatorControlUC = EnergyPlus::Util::makeUPPER(availActuator.ControlTypeName);
         if (typeUC == actuatorTypeUC && keyUC == actuatorIDUC && controlUC == actuatorControlUC) {
+            // issue #10944: mark any IDF-declared EMSActuatorUsed entry as referenced once Python
+            // retrieves its handle — Python catches typos itself, so handle retrieval is the usage signal.
+            for (auto &usedActuator : thisState->dataRuntimeLang->EMSActuatorUsed) {
+                if (usedActuator.ActuatorVariableNum == handle) {
+                    usedActuator.wasActuated = true;
+                    break;
+                }
+            }
             if (availActuator.handleCount > 0) {
                 // If the handle is already used by an IDF EnergyManagementSystem:Actuator, we should warn the user
                 bool foundActuator = false;

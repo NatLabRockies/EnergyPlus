@@ -964,10 +964,16 @@ namespace FanCoilUnits {
                                 OutputProcessor::StoreType::Average,
                                 fanCoil.Name);
 
-            state.dataRptCoilSelection->coilSelectionReportObj->setCoilSupplyFanInfo(
-                state, fanCoil.CCoilName, fanCoil.CCoilType, fanCoil.FanName, fanCoil.fanType, fanCoil.FanIndex);
-            state.dataRptCoilSelection->coilSelectionReportObj->setCoilSupplyFanInfo(
-                state, fanCoil.HCoilName, fanCoil.HCoilType, fanCoil.FanName, fanCoil.fanType, fanCoil.FanIndex);
+            ReportCoilSelection::setCoilSupplyFanInfo(state,
+                                                      ReportCoilSelection::getReportIndex(state, fanCoil.CCoilName, fanCoil.coolCoilType),
+                                                      fanCoil.FanName,
+                                                      fanCoil.fanType,
+                                                      fanCoil.FanIndex);
+            ReportCoilSelection::setCoilSupplyFanInfo(state,
+                                                      ReportCoilSelection::getReportIndex(state, fanCoil.HCoilName, fanCoil.heatCoilType),
+                                                      fanCoil.FanName,
+                                                      fanCoil.fanType,
+                                                      fanCoil.FanIndex);
         }
     }
 
@@ -1249,7 +1255,7 @@ namespace FanCoilUnits {
                 int SAFMethod; // supply air flow rate sizing method (SupplyAirFlowRate, FlowPerFloorArea, FractionOfAutosizedCoolingAirflow,
                 SizingString = state.dataFanCoilUnits->FanCoilNumericFields(FanCoilNum).FieldNames(FieldNum) + " [m3/s]";
                 if (state.dataGlobal->isEpJSON) {
-                    SizingString = "maximum_supply_air_flow_rate [m3/s]";
+                    SizingString = "Maximum Supply Air Flow Rate [m3/s]";
                 }
                 if (state.dataSize->ZoneHVACSizing(zoneHVACIndex).CoolingSAFMethod > 0) {
                     SizingMethod = HVAC::CoolingAirflowSizing;

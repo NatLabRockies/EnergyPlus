@@ -708,6 +708,41 @@ TEST_F(DataExchangeAPIUnitTestFixture, DataTransfer_Python_EMS_Override)
     EXPECT_TRUE(compare_err_stream(expectedError, true));
 }
 
+TEST_F(DataExchangeAPIUnitTestFixture, DataTransfer_PythonHandle_MarksActuatorAsUsed)
+{
+    // Issue #10944: when Python retrieves a handle for an IDF-declared actuator,
+    // mark wasActuated so the end-of-sim unused-actuator check doesn't false-positive
+    // on legitimate Python-driven actuators (Python catches typos itself at handle lookup).
+    std::string const idf_objects = delimited_string({
+        "OutdoorAir:Node, Test node;",
+        "EnergyManagementSystem:Actuator,",
+        "TempSetpointLo,          !- Name",
+        "Test node,               !- Actuated Component Unique Name",
+        "System Node Setpoint,    !- Actuated Component Type",
+        "Temperature Minimum Setpoint;    !- Actuated Component Control Type",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    OutAirNodeManager::SetOutAirNodes(*state);
+    EMSManager::CheckIfAnyEMS(*state);
+    state->dataEMSMgr->FinishProcessingUserInput = true;
+    bool anyRan;
+    EMSManager::ManageEMS(*state, EMSManager::EMSCallFrom::SetupSimulation, anyRan);
+    ASSERT_EQ(1, state->dataRuntimeLang->numActuatorsUsed);
+
+    // Before Python handle retrieval, the actuator is un-referenced
+    EXPECT_FALSE(state->dataRuntimeLang->EMSActuatorUsed(1).wasActuated);
+
+    int hActuator = getActuatorHandle(state, "System Node Setpoint", "Temperature Minimum Setpoint", "Test node");
+    EXPECT_GT(hActuator, -1);
+
+    // getActuatorHandle should have flipped the flag
+    EXPECT_TRUE(state->dataRuntimeLang->EMSActuatorUsed(1).wasActuated);
+
+    EMSManager::checkForUnusedActuatorsAtEnd(*state);
+    EXPECT_FALSE(compare_err_stream_substring("Unused EMS Actuator detected", false, false));
+}
+
 TEST_F(DataExchangeAPIUnitTestFixture, DataTransfer_Python_Python_Override)
 {
     // Test for #8084, should warn when getting a handle for an actuator via API Twice
