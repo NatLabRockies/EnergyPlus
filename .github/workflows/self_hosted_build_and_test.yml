@@ -114,12 +114,15 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p coverage/unit
-          lcov -c -d . -o coverage/unit/lcov.output --no-external --base-directory ${{ github.workspace }} --source-directory ${{ github.workspace }} --ignore-errors source,source
-          lcov -e coverage/unit/lcov.output "${{ github.workspace }}/src/EnergyPlus/*" "src/EnergyPlus/*" -o coverage/unit/lcov.output.filtered --ignore-errors unused,unused,empty,empty
-          grep -q '^DA:' coverage/unit/lcov.output.filtered
-          # Coveralls needs repo-relative SF paths to fetch source for line views.
-          sed "s#^SF:${{ github.workspace }}/#SF:#" coverage/unit/lcov.output.filtered > coverage/unit/lcov.output.coveralls
-          genhtml coverage/unit/lcov.output.filtered -o coverage/unit/lcov-html --source-directory ${{ github.workspace }} --demangle-cpp --function-coverage --synthesize-missing --ignore-errors source,source | tee coverage/unit/cover.txt
+          lcov -c -d . -o coverage/unit/lcov.output --base-directory ${{ github.workspace }} --ignore-errors source,source
+          ${{ steps.setup-runner.outputs.python-root-dir }}/bin/python \
+            ${{ github.workspace }}/scripts/dev/normalize_lcov_paths.py \
+            coverage/unit/lcov.output \
+            --workspace ${{ github.workspace }} \
+            --build-directory ${{ github.workspace }}/${{ env.BUILD_DIR }} \
+            --absolute-output coverage/unit/lcov.output.filtered \
+            --relative-output coverage/unit/lcov.output.coveralls
+          genhtml coverage/unit/lcov.output.filtered -o coverage/unit/lcov-html --demangle-cpp --function-coverage --ignore-errors source,source | tee coverage/unit/cover.txt
 
       - name: Process unit test coverage summary
         working-directory: ${{ env.BUILD_DIR }}/coverage/unit
@@ -147,12 +150,15 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p coverage/integration
-          lcov -c -d . -o coverage/integration/lcov.output --no-external --base-directory ${{ github.workspace }} --source-directory ${{ github.workspace }} --ignore-errors source,source
-          lcov -e coverage/integration/lcov.output "${{ github.workspace }}/src/EnergyPlus/*" "src/EnergyPlus/*" -o coverage/integration/lcov.output.filtered --ignore-errors unused,unused,empty,empty
-          grep -q '^DA:' coverage/integration/lcov.output.filtered
-          # Coveralls needs repo-relative SF paths to fetch source for line views.
-          sed "s#^SF:${{ github.workspace }}/#SF:#" coverage/integration/lcov.output.filtered > coverage/integration/lcov.output.coveralls
-          genhtml coverage/integration/lcov.output.filtered -o coverage/integration/lcov-html --source-directory ${{ github.workspace }} --demangle-cpp --function-coverage --synthesize-missing --ignore-errors source,source | tee coverage/integration/cover.txt
+          lcov -c -d . -o coverage/integration/lcov.output --base-directory ${{ github.workspace }} --ignore-errors source,source
+          ${{ steps.setup-runner.outputs.python-root-dir }}/bin/python \
+            ${{ github.workspace }}/scripts/dev/normalize_lcov_paths.py \
+            coverage/integration/lcov.output \
+            --workspace ${{ github.workspace }} \
+            --build-directory ${{ github.workspace }}/${{ env.BUILD_DIR }} \
+            --absolute-output coverage/integration/lcov.output.filtered \
+            --relative-output coverage/integration/lcov.output.coveralls
+          genhtml coverage/integration/lcov.output.filtered -o coverage/integration/lcov-html --demangle-cpp --function-coverage --ignore-errors source,source | tee coverage/integration/cover.txt
 
       - name: Process integration test coverage summary
         working-directory: ${{ env.BUILD_DIR }}/coverage/integration
