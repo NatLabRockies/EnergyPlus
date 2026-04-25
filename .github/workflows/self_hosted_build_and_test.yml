@@ -54,9 +54,9 @@ jobs:
         with:
           path: |
             ${{ steps.setup-runner.outputs.ccache-dir }}
-          key: ccache-self-hosted-linux-${{ steps.setup-runner.outputs.compiler-id }}-coverage-${{ github.event.pull_request.number || github.event.inputs.ref || github.ref_name }}-${{ github.event.pull_request.head.sha || steps.checkout-sha.outputs.sha }}
+          key: ccache-self-hosted-linux-${{ steps.setup-runner.outputs.compiler-id }}-coverage-${{ github.head_ref || github.event.inputs.ref || github.ref_name }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
-            ccache-self-hosted-linux-${{ steps.setup-runner.outputs.compiler-id }}-coverage-${{ github.event.pull_request.number || github.event.inputs.ref || github.ref_name }}-
+            ccache-self-hosted-linux-${{ steps.setup-runner.outputs.compiler-id }}-coverage-${{ github.head_ref || github.event.inputs.ref || github.ref_name }}-
             ccache-self-hosted-linux-${{ steps.setup-runner.outputs.compiler-id }}-coverage-
             ccache-self-hosted-linux-${{ steps.setup-runner.outputs.compiler-id }}-
             ccache-self-hosted-linux-
