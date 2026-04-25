@@ -171,9 +171,9 @@ jobs:
           flag-name: unit-tests
           parallel: true
           build-number: ${{ github.run_id }}
-          git-branch: ${{ github.head_ref || github.ref_name }}
-          git-commit: ${{ steps.checkout-sha.outputs.sha }}
-          fail-on-error: false
+          git-branch: ${{ github.head_ref || github.event.inputs.ref || github.ref_name }}
+          git-commit: ${{ github.event.pull_request.head.sha || steps.checkout-sha.outputs.sha }}
+          fail-on-error: true
 
       - name: Upload integration test coverage to Coveralls
         id: coveralls-integration
@@ -187,9 +187,9 @@ jobs:
           flag-name: integration-tests
           parallel: true
           build-number: ${{ github.run_id }}
-          git-branch: ${{ github.head_ref || github.ref_name }}
-          git-commit: ${{ steps.checkout-sha.outputs.sha }}
-          fail-on-error: false
+          git-branch: ${{ github.head_ref || github.event.inputs.ref || github.ref_name }}
+          git-commit: ${{ github.event.pull_request.head.sha || steps.checkout-sha.outputs.sha }}
+          fail-on-error: true
 
       - name: Finish Coveralls coverage build
         if: ${{ always() && (steps.coveralls-unit.conclusion == 'success' || steps.coveralls-integration.conclusion == 'success') }}
@@ -198,9 +198,9 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel-finished: true
           build-number: ${{ github.run_id }}
-          git-branch: ${{ github.head_ref || github.ref_name }}
-          git-commit: ${{ steps.checkout-sha.outputs.sha }}
-          fail-on-error: false
+          git-branch: ${{ github.head_ref || github.event.inputs.ref || github.ref_name }}
+          git-commit: ${{ github.event.pull_request.head.sha || steps.checkout-sha.outputs.sha }}
+          fail-on-error: true
 
       - name: Upload unit test coverage artifacts
         if: ${{ always() && hashFiles(format('{0}/{1}/coverage/unit/lcov.output.filtered', github.workspace, env.BUILD_DIR)) != '' }}
