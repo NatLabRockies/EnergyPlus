@@ -10,6 +10,10 @@ on:
         required: false
         default: ""
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.inputs.ref || github.ref }}
+  cancel-in-progress: true
+
 env:
   PYTHON_REQUIRED_VERSION: "3.12.2"
   FC: gfortran-13
@@ -60,7 +64,7 @@ jobs:
       - name: Install Linux coverage tools
         run: |
           sudo apt-get -qq update
-          sudo apt-get -qq install -y lcov gcovr
+          sudo apt-get -qq install -y lcov
 
       - name: Show restored ccache stats
         shell: bash
@@ -88,7 +92,7 @@ jobs:
           -DENABLE_GTEST_DEBUG_MODE:BOOL=OFF
           -DENABLE_PCH:BOOL=OFF
           -DFORCE_DEBUG_ARITHM_GCC_OR_CLANG:BOOL=ON
-          -DCOMMIT_SHA:STRING="$(git rev-parse HEAD)"
+          -DCOMMIT_SHA:STRING=${{ steps.checkout-sha.outputs.sha }}
 
       - name: Build coverage targets
         run: cmake --build ${{ env.BUILD_DIR }} -j "${{ steps.setup-runner.outputs.nproc }}"
@@ -105,24 +109,15 @@ jobs:
           --output-on-failure
           -j "${{ steps.setup-runner.outputs.nproc }}"
 
-      - name: Create coverage output directories
-        working-directory: ${{ env.BUILD_DIR }}
-        run: mkdir -p coverage/unit coverage/integration
-
-      - name: Generate raw unit test coverage results
-        working-directory: ${{ env.BUILD_DIR }}
-        run: lcov -c -d . -o coverage/unit/lcov.output --no-external --base-directory ${{ github.workspace }} --ignore-errors source,source
-
-      - name: Generate filtered unit test coverage results
+      - name: Generate unit test coverage results
         working-directory: ${{ env.BUILD_DIR }}
         run: |
-          if ! lcov -e coverage/unit/lcov.output "${{ github.workspace }}/src/EnergyPlus/*" -o coverage/unit/lcov.output.filtered --ignore-errors unused,unused,empty,empty; then
-            cp -f coverage/unit/lcov.output coverage/unit/lcov.output.filtered
-          fi
-
-      - name: Generate HTML unit test coverage results
-        working-directory: ${{ env.BUILD_DIR }}
-        run: genhtml coverage/unit/lcov.output.filtered -o coverage/unit/lcov-html --demangle-cpp --function-coverage --synthesize-missing --ignore-errors source,source | tee coverage/unit/cover.txt
+          mkdir -p coverage/unit
+          lcov -c -d . -o coverage/unit/lcov.output --no-external --base-directory ${{ github.workspace }} --ignore-errors source,source
+          lcov -e coverage/unit/lcov.output "${{ github.workspace }}/src/EnergyPlus/*" -o coverage/unit/lcov.output.filtered --ignore-errors unused,unused,empty,empty
+          # Coveralls needs repo-relative SF paths to fetch source for line views.
+          sed "s#^SF:${{ github.workspace }}/#SF:#" coverage/unit/lcov.output.filtered > coverage/unit/lcov.output.coveralls
+          genhtml coverage/unit/lcov.output.filtered -o coverage/unit/lcov-html --demangle-cpp --function-coverage --synthesize-missing --ignore-errors source,source | tee coverage/unit/cover.txt
 
       - name: Process unit test coverage summary
         working-directory: ${{ env.BUILD_DIR }}/coverage/unit
@@ -145,20 +140,15 @@ jobs:
           --output-on-failure
           -j "${{ steps.setup-runner.outputs.nproc }}"
 
-      - name: Generate raw integration test coverage results
-        working-directory: ${{ env.BUILD_DIR }}
-        run: lcov -c -d . -o coverage/integration/lcov.output --no-external --base-directory ${{ github.workspace }} --ignore-errors source,source
-
-      - name: Generate filtered integration test coverage results
+      - name: Generate integration test coverage results
         working-directory: ${{ env.BUILD_DIR }}
         run: |
-          if ! lcov -e coverage/integration/lcov.output "${{ github.workspace }}/src/EnergyPlus/*" -o coverage/integration/lcov.output.filtered --ignore-errors unused,unused,empty,empty; then
-            cp -f coverage/integration/lcov.output coverage/integration/lcov.output.filtered
-          fi
-
-      - name: Generate HTML integration test coverage results
-        working-directory: ${{ env.BUILD_DIR }}
-        run: genhtml coverage/integration/lcov.output.filtered -o coverage/integration/lcov-html --demangle-cpp --function-coverage --synthesize-missing --ignore-errors source,source | tee coverage/integration/cover.txt
+          mkdir -p coverage/integration
+          lcov -c -d . -o coverage/integration/lcov.output --no-external --base-directory ${{ github.workspace }} --ignore-errors source,source
+          lcov -e coverage/integration/lcov.output "${{ github.workspace }}/src/EnergyPlus/*" -o coverage/integration/lcov.output.filtered --ignore-errors unused,unused,empty,empty
+          # Coveralls needs repo-relative SF paths to fetch source for line views.
+          sed "s#^SF:${{ github.workspace }}/#SF:#" coverage/integration/lcov.output.filtered > coverage/integration/lcov.output.coveralls
+          genhtml coverage/integration/lcov.output.filtered -o coverage/integration/lcov-html --demangle-cpp --function-coverage --synthesize-missing --ignore-errors source,source | tee coverage/integration/cover.txt
 
       - name: Process integration test coverage summary
         working-directory: ${{ env.BUILD_DIR }}/coverage/integration
@@ -171,32 +161,34 @@ jobs:
 
       - name: Upload unit test coverage to Coveralls
         id: coveralls-unit
-        if: ${{ always() && hashFiles(format('{0}/{1}/coverage/unit/lcov.output.filtered', github.workspace, env.BUILD_DIR)) != '' }}
+        if: ${{ always() && hashFiles(format('{0}/{1}/coverage/unit/lcov.output.coveralls', github.workspace, env.BUILD_DIR)) != '' }}
         uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ github.workspace }}/${{ env.BUILD_DIR }}/coverage/unit/lcov.output.filtered
+          file: ${{ github.workspace }}/${{ env.BUILD_DIR }}/coverage/unit/lcov.output.coveralls
           format: lcov
+          base-path: ${{ github.workspace }}
           flag-name: unit-tests
           parallel: true
           build-number: ${{ github.run_id }}
           git-branch: ${{ github.head_ref || github.ref_name }}
-          git-commit: ${{ github.event.pull_request.head.sha || steps.checkout-sha.outputs.sha }}
+          git-commit: ${{ steps.checkout-sha.outputs.sha }}
           fail-on-error: false
 
       - name: Upload integration test coverage to Coveralls
         id: coveralls-integration
-        if: ${{ always() && hashFiles(format('{0}/{1}/coverage/integration/lcov.output.filtered', github.workspace, env.BUILD_DIR)) != '' }}
+        if: ${{ always() && hashFiles(format('{0}/{1}/coverage/integration/lcov.output.coveralls', github.workspace, env.BUILD_DIR)) != '' }}
         uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ github.workspace }}/${{ env.BUILD_DIR }}/coverage/integration/lcov.output.filtered
+          file: ${{ github.workspace }}/${{ env.BUILD_DIR }}/coverage/integration/lcov.output.coveralls
           format: lcov
+          base-path: ${{ github.workspace }}
           flag-name: integration-tests
           parallel: true
           build-number: ${{ github.run_id }}
           git-branch: ${{ github.head_ref || github.ref_name }}
-          git-commit: ${{ github.event.pull_request.head.sha || steps.checkout-sha.outputs.sha }}
+          git-commit: ${{ steps.checkout-sha.outputs.sha }}
           fail-on-error: false
 
       - name: Finish Coveralls coverage build
@@ -207,7 +199,7 @@ jobs:
           parallel-finished: true
           build-number: ${{ github.run_id }}
           git-branch: ${{ github.head_ref || github.ref_name }}
-          git-commit: ${{ github.event.pull_request.head.sha || steps.checkout-sha.outputs.sha }}
+          git-commit: ${{ steps.checkout-sha.outputs.sha }}
           fail-on-error: false
 
       - name: Upload unit test coverage artifacts
@@ -217,6 +209,7 @@ jobs:
           name: unit_test_coverage_results
           path: |
             ${{ github.workspace }}/${{ env.BUILD_DIR }}/coverage/unit/lcov.output.filtered
+            ${{ github.workspace }}/${{ env.BUILD_DIR }}/coverage/unit/lcov.output.coveralls
             ${{ github.workspace }}/${{ env.BUILD_DIR }}/coverage/unit/lcov-html
 
       - name: Upload integration test coverage artifacts
@@ -226,6 +219,7 @@ jobs:
           name: integration_test_coverage_results
           path: |
             ${{ github.workspace }}/${{ env.BUILD_DIR }}/coverage/integration/lcov.output.filtered
+            ${{ github.workspace }}/${{ env.BUILD_DIR }}/coverage/integration/lcov.output.coveralls
             ${{ github.workspace }}/${{ env.BUILD_DIR }}/coverage/integration/lcov-html
 
       - name: Save ccache
