@@ -10884,7 +10884,7 @@ namespace UnitarySystems {
                     if (SensOutputOff < 0.0 && SensOutputOff - state.dataUnitarySystems->QToHeatSetPt < -HVAC::SmallLoad) {
                         state.dataUnitarySystems->HeatingLoad = true;
                         state.dataUnitarySystems->CoolingLoad = false;
-                        ZoneLoad = max(state.dataUnitarySystems->QToHeatSetPt, QZnReq);
+                        ZoneLoad = state.dataUnitarySystems->QToHeatSetPt;
                         // zone pushed above cooling set point
                     } else if (SensOutputOff > 0.0 && SensOutputOff - state.dataUnitarySystems->QToCoolSetPt > HVAC::SmallLoad) {
                         state.dataUnitarySystems->HeatingLoad = false;
