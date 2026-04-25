@@ -10814,7 +10814,7 @@ namespace UnitarySystems {
                     SensOutputOff - state.dataUnitarySystems->QToHeatSetPt < -HVAC::SmallLoad) {
                     state.dataUnitarySystems->HeatingLoad = true;
                     state.dataUnitarySystems->CoolingLoad = false;
-                    ZoneLoad = max(state.dataUnitarySystems->QToHeatSetPt, QZnReq);
+                    ZoneLoad = state.dataUnitarySystems->QToHeatSetPt;
                 }
             } break;
 
@@ -10836,7 +10836,7 @@ namespace UnitarySystems {
                     if (SensOutputOff < 0.0 && state.dataUnitarySystems->QToHeatSetPt - SensOutputOff > HVAC::SmallLoad) {
                         state.dataUnitarySystems->HeatingLoad = true;
                         state.dataUnitarySystems->CoolingLoad = false;
-                        ZoneLoad = max(state.dataUnitarySystems->QToHeatSetPt, QZnReq);
+                        ZoneLoad = state.dataUnitarySystems->QToHeatSetPt;
                     }
                     // zone temp below heating set point temp
                 } else if (state.dataUnitarySystems->QToHeatSetPt > 0.0 && state.dataUnitarySystems->QToCoolSetPt > 0.0) {
@@ -10862,7 +10862,7 @@ namespace UnitarySystems {
                     if (SensOutputOff < 0.0 && state.dataUnitarySystems->QToHeatSetPt - SensOutputOff > HVAC::SmallLoad) {
                         state.dataUnitarySystems->HeatingLoad = true;
                         state.dataUnitarySystems->CoolingLoad = false;
-                        ZoneLoad = max(state.dataUnitarySystems->QToHeatSetPt, QZnReq);
+                        ZoneLoad = state.dataUnitarySystems->QToHeatSetPt;
                     }
                     // zone temp below heating set point temp
                 } else if (state.dataUnitarySystems->QToHeatSetPt > 0.0 && state.dataUnitarySystems->QToCoolSetPt > 0.0) {
