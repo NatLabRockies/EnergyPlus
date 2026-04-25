@@ -8200,10 +8200,9 @@ namespace UnitarySystems {
                 if (ZoneLoad > suppLoadTarget) {
                     suppLoadTarget = ZoneLoad;
                 }
-                // When HeatingLoad is set by constant-fan logic but QToHeatSetPt is negative
-                // (predictor overestimates zone temp), the primary coil targets a negative load
-                // and the supp check never fires. Floor at 0 so supp fires when primary
-                // can't achieve neutral output. (#11039)
+                // QToHeatSetPt can be negative when the predictor overestimates
+                // zone temp. Floor at 0 so supp fires when primary can't
+                // achieve neutral output. (#11039)
                 if (suppLoadTarget < 0.0) {
                     suppLoadTarget = 0.0;
                 }
