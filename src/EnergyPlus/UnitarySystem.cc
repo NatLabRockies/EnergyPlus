@@ -8195,8 +8195,21 @@ namespace UnitarySystems {
 
         if (this->m_SuppCoilExists &&
             (state.dataUnitarySystems->HeatingLoad || state.dataUnitarySystems->CoolingLoad || state.dataUnitarySystems->MoistureLoad < 0.0)) {
-            if ((FullSensibleOutput < (state.dataUnitarySystems->QToHeatSetPt - HVAC::SmallLoad)) && !FirstHVACIteration) {
-                SupHeaterLoad = max(0.0, state.dataUnitarySystems->QToHeatSetPt - FullSensibleOutput);
+            Real64 suppLoadTarget = state.dataUnitarySystems->QToHeatSetPt;
+            if (state.dataUnitarySystems->HeatingLoad) {
+                if (ZoneLoad > suppLoadTarget) {
+                    suppLoadTarget = ZoneLoad;
+                }
+                // When HeatingLoad is set by constant-fan logic but QToHeatSetPt is negative
+                // (predictor overestimates zone temp), the primary coil targets a negative load
+                // and the supp check never fires. Floor at 0 so supp fires when primary
+                // can't achieve neutral output. (#11039)
+                if (suppLoadTarget < 0.0) {
+                    suppLoadTarget = 0.0;
+                }
+            }
+            if ((FullSensibleOutput < (suppLoadTarget - HVAC::SmallLoad)) && !FirstHVACIteration) {
+                SupHeaterLoad = max(0.0, suppLoadTarget - FullSensibleOutput);
                 this->m_SupHeaterLoad = 0.0;
                 // what does this line even do? I know we want the supplemental heater on only if there is a dehum load,
                 // but for HP's the supp heater should also run if the heating coil can't turn on
@@ -10801,7 +10814,7 @@ namespace UnitarySystems {
                     SensOutputOff - state.dataUnitarySystems->QToHeatSetPt < -HVAC::SmallLoad) {
                     state.dataUnitarySystems->HeatingLoad = true;
                     state.dataUnitarySystems->CoolingLoad = false;
-                    ZoneLoad = state.dataUnitarySystems->QToHeatSetPt;
+                    ZoneLoad = max(state.dataUnitarySystems->QToHeatSetPt, QZnReq);
                 }
             } break;
 
@@ -10823,7 +10836,7 @@ namespace UnitarySystems {
                     if (SensOutputOff < 0.0 && state.dataUnitarySystems->QToHeatSetPt - SensOutputOff > HVAC::SmallLoad) {
                         state.dataUnitarySystems->HeatingLoad = true;
                         state.dataUnitarySystems->CoolingLoad = false;
-                        ZoneLoad = state.dataUnitarySystems->QToHeatSetPt;
+                        ZoneLoad = max(state.dataUnitarySystems->QToHeatSetPt, QZnReq);
                     }
                     // zone temp below heating set point temp
                 } else if (state.dataUnitarySystems->QToHeatSetPt > 0.0 && state.dataUnitarySystems->QToCoolSetPt > 0.0) {
@@ -10849,7 +10862,7 @@ namespace UnitarySystems {
                     if (SensOutputOff < 0.0 && state.dataUnitarySystems->QToHeatSetPt - SensOutputOff > HVAC::SmallLoad) {
                         state.dataUnitarySystems->HeatingLoad = true;
                         state.dataUnitarySystems->CoolingLoad = false;
-                        ZoneLoad = state.dataUnitarySystems->QToHeatSetPt;
+                        ZoneLoad = max(state.dataUnitarySystems->QToHeatSetPt, QZnReq);
                     }
                     // zone temp below heating set point temp
                 } else if (state.dataUnitarySystems->QToHeatSetPt > 0.0 && state.dataUnitarySystems->QToCoolSetPt > 0.0) {
@@ -10871,7 +10884,7 @@ namespace UnitarySystems {
                     if (SensOutputOff < 0.0 && SensOutputOff - state.dataUnitarySystems->QToHeatSetPt < -HVAC::SmallLoad) {
                         state.dataUnitarySystems->HeatingLoad = true;
                         state.dataUnitarySystems->CoolingLoad = false;
-                        ZoneLoad = state.dataUnitarySystems->QToHeatSetPt;
+                        ZoneLoad = max(state.dataUnitarySystems->QToHeatSetPt, QZnReq);
                         // zone pushed above cooling set point
                     } else if (SensOutputOff > 0.0 && SensOutputOff - state.dataUnitarySystems->QToCoolSetPt > HVAC::SmallLoad) {
                         state.dataUnitarySystems->HeatingLoad = false;
