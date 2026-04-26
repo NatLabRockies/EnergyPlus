@@ -16950,14 +16950,14 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_CheckMultistageHeatingCoil)
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp.allocate(1);
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp(1).TypeOf = "Fan:ConstantVolume";
 
-    state->dataLoopNodes->NumOfNodes = 1;
-    state->dataLoopNodes->Node.allocate(2);
-    state->dataLoopNodes->Node(1).fluidType = Node::FluidType::Air;
-    state->dataLoopNodes->NodeID.allocate(1);
-    state->dataLoopNodes->NodeID(1) = "ATTIC ZONE AIR NODE";
+    state->dataLoopNodes->NumOfNodes++;
+    state->dataLoopNodes->Node.redimension(state->dataLoopNodes->NumOfNodes);
+    state->dataLoopNodes->Node(state->dataLoopNodes->NumOfNodes).fluidType = Node::FluidType::Air;
+    state->dataLoopNodes->NodeID.redimension(state->dataLoopNodes->NumOfNodes);
+    state->dataLoopNodes->NodeID(state->dataLoopNodes->NumOfNodes) = "ATTIC ZONE AIR NODE";
     bool errFlag{false};
     Node::RegisterNodeConnection(*state,
-                                 1,
+                                 state->dataLoopNodes->NumOfNodes,
                                  "ATTIC ZONE AIR NODE",
                                  Node::ConnectionObjectType::FanOnOff,
                                  "Object1",
@@ -16970,7 +16970,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_CheckMultistageHeatingCoil)
     state->dataZoneEquip->ZoneEquipConfig.allocate(1);
     state->dataZoneEquip->ZoneEquipConfig(1).IsControlled = true;
     state->dataZoneEquip->ZoneEquipConfig(1).ZoneName = "ATTIC ZONE";
-    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = 1;
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = state->dataLoopNodes->NumOfNodes;
     state->dataZoneEquip->ZoneEquipConfig(1).NumInletNodes = 0;
     state->dataZoneEquip->ZoneEquipConfig(1).NumReturnNodes = 0;
     state->dataZoneEquip->ZoneEquipConfig(1).IsControlled = true;
@@ -16982,10 +16982,10 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_CheckMultistageHeatingCoil)
     state->afn->MultizoneZoneData(1).ZoneName = "ATTIC ZONE";
 
     // Assume only one AirflowNetwork:Distribution:Node object is set for the Zone Air Node
-    state->afn->AirflowNetworkNumOfNodes = 1;
-    state->afn->AirflowNetworkNodeData.allocate(1);
-    state->afn->AirflowNetworkNodeData(1).Name = "ATTIC ZONE";
-    state->afn->AirflowNetworkNodeData(1).EPlusZoneNum = 1;
+    state->afn->AirflowNetworkNumOfNodes = state->dataLoopNodes->NumOfNodes;
+    state->afn->AirflowNetworkNodeData.allocate(state->dataLoopNodes->NumOfNodes);
+    state->afn->AirflowNetworkNodeData(state->dataLoopNodes->NumOfNodes).Name = "ATTIC ZONE";
+    state->afn->AirflowNetworkNodeData(state->dataLoopNodes->NumOfNodes).EPlusZoneNum = 1;
 
     state->afn->SplitterNodeNumbers.allocate(2);
     state->afn->SplitterNodeNumbers(1) = 0;

@@ -16393,9 +16393,9 @@ Coil:Heating:Electric,
     UnitarySys mySys;
     HVACSystemData *thisSys = state->dataZoneEquip->ZoneEquipList(1).compPointer[2];  // UnitarySystem is the 2nd in the zone equipment list
 
-    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
-    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "ZONE EXHAUST NODE");
-    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "ZONE 2 INLET NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = Node::GetNodeIndex(*state, "EAST ZONE ZONE AIR NODE");
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = Node::GetNodeIndex(*state, "EAST ZONE AIR TERMINAL MIXER SECONDARY INLET");
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = Node::GetNodeIndex(*state, "EAST ZONE SUPPLY INLET");
 
     state->dataZoneEquip->ZoneEquipInputsFilled = true;                               // indicate zone data is available
     mySys.getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
@@ -19297,8 +19297,10 @@ Dimensionless;	!- Output Unit Type
     mixedAirNode.Temp = 24.18496;    // 24C db
     mixedAirNode.HumRat = 0.0121542; // 17C wb
     mixedAirNode.Enthalpy = Psychrometrics::PsyHFnTdbW(mixedAirNode.Temp, mixedAirNode.HumRat);
-    zoneHeatBalance.airHumRat = state->dataLoopNodes->Node(1).HumRat;
-    zoneHeatBalance.MAT = state->dataLoopNodes->Node(1).Temp;
+
+    int space1ZoneNode = Node::GetNodeIndex(*state, "SPACE1-1 ZONE AIR NODE");
+    zoneHeatBalance.airHumRat = state->dataLoopNodes->Node(space1ZoneNode).HumRat;
+    zoneHeatBalance.MAT = state->dataLoopNodes->Node(space1ZoneNode).Temp;
 
     zoneSysEnergyDemand.RemainingOutputRequired = -397.162;
     zoneSysEnergyDemand.RemainingOutputReqToCoolSP = -397.162;
@@ -19316,7 +19318,7 @@ Dimensionless;	!- Output Unit Type
                       ZoneEquipFlag,
                       SenOutput,
                       LatOutput);
-    EXPECT_EQ(performance->OperatingMode, 3);
+    EXPECT_EQ(performance->OperatingMode, 3); // This should be an enum
     EXPECT_NEAR(performance->ModeRatio, 0.1991, 0.001);
     EXPECT_NEAR(thisSys->LoadSHR, 0.57154, 0.001);
     EXPECT_NEAR(thisSys->CoilSHR, 0.5266, 0.001);
@@ -26804,7 +26806,8 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_MultiSpeedFanWSHP_Test)
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand[0].RemainingOutputRequired = -800.0;
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand[0].RemainingOutputReqToCoolSP = -800.0;
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand[0].RemainingOutputReqToHeatSP = -800.0;
-    state->dataLoopNodes->Node(3).MassFlowRate = state->dataLoopNodes->Node(3).MassFlowRateMax;
+    int space1CoolingWaterInletNode = Node::GetNodeIndex(*state, "SPACE1-1 HP COOLING WATER INLET");
+    state->dataLoopNodes->Node(space1CoolingWaterInletNode).MassFlowRate = state->dataLoopNodes->Node(space1CoolingWaterInletNode).MassFlowRateMax;
     HeatActive = false;
     CoolActive = true;
     thisSys.simulate(*state,
@@ -26850,7 +26853,8 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_MultiSpeedFanWSHP_Test)
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand[1].RemainingOutputReqToHeatSP = -100.0;
     auto &thisSys1 = state->dataUnitarySystems->unitarySys[1];
     CompIndex = 2;
-    state->dataLoopNodes->Node(7).MassFlowRate = state->dataLoopNodes->Node(7).MassFlowRateMax;
+    int space2CoolingWaterInletNode = Node::GetNodeIndex(*state, "SPACE2-1 HP COOLING WATER INLET");
+    state->dataLoopNodes->Node(space2CoolingWaterInletNode).MassFlowRate = state->dataLoopNodes->Node(space2CoolingWaterInletNode).MassFlowRateMax;
     // Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit
     thisSys1.simulate(*state,
                       thisSys1.Name,
@@ -26897,7 +26901,9 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_MultiSpeedFanWSHP_Test)
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand[1].RemainingOutputRequired = 100.0;
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand[1].RemainingOutputReqToCoolSP = 100.0;
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand[1].RemainingOutputReqToHeatSP = 100.0;
-    state->dataLoopNodes->Node(9).MassFlowRate = state->dataLoopNodes->Node(9).MassFlowRateMax;
+
+    int space2HeatingWaterInletNode = Node::GetNodeIndex(*state, "SPACE2-1 HP HEATING WATER INLET");
+    state->dataLoopNodes->Node(space2HeatingWaterInletNode).MassFlowRate = state->dataLoopNodes->Node(space2HeatingWaterInletNode).MassFlowRateMax;
     thisSys1.simulate(*state,
                       thisSys1.Name,
                       FirstHVACIteration,

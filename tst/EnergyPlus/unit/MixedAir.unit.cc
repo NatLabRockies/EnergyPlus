@@ -512,7 +512,9 @@ TEST_F(EnergyPlusFixture, MixedAir_HXBypassOptionTest)
     state->dataAirLoop->AirLoopControlInfo.allocate(5);       // will be deallocated by MixedAir::clear_state(); in EnergyPlusFixture
     state->dataAirLoop->AirLoopFlow.allocate(5);              // will be deallocated by MixedAir::clear_state(); in EnergyPlusFixture
     state->dataAirSystemsData->PrimaryAirSystems.allocate(5); // will be deallocated by DataAirSystems::clear_state(); in EnergyPlusFixture
-    state->dataLoopNodes->Node.allocate(21);                  // will be deallocated by DataLoopNode::clear_state(); in EnergyPlusFixture
+
+    int NumNodes = state->dataLoopNodes->NumOfNodes;
+    state->dataLoopNodes->Node.redimension(NumNodes + 21);                  // will be deallocated by DataLoopNode::clear_state(); in EnergyPlusFixture
 
     state->dataEnvrn->StdBaroPress = StdPressureSeaLevel;
     state->dataEnvrn->StdRhoAir = Psychrometrics::PsyRhoAirFnPbTdbW(*state, state->dataEnvrn->StdBaroPress, 20.0, 0.0);
@@ -536,6 +538,7 @@ TEST_F(EnergyPlusFixture, MixedAir_HXBypassOptionTest)
         state->dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(1).TotalComponents = 1;
         state->dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(1).Comp.allocate(1);
     }
+    
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp(1).Name = "OA Sys 1";
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp(1).TypeOf = "AirLoopHVAC:OutdoorAirSystem";
     state->dataAirSystemsData->PrimaryAirSystems(2).Branch(1).Comp(1).Name = "OA Sys 2";
@@ -547,39 +550,35 @@ TEST_F(EnergyPlusFixture, MixedAir_HXBypassOptionTest)
 
     // Initialize common OA controller and node data
     for (OAControllerNum = 1; OAControllerNum <= 5; ++OAControllerNum) {
-        state->dataMixedAir->OAController(OAControllerNum).MinOAMassFlowRate =
-            state->dataMixedAir->OAController(OAControllerNum).MinOA * state->dataEnvrn->StdRhoAir;
-        state->dataMixedAir->OAController(OAControllerNum).MaxOAMassFlowRate =
-            state->dataMixedAir->OAController(OAControllerNum).MaxOA * state->dataEnvrn->StdRhoAir;
+        auto &oaController = state->dataMixedAir->OAController(OAControllerNum);
+        oaController.MinOAMassFlowRate = oaController.MinOA * state->dataEnvrn->StdRhoAir;
+        oaController.MaxOAMassFlowRate = oaController.MaxOA * state->dataEnvrn->StdRhoAir;
         if (OAControllerNum == 5) {
-            state->dataMixedAir->OAController(OAControllerNum).InletNode = 18;
+            oaController.InletNode = NumNodes + 18; // Not happy with this random node arithmetic
         } else {
-            state->dataMixedAir->OAController(OAControllerNum).InletNode = state->dataMixedAir->OAController(OAControllerNum).OANode;
+            oaController.InletNode = oaController.OANode;
         }
-        state->dataMixedAir->OAController(OAControllerNum).RetTemp = 24.0;
-        state->dataMixedAir->OAController(OAControllerNum).InletTemp = 20.0; // This is the same as the outdoor air dry bulb for these tests
-        state->dataMixedAir->OAController(OAControllerNum).OATemp = 20.0;
-        state->dataMixedAir->OAController(OAControllerNum).MixSetTemp = 22.0;
-        state->dataMixedAir->OAController(OAControllerNum).ExhMassFlow = 0.0;
+        oaController.RetTemp = 24.0;
+        oaController.InletTemp = 20.0; // This is the same as the outdoor air dry bulb for these tests
+        oaController.OATemp = 20.0;
+        oaController.MixSetTemp = 22.0;
+        oaController.ExhMassFlow = 0.0;
         // OAController( OAControllerNum ).InletEnth = needs to be initialized if an enthalpy economizer is tested
         // OAController( OAControllerNum ).RetEnth = needs to be initialized if an enthalpy economizer is tested
-        state->dataMixedAir->OAController(OAControllerNum).MixMassFlow = 0.5; // Note this is 50% of design flow set above
-        state->dataLoopNodes->Node(OAControllerNum * 4).MassFlowRate =
-            state->dataMixedAir->OAController(OAControllerNum).MixMassFlow; // Return air nodes
-        state->dataLoopNodes->Node(OAControllerNum + ((OAControllerNum - 1) * 3)).MassFlowRateMaxAvail =
-            state->dataMixedAir->OAController(OAControllerNum).MixMassFlow;                                                // Mixed air nodes
-        state->dataLoopNodes->Node(OAControllerNum * 4).Temp = state->dataMixedAir->OAController(OAControllerNum).RetTemp; // Return air nodes
-        state->dataLoopNodes->Node(OAControllerNum * 4).Enthalpy =
-            Psychrometrics::PsyHFnTdbW(state->dataMixedAir->OAController(OAControllerNum).RetTemp, 0.0); // Return air nodes, dry air
-        state->dataLoopNodes->Node(OAControllerNum * 4 - 3).TempSetPoint =
-            state->dataMixedAir->OAController(OAControllerNum).MixSetTemp; // Mixed air nodes
+        oaController.MixMassFlow = 0.5; // Note this is 50% of design flow set above
+        state->dataLoopNodes->Node(NumNodes + OAControllerNum * 4).MassFlowRate =
+            oaController.MixMassFlow; // Return air nodes
+        // This node number arithmetic makes no sense, why * 3 when everything else is * 4?
+        // state->dataLoopNodes->Node(NumNodes + OAControllerNum + ((OAControllerNum - 1) * 3)).MassFlowRateMaxAvail = oaController.MixMassFlow; // Mixed air nodes
+        state->dataLoopNodes->Node(NumNodes + OAControllerNum * 4 - 3).MassFlowRateMaxAvail = oaController.MixMassFlow; // Mixed air nodes
+        state->dataLoopNodes->Node(NumNodes + OAControllerNum * 4).Temp = oaController.RetTemp; // Return air nodes
+        state->dataLoopNodes->Node(NumNodes + OAControllerNum * 4).Enthalpy = Psychrometrics::PsyHFnTdbW(oaController.RetTemp, 0.0); // Return air nodes, dry air
+        state->dataLoopNodes->Node(NumNodes + OAControllerNum * 4 - 3).TempSetPoint = oaController.MixSetTemp; // Mixed air nodes
         if (OAControllerNum == 5) {
-            state->dataLoopNodes->Node(18).TempSetPoint = state->dataMixedAir->OAController(OAControllerNum).MixSetTemp + 1.0; // Mixed air nodes
+            state->dataLoopNodes->Node(NumNodes + 18).TempSetPoint = oaController.MixSetTemp + 1.0; // Mixed air nodes
         }
-        state->dataLoopNodes->Node(OAControllerNum * 4 - 2).Temp =
-            state->dataMixedAir->OAController(OAControllerNum).OATemp; // OA inlet (actuated) air nodes, dry air
-        state->dataLoopNodes->Node(OAControllerNum * 4 - 2).Enthalpy =
-            Psychrometrics::PsyHFnTdbW(state->dataMixedAir->OAController(OAControllerNum).InletTemp, 0.0);
+        state->dataLoopNodes->Node(NumNodes + OAControllerNum * 4 - 2).Temp = oaController.OATemp; // OA inlet (actuated) air nodes, dry air
+        state->dataLoopNodes->Node(NumNodes + OAControllerNum * 4 - 2).Enthalpy = Psychrometrics::PsyHFnTdbW(oaController.InletTemp, 0.0);
         ; // OA inlet (actuated) air nodes, dry air
     }
 
@@ -591,131 +590,116 @@ TEST_F(EnergyPlusFixture, MixedAir_HXBypassOptionTest)
     //   OAFlow = MixFlow*(MixTemp - RetTemp)/(InletTemp - RetTemp)
     AirLoopNum = 1;
     OAControllerNum = 1;
+    auto &oaController1 = state->dataMixedAir->OAController(OAControllerNum);
     state->dataAirLoop->AirLoopControlInfo(AirLoopNum).HeatingActiveFlag = true;
     // setup OA system and initialize nodes
     //		ManageOutsideAirSystem( "OA Sys 1", true, AirLoopNum, OAControllerNum );
-    state->dataMixedAir->OAController(OAControllerNum).CalcOAController(*state, AirLoopNum, true);
+    oaController1.CalcOAController(*state, AirLoopNum, true);
 
-    expectedMinOAflow = 0.2 * state->dataEnvrn->StdRhoAir * state->dataMixedAir->OAController(OAControllerNum).MixMassFlow /
+    expectedMinOAflow = 0.2 * state->dataEnvrn->StdRhoAir * oaController1.MixMassFlow /
                         state->dataAirLoop->AirLoopFlow(AirLoopNum).DesSupply; // For Proportional minimum input
-    expectedOAflow = state->dataMixedAir->OAController(OAControllerNum).MixMassFlow *
-                     (state->dataMixedAir->OAController(OAControllerNum).MixSetTemp - state->dataMixedAir->OAController(OAControllerNum).RetTemp) /
-                     (state->dataMixedAir->OAController(OAControllerNum).InletTemp - state->dataMixedAir->OAController(OAControllerNum).RetTemp);
-    EXPECT_NEAR(expectedOAflow, state->dataMixedAir->OAController(OAControllerNum).OAMassFlow, 0.00001);
-    EXPECT_NEAR(state->dataMixedAir->OAController(OAControllerNum).OAMassFlow / state->dataMixedAir->OAController(OAControllerNum).MixMassFlow,
-                state->dataAirLoop->AirLoopFlow(AirLoopNum).OAFrac,
-                0.00001);
+    expectedOAflow = oaController1.MixMassFlow * (oaController1.MixSetTemp - oaController1.RetTemp) / (oaController1.InletTemp - oaController1.RetTemp);
+    EXPECT_NEAR(expectedOAflow, oaController1.OAMassFlow, 0.00001);
+    EXPECT_NEAR(oaController1.OAMassFlow / oaController1.MixMassFlow, state->dataAirLoop->AirLoopFlow(AirLoopNum).OAFrac, 0.00001);
     EXPECT_EQ(expectedMinOAflow, state->dataAirLoop->AirLoopFlow(AirLoopNum).MinOutAir);
-    EXPECT_EQ(expectedMinOAflow / state->dataMixedAir->OAController(OAControllerNum).MixMassFlow,
-              state->dataAirLoop->AirLoopFlow(AirLoopNum).OAMinFrac);
+    EXPECT_EQ(expectedMinOAflow / oaController1.MixMassFlow, state->dataAirLoop->AirLoopFlow(AirLoopNum).OAMinFrac);
     EXPECT_TRUE(state->dataAirLoop->AirLoopControlInfo(AirLoopNum).HeatRecoveryBypass);
-    EXPECT_EQ(1, state->dataMixedAir->OAController(OAControllerNum).HeatRecoveryBypassStatus);
+    EXPECT_EQ(1, oaController1.HeatRecoveryBypassStatus);
 
     // Case 2 - economizer active, LockoutWithHeating, BypassWhenWithinEconomizerLimits
     // economizer should not be locked out, OA flow at minimum, HXbypass true
     AirLoopNum = 2;
     OAControllerNum = 2;
+    auto &oaController2 = state->dataMixedAir->OAController(OAControllerNum);
     state->dataAirLoop->AirLoopControlInfo(AirLoopNum).HeatingActiveFlag = true;
-    state->dataMixedAir->OAController(OAControllerNum).InletTemp = 0.0; // This is the same as the outdoor air dry bulb for these tests
-    state->dataMixedAir->OAController(OAControllerNum).OATemp = 0.0;
-    state->dataLoopNodes->Node(OAControllerNum * 4 - 2).Temp =
-        state->dataMixedAir->OAController(OAControllerNum).OATemp; // OA inlet (actuated) air nodes, dry air
+    oaController2.InletTemp = 0.0; // This is the same as the outdoor air dry bulb for these tests
+    oaController2.OATemp = 0.0;
+    state->dataLoopNodes->Node(NumNodes + OAControllerNum * 4 - 2).Temp = oaController2.OATemp; // OA inlet (actuated) air nodes, dry air
 
-    state->dataMixedAir->OAController(OAControllerNum).CalcOAController(*state, AirLoopNum, true);
+    oaController2.CalcOAController(*state, AirLoopNum, true);
 
-    expectedMinOAflow = 0.2 * state->dataEnvrn->StdRhoAir * state->dataMixedAir->OAController(OAControllerNum).MixMassFlow /
-                        state->dataAirLoop->AirLoopFlow(AirLoopNum).DesSupply; // For Proportional minimum input
+    expectedMinOAflow = 0.2 * state->dataEnvrn->StdRhoAir * oaController2.MixMassFlow / state->dataAirLoop->AirLoopFlow(AirLoopNum).DesSupply; // For Proportional minimum input
     expectedOAflow = expectedMinOAflow;
-    EXPECT_NEAR(expectedOAflow, state->dataMixedAir->OAController(OAControllerNum).OAMassFlow, 0.00001);
-    EXPECT_NEAR(state->dataMixedAir->OAController(OAControllerNum).OAMassFlow / state->dataMixedAir->OAController(OAControllerNum).MixMassFlow,
-                state->dataAirLoop->AirLoopFlow(AirLoopNum).OAFrac,
-                0.00001);
+    EXPECT_NEAR(expectedOAflow, oaController2.OAMassFlow, 0.00001);
+    EXPECT_NEAR(oaController2.OAMassFlow / oaController2.MixMassFlow, state->dataAirLoop->AirLoopFlow(AirLoopNum).OAFrac, 0.00001);
     EXPECT_EQ(expectedMinOAflow, state->dataAirLoop->AirLoopFlow(AirLoopNum).MinOutAir);
-    EXPECT_EQ(expectedMinOAflow / state->dataMixedAir->OAController(OAControllerNum).MixMassFlow,
-              state->dataAirLoop->AirLoopFlow(AirLoopNum).OAMinFrac);
+    EXPECT_EQ(expectedMinOAflow / oaController2.MixMassFlow, state->dataAirLoop->AirLoopFlow(AirLoopNum).OAMinFrac);
     EXPECT_FALSE(state->dataAirLoop->AirLoopControlInfo(AirLoopNum).HeatRecoveryBypass);
-    EXPECT_EQ(0, state->dataMixedAir->OAController(OAControllerNum).HeatRecoveryBypassStatus);
+    EXPECT_EQ(0, oaController2.HeatRecoveryBypassStatus);
 
     // Case 3 - economizer active, NoLockout, BypassWhenOAFlowGreaterThanMinimum (should be same result as Case 1)
     // economizer should open to meet the mixed air setpoint assuming dry air to make it simple, HXbypass true
     //   OAFlow = MixFlow*(MixTemp - RetTemp)/(InletTemp - RetTemp)
     AirLoopNum = 3;
     OAControllerNum = 3;
+    auto &oaController3 = state->dataMixedAir->OAController(OAControllerNum);
     state->dataAirLoop->AirLoopControlInfo(AirLoopNum).HeatingActiveFlag = true;
-    state->dataMixedAir->OAController(OAControllerNum).InletTemp = 20.0; // This is the same as the outdoor air dry bulb for these tests
-    state->dataMixedAir->OAController(OAControllerNum).OATemp = 20.0;
-    state->dataLoopNodes->Node(OAControllerNum * 4 - 2).Temp =
-        state->dataMixedAir->OAController(OAControllerNum).OATemp; // OA inlet (actuated) air nodes, dry air
-    state->dataMixedAir->OAController(OAControllerNum).CalcOAController(*state, AirLoopNum, true);
+    oaController3.InletTemp = 20.0; // This is the same as the outdoor air dry bulb for these tests
+    oaController3.OATemp = 20.0;
+    state->dataLoopNodes->Node(NumNodes + OAControllerNum * 4 - 2).Temp = oaController3.OATemp; // OA inlet (actuated) air nodes, dry air
+    oaController3.CalcOAController(*state, AirLoopNum, true);
 
-    expectedMinOAflow = 0.2 * state->dataEnvrn->StdRhoAir * state->dataMixedAir->OAController(OAControllerNum).MixMassFlow /
+    expectedMinOAflow = 0.2 * state->dataEnvrn->StdRhoAir * oaController3.MixMassFlow /
                         state->dataAirLoop->AirLoopFlow(AirLoopNum).DesSupply; // For Proportional minimum input
-    expectedOAflow = state->dataMixedAir->OAController(OAControllerNum).MixMassFlow *
-                     (state->dataMixedAir->OAController(OAControllerNum).MixSetTemp - state->dataMixedAir->OAController(OAControllerNum).RetTemp) /
-                     (state->dataMixedAir->OAController(OAControllerNum).InletTemp - state->dataMixedAir->OAController(OAControllerNum).RetTemp);
-    EXPECT_NEAR(expectedOAflow, state->dataMixedAir->OAController(OAControllerNum).OAMassFlow, 0.00001);
-    EXPECT_NEAR(state->dataMixedAir->OAController(OAControllerNum).OAMassFlow / state->dataMixedAir->OAController(OAControllerNum).MixMassFlow,
-                state->dataAirLoop->AirLoopFlow(AirLoopNum).OAFrac,
-                0.00001);
+    expectedOAflow = oaController3.MixMassFlow * (oaController3.MixSetTemp - oaController3.RetTemp) / (oaController3.InletTemp - oaController3.RetTemp);
+    EXPECT_NEAR(expectedOAflow, oaController3.OAMassFlow, 0.00001);
+    EXPECT_NEAR(oaController3.OAMassFlow / oaController3.MixMassFlow, state->dataAirLoop->AirLoopFlow(AirLoopNum).OAFrac, 0.00001);
     EXPECT_EQ(expectedMinOAflow, state->dataAirLoop->AirLoopFlow(AirLoopNum).MinOutAir);
-    EXPECT_EQ(expectedMinOAflow / state->dataMixedAir->OAController(OAControllerNum).MixMassFlow,
-              state->dataAirLoop->AirLoopFlow(AirLoopNum).OAMinFrac);
+    EXPECT_EQ(expectedMinOAflow / oaController3.MixMassFlow, state->dataAirLoop->AirLoopFlow(AirLoopNum).OAMinFrac);
     EXPECT_TRUE(state->dataAirLoop->AirLoopControlInfo(AirLoopNum).HeatRecoveryBypass);
-    EXPECT_EQ(1, state->dataMixedAir->OAController(OAControllerNum).HeatRecoveryBypassStatus);
+    EXPECT_EQ(1, oaController3.HeatRecoveryBypassStatus);
 
     // Case 4 - economizer active, NoLockout, BypassWhenOAFlowGreaterThanMinimum
     // economizer should be at minimum due to cold outdoor temp, OA flow at minimum, HXbypass false
     AirLoopNum = 4;
     OAControllerNum = 4;
+    auto &oaController4 = state->dataMixedAir->OAController(OAControllerNum);
     state->dataAirLoop->AirLoopControlInfo(AirLoopNum).HeatingActiveFlag = true;
-    state->dataMixedAir->OAController(OAControllerNum).InletTemp = 0.0; // This is the same as the outdoor air dry bulb for these tests
-    state->dataMixedAir->OAController(OAControllerNum).OATemp = 0.0;
-    state->dataLoopNodes->Node(OAControllerNum * 4 - 2).Temp =
-        state->dataMixedAir->OAController(OAControllerNum).OATemp; // OA inlet (actuated) air nodes, dry air
+    oaController4.InletTemp = 0.0; // This is the same as the outdoor air dry bulb for these tests
+    oaController4.OATemp = 0.0;
+    state->dataLoopNodes->Node(NumNodes + OAControllerNum * 4 - 2).Temp = oaController4.OATemp; // OA inlet (actuated) air nodes, dry air
 
-    state->dataMixedAir->OAController(OAControllerNum).CalcOAController(*state, AirLoopNum, true);
+    oaController4.CalcOAController(*state, AirLoopNum, true);
 
-    expectedMinOAflow = 0.2 * state->dataEnvrn->StdRhoAir * state->dataMixedAir->OAController(OAControllerNum).MixMassFlow /
+    expectedMinOAflow = 0.2 * state->dataEnvrn->StdRhoAir * oaController4.MixMassFlow /
                         state->dataAirLoop->AirLoopFlow(AirLoopNum).DesSupply; // For Proportional minimum input
     expectedOAflow = expectedMinOAflow;
-    EXPECT_NEAR(expectedOAflow, state->dataMixedAir->OAController(OAControllerNum).OAMassFlow, 0.00001);
-    EXPECT_NEAR(state->dataMixedAir->OAController(OAControllerNum).OAMassFlow / state->dataMixedAir->OAController(OAControllerNum).MixMassFlow,
-                state->dataAirLoop->AirLoopFlow(AirLoopNum).OAFrac,
-                0.00001);
+    EXPECT_NEAR(expectedOAflow, oaController4.OAMassFlow, 0.00001);
+    EXPECT_NEAR(oaController4.OAMassFlow / oaController4.MixMassFlow, state->dataAirLoop->AirLoopFlow(AirLoopNum).OAFrac, 0.00001);
     EXPECT_EQ(expectedMinOAflow, state->dataAirLoop->AirLoopFlow(AirLoopNum).MinOutAir);
-    EXPECT_EQ(expectedMinOAflow / state->dataMixedAir->OAController(OAControllerNum).MixMassFlow,
-              state->dataAirLoop->AirLoopFlow(AirLoopNum).OAMinFrac);
+    EXPECT_EQ(expectedMinOAflow / oaController4.MixMassFlow, state->dataAirLoop->AirLoopFlow(AirLoopNum).OAMinFrac);
     EXPECT_FALSE(state->dataAirLoop->AirLoopControlInfo(AirLoopNum).HeatRecoveryBypass);
-    EXPECT_EQ(0, state->dataMixedAir->OAController(OAControllerNum).HeatRecoveryBypassStatus);
+    EXPECT_EQ(0, oaController4.HeatRecoveryBypassStatus);
 
     // Case 5 - heating coil in outside air stream upstream of mixer #5697
     // economizer active, NoLockout, BypassWhenOAFlowGreaterThanMinimum
     // economizer should open to meet mixed air set point temperature, HXbypass true
     AirLoopNum = 5;
     OAControllerNum = 5;
+    auto &oaController5 = state->dataMixedAir->OAController(OAControllerNum);
     state->dataAirLoop->AirLoopControlInfo(AirLoopNum).HeatingActiveFlag = false;
-    state->dataMixedAir->OAController(OAControllerNum).InletTemp = 20.0; // This is the same as the outdoor air dry bulb for these tests
-    state->dataMixedAir->OAController(OAControllerNum).OATemp = 20.0;
-    state->dataLoopNodes->Node(OAControllerNum * 4 - 3).MassFlowRate =
-        state->dataMixedAir->OAController(OAControllerNum).MixMassFlow; // set the mixed air node mass flow rate
-    state->dataLoopNodes->Node(OAControllerNum * 4 - 2).Temp =
-        state->dataMixedAir->OAController(OAControllerNum).OATemp; // OA inlet (actuated) air nodes, dry air
+    oaController5.InletTemp = 20.0; // This is the same as the outdoor air dry bulb for these tests
+    oaController5.OATemp = 20.0;
+    state->dataLoopNodes->Node(NumNodes + OAControllerNum * 4 - 3).MassFlowRate =
+        oaController5.MixMassFlow; // set the mixed air node mass flow rate
+    state->dataLoopNodes->Node(NumNodes + OAControllerNum * 4 - 2).Temp =
+        oaController5.OATemp; // OA inlet (actuated) air nodes, dry air
 
-    state->dataMixedAir->OAController(OAControllerNum).CalcOAController(*state, AirLoopNum, true);
+    oaController5.CalcOAController(*state, AirLoopNum, true);
 
-    expectedMinOAflow = 0.2 * state->dataEnvrn->StdRhoAir * state->dataMixedAir->OAController(OAControllerNum).MixMassFlow /
+    expectedMinOAflow = 0.2 * state->dataEnvrn->StdRhoAir * oaController5.MixMassFlow /
                         state->dataAirLoop->AirLoopFlow(AirLoopNum).DesSupply; // For Proportional minimum input
     expectedOAflow = expectedMinOAflow;
-    EXPECT_GT(state->dataMixedAir->OAController(OAControllerNum).OAMassFlow, expectedOAflow);
-    EXPECT_NEAR(state->dataMixedAir->OAController(OAControllerNum).OAMassFlow / state->dataMixedAir->OAController(OAControllerNum).MixMassFlow,
+    EXPECT_GT(oaController5.OAMassFlow, expectedOAflow);
+    EXPECT_NEAR(oaController5.OAMassFlow / oaController5.MixMassFlow,
                 state->dataAirLoop->AirLoopFlow(AirLoopNum).OAFrac,
                 0.00001);
-    EXPECT_NEAR(state->dataMixedAir->OAController(OAControllerNum).OAMassFlow, 0.145329, 0.000001);
+    EXPECT_NEAR(oaController5.OAMassFlow, 0.145329, 0.000001);
     EXPECT_EQ(expectedMinOAflow, state->dataAirLoop->AirLoopFlow(AirLoopNum).MinOutAir);
-    EXPECT_EQ(expectedMinOAflow / state->dataMixedAir->OAController(OAControllerNum).MixMassFlow,
+    EXPECT_EQ(expectedMinOAflow / oaController5.MixMassFlow,
               state->dataAirLoop->AirLoopFlow(AirLoopNum).OAMinFrac);
     EXPECT_FALSE(state->dataAirLoop->AirLoopControlInfo(AirLoopNum).HeatRecoveryBypass);
-    EXPECT_EQ(0, state->dataMixedAir->OAController(OAControllerNum).HeatRecoveryBypassStatus);
+    EXPECT_EQ(0, oaController5.HeatRecoveryBypassStatus);
 }
 
 TEST_F(EnergyPlusFixture, CO2ControlDesignOccupancyTest)
