@@ -24,6 +24,13 @@ def repo_relative_source(
     source_path = Path(source_file)
     candidates: list[Path] = []
 
+    source_parts = source_path.parts
+    for index in range(len(source_parts) - 1):
+        if source_parts[index] == "src" and source_parts[index + 1] == "EnergyPlus":
+            relative_path = Path(*source_parts[index:])
+            if (workspace / relative_path).is_file():
+                return relative_path
+
     if source_path.is_absolute():
         candidates.append(source_path)
     else:

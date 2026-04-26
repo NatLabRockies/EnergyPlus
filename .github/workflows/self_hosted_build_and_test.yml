@@ -11,7 +11,8 @@ on:
         default: ""
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.inputs.ref || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number ||
+    github.event.inputs.ref || github.ref }}
   cancel-in-progress: true
 
 env:
@@ -26,7 +27,7 @@ env:
 jobs:
   coverage:
     name: Coverage
-    runs-on: [self-hosted, linux, x64, ubuntu-24.04]
+    runs-on: [ self-hosted, linux, x64, ubuntu-24.04 ]
     permissions:
       contents: read
       statuses: write
@@ -54,7 +55,9 @@ jobs:
         with:
           path: |
             ${{ steps.setup-runner.outputs.ccache-dir }}
-          key: ccache-self-hosted-linux-${{ steps.setup-runner.outputs.compiler-id }}-coverage-${{ github.head_ref || github.event.inputs.ref || github.ref_name }}-${{ github.run_id }}-${{ github.run_attempt }}
+          key: ccache-self-hosted-linux-${{ steps.setup-runner.outputs.compiler-id
+            }}-coverage-${{ github.head_ref || github.event.inputs.ref ||
+            github.ref_name }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
             ccache-self-hosted-linux-${{ steps.setup-runner.outputs.compiler-id }}-coverage-${{ github.head_ref || github.event.inputs.ref || github.ref_name }}-
             ccache-self-hosted-linux-${{ steps.setup-runner.outputs.compiler-id }}-coverage-
@@ -75,27 +78,21 @@ jobs:
 
       - name: Configure coverage build
         run: >
-          cmake -S . -B ${{ env.BUILD_DIR }}
-          -G "Unix Makefiles"
-          -DCMAKE_BUILD_TYPE=RelWithDebInfo
-          -DLINK_WITH_PYTHON:BOOL=ON
-          -DPYTHON_CLI:BOOL=OFF
-          -DPython_REQUIRED_VERSION:STRING=${{ env.PYTHON_REQUIRED_VERSION }}
-          -DPython_ROOT_DIR:PATH=${{ steps.setup-runner.outputs.python-root-dir }}
-          -DBUILD_FORTRAN:BOOL=ON
-          -DBUILD_TESTING=ON
-          -DBUILD_PACKAGE=OFF
-          -DDOCUMENTATION_BUILD=DoNotBuild
-          -DENABLE_REGRESSION_TESTING:BOOL=OFF
-          -DTEST_ANNUAL_SIMULATION:BOOL=OFF
-          -DENABLE_COVERAGE:BOOL=ON
-          -DENABLE_GTEST_DEBUG_MODE:BOOL=OFF
-          -DENABLE_PCH:BOOL=OFF
-          -DFORCE_DEBUG_ARITHM_GCC_OR_CLANG:BOOL=ON
-          -DCOMMIT_SHA:STRING=${{ steps.checkout-sha.outputs.sha }}
+          cmake -S . -B ${{ env.BUILD_DIR }} -G "Unix Makefiles"
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo -DLINK_WITH_PYTHON:BOOL=ON
+          -DPYTHON_CLI:BOOL=OFF -DPython_REQUIRED_VERSION:STRING=${{
+          env.PYTHON_REQUIRED_VERSION }} -DPython_ROOT_DIR:PATH=${{
+          steps.setup-runner.outputs.python-root-dir }} -DBUILD_FORTRAN:BOOL=ON
+          -DBUILD_TESTING=ON -DBUILD_PACKAGE=OFF
+          -DDOCUMENTATION_BUILD=DoNotBuild -DENABLE_REGRESSION_TESTING:BOOL=OFF
+          -DTEST_ANNUAL_SIMULATION:BOOL=OFF -DENABLE_COVERAGE:BOOL=ON
+          -DENABLE_GTEST_DEBUG_MODE:BOOL=OFF -DENABLE_PCH:BOOL=OFF
+          -DFORCE_DEBUG_ARITHM_GCC_OR_CLANG:BOOL=ON -DCOMMIT_SHA:STRING=${{
+          steps.checkout-sha.outputs.sha }}
 
       - name: Build coverage targets
-        run: cmake --build ${{ env.BUILD_DIR }} -j "${{ steps.setup-runner.outputs.nproc }}"
+        run: cmake --build ${{ env.BUILD_DIR }} -j "${{ steps.setup-runner.outputs.nproc
+          }}"
 
       - name: Show post-build ccache stats
         shell: bash
@@ -103,18 +100,15 @@ jobs:
 
       - name: Run unit tests
         run: >
-          ctest
-          --test-dir ${{ env.BUILD_DIR }}
-          -E "integration.*"
-          --output-on-failure
-          -j "${{ steps.setup-runner.outputs.nproc }}"
+          ctest --test-dir ${{ env.BUILD_DIR }} -E "integration.*"
+          --output-on-failure -j "${{ steps.setup-runner.outputs.nproc }}"
 
       - name: Generate unit test coverage results
         working-directory: ${{ env.BUILD_DIR }}
         run: |
           set -o pipefail
           mkdir -p coverage/unit
-          lcov -c -d . -o coverage/unit/lcov.output --base-directory ${{ github.workspace }} --ignore-errors source,source
+          lcov -c -d . -o coverage/unit/lcov.output --base-directory ${{ github.workspace }} --ignore-errors source,source,mismatch,mismatch
           ${{ steps.setup-runner.outputs.python-root-dir }}/bin/python \
             ${{ github.workspace }}/scripts/dev/normalize_lcov_paths.py \
             coverage/unit/lcov.output \
@@ -127,30 +121,33 @@ jobs:
       - name: Process unit test coverage summary
         working-directory: ${{ env.BUILD_DIR }}/coverage/unit
         continue-on-error: true
-        run: ${{ steps.setup-runner.outputs.python-root-dir }}/bin/python ${{ github.workspace }}/scripts/dev/gha_coverage_summary.py
+        run: ${{ steps.setup-runner.outputs.python-root-dir }}/bin/python ${{
+          github.workspace }}/scripts/dev/gha_coverage_summary.py
 
       - name: Add unit test coverage summary to job summary
-        if: ${{ always() && hashFiles(format('{0}/{1}/coverage/unit/cover.md', github.workspace, env.BUILD_DIR)) != '' }}
-        run: cat ${{ github.workspace }}/${{ env.BUILD_DIR }}/coverage/unit/cover.md >> "$GITHUB_STEP_SUMMARY"
+        if: ${{ always() && hashFiles(format('{0}/{1}/coverage/unit/cover.md',
+          github.workspace, env.BUILD_DIR)) != '' }}
+        run: cat ${{ github.workspace }}/${{ env.BUILD_DIR }}/coverage/unit/cover.md >>
+          "$GITHUB_STEP_SUMMARY"
 
       - name: Clear coverage counters before integration tests
-        run: ${{ steps.setup-runner.outputs.python-root-dir }}/bin/python ${{ github.workspace }}/scripts/dev/clear_coverage_results.py ${{ env.BUILD_DIR }}
+        run: ${{ steps.setup-runner.outputs.python-root-dir }}/bin/python ${{
+          github.workspace }}/scripts/dev/clear_coverage_results.py ${{
+          env.BUILD_DIR }}
 
       - name: Run integration tests excluding slowest and annual-only tests
         run: >
-          ctest
-          --test-dir ${{ env.BUILD_DIR }}
-          -R "integration.*"
-          -E "${{ env.INTEGRATION_EXCLUDE_REGEX }}|${{ env.ANNUAL_SIMULATION_EXCLUDE_REGEX }}"
-          --output-on-failure
-          -j "${{ steps.setup-runner.outputs.nproc }}"
+          ctest --test-dir ${{ env.BUILD_DIR }} -R "integration.*" -E "${{
+          env.INTEGRATION_EXCLUDE_REGEX }}|${{
+          env.ANNUAL_SIMULATION_EXCLUDE_REGEX }}" --output-on-failure -j "${{
+          steps.setup-runner.outputs.nproc }}"
 
       - name: Generate integration test coverage results
         working-directory: ${{ env.BUILD_DIR }}
         run: |
           set -o pipefail
           mkdir -p coverage/integration
-          lcov -c -d . -o coverage/integration/lcov.output --base-directory ${{ github.workspace }} --ignore-errors source,source
+          lcov -c -d . -o coverage/integration/lcov.output --base-directory ${{ github.workspace }} --ignore-errors source,source,mismatch,mismatch
           ${{ steps.setup-runner.outputs.python-root-dir }}/bin/python \
             ${{ github.workspace }}/scripts/dev/normalize_lcov_paths.py \
             coverage/integration/lcov.output \
@@ -163,57 +160,72 @@ jobs:
       - name: Process integration test coverage summary
         working-directory: ${{ env.BUILD_DIR }}/coverage/integration
         continue-on-error: true
-        run: ${{ steps.setup-runner.outputs.python-root-dir }}/bin/python ${{ github.workspace }}/scripts/dev/gha_coverage_summary.py
+        run: ${{ steps.setup-runner.outputs.python-root-dir }}/bin/python ${{
+          github.workspace }}/scripts/dev/gha_coverage_summary.py
 
       - name: Add integration test coverage summary to job summary
-        if: ${{ always() && hashFiles(format('{0}/{1}/coverage/integration/cover.md', github.workspace, env.BUILD_DIR)) != '' }}
-        run: cat ${{ github.workspace }}/${{ env.BUILD_DIR }}/coverage/integration/cover.md >> "$GITHUB_STEP_SUMMARY"
+        if: ${{ always() && hashFiles(format('{0}/{1}/coverage/integration/cover.md',
+          github.workspace, env.BUILD_DIR)) != '' }}
+        run: cat ${{ github.workspace }}/${{ env.BUILD_DIR
+          }}/coverage/integration/cover.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload unit test coverage to Coveralls
         id: coveralls-unit
-        if: ${{ always() && hashFiles(format('{0}/{1}/coverage/unit/lcov.output.coveralls', github.workspace, env.BUILD_DIR)) != '' }}
+        if: ${{ always() &&
+          hashFiles(format('{0}/{1}/coverage/unit/lcov.output.coveralls',
+          github.workspace, env.BUILD_DIR)) != '' }}
         uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ github.workspace }}/${{ env.BUILD_DIR }}/coverage/unit/lcov.output.coveralls
+          file: ${{ github.workspace }}/${{ env.BUILD_DIR
+            }}/coverage/unit/lcov.output.coveralls
           format: lcov
           base-path: ${{ github.workspace }}
           flag-name: unit-tests
           parallel: true
           build-number: ${{ github.run_id }}
           git-branch: ${{ github.head_ref || github.event.inputs.ref || github.ref_name }}
-          git-commit: ${{ github.event.pull_request.head.sha || steps.checkout-sha.outputs.sha }}
+          git-commit: ${{ github.event.pull_request.head.sha ||
+            steps.checkout-sha.outputs.sha }}
           fail-on-error: true
 
       - name: Upload integration test coverage to Coveralls
         id: coveralls-integration
-        if: ${{ always() && hashFiles(format('{0}/{1}/coverage/integration/lcov.output.coveralls', github.workspace, env.BUILD_DIR)) != '' }}
+        if: ${{ always() &&
+          hashFiles(format('{0}/{1}/coverage/integration/lcov.output.coveralls',
+          github.workspace, env.BUILD_DIR)) != '' }}
         uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ github.workspace }}/${{ env.BUILD_DIR }}/coverage/integration/lcov.output.coveralls
+          file: ${{ github.workspace }}/${{ env.BUILD_DIR
+            }}/coverage/integration/lcov.output.coveralls
           format: lcov
           base-path: ${{ github.workspace }}
           flag-name: integration-tests
           parallel: true
           build-number: ${{ github.run_id }}
           git-branch: ${{ github.head_ref || github.event.inputs.ref || github.ref_name }}
-          git-commit: ${{ github.event.pull_request.head.sha || steps.checkout-sha.outputs.sha }}
+          git-commit: ${{ github.event.pull_request.head.sha ||
+            steps.checkout-sha.outputs.sha }}
           fail-on-error: true
 
       - name: Finish Coveralls coverage build
-        if: ${{ always() && (steps.coveralls-unit.conclusion == 'success' || steps.coveralls-integration.conclusion == 'success') }}
+        if: ${{ always() && (steps.coveralls-unit.conclusion == 'success' ||
+          steps.coveralls-integration.conclusion == 'success') }}
         uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel-finished: true
           build-number: ${{ github.run_id }}
           git-branch: ${{ github.head_ref || github.event.inputs.ref || github.ref_name }}
-          git-commit: ${{ github.event.pull_request.head.sha || steps.checkout-sha.outputs.sha }}
+          git-commit: ${{ github.event.pull_request.head.sha ||
+            steps.checkout-sha.outputs.sha }}
           fail-on-error: true
 
       - name: Upload unit test coverage artifacts
-        if: ${{ always() && hashFiles(format('{0}/{1}/coverage/unit/lcov.output.filtered', github.workspace, env.BUILD_DIR)) != '' }}
+        if: ${{ always() &&
+          hashFiles(format('{0}/{1}/coverage/unit/lcov.output.filtered',
+          github.workspace, env.BUILD_DIR)) != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: unit_test_coverage_results
@@ -223,7 +235,9 @@ jobs:
             ${{ github.workspace }}/${{ env.BUILD_DIR }}/coverage/unit/lcov-html
 
       - name: Upload integration test coverage artifacts
-        if: ${{ always() && hashFiles(format('{0}/{1}/coverage/integration/lcov.output.filtered', github.workspace, env.BUILD_DIR)) != '' }}
+        if: ${{ always() &&
+          hashFiles(format('{0}/{1}/coverage/integration/lcov.output.filtered',
+          github.workspace, env.BUILD_DIR)) != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: integration_test_coverage_results
