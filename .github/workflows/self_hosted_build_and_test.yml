@@ -180,7 +180,6 @@ jobs:
           file: ${{ github.workspace }}/${{ env.BUILD_DIR
             }}/coverage/unit/lcov.output.coveralls
           format: lcov
-          base-path: ${{ github.workspace }}
           flag-name: unit-tests
           parallel: true
           build-number: ${{ github.run_id }}
@@ -199,7 +198,6 @@ jobs:
           file: ${{ github.workspace }}/${{ env.BUILD_DIR
             }}/coverage/integration/lcov.output.coveralls
           format: lcov
-          base-path: ${{ github.workspace }}
           flag-name: integration-tests
           parallel: true
           build-number: ${{ github.run_id }}
