@@ -171,7 +171,7 @@ jobs:
 
       - name: Upload unit test coverage to Coveralls
         id: coveralls-unit
-        if: ${{ always() &&
+        if: ${{ success() &&
           hashFiles(format('{0}/{1}/coverage/unit/lcov.output.coveralls',
           github.workspace, env.BUILD_DIR)) != '' }}
         uses: coverallsapp/github-action@v2
@@ -189,7 +189,7 @@ jobs:
 
       - name: Upload integration test coverage to Coveralls
         id: coveralls-integration
-        if: ${{ always() &&
+        if: ${{ success() &&
           hashFiles(format('{0}/{1}/coverage/integration/lcov.output.coveralls',
           github.workspace, env.BUILD_DIR)) != '' }}
         uses: coverallsapp/github-action@v2
@@ -206,8 +206,8 @@ jobs:
           fail-on-error: true
 
       - name: Finish Coveralls coverage build
-        if: ${{ always() && (steps.coveralls-unit.conclusion == 'success' ||
-          steps.coveralls-integration.conclusion == 'success') }}
+        if: ${{ success() && steps.coveralls-unit.conclusion == 'success' &&
+          steps.coveralls-integration.conclusion == 'success' }}
         uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
