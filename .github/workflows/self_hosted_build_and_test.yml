@@ -116,7 +116,7 @@ jobs:
             --build-directory ${{ github.workspace }}/${{ env.BUILD_DIR }} \
             --absolute-output coverage/unit/lcov.output.filtered \
             --relative-output coverage/unit/lcov.output.coveralls
-          genhtml coverage/unit/lcov.output.filtered -o coverage/unit/lcov-html --demangle-cpp --function-coverage --ignore-errors source,source | tee coverage/unit/cover.txt
+          genhtml coverage/unit/lcov.output.filtered -o coverage/unit/lcov-html --demangle-cpp --function-coverage --ignore-errors source,source,unmapped,unmapped | tee coverage/unit/cover.txt
 
       - name: Process unit test coverage summary
         working-directory: ${{ env.BUILD_DIR }}/coverage/unit
@@ -155,7 +155,7 @@ jobs:
             --build-directory ${{ github.workspace }}/${{ env.BUILD_DIR }} \
             --absolute-output coverage/integration/lcov.output.filtered \
             --relative-output coverage/integration/lcov.output.coveralls
-          genhtml coverage/integration/lcov.output.filtered -o coverage/integration/lcov-html --demangle-cpp --function-coverage --ignore-errors source,source | tee coverage/integration/cover.txt
+          genhtml coverage/integration/lcov.output.filtered -o coverage/integration/lcov-html --demangle-cpp --function-coverage --ignore-errors source,source,unmapped,unmapped | tee coverage/integration/cover.txt
 
       - name: Process integration test coverage summary
         working-directory: ${{ env.BUILD_DIR }}/coverage/integration
