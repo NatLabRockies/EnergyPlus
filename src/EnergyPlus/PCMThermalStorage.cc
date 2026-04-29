@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -196,27 +196,11 @@ namespace PCMStorage {
             PlantUtilities::InitComponentNodes(state, 0.0, this->PlantSideMassFlowRate, this->PlantSideInletNode, this->PlantSideOutletNode);
 
             // Set the component flow priorities so that the plant loop will attempt to deliver the required flow.
-            for (int compNum = 1; compNum <= state.dataPlnt->PlantLoop(this->usePlantLoc.loopNum)
-                                                 .LoopSide(this->usePlantLoc.loopSideNum)
-                                                 .Branch(this->usePlantLoc.branchNum)
-                                                 .TotalComponents;
-                 ++compNum) {
-                state.dataPlnt->PlantLoop(this->usePlantLoc.loopNum)
-                    .LoopSide(this->usePlantLoc.loopSideNum)
-                    .Branch(this->usePlantLoc.branchNum)
-                    .Comp(compNum)
-                    .FlowPriority = DataPlant::LoopFlowStatus::NeedyAndTurnsLoopOn;
+            for (int compNum = 1; compNum <= this->usePlantLoc.branch->TotalComponents; ++compNum) {
+                this->usePlantLoc.branch->Comp(compNum).FlowPriority = DataPlant::LoopFlowStatus::NeedyAndTurnsLoopOn;
             }
-            for (int compNum = 1; compNum <= state.dataPlnt->PlantLoop(this->sourcePlantLoc.loopNum)
-                                                 .LoopSide(this->sourcePlantLoc.loopSideNum)
-                                                 .Branch(this->sourcePlantLoc.branchNum)
-                                                 .TotalComponents;
-                 ++compNum) {
-                state.dataPlnt->PlantLoop(this->sourcePlantLoc.loopNum)
-                    .LoopSide(this->sourcePlantLoc.loopSideNum)
-                    .Branch(this->sourcePlantLoc.branchNum)
-                    .Comp(compNum)
-                    .FlowPriority = DataPlant::LoopFlowStatus::NeedyAndTurnsLoopOn;
+            for (int compNum = 1; compNum <= this->sourcePlantLoc.branch->TotalComponents; ++compNum) {
+                this->sourcePlantLoc.branch->Comp(compNum).FlowPriority = DataPlant::LoopFlowStatus::NeedyAndTurnsLoopOn;
             }
 
             // Reset state variables for the start of the new environment.
@@ -347,7 +331,8 @@ namespace PCMStorage {
         if (mUseReq > 0.0) {
             useOutlet.Temp = useOutletTemp;
         } else if (mPlantReq > 0.0) {
-            plantOutlet.Temp = std::min(plantOutletTemp, state.dataPlnt->PlantLoop[this->sourcePlantLoc.loopNum].MaxTemp);
+            plantOutlet.Temp =
+                std::min(plantOutletTemp, state.dataPlnt->PlantLoop(this->sourcePlantLoc.loopNum).MaxTemp); // This was in brackets, probably a bug
         }
 
         // Recompute heat-transfer rates using the requested flows (W)
@@ -487,7 +472,6 @@ namespace PCMStorage {
         int NumPCMObjs = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "ThermalStorage:PCM");
         if (NumPCMObjs != 1) {
             ShowSevereError(state, "Exactly one ThermalStorage:PCM object is required.");
-            ErrorsFound = true;
             return;
         }
 
@@ -510,8 +494,6 @@ namespace PCMStorage {
                                                                  state.dataIPShortCut->cAlphaFieldNames,
                                                                  state.dataIPShortCut->cNumericFieldNames);
 
-        Util::IsNameEmpty(state, state.dataIPShortCut->cAlphaArgs(1), state.dataIPShortCut->cCurrentModuleObject, ErrorsFound);
-
         PCM.Name = state.dataIPShortCut->cAlphaArgs(1);
         PCM.AvailabilityScheduleName = state.dataIPShortCut->cAlphaArgs(2);
 
@@ -525,8 +507,10 @@ namespace PCMStorage {
 
         int matNum = Material::GetMaterialNum(state, state.dataIPShortCut->cAlphaArgs(7));
         if (matNum == 0) {
-            ShowSevereError(
-                state, format("{}: Invalid PCM material name: {}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(7)));
+            ShowSevereError(state,
+                            EnergyPlus::format("{}: Invalid PCM material name: {}",
+                                               state.dataIPShortCut->cCurrentModuleObject,
+                                               state.dataIPShortCut->cAlphaArgs(7)));
             ErrorsFound = true;
         } else {
             // Obtains conduction FD related parameters from input file
@@ -538,8 +522,9 @@ namespace PCMStorage {
             auto *mat = state.dataMaterial->materials(matNum);
 
             if (!mat->hasPCM) {
-                ShowSevereError(state,
-                                format("{}: Material {} is not a phase change material.", state.dataIPShortCut->cCurrentModuleObject, mat->Name));
+                ShowSevereError(
+                    state,
+                    EnergyPlus::format("{}: Material {} is not a phase change material.", state.dataIPShortCut->cCurrentModuleObject, mat->Name));
                 ErrorsFound = true;
             } else {
                 PCM.PCMMaterialNum = matNum;
@@ -557,19 +542,20 @@ namespace PCMStorage {
 
                 // Report warnings instead of fatal errors for design flows <= 0.0 indicating an autosize request.
                 if (PCM.UseSideDesignFlowRate < 0.0) {
-                    ShowWarningError(state,
-                                     format("{}={}, Use Side Design Flow Rate was entered as {:.6R}.  This will be autosized during initialization.",
-                                            state.dataIPShortCut->cCurrentModuleObject,
-                                            PCM.Name,
-                                            PCM.UseSideDesignFlowRate));
+                    ShowWarningError(
+                        state,
+                        EnergyPlus::format("{}={}, Use Side Design Flow Rate was entered as {:.6R}.  This will be autosized during initialization.",
+                                           state.dataIPShortCut->cCurrentModuleObject,
+                                           PCM.Name,
+                                           PCM.UseSideDesignFlowRate));
                 }
                 if (PCM.PlantSideDesignFlowRate < 0.0) {
                     ShowWarningError(
                         state,
-                        format("{}={}, Plant Side Design Flow Rate was entered as {:.6R}.  This will be autosized during initialization.",
-                               state.dataIPShortCut->cCurrentModuleObject,
-                               PCM.Name,
-                               PCM.PlantSideDesignFlowRate));
+                        EnergyPlus::format("{}={}, Plant Side Design Flow Rate was entered as {:.6R}.  This will be autosized during initialization.",
+                                           state.dataIPShortCut->cCurrentModuleObject,
+                                           PCM.Name,
+                                           PCM.PlantSideDesignFlowRate));
                 }
 
                 PCM.MeltingTemp = PCM.PCMmat->peakTempMelting;
@@ -579,73 +565,73 @@ namespace PCMStorage {
             }
         }
 
-        PCM.PlantSideInletNode = NodeInputManager::GetOnlySingleNode(state,
-                                                                     state.dataIPShortCut->cAlphaArgs(3),
-                                                                     ErrorsFound,
-                                                                     DataLoopNode::ConnectionObjectType::ThermalStoragePCM,
-                                                                     PCM.Name,
-                                                                     DataLoopNode::NodeFluidType::Water,
-                                                                     DataLoopNode::ConnectionType::Inlet,
-                                                                     NodeInputManager::CompFluidStream::Primary,
-                                                                     DataLoopNode::ObjectIsNotParent);
+        PCM.PlantSideInletNode = Node::GetOnlySingleNode(state,
+                                                         state.dataIPShortCut->cAlphaArgs(3),
+                                                         ErrorsFound,
+                                                         Node::ConnectionObjectType::ThermalStoragePCM,
+                                                         PCM.Name,
+                                                         Node::FluidType::Water,
+                                                         Node::ConnectionType::Inlet,
+                                                         Node::CompFluidStream::Primary,
+                                                         Node::ObjectIsNotParent);
 
-        PCM.PlantSideOutletNode = NodeInputManager::GetOnlySingleNode(state,
-                                                                      state.dataIPShortCut->cAlphaArgs(4),
-                                                                      ErrorsFound,
-                                                                      DataLoopNode::ConnectionObjectType::ThermalStoragePCM,
-                                                                      PCM.Name,
-                                                                      DataLoopNode::NodeFluidType::Water,
-                                                                      DataLoopNode::ConnectionType::Outlet,
-                                                                      NodeInputManager::CompFluidStream::Primary,
-                                                                      DataLoopNode::ObjectIsNotParent);
+        PCM.PlantSideOutletNode = Node::GetOnlySingleNode(state,
+                                                          state.dataIPShortCut->cAlphaArgs(4),
+                                                          ErrorsFound,
+                                                          Node::ConnectionObjectType::ThermalStoragePCM,
+                                                          PCM.Name,
+                                                          Node::FluidType::Water,
+                                                          Node::ConnectionType::Outlet,
+                                                          Node::CompFluidStream::Primary,
+                                                          Node::ObjectIsNotParent);
 
-        PCM.UseSideInletNode = NodeInputManager::GetOnlySingleNode(state,
-                                                                   state.dataIPShortCut->cAlphaArgs(5),
-                                                                   ErrorsFound,
-                                                                   DataLoopNode::ConnectionObjectType::ThermalStoragePCM,
-                                                                   PCM.Name,
-                                                                   DataLoopNode::NodeFluidType::Water,
-                                                                   DataLoopNode::ConnectionType::Inlet,
-                                                                   NodeInputManager::CompFluidStream::Secondary,
-                                                                   DataLoopNode::ObjectIsNotParent);
+        PCM.UseSideInletNode = Node::GetOnlySingleNode(state,
+                                                       state.dataIPShortCut->cAlphaArgs(5),
+                                                       ErrorsFound,
+                                                       Node::ConnectionObjectType::ThermalStoragePCM,
+                                                       PCM.Name,
+                                                       Node::FluidType::Water,
+                                                       Node::ConnectionType::Inlet,
+                                                       Node::CompFluidStream::Secondary,
+                                                       Node::ObjectIsNotParent);
 
-        PCM.UseSideOutletNode = NodeInputManager::GetOnlySingleNode(state,
-                                                                    state.dataIPShortCut->cAlphaArgs(6),
-                                                                    ErrorsFound,
-                                                                    DataLoopNode::ConnectionObjectType::ThermalStoragePCM,
-                                                                    PCM.Name,
-                                                                    DataLoopNode::NodeFluidType::Water,
-                                                                    DataLoopNode::ConnectionType::Outlet,
-                                                                    NodeInputManager::CompFluidStream::Secondary,
-                                                                    DataLoopNode::ObjectIsNotParent);
+        PCM.UseSideOutletNode = Node::GetOnlySingleNode(state,
+                                                        state.dataIPShortCut->cAlphaArgs(6),
+                                                        ErrorsFound,
+                                                        Node::ConnectionObjectType::ThermalStoragePCM,
+                                                        PCM.Name,
+                                                        Node::FluidType::Water,
+                                                        Node::ConnectionType::Outlet,
+                                                        Node::CompFluidStream::Secondary,
+                                                        Node::ObjectIsNotParent);
 
-        BranchNodeConnections::TestCompSet(state,
-                                           state.dataIPShortCut->cCurrentModuleObject,
-                                           PCM.Name,
-                                           state.dataIPShortCut->cAlphaArgs(3),
-                                           state.dataIPShortCut->cAlphaArgs(4),
-                                           "PCM Storage Plant Side");
+        Node::TestCompSet(state,
+                          state.dataIPShortCut->cCurrentModuleObject,
+                          PCM.Name,
+                          state.dataIPShortCut->cAlphaArgs(3),
+                          state.dataIPShortCut->cAlphaArgs(4),
+                          "PCM Storage Plant Side");
 
-        BranchNodeConnections::TestCompSet(state,
-                                           state.dataIPShortCut->cCurrentModuleObject,
-                                           PCM.Name,
-                                           state.dataIPShortCut->cAlphaArgs(5),
-                                           state.dataIPShortCut->cAlphaArgs(6),
-                                           "PCM Storage Use Side");
+        Node::TestCompSet(state,
+                          state.dataIPShortCut->cCurrentModuleObject,
+                          PCM.Name,
+                          state.dataIPShortCut->cAlphaArgs(5),
+                          state.dataIPShortCut->cAlphaArgs(6),
+                          "PCM Storage Use Side");
 
         // Allow the tank capacity to be autosized by entering a value <= 0.  A negative or zero
         // entry signals that the capacity should be determined automatically during initialization.
         // Issue a warning to let the user know that autosizing will occur but do not halt execution.
         if (PCM.TankCapacity <= 0.0) {
             ShowWarningError(state,
-                             format("{}={}, Tank Capacity was entered as {:.6R} and will be autosized during initialization.",
-                                    state.dataIPShortCut->cCurrentModuleObject,
-                                    PCM.Name,
-                                    PCM.TankCapacity));
+                             EnergyPlus::format("{}={}, Tank Capacity was entered as {:.6R} and will be autosized during initialization.",
+                                                state.dataIPShortCut->cCurrentModuleObject,
+                                                PCM.Name,
+                                                PCM.TankCapacity));
         }
 
         if (ErrorsFound) {
-            ShowFatalError(state, format("Errors found in processing input for {}", state.dataIPShortCut->cCurrentModuleObject));
+            ShowFatalError(state, EnergyPlus::format("Errors found in processing input for {}", state.dataIPShortCut->cCurrentModuleObject));
         }
     }
 } // namespace PCMStorage

@@ -255,7 +255,7 @@ namespace detail {
 template <typename Dest, typename Source>
 FMT_CONSTEXPR20 auto bit_cast(const Source& source) -> Dest {
   static_assert(sizeof(Dest) == sizeof(Source), "size mismatch");
-#ifdef __cpp_lib_bit_cast
+#if defined(__cpp_lib_bit_cast) && !(FMT_MSC_VER >= 1944)
   if (is_constant_evaluated()) {
     return std::bit_cast<Dest>(source);
   }

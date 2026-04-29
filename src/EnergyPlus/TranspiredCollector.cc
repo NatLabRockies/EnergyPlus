@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -153,26 +153,28 @@ namespace TranspiredCollector {
         if (CompIndex == 0) {
             UTSCNum = Util::FindItemInList(CompName, state.dataTranspiredCollector->UTSC);
             if (UTSCNum == 0) {
-                ShowFatalError(state, format("Transpired Collector not found={}", CompName));
+                ShowFatalError(state, EnergyPlus::format("Transpired Collector not found={}", CompName));
             }
             CompIndex = UTSCNum;
         } else {
             UTSCNum = CompIndex;
             if (UTSCNum > state.dataTranspiredCollector->NumUTSC || UTSCNum < 1) {
-                ShowFatalError(state,
-                               format("SimTranspiredCollector: Invalid CompIndex passed={}, Number of Transpired Collectors={}, UTSC name={}",
-                                      UTSCNum,
-                                      state.dataTranspiredCollector->NumUTSC,
-                                      CompName));
+                ShowFatalError(
+                    state,
+                    EnergyPlus::format("SimTranspiredCollector: Invalid CompIndex passed={}, Number of Transpired Collectors={}, UTSC name={}",
+                                       UTSCNum,
+                                       state.dataTranspiredCollector->NumUTSC,
+                                       CompName));
             }
             if (state.dataTranspiredCollector->CheckEquipName(UTSCNum)) {
                 if (CompName != state.dataTranspiredCollector->UTSC(UTSCNum).Name) {
-                    ShowFatalError(state,
-                                   format("SimTranspiredCollector: Invalid CompIndex passed={}, Transpired Collector name={}, stored Transpired "
-                                          "Collector Name for that index={}",
-                                          UTSCNum,
-                                          CompName,
-                                          state.dataTranspiredCollector->UTSC(UTSCNum).Name));
+                    ShowFatalError(
+                        state,
+                        EnergyPlus::format("SimTranspiredCollector: Invalid CompIndex passed={}, Transpired Collector name={}, stored Transpired "
+                                           "Collector Name for that index={}",
+                                           UTSCNum,
+                                           CompName,
+                                           state.dataTranspiredCollector->UTSC(UTSCNum).Name));
                 }
                 state.dataTranspiredCollector->CheckEquipName(UTSCNum) = false;
             }
@@ -235,11 +237,11 @@ namespace TranspiredCollector {
         static constexpr std::string_view routineName = "GetTranspiredCollectorInput";
 
         // Using/Aliasing
-        using BranchNodeConnections::TestCompSet;
-        using DataLoopNode::ObjectIsNotParent;
         using DataSurfaces::OtherSideCondModeledExt;
         using DataSurfaces::SurfaceData;
-        using NodeInputManager::GetOnlySingleNode;
+        using Node::GetOnlySingleNode;
+        using Node::ObjectIsNotParent;
+        using Node::TestCompSet;
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
 
@@ -283,8 +285,9 @@ namespace TranspiredCollector {
         state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state, CurrentModuleObject, Dummy, MaxNumAlphas, MaxNumNumbers);
 
         if (MaxNumNumbers != 11) {
-            ShowSevereError(state,
-                            format("GetTranspiredCollectorInput: {} Object Definition indicates not = 11 Number Objects, Number Indicated={}",
+            ShowSevereError(
+                state,
+                EnergyPlus::format("GetTranspiredCollectorInput: {} Object Definition indicates not = 11 Number Objects, Number Indicated={}",
                                    CurrentModuleObject,
                                    MaxNumNumbers));
             ErrorsFound = true;
@@ -326,8 +329,9 @@ namespace TranspiredCollector {
                     state, CurrentModuleMultiObject, Dummy, MaxNumAlphasSplit, MaxNumNumbersSplit);
 
                 if (MaxNumNumbersSplit != 0) {
-                    ShowSevereError(state,
-                                    format("GetTranspiredCollectorInput: {} Object Definition indicates not = 0 Number Objects, Number Indicated={}",
+                    ShowSevereError(
+                        state,
+                        EnergyPlus::format("GetTranspiredCollectorInput: {} Object Definition indicates not = 0 Number Objects, Number Indicated={}",
                                            CurrentModuleMultiObject,
                                            MaxNumNumbersSplit));
                     ErrorsFound = true;
@@ -346,8 +350,9 @@ namespace TranspiredCollector {
                     SplitterNameOK(ItemSplit) = true;
                     state.dataTranspiredCollector->UTSC(Item).NumOASysAttached = std::floor(NumAlphasSplit / 4.0);
                     if (mod((NumAlphasSplit), 4) != 1) {
-                        ShowSevereError(state,
-                                        format("GetTranspiredCollectorInput: {} Object Definition indicates not uniform quadtuples of nodes for {}",
+                        ShowSevereError(
+                            state,
+                            EnergyPlus::format("GetTranspiredCollectorInput: {} Object Definition indicates not uniform quadtuples of nodes for {}",
                                                CurrentModuleMultiObject,
                                                AlphasSplit(1)));
                         ErrorsFound = true;
@@ -366,22 +371,22 @@ namespace TranspiredCollector {
                             GetOnlySingleNode(state,
                                               AlphasSplit(ACountBase),
                                               ErrorsFound,
-                                              DataLoopNode::ConnectionObjectType::SolarCollectorUnglazedTranspired,
+                                              Node::ConnectionObjectType::SolarCollectorUnglazedTranspired,
                                               AlphasSplit(1),
-                                              DataLoopNode::NodeFluidType::Air,
-                                              DataLoopNode::ConnectionType::Inlet,
-                                              static_cast<NodeInputManager::CompFluidStream>(NumOASys),
+                                              Node::FluidType::Air,
+                                              Node::ConnectionType::Inlet,
+                                              static_cast<Node::CompFluidStream>(NumOASys),
                                               ObjectIsNotParent);
 
                         state.dataTranspiredCollector->UTSC(Item).OutletNode(NumOASys) =
                             GetOnlySingleNode(state,
                                               AlphasSplit(ACountBase + 1),
                                               ErrorsFound,
-                                              DataLoopNode::ConnectionObjectType::SolarCollectorUnglazedTranspired,
+                                              Node::ConnectionObjectType::SolarCollectorUnglazedTranspired,
                                               AlphasSplit(1),
-                                              DataLoopNode::NodeFluidType::Air,
-                                              DataLoopNode::ConnectionType::Outlet,
-                                              static_cast<NodeInputManager::CompFluidStream>(NumOASys),
+                                              Node::FluidType::Air,
+                                              Node::ConnectionType::Outlet,
+                                              static_cast<Node::CompFluidStream>(NumOASys),
                                               ObjectIsNotParent);
                         TestCompSet(state,
                                     CurrentModuleObject,
@@ -393,22 +398,22 @@ namespace TranspiredCollector {
                             GetOnlySingleNode(state,
                                               AlphasSplit(ACountBase + 2),
                                               ErrorsFound,
-                                              DataLoopNode::ConnectionObjectType::SolarCollectorUnglazedTranspired,
+                                              Node::ConnectionObjectType::SolarCollectorUnglazedTranspired,
                                               AlphasSplit(1),
-                                              DataLoopNode::NodeFluidType::Air,
-                                              DataLoopNode::ConnectionType::Sensor,
-                                              NodeInputManager::CompFluidStream::Primary,
+                                              Node::FluidType::Air,
+                                              Node::ConnectionType::Sensor,
+                                              Node::CompFluidStream::Primary,
                                               ObjectIsNotParent);
 
                         state.dataTranspiredCollector->UTSC(Item).ZoneNode(NumOASys) =
                             GetOnlySingleNode(state,
                                               AlphasSplit(ACountBase + 3),
                                               ErrorsFound,
-                                              DataLoopNode::ConnectionObjectType::SolarCollectorUnglazedTranspired,
+                                              Node::ConnectionObjectType::SolarCollectorUnglazedTranspired,
                                               AlphasSplit(1),
-                                              DataLoopNode::NodeFluidType::Air,
-                                              DataLoopNode::ConnectionType::Sensor,
-                                              NodeInputManager::CompFluidStream::Primary,
+                                              Node::FluidType::Air,
+                                              Node::ConnectionType::Sensor,
+                                              Node::CompFluidStream::Primary,
                                               ObjectIsNotParent);
 
                     } // Each OA System in a Multisystem
@@ -420,11 +425,11 @@ namespace TranspiredCollector {
             Found = Util::FindItemInList(state.dataTranspiredCollector->UTSC(Item).OSCMName, state.dataSurface->OSCM);
             if (Found == 0) {
                 ShowSevereError(state,
-                                format("{} not found={} in {} ={}",
-                                       state.dataIPShortCut->cAlphaFieldNames(2),
-                                       state.dataTranspiredCollector->UTSC(Item).OSCMName,
-                                       CurrentModuleObject,
-                                       state.dataTranspiredCollector->UTSC(Item).Name));
+                                EnergyPlus::format("{} not found={} in {} ={}",
+                                                   state.dataIPShortCut->cAlphaFieldNames(2),
+                                                   state.dataTranspiredCollector->UTSC(Item).OSCMName,
+                                                   CurrentModuleObject,
+                                                   state.dataTranspiredCollector->UTSC(Item).Name));
                 ErrorsFound = true;
             }
             state.dataTranspiredCollector->UTSC(Item).OSCMPtr = Found;
@@ -452,21 +457,21 @@ namespace TranspiredCollector {
                     GetOnlySingleNode(state,
                                       Alphas(4),
                                       ErrorsFound,
-                                      DataLoopNode::ConnectionObjectType::SolarCollectorUnglazedTranspired,
+                                      Node::ConnectionObjectType::SolarCollectorUnglazedTranspired,
                                       Alphas(1),
-                                      DataLoopNode::NodeFluidType::Air,
-                                      DataLoopNode::ConnectionType::Inlet,
-                                      NodeInputManager::CompFluidStream::Primary,
+                                      Node::FluidType::Air,
+                                      Node::ConnectionType::Inlet,
+                                      Node::CompFluidStream::Primary,
                                       ObjectIsNotParent);
                 state.dataTranspiredCollector->UTSC(Item).OutletNode(1) =
                     GetOnlySingleNode(state,
                                       Alphas(5),
                                       ErrorsFound,
-                                      DataLoopNode::ConnectionObjectType::SolarCollectorUnglazedTranspired,
+                                      Node::ConnectionObjectType::SolarCollectorUnglazedTranspired,
                                       Alphas(1),
-                                      DataLoopNode::NodeFluidType::Air,
-                                      DataLoopNode::ConnectionType::Outlet,
-                                      NodeInputManager::CompFluidStream::Primary,
+                                      Node::FluidType::Air,
+                                      Node::ConnectionType::Outlet,
+                                      Node::CompFluidStream::Primary,
                                       ObjectIsNotParent);
                 TestCompSet(state, CurrentModuleObject, Alphas(1), Alphas(4), Alphas(5), "Transpired Collector Air Nodes");
 
@@ -474,21 +479,21 @@ namespace TranspiredCollector {
                     GetOnlySingleNode(state,
                                       Alphas(6),
                                       ErrorsFound,
-                                      DataLoopNode::ConnectionObjectType::SolarCollectorUnglazedTranspired,
+                                      Node::ConnectionObjectType::SolarCollectorUnglazedTranspired,
                                       Alphas(1),
-                                      DataLoopNode::NodeFluidType::Air,
-                                      DataLoopNode::ConnectionType::Sensor,
-                                      NodeInputManager::CompFluidStream::Primary,
+                                      Node::FluidType::Air,
+                                      Node::ConnectionType::Sensor,
+                                      Node::CompFluidStream::Primary,
                                       ObjectIsNotParent);
                 state.dataTranspiredCollector->UTSC(Item).ZoneNode(1) =
                     GetOnlySingleNode(state,
                                       Alphas(7),
                                       ErrorsFound,
-                                      DataLoopNode::ConnectionObjectType::SolarCollectorUnglazedTranspired,
+                                      Node::ConnectionObjectType::SolarCollectorUnglazedTranspired,
                                       Alphas(1),
-                                      DataLoopNode::NodeFluidType::Air,
-                                      DataLoopNode::ConnectionType::Sensor,
-                                      NodeInputManager::CompFluidStream::Primary,
+                                      Node::FluidType::Air,
+                                      Node::ConnectionType::Sensor,
+                                      Node::CompFluidStream::Primary,
                                       ObjectIsNotParent);
             } // no splitter
 
@@ -507,11 +512,11 @@ namespace TranspiredCollector {
                 state.dataTranspiredCollector->UTSC(Item).Layout = Layout_Square;
             } else {
                 ShowSevereError(state,
-                                format("{} has incorrect entry of {} in {} ={}",
-                                       state.dataIPShortCut->cAlphaFieldNames(9),
-                                       Alphas(9),
-                                       CurrentModuleObject,
-                                       state.dataTranspiredCollector->UTSC(Item).Name));
+                                EnergyPlus::format("{} has incorrect entry of {} in {} ={}",
+                                                   state.dataIPShortCut->cAlphaFieldNames(9),
+                                                   Alphas(9),
+                                                   CurrentModuleObject,
+                                                   state.dataTranspiredCollector->UTSC(Item).Name));
                 ErrorsFound = true;
                 continue;
             }
@@ -522,11 +527,11 @@ namespace TranspiredCollector {
                 state.dataTranspiredCollector->UTSC(Item).Correlation = Correlation_VanDeckerHollandsBrunger2001;
             } else {
                 ShowSevereError(state,
-                                format("{} has incorrect entry of {} in {} ={}",
-                                       state.dataIPShortCut->cAlphaFieldNames(10),
-                                       Alphas(9),
-                                       CurrentModuleObject,
-                                       state.dataTranspiredCollector->UTSC(Item).Name));
+                                EnergyPlus::format("{} has incorrect entry of {} in {} ={}",
+                                                   state.dataIPShortCut->cAlphaFieldNames(10),
+                                                   Alphas(9),
+                                                   CurrentModuleObject,
+                                                   state.dataTranspiredCollector->UTSC(Item).Name));
                 ErrorsFound = true;
                 continue;
             }
@@ -555,19 +560,21 @@ namespace TranspiredCollector {
             // Was it set?
             if (state.dataTranspiredCollector->UTSC(Item).CollRoughness == Material::SurfaceRoughness::Invalid) {
                 ShowSevereError(state,
-                                format("{} has incorrect entry of {} in {} ={}",
-                                       state.dataIPShortCut->cAlphaFieldNames(11),
-                                       Alphas(11),
-                                       CurrentModuleObject,
-                                       state.dataTranspiredCollector->UTSC(Item).Name));
+                                EnergyPlus::format("{} has incorrect entry of {} in {} ={}",
+                                                   state.dataIPShortCut->cAlphaFieldNames(11),
+                                                   Alphas(11),
+                                                   CurrentModuleObject,
+                                                   state.dataTranspiredCollector->UTSC(Item).Name));
                 ErrorsFound = true;
             }
 
             AlphaOffset = 11;
             state.dataTranspiredCollector->UTSC(Item).NumSurfs = NumAlphas - AlphaOffset;
             if (state.dataTranspiredCollector->UTSC(Item).NumSurfs == 0) {
-                ShowSevereError(
-                    state, format("No underlying surfaces specified in {} ={}", CurrentModuleObject, state.dataTranspiredCollector->UTSC(Item).Name));
+                ShowSevereError(state,
+                                EnergyPlus::format("No underlying surfaces specified in {} ={}",
+                                                   CurrentModuleObject,
+                                                   state.dataTranspiredCollector->UTSC(Item).Name));
                 ErrorsFound = true;
                 continue;
             }
@@ -577,59 +584,62 @@ namespace TranspiredCollector {
                 Found = Util::FindItemInList(Alphas(ThisSurf + AlphaOffset), state.dataSurface->Surface);
                 if (Found == 0) {
                     ShowSevereError(state,
-                                    format("Surface Name not found={} in {} ={}",
-                                           Alphas(ThisSurf + AlphaOffset),
-                                           CurrentModuleObject,
-                                           state.dataTranspiredCollector->UTSC(Item).Name));
+                                    EnergyPlus::format("Surface Name not found={} in {} ={}",
+                                                       Alphas(ThisSurf + AlphaOffset),
+                                                       CurrentModuleObject,
+                                                       state.dataTranspiredCollector->UTSC(Item).Name));
                     ErrorsFound = true;
                     continue;
                 }
                 // check that surface is appropriate, Heat transfer, Sun, Wind,
                 if (!state.dataSurface->Surface(Found).HeatTransSurf) {
                     ShowSevereError(state,
-                                    format("Surface {} not of Heat Transfer type in {} ={}",
-                                           Alphas(ThisSurf + AlphaOffset),
-                                           CurrentModuleObject,
-                                           state.dataTranspiredCollector->UTSC(Item).Name));
+                                    EnergyPlus::format("Surface {} not of Heat Transfer type in {} ={}",
+                                                       Alphas(ThisSurf + AlphaOffset),
+                                                       CurrentModuleObject,
+                                                       state.dataTranspiredCollector->UTSC(Item).Name));
                     ErrorsFound = true;
                     continue;
                 }
                 if (!state.dataSurface->Surface(Found).ExtSolar) {
                     ShowSevereError(state,
-                                    format("Surface {} not exposed to sun in {} ={}",
-                                           Alphas(ThisSurf + AlphaOffset),
-                                           CurrentModuleObject,
-                                           state.dataTranspiredCollector->UTSC(Item).Name));
+                                    EnergyPlus::format("Surface {} not exposed to sun in {} ={}",
+                                                       Alphas(ThisSurf + AlphaOffset),
+                                                       CurrentModuleObject,
+                                                       state.dataTranspiredCollector->UTSC(Item).Name));
                     ErrorsFound = true;
                     continue;
                 }
                 if (!state.dataSurface->Surface(Found).ExtWind) {
                     ShowSevereError(state,
-                                    format("Surface {} not exposed to wind in {} ={}",
-                                           Alphas(ThisSurf + AlphaOffset),
-                                           CurrentModuleObject,
-                                           state.dataTranspiredCollector->UTSC(Item).Name));
+                                    EnergyPlus::format("Surface {} not exposed to wind in {} ={}",
+                                                       Alphas(ThisSurf + AlphaOffset),
+                                                       CurrentModuleObject,
+                                                       state.dataTranspiredCollector->UTSC(Item).Name));
                     ErrorsFound = true;
                     continue;
                 }
                 if (state.dataSurface->Surface(Found).ExtBoundCond != OtherSideCondModeledExt) {
                     ShowSevereError(state,
-                                    format("Surface {} does not have OtherSideConditionsModel for exterior boundary conditions in {} ={}",
-                                           Alphas(ThisSurf + AlphaOffset),
-                                           CurrentModuleObject,
-                                           state.dataTranspiredCollector->UTSC(Item).Name));
+                                    EnergyPlus::format("Surface {} does not have OtherSideConditionsModel for exterior boundary conditions in {} ={}",
+                                                       Alphas(ThisSurf + AlphaOffset),
+                                                       CurrentModuleObject,
+                                                       state.dataTranspiredCollector->UTSC(Item).Name));
                     ErrorsFound = true;
                     continue;
                 }
                 // check surface orientation, warn if upside down
                 if ((state.dataSurface->Surface(Found).Tilt < -95.0) || (state.dataSurface->Surface(Found).Tilt > 95.0)) {
-                    ShowWarningError(state, format("Suspected input problem with collector surface = {}", Alphas(ThisSurf + AlphaOffset)));
-                    ShowContinueError(
-                        state,
-                        format("Entered in {} = {}", state.dataIPShortCut->cCurrentModuleObject, state.dataTranspiredCollector->UTSC(Item).Name));
+                    ShowWarningError(state,
+                                     EnergyPlus::format("Suspected input problem with collector surface = {}", Alphas(ThisSurf + AlphaOffset)));
+                    ShowContinueError(state,
+                                      EnergyPlus::format("Entered in {} = {}",
+                                                         state.dataIPShortCut->cCurrentModuleObject,
+                                                         state.dataTranspiredCollector->UTSC(Item).Name));
                     ShowContinueError(state, "Surface used for solar collector faces down");
-                    ShowContinueError(
-                        state, format("Surface tilt angle (degrees from ground outward normal) = {:.2R}", state.dataSurface->Surface(Found).Tilt));
+                    ShowContinueError(state,
+                                      EnergyPlus::format("Surface tilt angle (degrees from ground outward normal) = {:.2R}",
+                                                         state.dataSurface->Surface(Found).Tilt));
                 }
 
                 state.dataTranspiredCollector->UTSC(Item).SurfPtrs(ThisSurf) = Found;
@@ -660,17 +670,17 @@ namespace TranspiredCollector {
                 SurfID = state.dataTranspiredCollector->UTSC(Item).SurfPtrs(ThisSurf);
                 if (General::rotAzmDiffDeg(state.dataSurface->Surface(SurfID).Azimuth, AvgAzimuth) > 15.0) {
                     ShowWarningError(state,
-                                     format("Surface {} has Azimuth different from others in the group associated with {} ={}",
-                                            state.dataSurface->Surface(SurfID).Name,
-                                            CurrentModuleObject,
-                                            state.dataTranspiredCollector->UTSC(Item).Name));
+                                     EnergyPlus::format("Surface {} has Azimuth different from others in the group associated with {} ={}",
+                                                        state.dataSurface->Surface(SurfID).Name,
+                                                        CurrentModuleObject,
+                                                        state.dataTranspiredCollector->UTSC(Item).Name));
                 }
                 if (std::abs(state.dataSurface->Surface(SurfID).Tilt - AvgTilt) > 10.0) {
                     ShowWarningError(state,
-                                     format("Surface {} has Tilt different from others in the group associated with {} ={}",
-                                            state.dataSurface->Surface(SurfID).Name,
-                                            CurrentModuleObject,
-                                            state.dataTranspiredCollector->UTSC(Item).Name));
+                                     EnergyPlus::format("Surface {} has Tilt different from others in the group associated with {} ={}",
+                                                        state.dataSurface->Surface(SurfID).Name,
+                                                        CurrentModuleObject,
+                                                        state.dataTranspiredCollector->UTSC(Item).Name));
                 }
 
                 // test that there are no windows.  Now allow windows
@@ -705,9 +715,10 @@ namespace TranspiredCollector {
             state.dataTranspiredCollector->UTSC(Item).Height = Numbers(5);
             state.dataTranspiredCollector->UTSC(Item).PlenGapThick = Numbers(6);
             if (state.dataTranspiredCollector->UTSC(Item).PlenGapThick <= 0.0) {
-                ShowSevereError(
-                    state,
-                    format("Plenum gap must be greater than Zero in {} ={}", CurrentModuleObject, state.dataTranspiredCollector->UTSC(Item).Name));
+                ShowSevereError(state,
+                                EnergyPlus::format("Plenum gap must be greater than Zero in {} ={}",
+                                                   CurrentModuleObject,
+                                                   state.dataTranspiredCollector->UTSC(Item).Name));
                 continue;
             }
             state.dataTranspiredCollector->UTSC(Item).PlenCrossArea = Numbers(7);
@@ -723,9 +734,9 @@ namespace TranspiredCollector {
             state.dataTranspiredCollector->UTSC(Item).ProjArea = surfaceArea;
             if (state.dataTranspiredCollector->UTSC(Item).ProjArea == 0) {
                 ShowSevereError(state,
-                                format("Gross area of underlying surfaces is zero in {} ={}",
-                                       CurrentModuleObject,
-                                       state.dataTranspiredCollector->UTSC(Item).Name));
+                                EnergyPlus::format("Gross area of underlying surfaces is zero in {} ={}",
+                                                   CurrentModuleObject,
+                                                   state.dataTranspiredCollector->UTSC(Item).Name));
                 continue;
             }
             state.dataTranspiredCollector->UTSC(Item).ActualArea =
@@ -878,7 +889,6 @@ namespace TranspiredCollector {
 
         // Using/Aliasing
         bool DoSetPointTest = state.dataHVACGlobal->DoSetPointTest;
-        using namespace DataLoopNode;
         using DataSurfaces::SurfaceData;
         using EMSManager::CheckIfNodeSetPointManagedByEMS;
 
@@ -927,19 +937,20 @@ namespace TranspiredCollector {
                 for (SplitBranch = 1; SplitBranch <= state.dataTranspiredCollector->UTSC(UTSCUnitNum).NumOASysAttached; ++SplitBranch) {
                     ControlNode = state.dataTranspiredCollector->UTSC(UTSCUnitNum).ControlNode(SplitBranch);
                     if (ControlNode > 0) {
-                        if (state.dataLoopNodes->Node(ControlNode).TempSetPoint == SensedNodeFlagValue) {
+                        if (state.dataLoopNodes->Node(ControlNode).TempSetPoint == Node::SensedNodeFlagValue) {
                             if (!state.dataGlobal->AnyEnergyManagementSystemInModel) {
-                                ShowSevereError(
-                                    state, format("Missing temperature setpoint for UTSC {}", state.dataTranspiredCollector->UTSC(UTSCUnitNum).Name));
+                                ShowSevereError(state,
+                                                EnergyPlus::format("Missing temperature setpoint for UTSC {}",
+                                                                   state.dataTranspiredCollector->UTSC(UTSCUnitNum).Name));
                                 ShowContinueError(state, " use a Setpoint Manager to establish a setpoint at the unit control node.");
                                 state.dataHVACGlobal->SetPointErrorFlag = true;
                             } else {
                                 // need call to EMS to check node
                                 CheckIfNodeSetPointManagedByEMS(state, ControlNode, HVAC::CtrlVarType::Temp, state.dataHVACGlobal->SetPointErrorFlag);
                                 if (state.dataHVACGlobal->SetPointErrorFlag) {
-                                    ShowSevereError(
-                                        state,
-                                        format("Missing temperature setpoint for UTSC {}", state.dataTranspiredCollector->UTSC(UTSCUnitNum).Name));
+                                    ShowSevereError(state,
+                                                    EnergyPlus::format("Missing temperature setpoint for UTSC {}",
+                                                                       state.dataTranspiredCollector->UTSC(UTSCUnitNum).Name));
                                     ShowContinueError(state, " use a Setpoint Manager to establish a setpoint at the unit control node.");
                                     ShowContinueError(state, "Or add EMS Actuator to provide temperature setpoint at this node");
                                 }
@@ -985,7 +996,7 @@ namespace TranspiredCollector {
         // Replaced by below
         state.dataTranspiredCollector->UTSC(UTSCNum).InletMDot =
             sum_sub(state.dataLoopNodes->Node,
-                    &DataLoopNode::NodeData::MassFlowRate,
+                    &Node::NodeData::MassFlowRate,
                     state.dataTranspiredCollector->UTSC(UTSCNum).InletNode); // Autodesk:F2C++ Functions handle array subscript usage
         state.dataTranspiredCollector->UTSC(UTSCNum).IsOn = false;           // initialize then turn on if appropriate
         state.dataTranspiredCollector->UTSC(UTSCNum).Tplen = state.dataTranspiredCollector->UTSC(UTSCNum).TplenLast;
@@ -1118,10 +1129,11 @@ namespace TranspiredCollector {
 
         if ((Vsuction < 0.001) || (Vsuction > 0.08)) { // warn that collector is not sized well
             if (state.dataTranspiredCollector->UTSC(UTSCNum).VsucErrIndex == 0) {
-                ShowWarningMessage(state,
-                                   format("Solar Collector:Unglazed Transpired=\"{}\", Suction velocity is outside of range for a good design",
-                                          state.dataTranspiredCollector->UTSC(UTSCNum).Name));
-                ShowContinueErrorTimeStamp(state, format("Suction velocity ={:.4R}", Vsuction));
+                ShowWarningMessage(
+                    state,
+                    EnergyPlus::format("Solar Collector:Unglazed Transpired=\"{}\", Suction velocity is outside of range for a good design",
+                                       state.dataTranspiredCollector->UTSC(UTSCNum).Name));
+                ShowContinueErrorTimeStamp(state, EnergyPlus::format("Suction velocity ={:.4R}", Vsuction));
                 if (Vsuction < 0.003) {
                     ShowContinueError(state, "Velocity is low -- suggest decreasing area of transpired collector");
                 }
@@ -1563,9 +1575,9 @@ namespace TranspiredCollector {
         }
 
         if (SurfacePtr == 0) {
-            ShowFatalError(
-                state,
-                format("Invalid surface passed to GetTranspiredCollectorIndex, Surface name = {}", state.dataSurface->Surface(SurfacePtr).Name));
+            ShowFatalError(state,
+                           EnergyPlus::format("Invalid surface passed to GetTranspiredCollectorIndex, Surface name = {}",
+                                              state.dataSurface->Surface(SurfacePtr).Name));
         }
 
         UTSCNum = 0;
@@ -1581,8 +1593,8 @@ namespace TranspiredCollector {
 
         if (!Found) {
             ShowFatalError(state,
-                           format("Did not find surface in UTSC description in GetTranspiredCollectorIndex, Surface name = {}",
-                                  state.dataSurface->Surface(SurfacePtr).Name));
+                           EnergyPlus::format("Did not find surface in UTSC description in GetTranspiredCollectorIndex, Surface name = {}",
+                                              state.dataSurface->Surface(SurfacePtr).Name));
         } else {
 
             UTSCIndex = UTSCNum;
@@ -1634,7 +1646,7 @@ namespace TranspiredCollector {
         if (WhichUTSC != 0) {
             NodeNum = state.dataTranspiredCollector->UTSC(WhichUTSC).InletNode(1);
         } else {
-            ShowSevereError(state, format("GetAirInletNodeNum: Could not find TranspiredCollector = \"{}\"", UTSCName));
+            ShowSevereError(state, EnergyPlus::format("GetAirInletNodeNum: Could not find TranspiredCollector = \"{}\"", UTSCName));
             ErrorsFound = true;
             NodeNum = 0;
         }
@@ -1669,7 +1681,7 @@ namespace TranspiredCollector {
         if (WhichUTSC != 0) {
             NodeNum = state.dataTranspiredCollector->UTSC(WhichUTSC).OutletNode(1);
         } else {
-            ShowSevereError(state, format("GetAirOutletNodeNum: Could not find TranspiredCollector = \"{}\"", UTSCName));
+            ShowSevereError(state, EnergyPlus::format("GetAirOutletNodeNum: Could not find TranspiredCollector = \"{}\"", UTSCName));
             ErrorsFound = true;
             NodeNum = 0;
         }

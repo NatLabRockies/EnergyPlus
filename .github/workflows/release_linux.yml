@@ -21,18 +21,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - os: ubuntu-22.04
-          pretty: "Ubuntu 22.04"
-          arch: x86_64
-          python-arch: x64
         - os: ubuntu-24.04
           pretty: "Ubuntu 24.04"
           arch: x86_64
           python-arch: x64
-        - os: ubuntu-22.04-arm
-          pretty: "Ubuntu 22.04 arm64"
-          arch: arm64
-          python-arch: arm64
         - os: ubuntu-24.04-arm
           pretty: "Ubuntu 24.04 arm64"
           arch: arm64
@@ -67,7 +59,7 @@ jobs:
         set -x
         echo "Using Apt to install dependencies"
         sudo apt-get update
-        sudo apt-get install texlive texlive-xetex texlive-science libxkbcommon-x11-0 xorg-dev libgl1-mesa-dev patchelf
+        sudo apt-get install -y texlive texlive-xetex texlive-science libxkbcommon-x11-0 xorg-dev libgl1-mesa-dev patchelf
         if [[ "${{ matrix.os }}" == "ubuntu-24.04" ]]; then
           # https://github.com/actions/runner-images/issues/10025
           echo "FC=gfortran-13" >> $GITHUB_ENV
@@ -96,7 +88,7 @@ jobs:
       run: cmake --build . --target package -j 4
 
     - name: Upload Tarball as artifact for testing
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: energyplus-${{ matrix.os }}
         path: build/EnergyPlus-*-${{ matrix.arch }}.tar.gz
@@ -142,12 +134,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-22.04
-            test_key: ubuntu2204
           - os: ubuntu-24.04
             test_key: ubuntu2404
-          - os: ubuntu-22.04-arm
-            test_key: ubuntu2204-arm64
           - os: ubuntu-24.04-arm
             test_key: ubuntu2404-arm64
 
@@ -164,7 +152,7 @@ jobs:
           architecture: ${{ matrix.arch }}
 
       - name: Gather Test Package from Artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: energyplus-${{ matrix.os }}
           path: package

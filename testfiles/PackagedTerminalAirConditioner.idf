@@ -127,7 +127,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,26.1;
+  Version,26.2;
 
 !-   ===========  ALL OBJECTS IN CLASS: SIMULATIONCONTROL ===========
 
@@ -1526,7 +1526,45 @@
     Coil:Cooling:DX:SingleSpeed,  !- Cooling Coil Object Type
     Zone1PTACDXCoolCoil,     !- Cooling Coil Name
     BlowThrough,             !- Fan Placement
-    ConstantFanSch;          !- Supply Air Fan Operating Mode Schedule Name
+    ConstantFanSch,          !- Supply Air Fan Operating Mode Schedule Name
+    Zone1PTAC Availability Manager List;  !- Availability Manager List Name
+
+  Schedule:Compact,
+    Zone1FanSched,           !- Name
+    Fraction,                !- Schedule Type Limits Name
+    Through: 12/31,          !- Field 1
+    For: AllDays,            !- Field 2
+    Until: 7:00,0.0,         !- Field 3
+    Until: 18:00,1.0,        !- Field 5
+    Until: 24:00,0.0;        !- Field 7
+
+  AvailabilityManagerAssignmentList,
+    Zone1PTAC Availability Manager List,  !- Name
+    AvailabilityManager:OptimumStart,  !- Availability Manager 1 Object Type
+    OptStart;                !- Availability Manager 1 Name
+
+  AvailabilityManager:OptimumStart,
+    OptStart,                !- Name
+    ALWAYS_ON,               !- Applicability Schedule Name
+    Zone1FanSched,           !- Fan Schedule Name
+    ControlZone,             !- Control Type
+    WEST ZONE,               !- Control Zone Name
+    ,                        !- Zone List Name
+    6,                       !- Maximum Value for Optimum Start Time {hr}
+    AdaptiveTemperatureGradient,  !- Control Algorithm
+    3,                       !- Constant Temperature Gradient during Cooling {deltaC/hr}
+    3,                       !- Constant Temperature Gradient during Heating {deltaC/hr}
+    2,                       !- Initial Temperature Gradient during Cooling {deltaC/hr}
+    2,                       !- Initial Temperature Gradient during Heating {deltaC/hr}
+    2,                       !- Constant Start Time {hr}
+    3;                       !- Number of Previous Days {days}
+
+  Schedule:Compact,
+    ALWAYS_ON,               !- Name
+    On/Off,                  !- Schedule Type Limits Name
+    Through: 12/31,          !- Field 1
+    For: AllDays,            !- Field 2
+    Until: 24:00,1;          !- Field 3
 
   ZoneHVAC:PackagedTerminalAirConditioner,
     Zone2PTAC,               !- Name
@@ -1634,7 +1672,7 @@
 
   Fan:SystemModel,
     Zone1PTACFan,            !- Name
-    FanAndCoilAvailSched,    !- Availability Schedule Name
+    Zone1FanSched,           !- Availability Schedule Name
     Zone1PTACOAMixerOutletNode,  !- Air Inlet Node Name
     Zone1PTACFanOutletNode,  !- Air Outlet Node Name
     0.4,                     !- Design Maximum Air Flow Rate {m3/s}
@@ -2336,6 +2374,10 @@
   Output:Variable,Zone2PTACAirInletNode,System Node Humidity Ratio,Hourly;
 
   Output:Variable,Zone3PTACAirInletNode,System Node Humidity Ratio,Hourly;
+
+  Output:Variable,*,Availability Manager Optimum Start Control Status,Hourly;
+
+  Output:Variable,*,Availability Manager Optimum Start Time Before Occupancy,Hourly;
 
 !-   ===========  ALL OBJECTS IN CLASS: OUTPUT:METER:METERFILEONLY ===========
 

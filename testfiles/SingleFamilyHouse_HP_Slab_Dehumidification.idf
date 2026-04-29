@@ -4,7 +4,7 @@
 !-      Use '!' comments if they need to be retained when using the IDFEditor.
 !-   ===========  ALL OBJECTS IN CLASS: VERSION ===========
 
-  Version,26.1;
+  Version,26.2;
 
 !-   ===========  ALL OBJECTS IN CLASS: SIMULATIONCONTROL ===========
 
@@ -1294,28 +1294,6 @@
     31;                      !- End Day 1
 
 !-   ===========  ALL OBJECTS IN CLASS: SCHEDULE:COMPACT ===========
-                             !- Field 4
-                             !- Field 6
-                             !- Field 8
-                             !- Field 10
-                             !- Field 12
-                             !- Field 14
-                             !- Field 16
-                             !- Field 20
-                             !- Field 22
-                             !- Field 24
-                             !- Field 26
-                             !- Field 28
-                             !- Field 30
-                             !- Field 32
-                             !- Field 34
-                             !- Field 36
-                             !- Field 38
-                             !- Field 40
-                             !- Field 42
-                             !- Field 44
-                             !- Field 46
-                             !- Field 48
 
   Schedule:Compact,
     BA_shower_sch,           !- Name
@@ -1347,27 +1325,6 @@
     Until: 23:00,0.00460526444444444, !- Field 47
     Until: 24:00,0.00333484666666667; !- Field 49
 
-                             !- Field 50
-                             !- Field 4
-                             !- Field 6
-                             !- Field 8
-                             !- Field 10
-                             !- Field 12
-                             !- Field 14
-                             !- Field 16
-                             !- Field 18
-                             !- Field 22
-                             !- Field 24
-                             !- Field 26
-                             !- Field 28
-                             !- Field 30
-                             !- Field 32
-                             !- Field 34
-                             !- Field 36
-                             !- Field 38
-                             !- Field 42
-                             !- Field 44
-
   Schedule:Compact,
     BA_bath_sch,             !- Name
     any number,              !- Schedule Type Limits Name
@@ -1398,30 +1355,6 @@
     Until: 23:00,0.0013455,  !- Field 47
     Until: 24:00,0.000795068181818182; !- Field 49
 
-                             !- Field 50
-                             !- Field 4
-                             !- Field 6
-                             !- Field 8
-                             !- Field 10
-                             !- Field 12
-                             !- Field 14
-                             !- Field 16
-                             !- Field 18
-                             !- Field 20
-                             !- Field 22
-                             !- Field 24
-                             !- Field 26
-                             !- Field 28
-                             !- Field 30
-                             !- Field 32
-                             !- Field 34
-                             !- Field 36
-                             !- Field 38
-                             !- Field 40
-                             !- Field 42
-                             !- Field 46
-                             !- Field 48
-
   Schedule:Compact,
     BA_sink_sch,             !- Name
     any number,              !- Schedule Type Limits Name
@@ -1451,8 +1384,6 @@
     Until: 22:00,0.0132818947368421, !- Field 45
     Until: 23:00,0.0110682456140351, !- Field 47
     Until: 24:00,0.00747106578947368; !- Field 49
-
-                             !- Field 50
 
   Schedule:Compact,
     activity_sch,            !- Name
@@ -1551,16 +1482,12 @@
     For: AllDays,            !- Field 2
     Until: 24:00,22.2222222222223; !- Field 3
 
-                             !- Field 4
-
   Schedule:Compact,
     cooling_sch,             !- Name
     Temperature,             !- Schedule Type Limits Name
     Through: 12/31,          !- Field 1
     For: AllDays,            !- Field 2
     Until: 24:00,23.888888888889; !- Field 3
-
-                             !- Field 4
 
   Schedule:Compact,
     fan_cycle,               !- Name
@@ -2152,8 +2079,6 @@
     1;                       !- Multiplier
 
 !-   ===========  ALL OBJECTS IN CLASS: BUILDINGSURFACE:DETAILED ===========
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Inter zone floor 1,      !- Name
@@ -2172,10 +2097,6 @@
     12.1330909462833,9.09981820971244,2.60156341463415,  !- X,Y,Z ==> Vertex 3 {m}
     12.1330909462833,0,2.60156341463415;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     ceiling_unit1,           !- Name
     Ceiling,                 !- Surface Type
@@ -2192,10 +2113,6 @@
     12.1330909462833,0,5.19302682926829,  !- X,Y,Z ==> Vertex 2 {m}
     12.1330909462833,9.09981820971244,5.19302682926829,  !- X,Y,Z ==> Vertex 3 {m}
     0,9.09981820971244,5.19302682926829;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Roof_front_unit1,        !- Name
@@ -2214,11 +2131,6 @@
     12.1330909462833,4.54990910485622,6.6995631975537,  !- X,Y,Z ==> Vertex 3 {m}
     0,4.54990910485622,6.6995631975537;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Roof_back_unit1,         !- Name
     Roof,                    !- Surface Type
@@ -2236,10 +2148,6 @@
     0,4.54990910485622,6.6995631975537,  !- X,Y,Z ==> Vertex 3 {m}
     12.1330909462833,4.54990910485622,6.6995631975537;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-
   BuildingSurface:Detailed,
     Roof_right_unit1,        !- Name
     Wall,                    !- Surface Type
@@ -2256,9 +2164,6 @@
     12.1330909462833,9.09981820971244,5.19302682926829,  !- X,Y,Z ==> Vertex 2 {m}
     12.1330909462833,4.54990910485622,6.6995631975537;  !- X,Y,Z ==> Vertex 3 {m}
 
-                                        !- X,Y,Z  3 {m}
-                                        !- X,Y,Z  1 {m}
-
   BuildingSurface:Detailed,
     Roof_left_unit1,         !- Name
     Wall,                    !- Surface Type
@@ -2274,9 +2179,6 @@
     0,9.09981820971244,5.19302682926829,  !- X,Y,Z ==> Vertex 1 {m}
     0,0,5.19302682926829,  !- X,Y,Z ==> Vertex 2 {m}
     0,4.54990910485622,6.6995631975537;  !- X,Y,Z ==> Vertex 3 {m}
-
-                                        !- X,Y,Z  3 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Wall_ldf_1.unit1,        !- Name
@@ -2295,9 +2197,6 @@
     12.1330909462833,0,2.60156341463415,  !- X,Y,Z ==> Vertex 3 {m}
     0,0,2.60156341463415;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Wall_sdr_1.unit1,        !- Name
     Wall,                    !- Surface Type
@@ -2314,10 +2213,6 @@
     12.1330909462833,9.09981820971244,0.0101,  !- X,Y,Z ==> Vertex 2 {m}
     12.1330909462833,9.09981820971244,2.60156341463415,  !- X,Y,Z ==> Vertex 3 {m}
     12.1330909462833,0,2.60156341463415;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Wall_ldb_1.unit1,        !- Name
@@ -2336,8 +2231,6 @@
     0,9.09981820971244,2.60156341463415,  !- X,Y,Z ==> Vertex 3 {m}
     12.1330909462833,9.09981820971244,2.60156341463415;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-
   BuildingSurface:Detailed,
     Wall_sdl_1.unit1,        !- Name
     Wall,                    !- Surface Type
@@ -2354,10 +2247,6 @@
     0,0,0.0101,  !- X,Y,Z ==> Vertex 2 {m}
     0,0,2.60156341463415,  !- X,Y,Z ==> Vertex 3 {m}
     0,9.09981820971244,2.60156341463415;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Wall_ldf_2.unit1,        !- Name
@@ -2376,10 +2265,6 @@
     12.1330909462833,0,5.19302682926829,  !- X,Y,Z ==> Vertex 3 {m}
     0,0,5.19302682926829;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Wall_sdr_2.unit1,        !- Name
     Wall,                    !- Surface Type
@@ -2396,11 +2281,6 @@
     12.1330909462833,9.09981820971244,2.60156341463415,  !- X,Y,Z ==> Vertex 2 {m}
     12.1330909462833,9.09981820971244,5.19302682926829,  !- X,Y,Z ==> Vertex 3 {m}
     12.1330909462833,0,5.19302682926829;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Wall_ldb_2.unit1,        !- Name
@@ -2419,9 +2299,6 @@
     0,9.09981820971244,5.19302682926829,  !- X,Y,Z ==> Vertex 3 {m}
     12.1330909462833,9.09981820971244,5.19302682926829;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-
   BuildingSurface:Detailed,
     Wall_sdl_2.unit1,        !- Name
     Wall,                    !- Surface Type
@@ -2438,9 +2315,6 @@
     0,0,2.60156341463415,  !- X,Y,Z ==> Vertex 2 {m}
     0,0,5.19302682926829,  !- X,Y,Z ==> Vertex 3 {m}
     0,9.09981820971244,5.19302682926829;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Floor_unit1,             !- Name

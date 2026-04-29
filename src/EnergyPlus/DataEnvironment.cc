@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -109,7 +109,7 @@ Real64 OutDryBulbTempAt(EnergyPlusData &state, Real64 const Z) // Height above g
 
     if (LocalOutDryBulbTemp < -100.0) {
         ShowSevereError(state, "OutDryBulbTempAt: outdoor drybulb temperature < -100 C");
-        ShowContinueError(state, format("...check heights, this height=[{:.0R}].", Z));
+        ShowContinueError(state, EnergyPlus::format("...check heights, this height=[{:.0R}].", Z));
         ShowFatalError(state, "Program terminates due to preceding condition(s).");
     }
 
@@ -152,7 +152,7 @@ Real64 OutWetBulbTempAt(EnergyPlusData &state, Real64 const Z) // Height above g
 
     if (LocalOutWetBulbTemp < -100.0) {
         ShowSevereError(state, "OutWetBulbTempAt: outdoor wetbulb temperature < -100 C");
-        ShowContinueError(state, format("...check heights, this height=[{:.0R}].", Z));
+        ShowContinueError(state, EnergyPlus::format("...check heights, this height=[{:.0R}].", Z));
         ShowFatalError(state, "Program terminates due to preceding condition(s).");
     }
 
@@ -237,11 +237,11 @@ void SetOutBulbTempAt_error(EnergyPlusData &state, std::string const &Settings, 
 {
     // Using/Aliasing
 
-    ShowSevereError(state, format("SetOutBulbTempAt: {} Outdoor Temperatures < -100 C", Settings));
-    ShowContinueError(state, format("...check {} Heights - Maximum {} Height=[{:.0R}].", Settings, Settings, max_height));
+    ShowSevereError(state, EnergyPlus::format("SetOutBulbTempAt: {} Outdoor Temperatures < -100 C", Settings));
+    ShowContinueError(state, EnergyPlus::format("...check {} Heights - Maximum {} Height=[{:.0R}].", Settings, Settings, max_height));
     if (max_height >= 20000.0) {
         ShowContinueError(state, "...according to your maximum Z height, your building is somewhere in the Stratosphere.");
-        ShowContinueError(state, format("...look at {} Name= {}", Settings, SettingsName));
+        ShowContinueError(state, EnergyPlus::format("...look at {} Name= {}", Settings, SettingsName));
     }
     ShowFatalError(state, "Program terminates due to preceding condition(s).");
 }

@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -67,7 +67,7 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
     // Check for duplicates
     for (auto &existingObj : state.dataGroundHeatExchanger->verticalGLHE) {
         if (objName == existingObj.name) {
-            ShowFatalError(state, format("Invalid input for {} object: Duplicate name found: {}", moduleName, existingObj.name));
+            ShowFatalError(state, EnergyPlus::format("Invalid input for {} object: Duplicate name found: {}", moduleName, existingObj.name));
         }
     }
 
@@ -78,32 +78,32 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
     // get inlet node num
     std::string const inletNodeName = Util::makeUPPER(j["inlet_node_name"].get<std::string>());
 
-    this->inletNodeNum = NodeInputManager::GetOnlySingleNode(state,
-                                                             inletNodeName,
-                                                             errorsFound,
-                                                             DataLoopNode::ConnectionObjectType::GroundHeatExchangerSystem,
-                                                             objName,
-                                                             DataLoopNode::NodeFluidType::Water,
-                                                             DataLoopNode::ConnectionType::Inlet,
-                                                             NodeInputManager::CompFluidStream::Primary,
-                                                             DataLoopNode::ObjectIsNotParent);
+    this->inletNodeNum = Node::GetOnlySingleNode(state,
+                                                 inletNodeName,
+                                                 errorsFound,
+                                                 Node::ConnectionObjectType::GroundHeatExchangerSystem,
+                                                 objName,
+                                                 Node::FluidType::Water,
+                                                 Node::ConnectionType::Inlet,
+                                                 Node::CompFluidStream::Primary,
+                                                 Node::ObjectIsNotParent);
 
     // get outlet node num
     std::string const outletNodeName = Util::makeUPPER(j["outlet_node_name"].get<std::string>());
 
-    this->outletNodeNum = NodeInputManager::GetOnlySingleNode(state,
-                                                              outletNodeName,
-                                                              errorsFound,
-                                                              DataLoopNode::ConnectionObjectType::GroundHeatExchangerSystem,
-                                                              objName,
-                                                              DataLoopNode::NodeFluidType::Water,
-                                                              DataLoopNode::ConnectionType::Outlet,
-                                                              NodeInputManager::CompFluidStream::Primary,
-                                                              DataLoopNode::ObjectIsNotParent);
+    this->outletNodeNum = Node::GetOnlySingleNode(state,
+                                                  outletNodeName,
+                                                  errorsFound,
+                                                  Node::ConnectionObjectType::GroundHeatExchangerSystem,
+                                                  objName,
+                                                  Node::FluidType::Water,
+                                                  Node::ConnectionType::Outlet,
+                                                  Node::CompFluidStream::Primary,
+                                                  Node::ObjectIsNotParent);
     this->available = true;
     this->on = true;
 
-    BranchNodeConnections::TestCompSet(state, moduleName, objName, inletNodeName, outletNodeName, "Condenser Water Nodes");
+    Node::TestCompSet(state, moduleName, objName, inletNodeName, outletNodeName, "Condenser Water Nodes");
 
     this->designFlow = j["design_flow_rate"].get<Real64>();
     PlantUtilities::RegisterPlantCompDesignFlow(state, this->inletNodeNum, this->designFlow);
@@ -146,14 +146,16 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
             bool objNameFound = j.find("ghe_vertical_sizing_object_name") != j.end();
 
             if (!objTypeFound) {
-                ShowSevereError(state, format("GroundHeatExchanger:System \"{}\"", this->name));
-                ShowContinueError(state, format("g-Function Calculation Method = \"{}\"", j["g_function_calculation_method"].get<std::string>()));
+                ShowSevereError(state, EnergyPlus::format("GroundHeatExchanger:System \"{}\"", this->name));
+                ShowContinueError(
+                    state, EnergyPlus::format("g-Function Calculation Method = \"{}\"", j["g_function_calculation_method"].get<std::string>()));
                 ShowContinueError(state, "GHE:Vertical:Sizing Object Type not specified.");
                 errorsFound = true;
             }
             if (!objNameFound) {
-                ShowSevereError(state, format("GroundHeatExchanger:System \"{}\"", this->name));
-                ShowContinueError(state, format("g-Function Calculation Method = \"{}\"", j["g_function_calculation_method"].get<std::string>()));
+                ShowSevereError(state, EnergyPlus::format("GroundHeatExchanger:System \"{}\"", this->name));
+                ShowContinueError(
+                    state, EnergyPlus::format("g-Function Calculation Method = \"{}\"", j["g_function_calculation_method"].get<std::string>()));
                 ShowContinueError(state, "GHE:Vertical:Sizing Object Name not specified.");
                 errorsFound = true;
             }
@@ -162,15 +164,16 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
             this->sizingData.type = j.at("ghe_vertical_sizing_object_type");
 
             if (Util::makeUPPER(this->sizingData.type) != "GROUNDHEATEXCHANGER:VERTICAL:SIZING:RECTANGLE") {
-                ShowSevereError(state, format("GroundHeatExchanger:System \"{}\"", this->name));
-                ShowContinueError(state, format("GHE:Vertical:Sizing Object Type not supported \"{}\"", this->sizingData.type));
+                ShowSevereError(state, EnergyPlus::format("GroundHeatExchanger:System \"{}\"", this->name));
+                ShowContinueError(state, EnergyPlus::format("GHE:Vertical:Sizing Object Type not supported \"{}\"", this->sizingData.type));
                 errorsFound = true;
             }
 
             auto const instances = state.dataInputProcessing->inputProcessor->epJSON.find("GroundHeatExchanger:Vertical:Sizing:Rectangle");
             if (instances == state.dataInputProcessing->inputProcessor->epJSON.end()) {
-                ShowSevereError(state,
-                                format("Expected to find GroundHeatExchanger:Vertical:Sizing named {}, but it was missing", this->sizingData.name));
+                ShowSevereError(
+                    state,
+                    EnergyPlus::format("Expected to find GroundHeatExchanger:Vertical:Sizing named {}, but it was missing", this->sizingData.name));
                 errorsFound = true;
             }
 
@@ -185,9 +188,9 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
                     this->sizingData.sizingPeriodName = fields.at("sizingperiod_weatherfiledays_name");
                     auto const spInstances = state.dataInputProcessing->inputProcessor->epJSON.find("SizingPeriod:WeatherFileDays");
                     if (spInstances == state.dataInputProcessing->inputProcessor->epJSON.end()) {
-                        ShowSevereError(
-                            state,
-                            format("Expected to find SizingPeriod:WeatherFileDays named {}, but it was missing", this->sizingData.sizingPeriodName));
+                        ShowSevereError(state,
+                                        EnergyPlus::format("Expected to find SizingPeriod:WeatherFileDays named {}, but it was missing",
+                                                           this->sizingData.sizingPeriodName));
                         errorsFound = true;
                     }
 
@@ -202,8 +205,8 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
 
                     if (!spIsAnnual) {
                         ShowSevereError(state,
-                                        format("SizingPeriod:WeatherFileDays named {}, must be an annual design period of 365 days",
-                                               this->sizingData.sizingPeriodName));
+                                        EnergyPlus::format("SizingPeriod:WeatherFileDays named {}, must be an annual design period of 365 days",
+                                                           this->sizingData.sizingPeriodName));
                         errorsFound = true;
                     }
 
@@ -274,7 +277,7 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
             if (j.find("vertical_well_locations") == j.end()) {
                 ShowSevereError(state, "For a full design GHE simulation, you must provide a GHE:Vertical:Single object");
                 ShowContinueError(state, "If you enter more than one, only the first is used to specify the borehole design");
-                ShowContinueError(state, format("Check references to these objects for GHE:System object: {}", this->name));
+                ShowContinueError(state, EnergyPlus::format("Check references to these objects for GHE:System object: {}", this->name));
                 errorsFound = true;
             }
 
@@ -302,7 +305,7 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
             if (j.find("vertical_well_locations") == j.end()) {
                 // No ResponseFactors, GHEArray, or SingleBH object are referenced
                 ShowSevereError(state, "No GHE:ResponseFactors, GHE:Vertical:Array, or GHE:Vertical:Single objects found");
-                ShowContinueError(state, format("Check references to these objects for GHE:System object: {}", this->name));
+                ShowContinueError(state, EnergyPlus::format("Check references to these objects for GHE:System object: {}", this->name));
                 errorsFound = true;
             }
 
@@ -386,7 +389,7 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
 
     // Check for Errors
     if (errorsFound) {
-        ShowFatalError(state, format("Errors found in processing input for {}", moduleName));
+        ShowFatalError(state, EnergyPlus::format("Errors found in processing input for {}", moduleName));
     }
 }
 
@@ -679,9 +682,8 @@ nlohmann::json GLHEVert::getCommonGHEDesignerInputs(EnergyPlusData &state) const
 
 fs::path GLHEVert::runGHEDesigner(EnergyPlusData &state, nlohmann::json const &inputs)
 {
-    // we'll drop the ghedesigner input file and output directory in the same folder as the input file
-    auto ghe_designer_input_file_path = state.dataStrGlobals->inputDirPath / "eplus_ghedesigner_input.json";
-    auto ghe_designer_output_directory = state.dataStrGlobals->inputDirPath / "eplus_ghedesigner_outputs";
+    auto ghe_designer_input_file_path = state.dataStrGlobals->outDirPath / "eplus_ghedesigner_input.json";
+    auto ghe_designer_output_directory = state.dataStrGlobals->outDirPath / "eplus_ghedesigner_outputs";
     try {
         // If file already exists, try removing it
         if (fs::exists(ghe_designer_input_file_path)) {
@@ -733,7 +735,6 @@ fs::path GLHEVert::runGHEDesigner(EnergyPlusData &state, nlohmann::json const &i
 void GLHEVert::performBoreholeFieldDesignAndSizingWithGHEDesigner(EnergyPlusData &state, std::vector<Real64> const &hourlyLoads) const
 {
     nlohmann::json gheDesignerInputs = this->getCommonGHEDesignerInputs(state);
-    std::string const p = fmt::format("[GHEDesigner Calculation for GHE Named: {}] ", this->name);
 
     // grab thermal and borehole properties
     nlohmann::json grout = {{"conductivity", this->grout.k}, {"rho_cp", this->grout.rhoCp}};
@@ -868,7 +869,6 @@ void GLHEVert::performBoreholeFieldDesignAndSizingWithGHEDesigner(EnergyPlusData
         nlohmann::json data = nlohmann::json::parse(file3);
         std::vector<double> t = data["log_time"];
         std::vector<double> g = data["g_values"];
-        std::vector<double> gbhw = data["g_bhw_values"];
         this->myRespFactors->time = t;
         this->myRespFactors->LNTTS = t;
         this->myRespFactors->GFNC = g;
@@ -1287,8 +1287,6 @@ void GLHEVert::calcShortTimestepGFunctions(EnergyPlusData &state)
     for (auto const val : GFNC_shortTimestep) {
         g << val << '\n';
     }
-    std::string l2 = l.str();
-    std::string g2 = g.str();
 }
 
 Real64 GLHEVert::calcBHAverageResistance(EnergyPlusData &state)

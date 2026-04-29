@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -715,7 +715,8 @@ namespace Weather {
                 if (state.dataWeather->NumIntervalsPerHour != state.dataGlobal->TimeStepsInHour) {
                     ShowSevereError(
                         state,
-                        format("{}Number of intervals per hour on Weather file does not match specified number of Time Steps Per Hour", RoutineName));
+                        EnergyPlus::format("{}Number of intervals per hour on Weather file does not match specified number of Time Steps Per Hour",
+                                           RoutineName));
                     ErrorsFound = true;
                 }
             }
@@ -729,24 +730,25 @@ namespace Weather {
                     CheckWeatherFileValidity(state);
                 }
                 if (ErrorsFound) {
-                    ShowSevereError(state, format("{}No location specified, program will terminate.", RoutineName));
+                    ShowSevereError(state, EnergyPlus::format("{}No location specified, program will terminate.", RoutineName));
                 }
             } else {
                 ErrorsFound = true;
-                ShowSevereError(state, format("{}No Design Days or Run Period(s) specified, program will terminate.", RoutineName));
+                ShowSevereError(state, EnergyPlus::format("{}No Design Days or Run Period(s) specified, program will terminate.", RoutineName));
             }
             if (state.dataSysVars->DDOnly && state.dataEnvrn->TotDesDays == 0) {
                 ErrorsFound = true;
                 ShowSevereError(
                     state,
-                    format("{}Requested Design Days only (DataSystemVariables::DDOnly) but no Design Days specified, program will terminate.",
-                           RoutineName));
+                    EnergyPlus::format(
+                        "{}Requested Design Days only (DataSystemVariables::DDOnly) but no Design Days specified, program will terminate.",
+                        RoutineName));
             }
             if (state.dataSysVars->ReverseDD && state.dataEnvrn->TotDesDays == 1) {
                 ErrorsFound = true;
                 ShowSevereError(
                     state,
-                    format(
+                    EnergyPlus::format(
                         "{}Requested Reverse Design Days (DataSystemVariables::ReverseDD) but only 1 Design Day specified, program will terminate.",
                         RoutineName));
             }
@@ -754,7 +756,7 @@ namespace Weather {
             // Throw a Fatal now that we have said it'll terminate
             if (ErrorsFound) {
                 CloseWeatherFile(state); // will only close if opened.
-                ShowFatalError(state, format("{}Errors found in Weather Data Input. Program terminates.", RoutineName));
+                ShowFatalError(state, EnergyPlus::format("{}Errors found in Weather Data Input. Program terminates.", RoutineName));
             }
 
             state.dataEnvrn->CurrentOverallSimDay = 0;
@@ -790,7 +792,7 @@ namespace Weather {
                 (state.dataHeatBal->AdaptiveComfortRequested_ASH55 || state.dataHeatBal->AdaptiveComfortRequested_CEN15251)) {
                 if (state.dataGlobal->KindOfSim == Constant::KindOfSim::DesignDay) {
                     if (state.dataGlobal->DoDesDaySim) {
-                        ShowWarningError(state, format("{}Adaptive Comfort being reported during design day.", RoutineName));
+                        ShowWarningError(state, EnergyPlus::format("{}Adaptive Comfort being reported during design day.", RoutineName));
                         Real64 GrossApproxAvgDryBulb = (state.dataWeather->DesDayInput(state.dataWeather->Envrn).MaxDryBulb +
                                                         (state.dataWeather->DesDayInput(state.dataWeather->Envrn).MaxDryBulb -
                                                          state.dataWeather->DesDayInput(state.dataWeather->Envrn).DailyDBRange)) /
@@ -891,7 +893,8 @@ namespace Weather {
 
                                 ShowSevereError(
                                     state,
-                                    format("{}Weatherfile does not support leap years but runperiod includes a leap year ({})", RoutineName, year));
+                                    EnergyPlus::format(
+                                        "{}Weatherfile does not support leap years but runperiod includes a leap year ({})", RoutineName, year));
                                 missingLeap = true;
                             }
                         }
@@ -904,8 +907,9 @@ namespace Weather {
                                 int runStartJulian = dataperiod.DataStJDay;
                                 int runEndJulian = dataperiod.DataEnJDay;
                                 if (!dataperiod.HasYearData) {
-                                    ShowSevereError(state,
-                                                    format("{}Actual weather runperiod has been entered but weatherfile DATA PERIOD does not have "
+                                    ShowSevereError(
+                                        state,
+                                        EnergyPlus::format("{}Actual weather runperiod has been entered but weatherfile DATA PERIOD does not have "
                                                            "year included in start/end date.",
                                                            RoutineName));
                                     ShowContinueError(state, "...to match the RunPeriod, the DATA PERIOD should be mm/dd/yyyy for both, or");
@@ -946,56 +950,58 @@ namespace Weather {
 
                         if (!OkRun) {
                             if (!envCurr.ActualWeather) {
-                                StDate = format(DateFormat, envCurr.StartMonth, envCurr.StartDay);
-                                EnDate = format(DateFormat, envCurr.EndMonth, envCurr.EndDay);
-                                ShowSevereError(state,
-                                                format("{}Runperiod [mm/dd] (Start={},End={}) requested not within Data Period(s) from Weather File",
+                                StDate = EnergyPlus::format(DateFormat, envCurr.StartMonth, envCurr.StartDay);
+                                EnDate = EnergyPlus::format(DateFormat, envCurr.EndMonth, envCurr.EndDay);
+                                ShowSevereError(
+                                    state,
+                                    EnergyPlus::format("{}Runperiod [mm/dd] (Start={},End={}) requested not within Data Period(s) from Weather File",
                                                        RoutineName,
                                                        StDate,
                                                        EnDate));
                             } else {
-                                StDate = format(DateFormatWithYear, envCurr.StartMonth, envCurr.StartDay, envCurr.StartYear);
-                                EnDate = format(DateFormatWithYear, envCurr.EndMonth, envCurr.EndDay, envCurr.EndYear);
+                                StDate = EnergyPlus::format(DateFormatWithYear, envCurr.StartMonth, envCurr.StartDay, envCurr.StartYear);
+                                EnDate = EnergyPlus::format(DateFormatWithYear, envCurr.EndMonth, envCurr.EndDay, envCurr.EndYear);
                                 ShowSevereError(
                                     state,
-                                    format("{}Runperiod [mm/dd/yyyy] (Start={},End={}) requested not within Data Period(s) from Weather File",
-                                           RoutineName,
-                                           StDate,
-                                           EnDate));
+                                    EnergyPlus::format(
+                                        "{}Runperiod [mm/dd/yyyy] (Start={},End={}) requested not within Data Period(s) from Weather File",
+                                        RoutineName,
+                                        StDate,
+                                        EnDate));
                             }
 
                             auto const &dataPeriod1 = state.dataWeather->DataPeriods(1);
-                            StDate = format(DateFormat, dataPeriod1.StMon, dataPeriod1.StDay);
-                            EnDate = format(DateFormat, dataPeriod1.EnMon, dataPeriod1.EnDay);
+                            StDate = EnergyPlus::format(DateFormat, dataPeriod1.StMon, dataPeriod1.StDay);
+                            EnDate = EnergyPlus::format(DateFormat, dataPeriod1.EnMon, dataPeriod1.EnDay);
                             if (dataPeriod1.StYear > 0) {
-                                StDate += format("/{}", dataPeriod1.StYear);
+                                StDate += EnergyPlus::format("/{}", dataPeriod1.StYear);
                             } else {
                                 StDate += "/<noyear>";
                             }
                             if (dataPeriod1.EnYear > 0) {
-                                EnDate += format("/{}", dataPeriod1.EnYear);
+                                EnDate += EnergyPlus::format("/{}", dataPeriod1.EnYear);
                             } else {
                                 EnDate += "/<noyear>";
                             }
                             if (state.dataWeather->NumDataPeriods == 1) {
-                                ShowContinueError(state, format("Weather Data Period (Start={},End={})", StDate, EnDate));
+                                ShowContinueError(state, EnergyPlus::format("Weather Data Period (Start={},End={})", StDate, EnDate));
                             } else {
-                                ShowContinueError(state, format("Multiple Weather Data Periods 1st (Start={},End={})", StDate, EnDate));
+                                ShowContinueError(state, EnergyPlus::format("Multiple Weather Data Periods 1st (Start={},End={})", StDate, EnDate));
                             }
-                            ShowFatalError(state, format("{}Program terminates due to preceding condition.", RoutineName));
+                            ShowFatalError(state, EnergyPlus::format("{}Program terminates due to preceding condition.", RoutineName));
                         }
 
                         if (missingLeap) {
                             // Bail out now if we still need to
-                            ShowFatalError(state, format("{}Program terminates due to preceding condition.", RoutineName));
+                            ShowFatalError(state, EnergyPlus::format("{}Program terminates due to preceding condition.", RoutineName));
                         }
 
                         // Following builds Environment start/end for ASHRAE 55 warnings
-                        StDate = format(DateFormat, envCurr.StartMonth, envCurr.StartDay);
-                        EnDate = format(DateFormat, envCurr.EndMonth, envCurr.EndDay);
+                        StDate = EnergyPlus::format(DateFormat, envCurr.StartMonth, envCurr.StartDay);
+                        EnDate = EnergyPlus::format(DateFormat, envCurr.EndMonth, envCurr.EndDay);
                         if (envCurr.KindOfEnvrn == Constant::KindOfSim::RunPeriodWeather) {
-                            StDate += format("/{}", envCurr.StartYear);
-                            EnDate += format("/{}", envCurr.EndYear);
+                            StDate += EnergyPlus::format("/{}", envCurr.StartYear);
+                            EnDate += EnergyPlus::format("/{}", envCurr.EndYear);
                         }
                         state.dataEnvrn->EnvironmentStartEnd = StDate + " - " + EnDate;
                         state.dataEnvrn->StartYear = envCurr.StartYear;
@@ -1034,14 +1040,15 @@ namespace Weather {
                             if (state.dataWeather->WFAllowsLeapYears) {
                                 ShowSevereError(
                                     state,
-                                    format("{}AdaptiveComfort Reporting does not work correctly with leap years in weather files.", RoutineName));
+                                    EnergyPlus::format("{}AdaptiveComfort Reporting does not work correctly with leap years in weather files.",
+                                                       RoutineName));
                                 ErrorsFound = true;
                             }
                             if (state.dataWeather->NumDataPeriods != 1) {
-                                ShowSevereError(
-                                    state,
-                                    format("{}AdaptiveComfort Reporting does not work correctly with multiple dataperiods in weather files.",
-                                           RoutineName));
+                                ShowSevereError(state,
+                                                EnergyPlus::format(
+                                                    "{}AdaptiveComfort Reporting does not work correctly with multiple dataperiods in weather files.",
+                                                    RoutineName));
                                 ErrorsFound = true;
                             }
                             auto const &dataPeriod1 = state.dataWeather->DataPeriods(1);
@@ -1049,24 +1056,26 @@ namespace Weather {
                                 int RunStJDay = General::OrdinalDay(dataPeriod1.StMon, dataPeriod1.StDay, state.dataWeather->LeapYearAdd);
                                 int RunEnJDay = General::OrdinalDay(dataPeriod1.EnMon, dataPeriod1.EnDay, state.dataWeather->LeapYearAdd);
                                 if (RunEnJDay - RunStJDay + 1 != 365) {
-                                    ShowSevereError(state,
-                                                    format("{}AdaptiveComfort Reporting does not work correctly with weather files that do "
+                                    ShowSevereError(
+                                        state,
+                                        EnergyPlus::format("{}AdaptiveComfort Reporting does not work correctly with weather files that do "
                                                            "not contain 365 days.",
                                                            RoutineName));
                                     ErrorsFound = true;
                                 }
                             } else {
-                                ShowSevereError(state,
-                                                format("{}AdaptiveComfort Reporting does not work correctly with weather files that do not "
+                                ShowSevereError(
+                                    state,
+                                    EnergyPlus::format("{}AdaptiveComfort Reporting does not work correctly with weather files that do not "
                                                        "start on 1 January.",
                                                        RoutineName));
                                 ErrorsFound = true;
                             }
                             if (state.dataWeather->NumIntervalsPerHour != 1) {
                                 ShowSevereError(state,
-                                                format("{}AdaptiveComfort Reporting does not work correctly with weather files that have "
-                                                       "multiple interval records per hour.",
-                                                       RoutineName));
+                                                EnergyPlus::format("{}AdaptiveComfort Reporting does not work correctly with weather files that have "
+                                                                   "multiple interval records per hour.",
+                                                                   RoutineName));
                                 ErrorsFound = true;
                             }
                         } // if
@@ -1132,8 +1141,8 @@ namespace Weather {
                                 Source = "InputFile";
                             }
                             if (state.dataWeather->DaylightSavingIsActive && state.dataReportFlag->DoWeatherInitReporting) {
-                                StDate = format(DateFormat, DSTActStMon, DSTActStDay);
-                                EnDate = format(DateFormat, DSTActEnMon, DSTActEnDay);
+                                StDate = EnergyPlus::format(DateFormat, DSTActStMon, DSTActStDay);
+                                EnDate = EnergyPlus::format(DateFormat, DSTActEnMon, DSTActEnDay);
                                 print(state.files.eio, EnvDSTYFormat, Source, StDate, EnDate);
                             } else if (state.dataGlobal->DoOutputReporting) {
                                 print(state.files.eio, EnvDSTNFormat, Source);
@@ -1142,7 +1151,7 @@ namespace Weather {
                                 auto &specialDay = state.dataWeather->SpecialDays(k);
                                 static constexpr std::string_view EnvSpDyFormat("Environment:Special Days,{},{},{},{},{:3}\n");
                                 if (specialDay.WthrFile && state.dataWeather->UseSpecialDays && state.dataReportFlag->DoWeatherInitReporting) {
-                                    StDate = format(DateFormat, specialDay.ActStMon, specialDay.ActStDay);
+                                    StDate = EnergyPlus::format(DateFormat, specialDay.ActStMon, specialDay.ActStDay);
                                     print(state.files.eio,
                                           EnvSpDyFormat,
                                           specialDay.Name,
@@ -1152,7 +1161,7 @@ namespace Weather {
                                           specialDay.Duration);
                                 }
                                 if (!specialDay.WthrFile && state.dataReportFlag->DoWeatherInitReporting) {
-                                    StDate = format(DateFormat, specialDay.ActStMon, specialDay.ActStDay);
+                                    StDate = EnergyPlus::format(DateFormat, specialDay.ActStMon, specialDay.ActStDay);
                                     print(state.files.eio,
                                           EnvSpDyFormat,
                                           specialDay.Name,
@@ -1168,7 +1177,7 @@ namespace Weather {
                                state.dataGlobal->KindOfSim == Constant::KindOfSim::HVACSizeDesignDay) { // Design Day
                         auto const &desDayInput = state.dataWeather->DesDayInput(envCurr.DesignDayNum);
                         state.dataEnvrn->RunPeriodEnvironment = false;
-                        StDate = format(DateFormat, desDayInput.Month, desDayInput.DayOfMonth);
+                        StDate = EnergyPlus::format(DateFormat, desDayInput.Month, desDayInput.DayOfMonth);
                         EnDate = StDate;
                         if (state.dataReportFlag->DoWeatherInitReporting) {
                             print(state.files.eio,
@@ -1198,7 +1207,7 @@ namespace Weather {
         }
 
         if (ErrorsFound && !state.dataGlobal->DoingSizing && !state.dataGlobal->KickOffSimulation) {
-            ShowSevereError(state, format("{}Errors found in getting a new environment", RoutineName));
+            ShowSevereError(state, EnergyPlus::format("{}Errors found in getting a new environment", RoutineName));
             Available = false;
         } else if (ErrorsFound) {
             Available = false;
@@ -1219,7 +1228,7 @@ namespace Weather {
                 envNew = envBase; // copy over seed data from current array element
                 envNew.SeedEnvrnNum = i;
                 envNew.KindOfEnvrn = Constant::KindOfSim::HVACSizeDesignDay;
-                envNew.Title = format("{} HVAC Sizing Pass {}", envBase.Title, HVACSizingIterCount);
+                envNew.Title = EnergyPlus::format("{} HVAC Sizing Pass {}", envBase.Title, HVACSizingIterCount);
                 envNew.HVACSizingIterationNum = HVACSizingIterCount;
             } else if (state.dataWeather->Environment(i).KindOfEnvrn == Constant::KindOfSim::RunPeriodDesign) {
                 state.dataWeather->Environment.redimension(++state.dataWeather->NumOfEnvrn);
@@ -1228,7 +1237,7 @@ namespace Weather {
                 envNew = envBase; // copy over seed data
                 envNew.SeedEnvrnNum = i;
                 envNew.KindOfEnvrn = Constant::KindOfSim::HVACSizeRunPeriodDesign;
-                envNew.Title = format("{} HVAC Sizing Pass {}", envBase.Title, HVACSizingIterCount);
+                envNew.Title = EnergyPlus::format("{} HVAC Sizing Pass {}", envBase.Title, HVACSizingIterCount);
                 envNew.HVACSizingIterationNum = HVACSizingIterCount;
             }
         } // for each loop over Environment data structure
@@ -1552,7 +1561,7 @@ namespace Weather {
             }
             ThisDay += 7 * (state.dataWeather->DST.StDay - 1);
             if (ThisDay > state.dataWeather->EndDayOfMonthWithLeapDay(state.dataWeather->DST.StMon)) {
-                ShowSevereError(state, format("{}Determining DST: DST Start Date, Nth Day of Month, not enough Nths", RoutineName));
+                ShowSevereError(state, EnergyPlus::format("{}Determining DST: DST Start Date, Nth Day of Month, not enough Nths", RoutineName));
                 ErrorsFound = true;
             } else {
                 ActStartMonth = state.dataWeather->DST.StMon;
@@ -1579,7 +1588,7 @@ namespace Weather {
             if ((ThisDay >> state.dataWeather->EndDayOfMonthWithLeapDay(state.dataWeather->DST.EnMon)) != 0) {
                 ActEndMonth = 0; // Suppress uninitialized warning
                 ActEndDay = 0;   // Suppress uninitialized warning
-                ShowSevereError(state, format("{}Determining DST: DST End Date, Nth Day of Month, not enough Nths", RoutineName));
+                ShowSevereError(state, EnergyPlus::format("{}Determining DST: DST End Date, Nth Day of Month, not enough Nths", RoutineName));
                 ErrorsFound = true;
             } else {
                 ActEndMonth = state.dataWeather->DST.EnMon;
@@ -1595,7 +1604,7 @@ namespace Weather {
         }
 
         if (ErrorsFound) {
-            ShowFatalError(state, format("{}Program terminates due to preceding condition(s).", RoutineName));
+            ShowFatalError(state, EnergyPlus::format("{}Program terminates due to preceding condition(s).", RoutineName));
         }
 
         if (present(DSTActStMon)) {
@@ -1667,8 +1676,9 @@ namespace Weather {
                 }
                 ThisDay += 7 * (specialDay.Day - 1);
                 if (ThisDay > state.dataWeather->EndDayOfMonthWithLeapDay(specialDay.Month)) {
-                    ShowSevereError(state,
-                                    format("{}Special Day Date, Nth Day of Month, not enough Nths, for SpecialDay={}", RoutineName, specialDay.Name));
+                    ShowSevereError(
+                        state,
+                        EnergyPlus::format("{}Special Day Date, Nth Day of Month, not enough Nths, for SpecialDay={}", RoutineName, specialDay.Name));
                     ErrorsFound = true;
                     continue;
                 }
@@ -1685,9 +1695,10 @@ namespace Weather {
                 JDay = General::OrdinalDay(specialDay.Month, ThisDay, state.dataWeather->LeapYearAdd);
             }
             if (state.dataWeather->SpecialDayTypes(JDay) != 0) {
-                ShowWarningError(
-                    state,
-                    format("{}Special Day definition ({}) is overwriting previously entered special day period", RoutineName, specialDay.Name));
+                ShowWarningError(state,
+                                 EnergyPlus::format("{}Special Day definition ({}) is overwriting previously entered special day period",
+                                                    RoutineName,
+                                                    specialDay.Name));
                 if (state.dataWeather->UseSpecialDays) {
                     ShowContinueError(state, "...This could be caused by definitions on the Weather File.");
                 }
@@ -1707,7 +1718,7 @@ namespace Weather {
         }
 
         if (ErrorsFound) {
-            ShowFatalError(state, format("{}Program terminates due to preceding condition(s).", RoutineName));
+            ShowFatalError(state, EnergyPlus::format("{}Program terminates due to preceding condition(s).", RoutineName));
         }
     }
 
@@ -2067,11 +2078,11 @@ namespace Weather {
 
         Sched::UpdateScheduleVals(state);
 
-        state.dataEnvrn->CurMnDyHr =
-            format("{:02d}/{:02d} {:02d}", state.dataEnvrn->Month, state.dataEnvrn->DayOfMonth, (unsigned short)(state.dataGlobal->HourOfDay - 1));
-        state.dataEnvrn->CurMnDy = format("{:02d}/{:02d}", state.dataEnvrn->Month, state.dataEnvrn->DayOfMonth);
+        state.dataEnvrn->CurMnDyHr = EnergyPlus::format(
+            "{:02d}/{:02d} {:02d}", state.dataEnvrn->Month, state.dataEnvrn->DayOfMonth, (unsigned short)(state.dataGlobal->HourOfDay - 1));
+        state.dataEnvrn->CurMnDy = EnergyPlus::format("{:02d}/{:02d}", state.dataEnvrn->Month, state.dataEnvrn->DayOfMonth);
         state.dataEnvrn->CurMnDyYr =
-            format("{:02d}/{:02d}/{:04d}", state.dataEnvrn->Month, state.dataEnvrn->DayOfMonth, state.dataGlobal->CalendarYear);
+            EnergyPlus::format("{:02d}/{:02d}/{:04d}", state.dataEnvrn->Month, state.dataEnvrn->DayOfMonth, state.dataGlobal->CalendarYear);
 
         state.dataGlobal->WeightNow = state.dataWeather->Interpolation(state.dataGlobal->TimeStep);
         state.dataGlobal->WeightPreviousHour = 1.0 - state.dataGlobal->WeightNow;
@@ -2097,7 +2108,8 @@ namespace Weather {
         // Determine if Sun is up or down, set Solar Cosine values for time step.
         DetermineSunUpDown(state, state.dataEnvrn->SOLCOS);
         if (state.dataEnvrn->SunIsUp && state.dataWeather->SolarAltitudeAngle < 0.0) {
-            ShowFatalError(state, format("SetCurrentWeather: At {} Sun is Up but Solar Altitude Angle is < 0.0", state.dataEnvrn->CurMnDyHr));
+            ShowFatalError(state,
+                           EnergyPlus::format("SetCurrentWeather: At {} Sun is Up but Solar Altitude Angle is < 0.0", state.dataEnvrn->CurMnDyHr));
         }
 
         auto const &today = state.dataWeather->wvarsHrTsToday(state.dataGlobal->TimeStep, state.dataGlobal->HourOfDay);
@@ -2399,7 +2411,7 @@ namespace Weather {
                         if (thisEnviron.MatchYear) {
                             date += '/' + fmt::to_string(thisEnviron.StartYear);
                         }
-                        ShowSevereError(state, format("Multiple rewinds on EPW while searching for first day {}", date));
+                        ShowSevereError(state, EnergyPlus::format("Multiple rewinds on EPW while searching for first day {}", date));
                     } else {
                         state.files.inputWeatherFile.rewind();
                         ++NumRewinds;
@@ -2446,13 +2458,13 @@ namespace Weather {
                 }
                 if (!WeatherDataLine.good) {
                     ShowFatalError(state,
-                                   format("Error occurred on EPW while searching for first day, stopped at {}/{}/{} {}:{} IO Error='{}'",
-                                          WYear,
-                                          WMonth,
-                                          WDay,
-                                          WHour,
-                                          WMinute,
-                                          state.files.inputWeatherFile.error_state_to_string()),
+                                   EnergyPlus::format("Error occurred on EPW while searching for first day, stopped at {}/{}/{} {}:{} IO Error='{}'",
+                                                      WYear,
+                                                      WMonth,
+                                                      WDay,
+                                                      WHour,
+                                                      WMinute,
+                                                      state.files.inputWeatherFile.error_state_to_string()),
                                    OptionalOutputFileRef{state.files.eso});
                 }
                 if (state.dataWeather->CurDayOfWeek <= 7) {
@@ -2470,50 +2482,50 @@ namespace Weather {
                     // Do the range checks on the first set of fields -- no others.
                     bool ErrorsFound = false;
                     if (DryBulb < 99.9 && (DryBulb < -90.0 || DryBulb > 70.0)) {
-                        ShowSevereError(state, format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
-                        ShowContinueError(state, format("DryBulb Temperature ({:.2R}) is out of range [-90.0, 70.0]", DryBulb));
+                        ShowSevereError(state, EnergyPlus::format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
+                        ShowContinueError(state, EnergyPlus::format("DryBulb Temperature ({:.2R}) is out of range [-90.0, 70.0]", DryBulb));
                         ErrorsFound = true;
                     }
 
                     if (DewPoint < 99.9 && (DewPoint < -90.0 || DewPoint > 70.0)) {
-                        ShowSevereError(state, format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
-                        ShowContinueError(state, format("DewPoint Temperature ({:.2R}) is out of range [-90.0, 70.0]", DewPoint));
+                        ShowSevereError(state, EnergyPlus::format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
+                        ShowContinueError(state, EnergyPlus::format("DewPoint Temperature ({:.2R}) is out of range [-90.0, 70.0]", DewPoint));
                         ErrorsFound = true;
                     }
 
                     if (RelHum < 999.0 && (RelHum < 0.0 || RelHum > 110.0)) {
-                        ShowSevereError(state, format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
-                        ShowContinueError(state, format("Relative Humidity ({:.2R}) is out of range [0.0, 100.0]", RelHum));
+                        ShowSevereError(state, EnergyPlus::format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
+                        ShowContinueError(state, EnergyPlus::format("Relative Humidity ({:.2R}) is out of range [0.0, 100.0]", RelHum));
                         ErrorsFound = true;
                     }
 
                     if (AtmPress < 999999.0 && (AtmPress <= 31000.0 || AtmPress > 120000.0)) {
-                        ShowSevereError(state, format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
-                        ShowContinueError(state, format("Atmospheric Pressure ({:.0R}) is out of range [31000, 120000]", AtmPress));
+                        ShowSevereError(state, EnergyPlus::format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
+                        ShowContinueError(state, EnergyPlus::format("Atmospheric Pressure ({:.0R}) is out of range [31000, 120000]", AtmPress));
                         ErrorsFound = true;
                     }
 
                     if (DirectRad < 0.0) {
-                        ShowSevereError(state, format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
-                        ShowContinueError(state, format("Direct Radiation ({:.2R}) is out of range [0.0, -]", DirectRad));
+                        ShowSevereError(state, EnergyPlus::format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
+                        ShowContinueError(state, EnergyPlus::format("Direct Radiation ({:.2R}) is out of range [0.0, -]", DirectRad));
                         ErrorsFound = true;
                     }
 
                     if (DiffuseRad < 0.0) {
-                        ShowSevereError(state, format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
-                        ShowContinueError(state, format("Diffuse Radiation ({:.2R}) is out of range [0.0, -]", DiffuseRad));
+                        ShowSevereError(state, EnergyPlus::format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
+                        ShowContinueError(state, EnergyPlus::format("Diffuse Radiation ({:.2R}) is out of range [0.0, -]", DiffuseRad));
                         ErrorsFound = true;
                     }
 
                     if (WindDir < 999.0 && (WindDir < 0.0 || WindDir > 360.0)) {
-                        ShowSevereError(state, format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
-                        ShowContinueError(state, format("Wind Direction ({:.2R}) is out of range [0.0, 360.0]", WindDir));
+                        ShowSevereError(state, EnergyPlus::format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
+                        ShowContinueError(state, EnergyPlus::format("Wind Direction ({:.2R}) is out of range [0.0, 360.0]", WindDir));
                         ErrorsFound = true;
                     }
 
                     if (WindSpeed < 999.0 && (WindSpeed < 0.0 || WindSpeed > 40.0)) {
-                        ShowSevereError(state, format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
-                        ShowContinueError(state, format("Wind Speed ({:.2R}) is out of range [0.0, 40.0]", WindSpeed));
+                        ShowSevereError(state, EnergyPlus::format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
+                        ShowContinueError(state, EnergyPlus::format("Wind Speed ({:.2R}) is out of range [0.0, 40.0]", WindSpeed));
                         ErrorsFound = true;
                     }
 
@@ -2526,30 +2538,32 @@ namespace Weather {
                         WeatherDataLine.update(state.files.inputWeatherFile.readLine());
                         if (!WeatherDataLine.good) {
                             readList(WeatherDataLine.data, WYear, WMonth, WDay, WHour, WMinute);
-                            ShowFatalError(state,
-                                           format("Error occurred on EPW while searching for first day, stopped at {}/{}/{} {}:{} IO Error='{}'",
-                                                  WYear,
-                                                  WMonth,
-                                                  WDay,
-                                                  WHour,
-                                                  WMinute,
-                                                  state.files.inputWeatherFile.error_state_to_string()),
-                                           OptionalOutputFileRef{state.files.eso});
+                            ShowFatalError(
+                                state,
+                                EnergyPlus::format("Error occurred on EPW while searching for first day, stopped at {}/{}/{} {}:{} IO Error='{}'",
+                                                   WYear,
+                                                   WMonth,
+                                                   WDay,
+                                                   WHour,
+                                                   WMinute,
+                                                   state.files.inputWeatherFile.error_state_to_string()),
+                                OptionalOutputFileRef{state.files.eso});
                         }
                     }
                     for (int i = 1; i <= 23 * state.dataWeather->NumIntervalsPerHour; ++i) {
                         WeatherDataLine.update(state.files.inputWeatherFile.readLine());
                         if (!WeatherDataLine.good) {
                             readList(WeatherDataLine.data, WYear, WMonth, WDay, WHour, WMinute);
-                            ShowFatalError(state,
-                                           format("Error occurred on EPW while searching for first day, stopped at {}/{}/{} {}:{} IO Error='{}'",
-                                                  WYear,
-                                                  WMonth,
-                                                  WDay,
-                                                  WHour,
-                                                  WMinute,
-                                                  state.files.inputWeatherFile.error_state_to_string()),
-                                           OptionalOutputFileRef{state.files.eso});
+                            ShowFatalError(
+                                state,
+                                EnergyPlus::format("Error occurred on EPW while searching for first day, stopped at {}/{}/{} {}:{} IO Error='{}'",
+                                                   WYear,
+                                                   WMonth,
+                                                   WDay,
+                                                   WHour,
+                                                   WMinute,
+                                                   state.files.inputWeatherFile.error_state_to_string()),
+                                OptionalOutputFileRef{state.files.eso});
                         }
                     }
                 }
@@ -2688,35 +2702,36 @@ namespace Weather {
                                                          Albedo,
                                                          LiquidPrecip);
                             } else {
-                                ShowFatalError(state,
-                                               format("End-of-File encountered after {}/{}/{} {}:{}, starting from first day of Weather File would "
-                                                      "not be \"next day\"",
-                                                      WYear,
-                                                      WMonth,
-                                                      WDay,
-                                                      WHour,
-                                                      WMinute));
+                                ShowFatalError(
+                                    state,
+                                    EnergyPlus::format("End-of-File encountered after {}/{}/{} {}:{}, starting from first day of Weather File would "
+                                                       "not be \"next day\"",
+                                                       WYear,
+                                                       WMonth,
+                                                       WDay,
+                                                       WHour,
+                                                       WMinute));
                             }
                         } else {
                             ShowFatalError(state,
-                                           format("Unexpected error condition in middle of reading EPW file, stopped at {}/{}/{} {}:{}",
-                                                  WYear,
-                                                  WMonth,
-                                                  WDay,
-                                                  WHour,
-                                                  WMinute),
+                                           EnergyPlus::format("Unexpected error condition in middle of reading EPW file, stopped at {}/{}/{} {}:{}",
+                                                              WYear,
+                                                              WMonth,
+                                                              WDay,
+                                                              WHour,
+                                                              WMinute),
                                            OptionalOutputFileRef{state.files.eso});
                         }
                     }
 
                     if (hour != WHour) {
                         ShowFatalError(state,
-                                       format("Unexpected error condition in middle of reading EPW file, stopped at {}/{}/{} {}:{}",
-                                              WYear,
-                                              WMonth,
-                                              WDay,
-                                              WHour,
-                                              WMinute),
+                                       EnergyPlus::format("Unexpected error condition in middle of reading EPW file, stopped at {}/{}/{} {}:{}",
+                                                          WYear,
+                                                          WMonth,
+                                                          WDay,
+                                                          WHour,
+                                                          WMinute),
                                        OptionalOutputFileRef{state.files.eso});
                     }
 
@@ -3335,15 +3350,16 @@ namespace Weather {
         }
 
         if (DateInError) {
-            ShowSevereError(state, format("Reading Weather Data Line, Invalid Date, Year={}, Month={}, Day={}", WYear, WMonth, WDay));
+            ShowSevereError(state, EnergyPlus::format("Reading Weather Data Line, Invalid Date, Year={}, Month={}, Day={}", WYear, WMonth, WDay));
             ShowFatalError(state, "Program terminates due to previous condition.");
         }
 
         // index, unlike nth_occurrence returns the position of the search char, not the position after it
         pos = index(Line, ','); // WYear
         if (pos == std::string::npos) {
-            ShowSevereError(
-                state, format("Invalid Weather Line (no commas) at date={:4}/{:2}/{:2} Hour#={:2} Min#={:2}", WYear, WMonth, WDay, WHour, WMinute));
+            ShowSevereError(state,
+                            EnergyPlus::format(
+                                "Invalid Weather Line (no commas) at date={:4}/{:2}/{:2} Hour#={:2} Min#={:2}", WYear, WMonth, WDay, WHour, WMinute));
             ShowContinueError(state, fmt::format("Full Data Line={}", Line));
             ShowFatalError(state, "Error in Reading Weather Data");
         }
@@ -3538,7 +3554,7 @@ namespace Weather {
         designDay.DayOfMonth = desDayInput.DayOfMonth;
         designDay.DayOfYear = General::OrdinalDay(designDay.Month, designDay.DayOfMonth, 0);
         static constexpr std::string_view MnDyFmt("{:02}/{:02}");
-        state.dataEnvrn->CurMnDy = format(MnDyFmt, desDayInput.Month, desDayInput.DayOfMonth);
+        state.dataEnvrn->CurMnDy = EnergyPlus::format(MnDyFmt, desDayInput.Month, desDayInput.DayOfMonth);
         // EnvironmentName = DesDayInput( EnvrnNum ).Title;
         state.dataEnvrn->RunPeriodEnvironment = false;
         // Following builds Environment start/end for ASHRAE 55 warnings
@@ -3547,14 +3563,15 @@ namespace Weather {
         // Check that barometric pressure is within range
         if (desDayInput.PressureEntered) {
             if (std::abs((desDayInput.PressBarom - state.dataEnvrn->StdBaroPress) / state.dataEnvrn->StdBaroPress) > 0.1) { // 10% off
-                ShowWarningError(state,
-                                 format("SetUpDesignDay: Entered DesignDay Barometric Pressure={:.0R} differs by more than 10% from Standard "
-                                        "Barometric Pressure={:.0R}.",
-                                        desDayInput.PressBarom,
-                                        state.dataEnvrn->StdBaroPress));
-                ShowContinueError(
+                ShowWarningError(
                     state,
-                    format("...occurs in DesignDay={}, Standard Pressure (based on elevation) will be used.", state.dataEnvrn->EnvironmentName));
+                    EnergyPlus::format("SetUpDesignDay: Entered DesignDay Barometric Pressure={:.0R} differs by more than 10% from Standard "
+                                       "Barometric Pressure={:.0R}.",
+                                       desDayInput.PressBarom,
+                                       state.dataEnvrn->StdBaroPress));
+                ShowContinueError(state,
+                                  EnergyPlus::format("...occurs in DesignDay={}, Standard Pressure (based on elevation) will be used.",
+                                                     state.dataEnvrn->EnvironmentName));
                 desDayInput.PressBarom = state.dataEnvrn->StdBaroPress;
             }
         } else {
@@ -3703,7 +3720,7 @@ namespace Weather {
         } break;
         default: {
             ShowSevereError(state, "SetUpDesignDay: Invalid Humidity Indicator type");
-            ShowContinueError(state, format("Occurred in Design Day={}", desDayInput.Title));
+            ShowContinueError(state, EnergyPlus::format("Occurred in Design Day={}", desDayInput.Title));
         } break;
         } // switch
 
@@ -4367,8 +4384,9 @@ namespace Weather {
                 if (Line.eof) {
                     ShowFatalError(
                         state,
-                        format("OpenWeatherFile: Unexpected End-of-File on EPW Weather file, while reading header information, looking for header={}",
-                               epwHeaders[typeNum]),
+                        EnergyPlus::format(
+                            "OpenWeatherFile: Unexpected End-of-File on EPW Weather file, while reading header information, looking for header={}",
+                            epwHeaders[typeNum]),
                         OptionalOutputFileRef(state.files.eso));
                 }
 
@@ -4423,19 +4441,21 @@ namespace Weather {
                         std::abs(state.dataEnvrn->Elevation - state.dataWeather->WeatherFileElevation) / max(state.dataEnvrn->Elevation, 1.0) >
                             0.10) {
                         ShowWarningError(state, "Weather file location will be used rather than entered (IDF) Location object.");
-                        ShowContinueError(state, format("..Location object={}", state.dataWeather->LocationTitle));
-                        ShowContinueError(state, format("..Weather File Location={}", state.dataEnvrn->WeatherFileLocationTitle));
+                        ShowContinueError(state, EnergyPlus::format("..Location object={}", state.dataWeather->LocationTitle));
+                        ShowContinueError(state, EnergyPlus::format("..Weather File Location={}", state.dataEnvrn->WeatherFileLocationTitle));
                         ShowContinueError(
                             state,
-                            format("..due to location differences, Latitude difference=[{:.2R}] degrees, Longitude difference=[{:.2R}] degrees.",
-                                   std::abs(state.dataEnvrn->Latitude - state.dataWeather->WeatherFileLatitude),
-                                   std::abs(state.dataEnvrn->Longitude - state.dataWeather->WeatherFileLongitude)));
-                        ShowContinueError(state,
-                                          format("..Time Zone difference=[{:.1R}] hour(s), Elevation difference=[{:.2R}] percent, [{:.2R}] meters.",
-                                                 std::abs(state.dataEnvrn->TimeZoneNumber - state.dataWeather->WeatherFileTimeZone),
-                                                 std::abs((state.dataEnvrn->Elevation - state.dataWeather->WeatherFileElevation) /
-                                                          max(state.dataEnvrn->Elevation, 1.0) * 100.0),
-                                                 std::abs(state.dataEnvrn->Elevation - state.dataWeather->WeatherFileElevation)));
+                            EnergyPlus::format(
+                                "..due to location differences, Latitude difference=[{:.2R}] degrees, Longitude difference=[{:.2R}] degrees.",
+                                std::abs(state.dataEnvrn->Latitude - state.dataWeather->WeatherFileLatitude),
+                                std::abs(state.dataEnvrn->Longitude - state.dataWeather->WeatherFileLongitude)));
+                        ShowContinueError(
+                            state,
+                            EnergyPlus::format("..Time Zone difference=[{:.1R}] hour(s), Elevation difference=[{:.2R}] percent, [{:.2R}] meters.",
+                                               std::abs(state.dataEnvrn->TimeZoneNumber - state.dataWeather->WeatherFileTimeZone),
+                                               std::abs((state.dataEnvrn->Elevation - state.dataWeather->WeatherFileElevation) /
+                                                        max(state.dataEnvrn->Elevation, 1.0) * 100.0),
+                                               std::abs(state.dataEnvrn->Elevation - state.dataWeather->WeatherFileElevation)));
                     }
                 }
             }
@@ -4496,17 +4516,17 @@ namespace Weather {
         }
 
         if ((state.dataEnvrn->Latitude < -90.0) || (state.dataEnvrn->Latitude > 90.0)) {
-            ShowSevereError(state, format("Latitude must be between -90 and 90; Entered={:.2R}", state.dataEnvrn->Latitude));
+            ShowSevereError(state, EnergyPlus::format("Latitude must be between -90 and 90; Entered={:.2R}", state.dataEnvrn->Latitude));
             LocationError = true;
         }
 
         if ((state.dataEnvrn->Longitude < -180.0) || (state.dataEnvrn->Longitude > 180.0)) {
-            ShowSevereError(state, format("Longitude must be between -180 and 180; Entered={:.2R}", state.dataEnvrn->Longitude));
+            ShowSevereError(state, EnergyPlus::format("Longitude must be between -180 and 180; Entered={:.2R}", state.dataEnvrn->Longitude));
             LocationError = true;
         }
 
         if ((state.dataEnvrn->TimeZoneNumber < -12.00) || (state.dataEnvrn->TimeZoneNumber > 14.00)) {
-            ShowSevereError(state, format("Time Zone must be between -12 and +14; Entered={:.2R}", state.dataEnvrn->TimeZoneNumber));
+            ShowSevereError(state, EnergyPlus::format("Time Zone must be between -12 and +14; Entered={:.2R}", state.dataEnvrn->TimeZoneNumber));
             LocationError = true;
         }
 
@@ -4524,11 +4544,12 @@ namespace Weather {
                 Real64 const DiffCalc = std::abs(state.dataEnvrn->TimeZoneNumber - StdTimeMerid);
                 if (DiffCalc > 1.0 && DiffCalc < 24.0) {
                     if (DiffCalc < 3.0) {
-                        ShowWarningError(state,
-                                         format("Standard Time Meridian and Time Zone differ by more than 1, Difference=\"{:.1R}\"", DiffCalc));
+                        ShowWarningError(
+                            state, EnergyPlus::format("Standard Time Meridian and Time Zone differ by more than 1, Difference=\"{:.1R}\"", DiffCalc));
                         ShowContinueError(state, "Solar Positions may be incorrect");
                     } else {
-                        ShowSevereError(state, format("Standard Time Meridian and Time Zone differ by more than 2, Difference=\"{:.1R}\"", DiffCalc));
+                        ShowSevereError(
+                            state, EnergyPlus::format("Standard Time Meridian and Time Zone differ by more than 2, Difference=\"{:.1R}\"", DiffCalc));
                         ShowContinueError(state, "Solar Positions will be incorrect");
                         //          LocationError=.TRUE.
                     }
@@ -4913,27 +4934,27 @@ namespace Weather {
             if (reportPeriodInput.startYear == 0) {
                 if (reportPeriodInput.endYear != 0) { // Have to have an input start year to input an end year
                     ShowSevereError(state,
-                                    format("{}: object={}, end year cannot be specified if the start year is not.",
-                                           ipsc->cCurrentModuleObject,
-                                           reportPeriodInput.title));
+                                    EnergyPlus::format("{}: object={}, end year cannot be specified if the start year is not.",
+                                                       ipsc->cCurrentModuleObject,
+                                                       reportPeriodInput.title));
                     ErrorsFound = true;
                 }
             } else if (reportPeriodInput.startYear < 1583) { // Bail on the proleptic Gregorian calendar
                 ShowSevereError(state,
-                                format("{}: object={}, start year ({}) is too early, please choose a date after 1582.",
-                                       ipsc->cCurrentModuleObject,
-                                       reportPeriodInput.title,
-                                       reportPeriodInput.startYear));
+                                EnergyPlus::format("{}: object={}, start year ({}) is too early, please choose a date after 1582.",
+                                                   ipsc->cCurrentModuleObject,
+                                                   reportPeriodInput.title,
+                                                   reportPeriodInput.startYear));
                 ErrorsFound = true;
             }
 
             if (reportPeriodInput.endYear != 0 && reportPeriodInput.startYear > reportPeriodInput.endYear) {
                 ShowSevereError(state,
-                                format("{}: object={}, start year ({}) is after the end year ({}).",
-                                       ipsc->cCurrentModuleObject,
-                                       reportPeriodInput.title,
-                                       reportPeriodInput.startYear,
-                                       reportPeriodInput.endYear));
+                                EnergyPlus::format("{}: object={}, start year ({}) is after the end year ({}).",
+                                                   ipsc->cCurrentModuleObject,
+                                                   reportPeriodInput.title,
+                                                   reportPeriodInput.startYear,
+                                                   reportPeriodInput.endYear));
                 ErrorsFound = true;
             }
 
@@ -5071,27 +5092,27 @@ namespace Weather {
             if (runPeriodInput.startYear == 0) {
                 if (runPeriodInput.endYear != 0) { // Have to have an input start year to input an end year
                     ShowSevereError(state,
-                                    format("{}: object={}, end year cannot be specified if the start year is not.",
-                                           ipsc->cCurrentModuleObject,
-                                           runPeriodInput.title));
+                                    EnergyPlus::format("{}: object={}, end year cannot be specified if the start year is not.",
+                                                       ipsc->cCurrentModuleObject,
+                                                       runPeriodInput.title));
                     ErrorsFound = true;
                 }
             } else if (runPeriodInput.startYear < 1583) { // Bail on the proleptic Gregorian calendar
                 ShowSevereError(state,
-                                format("{}: object={}, start year ({}) is too early, please choose a date after 1582.",
-                                       ipsc->cCurrentModuleObject,
-                                       runPeriodInput.title,
-                                       runPeriodInput.startYear));
+                                EnergyPlus::format("{}: object={}, start year ({}) is too early, please choose a date after 1582.",
+                                                   ipsc->cCurrentModuleObject,
+                                                   runPeriodInput.title,
+                                                   runPeriodInput.startYear));
                 ErrorsFound = true;
             }
 
             if (runPeriodInput.endYear != 0 && runPeriodInput.startYear > runPeriodInput.endYear) {
                 ShowSevereError(state,
-                                format("{}: object={}, start year ({}) is after the end year ({}).",
-                                       ipsc->cCurrentModuleObject,
-                                       runPeriodInput.title,
-                                       runPeriodInput.startYear,
-                                       runPeriodInput.endYear));
+                                EnergyPlus::format("{}: object={}, start year ({}) is after the end year ({}).",
+                                                   ipsc->cCurrentModuleObject,
+                                                   runPeriodInput.title,
+                                                   runPeriodInput.startYear,
+                                                   runPeriodInput.endYear));
                 ErrorsFound = true;
             }
 
@@ -5101,11 +5122,11 @@ namespace Weather {
                 int dayType = getEnumValue(Sched::dayTypeNamesUC, state.dataIPShortCut->cAlphaArgs(2));
                 if (dayType < 1) {
                     ShowWarningError(state,
-                                     format("{}: object={}{} invalid (Day of Week) [{}] for Start is not valid, Sunday will be used.",
-                                            state.dataIPShortCut->cCurrentModuleObject,
-                                            state.dataWeather->RunPeriodInput(i).title,
-                                            state.dataIPShortCut->cAlphaFieldNames(2),
-                                            state.dataIPShortCut->cAlphaArgs(2)));
+                                     EnergyPlus::format("{}: object={}{} invalid (Day of Week) [{}] for Start is not valid, Sunday will be used.",
+                                                        state.dataIPShortCut->cCurrentModuleObject,
+                                                        state.dataWeather->RunPeriodInput(i).title,
+                                                        state.dataIPShortCut->cAlphaFieldNames(2),
+                                                        state.dataIPShortCut->cAlphaArgs(2)));
                     runPeriodInput.startWeekDay = Sched::DayType::Sunday;
                 } else {
                     runPeriodInput.startWeekDay = static_cast<Sched::DayType>(dayType);
@@ -5131,23 +5152,24 @@ namespace Weather {
                 } else {                                         // Have an input start year
                     if (!isLeapYear(runPeriodInput.startYear)) { // Start year is not a leap year
                         ShowSevereError(state,
-                                        format("{}: object={}, start year ({}) is not a leap year but the requested start date is 2/29.",
-                                               ipsc->cCurrentModuleObject,
-                                               runPeriodInput.title,
-                                               runPeriodInput.startYear));
+                                        EnergyPlus::format("{}: object={}, start year ({}) is not a leap year but the requested start date is 2/29.",
+                                                           ipsc->cCurrentModuleObject,
+                                                           runPeriodInput.title,
+                                                           runPeriodInput.startYear));
                         ErrorsFound = true;
                     } else { // Start year is a leap year
                         Sched::DayType weekday =
                             calculateDayOfWeek(state, runPeriodInput.startYear, runPeriodInput.startMonth, runPeriodInput.startDay);
                         if (inputWeekday) { // Check for correctness of input
                             if (weekday != runPeriodInput.startWeekDay) {
-                                ShowWarningError(state,
-                                                 format("{}: object={}, start weekday ({}) does not match the start year ({}), corrected to {}.",
-                                                        ipsc->cCurrentModuleObject,
-                                                        runPeriodInput.title,
-                                                        ipsc->cAlphaArgs(2),
-                                                        runPeriodInput.startYear,
-                                                        Sched::dayTypeNamesUC[static_cast<int>(weekday)]));
+                                ShowWarningError(
+                                    state,
+                                    EnergyPlus::format("{}: object={}, start weekday ({}) does not match the start year ({}), corrected to {}.",
+                                                       ipsc->cCurrentModuleObject,
+                                                       runPeriodInput.title,
+                                                       ipsc->cAlphaArgs(2),
+                                                       runPeriodInput.startYear,
+                                                       Sched::dayTypeNamesUC[static_cast<int>(weekday)]));
                                 runPeriodInput.startWeekDay = weekday;
                             }
                         } else { // Set the weekday if it was not input
@@ -5159,11 +5181,11 @@ namespace Weather {
                 // Non leap-day start date
                 if (!validMonthDay(runPeriodInput.startMonth, runPeriodInput.startDay)) {
                     ShowSevereError(state,
-                                    format("{}: object={}, Invalid input start month/day ({}/{})",
-                                           ipsc->cCurrentModuleObject,
-                                           runPeriodInput.title,
-                                           runPeriodInput.startMonth,
-                                           runPeriodInput.startDay));
+                                    EnergyPlus::format("{}: object={}, Invalid input start month/day ({}/{})",
+                                                       ipsc->cCurrentModuleObject,
+                                                       runPeriodInput.title,
+                                                       runPeriodInput.startMonth,
+                                                       runPeriodInput.startDay));
                     ErrorsFound = true;
                 } else {                                 // Month/day is valid
                     if (runPeriodInput.startYear == 0) { // No input starting year
@@ -5181,13 +5203,14 @@ namespace Weather {
                             calculateDayOfWeek(state, runPeriodInput.startYear, runPeriodInput.startMonth, runPeriodInput.startDay);
                         if (inputWeekday) { // Check for correctness of input
                             if (weekday != runPeriodInput.startWeekDay) {
-                                ShowWarningError(state,
-                                                 format("{}: object={}, start weekday ({}) does not match the start year ({}), corrected to {}.",
-                                                        ipsc->cCurrentModuleObject,
-                                                        runPeriodInput.title,
-                                                        ipsc->cAlphaArgs(2),
-                                                        runPeriodInput.startYear,
-                                                        Sched::dayTypeNamesUC[static_cast<int>(weekday)]));
+                                ShowWarningError(
+                                    state,
+                                    EnergyPlus::format("{}: object={}, start weekday ({}) does not match the start year ({}), corrected to {}.",
+                                                       ipsc->cCurrentModuleObject,
+                                                       runPeriodInput.title,
+                                                       ipsc->cAlphaArgs(2),
+                                                       runPeriodInput.startYear,
+                                                       Sched::dayTypeNamesUC[static_cast<int>(weekday)]));
                                 runPeriodInput.startWeekDay = weekday;
                             }
                         } else { // Set the weekday if it was not input
@@ -5219,20 +5242,20 @@ namespace Weather {
                 } else {                                       // Have an input end year
                     if (!isLeapYear(runPeriodInput.endYear)) { // End year is not a leap year
                         ShowSevereError(state,
-                                        format("{}: object={}, end year ({}) is not a leap year but the requested end date is 2/29.",
-                                               ipsc->cCurrentModuleObject,
-                                               runPeriodInput.title,
-                                               runPeriodInput.startYear));
+                                        EnergyPlus::format("{}: object={}, end year ({}) is not a leap year but the requested end date is 2/29.",
+                                                           ipsc->cCurrentModuleObject,
+                                                           runPeriodInput.title,
+                                                           runPeriodInput.startYear));
                         ErrorsFound = true;
                     } else {
                         runPeriodInput.endJulianDate = computeJulianDate(runPeriodInput.endYear, runPeriodInput.endMonth, runPeriodInput.endDay);
                         if (runPeriodInput.startJulianDate > runPeriodInput.endJulianDate) {
                             ShowSevereError(state,
-                                            format("{}: object={}, start Julian date ({}) is after the end Julian date ({}).",
-                                                   ipsc->cCurrentModuleObject,
-                                                   runPeriodInput.title,
-                                                   runPeriodInput.startJulianDate,
-                                                   runPeriodInput.endJulianDate));
+                                            EnergyPlus::format("{}: object={}, start Julian date ({}) is after the end Julian date ({}).",
+                                                               ipsc->cCurrentModuleObject,
+                                                               runPeriodInput.title,
+                                                               runPeriodInput.startJulianDate,
+                                                               runPeriodInput.endJulianDate));
                             ErrorsFound = true;
                         }
                     }
@@ -5241,11 +5264,11 @@ namespace Weather {
                 // Non leap-day end date
                 if (!validMonthDay(runPeriodInput.endMonth, runPeriodInput.endDay)) {
                     ShowSevereError(state,
-                                    format("{}: object={}, Invalid input end month/day ({}/{})",
-                                           ipsc->cCurrentModuleObject,
-                                           runPeriodInput.title,
-                                           runPeriodInput.startMonth,
-                                           runPeriodInput.startDay));
+                                    EnergyPlus::format("{}: object={}, Invalid input end month/day ({}/{})",
+                                                       ipsc->cCurrentModuleObject,
+                                                       runPeriodInput.title,
+                                                       runPeriodInput.startMonth,
+                                                       runPeriodInput.startDay));
                     ErrorsFound = true;
                 } else {                               // Month/day is valid
                     if (runPeriodInput.endYear == 0) { // No input end year
@@ -5260,11 +5283,11 @@ namespace Weather {
                         runPeriodInput.endJulianDate = computeJulianDate(runPeriodInput.endYear, runPeriodInput.endMonth, runPeriodInput.endDay);
                         if (runPeriodInput.startJulianDate > runPeriodInput.endJulianDate) {
                             ShowSevereError(state,
-                                            format("{}: object={}, start Julian date ({}) is after the end Julian date ({}).",
-                                                   ipsc->cCurrentModuleObject,
-                                                   runPeriodInput.title,
-                                                   runPeriodInput.startJulianDate,
-                                                   runPeriodInput.endJulianDate));
+                                            EnergyPlus::format("{}: object={}, start Julian date ({}) is after the end Julian date ({}).",
+                                                               ipsc->cCurrentModuleObject,
+                                                               runPeriodInput.title,
+                                                               runPeriodInput.startJulianDate,
+                                                               runPeriodInput.endJulianDate));
                             ErrorsFound = true;
                         }
                     }
@@ -5448,11 +5471,11 @@ namespace Weather {
             case 12: {
                 if (runPerDesInput.startDay > 31) {
                     ShowSevereError(state,
-                                    format("{}: object={} {} invalid (Day of Month) [{}]",
-                                           ipsc->cCurrentModuleObject,
-                                           runPerDesInput.title,
-                                           ipsc->cNumericFieldNames(2),
-                                           runPerDesInput.startDay));
+                                    EnergyPlus::format("{}: object={} {} invalid (Day of Month) [{}]",
+                                                       ipsc->cCurrentModuleObject,
+                                                       runPerDesInput.title,
+                                                       ipsc->cNumericFieldNames(2),
+                                                       runPerDesInput.startDay));
                     ErrorsFound = true;
                 }
             } break;
@@ -5462,32 +5485,32 @@ namespace Weather {
             case 11: {
                 if (runPerDesInput.startDay > 30) {
                     ShowSevereError(state,
-                                    format("{}: object={} {} invalid (Day of Month) [{}]",
-                                           ipsc->cCurrentModuleObject,
-                                           runPerDesInput.title,
-                                           ipsc->cNumericFieldNames(2),
-                                           runPerDesInput.startDay));
+                                    EnergyPlus::format("{}: object={} {} invalid (Day of Month) [{}]",
+                                                       ipsc->cCurrentModuleObject,
+                                                       runPerDesInput.title,
+                                                       ipsc->cNumericFieldNames(2),
+                                                       runPerDesInput.startDay));
                     ErrorsFound = true;
                 }
             } break;
             case 2: {
                 if (runPerDesInput.startDay > 28 + state.dataWeather->LeapYearAdd) {
                     ShowSevereError(state,
-                                    format("{}: object={} {} invalid (Day of Month) [{}]",
-                                           ipsc->cCurrentModuleObject,
-                                           runPerDesInput.title,
-                                           ipsc->cNumericFieldNames(2),
-                                           runPerDesInput.startDay));
+                                    EnergyPlus::format("{}: object={} {} invalid (Day of Month) [{}]",
+                                                       ipsc->cCurrentModuleObject,
+                                                       runPerDesInput.title,
+                                                       ipsc->cNumericFieldNames(2),
+                                                       runPerDesInput.startDay));
                     ErrorsFound = true;
                 }
             } break;
             default: {
                 ShowSevereError(state,
-                                format("{}: object={} {} invalid (Month) [{}]",
-                                       ipsc->cCurrentModuleObject,
-                                       runPerDesInput.title,
-                                       ipsc->cNumericFieldNames(1),
-                                       runPerDesInput.startMonth));
+                                EnergyPlus::format("{}: object={} {} invalid (Month) [{}]",
+                                                   ipsc->cCurrentModuleObject,
+                                                   runPerDesInput.title,
+                                                   ipsc->cNumericFieldNames(1),
+                                                   runPerDesInput.startMonth));
                 ErrorsFound = true;
             } break;
             } // switch
@@ -5498,11 +5521,11 @@ namespace Weather {
                 runPerDesInput.dayOfWeek = getEnumValue(Sched::dayTypeNamesUC, ipsc->cAlphaArgs(2));
                 if (runPerDesInput.dayOfWeek < 1 || runPerDesInput.dayOfWeek == 8) {
                     ShowWarningError(state,
-                                     format("{}: object={} {} invalid (Day of Week) [{} for Start is not Valid, Monday will be Used.",
-                                            ipsc->cCurrentModuleObject,
-                                            runPerDesInput.title,
-                                            ipsc->cAlphaFieldNames(1),
-                                            ipsc->cAlphaArgs(1)));
+                                     EnergyPlus::format("{}: object={} {} invalid (Day of Week) [{} for Start is not Valid, Monday will be Used.",
+                                                        ipsc->cCurrentModuleObject,
+                                                        runPerDesInput.title,
+                                                        ipsc->cAlphaFieldNames(1),
+                                                        ipsc->cAlphaArgs(1)));
                     runPerDesInput.dayOfWeek = (int)Sched::DayType::Monday; // Defaults to Monday
                 }
             }
@@ -5595,21 +5618,21 @@ namespace Weather {
                     WhichPeriod = Util::FindItem(ipsc->cAlphaArgs(2), state.dataWeather->TypicalExtremePeriods, &TypicalExtremeData::MatchValue2);
                     if (WhichPeriod != 0) {
                         ShowWarningError(state,
-                                         format("{}: object={} {}={} matched to {}",
-                                                ipsc->cCurrentModuleObject,
-                                                runPerDesInput.title,
-                                                ipsc->cAlphaFieldNames(2),
-                                                ipsc->cAlphaArgs(2),
-                                                state.dataWeather->TypicalExtremePeriods(WhichPeriod).MatchValue2));
+                                         EnergyPlus::format("{}: object={} {}={} matched to {}",
+                                                            ipsc->cCurrentModuleObject,
+                                                            runPerDesInput.title,
+                                                            ipsc->cAlphaFieldNames(2),
+                                                            ipsc->cAlphaArgs(2),
+                                                            state.dataWeather->TypicalExtremePeriods(WhichPeriod).MatchValue2));
                     }
                 }
                 if (WhichPeriod == 0) {
                     ShowSevereError(state,
-                                    format("{}: object={} {} invalid (not on Weather File)={}",
-                                           ipsc->cCurrentModuleObject,
-                                           runPerDesInput.title,
-                                           ipsc->cAlphaFieldNames(2),
-                                           ipsc->cAlphaArgs(2)));
+                                    EnergyPlus::format("{}: object={} {} invalid (not on Weather File)={}",
+                                                       ipsc->cCurrentModuleObject,
+                                                       runPerDesInput.title,
+                                                       ipsc->cAlphaFieldNames(2),
+                                                       ipsc->cAlphaArgs(2)));
                     ErrorsFound = true;
                 } else {
                     auto const &typicalExtPer = state.dataWeather->TypicalExtremePeriods(WhichPeriod);
@@ -5761,8 +5784,9 @@ namespace Weather {
             if (Duration(1) > 0) {
                 specialDay.Duration = int(Duration(1));
             } else {
-                ShowSevereError(
-                    state, format("{}: {} Invalid {}={:.0T}", ipsc->cCurrentModuleObject, AlphArray(1), ipsc->cNumericFieldNames(1), Duration(1)));
+                ShowSevereError(state,
+                                EnergyPlus::format(
+                                    "{}: {} Invalid {}={:.0T}", ipsc->cCurrentModuleObject, AlphArray(1), ipsc->cNumericFieldNames(1), Duration(1)));
                 ErrorsFound = true;
             }
 
@@ -5805,10 +5829,11 @@ namespace Weather {
             for (int j = 1; j <= specialDay.Duration; ++j) {
                 ++JDay;
                 if (JDay > 366) {
-                    ShowWarningError(state, format("SpecialDay={} causes index of more than 366, ignoring those beyond 366", specialDay.Name));
+                    ShowWarningError(state,
+                                     EnergyPlus::format("SpecialDay={} causes index of more than 366, ignoring those beyond 366", specialDay.Name));
                 } else {
                     if (state.dataWeather->SpecialDayTypes(JDay) != 0 && Warn == 0) {
-                        ShowWarningError(state, format("SpecialDay={} attempted overwrite of previous set special day", specialDay.Name));
+                        ShowWarningError(state, EnergyPlus::format("SpecialDay={} attempted overwrite of previous set special day", specialDay.Name));
                         Warn = 1;
                     } else if (state.dataWeather->SpecialDayTypes(JDay) == 0) {
                         state.dataWeather->SpecialDayTypes(JDay) = specialDay.DayType;
@@ -5875,7 +5900,7 @@ namespace Weather {
             ErrorObjectHeader eoh{routineName, ipsc->cCurrentModuleObject, ipsc->cAlphaArgs(1)};
 
             if (NumAlphas != 2) {
-                ShowSevereError(state, format("{}: Insufficient fields, must have Start AND End Dates", ipsc->cCurrentModuleObject));
+                ShowSevereError(state, EnergyPlus::format("{}: Insufficient fields, must have Start AND End Dates", ipsc->cCurrentModuleObject));
                 ErrorsFound = true;
             } else { // Correct number of arguments
                 General::ProcessDateString(state,
@@ -5903,7 +5928,7 @@ namespace Weather {
                 state.dataWeather->IDFDaylightSaving = true;
             }
         } else if (NumFound > 1) {
-            ShowSevereError(state, format("{}: Too many objects in Input File, only one allowed.", ipsc->cCurrentModuleObject));
+            ShowSevereError(state, EnergyPlus::format("{}: Too many objects in Input File, only one allowed.", ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
     }
@@ -6127,8 +6152,8 @@ namespace Weather {
                 desDayInput.dryBulbRangeType != DesDayDryBulbRangeType::Profile) {
                 Real64 testval = desDayInput.MaxDryBulb - desDayInput.DailyDBRange;
                 if (testval < -90.0 || testval > 70.0) {
-                    ShowSevereError(state, format("{}: {} = {}", routineName, ipsc->cCurrentModuleObject, desDayInput.Title));
-                    ShowContinueError(state, format("{} ({:.2R}) is out of range [-90.0, 70.0]", ipsc->cAlphaFieldNames(3), testval));
+                    ShowSevereError(state, EnergyPlus::format("{}: {} = {}", routineName, ipsc->cCurrentModuleObject, desDayInput.Title));
+                    ShowContinueError(state, EnergyPlus::format("{} ({:.2R}) is out of range [-90.0, 70.0]", ipsc->cAlphaFieldNames(3), testval));
                     ErrorsFound = true;
                 }
             }
@@ -6200,19 +6225,20 @@ namespace Weather {
 
                 if (desDayInput.dryBulbRangeType == DesDayDryBulbRangeType::Profile) {
                     if (MaxDryBulbEntered) {
-                        ShowWarningError(state, format("{}=\"{}\", data override.", ipsc->cCurrentModuleObject, desDayInput.Title));
-                        ShowContinueError(state, format("..{}=[{:.2R}] will be overwritten.", ipsc->cNumericFieldNames(3), desDayInput.MaxDryBulb));
-                        ShowContinueError(state, format("..{}=\"{}\".", ipsc->cAlphaFieldNames(3), ipsc->cAlphaArgs(3)));
-                        ShowContinueError(state, format("..with max value=[{:.2R}].", testval));
+                        ShowWarningError(state, EnergyPlus::format("{}=\"{}\", data override.", ipsc->cCurrentModuleObject, desDayInput.Title));
+                        ShowContinueError(
+                            state, EnergyPlus::format("..{}=[{:.2R}] will be overwritten.", ipsc->cNumericFieldNames(3), desDayInput.MaxDryBulb));
+                        ShowContinueError(state, EnergyPlus::format("..{}=\"{}\".", ipsc->cAlphaFieldNames(3), ipsc->cAlphaArgs(3)));
+                        ShowContinueError(state, EnergyPlus::format("..with max value=[{:.2R}].", testval));
                     }
                     desDayInput.MaxDryBulb = testval;
                 }
 
                 testval = desDayInput.MaxDryBulb - testval;
                 if (testval < -90.0 || testval > 70.0) {
-                    ShowSevereError(state, format("{}: {} = {}", routineName, ipsc->cCurrentModuleObject, desDayInput.Title));
+                    ShowSevereError(state, EnergyPlus::format("{}: {} = {}", routineName, ipsc->cCurrentModuleObject, desDayInput.Title));
                     // should this be cNumericFieldNames?
-                    ShowContinueError(state, format("{} = ({:.2R}) is out of range [-90.0, 70.0]", ipsc->cAlphaFieldNames(4), testval));
+                    ShowContinueError(state, EnergyPlus::format("{} = ({:.2R}) is out of range [-90.0, 70.0]", ipsc->cAlphaFieldNames(4), testval));
                     ErrorsFound = true;
                 }
             }
@@ -6231,10 +6257,11 @@ namespace Weather {
                 }
 
                 if (desDayInput.HumIndValue < -90.0 || desDayInput.HumIndValue > 70.0) {
-                    ShowSevereError(state, format("{}: {} = {}", routineName, ipsc->cCurrentModuleObject, desDayInput.Title));
-                    ShowContinueError(
-                        state,
-                        format("{} = {:.2R} is out of range [-90.0, 70.0]", ipsc->cAlphaFieldNames(5) + " - WetBulb", desDayInput.HumIndValue));
+                    ShowSevereError(state, EnergyPlus::format("{}: {} = {}", routineName, ipsc->cCurrentModuleObject, desDayInput.Title));
+                    ShowContinueError(state,
+                                      EnergyPlus::format("{} = {:.2R} is out of range [-90.0, 70.0]",
+                                                         ipsc->cAlphaFieldNames(5) + " - WetBulb",
+                                                         desDayInput.HumIndValue));
                     ErrorsFound = true;
                 }
             } break;
@@ -6248,10 +6275,11 @@ namespace Weather {
                 }
 
                 if (desDayInput.HumIndValue < -90.0 || desDayInput.HumIndValue > 70.0) {
-                    ShowSevereError(state, format("{}: {} = {}", routineName, ipsc->cCurrentModuleObject, desDayInput.Title));
-                    ShowContinueError(
-                        state,
-                        format("{} = {:.2R} is out of range [-90.0, 70.0]", ipsc->cAlphaFieldNames(5) + " - DewPoint", desDayInput.HumIndValue));
+                    ShowSevereError(state, EnergyPlus::format("{}: {} = {}", routineName, ipsc->cCurrentModuleObject, desDayInput.Title));
+                    ShowContinueError(state,
+                                      EnergyPlus::format("{} = {:.2R} is out of range [-90.0, 70.0]",
+                                                         ipsc->cAlphaFieldNames(5) + " - DewPoint",
+                                                         desDayInput.HumIndValue));
                     ErrorsFound = true;
                 }
             } break;
@@ -6266,10 +6294,11 @@ namespace Weather {
                 }
 
                 if (desDayInput.HumIndValue < 0.0 || desDayInput.HumIndValue > 0.03) {
-                    ShowSevereError(state, format("{}: {} = {}", routineName, ipsc->cCurrentModuleObject, desDayInput.Title));
-                    ShowContinueError(
-                        state,
-                        format("{} = {:.2R} is out of range [0.0, 0.03]", ipsc->cAlphaFieldNames(5) + " - Humidity-Ratio", desDayInput.HumIndValue));
+                    ShowSevereError(state, EnergyPlus::format("{}: {} = {}", routineName, ipsc->cCurrentModuleObject, desDayInput.Title));
+                    ShowContinueError(state,
+                                      EnergyPlus::format("{} = {:.2R} is out of range [0.0, 0.03]",
+                                                         ipsc->cAlphaFieldNames(5) + " - Humidity-Ratio",
+                                                         desDayInput.HumIndValue));
                     ErrorsFound = true;
                 }
             } break;
@@ -6285,10 +6314,11 @@ namespace Weather {
 
                 desDayInput.HumIndType = DesDayHumIndType::Enthalpy;
                 if (desDayInput.HumIndValue < 0.0 || desDayInput.HumIndValue > 130000.0) {
-                    ShowSevereError(state, format("{}: {} = {}", routineName, ipsc->cCurrentModuleObject, desDayInput.Title));
-                    ShowContinueError(
-                        state,
-                        format("{} = {.0R} is out of range [0.0, 130000.0]", ipsc->cAlphaFieldNames(5) + " - Enthalpy", desDayInput.HumIndValue));
+                    ShowSevereError(state, EnergyPlus::format("{}: {} = {}", routineName, ipsc->cCurrentModuleObject, desDayInput.Title));
+                    ShowContinueError(state,
+                                      EnergyPlus::format("{} = {.0R} is out of range [0.0, 130000.0]",
+                                                         ipsc->cAlphaFieldNames(5) + " - Enthalpy",
+                                                         desDayInput.HumIndValue));
                     ErrorsFound = true;
                 }
             } break;
@@ -6330,8 +6360,8 @@ namespace Weather {
             } break;
 
             default: {
-                ShowWarningError(state, format("{}=\"{}\", invalid data.", ipsc->cCurrentModuleObject, desDayInput.Title));
-                ShowContinueError(state, format("..invalid field: {}=\"{}\".", ipsc->cAlphaFieldNames(5), ipsc->cAlphaArgs(5)));
+                ShowWarningError(state, EnergyPlus::format("{}=\"{}\", invalid data.", ipsc->cCurrentModuleObject, desDayInput.Title));
+                ShowContinueError(state, EnergyPlus::format("..invalid field: {}=\"{}\".", ipsc->cAlphaFieldNames(5), ipsc->cAlphaArgs(5)));
                 ShowContinueError(state, "WetBulb will be used. Maximum Dry Bulb will be used as WetBulb at Maximum Dry Bulb.");
                 desDayInput.HumIndType = DesDayHumIndType::WetBulb;
                 desDayInput.HumIndValue = ipsc->rNumericArgs(3);
@@ -6419,12 +6449,12 @@ namespace Weather {
                 desDayInput.HumIndType == DesDayHumIndType::WBProfMul || desDayInput.HumIndType == DesDayHumIndType::WBProfDef ||
                 desDayInput.HumIndType == DesDayHumIndType::WBProfDif) {
                 if (desDayInput.HumIndValue > desDayInput.MaxDryBulb) {
-                    ShowWarningError(state, format("{}=\"{}\", range check data.", ipsc->cCurrentModuleObject, desDayInput.Title));
+                    ShowWarningError(state, EnergyPlus::format("{}=\"{}\", range check data.", ipsc->cCurrentModuleObject, desDayInput.Title));
                     ShowContinueError(state,
-                                      format("..Humidity Indicator Temperature at Max Temperature={:.1R} > Max DryBulb={:.1R}",
-                                             desDayInput.HumIndValue,
-                                             desDayInput.MaxDryBulb));
-                    ShowContinueError(state, format("..{}=\"{}\".", ipsc->cAlphaFieldNames(5), ipsc->cAlphaArgs(5)));
+                                      EnergyPlus::format("..Humidity Indicator Temperature at Max Temperature={:.1R} > Max DryBulb={:.1R}",
+                                                         desDayInput.HumIndValue,
+                                                         desDayInput.MaxDryBulb));
+                    ShowContinueError(state, EnergyPlus::format("..{}=\"{}\".", ipsc->cAlphaFieldNames(5), ipsc->cAlphaArgs(5)));
                     ShowContinueError(state, "..Conditions for day will be set to Relative Humidity = 100%");
                     if (desDayInput.HumIndType == DesDayHumIndType::DewPoint) {
                         desDayInput.DewPointNeedsSet = true;
@@ -6539,10 +6569,11 @@ namespace Weather {
             case 10:
             case 12: {
                 if (desDayInput.DayOfMonth > 31) {
-                    ShowSevereError(state, format("{}=\"{}\", invalid data.", ipsc->cCurrentModuleObject, desDayInput.Title));
+                    ShowSevereError(state, EnergyPlus::format("{}=\"{}\", invalid data.", ipsc->cCurrentModuleObject, desDayInput.Title));
                     ShowContinueError(
                         state,
-                        format(".. invalid field: {}=[{}], Month=[{}].", ipsc->cNumericFieldNames(2), desDayInput.DayOfMonth, desDayInput.Month));
+                        EnergyPlus::format(
+                            ".. invalid field: {}=[{}], Month=[{}].", ipsc->cNumericFieldNames(2), desDayInput.DayOfMonth, desDayInput.Month));
                     ErrorsFound = true;
                 }
             } break;
@@ -6551,23 +6582,25 @@ namespace Weather {
             case 9:
             case 11: {
                 if (desDayInput.DayOfMonth > 30) {
-                    ShowSevereError(state, format("{}=\"{}\", invalid data.", ipsc->cCurrentModuleObject, desDayInput.Title));
-                    ShowContinueError(
-                        state, format(".. invalid {}=[{}], Month=[{}].", ipsc->cNumericFieldNames(2), desDayInput.DayOfMonth, desDayInput.Month));
+                    ShowSevereError(state, EnergyPlus::format("{}=\"{}\", invalid data.", ipsc->cCurrentModuleObject, desDayInput.Title));
+                    ShowContinueError(state,
+                                      EnergyPlus::format(
+                                          ".. invalid {}=[{}], Month=[{}].", ipsc->cNumericFieldNames(2), desDayInput.DayOfMonth, desDayInput.Month));
                     ErrorsFound = true;
                 }
             } break;
             case 2: {
                 if (desDayInput.DayOfMonth > 28) {
-                    ShowSevereError(state, format("{}=\"{}\", invalid data.", ipsc->cCurrentModuleObject, desDayInput.Title));
-                    ShowContinueError(
-                        state, format(".. invalid {}=[{}], Month=[{}].", ipsc->cNumericFieldNames(2), desDayInput.DayOfMonth, desDayInput.Month));
+                    ShowSevereError(state, EnergyPlus::format("{}=\"{}\", invalid data.", ipsc->cCurrentModuleObject, desDayInput.Title));
+                    ShowContinueError(state,
+                                      EnergyPlus::format(
+                                          ".. invalid {}=[{}], Month=[{}].", ipsc->cNumericFieldNames(2), desDayInput.DayOfMonth, desDayInput.Month));
                     ErrorsFound = true;
                 }
             } break;
             default: {
-                ShowSevereError(state, format("{}=\"{}\", invalid data.", ipsc->cCurrentModuleObject, desDayInput.Title));
-                ShowContinueError(state, format(".. invalid {} invalid (Month) [{}].", ipsc->cNumericFieldNames(1), desDayInput.Month));
+                ShowSevereError(state, EnergyPlus::format("{}=\"{}\", invalid data.", ipsc->cCurrentModuleObject, desDayInput.Title));
+                ShowContinueError(state, EnergyPlus::format(".. invalid {} invalid (Month) [{}].", ipsc->cNumericFieldNames(1), desDayInput.Month));
                 ErrorsFound = true;
             } break;
             } // switch (desDayInput.Month)
@@ -6637,7 +6670,7 @@ namespace Weather {
         int const NumLocations = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, ipsc->cCurrentModuleObject);
 
         if (NumLocations > 1) {
-            ShowSevereError(state, format("{}: Too many objects entered. Only one allowed.", ipsc->cCurrentModuleObject));
+            ShowSevereError(state, EnergyPlus::format("{}: Too many objects entered. Only one allowed.", ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
 
@@ -6733,21 +6766,21 @@ namespace Weather {
                     }
                     if (environJ.WP_Type1 != 0) {
                         ShowSevereError(state,
-                                        format("{}: {}=\"{}\", indicated Environment Name already assigned.",
-                                               routineName,
-                                               ipsc->cCurrentModuleObject,
-                                               ipsc->cAlphaArgs(1)));
+                                        EnergyPlus::format("{}: {}=\"{}\", indicated Environment Name already assigned.",
+                                                           routineName,
+                                                           ipsc->cCurrentModuleObject,
+                                                           ipsc->cAlphaArgs(1)));
                         if (!environJ.Title.empty()) {
                             ShowContinueError(state,
-                                              format("...Environment=\"{}\", already using {}=\"{}\".",
-                                                     environJ.Title,
-                                                     ipsc->cCurrentModuleObject,
-                                                     state.dataWeather->WPSkyTemperature(environJ.WP_Type1).Name));
+                                              EnergyPlus::format("...Environment=\"{}\", already using {}=\"{}\".",
+                                                                 environJ.Title,
+                                                                 ipsc->cCurrentModuleObject,
+                                                                 state.dataWeather->WPSkyTemperature(environJ.WP_Type1).Name));
                         } else {
                             ShowContinueError(state,
-                                              format("... Runperiod Environment, already using {}=\"{}\".",
-                                                     ipsc->cCurrentModuleObject,
-                                                     state.dataWeather->WPSkyTemperature(environJ.WP_Type1).Name));
+                                              EnergyPlus::format("... Runperiod Environment, already using {}=\"{}\".",
+                                                                 ipsc->cCurrentModuleObject,
+                                                                 state.dataWeather->WPSkyTemperature(environJ.WP_Type1).Name));
                         }
                         ErrorsFound = true;
                     } else {
@@ -6772,15 +6805,15 @@ namespace Weather {
                 auto &envrnFound = state.dataWeather->Environment(Found);
                 if (envrnFound.WP_Type1 != 0) {
                     ShowSevereError(state,
-                                    format("{}:{}=\"{}\", indicated Environment Name already assigned.",
-                                           routineName,
-                                           ipsc->cCurrentModuleObject,
-                                           ipsc->cAlphaArgs(1)));
+                                    EnergyPlus::format("{}:{}=\"{}\", indicated Environment Name already assigned.",
+                                                       routineName,
+                                                       ipsc->cCurrentModuleObject,
+                                                       ipsc->cAlphaArgs(1)));
                     ShowContinueError(state,
-                                      format("...Environment=\"{}\", already using {}=\"{}\".",
-                                             envrnFound.Title,
-                                             ipsc->cCurrentModuleObject,
-                                             state.dataWeather->WPSkyTemperature(envrnFound.WP_Type1).Name));
+                                      EnergyPlus::format("...Environment=\"{}\", already using {}=\"{}\".",
+                                                         envrnFound.Title,
+                                                         ipsc->cCurrentModuleObject,
+                                                         state.dataWeather->WPSkyTemperature(envrnFound.WP_Type1).Name));
                     ErrorsFound = true;
                 } else {
                     state.dataWeather->Environment(Found).WP_Type1 = i;
@@ -6924,7 +6957,7 @@ namespace Weather {
                     state, ipsc->cCurrentModuleObject, 1, GndAlphas, GndNumAlpha, GndProps, GndNumProp, IOStat);
 
                 if (GndNumProp < 12) {
-                    ShowSevereError(state, format("{}: Less than 12 values entered.", ipsc->cCurrentModuleObject));
+                    ShowSevereError(state, EnergyPlus::format("{}: Less than 12 values entered.", ipsc->cCurrentModuleObject));
                     ErrorsFound = true;
                 }
 
@@ -6932,7 +6965,7 @@ namespace Weather {
                 state.dataWeather->GroundReflectances({1, 12}) = GndProps({1, 12});
 
             } else {
-                ShowSevereError(state, format("{}: Too many objects entered. Only one allowed.", ipsc->cCurrentModuleObject));
+                ShowSevereError(state, EnergyPlus::format("{}: Too many objects entered. Only one allowed.", ipsc->cCurrentModuleObject));
                 ErrorsFound = true;
             }
         }
@@ -6982,7 +7015,7 @@ namespace Weather {
                 state.dataWeather->SnowGndRefModifierForDayltg = GndProps(2);
 
             } else {
-                ShowSevereError(state, format("{}: Too many objects entered. Only one allowed.", ipsc->cCurrentModuleObject));
+                ShowSevereError(state, EnergyPlus::format("{}: Too many objects entered. Only one allowed.", ipsc->cCurrentModuleObject));
                 ErrorsFound = true;
             }
         }
@@ -7071,10 +7104,11 @@ namespace Weather {
 
             case WaterMainsTempCalcMethod::Correlation: {
                 if (NumNums == 0) {
-                    ShowSevereError(state, format("{}: Missing Annual Average and Maximum Difference fields.", ipsc->cCurrentModuleObject));
+                    ShowSevereError(state,
+                                    EnergyPlus::format("{}: Missing Annual Average and Maximum Difference fields.", ipsc->cCurrentModuleObject));
                     ErrorsFound = true;
                 } else if (NumNums == 1) {
-                    ShowSevereError(state, format("{}: Missing Maximum Difference field.", ipsc->cCurrentModuleObject));
+                    ShowSevereError(state, EnergyPlus::format("{}: Missing Maximum Difference field.", ipsc->cCurrentModuleObject));
                     ErrorsFound = true;
                 } else {
                     state.dataWeather->WaterMainsTempsAnnualAvgAirTemp = NumArray(1);
@@ -7094,7 +7128,7 @@ namespace Weather {
             state.dataWeather->WaterMainsTempsOffset = NumArray(4);
 
         } else if (NumObjects > 1) {
-            ShowSevereError(state, format("{}: Too many objects entered. Only one allowed.", ipsc->cCurrentModuleObject));
+            ShowSevereError(state, EnergyPlus::format("{}: Too many objects entered. Only one allowed.", ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
     }
@@ -7239,7 +7273,7 @@ namespace Weather {
             }
 
         } else if (NumObjects > 1) {
-            ShowSevereError(state, format("{}: Too many objects entered. Only one allowed.", ipsc->cCurrentModuleObject));
+            ShowSevereError(state, EnergyPlus::format("{}: Too many objects entered. Only one allowed.", ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
 
@@ -7470,7 +7504,7 @@ namespace Weather {
         std::string::size_type Pos = index(Line, ',');
         if ((Pos == std::string::npos) && !((headerType == EpwHeaderType::Comments1) || (headerType == EpwHeaderType::Comments2))) {
             ShowSevereError(state, "Invalid Header line in in.epw -- no commas");
-            ShowContinueError(state, format("Line={}", Line));
+            ShowContinueError(state, EnergyPlus::format("Line={}", Line));
             ShowFatalError(state, "Previous conditions cause termination.");
         }
         if (Pos != std::string::npos) {
@@ -7539,7 +7573,7 @@ namespace Weather {
                     }
                 } break;
                 default:
-                    ShowSevereError(state, format("GetEPWHeader:LOCATION, invalid numeric={}", Line.substr(0, Pos)));
+                    ShowSevereError(state, EnergyPlus::format("GetEPWHeader:LOCATION, invalid numeric={}", Line.substr(0, Pos)));
                     ErrorsFound = true;
                     break;
                 }
@@ -7573,8 +7607,9 @@ namespace Weather {
                     state.dataWeather->TypicalExtremePeriods(i).Title = Line.substr(0, Pos);
                     Line.erase(0, Pos + 1);
                 } else {
-                    ShowWarningError(state, format("ProcessEPWHeader: Invalid Typical/Extreme Periods Header(WeatherFile)={}", Line.substr(0, Pos)));
-                    ShowContinueError(state, format("...on processing Typical/Extreme period #{}", i));
+                    ShowWarningError(
+                        state, EnergyPlus::format("ProcessEPWHeader: Invalid Typical/Extreme Periods Header(WeatherFile)={}", Line.substr(0, Pos)));
+                    ShowContinueError(state, EnergyPlus::format("...on processing Typical/Extreme period #{}", i));
                     state.dataWeather->NumEPWTypExtSets = i - 1;
                     break;
                 }
@@ -7650,10 +7685,10 @@ namespace Weather {
                     }
                 } else {
                     ShowWarningError(state,
-                                     format("ProcessEPWHeader: Invalid Typical/Extreme Periods Header(WeatherFile)={} {}",
-                                            state.dataWeather->TypicalExtremePeriods(i).Title,
-                                            Line.substr(0, Pos)));
-                    ShowContinueError(state, format("...on processing Typical/Extreme period #{}", i));
+                                     EnergyPlus::format("ProcessEPWHeader: Invalid Typical/Extreme Periods Header(WeatherFile)={} {}",
+                                                        state.dataWeather->TypicalExtremePeriods(i).Title,
+                                                        Line.substr(0, Pos)));
+                    ShowContinueError(state, EnergyPlus::format("...on processing Typical/Extreme period #{}", i));
                     state.dataWeather->NumEPWTypExtSets = i - 1;
                     break;
                 }
@@ -7671,9 +7706,10 @@ namespace Weather {
                             state.dataWeather->TypicalExtremePeriods(i).StartDay = PDay;
                         }
                     } else {
-                        ShowSevereError(
-                            state, format("ProcessEPWHeader: Invalid Typical/Extreme Periods Start Date Field(WeatherFile)={}", Line.substr(0, Pos)));
-                        ShowContinueError(state, format("...on processing Typical/Extreme period #{}", i));
+                        ShowSevereError(state,
+                                        EnergyPlus::format("ProcessEPWHeader: Invalid Typical/Extreme Periods Start Date Field(WeatherFile)={}",
+                                                           Line.substr(0, Pos)));
+                        ShowContinueError(state, EnergyPlus::format("...on processing Typical/Extreme period #{}", i));
                         ErrorsFound = true;
                     }
                     Line.erase(0, Pos + 1);
@@ -7689,9 +7725,10 @@ namespace Weather {
                             state.dataWeather->TypicalExtremePeriods(i).EndDay = PDay;
                         }
                     } else {
-                        ShowSevereError(
-                            state, format("ProcessEPWHeader: Invalid Typical/Extreme Periods End Date Field(WeatherFile)={}", Line.substr(0, Pos)));
-                        ShowContinueError(state, format("...on processing Typical/Extreme period #{}", i));
+                        ShowSevereError(state,
+                                        EnergyPlus::format("ProcessEPWHeader: Invalid Typical/Extreme Periods End Date Field(WeatherFile)={}",
+                                                           Line.substr(0, Pos)));
+                        ShowContinueError(state, EnergyPlus::format("...on processing Typical/Extreme period #{}", i));
                         ErrorsFound = true;
                     }
                     Line.erase(0, Pos + 1);
@@ -7704,8 +7741,9 @@ namespace Weather {
                             state.dataWeather->TypicalExtremePeriods(i).EndDay = PDay;
                         }
                     } else {
-                        ShowSevereError(
-                            state, format("ProcessEPWHeader: Invalid Typical/Extreme Periods End Date Field(WeatherFile)={}", Line.substr(0, Pos)));
+                        ShowSevereError(state,
+                                        EnergyPlus::format("ProcessEPWHeader: Invalid Typical/Extreme Periods End Date Field(WeatherFile)={}",
+                                                           Line.substr(0, Pos)));
                         ErrorsFound = true;
                     }
                 }
@@ -7884,9 +7922,10 @@ namespace Weather {
                         }
                     } else {
                         // ErrorsFound is untouched
-                        ShowContinueError(
-                            state, format("ProcessEPWHeader: Invalid Daylight Saving Period Start Date Field(WeatherFile)={}", Line.substr(0, Pos)));
-                        ShowContinueError(state, format("...invalid header={}", epwHeaders[static_cast<int>(headerType)]));
+                        ShowContinueError(state,
+                                          EnergyPlus::format("ProcessEPWHeader: Invalid Daylight Saving Period Start Date Field(WeatherFile)={}",
+                                                             Line.substr(0, Pos)));
+                        ShowContinueError(state, EnergyPlus::format("...invalid header={}", epwHeaders[static_cast<int>(headerType)]));
                         ShowContinueError(state, "...Setting Weather File DST to false.");
                         state.dataWeather->EPWDaylightSaving = false;
                     }
@@ -7900,9 +7939,9 @@ namespace Weather {
                             state.dataWeather->EPWDST.EnDay = PDay;
                             state.dataWeather->EPWDST.EnWeekDay = PWeekDay;
                         } else {
-                            ShowWarningError(
-                                state,
-                                format("ProcessEPWHeader: Invalid Daylight Saving Period End Date Field(WeatherFile)={}", Line.substr(0, Pos)));
+                            ShowWarningError(state,
+                                             EnergyPlus::format("ProcessEPWHeader: Invalid Daylight Saving Period End Date Field(WeatherFile)={}",
+                                                                Line.substr(0, Pos)));
                             ShowContinueError(state, "...Setting Weather File DST to false.");
                             state.dataWeather->EPWDaylightSaving = false;
                         }
@@ -7950,7 +7989,7 @@ namespace Weather {
                                 specialDay.DayType = 1;
                                 specialDay.WthrFile = true;
                             } else {
-                                ShowSevereError(state, format("Invalid SpecialDay Date Field(WeatherFile)={}", Line.substr(0, Pos)));
+                                ShowSevereError(state, EnergyPlus::format("Invalid SpecialDay Date Field(WeatherFile)={}", Line.substr(0, Pos)));
                                 ErrorsFound = true;
                             }
                         }
@@ -8067,8 +8106,9 @@ namespace Weather {
                                     dataPeriod.HasYearData = true;
                                 }
                             } else {
-                                ShowSevereError(state,
-                                                format("Data Periods must be of the form <DayOfYear> or <Month Day> (WeatherFile), found={}",
+                                ShowSevereError(
+                                    state,
+                                    EnergyPlus::format("Data Periods must be of the form <DayOfYear> or <Month Day> (WeatherFile), found={}",
                                                        Line.substr(0, Pos)));
                                 ErrorsFound = true;
                             }
@@ -8088,8 +8128,9 @@ namespace Weather {
                                     dataPeriod.EnYear = dataPeriod.StYear;
                                 }
                             } else {
-                                ShowSevereError(state,
-                                                format("Data Periods must be of the form <DayOfYear> or <Month Day>, (WeatherFile) found={}",
+                                ShowSevereError(
+                                    state,
+                                    EnergyPlus::format("Data Periods must be of the form <DayOfYear> or <Month Day>, (WeatherFile) found={}",
                                                        Line.substr(0, Pos)));
                                 ErrorsFound = true;
                             }
@@ -8147,9 +8188,10 @@ namespace Weather {
         while (true) {
             Line = state.files.inputWeatherFile.readLine();
             if (Line.eof) {
-                ShowFatalError(state,
-                               format("Unexpected End-of-File on EPW Weather file, while reading header information, looking for header={}", Header),
-                               OptionalOutputFileRef{state.files.eso});
+                ShowFatalError(
+                    state,
+                    EnergyPlus::format("Unexpected End-of-File on EPW Weather file, while reading header information, looking for header={}", Header),
+                    OptionalOutputFileRef{state.files.eso});
             }
             uppercase(Line.data);
             if (has(Line.data, Header)) {
@@ -8234,7 +8276,7 @@ namespace Weather {
                     ShowWarningError(state, std::string{MissString});
                     MissedHeader = true;
                 }
-                ShowMessage(state, format(msFmt, "\"" + description + "\"", value));
+                ShowMessage(state, EnergyPlus::format(msFmt, "\"" + description + "\"", value));
             }
         };
 
@@ -8251,7 +8293,7 @@ namespace Weather {
         missedHeaderCheck(state.dataWeather->wvarsMissedCounts.SnowDepth, "Snow Depth");
         if (state.dataWeather->wvarsMissedCounts.WeathCodes > 0) {
             ShowWarningError(state, std::string{InvString});
-            ShowMessage(state, format(ivFmt, "\"Weather Codes\" (not equal 9 digits)", state.dataWeather->wvarsMissedCounts.WeathCodes));
+            ShowMessage(state, EnergyPlus::format(ivFmt, "\"Weather Codes\" (not equal 9 digits)", state.dataWeather->wvarsMissedCounts.WeathCodes));
         }
         missedHeaderCheck(state.dataWeather->wvarsMissedCounts.LiquidPrecip, "Liquid Precipitation Depth");
 
@@ -8652,7 +8694,8 @@ namespace Weather {
             if (statFileExists) {
                 auto statFile = state.files.inStatFilePath.try_open();
                 if (!statFile.good()) {
-                    ShowSevereError(state, format("CalcAnnualAndMonthlyDryBulbTemp: Could not open file {} for input (read).", statFile.filePath));
+                    ShowSevereError(
+                        state, EnergyPlus::format("CalcAnnualAndMonthlyDryBulbTemp: Could not open file {} for input (read).", statFile.filePath));
                     ShowContinueError(state, "Water Mains Temperature will be set to a fixed default value of 10.0 C.");
                     return;
                 }
@@ -8661,25 +8704,25 @@ namespace Weather {
                 while (statFile.good()) {
                     auto lineIn = statFile.readLine();
                     if (has(lineIn.data, "Monthly Statistics for Dry Bulb temperatures")) {
-                        for (int i = 1; i <= 7; ++i) {
-                            lineIn = statFile.readLine();
+                        for (int i = 0; i < 7; ++i) {
+                            statFile.readLine();
                         }
-                        lineIn = statFile.readLine();
-                        lineAvg = lineIn.data;
+                        lineAvg = statFile.readLine().data;
                         break;
                     }
                 }
                 if (lineAvg.empty()) {
-                    ShowSevereError(
-                        state,
-                        format("CalcAnnualAndMonthlyDryBulbTemp: Stat file '{}' does not have Monthly Statistics for Dry Bulb temperatures.",
-                               statFile.filePath));
+                    ShowSevereError(state,
+                                    EnergyPlus::format(
+                                        "CalcAnnualAndMonthlyDryBulbTemp: Stat file '{}' does not have Monthly Statistics for Dry Bulb temperatures.",
+                                        statFile.filePath));
                     ShowContinueError(state, "Water Mains Temperature will be set to a fixed default value of 10.0 C.");
                     return;
                 }
                 if (lineAvg.find("Daily Avg") == std::string::npos) {
-                    ShowSevereError(state,
-                                    format("CalcAnnualAndMonthlyDryBulbTemp: Stat file '{}' does not have the 'Daily Avg' line in the Monthly "
+                    ShowSevereError(
+                        state,
+                        EnergyPlus::format("CalcAnnualAndMonthlyDryBulbTemp: Stat file '{}' does not have the 'Daily Avg' line in the Monthly "
                                            "Statistics for Dry Bulb temperatures.",
                                            statFile.filePath));
                     ShowContinueError(state, "Water Mains Temperature will be set to a fixed default value of 10.0 C.");
@@ -8702,7 +8745,8 @@ namespace Weather {
                 auto epwFile = state.files.inputWeatherFilePath.try_open();
                 bool epwHasLeapYear(false);
                 if (!epwFile.good()) {
-                    ShowSevereError(state, format("CalcAnnualAndMonthlyDryBulbTemp: Could not open file {} for input (read).", epwFile.filePath));
+                    ShowSevereError(
+                        state, EnergyPlus::format("CalcAnnualAndMonthlyDryBulbTemp: Could not open file {} for input (read).", epwFile.filePath));
                     ShowContinueError(state, "Water Mains Temperature will be set to a fixed default value of 10.0 C.");
                     return;
                 }
@@ -8761,8 +8805,8 @@ namespace Weather {
                 this->OADryBulbWeatherDataProcessed = true;
             } else {
                 ShowSevereError(state, "CalcAnnualAndMonthlyDryBulbTemp: weather file or stat file does not exist.");
-                ShowContinueError(state, format("Weather file: {}.", state.files.inputWeatherFilePath.filePath));
-                ShowContinueError(state, format("Stat file: {}.", state.files.inStatFilePath.filePath));
+                ShowContinueError(state, EnergyPlus::format("Weather file: {}.", state.files.inputWeatherFilePath.filePath));
+                ShowContinueError(state, EnergyPlus::format("Stat file: {}.", state.files.inStatFilePath.filePath));
                 ShowContinueError(state, "Water Mains Monthly Temperature cannot be calculated using CorrelationFromWeatherFile method.");
                 ShowContinueError(state, "Instead a fixed default value of 10.0 C will be used.");
             }
@@ -8795,31 +8839,31 @@ namespace Weather {
             *eiostream << "Site Water Mains Temperature Information,";
             *eiostream << waterMainsCalcMethodNames[static_cast<int>(state.dataWeather->WaterMainsTempsMethod)] << ","
                        << state.dataWeather->waterMainsTempSched->Name << ",";
-            *eiostream << format("{:.2R}", state.dataWeather->WaterMainsTempsAnnualAvgAirTemp) << ","
-                       << format("{:.2R}", state.dataWeather->WaterMainsTempsMaxDiffAirTemp) << ",";
+            *eiostream << EnergyPlus::format("{:.2R}", state.dataWeather->WaterMainsTempsAnnualAvgAirTemp) << ","
+                       << EnergyPlus::format("{:.2R}", state.dataWeather->WaterMainsTempsMaxDiffAirTemp) << ",";
             *eiostream << "NA\n";
             break;
         case WaterMainsTempCalcMethod::Correlation:
             *eiostream << "Site Water Mains Temperature Information,";
             *eiostream << waterMainsCalcMethodNames[static_cast<int>(state.dataWeather->WaterMainsTempsMethod)] << "," << "NA" << ",";
-            *eiostream << format("{:.2R}", state.dataWeather->WaterMainsTempsAnnualAvgAirTemp) << ","
-                       << format("{:.2R}", state.dataWeather->WaterMainsTempsMaxDiffAirTemp) << ",";
+            *eiostream << EnergyPlus::format("{:.2R}", state.dataWeather->WaterMainsTempsAnnualAvgAirTemp) << ","
+                       << EnergyPlus::format("{:.2R}", state.dataWeather->WaterMainsTempsMaxDiffAirTemp) << ",";
             *eiostream << "NA\n";
             break;
         case WaterMainsTempCalcMethod::CorrelationFromWeatherFile:
             if (state.dataWeather->OADryBulbAverage.OADryBulbWeatherDataProcessed) {
                 *eiostream << "Site Water Mains Temperature Information,";
                 *eiostream << waterMainsCalcMethodNames[static_cast<int>(state.dataWeather->WaterMainsTempsMethod)] << "," << "NA" << ",";
-                *eiostream << format("{:.2R}", state.dataWeather->OADryBulbAverage.AnnualAvgOADryBulbTemp) << ","
-                           << format("{:.2R}", state.dataWeather->OADryBulbAverage.MonthlyAvgOADryBulbTempMaxDiff) << "," << "NA\n";
+                *eiostream << EnergyPlus::format("{:.2R}", state.dataWeather->OADryBulbAverage.AnnualAvgOADryBulbTemp) << ","
+                           << EnergyPlus::format("{:.2R}", state.dataWeather->OADryBulbAverage.MonthlyAvgOADryBulbTempMaxDiff) << "," << "NA\n";
             } else {
                 *eiostream << "Site Water Mains Temperature Information,";
-                *eiostream << "FixedDefault" << "," << "NA" << "," << "NA" << "," << "NA" << "," << format("{:.1R}", 10.0) << '\n';
+                *eiostream << "FixedDefault" << "," << "NA" << "," << "NA" << "," << "NA" << "," << EnergyPlus::format("{:.1R}", 10.0) << '\n';
             }
             break;
         default:
             *eiostream << "Site Water Mains Temperature Information,";
-            *eiostream << "FixedDefault" << "," << "NA" << "," << "NA" << "," << "NA" << "," << format("{:.1R}", 10.0) << '\n';
+            *eiostream << "FixedDefault" << "," << "NA" << "," << "NA" << "," << "NA" << "," << EnergyPlus::format("{:.1R}", 10.0) << '\n';
             break;
         }
 

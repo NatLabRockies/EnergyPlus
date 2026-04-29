@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -118,23 +118,22 @@ namespace Furnaces {
         int airloopNum;                                            // Index to air loop
         int ZoneSequenceCoolingNum;                                // Index to cooling sequence/priority for this zone
         int ZoneSequenceHeatingNum;                                // Index to heating sequence/priority for this zone
-        int CoolingCoilType_Num;                                   // Numeric Equivalent for Cooling Coil Type
+        HVAC::CoilType coolCoilType = HVAC::CoilType::Invalid;     // Numeric Equivalent for Cooling Coil Type
         int CoolingCoilIndex;                                      // Index to cooling coil
         int ActualDXCoilIndexForHXAssisted;                        // Index to DX cooling coil when HX assisted
         bool CoolingCoilUpstream;                                  // Indicates if cooling coil is upstream of heating coil
-        int HeatingCoilType_Num;                                   // Numeric Equivalent for Heating Coil Type
+        HVAC::CoilType heatCoilType = HVAC::CoilType::Invalid;     // Numeric Equivalent for Heating Coil Type
         int HeatingCoilIndex;                                      // Index to heating coil
-        int ReheatingCoilType_Num;                                 // Numeric Equivalent for Reheat Coil Type
+        HVAC::CoilType reheatCoilType = HVAC::CoilType::Invalid;   // Numeric Equivalent for Reheat Coil Type
         int ReheatingCoilIndex;                                    // Index to reheat coil
         std::string HeatingCoilName;                               // name of heating coil
-        std::string HeatingCoilType;                               // type of heating coil
         Real64 HeatingSizingRatio = 1.0;                           // Ratio of heat pump heating to cooling capacity
         int CoilControlNode;                                       // control node for hot water and steam heating coils
         int HWCoilAirInletNode;                                    // air inlet node number of HW coil for PTAC, PTHP, HeatCool, HeatOnly
         int HWCoilAirOutletNode;                                   // air outlet node number of HW coil for PTAC, PTHP, HeatCool, HeatOnly
         int SuppCoilAirInletNode;                                  // air inlet node number of HW coil for HeatCool Reheat Coil
         int SuppCoilAirOutletNode;                                 // air outlet node number of HW coil for HeatCool Reheat Coil
-        int SuppHeatCoilType_Num;                                  // Numeric Equivalent for Supplemental Heat Coil Type
+        HVAC::CoilType suppHeatCoilType = HVAC::CoilType::Invalid; // Numeric Equivalent for Supplemental Heat Coil Type
         int SuppHeatCoilIndex;                                     // Index to supplemental heater
         int SuppCoilControlNode;                                   // control node for steam and hot water heating coil
         std::string SuppHeatCoilName;                              // name of supplemental heating coil
@@ -257,11 +256,10 @@ namespace Furnaces {
         int ErrCountVar2 = 0; // Counter used to minimize the occurrence of output warnings
 
         FurnaceEquipConditions()
-            : FurnaceIndex(0), ControlZoneNum(0), airloopNum(0), ZoneSequenceCoolingNum(0), ZoneSequenceHeatingNum(0), CoolingCoilType_Num(0),
-              CoolingCoilIndex(0), ActualDXCoilIndexForHXAssisted(0), CoolingCoilUpstream(true), HeatingCoilType_Num(0), HeatingCoilIndex(0),
-              ReheatingCoilType_Num(0), ReheatingCoilIndex(0), CoilControlNode(0), HWCoilAirInletNode(0), HWCoilAirOutletNode(0),
-              SuppCoilAirInletNode(0), SuppCoilAirOutletNode(0), SuppHeatCoilType_Num(0), SuppHeatCoilIndex(0), SuppCoilControlNode(0),
-              fanType(HVAC::FanType::Invalid), FanIndex(0), FurnaceInletNodeNum(0), FurnaceOutletNodeNum(0),
+            : FurnaceIndex(0), ControlZoneNum(0), airloopNum(0), ZoneSequenceCoolingNum(0), ZoneSequenceHeatingNum(0), CoolingCoilIndex(0),
+              ActualDXCoilIndexForHXAssisted(0), CoolingCoilUpstream(true), HeatingCoilIndex(0), ReheatingCoilIndex(0), CoilControlNode(0),
+              HWCoilAirInletNode(0), HWCoilAirOutletNode(0), SuppCoilAirInletNode(0), SuppCoilAirOutletNode(0), SuppHeatCoilIndex(0),
+              SuppCoilControlNode(0), fanType(HVAC::FanType::Invalid), FanIndex(0), FurnaceInletNodeNum(0), FurnaceOutletNodeNum(0),
               LastMode(Furnaces::ModeOfOperation::Invalid), AirFlowControl(AirFlowControlConstFan::Invalid), fanPlace(HVAC::FanPlace::Invalid),
               NodeNumOfControlledZone(0), CoolingConvergenceTolerance(0.0), HeatingConvergenceTolerance(0.0), DesignHeatingCapacity(0.0),
               DesignCoolingCapacity(0.0), CoolingCoilSensDemand(0.0), HeatingCoilSensDemand(0.0), CoolingCoilLatentDemand(0.0),

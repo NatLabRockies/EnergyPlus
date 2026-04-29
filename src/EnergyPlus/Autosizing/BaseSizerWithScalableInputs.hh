@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -86,7 +86,7 @@ struct BaseSizerWithScalableInputs : BaseSizerWithFanHeatInputs
     Real64 suppHeatCap = 0.0;
     Real64 unitaryHeatCap = 0.0;
     int dataTotCapCurveIndex = 0;
-    int dataCoolCoilType = -1;
+    HVAC::CoilType dataCoolCoilType = HVAC::CoilType::Invalid;
     int dataCoolCoilIndex = -1;
 
     int zoneHVACSizingIndex = 0;
@@ -125,7 +125,7 @@ struct BaseSizerWithScalableInputs : BaseSizerWithFanHeatInputs
         suppHeatCap = 0.0;
         unitaryHeatCap = 0.0;
         zoneHVACSizingIndex = 0;
-        dataCoolCoilType = -1;
+        dataCoolCoilType = HVAC::CoilType::Invalid;
         dataCoolCoilIndex = -1;
         zoneHVACSizing.clear();
     }

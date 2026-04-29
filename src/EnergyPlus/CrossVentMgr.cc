@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -444,10 +444,10 @@ namespace RoomAir {
                 ShowSevereError(
                     state, "RoomAirModelCrossVent:EvolveParaUCSDCV: Illegal leakage component referenced in the cross ventilation room air model");
                 ShowContinueError(state,
-                                  format("Surface {} in zone {} uses leakage component {}",
-                                         state.afn->AirflowNetworkLinkageData(Ctd).Name,
-                                         state.dataHeatBal->Zone(ZoneNum).Name,
-                                         state.afn->AirflowNetworkLinkageData(Ctd).CompName));
+                                  EnergyPlus::format("Surface {} in zone {} uses leakage component {}",
+                                                     state.afn->AirflowNetworkLinkageData(Ctd).Name,
+                                                     state.dataHeatBal->Zone(ZoneNum).Name,
+                                                     state.afn->AirflowNetworkLinkageData(Ctd).CompName));
                 ShowContinueError(state, "Only leakage component types AirflowNetwork:MultiZone:Component:DetailedOpening and ");
                 ShowContinueError(state, "AirflowNetwork:MultiZone:Surface:Crack can be used with the cross ventilation room air model");
                 ShowFatalError(state, "Previous severe error causes program termination");

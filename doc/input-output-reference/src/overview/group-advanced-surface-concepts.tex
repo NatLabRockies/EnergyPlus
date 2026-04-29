@@ -2560,7 +2560,7 @@ This is the unique name of the surface property.
 
 \subsubsection{Field: Sky View Factor}\label{field-sky-view-factor}
 
-This field defines the constant sky view factor to an external surface. The sky view factor used in solar radiation calculation of the surface would be overwritten with the value of the fraction if defined here. If the field is left blank, the sky view factor of this surface will be calculated with the rules demonstrated above.
+This field defines the constant sky view factor to an external surface. The sky view factor used in solar radiation calculation of the surface would be overwritten with the value of the fraction if defined here. This value can be autocalculated (the default); if it is, the sky view factor of this surface will be calculated with the rules demonstrated above.
 
 \subsubsection{Field: Sky Temperature Schedule Name}\label{field-sky-temperature-schedule-name}
 
@@ -2568,7 +2568,7 @@ This field is used to supply a schedule name of the sky temperature. The sky tem
 
 \subsubsection{Field: Ground View Factor}\label{field-ground-view-factor}
 
-This field defines the constant ground view factor to an external surface. The ground view factor used in solar radiation calculation of the surface would be overwritten with the value of the fraction if defined here. If the field is left blank, the ground view factor of this surface will be calculated with the rules demonstrated above. Ground surface view factor defined in \textit{SurfaceProperty:GroundSurfaces} object overrides the value specified in this field.
+This field defines the constant ground view factor to an external surface. The ground view factor used in solar radiation calculation of the surface would be overwritten with the value of the fraction if defined here. This value can be autocalculated (the default); if it is, the ground view factor of this surface will be calculated with the rules demonstrated above. Ground surface view factor defined in \textit{SurfaceProperty:GroundSurfaces} object overrides the value specified in this field.
 
 \subsubsection{Field: Ground Temperature Schedule Name}\label{field-ground-temperature-schedule-name}
 
@@ -2713,7 +2713,7 @@ NREL/PR-5K00-72589. https://www.nlr.gov/docs/fy20osti/72589.pdf
 
 \subsection{SurfaceProperty:LocalEnvironment}\label{surfacePropertylocalEnvironment}
 
-The object links to an exterior surface object \textbf{BuildingSurface:Detailed} or an exterior fenestration object \textbf{FenestrationSurface:Detailed} and is used when there is a need to calculate surface level environmental data externally and import them into the simulation to override existing environmental data, including external solar shading fractions, local air velocity, temperature and humidity, and surrounding surface temperatures, sky view factor, ground surfaces view factors, ground surfaces temperature and ground surfaces reflectance. The object links to four optional objects including a schedule object declared by \textbf{Field: Sunlit Fraction Schedule Name}, a \textbf{\hyperref[surfacePropertySurroundingSurfaces]{SurfaceProperty:SurroundingSurfaces}} object declared by \textbf{Field: Surrounding Surfaces Object Name}, an \textbf{\hyperref[outdoorairnode]{OutdoorAir:Node}} object declared by \textbf{Field: Outdoor Air Node Name}, and a \textbf{\hyperref[surfacePropertyGroundSurfaces]{SurfaceProperty:GroundSurfaces}} object declared by
+The object links to an exterior surface object (e.g., \textbf{BuildingSurface:Detailed}) or an exterior fenestration object (e.g., \textbf{FenestrationSurface:Detailed}) and is used when there is a need to calculate surface level environmental data externally and import them into the simulation to override existing environmental data, including external solar shading fractions, local air velocity, temperature and humidity, and surrounding surface temperatures, sky view factor, ground surfaces view factors, ground surfaces temperature and ground surfaces reflectance. The object links to four optional objects including a schedule object declared by \textbf{Field: Sunlit Fraction Schedule Name}, a \textbf{\hyperref[surfacePropertySurroundingSurfaces]{SurfaceProperty:SurroundingSurfaces}} object declared by \textbf{Field: Surrounding Surfaces Object Name}, an \textbf{\hyperref[outdoorairnode]{OutdoorAir:Node}} object declared by \textbf{Field: Outdoor Air Node Name}, and a \textbf{\hyperref[surfacePropertyGroundSurfaces]{SurfaceProperty:GroundSurfaces}} object declared by
 \textbf{Field: Ground Surfaces Object Name}. The object provides inputs to calculate shading, solar radiation, zone air balance, and surface exterior heat balance.
 
 \subsubsection{Field: Name}\label{field-surf-localenv-name}

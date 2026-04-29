@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -47,6 +47,8 @@
 
 // EnergyPlus::OutputProcessor Unit Tests
 
+#include <algorithm>
+
 // Google Test Headers
 #include <gtest/gtest.h>
 
@@ -67,6 +69,7 @@
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/SystemReports.hh>
 #include <EnergyPlus/WeatherManager.hh>
+#include <EnergyPlus/api/datatransfer.h>
 
 #include <climits>
 #include <map>
@@ -5312,6 +5315,11 @@ namespace OutputProcessor {
         // testing an ABUPS end use with no sub end use specified
         EXPECT_EQ(1, op->EndUseCategory(2).NumSubcategories);
         EXPECT_EQ("General", op->EndUseCategory(2).SubcategoryName(1));
+
+        auto const zeroMeter = std::find_if(op->meterMap.begin(), op->meterMap.end(), [](auto const &meterEntry) { return meterEntry.second == 0; });
+        ASSERT_NE(op->meterMap.end(), zeroMeter);
+        EXPECT_EQ(0, getMeterHandle(state, zeroMeter->first.c_str()));
+        EXPECT_EQ(GetMeterIndex(*state, "ELECTRICITY:FACILITY"), getMeterHandle(state, "Electricity:Facility"));
 
         int found = GetMeterIndex(*state, "COOLING:ELECTRICITY");
         EXPECT_NE(-1, found);

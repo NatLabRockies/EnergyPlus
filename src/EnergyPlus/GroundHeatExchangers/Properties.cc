@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -58,7 +58,7 @@ GLHEVertProps::GLHEVertProps(EnergyPlusData &state, std::string const &objName, 
     // Check for duplicates
     for (const auto &existingObj : state.dataGroundHeatExchanger->vertPropsVector) {
         if (objName == existingObj->name) {
-            ShowFatalError(state, format("Invalid input for {} object: Duplicate name found: {}", moduleName, existingObj->name));
+            ShowFatalError(state, EnergyPlus::format("Invalid input for {} object: Duplicate name found: {}", moduleName, existingObj->name));
         }
     }
 

@@ -8,7 +8,7 @@
 ! System:   None.
 ! Plant:    Both the heating loop and the cooling loop served by air-to-water heat pump.
 
-  Version,26.1;
+  Version,26.2;
 
   Building,
     Plant Load Profile Example,  !- Name

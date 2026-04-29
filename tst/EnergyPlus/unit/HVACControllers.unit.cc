@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -444,7 +444,7 @@ TEST_F(EnergyPlusFixture, HVACControllers_WaterCoilOnPrimaryLoopCheckTest)
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp(1).CompType_Num = SimAirServingZones::CompType::WaterCoil_Cooling;
 
     bool WaterCoilOnAirLoop = true;
-    std::string CompType = HVAC::cAllCoilTypes(HVAC::Coil_CoolingWater); //"Coil:Cooling:Water";
+    std::string CompType = std::string{HVAC::coilTypeNames[(int)HVAC::CoilType::CoolingWater]}; //"Coil:Cooling:Water";
     std::string CompName = "CHILLED WATER COIL";
     SimAirServingZones::CompType CoilTypeNum = SimAirServingZones::CompType::WaterCoil_Cooling;
 
@@ -526,7 +526,7 @@ TEST_F(EnergyPlusFixture, HVACControllers_WaterCoilOnOutsideAirSystemCheckTest)
     state->dataAirLoop->OutsideAirSys(1).ControllerName(1) = "OA CONTROLLER 1";
     state->dataAirLoop->OutsideAirSys(1).NumComponents = 2;
     state->dataAirLoop->OutsideAirSys(1).ComponentType.allocate(2);
-    state->dataAirLoop->OutsideAirSys(1).ComponentType(1) = HVAC::cAllCoilTypes(HVAC::Coil_HeatingWater);
+    state->dataAirLoop->OutsideAirSys(1).ComponentType(1) = HVAC::coilTypeNames[(int)HVAC::CoilType::HeatingWater];
     state->dataAirLoop->OutsideAirSys(1).ComponentType(2) = "OutdoorAir:Mixer";
     state->dataAirLoop->OutsideAirSys(1).ComponentName.allocate(2);
     state->dataAirLoop->OutsideAirSys(1).ComponentName(1) = state->dataWaterCoils->WaterCoil(1).Name;
@@ -550,7 +550,7 @@ TEST_F(EnergyPlusFixture, HVACControllers_WaterCoilOnOutsideAirSystemCheckTest)
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp(1).TypeOf = "AirLoopHVAC:OutdoorAirSystem";
 
     bool WaterCoilOnAirLoop = true;
-    std::string CompType = HVAC::cAllCoilTypes(HVAC::Coil_HeatingWater);
+    std::string CompType = std::string{HVAC::coilTypeNames[(int)HVAC::CoilType::HeatingWater]};
     std::string CompName = state->dataWaterCoils->WaterCoil(1).Name;
     SimAirServingZones::CompType CoilTypeNum = SimAirServingZones::CompType::WaterCoil_SimpleHeat;
 
@@ -659,7 +659,7 @@ TEST_F(EnergyPlusFixture, HVACControllers_CoilSystemCoolingWaterOnOutsideAirSyst
     state->dataAirLoop->OutsideAirSys(1).ControllerName(1) = "OA CONTROLLER 1";
     state->dataAirLoop->OutsideAirSys(1).NumComponents = 2;
     state->dataAirLoop->OutsideAirSys(1).ComponentType.allocate(2);
-    state->dataAirLoop->OutsideAirSys(1).ComponentType(1) = HVAC::cAllCoilTypes(HVAC::CoilWater_CoolingHXAssisted);
+    state->dataAirLoop->OutsideAirSys(1).ComponentType(1) = HVAC::coilTypeNames[(int)HVAC::CoilType::CoolingWaterHXAssisted];
     state->dataAirLoop->OutsideAirSys(1).ComponentType(2) = "OutdoorAir:Mixer";
     state->dataAirLoop->OutsideAirSys(1).ComponentName.allocate(2);
     state->dataAirLoop->OutsideAirSys(1).ComponentName(1) = "HXAssisting Cooling Coil";
@@ -683,7 +683,7 @@ TEST_F(EnergyPlusFixture, HVACControllers_CoilSystemCoolingWaterOnOutsideAirSyst
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp(1).TypeOf = "AirLoopHVAC:OutdoorAirSystem";
 
     bool WaterCoilOnAirLoop = true;
-    std::string CompType = HVAC::cAllCoilTypes(HVAC::Coil_CoolingWaterDetailed);
+    std::string CompType = std::string{HVAC::coilTypeNames[(int)HVAC::CoilType::CoolingWaterDetailed]};
     std::string CompName = state->dataWaterCoils->WaterCoil(1).Name;
     SimAirServingZones::CompType CoilTypeNum = SimAirServingZones::CompType::WaterCoil_DetailedCool;
 

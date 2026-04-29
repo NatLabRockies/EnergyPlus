@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -91,7 +91,7 @@ namespace IndoorGreen {
             GetIndoorGreenInput(state, ErrorsFound);
             if (ErrorsFound) {
                 const char *RoutineName("IndoorLivingWall: "); // include trailing blank space
-                ShowFatalError(state, format("{}Errors found in input.  Program terminates.", RoutineName));
+                ShowFatalError(state, EnergyPlus::format("{}Errors found in input.  Program terminates.", RoutineName));
             }
             SetIndoorGreenOutput(state);
             lw->getInputFlag = false;
@@ -137,7 +137,6 @@ namespace IndoorGreen {
                                 s_ipsc->cAlphaFieldNames,
                                 s_ipsc->cNumericFieldNames);
             ErrorObjectHeader eoh{RoutineName, cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
-            Util::IsNameEmpty(state, s_ipsc->cAlphaArgs(1), cCurrentModuleObject, ErrorsFound);
             ig.Name = s_ipsc->cAlphaArgs(1);
             ig.SurfName = s_ipsc->cAlphaArgs(2);
             ig.SurfPtr = Util::FindItemInList(s_ipsc->cAlphaArgs(2), state.dataSurface->Surface);
@@ -146,8 +145,9 @@ namespace IndoorGreen {
                 ErrorsFound = true;
             } else {
                 if (state.dataSurface->Surface(ig.SurfPtr).insideHeatSourceTermSched != nullptr) {
-                    ShowSevereError(state,
-                                    format("The indoor green surface {} has an Inside Face Heat Source Term Schedule defined. This surface cannot "
+                    ShowSevereError(
+                        state,
+                        EnergyPlus::format("The indoor green surface {} has an Inside Face Heat Source Term Schedule defined. This surface cannot "
                                            "also be used for indoor green.",
                                            s_ipsc->cAlphaArgs(2)));
                     ErrorsFound = true;
@@ -157,21 +157,21 @@ namespace IndoorGreen {
 
                 if (ig.ZonePtr <= 0 || ig.SpacePtr <= 0) {
                     ShowSevereError(state,
-                                    format("{}=\"{}\", invalid {} entered={}, {} is not associated with a thermal zone or space",
-                                           RoutineName,
-                                           s_ipsc->cAlphaArgs(1),
-                                           s_ipsc->cAlphaFieldNames(2),
-                                           s_ipsc->cAlphaArgs(2),
-                                           s_ipsc->cAlphaArgs(2)));
+                                    EnergyPlus::format("{}=\"{}\", invalid {} entered={}, {} is not associated with a thermal zone or space",
+                                                       RoutineName,
+                                                       s_ipsc->cAlphaArgs(1),
+                                                       s_ipsc->cAlphaFieldNames(2),
+                                                       s_ipsc->cAlphaArgs(2),
+                                                       s_ipsc->cAlphaArgs(2)));
                     ErrorsFound = true;
                 } else if (state.dataSurface->Surface(ig.SurfPtr).ExtBoundCond < 0 ||
                            state.dataSurface->Surface(ig.SurfPtr).HeatTransferAlgorithm != DataSurfaces::HeatTransferModel::CTF) {
                     ShowSevereError(state,
-                                    format("{}=\"{}\", invalid {} entered={}, not a valid surface for indoor green module",
-                                           RoutineName,
-                                           s_ipsc->cAlphaArgs(1),
-                                           s_ipsc->cAlphaFieldNames(2),
-                                           s_ipsc->cAlphaArgs(2)));
+                                    EnergyPlus::format("{}=\"{}\", invalid {} entered={}, not a valid surface for indoor green module",
+                                                       RoutineName,
+                                                       s_ipsc->cAlphaArgs(1),
+                                                       s_ipsc->cAlphaFieldNames(2),
+                                                       s_ipsc->cAlphaArgs(2)));
                     ErrorsFound = true;
                 }
             }
@@ -241,41 +241,41 @@ namespace IndoorGreen {
             ig.LeafArea = s_ipsc->rNumericArgs(1);
             if (ig.LeafArea < 0) {
                 ShowSevereError(state,
-                                format("{}=\"{}\", invalid {} entered={}",
-                                       RoutineName,
-                                       s_ipsc->cAlphaArgs(1),
-                                       s_ipsc->cNumericFieldNames(1),
-                                       s_ipsc->rNumericArgs(1)));
+                                EnergyPlus::format("{}=\"{}\", invalid {} entered={}",
+                                                   RoutineName,
+                                                   s_ipsc->cAlphaArgs(1),
+                                                   s_ipsc->cNumericFieldNames(1),
+                                                   s_ipsc->rNumericArgs(1)));
                 ErrorsFound = true;
             }
             ig.LEDNominalPPFD = s_ipsc->rNumericArgs(2);
             if (ig.LEDNominalPPFD < 0) {
                 ShowSevereError(state,
-                                format("{}=\"{}\", invalid {} entered={}",
-                                       RoutineName,
-                                       s_ipsc->cAlphaArgs(1),
-                                       s_ipsc->cNumericFieldNames(2),
-                                       s_ipsc->rNumericArgs(2)));
+                                EnergyPlus::format("{}=\"{}\", invalid {} entered={}",
+                                                   RoutineName,
+                                                   s_ipsc->cAlphaArgs(1),
+                                                   s_ipsc->cNumericFieldNames(2),
+                                                   s_ipsc->rNumericArgs(2)));
                 ErrorsFound = true;
             }
             ig.LEDNominalEleP = s_ipsc->rNumericArgs(3);
             if (ig.LEDNominalEleP < 0) {
                 ShowSevereError(state,
-                                format("{}=\"{}\", invalid {} entered={}",
-                                       RoutineName,
-                                       s_ipsc->cAlphaArgs(1),
-                                       s_ipsc->cNumericFieldNames(3),
-                                       s_ipsc->rNumericArgs(3)));
+                                EnergyPlus::format("{}=\"{}\", invalid {} entered={}",
+                                                   RoutineName,
+                                                   s_ipsc->cAlphaArgs(1),
+                                                   s_ipsc->cNumericFieldNames(3),
+                                                   s_ipsc->rNumericArgs(3)));
                 ErrorsFound = true;
             }
             ig.LEDRadFraction = s_ipsc->rNumericArgs(4);
             if (ig.LEDRadFraction < 0 || ig.LEDRadFraction > 1.0) {
                 ShowSevereError(state,
-                                format("{}=\"{}\", invalid {} entered={}",
-                                       RoutineName,
-                                       s_ipsc->cAlphaArgs(1),
-                                       s_ipsc->cNumericFieldNames(4),
-                                       s_ipsc->rNumericArgs(4)));
+                                EnergyPlus::format("{}=\"{}\", invalid {} entered={}",
+                                                   RoutineName,
+                                                   s_ipsc->cAlphaArgs(1),
+                                                   s_ipsc->cNumericFieldNames(4),
+                                                   s_ipsc->rNumericArgs(4)));
                 ErrorsFound = true;
             }
             if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
@@ -409,27 +409,27 @@ namespace IndoorGreen {
         // SUBROUTINE PARAMETER DEFINITIONS:
         static constexpr std::string_view RoutineName("ETModel: ");
         auto &lw = state.dataIndoorGreen;
-        Real64 ZonePreTemp; // Indoor air temperature (C)
-        Real64 ZonePreHum;  // Indoor humidity ratio (kg moisture / kg dry air)
-        Real64 ZoneNewTemp; // Indoor air temperature (C) after ET
-        Real64 ZoneNewHum;  // Indoor humidity ratio (kg moisture / kg dry air) after ET
-        Real64 ZoneSatHum;  // Saturated humidity ratio
-        Real64 ZoneCO2;     // Indoor zone co2 concentration (ppm)
-        Real64 ZonePPFD;    // Indoor net radiation (PPFD)
-        Real64 ZoneVPD;     // vapor pressure deficit (kpa); local variable
-        Real64 Timestep;    // s
-        Real64 ETTotal;     // kg
-        Real64 rhoair;      // kg/m3
-        Real64 Tdp;         // dew point temperature
-        Real64 Twb;         // wet bulb temperature
-        Real64 HCons;       // enthalpy (J/kg)
-        Real64 HMid;        // enthalpy 3rd point (J/kg)
-        Real64 ZoneAirVol;  // zone air volume (m3)
-        Real64 LAI;         // leaf area index, the ratio of one-side leaf area per unit plant growing area, maximum LAI =2 if LAI_cal>2.0
-        Real64 LAI_Cal;     // calculated leaf area index based on users's input on total leaf area
-        Real64 OutPb;       // outdoor pressure (kPa)
-        Real64 vp;          // actual vapor pressure of the air (kpa)
-        Real64 vpSat;       // saturated vapor pressure at air temperature (kpa)
+        Real64 ZonePreTemp;                              // Indoor air temperature (C)
+        Real64 ZonePreHum;                               // Indoor humidity ratio (kg moisture / kg dry air)
+        Real64 ZoneNewTemp;                              // Indoor air temperature (C) after ET
+        Real64 ZoneNewHum;                               // Indoor humidity ratio (kg moisture / kg dry air) after ET
+        Real64 ZoneSatHum;                               // Saturated humidity ratio
+        Real64 ZoneCO2;                                  // Indoor zone co2 concentration (ppm)
+        Real64 ZonePPFD;                                 // Indoor net radiation (PPFD)
+        Real64 ZoneVPD;                                  // vapor pressure deficit (kpa); local variable
+        Real64 Timestep;                                 // s
+        Real64 ETTotal;                                  // kg
+        Real64 rhoair;                                   // kg/m3
+        Real64 Tdp;                                      // dew point temperature
+        Real64 Twb;                                      // wet bulb temperature
+        Real64 HCons;                                    // enthalpy (J/kg)
+        Real64 HMid;                                     // enthalpy 3rd point (J/kg)
+        Real64 ZoneAirVol;                               // zone air volume (m3)
+        Real64 LAI;                                      // leaf area index, the ratio of one-side leaf area per unit plant growing area
+        Real64 LAI_Cal;                                  // calculated leaf area index based on users's input on total leaf area
+        Real64 OutPb;                                    // outdoor pressure (kPa)
+        Real64 vp;                                       // actual vapor pressure of the air (kpa)
+        Real64 vpSat;                                    // saturated vapor pressure at air temperature (kpa)
         Timestep = state.dataHVACGlobal->TimeStepSysSec; // unit s
         for (int IndoorGreenNum = 1; IndoorGreenNum <= lw->NumIndoorGreen; ++IndoorGreenNum) {
             auto &ig = lw->indoorGreens(IndoorGreenNum);
@@ -443,9 +443,10 @@ namespace IndoorGreen {
             ig.ZVPD = (vpSat - vp) * 1000; // Pa
             LAI_Cal = ig.LeafArea / state.dataSurface->Surface(ig.SurfPtr).Area;
             LAI = LAI_Cal;
-            if (LAI_Cal > 2.0) {
-                LAI = 2.0; // maximum LAI=2.0 in the surface heat balance
-                ShowSevereError(state, format("Maximum indoor living wall leaf area index (LAI) =2.0 is used,calculated LAI is {}", LAI_Cal));
+            if (LAI_Cal > 10.0) {
+                LAI = 10.0;
+                ShowSevereError(state,
+                                EnergyPlus::format("Maximum indoor living wall leaf area index (LAI) =10.0 is used,calculated LAI is {}", LAI_Cal));
             }
             switch (ig.lightingMethod) {
             case LightingMethod::LED: {

@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -67,13 +67,11 @@ namespace HVACHXAssistedCoolingCoil {
     struct HXAssistedCoilParameters
     {
         // Members
-        std::string HXAssistedCoilType; // Type of HXAssistedCoolingCoil
-        int HXAssistedCoilType_Num;     // Numeric equivalent for hx assisted coil
-        std::string Name;               // Name of the HXAssistedCoolingCoil
-        std::string CoolingCoilType;    // Cooling coil type must be DetailedFlatCooling
+        HVAC::CoilType hxAssistedCoilType = HVAC::CoilType::Invalid; // Numeric equivalent for hx assisted coil
+        std::string Name;                                            // Name of the HXAssistedCoolingCoil
         //  or Coil:DX:CoolingBypassFactorEmpirical
-        int CoolingCoilType_Num;     // Numeric Equivalent for cooling coil
-        std::string CoolingCoilName; // Cooling coil name
+        HVAC::CoilType coolCoilType = HVAC::CoilType::Invalid; // Numeric Equivalent for cooling coil
+        std::string CoolingCoilName;                           // Cooling coil name
         int CoolingCoilIndex;
         int DXCoilNumOfSpeeds; // number of speed levels for variable speed DX coil
         // Heat Exchanger type must be HeatExchanger:AirToAir:FlatPlate,
@@ -93,9 +91,8 @@ namespace HVACHXAssistedCoolingCoil {
 
         // Default Constructor
         HXAssistedCoilParameters()
-            : HXAssistedCoilType_Num(0), CoolingCoilType_Num(0), CoolingCoilIndex(0), DXCoilNumOfSpeeds(0), HeatExchangerIndex(0),
-              HXAssistedCoilInletNodeNum(0), HXAssistedCoilOutletNodeNum(0), HXExhaustAirInletNodeNum(0), MassFlowRate(0.0), MaxIterCounter(0),
-              MaxIterIndex(0), ControllerIndex(0)
+            : CoolingCoilIndex(0), DXCoilNumOfSpeeds(0), HeatExchangerIndex(0), HXAssistedCoilInletNodeNum(0), HXAssistedCoilOutletNodeNum(0),
+              HXExhaustAirInletNodeNum(0), MassFlowRate(0.0), MaxIterCounter(0), MaxIterIndex(0), ControllerIndex(0)
         {
         }
     };
@@ -152,24 +149,24 @@ namespace HVACHXAssistedCoolingCoil {
                            bool &ErrorsFound            // set to true if problem
     );
 
-    int GetCoilGroupTypeNum(EnergyPlusData &state,
-                            std::string const &CoilType,   // must match coil types in this module
-                            std::string const &CoilName,   // must match coil names for the coil type
-                            bool &ErrorsFound,             // set to true if problem
-                            bool const PrintWarning = true // prints warning message if true
+    HVAC::CoilType GetCoilGroupTypeNum(EnergyPlusData &state,
+                                       std::string const &CoilType,   // must match coil types in this module
+                                       std::string const &CoilName,   // must match coil names for the coil type
+                                       bool &ErrorsFound,             // set to true if problem
+                                       bool const PrintWarning = true // prints warning message if true
     );
 
-    int GetCoilObjectTypeNum(EnergyPlusData &state,
-                             std::string const &CoilType,   // must match coil types in this module
-                             std::string const &CoilName,   // must match coil names for the coil type
-                             bool &ErrorsFound,             // set to true if problem
-                             bool const PrintWarning = true // prints warning message if true
+    HVAC::CoilType GetCoilObjectTypeNum(EnergyPlusData &state,
+                                        std::string_view const coilType, // must match coil types in this module
+                                        std::string const &CoilName,     // must match coil names for the coil type
+                                        bool &ErrorsFound,               // set to true if problem
+                                        bool const PrintWarning = true   // prints warning message if true
     );
 
     int GetCoilInletNode(EnergyPlusData &state,
-                         std::string_view CoilType,   // must match coil types in this module
-                         std::string const &CoilName, // must match coil names for the coil type
-                         bool &ErrorsFound            // set to true if problem
+                         std::string_view const coilType, // must match coil types in this module
+                         std::string const &CoilName,     // must match coil names for the coil type
+                         bool &ErrorsFound                // set to true if problem
     );
 
     int GetCoilWaterInletNode(EnergyPlusData &state,

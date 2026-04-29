@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -122,6 +122,22 @@ TEST_F(EnergyPlusFixture, SysAvailManager_OptimumStart)
         "   2,                       !- Initial Temperature Gradient during Cooling {deltaC/hr}",
         "   2,                       !- Initial Temperature Gradient during Heating {deltaC/hr}",
         "   ,                        !- Constant Start Time {hr}",
+        "   2;                       !- Number of Previous Days {days}",
+
+        " AvailabilityManager:OptimumStart,",
+        "   OptStart Availability 4, !- Name",
+        "   Sch_OptStart,            !- Applicability Schedule Name",
+        "   Fan_Schedule_Alt,        !- Fan Schedule Name",
+        "   ControlZone,             !- Control Type",
+        "   Zone 7 - No AirloopHVAC, !- Control Zone Name",
+        "   ,                        !- Zone List Name",
+        "   6,                       !- Maximum Value for Optimum Start Time {hr}",
+        "   ConstantStartTime,       !- Control Algorithm",
+        "   3,                       !- Constant Temperature Gradient during Cooling {deltaC/hr}",
+        "   3,                       !- Constant Temperature Gradient during Heating {deltaC/hr}",
+        "   3,                       !- Initial Temperature Gradient during Cooling {deltaC/hr}",
+        "   3,                       !- Initial Temperature Gradient during Heating {deltaC/hr}",
+        "   1.5,                     !- Constant Start Time {hr}",
         "   2;                       !- Number of Previous Days {days}",
 
         " Schedule:Compact,",
@@ -254,9 +270,9 @@ TEST_F(EnergyPlusFixture, SysAvailManager_OptimumStart)
     state->dataEnvrn->DayOfYear_Schedule = General::OrdinalDay(state->dataEnvrn->Month, state->dataEnvrn->DayOfMonth, 1);
     Sched::UpdateScheduleVals(*state);
 
-    state->dataZoneEquip->ZoneEquipAvail.allocate(6);
+    state->dataZoneEquip->ZoneEquipAvail.allocate(7);
 
-    state->dataGlobal->NumOfZones = 6;
+    state->dataGlobal->NumOfZones = 7;
 
     state->dataHeatBal->Zone.allocate(state->dataGlobal->NumOfZones);
     state->dataHeatBal->Zone(1).Name = "ZONE 1";
@@ -265,6 +281,7 @@ TEST_F(EnergyPlusFixture, SysAvailManager_OptimumStart)
     state->dataHeatBal->Zone(4).Name = "ZONE 4";
     state->dataHeatBal->Zone(5).Name = "ZONE 5";
     state->dataHeatBal->Zone(6).Name = "ZONE 6";
+    state->dataHeatBal->Zone(7).Name = "ZONE 7 - NO AIRLOOPHVAC";
 
     state->dataZoneEquip->ZoneEquipConfig.allocate(state->dataGlobal->NumOfZones);
 
@@ -286,30 +303,44 @@ TEST_F(EnergyPlusFixture, SysAvailManager_OptimumStart)
     state->dataZoneEquip->ZoneEquipConfig(6).ZoneName = "Zone 6";
     state->dataZoneEquip->ZoneEquipConfig(6).ZoneNode = 6;
 
+    state->dataZoneEquip->ZoneEquipConfig(7).ZoneName = "Zone 7 - No AirloopHVAC";
+    state->dataZoneEquip->ZoneEquipConfig(7).ZoneNode = 7;
+
     state->dataZoneEquip->ZoneEquipInputsFilled = true;
 
-    state->dataHeatBalFanSys->TempTstatAir.allocate(6);
+    state->dataHeatBalFanSys->TempTstatAir.allocate(7);
     state->dataHeatBalFanSys->TempTstatAir(1) = 18.0; // all zones have different space temperature
     state->dataHeatBalFanSys->TempTstatAir(2) = 17.0;
     state->dataHeatBalFanSys->TempTstatAir(3) = 16.0;
     state->dataHeatBalFanSys->TempTstatAir(4) = 15.0;
     state->dataHeatBalFanSys->TempTstatAir(5) = 14.0;
     state->dataHeatBalFanSys->TempTstatAir(6) = 10.0;
+    state->dataHeatBalFanSys->TempTstatAir(7) = 8.0;
 
-    state->dataHeatBalFanSys->zoneTstatSetpts.allocate(6);
+    state->dataHeatBalFanSys->zoneTstatSetpts.allocate(7);
 
     for (auto &zoneTstatSetpt : state->dataHeatBalFanSys->zoneTstatSetpts) {
         zoneTstatSetpt.setptLo = 19.0; // all zones use same set point temperature
         zoneTstatSetpt.setptHi = 24.0;
     }
 
-    state->dataZoneCtrls->OccRoomTSetPointHeat.allocate(6);
-    state->dataZoneCtrls->OccRoomTSetPointCool.allocate(6);
+    state->dataZoneCtrls->OccRoomTSetPointHeat.allocate(7);
+    state->dataZoneCtrls->OccRoomTSetPointCool.allocate(7);
 
     state->dataZoneCtrls->OccRoomTSetPointHeat = 19.0; // all zones use same set point temperature
     state->dataZoneCtrls->OccRoomTSetPointCool = 24.0;
 
     Avail::ManageSystemAvailability(*state); // 1st time through just gets input
+
+    // add ZoneHVAC avail manager because ZoneHVAC:TerminalUnit:VariableRefrigerantFlow object not included in inputs above
+    state->dataAvail->ZoneComp(11).TotalNumComp = 1; // where 11 = ZoneHVAC:TerminalUnit:VariableRefrigerantFlow
+    state->dataAvail->ZoneComp(11).ZoneCompAvailMgrs.allocate(1);
+    state->dataAvail->ZoneComp(11).ZoneCompAvailMgrs(1).NumAvailManagers = 1;
+    state->dataAvail->ZoneComp(11).ZoneCompAvailMgrs(1).ZoneNum = 7;
+    state->dataAvail->ZoneComp(11).ZoneCompAvailMgrs(1).availManagers.allocate(1);
+    state->dataAvail->ZoneComp(11).ZoneCompAvailMgrs(1).availManagers(1).type = Avail::ManagerType::OptimumStart;
+    state->dataAvail->ZoneComp(11).ZoneCompAvailMgrs(1).availManagers(1).Name = "OptStart Availability 4";
+    state->dataAvail->ZoneComp(11).ZoneCompAvailMgrs(1).availManagers(1).Num = 4;
 
     state->dataGlobal->WarmupFlag = true;
     state->dataGlobal->BeginDayFlag = true; // initialize optimum start data to beginning of day data
@@ -322,6 +353,7 @@ TEST_F(EnergyPlusFixture, SysAvailManager_OptimumStart)
     EXPECT_EQ(0.0, state->dataAvail->OptimumStartData(1).TempDiffHi);  // cooling data did not get set so is 0
     EXPECT_EQ((int)Avail::Status::NoAction, (int)state->dataAvail->OptimumStartData(1).availStatus); // avail manager should not yet be set
     EXPECT_EQ((int)Avail::Status::NoAction, (int)state->dataAvail->OptimumStartData(2).availStatus); // avail manager should not be set until 6 AM
+    EXPECT_EQ((int)Avail::Status::NoAction, (int)state->dataAvail->OptimumStartData(4).availStatus); // ZoneHVAC avail manager not set until 6 AM
 
     state->dataGlobal->WarmupFlag = false;
     state->dataGlobal->BeginDayFlag = false; // start processing temp data to find optimum start time
@@ -335,6 +367,7 @@ TEST_F(EnergyPlusFixture, SysAvailManager_OptimumStart)
     EXPECT_EQ(0.0, state->dataAvail->OptimumStartData(1).TempDiffHi);  // cooling data did not get set so is 0
     EXPECT_EQ((int)Avail::Status::NoAction, (int)state->dataAvail->OptimumStartData(1).availStatus); // avail manager should not yet be set
     EXPECT_EQ((int)Avail::Status::NoAction, (int)state->dataAvail->OptimumStartData(2).availStatus); // avail manager should not be set until 6 AM
+    EXPECT_EQ((int)Avail::Status::NoAction, (int)state->dataAvail->OptimumStartData(4).availStatus); // ZoneHVAC avail manager not set until 6 AM
 
     state->dataGlobal->CurrentTime = 7.0; // set the current time to 7 AM which is past time to pre-start HVAC
     Avail::ManageSystemAvailability(*state);
@@ -343,14 +376,18 @@ TEST_F(EnergyPlusFixture, SysAvailManager_OptimumStart)
     EXPECT_EQ(1.5, state->dataAvail->OptimumStartData(1).NumHoursBeforeOccupancy);                  // 1.5 hours = 3C from SP divided by 2C/hour
 
     EXPECT_EQ((int)Avail::Status::CycleOn, (int)state->dataAvail->OptimumStartData(2).availStatus); // avail manager should be set at 6 AM
+    EXPECT_EQ((int)Avail::Status::CycleOn, (int)state->dataAvail->OptimumStartData(4).availStatus); // ZoneHVAC avail manager set at 6 AM
+    EXPECT_TRUE(state->dataAvail->OptStart(7).OptStartFlag); // ZoneHVAC avail manager set to cycle on for Zone 7
 
     // #8013 - Check that the optimum start is available during the correct times when using a partial hour fan start
     state->dataGlobal->CurrentTime = 5.00; // set the current time to 5:00 AM, before max optimum start time
     Avail::ManageSystemAvailability(*state);
     EXPECT_FALSE(state->dataAvail->OptStart(6).OptStartFlag); // avail manager should be set to no action for Zone 6
+    EXPECT_FALSE(state->dataAvail->OptStart(7).OptStartFlag); // ZoneHVAC avail manager set to no action for Zone 7
     state->dataGlobal->CurrentTime = 6.50;                    // set the current time to 6:30 AM when occupancy begins
     Avail::ManageSystemAvailability(*state);
     EXPECT_TRUE(state->dataAvail->OptStart(6).OptStartFlag); // avail manager should be set to cycle on for Zone 6
+    EXPECT_TRUE(state->dataAvail->OptStart(7).OptStartFlag); // ZoneHVAC avail manager set to cycle on for Zone 7
 
     // Check that the system restores setpoints to unoccupied setpoints and don't use occupied setpoints post-occupancy
     ZoneTempPredictorCorrector::GetZoneAirSetPoints(*state);

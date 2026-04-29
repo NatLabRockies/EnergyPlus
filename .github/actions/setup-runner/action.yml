@@ -27,7 +27,7 @@ runs:
 
   - name: Set up Python ${{ inputs.python-version }}
     id: setup-python
-    uses: actions/setup-python@v5
+    uses: actions/setup-python@v6
     with:
       python-version: ${{ inputs.python-version }}
       architecture: ${{ inputs.python-arch }}
@@ -62,7 +62,7 @@ runs:
       if [ "$RUNNER_OS" == "Linux" ]; then
         echo "FC=gfortran-13" >> $GITHUB_ENV
         sudo apt-get -qq update
-        sudo apt-get -qq install -y libxkbcommon-x11-0 xorg-dev libgl1-mesa-dev ccache
+        sudo apt-get -qq install -y ninja-build libxkbcommon-x11-0 xorg-dev libgl1-mesa-dev ccache
 
         COMPILER="gcc-$(gcc -dumpversion)"
       elif [ "$RUNNER_OS" == "Windows" ]; then

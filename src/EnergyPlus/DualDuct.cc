@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -131,25 +131,26 @@ namespace DualDuct {
         if (CompIndex == 0) {
             DDNum = Util::FindItemInList(CompName, state.dataDualDuct->dd_airterminal, &DualDuctAirTerminal::Name);
             if (DDNum == 0) {
-                ShowFatalError(state, format("SimulateDualDuct: Damper not found={}", CompName));
+                ShowFatalError(state, EnergyPlus::format("SimulateDualDuct: Damper not found={}", CompName));
             }
             CompIndex = DDNum;
         } else {
             DDNum = CompIndex;
             if (DDNum > state.dataDualDuct->NumDDAirTerminal || DDNum < 1) {
                 ShowFatalError(state,
-                               format("SimulateDualDuct: Invalid CompIndex passed={}, Number of Dampers={}, Damper name={}",
-                                      CompIndex,
-                                      state.dataDualDuct->NumDDAirTerminal,
-                                      CompName));
+                               EnergyPlus::format("SimulateDualDuct: Invalid CompIndex passed={}, Number of Dampers={}, Damper name={}",
+                                                  CompIndex,
+                                                  state.dataDualDuct->NumDDAirTerminal,
+                                                  CompName));
             }
             if (state.dataDualDuct->dd_airterminal(DDNum).CheckEquipName) {
                 if (CompName != state.dataDualDuct->dd_airterminal(DDNum).Name) {
-                    ShowFatalError(state,
-                                   format("SimulateDualDuct: Invalid CompIndex passed={}, Damper name={}, stored Damper Name for that index={}",
-                                          CompIndex,
-                                          CompName,
-                                          state.dataDualDuct->dd_airterminal(DDNum).Name));
+                    ShowFatalError(
+                        state,
+                        EnergyPlus::format("SimulateDualDuct: Invalid CompIndex passed={}, Damper name={}, stored Damper Name for that index={}",
+                                           CompIndex,
+                                           CompName,
+                                           state.dataDualDuct->dd_airterminal(DDNum).Name));
                 }
                 state.dataDualDuct->dd_airterminal(DDNum).CheckEquipName = false;
             }
@@ -180,7 +181,7 @@ namespace DualDuct {
             // Update the current Damper to the outlet nodes
             thisDualDuct.UpdateDualDuct(state);
         } else {
-            ShowFatalError(state, format("SimulateDualDuct: Damper not found={}", CompName));
+            ShowFatalError(state, EnergyPlus::format("SimulateDualDuct: Damper not found={}", CompName));
         }
     }
 
@@ -263,40 +264,40 @@ namespace DualDuct {
                 thisDD.OutletNodeNum = GetOnlySingleNode(state,
                                                          AlphArray(3),
                                                          ErrorsFound,
-                                                         DataLoopNode::ConnectionObjectType::AirTerminalDualDuctConstantVolume,
+                                                         Node::ConnectionObjectType::AirTerminalDualDuctConstantVolume,
                                                          thisDD.Name,
-                                                         DataLoopNode::NodeFluidType::Air,
-                                                         DataLoopNode::ConnectionType::Outlet,
-                                                         NodeInputManager::CompFluidStream::Primary,
-                                                         DataLoopNode::ObjectIsNotParent,
+                                                         Node::FluidType::Air,
+                                                         Node::ConnectionType::Outlet,
+                                                         Node::CompFluidStream::Primary,
+                                                         Node::ObjectIsNotParent,
                                                          cAlphaFields(3));
                 thisDD.HotAirInletNodeNum = GetOnlySingleNode(state,
                                                               AlphArray(4),
                                                               ErrorsFound,
-                                                              DataLoopNode::ConnectionObjectType::AirTerminalDualDuctConstantVolume,
+                                                              Node::ConnectionObjectType::AirTerminalDualDuctConstantVolume,
                                                               thisDD.Name,
-                                                              DataLoopNode::NodeFluidType::Air,
-                                                              DataLoopNode::ConnectionType::Inlet,
-                                                              NodeInputManager::CompFluidStream::Primary,
-                                                              DataLoopNode::ObjectIsNotParent,
+                                                              Node::FluidType::Air,
+                                                              Node::ConnectionType::Inlet,
+                                                              Node::CompFluidStream::Primary,
+                                                              Node::ObjectIsNotParent,
                                                               cAlphaFields(4));
                 thisDD.ColdAirInletNodeNum = GetOnlySingleNode(state,
                                                                AlphArray(5),
                                                                ErrorsFound,
-                                                               DataLoopNode::ConnectionObjectType::AirTerminalDualDuctConstantVolume,
+                                                               Node::ConnectionObjectType::AirTerminalDualDuctConstantVolume,
                                                                thisDD.Name,
-                                                               DataLoopNode::NodeFluidType::Air,
-                                                               DataLoopNode::ConnectionType::Inlet,
-                                                               NodeInputManager::CompFluidStream::Primary,
-                                                               DataLoopNode::ObjectIsNotParent,
+                                                               Node::FluidType::Air,
+                                                               Node::ConnectionType::Inlet,
+                                                               Node::CompFluidStream::Primary,
+                                                               Node::ObjectIsNotParent,
                                                                cAlphaFields(5));
 
                 thisDD.MaxAirVolFlowRate = NumArray(1);
                 thisDD.ZoneMinAirFracDes = 0.0;
 
                 // Register component set data - one for heat and one for cool
-                BranchNodeConnections::TestCompSet(state, CurrentModuleObject + ":HEAT", thisDD.Name, AlphArray(4), AlphArray(3), "Air Nodes");
-                BranchNodeConnections::TestCompSet(state, CurrentModuleObject + ":COOL", thisDD.Name, AlphArray(5), AlphArray(3), "Air Nodes");
+                Node::TestCompSet(state, CurrentModuleObject + ":HEAT", thisDD.Name, AlphArray(4), AlphArray(3), "Air Nodes");
+                Node::TestCompSet(state, CurrentModuleObject + ":COOL", thisDD.Name, AlphArray(5), AlphArray(3), "Air Nodes");
 
                 for (ADUNum = 1; ADUNum <= (int)state.dataDefineEquipment->AirDistUnit.size(); ++ADUNum) {
                     if (thisDD.OutletNodeNum == state.dataDefineEquipment->AirDistUnit(ADUNum).OutletNodeNum) {
@@ -310,8 +311,9 @@ namespace DualDuct {
                     auto &thisObjType = damperTypeStrings[static_cast<int>(thisDD.DamperType)];
                     ShowSevereError(
                         state,
-                        format("{}No matching List:Zone:AirTerminal for AirTerminal:DualDuct = [{},{}].", RoutineName, thisObjType, thisDD.Name));
-                    ShowContinueError(state, format("...should have outlet node={}", state.dataLoopNodes->NodeID(thisDD.OutletNodeNum)));
+                        EnergyPlus::format(
+                            "{}No matching List:Zone:AirTerminal for AirTerminal:DualDuct = [{},{}].", RoutineName, thisObjType, thisDD.Name));
+                    ShowContinueError(state, EnergyPlus::format("...should have outlet node={}", state.dataLoopNodes->NodeID(thisDD.OutletNodeNum)));
                     ErrorsFound = true;
                 } else {
 
@@ -326,8 +328,10 @@ namespace DualDuct {
                                 if (state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).OutNode > 0) {
                                     ShowSevereError(state, "Error in connecting a terminal unit to a zone");
                                     ShowContinueError(
-                                        state, format("{} already connects to another zone", state.dataLoopNodes->NodeID(thisDD.OutletNodeNum)));
-                                    ShowContinueError(state, format("Occurs for terminal unit {} = {}", CurrentModuleObject, thisDD.Name));
+                                        state,
+                                        EnergyPlus::format("{} already connects to another zone", state.dataLoopNodes->NodeID(thisDD.OutletNodeNum)));
+                                    ShowContinueError(state,
+                                                      EnergyPlus::format("Occurs for terminal unit {} = {}", CurrentModuleObject, thisDD.Name));
                                     ShowContinueError(state, "Check terminal unit node names for errors");
                                     ErrorsFound = true;
                                 } else {
@@ -402,40 +406,40 @@ namespace DualDuct {
                 thisDD.OutletNodeNum = GetOnlySingleNode(state,
                                                          AlphArray(3),
                                                          ErrorsFound,
-                                                         DataLoopNode::ConnectionObjectType::AirTerminalDualDuctVAV,
+                                                         Node::ConnectionObjectType::AirTerminalDualDuctVAV,
                                                          thisDD.Name,
-                                                         DataLoopNode::NodeFluidType::Air,
-                                                         DataLoopNode::ConnectionType::Outlet,
-                                                         NodeInputManager::CompFluidStream::Primary,
-                                                         DataLoopNode::ObjectIsNotParent,
+                                                         Node::FluidType::Air,
+                                                         Node::ConnectionType::Outlet,
+                                                         Node::CompFluidStream::Primary,
+                                                         Node::ObjectIsNotParent,
                                                          cAlphaFields(3));
                 thisDD.HotAirInletNodeNum = GetOnlySingleNode(state,
                                                               AlphArray(4),
                                                               ErrorsFound,
-                                                              DataLoopNode::ConnectionObjectType::AirTerminalDualDuctVAV,
+                                                              Node::ConnectionObjectType::AirTerminalDualDuctVAV,
                                                               thisDD.Name,
-                                                              DataLoopNode::NodeFluidType::Air,
-                                                              DataLoopNode::ConnectionType::Inlet,
-                                                              NodeInputManager::CompFluidStream::Primary,
-                                                              DataLoopNode::ObjectIsNotParent,
+                                                              Node::FluidType::Air,
+                                                              Node::ConnectionType::Inlet,
+                                                              Node::CompFluidStream::Primary,
+                                                              Node::ObjectIsNotParent,
                                                               cAlphaFields(4));
                 thisDD.ColdAirInletNodeNum = GetOnlySingleNode(state,
                                                                AlphArray(5),
                                                                ErrorsFound,
-                                                               DataLoopNode::ConnectionObjectType::AirTerminalDualDuctVAV,
+                                                               Node::ConnectionObjectType::AirTerminalDualDuctVAV,
                                                                thisDD.Name,
-                                                               DataLoopNode::NodeFluidType::Air,
-                                                               DataLoopNode::ConnectionType::Inlet,
-                                                               NodeInputManager::CompFluidStream::Primary,
-                                                               DataLoopNode::ObjectIsNotParent,
+                                                               Node::FluidType::Air,
+                                                               Node::ConnectionType::Inlet,
+                                                               Node::CompFluidStream::Primary,
+                                                               Node::ObjectIsNotParent,
                                                                cAlphaFields(5));
 
                 thisDD.MaxAirVolFlowRate = NumArray(1);
                 thisDD.ZoneMinAirFracDes = NumArray(2);
 
                 // Register component set data - one for heat and one for cool
-                BranchNodeConnections::TestCompSet(state, CurrentModuleObject + ":HEAT", thisDD.Name, AlphArray(4), AlphArray(3), "Air Nodes");
-                BranchNodeConnections::TestCompSet(state, CurrentModuleObject + ":COOL", thisDD.Name, AlphArray(5), AlphArray(3), "Air Nodes");
+                Node::TestCompSet(state, CurrentModuleObject + ":HEAT", thisDD.Name, AlphArray(4), AlphArray(3), "Air Nodes");
+                Node::TestCompSet(state, CurrentModuleObject + ":COOL", thisDD.Name, AlphArray(5), AlphArray(3), "Air Nodes");
 
                 for (ADUNum = 1; ADUNum <= (int)state.dataDefineEquipment->AirDistUnit.size(); ++ADUNum) {
                     if (thisDD.OutletNodeNum == state.dataDefineEquipment->AirDistUnit(ADUNum).OutletNodeNum) {
@@ -449,8 +453,9 @@ namespace DualDuct {
                     auto &thisObjType = damperTypeStrings[static_cast<int>(thisDD.DamperType)];
                     ShowSevereError(
                         state,
-                        format("{}No matching List:Zone:AirTerminal for AirTerminal:DualDuct = [{},{}].", RoutineName, thisObjType, thisDD.Name));
-                    ShowContinueError(state, format("...should have outlet node={}", state.dataLoopNodes->NodeID(thisDD.OutletNodeNum)));
+                        EnergyPlus::format(
+                            "{}No matching List:Zone:AirTerminal for AirTerminal:DualDuct = [{},{}].", RoutineName, thisObjType, thisDD.Name));
+                    ShowContinueError(state, EnergyPlus::format("...should have outlet node={}", state.dataLoopNodes->NodeID(thisDD.OutletNodeNum)));
                     ErrorsFound = true;
                 } else {
 
@@ -479,8 +484,8 @@ namespace DualDuct {
                 if (!lAlphaBlanks(6)) {
                     thisDD.OARequirementsPtr = Util::FindItemInList(AlphArray(6), state.dataSize->OARequirements);
                     if (thisDD.OARequirementsPtr == 0) {
-                        ShowSevereError(state, format("{} = {} not found.", cAlphaFields(6), AlphArray(6)));
-                        ShowContinueError(state, format("Occurs in {} = {}", cCMO_DDVariableVolume, thisDD.Name));
+                        ShowSevereError(state, EnergyPlus::format("{} = {} not found.", cAlphaFields(6), AlphArray(6)));
+                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", cCMO_DDVariableVolume, thisDD.Name));
                         ErrorsFound = true;
                     } else {
                         thisDD.NoOAFlowInputFromUser = false;
@@ -556,34 +561,34 @@ namespace DualDuct {
                 thisDD.OutletNodeNum = GetOnlySingleNode(state,
                                                          AlphArray(3),
                                                          ErrorsFound,
-                                                         DataLoopNode::ConnectionObjectType::AirTerminalDualDuctVAVOutdoorAir,
+                                                         Node::ConnectionObjectType::AirTerminalDualDuctVAVOutdoorAir,
                                                          thisDD.Name,
-                                                         DataLoopNode::NodeFluidType::Air,
-                                                         DataLoopNode::ConnectionType::Outlet,
-                                                         NodeInputManager::CompFluidStream::Primary,
-                                                         DataLoopNode::ObjectIsNotParent,
+                                                         Node::FluidType::Air,
+                                                         Node::ConnectionType::Outlet,
+                                                         Node::CompFluidStream::Primary,
+                                                         Node::ObjectIsNotParent,
                                                          cAlphaFields(3));
                 thisDD.OAInletNodeNum = GetOnlySingleNode(state,
                                                           AlphArray(4),
                                                           ErrorsFound,
-                                                          DataLoopNode::ConnectionObjectType::AirTerminalDualDuctVAVOutdoorAir,
+                                                          Node::ConnectionObjectType::AirTerminalDualDuctVAVOutdoorAir,
                                                           thisDD.Name,
-                                                          DataLoopNode::NodeFluidType::Air,
-                                                          DataLoopNode::ConnectionType::Inlet,
-                                                          NodeInputManager::CompFluidStream::Primary,
-                                                          DataLoopNode::ObjectIsNotParent,
+                                                          Node::FluidType::Air,
+                                                          Node::ConnectionType::Inlet,
+                                                          Node::CompFluidStream::Primary,
+                                                          Node::ObjectIsNotParent,
                                                           cAlphaFields(4));
 
                 if (!lAlphaBlanks(5)) {
                     thisDD.RecircAirInletNodeNum = GetOnlySingleNode(state,
                                                                      AlphArray(5),
                                                                      ErrorsFound,
-                                                                     DataLoopNode::ConnectionObjectType::AirTerminalDualDuctVAVOutdoorAir,
+                                                                     Node::ConnectionObjectType::AirTerminalDualDuctVAVOutdoorAir,
                                                                      thisDD.Name,
-                                                                     DataLoopNode::NodeFluidType::Air,
-                                                                     DataLoopNode::ConnectionType::Inlet,
-                                                                     NodeInputManager::CompFluidStream::Primary,
-                                                                     DataLoopNode::ObjectIsNotParent,
+                                                                     Node::FluidType::Air,
+                                                                     Node::ConnectionType::Inlet,
+                                                                     Node::CompFluidStream::Primary,
+                                                                     Node::ObjectIsNotParent,
                                                                      cAlphaFields(5));
                 } else {
                     // for this model, we intentionally allow not using the recirc side
@@ -594,10 +599,9 @@ namespace DualDuct {
                 thisDD.MaxAirMassFlowRate = thisDD.MaxAirVolFlowRate * state.dataEnvrn->StdRhoAir;
 
                 // Register component set data - one for OA and one for RA
-                BranchNodeConnections::TestCompSet(state, CurrentModuleObject + ":OutdoorAir", thisDD.Name, AlphArray(4), AlphArray(3), "Air Nodes");
+                Node::TestCompSet(state, CurrentModuleObject + ":OutdoorAir", thisDD.Name, AlphArray(4), AlphArray(3), "Air Nodes");
                 if (thisDD.RecircIsUsed) {
-                    BranchNodeConnections::TestCompSet(
-                        state, CurrentModuleObject + ":RecirculatedAir", thisDD.Name, AlphArray(5), AlphArray(3), "Air Nodes");
+                    Node::TestCompSet(state, CurrentModuleObject + ":RecirculatedAir", thisDD.Name, AlphArray(5), AlphArray(3), "Air Nodes");
                 }
 
                 thisDD.OAPerPersonMode = static_cast<PerPersonMode>(getEnumValue(modeStrings, AlphArray(7)));
@@ -618,8 +622,9 @@ namespace DualDuct {
                     auto &thisObjType = damperTypeStrings[static_cast<int>(thisDD.DamperType)];
                     ShowSevereError(
                         state,
-                        format("{}No matching List:Zone:AirTerminal for AirTerminal:DualDuct = [{},{}].", RoutineName, thisObjType, thisDD.Name));
-                    ShowContinueError(state, format("...should have outlet node={}", state.dataLoopNodes->NodeID(thisDD.OutletNodeNum)));
+                        EnergyPlus::format(
+                            "{}No matching List:Zone:AirTerminal for AirTerminal:DualDuct = [{},{}].", RoutineName, thisObjType, thisDD.Name));
+                    ShowContinueError(state, EnergyPlus::format("...should have outlet node={}", state.dataLoopNodes->NodeID(thisDD.OutletNodeNum)));
                     ErrorsFound = true;
                 } else {
 
@@ -651,8 +656,8 @@ namespace DualDuct {
                 }
                 thisDD.OARequirementsPtr = Util::FindItemInList(AlphArray(6), state.dataSize->OARequirements);
                 if (thisDD.OARequirementsPtr == 0) {
-                    ShowSevereError(state, format("{} = {} not found.", cAlphaFields(6), AlphArray(6)));
-                    ShowContinueError(state, format("Occurs in {} = {}", cCMO_DDVarVolOA, thisDD.Name));
+                    ShowSevereError(state, EnergyPlus::format("{} = {} not found.", cAlphaFields(6), AlphArray(6)));
+                    ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", cCMO_DDVarVolOA, thisDD.Name));
                     ErrorsFound = true;
                 } else {
                     thisDD.NoOAFlowInputFromUser = false;
@@ -672,11 +677,11 @@ namespace DualDuct {
                         } else {
                             if (thisDD.MaxAirVolFlowRate < thisDD.DesignOAFlowRate) {
                                 ShowSevereError(state,
-                                                format("The value {:.5R} in {}is lower than the outdoor air requirement.",
-                                                       thisDD.MaxAirVolFlowRate,
-                                                       cNumericFields(1)));
-                                ShowContinueError(state, format("Occurs in {} = {}", cCMO_DDVarVolOA, thisDD.Name));
-                                ShowContinueError(state, format("The design outdoor air requirement is {:.5R}", thisDD.DesignOAFlowRate));
+                                                EnergyPlus::format("The value {:.5R} in {}is lower than the outdoor air requirement.",
+                                                                   thisDD.MaxAirVolFlowRate,
+                                                                   cNumericFields(1)));
+                                ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", cCMO_DDVarVolOA, thisDD.Name));
+                                ShowContinueError(state, EnergyPlus::format("The design outdoor air requirement is {:.5R}", thisDD.DesignOAFlowRate));
                                 ErrorsFound = true;
                             }
                         }
@@ -688,13 +693,13 @@ namespace DualDuct {
                     if ((DummyOAFlow == 0.0) && (lAlphaBlanks(7))) {       // no worries
                                                                            // do nothing, okay since no per person requirement involved
                     } else if ((DummyOAFlow > 0.0) && (lAlphaBlanks(7))) { // missing input
-                        ShowSevereError(state, format("{} was blank.", cAlphaFields(7)));
-                        ShowContinueError(state, format("Occurs in {} = {}", cCMO_DDVarVolOA, thisDD.Name));
+                        ShowSevereError(state, EnergyPlus::format("{} was blank.", cAlphaFields(7)));
+                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", cCMO_DDVarVolOA, thisDD.Name));
                         ShowContinueError(state, R"(Valid choices are "CurrentOccupancy" or "DesignOccupancy")");
                         ErrorsFound = true;
                     } else if ((DummyOAFlow > 0.0) && !(lAlphaBlanks(7))) { // incorrect input
-                        ShowSevereError(state, format("{} = {} not a valid key choice.", cAlphaFields(7), AlphArray(7)));
-                        ShowContinueError(state, format("Occurs in {} = {}", cCMO_DDVarVolOA, thisDD.Name));
+                        ShowSevereError(state, EnergyPlus::format("{} = {} not a valid key choice.", cAlphaFields(7), AlphArray(7)));
+                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", cCMO_DDVarVolOA, thisDD.Name));
                         ShowContinueError(state, R"(Valid choices are "CurrentOccupancy" or "DesignOccupancy")");
                         ErrorsFound = true;
                     }
@@ -727,7 +732,7 @@ namespace DualDuct {
         }
 
         if (ErrorsFound) {
-            ShowFatalError(state, format("{}Errors found in input.  Preceding condition(s) cause termination.", RoutineName));
+            ShowFatalError(state, EnergyPlus::format("{}Errors found in input.  Preceding condition(s) cause termination.", RoutineName));
         }
     }
 
@@ -767,16 +772,18 @@ namespace DualDuct {
                     continue;
                 }
                 ShowSevereError(state,
-                                format("InitDualDuct: ADU=[Air Distribution Unit,{}] is not on any ZoneHVAC:EquipmentList.",
-                                       state.dataDefineEquipment->AirDistUnit(this->ADUNum).Name));
+                                EnergyPlus::format("InitDualDuct: ADU=[Air Distribution Unit,{}] is not on any ZoneHVAC:EquipmentList.",
+                                                   state.dataDefineEquipment->AirDistUnit(this->ADUNum).Name));
                 if (this->DamperType == DualDuctDamper::ConstantVolume) {
-                    ShowContinueError(state, format("...Dual Duct Damper=[{},{}] will not be simulated.", cCMO_DDConstantVolume, this->Name));
+                    ShowContinueError(state,
+                                      EnergyPlus::format("...Dual Duct Damper=[{},{}] will not be simulated.", cCMO_DDConstantVolume, this->Name));
                 } else if (this->DamperType == DualDuctDamper::VariableVolume) {
-                    ShowContinueError(state, format("...Dual Duct Damper=[{},{}] will not be simulated.", cCMO_DDVariableVolume, this->Name));
+                    ShowContinueError(state,
+                                      EnergyPlus::format("...Dual Duct Damper=[{},{}] will not be simulated.", cCMO_DDVariableVolume, this->Name));
                 } else if (this->DamperType == DualDuctDamper::OutdoorAir) {
-                    ShowContinueError(state, format("...Dual Duct Damper=[{},{}] will not be simulated.", cCMO_DDVarVolOA, this->Name));
+                    ShowContinueError(state, EnergyPlus::format("...Dual Duct Damper=[{},{}] will not be simulated.", cCMO_DDVarVolOA, this->Name));
                 } else {
-                    ShowContinueError(state, format("...Dual Duct Damper=[unknown/invalid,{}] will not be simulated.", this->Name));
+                    ShowContinueError(state, EnergyPlus::format("...Dual Duct Damper=[unknown/invalid,{}] will not be simulated.", this->Name));
                 }
             }
         }
@@ -1709,7 +1716,8 @@ namespace DualDuct {
         if (this->NoOAFlowInputFromUser) {
             ShowSevereError(
                 state,
-                format("CalcOAOnlyMassFlow: Problem in AirTerminal:DualDuct:VAV:OutdoorAir = {}, check outdoor air specification", this->Name));
+                EnergyPlus::format("CalcOAOnlyMassFlow: Problem in AirTerminal:DualDuct:VAV:OutdoorAir = {}, check outdoor air specification",
+                                   this->Name));
             if (present(MaxOAVolFlow)) {
                 MaxOAVolFlow = 0.0;
             }

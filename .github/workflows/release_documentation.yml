@@ -1,0 +1,90 @@
+name: Release Documentation
+
+on:
+  push:
+    tags:
+      - '*'
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  PYTHON_VERSION: '3.12'
+
+jobs:
+  build_release_documentation:
+    name: Build and Package Documentation
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout EnergyPlus
+      uses: actions/checkout@v6
+
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v6
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install LaTeX dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y texlive texlive-xetex texlive-science zip
+
+    - name: Configure documentation build
+      run: cmake -S doc -B build/doc-release -DTEX_INTERACTION:STRING=batchmode
+
+    - name: Build documentation
+      run: cmake --build build/doc-release --target package -j $(nproc)
+
+    - name: Convert documentation tarball to zip
+      run: |
+        archive=$(find "$GITHUB_WORKSPACE/build/doc-release" -maxdepth 1 -name 'EnergyPlus-PDFDocumentation-*.tar.gz' -print -quit)
+        if [ -z "$archive" ]; then
+          echo "Expected documentation tarball was not found"
+          exit 1
+        fi
+        zip_path="${archive%.tar.gz}.zip"
+        temp_dir=$(mktemp -d)
+        trap 'rm -rf "$temp_dir"' EXIT
+        tar -xzf "$archive" -C "$temp_dir"
+        (
+          cd "$temp_dir"
+          zip -r "$zip_path" .
+        )
+
+    - name: Upload documentation tar.gz artifact
+      uses: actions/upload-artifact@v7
+      with:
+        name: documentation-tar-gz
+        path: build/doc-release/EnergyPlus-PDFDocumentation-*.tar.gz
+        if-no-files-found: error
+        retention-days: 7
+
+    - name: Upload documentation zip artifact
+      uses: actions/upload-artifact@v7
+      with:
+        name: documentation-zip
+        path: build/doc-release/EnergyPlus-PDFDocumentation-*.zip
+        if-no-files-found: error
+        retention-days: 7
+
+    - name: Upload documentation tar.gz to release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: build/doc-release/EnergyPlus-PDFDocumentation-*.tar.gz
+        tag: ${{ github.ref }}
+        overwrite: true
+        file_glob: true
+
+    - name: Upload documentation zip to release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: build/doc-release/EnergyPlus-PDFDocumentation-*.zip
+        tag: ${{ github.ref }}
+        overwrite: true
+        file_glob: true

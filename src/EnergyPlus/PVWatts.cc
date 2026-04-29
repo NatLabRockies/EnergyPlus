@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -111,24 +111,24 @@ namespace PVWatts {
         dcSystemCapacity_ = dcSystemCapacity;
 
         if (systemLosses > 1.0 || systemLosses < 0.0) {
-            ShowSevereError(state, format("PVWatts: Invalid system loss value {:.2R}", systemLosses));
+            ShowSevereError(state, EnergyPlus::format("PVWatts: Invalid system loss value {:.2R}", systemLosses));
             errorsFound = true;
         }
         systemLosses_ = systemLosses;
 
         if (geometryType_ == GeometryType::TILT_AZIMUTH) {
             if (tilt < 0 || tilt > 90) {
-                ShowSevereError(state, format("PVWatts: Invalid tilt: {:.2R}", tilt));
+                ShowSevereError(state, EnergyPlus::format("PVWatts: Invalid tilt: {:.2R}", tilt));
                 errorsFound = true;
             }
             tilt_ = tilt;
             if (azimuth < 0 || azimuth >= 360) {
-                ShowSevereError(state, format("PVWatts: Invalid azimuth: {:.2R}", azimuth));
+                ShowSevereError(state, EnergyPlus::format("PVWatts: Invalid azimuth: {:.2R}", azimuth));
             }
             azimuth_ = azimuth;
         } else if (geometryType_ == GeometryType::SURFACE) {
             if (surfaceNum == 0 || surfaceNum > state.dataSurface->Surface.size()) {
-                ShowSevereError(state, format("PVWatts: SurfaceNum not in Surfaces: {}", surfaceNum));
+                ShowSevereError(state, EnergyPlus::format("PVWatts: SurfaceNum not in Surfaces: {}", surfaceNum));
                 errorsFound = true;
             } else {
                 surfaceNum_ = surfaceNum;
@@ -141,7 +141,7 @@ namespace PVWatts {
         }
 
         if (groundCoverageRatio > 1.0 || groundCoverageRatio < 0.0) {
-            ShowSevereError(state, format("PVWatts: Invalid ground coverage ratio: {:.2R}", groundCoverageRatio));
+            ShowSevereError(state, EnergyPlus::format("PVWatts: Invalid ground coverage ratio: {:.2R}", groundCoverageRatio));
             errorsFound = true;
         }
         groundCoverageRatio_ = groundCoverageRatio;
@@ -254,7 +254,7 @@ namespace PVWatts {
         ModuleType moduleType;
         auto moduleTypeIt = moduleTypeMap.find(cAlphaArgs(AlphaFields::MODULE_TYPE));
         if (moduleTypeIt == moduleTypeMap.end()) {
-            ShowSevereError(state, format("PVWatts: Invalid Module Type: {}", cAlphaArgs(AlphaFields::MODULE_TYPE)));
+            ShowSevereError(state, EnergyPlus::format("PVWatts: Invalid Module Type: {}", cAlphaArgs(AlphaFields::MODULE_TYPE)));
             errorsFound = true;
         } else {
             moduleType = moduleTypeIt->second;
@@ -268,7 +268,7 @@ namespace PVWatts {
         ArrayType arrayType;
         auto arrayTypeIt = arrayTypeMap.find(cAlphaArgs(AlphaFields::ARRAY_TYPE));
         if (arrayTypeIt == arrayTypeMap.end()) {
-            ShowSevereError(state, format("PVWatts: Invalid Array Type: {}", cAlphaArgs(AlphaFields::ARRAY_TYPE)));
+            ShowSevereError(state, EnergyPlus::format("PVWatts: Invalid Array Type: {}", cAlphaArgs(AlphaFields::ARRAY_TYPE)));
             errorsFound = true;
         } else {
             arrayType = arrayTypeIt->second;
@@ -279,7 +279,7 @@ namespace PVWatts {
         GeometryType geometryType;
         auto geometryTypeIt = geometryTypeMap.find(cAlphaArgs(AlphaFields::GEOMETRY_TYPE));
         if (geometryTypeIt == geometryTypeMap.end()) {
-            ShowSevereError(state, format("PVWatts: Invalid Geometry Type: {}", cAlphaArgs(AlphaFields::GEOMETRY_TYPE)));
+            ShowSevereError(state, EnergyPlus::format("PVWatts: Invalid Geometry Type: {}", cAlphaArgs(AlphaFields::GEOMETRY_TYPE)));
             errorsFound = true;
         } else {
             geometryType = geometryTypeIt->second;

@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -202,7 +202,7 @@ namespace HeatRecovery {
         bool MySizeFlag = true;
         bool hasZoneERVController = false; // If this HX is controlled by a ZoneHVAC:EnergyRecoveryVentilator:Controller
 
-        void initialize(EnergyPlusData &state, int CompanionCoilIndex, int CompanionCoilType_Num);
+        void initialize(EnergyPlusData &state, int CompanionCoilIndex, HVAC::CoilType const companionCoilType);
 
         void size(EnergyPlusData &state);
 
@@ -223,12 +223,12 @@ namespace HeatRecovery {
 
         void
         CalcDesiccantBalancedHeatExch(EnergyPlusData &state,
-                                      bool HXUnitOn,           // flag to simulate heat exchager heat recovery
-                                      bool FirstHVACIteration, // First HVAC iteration flag
-                                      HVAC::FanOp const fanOp, // Supply air fan operating mode (1=cycling, 2=constant)
-                                      Real64 PartLoadRatio,    // Part load ratio requested of DX compressor
-                                      int CompanionCoilIndex,  // index of companion cooling coil
-                                      int CompanionCoilType,   // type of cooling coil
+                                      bool HXUnitOn,                    // flag to simulate heat exchager heat recovery
+                                      bool FirstHVACIteration,          // First HVAC iteration flag
+                                      HVAC::FanOp const fanOp,          // Supply air fan operating mode (1=cycling, 2=constant)
+                                      Real64 PartLoadRatio,             // Part load ratio requested of DX compressor
+                                      int CompanionCoilIndex,           // index of companion cooling coil
+                                      HVAC::CoilType companionCoilType, // type of cooling coil
                                       bool RegenInletIsOANode, // Flag to determine if regen side inlet is OANode, if so this air stream cycles
                                       ObjexxFCL::Optional_bool_const EconomizerFlag = _, // economizer flag pass by air loop or OA sys
                                       ObjexxFCL::Optional_bool_const HighHumCtrlFlag = _ // high humidity control flag passed by airloop or OA sys
@@ -402,7 +402,7 @@ namespace HeatRecovery {
                          ObjexxFCL::Optional_bool_const RegenInletIsOANode = _, // flag to determine if supply inlet is OA node, if so air flow cycles
                          ObjexxFCL::Optional_bool_const EconomizerFlag = _,     // economizer operation flag passed by airloop or OA sys
                          ObjexxFCL::Optional_bool_const HighHumCtrlFlag = _,    // high humidity control flag passed by airloop or OA sys
-                         ObjexxFCL::Optional_int_const CompanionCoilType_Num = _ // cooling coil type of coil
+                         ObjexxFCL::Optional<HVAC::CoilType const> coilTypeOpt = _ // cooling coil type of coil
     );
 
     void GetHeatRecoveryInput(EnergyPlusData &state);

@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -221,15 +221,15 @@ namespace HVAC {
     enum class CoilType
     {
         Invalid = -1,
-        DXCoolingSingleSpeed,
-        DXHeatingEmpirical,
-        DXCoolingTwoSpeed,
-        DXCoolingHXAssisted,
-        DXCoolingTwoStageWHumControl,
-        DXHeatPumpWaterHeaterPumped,
-        DXHeatPumpWaterHeaterWrapped,
-        DXMultiSpeedCooling,
-        DXMultiSpeedHeating,
+        CoolingDXSingleSpeed,
+        HeatingDXSingleSpeed,
+        CoolingDXTwoSpeed,
+        CoolingDXHXAssisted,
+        CoolingDXTwoStageWHumControl,
+        WaterHeatingDXPumped,
+        WaterHeatingDXWrapped,
+        CoolingDXMultiSpeed,
+        HeatingDXMultiSpeed,
         HeatingGasOrOtherFuel,
         HeatingGasMultiStage,
         HeatingElectric,
@@ -239,105 +239,41 @@ namespace HVAC {
         CoolingWaterDetailed,
         HeatingWater,
         HeatingSteam,
-        WaterCoolingHXAssisted,
-        CoolingWaterToAirHP,
-        HeatingWaterToAirHP,
-        CoolingWaterToAirHPSimple,
-        HeatingWaterToAirHPSimple,
-        VRFCooling,
-        VRFHeating,
+        CoolingWaterHXAssisted,
+        CoolingWAHP,
+        HeatingWAHP,
+        CoolingWAHPSimple,
+        HeatingWAHPSimple,
+        CoolingVRF,
+        HeatingVRF,
         UserDefined,
-        DXPackagedThermalStorageCooling,
-        CoolingWaterToAirHPVSEquationFit,
-        HeatingWaterToAirHPVSEquationFit,
-        CoolingAirToAirVariableSpeed,
-        HeatingAirToAirVariableSpeed,
-        DXHeatPumpWaterHeaterVariableSpeed,
-        VRFFluidTCtrlCooling,
-        VRFFluidTCtrlHeating,
-        DXCooling,
+        CoolingDXPackagedThermalStorage,
+        CoolingWAHPVariableSpeedEquationFit,
+        HeatingWAHPVariableSpeedEquationFit,
+        CoolingDXVariableSpeed,
+        HeatingDXVariableSpeed,
+        WaterHeatingAWHPVariableSpeed,
+        CoolingVRFFluidTCtrl,
+        HeatingVRFFluidTCtrl,
+        CoolingDX,
         DXSubcoolReheat,
-        DXCurveFitSpeed,
+        CoolingDXCurveFit,
+#ifdef GET_OUT
+        // Leaving these out for now
+        IHPAirSource,
+        CoolingSystemDX,
+        HeatingSystemDX,
+#endif // GET_OUT
         Num
     };
-    static constexpr std::array<std::string_view, static_cast<int>(CoilType::Num)> coilTypeNamesUC = {
-        "COIL:COOLING:DX:SINGLESPEED",
-        "COIL:HEATING:DX:SINGLESPEED",
-        "COIL:COOLING:DX:TWOSPEED",
-        "COILSYSTEM:COOLING:DX:HEATEXCHANGERASSISTED",
-        "COIL:COOLING:DX:TWOSTAGEWITHHUMIDITYCONTROLMODE",
-        "COIL:WATERHEATING:AIRTOWATERHEATPUMP:PUMPED",
-        "COIL:WATERHEATING:AIRTOWATERHEATPUMP:WRAPPED",
-        "COIL:COOLING:DX:MULTISPEED",
-        "COIL:HEATING:DX:MULTISPEED",
-        "COIL:HEATING:FUEL",
-        "COIL:HEATING:GAS:MULTISTAGE",
-        "COIL:HEATING:ELECTRIC",
-        "COIL:HEATING:ELECTRIC:MULTISTAGE",
-        "COIL:HEATING:DESUPERHEATER",
-        "COIL:COOLING:WATER",
-        "COIL:COOLING:WATER:DETAILEDGEOMETRY",
-        "COIL:HEATING:WATER",
-        "COIL:HEATING:STEAM",
-        "COILSYSTEM:COOLING:WATER:HEATEXCHANGERASSISTED",
-        "COIL:COOLING:WATERTOAIRHEATPUMP:PARAMETERESTIMATION",
-        "COIL:HEATING:WATERTOAIRHEATPUMP:PARAMETERESTIMATION",
-        "COIL:COOLING:WATERTOAIRHEATPUMP:EQUATIONFIT",
-        "COIL:HEATING:WATERTOAIRHEATPUMP:EQUATIONFIT",
-        "COIL:COOLING:DX:VARIABLEREFRIGERANTFLOW",
-        "COIL:HEATING:DX:VARIABLEREFRIGERANTFLOW",
-        "COIL:USERDEFINED",
-        "COIL:COOLING:DX:SINGLESPEED:THERMALSTORAGE",
-        "COIL:COOLING:WATERTOAIRHEATPUMP:VARIABLESPEEDEQUATIONFIT",
-        "COIL:HEATING:WATERTOAIRHEATPUMP:VARIABLESPEEDEQUATIONFIT",
-        "COIL:COOLING:DX:VARIABLESPEED",
-        "COIL:HEATING:DX:VARIABLESPEED",
-        "COIL:WATERHEATING:AIRTOWATERHEATPUMP:VARIABLESPEED",
-        "COIL:COOLING:DX:VARIABLEREFRIGERANTFLOW:FLUIDTEMPERATURECONTROL",
-        "COIL:HEATING:DX:VARIABLEREFRIGERANTFLOW:FLUIDTEMPERATURECONTROL",
-        "COIL:COOLING:DX",
-        "COIL:COOLING:DX:SUBCOOLREHEAT",
-        "COIL:COOLING:DX:CURVEFIT:SPEED"};
 
-    // parameters describing coil types
-    int constexpr NumAllCoilTypes(37);
-    int constexpr CoilDX_CoolingSingleSpeed(1);
-    int constexpr CoilDX_HeatingEmpirical(2);
-    int constexpr CoilDX_CoolingTwoSpeed(3);
-    int constexpr CoilDX_CoolingHXAssisted(4);
-    int constexpr CoilDX_CoolingTwoStageWHumControl(5);
-    int constexpr CoilDX_HeatPumpWaterHeaterPumped(6);
-    int constexpr CoilDX_HeatPumpWaterHeaterWrapped(7);
-    int constexpr CoilDX_MultiSpeedCooling(8);
-    int constexpr CoilDX_MultiSpeedHeating(9);
-    int constexpr Coil_HeatingGasOrOtherFuel(10);
-    int constexpr Coil_HeatingGas_MultiStage(11);
-    int constexpr Coil_HeatingElectric(12);
-    int constexpr Coil_HeatingElectric_MultiStage(13);
-    int constexpr Coil_HeatingDesuperheater(14);
-    int constexpr Coil_CoolingWater(15);
-    int constexpr Coil_CoolingWaterDetailed(16);
-    int constexpr Coil_HeatingWater(17);
-    int constexpr Coil_HeatingSteam(18);
-    int constexpr CoilWater_CoolingHXAssisted(19);
-    int constexpr Coil_CoolingWaterToAirHP(20);
-    int constexpr Coil_HeatingWaterToAirHP(21);
-    int constexpr Coil_CoolingWaterToAirHPSimple(22);
-    int constexpr Coil_HeatingWaterToAirHPSimple(23);
-    int constexpr CoilVRF_Cooling(24);
-    int constexpr CoilVRF_Heating(25);
-    int constexpr Coil_UserDefined(26);
-    int constexpr CoilDX_PackagedThermalStorageCooling(27);
-    int constexpr Coil_CoolingWaterToAirHPVSEquationFit(28);
-    int constexpr Coil_HeatingWaterToAirHPVSEquationFit(29);
-    int constexpr Coil_CoolingAirToAirVariableSpeed(30);
-    int constexpr Coil_HeatingAirToAirVariableSpeed(31);
-    int constexpr CoilDX_HeatPumpWaterHeaterVariableSpeed(32);
-    int constexpr CoilVRF_FluidTCtrl_Cooling(33);
-    int constexpr CoilVRF_FluidTCtrl_Heating(34);
-    int constexpr CoilDX_Cooling(35);
-    //    int constexpr CoilDX_SubcoolReheat(36);
-    int constexpr CoilDX_CurveFit_Speed(37);
+    extern const std::array<std::string_view, (int)CoilType::Num> coilTypeNames;
+    extern const std::array<std::string_view, (int)CoilType::Num> coilTypeNamesUC;
+
+    extern const std::array<bool, (int)CoilType::Num> coilTypeIsHeating;
+    extern const std::array<bool, (int)CoilType::Num> coilTypeIsCooling;
+
+    extern const std::array<bool, (int)CoilType::Num> coilTypeIsHeatPump;
 
     enum class CoilMode
     {
@@ -347,6 +283,52 @@ namespace HVAC {
         SubcoolReheat,
         Num
     };
+
+    enum class HeatReclaimType // reclaim heat object types
+    {
+        Invalid = -1,
+        RefrigeratedCaseCompressorRack,
+        RefrigeratedCaseCondenserAirCooled,
+        RefrigeratedCaseCondenserEvaporativeCooled,
+        RefrigeratedCaseCondenserWaterCooled,
+        CoilCoolDXSingleSpeed,
+        CoilCoolDXTwoSpeed,
+        CoilCoolDXMultiSpeed,
+        CoilCoolDXMultiMode,
+        CoilCoolDXVariableSpeed,
+        CoilCoolDX,
+        CoilCoolWAHPEquationFit,
+        CoilCoolWAHPVariableSpeedEquationFit,
+        Num
+    };
+
+    constexpr std::array<std::string_view, (int)HeatReclaimType::Num> heatReclaimTypeNames = {
+        "Refrigeration:CompressorRack",
+        "Refrigeration:Condenser:AirCooled",
+        "Refrigeration:Condenser:EvaporativeCooled",
+        "Refrigeration:Condenser:WaterCooled",
+        "Coil:Cooling:DX:SingleSpeed",
+        "Coil:Cooling:DX:TwoSpeed",
+        "Coil:Cooling:DX:MultiSpeed",
+        "Coil:Cooling:DX:TwoStageWithHumidityControlMode",
+        "Coil:Cooling:DX:VariableSpeed",
+        "Coil:Cooling:DX",
+        "Coil:Cooling:WaterToAirHeatPump:EquationFit",
+        "Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit"};
+
+    constexpr std::array<std::string_view, (int)HeatReclaimType::Num> heatReclaimTypeNamesUC = {
+        "REFRIGERATION:COMPRESSORRACK",
+        "REFRIGERATION:CONDENSER:AIRCOOLED",
+        "REFRIGERATION:CONDENSER:EVAPORATIVECOOLED",
+        "REFRIGERATION:CONDENSER:WATERCOOLED",
+        "COIL:COOLING:DX:SINGLESPEED",
+        "COIL:COOLING:DX:TWOSPEED",
+        "COIL:COOLING:DX:MULTISPEED",
+        "COIL:COOLING:DX:TWOSTAGEWITHHUMIDITYCONTROLMODE",
+        "COIL:COOLING:DX:VARIABLESPEED",
+        "COIL:COOLING:DX",
+        "COIL:COOLING:WATERTOAIRHEATPUMP:EQUATIONFIT",
+        "COIL:COOLING:WATERTOAIRHEATPUMP:VARIABLESPEEDEQUATIONFIT"};
 
     enum class WaterFlow
     {
@@ -434,10 +416,6 @@ namespace HVAC {
     Real64 constexpr OscillateMagnitude(0.15);
 
     int constexpr MaxSpeedLevels = 10;
-
-    extern Array1D_string const cAllCoilTypes;
-    extern Array1D_string const cCoolingCoilTypes;
-    extern Array1D_string const cHeatingCoilTypes;
 
     struct ComponentSetPtData
     {

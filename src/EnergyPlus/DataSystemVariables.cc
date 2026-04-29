@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -193,10 +193,10 @@ namespace DataSystemVariables {
         }
 
         // If we get here, we didn't find the file
-        ShowSevereError(state, format("{}\"{}\" not found.", contextString, originalInputFilePath));
+        ShowSevereError(state, EnergyPlus::format("{}\"{}\" not found.", contextString, originalInputFilePath));
         ShowContinueError(state, "  Paths searched:");
         for (auto &path : pathsChecked) {
-            ShowContinueError(state, format("    {}: \"{}\"", path.second, path.first));
+            ShowContinueError(state, EnergyPlus::format("    {}: \"{}\"", path.second, path.first));
         }
 
         return foundFilePath;

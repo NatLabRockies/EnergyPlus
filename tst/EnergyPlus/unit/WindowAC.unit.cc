@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -484,7 +484,7 @@ TEST_F(EnergyPlusFixture, WindowAC_VStest1)
 
     EXPECT_EQ(windowAC.HVACSizingIndex, 0);
 
-    EXPECT_EQ(windowAC.DXCoilType_Num, HVAC::Coil_CoolingAirToAirVariableSpeed);
+    EXPECT_ENUM_EQ(windowAC.coilType, HVAC::CoilType::CoolingDXVariableSpeed);
     ASSERT_GT(windowAC.DXCoilIndex, 0);
     auto const &varSpeedCoil = state->dataVariableSpeedCoils->VarSpeedCoil(windowAC.DXCoilIndex);
 
@@ -966,7 +966,7 @@ TEST_F(EnergyPlusFixture, WindowAC_DesignSpecificationZoneHVACSizing)
     EXPECT_EQ(DataSizing::FractionOfAutosizedCoolingCapacity, zoneHVACSizing.CoolingCapMethod);
     EXPECT_EQ(scaler_cooling_cap, zoneHVACSizing.ScaledCoolingCapacity);
 
-    EXPECT_EQ(windowAC.DXCoilType_Num, HVAC::Coil_CoolingAirToAirVariableSpeed);
+    EXPECT_ENUM_EQ(windowAC.coilType, HVAC::CoilType::CoolingDXVariableSpeed);
     ASSERT_GT(windowAC.DXCoilIndex, 0);
     auto const &varSpeedCoil = state->dataVariableSpeedCoils->VarSpeedCoil(windowAC.DXCoilIndex);
 

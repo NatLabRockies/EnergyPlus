@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -107,18 +107,14 @@ void ReportSurfaces(EnergyPlusData &state)
 
     General::ScanForReports(state, "Surfaces", DoReport, "Vertices");
     if (DoReport) {
-        if (!SurfVert) {
-            ++SurfDetails;
-            SurfVert = true;
-        }
+        ++SurfDetails;
+        SurfVert = true;
     }
 
     General::ScanForReports(state, "Surfaces", DoReport, "Details");
     if (DoReport) {
-        if (!SurfDet) {
-            SurfDetails += 10;
-            SurfDet = true;
-        }
+        SurfDetails += 10;
+        SurfDet = true;
     }
 
     General::ScanForReports(state, "Surfaces", DoReport, "DetailsWithVertices");
@@ -135,15 +131,11 @@ void ReportSurfaces(EnergyPlusData &state)
 
     General::ScanForReports(state, "Surfaces", DoReport, "DXF", Option1, Option2);
     if (DoReport) {
-        if (!DXFDone) {
-            if (!Option2.empty()) {
-                DataSurfaceColors::SetUpSchemeColors(state, Option2, "DXF");
-            }
-            DXFOut(state, Option1, Option2);
-            DXFDone = true;
-        } else {
-            ShowWarningError(state, format("ReportSurfaces: DXF output already generated.  DXF with option=[{}] will not be generated.", Option1));
+        if (!Option2.empty()) {
+            DataSurfaceColors::SetUpSchemeColors(state, Option2, "DXF");
         }
+        DXFOut(state, Option1, Option2);
+        DXFDone = true;
     }
 
     General::ScanForReports(state, "Surfaces", DoReport, "DXF:WireFrame", Option1, Option2);
@@ -153,7 +145,6 @@ void ReportSurfaces(EnergyPlusData &state)
                 DataSurfaceColors::SetUpSchemeColors(state, Option2, "DXF");
             }
             DXFOutWireFrame(state, Option2);
-            DXFDone = true;
         } else {
             ShowWarningError(state, "ReportSurfaces: DXF output already generated.  DXF:WireFrame will not be generated.");
         }
@@ -161,13 +152,7 @@ void ReportSurfaces(EnergyPlusData &state)
 
     General::ScanForReports(state, "Surfaces", DoReport, "VRML", Option1, Option2);
     if (DoReport) {
-        bool VRMLDone = false;
-        if (!VRMLDone) {
-            VRMLOut(state, Option1, Option2);
-            VRMLDone = true;
-        } else {
-            ShowWarningError(state, format("ReportSurfaces: VRML output already generated.  VRML with option=[{}] will not be generated.", Option1));
-        }
+        VRMLOut(state, Option1, Option2);
     }
 
     General::ScanForReports(state, "Surfaces", DoReport, "CostInfo");
@@ -203,9 +188,10 @@ void LinesOut(EnergyPlusData &state, std::string const &option)
     }
 
     if (state.dataOutputReports->optiondone) {
-        ShowWarningError(state,
-                         format("Report of Surfaces/Lines Option has already been completed with option={}", state.dataOutputReports->lastoption));
-        ShowContinueError(state, format("..option=\"{}\" will not be done this time.", option));
+        ShowWarningError(
+            state,
+            EnergyPlus::format("Report of Surfaces/Lines Option has already been completed with option={}", state.dataOutputReports->lastoption));
+        ShowContinueError(state, EnergyPlus::format("..option=\"{}\" will not be done this time.", option));
         return;
     }
 
@@ -518,7 +504,7 @@ void DXFOut(EnergyPlusData &state,
         ThickPolyline = false;
         PolylineWidth = " 0";
     } else {
-        ShowWarningError(state, format("DXFOut: Illegal key specified for Surfaces with > 4 sides={}", PolygonAction));
+        ShowWarningError(state, EnergyPlus::format("DXFOut: Illegal key specified for Surfaces with > 4 sides={}", PolygonAction));
         ShowContinueError(state, R"(...Valid keys are: "ThickPolyline", "RegularPolyline", "Triangulate3DFace".)");
         ShowContinueError(state, "\"Triangulate3DFace\" will be used for any surfaces with > 4 sides.");
         TriangulateFace = true;
@@ -832,7 +818,7 @@ void DXFOut(EnergyPlusData &state,
             }
             int numRefPt = 0;
             for (auto const &refPt : illumMap.refPts) {
-                print(dxffile, Format_710, format("{}:MapRefPt:{}", state.dataHeatBal->Zone(zones).Name, ++numRefPt));
+                print(dxffile, Format_710, EnergyPlus::format("{}:MapRefPt:{}", state.dataHeatBal->Zone(zones).Name, ++numRefPt));
                 print(dxffile,
                       Format_709,
                       normalizeName(state.dataHeatBal->Zone(zones).Name),
@@ -922,7 +908,7 @@ void DXFOutWireFrame(EnergyPlusData &state, std::string const &ColorScheme)
             print(dxffile, Format_710, "Building Shading:" + thisSurface.Name);
         }
         ++surfcount;
-        ShadeType += format("_{}", surfcount);
+        ShadeType += EnergyPlus::format("_{}", surfcount);
         Real64 minz = 99999.0;
         for (int vert = 1; vert <= thisSurface.Sides; ++vert) {
             minz = min(minz, thisSurface.Vertex(vert).z);
@@ -980,7 +966,7 @@ void DXFOutWireFrame(EnergyPlusData &state, std::string const &ColorScheme)
             ++surfcount;
 
             print(dxffile, Format_710, thisSurface.ZoneName + ':' + thisSurface.Name);
-            std::string const TempZoneName = format("{}_{}", SaveZoneName, surfcount);
+            std::string const TempZoneName = EnergyPlus::format("{}_{}", SaveZoneName, surfcount);
             Real64 minz = 99999.0;
             for (int vert = 1; vert <= thisSurface.Sides; ++vert) {
                 minz = min(minz, thisSurface.Vertex(vert).z);
@@ -1010,7 +996,7 @@ void DXFOutWireFrame(EnergyPlusData &state, std::string const &ColorScheme)
             ++surfcount;
 
             print(dxffile, Format_710, thisSurface.ZoneName + ':' + thisSurface.Name);
-            std::string const TempZoneName = format("{}_{}", SaveZoneName, surfcount);
+            std::string const TempZoneName = EnergyPlus::format("{}_{}", SaveZoneName, surfcount);
             Real64 minz = 99999.0;
             for (int vert = 1; vert <= thisSurface.Sides; ++vert) {
                 minz = min(minz, thisSurface.Vertex(vert).z);
@@ -1146,34 +1132,36 @@ void DetailsForSurfaces(EnergyPlusData &state, int const RptType) // (1=Vertices
             if (RptType == 10) {
                 if (thisSurface.shadowSurfSched != nullptr) {
                     ScheduleName = thisSurface.shadowSurfSched->Name;
-                    cSchedMin = format("{:.2R}", thisSurface.shadowSurfSched->getMinVal(state));
-                    cSchedMax = format("{:.2R}", thisSurface.shadowSurfSched->getMinVal(state));
+                    cSchedMin = EnergyPlus::format("{:.2R}", thisSurface.shadowSurfSched->getMinVal(state));
+                    cSchedMax = EnergyPlus::format("{:.2R}", thisSurface.shadowSurfSched->getMinVal(state));
                 } else {
                     ScheduleName = "";
                     cSchedMin = "0.0";
                     cSchedMax = "0.0";
                 }
-                *eiostream << ScheduleName << "," << cSchedMin << "," << cSchedMax << "," << ' ' << "," << format("{:.2R}", thisSurface.Area) << ","
-                           << format("{:.2R}", thisSurface.GrossArea) << "," << format("{:.2R}", thisSurface.NetAreaShadowCalc) << ","
-                           << format("{:.2R}", thisSurface.Azimuth) << "," << format("{:.2R}", thisSurface.Tilt) << ","
-                           << format("{:.2R}", thisSurface.Width) << "," << format("{:.2R}", thisSurface.Height) << ",";
+                *eiostream << ScheduleName << "," << cSchedMin << "," << cSchedMax << "," << ' ' << ","
+                           << EnergyPlus::format("{:.2R}", thisSurface.Area) << "," << EnergyPlus::format("{:.2R}", thisSurface.GrossArea) << ","
+                           << EnergyPlus::format("{:.2R}", thisSurface.NetAreaShadowCalc) << "," << EnergyPlus::format("{:.2R}", thisSurface.Azimuth)
+                           << "," << EnergyPlus::format("{:.2R}", thisSurface.Tilt) << "," << EnergyPlus::format("{:.2R}", thisSurface.Width) << ","
+                           << EnergyPlus::format("{:.2R}", thisSurface.Height) << ",";
                 *eiostream << ",,,,,,,,,," << fmt::to_string(thisSurface.Sides) << '\n';
             } else if (RptType == 1) {
                 *eiostream << fmt::to_string(thisSurface.Sides) << ",";
             } else {
                 if (thisSurface.shadowSurfSched != nullptr) {
                     ScheduleName = thisSurface.shadowSurfSched->Name;
-                    cSchedMin = format("{:.2R}", thisSurface.shadowSurfSched->getMinVal(state));
-                    cSchedMax = format("{:.2R}", thisSurface.shadowSurfSched->getMinVal(state));
+                    cSchedMin = EnergyPlus::format("{:.2R}", thisSurface.shadowSurfSched->getMinVal(state));
+                    cSchedMax = EnergyPlus::format("{:.2R}", thisSurface.shadowSurfSched->getMinVal(state));
                 } else {
                     ScheduleName = "";
                     cSchedMin = "0.0";
                     cSchedMax = "0.0";
                 }
-                *eiostream << ScheduleName << "," << cSchedMin << "," << cSchedMax << "," << ' ' << "," << format("{:.2R}", thisSurface.Area) << ","
-                           << format("{:.2R}", thisSurface.GrossArea) << "," << format("{:.2R}", thisSurface.NetAreaShadowCalc) << ","
-                           << format("{:.2R}", thisSurface.Azimuth) << "," << format("{:.2R}", thisSurface.Tilt) << ","
-                           << format("{:.2R}", thisSurface.Width) << "," << format("{:.2R}", thisSurface.Height) << ",";
+                *eiostream << ScheduleName << "," << cSchedMin << "," << cSchedMax << "," << ' ' << ","
+                           << EnergyPlus::format("{:.2R}", thisSurface.Area) << "," << EnergyPlus::format("{:.2R}", thisSurface.GrossArea) << ","
+                           << EnergyPlus::format("{:.2R}", thisSurface.NetAreaShadowCalc) << "," << EnergyPlus::format("{:.2R}", thisSurface.Azimuth)
+                           << "," << EnergyPlus::format("{:.2R}", thisSurface.Tilt) << "," << EnergyPlus::format("{:.2R}", thisSurface.Width) << ","
+                           << EnergyPlus::format("{:.2R}", thisSurface.Height) << ",";
                 *eiostream << ",,,,,,,,,," << fmt::to_string(thisSurface.Sides) << ",";
             }
             if (RptType == 10) {
@@ -1181,11 +1169,13 @@ void DetailsForSurfaces(EnergyPlusData &state, int const RptType) // (1=Vertices
             }
             for (int vert = 1; vert <= thisSurface.Sides; ++vert) {
                 if (vert != thisSurface.Sides) {
-                    *eiostream << format("{:.2R}", thisSurface.Vertex(vert).x) << "," << format("{:.2R}", thisSurface.Vertex(vert).y) << ","
-                               << format("{:.2R}", thisSurface.Vertex(vert).z) << ",";
+                    *eiostream << EnergyPlus::format("{:.2R}", thisSurface.Vertex(vert).x) << ","
+                               << EnergyPlus::format("{:.2R}", thisSurface.Vertex(vert).y) << ","
+                               << EnergyPlus::format("{:.2R}", thisSurface.Vertex(vert).z) << ",";
                 } else {
-                    *eiostream << format("{:.2R}", thisSurface.Vertex(vert).x) << "," << format("{:.2R}", thisSurface.Vertex(vert).y) << ","
-                               << format("{:.2R}", thisSurface.Vertex(vert).z) << '\n';
+                    *eiostream << EnergyPlus::format("{:.2R}", thisSurface.Vertex(vert).x) << ","
+                               << EnergyPlus::format("{:.2R}", thisSurface.Vertex(vert).y) << ","
+                               << EnergyPlus::format("{:.2R}", thisSurface.Vertex(vert).z) << '\n';
                 }
             }
             //  This shouldn't happen with shading surface -- always have vertices
@@ -1264,7 +1254,7 @@ void DetailsForSurfaces(EnergyPlusData &state, int const RptType) // (1=Vertices
                     } break;
                     }
                     if (cNominalUwithConvCoeffs.empty()) {
-                        cNominalUwithConvCoeffs = format("{:.3R}", NominalUwithConvCoeffs);
+                        cNominalUwithConvCoeffs = EnergyPlus::format("{:.3R}", NominalUwithConvCoeffs);
                     } else {
                         cNominalUwithConvCoeffs = "[invalid]";
                     }
@@ -1277,7 +1267,7 @@ void DetailsForSurfaces(EnergyPlusData &state, int const RptType) // (1=Vertices
                             SolarDiffusing = "No";
                         }
                     } else {
-                        cNominalU = format("{:.3R}", state.dataHeatBal->NominalU(thisSurface.Construction));
+                        cNominalU = EnergyPlus::format("{:.3R}", state.dataHeatBal->NominalU(thisSurface.Construction));
                     }
                 } else {
                     cNominalUwithConvCoeffs = "**";
@@ -1286,10 +1276,10 @@ void DetailsForSurfaces(EnergyPlusData &state, int const RptType) // (1=Vertices
                 }
 
                 *eiostream << ConstructionName << "," << cNominalU << "," << cNominalUwithConvCoeffs << "," << SolarDiffusing << ","
-                           << format("{:.2R}", thisSurface.Area) << "," << format("{:.2R}", thisSurface.GrossArea) << ","
-                           << format("{:.2R}", thisSurface.NetAreaShadowCalc) << "," << format("{:.2R}", thisSurface.Azimuth) << ","
-                           << format("{:.2R}", thisSurface.Tilt) << "," << format("{:.2R}", thisSurface.Width) << ","
-                           << format("{:.2R}", thisSurface.Height) << "," << format("{:.2R}", thisSurface.Reveal) << ",";
+                           << EnergyPlus::format("{:.2R}", thisSurface.Area) << "," << EnergyPlus::format("{:.2R}", thisSurface.GrossArea) << ","
+                           << EnergyPlus::format("{:.2R}", thisSurface.NetAreaShadowCalc) << "," << EnergyPlus::format("{:.2R}", thisSurface.Azimuth)
+                           << "," << EnergyPlus::format("{:.2R}", thisSurface.Tilt) << "," << EnergyPlus::format("{:.2R}", thisSurface.Width) << ","
+                           << EnergyPlus::format("{:.2R}", thisSurface.Height) << "," << EnergyPlus::format("{:.2R}", thisSurface.Reveal) << ",";
 
                 static constexpr std::array<std::string_view, (int)Convect::OverrideType::Num> overrideTypeStrs = {
                     "User Supplied Value", "User Supplied Schedule", "User Supplied Curve", "User Specified Model"};
@@ -1341,20 +1331,24 @@ void DetailsForSurfaces(EnergyPlusData &state, int const RptType) // (1=Vertices
                     *eiostream << "NoWind" << ",";
                 }
                 if (RptType == 10) {
-                    *eiostream << format("{:.2R}", thisSurface.ViewFactorGround) << "," << format("{:.2R}", thisSurface.ViewFactorSky) << ","
-                               << format("{:.2R}", thisSurface.ViewFactorGroundIR) << "," << format("{:.2R}", thisSurface.ViewFactorSkyIR) << ","
-                               << fmt::to_string(thisSurface.Sides) << '\n';
+                    *eiostream << EnergyPlus::format("{:.2R}", thisSurface.ViewFactorGround) << ","
+                               << EnergyPlus::format("{:.2R}", thisSurface.ViewFactorSky) << ","
+                               << EnergyPlus::format("{:.2R}", thisSurface.ViewFactorGroundIR) << ","
+                               << EnergyPlus::format("{:.2R}", thisSurface.ViewFactorSkyIR) << "," << fmt::to_string(thisSurface.Sides) << '\n';
                 } else {
-                    *eiostream << format("{:.2R}", thisSurface.ViewFactorGround) << "," << format("{:.2R}", thisSurface.ViewFactorSky) << ","
-                               << format("{:.2R}", thisSurface.ViewFactorGroundIR) << "," << format("{:.2R}", thisSurface.ViewFactorSkyIR) << ","
-                               << fmt::to_string(thisSurface.Sides) << ",";
+                    *eiostream << EnergyPlus::format("{:.2R}", thisSurface.ViewFactorGround) << ","
+                               << EnergyPlus::format("{:.2R}", thisSurface.ViewFactorSky) << ","
+                               << EnergyPlus::format("{:.2R}", thisSurface.ViewFactorGroundIR) << ","
+                               << EnergyPlus::format("{:.2R}", thisSurface.ViewFactorSkyIR) << "," << fmt::to_string(thisSurface.Sides) << ",";
                     for (int vert = 1; vert <= thisSurface.Sides; ++vert) {
                         if (vert != thisSurface.Sides) {
-                            *eiostream << format("{:.2R}", thisSurface.Vertex(vert).x) << "," << format("{:.2R}", thisSurface.Vertex(vert).y) << ","
-                                       << format("{:.2R}", thisSurface.Vertex(vert).z) << ",";
+                            *eiostream << EnergyPlus::format("{:.2R}", thisSurface.Vertex(vert).x) << ","
+                                       << EnergyPlus::format("{:.2R}", thisSurface.Vertex(vert).y) << ","
+                                       << EnergyPlus::format("{:.2R}", thisSurface.Vertex(vert).z) << ",";
                         } else {
-                            *eiostream << format("{:.2R}", thisSurface.Vertex(vert).x) << "," << format("{:.2R}", thisSurface.Vertex(vert).y) << ","
-                                       << format("{:.2R}", thisSurface.Vertex(vert).z) << '\n';
+                            *eiostream << EnergyPlus::format("{:.2R}", thisSurface.Vertex(vert).x) << ","
+                                       << EnergyPlus::format("{:.2R}", thisSurface.Vertex(vert).y) << ","
+                                       << EnergyPlus::format("{:.2R}", thisSurface.Vertex(vert).z) << '\n';
                         }
                     }
                     if (thisSurface.Sides == 0) {
@@ -1368,9 +1362,10 @@ void DetailsForSurfaces(EnergyPlusData &state, int const RptType) // (1=Vertices
                         AlgoName = DataSurfaces::HeatTransAlgoStrs[(int)thisSurface.HeatTransferAlgorithm];
                         *eiostream << "Frame/Divider Surface," << state.dataSurface->FrameDivider(fd).Name << "," << "Frame," << thisSurface.Name
                                    << "," << AlgoName << ",";
-                        *eiostream << ",N/A,N/A,," << format("{:.2R}", state.dataSurface->SurfWinFrameArea(surf)) << ","
-                                   << format("{:.2R}", state.dataSurface->SurfWinFrameArea(surf) / thisSurface.Multiplier) << ",*" << ",N/A"
-                                   << ",N/A," << format("{:.2R}", state.dataSurface->FrameDivider(fd).FrameWidth) << ",N/A" << '\n';
+                        *eiostream << ",N/A,N/A,," << EnergyPlus::format("{:.2R}", state.dataSurface->SurfWinFrameArea(surf)) << ","
+                                   << EnergyPlus::format("{:.2R}", state.dataSurface->SurfWinFrameArea(surf) / thisSurface.Multiplier) << ",*"
+                                   << ",N/A" << ",N/A," << EnergyPlus::format("{:.2R}", state.dataSurface->FrameDivider(fd).FrameWidth) << ",N/A"
+                                   << '\n';
                     }
                     if (state.dataSurface->FrameDivider(fd).DividerWidth > 0.0) {
                         if (state.dataSurface->FrameDivider(fd).DividerType == DataSurfaces::FrameDividerType::DividedLite) {
@@ -1380,9 +1375,10 @@ void DetailsForSurfaces(EnergyPlusData &state, int const RptType) // (1=Vertices
                             *eiostream << "Frame/Divider Surface," << state.dataSurface->FrameDivider(fd).Name << "," << "Divider:Suspended,"
                                        << thisSurface.Name << ",,";
                         }
-                        *eiostream << ",N/A,N/A,," << format("{:.2R}", state.dataSurface->SurfWinDividerArea(surf)) << ","
-                                   << format("{:.2R}", state.dataSurface->SurfWinDividerArea(surf) / thisSurface.Multiplier) << ",*" << ",N/A"
-                                   << ",N/A," << format("{:.2R}", state.dataSurface->FrameDivider(fd).DividerWidth) << ",N/A" << '\n';
+                        *eiostream << ",N/A,N/A,," << EnergyPlus::format("{:.2R}", state.dataSurface->SurfWinDividerArea(surf)) << ","
+                                   << EnergyPlus::format("{:.2R}", state.dataSurface->SurfWinDividerArea(surf) / thisSurface.Multiplier) << ",*"
+                                   << ",N/A" << ",N/A," << EnergyPlus::format("{:.2R}", state.dataSurface->FrameDivider(fd).DividerWidth) << ",N/A"
+                                   << '\n';
                     }
                 }
             } else { // RptType=1  Vertices only
@@ -1399,11 +1395,13 @@ void DetailsForSurfaces(EnergyPlusData &state, int const RptType) // (1=Vertices
                 *eiostream << fmt::to_string(thisSurface.Sides) << ",";
                 for (int vert = 1; vert <= thisSurface.Sides; ++vert) {
                     if (vert != thisSurface.Sides) {
-                        *eiostream << format("{:.2R}", thisSurface.Vertex(vert).x) << "," << format("{:.2R}", thisSurface.Vertex(vert).y) << ","
-                                   << format("{:.2R}", thisSurface.Vertex(vert).z) << ",";
+                        *eiostream << EnergyPlus::format("{:.2R}", thisSurface.Vertex(vert).x) << ","
+                                   << EnergyPlus::format("{:.2R}", thisSurface.Vertex(vert).y) << ","
+                                   << EnergyPlus::format("{:.2R}", thisSurface.Vertex(vert).z) << ",";
                     } else {
-                        *eiostream << format("{:.2R}", thisSurface.Vertex(vert).x) << "," << format("{:.2R}", thisSurface.Vertex(vert).y) << ","
-                                   << format("{:.2R}", thisSurface.Vertex(vert).z) << '\n';
+                        *eiostream << EnergyPlus::format("{:.2R}", thisSurface.Vertex(vert).x) << ","
+                                   << EnergyPlus::format("{:.2R}", thisSurface.Vertex(vert).y) << ","
+                                   << EnergyPlus::format("{:.2R}", thisSurface.Vertex(vert).z) << '\n';
                     }
                 }
                 if (thisSurface.Sides == 0) {
@@ -1544,7 +1542,7 @@ void VRMLOut(EnergyPlusData &state, const std::string &PolygonAction, const std:
         RegularPolyline = true;
         PolylineWidth = " 0";
     } else {
-        ShowWarningError(state, format("VRMLOut: Illegal key specified for Surfaces with > 4 sides={}", PolygonAction));
+        ShowWarningError(state, EnergyPlus::format("VRMLOut: Illegal key specified for Surfaces with > 4 sides={}", PolygonAction));
         ShowContinueError(state, "\"TRIANGULATE 3DFACE\" will be used for any surfaces with > 4 sides.");
         TriangulateFace = true;
     }

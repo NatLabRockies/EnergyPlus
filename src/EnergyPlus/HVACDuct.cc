@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -86,8 +86,6 @@ namespace HVACDuct {
 
     // USE STATEMENTS:
     // <use statements for data only modules>
-    // Using/Aliasing
-    using namespace DataLoopNode;
 
     // <use statements for access to subroutines in other modules>
 
@@ -137,25 +135,26 @@ namespace HVACDuct {
         if (CompIndex == 0) {
             DuctNum = Util::FindItemInList(CompName, state.dataHVACDuct->Duct);
             if (DuctNum == 0) {
-                ShowFatalError(state, format("SimDuct: Component not found={}", CompName));
+                ShowFatalError(state, EnergyPlus::format("SimDuct: Component not found={}", CompName));
             }
             CompIndex = DuctNum;
         } else {
             DuctNum = CompIndex;
             if (DuctNum > state.dataHVACDuct->NumDucts || DuctNum < 1) {
                 ShowFatalError(state,
-                               format("SimDuct:  Invalid CompIndex passed={}, Number of Components={}, Entered Component name={}",
-                                      DuctNum,
-                                      state.dataHVACDuct->NumDucts,
-                                      CompName));
+                               EnergyPlus::format("SimDuct:  Invalid CompIndex passed={}, Number of Components={}, Entered Component name={}",
+                                                  DuctNum,
+                                                  state.dataHVACDuct->NumDucts,
+                                                  CompName));
             }
             if (state.dataHVACDuct->CheckEquipName(DuctNum)) {
                 if (CompName != state.dataHVACDuct->Duct(DuctNum).Name) {
-                    ShowFatalError(state,
-                                   format("SimDuct: Invalid CompIndex passed={}, Component name={}, stored Component Name for that index={}",
-                                          DuctNum,
-                                          CompName,
-                                          state.dataHVACDuct->Duct(DuctNum).Name));
+                    ShowFatalError(
+                        state,
+                        EnergyPlus::format("SimDuct: Invalid CompIndex passed={}, Component name={}, stored Component Name for that index={}",
+                                           DuctNum,
+                                           CompName,
+                                           state.dataHVACDuct->Duct(DuctNum).Name));
                 }
                 state.dataHVACDuct->CheckEquipName(DuctNum) = false;
             }
@@ -184,8 +183,8 @@ namespace HVACDuct {
         // Uses InputProcessor "Get" routines to obtain data.
 
         // Using/Aliasing
-        using BranchNodeConnections::TestCompSet;
-        using NodeInputManager::GetOnlySingleNode;
+        using Node::GetOnlySingleNode;
+        using Node::TestCompSet;
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         int DuctNum; // duct index
@@ -218,21 +217,21 @@ namespace HVACDuct {
             state.dataHVACDuct->Duct(DuctNum).InletNodeNum = GetOnlySingleNode(state,
                                                                                state.dataIPShortCut->cAlphaArgs(2),
                                                                                ErrorsFound,
-                                                                               DataLoopNode::ConnectionObjectType::Duct,
+                                                                               Node::ConnectionObjectType::Duct,
                                                                                state.dataIPShortCut->cAlphaArgs(1),
-                                                                               DataLoopNode::NodeFluidType::Air,
-                                                                               DataLoopNode::ConnectionType::Inlet,
-                                                                               NodeInputManager::CompFluidStream::Primary,
-                                                                               ObjectIsNotParent);
+                                                                               Node::FluidType::Air,
+                                                                               Node::ConnectionType::Inlet,
+                                                                               Node::CompFluidStream::Primary,
+                                                                               Node::ObjectIsNotParent);
             state.dataHVACDuct->Duct(DuctNum).OutletNodeNum = GetOnlySingleNode(state,
                                                                                 state.dataIPShortCut->cAlphaArgs(3),
                                                                                 ErrorsFound,
-                                                                                DataLoopNode::ConnectionObjectType::Duct,
+                                                                                Node::ConnectionObjectType::Duct,
                                                                                 state.dataIPShortCut->cAlphaArgs(1),
-                                                                                DataLoopNode::NodeFluidType::Air,
-                                                                                DataLoopNode::ConnectionType::Outlet,
-                                                                                NodeInputManager::CompFluidStream::Primary,
-                                                                                ObjectIsNotParent);
+                                                                                Node::FluidType::Air,
+                                                                                Node::ConnectionType::Outlet,
+                                                                                Node::CompFluidStream::Primary,
+                                                                                Node::ObjectIsNotParent);
             TestCompSet(state,
                         cCurrentModuleObject,
                         state.dataIPShortCut->cAlphaArgs(1),
@@ -244,7 +243,7 @@ namespace HVACDuct {
         // No output variables
 
         if (ErrorsFound) {
-            ShowFatalError(state, format("{} Errors found in input", RoutineName));
+            ShowFatalError(state, EnergyPlus::format("{} Errors found in input", RoutineName));
         }
     }
 

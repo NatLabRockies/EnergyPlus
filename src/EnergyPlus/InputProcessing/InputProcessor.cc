@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -622,8 +622,11 @@ std::string InputProcessor::getAlphaFieldValue(json const &ep_object, json const
 {
     // Return the value of fieldName in ep_object as a string.
     // If the field is not present in ep_object then return its default if there is one, or return an empty string
-    auto const &fprops = schema_obj_props[fieldName];
-    assert(!fprops.empty()); // Check that field name exists in the schema for this object type
+    auto const fpropsIt = schema_obj_props.find(fieldName);
+    if (fpropsIt == schema_obj_props.end()) {
+        throw std::runtime_error("InputProcessor schema field lookup failed for string field \"" + fieldName + "\"");
+    }
+    auto const &fprops = fpropsIt.value();
 
     uc = (fprops.find("retaincase") == fprops.end());
 
@@ -664,8 +667,11 @@ Real64 InputProcessor::getRealFieldValue(json const &ep_object, json const &sche
         }
     }
 
-    auto const &schema_field_obj = schema_obj_props[fieldName];
-    assert(!schema_field_obj.empty()); // Check that field name exists in the schema for this object type
+    auto const schemaFieldIt = schema_obj_props.find(fieldName);
+    if (schemaFieldIt == schema_obj_props.end()) {
+        throw std::runtime_error("InputProcessor schema field lookup failed for numeric field \"" + fieldName + "\"");
+    }
+    auto const &schema_field_obj = schemaFieldIt.value();
 
     auto const find_default = schema_field_obj.find("default");
     if (find_default != schema_field_obj.end()) {
@@ -687,9 +693,11 @@ int InputProcessor::getIntFieldValue(json const &ep_object, json const &schema_o
     // If the field value is a string, then assume autosize or autocalculate and return Constant::AutoCalculate(-99999).
     // If the field is not present in ep_object then return its default if there is one, or return 0
 
-    auto const &schema_field_obj = schema_obj_props[fieldName];
-    assert(!schema_field_obj.empty()); // Check that field name exists in the schema for this object type
-    bool isDefaulted = false;
+    auto const schemaFieldIt = schema_obj_props.find(fieldName);
+    if (schemaFieldIt == schema_obj_props.end()) {
+        throw std::runtime_error("InputProcessor schema field lookup failed for integer field \"" + fieldName + "\"");
+    }
+    auto const &schema_field_obj = schemaFieldIt.value();
     int value = 0;
     Real64 defaultValue = 0.0;
     auto it = ep_object.find(fieldName);
@@ -702,14 +710,12 @@ int InputProcessor::getIntFieldValue(json const &ep_object, json const &schema_o
             // really is an int then the input processor will have forced it to be an integer.
             assert(!field_value.is_number());
         } else if (field_value.get<std::string>().empty()) {
-            isDefaulted = findDefault(defaultValue, schema_field_obj);
-            if (isDefaulted) {
+            if (findDefault(defaultValue, schema_field_obj)) {
                 value = static_cast<int>(defaultValue);
             }
         }
     } else {
-        isDefaulted = findDefault(defaultValue, schema_field_obj);
-        if (isDefaulted) {
+        if (findDefault(defaultValue, schema_field_obj)) {
             value = static_cast<int>(defaultValue);
         }
     }
@@ -770,7 +776,7 @@ InputProcessor::MaxFields InputProcessor::findMaxFields(
                 continue;
             }
             for (std::size_t i = maxFields.max_fields; i < legacy_idd_fields.size(); ++i) {
-                if (field_key == legacy_idd_fields[i]) {
+                if (field_key == legacy_idd_fields[i].get<std::string>()) {
                     maxFields.max_fields = (i + 1);
                 }
             }
@@ -783,18 +789,7 @@ InputProcessor::MaxFields InputProcessor::findMaxFields(
                 auto const &legacy_idd_extensibles = legacy_idd_extensibles_iter.value();
                 auto const &epJSON_extensions_array = epJSON_extensions_array_itr.value();
 
-                for (auto const &exts : epJSON_extensions_array.items()) {
-                    std::size_t max_extensible_field = 0;
-                    for (auto const &ext : exts.value().items()) {
-                        auto const &ext_key = ext.key();
-                        for (std::size_t i = max_extensible_field; i < legacy_idd_extensibles.size(); ++i) {
-                            if (ext_key == legacy_idd_extensibles[i]) {
-                                max_extensible_field = (i + 1);
-                            }
-                        }
-                    }
-                    maxFields.max_extensible_fields += max_extensible_field;
-                }
+                maxFields.max_extensible_fields += epJSON_extensions_array.size() * legacy_idd_extensibles.size();
             }
         }
     }
@@ -918,7 +913,7 @@ const json &InputProcessor::getJSONObjectItem(EnergyPlusData &state, std::string
         auto tmp_umit = caseInsensitiveObjectMap.find(convertToUpper(objectInfo.objectType));
         if (tmp_umit == caseInsensitiveObjectMap.end()) {
             // indicates object type not found, see function GeneralRoutines::ValidateComponent
-            ShowFatalError(state, format(R"(ObjectType of type "{}" requested was not found in input)", objectInfo.objectType));
+            ShowFatalError(state, EnergyPlus::format(R"(ObjectType of type "{}" requested was not found in input)", objectInfo.objectType));
         }
         objectInfo.objectType = tmp_umit->second;
         obj_iter = epJSON.find(objectInfo.objectType);
@@ -938,7 +933,8 @@ const json &InputProcessor::getJSONObjectItem(EnergyPlusData &state, std::string
         }
     }
 
-    ShowFatalError(state, format(R"(Name "{}" requested was not found in input for ObjectType "{}")", objectInfo.objectType, objectInfo.objectName));
+    ShowFatalError(
+        state, EnergyPlus::format(R"(Name "{}" requested was not found in input for ObjectType "{}")", objectInfo.objectType, objectInfo.objectName));
     throw;
 }
 

@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -109,8 +109,7 @@ namespace ReturnAirPathManager {
         // PURPOSE OF THIS SUBROUTINE: This subroutine
 
         // Using/Aliasing
-        using NodeInputManager::GetOnlySingleNode;
-        using namespace DataLoopNode;
+        using Node::GetOnlySingleNode;
 
         //////////// hoisted into namespace ////////////////////////////////////////////////
         // static bool ErrorsFound( false );
@@ -142,21 +141,19 @@ namespace ReturnAirPathManager {
                                                                          state.dataIPShortCut->rNumericArgs,
                                                                          NumNums,
                                                                          IOStat);
-                Util::IsNameEmpty(state, state.dataIPShortCut->cAlphaArgs(1), cCurrentModuleObject, ErrorsFound);
 
                 state.dataZoneEquip->ReturnAirPath(PathNum).Name = state.dataIPShortCut->cAlphaArgs(1);
                 state.dataZoneEquip->ReturnAirPath(PathNum).NumOfComponents = nint((NumAlphas - 2.0) / 2.0);
 
-                state.dataZoneEquip->ReturnAirPath(PathNum).OutletNodeNum =
-                    GetOnlySingleNode(state,
-                                      state.dataIPShortCut->cAlphaArgs(2),
-                                      ErrorsFound,
-                                      DataLoopNode::ConnectionObjectType::AirLoopHVACReturnPath,
-                                      state.dataIPShortCut->cAlphaArgs(1),
-                                      DataLoopNode::NodeFluidType::Air,
-                                      DataLoopNode::ConnectionType::Outlet,
-                                      NodeInputManager::CompFluidStream::Primary,
-                                      ObjectIsParent);
+                state.dataZoneEquip->ReturnAirPath(PathNum).OutletNodeNum = GetOnlySingleNode(state,
+                                                                                              state.dataIPShortCut->cAlphaArgs(2),
+                                                                                              ErrorsFound,
+                                                                                              Node::ConnectionObjectType::AirLoopHVACReturnPath,
+                                                                                              state.dataIPShortCut->cAlphaArgs(1),
+                                                                                              Node::FluidType::Air,
+                                                                                              Node::ConnectionType::Outlet,
+                                                                                              Node::CompFluidStream::Primary,
+                                                                                              Node::ObjectIsParent);
 
                 state.dataZoneEquip->ReturnAirPath(PathNum).ComponentType.allocate(state.dataZoneEquip->ReturnAirPath(PathNum).NumOfComponents);
                 state.dataZoneEquip->ReturnAirPath(PathNum).ComponentType = "";
@@ -182,16 +179,19 @@ namespace ReturnAirPathManager {
                                           IsNotOK,
                                           "AirLoopHVAC:ReturnPath");
                         if (IsNotOK) {
-                            ShowContinueError(state, format("In AirLoopHVAC:ReturnPath ={}", state.dataZoneEquip->ReturnAirPath(PathNum).Name));
+                            ShowContinueError(state,
+                                              EnergyPlus::format("In AirLoopHVAC:ReturnPath ={}", state.dataZoneEquip->ReturnAirPath(PathNum).Name));
                             ErrorsFound = true;
                         }
                         state.dataZoneEquip->ReturnAirPath(PathNum).ComponentTypeEnum(CompNum) = static_cast<DataZoneEquipment::AirLoopHVACZone>(
                             getEnumValue(DataZoneEquipment::AirLoopHVACTypeNamesCC, state.dataIPShortCut->cAlphaArgs(Counter)));
 
                     } else {
-                        ShowSevereError(
-                            state, format("Unhandled component type in AirLoopHVAC:ReturnPath of {}", state.dataIPShortCut->cAlphaArgs(Counter)));
-                        ShowContinueError(state, format("Occurs in AirLoopHVAC:ReturnPath = {}", state.dataZoneEquip->ReturnAirPath(PathNum).Name));
+                        ShowSevereError(state,
+                                        EnergyPlus::format("Unhandled component type in AirLoopHVAC:ReturnPath of {}",
+                                                           state.dataIPShortCut->cAlphaArgs(Counter)));
+                        ShowContinueError(
+                            state, EnergyPlus::format("Occurs in AirLoopHVAC:ReturnPath = {}", state.dataZoneEquip->ReturnAirPath(PathNum).Name));
                         ShowContinueError(state, "Must be \"AirLoopHVAC:ZoneMixer\" or \"AirLoopHVAC:ReturnPlenum\"");
                         ErrorsFound = true;
                     }
@@ -253,9 +253,10 @@ namespace ReturnAirPathManager {
 
             default:
                 ShowSevereError(state,
-                                format("Invalid AirLoopHVAC:ReturnPath Component={}",
-                                       state.dataZoneEquip->ReturnAirPath(ReturnAirPathNum).ComponentType(ComponentNum)));
-                ShowContinueError(state, format("Occurs in AirLoopHVAC:ReturnPath ={}", state.dataZoneEquip->ReturnAirPath(ReturnAirPathNum).Name));
+                                EnergyPlus::format("Invalid AirLoopHVAC:ReturnPath Component={}",
+                                                   state.dataZoneEquip->ReturnAirPath(ReturnAirPathNum).ComponentType(ComponentNum)));
+                ShowContinueError(
+                    state, EnergyPlus::format("Occurs in AirLoopHVAC:ReturnPath ={}", state.dataZoneEquip->ReturnAirPath(ReturnAirPathNum).Name));
                 ShowFatalError(state, "Preceding condition causes termination.");
                 break;
             }

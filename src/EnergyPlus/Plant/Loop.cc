@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -131,7 +131,7 @@ void PlantLoopData::CalcUnmetPlantDemand(EnergyPlusData &state)
     TargetTemp = state.dataLoopNodes->Node(this->TempSetPointNodeNum).Temp;
     MassFlowRate = state.dataLoopNodes->Node(this->TempSetPointNodeNum).MassFlowRate;
 
-    if (this->FluidType == DataLoopNode::NodeFluidType::Water) {
+    if (this->FluidType == Node::FluidType::Water) {
 
         Cp = this->glycol->getSpecificHeat(state, TargetTemp, RoutineName);
 
@@ -175,7 +175,7 @@ void PlantLoopData::CalcUnmetPlantDemand(EnergyPlusData &state)
             break;
         }
 
-    } else if (this->FluidType == DataLoopNode::NodeFluidType::Steam) {
+    } else if (this->FluidType == Node::FluidType::Steam) {
 
         Cp = this->glycol->getSpecificHeat(state, TargetTemp, RoutineName);
 
@@ -249,13 +249,13 @@ void PlantLoopData::CheckLoopExitNode(EnergyPlusData &state, bool const FirstHVA
                                      "\", Error (CheckLoopExitNode) -- Mass Flow Rate Calculation. Outlet and Inlet differ by more than tolerance.");
                 ShowContinueErrorTimeStamp(state, "");
                 ShowContinueError(state,
-                                  format("Loop inlet node={}, flowrate={:.4R} kg/s",
-                                         state.dataLoopNodes->NodeID(LoopInlet),
-                                         state.dataLoopNodes->Node(LoopInlet).MassFlowRate));
+                                  EnergyPlus::format("Loop inlet node={}, flowrate={:.4R} kg/s",
+                                                     state.dataLoopNodes->NodeID(LoopInlet),
+                                                     state.dataLoopNodes->Node(LoopInlet).MassFlowRate));
                 ShowContinueError(state,
-                                  format("Loop outlet node={}, flowrate={:.4R} kg/s",
-                                         state.dataLoopNodes->NodeID(LoopOutlet),
-                                         state.dataLoopNodes->Node(LoopOutlet).MassFlowRate));
+                                  EnergyPlus::format("Loop outlet node={}, flowrate={:.4R} kg/s",
+                                                     state.dataLoopNodes->NodeID(LoopOutlet),
+                                                     state.dataLoopNodes->Node(LoopOutlet).MassFlowRate));
                 ShowContinueError(state, "This loop might be helped by a bypass.");
             }
             ShowRecurringWarningErrorAtEnd(

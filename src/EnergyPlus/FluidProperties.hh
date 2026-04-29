@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -541,7 +541,7 @@ namespace Fluid {
     RefrigProps *GetRefrig(EnergyPlusData &state, std::string_view name);
     RefrigProps *GetSteam(EnergyPlusData &state);
 
-    int GetGlycolRawNum(EnergyPlusData &state, std::string_view name);
+    int GetGlycolRawNum(EnergyPlusData const &state, std::string_view name);
     GlycolRawProps *GetGlycolRaw(EnergyPlusData &state, std::string_view name);
 
     int GetGlycolNum(EnergyPlusData &state, std::string_view name);

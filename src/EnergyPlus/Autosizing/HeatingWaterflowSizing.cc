@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -139,20 +139,17 @@ Real64 HeatingWaterflowSizer::size(EnergyPlusData &state, Real64 _originalValue,
         }
     }
     if (this->overrideSizeString) {
-        if (this->isEpJSON) {
-            this->sizingString = "maximum_water_flow_rate [m3/s]";
-        }
+        this->sizingString = "Maximum Water Flow Rate [m3/s]";
     }
     this->selectSizerOutput(state, errorsFound);
     if (this->isCoilReportObject) {
-        state.dataRptCoilSelection->coilSelectionReportObj->setCoilWaterFlowPltSizNum(
-            state, this->compName, this->compType, this->autoSizedValue, this->wasAutoSized, this->dataPltSizHeatNum, this->dataWaterLoopNum);
-        state.dataRptCoilSelection->coilSelectionReportObj->setCoilEntWaterTemp(state, this->compName, this->compType, Constant::HWInitConvTemp);
+        ReportCoilSelection::setCoilWaterFlowPltSizNum(
+            state, this->coilReportNum, this->autoSizedValue, this->wasAutoSized, this->dataPltSizHeatNum, this->dataWaterLoopNum);
+        ReportCoilSelection::setCoilEntWaterTemp(state, this->coilReportNum, Constant::HWInitConvTemp);
         if (!this->plantSizData.empty() && this->dataPltSizHeatNum > 0) {
-            state.dataRptCoilSelection->coilSelectionReportObj->setCoilWaterDeltaT(
-                state, this->compName, this->compType, this->plantSizData(this->dataPltSizHeatNum).DeltaT);
-            state.dataRptCoilSelection->coilSelectionReportObj->setCoilLvgWaterTemp(
-                state, this->compName, this->compType, Constant::HWInitConvTemp - this->plantSizData(this->dataPltSizHeatNum).DeltaT);
+            ReportCoilSelection::setCoilWaterDeltaT(state, this->coilReportNum, this->plantSizData(this->dataPltSizHeatNum).DeltaT);
+            ReportCoilSelection::setCoilLvgWaterTemp(
+                state, this->coilReportNum, Constant::HWInitConvTemp - this->plantSizData(this->dataPltSizHeatNum).DeltaT);
         }
         this->calcCoilWaterFlowRates(state,
                                      this->compName,

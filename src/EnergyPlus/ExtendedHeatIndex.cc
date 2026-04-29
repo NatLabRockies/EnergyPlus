@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -542,8 +542,8 @@ namespace ExtendedHI {
         // RH: relative humidity in range of 0.0 to 1.0
         // The function computes the extended heat index, in Kelvinn
 
-        auto const HVACSystemRootSolverMethodBackup = state.dataRootFinder->HVACSystemRootFinding.HVACSystemRootSolverMethod;
-        state.dataRootFinder->HVACSystemRootFinding.HVACSystemRootSolverMethod = HVACSystemRootSolverAlgorithm::ShortBisectionThenRegulaFalsi;
+        RootAlgo rootAlgoBackup = state.dataRootFinder->rootAlgo;
+        state.dataRootFinder->rootAlgo = RootAlgo::ShortBisectionThenRegulaFalsi;
         EqvarName eqvar_name = EqvarName::Invalid;
         Real64 const eqvar_value = find_eqvar_name_and_value(state, Ta, RH, eqvar_name);
 
@@ -553,7 +553,7 @@ namespace ExtendedHI {
             T = 0.0;
         }
 
-        state.dataRootFinder->HVACSystemRootFinding.HVACSystemRootSolverMethod = HVACSystemRootSolverMethodBackup;
+        state.dataRootFinder->rootAlgo = rootAlgoBackup;
         return T;
     }
 

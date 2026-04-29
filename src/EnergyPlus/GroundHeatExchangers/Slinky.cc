@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -60,7 +60,7 @@ GLHESlinky::GLHESlinky(EnergyPlusData &state, std::string const &objName, nlohma
     // Check for duplicates
     for (const auto &existingObj : state.dataGroundHeatExchanger->singleBoreholesVector) {
         if (objName == existingObj->name) {
-            ShowFatalError(state, format("Invalid input for {} object: Duplicate name found: {}", this->moduleName, existingObj->name));
+            ShowFatalError(state, EnergyPlus::format("Invalid input for {} object: Duplicate name found: {}", this->moduleName, existingObj->name));
         }
     }
 
@@ -72,31 +72,31 @@ GLHESlinky::GLHESlinky(EnergyPlusData &state, std::string const &objName, nlohma
     std::string outletNodeName = Util::makeUPPER(j["outlet_node_name"].get<std::string>());
 
     // get inlet node num
-    this->inletNodeNum = NodeInputManager::GetOnlySingleNode(state,
-                                                             inletNodeName,
-                                                             errorsFound,
-                                                             DataLoopNode::ConnectionObjectType::GroundHeatExchangerSlinky,
-                                                             this->name,
-                                                             DataLoopNode::NodeFluidType::Water,
-                                                             DataLoopNode::ConnectionType::Inlet,
-                                                             NodeInputManager::CompFluidStream::Primary,
-                                                             DataLoopNode::ObjectIsNotParent);
+    this->inletNodeNum = Node::GetOnlySingleNode(state,
+                                                 inletNodeName,
+                                                 errorsFound,
+                                                 Node::ConnectionObjectType::GroundHeatExchangerSlinky,
+                                                 this->name,
+                                                 Node::FluidType::Water,
+                                                 Node::ConnectionType::Inlet,
+                                                 Node::CompFluidStream::Primary,
+                                                 Node::ObjectIsNotParent);
 
     // get outlet node num
-    this->outletNodeNum = NodeInputManager::GetOnlySingleNode(state,
-                                                              outletNodeName,
-                                                              errorsFound,
-                                                              DataLoopNode::ConnectionObjectType::GroundHeatExchangerSlinky,
-                                                              this->name,
-                                                              DataLoopNode::NodeFluidType::Water,
-                                                              DataLoopNode::ConnectionType::Outlet,
-                                                              NodeInputManager::CompFluidStream::Primary,
-                                                              DataLoopNode::ObjectIsNotParent);
+    this->outletNodeNum = Node::GetOnlySingleNode(state,
+                                                  outletNodeName,
+                                                  errorsFound,
+                                                  Node::ConnectionObjectType::GroundHeatExchangerSlinky,
+                                                  this->name,
+                                                  Node::FluidType::Water,
+                                                  Node::ConnectionType::Outlet,
+                                                  Node::CompFluidStream::Primary,
+                                                  Node::ObjectIsNotParent);
 
     this->available = true;
     this->on = true;
 
-    BranchNodeConnections::TestCompSet(state, this->moduleName, this->name, inletNodeName, outletNodeName, "Condenser Water Nodes");
+    Node::TestCompSet(state, this->moduleName, this->name, inletNodeName, outletNodeName, "Condenser Water Nodes");
 
     // load data
     this->designFlow = j["design_flow_rate"].get<Real64>();
@@ -149,9 +149,9 @@ GLHESlinky::GLHESlinky(EnergyPlusData &state, std::string const &objName, nlohma
         // Vertical configuration
         if (this->trenchDepth - this->coilDiameter < 0.0) {
             // Error: part of the coil is above ground
-            ShowSevereError(state, format("{}=\"{}\", invalid value in field.", this->moduleName, this->name));
-            ShowContinueError(state, format("...{}=[{:.3R}].", "Trench Depth", this->trenchDepth));
-            ShowContinueError(state, format("...{}=[{:.3R}].", "Coil Depth", this->coilDepth));
+            ShowSevereError(state, EnergyPlus::format("{}=\"{}\", invalid value in field.", this->moduleName, this->name));
+            ShowContinueError(state, EnergyPlus::format("...{}=[{:.3R}].", "Trench Depth", this->trenchDepth));
+            ShowContinueError(state, EnergyPlus::format("...{}=[{:.3R}].", "Coil Depth", this->coilDepth));
             ShowContinueError(state, "...Part of coil will be above ground.");
             errorsFound = true;
 
@@ -172,9 +172,9 @@ GLHESlinky::GLHESlinky(EnergyPlusData &state, std::string const &objName, nlohma
     this->prevTimeSteps = 0.0;
 
     if (this->pipe.thickness >= this->pipe.outDia / 2.0) {
-        ShowSevereError(state, format("{}=\"{}\", invalid value in field.", this->moduleName, this->name));
-        ShowContinueError(state, format("...{}=[{:.3R}].", "Pipe Thickness", this->pipe.thickness));
-        ShowContinueError(state, format("...{}=[{:.3R}].", "Pipe Outer Diameter", this->pipe.outDia));
+        ShowSevereError(state, EnergyPlus::format("{}=\"{}\", invalid value in field.", this->moduleName, this->name));
+        ShowContinueError(state, EnergyPlus::format("...{}=[{:.3R}].", "Pipe Thickness", this->pipe.thickness));
+        ShowContinueError(state, EnergyPlus::format("...{}=[{:.3R}].", "Pipe Outer Diameter", this->pipe.outDia));
         ShowContinueError(state, "...Radius will be <=0.");
         errorsFound = true;
     }
@@ -189,7 +189,7 @@ GLHESlinky::GLHESlinky(EnergyPlusData &state, std::string const &objName, nlohma
 
     // Check for Errors
     if (errorsFound) {
-        ShowFatalError(state, format("Errors found in processing input for {}", this->moduleName));
+        ShowFatalError(state, EnergyPlus::format("Errors found in processing input for {}", this->moduleName));
     }
 }
 

@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -92,7 +92,6 @@ using namespace EnergyPlus::ZoneEquipmentManager;
 using namespace EnergyPlus::HeatBalanceAirManager;
 using namespace EnergyPlus::DataHeatBalFanSys;
 using namespace EnergyPlus::DataZoneEquipment;
-using namespace EnergyPlus::DataLoopNode;
 using namespace EnergyPlus::DataAirLoop;
 using namespace EnergyPlus::DataAirSystems;
 using namespace nlohmann::literals;
@@ -1338,7 +1337,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceManager_HVACSystemRootFindingAlgorithmInput
     ErrorsFound = false;
     GetProjectControlData(*state, ErrorsFound); // returns ErrorsFound false
     EXPECT_FALSE(ErrorsFound);
-    EXPECT_EQ(state->dataRootFinder->HVACSystemRootFinding.Algorithm, "REGULAFALSITHENBISECTION");
+    EXPECT_EQ(state->dataRootFinder->Algorithm, "REGULAFALSITHENBISECTION");
 }
 
 TEST_F(EnergyPlusFixture, HeatBalanceManager_HVACSystemRootFindingAlgorithmNoInputTest)
@@ -1368,7 +1367,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceManager_HVACSystemRootFindingAlgorithmNoInp
     ErrorsFound = false;
     GetProjectControlData(*state, ErrorsFound); // returns ErrorsFound false
     EXPECT_FALSE(ErrorsFound);
-    EXPECT_EQ(state->dataRootFinder->HVACSystemRootFinding.Algorithm, "RegulaFalsi");
+    EXPECT_EQ(state->dataRootFinder->Algorithm, "RegulaFalsi");
 }
 
 TEST_F(EnergyPlusFixture, HeatBalanceManager_EMSConstructionTest)
@@ -1969,7 +1968,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceManager_HVACSystemRootFindingAlgorithmBisec
     ErrorsFound = false;
     GetProjectControlData(*state, ErrorsFound); // returns ErrorsFound false
     EXPECT_FALSE(ErrorsFound);
-    EXPECT_EQ(state->dataRootFinder->HVACSystemRootFinding.Algorithm, "BISECTION");
+    EXPECT_EQ(state->dataRootFinder->Algorithm, "BISECTION");
 }
 
 TEST_F(EnergyPlusFixture, HeatBalanceManager_EMSConstructionSwitchTest)

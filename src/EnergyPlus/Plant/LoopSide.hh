@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -144,18 +144,17 @@ namespace DataPlant {
         HalfLoopData()
             : SimLoopSideNeeded(true), SimZoneEquipNeeded(true), SimAirLoopsNeeded(true), SimNonZoneEquipNeeded(true), SimElectLoadCentrNeeded(true),
               OncePerTimeStepOperations(true), TimeElapsed(0.0), FlowRequest(0.0), FlowRequestTemperature(0.0),
-              TempSetPoint(DataLoopNode::SensedNodeFlagValue), TempSetPointHi(DataLoopNode::SensedNodeFlagValue),
-              TempSetPointLo(DataLoopNode::SensedNodeFlagValue), TempInterfaceTankOutlet(0.0), LastTempInterfaceTankOutlet(0.0), TotalBranches(0),
-              NodeNumIn(0), NodeNumOut(0), TotalPumps(0), BranchPumpsExist(false), TotalPumpHeat(0.0), BypassExists(false), InletNodeSetPt(false),
-              OutletNodeSetPt(false), EMSCtrl(false), EMSValue(0.0), FlowRestrictionFlag(false), FlowLock(DataPlant::FlowLock::Unlocked),
-              TotalConnected(0), HasPressureComponents(false), HasParallelPressComps(false), PressureDrop(0.0), PressureEffectiveK(0.0),
-              errCount_LoadWasntDist(0), errIndex_LoadWasntDist(0), errCount_LoadRemains(0), errIndex_LoadRemains(0), LoopSideInlet_TankTemp(0.0),
-              LoopSideInlet_MdotCpDeltaT(0.0), LoopSideInlet_McpDTdt(0.0), LoopSideInlet_CapExcessStorageTime(0.0),
-              LoopSideInlet_CapExcessStorageTimeReport(0.0), LoopSideInlet_TotalTime(0.0), InletNode(0.0, 0.0), OutletNode(0.0, 0.0),
-              flowRequestNeedIfOn(0.0), flowRequestNeedAndTurnOn(0.0), flowRequestFinal(0.0), hasConstSpeedBranchPumps(false),
-              InitialDemandToLoopSetPoint(0.0), CurrentAlterationsToDemand(0.0), UpdatedDemandToLoopSetPoint(0.0),
-              LoadToLoopSetPointThatWasntMet(0.0), InitialDemandToLoopSetPointSAVED(0.0), LoopSetPtDemandAtInlet(0.0), ThisSideLoadAlterations(0.0),
-              plantLoc{}
+              TempSetPoint(Node::SensedNodeFlagValue), TempSetPointHi(Node::SensedNodeFlagValue), TempSetPointLo(Node::SensedNodeFlagValue),
+              TempInterfaceTankOutlet(0.0), LastTempInterfaceTankOutlet(0.0), TotalBranches(0), NodeNumIn(0), NodeNumOut(0), TotalPumps(0),
+              BranchPumpsExist(false), TotalPumpHeat(0.0), BypassExists(false), InletNodeSetPt(false), OutletNodeSetPt(false), EMSCtrl(false),
+              EMSValue(0.0), FlowRestrictionFlag(false), FlowLock(DataPlant::FlowLock::Unlocked), TotalConnected(0), HasPressureComponents(false),
+              HasParallelPressComps(false), PressureDrop(0.0), PressureEffectiveK(0.0), errCount_LoadWasntDist(0), errIndex_LoadWasntDist(0),
+              errCount_LoadRemains(0), errIndex_LoadRemains(0), LoopSideInlet_TankTemp(0.0), LoopSideInlet_MdotCpDeltaT(0.0),
+              LoopSideInlet_McpDTdt(0.0), LoopSideInlet_CapExcessStorageTime(0.0), LoopSideInlet_CapExcessStorageTimeReport(0.0),
+              LoopSideInlet_TotalTime(0.0), InletNode(0.0, 0.0), OutletNode(0.0, 0.0), flowRequestNeedIfOn(0.0), flowRequestNeedAndTurnOn(0.0),
+              flowRequestFinal(0.0), hasConstSpeedBranchPumps(false), InitialDemandToLoopSetPoint(0.0), CurrentAlterationsToDemand(0.0),
+              UpdatedDemandToLoopSetPoint(0.0), LoadToLoopSetPointThatWasntMet(0.0), InitialDemandToLoopSetPointSAVED(0.0),
+              LoopSetPtDemandAtInlet(0.0), ThisSideLoadAlterations(0.0), plantLoc{}
         {
         }
 

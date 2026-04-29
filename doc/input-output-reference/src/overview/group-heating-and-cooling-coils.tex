@@ -2178,7 +2178,7 @@ The rated power of the evaporative condenser water pump in Watts. This value is 
 
 \paragraph{Field: Crankcase Heater Capacity}\label{field-crankcase-heater-capacity}
 
-This numeric field defines the crankcase heater capacity in Watts. When the outdoor air dry-bulb temperature is below the value specified in the input field Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation (described below), the crankcase heater is enabled during the time that the compressor is not running. If this cooling coil is used as part of an air-to-air heat pump (Ref. \hyperref[airloophvacunitaryheatpumpairtoair]{AirLoopHVAC:UnitaryHeatPump:AirToAir} or PackageTerminal: HeatPump:AirToAir), the crankcase heater defined for this DX cooling coil is ignored and the crankcase heater power defined for the DX heating coil (Ref. \hyperref[coilheatingdxsinglespeed]{Coil:Heating:DX:SingleSpeed}) is enabled during the time that the compressor is not running for either heating or cooling. The value for this input field must be greater than or equal to 0, and the default value is 0. To simulate a DX cooling coil without a crankcase heater, enter a value of 0.
+This numeric field defines the crankcase heater capacity in Watts. When the outdoor air dry-bulb temperature is below the value specified in the input field Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation (described below), the crankcase heater is enabled during the time that the compressor is not running. If this cooling coil is used as part of an air-to-air heat pump (e.g., AirLoopHVAC:UnitaryHeatPump:AirToAir, AirLoopHVAC:UnitarySystem, or ZoneHVAC:PackagedTerminalHeatPump), the crankcase heater defined for this DX cooling coil is ignored and the crankcase heater power defined for the DX heating coil (e.g., Coil:Heating:DX:SingleSpeed) is enabled during the time that the compressor is not running for either heating or cooling. The value for this input field must be greater than or equal to 0, and the default value is 0. To simulate a DX cooling coil without a crankcase heater, enter a value of 0.
 
 \paragraph{Field: Crankcase Heater Capacity Function of Temperature Curve Name}
 
@@ -2628,7 +2628,7 @@ The name of the HVAC system node to which the DX cooling coil sends its outlet a
 
 \paragraph{Field: Crankcase Heater Capacity}\label{field-crankcase-heater-capacity-1}
 
-This numeric field defines the crankcase heater capacity in Watts. When the outdoor air dry-bulb temperature is below the value specified in the input field Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation (described below), the crankcase heater is enabled during the time that the compressor is not running. If this cooling coil is used as part of an air-to-air heat pump (Ref. \hyperref[airloophvacunitarysystem]{AirLoopHVAC:UnitarySystem} and \hyperref[airloophvacunitaryheatcoolvavchangeoverbypass]{AirLoopHVAC:UnitaryHeatCool:VAVChangeoverBypass}), the crankcase heater defined for this DX cooling coil is ignored and the crankcase heater power defined for the DX heating coil (Ref. \hyperref[coilheatingdxsinglespeed]{Coil:Heating:DX:SingleSpeed}) is enabled during the time that the compressor is not running for either heating or cooling. The value for this input field must be greater than or equal to 0, and the default value is 0. To simulate a DX cooling coil without a crankcase heater, enter a value of 0.
+This numeric field defines the crankcase heater capacity in Watts. When the outdoor air dry-bulb temperature is below the value specified in the input field Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation (described below), the crankcase heater is enabled during the time that the compressor is not running. If this cooling coil is used as part of an air-to-air heat pump (e.g., AirLoopHVAC:UnitarySystem or AirLoopHVAC:UnitaryHeatCool:VAVChangeoverBypass), the crankcase heater defined for this DX cooling coil is ignored and the crankcase heater power defined for the DX heating coil (e.g., Coil:Heating:DX:SingleSpeed) is enabled during the time that the compressor is not running for either heating or cooling. The value for this input field must be greater than or equal to 0, and the default value is 0. To simulate a DX cooling coil without a crankcase heater, enter a value of 0.
 
 \paragraph{Field: Crankcase Heater Capacity Function of Temperature Curve Name}
 
@@ -2774,7 +2774,7 @@ The latent capacity degradation model only applies when the ContinuousFanWithCyc
 
 \paragraph{Field: Crankcase Heater Capacity}\label{field-crankcase-heater-capacity-2}
 
-This numeric field defines the crankcase heater capacity in Watts. When the outdoor air dry-bulb temperature is below the value specified in the input field Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation (described below), the crankcase heater is enabled during the time that the compressor is not running. The value for this input field must be greater than or equal to 0. If this input field is left blank, the default value is 0. To simulate a unit without a crankcase heater, enter a value of 0.
+This numeric field defines the crankcase heater capacity in Watts. When the outdoor air dry-bulb temperature is below the value specified in the input field Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation (described below), the crankcase heater is enabled during the time that the compressor is not running. If this cooling coil is used as part of an air-to-air heat pump (e.g., AirLoopHVAC:UnitarySystem), the crankcase heater defined for this DX cooling coil is ignored and the crankcase heater power defined for the DX heating coil (e.g., Coil:Heating:DX:SingleSpeed) is enabled during the time that the compressor is not running for either heating or cooling. The value for this input field must be greater than or equal to 0, and the default value is 0. To simulate a DX cooling coil without a crankcase heater, enter a value of 0.
 
 \paragraph{Field: Crankcase Heater Capacity Function of Temperature Curve Name}
 
@@ -3072,7 +3072,7 @@ Coil:Cooling:DX:MultiSpeed,
   HVAC,Average,Cooling Coil Runtime Fraction {[]}
 \end{itemize}
 
-If not part of AirLoopHVAC:UnitaryHeatPump:AirToAir (if part of a heat pump, crankcase heater is reported only for the heating coil):
+If not part of a heat pump (if part of a heat pump, crankcase heater is reported only for the heating coil):
 
 \begin{itemize}
 \item
@@ -3350,7 +3350,7 @@ The rated power of the evaporative condenser water pump in Watts. This value is 
 
 \paragraph{Field: Crankcase Heater Capacity}\label{field-crankcase-heater-capacity-3}
 
-This numeric field defines the crankcase heater capacity in Watts. When the outdoor air drybulb temperature is below the value specified in the input field Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation (described below), the crankcase heater is enabled during the time that the compressor is not running. If this cooling coil is used as part of an air-to-air heat pump, the crankcase heater defined for this DX cooling coil is ignored and the crankcase heater power defined for the DX heating coil (Ref. \hyperref[coilheatingdxsinglespeed]{Coil:Heating:DX:SingleSpeed}) is enabled during the time that the compressor is not running for either heating or cooling. The value for this input field must be greater than or equal to 0, and the default value is 0. To simulate a DX cooling coil without a crankcase heater, enter a value of 0.
+This numeric field defines the crankcase heater capacity in Watts. When the outdoor air dry-bulb temperature is below the value specified in the input field Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation (described below), the crankcase heater is enabled during the time that the compressor is not running. If this cooling coil is used as part of an air-to-air heat pump (e.g., AirLoopHVAC:UnitaryHeatPump:AirToAir, AirLoopHVAC:UnitarySystem, or ZoneHVAC:PackagedTerminalHeatPump), the crankcase heater defined for this DX cooling coil is ignored and the crankcase heater power defined for the DX heating coil (e.g., Coil:Heating:DX:SingleSpeed) is enabled during the time that the compressor is not running for either heating or cooling. The value for this input field must be greater than or equal to 0, and the default value is 0. To simulate a DX cooling coil without a crankcase heater, enter a value of 0.
 
 \paragraph{Field: Crankcase Heater Capacity Function of Temperature Curve Name}
 
@@ -3617,10 +3617,18 @@ Coil:Cooling:DX:VariableSpeed,
   HVAC,Sum,Cooling Coil Latent Cooling Energy {[}J{]}
 \item
   HVAC,Sum,Cooling Coil Source Side Heat Transfer Energy {[}J{]}
+\end{itemize}
+
+If not part of a heat pump (if part of a heat pump, crankcase heater is reported only for the heating coil):
+
+\begin{itemize}
 \item
   HVAC,Average,Cooling Coil Crankcase Heater Electricity Rate {[}W{]}
 \item
   HVAC,Sum,Cooling Coil Crankcase Heater Electricity Energy {[}J{]}
+\end{itemize}
+
+\begin{itemize}
 \item
   HVAC,Average,Cooling Coil Condensate Volume Flow Rate {[}m3/s{]}
 \item
@@ -4168,7 +4176,7 @@ This numeric field defines the outdoor air dry-bulb temperature above which outd
 
 \paragraph{Field: Crankcase Heater Capacity}\label{field-crankcase-heater-capacity-4}
 
-This numeric field defines the crankcase heater capacity in Watts. When the outdoor air dry-bulb temperature is below the value specified in the input field Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation (described below), the crankcase heater is enabled during the time that the compressor is not running. If this heating coil is used as part of an air-to-air heat pump (Ref. \hyperref[airloophvacunitaryheatpumpairtoair]{AirLoopHVAC:UnitaryHeatPump:AirToAir} or \hyperref[zonehvacpackagedterminalheatpump]{ZoneHVAC:PackagedTerminalHeatPump}), the crankcase heater defined for this DX heating coil is enabled during the time that the compressor is not running for either heating or cooling (and the crankcase heater power defined in the DX cooling coil object is disregarded in this case). The value for this input field must be greater than or equal to 0. If this input field is left blank, the default value is 0. To simulate a unit without a crankcase heater, enter a value of 0.
+This numeric field defines the crankcase heater capacity in Watts. When the outdoor air dry-bulb temperature is below the value specified in the input field Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation (described below), the crankcase heater is enabled during the time that the compressor is not running. If this heating coil is used as part of an air-to-air heat pump (e.g., AirLoopHVAC:UnitaryHeatPump:AirToAir, AirLoopHVAC:UnitarySystem, or ZoneHVAC:PackagedTerminalHeatPump), the crankcase heater defined for this DX heating coil is enabled during the time that the compressor is not running for either heating or cooling (and the crankcase heater power defined in the DX cooling coil object is disregarded in this case). The value for this input field must be greater than or equal to 0. If this input field is left blank, the default value is 0. To simulate a unit without a crankcase heater, enter a value of 0.
 
 \paragraph{Field: Crankcase Heater Capacity Function of Temperature Curve Name}
 
@@ -4374,7 +4382,7 @@ This numeric field defines the minimum outdoor air dry-bulb temperature where th
 
 \paragraph{Field: Crankcase Heater Capacity}\label{field-crankcase-heater-capacity-5}
 
-This numeric field defines the crankcase heater capacity in Watts. When the outdoor air dry-bulb temperature is below the value specified in the input field Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation (described below), the crankcase heater is enabled during the time that the compressor is not running. The value for this input field must be greater than or equal to 0. If this input field is left blank, the default value is 0. To simulate a unit without a crankcase heater, enter a value of 0.
+This numeric field defines the crankcase heater capacity in Watts. When the outdoor air dry-bulb temperature is below the value specified in the input field Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation (described below), the crankcase heater is enabled during the time that the compressor is not running. If this heating coil is used as part of an air-to-air heat pump (e.g., AirLoopHVAC:UnitarySystem), the crankcase heater defined for this DX heating coil is enabled during the time that the compressor is not running for either heating or cooling (and the crankcase heater power defined in the DX cooling coil object is disregarded in this case). The value for this input field must be greater than or equal to 0. If this input field is left blank, the default value is 0. To simulate a unit without a crankcase heater, enter a value of 0.
 
 \paragraph{Field: Crankcase Heater Capacity Function of Temperature Curve Name}
 
@@ -4769,7 +4777,7 @@ This numeric field defines the outdoor air dry-bulb temperature above which outd
 
 \paragraph{Field: Crankcase Heater Capacity}\label{field-crankcase-heater-capacity-6}
 
-This numeric field defines the crankcase heater capacity in Watts. When the outdoor air drybulb temperature is below the value specified in the input field Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation (described below), the crankcase heater is enabled during the time that the compressor is not running. The value for this input field must be greater than or equal to 0. If this input field is left blank, the default value is 0. To simulate a unit without a crankcase heater, enter a value of 0.
+This numeric field defines the crankcase heater capacity in Watts. When the outdoor air dry-bulb temperature is below the value specified in the input field Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation (described below), the crankcase heater is enabled during the time that the compressor is not running. If this heating coil is used as part of an air-to-air heat pump (e.g., AirLoopHVAC:UnitaryHeatPump:AirToAir, AirLoopHVAC:UnitarySystem, or ZoneHVAC:PackagedTerminalHeatPump), the crankcase heater defined for this DX heating coil is enabled during the time that the compressor is not running for either heating or cooling (and the crankcase heater power defined in the DX cooling coil object is disregarded in this case). The value for this input field must be greater than or equal to 0. If this input field is left blank, the default value is 0. To simulate a unit without a crankcase heater, enter a value of 0.
 
 \paragraph{Field: Crankcase Heater Capacity Function of Temperature Curve Name}
 

@@ -4,7 +4,7 @@
 !-      Use '!' comments if they need to be retained when using the IDFEditor.
 !-   ===========  ALL OBJECTS IN CLASS: VERSION ===========
 
-  Version,26.1;
+  Version,26.2;
 
 !-   ===========  ALL OBJECTS IN CLASS: SIMULATIONCONTROL ===========
 
@@ -510,9 +510,6 @@
     Until: 18:00,0.5,        !- Field 37
     Until: 24:00,0.05;       !- Field 39
 
-                             !- Field 6
-                             !- Field 44
-
   Schedule:Compact,
     Type1_EQUIP_SCH,         !- Name
     Fraction,                !- Schedule Type Limits Name
@@ -544,8 +541,6 @@
     Until: 10:00,0.49814375, !- Field 45
     Until: 23:00,0.89665875, !- Field 47
     Until: 24:00,0.49814375; !- Field 49
-
-                             !- Field 40
 
   Schedule:Compact,
     Type2_EQUIP_SCH,         !- Name

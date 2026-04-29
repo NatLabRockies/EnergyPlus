@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -111,26 +111,26 @@ struct CoilCoolingDX205Performance : public CoilCoolingDXPerformanceBase
     void size(EnergyPlusData &state) override;
 
     void simulate(EnergyPlusData &state,
-                  const DataLoopNode::NodeData &inletNode,
-                  DataLoopNode::NodeData &outletNode,
+                  const Node::NodeData &inletNode,
+                  Node::NodeData &outletNode,
                   HVAC::CoilMode mode,
                   int speedNum,
                   Real64 speedRatio,
                   HVAC::FanOp const fanOpMode,
-                  DataLoopNode::NodeData &condInletNode,
-                  DataLoopNode::NodeData &condOutletNode,
+                  Node::NodeData &condInletNode,
+                  Node::NodeData &condOutletNode,
                   bool const singleMode,
                   Real64 LoadSHR = 0.0) override;
 
     void calculate(EnergyPlusData &state,
-                   const DataLoopNode::NodeData &inletNode,
-                   DataLoopNode::NodeData &outletNode,
+                   const Node::NodeData &inletNode,
+                   Node::NodeData &outletNode,
                    // Real64 &PLR,
                    int speedNum,
                    Real64 speedRatio,
                    HVAC::FanOp fanOpMode,
-                   DataLoopNode::NodeData &condInletNode,
-                   DataLoopNode::NodeData &);
+                   Node::NodeData &condInletNode,
+                   Node::NodeData &);
 
 private:
     tk205::rs0004_ns::LookupVariablesCoolingStruct calculate_rated_capacities(EnergyPlus::EnergyPlusData &state, int speed_index) const;
@@ -138,15 +138,15 @@ private:
     void calculate_air_mass_flow(EnergyPlusData &state, int speed_index);
 
     void calculate_cycling_capcacity(EnergyPlusData &state,
-                                     const DataLoopNode::NodeData &inletNode,
-                                     DataLoopNode::NodeData &outletNode,
+                                     const Node::NodeData &inletNode,
+                                     Node::NodeData &outletNode,
                                      Real64 const gross_power,
                                      Real64 const ratio,
                                      HVAC::FanOp const fanOpMode);
 
     void set_output_node_conditions(EnergyPlusData &state,
-                                    const DataLoopNode::NodeData &inletNode,
-                                    DataLoopNode::NodeData &outletNode,
+                                    const Node::NodeData &inletNode,
+                                    Node::NodeData &outletNode,
                                     Real64 gross_total_capacity,
                                     Real64 gross_sensible_capacity,
                                     Real64 air_mass_flow_rate) const;

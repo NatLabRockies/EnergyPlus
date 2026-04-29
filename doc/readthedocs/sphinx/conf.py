@@ -18,13 +18,14 @@ autodoc_mock_imports = ["pyenergyplus"]
 
 # -- Project information -----------------------------------------------------
 project = "EnergyPlus"
-copyright = "2023, National Laboratory of the Rockies for the United States Department of Energy"
+copyright = "2026, National Laboratory of the Rockies for the United States Department of Energy"
 author = "National Laboratory of the Rockies for the United States Department of Energy"
-version = "23.1"  # The short X.Y version
-release = "23.1"  # The full version, including alpha/beta/rc tags
+version = "26.2"  # The short X.Y version
+release = "26.2"  # The full version, including alpha/beta/rc tags
 
 # -- General configuration ---------------------------------------------------
 extensions = [
+    "sphinx_rtd_theme",
     "sphinx.ext.autodoc",
     "sphinx.ext.coverage",
     "sphinx.ext.mathjax",
@@ -47,7 +48,6 @@ html_css_files = [
     "main.css",
 ]
 html_js_files = [
-    "https://code.jquery.com/jquery-1.11.2.min.js",
     "main.js",
 ]
 extra_nav_links = {"Blah": "https://energyplus.net"}

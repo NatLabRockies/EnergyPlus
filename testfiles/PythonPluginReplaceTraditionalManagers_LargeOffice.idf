@@ -45,7 +45,7 @@
 ! RoofConstruction=Insulation Entirely Above Deck
 ! ExtWallConstruction=Mass
 
-  Version,26.1;
+  Version,26.2;
 
   Timestep,4;
 

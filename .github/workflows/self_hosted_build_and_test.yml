@@ -17,12 +17,11 @@ jobs:
       fail-fast: false
       matrix:
         runner:
-          - [self-hosted, linux, x64, ubuntu-22.04]
           - [self-hosted, linux, x64, ubuntu-24.04]
     runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout EnergyPlus
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.inputs.ref || github.ref }}
 

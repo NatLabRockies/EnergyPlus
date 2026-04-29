@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -111,7 +111,6 @@ namespace OutdoorAirUnit {
     // condition.
 
     // Using/Aliasing
-    using namespace DataLoopNode;
     using HVAC::SmallAirVolFlow;
     using HVAC::SmallLoad;
     using HVAC::SmallMassFlow;
@@ -153,25 +152,26 @@ namespace OutdoorAirUnit {
         if (CompIndex == 0) {
             OAUnitNum = Util::FindItemInList(CompName, state.dataOutdoorAirUnit->OutAirUnit);
             if (OAUnitNum == 0) {
-                ShowFatalError(state, format("ZoneHVAC:OutdoorAirUnit not found={}", CompName));
+                ShowFatalError(state, EnergyPlus::format("ZoneHVAC:OutdoorAirUnit not found={}", CompName));
             }
             CompIndex = OAUnitNum;
         } else {
             OAUnitNum = CompIndex;
             if (OAUnitNum > state.dataOutdoorAirUnit->NumOfOAUnits || OAUnitNum < 1) {
                 ShowFatalError(state,
-                               format("SimOutdoorAirUnit:  Invalid CompIndex passed={}, Number of Units={}, Entered Unit name={}",
-                                      OAUnitNum,
-                                      state.dataOutdoorAirUnit->NumOfOAUnits,
-                                      CompName));
+                               EnergyPlus::format("SimOutdoorAirUnit:  Invalid CompIndex passed={}, Number of Units={}, Entered Unit name={}",
+                                                  OAUnitNum,
+                                                  state.dataOutdoorAirUnit->NumOfOAUnits,
+                                                  CompName));
             }
             if (state.dataOutdoorAirUnit->CheckEquipName(OAUnitNum)) {
                 if (CompName != state.dataOutdoorAirUnit->OutAirUnit(OAUnitNum).Name) {
-                    ShowFatalError(state,
-                                   format("SimOutdoorAirUnit: Invalid CompIndex passed={}, Unit name={}, stored Unit Name for that index={}",
-                                          OAUnitNum,
-                                          CompName,
-                                          state.dataOutdoorAirUnit->OutAirUnit(OAUnitNum).Name));
+                    ShowFatalError(
+                        state,
+                        EnergyPlus::format("SimOutdoorAirUnit: Invalid CompIndex passed={}, Unit name={}, stored Unit Name for that index={}",
+                                           OAUnitNum,
+                                           CompName,
+                                           state.dataOutdoorAirUnit->OutAirUnit(OAUnitNum).Name));
                 }
                 state.dataOutdoorAirUnit->CheckEquipName(OAUnitNum) = false;
             }
@@ -215,19 +215,18 @@ namespace OutdoorAirUnit {
         // Mixed Air.cc
 
         // Using/Aliasing
-        using BranchNodeConnections::SetUpCompSets;
-        using BranchNodeConnections::TestCompSet;
-        using NodeInputManager::GetOnlySingleNode;
+        using HeatingCoils::GetCoilInletNode;
+        using HeatingCoils::GetCoilOutletNode;
+        using Node::GetOnlySingleNode;
+        using Node::SetUpCompSets;
+        using Node::TestCompSet;
+        using OutAirNodeManager::CheckAndAddAirNodeNumber;
         using SteamCoils::GetCoilAirInletNode;
         using SteamCoils::GetCoilAirOutletNode;
         using SteamCoils::GetCoilMaxSteamFlowRate;
         using SteamCoils::GetCoilSteamInletNode;
         using SteamCoils::GetCoilSteamOutletNode;
         using SteamCoils::GetSteamCoilIndex;
-        using namespace DataLoopNode;
-        using HeatingCoils::GetCoilInletNode;
-        using HeatingCoils::GetCoilOutletNode;
-        using OutAirNodeManager::CheckAndAddAirNodeNumber;
         using WaterCoils::GetCoilWaterInletNode;
         using WaterCoils::GetCoilWaterOutletNode;
         using WaterCoils::GetWaterCoilIndex;
@@ -305,7 +304,6 @@ namespace OutdoorAirUnit {
                                                                      cNumericFields);
 
             ErrorObjectHeader eoh{routineName, CurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)};
-            Util::IsNameEmpty(state, state.dataIPShortCut->cAlphaArgs(1), CurrentModuleObject, ErrorsFound);
 
             // A1
             thisOutAirUnit.Name = state.dataIPShortCut->cAlphaArgs(1);
@@ -325,17 +323,17 @@ namespace OutdoorAirUnit {
             if (thisOutAirUnit.ZonePtr == 0) {
                 if (lAlphaBlanks(3)) {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {} is required but input is blank.",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           state.dataIPShortCut->cAlphaArgs(3)));
+                                    EnergyPlus::format("{}=\"{}\" invalid {} is required but input is blank.",
+                                                       CurrentModuleObject,
+                                                       state.dataIPShortCut->cAlphaArgs(1),
+                                                       state.dataIPShortCut->cAlphaArgs(3)));
                 } else {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {}=\"{}\" not found.",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           state.dataIPShortCut->cAlphaArgs(3),
-                                           state.dataIPShortCut->cAlphaArgs(3)));
+                                    EnergyPlus::format("{}=\"{}\" invalid {}=\"{}\" not found.",
+                                                       CurrentModuleObject,
+                                                       state.dataIPShortCut->cAlphaArgs(1),
+                                                       state.dataIPShortCut->cAlphaArgs(3),
+                                                       state.dataIPShortCut->cAlphaArgs(3)));
                 }
                 ErrorsFound = true;
             }
@@ -378,8 +376,9 @@ namespace OutdoorAirUnit {
             if (lAlphaBlanks(7)) {
                 thisOutAirUnit.ExtFan = false;
                 if (!state.dataHeatBal->ZoneAirMassFlow.EnforceZoneMassBalance) {
-                    ShowWarningError(state,
-                                     format("{}=\"{}\", {} is blank.", CurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1), cAlphaFields(7)));
+                    ShowWarningError(
+                        state,
+                        EnergyPlus::format("{}=\"{}\", {} is blank.", CurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1), cAlphaFields(7)));
                     ShowContinueError(state,
                                       "Unbalanced mass flow rates between supply from outdoor air and exhaust from zone air will be introduced.");
                 }
@@ -409,12 +408,13 @@ namespace OutdoorAirUnit {
             if ((thisOutAirUnit.ExtFan) && (!state.dataHeatBal->ZoneAirMassFlow.EnforceZoneMassBalance)) {
                 if (NumArray(2) != NumArray(1)) {
                     ShowWarningError(state,
-                                     format("{}=\"{}\", {} and {} are not equal. This may cause unbalanced flow.",
-                                            CurrentModuleObject,
-                                            state.dataIPShortCut->cAlphaArgs(1),
-                                            cNumericFields(1),
-                                            cNumericFields(2)));
-                    ShowContinueError(state, format("{}={:.3R}= and {}{:.3R}", cNumericFields(1), NumArray(1), cNumericFields(2), NumArray(2)));
+                                     EnergyPlus::format("{}=\"{}\", {} and {} are not equal. This may cause unbalanced flow.",
+                                                        CurrentModuleObject,
+                                                        state.dataIPShortCut->cAlphaArgs(1),
+                                                        cNumericFields(1),
+                                                        cNumericFields(2)));
+                    ShowContinueError(state,
+                                      EnergyPlus::format("{}={:.3R}= and {}{:.3R}", cNumericFields(1), NumArray(1), cNumericFields(2), NumArray(2)));
                 }
             }
             // A8
@@ -431,15 +431,16 @@ namespace OutdoorAirUnit {
                            (!state.dataHeatBal->ZoneAirMassFlow.EnforceZoneMassBalance)) {
                     ShowWarningError(
                         state,
-                        format("{}=\"{}\", different schedule inputs for outdoor air and exhaust air schedules may cause unbalanced mass flow.",
-                               CurrentModuleObject,
-                               state.dataIPShortCut->cAlphaArgs(1)));
+                        EnergyPlus::format(
+                            "{}=\"{}\", different schedule inputs for outdoor air and exhaust air schedules may cause unbalanced mass flow.",
+                            CurrentModuleObject,
+                            state.dataIPShortCut->cAlphaArgs(1)));
                     ShowContinueError(state,
-                                      format("{}={} and {}={}",
-                                             cAlphaFields(4),
-                                             state.dataIPShortCut->cAlphaArgs(4),
-                                             cAlphaFields(8),
-                                             state.dataIPShortCut->cAlphaArgs(8)));
+                                      EnergyPlus::format("{}={} and {}={}",
+                                                         cAlphaFields(4),
+                                                         state.dataIPShortCut->cAlphaArgs(4),
+                                                         cAlphaFields(8),
+                                                         state.dataIPShortCut->cAlphaArgs(8)));
                 }
 
                 SetUpCompSets(
@@ -484,29 +485,29 @@ namespace OutdoorAirUnit {
             thisOutAirUnit.AirOutletNode = GetOnlySingleNode(state,
                                                              state.dataIPShortCut->cAlphaArgs(13),
                                                              ErrorsFound,
-                                                             DataLoopNode::ConnectionObjectType::ZoneHVACOutdoorAirUnit,
+                                                             Node::ConnectionObjectType::ZoneHVACOutdoorAirUnit,
                                                              state.dataIPShortCut->cAlphaArgs(1),
-                                                             DataLoopNode::NodeFluidType::Air,
-                                                             DataLoopNode::ConnectionType::Outlet,
-                                                             NodeInputManager::CompFluidStream::Primary,
-                                                             ObjectIsParent);
+                                                             Node::FluidType::Air,
+                                                             Node::ConnectionType::Outlet,
+                                                             Node::CompFluidStream::Primary,
+                                                             Node::ObjectIsParent);
             if (!lAlphaBlanks(14)) {
                 thisOutAirUnit.AirInletNode = GetOnlySingleNode(state,
                                                                 state.dataIPShortCut->cAlphaArgs(14),
                                                                 ErrorsFound,
-                                                                DataLoopNode::ConnectionObjectType::ZoneHVACOutdoorAirUnit,
+                                                                Node::ConnectionObjectType::ZoneHVACOutdoorAirUnit,
                                                                 state.dataIPShortCut->cAlphaArgs(1),
-                                                                DataLoopNode::NodeFluidType::Air,
-                                                                DataLoopNode::ConnectionType::Inlet,
-                                                                NodeInputManager::CompFluidStream::Primary,
-                                                                ObjectIsParent);
+                                                                Node::FluidType::Air,
+                                                                Node::ConnectionType::Inlet,
+                                                                Node::CompFluidStream::Primary,
+                                                                Node::ObjectIsParent);
             } else {
                 if (thisOutAirUnit.ExtFan) {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {} cannot be blank when there is an exhaust fan.",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           cAlphaFields(14)));
+                                    EnergyPlus::format("{}=\"{}\" invalid {} cannot be blank when there is an exhaust fan.",
+                                                       CurrentModuleObject,
+                                                       state.dataIPShortCut->cAlphaArgs(1),
+                                                       cAlphaFields(14)));
                     ErrorsFound = true;
                 }
             }
@@ -514,32 +515,32 @@ namespace OutdoorAirUnit {
             thisOutAirUnit.SFanOutletNode = GetOnlySingleNode(state,
                                                               state.dataIPShortCut->cAlphaArgs(15),
                                                               ErrorsFound,
-                                                              DataLoopNode::ConnectionObjectType::ZoneHVACOutdoorAirUnit,
+                                                              Node::ConnectionObjectType::ZoneHVACOutdoorAirUnit,
                                                               state.dataIPShortCut->cAlphaArgs(1),
-                                                              DataLoopNode::NodeFluidType::Air,
-                                                              DataLoopNode::ConnectionType::Internal,
-                                                              NodeInputManager::CompFluidStream::Primary,
-                                                              ObjectIsNotParent);
+                                                              Node::FluidType::Air,
+                                                              Node::ConnectionType::Internal,
+                                                              Node::CompFluidStream::Primary,
+                                                              Node::ObjectIsNotParent);
 
             //  Set connection type to 'OutdoorAir', because this is hardwired to OA conditions
             thisOutAirUnit.OutsideAirNode = GetOnlySingleNode(state,
                                                               state.dataIPShortCut->cAlphaArgs(12),
                                                               ErrorsFound,
-                                                              DataLoopNode::ConnectionObjectType::ZoneHVACOutdoorAirUnit,
+                                                              Node::ConnectionObjectType::ZoneHVACOutdoorAirUnit,
                                                               state.dataIPShortCut->cAlphaArgs(1),
-                                                              DataLoopNode::NodeFluidType::Air,
-                                                              DataLoopNode::ConnectionType::OutsideAirReference,
-                                                              NodeInputManager::CompFluidStream::Primary,
-                                                              ObjectIsNotParent);
+                                                              Node::FluidType::Air,
+                                                              Node::ConnectionType::OutsideAirReference,
+                                                              Node::CompFluidStream::Primary,
+                                                              Node::ObjectIsNotParent);
 
             if (!lAlphaBlanks(12)) {
                 CheckAndAddAirNodeNumber(state, thisOutAirUnit.OutsideAirNode, IsValid);
                 if (!IsValid) {
                     ShowWarningError(state,
-                                     format("{}=\"{}\", Adding OutdoorAir:Node={}",
-                                            CurrentModuleObject,
-                                            state.dataIPShortCut->cAlphaArgs(1),
-                                            state.dataIPShortCut->cAlphaArgs(12)));
+                                     EnergyPlus::format("{}=\"{}\", Adding OutdoorAir:Node={}",
+                                                        CurrentModuleObject,
+                                                        state.dataIPShortCut->cAlphaArgs(1),
+                                                        state.dataIPShortCut->cAlphaArgs(12)));
                 }
             }
 
@@ -579,206 +580,117 @@ namespace OutdoorAirUnit {
 
                     // Get information of component
                     for (int InListNum = 1; InListNum <= NumInList; ++InListNum) {
-                        thisOutAirUnit.OAEquip(InListNum).ComponentName = AlphArray(InListNum * 2 + 1);
+                        auto &oaEquip = thisOutAirUnit.OAEquip(InListNum);
 
-                        thisOutAirUnit.OAEquip(InListNum).Type =
-                            static_cast<CompType>(getEnumValue(CompTypeNamesUC, Util::makeUPPER(AlphArray(InListNum * 2))));
-
-                        int const CompNum = InListNum;
+                        oaEquip.ComponentName = AlphArray(InListNum * 2 + 1);
+                        oaEquip.Type = static_cast<CompType>(getEnumValue(CompTypeNamesUC, Util::makeUPPER(AlphArray(InListNum * 2))));
 
                         // Coil Types
                         switch (thisOutAirUnit.OAEquip(InListNum).Type) {
                         case CompType::WaterCoil_Cooling: {
-                            thisOutAirUnit.OAEquip(CompNum).CoilType = DataPlant::PlantEquipmentType::CoilWaterCooling;
-                            thisOutAirUnit.OAEquip(CompNum).ComponentIndex =
-                                GetWaterCoilIndex(state,
-                                                  CompTypeNamesUC[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                  thisOutAirUnit.OAEquip(CompNum).ComponentName,
-                                                  ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).CoilAirInletNode =
-                                WaterCoils::GetCoilInletNode(state,
-                                                             CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                             thisOutAirUnit.OAEquip(CompNum).ComponentName,
-                                                             ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).CoilAirOutletNode =
-                                WaterCoils::GetCoilOutletNode(state,
-                                                              CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                              thisOutAirUnit.OAEquip(CompNum).ComponentName,
-                                                              ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).CoilWaterInletNode =
-                                GetCoilWaterInletNode(state,
-                                                      CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                      thisOutAirUnit.OAEquip(CompNum).ComponentName,
-                                                      ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).CoilWaterOutletNode =
-                                GetCoilWaterOutletNode(state,
-                                                       CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                       thisOutAirUnit.OAEquip(CompNum).ComponentName,
-                                                       ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).MaxVolWaterFlow =
-                                WaterCoils::GetCoilMaxWaterFlowRate(state,
-                                                                    CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                                    thisOutAirUnit.OAEquip(CompNum).ComponentName,
-                                                                    ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).MinVolWaterFlow = 0.0;
+                            oaEquip.CoilType = DataPlant::PlantEquipmentType::CoilWaterCooling;
+                            oaEquip.ComponentIndex =
+                                GetWaterCoilIndex(state, CompTypeNamesUC[static_cast<int>(oaEquip.Type)], oaEquip.ComponentName, ErrorsFound);
+                            oaEquip.CoilAirInletNode = WaterCoils::GetCoilInletNode(
+                                state, CompTypeNames[static_cast<int>(oaEquip.Type)], oaEquip.ComponentName, ErrorsFound);
+                            oaEquip.CoilAirOutletNode = WaterCoils::GetCoilOutletNode(
+                                state, CompTypeNames[static_cast<int>(oaEquip.Type)], oaEquip.ComponentName, ErrorsFound);
+                            oaEquip.CoilWaterInletNode =
+                                GetCoilWaterInletNode(state, CompTypeNames[static_cast<int>(oaEquip.Type)], oaEquip.ComponentName, ErrorsFound);
+                            oaEquip.CoilWaterOutletNode =
+                                GetCoilWaterOutletNode(state, CompTypeNames[static_cast<int>(oaEquip.Type)], oaEquip.ComponentName, ErrorsFound);
+                            oaEquip.MaxVolWaterFlow = WaterCoils::GetCoilMaxWaterFlowRate(
+                                state, CompTypeNames[static_cast<int>(oaEquip.Type)], oaEquip.ComponentName, ErrorsFound);
+                            oaEquip.MinVolWaterFlow = 0.0;
                             break;
                         }
                         case CompType::WaterCoil_SimpleHeat: {
-                            thisOutAirUnit.OAEquip(CompNum).CoilType = DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
-                            thisOutAirUnit.OAEquip(CompNum).ComponentIndex =
-                                GetWaterCoilIndex(state,
-                                                  CompTypeNamesUC[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                  thisOutAirUnit.OAEquip(CompNum).ComponentName,
-                                                  ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).CoilAirInletNode =
-                                WaterCoils::GetCoilInletNode(state,
-                                                             CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                             thisOutAirUnit.OAEquip(CompNum).ComponentName,
-                                                             ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).CoilAirOutletNode = WaterCoils::GetCoilOutletNode(
-                                state, "Coil:Heating:Water", thisOutAirUnit.OAEquip(CompNum).ComponentName, ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).CoilWaterInletNode =
-                                GetCoilWaterInletNode(state,
-                                                      CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                      thisOutAirUnit.OAEquip(CompNum).ComponentName,
-                                                      ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).CoilWaterOutletNode =
-                                GetCoilWaterOutletNode(state,
-                                                       CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                       thisOutAirUnit.OAEquip(CompNum).ComponentName,
-                                                       ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).MaxVolWaterFlow = WaterCoils::GetCoilMaxWaterFlowRate(
-                                state, "Coil:Heating:Water", thisOutAirUnit.OAEquip(CompNum).ComponentName, ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).MinVolWaterFlow = 0.0;
+                            oaEquip.CoilType = DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
+                            oaEquip.ComponentIndex =
+                                GetWaterCoilIndex(state, CompTypeNamesUC[static_cast<int>(oaEquip.Type)], oaEquip.ComponentName, ErrorsFound);
+                            oaEquip.CoilAirInletNode = WaterCoils::GetCoilInletNode(
+                                state, CompTypeNames[static_cast<int>(oaEquip.Type)], oaEquip.ComponentName, ErrorsFound);
+                            oaEquip.CoilAirOutletNode =
+                                WaterCoils::GetCoilOutletNode(state, "Coil:Heating:Water", oaEquip.ComponentName, ErrorsFound);
+                            oaEquip.CoilWaterInletNode =
+                                GetCoilWaterInletNode(state, CompTypeNames[static_cast<int>(oaEquip.Type)], oaEquip.ComponentName, ErrorsFound);
+                            oaEquip.CoilWaterOutletNode =
+                                GetCoilWaterOutletNode(state, CompTypeNames[static_cast<int>(oaEquip.Type)], oaEquip.ComponentName, ErrorsFound);
+                            oaEquip.MaxVolWaterFlow =
+                                WaterCoils::GetCoilMaxWaterFlowRate(state, "Coil:Heating:Water", oaEquip.ComponentName, ErrorsFound);
+                            oaEquip.MinVolWaterFlow = 0.0;
                             break;
                         }
                         case CompType::SteamCoil_AirHeat: {
-                            thisOutAirUnit.OAEquip(CompNum).CoilType = DataPlant::PlantEquipmentType::CoilSteamAirHeating;
-                            thisOutAirUnit.OAEquip(CompNum).ComponentIndex =
-                                GetSteamCoilIndex(state,
-                                                  CompTypeNamesUC[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                  thisOutAirUnit.OAEquip(CompNum).ComponentName,
-                                                  ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).CoilAirInletNode = GetCoilAirInletNode(
-                                state, thisOutAirUnit.OAEquip(CompNum).ComponentIndex, thisOutAirUnit.OAEquip(CompNum).ComponentName, ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).CoilAirOutletNode = GetCoilAirOutletNode(
-                                state, thisOutAirUnit.OAEquip(CompNum).ComponentIndex, thisOutAirUnit.OAEquip(CompNum).ComponentName, ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).CoilWaterInletNode = GetCoilSteamInletNode(
-                                state, thisOutAirUnit.OAEquip(CompNum).ComponentIndex, thisOutAirUnit.OAEquip(CompNum).ComponentName, ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).CoilWaterOutletNode =
-                                GetCoilSteamOutletNode(state,
-                                                       CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                       thisOutAirUnit.OAEquip(CompNum).ComponentName,
-                                                       ErrorsFound);
+                            oaEquip.CoilType = DataPlant::PlantEquipmentType::CoilSteamAirHeating;
+                            oaEquip.ComponentIndex =
+                                GetSteamCoilIndex(state, CompTypeNamesUC[static_cast<int>(oaEquip.Type)], oaEquip.ComponentName, ErrorsFound);
+                            oaEquip.CoilAirInletNode = GetCoilAirInletNode(state, oaEquip.ComponentIndex, oaEquip.ComponentName, ErrorsFound);
+                            oaEquip.CoilAirOutletNode = GetCoilAirOutletNode(state, oaEquip.ComponentIndex, oaEquip.ComponentName, ErrorsFound);
+                            oaEquip.CoilWaterInletNode = GetCoilSteamInletNode(state, oaEquip.ComponentIndex, oaEquip.ComponentName, ErrorsFound);
+                            oaEquip.CoilWaterOutletNode =
+                                GetCoilSteamOutletNode(state, CompTypeNames[static_cast<int>(oaEquip.Type)], oaEquip.ComponentName, ErrorsFound);
 
-                            thisOutAirUnit.OAEquip(CompNum).MaxVolWaterFlow =
-                                GetCoilMaxSteamFlowRate(state, thisOutAirUnit.OAEquip(CompNum).ComponentIndex, ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).MinVolWaterFlow = 0.0;
+                            oaEquip.MaxVolWaterFlow = GetCoilMaxSteamFlowRate(state, oaEquip.ComponentIndex, ErrorsFound);
+                            oaEquip.MinVolWaterFlow = 0.0;
                             // below: no extra error needed if steam properties not in input
                             // file because getting the steam coil will have done that.
-                            thisOutAirUnit.OAEquip(CompNum).FluidIndex = Fluid::GetRefrigNum(state, "STEAM");
+                            oaEquip.FluidIndex = Fluid::GetRefrigNum(state, "STEAM");
                             break;
                         }
                         case CompType::WaterCoil_DetailedCool: {
-                            thisOutAirUnit.OAEquip(CompNum).ComponentIndex =
-                                GetWaterCoilIndex(state,
-                                                  CompTypeNamesUC[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                  thisOutAirUnit.OAEquip(CompNum).ComponentName,
-                                                  ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).CoilType = DataPlant::PlantEquipmentType::CoilWaterDetailedFlatCooling;
-                            thisOutAirUnit.OAEquip(CompNum).CoilAirInletNode =
-                                WaterCoils::GetCoilInletNode(state,
-                                                             CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                             thisOutAirUnit.OAEquip(CompNum).ComponentName,
-                                                             ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).CoilAirOutletNode =
-                                WaterCoils::GetCoilOutletNode(state,
-                                                              CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                              thisOutAirUnit.OAEquip(CompNum).ComponentName,
-                                                              ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).CoilWaterInletNode =
-                                GetCoilWaterInletNode(state,
-                                                      CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                      thisOutAirUnit.OAEquip(CompNum).ComponentName,
-                                                      ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).CoilWaterOutletNode =
-                                GetCoilWaterOutletNode(state,
-                                                       CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                       thisOutAirUnit.OAEquip(CompNum).ComponentName,
-                                                       ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).MaxVolWaterFlow =
-                                WaterCoils::GetCoilMaxWaterFlowRate(state,
-                                                                    CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                                    thisOutAirUnit.OAEquip(CompNum).ComponentName,
-                                                                    ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).MinVolWaterFlow = 0.0;
+                            oaEquip.ComponentIndex =
+                                GetWaterCoilIndex(state, CompTypeNamesUC[static_cast<int>(oaEquip.Type)], oaEquip.ComponentName, ErrorsFound);
+                            oaEquip.CoilType = DataPlant::PlantEquipmentType::CoilWaterDetailedFlatCooling;
+                            oaEquip.CoilAirInletNode = WaterCoils::GetCoilInletNode(
+                                state, CompTypeNames[static_cast<int>(oaEquip.Type)], oaEquip.ComponentName, ErrorsFound);
+                            oaEquip.CoilAirOutletNode = WaterCoils::GetCoilOutletNode(
+                                state, CompTypeNames[static_cast<int>(oaEquip.Type)], oaEquip.ComponentName, ErrorsFound);
+                            oaEquip.CoilWaterInletNode =
+                                GetCoilWaterInletNode(state, CompTypeNames[static_cast<int>(oaEquip.Type)], oaEquip.ComponentName, ErrorsFound);
+                            oaEquip.CoilWaterOutletNode =
+                                GetCoilWaterOutletNode(state, CompTypeNames[static_cast<int>(oaEquip.Type)], oaEquip.ComponentName, ErrorsFound);
+                            oaEquip.MaxVolWaterFlow = WaterCoils::GetCoilMaxWaterFlowRate(
+                                state, CompTypeNames[static_cast<int>(oaEquip.Type)], oaEquip.ComponentName, ErrorsFound);
+                            oaEquip.MinVolWaterFlow = 0.0;
                             break;
                         }
                         case CompType::WaterCoil_CoolingHXAsst: {
-                            thisOutAirUnit.OAEquip(CompNum).CoilAirInletNode =
-                                HVACHXAssistedCoolingCoil::GetCoilInletNode(state,
-                                                                            CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                                            thisOutAirUnit.OAEquip(CompNum).ComponentName,
-                                                                            ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).CoilAirOutletNode =
-                                HVACHXAssistedCoolingCoil::GetCoilOutletNode(state,
-                                                                             CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                                             thisOutAirUnit.OAEquip(CompNum).ComponentName,
-                                                                             ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).CoilWaterInletNode =
-                                GetCoilWaterInletNode(state,
-                                                      CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                      thisOutAirUnit.OAEquip(CompNum).ComponentName,
-                                                      ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).CoilWaterOutletNode =
-                                GetCoilWaterOutletNode(state,
-                                                       CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                       thisOutAirUnit.OAEquip(CompNum).ComponentName,
-                                                       ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).MaxVolWaterFlow = HVACHXAssistedCoolingCoil::GetCoilMaxWaterFlowRate(
-                                state,
-                                CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                thisOutAirUnit.OAEquip(CompNum).ComponentName,
-                                ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).MinVolWaterFlow = 0.0;
+                            oaEquip.CoilAirInletNode = HVACHXAssistedCoolingCoil::GetCoilInletNode(
+                                state, CompTypeNames[static_cast<int>(oaEquip.Type)], oaEquip.ComponentName, ErrorsFound);
+                            oaEquip.CoilAirOutletNode = HVACHXAssistedCoolingCoil::GetCoilOutletNode(
+                                state, CompTypeNames[static_cast<int>(oaEquip.Type)], oaEquip.ComponentName, ErrorsFound);
+                            oaEquip.CoilWaterInletNode =
+                                GetCoilWaterInletNode(state, CompTypeNames[static_cast<int>(oaEquip.Type)], oaEquip.ComponentName, ErrorsFound);
+                            oaEquip.CoilWaterOutletNode =
+                                GetCoilWaterOutletNode(state, CompTypeNames[static_cast<int>(oaEquip.Type)], oaEquip.ComponentName, ErrorsFound);
+                            oaEquip.MaxVolWaterFlow = HVACHXAssistedCoolingCoil::GetCoilMaxWaterFlowRate(
+                                state, CompTypeNames[static_cast<int>(oaEquip.Type)], oaEquip.ComponentName, ErrorsFound);
+                            oaEquip.MinVolWaterFlow = 0.0;
                             break;
                         }
                         case CompType::Coil_ElectricHeat: {
                             // Get OutAirUnit( OAUnitNum ).OAEquip( CompNum ).ComponentIndex, 2 types of mining functions to choose from
-                            HeatingCoils::GetCoilIndex(
-                                state, thisOutAirUnit.OAEquip(CompNum).ComponentName, thisOutAirUnit.OAEquip(CompNum).ComponentIndex, ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).CoilAirInletNode =
-                                HeatingCoils::GetCoilInletNode(state,
-                                                               CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                               thisOutAirUnit.OAEquip(CompNum).ComponentName,
-                                                               ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).CoilAirOutletNode =
-                                HeatingCoils::GetCoilOutletNode(state,
-                                                                CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                                thisOutAirUnit.OAEquip(CompNum).ComponentName,
-                                                                ErrorsFound);
+                            HeatingCoils::GetCoilIndex(state, oaEquip.ComponentName, oaEquip.ComponentIndex, ErrorsFound);
+                            oaEquip.CoilAirInletNode = HeatingCoils::GetCoilInletNode(
+                                state, CompTypeNames[static_cast<int>(oaEquip.Type)], oaEquip.ComponentName, ErrorsFound);
+                            oaEquip.CoilAirOutletNode = HeatingCoils::GetCoilOutletNode(
+                                state, CompTypeNames[static_cast<int>(oaEquip.Type)], oaEquip.ComponentName, ErrorsFound);
                             break;
                         }
                         case CompType::Coil_GasHeat: {
                             // Get OutAirUnit( OAUnitNum ).OAEquip( CompNum ).ComponentIndex, 2 types of mining functions to choose from
-                            HeatingCoils::GetCoilIndex(
-                                state, thisOutAirUnit.OAEquip(CompNum).ComponentName, thisOutAirUnit.OAEquip(CompNum).ComponentIndex, ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).CoilAirInletNode =
-                                GetCoilInletNode(state,
-                                                 CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                 thisOutAirUnit.OAEquip(CompNum).ComponentName,
-                                                 ErrorsFound);
-                            thisOutAirUnit.OAEquip(CompNum).CoilAirOutletNode =
-                                GetCoilOutletNode(state,
-                                                  CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                  thisOutAirUnit.OAEquip(CompNum).ComponentName,
-                                                  ErrorsFound);
+                            HeatingCoils::GetCoilIndex(state, oaEquip.ComponentName, oaEquip.ComponentIndex, ErrorsFound);
+                            oaEquip.CoilAirInletNode =
+                                GetCoilInletNode(state, CompTypeNames[static_cast<int>(oaEquip.Type)], oaEquip.ComponentName, ErrorsFound);
+                            oaEquip.CoilAirOutletNode =
+                                GetCoilOutletNode(state, CompTypeNames[static_cast<int>(oaEquip.Type)], oaEquip.ComponentName, ErrorsFound);
                             break;
                         }
                         case CompType::DXSystem: {
                             // set the data for 100% DOAS DX cooling coil
                             // is a different function call needed here? similar to one in HVACDXSystem
-                            // CheckDXCoolingCoilInOASysExists(state, thisOutAirUnit.OAEquip(CompNum).ComponentName);
+                            // CheckDXCoolingCoilInOASysExists(state, oaEquip.ComponentName);
                             break;
                         }
                         case CompType::DXHeatPumpSystem: {
@@ -786,10 +698,9 @@ namespace OutdoorAirUnit {
                         }
                         case CompType::UnitarySystemModel: {
                             UnitarySystems::UnitarySys thisSys;
-                            thisOutAirUnit.OAEquip(CompNum).compPointer = thisSys.factory(
-                                state, HVAC::UnitarySysType::Unitary_AnyCoilType, thisOutAirUnit.OAEquip(CompNum).ComponentName, false, OAUnitNum);
-                            UnitarySystems::UnitarySys::checkUnitarySysCoilInOASysExists(
-                                state, thisOutAirUnit.OAEquip(CompNum).ComponentName, OAUnitNum);
+                            oaEquip.compPointer =
+                                thisSys.factory(state, HVAC::UnitarySysType::Unitary_AnyCoilType, oaEquip.ComponentName, false, OAUnitNum);
+                            UnitarySystems::UnitarySys::checkUnitarySysCoilInOASysExists(state, oaEquip.ComponentName, OAUnitNum);
 
                             // Heat recovery
                             break;
@@ -800,10 +711,8 @@ namespace OutdoorAirUnit {
                             //          thisOutAirUnit%OAEquip(CompNum)%Type= CompType::HeatXchngr
 
                             // Desiccant Dehumidifier
-                            OutputReportPredefined::PreDefTableEntry(state,
-                                                                     state.dataOutRptPredefined->pdchAirHRZoneHVACName,
-                                                                     thisOutAirUnit.OAEquip(CompNum).ComponentName,
-                                                                     thisOutAirUnit.Name);
+                            OutputReportPredefined::PreDefTableEntry(
+                                state, state.dataOutRptPredefined->pdchAirHRZoneHVACName, oaEquip.ComponentName, thisOutAirUnit.Name);
 
                             break;
                         }
@@ -815,10 +724,10 @@ namespace OutdoorAirUnit {
                         }
                         default: {
                             ShowSevereError(state,
-                                            format("{}= \"{}\" invalid Outside Air Component=\"{}\".",
-                                                   CurrentModuleObject,
-                                                   AlphArray(1),
-                                                   CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)]));
+                                            EnergyPlus::format("{}= \"{}\" invalid Outside Air Component=\"{}\".",
+                                                               CurrentModuleObject,
+                                                               AlphArray(1),
+                                                               CompTypeNames[static_cast<int>(oaEquip.Type)]));
                             ErrorsFound = true;
                         }
                         }
@@ -881,8 +790,7 @@ namespace OutdoorAirUnit {
                         }
                         // Must call after SetUpCompSets since this will add another CoilSystem:Cooling:DX object in CompSets
                         if (CompTypeNamesUC[static_cast<int>(thisOutAirUnit.OAEquip(InListNum).Type)] == "COILSYSTEM:COOLING:DX") {
-                            UnitarySystems::UnitarySys::checkUnitarySysCoilInOASysExists(
-                                state, thisOutAirUnit.OAEquip(CompNum).ComponentName, OAUnitNum);
+                            UnitarySystems::UnitarySys::checkUnitarySysCoilInOASysExists(state, oaEquip.ComponentName, OAUnitNum);
                         }
                     } // End Inlist
 
@@ -899,19 +807,19 @@ namespace OutdoorAirUnit {
 
                 } else { // when ListNum<0
                     ShowSevereError(state,
-                                    format("{} = \"{}\" invalid {}=\"{}\" not found.",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           cAlphaFields(16),
-                                           state.dataIPShortCut->cAlphaArgs(16)));
+                                    EnergyPlus::format("{} = \"{}\" invalid {}=\"{}\" not found.",
+                                                       CurrentModuleObject,
+                                                       state.dataIPShortCut->cAlphaArgs(1),
+                                                       cAlphaFields(16),
+                                                       state.dataIPShortCut->cAlphaArgs(16)));
                     ErrorsFound = true;
                 }
             } else { // when Equipment list is left blanked
                 ShowSevereError(state,
-                                format("{} = \"{}\" invalid {} is blank and must be entered.",
-                                       CurrentModuleObject,
-                                       state.dataIPShortCut->cAlphaArgs(1),
-                                       cAlphaFields(16)));
+                                EnergyPlus::format("{} = \"{}\" invalid {} is blank and must be entered.",
+                                                   CurrentModuleObject,
+                                                   state.dataIPShortCut->cAlphaArgs(1),
+                                                   cAlphaFields(16)));
                 ErrorsFound = true;
             }
             if (!lAlphaBlanks(17)) {
@@ -920,7 +828,7 @@ namespace OutdoorAirUnit {
         }
 
         if (ErrorsFound) {
-            ShowFatalError(state, format("{}Errors found in getting {}.", RoutineName, CurrentModuleObject));
+            ShowFatalError(state, EnergyPlus::format("{}Errors found in getting {}.", RoutineName, CurrentModuleObject));
         }
 
         AlphArray.deallocate();
@@ -1165,9 +1073,10 @@ namespace OutdoorAirUnit {
                 }
                 ShowSevereError(
                     state,
-                    format("InitOutdoorAirUnit: Zone Outdoor Air Unit=[{},{}] is not on any ZoneHVAC:EquipmentList.  It will not be simulated.",
-                           CurrentModuleObject,
-                           state.dataOutdoorAirUnit->OutAirUnit(Loop).Name));
+                    EnergyPlus::format(
+                        "InitOutdoorAirUnit: Zone Outdoor Air Unit=[{},{}] is not on any ZoneHVAC:EquipmentList.  It will not be simulated.",
+                        CurrentModuleObject,
+                        state.dataOutdoorAirUnit->OutAirUnit(Loop).Name));
             }
         }
 
@@ -1209,8 +1118,8 @@ namespace OutdoorAirUnit {
                                                                 CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(compLoop).Type)],
                                                                 thisOutAirUnit.OAEquip(compLoop).ComponentName,
                                                                 errFlag);
-                        Real64 const rho = state.dataPlnt->PlantLoop(thisOutAirUnit.OAEquip(compLoop).plantLoc.loopNum)
-                                               .glycol->getDensity(state, Constant::CWInitConvTemp, RoutineName);
+                        Real64 const rho =
+                            thisOutAirUnit.OAEquip(compLoop).plantLoc.loop->glycol->getDensity(state, Constant::CWInitConvTemp, RoutineName);
                         thisOutAirUnit.OAEquip(compLoop).MaxWaterMassFlow = rho * thisOutAirUnit.OAEquip(compLoop).MaxVolWaterFlow;
                         thisOutAirUnit.OAEquip(compLoop).MinWaterMassFlow = rho * thisOutAirUnit.OAEquip(compLoop).MinVolWaterFlow;
                         InitComponentNodes(state,
@@ -1226,8 +1135,8 @@ namespace OutdoorAirUnit {
                                                                 CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(compLoop).Type)],
                                                                 thisOutAirUnit.OAEquip(compLoop).ComponentName,
                                                                 errFlag);
-                        Real64 const rho = state.dataPlnt->PlantLoop(thisOutAirUnit.OAEquip(compLoop).plantLoc.loopNum)
-                                               .glycol->getDensity(state, Constant::HWInitConvTemp, RoutineName);
+                        Real64 const rho =
+                            thisOutAirUnit.OAEquip(compLoop).plantLoc.loop->glycol->getDensity(state, Constant::HWInitConvTemp, RoutineName);
                         thisOutAirUnit.OAEquip(compLoop).MaxWaterMassFlow = rho * thisOutAirUnit.OAEquip(compLoop).MaxVolWaterFlow;
                         thisOutAirUnit.OAEquip(compLoop).MinWaterMassFlow = rho * thisOutAirUnit.OAEquip(compLoop).MinVolWaterFlow;
                         InitComponentNodes(state,
@@ -1239,8 +1148,8 @@ namespace OutdoorAirUnit {
                     if (thisOutAirUnit.OAEquip(compLoop).Type == CompType::SteamCoil_AirHeat) {
                         thisOutAirUnit.OAEquip(compLoop).MaxVolWaterFlow =
                             GetCoilMaxSteamFlowRate(state, thisOutAirUnit.OAEquip(compLoop).ComponentIndex, errFlag);
-                        Real64 const rho = state.dataPlnt->PlantLoop(thisOutAirUnit.OAEquip(compLoop).plantLoc.loopNum)
-                                               .steam->getSatDensity(state, Constant::SteamInitConvTemp, 1.0, RoutineName);
+                        Real64 const rho = thisOutAirUnit.OAEquip(compLoop).plantLoc.loop->steam->getSatDensity(
+                            state, Constant::SteamInitConvTemp, 1.0, RoutineName);
                         thisOutAirUnit.OAEquip(compLoop).MaxWaterMassFlow = rho * thisOutAirUnit.OAEquip(compLoop).MaxVolWaterFlow;
                         thisOutAirUnit.OAEquip(compLoop).MinWaterMassFlow = rho * thisOutAirUnit.OAEquip(compLoop).MinVolWaterFlow;
                         InitComponentNodes(state,
@@ -1255,8 +1164,8 @@ namespace OutdoorAirUnit {
                                                                 CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(compLoop).Type)],
                                                                 thisOutAirUnit.OAEquip(compLoop).ComponentName,
                                                                 errFlag);
-                        Real64 const rho = state.dataPlnt->PlantLoop(thisOutAirUnit.OAEquip(compLoop).plantLoc.loopNum)
-                                               .glycol->getDensity(state, Constant::CWInitConvTemp, RoutineName);
+                        Real64 const rho =
+                            thisOutAirUnit.OAEquip(compLoop).plantLoc.loop->glycol->getDensity(state, Constant::CWInitConvTemp, RoutineName);
                         thisOutAirUnit.OAEquip(compLoop).MaxWaterMassFlow = rho * thisOutAirUnit.OAEquip(compLoop).MaxVolWaterFlow;
                         thisOutAirUnit.OAEquip(compLoop).MinWaterMassFlow = rho * thisOutAirUnit.OAEquip(compLoop).MinVolWaterFlow;
                         InitComponentNodes(state,
@@ -1372,8 +1281,6 @@ namespace OutdoorAirUnit {
         Real64 ExtAirVolFlowDes = 0.0;  // Autosized exhaust air flow for reporting
         Real64 ExtAirVolFlowUser = 0.0; // Hardsized exhaust air flow for reporting
 
-        bool ErrorsFound = false;
-
         auto &thisOutAirUnit = state.dataOutdoorAirUnit->OutAirUnit(OAUnitNum);
 
         state.dataSize->DataFanType = thisOutAirUnit.supFanType;
@@ -1409,11 +1316,14 @@ namespace OutdoorAirUnit {
                             if ((std::abs(OutAirVolFlowDes - OutAirVolFlowUser) / OutAirVolFlowUser) > state.dataSize->AutoVsHardSizingThreshold) {
                                 BaseSizer::reportSizerOutput(
                                     state, ZoneHVACOAUnit, thisOutAirUnit.Name, "Design Size Outdoor Air Flow Rate [m3/s]", OutAirVolFlowDes);
-                                ShowMessage(state,
-                                            format("SizeOutdoorAirUnit: Potential issue with equipment sizing for ZoneHVAC:OutdoorAirUnit {}",
-                                                   thisOutAirUnit.Name));
-                                ShowContinueError(state, format("User-Specified Outdoor Air Flow Rate of {:.5R} [m3/s]", OutAirVolFlowUser));
-                                ShowContinueError(state, format("differs from Design Size Outdoor Air Flow Rate of {:.5R} [m3/s]", OutAirVolFlowDes));
+                                ShowMessage(
+                                    state,
+                                    EnergyPlus::format("SizeOutdoorAirUnit: Potential issue with equipment sizing for ZoneHVAC:OutdoorAirUnit {}",
+                                                       thisOutAirUnit.Name));
+                                ShowContinueError(state,
+                                                  EnergyPlus::format("User-Specified Outdoor Air Flow Rate of {:.5R} [m3/s]", OutAirVolFlowUser));
+                                ShowContinueError(
+                                    state, EnergyPlus::format("differs from Design Size Outdoor Air Flow Rate of {:.5R} [m3/s]", OutAirVolFlowDes));
                                 ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                 ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                             }
@@ -1449,11 +1359,14 @@ namespace OutdoorAirUnit {
                             if ((std::abs(ExtAirVolFlowDes - ExtAirVolFlowUser) / ExtAirVolFlowUser) > state.dataSize->AutoVsHardSizingThreshold) {
                                 BaseSizer::reportSizerOutput(
                                     state, ZoneHVACOAUnit, thisOutAirUnit.Name, "Design Size Exhaust Air Flow Rate [m3/s]", ExtAirVolFlowDes);
-                                ShowMessage(state,
-                                            format("SizeOutdoorAirUnit: Potential issue with equipment sizing for ZoneHVAC:OutdoorAirUnit {}",
-                                                   thisOutAirUnit.Name));
-                                ShowContinueError(state, format("User-Specified Exhaust Air Flow Rate of {:.5R} [m3/s]", ExtAirVolFlowUser));
-                                ShowContinueError(state, format("differs from Design Size Exhaust Air Flow Rate of {:.5R} [m3/s]", ExtAirVolFlowDes));
+                                ShowMessage(
+                                    state,
+                                    EnergyPlus::format("SizeOutdoorAirUnit: Potential issue with equipment sizing for ZoneHVAC:OutdoorAirUnit {}",
+                                                       thisOutAirUnit.Name));
+                                ShowContinueError(state,
+                                                  EnergyPlus::format("User-Specified Exhaust Air Flow Rate of {:.5R} [m3/s]", ExtAirVolFlowUser));
+                                ShowContinueError(
+                                    state, EnergyPlus::format("differs from Design Size Exhaust Air Flow Rate of {:.5R} [m3/s]", ExtAirVolFlowDes));
                                 ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                 ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                             }
@@ -1503,10 +1416,6 @@ namespace OutdoorAirUnit {
                         state, thisOAEquip.ComponentName, true, HVAC::CompressorOp::On, 0.0, thisOAEquip.ComponentIndex, HVAC::FanOp::Continuous);
                 }
             }
-        }
-
-        if (ErrorsFound) {
-            ShowFatalError(state, "Preceding sizing errors cause program termination");
         }
     }
 
@@ -1653,14 +1562,14 @@ namespace OutdoorAirUnit {
                 (!state.dataHeatBal->ZoneAirMassFlow.EnforceZoneMassBalance)) {
                 if (!thisOutAirUnit.FlowError) {
                     ShowWarningError(state, "Air mass flow between zone supply and exhaust is not balanced. Only the first occurrence is reported.");
-                    ShowContinueError(state, format("Occurs in ZoneHVAC:OutdoorAirUnit Object= {}", thisOutAirUnit.Name));
+                    ShowContinueError(state, EnergyPlus::format("Occurs in ZoneHVAC:OutdoorAirUnit Object= {}", thisOutAirUnit.Name));
                     ShowContinueError(state,
                                       "Air mass balance is required by other outdoor air units: Fan:ZoneExhaust, ZoneMixing, ZoneCrossMixing, or "
                                       "other air flow control inputs.");
                     ShowContinueErrorTimeStamp(state,
-                                               format("The outdoor mass flow rate = {:.3R} and the exhaust mass flow rate = {:.3R}.",
-                                                      thisOutAirUnit.OutAirMassFlow,
-                                                      thisOutAirUnit.ExtAirMassFlow));
+                                               EnergyPlus::format("The outdoor mass flow rate = {:.3R} and the exhaust mass flow rate = {:.3R}.",
+                                                                  thisOutAirUnit.OutAirMassFlow,
+                                                                  thisOutAirUnit.ExtAirMassFlow));
                     thisOutAirUnit.FlowError = true;
                 }
             }
@@ -2190,7 +2099,7 @@ namespace OutdoorAirUnit {
                 }
             } break;
             default: {
-                ShowFatalError(state, format("Invalid Outdoor Air Unit Component={}", EquipType)); // validate
+                ShowFatalError(state, EnergyPlus::format("Invalid Outdoor Air Unit Component={}", EquipType)); // validate
             } break;
             }
         }
@@ -2302,7 +2211,7 @@ namespace OutdoorAirUnit {
             LoadMet = AirMassFlow * (PsyHFnTdbW(oaOutletNode.Temp, oaInletNode.HumRat) - PsyHFnTdbW(oaInletNode.Temp, oaInletNode.HumRat));
         } break;
         default:
-            ShowFatalError(state, format("Invalid Coil Type = {}", CoilTypeNum)); // validate
+            ShowFatalError(state, EnergyPlus::format("Invalid Coil Type = {}", CoilTypeNum)); // validate
             break;
         }
     }

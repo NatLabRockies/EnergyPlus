@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -624,9 +624,11 @@ state.dataStrGlobals->inputFilePath='{:g}',
             //       Get directories from ini file
             std::string programPathStr;
             ReadINIFile(iniFile, "program", "dir", programPathStr);
-            state.dataStrGlobals->ProgramPath = fs::path(programPathStr);
 
-            state.dataStrGlobals->inputIddFilePath = state.dataStrGlobals->ProgramPath / "Energy+.idd";
+            if (!programPathStr.empty()) {
+                state.dataStrGlobals->ProgramPath = fs::path(programPathStr);
+                state.dataStrGlobals->inputIddFilePath = state.dataStrGlobals->ProgramPath / "Energy+.idd";
+            }
         }
 
         // Check if specified files exist
@@ -905,7 +907,7 @@ state.dataStrGlobals->inputFilePath='{:g}',
         if (!rviFileExists) {
             std::ofstream ofs{RVIfile};
             if (!ofs.good()) {
-                ShowFatalError(state, format("EnergyPlus: Could not open file \"{}\" for output (write).", RVIfile));
+                ShowFatalError(state, EnergyPlus::format("EnergyPlus: Could not open file \"{}\" for output (write).", RVIfile));
             } else {
                 ofs << FileSystem::toString(state.files.eso.filePath) << '\n';
                 ofs << FileSystem::toString(state.files.csv.filePath) << '\n';
@@ -916,7 +918,7 @@ state.dataStrGlobals->inputFilePath='{:g}',
         if (!mviFileExists) {
             std::ofstream ofs{MVIfile};
             if (!ofs.good()) {
-                ShowFatalError(state, format("EnergyPlus: Could not open file \"{}\" for output (write).", RVIfile));
+                ShowFatalError(state, EnergyPlus::format("EnergyPlus: Could not open file \"{}\" for output (write).", RVIfile));
             } else {
                 ofs << FileSystem::toString(state.files.mtr.filePath) << '\n';
                 ofs << FileSystem::toString(state.files.mtr_csv.filePath) << '\n';

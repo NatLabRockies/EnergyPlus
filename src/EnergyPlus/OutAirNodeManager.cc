@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -89,7 +89,6 @@ namespace OutAirNodeManager {
     // USE STATEMENTS:
     // Use statements for data only modules
     // Using/Aliasing
-    using namespace DataLoopNode;
     using namespace DataEnvironment;
 
     void SetOutAirNodes(EnergyPlusData &state)
@@ -128,9 +127,6 @@ namespace OutAirNodeManager {
 
         // METHODOLOGY EMPLOYED:
         // Use the Get routines from the InputProcessor module.
-
-        // Using/Aliasing
-        using namespace NodeInputManager;
 
         // Locals
         // SUBROUTINE PARAMETER DEFINITIONS:
@@ -218,17 +214,18 @@ namespace OutAirNodeManager {
                                 NumNodes,
                                 NodeNums,
                                 ErrInList,
-                                DataLoopNode::NodeFluidType::Air,
-                                DataLoopNode::ConnectionObjectType::OutdoorAirNodeList,
+                                Node::FluidType::Air,
+                                Node::ConnectionObjectType::OutdoorAirNodeList,
                                 CurrentModuleObject,
-                                DataLoopNode::ConnectionType::OutsideAir,
-                                static_cast<NodeInputManager::CompFluidStream>(NextFluidStreamNum),
-                                ObjectIsNotParent,
-                                IncrementFluidStreamYes,
+                                Node::ConnectionType::OutsideAir,
+                                static_cast<Node::CompFluidStream>(NextFluidStreamNum),
+                                Node::ObjectIsNotParent,
+                                Node::IncrementFluidStreamYes,
                                 cAlphaFields(AlphaNum));
                     NextFluidStreamNum += NumNodes;
                     if (ErrInList) {
-                        ShowContinueError(state, format("Occurred in {}, {} = {}", CurrentModuleObject, cAlphaFields(AlphaNum), Alphas(AlphaNum)));
+                        ShowContinueError(
+                            state, EnergyPlus::format("Occurred in {}, {} = {}", CurrentModuleObject, cAlphaFields(AlphaNum), Alphas(AlphaNum)));
                         ErrorsFound = true;
                     }
                     for (int NodeNum = 1; NodeNum <= NumNodes; ++NodeNum) {
@@ -245,7 +242,7 @@ namespace OutAirNodeManager {
             }
 
             if (ErrorsFound) {
-                ShowFatalError(state, format("{}Errors found in getting {} input.", RoutineName, CurrentModuleObject));
+                ShowFatalError(state, EnergyPlus::format("{}Errors found in getting {} input.", RoutineName, CurrentModuleObject));
             }
         }
 
@@ -277,22 +274,22 @@ namespace OutAirNodeManager {
                             NumNodes,
                             NodeNums,
                             ErrInList,
-                            DataLoopNode::NodeFluidType::Air,
-                            DataLoopNode::ConnectionObjectType::OutdoorAirNode,
+                            Node::FluidType::Air,
+                            Node::ConnectionObjectType::OutdoorAirNode,
                             CurrentModuleObject,
-                            DataLoopNode::ConnectionType::OutsideAir,
-                            static_cast<NodeInputManager::CompFluidStream>(NextFluidStreamNum),
-                            ObjectIsNotParent,
-                            IncrementFluidStreamYes,
+                            Node::ConnectionType::OutsideAir,
+                            static_cast<Node::CompFluidStream>(NextFluidStreamNum),
+                            Node::ObjectIsNotParent,
+                            Node::IncrementFluidStreamYes,
                             cAlphaFields(1));
                 NextFluidStreamNum += NumNodes;
                 if (ErrInList) {
-                    ShowContinueError(state, format("Occurred in {}, {} = {}", CurrentModuleObject, cAlphaFields(1), Alphas(1)));
+                    ShowContinueError(state, EnergyPlus::format("Occurred in {}, {} = {}", CurrentModuleObject, cAlphaFields(1), Alphas(1)));
                     ErrorsFound = true;
                 }
 
                 if (NumNodes > 1) {
-                    ShowSevereError(state, format("{}, {} = {}", CurrentModuleObject, cAlphaFields(1), Alphas(1)));
+                    ShowSevereError(state, EnergyPlus::format("{}, {} = {}", CurrentModuleObject, cAlphaFields(1), Alphas(1)));
                     ShowContinueError(state, "...appears to point to a node list, not a single node.");
                     ErrorsFound = true;
                     continue;
@@ -305,8 +302,8 @@ namespace OutAirNodeManager {
                     }
                     TmpNums(ListSize) = NodeNums(1);
                 } else { // Duplicates are a problem
-                    ShowSevereError(state, format("{}, duplicate {} = {}", CurrentModuleObject, cAlphaFields(1), Alphas(1)));
-                    ShowContinueError(state, format("Duplicate {} might be found in an OutdoorAir:NodeList.", cAlphaFields(1)));
+                    ShowSevereError(state, EnergyPlus::format("{}, duplicate {} = {}", CurrentModuleObject, cAlphaFields(1), Alphas(1)));
+                    ShowContinueError(state, EnergyPlus::format("Duplicate {} might be found in an OutdoorAir:NodeList.", cAlphaFields(1)));
                     ErrorsFound = true;
                     continue;
                 }
@@ -345,7 +342,7 @@ namespace OutAirNodeManager {
                 }
 
                 if (NumAlphas > 8) {
-                    ShowSevereError(state, format("{}, {} = {}", CurrentModuleObject, cAlphaFields(1), Alphas(1)));
+                    ShowSevereError(state, EnergyPlus::format("{}, {} = {}", CurrentModuleObject, cAlphaFields(1), Alphas(1)));
                     ShowContinueError(state, "Object Definition indicates more than 7 Alpha Objects.");
                     ErrorsFound = true;
                     continue;
@@ -356,7 +353,7 @@ namespace OutAirNodeManager {
                 }
             }
             if (ErrorsFound) {
-                ShowFatalError(state, format("{}Errors found in getting {} input.", RoutineName, CurrentModuleObject));
+                ShowFatalError(state, EnergyPlus::format("{}Errors found in getting {} input.", RoutineName, CurrentModuleObject));
             }
         }
 
@@ -463,9 +460,6 @@ namespace OutAirNodeManager {
         // REFERENCES:
         // na
 
-        // Using/Aliasing
-        using namespace NodeInputManager;
-
         // Locals
         // SUBROUTINE ARGUMENT DEFINITIONS:
 
@@ -512,13 +506,13 @@ namespace OutAirNodeManager {
                             DummyNumber,
                             TmpNums,
                             errFlag,
-                            DataLoopNode::NodeFluidType::Air,
-                            DataLoopNode::ConnectionObjectType::OutdoorAirNode,
+                            Node::FluidType::Air,
+                            Node::ConnectionObjectType::OutdoorAirNode,
                             "OutdoorAir:Node",
-                            DataLoopNode::ConnectionType::OutsideAir,
-                            static_cast<NodeInputManager::CompFluidStream>(state.dataOutAirNodeMgr->NumOutsideAirNodes),
-                            ObjectIsNotParent,
-                            IncrementFluidStreamYes);
+                            Node::ConnectionType::OutsideAir,
+                            static_cast<Node::CompFluidStream>(state.dataOutAirNodeMgr->NumOutsideAirNodes),
+                            Node::ObjectIsNotParent,
+                            Node::IncrementFluidStreamYes);
                 SetOANodeValues(state, NodeNumber, false);
             }
         }

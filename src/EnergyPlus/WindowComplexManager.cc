@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -478,11 +478,8 @@ namespace WindowComplexManager {
         // PURPOSE OF THIS SUBROUTINE:
         // Check if there are new states available for complex fenestration and performs proper initialization
 
-        bool StateFound; // variable to indicate if state has been found
-        int CurrentCFSState;
-
-        StateFound = false;
-        CurrentCFSState = state.dataSurface->SurfaceWindow(iSurf).ComplexFen.CurrentState;
+        bool StateFound = false; // variable to indicate if state has been found
+        int const CurrentCFSState = state.dataSurface->SurfaceWindow(iSurf).ComplexFen.CurrentState;
 
         // Check if EMS changed construction number
         if (state.dataSurface->Surface(iSurf).Construction != state.dataSurface->SurfaceWindow(iSurf).ComplexFen.State(CurrentCFSState).Konst) {
@@ -493,7 +490,6 @@ namespace WindowComplexManager {
             for (int i = 1; i <= NumOfStates; ++i) {
                 if (state.dataSurface->Surface(iSurf).Construction == state.dataSurface->SurfaceWindow(iSurf).ComplexFen.State(i).Konst) {
                     StateFound = true;
-                    CurrentCFSState = i;
                     state.dataSurface->SurfaceWindow(iSurf).ComplexFen.CurrentState = i;
                 }
             }
@@ -504,8 +500,7 @@ namespace WindowComplexManager {
         // If new state is not found in the list of current states, then create new one, initialize and make it active
         if (!StateFound) {
             ExpandComplexState(state, iSurf, state.dataSurface->Surface(iSurf).Construction);
-            CurrentCFSState = state.dataSurface->SurfaceWindow(iSurf).ComplexFen.NumStates;
-            state.dataSurface->SurfaceWindow(iSurf).ComplexFen.CurrentState = CurrentCFSState;
+            state.dataSurface->SurfaceWindow(iSurf).ComplexFen.CurrentState = state.dataSurface->SurfaceWindow(iSurf).ComplexFen.NumStates;
         }
     }
 
@@ -2641,7 +2636,7 @@ namespace WindowComplexManager {
 
         // Deflection
         // Tarcog requires deflection as input parameters.  Deflection is NOT used in EnergyPlus simulations
-        TARCOGParams::DeflectionCalculation CalcDeflection; // Deflection calculation flag:
+        TARCOGParams::DeflectionCalculation CalcDeflection = TARCOGParams::DeflectionCalculation::NONE; // Deflection calculation flag:
         //    0 - no deflection calculations
         //    1 - perform deflection calculation (input is Pressure/Temp)
         //    2 - perform deflection calculation (input is measured deflection)
@@ -2747,7 +2742,6 @@ namespace WindowComplexManager {
         // Simon: locally used variables
         int ngllayer;
         int nglface;
-        int nglfacep;
         int ThermalModelNum;
         Real64 rmir; // IR radiance of window's interior surround (W/m2)
         Real64 outir;
@@ -2761,7 +2755,6 @@ namespace WindowComplexManager {
         auto &s_mat = state.dataMaterial;
         // fill local vars
 
-        CalcDeflection = TARCOGParams::DeflectionCalculation::NONE;
         CalcSHGC = 0;
 
         if (CalcCondition == DataBSDFWindow::Condition::Invalid) {
@@ -2772,7 +2765,6 @@ namespace WindowComplexManager {
 
         ngllayer = state.dataConstruction->Construct(ConstrNum).TotGlassLayers;
         nglface = 2 * ngllayer;
-        nglfacep = nglface;
         hrin = 0.0;
         hcin = 0.0;
         hrout = 0.0;
@@ -2992,7 +2984,7 @@ namespace WindowComplexManager {
                 }
             } else {
                 ShowContinueError(state, "Illegal layer type in Construction:ComplexFenestrationState.");
-                ShowContinueError(state, "Allowed object are:");
+                ShowContinueError(state, "Allowed objects are:");
                 ShowContinueError(state, "   - WindowMaterial:Glazing");
                 ShowContinueError(state, "   - WindowMaterial:ComplexShade");
                 ShowContinueError(state, "   - WindowMaterial:Gap");
@@ -3219,9 +3211,9 @@ namespace WindowComplexManager {
             tarcogErrorMessage = "message = \"" + tarcogErrorMessage + "\"";
             ShowContinueErrorTimeStamp(state, tarcogErrorMessage);
             if (CalcCondition == DataBSDFWindow::Condition::Invalid) {
-                ShowContinueError(state, format("surface name = {}", state.dataSurface->Surface(SurfNum).Name));
+                ShowContinueError(state, EnergyPlus::format("surface name = {}", state.dataSurface->Surface(SurfNum).Name));
             }
-            ShowContinueError(state, format("construction name = {}", state.dataConstruction->Construct(ConstrNum).Name));
+            ShowContinueError(state, EnergyPlus::format("construction name = {}", state.dataConstruction->Construct(ConstrNum).Name));
             ShowFatalError(state, "halting because of error in tarcog");
         }
 
@@ -3281,7 +3273,7 @@ namespace WindowComplexManager {
                 //   IR to zone from glass when interior shade/blind is present.
                 ShadeArea = state.dataSurface->Surface(SurfNum).Area + state.dataSurface->SurfWinDividerArea(SurfNum);
                 sconsh = scon(ngllayer + 1) / thick(ngllayer + 1);
-                nglfacep = nglface + 2;
+                int const nglfacep = nglface + 2;
                 // CondHeatGainShade = ShadeArea * sconsh * (theta(nglfacep - 1) - theta(nglfacep));
                 EpsShIR1 = emis(nglface + 1);
                 EpsShIR2 = emis(nglface + 2);

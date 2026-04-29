@@ -41,7 +41,7 @@
 ! ***GENERAL SIMULATION PARAMETERS***
 ! Number of Zones: 5
 
-  Version,26.1;
+  Version,26.2;
 
   SimulationControl,
     YES,                     !- Do Zone Sizing Calculation
@@ -7949,7 +7949,7 @@
     SET SumReliefMCT = SumReliefMCT + (h_Relief_4 * mdotRelief_4 );  !- <none>
 
   EnergyManagementSystem:Program,
-    IntializeParameters,     !- Name
+    InitializeParameters,    !- Name
     Set CV_Height = 1.0,     !- Program Line 1
     Set CV_effWidth = 40.0,  !- Program Line 2
     Set CV_crossSectArea = CV_Height * CV_effWidth,  !- <none>
@@ -8066,8 +8066,10 @@
 
   EnergyManagementSystem:GlobalVariable,
     Troof,                   !- Erl Variable 1 Name
-    CV_Height,               !- Erl Variable 2 Name
-    CV_crossSectArea,        !- Erl Variable 3 Name
+    DeltaT,                  !- Erl Variable 2 Name
+    ratioT,                  !- Erl Variable 3 Name
+    CV_Height,               !- <none>
+    CV_crossSectArea,        !- <none>
     C_v,                     !- <none>
     rhoAir,                  !- <none>
     CpAir,                   !- <none>
@@ -8101,7 +8103,7 @@
   EnergyManagementSystem:ProgramCallingManager,
     Model Flat Roof Microclimate,  !- Name
     BeginTimestepBeforePredictor,  !- EnergyPlus Model Calling Point
-    IntializeParameters,     !- Program Name 1
+    InitializeParameters,    !- Program Name 1
     ModelFlatRoofMicroClime, !- Program Name 2
     ApplyMicroClimeActuators;!- Program Name 3
 
@@ -8115,7 +8117,7 @@
     Run SumReliefAirMCTterm, !- <none>
     Run CalcWindTerms,       !- <none>
     Run CalcBouyancyTerms,   !- <none>
-    SEt Numerator = WindMCT + NatBouyMCT + SumHATroof + QdotCond + SumReliefMCT,  !- <none>
+    Set Numerator = WindMCT + NatBouyMCT + SumHATroof + QdotCond + SumReliefMCT,  !- <none>
     Set Denominator = WindMC + NatBouyMC + SumHAroof + SumIntakeMdotCp,  !- <none>
     Set Troof = Numerator / Denominator,  !- <none>
     IF Ta < 2.0,             !- <none>

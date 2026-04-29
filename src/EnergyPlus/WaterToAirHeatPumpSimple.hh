@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -80,7 +80,11 @@ namespace WaterToAirHeatPumpSimple {
     struct SimpleWatertoAirHPConditions
     {
         // Members
-        std::string Name;                                                                     // Name of the Water to Air Heat pump
+        std::string Name; // Name of the Water to Air Heat pump
+
+        HVAC::CoilType coilType = HVAC::CoilType::Invalid;
+        int coilReportNum = -1;
+
         Sched::Schedule *availSched = nullptr;                                                // availability schedule
         WatertoAirHP WAHPType = WatertoAirHP::Invalid;                                        // Type of WatertoAirHP ie. Heating or Cooling
         DataPlant::PlantEquipmentType WAHPPlantType = DataPlant::PlantEquipmentType::Invalid; // type of component in plant
@@ -132,16 +136,19 @@ namespace WaterToAirHeatPumpSimple {
         Real64 RatedEntAirWetbulbTemp = 0.0;         // Rated Entering Air Wetbulb Temperature [C]
         Real64 RatedEntAirDrybulbTemp = 0.0;         // Rated Entering Air Drybulb Temperature [C]
         Real64 RatioRatedHeatRatedTotCoolCap = 0.0;  // Ratio of Rated Heating Capacity to Rated Cooling Capacity [-]
-        Curve::Curve *HeatCapCurve = nullptr;        // Index of the heating capacity performance curve
-        Curve::Curve *HeatPowCurve = nullptr;        // Index of the heating power consumption curve
-        Curve::Curve *TotalCoolCapCurve = nullptr;   // Index of the Total Cooling capacity performance curve
-        Curve::Curve *SensCoolCapCurve = nullptr;    // Index of the Sensible Cooling capacity performance curve
-        Curve::Curve *CoolPowCurve = nullptr;        // Index of the Cooling power consumption curve
-        Curve::Curve *PLFCurve = nullptr;            // Index of the Part Load Factor curve
-        int AirInletNodeNum = 0;                     // Node Number of the Air Inlet
-        int AirOutletNodeNum = 0;                    // Node Number of the Air Outlet
-        int WaterInletNodeNum = 0;                   // Node Number of the Water Onlet
-        int WaterOutletNodeNum = 0;                  // Node Number of the Water Outlet
+
+        Curve::Curve *HeatCapCurve = nullptr;      // Index of the heating capacity performance curve
+        Curve::Curve *HeatPowCurve = nullptr;      // Index of the heating power consumption curve
+        Curve::Curve *TotalCoolCapCurve = nullptr; // Index of the Total Cooling capacity performance curve
+        Curve::Curve *SensCoolCapCurve = nullptr;  // Index of the Sensible Cooling capacity performance curve
+        Curve::Curve *CoolPowCurve = nullptr;      // Index of the Cooling power consumption curve
+        Curve::Curve *PLFCurve = nullptr;          // Index of the Part Load Factor curve
+
+        int AirInletNodeNum = 0;    // Node Number of the Air Inlet
+        int AirOutletNodeNum = 0;   // Node Number of the Air Outlet
+        int WaterInletNodeNum = 0;  // Node Number of the Water Onlet
+        int WaterOutletNodeNum = 0; // Node Number of the Water Outlet
+
         PlantLocation plantLoc;
         HVAC::WaterFlow WaterCyclingMode = HVAC::WaterFlow::Invalid; // Heat Pump Coil water flow mode; See definitions in DataHVACGlobals,
         // 1=water cycling, 2=water constant, 3=water constant on demand (old mode)
@@ -162,6 +169,7 @@ namespace WaterToAirHeatPumpSimple {
         Real64 LatentCapacityTimeConstant = 0.0; // Latent capcacity time constant [s]
         Real64 FanDelayTime = 0.0;               // Fan delay time, time delay for the HP's fan to
         bool reportCoilFinalSizes = true;        // one time report of sizes to coil report
+        bool LowFlowFlag = true;                 // one time low flow warning for coil in cycling fan mode
     };
 
     void SimWatertoAirHPSimple(EnergyPlusData &state,
@@ -190,7 +198,8 @@ namespace WaterToAirHeatPumpSimple {
                                 Real64 const LatentLoad,        // Control zone latent load[W]
                                 HVAC::FanOp const fanOp,        // fan operating mode
                                 Real64 const OnOffAirFlowRatio, // ratio of compressor on flow to average flow over time step
-                                bool const FirstHVACIteration   // Iteration flag
+                                bool const FirstHVACIteration,  // Iteration flag
+                                Real64 const PartLoadRatio      // compressor part load ratio
     );
 
     void SizeHVACWaterToAir(EnergyPlusData &state, int const HPNum);
@@ -237,15 +246,15 @@ namespace WaterToAirHeatPumpSimple {
     );
 
     Real64 GetCoilCapacity(EnergyPlusData &state,
-                           std::string const &CoilType, // must match coil types in this module
-                           std::string const &CoilName, // must match coil names for the coil type
-                           bool &ErrorsFound            // set to true if problem
+                           std::string_view const coilType, // must match coil types in this module
+                           std::string const &CoilName,     // must match coil names for the coil type
+                           bool &ErrorsFound                // set to true if problem
     );
 
     Real64 GetCoilAirFlowRate(EnergyPlusData &state,
-                              std::string const &CoilType, // must match coil types in this module
-                              std::string const &CoilName, // must match coil names for the coil type
-                              bool &ErrorsFound            // set to true if problem
+                              std::string_view const coilType, // must match coil types in this module
+                              std::string const &CoilName,     // must match coil names for the coil type
+                              bool &ErrorsFound                // set to true if problem
     );
 
     int GetCoilInletNode(EnergyPlusData &state,
@@ -276,9 +285,6 @@ namespace WaterToAirHeatPumpSimple {
 
 struct WaterToAirHeatPumpSimpleData : BaseGlobalStruct
 {
-
-    Real64 const CelsiustoKelvin; // Conversion from Celsius to Kelvin
-
     int NumWatertoAirHPs; // The Number of Water to Air Heat Pumps found in the Input
                           // INTEGER        :: WaterIndex = 0                   ! Water index
                           // INTEGER        :: Count = 0
@@ -287,31 +293,15 @@ struct WaterToAirHeatPumpSimpleData : BaseGlobalStruct
     Array1D_bool MySizeFlag;
     Array1D_bool SimpleHPTimeStepFlag; // determines whether the previous operating mode for the coil and it's partner has been initialized
 
-    Real64 SourceSideMassFlowRate; // Source Side Mass flow rate [Kg/s]
-    Real64 SourceSideInletTemp;    // Source Side Inlet Temperature [C]
-    Real64 SourceSideInletEnth;    // Source Side Inlet Enthalpy [J/kg]
-    Real64 LoadSideInletDBTemp;    // Load Side Inlet Dry Bulb Temp [C]
-    Real64 LoadSideInletWBTemp;    // Load Side Inlet Wet Bulb Temp [C]
-    Real64 LoadSideInletHumRat;    // Load Side Outlet Humidity ratio
-    Real64 LoadSideInletEnth;      // Load Side Inlet Enthalpy [J/kg]
-    Real64 LoadSideOutletDBTemp;   // Load Side Outlet Dry Bulb Temp [C]
-    Real64 LoadSideOutletHumRat;   // Load Side Outlet Humidity ratio
-    Real64 QLatRated;              // Latent Capacity [W] rated at entering air conditions [Tdb=26.7C Twb=19.4C]
-    Real64 QLatActual;             // Actual Latent Capacity [W]
-    Real64 Winput;                 // Power Consumption [W]
-    bool MyOneTimeFlag = true;     // one time allocation flag
-    bool firstTime = true;
+    Real64 QLatRated;          // Latent Capacity [W] rated at entering air conditions [Tdb=26.7C Twb=19.4C]
+    Real64 QLatActual;         // Actual Latent Capacity [W]
+    Real64 Winput;             // Power Consumption [W]
+    bool MyOneTimeFlag = true; // one time allocation flag
 
     Array1D<WaterToAirHeatPumpSimple::SimpleWatertoAirHPConditions> SimpleWatertoAirHP;
 
     Array1D_bool MyEnvrnFlag; // used for initializations each begin environment flag
     Array1D_bool MyPlantScanFlag;
-
-    Real64 LoadSideInletDBTemp_Init = 0; // rated conditions
-    Real64 LoadSideInletWBTemp_Init = 0; // rated conditions
-    Real64 LoadSideInletHumRat_Init = 0; // rated conditions
-    Real64 LoadSideInletEnth_Init = 0;   // rated conditions
-    Real64 CpAir_Init = 0;               // rated conditions
 
     void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
     {
@@ -330,22 +320,13 @@ struct WaterToAirHeatPumpSimpleData : BaseGlobalStruct
         this->MySizeFlag.clear();
         this->SimpleHPTimeStepFlag.clear();
         this->SimpleWatertoAirHP.deallocate();
-        this->firstTime = true;
         this->MyEnvrnFlag.deallocate();
         this->MyPlantScanFlag.deallocate();
-        this->LoadSideInletDBTemp_Init = 0;
-        this->LoadSideInletWBTemp_Init = 0;
-        this->LoadSideInletHumRat_Init = 0;
-        this->LoadSideInletEnth_Init = 0;
-        this->CpAir_Init = 0;
     }
 
     // Default Constructor
     WaterToAirHeatPumpSimpleData()
-        : CelsiustoKelvin(Constant::Kelvin), NumWatertoAirHPs(0), AirflowErrPointer(0), GetCoilsInputFlag(true), SourceSideMassFlowRate(0.0),
-          SourceSideInletTemp(0.0), SourceSideInletEnth(0.0), LoadSideInletDBTemp(0.0), LoadSideInletWBTemp(0.0), LoadSideInletHumRat(0.0),
-          LoadSideInletEnth(0.0), LoadSideOutletDBTemp(0.0), LoadSideOutletHumRat(0.0), QLatRated(0.0), QLatActual(0.0), Winput(0.0),
-          MyOneTimeFlag(true), firstTime(true)
+        : NumWatertoAirHPs(0), AirflowErrPointer(0), GetCoilsInputFlag(true), QLatRated(0.0), QLatActual(0.0), Winput(0.0), MyOneTimeFlag(true)
     {
     }
 };

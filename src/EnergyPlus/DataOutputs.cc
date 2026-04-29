@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -154,7 +154,8 @@ OutputReportingVariables::OutputReportingVariables(EnergyPlusData &state, std::s
     pattern = std::make_shared<RE2>(KeyValue);
     case_insensitive_pattern = std::make_shared<RE2>("(?i)" + KeyValue);
     if (!pattern->ok()) {
-        ShowSevereError(state, format("Regular expression \"{}\" for variable name \"{}\" in input file is incorrect", KeyValue, VariableName));
+        ShowSevereError(state,
+                        EnergyPlus::format("Regular expression \"{}\" for variable name \"{}\" in input file is incorrect", KeyValue, VariableName));
         ShowContinueError(state, pattern->error());
         ShowFatalError(state, "Error found in regular expression. Previous error(s) cause program termination.");
     }

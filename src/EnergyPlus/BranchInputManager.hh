@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -107,11 +107,11 @@ namespace BranchInputManager {
         std::string Name;             // Name for this Branch
         std::string AssignedLoopName; // Loop Name for this branch
         DataBranchAirLoopPlant::PressureCurveType PressureCurveType =
-            DataBranchAirLoopPlant::PressureCurveType::Invalid;                     // Integer index of pressure curve type
-        int PressureCurveIndex = 0;                                                 // Integer index of pressure curve
-        DataLoopNode::NodeFluidType FluidType = DataLoopNode::NodeFluidType::Blank; // Fluid type (see DataLoopNode)
-        int NumOfComponents = 0;                                                    // Number of Components on this Branch
-        Array1D<ComponentData> Component;                                           // Component definitions for each component
+            DataBranchAirLoopPlant::PressureCurveType::Invalid; // Integer index of pressure curve type
+        int PressureCurveIndex = 0;                             // Integer index of pressure curve
+        Node::FluidType FluidType = Node::FluidType::Blank;     // Fluid type (see DataLoopNode)
+        int NumOfComponents = 0;                                // Number of Components on this Branch
+        Array1D<ComponentData> Component;                       // Component definitions for each component
     };
 
     struct SplitterData

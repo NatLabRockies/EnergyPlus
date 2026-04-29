@@ -4,7 +4,7 @@
 !-      Use '!' comments if they need to be retained when using the IDFEditor.
 !-   ===========  ALL OBJECTS IN CLASS: VERSION ===========
 
-  Version,26.1;
+  Version,26.2;
 
 !-   ===========  ALL OBJECTS IN CLASS: SIMULATIONCONTROL ===========
 
@@ -553,11 +553,6 @@
     Until: 16:00,0.679,      !- Field 25
     Until: 24:00,0.485;      !- Field 27
 
-                             !- Field 8
-                             !- Field 10
-                             !- Field 29
-                             !- Field 36
-
   Schedule:Compact,
     BLDG_LIGHT_OFFICE_BSMT_SCH,  !- Name
     Fraction,                !- Schedule Type Limits Name
@@ -740,19 +735,6 @@
     Until: 16:00,0.6,        !- Field 37
     Until: 24:00,0.4;        !- Field 39
 
-                             !- Field 4
-                             !- Field 6
-                             !- Field 8
-                             !- Field 10
-                             !- Field 12
-                             !- Field 14
-                             !- Field 23
-                             !- Field 25
-                             !- Field 27
-                             !- Field 29
-                             !- Field 32
-                             !- Field 34
-
   Schedule:Compact,
     BLDG_EQUIP_SCH,          !- Name
     Fraction,                !- Schedule Type Limits Name
@@ -777,8 +759,6 @@
     Until: 08:00,0.2619511698, !- Field 31
     Until: 16:00,0.3492682264, !- Field 33
     Until: 24:00,0.2619511698; !- Field 35
-
-                             !- Field 36
 
   Schedule:Compact,
     BLDG_EQUIP_EXTD_SCH,     !- Name
@@ -1997,7 +1977,6 @@
     Until: 07:00,1.0,        !- Field 3
     Until: 24:00,0.445694444444444; !- Field 5
 
-                             !- Field 6
 !-   ===========  ALL OBJECTS IN CLASS: SCHEDULE:CONSTANT ===========
 
   Schedule:Constant,VAV_1 Max OA Fraction,,1.0;
@@ -10887,10 +10866,6 @@
     9.453,53.3400,17.9830,  !- X,Y,Z ==> Vertex 3 {m}
     9.453,53.3400,19.2020;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     ER_Exam3_Mult4_Flr_1_Wall_East_Door,  !- Name
     Door,                    !- Surface Type
@@ -10905,11 +10880,6 @@
     70.104000000000,7.359108108820,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     70.104000000000,8.273508108820,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     70.104000000000,8.273508108820,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     ER_Trauma1_Flr_1_Wall_East_Door,  !- Name
@@ -10926,11 +10896,6 @@
     70.104000000000,3.673213671662,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     70.104000000000,3.673213671662,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Corridor_Flr_1_Wall_South_Door2,  !- Name
     Door,                    !- Surface Type
@@ -10945,11 +10910,6 @@
     35.953443675091,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     36.867843675091,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     36.867843675091,0.000000000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Corridor_Flr_1_Wall_North_Door2,  !- Name
@@ -10966,11 +10926,6 @@
     31.050836137530,53.340000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     31.050836137530,53.340000000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Lobby_Records_Flr_1_Wall_1_South_Door,  !- Name
     Door,                    !- Surface Type
@@ -10985,11 +10940,6 @@
     3.585870154051,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     4.500270154051,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.500270154051,0.000000000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Lobby_Records_Flr_1_Wall_2_South_Door,  !- Name
@@ -11006,11 +10956,6 @@
     27.967667114353,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     27.967667114353,0.000000000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Lobby_Records_Flr_1_Wall_North_Door1,  !- Name
     Door,                    !- Surface Type
@@ -11025,11 +10970,6 @@
     26.374663905857,53.340000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     25.460263905857,53.340000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     25.460263905857,53.340000000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Lobby_Records_Flr_1_Wall_North_Door3,  !- Name
@@ -11046,11 +10986,6 @@
     2.839882444979,53.340000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     2.839882444979,53.340000000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     ER_Exam1_Mult4_Flr_1_Wall_South_Door,  !- Name
     Door,                    !- Surface Type
@@ -11065,11 +11000,6 @@
     42.288205250969,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     43.202605250969,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     43.202605250969,0.000000000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     ER_Trauma1_Flr_1_Wall_South_Door,  !- Name
@@ -11086,11 +11016,6 @@
     66.293646485980,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     66.293646485980,0.000000000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     ER_Trauma2_Flr_1_Wall_East_Door,  !- Name
     Door,                    !- Surface Type
@@ -11105,11 +11030,6 @@
     70.104000000000,49.786049019517,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     70.104000000000,50.700449019517,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     70.104000000000,50.700449019517,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     ER_Trauma2_Flr_1_Wall_North_Door,  !- Name
@@ -11126,11 +11046,6 @@
     65.520546561573,53.340000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     65.520546561573,53.340000000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     ER_Triage_Mult4_Flr_1_Wall_North_Door,  !- Name
     Door,                    !- Surface Type
@@ -11145,11 +11060,6 @@
     44.446456441754,53.340000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     43.532056441754,53.340000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     43.532056441754,53.340000000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Corridor_Flr_1_Wall_South_Door1,  !- Name
@@ -11166,11 +11076,6 @@
     32.411018875192,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     32.411018875192,0.000000000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Corridor_Flr_1_Wall_North_Door1,  !- Name
     Door,                    !- Surface Type
@@ -11185,11 +11090,6 @@
     37.530463591957,53.340000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     36.616063591957,53.340000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     36.616063591957,53.340000000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Lobby_Records_Flr_1_Wall_North_Door2,  !- Name
@@ -11206,11 +11106,6 @@
     15.594601079618,53.340000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     15.594601079618,53.340000000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Lobby_Records_Flr_1_Wall_2_South_RollDoor,  !- Name
     Door,                    !- Surface Type
@@ -11226,7 +11121,6 @@
     25.531082864734,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     25.531082864734,0.000000000000,2.438400000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
 !-   ===========  ALL OBJECTS IN CLASS: INTERNALMASS ===========
 
   InternalMass,
@@ -28113,12 +28007,6 @@
     Schedule Value;          !- Actuated Component Control Type
 
   EnergyManagementSystem:Actuator,
-    BypassHXStatus,          !- Name
-    Bypass Heat Exchanger Status,  !- Actuated Component Unique Name
-    Schedule:Constant,       !- Actuated Component Type
-    Schedule Value;          !- Actuated Component Control Type
-
-  EnergyManagementSystem:Actuator,
     HRC_SPM_Reset,           !- Name
     Heat Recovery Chiller Bypass Loop Setpoint Schedule,  !- Actuated Component Unique Name
     Schedule:Constant,       !- Actuated Component Type
@@ -28141,12 +28029,6 @@
     COOLSYS1 CHILLER2 PUMP,  !- Actuated Component Unique Name
     Plant Component Pump:ConstantSpeed,  !- Actuated Component Type
     On/Off Supervisory;      !- Actuated Component Control Type
-
-  EnergyManagementSystem:Actuator,
-    Chiller1PumpFlow,        !- Name
-    COOLSYS1 CHILLER1 PUMP,  !- Actuated Component Unique Name
-    Pump,                    !- Actuated Component Type
-    Pump Mass Flow Rate;     !- Actuated Component Control Type
 
   EnergyManagementSystem:Actuator,
     Chiller2PumpFlow,        !- Name

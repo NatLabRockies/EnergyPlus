@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -56,6 +56,7 @@
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/General.hh>
 #include <EnergyPlus/HVACControllers.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
 
@@ -88,29 +89,32 @@ namespace WaterCoils {
         std::string WaterCoilTypeA;                  // Type of WaterCoil ie. Heating or Cooling
         std::string WaterCoilModelA;                 // Type of WaterCoil ie. Simple, Detailed, etc.
         DataPlant::PlantEquipmentType WaterCoilType; // Type of WaterCoil ie. Heating or Cooling
-        CoilModel WaterCoilModel;                    // Type of WaterCoil ie. Simple, Detailed, etc.
-        Sched::Schedule *availSched = nullptr;       // availability schedule
-        bool RequestingAutoSize;                     // True if this coil has appropriate autosize fields
-        Real64 InletAirMassFlowRate;                 // MassFlow through the WaterCoil being Simulated [kg/s]
-        Real64 OutletAirMassFlowRate;                // MassFlow through the WaterCoil being Simulated[kg/s]
-        Real64 InletAirTemp;                         // Inlet Air Temperature Operating Condition [C]
-        Real64 OutletAirTemp;                        // Outlet Air Temperature Operating Condition [C]
-        Real64 InletAirHumRat;                       // Inlet Air Humidity Ratio Operating Condition
-        Real64 OutletAirHumRat;                      // Outlet Air Humidity Ratio Calculated Condition
-        Real64 InletAirEnthalpy;                     // Inlet Air enthalpy [J/kg]
-        Real64 OutletAirEnthalpy;                    // Outlet Air enthalpy [J/kg]
-        Real64 TotWaterCoilLoad;                     // Total Load on the Coil [W]
-        Real64 SenWaterCoilLoad;                     // Sensible Load on the Coil [W]
-        Real64 TotWaterHeatingCoilEnergy;            // Total Heating Coil energy of the Coil [J]
-        Real64 TotWaterCoolingCoilEnergy;            // Total Cooling Coil energy of the Coil [J]
-        Real64 SenWaterCoolingCoilEnergy;            // Sensible Cooling Coil energy of the Coil [J]
-        Real64 DesWaterHeatingCoilRate;              // Design Heating Coil Rate used for sizing [W]
-        Real64 TotWaterHeatingCoilRate;              // Total Heating Coil Rate on the Coil [W]
-        Real64 DesWaterCoolingCoilRate;              // Design Cooling Coil Rate used for sizing [W]
-        Real64 TotWaterCoolingCoilRate;              // Total Cooling Coil Rate on the Coil [W]
-        Real64 SenWaterCoolingCoilRate;              // Sensible Cooling Coil Rate on the Coil [W]
-        Real64 UACoil;                               // WaterCoil UA Value
-        Real64 LeavingRelHum;                        // Simple Coil Latent Model requires User input for leaving RH
+
+        HVAC::CoilType coilType = HVAC::CoilType::Invalid;
+        int coilReportNum = -1;
+        CoilModel WaterCoilModel;              // Type of WaterCoil ie. Simple, Detailed, etc.
+        Sched::Schedule *availSched = nullptr; // availability schedule
+        bool RequestingAutoSize;               // True if this coil has appropriate autosize fields
+        Real64 InletAirMassFlowRate;           // MassFlow through the WaterCoil being Simulated [kg/s]
+        Real64 OutletAirMassFlowRate;          // MassFlow through the WaterCoil being Simulated[kg/s]
+        Real64 InletAirTemp;                   // Inlet Air Temperature Operating Condition [C]
+        Real64 OutletAirTemp;                  // Outlet Air Temperature Operating Condition [C]
+        Real64 InletAirHumRat;                 // Inlet Air Humidity Ratio Operating Condition
+        Real64 OutletAirHumRat;                // Outlet Air Humidity Ratio Calculated Condition
+        Real64 InletAirEnthalpy;               // Inlet Air enthalpy [J/kg]
+        Real64 OutletAirEnthalpy;              // Outlet Air enthalpy [J/kg]
+        Real64 TotWaterCoilLoad;               // Total Load on the Coil [W]
+        Real64 SenWaterCoilLoad;               // Sensible Load on the Coil [W]
+        Real64 TotWaterHeatingCoilEnergy;      // Total Heating Coil energy of the Coil [J]
+        Real64 TotWaterCoolingCoilEnergy;      // Total Cooling Coil energy of the Coil [J]
+        Real64 SenWaterCoolingCoilEnergy;      // Sensible Cooling Coil energy of the Coil [J]
+        Real64 DesWaterHeatingCoilRate;        // Design Heating Coil Rate used for sizing [W]
+        Real64 TotWaterHeatingCoilRate;        // Total Heating Coil Rate on the Coil [W]
+        Real64 DesWaterCoolingCoilRate;        // Design Cooling Coil Rate used for sizing [W]
+        Real64 TotWaterCoolingCoilRate;        // Total Cooling Coil Rate on the Coil [W]
+        Real64 SenWaterCoolingCoilRate;        // Sensible Cooling Coil Rate on the Coil [W]
+        Real64 UACoil;                         // WaterCoil UA Value
+        Real64 LeavingRelHum;                  // Simple Coil Latent Model requires User input for leaving RH
         Real64 DesiredOutletTemp;
         Real64 DesiredOutletHumRat;
         Real64 InletWaterTemp;          // Inlet Water Temperature [C]
@@ -219,6 +223,7 @@ namespace WaterCoils {
         bool AirLoopDOASFlag;           // True when this coil is used AirLoopDOAS
         bool heatRecoveryCoil;          // is true when coils are connected to each other to create a heat recovery loop
 
+        General::SolveRootStats solveRootStats{};
         // Default Constructor
         WaterCoilEquipConditions()
             : WaterCoilType(DataPlant::PlantEquipmentType::Invalid), WaterCoilModel(CoilModel::Invalid), RequestingAutoSize(false),
@@ -486,9 +491,9 @@ namespace WaterCoils {
     int GetCompIndex(EnergyPlusData &state, CoilModel coilType, std::string_view const coilName);
 
     Real64 GetWaterCoilCapacity(EnergyPlusData &state,
-                                std::string const &CoilType, // must match coil types in this module
-                                std::string const &CoilName, // must match coil names for the coil type
-                                bool &ErrorsFound            // set to true if problem
+                                std::string_view const CoilType, // must match coil types in this module
+                                std::string const &CoilName,     // must match coil names for the coil type
+                                bool &ErrorsFound                // set to true if problem
     );
 
     void UpdateWaterToAirCoilPlantConnection(EnergyPlusData &state,
@@ -499,13 +504,13 @@ namespace WaterCoils {
                                              const DataPlant::LoopSideLocation LoopSide, // Plant loop side index for where called from
                                              int &CompIndex,                             // Chiller number pointer
                                              bool const FirstHVACIteration,
-                                             bool &InitLoopEquip // If not zero, calculate the max load for operating conditions
+                                             bool const &InitLoopEquip // If not zero, calculate the max load for operating conditions
     );
 
     Sched::Schedule *GetWaterCoilAvailSched(EnergyPlusData &state,
-                                            std::string const &CoilType, // must match coil types in this module
-                                            std::string const &CoilName, // must match coil names for the coil type
-                                            bool &ErrorsFound            // set to true if problem
+                                            std::string_view const coilType, // must match coil types in this module
+                                            std::string const &CoilName,     // must match coil names for the coil type
+                                            bool &ErrorsFound                // set to true if problem
     );
 
     // sets data to a coil that is used as a regeneration air heating coil in

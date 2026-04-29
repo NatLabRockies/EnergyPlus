@@ -75,8 +75,8 @@ elseif(MSVC) # VisualStudio
 endif()
 target_compile_features(ssc PRIVATE cxx_std_11)
 
-# C++17 flag is intentionally after ssc
-set(CMAKE_CXX_STANDARD 17)
+# C++20 flag is intentionally after ssc
+set(CMAKE_CXX_STANDARD 20)
 
 #Note: the Tarcog files are improperly initializing their virtual base classes, and this 4589 warning
 # on MSVC is legitimate, but silencing the warning because it's a third-party library

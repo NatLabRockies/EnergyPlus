@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -68,9 +68,7 @@ Real64 CoolingWaterNumofTubesPerRowSizer::size(EnergyPlusData &state, Real64 _or
         this->errorType = AutoSizingResultType::ErrorType1;
     }
     if (this->overrideSizeString) {
-        if (this->isEpJSON) {
-            this->sizingString = "number_of_tubes_per_row";
-        }
+        this->sizingString = "Number of Tubes per Row";
     }
     this->selectSizerOutput(state, errorsFound);
     return this->autoSizedValue;

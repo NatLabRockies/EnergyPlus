@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -508,7 +508,7 @@ namespace Fluid {
 
     void InitConstantFluidPropertiesData(EnergyPlusData &state)
     {
-        auto &df = state.dataFluid;
+        const auto &df = state.dataFluid;
         bool ErrorsFound = false;
 
         // Where are these things initialized?
@@ -825,14 +825,15 @@ namespace Fluid {
                     glycolRaw->Num = df->glycolsRaw.isize();
                 }
             } else {
-                ShowSevereError(state, format("{}: {}=\"{}\", invalid type", routineName, CurrentModuleObject, Alphas(1)));
-                ShowContinueError(state, format("...entered value=\"{}, Only REFRIGERANT or GLYCOL allowed as {}", Alphas(2), cAlphaFields(2)));
+                ShowSevereError(state, EnergyPlus::format("{}: {}=\"{}\", invalid type", routineName, CurrentModuleObject, Alphas(1)));
+                ShowContinueError(state,
+                                  EnergyPlus::format("...entered value=\"{}, Only REFRIGERANT or GLYCOL allowed as {}", Alphas(2), cAlphaFields(2)));
                 ErrorsFound = true;
             }
         }
 
         if (ErrorsFound) {
-            ShowFatalError(state, format("{}: Previous errors in input cause program termination.", routineName));
+            ShowFatalError(state, EnergyPlus::format("{}: Previous errors in input cause program termination.", routineName));
         }
 
         // Read in all of the temperature arrays in the input file
@@ -864,14 +865,15 @@ namespace Fluid {
 
             for (int TempLoop = 2; TempLoop <= tempArray.NumOfTemps; ++TempLoop) {
                 if (tempArray.Temps(TempLoop) <= tempArray.Temps(TempLoop - 1)) {
-                    ShowSevereError(
-                        state, format("{}: {} name={}, lists must have data in ascending order", routineName, CurrentModuleObject, tempArray.Name));
+                    ShowSevereError(state,
+                                    EnergyPlus::format(
+                                        "{}: {} name={}, lists must have data in ascending order", routineName, CurrentModuleObject, tempArray.Name));
                     ShowContinueError(state,
-                                      format("First out of order occurrence at Temperature #({}) {{{:.3R}}} >= Temp({}) {{{:.3R}}}",
-                                             TempLoop - 1,
-                                             tempArray.Temps(TempLoop - 1),
-                                             TempLoop,
-                                             tempArray.Temps(TempLoop)));
+                                      EnergyPlus::format("First out of order occurrence at Temperature #({}) {{{:.3R}}} >= Temp({}) {{{:.3R}}}",
+                                                         TempLoop - 1,
+                                                         tempArray.Temps(TempLoop - 1),
+                                                         TempLoop,
+                                                         tempArray.Temps(TempLoop)));
                     ErrorsFound = true;
                     break;
                 }
@@ -927,13 +929,15 @@ namespace Fluid {
 
             // Make sure the number of points in the two arrays (temps and values) are the same
             if (NumNumbers != tempArray.NumOfTemps) {
-                ShowSevereError(state, format("{}: {} Name={}", routineName, CurrentModuleObject, refrig->Name));
+                ShowSevereError(state, EnergyPlus::format("{}: {} Name={}", routineName, CurrentModuleObject, refrig->Name));
                 ShowContinueError(state,
-                                  format("Temperature Name={}, Temperature array and fluid saturation pressure array must have the "
-                                         "same number of points",
-                                         tempArray.Name));
+                                  EnergyPlus::format("Temperature Name={}, Temperature array and fluid saturation pressure array must have the "
+                                                     "same number of points",
+                                                     tempArray.Name));
                 ShowContinueError(
-                    state, format("Temperature # points={} whereas {} # {} points={}", tempArray.NumOfTemps, refrig->Name, Alphas(2), NumNumbers));
+                    state,
+                    EnergyPlus::format(
+                        "Temperature # points={} whereas {} # {} points={}", tempArray.NumOfTemps, refrig->Name, Alphas(2), NumNumbers));
                 ErrorsFound = true;
                 break; // the TempLoop DO Loop
             }
@@ -983,23 +987,25 @@ namespace Fluid {
 
             } else if (Alphas(3) == "FLUID") {
                 if (Alphas(2) != "ENTHALPY" && Alphas(2) != "SPECIFICHEAT" && Alphas(2) != "DENSITY") {
-                    ShowWarningError(state, format("{}: {} Name={}", routineName, CurrentModuleObject, refrig->Name));
-                    ShowContinueError(state, format(R"({}="FLUID", but {}="{}" is not valid.)", cAlphaFields(3), cAlphaFields(2), Alphas(2)));
-                    ShowContinueError(state, format(R"(Valid choices are "Enthalpy", "SpecificHeat", "Density".)"));
+                    ShowWarningError(state, EnergyPlus::format("{}: {} Name={}", routineName, CurrentModuleObject, refrig->Name));
+                    ShowContinueError(state,
+                                      EnergyPlus::format(R"({}="FLUID", but {}="{}" is not valid.)", cAlphaFields(3), cAlphaFields(2), Alphas(2)));
+                    ShowContinueError(state, EnergyPlus::format(R"(Valid choices are "Enthalpy", "SpecificHeat", "Density".)"));
                     ShowContinueError(state, "This fluid property will not be processed nor available for the simulation.");
                 }
 
             } else if (Alphas(3) == "FLUIDGAS") {
                 if (Alphas(2) != "PRESSURE" && Alphas(2) != "ENTHALPY" && Alphas(2) != "SPECIFICHEAT" && Alphas(2) != "DENSITY") {
-                    ShowWarningError(state, format("{}: {} Name={}", routineName, CurrentModuleObject, refrig->Name));
-                    ShowContinueError(state, format(R"({}="FluidGas", but {}="{}" is not valid.)", cAlphaFields(3), cAlphaFields(2), Alphas(2)));
-                    ShowContinueError(state, format(R"(Valid choices are "Pressure", "Enthalpy", "SpecificHeat", "Density".)"));
+                    ShowWarningError(state, EnergyPlus::format("{}: {} Name={}", routineName, CurrentModuleObject, refrig->Name));
+                    ShowContinueError(state,
+                                      EnergyPlus::format(R"({}="FluidGas", but {}="{}" is not valid.)", cAlphaFields(3), cAlphaFields(2), Alphas(2)));
+                    ShowContinueError(state, EnergyPlus::format(R"(Valid choices are "Pressure", "Enthalpy", "SpecificHeat", "Density".)"));
                     ShowContinueError(state, "This fluid property will not be processed nor available for the simulation.");
                 }
             } else {
-                ShowWarningError(state, format("{}: {} Name={}", routineName, CurrentModuleObject, refrig->Name));
-                ShowContinueError(state, format("{}=\"{}\" is not valid.", cAlphaFields(3), Alphas(3)));
-                ShowContinueError(state, format(R"(Valid choices are "Fluid", "GasFluid".)"));
+                ShowWarningError(state, EnergyPlus::format("{}: {} Name={}", routineName, CurrentModuleObject, refrig->Name));
+                ShowContinueError(state, EnergyPlus::format("{}=\"{}\" is not valid.", cAlphaFields(3), Alphas(3)));
+                ShowContinueError(state, EnergyPlus::format(R"(Valid choices are "Fluid", "GasFluid".)"));
                 ShowContinueError(state, "This fluid property will not be processed nor available for the simulation.");
             }
         } // for (inData)
@@ -1008,65 +1014,68 @@ namespace Fluid {
 
             ErrorObjectHeader eoh{routineName, CurrentModuleObject, refrig->Name};
             if (refrig->PsValues.empty()) {
-                ShowSevereCustom(state,
-                                 eoh,
-                                 format(R"(No Gas/Fluid Saturation Pressure found. Need properties with {}="Pressure" and {}="FluidGas".)",
-                                        cAlphaFields(2),
-                                        cAlphaFields(3)));
+                ShowSevereCustom(
+                    state,
+                    eoh,
+                    EnergyPlus::format(R"(No Gas/Fluid Saturation Pressure found. Need properties with {}="Pressure" and {}="FluidGas".)",
+                                       cAlphaFields(2),
+                                       cAlphaFields(3)));
                 ErrorsFound = true;
             }
 
             if (refrig->HfValues.empty()) {
                 ShowSevereCustom(state,
                                  eoh,
-                                 format(R"(No Saturated Fluid Enthalpy found. Need properties with {}="Enthalpy" and {}="Fluid".)",
-                                        cAlphaFields(2),
-                                        cAlphaFields(3)));
+                                 EnergyPlus::format(R"(No Saturated Fluid Enthalpy found. Need properties with {}="Enthalpy" and {}="Fluid".)",
+                                                    cAlphaFields(2),
+                                                    cAlphaFields(3)));
                 ErrorsFound = true;
             }
 
             if (refrig->HfgValues.empty()) {
                 ShowSevereCustom(state,
                                  eoh,
-                                 format(R"(No Saturated Gas/Fluid Enthalpy found. Need properties with {}="Enthalpy" and {}="FluidGas".)",
-                                        cAlphaFields(2),
-                                        cAlphaFields(3)));
+                                 EnergyPlus::format(R"(No Saturated Gas/Fluid Enthalpy found. Need properties with {}="Enthalpy" and {}="FluidGas".)",
+                                                    cAlphaFields(2),
+                                                    cAlphaFields(3)));
                 ErrorsFound = true;
             }
 
             if (refrig->CpfValues.empty()) {
-                ShowSevereCustom(state,
-                                 eoh,
-                                 format(R"(No Saturated Fluid Specific Heat found. Need properties with {}="SpecificHeat" and {}="Fluid".)",
-                                        cAlphaFields(2),
-                                        cAlphaFields(3)));
+                ShowSevereCustom(
+                    state,
+                    eoh,
+                    EnergyPlus::format(R"(No Saturated Fluid Specific Heat found. Need properties with {}="SpecificHeat" and {}="Fluid".)",
+                                       cAlphaFields(2),
+                                       cAlphaFields(3)));
                 ErrorsFound = true;
             }
 
             if (refrig->CpfgValues.empty()) {
-                ShowSevereCustom(state,
-                                 eoh,
-                                 format(R"(No Saturated Gas/Fluid Specific Heat found. Need properties with {}="SpecificHeat" and {}="FluidGas".)",
-                                        cAlphaFields(2),
-                                        cAlphaFields(3)));
+                ShowSevereCustom(
+                    state,
+                    eoh,
+                    EnergyPlus::format(R"(No Saturated Gas/Fluid Specific Heat found. Need properties with {}="SpecificHeat" and {}="FluidGas".)",
+                                       cAlphaFields(2),
+                                       cAlphaFields(3)));
                 ErrorsFound = true;
             }
 
             if (refrig->RhofValues.empty()) {
                 ShowSevereCustom(state,
                                  eoh,
-                                 format(R"(No Saturated Fluid Density found. Need properties with {}="Density" and {}="Fluid".)",
-                                        cAlphaFields(2),
-                                        cAlphaFields(3)));
+                                 EnergyPlus::format(R"(No Saturated Fluid Density found. Need properties with {}="Density" and {}="Fluid".)",
+                                                    cAlphaFields(2),
+                                                    cAlphaFields(3)));
                 ErrorsFound = true;
             }
 
             if (refrig->RhofgValues.empty()) {
                 ShowSevereCustom(state,
                                  eoh,
-                                 format(R"(No Saturated Gas/Fluid Density found. Need properties with {}="Density" and {}="FluidGas".)",
-                                        cAlphaFields(2),
-                                        cAlphaFields(3)));
+                                 EnergyPlus::format(R"(No Saturated Gas/Fluid Density found. Need properties with {}="Density" and {}="FluidGas".)",
+                                                    cAlphaFields(2),
+                                                    cAlphaFields(3)));
                 ErrorsFound = true;
             }
         } // for (refrigNum)
@@ -1149,8 +1158,9 @@ namespace Fluid {
             refrig->SupTemps = supTempArray.Temps;
 
             if (Numbers(1) <= 0.0) {
-                ShowSevereError(state, format("{}: {} Name={}", routineName, CurrentModuleObject, refrig->Name));
-                ShowContinueError(state, format("Negative pressures not allowed in fluid property input data, Value =[{:.3R}].", Numbers(1)));
+                ShowSevereError(state, EnergyPlus::format("{}: {} Name={}", routineName, CurrentModuleObject, refrig->Name));
+                ShowContinueError(state,
+                                  EnergyPlus::format("Negative pressures not allowed in fluid property input data, Value =[{:.3R}].", Numbers(1)));
                 ErrorsFound = true;
                 continue;
             }
@@ -1201,10 +1211,10 @@ namespace Fluid {
             if ((NumNumbers - 1) != refrig->NumSupTempPoints) {
                 ShowSevereCustom(state,
                                  eoh,
-                                 format("Number of superheated {} points ({}) not equal to number of temperature points ({})",
-                                        Alphas(2),
-                                        NumNumbers - 1,
-                                        refrig->NumSupTempPoints));
+                                 EnergyPlus::format("Number of superheated {} points ({}) not equal to number of temperature points ({})",
+                                                    Alphas(2),
+                                                    NumNumbers - 1,
+                                                    refrig->NumSupTempPoints));
                 ErrorsFound = true;
                 continue;
             }
@@ -1433,10 +1443,10 @@ namespace Fluid {
                 if (!glycolRaw->CpTempArrayName.empty() && glycolRaw->CpTempArrayName != Alphas(3)) {
                     ShowSevereCustom(state,
                                      eoh,
-                                     format("All specific heat data for the same glycol must use the same temperature list"
-                                            "Expected name={}, Entered name={}",
-                                            glycolRaw->CpTempArrayName,
-                                            Alphas(3)));
+                                     EnergyPlus::format("All specific heat data for the same glycol must use the same temperature list"
+                                                        "Expected name={}, Entered name={}",
+                                                        glycolRaw->CpTempArrayName,
+                                                        Alphas(3)));
                     ErrorsFound = true;
                     continue;
                 }
@@ -1452,10 +1462,10 @@ namespace Fluid {
                 if (!glycolRaw->RhoTempArrayName.empty() && glycolRaw->RhoTempArrayName != Alphas(3)) {
                     ShowSevereCustom(state,
                                      eoh,
-                                     format("All density data for the same glycol must use the same temperature list"
-                                            "Expected name={}, Entered name={}",
-                                            glycolRaw->RhoTempArrayName,
-                                            Alphas(3)));
+                                     EnergyPlus::format("All density data for the same glycol must use the same temperature list"
+                                                        "Expected name={}, Entered name={}",
+                                                        glycolRaw->RhoTempArrayName,
+                                                        Alphas(3)));
                     ErrorsFound = true;
                     continue;
                 }
@@ -1471,10 +1481,10 @@ namespace Fluid {
                 if (!glycolRaw->CondTempArrayName.empty() && glycolRaw->CondTempArrayName != Alphas(3)) {
                     ShowSevereCustom(state,
                                      eoh,
-                                     format("All conductivity data for the same glycol must use the same temperature list"
-                                            "Expected name={}, Entered name={}",
-                                            glycolRaw->CondTempArrayName,
-                                            Alphas(3)));
+                                     EnergyPlus::format("All conductivity data for the same glycol must use the same temperature list"
+                                                        "Expected name={}, Entered name={}",
+                                                        glycolRaw->CondTempArrayName,
+                                                        Alphas(3)));
                     ErrorsFound = true;
                     continue;
                 }
@@ -1490,10 +1500,10 @@ namespace Fluid {
                 if (!glycolRaw->ViscTempArrayName.empty() && glycolRaw->ViscTempArrayName != Alphas(3)) {
                     ShowSevereCustom(state,
                                      eoh,
-                                     format("All conductivity data for the same glycol must use the same temperature list"
-                                            "Expected name={}, Entered name={}",
-                                            glycolRaw->ViscTempArrayName,
-                                            Alphas(3)));
+                                     EnergyPlus::format("All conductivity data for the same glycol must use the same temperature list"
+                                                        "Expected name={}, Entered name={}",
+                                                        glycolRaw->ViscTempArrayName,
+                                                        Alphas(3)));
                     ErrorsFound = true;
                     continue;
                 }
@@ -1588,9 +1598,9 @@ namespace Fluid {
                 if ((NumNumbers - 1) != glycolRaw->NumCpTempPoints) {
                     ShowSevereCustom(state,
                                      eoh,
-                                     format("Number of specific heat points ({}) not equal to number of temperature points ({})",
-                                            NumNumbers - 1,
-                                            glycolRaw->NumCpTempPoints));
+                                     EnergyPlus::format("Number of specific heat points ({}) not equal to number of temperature points ({})",
+                                                        NumNumbers - 1,
+                                                        glycolRaw->NumCpTempPoints));
                     ErrorsFound = true;
                     continue;
                 }
@@ -1603,9 +1613,9 @@ namespace Fluid {
                 if ((NumNumbers - 1) != glycolRaw->NumRhoTempPoints) {
                     ShowSevereCustom(state,
                                      eoh,
-                                     format("Number of density points ({}) not equal to number of temperature points ({})",
-                                            NumNumbers - 1,
-                                            glycolRaw->NumRhoTempPoints));
+                                     EnergyPlus::format("Number of density points ({}) not equal to number of temperature points ({})",
+                                                        NumNumbers - 1,
+                                                        glycolRaw->NumRhoTempPoints));
                     ErrorsFound = true;
                     continue;
                 }
@@ -1618,9 +1628,9 @@ namespace Fluid {
                 if ((NumNumbers - 1) != glycolRaw->NumCondTempPoints) {
                     ShowSevereCustom(state,
                                      eoh,
-                                     format("Number of conductivity points ({}) not equal to number of temperature points ({})",
-                                            NumNumbers - 1,
-                                            glycolRaw->NumCondTempPoints));
+                                     EnergyPlus::format("Number of conductivity points ({}) not equal to number of temperature points ({})",
+                                                        NumNumbers - 1,
+                                                        glycolRaw->NumCondTempPoints));
                     ErrorsFound = true;
                     continue;
                 }
@@ -1633,9 +1643,9 @@ namespace Fluid {
                 if ((NumNumbers - 1) != glycolRaw->NumViscTempPoints) {
                     ShowSevereCustom(state,
                                      eoh,
-                                     format("Number of viscosity points ({}) not equal to number of temperature points ({})",
-                                            NumNumbers - 1,
-                                            glycolRaw->NumViscTempPoints));
+                                     EnergyPlus::format("Number of viscosity points ({}) not equal to number of temperature points ({})",
+                                                        NumNumbers - 1,
+                                                        glycolRaw->NumViscTempPoints));
                     ErrorsFound = true;
                     continue;
                 }
@@ -1726,10 +1736,10 @@ namespace Fluid {
 
             glycol->CpDataPresent = glycolRaw->CpDataPresent;
             if (!glycol->CpDataPresent) {
-                ShowSevereError(state, format("{}: Specific heat data not entered for a {}", routineName, CurrentModuleObject));
+                ShowSevereError(state, EnergyPlus::format("{}: Specific heat data not entered for a {}", routineName, CurrentModuleObject));
                 ShowContinueError(state, "ALL data must be entered for user-defined glycols");
-                ShowContinueError(state, format("Glycol mixture name = {}", glycol->Name));
-                ShowContinueError(state, format("Glycol fluid name = {}", glycol->GlycolName));
+                ShowContinueError(state, EnergyPlus::format("Glycol mixture name = {}", glycol->Name));
+                ShowContinueError(state, EnergyPlus::format("Glycol fluid name = {}", glycol->GlycolName));
                 ErrorsFound = true;
                 continue;
             }
@@ -1748,10 +1758,10 @@ namespace Fluid {
 
             glycol->RhoDataPresent = glycolRaw->RhoDataPresent;
             if (!glycol->RhoDataPresent) {
-                ShowSevereError(state, format("{}: density data not entered for a {}", routineName, CurrentModuleObject));
+                ShowSevereError(state, EnergyPlus::format("{}: density data not entered for a {}", routineName, CurrentModuleObject));
                 ShowContinueError(state, "ALL data must be entered for user-defined glycols");
-                ShowContinueError(state, format("Glycol mixture name = {}", glycol->Name));
-                ShowContinueError(state, format("Glycol fluid name = {}", glycol->GlycolName));
+                ShowContinueError(state, EnergyPlus::format("Glycol mixture name = {}", glycol->Name));
+                ShowContinueError(state, EnergyPlus::format("Glycol fluid name = {}", glycol->GlycolName));
                 ErrorsFound = true;
                 continue;
             }
@@ -1770,10 +1780,10 @@ namespace Fluid {
 
             glycol->CondDataPresent = glycolRaw->CondDataPresent;
             if (!glycol->CondDataPresent) {
-                ShowSevereError(state, format("{}: conductivity data not entered for a {}", routineName, CurrentModuleObject));
+                ShowSevereError(state, EnergyPlus::format("{}: conductivity data not entered for a {}", routineName, CurrentModuleObject));
                 ShowContinueError(state, "ALL data must be entered for user-defined glycols");
-                ShowContinueError(state, format("Glycol mixture name = {}", glycol->Name));
-                ShowContinueError(state, format("Glycol fluid name = {}", glycol->GlycolName));
+                ShowContinueError(state, EnergyPlus::format("Glycol mixture name = {}", glycol->Name));
+                ShowContinueError(state, EnergyPlus::format("Glycol fluid name = {}", glycol->GlycolName));
                 ErrorsFound = true;
                 continue;
             }
@@ -1792,10 +1802,10 @@ namespace Fluid {
 
             glycol->ViscDataPresent = glycolRaw->ViscDataPresent;
             if (!glycol->ViscDataPresent) {
-                ShowSevereError(state, format("{}: viscosity data not entered for a {}", routineName, CurrentModuleObject));
+                ShowSevereError(state, EnergyPlus::format("{}: viscosity data not entered for a {}", routineName, CurrentModuleObject));
                 ShowContinueError(state, "ALL data must be entered for user-defined glycols");
-                ShowContinueError(state, format("Glycol mixture name = {}", glycol->Name));
-                ShowContinueError(state, format("Glycol fluid name = {}", glycol->GlycolName));
+                ShowContinueError(state, EnergyPlus::format("Glycol mixture name = {}", glycol->Name));
+                ShowContinueError(state, EnergyPlus::format("Glycol fluid name = {}", glycol->GlycolName));
                 ErrorsFound = true;
                 continue;
             }
@@ -1844,7 +1854,7 @@ namespace Fluid {
         lNumericFieldBlanks.deallocate();
 
         if (ErrorsFound) {
-            ShowFatalError(state, format("{}: Previous errors in input cause program termination.", routineName));
+            ShowFatalError(state, EnergyPlus::format("{}: Previous errors in input cause program termination.", routineName));
         }
 
         if (state.dataInputProcessing->inputProcessor->getNumSectionsFound("REPORTGLYCOLS") > 0) {
@@ -1920,14 +1930,16 @@ namespace Fluid {
         // First, find where the actual concentration falls between the concentration data.
         // Then, interpolate if necessary.
         if (Concentration < RawConcData(1)) { // Concentration too low
-            ShowWarningError(state,
-                             format("{}: Glycol concentration out of range for data (too low), concentration = {:.3R}", routineName, Concentration));
+            ShowWarningError(
+                state,
+                EnergyPlus::format("{}: Glycol concentration out of range for data (too low), concentration = {:.3R}", routineName, Concentration));
             ShowContinueError(state, "Check your data or the definition of your glycols in the GlycolConcentrations input");
             ShowContinueError(state, "Property data set to data for lowest concentration entered");
             InterpData = RawPropData(1, _);
         } else if (Concentration > RawConcData(NumOfConcs)) { // Concentration too high
-            ShowWarningError(state,
-                             format("{}: Glycol concentration out of range for data (too high), concentration = {:.3R}", routineName, Concentration));
+            ShowWarningError(
+                state,
+                EnergyPlus::format("{}: Glycol concentration out of range for data (too high), concentration = {:.3R}", routineName, Concentration));
             ShowContinueError(state, "Check your data or the definition of your glycols in the GlycolConcentrations input");
             ShowContinueError(state, "Property data set to data for highest concentration entered");
             InterpData = RawPropData(NumOfConcs, _);
@@ -1955,8 +1967,9 @@ namespace Fluid {
                     }
                 }
             } else { // user has input data for concentrations that are too close or repeated, this must be fixed
-                ShowFatalError(state,
-                               format("{}: concentration values too close or data repeated, check your fluid property input data", routineName));
+                ShowFatalError(
+                    state,
+                    EnergyPlus::format("{}: concentration values too close or data repeated, check your fluid property input data", routineName));
             }
         }
     }
@@ -2073,7 +2086,8 @@ namespace Fluid {
             Failure = this->ViscLowTempIndex == 0 || this->ViscHighTempIndex == 0;
         }
         if (Failure) {
-            ShowSevereError(state, format("setTempLimits: Required values for Glycol={} are all zeroes for some data types.", this->Name));
+            ShowSevereError(state,
+                            EnergyPlus::format("setTempLimits: Required values for Glycol={} are all zeroes for some data types.", this->Name));
             ErrorsFound = true;
         }
     }
@@ -2224,8 +2238,9 @@ namespace Fluid {
             Failure = this->RhofLowTempIndex == 0 || this->RhofgLowTempIndex == 0 || this->RhofHighTempIndex == 0 || this->RhofgHighTempIndex == 0;
         }
         if (Failure) {
-            ShowSevereError(state,
-                            format("RefrigProps::setTempimits: Required values for Refrigerant={} are all zeroes for some data types.", this->Name));
+            ShowSevereError(
+                state,
+                EnergyPlus::format("RefrigProps::setTempimits: Required values for Refrigerant={} are all zeroes for some data types.", this->Name));
             ErrorsFound = true;
         }
     }
@@ -2854,19 +2869,22 @@ namespace Fluid {
             // send warning
             if (this->errors[(int)RefrigError::SatTemp].count <= df->RefrigErrorLimitTest) {
                 ShowSevereMessage(
-                    state, format("{}: Saturation temperature is out of range for refrigerant [{}] supplied data: **", routineName, this->Name));
+                    state,
+                    EnergyPlus::format("{}: Saturation temperature is out of range for refrigerant [{}] supplied data: **", routineName, this->Name));
                 ShowContinueError(state,
-                                  format("...Called From:{}, supplied data range=[{:.2R},{:.2R}]",
-                                         CalledFrom,
-                                         this->PsTemps(this->PsLowTempIndex),
-                                         this->PsTemps(this->PsHighTempIndex)));
-                ShowContinueError(
-                    state, format("...Supplied Refrigerant Temperature={:.2R} Returned saturated pressure value = {:.0R}", Temperature, ReturnValue));
+                                  EnergyPlus::format("...Called From:{}, supplied data range=[{:.2R},{:.2R}]",
+                                                     CalledFrom,
+                                                     this->PsTemps(this->PsLowTempIndex),
+                                                     this->PsTemps(this->PsHighTempIndex)));
+                ShowContinueError(state,
+                                  EnergyPlus::format("...Supplied Refrigerant Temperature={:.2R} Returned saturated pressure value = {:.0R}",
+                                                     Temperature,
+                                                     ReturnValue));
                 ShowContinueErrorTimeStamp(state, "");
             }
             ShowRecurringSevereErrorAtEnd(
                 state,
-                format("{}: Saturation temperature is out of range for refrigerant [{}] supplied data: **", routineName, this->Name),
+                EnergyPlus::format("{}: Saturation temperature is out of range for refrigerant [{}] supplied data: **", routineName, this->Name),
                 this->errors[(int)RefrigError::SatTemp].index,
                 Temperature,
                 "{C}");
@@ -2887,7 +2905,7 @@ namespace Fluid {
 
         if (RefrigIndex == 0) {
             if ((RefrigIndex = GetRefrigNum(state, refrigName)) == 0) {
-                ShowSevereError(state, format("Refrigerant \"{}\" not found, called from: {}", refrigName, CalledFrom));
+                ShowSevereError(state, EnergyPlus::format("Refrigerant \"{}\" not found, called from: {}", refrigName, CalledFrom));
                 ShowFatalError(state, "Program terminates due to preceding condition.");
                 return 0.0;
             }
@@ -2949,20 +2967,22 @@ namespace Fluid {
 
             // send warning
             if (this->errors[(int)RefrigError::SatPress].count <= df->RefrigErrorLimitTest) {
-                ShowSevereMessage(state,
-                                  format("{}: Saturation pressure is out of range for refrigerant [{}] supplied data: **", routineName, this->Name));
+                ShowSevereMessage(
+                    state,
+                    EnergyPlus::format("{}: Saturation pressure is out of range for refrigerant [{}] supplied data: **", routineName, this->Name));
                 ShowContinueError(state,
-                                  format("...Called From:{}, supplied data range=[{:.0R},{:.0R}]",
-                                         CalledFrom,
-                                         this->PsValues(this->PsLowPresIndex),
-                                         this->PsValues(this->PsHighPresIndex)));
-                ShowContinueError(
-                    state, format("...Supplied Refrigerant Pressure={:.0R} Returned saturated temperature value ={:.2R}", Pressure, ReturnValue));
+                                  EnergyPlus::format("...Called From:{}, supplied data range=[{:.0R},{:.0R}]",
+                                                     CalledFrom,
+                                                     this->PsValues(this->PsLowPresIndex),
+                                                     this->PsValues(this->PsHighPresIndex)));
+                ShowContinueError(state,
+                                  EnergyPlus::format(
+                                      "...Supplied Refrigerant Pressure={:.0R} Returned saturated temperature value ={:.2R}", Pressure, ReturnValue));
                 ShowContinueErrorTimeStamp(state, "");
             }
             ShowRecurringSevereErrorAtEnd(
                 state,
-                format("{}: Saturation pressure is out of range for refrigerant [{}] supplied data: **", routineName, this->Name),
+                EnergyPlus::format("{}: Saturation pressure is out of range for refrigerant [{}] supplied data: **", routineName, this->Name),
                 this->errors[(int)RefrigError::SatPress].index,
                 Pressure,
                 "{Pa}");
@@ -2982,7 +3002,7 @@ namespace Fluid {
 
         if (RefrigIndex == 0) {
             if ((RefrigIndex = GetRefrigNum(state, refrigName)) == 0) {
-                ShowSevereError(state, format("Refrigerant \"{}\" not found, called from: {}", refrigName, CalledFrom));
+                ShowSevereError(state, EnergyPlus::format("Refrigerant \"{}\" not found, called from: {}", refrigName, CalledFrom));
                 ShowFatalError(state, "Program terminates due to preceding condition.");
                 return 0.0;
             }
@@ -3034,7 +3054,7 @@ namespace Fluid {
 
         if (RefrigIndex == 0) {
             if ((RefrigIndex = GetRefrigNum(state, refrigName)) == 0) {
-                ShowSevereError(state, format("Refrigerant \"{}\" not found, called from: {}", refrigName, CalledFrom));
+                ShowSevereError(state, EnergyPlus::format("Refrigerant \"{}\" not found, called from: {}", refrigName, CalledFrom));
                 ShowFatalError(state, "Program terminates due to preceding condition.");
                 return 0.0;
             }
@@ -3074,7 +3094,7 @@ namespace Fluid {
 
         if ((Quality < 0.0) || (Quality > 1.0)) {
             ShowSevereError(state, fmt::format("{}Refrigerant \"{}\", invalid quality, called from {}", routineName, this->Name, CalledFrom));
-            ShowContinueError(state, format("Saturated density quality must be between 0 and 1, entered value=[{:.4R}].", Quality));
+            ShowContinueError(state, EnergyPlus::format("Saturated density quality must be between 0 and 1, entered value=[{:.4R}].", Quality));
             ShowFatalError(state, "Program terminates due to preceding condition.");
         }
 
@@ -3125,19 +3145,22 @@ namespace Fluid {
             // send warning
             if (this->errors[(int)RefrigError::SatTempDensity].count <= df->RefrigErrorLimitTest) {
                 ShowSevereMessage(
-                    state, format("{}: Saturation temperature is out of range for refrigerant [{}] supplied data: **", routineName, this->Name));
+                    state,
+                    EnergyPlus::format("{}: Saturation temperature is out of range for refrigerant [{}] supplied data: **", routineName, this->Name));
                 ShowContinueError(state,
-                                  format("...Called From:{}, supplied data range=[{:.2R},{:.2R}]",
-                                         CalledFrom,
-                                         this->RhoTemps(this->RhofLowTempIndex),
-                                         this->RhoTemps(this->RhofHighTempIndex)));
-                ShowContinueError(
-                    state, format("...Supplied Refrigerant Temperature={:.2R} Returned saturated density value ={:.2R}", Temperature, ReturnValue));
+                                  EnergyPlus::format("...Called From:{}, supplied data range=[{:.2R},{:.2R}]",
+                                                     CalledFrom,
+                                                     this->RhoTemps(this->RhofLowTempIndex),
+                                                     this->RhoTemps(this->RhofHighTempIndex)));
+                ShowContinueError(state,
+                                  EnergyPlus::format("...Supplied Refrigerant Temperature={:.2R} Returned saturated density value ={:.2R}",
+                                                     Temperature,
+                                                     ReturnValue));
                 ShowContinueErrorTimeStamp(state, "");
             }
             ShowRecurringSevereErrorAtEnd(
                 state,
-                format("{}: Saturation temperature is out of range for refrigerant [{}] supplied data: **", routineName, this->Name),
+                EnergyPlus::format("{}: Saturation temperature is out of range for refrigerant [{}] supplied data: **", routineName, this->Name),
                 this->errors[(int)RefrigError::SatTempDensity].index,
                 Temperature,
                 "{C}");
@@ -3158,7 +3181,7 @@ namespace Fluid {
 
         if (RefrigIndex == 0) {
             if ((RefrigIndex = GetRefrigNum(state, refrigName)) == 0) {
-                ShowSevereError(state, format("Refrigerant \"{}\" not found, called from: {}", refrigName, CalledFrom));
+                ShowSevereError(state, EnergyPlus::format("Refrigerant \"{}\" not found, called from: {}", refrigName, CalledFrom));
                 ShowFatalError(state, "Program terminates due to preceding condition.");
                 return 0.0;
             }
@@ -3195,7 +3218,7 @@ namespace Fluid {
 
         if ((Quality < 0.0) || (Quality > 1.0)) {
             ShowSevereError(state, fmt::format("{}: Refrigerant \"{}\", invalid quality, called from {}", routineName, this->Name, CalledFrom));
-            ShowContinueError(state, format("Saturated density quality must be between 0 and 1, entered value=[{:.4R}].", Quality));
+            ShowContinueError(state, EnergyPlus::format("Saturated density quality must be between 0 and 1, entered value=[{:.4R}].", Quality));
             ShowFatalError(state, "Program terminates due to preceding condition.");
         }
 
@@ -3218,7 +3241,7 @@ namespace Fluid {
 
         if (RefrigIndex == 0) {
             if ((RefrigIndex = GetRefrigNum(state, refrigName)) == 0) {
-                ShowSevereError(state, format("Refrigerant \"{}\" not found, called from: {}", refrigName, CalledFrom));
+                ShowSevereError(state, EnergyPlus::format("Refrigerant \"{}\" not found, called from: {}", refrigName, CalledFrom));
                 ShowFatalError(state, "Program terminates due to preceding condition.");
                 return 0.0;
             }
@@ -3361,20 +3384,22 @@ namespace Fluid {
                 if (this->errors[(int)RefrigError::SatTempDensity].count <= df->RefrigErrorLimitTest) {
                     ShowWarningMessage(
                         state,
-                        format("{}: Refrigerant [{}] is saturated at the given conditions, saturated enthalpy at given temperature returned. **",
-                               routineName,
-                               this->Name));
+                        EnergyPlus::format(
+                            "{}: Refrigerant [{}] is saturated at the given conditions, saturated enthalpy at given temperature returned. **",
+                            routineName,
+                            this->Name));
                     ShowContinueError(state, fmt::format("...Called From:{}", CalledFrom));
-                    ShowContinueError(state, format("Refrigerant temperature = {:.2R}", Temperature));
-                    ShowContinueError(state, format("Refrigerant pressure = {:.0R}", Pressure));
-                    ShowContinueError(state, format("Returned Enthalpy value = {:.3R}", ReturnValue));
+                    ShowContinueError(state, EnergyPlus::format("Refrigerant temperature = {:.2R}", Temperature));
+                    ShowContinueError(state, EnergyPlus::format("Refrigerant pressure = {:.0R}", Pressure));
+                    ShowContinueError(state, EnergyPlus::format("Returned Enthalpy value = {:.3R}", ReturnValue));
                     ShowContinueErrorTimeStamp(state, "");
                 }
-                ShowRecurringWarningErrorAtEnd(state,
-                                               format("{}: Refrigerant [{}] saturated at the given conditions **", routineName, this->Name),
-                                               this->errors[(int)RefrigError::SatSupEnthalpy].index,
-                                               Temperature,
-                                               "{C}");
+                ShowRecurringWarningErrorAtEnd(
+                    state,
+                    EnergyPlus::format("{}: Refrigerant [{}] saturated at the given conditions **", routineName, this->Name),
+                    this->errors[(int)RefrigError::SatSupEnthalpy].index,
+                    Temperature,
+                    "{C}");
             }
             return ReturnValue;
         }
@@ -3384,16 +3409,17 @@ namespace Fluid {
             this->errors[(int)RefrigError::SatSupEnthalpy].count += CurTempRangeErrCount;
             if (CurTempRangeErrCount > 0) {
                 if (this->errors[(int)RefrigError::SatSupEnthalpyTemp].count <= df->RefrigErrorLimitTest) {
-                    ShowWarningMessage(state,
-                                       format("{}: Refrigerant [{}] Temperature is out of range for superheated enthalpy: values capped **",
-                                              routineName,
-                                              this->Name));
+                    ShowWarningMessage(
+                        state,
+                        EnergyPlus::format(
+                            "{}: Refrigerant [{}] Temperature is out of range for superheated enthalpy: values capped **", routineName, this->Name));
                     ShowContinueError(state, fmt::format(" Called From:{}", CalledFrom));
                     ShowContinueErrorTimeStamp(state, "");
                 }
                 ShowRecurringWarningErrorAtEnd(
                     state,
-                    format("{}: Refrigerant [{}] Temperature is out of range for superheated enthalpy: values capped **", routineName, this->Name),
+                    EnergyPlus::format(
+                        "{}: Refrigerant [{}] Temperature is out of range for superheated enthalpy: values capped **", routineName, this->Name),
                     this->errors[(int)RefrigError::SatSupEnthalpyTemp].index,
                     Temperature,
                     "{C}");
@@ -3403,15 +3429,17 @@ namespace Fluid {
             this->errors[(int)RefrigError::SatSupEnthalpyPress].count += CurPresRangeErrCount;
             if (CurPresRangeErrCount > 0) {
                 if (this->errors[(int)RefrigError::SatSupEnthalpyPress].count <= df->RefrigErrorLimitTest) {
-                    ShowWarningMessage(
-                        state,
-                        format("{}: Refrigerant [{}] Pressure is out of range for superheated enthalpy: values capped **", routineName, this->Name));
+                    ShowWarningMessage(state,
+                                       EnergyPlus::format("{}: Refrigerant [{}] Pressure is out of range for superheated enthalpy: values capped **",
+                                                          routineName,
+                                                          this->Name));
                     ShowContinueError(state, fmt::format(" Called From:{}", CalledFrom));
                     ShowContinueErrorTimeStamp(state, "");
                 }
                 ShowRecurringWarningErrorAtEnd(
                     state,
-                    format("{}: Refrigerant [{}] Pressure is out of range for superheated enthalpy: values capped **", routineName, this->Name),
+                    EnergyPlus::format(
+                        "{}: Refrigerant [{}] Pressure is out of range for superheated enthalpy: values capped **", routineName, this->Name),
                     this->errors[(int)RefrigError::SatSupEnthalpyPress].index,
                     Pressure,
                     "{Pa}");
@@ -3434,7 +3462,7 @@ namespace Fluid {
 
         if (RefrigIndex == 0) {
             if ((RefrigIndex = GetRefrigNum(state, refrigName)) == 0) {
-                ShowSevereError(state, format("Refrigerant \"{}\" not found, called from: {}", refrigName, CalledFrom));
+                ShowSevereError(state, EnergyPlus::format("Refrigerant \"{}\" not found, called from: {}", refrigName, CalledFrom));
                 ShowFatalError(state, "Program terminates due to preceding condition.");
                 return 0.0;
             }
@@ -3624,20 +3652,21 @@ namespace Fluid {
             // send warning
             if (CurSatErrCount > 0) {
                 if (this->errors[(int)RefrigError::SatSupPress].count <= df->RefrigErrorLimitTest) {
-                    ShowSevereMessage(state,
-                                      format("{}: Refrigerant [{}] is saturated at the given enthalpy and temperature, saturated enthalpy at given "
-                                             "temperature returned. **",
-                                             routineName,
-                                             this->Name));
+                    ShowSevereMessage(
+                        state,
+                        EnergyPlus::format("{}: Refrigerant [{}] is saturated at the given enthalpy and temperature, saturated enthalpy at given "
+                                           "temperature returned. **",
+                                           routineName,
+                                           this->Name));
                     ShowContinueError(state, fmt::format("...Called From:{}", CalledFrom));
-                    ShowContinueError(state, format("Refrigerant temperature = {:.2R}", Temperature));
-                    ShowContinueError(state, format("Refrigerant Enthalpy = {:.3R}", Enthalpy));
-                    ShowContinueError(state, format("Returned Pressure value = {:.0R}", ReturnValue));
+                    ShowContinueError(state, EnergyPlus::format("Refrigerant temperature = {:.2R}", Temperature));
+                    ShowContinueError(state, EnergyPlus::format("Refrigerant Enthalpy = {:.3R}", Enthalpy));
+                    ShowContinueError(state, EnergyPlus::format("Returned Pressure value = {:.0R}", ReturnValue));
                     ShowContinueErrorTimeStamp(state, "");
                 }
                 ShowRecurringSevereErrorAtEnd(
                     state,
-                    format("{}: Refrigerant [{}] saturated at the given enthalpy and temperature **", routineName, this->Name),
+                    EnergyPlus::format("{}: Refrigerant [{}] saturated at the given enthalpy and temperature **", routineName, this->Name),
                     this->errors[(int)RefrigError::SatSupPress].index,
                     ReturnValue,
                     "{Pa}");
@@ -3647,16 +3676,17 @@ namespace Fluid {
             this->errors[(int)RefrigError::SatSupPressTemp].count += CurTempRangeErrCount;
             if (CurTempRangeErrCount > 0) {
                 if (this->errors[(int)RefrigError::SatSupPressTemp].count <= df->RefrigErrorLimitTest) {
-                    ShowWarningMessage(state,
-                                       format("{}: Refrigerant [{}] Temperature is out of range for superheated pressure: values capped **",
-                                              routineName,
-                                              this->Name));
+                    ShowWarningMessage(
+                        state,
+                        EnergyPlus::format(
+                            "{}: Refrigerant [{}] Temperature is out of range for superheated pressure: values capped **", routineName, this->Name));
                     ShowContinueError(state, fmt::format(" Called From:{}", CalledFrom));
                     ShowContinueErrorTimeStamp(state, "");
                 }
                 ShowRecurringWarningErrorAtEnd(
                     state,
-                    format("{}: Refrigerant [{}] Temperature is out of range for superheated pressure: values capped **", routineName, this->Name),
+                    EnergyPlus::format(
+                        "{}: Refrigerant [{}] Temperature is out of range for superheated pressure: values capped **", routineName, this->Name),
                     this->errors[(int)RefrigError::SatSupPressTemp].index,
                     Temperature,
                     "{C}");
@@ -3666,15 +3696,17 @@ namespace Fluid {
             this->errors[(int)RefrigError::SatSupPressEnthalpy].count += CurEnthalpyRangeErrCount;
             if (CurEnthalpyRangeErrCount > 0) {
                 if (this->errors[(int)RefrigError::SatSupPressEnthalpy].count <= df->RefrigErrorLimitTest) {
-                    ShowWarningMessage(
-                        state,
-                        format("{}: Refrigerant [{}] Pressure is out of range for superheated enthalpy: values capped **", routineName, this->Name));
+                    ShowWarningMessage(state,
+                                       EnergyPlus::format("{}: Refrigerant [{}] Pressure is out of range for superheated enthalpy: values capped **",
+                                                          routineName,
+                                                          this->Name));
                     ShowContinueError(state, fmt::format(" Called From:{}", CalledFrom));
                     ShowContinueErrorTimeStamp(state, "");
                 }
                 ShowRecurringWarningErrorAtEnd(
                     state,
-                    format("{}: Refrigerant [{}] Pressure is out of range for superheated pressure: values capped **", routineName, this->Name),
+                    EnergyPlus::format(
+                        "{}: Refrigerant [{}] Pressure is out of range for superheated pressure: values capped **", routineName, this->Name),
                     this->errors[(int)RefrigError::SatSupPressEnthalpy].index,
                     Enthalpy,
                     "{J}");
@@ -3697,7 +3729,7 @@ namespace Fluid {
 
         if (RefrigIndex == 0) {
             if ((RefrigIndex = GetRefrigNum(state, refrigName)) == 0) {
-                ShowSevereError(state, format("Refrigerant \"{}\" not found, called from: {}", refrigName, CalledFrom));
+                ShowSevereError(state, EnergyPlus::format("Refrigerant \"{}\" not found, called from: {}", refrigName, CalledFrom));
                 ShowFatalError(state, "Program terminates due to preceding condition.");
                 return 0.0;
             }
@@ -3746,28 +3778,31 @@ namespace Fluid {
         RefTSat = this->getSatTemperature(state, Pressure, fmt::format("{}:{}", routineName, CalledFrom));
 
         if (TempLow < RefTSat) {
-            ShowWarningMessage(state,
-                               format("{}: Refrigerant [{}] temperature lower bound is out of range for superheated refrigerant: values capped **",
-                                      routineName,
-                                      this->Name));
+            ShowWarningMessage(
+                state,
+                EnergyPlus::format("{}: Refrigerant [{}] temperature lower bound is out of range for superheated refrigerant: values capped **",
+                                   routineName,
+                                   this->Name));
             ShowContinueError(state, fmt::format(" Called From:{}", CalledFrom));
             ShowContinueErrorTimeStamp(state, "");
             TempLow = RefTSat;
         }
         if (TempUp > RefTHigh) {
-            ShowWarningMessage(state,
-                               format("{}: Refrigerant [{}] temperature lower bound is out of range for superheated refrigerant: values capped **",
-                                      routineName,
-                                      this->Name));
+            ShowWarningMessage(
+                state,
+                EnergyPlus::format("{}: Refrigerant [{}] temperature lower bound is out of range for superheated refrigerant: values capped **",
+                                   routineName,
+                                   this->Name));
             ShowContinueError(state, fmt::format(" Called From:{}", CalledFrom));
             ShowContinueErrorTimeStamp(state, "");
             TempUp = RefTHigh;
         }
         if (TempLow >= TempUp) {
-            ShowWarningMessage(state,
-                               format("{}Refrigerant [{}] temperature lower bound is out of range for superheated refrigerant: values capped **",
-                                      routineName,
-                                      this->Name));
+            ShowWarningMessage(
+                state,
+                EnergyPlus::format("{}Refrigerant [{}] temperature lower bound is out of range for superheated refrigerant: values capped **",
+                                   routineName,
+                                   this->Name));
             ShowContinueError(state, fmt::format(" Called From:{}", CalledFrom));
             ShowContinueErrorTimeStamp(state, "");
             TempLow = RefTSat;
@@ -3824,7 +3859,7 @@ namespace Fluid {
 
         if (RefrigIndex == 0) {
             if ((RefrigIndex = GetRefrigNum(state, refrigName)) == 0) {
-                ShowSevereError(state, format("Refrigerant \"{}\" not found, called from: {}", refrigName, CalledFrom));
+                ShowSevereError(state, EnergyPlus::format("Refrigerant \"{}\" not found, called from: {}", refrigName, CalledFrom));
                 ShowFatalError(state, "Program terminates due to preceding condition.");
                 return 0.0;
             }
@@ -3970,21 +4005,23 @@ namespace Fluid {
             if (this->errors[(int)RefrigError::SatSupDensity].count <= df->RefrigErrorLimitTest) {
                 ShowWarningMessage(
                     state,
-                    format("{}: Refrigerant [{}] is saturated at the given conditions, saturated density at given temperature returned. **",
-                           routineName,
-                           this->Name));
+                    EnergyPlus::format(
+                        "{}: Refrigerant [{}] is saturated at the given conditions, saturated density at given temperature returned. **",
+                        routineName,
+                        this->Name));
                 ShowContinueError(state, fmt::format("...Called From:{}", CalledFrom));
-                ShowContinueError(state, format("Refrigerant temperature = {:.2R}", Temperature));
-                ShowContinueError(state, format("Refrigerant pressure = {:.0R}", Pressure));
-                ShowContinueError(state, format("Returned Density value = {:.3R}", saturated_density));
+                ShowContinueError(state, EnergyPlus::format("Refrigerant temperature = {:.2R}", Temperature));
+                ShowContinueError(state, EnergyPlus::format("Refrigerant pressure = {:.0R}", Pressure));
+                ShowContinueError(state, EnergyPlus::format("Returned Density value = {:.3R}", saturated_density));
                 ShowContinueErrorTimeStamp(state, "");
             }
             if (df->SatErrCountGetSupHeatDensityRefrig > 0) {
-                ShowRecurringWarningErrorAtEnd(state,
-                                               format("{}: Refrigerant [{}] saturated at the given conditions **", routineName, this->Name),
-                                               this->errors[(int)RefrigError::SatSupEnthalpy].index,
-                                               Temperature,
-                                               "{C}");
+                ShowRecurringWarningErrorAtEnd(
+                    state,
+                    EnergyPlus::format("{}: Refrigerant [{}] saturated at the given conditions **", routineName, this->Name),
+                    this->errors[(int)RefrigError::SatSupEnthalpy].index,
+                    Temperature,
+                    "{C}");
             }
             return saturated_density;
         }
@@ -3994,16 +4031,17 @@ namespace Fluid {
             this->errors[(int)RefrigError::SatSupDensityTemp].count += CurTempRangeErrCount;
             if (CurTempRangeErrCount > 0) {
                 if (this->errors[(int)RefrigError::SatSupDensityTemp].count <= df->RefrigErrorLimitTest) {
-                    ShowWarningMessage(state,
-                                       format("{}: Refrigerant [{}] Temperature is out of range for superheated density: values capped **",
-                                              routineName,
-                                              this->Name));
+                    ShowWarningMessage(
+                        state,
+                        EnergyPlus::format(
+                            "{}: Refrigerant [{}] Temperature is out of range for superheated density: values capped **", routineName, this->Name));
                     ShowContinueError(state, fmt::format(" Called From:{}", CalledFrom));
                     ShowContinueErrorTimeStamp(state, "");
                 }
                 ShowRecurringWarningErrorAtEnd(
                     state,
-                    format("{}: Refrigerant [{}] Temperature is out of range for superheated density: values capped **", routineName, this->Name),
+                    EnergyPlus::format(
+                        "{}: Refrigerant [{}] Temperature is out of range for superheated density: values capped **", routineName, this->Name),
                     this->errors[(int)RefrigError::SatSupDensityTemp].index,
                     Temperature,
                     "{C}");
@@ -4013,15 +4051,17 @@ namespace Fluid {
             this->errors[(int)RefrigError::SatSupDensityPress].count += CurPresRangeErrCount;
             if (CurPresRangeErrCount > 0) {
                 if (this->errors[(int)RefrigError::SatSupDensityPress].count <= df->RefrigErrorLimitTest) {
-                    ShowWarningMessage(
-                        state,
-                        format("{}: Refrigerant [{}] Pressure is out of range for superheated density: values capped **", routineName, this->Name));
+                    ShowWarningMessage(state,
+                                       EnergyPlus::format("{}: Refrigerant [{}] Pressure is out of range for superheated density: values capped **",
+                                                          routineName,
+                                                          this->Name));
                     ShowContinueError(state, fmt::format(" Called From:{}", CalledFrom));
                     ShowContinueErrorTimeStamp(state, "");
                 }
                 ShowRecurringWarningErrorAtEnd(
                     state,
-                    format("{}: Refrigerant [{}] Pressure is out of range for superheated density: values capped **", routineName, this->Name),
+                    EnergyPlus::format(
+                        "{}: Refrigerant [{}] Pressure is out of range for superheated density: values capped **", routineName, this->Name),
                     this->errors[(int)RefrigError::SatSupDensityPress].index,
                     Pressure,
                     "{Pa}");
@@ -4043,7 +4083,7 @@ namespace Fluid {
         auto &df = state.dataFluid;
         if (RefrigIndex == 0) {
             if ((RefrigIndex = GetRefrigNum(state, refrigName)) == 0) {
-                ShowSevereError(state, format("Refrigerant \"{}\" not found, called from: {}", refrigName, CalledFrom));
+                ShowSevereError(state, EnergyPlus::format("Refrigerant \"{}\" not found, called from: {}", refrigName, CalledFrom));
                 ShowFatalError(state, "Program terminates due to preceding condition.");
                 return 0.0;
             }
@@ -4128,20 +4168,21 @@ namespace Fluid {
             if (!state.dataGlobal->WarmupFlag) {
                 df->glycolErrorLimits[(int)GlycolError::SpecHeatLow] = ++this->errors[(int)GlycolError::SpecHeatLow].count;
                 if (df->glycolErrorLimits[(int)GlycolError::SpecHeatLow] <= df->GlycolErrorLimitTest) {
-                    ShowWarningMessage(
-                        state,
-                        format("{}: Temperature is out of range (too low) for fluid [{}] specific heat supplied values **", routineName, this->Name));
+                    ShowWarningMessage(state,
+                                       EnergyPlus::format("{}: Temperature is out of range (too low) for fluid [{}] specific heat supplied values **",
+                                                          routineName,
+                                                          this->Name));
                     ShowContinueError(state,
-                                      format("..Called From:{},Temperature=[{:.2R}], supplied data range=[{:.2R},{:.2R}]",
-                                             CalledFrom,
-                                             Temp,
-                                             this->CpLowTempValue,
-                                             this->CpHighTempValue));
+                                      EnergyPlus::format("..Called From:{},Temperature=[{:.2R}], supplied data range=[{:.2R},{:.2R}]",
+                                                         CalledFrom,
+                                                         Temp,
+                                                         this->CpLowTempValue,
+                                                         this->CpHighTempValue));
                     ShowContinueErrorTimeStamp(state, "");
                 }
                 ShowRecurringWarningErrorAtEnd(
                     state,
-                    format("{}: Temperature out of range (too low) for fluid [{}] specific heat **", routineName, this->Name),
+                    EnergyPlus::format("{}: Temperature out of range (too low) for fluid [{}] specific heat **", routineName, this->Name),
                     this->errors[(int)GlycolError::SpecHeatLow].index,
                     Temp,
                     "{C}");
@@ -4152,19 +4193,20 @@ namespace Fluid {
             if (!state.dataGlobal->WarmupFlag) {
                 df->glycolErrorLimits[(int)GlycolError::SpecHeatHigh] = ++this->errors[(int)GlycolError::SpecHeatHigh].count;
                 if (df->glycolErrorLimits[(int)GlycolError::SpecHeatHigh] <= df->GlycolErrorLimitTest) {
-                    ShowWarningMessage(state,
-                                       format("{}: Temperature is out of range (too high) for fluid [{}] specific heat **", routineName, this->Name));
+                    ShowWarningMessage(
+                        state,
+                        EnergyPlus::format("{}: Temperature is out of range (too high) for fluid [{}] specific heat **", routineName, this->Name));
                     ShowContinueError(state,
-                                      format("..Called From:{},Temperature=[{:.2R}], supplied data range=[{:.2R},{:.2R}]",
-                                             CalledFrom,
-                                             Temp,
-                                             this->CpLowTempValue,
-                                             this->CpHighTempValue));
+                                      EnergyPlus::format("..Called From:{},Temperature=[{:.2R}], supplied data range=[{:.2R},{:.2R}]",
+                                                         CalledFrom,
+                                                         Temp,
+                                                         this->CpLowTempValue,
+                                                         this->CpHighTempValue));
                     ShowContinueErrorTimeStamp(state, "");
                 }
                 ShowRecurringWarningErrorAtEnd(
                     state,
-                    format("{}: Temperature out of range (too high) for fluid [{}] specific heat **", routineName, this->Name),
+                    EnergyPlus::format("{}: Temperature out of range (too high) for fluid [{}] specific heat **", routineName, this->Name),
                     this->errors[(int)GlycolError::SpecHeatHigh].index,
                     Temp,
                     "{C}");
@@ -4201,7 +4243,7 @@ namespace Fluid {
 
         if (GlycolIndex == 0) {
             if ((GlycolIndex = GetGlycolNum(state, glycolName)) == 0) {
-                ShowSevereError(state, format("Glycol \"{}\" not found, called from: {}", glycolName, CalledFrom));
+                ShowSevereError(state, EnergyPlus::format("Glycol \"{}\" not found, called from: {}", glycolName, CalledFrom));
                 ShowFatalError(state, "Program terminates due to preceding condition.");
                 return 0.0;
             }
@@ -4278,39 +4320,42 @@ namespace Fluid {
 
             if (error == GlycolError::DensityLow) {
                 if (df->glycolErrorLimits[(int)error] <= df->GlycolErrorLimitTest) {
-                    ShowWarningMessage(state, format("{}: Temperature is out of range (too low) for fluid [{}] density **", routineName, this->Name));
+                    ShowWarningMessage(
+                        state, EnergyPlus::format("{}: Temperature is out of range (too low) for fluid [{}] density **", routineName, this->Name));
                     ShowContinueError(state,
-                                      format("..Called From:{},Temperature=[{:.2R}], supplied data range=[{:.2R},{:.2R}]",
-                                             CalledFrom,
-                                             Temp,
-                                             this->RhoLowTempValue,
-                                             this->RhoHighTempValue));
+                                      EnergyPlus::format("..Called From:{},Temperature=[{:.2R}], supplied data range=[{:.2R},{:.2R}]",
+                                                         CalledFrom,
+                                                         Temp,
+                                                         this->RhoLowTempValue,
+                                                         this->RhoHighTempValue));
                     ShowContinueErrorTimeStamp(state, "");
                 }
 
-                ShowRecurringWarningErrorAtEnd(state,
-                                               format("{}: Temperature out of range (too low) for fluid [{}] density **", routineName, this->Name),
-                                               this->errors[(int)GlycolError::DensityLow].index,
-                                               Temp,
-                                               "{C}");
+                ShowRecurringWarningErrorAtEnd(
+                    state,
+                    EnergyPlus::format("{}: Temperature out of range (too low) for fluid [{}] density **", routineName, this->Name),
+                    this->errors[(int)GlycolError::DensityLow].index,
+                    Temp,
+                    "{C}");
 
             } else { // error == GlycolError::DensityHigh
                 if (df->glycolErrorLimits[(int)error] <= df->GlycolErrorLimitTest) {
-                    ShowWarningMessage(state,
-                                       format("{}: Temperature is out of range (too high) for fluid [{}] density **", routineName, this->Name));
+                    ShowWarningMessage(
+                        state, EnergyPlus::format("{}: Temperature is out of range (too high) for fluid [{}] density **", routineName, this->Name));
                     ShowContinueError(state,
-                                      format("..Called From:{},Temperature=[{:.2R}], supplied data range=[{:.2R},{:.2R}]",
-                                             CalledFrom,
-                                             Temp,
-                                             this->RhoLowTempValue,
-                                             this->RhoHighTempValue));
+                                      EnergyPlus::format("..Called From:{},Temperature=[{:.2R}], supplied data range=[{:.2R},{:.2R}]",
+                                                         CalledFrom,
+                                                         Temp,
+                                                         this->RhoLowTempValue,
+                                                         this->RhoHighTempValue));
                     ShowContinueErrorTimeStamp(state, "");
                 }
-                ShowRecurringWarningErrorAtEnd(state,
-                                               format("{}: Temperature out of range (too high) for fluid [{}] density **", routineName, this->Name),
-                                               this->errors[(int)GlycolError::DensityHigh].index,
-                                               Temp,
-                                               "{C}");
+                ShowRecurringWarningErrorAtEnd(
+                    state,
+                    EnergyPlus::format("{}: Temperature out of range (too high) for fluid [{}] density **", routineName, this->Name),
+                    this->errors[(int)GlycolError::DensityHigh].index,
+                    Temp,
+                    "{C}");
             }
         }
 
@@ -4330,7 +4375,7 @@ namespace Fluid {
 
         if (GlycolIndex == 0) {
             if ((GlycolIndex = GetGlycolNum(state, glycolName)) == 0) {
-                ShowSevereError(state, format("Glycol \"{}\" not found, called from: {}", glycolName, CalledFrom));
+                ShowSevereError(state, EnergyPlus::format("Glycol \"{}\" not found, called from: {}", glycolName, CalledFrom));
                 ShowFatalError(state, "Program terminates due to preceding condition.");
                 return 0.0;
             }
@@ -4378,7 +4423,8 @@ namespace Fluid {
 
         // If user didn't input data (shouldn't get this far, but just in case...), we can't find a value
         if (!this->CondDataPresent) {
-            ShowSevereError(state, format("{}: conductivity data not found for glycol \"{}\", called from {}", routineName, this->Name, CalledFrom));
+            ShowSevereError(
+                state, EnergyPlus::format("{}: conductivity data not found for glycol \"{}\", called from {}", routineName, this->Name, CalledFrom));
             ShowFatalError(state, "Program terminates due to preceding condition.");
             return 0.0;
         }
@@ -4410,20 +4456,21 @@ namespace Fluid {
 
             if (error == GlycolError::ConductivityLow) {
                 if (df->glycolErrorLimits[(int)error] <= df->GlycolErrorLimitTest) {
-                    ShowWarningMessage(state,
-                                       format("{}: Temperature is out of range (too low) for fluid [{}] conductivity **", routineName, this->Name));
+                    ShowWarningMessage(
+                        state,
+                        EnergyPlus::format("{}: Temperature is out of range (too low) for fluid [{}] conductivity **", routineName, this->Name));
                     ShowContinueError(state,
-                                      format("..Called From:{},Temperature=[{:.2R}], supplied data range=[{:.2R},{:.2R}]",
-                                             CalledFrom,
-                                             Temp,
-                                             this->CondLowTempValue,
-                                             this->CondHighTempValue));
+                                      EnergyPlus::format("..Called From:{},Temperature=[{:.2R}], supplied data range=[{:.2R},{:.2R}]",
+                                                         CalledFrom,
+                                                         Temp,
+                                                         this->CondLowTempValue,
+                                                         this->CondHighTempValue));
                     ShowContinueErrorTimeStamp(state, "");
                 }
 
                 ShowRecurringWarningErrorAtEnd(
                     state,
-                    format("{}: Temperature out of range (too low) for fluid [{}] conductivity **", routineName, this->Name),
+                    EnergyPlus::format("{}: Temperature out of range (too low) for fluid [{}] conductivity **", routineName, this->Name),
                     this->errors[(int)error].index,
                     Temp,
                     "{C}");
@@ -4431,20 +4478,21 @@ namespace Fluid {
 
             else if (error == GlycolError::ConductivityHigh) {
                 if (df->glycolErrorLimits[(int)error] <= df->GlycolErrorLimitTest) {
-                    ShowWarningMessage(state,
-                                       format("{}: Temperature is out of range (too high) for fluid [{}] conductivity **", routineName, this->Name));
+                    ShowWarningMessage(
+                        state,
+                        EnergyPlus::format("{}: Temperature is out of range (too high) for fluid [{}] conductivity **", routineName, this->Name));
                     ShowContinueError(state,
-                                      format("..Called From:{},Temperature=[{:.2R}], supplied data range=[{:.2R},{:.2R}]",
-                                             CalledFrom,
-                                             Temp,
-                                             this->CondLowTempValue,
-                                             this->CondHighTempValue));
+                                      EnergyPlus::format("..Called From:{},Temperature=[{:.2R}], supplied data range=[{:.2R},{:.2R}]",
+                                                         CalledFrom,
+                                                         Temp,
+                                                         this->CondLowTempValue,
+                                                         this->CondHighTempValue));
                     ShowContinueErrorTimeStamp(state, "");
                 }
 
                 ShowRecurringWarningErrorAtEnd(
                     state,
-                    format("{}: Temperature out of range (too high) for fluid [{}] conductivity **", routineName, this->Name),
+                    EnergyPlus::format("{}: Temperature out of range (too high) for fluid [{}] conductivity **", routineName, this->Name),
                     this->errors[(int)error].index,
                     Temp,
                     "{C}");
@@ -4466,7 +4514,7 @@ namespace Fluid {
 
         if (GlycolIndex == 0) {
             if ((GlycolIndex = GetGlycolNum(state, glycolName)) == 0) {
-                ShowSevereError(state, format("Glycol \"{}\" not found, called from: {}", glycolName, CalledFrom));
+                ShowSevereError(state, EnergyPlus::format("Glycol \"{}\" not found, called from: {}", glycolName, CalledFrom));
                 ShowFatalError(state, "Program terminates due to preceding condition.");
                 return 0.0;
             }
@@ -4515,7 +4563,8 @@ namespace Fluid {
 
         // If user didn't input data (shouldn't get this far, but just in case...), we can't find a value
         if (!this->ViscDataPresent) {
-            ShowSevereError(state, format("{}: viscosity data not found for glycol \"{}\", called from {}", routineName, this->Name, CalledFrom));
+            ShowSevereError(
+                state, EnergyPlus::format("{}: viscosity data not found for glycol \"{}\", called from {}", routineName, this->Name, CalledFrom));
             ShowFatalError(state, "Program terminates due to preceding condition.");
             return 0.0;
         }
@@ -4547,42 +4596,44 @@ namespace Fluid {
 
             if (error == GlycolError::ViscosityHigh) {
                 if (df->glycolErrorLimits[(int)error] <= df->GlycolErrorLimitTest) {
-                    ShowWarningMessage(state,
-                                       format("{}: Temperature is out of range (too low) for fluid [{}] viscosity **", routineName, this->Name));
+                    ShowWarningMessage(
+                        state, EnergyPlus::format("{}: Temperature is out of range (too low) for fluid [{}] viscosity **", routineName, this->Name));
                     ShowContinueError(state,
-                                      format("..Called From:{},Temperature=[{:.2R}], supplied data range=[{:.2R},{:.2R}]",
-                                             CalledFrom,
-                                             Temp,
-                                             this->ViscLowTempValue,
-                                             this->ViscHighTempValue));
+                                      EnergyPlus::format("..Called From:{},Temperature=[{:.2R}], supplied data range=[{:.2R},{:.2R}]",
+                                                         CalledFrom,
+                                                         Temp,
+                                                         this->ViscLowTempValue,
+                                                         this->ViscHighTempValue));
                     ShowContinueErrorTimeStamp(state, "");
                 }
 
-                ShowRecurringWarningErrorAtEnd(state,
-                                               format("{}: Temperature out of range (too low) for fluid [{}] viscosity **", routineName, this->Name),
-                                               this->errors[(int)GlycolError::ViscosityLow].index,
-                                               Temp,
-                                               "{C}");
+                ShowRecurringWarningErrorAtEnd(
+                    state,
+                    EnergyPlus::format("{}: Temperature out of range (too low) for fluid [{}] viscosity **", routineName, this->Name),
+                    this->errors[(int)GlycolError::ViscosityLow].index,
+                    Temp,
+                    "{C}");
             }
 
             else if (error == GlycolError::ViscosityHigh) {
                 if (df->glycolErrorLimits[(int)error] <= df->GlycolErrorLimitTest) {
-                    ShowWarningMessage(state,
-                                       format("{}: Temperature is out of range (too high) for fluid [{}] viscosity **", routineName, this->Name));
+                    ShowWarningMessage(
+                        state, EnergyPlus::format("{}: Temperature is out of range (too high) for fluid [{}] viscosity **", routineName, this->Name));
                     ShowContinueError(state,
-                                      format("..Called From:{},Temperature=[{:.2R}], supplied data range=[{:.2R},{:.2R}]",
-                                             CalledFrom,
-                                             Temp,
-                                             this->ViscLowTempValue,
-                                             this->ViscHighTempValue));
+                                      EnergyPlus::format("..Called From:{},Temperature=[{:.2R}], supplied data range=[{:.2R},{:.2R}]",
+                                                         CalledFrom,
+                                                         Temp,
+                                                         this->ViscLowTempValue,
+                                                         this->ViscHighTempValue));
                     ShowContinueErrorTimeStamp(state, "");
                 }
 
-                ShowRecurringWarningErrorAtEnd(state,
-                                               format("{}: Temperature out of range (too high) for fluid [{}] viscosity **", routineName, this->Name),
-                                               this->errors[(int)GlycolError::ViscosityHigh].index,
-                                               Temp,
-                                               "{C}");
+                ShowRecurringWarningErrorAtEnd(
+                    state,
+                    EnergyPlus::format("{}: Temperature out of range (too high) for fluid [{}] viscosity **", routineName, this->Name),
+                    this->errors[(int)GlycolError::ViscosityHigh].index,
+                    Temp,
+                    "{C}");
             }
         }
 
@@ -4601,7 +4652,7 @@ namespace Fluid {
 
         if (GlycolIndex == 0) {
             if ((GlycolIndex = GetGlycolNum(state, glycolName)) == 0) {
-                ShowSevereError(state, format("Glycol \"{}\" not found, called from: {}", glycolName, CalledFrom));
+                ShowSevereError(state, EnergyPlus::format("Glycol \"{}\" not found, called from: {}", glycolName, CalledFrom));
                 ShowFatalError(state, "Program terminates due to preceding condition.");
                 return 0.0;
             }
@@ -4689,7 +4740,7 @@ namespace Fluid {
         return state.dataFluid->glycols(GlycolNum_Water);
     }
 
-    int GetGlycolRawNum(EnergyPlusData &state, std::string_view const glycolRawName) // carries in substance name
+    int GetGlycolRawNum(EnergyPlusData const &state, std::string_view const glycolRawName) // carries in substance name
     {
         auto const &df = state.dataFluid;
 
@@ -4911,8 +4962,8 @@ namespace Fluid {
             if (df->TempRangeErrCountGetInterpolatedSatProp <= df->RefrigErrorLimitTest) {
                 ShowWarningError(state, "GetInterpolatedSatProp: Saturation temperature for interpolation is out of range of data supplied: **");
                 ShowContinueErrorTimeStamp(state, fmt::format(" Called from:{}", CalledFrom));
-                ShowContinueError(state, format("Refrigerant temperature = {:.2R}", Temperature));
-                ShowContinueError(state, format("Returned saturated property value = {:.3R}", ReturnValue));
+                ShowContinueError(state, EnergyPlus::format("Refrigerant temperature = {:.2R}", Temperature));
+                ShowContinueError(state, EnergyPlus::format("Returned saturated property value = {:.3R}", ReturnValue));
             } else {
                 ShowRecurringWarningErrorAtEnd(state,
                                                "GetInterpolatedSatProp: Refrigerant temperature for interpolation out of range error",
@@ -4956,7 +5007,7 @@ namespace Fluid {
                 NeedOrphanMessage = false;
             }
             if (state.dataGlobal->DisplayUnusedObjects) {
-                ShowMessage(state, format("Refrigerant={}", refrig->Name));
+                ShowMessage(state, EnergyPlus::format("Refrigerant={}", refrig->Name));
             } else {
                 ++NumUnusedRefrig;
             }
@@ -4983,7 +5034,7 @@ namespace Fluid {
                 NeedOrphanMessage = false;
             }
             if (state.dataGlobal->DisplayUnusedObjects) {
-                ShowMessage(state, format("Glycol={}", glycol->Name));
+                ShowMessage(state, EnergyPlus::format("Glycol={}", glycol->Name));
             } else {
                 ++NumUnusedGlycol;
             }
@@ -4991,10 +5042,10 @@ namespace Fluid {
 
         if (NumUnusedRefrig > 0 || NumUnusedGlycol > 0) {
             if (NumUnusedRefrig > 0) {
-                ShowMessage(state, format("There are {} unused refrigerants in input.", NumUnusedRefrig));
+                ShowMessage(state, EnergyPlus::format("There are {} unused refrigerants in input.", NumUnusedRefrig));
             }
             if (NumUnusedGlycol > 0) {
-                ShowMessage(state, format("There are {} unused glycols in input.", NumUnusedGlycol));
+                ShowMessage(state, EnergyPlus::format("There are {} unused glycols in input.", NumUnusedGlycol));
             }
             ShowMessage(state, "Use Output:Diagnostics,DisplayUnusedObjects; to see them.");
         }

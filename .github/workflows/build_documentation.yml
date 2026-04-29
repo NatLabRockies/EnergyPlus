@@ -139,70 +139,70 @@ jobs:
       run: cmake --build . -j 4
 
     - name: Upload EngineeringReference
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       if: matrix.os == 'ubuntu-24.04'
       with:
         name: EngineeringReference
         path: ${{ github.workspace }}/doc/build/pdf/EngineeringReference.pdf
 
     - name: Upload ExternalInterfacesApplicationGuide
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       if: matrix.os == 'ubuntu-24.04'
       with:
         name: ExternalInterfacesApplicationGuide
         path: ${{ github.workspace }}/doc/build/pdf/ExternalInterfacesApplicationGuide.pdf
 
     - name: Upload GettingStarted
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       if: matrix.os == 'ubuntu-24.04'
       with:
         name: GettingStarted
         path: ${{ github.workspace }}/doc/build/pdf/GettingStarted.pdf
 
     - name: Upload InputOutputReference
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       if: matrix.os == 'ubuntu-24.04'
       with:
         name: InputOutputReference
         path: ${{ github.workspace }}/doc/build/pdf/InputOutputReference.pdf
 
     - name: Upload InterfaceDeveloper
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       if: matrix.os == 'ubuntu-24.04'
       with:
         name: InterfaceDeveloper
         path: ${{ github.workspace }}/doc/build/pdf/InterfaceDeveloper.pdf
 
     - name: Upload ModuleDeveloper
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       if: matrix.os == 'ubuntu-24.04'
       with:
         name: ModuleDeveloper
         path: ${{ github.workspace }}/doc/build/pdf/ModuleDeveloper.pdf
 
     - name: Upload OutputDetailsAndExamples
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       if: matrix.os == 'ubuntu-24.04'
       with:
         name: OutputDetailsAndExamples
         path: ${{ github.workspace }}/doc/build/pdf/OutputDetailsAndExamples.pdf
 
     - name: Upload PlantApplicationGuide
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       if: matrix.os == 'ubuntu-24.04'
       with:
         name: PlantApplicationGuide
         path: ${{ github.workspace }}/doc/build/pdf/PlantApplicationGuide.pdf
 
     - name: Upload UsingEnergyPlusForCompliance
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       if: matrix.os == 'ubuntu-24.04'
       with:
         name: UsingEnergyPlusForCompliance
         path: ${{ github.workspace }}/doc/build/pdf/UsingEnergyPlusForCompliance.pdf
 
     - name: Upload entire pdf folder
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: "AllDocumentation-${{ matrix.os }}-${{ github.event.pull_request.head.sha }}"
@@ -210,7 +210,7 @@ jobs:
 
     - name: Upload log folder upon failure
       if: failure() && runner.os == 'Windows'
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: Xelatex_Logs_after_all
         path: C:\Users\runneradmin\AppData\Local\MiKTeX\miktex\log\

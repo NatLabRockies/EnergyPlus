@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -111,33 +111,32 @@ namespace ChillerIndirectAbsorption {
         Real64 OptPartLoadRat = 0.0;              // (BLAST BEST) optimal operating frac full load
         Real64 TempDesCondIn = 0.0;               // C - (BLAST ADJTC(1)The design secondary loop fluid
         // temperature at the Absorber condenser side inlet
-        Real64 MinCondInletTemp = 0.0;                 // C - minimum condenser inlet temperature for chiller operation
-        Real64 MinGeneratorInletTemp = 0.0;            // C - minimum generator inlet temperature for chiller operation
-        Real64 TempLowLimitEvapOut = 0.0;              // C - low temperature shut off
-        Real64 GeneratorVolFlowRate = 0.0;             // m3/s - hot water volumetric flow rate through generator
-        bool GeneratorVolFlowRateWasAutoSized = false; // true if hot water flow was autosize on input
-        Real64 GeneratorSubcool = 0.0;                 // C - amount of subcooling in steam generator
-        Real64 LoopSubcool = 0.0;                      // C - amount of subcooling in steam generator
-        Real64 GeneratorDeltaTemp = -99999.0;          // C - generator fluid temperature difference (water only)
-        bool GeneratorDeltaTempWasAutoSized = true;    // true if generator delta T was autosize on input
-        Real64 SizFac = 0.0;                           // Sizing factor
-        int EvapInletNodeNum = 0;                      // Node number on the inlet side of the plant
-        int EvapOutletNodeNum = 0;                     // Node number on the outlet side of the plant
-        int CondInletNodeNum = 0;                      // Node number on the inlet side of the condenser
-        int CondOutletNodeNum = 0;                     // Node number on the outlet side of the condenser
-        int GeneratorInletNodeNum = 0;                 // Generator inlet node number, steam/water side
-        int GeneratorOutletNodeNum = 0;                // Generator outlet node number, steam/water side
-        int GeneratorInputCurvePtr = 0;                // Index to steam use curve as a function of PLR
-        int PumpPowerCurvePtr = 0;                     // Index to pump power curve as a function of PLR
-        int CapFCondenserTempPtr = 0;                  // Index to capacity as a function of absorber temp curve
-        int CapFEvaporatorTempPtr = 0;                 // Index to capacity as a function of evaporator temp curve
-        int CapFGeneratorTempPtr = 0;                  // Index to capacity as a function of generator temp curve
-        int HeatInputFCondTempPtr = 0;                 // Index to generator heat input as a function of absorber temp
-        int HeatInputFEvapTempPtr = 0;                 // Index to generator heat input as a function of absorber temp
-        int ErrCount2 = 0;                             // error counter
-        DataLoopNode::NodeFluidType GenHeatSourceType =
-            DataLoopNode::NodeFluidType::Blank;                      // Generator heat source type, DataLoopNode::NodeFluidType::Steam=3 or
-                                                                     // DataLoopNode::NodeFluidType::Water=2
+        Real64 MinCondInletTemp = 0.0;                               // C - minimum condenser inlet temperature for chiller operation
+        Real64 MinGeneratorInletTemp = 0.0;                          // C - minimum generator inlet temperature for chiller operation
+        Real64 TempLowLimitEvapOut = 0.0;                            // C - low temperature shut off
+        Real64 GeneratorVolFlowRate = 0.0;                           // m3/s - hot water volumetric flow rate through generator
+        bool GeneratorVolFlowRateWasAutoSized = false;               // true if hot water flow was autosize on input
+        Real64 GeneratorSubcool = 0.0;                               // C - amount of subcooling in steam generator
+        Real64 LoopSubcool = 0.0;                                    // C - amount of subcooling in steam generator
+        Real64 GeneratorDeltaTemp = -99999.0;                        // C - generator fluid temperature difference (water only)
+        bool GeneratorDeltaTempWasAutoSized = true;                  // true if generator delta T was autosize on input
+        Real64 SizFac = 0.0;                                         // Sizing factor
+        int EvapInletNodeNum = 0;                                    // Node number on the inlet side of the plant
+        int EvapOutletNodeNum = 0;                                   // Node number on the outlet side of the plant
+        int CondInletNodeNum = 0;                                    // Node number on the inlet side of the condenser
+        int CondOutletNodeNum = 0;                                   // Node number on the outlet side of the condenser
+        int GeneratorInletNodeNum = 0;                               // Generator inlet node number, steam/water side
+        int GeneratorOutletNodeNum = 0;                              // Generator outlet node number, steam/water side
+        int GeneratorInputCurvePtr = 0;                              // Index to steam use curve as a function of PLR
+        int PumpPowerCurvePtr = 0;                                   // Index to pump power curve as a function of PLR
+        int CapFCondenserTempPtr = 0;                                // Index to capacity as a function of absorber temp curve
+        int CapFEvaporatorTempPtr = 0;                               // Index to capacity as a function of evaporator temp curve
+        int CapFGeneratorTempPtr = 0;                                // Index to capacity as a function of generator temp curve
+        int HeatInputFCondTempPtr = 0;                               // Index to generator heat input as a function of absorber temp
+        int HeatInputFEvapTempPtr = 0;                               // Index to generator heat input as a function of absorber temp
+        int ErrCount2 = 0;                                           // error counter
+        Node::FluidType GenHeatSourceType = Node::FluidType::Blank;  // Generator heat source type, Node::NodeFluidType::Steam=3 or
+                                                                     // Node::NodeFluidType::Water=2
         Fluid::RefrigProps *steam = nullptr;                         // STEAM Fluid Properties
         bool Available = false;                                      // need an array of logicals--load identifiers of available equipment
         bool ON = false;                                             // simulate the machine at it's operating part load ratio

@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -50,8 +50,6 @@
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1A.hh>
-#include <ObjexxFCL/Array1D.hh>
-#include <ObjexxFCL/Array2A.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
@@ -69,10 +67,20 @@ struct EnergyPlusData;
 
 namespace Window {
 
+    Real64 constexpr AirDens = 1.29;
+    Real64 constexpr AirDDensDT = -0.4e-2;
+    Real64 constexpr AirCon = 2.41e-2;
+    Real64 constexpr AirDConDT = 7.6e-5;
+    Real64 constexpr AirVis = 1.73e-5;
+    Real64 constexpr AirDVisDT = 1.0e-7;
+    Real64 constexpr AirPrandtl = 0.72;
+    Real64 constexpr AirDPrandtlDT = 1.8e-3;
+
     int constexpr nume = 107; // Number of wavelength values in solar spectrum
     int constexpr numt3 = 81; // Number of wavelength values in the photopic response
 
     int constexpr maxGlassLayers = 5;
+    int constexpr maxArraySize = 2 * maxGlassLayers;
     int constexpr maxGapLayers = 5;
     int constexpr maxSpectralDataElements = 800; // Maximum number in Spectral Data arrays.
 
@@ -89,7 +97,7 @@ namespace Window {
                                                      0.50000000000000011,
                                                      0.34202014332566882,
                                                      0.17364817766693041,
-                                                     0.0}; // 6.123233995736766E-17
+                                                     0.0};
 
     constexpr int maxPolyCoef = 6;
 
@@ -120,14 +128,17 @@ namespace Window {
                                        std::array<Real64, nume> &stPhi,
                                        std::array<Real64, nume> &srfPhi,
                                        std::array<Real64, nume> &srbPhi,
-                                       Array2D<Real64> &saPhi);
+                                       std::array<std::array<Real64, nume>, maxGlassLayers> &saPhi);
 
     void SystemPropertiesAtLambdaAndPhi(EnergyPlusData &state,
                                         int n,       // Number of glass layers
                                         Real64 &tt,  // System transmittance
                                         Real64 &rft, // System front and back reflectance
                                         Real64 &rbt,
-                                        Array1A<Real64> aft // System absorptance of each glass layer
+                                        std::array<std::array<Real64, maxGlassLayers>, maxGlassLayers> &top,
+                                        std::array<std::array<Real64, maxGlassLayers>, maxGlassLayers> &rfop,
+                                        std::array<std::array<Real64, maxGlassLayers>, maxGlassLayers> &rbop,
+                                        std::array<Real64, maxGlassLayers> &aft // System absorptance of each glass layer
     );
 
     Real64 solarSpectrumAverage(EnergyPlusData const &state, gsl::span<Real64 const> p);
@@ -154,12 +165,13 @@ namespace Window {
                                                Real64 &SurfOutsideTemp // Outside surface temperature (C)
     );
 
-    void GetHeatBalanceEqCoefMatrixSimple(EnergyPlusData &state,
-                                          int nglasslayer,           // Number of glass layers
-                                          Array1D<Real64> const &hr, // Radiative conductance (W/m2-K)
-                                          Array1A<Real64> &hgap,     // Gap gas conductive conductance (W/m2-K)
-                                          Array2D<Real64> &Aface,    // Coefficient in equation Aface*thetas = Bface
-                                          Array1D<Real64> &Bface     // Coefficient in equation Aface*thetas = Bface
+    void GetHeatBalanceEqCoefMatrixSimple(
+        EnergyPlusData &state,
+        int nglasslayer,                                                   // Number of glass layers
+        std::array<Real64, maxArraySize> const &hr,                        // Radiative conductance (W/m2-K)
+        std::array<Real64, maxGapLayers> &hgap,                            // Gap gas conductive conductance (W/m2-K)
+        std::array<std::array<Real64, maxArraySize>, maxArraySize> &Aface, // Coefficient in equation Aface*thetas = Bface
+        std::array<Real64, maxArraySize> &Bface                            // Coefficient in equation Aface*thetas = Bface
     );
 
     void GetHeatBalanceEqCoefMatrix(EnergyPlusData &state,
@@ -175,16 +187,16 @@ namespace Window {
                                     Real64 ShGlReflFacIR,
                                     Real64 RhoGlIR1,
                                     Real64 RhoGlIR2,
-                                    Real64 hcv,                   // Convection coefficient from gap glass or shade/blind to gap air (W/m2-K)
-                                    Real64 TGapNew,               // Current-iteration average air temp in airflow gap (K)
-                                    Real64 TAirflowGapNew,        // Average air temp in airflow gap between glass panes (K)
-                                    Real64 hcvAirflowGap,         // Convection coefficient from airflow gap glass to airflow gap air (W/m2-K)
-                                    Array1A<Real64> const &hcvBG, // Convection coefficient from gap glass or shade to gap gas (W/m2-K)
-                                    Array1A<Real64> const &TGapNewBG,
-                                    Array1A<Real64> const &AbsRadShadeFace,
-                                    Array1D<Real64> const &hr,
-                                    Array2D<Real64> &Aface,
-                                    Array1D<Real64> &Bface);
+                                    Real64 hcv,                         // Convection coefficient from gap glass or shade/blind to gap air (W/m2-K)
+                                    Real64 TGapNew,                     // Current-iteration average air temp in airflow gap (K)
+                                    Real64 TAirflowGapNew,              // Average air temp in airflow gap between glass panes (K)
+                                    Real64 hcvAirflowGap,               // Convection coefficient from airflow gap glass to airflow gap air (W/m2-K)
+                                    std::array<Real64, 2> const &hcvBG, // Convection coefficient from gap glass or shade to gap gas (W/m2-K)
+                                    std::array<Real64, 2> const &TGapNewBG,
+                                    std::array<Real64, 2> const &AbsRadShadeFace,
+                                    std::array<Real64, maxArraySize> const &hr,
+                                    std::array<std::array<Real64, maxArraySize>, maxArraySize> &Aface,
+                                    std::array<Real64, maxArraySize> &Bface);
 
     void SolveForWindowTemperatures(EnergyPlusData &state, int SurfNum); // Surface number
 
@@ -199,11 +211,11 @@ namespace Window {
     );
 
     void BetweenGlassShadeNaturalFlow(EnergyPlusData &state,
-                                      int SurfNum,             // Surface number
-                                      int iter,                // Iteration number for glass heat balance calculation
-                                      Real64 &VGap,            // Gas velocity in gaps (m/s)
-                                      Array1A<Real64> TGapNew, // Current-iteration average gas temp in gaps (K)
-                                      Array1A<Real64> hcv      // Convection coefficient from gap glass or shade to gap gas (W/m2-K)
+                                      int SurfNum,                    // Surface number
+                                      int iter,                       // Iteration number for glass heat balance calculation
+                                      Real64 &VGap,                   // Gas velocity in gaps (m/s)
+                                      std::array<Real64, 2> &TGapNew, // Current iteration average gas temp in gaps (K)
+                                      std::array<Real64, 2> &hcv      // Convection coefficient from gap glass or shade to gap gas (W/m2-K)
     );
 
     void BetweenGlassForcedFlow(EnergyPlusData &state,
@@ -217,27 +229,27 @@ namespace Window {
     );
 
     void BetweenGlassShadeForcedFlow(EnergyPlusData &state,
-                                     int SurfNum,             // Surface number
-                                     int iter,                // Iteration number for glass heat balance calculation
-                                     Real64 &VGap,            // Air velocity in each gap (m/s)
-                                     Array1A<Real64> TGapNew, // Current-iteration average gas temp in gaps (K)
-                                     Real64 &TGapOutletAve,   // Average of TGapOutlet(1) and TGapOutlet(2) (K)
-                                     Array1A<Real64> hcv,     // Convection coefficient from gap glass or shade to gap gas (W/m2-K)
-                                     Real64 &QConvTot         // Sum of convective heat flow from gaps (W)
+                                     int const SurfNum,              // Surface number
+                                     int const iter,                 // Iteration number for glass heat balance calculation
+                                     Real64 &VGap,                   // Air velocity in each gap (m/s)
+                                     std::array<Real64, 2> &TGapNew, // Current-iteration average gas temp in gaps (K)
+                                     Real64 &TGapOutletAve,          // Average of TGapOutlet(1) and TGapOutlet(2) (K)
+                                     std::array<Real64, 2> &hcv,     // Convection coefficient from gap glass or shade to gap gas (W/m2-K)
+                                     Real64 &QConvTot                // Sum of convective heat flow from gaps (W)
     );
 
     void LUdecomposition(EnergyPlusData &state,
-                         Array2<Real64> &ajac, // As input: matrix to be decomposed;
-                         int n,                // Dimension of matrix
-                         Array1D_int &indx,    // Vector of row permutations
-                         int &d                // +1 if even number of row interchange is even, -1
+                         std::array<std::array<Real64, maxArraySize>, maxArraySize> &ajac, // As input: matrix to be decomposed;
+                         int const n,                                                      // Dimension of matrix
+                         std::array<int, maxArraySize> &indx,                              // Vector of row permutations
+                         int &d                                                            // +1 if even number of row interchange is even, -1
     );
 
     void LUsolution(EnergyPlusData &state,
-                    Array2<Real64> const &a, // Matrix and vector in a.x = b;
-                    int n,                   // Dimension of a and b
-                    Array1D_int const &indx, // Vector of row permutations
-                    Array1D<Real64> &b       // Matrix and vector in a.x = b;
+                    std::array<std::array<Real64, maxArraySize>, maxArraySize> const &a, // Matrix and vector in a.x = b;
+                    int n,                                                               // Dimension of a and b
+                    std::array<int, maxArraySize> const &indx,                           // Vector of row permutations
+                    std::array<Real64, maxArraySize> &b                                  // Matrix and vector in a.x = b;
     );
 
     constexpr Real64 POLYF(Real64 const X,                // Cosine of angle of incidence
@@ -246,19 +258,6 @@ namespace Window {
     {
         return (X < 0.0 || X > 1.0) ? 0.0 : (X * (A[0] + X * (A[1] + X * (A[2] + X * (A[3] + X * (A[4] + X * A[5]))))));
     }
-
-#ifdef GET_OUT
-    constexpr Real64 POLYF(Real64 const X,          // Cosine of angle of incidence
-                           Array1D<Real64> const &A // Polynomial coefficients
-    )
-    {
-        if (X < 0.0 || X > 1.0) {
-            return 0.0;
-        } else {
-            return X * (A(1) + X * (A(2) + X * (A(3) + X * (A(4) + X * (A(5) + X * A(6))))));
-        }
-    }
-#endif // GET_OUT
 
     void WindowGasConductance(EnergyPlusData &state,
                               Real64 tleft,  // Temperature of gap surface closest to outside (K)
@@ -277,8 +276,8 @@ namespace Window {
     );
 
     void StartingWindowTemps(EnergyPlusData &state,
-                             int SurfNum,                // Surface number
-                             Array1A<Real64> AbsRadShade // Short-wave radiation absorbed by shade/blind faces
+                             int SurfNum,                             // Surface number
+                             std::array<Real64, 2> const &AbsRadShade // Short-wave radiation absorbed by shade/blind faces
     );
 
     void NusseltNumber(EnergyPlusData &state,
@@ -336,18 +335,18 @@ namespace Window {
     );
 
     void EvalNominalWindowCond(EnergyPlusData &state,
-                               Real64 AbsBeamShadeNorm,     // Shade solar absorptance at normal incidence
-                               Array1D<Real64> AbsBeamNorm, // Beam absorptance at normal incidence for each glass layer
-                               Array1D<Real64> hgap,        // Conductive gap conductance [W/m2-K]
-                               Real64 &NominalConductance,  // Nominal center-of-glass conductance, including air films
-                               Real64 &SHGC,                // Nominal center-of-glass solar heat gain coefficient for
-                               Real64 TSolNorm              // Overall beam solar transmittance at normal incidence
+                               Real64 AbsBeamShadeNorm,                               // Shade solar absorptance at normal incidence
+                               std::array<Real64, maxGlassLayers> const &AbsBeamNorm, // Beam absorptance at normal incidence for each glass layer
+                               std::array<Real64, maxGapLayers> const &hgap,          // Conductive gap conductance [W/m2-K]
+                               Real64 &NominalConductance,                            // Nominal center-of-glass conductance, including air films
+                               Real64 &SHGC,                                          // Nominal center-of-glass solar heat gain coefficient for
+                               Real64 TSolNorm                                        // Overall beam solar transmittance at normal incidence
     );
 
     void WindowTempsForNominalCond(EnergyPlusData &state,
-                                   int ConstrNum,        // Construction number
-                                   Array1A<Real64> hgap, // Gap gas conductive conductance (W/m2-K)
-                                   Real64 adjRatio       // adjustment Ratio to hcin
+                                   int ConstrNum,                          // Construction number
+                                   std::array<Real64, maxGapLayers> &hgap, // Gap gas conductive conductance (W/m2-K)
+                                   Real64 adjRatio                         // adjustment Ratio to hcin
     );
 
     void StartingWinTempsForNominalCond(EnergyPlusData &state);
@@ -359,19 +358,19 @@ namespace Window {
     void CalcWindowScreenProperties(EnergyPlusData &state);
 
     void BlindOpticsDiffuse(EnergyPlusData &state,
-                            int BlindNum,      // Blind number
-                            int ISolVis,       // 1 = solar and IR calculation; 2 = visible calculation
-                            Array1A<Real64> c, // Slat properties
-                            Real64 b_el,       // Slat elevation (radians)
-                            Array1A<Real64> p  // Blind properties
+                            int BlindNum,                    // Blind number
+                            int ISolVis,                     // 1 = solar and IR calculation; 2 = visible calculation
+                            std::array<Real64, 15> const &c, // Slat properties
+                            Real64 b_el,                     // Slat elevation (radians)
+                            std::array<Real64, 16> &p        // Blind properties
     );
 
     void BlindOpticsBeam(EnergyPlusData &state,
-                         int BlindNum,      // Blind number
-                         Array1A<Real64> c, // Slat properties (equivalent to BLD_PR)
-                         Real64 b_el,       // Slat elevation (radians)
-                         Real64 s_el,       // Solar profile angle (radians)
-                         Array1A<Real64> p  // Blind properties (equivalent to ST_LAY)
+                         int BlindNum,                    // Blind number
+                         std::array<Real64, 15> const &c, // Slat properties (equivalent to BLD_PR)
+                         Real64 b_el,                     // Slat elevation (radians)
+                         Real64 s_el,                     // Solar profile angle (radians)
+                         std::array<Real64, 16> &p        // Blind properties (equivalent to ST_LAY)
     );
 
     inline Real64 InterpSw(Real64 const SwitchFac, // Switching factor: 0.0 if glazing is unswitched, = 1.0 if fully switched
@@ -392,17 +391,17 @@ namespace Window {
         return (1.0 - locSwitchFac) * A + locSwitchFac * B;
     }
 
-    void ViewFac(Real64 s,         // Slat width (m)
-                 Real64 h,         // Distance between faces of adjacent slats (m)
-                 Real64 phib,      // Elevation angle of normal to slat (radians)
-                 Real64 phis,      // Profile angle of radiation source (radians)
-                 Array2A<Real64> F // View factor array
+    void ViewFac(Real64 s,                               // Slat width (m)
+                 Real64 h,                               // Distance between faces of adjacent slats (m)
+                 Real64 phib,                            // Elevation angle of normal to slat (radians)
+                 Real64 phis,                            // Profile angle of radiation source (radians)
+                 std::array<std::array<Real64, 6>, 6> &F // View factor array
     );
 
     void InvertMatrix(EnergyPlusData &state,
-                      Array2D<Real64> &a, // Matrix to be inverted
-                      Array2D<Real64> &y, // Inverse of matrix a
-                      Array1D_int &indx,  // Index vector for LU decomposition
+                      std::array<std::array<Real64, maxArraySize>, maxArraySize> &a, // Matrix to be inverted
+                      std::array<std::array<Real64, maxArraySize>, maxArraySize> &y, // Inverse of matrix a
+                      std::array<int, maxArraySize> &indx,                           // Index vector for LU decomposition
                       int n);
 
     // added for custom solar or visible spectrum
@@ -422,10 +421,6 @@ namespace Window {
 
 struct WindowManagerData : BaseGlobalStruct
 {
-
-    //                                      Dens  dDens/dT  Con    dCon/dT   Vis    dVis/dT Prandtl dPrandtl/dT
-    std::array<Real64, 8> const AirProps = {1.29, -0.4e-2, 2.41e-2, 7.6e-5, 1.73e-5, 1.0e-7, 0.72, 1.8e-3};
-
     // Air mass 1.5 terrestrial solar global spectral irradiance (W/m2-micron)
     // on a 37 degree tilted surface; corresponds
     // to wavelengths (microns) in following data block (ISO 9845-1 and ASTM E 892;
@@ -509,34 +504,16 @@ struct WindowManagerData : BaseGlobalStruct
     Real64 A45 = 0.0;
     Real64 A67 = 0.0;
 
-    // TEMP MOVED FROM DataHeatBalance.hh -BLB
-
-    // for each wavelenth in wle
-    std::array<std::array<Real64, Window::maxGlassLayers>, Window::maxGlassLayers> top = {0.0};  // Transmittance matrix for subr. op
-    std::array<std::array<Real64, Window::maxGlassLayers>, Window::maxGlassLayers> rfop = {0.0}; // Front reflectance matrix for subr. op
-    std::array<std::array<Real64, Window::maxGlassLayers>, Window::maxGlassLayers> rbop = {0.0}; // Back transmittance matrix for subr. op
-
     std::unique_ptr<Window::CWindowModel> inExtWindowModel;       // Information about windows model (interior or exterior)
     std::unique_ptr<Window::CWindowOpticalModel> winOpticalModel; // Information about windows optical model (Simplified or BSDF)
 
     bool RunMeOnceFlag = false;
-    bool lSimpleGlazingSystem = false; // true if using simple glazing system block model
-    bool BGFlag = false;               // True if between-glass shade or blind
-    bool locTCFlag = false;            // True if this surface is a TC window
+    bool BGFlag = false;    // True if between-glass shade or blind
+    bool locTCFlag = false; // True if this surface is a TC window
     bool DoReport = false;
     bool HasWindows = false;
     bool HasComplexWindows = false;
-    bool HasEQLWindows = false;     // equivalent layer window defined
-    Real64 SimpleGlazingSHGC = 0.0; // value of SHGC for simple glazing system block model
-    Real64 SimpleGlazingU = 0.0;    // value of U-factor for simple glazing system block model
-    Real64 tmpTrans = 0.0;          // solar transmittance calculated from spectral data
-    Real64 tmpTransVis = 0.0;       // visible transmittance calculated from spectral data
-    Real64 tmpReflectSolBeamFront = 0.0;
-    Real64 tmpReflectSolBeamBack = 0.0;
-    Real64 tmpReflectVisBeamFront = 0.0;
-    Real64 tmpReflectVisBeamBack = 0.0;
-
-    std::array<int, Window::maxGlassLayers> LayerNum = {0}; // Glass layer number
+    bool HasEQLWindows = false; // equivalent layer window defined
 
     void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
     {
@@ -580,37 +557,19 @@ struct WindowManagerData : BaseGlobalStruct
         this->A23 = 0.0;
         this->A45 = 0.0;
         this->A67 = 0.0;
-        this->top = {0.0};
-        this->rfop = {0.0};
-        this->rbop = {0.0};
         Window::CWindowConstructionsSimplified::clearState();
         this->RunMeOnceFlag = false;
-        this->lSimpleGlazingSystem = false; // true if using simple glazing system block model
-        this->BGFlag = false;               // True if between-glass shade or blind
-        this->locTCFlag = false;            // True if this surface is a TC window
+        this->BGFlag = false;    // True if between-glass shade or blind
+        this->locTCFlag = false; // True if this surface is a TC window
         this->DoReport = false;
         this->HasWindows = false;
         this->HasComplexWindows = false;
         this->HasEQLWindows = false; // equivalent layer window defined
-        this->SimpleGlazingSHGC = 0.0;
-        this->SimpleGlazingU = 0.0;
-        this->tmpTrans = 0.0;    // solar transmittance calculated from spectral data
-        this->tmpTransVis = 0.0; // visible transmittance calculated from spectral data
-        this->tmpReflectSolBeamFront = 0.0;
-        this->tmpReflectSolBeamBack = 0.0;
-        this->tmpReflectVisBeamFront = 0.0;
-        this->tmpReflectVisBeamBack = 0.0;
     }
 
     // Default Constructor
     WindowManagerData()
     {
-        SimpleGlazingSHGC = 0.0;
-        SimpleGlazingU = 0.0;
-        tmpReflectSolBeamFront = 0.0;
-        tmpReflectSolBeamBack = 0.0;
-        tmpReflectVisBeamFront = 0.0;
-        tmpReflectVisBeamBack = 0.0;
     }
 };
 

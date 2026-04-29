@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -58,6 +58,7 @@
 #include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/FluidProperties.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
+#include <EnergyPlus/PlantUtilities.hh>
 #include <EnergyPlus/Psychrometrics.hh>
 
 #include "Fixtures/EnergyPlusFixture.hh"
@@ -89,6 +90,9 @@ TEST_F(EnergyPlusFixture, Boiler_HotWaterSizingTest)
     state->dataPlnt->PlantLoop(1).PlantSizNum = 1;
     state->dataPlnt->PlantLoop(1).FluidName = "WATER";
     state->dataPlnt->PlantLoop(1).glycol = Fluid::GetWater(*state);
+
+    state->dataBoilers->Boiler[0].plantLoc.loopNum = 1;
+    PlantUtilities::SetPlantLocationLinks(*state, state->dataBoilers->Boiler[0].plantLoc);
 
     state->dataSize->PlantSizData(1).DesVolFlowRate = 1.0;
     state->dataSize->PlantSizData(1).DeltaT = 10.0;
@@ -123,7 +127,6 @@ TEST_F(EnergyPlusFixture, Boiler_HotWaterAutoSizeTempTest)
     // boiler nominal capacity in Boiler:HotWater
     state->dataBoilers->Boiler.emplace_back();
     // Autosized Hot Water Boiler
-    state->dataBoilers->Boiler[0].plantLoc.loopNum = 1;
     state->dataBoilers->Boiler[0].SizFac = 1.2;
     state->dataBoilers->Boiler[0].NomCap = DataSizing::AutoSize;
     state->dataBoilers->Boiler[0].NomCapWasAutoSized = true;
@@ -140,11 +143,12 @@ TEST_F(EnergyPlusFixture, Boiler_HotWaterAutoSizeTempTest)
     state->dataSize->PlantSizData(1).DeltaT = 10.0;
     state->dataPlnt->PlantFirstSizesOkayToFinalize = true;
 
+    state->dataBoilers->Boiler[0].plantLoc.loopNum = 1;
+    PlantUtilities::SetPlantLocationLinks(*state, state->dataBoilers->Boiler[0].plantLoc);
+
     // calculate nominal capacity at 60.0 C hot water temperature
-    Real64 rho = state->dataPlnt->PlantLoop(state->dataBoilers->Boiler[0].plantLoc.loopNum)
-                     .glycol->getDensity(*state, 60.0, "Boiler_HotWaterAutoSizeTempTest");
-    Real64 Cp = state->dataPlnt->PlantLoop(state->dataBoilers->Boiler[0].plantLoc.loopNum)
-                    .glycol->getSpecificHeat(*state, 60.0, "Boiler_HotWaterAutoSizeTempTest");
+    Real64 rho = state->dataBoilers->Boiler[0].plantLoc.loop->glycol->getDensity(*state, 60.0, "Boiler_HotWaterAutoSizeTempTest");
+    Real64 Cp = state->dataBoilers->Boiler[0].plantLoc.loop->glycol->getSpecificHeat(*state, 60.0, "Boiler_HotWaterAutoSizeTempTest");
 
     Real64 NomCapBoilerExpected =
         rho * state->dataSize->PlantSizData(1).DesVolFlowRate * Cp * state->dataSize->PlantSizData(1).DeltaT * state->dataBoilers->Boiler[0].SizFac;

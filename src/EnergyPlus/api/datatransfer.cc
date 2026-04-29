@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -108,7 +108,8 @@ APIDataEntry *getAPIData(EnergyPlusState state, unsigned int *resultingSize)
         if (meter->Name.empty()) {
             break;
         }
-        localDataEntries.emplace_back("OutputMeter", "", "", meter->Name, format("{}", EnergyPlus::Constant::unitNames[(int)meter->units]));
+        localDataEntries.emplace_back(
+            "OutputMeter", "", "", meter->Name, EnergyPlus::format("{}", EnergyPlus::Constant::unitNames[(int)meter->units]));
     }
     for (auto const *variable : thisState->dataOutputProcessor->outVars) {
         if (variable->varType != EnergyPlus::OutputProcessor::VariableType::Real) {
@@ -123,7 +124,7 @@ APIDataEntry *getAPIData(EnergyPlusState state, unsigned int *resultingSize)
                                       variable->keyUC,
                                       variable->units == EnergyPlus::Constant::Units::customEMS
                                           ? variable->unitNameCustomEMS
-                                          : format("{}", EnergyPlus::Constant::unitNames[(int)variable->units]));
+                                          : EnergyPlus::format("{}", EnergyPlus::Constant::unitNames[(int)variable->units]));
     }
     *resultingSize = localDataEntries.size();
     auto *data = new APIDataEntry[*resultingSize];
@@ -195,7 +196,7 @@ char *listAllAPIDataCSV(EnergyPlusState state)
         }
         output.append("OutputMeter").append(","); // This multiple append thing is not good
         output.append(meter->Name).append(",");
-        output.append(format("{}\n", EnergyPlus::Constant::unitNames[(int)meter->units]));
+        output.append(EnergyPlus::format("{}\n", EnergyPlus::Constant::unitNames[(int)meter->units]));
     }
     output.append("**VARIABLES**\n");
     for (auto const *variable : thisState->dataOutputProcessor->outVars) {
@@ -208,9 +209,10 @@ char *listAllAPIDataCSV(EnergyPlusState state)
         output.append("OutputVariable,");
         output.append(variable->name).append(",");
         output.append(variable->keyUC).append(",");
-        output.append(format("{}\n",
-                             variable->units == EnergyPlus::Constant::Units::customEMS ? variable->unitNameCustomEMS
-                                                                                       : EnergyPlus::Constant::unitNames[(int)variable->units]));
+        output.append(EnergyPlus::format("{}\n",
+                                         variable->units == EnergyPlus::Constant::Units::customEMS
+                                             ? variable->unitNameCustomEMS
+                                             : EnergyPlus::Constant::unitNames[(int)variable->units]));
     }
     // note that we cannot just return a c_str to the local string, as the string will be destructed upon leaving
     // this function, and undefined behavior will occur.
@@ -278,7 +280,6 @@ char **getObjectNames(EnergyPlusState state, const char *objectType, unsigned in
     unsigned int i = -1;
     for (auto instance = instancesValue.begin(); instance != instancesValue.end(); ++instance) {
         i++;
-        std::string s = std::string(instance.key());
         data[i] = new char[std::strlen(instance.key().data()) + 1];
         std::strcpy(data[i], instance.key().data());
     }
@@ -385,12 +386,7 @@ int getMeterHandle(EnergyPlusState state, const char *meterName)
 {
     auto *thisState = static_cast<EnergyPlus::EnergyPlusData *>(state);
     std::string const meterNameUC = EnergyPlus::Util::makeUPPER(meterName);
-    const int i = EnergyPlus::GetMeterIndex(*thisState, meterNameUC);
-    if (i == 0) {
-        // inside E+, zero is meaningful, but through the API, I want to use negative one as a signal of a bad lookup
-        return -1;
-    }
-    return i;
+    return EnergyPlus::GetMeterIndex(*thisState, meterNameUC);
 }
 
 Real64 getMeterValue(EnergyPlusState state, int handle)
@@ -425,6 +421,14 @@ int getActuatorHandle(EnergyPlusState state, const char *componentType, const ch
         std::string const actuatorIDUC = EnergyPlus::Util::makeUPPER(availActuator.UniqueIDName);
         std::string const actuatorControlUC = EnergyPlus::Util::makeUPPER(availActuator.ControlTypeName);
         if (typeUC == actuatorTypeUC && keyUC == actuatorIDUC && controlUC == actuatorControlUC) {
+            // issue #10944: mark any IDF-declared EMSActuatorUsed entry as referenced once Python
+            // retrieves its handle — Python catches typos itself, so handle retrieval is the usage signal.
+            for (auto &usedActuator : thisState->dataRuntimeLang->EMSActuatorUsed) {
+                if (usedActuator.ActuatorVariableNum == handle) {
+                    usedActuator.wasActuated = true;
+                    break;
+                }
+            }
             if (availActuator.handleCount > 0) {
                 // If the handle is already used by an IDF EnergyManagementSystem:Actuator, we should warn the user
                 bool foundActuator = false;
@@ -486,7 +490,7 @@ void setActuatorValue(EnergyPlusState state, const int handle, const Real64 valu
 {
     auto *thisState = static_cast<EnergyPlus::EnergyPlusData *>(state);
     if (handle >= 1 && handle <= thisState->dataRuntimeLang->numEMSActuatorsAvailable) {
-        auto &theActuator(thisState->dataRuntimeLang->EMSActuatorAvailable(handle));
+        const auto &theActuator(thisState->dataRuntimeLang->EMSActuatorAvailable(handle));
         if (theActuator.RealValue != nullptr) {
             *theActuator.RealValue = value;
         } else if (theActuator.IntValue != nullptr) {

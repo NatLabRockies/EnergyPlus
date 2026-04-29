@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -196,7 +196,7 @@ void ControlCompOutput(EnergyPlusData &state,
     if (ControlCompTypeNum != 0) {
         SimCompNum = ControlCompTypeNum;
     } else {
-        SimCompNum = Util::FindItemInSortedList(CompType, ListOfComponents, NumComponents);
+        SimCompNum = Util::FindItem(CompType, ListOfComponents, NumComponents);
         ControlCompTypeNum = SimCompNum;
     }
 
@@ -226,9 +226,11 @@ void ControlCompOutput(EnergyPlusData &state,
             state.dataLoopNodes->Node(ActuatedNode).MassFlowRateMinAvail = MinFlow;
             // Check to make sure that the Minimum Flow rate is less than the max.
             if (MinFlow > MaxFlow) {
-                ShowSevereError(state, format("ControlCompOutput:{}:{}, Min Control Flow is > Max Control Flow", CompType, CompName));
+                ShowSevereError(state, EnergyPlus::format("ControlCompOutput:{}:{}, Min Control Flow is > Max Control Flow", CompType, CompName));
                 ShowContinueError(
-                    state, format("Acuated Node={} MinFlow=[{:.3T}], Max Flow={:.3T}", state.dataLoopNodes->NodeID(ActuatedNode), MinFlow, MaxFlow));
+                    state,
+                    EnergyPlus::format(
+                        "Acuated Node={} MinFlow=[{:.3T}], Max Flow={:.3T}", state.dataLoopNodes->NodeID(ActuatedNode), MinFlow, MaxFlow));
                 ShowContinueErrorTimeStamp(state, "");
                 ShowFatalError(state, "Program terminates due to preceding condition.");
             }
@@ -410,7 +412,7 @@ void ControlCompOutput(EnergyPlusData &state,
             } else if (Action == iReverseAction) {
                 Denom = -max(std::abs(QZnReq), 100.0);
             } else {
-                ShowFatalError(state, format("ControlCompOutput: Illegal Action argument =[{}]", Action));
+                ShowFatalError(state, EnergyPlus::format("ControlCompOutput: Illegal Action argument =[{}]", Action));
             }
         }
 
@@ -514,7 +516,7 @@ void ControlCompOutput(EnergyPlusData &state,
             break;
 
         default:
-            ShowFatalError(state, format("ControlCompOutput: Illegal Component Number argument =[{}]", SimCompNum));
+            ShowFatalError(state, EnergyPlus::format("ControlCompOutput: Illegal Component Number argument =[{}]", SimCompNum));
             break;
         }
 
@@ -546,13 +548,14 @@ void ControlCompOutput(EnergyPlusData &state,
         ++Iter;
         if ((Iter > MaxIter) && (!state.dataGlobal->WarmupFlag)) {
             // if ( CompErrIndex == 0 ) {
-            ShowWarningMessage(state, format("ControlCompOutput: Maximum iterations exceeded for {} = {}", CompType, CompName));
-            ShowContinueError(state, format("... Load met       = {:.5T} W.", LoadMet));
-            ShowContinueError(state, format("... Load requested = {:.5T} W.", QZnReq));
-            ShowContinueError(state, format("... Error          = {:.8T} %.", std::abs((LoadMet - QZnReq) * 100.0 / Denom)));
-            ShowContinueError(state, format("... Tolerance      = {:.8T} %.", ControlOffset * 100.0));
+            ShowWarningMessage(state, EnergyPlus::format("ControlCompOutput: Maximum iterations exceeded for {} = {}", CompType, CompName));
+            ShowContinueError(state, EnergyPlus::format("... Load met       = {:.5T} W.", LoadMet));
+            ShowContinueError(state, EnergyPlus::format("... Load requested = {:.5T} W.", QZnReq));
+            ShowContinueError(state, EnergyPlus::format("... Error          = {:.8T} %.", std::abs((LoadMet - QZnReq) * 100.0 / Denom)));
+            ShowContinueError(state, EnergyPlus::format("... Tolerance      = {:.8T} %.", ControlOffset * 100.0));
             ShowContinueError(state, "... Error          = (Load met - Load requested) / MAXIMUM(Load requested, 100)");
-            ShowContinueError(state, format("... Actuated Node Mass Flow Rate ={:.9R} kg/s", state.dataLoopNodes->Node(ActuatedNode).MassFlowRate));
+            ShowContinueError(
+                state, EnergyPlus::format("... Actuated Node Mass Flow Rate ={:.9R} kg/s", state.dataLoopNodes->Node(ActuatedNode).MassFlowRate));
             ShowContinueErrorTimeStamp(state, "");
             ShowRecurringWarningErrorAtEnd(state,
                                            "ControlCompOutput: Maximum iterations error for " + CompType + " = " + CompName,
@@ -636,7 +639,7 @@ void CheckSysSizing(EnergyPlusData &state,
     // Checks SysSizingRunDone flag. If false throws a fatal error.
 
     if (!state.dataSize->SysSizingRunDone) {
-        ShowSevereError(state, format("For autosizing of {} {}, a system sizing run must be done.", CompType, CompName));
+        ShowSevereError(state, EnergyPlus::format("For autosizing of {} {}, a system sizing run must be done.", CompType, CompName));
         if (state.dataSize->NumSysSizInput == 0) {
             ShowContinueError(state, "No \"Sizing:System\" objects were entered.");
         }
@@ -683,7 +686,7 @@ void CheckZoneSizing(EnergyPlusData &state,
     // Checks ZoneSizingRunDone flag. If false throws a fatal error.
 
     if (!state.dataSize->ZoneSizingRunDone) {
-        ShowSevereError(state, format("For autosizing of {} {}, a zone sizing run must be done.", CompType, CompName));
+        ShowSevereError(state, EnergyPlus::format("For autosizing of {} {}, a zone sizing run must be done.", CompType, CompName));
         if (state.dataSize->NumZoneSizingInput == 0) {
             ShowContinueError(state, "No \"Sizing:Zone\" objects were entered.");
         }
@@ -749,12 +752,12 @@ void ValidateComponent(EnergyPlusData &state,
     int ItemNum = state.dataInputProcessing->inputProcessor->getObjectItemNum(state, std::string{CompType}, CompName);
 
     if (ItemNum < 0) {
-        ShowSevereError(state, format("During {} Input, Invalid Component Type input={}", CallString, CompType));
-        ShowContinueError(state, format("Component name={}", CompName));
+        ShowSevereError(state, EnergyPlus::format("During {} Input, Invalid Component Type input={}", CallString, CompType));
+        ShowContinueError(state, EnergyPlus::format("Component name={}", CompName));
         IsNotOK = true;
     } else if (ItemNum == 0) {
-        ShowSevereError(state, format("During {} Input, Invalid Component Name input={}", CallString, CompName));
-        ShowContinueError(state, format("Component type={}", CompType));
+        ShowSevereError(state, EnergyPlus::format("During {} Input, Invalid Component Name input={}", CallString, CompName));
+        ShowContinueError(state, EnergyPlus::format("Component type={}", CompType));
         IsNotOK = true;
     }
 }
@@ -789,17 +792,17 @@ void ValidateComponent(EnergyPlusData &state,
     int ItemNum = state.dataInputProcessing->inputProcessor->getObjectItemNum(state, CompType, CompValType, CompName);
 
     if (ItemNum < 0) {
-        ShowSevereError(state, format("During {} Input, Invalid Component Type input={}", CallString, CompType));
-        ShowContinueError(state, format("Component name={}", CompName));
+        ShowSevereError(state, EnergyPlus::format("During {} Input, Invalid Component Type input={}", CallString, CompType));
+        ShowContinueError(state, EnergyPlus::format("Component name={}", CompName));
         IsNotOK = true;
     } else if (ItemNum == 0) {
-        ShowSevereError(state, format("During {} Input, Invalid Component Name input={}", CallString, CompName));
-        ShowContinueError(state, format("Component type={}", CompType));
+        ShowSevereError(state, EnergyPlus::format("During {} Input, Invalid Component Name input={}", CallString, CompName));
+        ShowContinueError(state, EnergyPlus::format("Component type={}", CompType));
         IsNotOK = true;
     }
 }
 
-void CalcBasinHeaterPower(EnergyPlusData &state,
+void CalcBasinHeaterPower(EnergyPlusData const &state,
                           Real64 const Capacity,     // Basin heater capacity per degree C below setpoint (W/C)
                           Sched::Schedule *sched,    // basin heater schedule
                           Real64 const SetPointTemp, // setpoint temperature for basin heater operation (C)
@@ -902,8 +905,8 @@ void TestAirPathIntegrity(EnergyPlusData &state, bool &ErrFound)
             }
             if (Count > 0) {
                 ShowSevereError(state, "Duplicate Node detected in Return Air Paths");
-                ShowContinueError(state, format("Test Node={}", state.dataLoopNodes->NodeID(TestNode)));
-                ShowContinueError(state, format("In Air Path={}", state.dataAirLoop->AirToZoneNodeInfo(Loop).AirLoopName));
+                ShowContinueError(state, EnergyPlus::format("Test Node={}", state.dataLoopNodes->NodeID(TestNode)));
+                ShowContinueError(state, EnergyPlus::format("In Air Path={}", state.dataAirLoop->AirToZoneNodeInfo(Loop).AirLoopName));
                 ErrFound = true;
             }
         }
@@ -1001,13 +1004,16 @@ void TestSupplyAirPathIntegrity(EnergyPlusData &state, bool &ErrFound)
                         continue;
                     }
                     if (Count == 1 && AirPathNodeName != state.dataLoopNodes->NodeID(state.dataZonePlenum->ZoneSupPlenCond(Count2).InletNode)) {
-                        ShowSevereError(state, format("Error in AirLoopHVAC:SupplyPath={}", state.dataZoneEquip->SupplyAirPath(BCount).Name));
-                        ShowContinueError(state,
-                                          format("For AirLoopHVAC:SupplyPlenum={}", state.dataZonePlenum->ZoneSupPlenCond(Count2).ZonePlenumName));
-                        ShowContinueError(state, format("Expected inlet node (supply air path)={}", AirPathNodeName));
-                        ShowContinueError(state,
-                                          format("Encountered node name (supply plenum)={}",
-                                                 state.dataLoopNodes->NodeID(state.dataZonePlenum->ZoneSupPlenCond(Count2).OutletNode(1))));
+                        ShowSevereError(state,
+                                        EnergyPlus::format("Error in AirLoopHVAC:SupplyPath={}", state.dataZoneEquip->SupplyAirPath(BCount).Name));
+                        ShowContinueError(
+                            state,
+                            EnergyPlus::format("For AirLoopHVAC:SupplyPlenum={}", state.dataZonePlenum->ZoneSupPlenCond(Count2).ZonePlenumName));
+                        ShowContinueError(state, EnergyPlus::format("Expected inlet node (supply air path)={}", AirPathNodeName));
+                        ShowContinueError(
+                            state,
+                            EnergyPlus::format("Encountered node name (supply plenum)={}",
+                                               state.dataLoopNodes->NodeID(state.dataZonePlenum->ZoneSupPlenCond(Count2).OutletNode(1))));
                         ErrFound = true;
                         ++NumErr;
                     }
@@ -1033,13 +1039,16 @@ void TestSupplyAirPathIntegrity(EnergyPlusData &state, bool &ErrFound)
                         continue;
                     }
                     if (Count == 1 && AirPathNodeName != state.dataLoopNodes->NodeID(state.dataSplitterComponent->SplitterCond(Count2).InletNode)) {
-                        ShowSevereError(state, format("Error in AirLoopHVAC:SupplyPath={}", state.dataZoneEquip->SupplyAirPath(BCount).Name));
-                        ShowContinueError(state,
-                                          format("For AirLoopHVAC:ZoneSplitter={}", state.dataSplitterComponent->SplitterCond(Count2).SplitterName));
-                        ShowContinueError(state, format("Expected inlet node (supply air path)={}", AirPathNodeName));
-                        ShowContinueError(state,
-                                          format("Encountered node name (zone splitter)={}",
-                                                 state.dataLoopNodes->NodeID(state.dataSplitterComponent->SplitterCond(Count2).InletNode)));
+                        ShowSevereError(state,
+                                        EnergyPlus::format("Error in AirLoopHVAC:SupplyPath={}", state.dataZoneEquip->SupplyAirPath(BCount).Name));
+                        ShowContinueError(
+                            state,
+                            EnergyPlus::format("For AirLoopHVAC:ZoneSplitter={}", state.dataSplitterComponent->SplitterCond(Count2).SplitterName));
+                        ShowContinueError(state, EnergyPlus::format("Expected inlet node (supply air path)={}", AirPathNodeName));
+                        ShowContinueError(
+                            state,
+                            EnergyPlus::format("Encountered node name (zone splitter)={}",
+                                               state.dataLoopNodes->NodeID(state.dataSplitterComponent->SplitterCond(Count2).InletNode)));
                         ErrFound = true;
                         ++NumErr;
                     }
@@ -1059,8 +1068,9 @@ void TestSupplyAirPathIntegrity(EnergyPlusData &state, bool &ErrFound)
                 }
             } break;
             default: {
-                ShowSevereError(
-                    state, format("Invalid Component Type in Supply Air Path={}", state.dataZoneEquip->SupplyAirPath(BCount).ComponentType(Count)));
+                ShowSevereError(state,
+                                EnergyPlus::format("Invalid Component Type in Supply Air Path={}",
+                                                   state.dataZoneEquip->SupplyAirPath(BCount).ComponentType(Count)));
                 ErrFound = true;
                 ++NumErr;
             } break;
@@ -1120,10 +1130,10 @@ void TestSupplyAirPathIntegrity(EnergyPlusData &state, bool &ErrFound)
                     continue;
                 }
                 if (FoundSupplyPlenum(Count1)) {
-                    ShowSevereError(
-                        state,
-                        format("AirLoopHVAC:SupplyPlenum=\"{}\", duplicate entry.", state.dataZonePlenum->ZoneSupPlenCond(Count1).ZonePlenumName));
-                    ShowContinueError(state, format("already exists on AirLoopHVAC:SupplyPath=\"{}\".", FoundNames(Count1)));
+                    ShowSevereError(state,
+                                    EnergyPlus::format("AirLoopHVAC:SupplyPlenum=\"{}\", duplicate entry.",
+                                                       state.dataZonePlenum->ZoneSupPlenCond(Count1).ZonePlenumName));
+                    ShowContinueError(state, EnergyPlus::format("already exists on AirLoopHVAC:SupplyPath=\"{}\".", FoundNames(Count1)));
                     ErrFound = true;
                 } else {
                     // record use
@@ -1144,10 +1154,10 @@ void TestSupplyAirPathIntegrity(EnergyPlusData &state, bool &ErrFound)
                     continue;
                 }
                 if (FoundZoneSplitter(Count1)) {
-                    ShowSevereError(
-                        state,
-                        format("AirLoopHVAC:ZoneSplitter=\"{}\", duplicate entry.", state.dataSplitterComponent->SplitterCond(Count1).SplitterName));
-                    ShowContinueError(state, format("already exists on AirLoopHVAC:SupplyPath=\"{}\".", FoundNames(Count1)));
+                    ShowSevereError(state,
+                                    EnergyPlus::format("AirLoopHVAC:ZoneSplitter=\"{}\", duplicate entry.",
+                                                       state.dataSplitterComponent->SplitterCond(Count1).SplitterName));
+                    ShowContinueError(state, EnergyPlus::format("already exists on AirLoopHVAC:SupplyPath=\"{}\".", FoundNames(Count1)));
                     ErrFound = true;
                 } else {
                     // record use
@@ -1165,8 +1175,8 @@ void TestSupplyAirPathIntegrity(EnergyPlusData &state, bool &ErrFound)
                 continue;
             }
             ShowSevereError(state,
-                            format("AirLoopHVAC:SupplyPlenum=\"{}\", not found on any AirLoopHVAC:SupplyPath.",
-                                   state.dataZonePlenum->ZoneSupPlenCond(Count1).ZonePlenumName));
+                            EnergyPlus::format("AirLoopHVAC:SupplyPlenum=\"{}\", not found on any AirLoopHVAC:SupplyPath.",
+                                               state.dataZonePlenum->ZoneSupPlenCond(Count1).ZonePlenumName));
         }
     }
 
@@ -1176,8 +1186,8 @@ void TestSupplyAirPathIntegrity(EnergyPlusData &state, bool &ErrFound)
                 continue;
             }
             ShowSevereError(state,
-                            format("AirLoopHVAC:ZoneSplitter=\"{}\", not found on any AirLoopHVAC:SupplyPath.",
-                                   state.dataSplitterComponent->SplitterCond(Count1).SplitterName));
+                            EnergyPlus::format("AirLoopHVAC:ZoneSplitter=\"{}\", not found on any AirLoopHVAC:SupplyPath.",
+                                               state.dataSplitterComponent->SplitterCond(Count1).SplitterName));
         }
     }
 
@@ -1301,7 +1311,7 @@ void TestReturnAirPathIntegrity(EnergyPlusData &state, bool &ErrFound, Array2S_i
         }
 
         if (MixerCount > 1) {
-            ShowSevereError(state, format("Too many zone mixers in Return Air Path={}", state.dataZoneEquip->ReturnAirPath(BCount).Name));
+            ShowSevereError(state, EnergyPlus::format("Too many zone mixers in Return Air Path={}", state.dataZoneEquip->ReturnAirPath(BCount).Name));
             ErrFound = true;
             ++NumErr;
             continue;
@@ -1323,12 +1333,13 @@ void TestReturnAirPathIntegrity(EnergyPlusData &state, bool &ErrFound, Array2S_i
                     }
                     // Found correct Mixer (by name), check outlet node vs. return air path outlet node
                     if (AirPathNodeName != state.dataLoopNodes->NodeID(state.dataMixerComponent->MixerCond(Count2).OutletNode)) {
-                        ShowSevereError(state, format("Error in Return Air Path={}", state.dataZoneEquip->ReturnAirPath(BCount).Name));
-                        ShowContinueError(state, format("For Connector:Mixer={}", state.dataZoneEquip->ReturnAirPath(BCount).ComponentName(NumComp)));
-                        ShowContinueError(state, format("Expected outlet node (return air path)={}", AirPathNodeName));
+                        ShowSevereError(state, EnergyPlus::format("Error in Return Air Path={}", state.dataZoneEquip->ReturnAirPath(BCount).Name));
+                        ShowContinueError(
+                            state, EnergyPlus::format("For Connector:Mixer={}", state.dataZoneEquip->ReturnAirPath(BCount).ComponentName(NumComp)));
+                        ShowContinueError(state, EnergyPlus::format("Expected outlet node (return air path)={}", AirPathNodeName));
                         ShowContinueError(state,
-                                          format("Encountered node name (mixer)={}",
-                                                 state.dataLoopNodes->NodeID(state.dataMixerComponent->MixerCond(Count2).OutletNode)));
+                                          EnergyPlus::format("Encountered node name (mixer)={}",
+                                                             state.dataLoopNodes->NodeID(state.dataMixerComponent->MixerCond(Count2).OutletNode)));
                         ErrFound = true;
                         ++NumErr;
                     } else {
@@ -1364,13 +1375,14 @@ void TestReturnAirPathIntegrity(EnergyPlusData &state, bool &ErrFound, Array2S_i
                         continue;
                     }
                     if (AirPathNodeName != state.dataLoopNodes->NodeID(state.dataZonePlenum->ZoneRetPlenCond(Count2).OutletNode)) {
-                        ShowSevereError(state, format("Error in Return Air Path={}", state.dataZoneEquip->ReturnAirPath(BCount).Name));
+                        ShowSevereError(state, EnergyPlus::format("Error in Return Air Path={}", state.dataZoneEquip->ReturnAirPath(BCount).Name));
                         ShowContinueError(
-                            state, format("For AirLoopHVAC:ReturnPlenum={}", state.dataZoneEquip->ReturnAirPath(BCount).ComponentName(NumComp)));
-                        ShowContinueError(state, format("Expected outlet node (return air path)={}", AirPathNodeName));
+                            state,
+                            EnergyPlus::format("For AirLoopHVAC:ReturnPlenum={}", state.dataZoneEquip->ReturnAirPath(BCount).ComponentName(NumComp)));
+                        ShowContinueError(state, EnergyPlus::format("Expected outlet node (return air path)={}", AirPathNodeName));
                         ShowContinueError(state,
-                                          format("Encountered node name (zone return plenum)={}",
-                                                 state.dataLoopNodes->NodeID(state.dataZonePlenum->ZoneRetPlenCond(Count2).OutletNode)));
+                                          EnergyPlus::format("Encountered node name (zone return plenum)={}",
+                                                             state.dataLoopNodes->NodeID(state.dataZonePlenum->ZoneRetPlenCond(Count2).OutletNode)));
                         ErrFound = true;
                         ++NumErr;
                     } else {
@@ -1473,8 +1485,8 @@ void TestReturnAirPathIntegrity(EnergyPlusData &state, bool &ErrFound, Array2S_i
                 }
             } else {
                 ShowWarningError(state,
-                                 format("TestReturnAirPathIntegrity: Air Loop has no Zone Equipment Return Node={}",
-                                        state.dataAirLoop->AirToZoneNodeInfo(Count2).AirLoopName));
+                                 EnergyPlus::format("TestReturnAirPathIntegrity: Air Loop has no Zone Equipment Return Node={}",
+                                                    state.dataAirLoop->AirToZoneNodeInfo(Count2).AirLoopName));
             }
         }
     }
@@ -1504,10 +1516,10 @@ void TestReturnAirPathIntegrity(EnergyPlusData &state, bool &ErrFound, Array2S_i
                     continue;
                 }
                 if (FoundReturnPlenum(Count1)) {
-                    ShowSevereError(
-                        state,
-                        format("AirLoopHVAC:ReturnPlenum=\"{}\", duplicate entry.", state.dataZonePlenum->ZoneRetPlenCond(Count1).ZonePlenumName));
-                    ShowContinueError(state, format("already exists on AirLoopHVAC:ReturnPath=\"{}\".", FoundNames(Count1)));
+                    ShowSevereError(state,
+                                    EnergyPlus::format("AirLoopHVAC:ReturnPlenum=\"{}\", duplicate entry.",
+                                                       state.dataZonePlenum->ZoneRetPlenCond(Count1).ZonePlenumName));
+                    ShowContinueError(state, EnergyPlus::format("already exists on AirLoopHVAC:ReturnPath=\"{}\".", FoundNames(Count1)));
                     ErrFound = true;
                 } else {
                     // record use
@@ -1530,9 +1542,10 @@ void TestReturnAirPathIntegrity(EnergyPlusData &state, bool &ErrFound, Array2S_i
                     continue;
                 }
                 if (FoundZoneMixer(Count1)) {
-                    ShowSevereError(state,
-                                    format("AirLoopHVAC:ZoneMixer=\"{}\", duplicate entry.", state.dataMixerComponent->MixerCond(Count1).MixerName));
-                    ShowContinueError(state, format("already exists on AirLoopHVAC:ReturnPath=\"{}\".", FoundNames(Count1)));
+                    ShowSevereError(
+                        state,
+                        EnergyPlus::format("AirLoopHVAC:ZoneMixer=\"{}\", duplicate entry.", state.dataMixerComponent->MixerCond(Count1).MixerName));
+                    ShowContinueError(state, EnergyPlus::format("already exists on AirLoopHVAC:ReturnPath=\"{}\".", FoundNames(Count1)));
                     ErrFound = true;
                 } else {
                     // record use
@@ -1568,8 +1581,8 @@ void TestReturnAirPathIntegrity(EnergyPlusData &state, bool &ErrFound, Array2S_i
                 continue;
             }
             ShowSevereError(state,
-                            format("AirLoopHVAC:ReturnPlenum=\"{}\", not found on any AirLoopHVAC:ReturnPath.",
-                                   state.dataZonePlenum->ZoneRetPlenCond(Count1).ZonePlenumName));
+                            EnergyPlus::format("AirLoopHVAC:ReturnPlenum=\"{}\", not found on any AirLoopHVAC:ReturnPath.",
+                                               state.dataZonePlenum->ZoneRetPlenCond(Count1).ZonePlenumName));
         }
     }
 
@@ -1579,9 +1592,9 @@ void TestReturnAirPathIntegrity(EnergyPlusData &state, bool &ErrFound, Array2S_i
                 continue;
             }
             ShowSevereError(state,
-                            format("AirLoopHVAC:ZoneMixer=\"{}\", not found on any AirLoopHVAC:ReturnPath, AirLoopHVAC:ExhaustSystem, "
-                                   "AirTerminal:SingleDuct:SeriesPIU:Reheat,",
-                                   state.dataMixerComponent->MixerCond(Count1).MixerName));
+                            EnergyPlus::format("AirLoopHVAC:ZoneMixer=\"{}\", not found on any AirLoopHVAC:ReturnPath, AirLoopHVAC:ExhaustSystem, "
+                                               "AirTerminal:SingleDuct:SeriesPIU:Reheat,",
+                                               state.dataMixerComponent->MixerCond(Count1).MixerName));
             ShowContinueError(state, "AirTerminal:SingleDuct:ParallelPIU:Reheat or AirTerminal:SingleDuct:ConstantVolume:FourPipeInduction.");
         }
     }

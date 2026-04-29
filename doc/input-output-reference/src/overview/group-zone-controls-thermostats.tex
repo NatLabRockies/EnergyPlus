@@ -748,7 +748,7 @@ ZoneControl:Thermostat:StagedDualSetpoint,
 
 \subsection{ZoneControl:Humidistat}\label{zonecontrolhumidistat}
 
-The humidistat zone control object is used to control a zone to a single relative humidity setpoint schedule, or to dual humidity setpoint schedules (humidifying/ dehumidifying setpoints with deadband). The single setpoint humidistat requires single setpoint input only, and the dual-setpoint humidistat requires inputs of both humidifying and dehumidifying setpoints. The schedules consist of relative humidities, expressed as a percentage (0-100), to be used during the simulation for that zone's moisture prediction calculation. Only one humidistat control statement can be specified for each zone. For a single setpoint humidistat, if the zone relative humidity is below the control relative humidity setpoint and the equipment specified can humidify then that equipment will try and meet the zone's humidification load. The opposite is true if the zone relative humidity is above the control relative humidity setpoint and the equipment can dehumidify. For a dual setpoint humidistat, if the zone relative humidity is below the \textbf{humidifying} relative humidity setpoint and the equipment specified can humidify then that equipment will try and meet the zone's humidification load. The opposite is true if the zone relative humidity is above the \textbf{dehumidifying} relative humidity setpoint and the equipment can dehumidify.
+The humidistat zone control object is used to control a zone to a single relative humidity setpoint schedule, or to dual humidity setpoint schedules (humidifying / dehumidifying setpoints with deadband). The single setpoint humidistat requires single setpoint input only, and the dual-setpoint humidistat requires inputs of both humidifying and dehumidifying setpoints. The schedules consist of relative humidities or dew-point temperatures, expressed as a percentage (0-100) or dew-point temperature, to be used during the simulation for that zone's moisture prediction calculation. Only one humidistat control statement can be specified for each zone. For a single setpoint humidistat, if the zone relative humidity or dew-point temperature is below the control relative humidity or dew-point temperature setpoint and the equipment specified can humidify then that equipment will try and meet the zone's humidification load. The opposite is true if the zone relative humidity or dew-point temperature is above the control relative humidity or dew-point temperature setpoint and the equipment can dehumidify. For a dual setpoint humidistat, if the zone relative humidity or dew-point temperature is below the \textbf{humidifying} relative humidity or dew-point temperature setpoint and the equipment specified can humidify then that equipment will try and meet the zone's humidification load. The opposite is true if the zone relative humidity or dew-point temperature is above the \textbf{dehumidifying} relative humidity or dew-point temperature setpoint and the equipment can dehumidify.
 
 If the ZoneControl:Humidistat is used by a furnace or unitary system (Ref. Furnace and Unitary Systems) no other objects are required. The signal from the humidistat is used directly by that component. If the Zone Control:Humidistat object is used to control a Humidifier or used in conjunction with a \hyperref[controllerwatercoil]{Controller:WaterCoil} object with control variable \textbf{TemperatureAndHumidityRatio} or \textbf{HumidityRatio}, the following objects are required to determine a setpoint for those components for a single setpoint humidistat:
 
@@ -801,15 +801,19 @@ Unique identifying name for the humidistat.
 
 Name of the zone that is being controlled.
 
-\paragraph{Field: Humidifying Relative Humidity Setpoint Schedule Name}\label{field-humidifying-relative-humidity-setpoint-schedule-name}
+\paragraph{Field: Humidifying Setpoint Schedule Name}\label{field-humidifying-setpoint-schedule-name}
 
-Name of a schedule that defines the humidifying relative humidity setpoint, expressed as a percentage (0-100), for each timestep of the simulation.
+Name of a schedule that defines the humidifying relative humidity (expressed as a percentage (0-100)) or dew-point temperature setpoint for each timestep of the simulation.
 
 \textbf{Note}: If only a single setpoint humidistat is desired, then input the single schedule name in the Humidifying Setpoint Schedule Name field (and leave the Dehumidifying Setpoint Schedule Name blank).
 
-\paragraph{Field: Dehumidifying Relative Humidity Setpoint Schedule Name}\label{field-dehumidifying-relative-humidity-setpoint-schedule-name-1}
+\paragraph{Field: Dehumidifying Setpoint Schedule Name}\label{field-dehumidifying-setpoint-schedule-name-1}
 
-Name of a schedule that defines the dehumidifying relative humidity setpoint, expressed as a percentage (0-100), for each timestep of the simulation. This field is optional, only used if a dual setpoint humidistat is to be modeled.
+Name of a schedule that defines the dehumidifying relative humidity setpoint (expressed as a percentage (0-100)) or dew-point temperature for each timestep of the simulation. This field is optional, only used if a dual setpoint humidistat is to be modeled.
+
+\paragraph{Field: Control Variable}\label{field-humidistat-control-variable}
+
+This fields describes if the schedules describe relative humidity or dew-point temperature values.
 
 An example of this statement in an IDF is:
 
@@ -817,8 +821,9 @@ An example of this statement in an IDF is:
 ZoneControl:Humidistat,
   Zone 2 Humidistat,          !- Humidistat Name
   EAST ZONE,                  !- Zone Name
-  Min Rel Hum Set Sch,        !- Humidifying Relative Humidity Setpoint SCHEDULE Name
-  Max Rel Hum Set Sch;        !- Dehumidifying Relative Humidity Setpoint SCHEDULE Name
+  Min Rel Hum Set Sch,        !- Humidifying Setpoint Schedule Name
+  Max Rel Hum Set Sch,        !- Dehumidifying Setpoint Schedule Name
+  RelativeHumidity;           !- Control Variable
 \end{lstlisting}
 
 An example schedule for the Zone Control:Humidistat

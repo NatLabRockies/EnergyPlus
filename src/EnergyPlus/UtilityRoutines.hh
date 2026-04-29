@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -369,6 +369,22 @@ void ShowWarningCustom(EnergyPlusData &state, ErrorObjectHeader const &eoh, std:
 void ShowWarningCustomField(
     EnergyPlusData &state, ErrorObjectHeader const &eoh, std::string_view fieldName, std::string_view fieldValue, std::string_view msg);
 
+void ShowWarningBadMax(EnergyPlusData &state,
+                       ErrorObjectHeader const &eoh,
+                       std::string_view fieldName,
+                       Real64 fieldVal,
+                       Clusive cluMax,
+                       Real64 maxVal,
+                       std::string_view msg = "");
+
+void ShowWarningBadMin(EnergyPlusData &state,
+                       ErrorObjectHeader const &eoh,
+                       std::string_view fieldName,
+                       Real64 fieldVal,
+                       Clusive cluMax,
+                       Real64 minVal,
+                       std::string_view msg = "");
+
 namespace Util {
 
     static constexpr std::array<std::string_view, 12> MonthNamesCC{
@@ -473,44 +489,6 @@ namespace Util {
     inline int FindItemInList(std::string_view const String, Container const &ListOfItems, std::string Container::value_type::*name_p)
     {
         return Util::FindItemInList(String, ListOfItems, name_p, ListOfItems.isize());
-    }
-
-    int FindItemInSortedList(std::string_view const string, Array1S_string const ListOfItems, int NumItems);
-
-    inline int FindItemInSortedList(std::string_view const String, Array1S_string const ListOfItems)
-    {
-        return FindItemInSortedList(String, ListOfItems, ListOfItems.isize());
-    }
-
-    template <typename A>
-    inline int FindItemInSortedList(std::string_view const String, MArray1<A, std::string> const &ListOfItems, int const NumItems)
-    {
-        int Probe(0);
-        int LBnd(0);
-        int UBnd(NumItems + 1);
-        bool Found(false);
-        while ((!Found) || (Probe != 0)) {
-            Probe = (UBnd - LBnd) / 2;
-            if (Probe == 0) {
-                break;
-            }
-            Probe += LBnd;
-            if (equali(String, ListOfItems(Probe))) {
-                Found = true;
-                break;
-            }
-            if (lessthani(String, ListOfItems(Probe))) {
-                UBnd = Probe;
-            } else {
-                LBnd = Probe;
-            }
-        }
-        return Probe;
-    }
-
-    template <typename A> inline int FindItemInSortedList(std::string_view const String, MArray1<A, std::string> const &ListOfItems)
-    {
-        return FindItemInSortedList(String, ListOfItems, ListOfItems.isize());
     }
 
     template <typename InputIterator> inline int FindItem(InputIterator first, InputIterator last, std::string_view const str, std::false_type)
@@ -670,134 +648,6 @@ namespace Util {
         // case insensitive comparison
         return equali(s, t);
     }
-
-    template <typename InputIterator>
-    inline void VerifyName(EnergyPlusData &state,
-                           InputIterator first,
-                           InputIterator last,
-                           std::string const &NameToVerify,
-                           bool &ErrorFound,
-                           bool &IsBlank,
-                           std::string const &StringToDisplay)
-    {
-        IsBlank = false;
-        ErrorFound = false;
-        if (NameToVerify.empty()) {
-            ShowSevereError(state, StringToDisplay + ", cannot be blank");
-            ErrorFound = true;
-            IsBlank = true;
-            return;
-        }
-        int Found = FindItem(first, last, NameToVerify);
-        if (Found != 0) {
-            ShowSevereError(state, StringToDisplay + ", duplicate name=" + NameToVerify);
-            ErrorFound = true;
-        }
-    }
-
-    void VerifyName(EnergyPlusData &state,
-                    std::string const &NameToVerify,
-                    Array1D_string const &NamesList,
-                    int const NumOfNames,
-                    bool &ErrorFound,
-                    bool &IsBlank,
-                    std::string const &StringToDisplay);
-
-    void VerifyName(EnergyPlusData &state,
-                    std::string const &NameToVerify,
-                    Array1S_string const NamesList,
-                    int const NumOfNames,
-                    bool &ErrorFound,
-                    bool &IsBlank,
-                    std::string const &StringToDisplay);
-
-    template <typename A>
-    inline void VerifyName(EnergyPlusData &state,
-                           std::string const &NameToVerify,
-                           MArray1<A, std::string> const &NamesList,
-                           int const NumOfNames,
-                           bool &ErrorFound,
-                           bool &IsBlank,
-                           std::string const &StringToDisplay)
-    { // Overload for member arrays: Implemented here to avoid copy to Array_string to forward to other VerifyName
-        ErrorFound = false;
-        if (NumOfNames > 0) {
-            int const Found = FindItem(NameToVerify, NamesList,
-                                       NumOfNames); // Calls FindItem overload that accepts member arrays
-            if (Found != 0) {
-                ShowSevereError(state, StringToDisplay + ", duplicate name=" + NameToVerify);
-                ErrorFound = true;
-            }
-        }
-
-        if (NameToVerify.empty()) {
-            ShowSevereError(state, StringToDisplay + ", cannot be blank");
-            ErrorFound = true;
-            IsBlank = true;
-        } else {
-            IsBlank = false;
-        }
-    }
-
-    template <typename Container, class = typename std::enable_if<!std::is_same<typename Container::value_type, std::string>::value>::type>
-    // Container needs size() and operator[i] and elements need Name
-    inline void VerifyName(EnergyPlusData &state,
-                           std::string const &NameToVerify,
-                           Container const &NamesList,
-                           int const NumOfNames,
-                           bool &ErrorFound,
-                           bool &IsBlank,
-                           std::string const &StringToDisplay)
-    {
-        ErrorFound = false;
-        if (NumOfNames > 0) {
-            int const Found = FindItem(NameToVerify, NamesList,
-                                       NumOfNames); // Calls FindItem overload that accepts member arrays
-            if (Found != 0) {
-                ShowSevereError(state, StringToDisplay + ", duplicate name=" + NameToVerify);
-                ErrorFound = true;
-            }
-        }
-
-        if (NameToVerify.empty()) {
-            ShowSevereError(state, StringToDisplay + ", cannot be blank");
-            ErrorFound = true;
-            IsBlank = true;
-        } else {
-            IsBlank = false;
-        }
-    }
-
-    template <typename Container, class = typename std::enable_if<!std::is_same<typename Container::value_type, std::string>::value>::type>
-    // Container needs size() and operator[i] and value_type
-    inline void VerifyName(EnergyPlusData &state,
-                           std::string const &NameToVerify,
-                           Container const &NamesList,
-                           std::string Container::value_type::*name_p,
-                           int const NumOfNames,
-                           bool &ErrorFound,
-                           bool &IsBlank,
-                           std::string const &StringToDisplay)
-    {
-        ErrorFound = false;
-        if (NumOfNames > 0) {
-            int const Found = FindItem(NameToVerify, NamesList, name_p, NumOfNames);
-            if (Found != 0) {
-                ShowSevereError(state, StringToDisplay + ", duplicate name=" + NameToVerify);
-                ErrorFound = true;
-            }
-        }
-
-        if (NameToVerify.empty()) {
-            ShowSevereError(state, StringToDisplay + ", cannot be blank");
-            ErrorFound = true;
-            IsBlank = true;
-        } else {
-            IsBlank = false;
-        }
-    }
-
-    bool IsNameEmpty(EnergyPlusData &state, std::string &NameToVerify, std::string_view StringToDisplay, bool &ErrorFound);
 
     void setDesignObjectNameAndPointer(EnergyPlusData &state,
                                        std::string &nameToBeSet,          // field that is being set once a match is found

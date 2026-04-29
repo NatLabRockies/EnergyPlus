@@ -240,7 +240,7 @@
 !    CHW_deltaT = 8.33
 !    HOTW_PumpCurve_flag = pump_ride_on_curve
 
-  Version,26.1;
+  Version,26.2;
 
 !-   ===========  ALL OBJECTS IN CLASS: SIMULATIONCONTROL ===========
 
@@ -700,8 +700,6 @@
     0.9,                     !- Thermal Absorptance
     0.7;                     !- Solar Absorptance
 
-            !- Thermal Resistance {m2-K/W}
-
   Material:NoMass,
     Nonres_Roof_Insulation,  !- Name
     MediumSmooth,            !- Roughness
@@ -709,8 +707,6 @@
     0.9,                     !- Thermal Absorptance
     0.7,                     !- Solar Absorptance
     0.7;                     !- Visible Absorptance
-
-            !- Thermal Resistance {m2-K/W}
 
   Material:NoMass,
     Res_Roof_Insulation,     !- Name
@@ -720,8 +716,6 @@
     0.7,                     !- Solar Absorptance
     0.7;                     !- Visible Absorptance
 
-            !- Thermal Resistance {m2-K/W}
-
   Material:NoMass,
     Semiheated_Roof_Insulation,  !- Name
     MediumSmooth,            !- Roughness
@@ -729,8 +723,6 @@
     0.9,                     !- Thermal Absorptance
     0.7,                     !- Solar Absorptance
     0.7;                     !- Visible Absorptance
-
-            !- Thermal Resistance {m2-K/W}
 
   Material:NoMass,
     Nonres_Exterior_Wall_Insulation,  !- Name
@@ -740,8 +732,6 @@
     0.7,                     !- Solar Absorptance
     0.7;                     !- Visible Absorptance
 
-            !- Thermal Resistance {m2-K/W}
-
   Material:NoMass,
     Res_Exterior_Wall_Insulation,  !- Name
     MediumSmooth,            !- Roughness
@@ -749,8 +739,6 @@
     0.9,                     !- Thermal Absorptance
     0.7,                     !- Solar Absorptance
     0.7;                     !- Visible Absorptance
-
-            !- Thermal Resistance {m2-K/W}
 
   Material:NoMass,
     Semiheated_Exterior_Wall_Insulation,  !- Name
@@ -760,8 +748,6 @@
     0.7,                     !- Solar Absorptance
     0.7;                     !- Visible Absorptance
 
-            !- Thermal Resistance {m2-K/W}
-
   Material:NoMass,
     Nonres_Floor_Insulation, !- Name
     MediumSmooth,            !- Roughness
@@ -770,8 +756,6 @@
     0.7,                     !- Solar Absorptance
     0.7;                     !- Visible Absorptance
 
-            !- Thermal Resistance {m2-K/W}
-
   Material:NoMass,
     Res_Floor_Insulation,    !- Name
     MediumSmooth,            !- Roughness
@@ -779,8 +763,6 @@
     0.9,                     !- Thermal Absorptance
     0.7,                     !- Solar Absorptance
     0.7;                     !- Visible Absorptance
-
-            !- Thermal Resistance {m2-K/W}
 
   Material:NoMass,
     Semiheated_Floor_Insulation,  !- Name
@@ -25027,8 +25009,6 @@
     Kitchen_Exhaust_SCH,     !- Minimum Outdoor Air Schedule Name
     ,                        !- Minimum Fraction of Outdoor Air Schedule Name
     PSZ4_8_Timestep_Econ_Eff_SCH;  !- Maximum Fraction of Outdoor Air Schedule Name
-
-                        !- Minimum Outdoor Air Flow Rate {m3/s}
 
   Controller:OutdoorAir,
     PSZ-AC_5:9_OA_Controller,!- Name

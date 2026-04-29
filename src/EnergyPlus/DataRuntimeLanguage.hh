@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -327,6 +327,7 @@ namespace DataRuntimeLanguage {
         bool CheckedOkay;              // set to true once matched to available actuator
         int ErlVariableNum;            // points to global Erl variable, matches Name
         int ActuatorVariableNum;       // points to index match in EMSActuatorAvailable structure
+        bool wasActuated = false;      // issue #10944: true once any Erl program has set this actuator
 
         // Default Constructor
         ActuatorUsedType() : CheckedOkay(false), ErlVariableNum(0), ActuatorVariableNum(0)
@@ -394,9 +395,11 @@ namespace DataRuntimeLanguage {
         ErlValueType Value;          // values taken by Erl variables
         bool ReadOnly;               // true if Erl variable is read-only
         bool SetByExternalInterface; // set to true if value is set by ExternalInterface
+        bool SetByGlobalVariable;
+        bool SetByInternalVariable;
 
         // Default Constructor
-        ErlVariableType() : StackNum(0), ReadOnly(false), SetByExternalInterface(false)
+        ErlVariableType() : StackNum(0), ReadOnly(false), SetByExternalInterface(false), SetByGlobalVariable(false), SetByInternalVariable(false)
         {
         }
     };

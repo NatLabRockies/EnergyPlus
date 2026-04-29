@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -135,9 +135,10 @@ void SetupSpaceInternalGain(EnergyPlusData &state,
 
     if (FoundDuplicate) {
         ShowSevereError(state, "SetupZoneInternalGain: developer error, trapped duplicate internal gains sent to SetupZoneInternalGain");
-        ShowContinueError(state, format("The duplicate object user name ={}", format(cComponentName)));
+        ShowContinueError(state, EnergyPlus::format("The duplicate object user name ={}", EnergyPlus::format(cComponentName)));
         ShowContinueError(state,
-                          format("The duplicate object type = {}", format(DataHeatBalance::IntGainTypeNamesCC[static_cast<int>(IntGainCompType)])));
+                          EnergyPlus::format("The duplicate object type = {}",
+                                             EnergyPlus::format(DataHeatBalance::IntGainTypeNamesCC[static_cast<int>(IntGainCompType)])));
         ShowContinueError(state, "This internal gain will not be modeled, and the simulation continues");
         return;
     }

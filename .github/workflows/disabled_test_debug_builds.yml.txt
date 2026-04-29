@@ -35,7 +35,7 @@ jobs:
     - name: Install Dependencies for Linux
       run: |
         sudo apt-get update
-        sudo apt-get install libxkbcommon-x11-0 xorg-dev libgl1-mesa-dev lcov gcovr
+        sudo apt-get install -y libxkbcommon-x11-0 xorg-dev libgl1-mesa-dev lcov gcovr
         # https://github.com/actions/runner-images/issues/10025
         echo "FC=gfortran-13" >> $GITHUB_ENV
 
@@ -104,7 +104,7 @@ jobs:
       - name: Install Dependencies for Linux
         run: |
           sudo apt-get update
-          sudo apt-get install libxkbcommon-x11-0 xorg-dev libgl1-mesa-dev lcov gcovr
+          sudo apt-get install -y libxkbcommon-x11-0 xorg-dev libgl1-mesa-dev lcov gcovr
           # https://github.com/actions/runner-images/issues/10025
           echo "FC=gfortran-13" >> $GITHUB_ENV
 

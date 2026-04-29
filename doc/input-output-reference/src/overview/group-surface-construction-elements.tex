@@ -4299,15 +4299,15 @@ The default is NoDeflection.
 
 \paragraph{Field: Vacuum Pressure Limit}\label{field-vacuum-pressure-limit}
 
-The pressure (Pa) which will be considered to be the limit for vacuum glazing pressure.~ All pressures less than or equal to this pressure will be considered to be vacuum. Default: 13.238 Pa.
+The pressure (Pa) which will be considered to be the limit for vacuum glazing pressure. All pressures less than or equal to this pressure will be considered to be vacuum. Default: 13.238 Pa. It is used only when WindowThermalModel:Params DeflectionModel = TemperatureAndPressureInput.
 
 \paragraph{Field: Initial Temperature}\label{field-initial-temperature}
 
-The temperature (\(^{o}\)C) of the gap in the time of fabrication.~ It is used only when WindowThermalModel:Params DeflectionModel = TemperatureAndPressureInput
+The temperature (\(^{o}\)C) of the gap in the time of fabrication. Default: 25 \(^{o}\)C. It is used only when WindowThermalModel:Params DeflectionModel = TemperatureAndPressureInput.
 
 \paragraph{Field: Initial Pressure}\label{field-initial-pressure}
 
-The pressure (Pa) of the gap at the time of fabrication of the sealed glazing system unitIt is used only when WindowThermalModel:Params DeflectionModel = TemperatureAndPressureInput.
+The pressure (Pa) of the gap at the time of fabrication of the sealed glazing system unit. Default: 101325 Pa. It is used only when WindowThermalModel:Params DeflectionModel = TemperatureAndPressureInput.
 
 An IDF example for WindowThermalModel:Params (without deflection):
 

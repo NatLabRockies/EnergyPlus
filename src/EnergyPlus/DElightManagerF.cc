@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -242,7 +242,7 @@ namespace DElightManagerF {
 
                 // Register Error if 0 DElight RefPts have been input for valid DElight object
                 if (znDayl.TotalDaylRefPoints == 0) {
-                    ShowSevereError(state, format("No Reference Points input for daylighting zone using DElight ={}", znDayl.Name));
+                    ShowSevereError(state, EnergyPlus::format("No Reference Points input for daylighting zone using DElight ={}", znDayl.Name));
                     ErrorsFound = true;
                 }
 
@@ -250,7 +250,8 @@ namespace DElightManagerF {
                 if (znDayl.TotalDaylRefPoints > 100) {
                     // Restrict to 100 Ref Pt maximum
                     znDayl.TotalDaylRefPoints = 100;
-                    ShowWarningError(state, format("Maximum of 100 Reference Points exceeded for daylighting zone using DElight ={}", znDayl.Name));
+                    ShowWarningError(
+                        state, EnergyPlus::format("Maximum of 100 Reference Points exceeded for daylighting zone using DElight ={}", znDayl.Name));
                     ShowWarningError(state, "  Only first 100 Reference Points included in DElight analysis");
                 }
 
@@ -394,7 +395,7 @@ namespace DElightManagerF {
                                             if (wndo.Multiplier > 1.0) {
                                                 ShowSevereError(
                                                     state,
-                                                    format(
+                                                    EnergyPlus::format(
                                                         "Multiplier > 1.0 for window {} not allowed since it is in a zone with DElight daylighting.",
                                                         wndo.Name));
                                                 ErrorsFound = true;
@@ -403,8 +404,9 @@ namespace DElightManagerF {
                                             // Error if window has a shading device (blind/shade/screen) since
                                             // DElight cannot perform dynamic shading device deployment
                                             if (wndo.HasShadeControl) {
-                                                ShowSevereError(state,
-                                                                format("Shading Device on window {} dynamic control is not supported in a zone with "
+                                                ShowSevereError(
+                                                    state,
+                                                    EnergyPlus::format("Shading Device on window {} dynamic control is not supported in a zone with "
                                                                        "DElight daylighting.",
                                                                        wndo.Name));
                                                 ErrorsFound = true;
@@ -557,8 +559,9 @@ namespace DElightManagerF {
                                         }
                                         // Register Error if there is no valid Doppelganger for current Complex Fenestration
                                         if (iDoppelganger == 0) {
-                                            ShowSevereError(state,
-                                                            format("No Doppelganger Window Surface found for Complex Fenestration ={}", cfs.Name));
+                                            ShowSevereError(
+                                                state,
+                                                EnergyPlus::format("No Doppelganger Window Surface found for Complex Fenestration ={}", cfs.Name));
                                             ErrorsFound = true;
                                         }
                                     } // The current Opaque Bounding Surface hosts the current CFS object?
@@ -609,34 +612,40 @@ namespace DElightManagerF {
 
                                 // Validate that Reference Point coordinates are within the host Zone
                                 if (RefPt_WCS_Coord.x < thisZone.MinimumX || RefPt_WCS_Coord.x > thisZone.MaximumX) {
-                                    ShowSevereError(state,
-                                                    format("DElightInputGenerator:Reference point X Value outside Zone Min/Max X, Zone={}", zn.Name));
-                                    ShowContinueError(state,
-                                                      format("...X Reference Point= {:.2R}, Zone Minimum X= {:.2R}, Zone Maximum X= {:.2R}",
-                                                             thisZone.MinimumX,
-                                                             RefPt_WCS_Coord.x,
-                                                             thisZone.MaximumX));
+                                    ShowSevereError(
+                                        state,
+                                        EnergyPlus::format("DElightInputGenerator:Reference point X Value outside Zone Min/Max X, Zone={}", zn.Name));
+                                    ShowContinueError(
+                                        state,
+                                        EnergyPlus::format("...X Reference Point= {:.2R}, Zone Minimum X= {:.2R}, Zone Maximum X= {:.2R}",
+                                                           thisZone.MinimumX,
+                                                           RefPt_WCS_Coord.x,
+                                                           thisZone.MaximumX));
                                     ErrorsFound = true;
                                 }
                                 if (RefPt_WCS_Coord.y < thisZone.MinimumY || RefPt_WCS_Coord.y > thisZone.MaximumY) {
-                                    ShowSevereError(state,
-                                                    format("DElightInputGenerator:Reference point Y Value outside Zone Min/Max Y, Zone={}", zn.Name));
-                                    ShowContinueError(state,
-                                                      format("...Y Reference Point= {:.2R}, Zone Minimum Y= {:.2R}, Zone Maximum Y= {:.2R}",
-                                                             thisZone.MinimumY,
-                                                             RefPt_WCS_Coord.y,
-                                                             thisZone.MaximumY));
+                                    ShowSevereError(
+                                        state,
+                                        EnergyPlus::format("DElightInputGenerator:Reference point Y Value outside Zone Min/Max Y, Zone={}", zn.Name));
+                                    ShowContinueError(
+                                        state,
+                                        EnergyPlus::format("...Y Reference Point= {:.2R}, Zone Minimum Y= {:.2R}, Zone Maximum Y= {:.2R}",
+                                                           thisZone.MinimumY,
+                                                           RefPt_WCS_Coord.y,
+                                                           thisZone.MaximumY));
                                     ErrorsFound = true;
                                 }
                                 if (RefPt_WCS_Coord.z < state.dataHeatBal->Zone(izone).MinimumZ || RefPt_WCS_Coord.z > thisZone.MaximumZ) {
                                     ShowSevereError(
                                         state,
-                                        format("DElightInputGenerator:Reference point Z Value outside Zone Min/Max Z, Zone={}", thisZone.Name));
-                                    ShowContinueError(state,
-                                                      format("...Z Reference Point= {:.2R}, Zone Minimum Z= {:.2R}, Zone Maximum Z= {:.2R}",
-                                                             thisZone.MinimumZ,
-                                                             RefPt_WCS_Coord.z,
-                                                             thisZone.MaximumZ));
+                                        EnergyPlus::format("DElightInputGenerator:Reference point Z Value outside Zone Min/Max Z, Zone={}",
+                                                           thisZone.Name));
+                                    ShowContinueError(
+                                        state,
+                                        EnergyPlus::format("...Z Reference Point= {:.2R}, Zone Minimum Z= {:.2R}, Zone Maximum Z= {:.2R}",
+                                                           thisZone.MinimumZ,
+                                                           RefPt_WCS_Coord.z,
+                                                           thisZone.MaximumZ));
                                     ErrorsFound = true;
                                 }
 
@@ -755,24 +764,27 @@ namespace DElightManagerF {
             cfs.ComplexFeneType = state.dataIPShortCut->cAlphaArgs(2);
             cfs.surfName = state.dataIPShortCut->cAlphaArgs(3);
             if (Util::FindItemInList(cfs.surfName, state.dataSurface->Surface) == 0) {
-                ShowSevereError(state,
-                                format("{}{}",
+                ShowSevereError(
+                    state,
+                    EnergyPlus::format("{}{}",
                                        cCurrentModuleObject,
                                        ": " + cfs.Name + ", invalid " + state.dataIPShortCut->cAlphaFieldNames(3) + "=\"" + cfs.surfName + "\"."));
                 ErrorsFound = true;
             }
             cfs.wndwName = state.dataIPShortCut->cAlphaArgs(4);
             if (Util::FindItemInList(cfs.surfName, state.dataSurface->Surface) == 0) {
-                ShowSevereError(state,
-                                format("{}{}",
+                ShowSevereError(
+                    state,
+                    EnergyPlus::format("{}{}",
                                        cCurrentModuleObject,
                                        ": " + cfs.Name + ", invalid " + state.dataIPShortCut->cAlphaFieldNames(4) + "=\"" + cfs.wndwName + "\"."));
                 ErrorsFound = true;
             }
             cfs.feneRota = state.dataIPShortCut->rNumericArgs(1);
             if (cfs.feneRota < 0. || cfs.feneRota > 360.) {
-                ShowSevereError(state,
-                                format("{}{}",
+                ShowSevereError(
+                    state,
+                    EnergyPlus::format("{}{}",
                                        cCurrentModuleObject,
                                        ": " + cfs.Name + ", invalid " + state.dataIPShortCut->cNumericFieldNames(1) + " outside of range 0 to 360."));
                 ErrorsFound = true;
@@ -829,9 +841,10 @@ namespace DElightManagerF {
             OldAspectRatio = rNumerics(1);
             NewAspectRatio = rNumerics(2);
             if (cAlphas(1) != "XY") {
-                ShowWarningError(
-                    state,
-                    format("{}{}", CurrentModuleObject, ": invalid " + state.dataIPShortCut->cAlphaFieldNames(1) + "=" + cAlphas(1) + "...ignored."));
+                ShowWarningError(state,
+                                 EnergyPlus::format("{}{}",
+                                                    CurrentModuleObject,
+                                                    ": invalid " + state.dataIPShortCut->cAlphaFieldNames(1) + "=" + cAlphas(1) + "...ignored."));
             }
             doTransform = true;
             state.dataSurface->AspectTransform = true;

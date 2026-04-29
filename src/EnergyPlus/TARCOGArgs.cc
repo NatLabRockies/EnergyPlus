@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -368,7 +368,7 @@ int ArgCheck(EnergyPlusData &state,
     for (int i = 1; i <= nlayer - 1; ++i) {
         if (gap(i) <= 0.0) {
             ArgCheck = 20;
-            ErrorMessage = format("Gap width is less than (or equal to) zero. Gap #{:3}", i);
+            ErrorMessage = EnergyPlus::format("Gap width is less than (or equal to) zero. Gap #{:3}", i);
             return ArgCheck;
         }
     }
@@ -376,7 +376,7 @@ int ArgCheck(EnergyPlusData &state,
     for (int i = 1; i <= nlayer; ++i) {
         if (thick(i) <= 0.0) {
             ArgCheck = 21;
-            ErrorMessage = format("Layer width is less than (or equal to) zero. Layer #{:3}", i);
+            ErrorMessage = EnergyPlus::format("Layer width is less than (or equal to) zero. Layer #{:3}", i);
             return ArgCheck;
         }
         if ((i < nlayer) && IsShadingLayer(LayerType(i)) && IsShadingLayer(LayerType(i + 1))) {
@@ -421,7 +421,7 @@ int ArgCheck(EnergyPlusData &state,
     for (int i = 1; i <= nlayer; ++i) {
         if (scon(i) <= 0.0) {
             ArgCheck = 26;
-            ErrorMessage = format("Layer {:3} has conductivity which is less or equal to zero.", i);
+            ErrorMessage = EnergyPlus::format("Layer {:3} has conductivity which is less or equal to zero.", i);
             return ArgCheck;
         }
 
@@ -431,10 +431,11 @@ int ArgCheck(EnergyPlusData &state,
 
         {
             ArgCheck = 22;
-            ErrorMessage = format("Incorrect layer type for layer #{:3}"
-                                  ".  Layer type can either be 0 (glazing layer), 1 (Venetian blind), 2 (woven shade), 3 (perforated), 4 (diffuse "
-                                  "shade) or 5 (bsdf).",
-                                  i);
+            ErrorMessage =
+                EnergyPlus::format("Incorrect layer type for layer #{:3}"
+                                   ".  Layer type can either be 0 (glazing layer), 1 (Venetian blind), 2 (woven shade), 3 (perforated), 4 (diffuse "
+                                   "shade) or 5 (bsdf).",
+                                   i);
             return ArgCheck;
         }
 
@@ -454,32 +455,33 @@ int ArgCheck(EnergyPlusData &state,
             LayerType(i) == TARCOGParams::TARCOGLayerType::VENETBLIND_VERT) { // Venetian blind specific:
             if (SlatThick(i) <= 0) {
                 ArgCheck = 31;
-                ErrorMessage = format("Invalid slat thickness (must be >0). Layer #{:3}", i);
+                ErrorMessage = EnergyPlus::format("Invalid slat thickness (must be >0). Layer #{:3}", i);
                 return ArgCheck;
             }
             if (SlatWidth(i) <= 0.0) {
                 ArgCheck = 32;
-                ErrorMessage = format("Invalid slat width (must be >0). Layer #{:3}", i);
+                ErrorMessage = EnergyPlus::format("Invalid slat width (must be >0). Layer #{:3}", i);
                 return ArgCheck;
             }
             if ((SlatAngle(i) < -90.0) || (SlatAngle(i) > 90.0)) {
                 ArgCheck = 33;
-                ErrorMessage = format("Invalid slat angle (must be between -90 and 90). Layer #{:3}", i);
+                ErrorMessage = EnergyPlus::format("Invalid slat angle (must be between -90 and 90). Layer #{:3}", i);
                 return ArgCheck;
             }
             if (SlatCond(i) <= 0.0) {
                 ArgCheck = 34;
-                ErrorMessage = format("Invalid conductivity of slat material (must be >0). Layer #{:3}", i);
+                ErrorMessage = EnergyPlus::format("Invalid conductivity of slat material (must be >0). Layer #{:3}", i);
                 return ArgCheck;
             }
             if (SlatSpacing(i) <= 0.0) {
                 ArgCheck = 35;
-                ErrorMessage = format("Invalid slat spacing (must be >0). Layer #{:3}", i);
+                ErrorMessage = EnergyPlus::format("Invalid slat spacing (must be >0). Layer #{:3}", i);
                 return ArgCheck;
             }
             if ((SlatCurve(i) != 0.0) && (std::abs(SlatCurve(i)) <= (SlatWidth(i) / 2.0))) {
                 ArgCheck = 36;
-                ErrorMessage = format("Invalid curvature radius (absolute value must be >SlatWidth/2, or 0 for flat slats). Layer #{:3}", i);
+                ErrorMessage =
+                    EnergyPlus::format("Invalid curvature radius (absolute value must be >SlatWidth/2, or 0 for flat slats). Layer #{:3}", i);
                 return ArgCheck;
             }
 
@@ -493,7 +495,7 @@ int ArgCheck(EnergyPlusData &state,
             if ((i == 1) || (i == (nlayer + 1))) {
                 ErrorMessage = "One of environments (inside or outside) has pressure which is less than zero.";
             } else {
-                ErrorMessage = format("One of gaps has pressure which is less than zero. Gap #{:3}", i);
+                ErrorMessage = EnergyPlus::format("One of gaps has pressure which is less than zero. Gap #{:3}", i);
             }
             return ArgCheck;
         }
@@ -518,8 +520,8 @@ void PrepVariablesISO15099(int const nlayer,
                            const Array1D<Real64> &tir,
                            const Array1D<Real64> &emis,
                            Real64 const tilt,
-                           Real64 &hin,
-                           Real64 &hout,
+                           Real64 const &hin,
+                           Real64 const &hout,
                            const Array1D_int &ibc,
                            const Array1D<Real64> &SlatThick,
                            const Array1D<Real64> &SlatWidth,
@@ -692,17 +694,17 @@ void PrepVariablesISO15099(int const nlayer,
         rir(k1 + 1) = 1 - tir(k1) - emis(k1 + 1);
         if ((tir(k1) < 0.0) || (tir(k1) > 1.0) || (tir(k1 + 1) < 0.0) || (tir(k1 + 1) > 1.0)) {
             nperr = 4;
-            ErrorMessage = format("Layer transmissivity is our of range (<0 or >1). Layer #{:3}", k);
+            ErrorMessage = EnergyPlus::format("Layer transmissivity is our of range (<0 or >1). Layer #{:3}", k);
             return;
         }
         if ((emis(k1) < 0.0) || (emis(k1) > 1.0) || (emis(k1 + 1) < 0.0) || (emis(k1 + 1) > 1.0)) {
             nperr = 14;
-            ErrorMessage = format("Layer emissivity is our of range (<0 or >1). Layer #{:3}", k);
+            ErrorMessage = EnergyPlus::format("Layer emissivity is our of range (<0 or >1). Layer #{:3}", k);
             return;
         }
         if ((rir(k1) < 0.0) || (rir(k1) > 1.0) || (rir(k1 + 1) < 0.0) || (rir(k1 + 1) > 1.0)) {
             nperr = 3;
-            ErrorMessage = format("Layer reflectivity is our of range (<0 or >1). Layer #{:3}", k);
+            ErrorMessage = EnergyPlus::format("Layer reflectivity is our of range (<0 or >1). Layer #{:3}", k);
             return;
         }
     }

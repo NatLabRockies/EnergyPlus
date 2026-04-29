@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -382,7 +382,7 @@ namespace Sched {
     // Uses EMS value if actuated, otherwise calls LookUpScheduleValue with ThisHour=DataGlobals::HourOfDay, ThisTimeStep=DataGlobals::TimeStep
     void UpdateScheduleVals(EnergyPlusData &state);
 
-    int GetScheduleTypeNum(EnergyPlusData &state, std::string const &name);
+    int GetScheduleTypeNum(EnergyPlusData const &state, std::string const &name);
 
     int GetDayScheduleNum(EnergyPlusData &state, std::string const &name);
     DaySchedule *GetDaySchedule(EnergyPlusData &state, std::string const &name);
@@ -392,8 +392,8 @@ namespace Sched {
 
     int GetScheduleNum(EnergyPlusData &state, std::string const &name);
     Schedule *GetSchedule(EnergyPlusData &state, std::string const &name);
-    Schedule *GetScheduleAlwaysOn(EnergyPlusData &state);
-    Schedule *GetScheduleAlwaysOff(EnergyPlusData &state);
+    Schedule *GetScheduleAlwaysOn(EnergyPlusData const &state);
+    Schedule *GetScheduleAlwaysOff(EnergyPlusData const &state);
 
     void ExternalInterfaceSetSchedule(EnergyPlusData &state,
                                       int schedNum,

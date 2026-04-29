@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -1343,7 +1343,7 @@ struct SizingData : BaseGlobalStruct
     int DataFanIndex = -1;                                // Fan index used during sizing
     HVAC::FanPlace DataFanPlacement = HVAC::FanPlace::Invalid; // identifies location of fan wrt coil
     int DataDXSpeedNum = 0;
-    int DataCoolCoilType = -1;
+    HVAC::CoilType DataCoolCoilType = HVAC::CoilType::Invalid;
     int DataCoolCoilIndex = -1;
     EPVector<DataSizing::OARequirementsData> OARequirements;
     EPVector<DataSizing::ZoneAirDistributionData> ZoneAirDistribution;

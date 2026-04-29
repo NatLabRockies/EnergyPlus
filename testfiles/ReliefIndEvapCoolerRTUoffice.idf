@@ -33,7 +33,7 @@
 !         The relief air that would have been dumped outside is fed into the secondary side of the
 !         indirect evaporative cooler.  Systems are set to Night Cycle during setup/setback.
 
-  Version,26.1;
+  Version,26.2;
 
   Timestep,6;
 

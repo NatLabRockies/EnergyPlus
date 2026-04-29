@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -96,17 +96,17 @@ Real64 CoolingWaterDesAirOutletTempSizer::size(EnergyPlusData &state, Real64 _or
                                   "\", Cooling Coil has leaving air temperature < entering water temperature.";
                 this->addErrorMessage(msg);
                 ShowWarningError(state, msg);
-                msg = format("    Tair,out  =  {:.3R}", this->autoSizedValue);
+                msg = EnergyPlus::format("    Tair,out  =  {:.3R}", this->autoSizedValue);
                 this->addErrorMessage(msg);
                 ShowContinueError(state, msg);
-                msg = format("    Twater,in = {:.3R}", this->dataDesInletWaterTemp);
+                msg = EnergyPlus::format("    Twater,in = {:.3R}", this->dataDesInletWaterTemp);
                 this->addErrorMessage(msg);
                 ShowContinueError(state, msg);
                 this->autoSizedValue = this->dataDesInletWaterTemp + 0.5;
                 msg = "....coil leaving air temperature will be reset to:";
                 this->addErrorMessage(msg);
                 ShowContinueError(state, msg);
-                msg = format("    Tair,out = {:.3R}", this->autoSizedValue);
+                msg = EnergyPlus::format("    Tair,out = {:.3R}", this->autoSizedValue);
                 this->addErrorMessage(msg);
                 ShowContinueError(state, msg);
             }
@@ -155,27 +155,25 @@ Real64 CoolingWaterDesAirOutletTempSizer::size(EnergyPlusData &state, Real64 _or
                                   "\", Cooling Coil has leaving air temperature < entering water temperature.";
                 this->addErrorMessage(msg);
                 ShowWarningError(state, msg);
-                msg = format("    Tair,out  =  {:.3R}", this->autoSizedValue);
+                msg = EnergyPlus::format("    Tair,out  =  {:.3R}", this->autoSizedValue);
                 ShowContinueError(state, msg);
-                msg = format("    Twater,in = {:.3R}", this->dataDesInletWaterTemp);
+                msg = EnergyPlus::format("    Twater,in = {:.3R}", this->dataDesInletWaterTemp);
                 ShowContinueError(state, msg);
                 this->autoSizedValue = this->dataDesInletWaterTemp + 0.5;
                 msg = "....coil leaving air temperature will be reset to:";
                 ShowContinueError(state, msg);
-                msg = format("    Tair,out = {:.3R}", this->autoSizedValue);
+                msg = EnergyPlus::format("    Tair,out = {:.3R}", this->autoSizedValue);
                 ShowContinueError(state, msg);
             }
         }
     }
     // override sizing string
     if (this->overrideSizeString) {
-        if (this->isEpJSON) {
-            this->sizingString = "design_outlet_air_temperature [C]";
-        }
+        this->sizingString = "Design Outlet Air Temperature [C]";
     }
     this->selectSizerOutput(state, errorsFound);
     if (this->isCoilReportObject) {
-        state.dataRptCoilSelection->coilSelectionReportObj->setCoilLvgAirTemp(state, this->compName, this->compType, this->autoSizedValue);
+        ReportCoilSelection::setCoilLvgAirTemp(state, this->coilReportNum, this->autoSizedValue);
     }
     return this->autoSizedValue;
 }

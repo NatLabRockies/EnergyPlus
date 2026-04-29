@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -177,7 +177,7 @@ void ValidateComponent(EnergyPlusData &state,
 );
 
 // Why is this in GeneralRoutines? Asking for a friend
-void CalcBasinHeaterPower(EnergyPlusData &state,
+void CalcBasinHeaterPower(EnergyPlusData const &state,
                           Real64 const Capacity,     // Basin heater capacity per degree C below setpoint (W/C)
                           Sched::Schedule *sched,    // Pointer to basin heater schedule
                           Real64 const SetPointTemp, // setpoint temperature for basin heater operation (C)

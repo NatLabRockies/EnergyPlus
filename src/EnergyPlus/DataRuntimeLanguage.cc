@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -114,32 +114,32 @@ namespace DataRuntimeLanguage {
 
         errFlag = false;
         if (has(cFieldValue, ' ')) {
-            ShowSevereError(state, format("{}=\"{}\", Invalid variable name entered.", cModuleObject, cFieldValue));
-            ShowContinueError(state, format("...{}; Names used as EMS variables cannot contain spaces", cFieldName));
+            ShowSevereError(state, EnergyPlus::format("{}=\"{}\", Invalid variable name entered.", cModuleObject, cFieldValue));
+            ShowContinueError(state, EnergyPlus::format("...{}; Names used as EMS variables cannot contain spaces", cFieldName));
             errFlag = true;
             ErrorsFound = true;
         }
         if (has(cFieldValue, '-')) {
-            ShowSevereError(state, format("{}=\"{}\", Invalid variable name entered.", cModuleObject, cFieldValue));
-            ShowContinueError(state, format("...{}; Names used as EMS variables cannot contain \"-\" characters.", cFieldName));
+            ShowSevereError(state, EnergyPlus::format("{}=\"{}\", Invalid variable name entered.", cModuleObject, cFieldValue));
+            ShowContinueError(state, EnergyPlus::format("...{}; Names used as EMS variables cannot contain \"-\" characters.", cFieldName));
             errFlag = true;
             ErrorsFound = true;
         }
         if (has(cFieldValue, '+')) {
-            ShowSevereError(state, format("{}=\"{}\", Invalid variable name entered.", cModuleObject, cFieldValue));
-            ShowContinueError(state, format("...{}; Names used as EMS variables cannot contain \"+\" characters.", cFieldName));
+            ShowSevereError(state, EnergyPlus::format("{}=\"{}\", Invalid variable name entered.", cModuleObject, cFieldValue));
+            ShowContinueError(state, EnergyPlus::format("...{}; Names used as EMS variables cannot contain \"+\" characters.", cFieldName));
             errFlag = true;
             ErrorsFound = true;
         }
         if (has(cFieldValue, '.')) {
-            ShowSevereError(state, format("{}=\"{}\", Invalid variable name entered.", cModuleObject, cFieldValue));
-            ShowContinueError(state, format("...{}; Names used as EMS variables cannot contain \".\" characters.", cFieldName));
+            ShowSevereError(state, EnergyPlus::format("{}=\"{}\", Invalid variable name entered.", cModuleObject, cFieldValue));
+            ShowContinueError(state, EnergyPlus::format("...{}; Names used as EMS variables cannot contain \".\" characters.", cFieldName));
             errFlag = true;
             ErrorsFound = true;
         }
         if ((!cFieldValue.empty()) && (is_any_of(cFieldValue[0], InvalidStartCharacters))) {
-            ShowSevereError(state, format("{}=\"{}\", Invalid variable name entered.", cModuleObject, cFieldValue));
-            ShowContinueError(state, format("...{}; Names used as EMS variables cannot start with numeric characters.", cFieldName));
+            ShowSevereError(state, EnergyPlus::format("{}=\"{}\", Invalid variable name entered.", cModuleObject, cFieldValue));
+            ShowContinueError(state, EnergyPlus::format("...{}; Names used as EMS variables cannot start with numeric characters.", cFieldName));
             errFlag = true;
             ErrorsFound = true;
         }
@@ -188,20 +188,20 @@ namespace DataRuntimeLanguage {
 
         errFlag = false;
         if (has(cFieldValue, ' ')) {
-            ShowSevereError(state, format("{}=\"{}\", Invalid variable name entered.", cModuleObject, cFieldValue));
-            ShowContinueError(state, format("...{}; Names used for EMS {} cannot contain spaces", cFieldName, cSubType));
+            ShowSevereError(state, EnergyPlus::format("{}=\"{}\", Invalid variable name entered.", cModuleObject, cFieldValue));
+            ShowContinueError(state, EnergyPlus::format("...{}; Names used for EMS {} cannot contain spaces", cFieldName, cSubType));
             errFlag = true;
             ErrorsFound = true;
         }
         if (has(cFieldValue, '-')) {
-            ShowSevereError(state, format("{}=\"{}\", Invalid variable name entered.", cModuleObject, cFieldValue));
-            ShowContinueError(state, format("...{}; Names used for EMS {} cannot contain \"-\" characters.", cFieldName, cSubType));
+            ShowSevereError(state, EnergyPlus::format("{}=\"{}\", Invalid variable name entered.", cModuleObject, cFieldValue));
+            ShowContinueError(state, EnergyPlus::format("...{}; Names used for EMS {} cannot contain \"-\" characters.", cFieldName, cSubType));
             errFlag = true;
             ErrorsFound = true;
         }
         if (has(cFieldValue, '+')) {
-            ShowSevereError(state, format("{}=\"{}\", Invalid variable name entered.", cModuleObject, cFieldValue));
-            ShowContinueError(state, format("...{}; Names used for EMS {} cannot contain \"+\" characters.", cFieldName, cSubType));
+            ShowSevereError(state, EnergyPlus::format("{}=\"{}\", Invalid variable name entered.", cModuleObject, cFieldValue));
+            ShowContinueError(state, EnergyPlus::format("...{}; Names used for EMS {} cannot contain \"+\" characters.", cFieldName, cSubType));
             errFlag = true;
             ErrorsFound = true;
         }

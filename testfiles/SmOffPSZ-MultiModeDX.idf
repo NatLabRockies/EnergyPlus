@@ -58,7 +58,7 @@
 !             the same as in SmOffPSZ.
 !
 
-  Version,26.1;
+  Version,26.2;
 
   Building,
     Small Office,            !- Name
@@ -477,8 +477,6 @@
     CounterClockWise,        !- Vertex Entry Direction
     World;                   !- Coordinate System
 
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     EWall,                   !- Name
     WALL,                    !- Surface Type
@@ -529,8 +527,6 @@
     0,0,0,  !- X,Y,Z ==> Vertex 2 {m}
     0,0,3.352800369,  !- X,Y,Z ==> Vertex 3 {m}
     0,8.794457436,3.352800369;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     zE-W-5,                  !- Name
@@ -600,8 +596,6 @@
     0,17.588914871,3.352800369,  !- X,Y,Z ==> Vertex 3 {m}
     17.588914871,17.588914871,3.352800369;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-
   BuildingSurface:Detailed,
     zE-W-8,                  !- Name
     WALL,                    !- Surface Type
@@ -618,9 +612,6 @@
     0,8.794457436,0,  !- X,Y,Z ==> Vertex 2 {m}
     0,8.794457436,3.352800369,  !- X,Y,Z ==> Vertex 3 {m}
     0,17.588914871,3.352800369;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     zE-W-11,                 !- Name
@@ -673,8 +664,6 @@
     0,0,6.705600738,  !- X,Y,Z ==> Vertex 3 {m}
     0,8.794457436,6.705600738;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     ZRoof,                   !- Name
     ROOF,                    !- Surface Type
@@ -691,10 +680,6 @@
     17.588914871,0,6.705600738,  !- X,Y,Z ==> Vertex 2 {m}
     17.588914871,8.794457436,6.705600738,  !- X,Y,Z ==> Vertex 3 {m}
     0,8.794457436,6.705600738;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     zE-W-17,                 !- Name
@@ -713,9 +698,6 @@
     17.588914871,17.588914871,6.705600738,  !- X,Y,Z ==> Vertex 3 {m}
     17.588914871,8.794457436,6.705600738;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-
   BuildingSurface:Detailed,
     zE-W-19,                 !- Name
     WALL,                    !- Surface Type
@@ -733,8 +715,6 @@
     0,17.588914871,6.705600738,  !- X,Y,Z ==> Vertex 3 {m}
     17.588914871,17.588914871,6.705600738;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-
   BuildingSurface:Detailed,
     zE-W-21,                 !- Name
     WALL,                    !- Surface Type
@@ -751,9 +731,6 @@
     0,8.794457436,3.352800369,  !- X,Y,Z ==> Vertex 2 {m}
     0,8.794457436,6.705600738,  !- X,Y,Z ==> Vertex 3 {m}
     0,17.588914871,6.705600738;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     zROOF-23,                !- Name
@@ -840,8 +817,6 @@
     17.588914871,8.794457436,0,  !- X,Y,Z ==> Vertex 3 {m}
     0,8.794457436,0;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     FSCEING-1,               !- Name
     CEILING,                 !- Surface Type
@@ -858,9 +833,6 @@
     17.588914871,0,3.352800369,  !- X,Y,Z ==> Vertex 2 {m}
     17.588914871,8.794457436,3.352800369,  !- X,Y,Z ==> Vertex 3 {m}
     0,8.794457436,3.352800369;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     FNCEING-1,               !- Name
@@ -879,8 +851,6 @@
     17.588914871,17.588914871,3.352800369,  !- X,Y,Z ==> Vertex 3 {m}
     0,17.588914871,3.352800369;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  2 {m}
-
   BuildingSurface:Detailed,
     SSFLOOR-1,               !- Name
     FLOOR,                   !- Surface Type
@@ -898,9 +868,6 @@
     17.588914871,0,3.352800369,  !- X,Y,Z ==> Vertex 3 {m}
     0,0,3.352800369;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     SNFLOOR-1,               !- Name
     FLOOR,                   !- Surface Type
@@ -917,8 +884,6 @@
     17.588914871,17.588914871,3.352800369,  !- X,Y,Z ==> Vertex 2 {m}
     17.588914871,8.794457436,3.352800369,  !- X,Y,Z ==> Vertex 3 {m}
     0,8.794457436,3.352800369;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  2 {m}
 
   BuildingSurface:Detailed,
     SLAB-1,                  !- Name
@@ -1246,10 +1211,6 @@
     0,                       !- Lower Limit Value
     1,                       !- Upper Limit Value
     DISCRETE;                !- Numeric Type
-
-                             !- Field 8
-                             !- Field 21
-                             !- Field 25
 
   Schedule:Compact,
     OCC-SCHED,               !- Name

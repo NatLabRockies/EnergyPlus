@@ -426,7 +426,7 @@
 !
 !
 
-  Version,26.1;
+  Version,26.2;
 
   Building,
     Exercise 2C,             !- Name
@@ -1845,8 +1845,6 @@
     Through: 12/31,          !- Field 1
     For: AllDays,            !- Field 2
     Until: 24:00,117.239997864; !- Field 3
-
-                             !- Complex Field #4
 
   Schedule:Compact,
     ShadeTransSch,           !- Name

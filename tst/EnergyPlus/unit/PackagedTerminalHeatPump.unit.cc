@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -98,7 +98,6 @@ using namespace EnergyPlus::BranchInputManager;
 using namespace EnergyPlus::DataDefineEquip;
 using namespace EnergyPlus::DataEnvironment;
 using namespace EnergyPlus::DataHeatBalFanSys;
-using namespace EnergyPlus::DataLoopNode;
 using namespace EnergyPlus::DataPlant;
 using namespace EnergyPlus::DataSizing;
 using namespace EnergyPlus::DataZoneEnergyDemands;
@@ -858,7 +857,7 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_SimPTAC_HeatingCoilTest)
     ASSERT_EQ(1, state->dataUnitarySystems->numUnitarySystems);
     EXPECT_EQ("ZoneHVAC:PackagedTerminalAirConditioner", thisSys.UnitType);                             // zoneHVAC equipment type
     EXPECT_EQ("COIL:HEATING:FUEL", thisSys.m_HeatingCoilTypeName);                                      // PTAC heating coil type
-    EXPECT_EQ(state->dataHeatingCoils->HeatingCoil(1).HCoilType_Num, HVAC::Coil_HeatingGasOrOtherFuel); // gas heating coil type
+    EXPECT_EQ(state->dataHeatingCoils->HeatingCoil(1).coilType, HVAC::CoilType::HeatingGasOrOtherFuel); // gas heating coil type
 
     state->dataGlobal->BeginEnvrnFlag = false;
 
@@ -4915,7 +4914,7 @@ TEST_F(EnergyPlusFixture, PTAC_AvailabilityManagerTest)
     ASSERT_EQ(1, state->dataUnitarySystems->numUnitarySystems);
     EXPECT_EQ("ZoneHVAC:PackagedTerminalAirConditioner", thisSys.UnitType);
     EXPECT_EQ("COIL:HEATING:FUEL", thisSys.m_HeatingCoilTypeName);
-    EXPECT_EQ(state->dataHeatingCoils->HeatingCoil(1).HCoilType_Num, HVAC::Coil_HeatingGasOrOtherFuel);
+    EXPECT_EQ(state->dataHeatingCoils->HeatingCoil(1).coilType, HVAC::CoilType::HeatingGasOrOtherFuel);
     EXPECT_FALSE(thisSys.m_useNoLoadLowSpeedAirFlow);
     // set input variables
     state->dataEnvrn->OutBaroPress = 101325.0;

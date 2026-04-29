@@ -109,7 +109,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,26.1;
+  Version,26.2;
 
   Building,
     Building,                !- Name
@@ -171,9 +171,9 @@
   RunPeriod,
     Run Period 1,            !- Name
     1,                       !- Begin Month
-    1,                      !- Begin Day of Month
+    1,                       !- Begin Day of Month
     ,                        !- Begin Year
-    12,                       !- End Month
+    12,                      !- End Month
     31,                      !- End Day of Month
     ,                        !- End Year
     Tuesday,                 !- Day of Week for Start Day
@@ -200,38 +200,38 @@
     1;                       !- Maximum Number of HVAC Sizing Simulation Passes
 
   OutputControl:Files,
-    Yes,                        !- Output CSV
-    Yes,                       !- Output MTR
-    Yes,                       !- Output ESO
-    Yes,                       !- Output EIO
-    Yes,                       !- Output Tabular
-    Yes,                       !- Output SQLite
-    Yes,                       !- Output JSON
-    Yes,                       !- Output AUDIT
-    Yes,                       !- Output Space Sizing
-    Yes,                       !- Output Zone Sizing
-    Yes,                       !- Output System Sizing
-    Yes,                       !- Output DXF
-    Yes,                       !- Output BND
-    Yes,                       !- Output RDD
-    Yes,                       !- Output MDD
-    Yes,                       !- Output MTD
-    Yes,                       !- Output END
-    Yes,                       !- Output SHD
-    Yes,                       !- Output DFS
-    Yes,                       !- Output GLHE
-    Yes,                       !- Output DelightIn
-    Yes,                       !- Output DelightELdmp
-    Yes,                       !- Output DelightDFdmp
-    Yes,                       !- Output EDD
-    Yes,                       !- Output DBG
-    Yes,                       !- Output PerfLog
-    Yes,                       !- Output SLN
-    Yes,                       !- Output SCI
-    Yes,                       !- Output WRL
-    Yes,                       !- Output Screen
-    Yes,                       !- Output ExtShd
-    Yes;                       !- Output Tarcog
+    Yes,                     !- Output CSV
+    Yes,                     !- Output MTR
+    Yes,                     !- Output ESO
+    Yes,                     !- Output EIO
+    Yes,                     !- Output Tabular
+    Yes,                     !- Output SQLite
+    Yes,                     !- Output JSON
+    Yes,                     !- Output AUDIT
+    Yes,                     !- Output Space Sizing
+    Yes,                     !- Output Zone Sizing
+    Yes,                     !- Output System Sizing
+    Yes,                     !- Output DXF
+    Yes,                     !- Output BND
+    Yes,                     !- Output RDD
+    Yes,                     !- Output MDD
+    Yes,                     !- Output MTD
+    Yes,                     !- Output END
+    Yes,                     !- Output SHD
+    Yes,                     !- Output DFS
+    Yes,                     !- Output GLHE
+    Yes,                     !- Output DelightIn
+    Yes,                     !- Output DelightELdmp
+    Yes,                     !- Output DelightDFdmp
+    Yes,                     !- Output EDD
+    Yes,                     !- Output DBG
+    Yes,                     !- Output PerfLog
+    Yes,                     !- Output SLN
+    Yes,                     !- Output SCI
+    Yes,                     !- Output WRL
+    Yes,                     !- Output Screen
+    Yes,                     !- Output ExtShd
+    Yes;                     !- Output Tarcog
 
 ! CHICAGO_IL_USA Annual Heating 99% Design Conditions DB, MaxDB= -17.3°C
 
@@ -660,8 +660,6 @@
     Through: 12/31,          !- Field 1
     For: Alldays,            !- Field 2
     Until: 24:00,117.239997864; !- Field 3
-
-                             !- Field 4
 
   Schedule:Compact,
     ShadeTransSch,           !- Name
@@ -2400,8 +2398,8 @@
     SPACE1-1 In Node,        !- Air Distribution Unit Outlet Node Name
     AirTerminal:SingleDuct:ParallelPIU:Reheat,  !- Air Terminal Object Type
     SPACE1-1 VAV Reheat,     !- Air Terminal Name
-    0.0,                    !- Nominal Upstream Leakage Fraction
-    0.0;                    !- Constant Downstream Leakage Fraction
+    0.0,                     !- Nominal Upstream Leakage Fraction
+    0.0;                     !- Constant Downstream Leakage Fraction
 
   ZoneHVAC:AirDistributionUnit,
     SPACE2-1 ATU,            !- Name
@@ -2436,19 +2434,19 @@
     0.00;                    !- Constant Downstream Leakage Fraction
 
   AirTerminal:SingleDuct:ParallelPIU:Reheat,
-    SPACE1-1 VAV Reheat,                       !- Name
-    ReheatCoilAvailSched,                      !- Availability Schedule Name
-    autosize,                                  !- Maximum Primary Air Flow Rate {m3/s}
-    0.20913,                                   !- Maximum Secondary Air Flow Rate {m3/s}
-    0.26186,                                   !- Minimum Primary Air Flow Fraction
-    0,                                         !- Fan On Flow Fraction
-    SPACE1-1 ATU In Node,                      !- Supply Air Inlet Node Name
-    PIU Inlet,                                 !- Secondary Air Inlet Node Name
-    SPACE1-1 In Node,                          !- Air Outlet Node Name
-    SPACE1-1 PIU MIXER,                        !- Zone Mixer Name
-    SPACE1-1 PIU FAN,                          !- Fan Name
-    Coil:Heating:Water,                        !- Reheat Coil Object Type
-    SPACE1-1 Zone Coil,                        !- Reheat Coil Name
+    SPACE1-1 VAV Reheat,     !- Name
+    ReheatCoilAvailSched,    !- Availability Schedule Name
+    autosize,                !- Maximum Primary Air Flow Rate {m3/s}
+    0.20913,                 !- Maximum Secondary Air Flow Rate {m3/s}
+    0.26186,                 !- Minimum Primary Air Flow Fraction
+    0,                       !- Fan On Flow Fraction
+    SPACE1-1 ATU In Node,    !- Supply Air Inlet Node Name
+    PIU Inlet,               !- Secondary Air Inlet Node Name
+    SPACE1-1 In Node,        !- Outlet Node Name
+    SPACE1-1 PIU MIXER,      !- Zone Mixer Name
+    SPACE1-1 PIU FAN,        !- Fan Name
+    Coil:Heating:Water,      !- Reheat Coil Object Type
+    SPACE1-1 Zone Coil,      !- Reheat Coil Name
     Autosize,                !- Maximum Hot Water or Steam Flow Rate {m3/s}
     0,                       !- Minimum Hot Water or Steam Flow Rate {m3/s}
     0.001,                   !- Convergence Tolerance
@@ -2461,21 +2459,21 @@
     SPACE5-1;                !- Backdraft Damper Leakage Zone Name
 
   AirLoopHVAC:ZoneMixer,
-    SPACE1-1 PIU MIXER,  !- Name
+    SPACE1-1 PIU MIXER,      !- Name
     SPACE1-1 PIU Mixer Outlet,  !- Outlet Node Name
-    SPACE1-1 PIU FAN Outlet,  !- Inlet 1 Node Name
-    SPACE1-1 ATU In Node;  !- Inlet 2 Node Name
+    SPACE1-1 PIU FAN Outlet, !- Inlet 1 Node Name
+    SPACE1-1 ATU In Node;    !- Inlet 2 Node Name
 
   Fan:ConstantVolume,
-    SPACE1-1 PIU FAN,  !- Name
-    ,                         !- Availability Schedule Name
-    0.7,                      !- Fan Total Efficiency
-    300,                      !- Pressure Rise {Pa}
-    AutoSize,                 !- Maximum Flow Rate {m3/s}
-    0.9,                      !- Motor Efficiency
-    1,                        !- Motor In Airstream Fraction
-    PIU Inlet,                !- Air Inlet Node Name
-    SPACE1-1 PIU FAN Outlet;  !- Air Outlet Node Name
+    SPACE1-1 PIU FAN,        !- Name
+    ,                        !- Availability Schedule Name
+    0.7,                     !- Fan Total Efficiency
+    300,                     !- Pressure Rise {Pa}
+    AutoSize,                !- Maximum Flow Rate {m3/s}
+    0.9,                     !- Motor Efficiency
+    1,                       !- Motor In Airstream Fraction
+    PIU Inlet,               !- Air Inlet Node Name
+    SPACE1-1 PIU FAN Outlet; !- Air Outlet Node Name
 
   Curve:Linear,
     low_0p25_in_wc,          !- Name

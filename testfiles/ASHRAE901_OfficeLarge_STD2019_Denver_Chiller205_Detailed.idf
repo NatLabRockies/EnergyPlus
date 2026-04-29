@@ -4,7 +4,7 @@
 !-      Use '!' comments if they need to be retained when using the IDFEditor.
 !-   ===========  ALL OBJECTS IN CLASS: VERSION ===========
 
-  Version,26.1;
+  Version,26.2;
 
 !-   ===========  ALL OBJECTS IN CLASS: SIMULATIONCONTROL ===========
 
@@ -420,16 +420,6 @@
     For: Sunday Holidays AllOtherDays, !- Field 16
     Until: 24:00,0.0;        !- Field 17
 
-                             !- Field 12
-                             !- Field 16
-                             !- Field 18
-                             !- Field 20
-                             !- Field 22
-                             !- Field 32
-                             !- Field 34
-                             !- Field 36
-                             !- Field 46
-
   Schedule:Compact,
     BLDG_LIGHT_SCH,          !- Name
     Fraction,                !- Schedule Type Limits Name
@@ -470,22 +460,6 @@
     Until: 19:00,0.0,        !- Field 5
     Until: 24:00,1.0;        !- Field 7
 
-                             !- Field 4
-                             !- Field 6
-                             !- Field 8
-                             !- Field 10
-                             !- Field 12
-                             !- Field 14
-                             !- Field 16
-                             !- Field 22
-                             !- Field 24
-                             !- Field 26
-                             !- Field 28
-                             !- Field 30
-                             !- Field 32
-                             !- Field 38
-                             !- Field 40
-
   Schedule:Compact,
     BLDG_EQUIP_SCH,          !- Name
     Fraction,                !- Schedule Type Limits Name
@@ -513,8 +487,6 @@
     Until: 06:00,0.2210823264, !- Field 37
     Until: 18:00,0.2847429789, !- Field 39
     Until: 24:00,0.2210823264; !- Field 41
-
-                             !- Field 42
 
   Schedule:Compact,
     DataCenter_EQUIP_SCH,    !- Name
@@ -604,8 +576,6 @@
     For: AllOtherDays,       !- Field 118
     Until: 24:00,1;          !- Field 119
 
-                             !- Field 23
-
   Schedule:Compact,
     BLDG_OCC_SCH,            !- Name
     Fraction,                !- Schedule Type Limits Name
@@ -637,8 +607,6 @@
     Until: 06:00,0.0,        !- Field 45
     Until: 18:00,0.05,       !- Field 47
     Until: 24:00,0.0;        !- Field 49
-
-                             !- Field 102
 
   Schedule:Compact,
     BLDG_OCC_SCH_w_SB,       !- Name
@@ -704,14 +672,6 @@
     Until: 06:00,0.0,        !- Field 111
     Until: 18:00,0.05,       !- Field 113
     Until: 24:00,0.0;        !- Field 115
-
-                             !- Field 24
-                             !- Field 28
-                             !- Field 32
-                             !- Field 73
-                             !- Field 77
-                             !- Field 81
-                             !- Field 102
 
   Schedule:Compact,
     BLDG_OCC_SCH_wo_SB,      !- Name
@@ -1024,13 +984,6 @@
     For: Sunday Holidays AllOtherDays, !- Field 38
     Until: 24:00,15.6;       !- Field 39
 
-                             !- Field 24
-                             !- Field 28
-                             !- Field 32
-                             !- Field 73
-                             !- Field 77
-                             !- Field 81
-
   Schedule:Compact,
     HTGSETP_SCH_YES_OPTIMUM_w_SB,  !- Name
     Temperature,             !- Schedule Type Limits Name
@@ -1203,13 +1156,6 @@
     Until: 24:00,26.7,       !- Field 36
     For: Sunday Holidays AllOtherDays, !- Field 38
     Until: 24:00,26.7;       !- Field 39
-
-                             !- Field 24
-                             !- Field 28
-                             !- Field 32
-                             !- Field 73
-                             !- Field 77
-                             !- Field 81
 
   Schedule:Compact,
     CLGSETP_SCH_YES_OPTIMUM_w_SB,  !- Name
@@ -2433,9 +2379,6 @@
     1;                       !- Multiplier
 
 !-   ===========  ALL OBJECTS IN CLASS: BUILDINGSURFACE:DETAILED ===========
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Basement_Wall_East,      !- Name
@@ -2454,11 +2397,6 @@
     73.107200000000,48.738100000000,-2.439000000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_2_Floor-PPAutoCreateOther,  !- Name
     Ceiling,                 !- Surface Type
@@ -2475,11 +2413,6 @@
     68.534000000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     73.107200000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_1_Floor-PPAutoCreateOther,  !- Name
@@ -2498,11 +2431,6 @@
     73.107200000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,4.573200000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_bot_ZN_5_Ceiling,   !- Name
     Ceiling,                 !- Surface Type
@@ -2519,11 +2447,6 @@
     5.487600000000,4.573200000000,2.744000000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,4.573200000000,2.744000000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_basement_ZN_6_Ceiling-Core_bot_ZN_5-PPAutoCreateOther,  !- Name
@@ -2542,11 +2465,6 @@
     5.487600000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     5.487600000000,44.165000000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_bot_ZN_5_Wall_South,!- Name
     Wall,                    !- Surface Type
@@ -2563,11 +2481,6 @@
     5.487600000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,4.573200000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Core_bot_ZN_5_Wall_West, !- Name
@@ -2586,11 +2499,6 @@
     5.487600000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     5.487600000000,4.573200000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_bot_ZN_5_Wall_North,!- Name
     Wall,                    !- Surface Type
@@ -2607,11 +2515,6 @@
     68.534000000000,44.165000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     5.487600000000,44.165000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     5.487600000000,44.165000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Core_bot_ZN_5_Wall_East, !- Name
@@ -2630,11 +2533,6 @@
     68.534000000000,44.165000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_mid_ZN_5_Ceiling,   !- Name
     Ceiling,                 !- Surface Type
@@ -2651,11 +2549,6 @@
     5.487600000000,4.573200000000,19.512300000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,4.573200000000,19.512300000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Core_mid_ZN_5_Floor,     !- Name
@@ -2674,11 +2567,6 @@
     5.487600000000,4.573200000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     5.487600000000,44.165000000000,16.768300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_mid_ZN_5_Wall_South,!- Name
     Wall,                    !- Surface Type
@@ -2695,11 +2583,6 @@
     5.487600000000,4.573200000000,16.768300000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,4.573200000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,4.573200000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Core_mid_ZN_5_Wall_West, !- Name
@@ -2718,11 +2601,6 @@
     5.487600000000,4.573200000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     5.487600000000,4.573200000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_mid_ZN_5_Wall_North,!- Name
     Wall,                    !- Surface Type
@@ -2739,11 +2617,6 @@
     68.534000000000,44.165000000000,16.768300000000,  !- X,Y,Z ==> Vertex 2 {m}
     5.487600000000,44.165000000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     5.487600000000,44.165000000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Core_mid_ZN_5_Wall_East, !- Name
@@ -2762,11 +2635,6 @@
     68.534000000000,44.165000000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_top_ZN_5_Ceiling,   !- Name
     Ceiling,                 !- Surface Type
@@ -2783,11 +2651,6 @@
     5.487600000000,4.573200000000,36.280600000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,4.573200000000,36.280600000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Core_top_ZN_5_Floor,     !- Name
@@ -2806,11 +2669,6 @@
     5.487600000000,4.573200000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     5.487600000000,44.165000000000,33.536600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_top_ZN_5_Wall_South,!- Name
     Wall,                    !- Surface Type
@@ -2827,11 +2685,6 @@
     5.487600000000,4.573200000000,33.536600000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,4.573200000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,4.573200000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Core_top_ZN_5_Wall_West, !- Name
@@ -2850,11 +2703,6 @@
     5.487600000000,4.573200000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     5.487600000000,4.573200000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_top_ZN_5_Wall_North,!- Name
     Wall,                    !- Surface Type
@@ -2871,11 +2719,6 @@
     68.534000000000,44.165000000000,33.536600000000,  !- X,Y,Z ==> Vertex 2 {m}
     5.487600000000,44.165000000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     5.487600000000,44.165000000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Core_top_ZN_5_Wall_East, !- Name
@@ -2894,11 +2737,6 @@
     68.534000000000,44.165000000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_3_Wall_North,  !- Name
     Wall,                    !- Surface Type
@@ -2915,11 +2753,6 @@
     73.107200000000,48.738100000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,48.738100000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_3_Ceiling,  !- Name
@@ -2938,11 +2771,6 @@
     68.534000000000,44.165000000000,2.744000000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_3_Floor,!- Name
     Floor,                   !- Surface Type
@@ -2959,11 +2787,6 @@
     68.534000000000,44.165000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     16.078200000000,44.165000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     16.078200000000,48.738100000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_3_Wall_West,  !- Name
@@ -2982,11 +2805,6 @@
     4.573200000000,44.165000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,44.165000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_bot_ZN_5_Wall_North-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -3003,11 +2821,6 @@
     5.487600000000,44.165000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,44.165000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_2_Wall_North-PPAutoCreateOther,  !- Name
@@ -3026,11 +2839,6 @@
     73.107200000000,48.738100000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_2_Wall_East,  !- Name
     Wall,                    !- Surface Type
@@ -3047,11 +2855,6 @@
     73.107200000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     73.107200000000,48.738100000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_2_Ceiling,  !- Name
@@ -3070,11 +2873,6 @@
     73.107200000000,0.000000000000,2.744000000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_2_Floor,!- Name
     Floor,                   !- Surface Type
@@ -3091,11 +2889,6 @@
     73.107200000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_2_Wall_North,  !- Name
@@ -3114,11 +2907,6 @@
     68.534000000000,44.165000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_bot_ZN_5_Wall_East-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -3135,11 +2923,6 @@
     68.534000000000,44.165000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,4.573200000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_1_Wall_East-PPAutoCreateOther,  !- Name
@@ -3158,11 +2941,6 @@
     73.107200000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,0.000000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_1_Wall_South,  !- Name
     Wall,                    !- Surface Type
@@ -3179,11 +2957,6 @@
     0.000000000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     73.107200000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,0.000000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_1_Ceiling,  !- Name
@@ -3202,11 +2975,6 @@
     73.107200000000,0.000000000000,2.744000000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,4.573200000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_basement_ZN_6-Perimeter_bot_ZN_1-PPAutoCreateOther,  !- Name
     Floor,                   !- Surface Type
@@ -3223,11 +2991,6 @@
     16.078200000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,4.573200000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_1_Wall_East,  !- Name
@@ -3246,11 +3009,6 @@
     68.534000000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,4.573200000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_bot_ZN_6_Wall_South-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -3267,11 +3025,6 @@
     5.487600000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     4.573200000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,4.573200000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_4_Wall_South-PPAutoCreateOther,  !- Name
@@ -3290,11 +3043,6 @@
     0.000000000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_4_Wall_West,  !- Name
     Wall,                    !- Surface Type
@@ -3311,11 +3059,6 @@
     0.000000000000,48.738100000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_4_Ceiling,  !- Name
@@ -3334,11 +3077,6 @@
     4.573200000000,4.573200000000,2.744000000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,44.165000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_4_Floor,!- Name
     Floor,                   !- Surface Type
@@ -3355,11 +3093,6 @@
     4.573200000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_4_Wall_South,  !- Name
@@ -3378,11 +3111,6 @@
     4.573200000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,4.573200000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_bot_ZN_6_Wall_West-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -3399,11 +3127,6 @@
     4.573200000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     4.573200000000,44.165000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,44.165000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_3_Wall_West-PPAutoCreateOther,  !- Name
@@ -3422,11 +3145,6 @@
     0.000000000000,48.738100000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_3_Wall_North,  !- Name
     Wall,                    !- Surface Type
@@ -3443,11 +3161,6 @@
     73.107200000000,48.738100000000,16.768300000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,48.738100000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_3_Ceiling,  !- Name
@@ -3466,11 +3179,6 @@
     68.534000000000,44.165000000000,19.512300000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_3_Floor,!- Name
     Floor,                   !- Surface Type
@@ -3487,11 +3195,6 @@
     68.534000000000,44.165000000000,16.768300000000,  !- X,Y,Z ==> Vertex 2 {m}
     4.573200000000,44.165000000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,16.768300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_3_Wall_West,  !- Name
@@ -3510,11 +3213,6 @@
     4.573200000000,44.165000000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,44.165000000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_mid_ZN_5_Wall_North-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -3531,11 +3229,6 @@
     5.487600000000,44.165000000000,16.768300000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,44.165000000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_2_Wall_North-PPAutoCreateOther,  !- Name
@@ -3554,11 +3247,6 @@
     73.107200000000,48.738100000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_2_Wall_East,  !- Name
     Wall,                    !- Surface Type
@@ -3575,11 +3263,6 @@
     73.107200000000,0.000000000000,16.768300000000,  !- X,Y,Z ==> Vertex 2 {m}
     73.107200000000,48.738100000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_2_Ceiling,  !- Name
@@ -3598,11 +3281,6 @@
     73.107200000000,0.000000000000,19.512300000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_2_Floor,!- Name
     Floor,                   !- Surface Type
@@ -3619,11 +3297,6 @@
     73.107200000000,0.000000000000,16.768300000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,4.573200000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,16.768300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_2_Wall_North,  !- Name
@@ -3642,11 +3315,6 @@
     68.534000000000,44.165000000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_mid_ZN_5_Wall_East-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -3663,11 +3331,6 @@
     68.534000000000,44.165000000000,16.768300000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,4.573200000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,4.573200000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_1_Wall_East-PPAutoCreateOther,  !- Name
@@ -3686,11 +3349,6 @@
     73.107200000000,0.000000000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,0.000000000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_1_Wall_East,  !- Name
     Wall,                    !- Surface Type
@@ -3707,11 +3365,6 @@
     73.107200000000,0.000000000000,16.768300000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,4.573200000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,4.573200000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_1_Wall_South,  !- Name
@@ -3730,11 +3383,6 @@
     73.107200000000,0.000000000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,0.000000000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_1_Ceiling,  !- Name
     Ceiling,                 !- Surface Type
@@ -3751,11 +3399,6 @@
     0.000000000000,0.000000000000,19.512300000000,  !- X,Y,Z ==> Vertex 2 {m}
     73.107200000000,0.000000000000,19.512300000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,4.573200000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_1_Floor,!- Name
@@ -3774,11 +3417,6 @@
     0.000000000000,0.000000000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,4.573200000000,16.768300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_mid_ZN_6_Wall_South-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -3795,11 +3433,6 @@
     5.487600000000,4.573200000000,16.768300000000,  !- X,Y,Z ==> Vertex 2 {m}
     4.573200000000,4.573200000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,4.573200000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_4_Wall_South-PPAutoCreateOther,  !- Name
@@ -3818,11 +3451,6 @@
     0.000000000000,0.000000000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_4_Wall_West,  !- Name
     Wall,                    !- Surface Type
@@ -3839,11 +3467,6 @@
     0.000000000000,48.738100000000,16.768300000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,0.000000000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_4_Ceiling,  !- Name
@@ -3862,11 +3485,6 @@
     4.573200000000,4.573200000000,19.512300000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,44.165000000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_4_Floor,!- Name
     Floor,                   !- Surface Type
@@ -3883,11 +3501,6 @@
     4.573200000000,4.573200000000,16.768300000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,0.000000000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,16.768300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_4_Wall_South,  !- Name
@@ -3906,11 +3519,6 @@
     4.573200000000,4.573200000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,4.573200000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_mid_ZN_6_Wall_West-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -3927,11 +3535,6 @@
     4.573200000000,4.573200000000,16.768300000000,  !- X,Y,Z ==> Vertex 2 {m}
     4.573200000000,44.165000000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,44.165000000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_3_Wall_West-PPAutoCreateOther,  !- Name
@@ -3950,11 +3553,6 @@
     0.000000000000,48.738100000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_top_ZN_3_Wall_North,  !- Name
     Wall,                    !- Surface Type
@@ -3971,11 +3569,6 @@
     73.107200000000,48.738100000000,33.536600000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,48.738100000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_top_ZN_3_Ceiling,  !- Name
@@ -3994,11 +3587,6 @@
     68.534000000000,44.165000000000,36.280600000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_top_ZN_3_Floor,!- Name
     Floor,                   !- Surface Type
@@ -4015,11 +3603,6 @@
     68.534000000000,44.165000000000,33.536600000000,  !- X,Y,Z ==> Vertex 2 {m}
     4.573200000000,44.165000000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,33.536600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_top_ZN_3_Wall_West,  !- Name
@@ -4038,11 +3621,6 @@
     4.573200000000,44.165000000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,44.165000000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_top_ZN_5_Wall_North-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -4059,11 +3637,6 @@
     5.487600000000,44.165000000000,33.536600000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,44.165000000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_top_ZN_2_Wall_North-PPAutoCreateOther,  !- Name
@@ -4082,11 +3655,6 @@
     73.107200000000,48.738100000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_top_ZN_2_Wall_East,  !- Name
     Wall,                    !- Surface Type
@@ -4103,11 +3671,6 @@
     73.107200000000,0.000000000000,33.536600000000,  !- X,Y,Z ==> Vertex 2 {m}
     73.107200000000,48.738100000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_top_ZN_2_Ceiling,  !- Name
@@ -4126,11 +3689,6 @@
     73.107200000000,0.000000000000,36.280600000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_top_ZN_2_Floor,!- Name
     Floor,                   !- Surface Type
@@ -4147,11 +3705,6 @@
     73.107200000000,0.000000000000,33.536600000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,4.573200000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,33.536600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_top_ZN_2_Wall_North,  !- Name
@@ -4170,11 +3723,6 @@
     68.534000000000,44.165000000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_top_ZN_5_Wall_East-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -4191,11 +3739,6 @@
     68.534000000000,44.165000000000,33.536600000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,4.573200000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,4.573200000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Int-Per3S-NE-PPAutoCreateOther,  !- Name
@@ -4214,11 +3757,6 @@
     73.107200000000,0.000000000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,0.000000000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_top_ZN_1_Wall_South,  !- Name
     Wall,                    !- Surface Type
@@ -4235,11 +3773,6 @@
     0.000000000000,0.000000000000,33.536600000000,  !- X,Y,Z ==> Vertex 2 {m}
     73.107200000000,0.000000000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,0.000000000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_top_ZN_1_Ceiling,  !- Name
@@ -4258,11 +3791,6 @@
     73.107200000000,0.000000000000,36.280600000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,4.573200000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_top_ZN_1_Floor,!- Name
     Floor,                   !- Surface Type
@@ -4279,11 +3807,6 @@
     73.107200000000,0.000000000000,33.536600000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,0.000000000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,4.573200000000,33.536600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Int-Per3S-NE,            !- Name
@@ -4302,11 +3825,6 @@
     68.534000000000,4.573200000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,4.573200000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_top_ZN_6_Wall_South-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -4323,11 +3841,6 @@
     5.487600000000,4.573200000000,33.536600000000,  !- X,Y,Z ==> Vertex 2 {m}
     4.573200000000,4.573200000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,4.573200000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_top_ZN_4_Wall_South-PPAutoCreateOther,  !- Name
@@ -4346,11 +3859,6 @@
     0.000000000000,0.000000000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_top_ZN_4_Wall_West,  !- Name
     Wall,                    !- Surface Type
@@ -4367,11 +3875,6 @@
     0.000000000000,48.738100000000,33.536600000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,0.000000000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_top_ZN_4_Ceiling,  !- Name
@@ -4390,11 +3893,6 @@
     4.573200000000,4.573200000000,36.280600000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,44.165000000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_top_ZN_4_Floor,!- Name
     Floor,                   !- Surface Type
@@ -4411,11 +3909,6 @@
     4.573200000000,4.573200000000,33.536600000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,0.000000000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,33.536600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_top_ZN_4_Wall_South,  !- Name
@@ -4434,11 +3927,6 @@
     4.573200000000,4.573200000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,4.573200000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_top_ZN_6_Wall_West-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -4455,11 +3943,6 @@
     4.573200000000,4.573200000000,33.536600000000,  !- X,Y,Z ==> Vertex 2 {m}
     4.573200000000,44.165000000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,44.165000000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_top_ZN_3_Wall_West-PPAutoCreateOther,  !- Name
@@ -4478,11 +3961,6 @@
     0.000000000000,48.738100000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     GroundFloor_Plenum_Wall_North,  !- Name
     Wall,                    !- Surface Type
@@ -4499,11 +3977,6 @@
     73.107200000000,48.738100000000,2.744000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,48.738100000000,2.744000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,3.963200000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     GroundFloor_Plenum_West, !- Name
@@ -4522,11 +3995,6 @@
     0.000000000000,0.000000000000,2.744000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,3.963200000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     GroundFloor_Plenum_Wall_South,  !- Name
     Wall,                    !- Surface Type
@@ -4543,11 +4011,6 @@
     0.000000000000,0.000000000000,2.744000000000,  !- X,Y,Z ==> Vertex 2 {m}
     73.107200000000,0.000000000000,2.744000000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,0.000000000000,3.963200000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     GroundFloor_Plenum_Wall_East,  !- Name
@@ -4566,11 +4029,6 @@
     73.107200000000,48.738100000000,2.744000000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,3.963200000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     MidFloor_Plenum_Wall_North,  !- Name
     Wall,                    !- Surface Type
@@ -4587,11 +4045,6 @@
     73.107200000000,48.738100000000,19.512300000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,48.738100000000,19.512300000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,20.731500000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     MidFloor_Plenum_Wall_West,  !- Name
@@ -4610,11 +4063,6 @@
     0.000000000000,0.000000000000,19.512300000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,20.731500000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     MidFloor_Plenum_Wall_South,  !- Name
     Wall,                    !- Surface Type
@@ -4631,11 +4079,6 @@
     0.000000000000,0.000000000000,19.512300000000,  !- X,Y,Z ==> Vertex 2 {m}
     73.107200000000,0.000000000000,19.512300000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,0.000000000000,20.731500000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     MidFloor_Plenum_Wall_East,  !- Name
@@ -4654,11 +4097,6 @@
     73.107200000000,48.738100000000,19.512300000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,20.731500000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     TopFloor_Plenum_Wall_North,  !- Name
     Wall,                    !- Surface Type
@@ -4675,11 +4113,6 @@
     0.000000000000,0.000000000000,36.280600000000,  !- X,Y,Z ==> Vertex 2 {m}
     73.107200000000,0.000000000000,36.280600000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,0.000000000000,37.499800000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     TopFloor_Plenum_Wall_East,  !- Name
@@ -4698,11 +4131,6 @@
     73.107200000000,48.738100000000,36.280600000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,37.499800000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Building_Roof,           !- Name
     Roof,                    !- Surface Type
@@ -4719,11 +4147,6 @@
     0.000000000000,0.000000000000,37.499800000000,  !- X,Y,Z ==> Vertex 2 {m}
     73.107200000000,0.000000000000,37.499800000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,37.499800000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     TopFloor_Plenum_Wall_West,  !- Name
@@ -4742,11 +4165,6 @@
     0.000000000000,0.000000000000,36.280600000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,37.499800000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     TopFloor_Plenum_Wall_South,  !- Name
     Wall,                    !- Surface Type
@@ -4763,11 +4181,6 @@
     73.107200000000,48.738100000000,36.280600000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,48.738100000000,36.280600000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,37.499800000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     GroundFloor_Plenum_Ceiling,  !- Name
@@ -4786,11 +4199,6 @@
     73.107200000000,0.000000000000,3.963200000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,3.963200000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     MidFloor_Plenum_Ceiling, !- Name
     Ceiling,                 !- Surface Type
@@ -4807,11 +4215,6 @@
     0.000000000000,0.000000000000,20.731500000000,  !- X,Y,Z ==> Vertex 2 {m}
     73.107200000000,0.000000000000,20.731500000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,20.731500000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_bot_ZN_6_Floor,  !- Name
@@ -4830,11 +4233,6 @@
     -0.914400000000,-39.591800000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     -0.914400000000,0.000000000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_bot_ZN_6_Wall_North,  !- Name
     Wall,                    !- Surface Type
@@ -4851,11 +4249,6 @@
     0.000000000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     -0.914400000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     -0.914400000000,0.000000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_bot_ZN_6_Wall_South,  !- Name
@@ -4874,11 +4267,6 @@
     0.000000000000,-39.591800000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,-39.591800000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_bot_ZN_6_Wall_East-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -4895,11 +4283,6 @@
     0.000000000000,-39.591800000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_bot_ZN_6_Ceiling,  !- Name
@@ -4918,11 +4301,6 @@
     0.000000000000,-39.591800000000,2.744000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_bot_ZN_6_Wall_West,  !- Name
     Wall,                    !- Surface Type
@@ -4939,11 +4317,6 @@
     -0.914400000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     -0.914400000000,-39.591800000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     -0.914400000000,-39.591800000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_bot_ZN_6_Wall_North-PPAutoCreateOther,  !- Name
@@ -4962,11 +4335,6 @@
     5.487600000000,44.165000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     5.487600000000,44.165000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_bot_ZN_5_Wall_South-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -4983,11 +4351,6 @@
     68.534000000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     5.487600000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     5.487600000000,4.573200000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_mid_ZN_6_Floor,  !- Name
@@ -5006,11 +4369,6 @@
     0.000000000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,39.591800000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_mid_ZN_6_Wall_West,  !- Name
     Wall,                    !- Surface Type
@@ -5027,11 +4385,6 @@
     0.000000000000,39.591800000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_mid_ZN_6_Wall_South,  !- Name
@@ -5050,11 +4403,6 @@
     0.914400000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.914400000000,0.000000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_mid_ZN_6_Wall_East,  !- Name
     Wall,                    !- Surface Type
@@ -5071,11 +4419,6 @@
     0.914400000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.914400000000,39.591800000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.914400000000,39.591800000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_mid_ZN_6_Wall_North,  !- Name
@@ -5094,11 +4437,6 @@
     0.000000000000,39.591800000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,39.591800000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_mid_ZN_6_ceiling,  !- Name
     Ceiling,                 !- Surface Type
@@ -5115,11 +4453,6 @@
     0.000000000000,0.000000000000,2.744000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.914400000000,0.000000000000,2.744000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.914400000000,39.591800000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Core_mid_ZN_5_Wall_South-PPAutoCreateOther,  !- Name
@@ -5138,11 +4471,6 @@
     5.487600000000,4.573200000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     5.487600000000,4.573200000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_mid_ZN_6_Wall_North-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -5159,11 +4487,6 @@
     4.573200000000,44.165000000000,16.768300000000,  !- X,Y,Z ==> Vertex 2 {m}
     5.487600000000,44.165000000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     5.487600000000,44.165000000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_top_ZN_6_Wall_North-PPAutoCreateOther,  !- Name
@@ -5182,11 +4505,6 @@
     5.487600000000,44.165000000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     5.487600000000,44.165000000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_top_ZN_5_Wall_South-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -5203,11 +4521,6 @@
     68.534000000000,4.573200000000,33.536600000000,  !- X,Y,Z ==> Vertex 2 {m}
     5.487600000000,4.573200000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     5.487600000000,4.573200000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_top_ZN_6_Floor,  !- Name
@@ -5226,11 +4539,6 @@
     0.000000000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,39.591800000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_top_ZN_6_Wall_East,  !- Name
     Wall,                    !- Surface Type
@@ -5247,11 +4555,6 @@
     0.914400000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.914400000000,39.591800000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.914400000000,39.591800000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_top_ZN_6_Wall_West,  !- Name
@@ -5270,11 +4573,6 @@
     0.000000000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_top_ZN_6_Wall_South,  !- Name
     Wall,                    !- Surface Type
@@ -5291,11 +4589,6 @@
     0.000000000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.914400000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.914400000000,0.000000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_top_ZN_6_ceiling,  !- Name
@@ -5314,11 +4607,6 @@
     0.914400000000,0.000000000000,2.744000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.914400000000,39.591800000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_top_ZN_6_Wall_North,  !- Name
     Wall,                    !- Surface Type
@@ -5335,11 +4623,6 @@
     0.914400000000,39.591800000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,39.591800000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,39.591800000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Core_bot_ZN_5_Floor-PPAutoCreateOther,  !- Name
@@ -5358,11 +4641,6 @@
     68.534000000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_bot_ZN_5_Floor,     !- Name
     Floor,                   !- Surface Type
@@ -5379,11 +4657,6 @@
     68.534000000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     16.078200000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     16.078200000000,44.165000000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_3_Floor-PPAutoCreateOther,  !- Name
@@ -5402,11 +4675,6 @@
     68.534000000000,44.165000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Basement_Wall_South,     !- Name
     Wall,                    !- Surface Type
@@ -5423,11 +4691,6 @@
     16.079400000000,0.000000000000,-2.439000000000,  !- X,Y,Z ==> Vertex 2 {m}
     73.107200000000,0.000000000000,-2.439000000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,0.000000000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Basement_Floor,          !- Name
@@ -5446,11 +4709,6 @@
     16.079400000000,0.000000000000,-2.439000000000,  !- X,Y,Z ==> Vertex 3 {m}
     16.079400000000,48.738100000000,-2.439000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Basement_Wall_North,     !- Name
     Wall,                    !- Surface Type
@@ -5467,11 +4725,6 @@
     73.107200000000,48.738100000000,-2.439000000000,  !- X,Y,Z ==> Vertex 2 {m}
     16.079400000000,48.738100000000,-2.439000000000,  !- X,Y,Z ==> Vertex 3 {m}
     16.079400000000,48.738100000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Basement_Wall_West,      !- Name
@@ -5490,11 +4743,6 @@
     16.079400000000,0.000000000000,-2.439000000000,  !- X,Y,Z ==> Vertex 3 {m}
     16.079400000000,0.000000000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_basement_ZN_6_Floor,  !- Name
     Floor,                   !- Surface Type
@@ -5511,11 +4759,6 @@
     0.000000000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     -16.079400000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     -16.079400000000,48.738100000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_basement_ZN_6_Wall_North,  !- Name
@@ -5534,11 +4777,6 @@
     -16.079400000000,48.738100000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     -16.079400000000,48.738100000000,2.439000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_basement_ZN_6_Wall_South,  !- Name
     Wall,                    !- Surface Type
@@ -5555,11 +4793,6 @@
     -16.079400000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,2.439000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_basement_ZN_6_Wall_West,  !- Name
@@ -5578,11 +4811,6 @@
     -16.079400000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     -16.079400000000,0.000000000000,2.439000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_bot_ZN_6_Floor-PPAutoCreateOther,  !- Name
     Ceiling,                 !- Surface Type
@@ -5599,11 +4827,6 @@
     -11.506200000000,4.573200000000,2.439000000000,  !- X,Y,Z ==> Vertex 2 {m}
     -10.591800000000,4.573200000000,2.439000000000,  !- X,Y,Z ==> Vertex 3 {m}
     -10.591800000000,44.165000000000,2.439000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_basement_ZN_6_Ceiling-Core_bot_ZN_5,  !- Name
@@ -5622,11 +4845,6 @@
     0.000000000000,4.573200000000,2.439000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,44.165000000000,2.439000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_4_Floor-PPAutoCreateOther,  !- Name
     Ceiling,                 !- Surface Type
@@ -5643,11 +4861,6 @@
     -16.079400000000,0.000000000000,2.439000000000,  !- X,Y,Z ==> Vertex 2 {m}
     -11.506200000000,4.573200000000,2.439000000000,  !- X,Y,Z ==> Vertex 3 {m}
     -11.506200000000,44.165000000000,2.439000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_basement_ZN_6_Ceiling-Perimeter_bot_ZN_1,  !- Name
@@ -5666,11 +4879,6 @@
     0.000000000000,0.000000000000,2.439000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,4.573200000000,2.439000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_basement_ZN_6_Ceiling-Perimeter_bot_ZN_3,  !- Name
     Ceiling,                 !- Surface Type
@@ -5687,11 +4895,6 @@
     -11.506200000000,44.165000000000,2.439000000000,  !- X,Y,Z ==> Vertex 2 {m}
     -0.001200000000,44.165000000000,2.439000000000,  !- X,Y,Z ==> Vertex 3 {m}
     -0.001200000000,48.738100000000,2.439000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_1_Floor,!- Name
@@ -5710,11 +4913,6 @@
     16.078200000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     16.078200000000,4.573200000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_basement_ZN_6_Ceiling-Perimeter_bot_ZN_3-PPAutoCreateOther,  !- Name
     Floor,                   !- Surface Type
@@ -5731,11 +4929,6 @@
     16.078200000000,44.165000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     4.573200000000,44.165000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_basement_ZN_6_Wall_East,  !- Name
@@ -5754,9 +4947,7 @@
     0.000000000000,48.738100000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,2.439000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
 !-   ===========  ALL OBJECTS IN CLASS: FENESTRATIONSURFACE:DETAILED ===========
-                                        !- X,Y,Z  1 {m}
 
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_3_Wall_North_Window1,  !- Name
@@ -5773,9 +4964,6 @@
     59.46085,48.73810,0.8014041856,  !- X,Y,Z ==> Vertex 3 {m}
     59.460850000000,48.738100000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_3_Wall_North_Window2,  !- Name
     Window,                  !- Surface Type
@@ -5790,9 +4978,6 @@
     58.24165,48.73810,0.8014041856,  !- X,Y,Z ==> Vertex 2 {m}
     44.59550,48.73810,0.8014041856,  !- X,Y,Z ==> Vertex 3 {m}
     44.595500000000,48.738100000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
 
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_3_Wall_North_Window3,  !- Name
@@ -5809,9 +4994,6 @@
     29.73015,48.73810,0.8014041856,  !- X,Y,Z ==> Vertex 3 {m}
     29.730150000000,48.738100000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_3_Wall_North_Window4,  !- Name
     Window,                  !- Surface Type
@@ -5826,9 +5008,6 @@
     28.51095,48.73810,0.8014041856,  !- X,Y,Z ==> Vertex 2 {m}
     14.86480,48.73810,0.8014041856,  !- X,Y,Z ==> Vertex 3 {m}
     14.864800000000,48.738100000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
 
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_3_Wall_North_Window5,  !- Name
@@ -5845,9 +5024,6 @@
     0.00000,48.73810,0.8014041856,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_2_Wall_East_Window1,  !- Name
     Window,                  !- Surface Type
@@ -5862,9 +5038,6 @@
     73.10720,0.00000,0.8312233024,  !- X,Y,Z ==> Vertex 2 {m}
     73.10720,15.433294,0.8312233024,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,15.433294000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
 
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_2_Wall_East_Window2,  !- Name
@@ -5881,9 +5054,6 @@
     73.10720,32.085788,0.8312233024,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,32.085788000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_2_Wall_East_Window3,  !- Name
     Window,                  !- Surface Type
@@ -5898,9 +5068,6 @@
     73.10720,33.304988,0.8312233024,  !- X,Y,Z ==> Vertex 2 {m}
     73.10720,48.73800,0.8312233024,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738000000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
 
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_1_Wall_South_Window1,  !- Name
@@ -5917,9 +5084,6 @@
     13.64615,0.00000,0.8014041856,  !- X,Y,Z ==> Vertex 3 {m}
     13.646150000000,0.000000000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_1_Wall_South_Window2,  !- Name
     Window,                  !- Surface Type
@@ -5934,9 +5098,6 @@
     14.86535,0.00000,0.8014041856,  !- X,Y,Z ==> Vertex 2 {m}
     28.51150,0.00000,0.8014041856,  !- X,Y,Z ==> Vertex 3 {m}
     28.511500000000,0.000000000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
 
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_1_Wall_South_Window3,  !- Name
@@ -5953,9 +5114,6 @@
     43.37685,0.00000,0.8014041856,  !- X,Y,Z ==> Vertex 3 {m}
     43.376850000000,0.000000000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_1_Wall_South_Window4,  !- Name
     Window,                  !- Surface Type
@@ -5970,9 +5128,6 @@
     44.59605,0.00000,0.8014041856,  !- X,Y,Z ==> Vertex 2 {m}
     58.24220,0.00000,0.8014041856,  !- X,Y,Z ==> Vertex 3 {m}
     58.242200000000,0.000000000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
 
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_1_Wall_South_Window5,  !- Name
@@ -5989,9 +5144,6 @@
     73.10700,0.00000,0.8014041856,  !- X,Y,Z ==> Vertex 3 {m}
     73.107000000000,0.000000000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_4_Wall_West_Window1,  !- Name
     Window,                  !- Surface Type
@@ -6006,9 +5158,6 @@
     0.00000,48.73800,0.8312233024,  !- X,Y,Z ==> Vertex 2 {m}
     0.00000,33.304706,0.8312233024,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,33.304706000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
 
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_4_Wall_West_Window2,  !- Name
@@ -6025,9 +5174,6 @@
     0.00000,16.652212,0.8312233024,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,16.652212000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_4_Wall_West_Window3,  !- Name
     Window,                  !- Surface Type
@@ -6042,8 +5188,6 @@
     0.00000,15.433012,0.8312233024,  !- X,Y,Z ==> Vertex 2 {m}
     0.00000,0.00000,0.8312233024,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
 
   FenestrationSurface:Detailed,
     Perimeter_mid_ZN_3_Wall_North_Window,  !- Name
@@ -6165,10 +5309,6 @@
     0.0000,0.0000,34.45132,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000,0.000000,36.036600;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_4_Wall_West_Door1,  !- Name
     Door,                    !- Surface Type
@@ -6183,11 +5323,6 @@
     0.000000000000,33.185179805763,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,32.270779805763,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,32.270779805763,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_4_Wall_West_Door2,  !- Name
@@ -6204,11 +5339,6 @@
     0.000000000000,15.638417982567,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,15.638417982567,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_1_Wall_South_Door1,  !- Name
     Door,                    !- Surface Type
@@ -6223,11 +5353,6 @@
     13.810736114328,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     14.725136114328,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     14.725136114328,0.000000000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_1_Wall_South_Door2,  !- Name
@@ -6244,11 +5369,6 @@
     29.558095630079,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     29.558095630079,0.000000000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_1_Wall_South_Door3,  !- Name
     Door,                    !- Surface Type
@@ -6263,11 +5383,6 @@
     43.526278450605,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     44.440678450605,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     44.440678450605,0.000000000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_1_Wall_South_Door4,  !- Name
@@ -6284,11 +5399,6 @@
     59.344780500539,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     59.344780500539,0.000000000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_2_Wall_East_Door1,  !- Name
     Door,                    !- Surface Type
@@ -6303,11 +5413,6 @@
     73.107200000000,15.598040704848,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     73.107200000000,16.512440704848,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,16.512440704848,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_2_Wall_East_Door2,  !- Name
@@ -6324,11 +5429,6 @@
     73.107200000000,33.123187109866,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,33.123187109866,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_3_Wall_North_Door1,  !- Name
     Door,                    !- Surface Type
@@ -6343,11 +5443,6 @@
     59.294409384709,48.738100000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     58.380009384709,48.738100000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     58.380009384709,48.738100000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_3_Wall_North_Door2,  !- Name
@@ -6364,11 +5459,6 @@
     43.523976131067,48.738100000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     43.523976131067,48.738100000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_3_Wall_North_Door3,  !- Name
     Door,                    !- Surface Type
@@ -6383,11 +5473,6 @@
     29.612533284962,48.738100000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     28.698133284962,48.738100000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     28.698133284962,48.738100000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_3_Wall_North_Door4,  !- Name
@@ -6404,7 +5489,6 @@
     13.822852885612,48.738100000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     13.822852885612,48.738100000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
 !-   ===========  ALL OBJECTS IN CLASS: INTERNALMASS ===========
 
   InternalMass,
@@ -14861,12 +13945,6 @@
     COOLSYS1 CHILLER2 PUMP,  !- Actuated Component Unique Name
     Plant Component Pump:ConstantSpeed,  !- Actuated Component Type
     On/Off Supervisory;      !- Actuated Component Control Type
-
-  EnergyManagementSystem:Actuator,
-    Chiller1PumpFlow,        !- Name
-    COOLSYS1 CHILLER1 PUMP,  !- Actuated Component Unique Name
-    Pump,                    !- Actuated Component Type
-    Pump Mass Flow Rate;     !- Actuated Component Control Type
 
   EnergyManagementSystem:Actuator,
     Chiller2PumpFlow,        !- Name

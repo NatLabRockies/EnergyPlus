@@ -8,7 +8,7 @@ Solving building energy and environmental problems inversely using measured data
 
 The new hybrid modeling approach uses the inverse modeling method to improve the accuracy of the building energy simulation for existing buildings, which adds measured data to solve uncertain model parameters. The hybrid modeling approach builds upon the virtue of the physics-based model taking advantage of measured data. The approach uses measured zone air temperature, humidity ratio, or CO$_2$ concentration to solve highly uncertain parameters such as internal thermal mass, infiltration airflow rate, and people count with the reformulated zone heat, moisture, or CO$_2$ balance equations. Figure~\ref{fig:hybrid-model-solution-diagram} shows the relationship among the measurements and unknown parameters.
 
-\begin{figure}[h]
+\begin{figure}[htbp]
 \begin{center}
 \includegraphics[width=295pt]{media/img_HybridModel-0.png}
 \caption{Relationship among measurements and unknown parameters}\protect \label{fig:hybrid-model-solution-diagram}
@@ -18,7 +18,7 @@ The new hybrid modeling approach uses the inverse modeling method to improve the
 
 Figure~\ref{fig:hybrid-model-conceptual-diagram} illustrates a conceptual diagram that easily express the concept of the hybrid modeling approach with measured air temperature.
 
-\begin{figure}[h]
+\begin{figure}[htbp]
 \begin{center}
 \includegraphics[width=295pt]{media/img_HybridModel-1.png}
 \caption{Hybrid model conceptual diagram}\protect \label{fig:hybrid-model-conceptual-diagram}
@@ -138,7 +138,7 @@ s],\\
 \subsection{Internal thermal mass hybrid modeling method}\label{internal-thermal-mass-hybrid-modeling method}
 There are two approaches to model internal thermal mass in EnergyPlus. One approach is to use the internal mass objects to define construction specifications of internal furnishing materials, and the other is to use the temperature capacitance multipliers. The multiplier increases zone air capacity as it represents the effective storage capacity of the zone interior thermal mass. Figure~\ref {fig:two-approaches-of-representing-interior-thermal-mass-in-EnergyPlus} illustrates two approaches of representing interior thermal mass in EnergyPlus.
 
-\begin{figure}[h]
+\begin{figure}[htbp]
 \begin{center}
 \includegraphics[width=428pt]{media/img_HybridModel-2.png}
 \caption{Two approaches of representing interior thermal mass in EnergyPlus}\protect \label{fig:two-approaches-of-representing-interior-thermal-mass-in-EnergyPlus}

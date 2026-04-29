@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -60,6 +60,8 @@
 #include <EnergyPlus/EPVector.hh>
 #include <EnergyPlus/EnergyPlus.hh>
 
+#include <EnergyPlus/HVACSystemRootFindingAlgorithm.hh>
+
 namespace EnergyPlus {
 
 // Forward declarations
@@ -72,6 +74,17 @@ namespace Weather {
 
 namespace General {
 
+    constexpr int SOLVEROOT_ERROR_INIT = -2;
+    constexpr int SOLVEROOT_ERROR_ITER = -1;
+
+    struct SolveRootStats
+    {
+        RootAlgo algo = RootAlgo::RegulaFalsi;
+        int counts = 0;
+        std::array<int, (int)RootAlgo::Num> algoCounts = {0};
+        std::array<int, (int)RootAlgo::Num> algoIters = {0};
+    };
+
     // A second version that does not require a payload -- use lambdas
     void SolveRoot(const EnergyPlusData &state,
                    Real64 Eps,   // required absolute accuracy
@@ -81,6 +94,15 @@ namespace General {
                    const std::function<Real64(Real64)> &f,
                    Real64 X_0,  // 1st bound of interval that contains the solution
                    Real64 X_1); // 2nd bound of interval that contains the solution
+
+    Real64 SolveRoot2(const EnergyPlusData &state,
+                      Real64 Eps,   // required absolute accuracy
+                      int maxIters, // maximum number of iterations
+                      int &SolFlag, // solution flag
+                      const std::function<Real64(Real64)> &f,
+                      Real64 X_0, // 1st bound of interval that contains the solution
+                      Real64 X_1,
+                      SolveRootStats &config); // 2nd bound of interval that contains the solution
 
     void MovingAvg(Array1D<Real64> &DataIn, int NumItemsInAvg);
 
@@ -124,7 +146,7 @@ namespace General {
                       int EndDate    // End date in sequence
     );
 
-    std::string CreateSysTimeIntervalString(EnergyPlusData &state);
+    std::string CreateSysTimeIntervalString(EnergyPlusData const &state);
 
     int nthDayOfWeekOfMonth(const EnergyPlusData &state,
                             int dayOfWeek,  // day of week (Sunday=1, Monday=2, ...)

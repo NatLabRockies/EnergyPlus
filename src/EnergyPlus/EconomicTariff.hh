@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -623,7 +623,7 @@ namespace EconomicTariff {
 
     void showWarningsBasedOnTotal(EnergyPlusData &state);
 
-    void getMaxAndSum(EnergyPlusData &state, int const varPointer, Real64 &sumResult, Real64 &maxResult);
+    void getMaxAndSum(EnergyPlusData const &state, int const varPointer, Real64 &sumResult, Real64 &maxResult);
 
     void ReportEconomicVariable(EnergyPlusData &state,
                                 std::string const &titleString,
@@ -634,7 +634,7 @@ namespace EconomicTariff {
 
     void selectTariff(EnergyPlusData &state);
 
-    void GetMonthlyCostForResource(EnergyPlusData &state, Constant::eResource const inResourceNumber, Array1A<Real64> outMonthlyCosts);
+    void GetMonthlyCostForResource(EnergyPlusData const &state, Constant::eResource const inResourceNumber, Array1A<Real64> outMonthlyCosts);
 
 } // namespace EconomicTariff
 

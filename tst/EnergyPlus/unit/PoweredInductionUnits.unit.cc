@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -595,7 +595,7 @@ TEST_F(EnergyPlusFixture, PIUArrayOutOfBounds)
     int PIUNum = 1;
     state->dataPowerInductionUnits->PIU(PIUNum).Name = "Series PIU";
     state->dataPowerInductionUnits->PIU(PIUNum).UnitType_Num = DataDefineEquip::ZnAirLoopEquipType::SingleDuct_SeriesPIU_Reheat;
-    state->dataPowerInductionUnits->PIU(PIUNum).HCoilType = PoweredInductionUnits::HtgCoilType::Electric;
+    state->dataPowerInductionUnits->PIU(PIUNum).heatCoilType = HVAC::CoilType::HeatingElectric;
 
     // Go into all of the autosize blocks (aside from Heating/Steam coils)
     state->dataPowerInductionUnits->PIU(PIUNum).MaxPriAirVolFlow = AutoSize;
@@ -3120,7 +3120,7 @@ TEST_F(EnergyPlusFixture, PIU_reportTerminalUnit)
     piu(1).UnitType = "AirTerminal:SingleDuct:SeriesPIU:Reheat";
     piu(1).MaxPriAirVolFlow = 0.30;
     piu(1).MaxSecAirVolFlow = 0.25;
-    piu(1).HCoilType = PoweredInductionUnits::HtgCoilType::Electric;
+    piu(1).heatCoilType = HVAC::CoilType::HeatingElectric;
     piu(1).fanType = HVAC::FanType::Constant;
     piu(1).FanName = "FanA";
 

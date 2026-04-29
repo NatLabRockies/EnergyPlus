@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -147,7 +147,6 @@ namespace Avail {
         // Manage the simulation of the System Availability Managers
 
         using DataZoneEquipment::NumValidSysAvailZoneComponents;
-        using namespace DataLoopNode;
         using namespace DataAirLoop;
         using namespace DataPlant;
 
@@ -163,7 +162,7 @@ namespace Avail {
         int ZoneEquipType;              // Type of ZoneHVAC:* component
         int CompNum;                    // Index of ZoneHVAC:* component
         int ZoneCompAvailMgrNum;        // Index of availability manager associated with the ZoneHVAC:* component
-        int constexpr DummyArgument(1); // This variable is used when SimSysAvailManager is called for a ZoneHVAC:* component
+        int constexpr DummyArgument(0); // This variable is used when SimSysAvailManager is called for a ZoneHVAC:* component
 
         if (state.dataAvail->GetAvailMgrInputFlag) {
             GetSysAvailManagerInputs(state);
@@ -272,6 +271,7 @@ namespace Avail {
                                                          zcam.availManagers(ZoneCompAvailMgrNum).Num,
                                                          DummyArgument,
                                                          previousAvailStatus,
+                                                         zcam.ZoneNum,
                                                          ZoneEquipType,
                                                          CompNum);
                         if (availStatus == Status::ForceOff) {
@@ -324,11 +324,10 @@ namespace Avail {
         // Uses InputProcessor "Get" routines to obtain data.
 
         // Using/Aliasing
-        using NodeInputManager::GetOnlySingleNode;
-        using NodeInputManager::MarkNode;
-        using namespace DataLoopNode;
         using DataZoneEquipment::cValidSysAvailManagerCompTypes;
         using DataZoneEquipment::NumValidSysAvailZoneComponents;
+        using Node::GetOnlySingleNode;
+        using Node::MarkNode;
 
         // SUBROUTINE PARAMETER DEFINITIONS:
         static constexpr std::string_view RoutineName("GetSysAvailManagerInputs: "); // include trailing blank
@@ -882,31 +881,25 @@ namespace Avail {
                 diffThermoMgr.HotNode = GetOnlySingleNode(state,
                                                           cAlphaArgs(2),
                                                           ErrorsFound,
-                                                          DataLoopNode::ConnectionObjectType::AvailabilityManagerDifferentialThermostat,
+                                                          Node::ConnectionObjectType::AvailabilityManagerDifferentialThermostat,
                                                           cAlphaArgs(1),
-                                                          DataLoopNode::NodeFluidType::Blank,
-                                                          DataLoopNode::ConnectionType::Sensor,
-                                                          NodeInputManager::CompFluidStream::Primary,
-                                                          ObjectIsNotParent);
-                MarkNode(state,
-                         diffThermoMgr.HotNode,
-                         DataLoopNode::ConnectionObjectType::AvailabilityManagerDifferentialThermostat,
-                         cAlphaArgs(1),
-                         "Hot Node");
+                                                          Node::FluidType::Blank,
+                                                          Node::ConnectionType::Sensor,
+                                                          Node::CompFluidStream::Primary,
+                                                          Node::ObjectIsNotParent);
+                MarkNode(
+                    state, diffThermoMgr.HotNode, Node::ConnectionObjectType::AvailabilityManagerDifferentialThermostat, cAlphaArgs(1), "Hot Node");
                 diffThermoMgr.ColdNode = GetOnlySingleNode(state,
                                                            cAlphaArgs(3),
                                                            ErrorsFound,
-                                                           DataLoopNode::ConnectionObjectType::AvailabilityManagerDifferentialThermostat,
+                                                           Node::ConnectionObjectType::AvailabilityManagerDifferentialThermostat,
                                                            cAlphaArgs(1),
-                                                           DataLoopNode::NodeFluidType::Blank,
-                                                           DataLoopNode::ConnectionType::Sensor,
-                                                           NodeInputManager::CompFluidStream::Primary,
-                                                           ObjectIsNotParent);
-                MarkNode(state,
-                         diffThermoMgr.ColdNode,
-                         DataLoopNode::ConnectionObjectType::AvailabilityManagerDifferentialThermostat,
-                         cAlphaArgs(1),
-                         "Cold Node");
+                                                           Node::FluidType::Blank,
+                                                           Node::ConnectionType::Sensor,
+                                                           Node::CompFluidStream::Primary,
+                                                           Node::ObjectIsNotParent);
+                MarkNode(
+                    state, diffThermoMgr.ColdNode, Node::ConnectionObjectType::AvailabilityManagerDifferentialThermostat, cAlphaArgs(1), "Cold Node");
 
                 diffThermoMgr.TempDiffOn = rNumericArgs(1);
 
@@ -917,8 +910,8 @@ namespace Avail {
                 }
 
                 if (diffThermoMgr.TempDiffOff > diffThermoMgr.TempDiffOn) {
-                    ShowSevereError(state, format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, cAlphaArgs(1)));
-                    ShowContinueError(state, format("The {} is greater than the {}.", cNumericFieldNames(2), cNumericFieldNames(1)));
+                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, cAlphaArgs(1)));
+                    ShowContinueError(state, EnergyPlus::format("The {} is greater than the {}.", cNumericFieldNames(2), cNumericFieldNames(1)));
                     ErrorsFound = true;
                 }
 
@@ -961,17 +954,14 @@ namespace Avail {
                 hiTurnOffMgr.Node = GetOnlySingleNode(state,
                                                       cAlphaArgs(2),
                                                       ErrorsFound,
-                                                      DataLoopNode::ConnectionObjectType::AvailabilityManagerHighTemperatureTurnOff,
+                                                      Node::ConnectionObjectType::AvailabilityManagerHighTemperatureTurnOff,
                                                       cAlphaArgs(1),
-                                                      DataLoopNode::NodeFluidType::Blank,
-                                                      DataLoopNode::ConnectionType::Sensor,
-                                                      NodeInputManager::CompFluidStream::Primary,
-                                                      ObjectIsNotParent);
-                MarkNode(state,
-                         hiTurnOffMgr.Node,
-                         DataLoopNode::ConnectionObjectType::AvailabilityManagerHighTemperatureTurnOff,
-                         cAlphaArgs(1),
-                         "Sensor Node");
+                                                      Node::FluidType::Blank,
+                                                      Node::ConnectionType::Sensor,
+                                                      Node::CompFluidStream::Primary,
+                                                      Node::ObjectIsNotParent);
+                MarkNode(
+                    state, hiTurnOffMgr.Node, Node::ConnectionObjectType::AvailabilityManagerHighTemperatureTurnOff, cAlphaArgs(1), "Sensor Node");
 
                 hiTurnOffMgr.Temp = rNumericArgs(1);
 
@@ -1014,17 +1004,13 @@ namespace Avail {
                 hiTurnOnMgr.Node = GetOnlySingleNode(state,
                                                      cAlphaArgs(2),
                                                      ErrorsFound,
-                                                     DataLoopNode::ConnectionObjectType::AvailabilityManagerHighTemperatureTurnOn,
+                                                     Node::ConnectionObjectType::AvailabilityManagerHighTemperatureTurnOn,
                                                      cAlphaArgs(1),
-                                                     DataLoopNode::NodeFluidType::Blank,
-                                                     DataLoopNode::ConnectionType::Sensor,
-                                                     NodeInputManager::CompFluidStream::Primary,
-                                                     ObjectIsNotParent);
-                MarkNode(state,
-                         hiTurnOnMgr.Node,
-                         DataLoopNode::ConnectionObjectType::AvailabilityManagerHighTemperatureTurnOn,
-                         cAlphaArgs(1),
-                         "Sensor Node");
+                                                     Node::FluidType::Blank,
+                                                     Node::ConnectionType::Sensor,
+                                                     Node::CompFluidStream::Primary,
+                                                     Node::ObjectIsNotParent);
+                MarkNode(state, hiTurnOnMgr.Node, Node::ConnectionObjectType::AvailabilityManagerHighTemperatureTurnOn, cAlphaArgs(1), "Sensor Node");
 
                 hiTurnOnMgr.Temp = rNumericArgs(1);
 
@@ -1068,17 +1054,14 @@ namespace Avail {
                 loTurnOffMgr.Node = GetOnlySingleNode(state,
                                                       cAlphaArgs(2),
                                                       ErrorsFound,
-                                                      DataLoopNode::ConnectionObjectType::AvailabilityManagerLowTemperatureTurnOff,
+                                                      Node::ConnectionObjectType::AvailabilityManagerLowTemperatureTurnOff,
                                                       cAlphaArgs(1),
-                                                      DataLoopNode::NodeFluidType::Blank,
-                                                      DataLoopNode::ConnectionType::Sensor,
-                                                      NodeInputManager::CompFluidStream::Primary,
-                                                      ObjectIsNotParent);
-                MarkNode(state,
-                         loTurnOffMgr.Node,
-                         DataLoopNode::ConnectionObjectType::AvailabilityManagerLowTemperatureTurnOff,
-                         cAlphaArgs(1),
-                         "Sensor Node");
+                                                      Node::FluidType::Blank,
+                                                      Node::ConnectionType::Sensor,
+                                                      Node::CompFluidStream::Primary,
+                                                      Node::ObjectIsNotParent);
+                MarkNode(
+                    state, loTurnOffMgr.Node, Node::ConnectionObjectType::AvailabilityManagerLowTemperatureTurnOff, cAlphaArgs(1), "Sensor Node");
 
                 loTurnOffMgr.Temp = rNumericArgs(1);
 
@@ -1128,17 +1111,13 @@ namespace Avail {
                 loTurnOnMgr.Node = GetOnlySingleNode(state,
                                                      cAlphaArgs(2),
                                                      ErrorsFound,
-                                                     DataLoopNode::ConnectionObjectType::AvailabilityManagerLowTemperatureTurnOn,
+                                                     Node::ConnectionObjectType::AvailabilityManagerLowTemperatureTurnOn,
                                                      cAlphaArgs(1),
-                                                     DataLoopNode::NodeFluidType::Blank,
-                                                     DataLoopNode::ConnectionType::Sensor,
-                                                     NodeInputManager::CompFluidStream::Primary,
-                                                     ObjectIsNotParent);
-                MarkNode(state,
-                         loTurnOnMgr.Node,
-                         DataLoopNode::ConnectionObjectType::AvailabilityManagerLowTemperatureTurnOn,
-                         cAlphaArgs(1),
-                         "Sensor Node");
+                                                     Node::FluidType::Blank,
+                                                     Node::ConnectionType::Sensor,
+                                                     Node::CompFluidStream::Primary,
+                                                     Node::ObjectIsNotParent);
+                MarkNode(state, loTurnOnMgr.Node, Node::ConnectionObjectType::AvailabilityManagerLowTemperatureTurnOn, cAlphaArgs(1), "Sensor Node");
 
                 loTurnOnMgr.Temp = rNumericArgs(1);
 
@@ -1233,7 +1212,7 @@ namespace Avail {
         lNumericFieldBlanks.deallocate();
 
         if (ErrorsFound) {
-            ShowFatalError(state, format("{}Errors found in input.  Preceding condition(s) cause termination.", RoutineName));
+            ShowFatalError(state, EnergyPlus::format("{}Errors found in input.  Preceding condition(s) cause termination.", RoutineName));
         }
     } // GetSysAvailManagerInputs()
 
@@ -1261,7 +1240,6 @@ namespace Avail {
         state.dataAvail->NumAvailManagerLists = ip->getNumObjectsFound(state, cCurrentModuleObject);
 
         if (state.dataAvail->NumAvailManagerLists > 0) {
-            bool ErrorsFound = false;
             state.dataAvail->ListData.allocate(state.dataAvail->NumAvailManagerLists);
             auto const instances = ip->epJSON.find(cCurrentModuleObject);
             auto const &objectSchemaProps = ip->getObjectSchemaProps(state, cCurrentModuleObject);
@@ -1303,10 +1281,6 @@ namespace Avail {
                         // these are validated individually in the GetPlant, GetSystem and GetZoneEq lists
                     }
                 }
-            }
-
-            if (ErrorsFound) {
-                ShowFatalError(state, "GetSysAvailManagerListInputs: Program terminates due to preceding conditions.");
             }
         }
     } // GetSysAvailManagerListInputs()
@@ -1360,27 +1334,31 @@ namespace Avail {
 
                 if (am.type == ManagerType::DiffThermo && Num != availMgr.NumAvailManagers) {
                     ShowWarningError(
-                        state, format("GetPlantLoopData/GetPlantAvailabilityManager: AvailabilityManager:DifferentialThermostat=\"{}\".", am.Name));
+                        state,
+                        EnergyPlus::format("GetPlantLoopData/GetPlantAvailabilityManager: AvailabilityManager:DifferentialThermostat=\"{}\".",
+                                           am.Name));
                     ShowContinueError(
                         state, "...is not the last manager on the AvailabilityManagerAssignmentList.  Any remaining managers will not be used.");
-                    ShowContinueError(state, format("Occurs in AvailabilityManagerAssignmentList =\"{}\".", AvailabilityListName));
+                    ShowContinueError(state, EnergyPlus::format("Occurs in AvailabilityManagerAssignmentList =\"{}\".", AvailabilityListName));
                 }
                 if (am.type == ManagerType::NightVent || am.type == ManagerType::NightCycle) {
-                    ShowSevereError(state,
-                                    format("GetPlantLoopData/GetPlantAvailabilityManager: Invalid System Availability Manager Type entered=\"{}\".",
+                    ShowSevereError(
+                        state,
+                        EnergyPlus::format("GetPlantLoopData/GetPlantAvailabilityManager: Invalid System Availability Manager Type entered=\"{}\".",
                                            managerTypeNames[(int)am.type]));
                     ShowContinueError(state, "...this manager is not used in a Plant Loop.");
-                    ShowContinueError(state, format("Occurs in AvailabilityManagerAssignmentList=\"{}\".", AvailabilityListName));
+                    ShowContinueError(state, EnergyPlus::format("Occurs in AvailabilityManagerAssignmentList=\"{}\".", AvailabilityListName));
                     ErrorsFound = true;
                 }
             } // End of Num Loop
 
         } else {
             if (!AvailabilityListName.empty()) {
-                ShowWarningError(state,
-                                 format("GetPlantLoopData/GetPlantAvailabilityManager: AvailabilityManagerAssignmentList={} not found in lists.  No "
-                                        "availability will be used.",
-                                        AvailabilityListName));
+                ShowWarningError(
+                    state,
+                    EnergyPlus::format("GetPlantLoopData/GetPlantAvailabilityManager: AvailabilityManagerAssignmentList={} not found in lists.  No "
+                                       "availability will be used.",
+                                       AvailabilityListName));
             }
             availMgr.NumAvailManagers = 0;
             availMgr.availStatus = Status::NoAction;
@@ -1439,19 +1417,22 @@ namespace Avail {
 
                 if (am.type == ManagerType::DiffThermo && Num != availMgr.NumAvailManagers) {
                     ShowWarningError(
-                        state, format("GetAirPathData/GetAirLoopAvailabilityManager: AvailabilityManager:DifferentialThermostat=\"{}\".", am.Name));
+                        state,
+                        EnergyPlus::format("GetAirPathData/GetAirLoopAvailabilityManager: AvailabilityManager:DifferentialThermostat=\"{}\".",
+                                           am.Name));
                     ShowContinueError(
                         state, "...is not the last manager on the AvailabilityManagerAssignmentList.  Any remaining managers will not be used.");
-                    ShowContinueError(state, format("Occurs in AvailabilityManagerAssignmentList=\"{}\".", am.Name));
+                    ShowContinueError(state, EnergyPlus::format("Occurs in AvailabilityManagerAssignmentList=\"{}\".", am.Name));
                 }
             } // End of Num Loop
 
         } else {
             if (!AvailabilityListName.empty()) {
-                ShowWarningError(state,
-                                 format("GetAirPathData/GetAirLoopAvailabilityManager: AvailabilityManagerAssignmentList={} not found in lists.  No "
-                                        "availability will be used.",
-                                        AvailabilityListName));
+                ShowWarningError(
+                    state,
+                    EnergyPlus::format("GetAirPathData/GetAirLoopAvailabilityManager: AvailabilityManagerAssignmentList={} not found in lists.  No "
+                                       "availability will be used.",
+                                       AvailabilityListName));
             }
             availMgr.NumAvailManagers = 0;
             availMgr.availStatus = Status::NoAction;
@@ -1510,10 +1491,11 @@ namespace Avail {
                     assert(am.type != ManagerType::Invalid);
 
                     if (am.type == ManagerType::DiffThermo && Num != availMgr.NumAvailManagers) {
-                        ShowWarningError(state, format("GetZoneEqAvailabilityManager: AvailabilityManager:DifferentialThermostat=\"{}\".", am.Name));
+                        ShowWarningError(
+                            state, EnergyPlus::format("GetZoneEqAvailabilityManager: AvailabilityManager:DifferentialThermostat=\"{}\".", am.Name));
                         ShowContinueError(
                             state, "...is not the last manager on the AvailabilityManagerAssignmentList.  Any remaining managers will not be used.");
-                        ShowContinueError(state, format("Occurs in AvailabilityManagerAssignmentList=\"{}\".", am.Name));
+                        ShowContinueError(state, EnergyPlus::format("Occurs in AvailabilityManagerAssignmentList=\"{}\".", am.Name));
                     }
                 } // End of Num Loop
             }
@@ -1670,6 +1652,14 @@ namespace Avail {
                 e.availStatus = Status::NoAction;
                 e.isSimulated = false;
             }
+            if (!allocated(state.dataAvail->OptStart)) {
+                state.dataAvail->OptStart.allocate(state.dataGlobal->NumOfZones);
+            }
+
+            // OptStartFlag needs to be reset each timestep to not stay set to true post-occupancy
+            for (auto &optStart : state.dataAvail->OptStart) {
+                optStart.OptStartFlag = false;
+            }
         }
         //  HybridVentSysAvailMgrData%AvailStatus= Status::NoAction
         if (allocated(state.dataAvail->ZoneComp)) {
@@ -1689,6 +1679,7 @@ namespace Avail {
                               int &SysAvailNum,
                               int const PriAirSysNum, // Primary Air System index. If being called for a ZoneHVAC:* component
                               Status const previousStatus,
+                              int const zoneNum,                           // zone index of zone availability manager
                               ObjexxFCL::Optional_int_const ZoneEquipType, // Type of ZoneHVAC:* equipment component
                               ObjexxFCL::Optional_int_const CompNum        // Index of ZoneHVAC:* equipment component
     )
@@ -1714,7 +1705,7 @@ namespace Avail {
             if (SysAvailNum > 0) {
                 availStatus = CalcSchedSysAvailMgr(state, SysAvailNum);
             } else {
-                ShowFatalError(state, format("SimSysAvailManager: AvailabilityManager:Scheduled not found: {}", SysAvailName));
+                ShowFatalError(state, EnergyPlus::format("SimSysAvailManager: AvailabilityManager:Scheduled not found: {}", SysAvailName));
             }
 
         } break;
@@ -1725,7 +1716,7 @@ namespace Avail {
             if (SysAvailNum > 0) {
                 availStatus = CalcSchedOnSysAvailMgr(state, SysAvailNum);
             } else {
-                ShowFatalError(state, format("SimSysAvailManager: AvailabilityManager:ScheduledOn not found: {}", SysAvailName));
+                ShowFatalError(state, EnergyPlus::format("SimSysAvailManager: AvailabilityManager:ScheduledOn not found: {}", SysAvailName));
             }
 
         } break;
@@ -1736,7 +1727,7 @@ namespace Avail {
             if (SysAvailNum > 0) {
                 availStatus = CalcSchedOffSysAvailMgr(state, SysAvailNum);
             } else {
-                ShowFatalError(state, format("SimSysAvailManager: AvailabilityManager:ScheduledOff not found: {}", SysAvailName));
+                ShowFatalError(state, EnergyPlus::format("SimSysAvailManager: AvailabilityManager:ScheduledOff not found: {}", SysAvailName));
             }
 
         } break;
@@ -1747,7 +1738,7 @@ namespace Avail {
             if (SysAvailNum > 0) {
                 availStatus = CalcNCycSysAvailMgr(state, SysAvailNum, PriAirSysNum, ZoneEquipType, CompNum);
             } else {
-                ShowFatalError(state, format("SimSysAvailManager: AvailabilityManager:NightCycle not found: {}", SysAvailName));
+                ShowFatalError(state, EnergyPlus::format("SimSysAvailManager: AvailabilityManager:NightCycle not found: {}", SysAvailName));
             }
 
         } break;
@@ -1756,9 +1747,9 @@ namespace Avail {
                 SysAvailNum = Util::FindItemInList(SysAvailName, state.dataAvail->OptimumStartData);
             }
             if (SysAvailNum > 0) {
-                availStatus = CalcOptStartSysAvailMgr(state, SysAvailNum, PriAirSysNum, ZoneEquipType, CompNum);
+                availStatus = CalcOptStartSysAvailMgr(state, SysAvailNum, PriAirSysNum, zoneNum, ZoneEquipType, CompNum);
             } else {
-                ShowFatalError(state, format("SimSysAvailManager: AvailabilityManager:OptimumStart not found: {}", SysAvailName));
+                ShowFatalError(state, EnergyPlus::format("SimSysAvailManager: AvailabilityManager:OptimumStart not found: {}", SysAvailName));
             }
 
         } break;
@@ -1769,7 +1760,7 @@ namespace Avail {
             if (SysAvailNum > 0) {
                 availStatus = CalcNVentSysAvailMgr(state, SysAvailNum, PriAirSysNum, present(ZoneEquipType));
             } else {
-                ShowFatalError(state, format("SimSysAvailManager: AvailabilityManager:NightVentilation not found: {}", SysAvailName));
+                ShowFatalError(state, EnergyPlus::format("SimSysAvailManager: AvailabilityManager:NightVentilation not found: {}", SysAvailName));
             }
 
         } break;
@@ -1780,7 +1771,8 @@ namespace Avail {
             if (SysAvailNum > 0) {
                 availStatus = CalcDiffTSysAvailMgr(state, SysAvailNum, previousStatus);
             } else {
-                ShowFatalError(state, format("SimSysAvailManager: AvailabilityManager:DifferentialThermostat not found: {}", SysAvailName));
+                ShowFatalError(state,
+                               EnergyPlus::format("SimSysAvailManager: AvailabilityManager:DifferentialThermostat not found: {}", SysAvailName));
             }
         } break;
         case ManagerType::HiTempTOff: { // 'AvailabilityManager:HighTemperatureTurnOff'
@@ -1790,7 +1782,8 @@ namespace Avail {
             if (SysAvailNum > 0) {
                 availStatus = CalcHiTurnOffSysAvailMgr(state, SysAvailNum);
             } else {
-                ShowFatalError(state, format("SimSysAvailManager: AvailabilityManager:HighTemperatureTurnOff not found: {}", SysAvailName));
+                ShowFatalError(state,
+                               EnergyPlus::format("SimSysAvailManager: AvailabilityManager:HighTemperatureTurnOff not found: {}", SysAvailName));
             }
         } break;
         case ManagerType::HiTempTOn: { // 'AvailabilityManager:HighTemperatureTurnOn'
@@ -1800,7 +1793,8 @@ namespace Avail {
             if (SysAvailNum > 0) {
                 availStatus = CalcHiTurnOnSysAvailMgr(state, SysAvailNum);
             } else {
-                ShowFatalError(state, format("SimSysAvailManager: AvailabilityManager:HighTemperatureTurnOn not found: {}", SysAvailName));
+                ShowFatalError(state,
+                               EnergyPlus::format("SimSysAvailManager: AvailabilityManager:HighTemperatureTurnOn not found: {}", SysAvailName));
             }
         } break;
         case ManagerType::LoTempTOff: { // 'AvailabilityManager:LowTemperatureTurnOff'
@@ -1810,7 +1804,8 @@ namespace Avail {
             if (SysAvailNum > 0) {
                 availStatus = CalcLoTurnOffSysAvailMgr(state, SysAvailNum);
             } else {
-                ShowFatalError(state, format("SimSysAvailManager: AvailabilityManager:LowTemperatureTurnOff not found: {}", SysAvailName));
+                ShowFatalError(state,
+                               EnergyPlus::format("SimSysAvailManager: AvailabilityManager:LowTemperatureTurnOff not found: {}", SysAvailName));
             }
 
         } break;
@@ -1821,14 +1816,14 @@ namespace Avail {
             if (SysAvailNum > 0) {
                 availStatus = CalcLoTurnOnSysAvailMgr(state, SysAvailNum);
             } else {
-                ShowFatalError(state, format("SimSysAvailManager: AvailabilityManager:LowTemperatureTurnOn not found: {}", SysAvailName));
+                ShowFatalError(state, EnergyPlus::format("SimSysAvailManager: AvailabilityManager:LowTemperatureTurnOn not found: {}", SysAvailName));
             }
 
         } break;
 
         default: {
-            ShowSevereError(state, format("AvailabilityManager Type not found: {}", type));
-            ShowContinueError(state, format("Occurs in Manager={}", SysAvailName));
+            ShowSevereError(state, EnergyPlus::format("AvailabilityManager Type not found: {}", type));
+            ShowContinueError(state, EnergyPlus::format("Occurs in Manager={}", SysAvailName));
             ShowFatalError(state, "Preceding condition causes termination.");
         }
         }
@@ -2036,8 +2031,9 @@ namespace Avail {
                 case NightCycleControlType::OnAny:
                 case NightCycleControlType::OnZoneFansOnly: {
                     if (ZoneCompNCControlType(SysAvailNum)) {
-                        ShowWarningError(state,
-                                         format("AvailabilityManager:NightCycle = {}, is specified for a ZoneHVAC component.", nightCycleMgr.Name));
+                        ShowWarningError(
+                            state,
+                            EnergyPlus::format("AvailabilityManager:NightCycle = {}, is specified for a ZoneHVAC component.", nightCycleMgr.Name));
                         ShowContinueError(state, "The only valid Control Types for ZoneHVAC components are Status::CycleOnControlZone and StayOff.");
                         ShowContinueError(state, "Night Cycle operation will not be modeled for ZoneHVAC components that reference this manager.");
                         ZoneCompNCControlType(SysAvailNum) = false;
@@ -2266,6 +2262,7 @@ namespace Avail {
     Status CalcOptStartSysAvailMgr(EnergyPlusData &state,
                                    int const SysAvailNum,  // number of the current scheduled system availability manager
                                    int const PriAirSysNum, // number of the primary air system affected by this Avail. Manager
+                                   int const zoneNum,      // zone index for zone availability managers
                                    [[maybe_unused]] ObjexxFCL::Optional_int_const ZoneEquipType, // Type of ZoneHVAC equipment component
                                    [[maybe_unused]] ObjexxFCL::Optional_int_const CompNum        // Index of ZoneHVAC equipment component
     )
@@ -2373,14 +2370,6 @@ namespace Avail {
 
             DayValues.allocate(state.dataGlobal->TimeStepsInHour, Constant::iHoursInDay);
             DayValuesTmr.allocate(state.dataGlobal->TimeStepsInHour, Constant::iHoursInDay);
-            if (!allocated(state.dataAvail->OptStart)) {
-                state.dataAvail->OptStart.allocate(state.dataGlobal->NumOfZones);
-            }
-
-            // OptStartFlag needs to be reset each timestep to not stay set to true post-occupancy
-            for (auto &optStart : state.dataAvail->OptStart) {
-                optStart.OptStartFlag = false;
-            }
 
             // reset OptStartData once per beginning of day
             if (state.dataGlobal->BeginDayFlag) {
@@ -2436,17 +2425,23 @@ namespace Avail {
             }
 
             // Pass the start time to ZoneTempPredictorCorrector
-            for (int counter = 1; counter <= state.dataAirLoop->AirToZoneNodeInfo(PriAirSysNum).NumZonesCooled; ++counter) {
-                int actZoneNum = state.dataAirLoop->AirToZoneNodeInfo(PriAirSysNum).CoolCtrlZoneNums(counter);
-                auto &optStart = state.dataAvail->OptStart(actZoneNum);
+            if (zoneNum == 0) {
+                for (int counter = 1; counter <= state.dataAirLoop->AirToZoneNodeInfo(PriAirSysNum).NumZonesCooled; ++counter) {
+                    int actZoneNum = state.dataAirLoop->AirToZoneNodeInfo(PriAirSysNum).CoolCtrlZoneNums(counter);
+                    auto &optStart = state.dataAvail->OptStart(actZoneNum);
+                    optStart.OccStartTime = FanStartTime;
+                    optStart.ActualZoneNum = actZoneNum;
+                }
+                for (int counter = 1; counter <= state.dataAirLoop->AirToZoneNodeInfo(PriAirSysNum).NumZonesHeated; ++counter) {
+                    int actZoneNum = state.dataAirLoop->AirToZoneNodeInfo(PriAirSysNum).HeatCtrlZoneNums(counter);
+                    auto &optStart = state.dataAvail->OptStart(actZoneNum);
+                    optStart.OccStartTime = FanStartTime;
+                    optStart.ActualZoneNum = actZoneNum;
+                }
+            } else {
+                auto &optStart = state.dataAvail->OptStart(zoneNum);
                 optStart.OccStartTime = FanStartTime;
-                optStart.ActualZoneNum = actZoneNum;
-            }
-            for (int counter = 1; counter <= state.dataAirLoop->AirToZoneNodeInfo(PriAirSysNum).NumZonesHeated; ++counter) {
-                int actZoneNum = state.dataAirLoop->AirToZoneNodeInfo(PriAirSysNum).HeatCtrlZoneNums(counter);
-                auto &optStart = state.dataAvail->OptStart(actZoneNum);
-                optStart.OccStartTime = FanStartTime;
-                optStart.ActualZoneNum = actZoneNum;
+                optStart.ActualZoneNum = zoneNum;
             }
 
             if (state.dataEnvrn->DSTIndicator > 0) {
@@ -2484,7 +2479,7 @@ namespace Avail {
                                 OSReportVarFlag = false;
                             }
                             availStatus = Status::CycleOn;
-                            OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                            OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                         } else {
                             availStatus = Status::NoAction;
                             OSReportVarFlag = true;
@@ -2499,7 +2494,7 @@ namespace Avail {
                                 OSReportVarFlag = false;
                             }
                             availStatus = Status::CycleOn;
-                            OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                            OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                         } else {
                             availStatus = Status::NoAction;
                             OSReportVarFlag = true;
@@ -2550,7 +2545,7 @@ namespace Avail {
                                     OSReportVarFlag = true;
                                 } else if (CycleOnFlag) {
                                     availStatus = Status::CycleOn;
-                                    OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                    OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                                     if (state.dataGlobal->CurrentTime > FanStartTime) {
                                         CycleOnFlag = false;
                                     }
@@ -2561,7 +2556,7 @@ namespace Avail {
                                         NumHoursBeforeOccupancy = DeltaTime;
                                         OSReportVarFlag = false;
                                     }
-                                    OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                    OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                                 } else {
                                     availStatus = Status::NoAction;
                                     CycleOnFlag = false;
@@ -2575,7 +2570,7 @@ namespace Avail {
                                     OSReportVarFlag = true;
                                 } else if (CycleOnFlag) {
                                     availStatus = Status::CycleOn;
-                                    OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                    OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                                     if (state.dataGlobal->CurrentTime > FanStartTime && state.dataGlobal->CurrentTime < PreStartTimeTmr) {
                                         CycleOnFlag = false;
                                     }
@@ -2586,7 +2581,7 @@ namespace Avail {
                                     }
                                     availStatus = Status::CycleOn;
                                     CycleOnFlag = true;
-                                    OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                    OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                                 } else {
                                     availStatus = Status::NoAction;
                                     CycleOnFlag = false;
@@ -2621,7 +2616,7 @@ namespace Avail {
                                 OSReportVarFlag = true;
                             } else if (CycleOnFlag) {
                                 availStatus = Status::CycleOn;
-                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                             } else if (PreStartTime < state.dataGlobal->CurrentTime) {
                                 if (OSReportVarFlag) {
                                     NumHoursBeforeOccupancy = DeltaTime;
@@ -2629,7 +2624,7 @@ namespace Avail {
                                 }
                                 availStatus = Status::CycleOn;
                                 CycleOnFlag = true;
-                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                             } else {
                                 availStatus = Status::NoAction;
                                 CycleOnFlag = false;
@@ -2643,7 +2638,7 @@ namespace Avail {
                                 OSReportVarFlag = true;
                             } else if (CycleOnFlag) {
                                 availStatus = Status::CycleOn;
-                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                             } else if (PreStartTime < state.dataGlobal->CurrentTime || PreStartTimeTmr < state.dataGlobal->CurrentTime) {
                                 if (OSReportVarFlag) {
                                     NumHoursBeforeOccupancy = DeltaTime;
@@ -2651,7 +2646,7 @@ namespace Avail {
                                 }
                                 availStatus = Status::CycleOn;
                                 CycleOnFlag = true;
-                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                             } else {
                                 availStatus = Status::NoAction;
                                 CycleOnFlag = false;
@@ -2711,7 +2706,7 @@ namespace Avail {
                                 OSReportVarFlag = true;
                             } else if (CycleOnFlag) {
                                 availStatus = Status::CycleOn;
-                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                                 if (state.dataGlobal->CurrentTime > FanStartTime) {
                                     CycleOnFlag = false;
                                 }
@@ -2722,7 +2717,7 @@ namespace Avail {
                                 }
                                 availStatus = Status::CycleOn;
                                 CycleOnFlag = true;
-                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                             } else {
                                 availStatus = Status::NoAction;
                                 CycleOnFlag = false;
@@ -2736,7 +2731,7 @@ namespace Avail {
                                 OSReportVarFlag = true;
                             } else if (CycleOnFlag) {
                                 availStatus = Status::CycleOn;
-                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                                 if (state.dataGlobal->CurrentTime > FanStartTime && state.dataGlobal->CurrentTime < PreStartTimeTmr) {
                                     CycleOnFlag = false;
                                 }
@@ -2747,7 +2742,7 @@ namespace Avail {
                                 }
                                 availStatus = Status::CycleOn;
                                 CycleOnFlag = true;
-                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                             } else {
                                 availStatus = Status::NoAction;
                                 CycleOnFlag = false;
@@ -2783,7 +2778,7 @@ namespace Avail {
                                 OSReportVarFlag = true;
                             } else if (CycleOnFlag) {
                                 availStatus = Status::CycleOn;
-                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                             } else if (PreStartTime < state.dataGlobal->CurrentTime) {
                                 if (OSReportVarFlag) {
                                     NumHoursBeforeOccupancy = DeltaTime;
@@ -2791,7 +2786,7 @@ namespace Avail {
                                 }
                                 availStatus = Status::CycleOn;
                                 CycleOnFlag = true;
-                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                             } else {
                                 availStatus = Status::NoAction;
                                 CycleOnFlag = false;
@@ -2805,7 +2800,7 @@ namespace Avail {
                                 OSReportVarFlag = true;
                             } else if (CycleOnFlag) {
                                 availStatus = Status::CycleOn;
-                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                             } else if (PreStartTime < state.dataGlobal->CurrentTime || PreStartTimeTmr < state.dataGlobal->CurrentTime) {
                                 if (OSReportVarFlag) {
                                     NumHoursBeforeOccupancy = DeltaTime;
@@ -2813,7 +2808,7 @@ namespace Avail {
                                 }
                                 availStatus = Status::CycleOn;
                                 CycleOnFlag = true;
-                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                             } else {
                                 availStatus = Status::NoAction;
                                 CycleOnFlag = false;
@@ -2905,7 +2900,7 @@ namespace Avail {
                                     OSReportVarFlag = true;
                                 } else if (CycleOnFlag) {
                                     availStatus = Status::CycleOn;
-                                    OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                    OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                                     if (state.dataGlobal->CurrentTime > FanStartTime) {
                                         CycleOnFlag = false;
                                     }
@@ -2940,7 +2935,7 @@ namespace Avail {
                                     CycleOnFlag = true;
                                     ATGUpdateFlag1 = true;
                                     ATGUpdateFlag2 = true;
-                                    OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                    OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                                 } else {
                                     availStatus = Status::NoAction;
                                     CycleOnFlag = false;
@@ -2954,7 +2949,7 @@ namespace Avail {
                                     OSReportVarFlag = true;
                                 } else if (CycleOnFlag) {
                                     availStatus = Status::CycleOn;
-                                    OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                    OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                                     if (state.dataGlobal->CurrentTime > FanStartTime && state.dataGlobal->CurrentTime < PreStartTimeTmr) {
                                         CycleOnFlag = false;
                                     }
@@ -2989,7 +2984,7 @@ namespace Avail {
                                     CycleOnFlag = true;
                                     ATGUpdateFlag1 = true;
                                     ATGUpdateFlag2 = true;
-                                    OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                    OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                                 } else {
                                     availStatus = Status::NoAction;
                                     CycleOnFlag = false;
@@ -3028,7 +3023,7 @@ namespace Avail {
                                     OSReportVarFlag = false;
                                 }
                                 availStatus = Status::CycleOn;
-                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                                 if (!state.dataGlobal->WarmupFlag) {
                                     if (ATGUpdateFlag1) {
                                         ATGUpdateTime1 = state.dataGlobal->CurrentTime;
@@ -3054,7 +3049,7 @@ namespace Avail {
                                 CycleOnFlag = true;
                                 ATGUpdateFlag1 = true;
                                 ATGUpdateFlag2 = true;
-                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                             } else {
                                 availStatus = Status::NoAction;
                                 CycleOnFlag = false;
@@ -3088,7 +3083,7 @@ namespace Avail {
                                         }
                                     }
                                 }
-                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                             } else if (PreStartTime < state.dataGlobal->CurrentTime || PreStartTimeTmr < state.dataGlobal->CurrentTime) {
                                 if (OSReportVarFlag) {
                                     NumHoursBeforeOccupancy = DeltaTime;
@@ -3098,7 +3093,7 @@ namespace Avail {
                                 CycleOnFlag = true;
                                 ATGUpdateFlag1 = true;
                                 ATGUpdateFlag2 = true;
-                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                             } else {
                                 availStatus = Status::NoAction;
                                 CycleOnFlag = false;
@@ -3202,7 +3197,7 @@ namespace Avail {
                                 CycleOnFlag = false;
                             } else if (CycleOnFlag) {
                                 availStatus = Status::CycleOn;
-                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                                 if (state.dataGlobal->CurrentTime > FanStartTime) {
                                     CycleOnFlag = false;
                                 }
@@ -3238,7 +3233,7 @@ namespace Avail {
                                 CycleOnFlag = true;
                                 ATGUpdateFlag1 = true;
                                 ATGUpdateFlag2 = true;
-                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                             } else {
                                 availStatus = Status::NoAction;
                                 CycleOnFlag = false;
@@ -3275,7 +3270,7 @@ namespace Avail {
                                     }
                                 }
                                 //---------------------------------------------------------------------------------
-                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                                 if (state.dataGlobal->CurrentTime > FanStartTime && state.dataGlobal->CurrentTime < PreStartTimeTmr) {
                                     CycleOnFlag = false;
                                 }
@@ -3288,7 +3283,7 @@ namespace Avail {
                                 CycleOnFlag = true;
                                 ATGUpdateFlag1 = true;
                                 ATGUpdateFlag2 = true;
-                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                             } else {
                                 availStatus = Status::NoAction;
                                 CycleOnFlag = false;
@@ -3347,7 +3342,7 @@ namespace Avail {
                                     }
                                 }
                                 //---------------------------------------------------------------------------------
-                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                             } else if (PreStartTime < state.dataGlobal->CurrentTime) {
                                 if (OSReportVarFlag) {
                                     NumHoursBeforeOccupancy = DeltaTime;
@@ -3357,7 +3352,7 @@ namespace Avail {
                                 CycleOnFlag = true;
                                 ATGUpdateFlag1 = true;
                                 ATGUpdateFlag2 = true;
-                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                             } else {
                                 availStatus = Status::NoAction;
                                 CycleOnFlag = false;
@@ -3394,7 +3389,7 @@ namespace Avail {
                                     }
                                 }
                                 //---------------------------------------------------------------------------------
-                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                             } else if (PreStartTime < state.dataGlobal->CurrentTime || PreStartTimeTmr < state.dataGlobal->CurrentTime) {
                                 if (OSReportVarFlag) {
                                     NumHoursBeforeOccupancy = DeltaTime;
@@ -3404,7 +3399,7 @@ namespace Avail {
                                 CycleOnFlag = true;
                                 ATGUpdateFlag2 = true;
                                 ATGUpdateFlag1 = true;
-                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum);
+                                OptStartMgr.SetOptStartFlag(state, PriAirSysNum, zoneNum);
                             } else {
                                 availStatus = Status::NoAction;
                                 CycleOnFlag = false;
@@ -3453,15 +3448,19 @@ namespace Avail {
         return availStatus;
     }
 
-    void SysAvailManagerOptimumStart::SetOptStartFlag(EnergyPlusData &state, int const AirLoopNum)
+    void SysAvailManagerOptimumStart::SetOptStartFlag(EnergyPlusData &state, int const AirLoopNum, int const zoneNum)
     {
         // Set the OptStartFlag true for all zones on the air loop
-        auto const &thisAirToZoneNodeInfo = state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum);
-        for (int counter = 1; counter <= thisAirToZoneNodeInfo.NumZonesCooled; ++counter) {
-            state.dataAvail->OptStart(thisAirToZoneNodeInfo.CoolCtrlZoneNums(counter)).OptStartFlag = true;
-        }
-        for (int counter = 1; counter <= thisAirToZoneNodeInfo.NumZonesHeated; ++counter) {
-            state.dataAvail->OptStart(thisAirToZoneNodeInfo.HeatCtrlZoneNums(counter)).OptStartFlag = true;
+        if (zoneNum > 0) {
+            state.dataAvail->OptStart(zoneNum).OptStartFlag = true;
+        } else {
+            auto const &thisAirToZoneNodeInfo = state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum);
+            for (int counter = 1; counter <= thisAirToZoneNodeInfo.NumZonesCooled; ++counter) {
+                state.dataAvail->OptStart(thisAirToZoneNodeInfo.CoolCtrlZoneNums(counter)).OptStartFlag = true;
+            }
+            for (int counter = 1; counter <= thisAirToZoneNodeInfo.NumZonesHeated; ++counter) {
+                state.dataAvail->OptStart(thisAirToZoneNodeInfo.HeatCtrlZoneNums(counter)).OptStartFlag = true;
+            }
         }
     }
 
@@ -3716,7 +3715,6 @@ namespace Avail {
         // PURPOSE OF THIS SUBROUTINE:
         // Manage the simulation of the Hybrid Ventilation Control System Availability Managers
 
-        using namespace DataLoopNode;
         using namespace DataAirLoop;
 
         int PriAirSysNum; // Primary Air System index
@@ -3765,9 +3763,8 @@ namespace Avail {
         // Uses InputProcessor "Get" routines to obtain data.
 
         // Using/Aliasing
-        using NodeInputManager::GetOnlySingleNode;
-        using NodeInputManager::MarkNode;
-        using namespace DataLoopNode;
+        using Node::GetOnlySingleNode;
+        using Node::MarkNode;
 
         using Curve::CurveValue;
         using Curve::GetCurveIndex;
@@ -3854,20 +3851,22 @@ namespace Avail {
                                        "All zones using this schedule have no hybrid ventilation control.");
             }
             if (SchedMax > 7.0) {
-                ShowSevereCustomField(state,
-                                      eoh,
-                                      ipsc->cAlphaFieldNames(4),
-                                      ipsc->cAlphaArgs(4),
-                                      format("Maximum value should be 7. However, the maximum value in the schedule is {:.1T}", SchedMax));
+                ShowSevereCustomField(
+                    state,
+                    eoh,
+                    ipsc->cAlphaFieldNames(4),
+                    ipsc->cAlphaArgs(4),
+                    EnergyPlus::format("Maximum value should be 7. However, the maximum value in the schedule is {:.1T}", SchedMax));
                 ErrorsFound = true;
             }
 
             if (SchedMin < 0.0) {
-                ShowSevereCustomField(state,
-                                      eoh,
-                                      ipsc->cAlphaFieldNames(4),
-                                      ipsc->cAlphaArgs(4),
-                                      format("Minimum value should be 0. However, the minimum value in the schedule is {:.1T}", SchedMin));
+                ShowSevereCustomField(
+                    state,
+                    eoh,
+                    ipsc->cAlphaFieldNames(4),
+                    ipsc->cAlphaArgs(4),
+                    EnergyPlus::format("Minimum value should be 0. However, the minimum value in the schedule is {:.1T}", SchedMin));
                 ErrorsFound = true;
             }
 
@@ -3894,10 +3893,10 @@ namespace Avail {
             if (NumNumbers > 0) {
                 hybridVentMgr.MaxWindSpeed = ipsc->rNumericArgs(1);
                 if (ipsc->rNumericArgs(1) > 40.0 || ipsc->rNumericArgs(1) < 0.0) {
-                    ShowSevereError(state, format("{}{}=\"{}\"", RoutineName, cCurrentModuleObject, ipsc->cAlphaArgs(1)));
-                    ShowContinueError(state, format("{} is beyond the range.", ipsc->cNumericFieldNames(1)));
-                    ShowContinueError(state,
-                                      format("The input value is {:.0T}. The allowed value must be >= 0 and <= 40 m/s", ipsc->rNumericArgs(1)));
+                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\"", RoutineName, cCurrentModuleObject, ipsc->cAlphaArgs(1)));
+                    ShowContinueError(state, EnergyPlus::format("{} is beyond the range.", ipsc->cNumericFieldNames(1)));
+                    ShowContinueError(
+                        state, EnergyPlus::format("The input value is {:.0T}. The allowed value must be >= 0 and <= 40 m/s", ipsc->rNumericArgs(1)));
                     ErrorsFound = true;
                 }
             }
@@ -3906,38 +3905,40 @@ namespace Avail {
             if (NumNumbers > 1) {
                 hybridVentMgr.MinOutdoorTemp = ipsc->rNumericArgs(2);
                 if (ipsc->rNumericArgs(2) > 100.0 || ipsc->rNumericArgs(2) < -100.0) {
-                    ShowSevereError(state, format("{}{}=\"{}\"", RoutineName, cCurrentModuleObject, ipsc->cAlphaArgs(1)));
-                    ShowContinueError(state, format("{} is beyond the range.", ipsc->cNumericFieldNames(2)));
+                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\"", RoutineName, cCurrentModuleObject, ipsc->cAlphaArgs(1)));
+                    ShowContinueError(state, EnergyPlus::format("{} is beyond the range.", ipsc->cNumericFieldNames(2)));
                     ShowContinueError(
-                        state, format("The input value is {:.0T}. The allowed value must be between -100 C and +100 C", ipsc->rNumericArgs(2)));
+                        state,
+                        EnergyPlus::format("The input value is {:.0T}. The allowed value must be between -100 C and +100 C", ipsc->rNumericArgs(2)));
                     ErrorsFound = true;
                 }
             }
             if (NumNumbers > 2) {
                 hybridVentMgr.MaxOutdoorTemp = ipsc->rNumericArgs(3);
                 if (ipsc->rNumericArgs(3) > 100.0 || ipsc->rNumericArgs(3) < -100.0) {
-                    ShowSevereError(state, format("{}{}=\"{}\"", RoutineName, cCurrentModuleObject, ipsc->cAlphaArgs(1)));
-                    ShowContinueError(state, format("{} is beyond the range.", ipsc->cNumericFieldNames(3)));
+                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\"", RoutineName, cCurrentModuleObject, ipsc->cAlphaArgs(1)));
+                    ShowContinueError(state, EnergyPlus::format("{} is beyond the range.", ipsc->cNumericFieldNames(3)));
                     ShowContinueError(
-                        state, format("The input value is {:.0T}. The allowed value must be between -100 C and +100 C", ipsc->rNumericArgs(3)));
+                        state,
+                        EnergyPlus::format("The input value is {:.0T}. The allowed value must be between -100 C and +100 C", ipsc->rNumericArgs(3)));
                     ErrorsFound = true;
                 }
             }
             // Ensure MaxTemp >= MinTemp
             if (ipsc->rNumericArgs(2) >= ipsc->rNumericArgs(3)) {
                 ShowSevereError(state,
-                                format("{}{}=\"{}\" The {} must be less than the {}",
-                                       RoutineName,
-                                       cCurrentModuleObject,
-                                       ipsc->cAlphaArgs(1),
-                                       ipsc->cNumericFieldNames(2),
-                                       ipsc->cNumericFieldNames(3)));
+                                EnergyPlus::format("{}{}=\"{}\" The {} must be less than the {}",
+                                                   RoutineName,
+                                                   cCurrentModuleObject,
+                                                   ipsc->cAlphaArgs(1),
+                                                   ipsc->cNumericFieldNames(2),
+                                                   ipsc->cNumericFieldNames(3)));
                 ShowContinueError(state,
-                                  format("The {} is {:.0T}. The {} is {:.0T}.",
-                                         ipsc->cNumericFieldNames(2),
-                                         ipsc->rNumericArgs(2),
-                                         ipsc->cNumericFieldNames(3),
-                                         ipsc->rNumericArgs(3)));
+                                  EnergyPlus::format("The {} is {:.0T}. The {} is {:.0T}.",
+                                                     ipsc->cNumericFieldNames(2),
+                                                     ipsc->rNumericArgs(2),
+                                                     ipsc->cNumericFieldNames(3),
+                                                     ipsc->rNumericArgs(3)));
                 ErrorsFound = true;
             }
 
@@ -3945,38 +3946,40 @@ namespace Avail {
             if (NumNumbers > 3) {
                 hybridVentMgr.MinOutdoorEnth = ipsc->rNumericArgs(4);
                 if (ipsc->rNumericArgs(4) > 300000.0 || ipsc->rNumericArgs(4) < 0.0) {
-                    ShowSevereError(state, format("{}{}=\"{}\"", RoutineName, cCurrentModuleObject, ipsc->cAlphaArgs(1)));
-                    ShowContinueError(state, format("{} is beyond the range.", ipsc->cNumericFieldNames(4)));
+                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\"", RoutineName, cCurrentModuleObject, ipsc->cAlphaArgs(1)));
+                    ShowContinueError(state, EnergyPlus::format("{} is beyond the range.", ipsc->cNumericFieldNames(4)));
                     ShowContinueError(
-                        state, format("The input value is {:.0T}. The allowed value must be between 0 and 300000 J/kg", ipsc->rNumericArgs(4)));
+                        state,
+                        EnergyPlus::format("The input value is {:.0T}. The allowed value must be between 0 and 300000 J/kg", ipsc->rNumericArgs(4)));
                     ErrorsFound = true;
                 }
             }
             if (NumNumbers > 4) {
                 hybridVentMgr.MaxOutdoorEnth = ipsc->rNumericArgs(5);
                 if (ipsc->rNumericArgs(5) > 300000.0 || ipsc->rNumericArgs(5) < 0.0) {
-                    ShowSevereError(state, format("{}{}=\"{}\"", RoutineName, cCurrentModuleObject, ipsc->cAlphaArgs(1)));
-                    ShowContinueError(state, format("{} is beyond the range.", ipsc->cNumericFieldNames(5)));
+                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\"", RoutineName, cCurrentModuleObject, ipsc->cAlphaArgs(1)));
+                    ShowContinueError(state, EnergyPlus::format("{} is beyond the range.", ipsc->cNumericFieldNames(5)));
                     ShowContinueError(
-                        state, format("The input value is {:.0T}. The allowed value must be between 0 and 300000 J/kg", ipsc->rNumericArgs(5)));
+                        state,
+                        EnergyPlus::format("The input value is {:.0T}. The allowed value must be between 0 and 300000 J/kg", ipsc->rNumericArgs(5)));
                     ErrorsFound = true;
                 }
             }
             // Ensure MaxEnth >= MiniEnth
             if (ipsc->rNumericArgs(4) >= ipsc->rNumericArgs(5)) {
                 ShowSevereError(state,
-                                format("{}{}=\"{}\" The {} must be less than the {}",
-                                       RoutineName,
-                                       cCurrentModuleObject,
-                                       ipsc->cAlphaArgs(1),
-                                       ipsc->cNumericFieldNames(4),
-                                       ipsc->cNumericFieldNames(5)));
+                                EnergyPlus::format("{}{}=\"{}\" The {} must be less than the {}",
+                                                   RoutineName,
+                                                   cCurrentModuleObject,
+                                                   ipsc->cAlphaArgs(1),
+                                                   ipsc->cNumericFieldNames(4),
+                                                   ipsc->cNumericFieldNames(5)));
                 ShowContinueError(state,
-                                  format("The {} is {:.0T}. The {} is {:.0T}.",
-                                         ipsc->cNumericFieldNames(4),
-                                         ipsc->rNumericArgs(4),
-                                         ipsc->cNumericFieldNames(5),
-                                         ipsc->rNumericArgs(5)));
+                                  EnergyPlus::format("The {} is {:.0T}. The {} is {:.0T}.",
+                                                     ipsc->cNumericFieldNames(4),
+                                                     ipsc->rNumericArgs(4),
+                                                     ipsc->cNumericFieldNames(5),
+                                                     ipsc->rNumericArgs(5)));
                 ErrorsFound = true;
             }
 
@@ -3984,38 +3987,40 @@ namespace Avail {
             if (NumNumbers > 5) {
                 hybridVentMgr.MinOutdoorDewPoint = ipsc->rNumericArgs(6);
                 if (ipsc->rNumericArgs(6) > 100.0 || ipsc->rNumericArgs(6) < -100.0) {
-                    ShowSevereError(state, format("{}{}=\"{}\"", RoutineName, cCurrentModuleObject, ipsc->cAlphaArgs(1)));
-                    ShowContinueError(state, format("{} is beyond the range.", ipsc->cNumericFieldNames(6)));
+                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\"", RoutineName, cCurrentModuleObject, ipsc->cAlphaArgs(1)));
+                    ShowContinueError(state, EnergyPlus::format("{} is beyond the range.", ipsc->cNumericFieldNames(6)));
                     ShowContinueError(
-                        state, format("The input value is {:.0T}. The allowed value must be between -100 C and +100 C", ipsc->rNumericArgs(6)));
+                        state,
+                        EnergyPlus::format("The input value is {:.0T}. The allowed value must be between -100 C and +100 C", ipsc->rNumericArgs(6)));
                     ErrorsFound = true;
                 }
             }
             if (NumNumbers > 6) {
                 hybridVentMgr.MaxOutdoorDewPoint = ipsc->rNumericArgs(7);
                 if (ipsc->rNumericArgs(7) > 100.0 || ipsc->rNumericArgs(7) < -100.0) {
-                    ShowSevereError(state, format("{}{}=\"{}\"", RoutineName, cCurrentModuleObject, ipsc->cAlphaArgs(1)));
-                    ShowContinueError(state, format("{} is beyond the range.", ipsc->cNumericFieldNames(7)));
+                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\"", RoutineName, cCurrentModuleObject, ipsc->cAlphaArgs(1)));
+                    ShowContinueError(state, EnergyPlus::format("{} is beyond the range.", ipsc->cNumericFieldNames(7)));
                     ShowContinueError(
-                        state, format("The input value is {:.0T}. The allowed value must be between -100 C and +100 C", ipsc->rNumericArgs(7)));
+                        state,
+                        EnergyPlus::format("The input value is {:.0T}. The allowed value must be between -100 C and +100 C", ipsc->rNumericArgs(7)));
                     ErrorsFound = true;
                 }
             }
             // Ensure MaxTemp >= MinTemp
             if (ipsc->rNumericArgs(6) >= ipsc->rNumericArgs(7)) {
                 ShowSevereError(state,
-                                format("{}{}=\"{}\" The {} must be less than the {}",
-                                       RoutineName,
-                                       cCurrentModuleObject,
-                                       ipsc->cAlphaArgs(1),
-                                       ipsc->cNumericFieldNames(6),
-                                       ipsc->cNumericFieldNames(7)));
+                                EnergyPlus::format("{}{}=\"{}\" The {} must be less than the {}",
+                                                   RoutineName,
+                                                   cCurrentModuleObject,
+                                                   ipsc->cAlphaArgs(1),
+                                                   ipsc->cNumericFieldNames(6),
+                                                   ipsc->cNumericFieldNames(7)));
                 ShowContinueError(state,
-                                  format("The {} is {:.0T}. The {} is {:.0T}.",
-                                         ipsc->cNumericFieldNames(6),
-                                         ipsc->rNumericArgs(6),
-                                         ipsc->cNumericFieldNames(7),
-                                         ipsc->rNumericArgs(7)));
+                                  EnergyPlus::format("The {} is {:.0T}. The {} is {:.0T}.",
+                                                     ipsc->cNumericFieldNames(6),
+                                                     ipsc->rNumericArgs(6),
+                                                     ipsc->cNumericFieldNames(7),
+                                                     ipsc->rNumericArgs(7)));
                 ErrorsFound = true;
             }
 
@@ -4038,32 +4043,34 @@ namespace Avail {
                 } else {
                     GetCurveMinMaxValues(state, hybridVentMgr.OpeningFactorFWS, CurveMin, CurveMax);
                     if (CurveMin < 0.0) {
-                        ShowSevereError(state, format("{}{}=\"{}\"", RoutineName, cCurrentModuleObject, ipsc->cAlphaArgs(1)));
+                        ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\"", RoutineName, cCurrentModuleObject, ipsc->cAlphaArgs(1)));
                         ShowContinueError(state,
-                                          format("The minimum wind speed used in {}=\"{}should be greater than or equal to 0.0 (m/s)",
-                                                 ipsc->cAlphaFieldNames(7),
-                                                 ipsc->cAlphaArgs(7)));
+                                          EnergyPlus::format("The minimum wind speed used in {}=\"{}should be greater than or equal to 0.0 (m/s)",
+                                                             ipsc->cAlphaFieldNames(7),
+                                                             ipsc->cAlphaArgs(7)));
                         ShowContinueError(state, "Curve minimum value appears to be less than 0.");
                         ErrorsFound = true;
                     }
                     CurveVal = CurveValue(state, hybridVentMgr.OpeningFactorFWS, CurveMin);
                     if (CurveVal < 0.0) {
-                        ShowSevereError(state, format("{}{}=\"{}\"", RoutineName, cCurrentModuleObject, ipsc->cAlphaArgs(1)));
-                        ShowContinueError(state,
-                                          format("The minimum value of {} must be greater than or equal to 0.0 at the minimum value of wind speed.",
-                                                 ipsc->cAlphaFieldNames(7)));
-                        ShowContinueError(state, format("{}=\"{}\".", ipsc->cAlphaFieldNames(7), ipsc->cAlphaArgs(7)));
-                        ShowContinueError(state, format("Curve output at the minimum wind speed = {:.3T}", CurveVal));
+                        ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\"", RoutineName, cCurrentModuleObject, ipsc->cAlphaArgs(1)));
+                        ShowContinueError(
+                            state,
+                            EnergyPlus::format("The minimum value of {} must be greater than or equal to 0.0 at the minimum value of wind speed.",
+                                               ipsc->cAlphaFieldNames(7)));
+                        ShowContinueError(state, EnergyPlus::format("{}=\"{}\".", ipsc->cAlphaFieldNames(7), ipsc->cAlphaArgs(7)));
+                        ShowContinueError(state, EnergyPlus::format("Curve output at the minimum wind speed = {:.3T}", CurveVal));
                         ErrorsFound = true;
                     }
                     CurveVal = CurveValue(state, hybridVentMgr.OpeningFactorFWS, CurveMax);
                     if (CurveVal > 1.0) {
-                        ShowSevereError(state, format("{}{}=\"{}\"", RoutineName, cCurrentModuleObject, ipsc->cAlphaArgs(1)));
-                        ShowContinueError(state,
-                                          format("The maximum value of {} must be less than or equal to 1.0 at the maximum value of wind speed.",
-                                                 ipsc->cAlphaFieldNames(7)));
-                        ShowContinueError(state, format("{}=\"{}\".", ipsc->cAlphaFieldNames(7), ipsc->cAlphaArgs(7)));
-                        ShowContinueError(state, format("Curve output at the maximum wind speed = {:.3T}", CurveVal));
+                        ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\"", RoutineName, cCurrentModuleObject, ipsc->cAlphaArgs(1)));
+                        ShowContinueError(
+                            state,
+                            EnergyPlus::format("The maximum value of {} must be less than or equal to 1.0 at the maximum value of wind speed.",
+                                               ipsc->cAlphaFieldNames(7)));
+                        ShowContinueError(state, EnergyPlus::format("{}=\"{}\".", ipsc->cAlphaFieldNames(7), ipsc->cAlphaArgs(7)));
+                        ShowContinueError(state, EnergyPlus::format("Curve output at the maximum wind speed = {:.3T}", CurveVal));
                         ErrorsFound = true;
                     }
                     // Check curve type
@@ -4096,10 +4103,10 @@ namespace Avail {
             } else if (hybridVentMgr.afnControlTypeSched != nullptr) {
                 ShowWarningCustom(state,
                                   eoh,
-                                  format("{} and {} cannot be used at the same time, {} is disabled.",
-                                         ipsc->cAlphaFieldNames(8),
-                                         ipsc->cAlphaFieldNames(9),
-                                         ipsc->cAlphaFieldNames(9)));
+                                  EnergyPlus::format("{} and {} cannot be used at the same time, {} is disabled.",
+                                                     ipsc->cAlphaFieldNames(8),
+                                                     ipsc->cAlphaFieldNames(9),
+                                                     ipsc->cAlphaFieldNames(9)));
                 hybridVentMgr.simpleControlTypeSched = nullptr;
             } else if (!hybridVentMgr.simpleControlTypeSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 1.0)) {
                 Sched::ShowSevereBadMinMax(state, eoh, ipsc->cAlphaFieldNames(9), ipsc->cAlphaArgs(9), Clusive::In, 0.0, Clusive::In, 1.0);
@@ -4121,28 +4128,30 @@ namespace Avail {
                         }
 
                         if (state.afn->simulation_control.type == AirflowNetwork::ControlType::NoMultizoneOrDistribution) {
-                            ShowWarningError(state, format("{}{}=\"{}\"", RoutineName, cCurrentModuleObject, hybridVentMgr.Name));
+                            ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\"", RoutineName, cCurrentModuleObject, hybridVentMgr.Name));
                             ShowContinueError(state, "The Airflow Network model is not available for Hybrid Ventilation Control.");
                         } else if (state.afn->simulation_control.type ==
                                    AirflowNetwork::ControlType::MultizoneWithDistributionOnlyDuringFanOperation) {
-                            ShowWarningError(state, format("{}{}=\"{}\"", RoutineName, cCurrentModuleObject, hybridVentMgr.Name));
+                            ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\"", RoutineName, cCurrentModuleObject, hybridVentMgr.Name));
                             ShowContinueError(state, "Please check the AirflowNetwork Control field in the AirflowNetwork:SimulationControl object.");
                             ShowContinueError(state, "The suggested choices are MultizoneWithDistribution or MultizoneWithoutDistribution.");
                         }
 
                     } else { // hybridVentMgr.VentilationPtr > 0
                         if (hybridVentMgr.ControlledZoneNum != state.dataHeatBal->Ventilation(hybridVentMgr.VentilationPtr).ZonePtr) {
-                            ShowSevereError(state, format("{}{}=\"{}\"", RoutineName, cCurrentModuleObject, ipsc->cAlphaArgs(1)));
+                            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\"", RoutineName, cCurrentModuleObject, ipsc->cAlphaArgs(1)));
                             ShowContinueError(
                                 state,
-                                format("The Zone name specified in the Ventilation object {}",
-                                       state.dataHeatBal->Zone(state.dataHeatBal->Ventilation(hybridVentMgr.VentilationPtr).ZonePtr).Name));
-                            ShowContinueError(state, format("is not equal to the {}=\"{}\".", ipsc->cAlphaFieldNames(3), ipsc->cAlphaArgs(3)));
+                                EnergyPlus::format(
+                                    "The Zone name specified in the Ventilation object {}",
+                                    state.dataHeatBal->Zone(state.dataHeatBal->Ventilation(hybridVentMgr.VentilationPtr).ZonePtr).Name));
+                            ShowContinueError(state,
+                                              EnergyPlus::format("is not equal to the {}=\"{}\".", ipsc->cAlphaFieldNames(3), ipsc->cAlphaArgs(3)));
                             ErrorsFound = true;
                         }
 
                         if (state.afn->simulation_control.type != AirflowNetwork::ControlType::NoMultizoneOrDistribution) {
-                            ShowSevereError(state, format("{}{}=\"{}\"", RoutineName, cCurrentModuleObject, hybridVentMgr.Name));
+                            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\"", RoutineName, cCurrentModuleObject, hybridVentMgr.Name));
                             ShowContinueError(state, "The simple airflow objects are used for natural ventilation calculation.");
                             ShowContinueError(
                                 state,
@@ -4157,9 +4166,9 @@ namespace Avail {
             if (hybridVentMgr.simpleControlTypeSched != nullptr && hybridVentMgr.controlModeSched->getMaxVal(state) == 4.0) {
                 ShowSevereCustom(state,
                                  eoh,
-                                 format("The outdoor ventilation air control type defined in {} cannot work together with {}",
-                                        ipsc->cAlphaArgs(4),
-                                        ipsc->cAlphaFieldNames(9)));
+                                 EnergyPlus::format("The outdoor ventilation air control type defined in {} cannot work together with {}",
+                                                    ipsc->cAlphaArgs(4),
+                                                    ipsc->cAlphaFieldNames(9)));
                 ErrorsFound = true;
             }
 
@@ -4177,13 +4186,13 @@ namespace Avail {
                 if (state.dataAvail->HybridVentData(SysAvailNum - 1).afnControlTypeSched != nullptr) {
                     if (state.dataAvail->HybridVentData(SysAvailNum).simpleControlTypeSched != nullptr) {
                         ShowSevereError(state,
-                                        format("The AirflowNetwork model is used for natural ventilation calculation in {}=\"{}\"",
-                                               cCurrentModuleObject,
-                                               state.dataAvail->HybridVentData(SysAvailNum - 1).Name));
+                                        EnergyPlus::format("The AirflowNetwork model is used for natural ventilation calculation in {}=\"{}\"",
+                                                           cCurrentModuleObject,
+                                                           state.dataAvail->HybridVentData(SysAvailNum - 1).Name));
                         ShowContinueError(state,
-                                          format("The simple airflow objects are used for natural ventilation calculation in {}=\"{}\"",
-                                                 cCurrentModuleObject,
-                                                 state.dataAvail->HybridVentData(SysAvailNum).Name));
+                                          EnergyPlus::format("The simple airflow objects are used for natural ventilation calculation in {}=\"{}\"",
+                                                             cCurrentModuleObject,
+                                                             state.dataAvail->HybridVentData(SysAvailNum).Name));
                         ShowContinueError(state, "The hybrid ventilation control requires the same models to calculate natural ventilation");
                         ErrorsFound = true;
                     }
@@ -4191,13 +4200,13 @@ namespace Avail {
                 if (state.dataAvail->HybridVentData(SysAvailNum - 1).simpleControlTypeSched != nullptr) {
                     if (state.dataAvail->HybridVentData(SysAvailNum).afnControlTypeSched != nullptr) {
                         ShowSevereError(state,
-                                        format("The Airflow Network model is used for natural ventilation calculation in {}=\"{}\"",
-                                               cCurrentModuleObject,
-                                               state.dataAvail->HybridVentData(SysAvailNum).Name));
+                                        EnergyPlus::format("The Airflow Network model is used for natural ventilation calculation in {}=\"{}\"",
+                                                           cCurrentModuleObject,
+                                                           state.dataAvail->HybridVentData(SysAvailNum).Name));
                         ShowContinueError(state,
-                                          format("The simple airflow objects are used for natural ventilation calculation in {}=\"{}\"",
-                                                 cCurrentModuleObject,
-                                                 state.dataAvail->HybridVentData(SysAvailNum - 1).Name));
+                                          EnergyPlus::format("The simple airflow objects are used for natural ventilation calculation in {}=\"{}\"",
+                                                             cCurrentModuleObject,
+                                                             state.dataAvail->HybridVentData(SysAvailNum - 1).Name));
                         ShowContinueError(state, "The hybrid ventilation control requires the same models to calculate natural ventilation");
                         ErrorsFound = true;
                     }
@@ -4206,7 +4215,7 @@ namespace Avail {
         }
 
         if (ErrorsFound) {
-            ShowFatalError(state, format("{} Errors found in input.  Preceding condition(s) cause termination.", RoutineName));
+            ShowFatalError(state, EnergyPlus::format("{} Errors found in input.  Preceding condition(s) cause termination.", RoutineName));
         }
 
         // Set up output variables
@@ -4356,10 +4365,10 @@ namespace Avail {
                         }
                         if (!zoneFound) {
                             ShowSevereError(state,
-                                            format("{}, The controlled zone ={} is not served by this Air Loop={}",
-                                                   managerTypeNames[(int)hybridVentMgr.type],
-                                                   hybridVentMgr.ControlZoneName,
-                                                   hybridVentMgr.AirLoopName));
+                                            EnergyPlus::format("{}, The controlled zone ={} is not served by this Air Loop={}",
+                                                               managerTypeNames[(int)hybridVentMgr.type],
+                                                               hybridVentMgr.ControlZoneName,
+                                                               hybridVentMgr.AirLoopName));
                             ErrorsFound = true;
                         }
                     }
@@ -4375,19 +4384,21 @@ namespace Avail {
                                     (HybridVentNum != SysAvailNum)) {
                                     if (ControlledZoneNum == state.dataAvail->HybridVentData(HybridVentNum).ControlledZoneNum &&
                                         ControlledZoneNum > 0) {
-                                        ShowWarningError(
-                                            state,
-                                            format("AvailabilityManager:HybridVentilation = \"{}\" has the controlled zone name = \"{}\".",
-                                                   state.dataAvail->HybridVentData(HybridVentNum).Name,
-                                                   state.dataAvail->HybridVentData(HybridVentNum).ControlZoneName));
+                                        ShowWarningError(state,
+                                                         EnergyPlus::format(
+                                                             "AvailabilityManager:HybridVentilation = \"{}\" has the controlled zone name = \"{}\".",
+                                                             state.dataAvail->HybridVentData(HybridVentNum).Name,
+                                                             state.dataAvail->HybridVentData(HybridVentNum).ControlZoneName));
                                         ShowContinueError(
                                             state,
-                                            format("This controlled zone already has hybrid ventilation control through this air loop = \"{}\".",
-                                                   hybridVentMgr.AirLoopName));
+                                            EnergyPlus::format(
+                                                "This controlled zone already has hybrid ventilation control through this air loop = \"{}\".",
+                                                hybridVentMgr.AirLoopName));
                                         ShowContinueError(
                                             state,
-                                            format("Only AvailabilityManager:HybridVentilation = \"{}\" will be simulated. Simulation continues...",
-                                                   hybridVentMgr.Name));
+                                            EnergyPlus::format(
+                                                "Only AvailabilityManager:HybridVentilation = \"{}\" will be simulated. Simulation continues...",
+                                                hybridVentMgr.Name));
                                     } else {
                                         state.dataAvail->HybridVentData(HybridVentNum).SimHybridVentSysAvailMgr = true;
                                     }
@@ -4403,20 +4414,22 @@ namespace Avail {
 
                 if (hybridVentMgr.ControlledZoneNum == 0) {
                     ShowSevereError(state,
-                                    format("{}, The controlled zone is not defined correctly ={}",
-                                           managerTypeNames[(int)hybridVentMgr.type],
-                                           hybridVentMgr.ControlZoneName));
+                                    EnergyPlus::format("{}, The controlled zone is not defined correctly ={}",
+                                                       managerTypeNames[(int)hybridVentMgr.type],
+                                                       hybridVentMgr.ControlZoneName));
                     ErrorsFound = true;
                 }
                 // check schedule value for adaptive temperature control
                 if (hybridVentMgr.controlModeSched->hasVal(state, 5.0) || hybridVentMgr.controlModeSched->hasVal(state, 6.0)) {
                     if (!state.dataHeatBal->AdaptiveComfortRequested_ASH55) {
-                        ShowSevereError(state,
-                                        format("GetHybridVentilationInputs: AvailabilityManager:HybridVentilation =\"{}\"", hybridVentMgr.Name));
-                        ShowContinueError(state,
-                                          format("Ventilation Control Mode Schedule Name =\"{}\", When the schedule value is 5 or 6, operative "
-                                                 "temperature control is requested. ",
-                                                 hybridVentMgr.controlModeSched->Name));
+                        ShowSevereError(
+                            state,
+                            EnergyPlus::format("GetHybridVentilationInputs: AvailabilityManager:HybridVentilation =\"{}\"", hybridVentMgr.Name));
+                        ShowContinueError(
+                            state,
+                            EnergyPlus::format("Ventilation Control Mode Schedule Name =\"{}\", When the schedule value is 5 or 6, operative "
+                                               "temperature control is requested. ",
+                                               hybridVentMgr.controlModeSched->Name));
                         ShowContinueError(state,
                                           "However, AdaptiveASH55 is not entered in the Thermal Comfort Model Type fields in the People object.");
                         ErrorsFound = true;
@@ -4439,9 +4452,9 @@ namespace Avail {
                 }
                 if (AirLoopCount > 1) {
                     ShowSevereError(state,
-                                    format("{}, The AirLoopHVAC name found more than once={}",
-                                           managerTypeNames[(int)state.dataAvail->HybridVentData(SysAvailIndex).type],
-                                           state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Name));
+                                    EnergyPlus::format("{}, The AirLoopHVAC name found more than once={}",
+                                                       managerTypeNames[(int)state.dataAvail->HybridVentData(SysAvailIndex).type],
+                                                       state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Name));
                     ShowContinueError(state, "Each AirLoopHVAC allows one hybrid ventilation control object.");
                     ErrorsFound = true;
                 }
@@ -4548,7 +4561,6 @@ namespace Avail {
         using Psychrometrics::PsyWFnTdbRhPb;
 
         Real64 ZoneAirEnthalpy;             // Zone air enthalpy
-        Real64 ZoneAirDewPoint;             // Zone air dew point temperature
         Real64 ZoneAirRH;                   // Zone air relative humidity
         Real64 TempExt;                     // Outdoor dry bulb temperature at zone height
         Real64 WindExt;                     // Outdoor wind speed at zone height
@@ -4715,9 +4727,10 @@ namespace Avail {
                 }
             } break;
             default: {
-                ShowSevereError(state,
-                                format("{}: incorrect Control Type: {}", managerTypeNames[(int)hybridVentMgr.type], hybridVentMgr.AirLoopName));
-                ShowFatalError(state, format("Errors found in getting {} Control mode value", managerTypeNames[(int)hybridVentMgr.type]));
+                ShowSevereError(
+                    state,
+                    EnergyPlus::format("{}: incorrect Control Type: {}", managerTypeNames[(int)hybridVentMgr.type], hybridVentMgr.AirLoopName));
+                ShowFatalError(state, EnergyPlus::format("Errors found in getting {} Control mode value", managerTypeNames[(int)hybridVentMgr.type]));
             }
             }
 
@@ -4746,9 +4759,9 @@ namespace Avail {
                         ++hybridVentMgr.SingleHCErrCount;
                         if (hybridVentMgr.SingleHCErrCount < 2) {
                             ShowWarningError(state,
-                                             format("Hybrid ventilation control: {}: The zone temperature control type is "
-                                                    "ThermostatSetpoint:SingleHeatingOrCooling. Natural ventilation is not allowed.",
-                                                    hybridVentMgr.AirLoopName));
+                                             EnergyPlus::format("Hybrid ventilation control: {}: The zone temperature control type is "
+                                                                "ThermostatSetpoint:SingleHeatingOrCooling. Natural ventilation is not allowed.",
+                                                                hybridVentMgr.AirLoopName));
                             ShowContinueErrorTimeStamp(state, "");
                         } else {
                             ShowRecurringWarningErrorAtEnd(
@@ -4776,14 +4789,14 @@ namespace Avail {
                 // Dew point control mode
                 if (hybridVentMgr.ctrlType == VentCtrlType::DewPoint) {
                     ZoneAirRH = PsyRhFnTdbWPb(state, thisZoneHB.MAT, thisZoneHB.airHumRat, state.dataEnvrn->OutBaroPress) * 100.0;
-                    ZoneAirDewPoint = PsyTdpFnWPb(state, thisZoneHB.airHumRat, state.dataEnvrn->OutBaroPress);
                     if (state.dataZoneCtrls->NumHumidityControlZones == 0) {
                         ++hybridVentMgr.DewPointNoRHErrCount;
                         if (hybridVentMgr.DewPointNoRHErrCount < 2) {
                             ShowWarningError(
                                 state,
-                                format("Hybrid ventilation control: Dew point control mode is selected, but no ZoneControl:Humidistat object={}",
-                                       hybridVentMgr.AirLoopName));
+                                EnergyPlus::format(
+                                    "Hybrid ventilation control: Dew point control mode is selected, but no ZoneControl:Humidistat object={}",
+                                    hybridVentMgr.AirLoopName));
                             ShowContinueError(state, "The hybrid ventilation control is triggered by outdoor min and max dewpoint only.");
                             ShowContinueError(state, "HVAC system may turn off when outdoor dewpoint is between min and max dewpoint.");
                             ShowContinueErrorTimeStamp(state, "");
@@ -4801,8 +4814,32 @@ namespace Avail {
                          ++HStatZoneNum) { // Humidity control zone number
                         if (state.dataZoneCtrls->HumidityControlZone(HStatZoneNum).ActualZoneNum == ZoneNum) {
                             found = true;
-                            ZoneRHHumidifyingSetPoint = state.dataZoneCtrls->HumidityControlZone(HStatZoneNum).humidifyingSched->getCurrentVal();
-                            ZoneRHDehumidifyingSetPoint = state.dataZoneCtrls->HumidityControlZone(HStatZoneNum).dehumidifyingSched->getCurrentVal();
+                            if (state.dataZoneCtrls->HumidityControlZone(HStatZoneNum).humidityControlVariableType ==
+                                DataZoneControls::HumidityCtrlVarType::RelativeHumidity) {
+                                ZoneRHHumidifyingSetPoint = state.dataZoneCtrls->HumidityControlZone(HStatZoneNum).humidifyingSched->getCurrentVal();
+                                ZoneRHDehumidifyingSetPoint =
+                                    state.dataZoneCtrls->HumidityControlZone(HStatZoneNum).dehumidifyingSched->getCurrentVal();
+                            } else if (state.dataZoneCtrls->HumidityControlZone(HStatZoneNum).humidityControlVariableType ==
+                                       DataZoneControls::HumidityCtrlVarType::DewPoint) { // Recalculate RH setpoint from DP
+                                ZoneRHHumidifyingSetPoint =
+                                    100 * Psychrometrics::PsyRhFnTdbWPb(
+                                              state,
+                                              thisZoneHB.ZT,
+                                              Psychrometrics::PsyWFnTdpPb(
+                                                  state,
+                                                  state.dataZoneCtrls->HumidityControlZone(HStatZoneNum).humidifyingSched->getCurrentVal(),
+                                                  state.dataEnvrn->OutBaroPress),
+                                              state.dataEnvrn->OutBaroPress);
+                                ZoneRHDehumidifyingSetPoint =
+                                    100 * Psychrometrics::PsyRhFnTdbWPb(
+                                              state,
+                                              thisZoneHB.ZT,
+                                              Psychrometrics::PsyWFnTdpPb(
+                                                  state,
+                                                  state.dataZoneCtrls->HumidityControlZone(HStatZoneNum).dehumidifyingSched->getCurrentVal(),
+                                                  state.dataEnvrn->OutBaroPress),
+                                              state.dataEnvrn->OutBaroPress);
+                            }
                             if (ZoneAirRH > ZoneRHDehumidifyingSetPoint) { // Need dehumidification
                                 WSetPoint =
                                     PsyWFnTdbRhPb(state, thisZoneHB.MAT, (ZoneRHDehumidifyingSetPoint / 100.0), state.dataEnvrn->OutBaroPress);
@@ -4822,13 +4859,14 @@ namespace Avail {
                     if (!found && state.dataZoneCtrls->NumHumidityControlZones > 0) {
                         ++hybridVentMgr.DewPointErrCount;
                         if (hybridVentMgr.DewPointErrCount < 2) {
-                            ShowWarningError(state,
-                                             format("Hybrid ventilation control: The zone for dew point control mode is different from the zone for "
-                                                    "ZoneControl:Humidistat={}",
-                                                    hybridVentMgr.AirLoopName));
-                            ShowContinueError(
+                            ShowWarningError(
                                 state,
-                                format("The Zone name for hybrid control is {}. Humidistat has no impact", state.dataHeatBal->Zone(ZoneNum).Name));
+                                EnergyPlus::format("Hybrid ventilation control: The zone for dew point control mode is different from the zone for "
+                                                   "ZoneControl:Humidistat={}",
+                                                   hybridVentMgr.AirLoopName));
+                            ShowContinueError(state,
+                                              EnergyPlus::format("The Zone name for hybrid control is {}. Humidistat has no impact",
+                                                                 state.dataHeatBal->Zone(ZoneNum).Name));
                             ShowContinueError(state, "HVAC system may turn off when outdoor dewpoint is between min and max dewpoint.");
                             ShowContinueErrorTimeStamp(state, "");
                         } else {

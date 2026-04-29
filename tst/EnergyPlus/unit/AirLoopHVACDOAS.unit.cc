@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -89,7 +89,6 @@
 using namespace EnergyPlus;
 using namespace DataSurfaces;
 using namespace DataHeatBalance;
-using namespace EnergyPlus::DataLoopNode;
 using namespace OutAirNodeManager;
 using namespace HeatingCoils;
 
@@ -4076,7 +4075,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOASTest)
     ZoneEquipmentManager::GetZoneEquipment(*state);
     SimAirServingZones::GetAirPathData(*state);
 
-    auto getNodeByName = [this](std::string_view nodeName) -> NodeData & {
+    auto getNodeByName = [this](std::string_view nodeName) -> Node::NodeData & {
         const int idx = Util::FindItemInList(nodeName, state->dataLoopNodes->NodeID, state->dataLoopNodes->NumOfNodes);
         if (idx == 0) {
             throw;
@@ -8466,7 +8465,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_ReportVariableResetTest)
     ZoneEquipmentManager::GetZoneEquipment(*state);
     SimAirServingZones::GetAirPathData(*state);
 
-    auto getNodeByName = [this](std::string_view nodeName) -> NodeData & {
+    auto getNodeByName = [this](std::string_view nodeName) -> Node::NodeData & {
         const int idx = Util::FindItemInList(nodeName, state->dataLoopNodes->NodeID, state->dataLoopNodes->NumOfNodes);
         if (idx == 0) {
             throw;
@@ -11664,7 +11663,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestFanDrawThroughPlacement)
 
     SimulationManager::ManageSimulation(*state); // run the design day over the warmup period (24 hrs, 25 days)
 
-    auto getNodeByName = [this](std::string_view nodeName) -> NodeData & {
+    auto getNodeByName = [this](std::string_view nodeName) -> Node::NodeData & {
         const int idx = Util::FindItemInList(nodeName, state->dataLoopNodes->NodeID, state->dataLoopNodes->NumOfNodes);
         if (idx == 0) {
             throw;

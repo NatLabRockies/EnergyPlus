@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -740,12 +740,12 @@ void Calc_ISO15099(EnergyPlusData &state,
         if (IsShadingLayer(LayerType(1))) {
             --nlayer_NOSD;
             FirstSpecularLayer = 2;
-            NeedUnshadedRun = true;
+            // NeedUnshadedRun = true;
         }
 
         if (IsShadingLayer(LayerType(nlayer))) {
             --nlayer_NOSD;
-            NeedUnshadedRun = true;
+            // NeedUnshadedRun = true;
         }
 
         // no unshaded run for now
@@ -1703,7 +1703,6 @@ void therm1d(EnergyPlusData &state,
         // it is important not to update gaps around shading layers since that is already calculated by
         // shading routines
         for (i = 1; i <= nlayer + 1; ++i) {
-            updateGapTemperature = true;
             if ((i == 1) || (i == nlayer + 1)) {
                 // update gap array with interior and exterior temperature
                 updateGapTemperature = true;

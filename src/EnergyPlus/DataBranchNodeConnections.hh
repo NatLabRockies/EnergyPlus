@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -60,16 +60,16 @@
 
 namespace EnergyPlus {
 
-namespace DataBranchNodeConnections {
+namespace Node {
 
     struct ComponentListData
     {
         // Members
         // std::string ParentCType; // Parent Object Type (Cannot be SPLITTER or MIXER)
-        DataLoopNode::ConnectionObjectType ParentObjectType = DataLoopNode::ConnectionObjectType::Invalid;
+        Node::ConnectionObjectType ParentObjectType = Node::ConnectionObjectType::Invalid;
         std::string ParentCName; // Parent Object Name
         // std::string CType;       // Component Type (Cannot be SPLITTER or MIXER)
-        DataLoopNode::ConnectionObjectType ComponentObjectType = DataLoopNode::ConnectionObjectType::Invalid;
+        Node::ConnectionObjectType ComponentObjectType = Node::ConnectionObjectType::Invalid;
         std::string CName;          // Component Name
         std::string InletNodeName;  // Inlet Node ID
         std::string OutletNodeName; // Outlet Node ID
@@ -79,39 +79,36 @@ namespace DataBranchNodeConnections {
     struct NodeConnectionDef
     {
         // Members
-        int NodeNumber = 0;                                                                          // Node number of this node connection
-        std::string NodeName;                                                                        // Node Name of this node connection
-        DataLoopNode::ConnectionObjectType ObjectType = DataLoopNode::ConnectionObjectType::Invalid; // Object/Component Type of this node connection
-        std::string ObjectName; // Name of the Object/Component Type of this node connection
-        DataLoopNode::ConnectionType ConnectionType =
-            DataLoopNode::ConnectionType::Invalid; // Connection Type (must be valid) for this node connection
-        NodeInputManager::CompFluidStream FluidStream = NodeInputManager::CompFluidStream::Invalid; // Fluid Stream for this node connection
-        bool ObjectIsParent = false;                                                                // Indicator whether the object is a parent or not
+        int NodeNumber = 0;                                                          // Node number of this node connection
+        std::string NodeName;                                                        // Node Name of this node connection
+        Node::ConnectionObjectType ObjectType = Node::ConnectionObjectType::Invalid; // Object/Component Type of this node connection
+        std::string ObjectName;                                                      // Name of the Object/Component Type of this node connection
+        Node::ConnectionType ConnectionType = Node::ConnectionType::Invalid;         // Connection Type (must be valid) for this node connection
+        Node::CompFluidStream FluidStream = Node::CompFluidStream::Invalid;          // Fluid Stream for this node connection
+        bool ObjectIsParent = false;                                                 // Indicator whether the object is a parent or not
     };
 
     struct ParentListData
     {
         // Members
-        DataLoopNode::ConnectionObjectType ComponentType =
-            DataLoopNode::ConnectionObjectType::Invalid; // Component Type (Cannot be SPLITTER or MIXER)
-        std::string ComponentName;                       // Component Name
-        std::string InletNodeName;                       // Inlet Node ID
-        std::string OutletNodeName;                      // Outlet Node ID
-        std::string Description;                         // Description of Component List Type
+        Node::ConnectionObjectType ComponentType = Node::ConnectionObjectType::Invalid; // Component Type (Cannot be SPLITTER or MIXER)
+        std::string ComponentName;                                                      // Component Name
+        std::string InletNodeName;                                                      // Inlet Node ID
+        std::string OutletNodeName;                                                     // Outlet Node ID
+        std::string Description;                                                        // Description of Component List Type
     };
 
     struct EqNodeConnectionDef
     {
         // Members
-        std::string NodeName;                                                                        // Node Name of this node connection
-        DataLoopNode::ConnectionObjectType ObjectType = DataLoopNode::ConnectionObjectType::Invalid; // Object/Component Type of this node connection
-        std::string ObjectName;     // Name of the Object/Component Type of this node connection
-        std::string InputFieldName; // Input Field Name for this connection
-        DataLoopNode::ConnectionType ConnectionType =
-            DataLoopNode::ConnectionType::Invalid; // Connection Type (must be valid) for this node connection
+        std::string NodeName;                                                        // Node Name of this node connection
+        Node::ConnectionObjectType ObjectType = Node::ConnectionObjectType::Invalid; // Object/Component Type of this node connection
+        std::string ObjectName;                                                      // Name of the Object/Component Type of this node connection
+        std::string InputFieldName;                                                  // Input Field Name for this connection
+        Node::ConnectionType ConnectionType = Node::ConnectionType::Invalid;         // Connection Type (must be valid) for this node connection
     };
 
-} // namespace DataBranchNodeConnections
+} // namespace Node
 
 struct BranchNodeConnectionsData : BaseGlobalStruct
 {
@@ -124,10 +121,10 @@ struct BranchNodeConnectionsData : BaseGlobalStruct
     int NumOfAirTerminalNodes = 0;
     int MaxNumOfAirTerminalNodes = 0;
 
-    EPVector<DataBranchNodeConnections::ComponentListData> CompSets;
-    EPVector<DataBranchNodeConnections::ParentListData> ParentNodeList;
-    EPVector<DataBranchNodeConnections::NodeConnectionDef> NodeConnections;
-    EPVector<DataBranchNodeConnections::EqNodeConnectionDef> AirTerminalNodeConnections;
+    EPVector<Node::ComponentListData> CompSets;
+    EPVector<Node::ParentListData> ParentNodeList;
+    EPVector<Node::NodeConnectionDef> NodeConnections;
+    EPVector<Node::EqNodeConnectionDef> AirTerminalNodeConnections;
     Array1D_bool NonConnectedNodes;
 
     void init_constant_state([[maybe_unused]] EnergyPlusData &state) override

@@ -4,7 +4,7 @@
 !-      Use '!' comments if they need to be retained when using the IDFEditor.
 !-   ===========  ALL OBJECTS IN CLASS: VERSION ===========
 
-  Version,26.1;
+  Version,26.2;
 
 !-   ===========  ALL OBJECTS IN CLASS: SIMULATIONCONTROL ===========
 
@@ -416,18 +416,18 @@
   PythonPlugin:Instance,
     DirectSolarHeatingEMS,   !- Name
     No,                      !- Run During Warmup Days
-    SolarHeatingPythonPlugin,!- Python Module Name
+    PythonPluginSolarHeating,!- Python Module Name
     DirectSolarHeating;      !- Plugin Class Name
 
   PythonPlugin:Instance,
     IndirectSolarHeatingEMS, !- Name
     No,                      !- Run During Warmup Days
-    SolarHeatingPythonPlugin,!- Python Module Name
+    PythonPluginSolarHeating,!- Python Module Name
     IndirectSolarHeating;    !- Plugin Class Name
 
   PythonPlugin:Instance,
     AirMixingEMS,            !- Name
     No,                      !- Run During Warmup Days
-    SolarHeatingPythonPlugin,!- Python Module Name
+    PythonPluginSolarHeating,!- Python Module Name
     AirMixing;               !- Plugin Class Name
 

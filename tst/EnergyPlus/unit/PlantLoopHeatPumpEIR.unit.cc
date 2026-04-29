@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -1163,15 +1163,12 @@ TEST_F(EnergyPlusFixture, calcLoadSideHeatTransfer_AWHP)
     PLHPPlantLoadSideComp.Type = DataPlant::PlantEquipmentType::HeatPumpAirToWaterCooling;
     state->dataLoopNodes->Node.allocate(2);
     thisAWHP.EIRHPType = EnergyPlus::DataPlant::PlantEquipmentType::HeatPumpAirToWaterCooling;
-    thisAWHP.loadSidePlantLoc.loopSideNum = DataPlant::LoopSideLocation::Supply;
-    thisAWHP.loadSidePlantLoc.branchNum = 1;
-    thisAWHP.loadSidePlantLoc.compNum = 1;
+    thisAWHP.loadSidePlantLoc = {1, DataPlant::LoopSideLocation::Supply, 1, 1};
     PlantUtilities::SetPlantLocationLinks(*state, thisAWHP.loadSidePlantLoc);
     thisAWHP.loadSideNodes.outlet = 2;
     thisAWHP.loadSideNodes.inlet = 1;
     thisAWHP.loadSideMassFlowRate = 2;
     thisAWHP.loadSideInletTemp = 20;
-    thisAWHP.loadSidePlantLoc.loop = &state->dataPlnt->PlantLoop(1);
     state->dataLoopNodes->Node(thisAWHP.loadSideNodes.inlet).Temp = thisAWHP.loadSideInletTemp;
     Real64 CpLoad = thisAWHP.loadSidePlantLoc.loop->glycol->getSpecificHeat(
         *state, state->dataLoopNodes->Node(thisAWHP.loadSideNodes.inlet).Temp, "HeatPumpAirToWater::calcLoadSideHeatTransfer()");
@@ -1281,8 +1278,8 @@ TEST_F(EnergyPlusFixture, calcPowerUsage_AWHP)
     state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Supply).Branch(1).Comp.allocate(1);
     auto &PLHPPlantLoadSideComp = state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Supply).Branch(1).Comp(1);
     PLHPPlantLoadSideComp.Type = DataPlant::PlantEquipmentType::HeatPumpAirToWaterCooling;
-    thisAWHP.loadSidePlantLoc.loop = &state->dataPlnt->PlantLoop(1);
-    thisAWHP.loadSidePlantLoc.comp = &PLHPPlantLoadSideComp;
+    thisAWHP.loadSidePlantLoc = {1, DataPlant::LoopSideLocation::Supply, 1, 1};
+    PlantUtilities::SetPlantLocationLinks(*state, thisAWHP.loadSidePlantLoc);
     thisAWHP.loadSidePlantLoc.comp->CurOpSchemeType = DataPlant::OpScheme::CompSetPtBased;
     thisAWHP.EIRHPType = EnergyPlus::DataPlant::PlantEquipmentType::HeatPumpAirToWaterCooling;
 
@@ -1405,12 +1402,8 @@ TEST_F(EnergyPlusFixture, calcOpMode_AWHP)
     state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Supply).Branch(1).Comp.allocate(1);
     auto &PLHPPlantLoadSideComp = state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Supply).Branch(1).Comp(1);
     PLHPPlantLoadSideComp.Type = DataPlant::PlantEquipmentType::HeatPumpAirToWaterCooling;
-    thisAWHP.loadSidePlantLoc.loop = &state->dataPlnt->PlantLoop(1);
-    thisAWHP.loadSidePlantLoc.comp = &PLHPPlantLoadSideComp;
-    thisAWHP.loadSidePlantLoc.loopNum = 1;
-    thisAWHP.loadSidePlantLoc.loopSideNum = EnergyPlus::DataPlant::LoopSideLocation::Supply;
-    thisAWHP.loadSidePlantLoc.branchNum = 1;
-    thisAWHP.loadSidePlantLoc.compNum = 1;
+    thisAWHP.loadSidePlantLoc = {1, EnergyPlus::DataPlant::LoopSideLocation::Supply, 1, 1};
+    PlantUtilities::SetPlantLocationLinks(*state, thisAWHP.loadSidePlantLoc);
     thisAWHP.OperationModeEMSOverrideOn = false;
 
     state->dataPlnt->PlantLoop(2).FluidName = "WATER";
@@ -1421,12 +1414,8 @@ TEST_F(EnergyPlusFixture, calcOpMode_AWHP)
     state->dataPlnt->PlantLoop(2).LoopSide(DataPlant::LoopSideLocation::Supply).Branch(1).Comp.allocate(1);
     auto &companionPLHPPlantLoadSideComp = state->dataPlnt->PlantLoop(2).LoopSide(DataPlant::LoopSideLocation::Supply).Branch(1).Comp(1);
     companionPLHPPlantLoadSideComp.Type = DataPlant::PlantEquipmentType::HeatPumpAirToWaterHeating;
-    companionAWHP.loadSidePlantLoc.loop = &state->dataPlnt->PlantLoop(2);
-    companionAWHP.loadSidePlantLoc.comp = &companionPLHPPlantLoadSideComp;
-    companionAWHP.loadSidePlantLoc.loopNum = 2;
-    companionAWHP.loadSidePlantLoc.loopSideNum = EnergyPlus::DataPlant::LoopSideLocation::Supply;
-    companionAWHP.loadSidePlantLoc.branchNum = 1;
-    companionAWHP.loadSidePlantLoc.compNum = 1;
+    companionAWHP.loadSidePlantLoc = {2, EnergyPlus::DataPlant::LoopSideLocation::Supply, 1, 1};
+    PlantUtilities::SetPlantLocationLinks(*state, companionAWHP.loadSidePlantLoc);
     companionAWHP.OperationModeEMSOverrideOn = false;
 
     thisAWHP.capFuncTempCurveIndex[0] = 1;
@@ -1732,7 +1721,7 @@ TEST_F(EnergyPlusFixture, processInputForEIRPLHP_TestAirSourceNoOANode)
     // expects fatal error due to same node names
     EIRPlantLoopHeatPump::factory(*state, DataPlant::PlantEquipmentType::HeatPumpEIRCooling, "HP COOLING SIDE");
     bool ErrFound = false;
-    BranchNodeConnections::CheckNodeConnections(*state, ErrFound);
+    Node::CheckNodeConnections(*state, ErrFound);
     // expect error related to OA node not being an OutdoorAirNode
     std::string error_msg = delimited_string({
         "   ** Severe  ** Node Connection Error, Node=\"NODE 1\", Inlet node did not find an appropriate matching \"outlet\" node.",
@@ -1992,12 +1981,12 @@ TEST_F(EnergyPlusFixture, EIRPLHP_Initialization_SetpointMissing)
     // Test SingleSetPoint operation first
     loadSideLoop.LoopDemandCalcScheme = DataPlant::LoopDemandCalcScheme::SingleSetPoint;
     state->dataLoopNodes->Node(loadSidePlantOutletNodeIndex).TempSetPoint = 30.0;
-    state->dataLoopNodes->Node(loadSidePlantOutletNodeIndex).TempSetPointHi = DataLoopNode::SensedNodeFlagValue;
-    state->dataLoopNodes->Node(loadSidePlantOutletNodeIndex).TempSetPointLo = DataLoopNode::SensedNodeFlagValue;
+    state->dataLoopNodes->Node(loadSidePlantOutletNodeIndex).TempSetPointHi = Node::SensedNodeFlagValue;
+    state->dataLoopNodes->Node(loadSidePlantOutletNodeIndex).TempSetPointLo = Node::SensedNodeFlagValue;
     // This is already the case, but I'm being explicit
-    state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.outlet).TempSetPoint = DataLoopNode::SensedNodeFlagValue;
-    state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.outlet).TempSetPointHi = DataLoopNode::SensedNodeFlagValue;
-    state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.outlet).TempSetPointLo = DataLoopNode::SensedNodeFlagValue;
+    state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.outlet).TempSetPoint = Node::SensedNodeFlagValue;
+    state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.outlet).TempSetPointHi = Node::SensedNodeFlagValue;
+    state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.outlet).TempSetPointLo = Node::SensedNodeFlagValue;
 
     // the init call expects a "from" calling point
     PlantLocation myLocation = PlantLocation(loadSidePlantIndex, DataPlant::LoopSideLocation::Supply, 1, 1);
@@ -2017,17 +2006,17 @@ TEST_F(EnergyPlusFixture, EIRPLHP_Initialization_SetpointMissing)
 
     EXPECT_NEAR(30.0, thisHeatingPLHP->getLoadSideOutletSetPointTemp(*state), 0.001);
     EXPECT_NEAR(30.0, state->dataLoopNodes->Node(thisHeatingPLHP->setPointNodeNum).TempSetPoint, 0.001);
-    EXPECT_NEAR(DataLoopNode::SensedNodeFlagValue, state->dataLoopNodes->Node(thisHeatingPLHP->setPointNodeNum).TempSetPointHi, 0.001);
-    EXPECT_NEAR(DataLoopNode::SensedNodeFlagValue, state->dataLoopNodes->Node(thisHeatingPLHP->setPointNodeNum).TempSetPointLo, 0.001);
+    EXPECT_NEAR(Node::SensedNodeFlagValue, state->dataLoopNodes->Node(thisHeatingPLHP->setPointNodeNum).TempSetPointHi, 0.001);
+    EXPECT_NEAR(Node::SensedNodeFlagValue, state->dataLoopNodes->Node(thisHeatingPLHP->setPointNodeNum).TempSetPointLo, 0.001);
 
     // test for dual setpoint operation
     loadSideLoop.LoopDemandCalcScheme = DataPlant::LoopDemandCalcScheme::DualSetPointDeadBand;
-    state->dataLoopNodes->Node(loadSidePlantOutletNodeIndex).TempSetPoint = DataLoopNode::SensedNodeFlagValue;
+    state->dataLoopNodes->Node(loadSidePlantOutletNodeIndex).TempSetPoint = Node::SensedNodeFlagValue;
     state->dataLoopNodes->Node(loadSidePlantOutletNodeIndex).TempSetPointHi = 30.0;
     state->dataLoopNodes->Node(loadSidePlantOutletNodeIndex).TempSetPointLo = 10.0;
-    state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.outlet).TempSetPoint = DataLoopNode::SensedNodeFlagValue;
-    state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.outlet).TempSetPointHi = DataLoopNode::SensedNodeFlagValue;
-    state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.outlet).TempSetPointLo = DataLoopNode::SensedNodeFlagValue;
+    state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.outlet).TempSetPoint = Node::SensedNodeFlagValue;
+    state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.outlet).TempSetPointHi = Node::SensedNodeFlagValue;
+    state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.outlet).TempSetPointLo = Node::SensedNodeFlagValue;
 
     // reset the flag to force re-running oneTimeInit
     thisHeatingPLHP->oneTimeInitFlag = true;
@@ -2044,7 +2033,7 @@ TEST_F(EnergyPlusFixture, EIRPLHP_Initialization_SetpointMissing)
     EXPECT_EQ(loadSidePlantOutletNodeIndex, thisHeatingPLHP->setPointNodeNum);
 
     EXPECT_NEAR(10.0, thisHeatingPLHP->getLoadSideOutletSetPointTemp(*state), 0.001);
-    EXPECT_NEAR(DataLoopNode::SensedNodeFlagValue, state->dataLoopNodes->Node(thisHeatingPLHP->setPointNodeNum).TempSetPoint, 0.001);
+    EXPECT_NEAR(Node::SensedNodeFlagValue, state->dataLoopNodes->Node(thisHeatingPLHP->setPointNodeNum).TempSetPoint, 0.001);
     EXPECT_NEAR(30.0, state->dataLoopNodes->Node(thisHeatingPLHP->setPointNodeNum).TempSetPointHi, 0.001);
     EXPECT_NEAR(10.0, state->dataLoopNodes->Node(thisHeatingPLHP->setPointNodeNum).TempSetPointLo, 0.001);
 

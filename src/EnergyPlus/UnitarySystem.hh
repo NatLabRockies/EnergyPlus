@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -177,7 +177,7 @@ namespace UnitarySystems {
         bool m_SingleModeFlag = false;
 
         static void getDesignSpecMSHP(EnergyPlusData &state);
-        static void getDesignSpecMSHPdata([[maybe_unused]] EnergyPlusData &state, bool errorsFound);
+        static void getDesignSpecMSHPdata([[maybe_unused]] EnergyPlusData &state, bool &errorsFound);
 
         DesignSpecMSHP() = default;
         ~DesignSpecMSHP() = default;
@@ -260,7 +260,7 @@ namespace UnitarySystems {
         int m_ZoneSequenceHeatingNum = 0;
         bool m_HeatCoilExists = false;
         Real64 m_HeatingSizingRatio = 1.0;
-        int m_HeatingCoilType_Num = 0;
+        HVAC::CoilType m_heatCoilType = HVAC::CoilType::Invalid;
         bool m_DXHeatingCoil = false;
         int m_HeatingCoilIndex = 0;
         Sched::Schedule *m_heatingCoilAvailSched = nullptr;
@@ -272,7 +272,7 @@ namespace UnitarySystems {
         bool m_VarSpeedHeatingCoil = false;
         int HeatCtrlNode = 0;
         bool m_CoolCoilExists = false;
-        int m_CoolingCoilType_Num = 0;
+        HVAC::CoilType m_coolCoilType = HVAC::CoilType::Invalid;
         int m_NumOfSpeedCooling = 0;
         Sched::Schedule *m_coolingCoilAvailSched = nullptr;
         Real64 m_DesignCoolingCapacity = 0.0;
@@ -291,7 +291,7 @@ namespace UnitarySystems {
         bool m_RunOnLatentLoad = false;
         bool m_RunOnLatentOnlyWithSensible = false;
         HVAC::CoilMode m_DehumidificationMode = HVAC::CoilMode::Normal; // Only explicitly initialized if something other than Normal
-        int m_SuppHeatCoilType_Num = 0;
+        HVAC::CoilType m_suppHeatCoilType = HVAC::CoilType::Invalid;
         bool m_SuppCoilExists = false;
         Real64 m_DesignSuppHeatingCapacity = 0.0;
         int m_SuppCoilAirInletNode = 0;

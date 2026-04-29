@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -314,7 +314,7 @@ namespace SZVAVModel {
                     }
 
                     if ((CoolingLoad && (TempSensOutput < ZoneLoad)) || (HeatingLoad && (TempSensOutput > ZoneLoad))) {
-                        if (SZVAVModel.HCoilType_Num == FanCoilUnits::HCoil::Water || !HeatingLoad) {
+                        if (SZVAVModel.heatCoilType == HVAC::CoilType::HeatingWater || !HeatingLoad) {
                             auto f = [&state, SysIndex, FirstHVACIteration, &SZVAVModel, ZoneLoad, coilFluidInletNode, maxCoilFluidFlow, AirMassFlow](
                                          Real64 const PLR) {
                                 return FanCoilUnits::CalcFanCoilWaterFlowResidual(state,
@@ -346,7 +346,7 @@ namespace SZVAVModel {
                     } else { // not enough capacity at this air flow rate. Unit does have enough capacity a full water/air, otherwise wouldn't be here
                         // this is different from the PTUnit and UnitarySys routines in this module
                         // find the water flow rate that meets the min load at region 1/2 boundary
-                        if (SZVAVModel.HCoilType_Num == FanCoilUnits::HCoil::Water || !HeatingLoad) {
+                        if (SZVAVModel.heatCoilType == HVAC::CoilType::HeatingWater || !HeatingLoad) {
                             auto f = // (AUTO_OK_LAMBDA)
                                 [&state, SysIndex, FirstHVACIteration, &SZVAVModel, ZoneLoad, coilFluidInletNode, maxCoilFluidFlow, minAirMassFlow](
                                     Real64 const PLR) {
@@ -395,7 +395,7 @@ namespace SZVAVModel {
                         }
                     }
                 } else { // too much capacity when coil off, could lower air flow rate here to meet load if air flow is above minimum
-                    if (SZVAVModel.HCoilType_Num == FanCoilUnits::HCoil::Water || !HeatingLoad) {
+                    if (SZVAVModel.heatCoilType == HVAC::CoilType::HeatingWater || !HeatingLoad) {
                         auto f2 = [&state, SysIndex, FirstHVACIteration, &SZVAVModel, ZoneLoad, coilFluidInletNode](Real64 const PLR) {
                             return FanCoilUnits::CalcFanCoilAirAndWaterFlowResidual(state,
                                                                                     PLR,
@@ -462,7 +462,7 @@ namespace SZVAVModel {
                 FanCoilUnits::Calc4PipeFanCoil(state, SysIndex, SZVAVModel.ControlZoneNum, FirstHVACIteration, TempSensOutput, PartLoadRatio);
                 if ((CoolingLoad && ZoneLoad < TempSensOutput) || (HeatingLoad && ZoneLoad > TempSensOutput)) {
                     // otherwise iterate on load
-                    if (SZVAVModel.HCoilType_Num == FanCoilUnits::HCoil::Water || !HeatingLoad) {
+                    if (SZVAVModel.heatCoilType == HVAC::CoilType::HeatingWater || !HeatingLoad) {
                         auto f = [&state, SysIndex, FirstHVACIteration, &SZVAVModel, ZoneLoad, coilFluidInletNode, maxCoilFluidFlow, maxAirMassFlow](
                                      Real64 const PLR) {
                             return FanCoilUnits::CalcFanCoilWaterFlowResidual(state,
@@ -488,7 +488,7 @@ namespace SZVAVModel {
                         MessagePrefix = "Step 3: ";
                     }
                 } else { // too much capacity at full air flow with coil off, operate coil and fan in unison
-                    if (SZVAVModel.HCoilType_Num == FanCoilUnits::HCoil::Water || !HeatingLoad) {
+                    if (SZVAVModel.heatCoilType == HVAC::CoilType::HeatingWater || !HeatingLoad) {
                         auto f2 = [&state, SysIndex, FirstHVACIteration, &SZVAVModel, ZoneLoad, coilFluidInletNode](Real64 const PLR) {
                             return FanCoilUnits::CalcFanCoilAirAndWaterFlowResidual(state,
                                                                                     PLR,
@@ -529,13 +529,15 @@ namespace SZVAVModel {
                     15.0) { // water coil can provide same output at varying water PLR (model discontinuity?)
                     if (SZVAVModel.MaxIterIndex == 0) {
                         ShowWarningMessage(
-                            state, format("{}Coil control failed to converge for {}:{}", MessagePrefix, SZVAVModel.UnitType, SZVAVModel.Name));
+                            state,
+                            EnergyPlus::format("{}Coil control failed to converge for {}:{}", MessagePrefix, SZVAVModel.UnitType, SZVAVModel.Name));
                         ShowContinueError(state, "  Iteration limit exceeded in calculating system sensible part-load ratio.");
                         ShowContinueErrorTimeStamp(
                             state,
-                            format("Sensible load to be met = {:.2T} (watts), sensible output = {:.2T} (watts), and the simulation continues.",
-                                   ZoneLoad,
-                                   TempSensOutput));
+                            EnergyPlus::format(
+                                "Sensible load to be met = {:.2T} (watts), sensible output = {:.2T} (watts), and the simulation continues.",
+                                ZoneLoad,
+                                TempSensOutput));
                     }
                     ShowRecurringWarningErrorAtEnd(
                         state,
@@ -547,9 +549,11 @@ namespace SZVAVModel {
                 }
             } else if (SolFlag == -2) {
                 if (SZVAVModel.RegulaFalsiFailedIndex == 0) {
-                    ShowWarningMessage(state, format("{}Coil control failed for {}:{}", MessagePrefix, SZVAVModel.UnitType, SZVAVModel.Name));
+                    ShowWarningMessage(state,
+                                       EnergyPlus::format("{}Coil control failed for {}:{}", MessagePrefix, SZVAVModel.UnitType, SZVAVModel.Name));
                     ShowContinueError(state, "  sensible part-load ratio determined to be outside the range of 0-1.");
-                    ShowContinueErrorTimeStamp(state, format("Sensible load to be met = {:.2T} (watts), and the simulation continues.", ZoneLoad));
+                    ShowContinueErrorTimeStamp(
+                        state, EnergyPlus::format("Sensible load to be met = {:.2T} (watts), and the simulation continues.", ZoneLoad));
                 }
                 ShowRecurringWarningErrorAtEnd(state,
                                                SZVAVModel.UnitType + " \"" + SZVAVModel.Name +
@@ -1054,13 +1058,15 @@ namespace SZVAVModel {
                     15.0) { // water coil can provide same output at varying water PLR (model discontinuity?)
                     if (SZVAVModel.MaxIterIndex == 0) {
                         ShowWarningMessage(
-                            state, format("{}Coil control failed to converge for {}:{}", MessagePrefix, SZVAVModel.UnitType, SZVAVModel.Name));
+                            state,
+                            EnergyPlus::format("{}Coil control failed to converge for {}:{}", MessagePrefix, SZVAVModel.UnitType, SZVAVModel.Name));
                         ShowContinueError(state, "  Iteration limit exceeded in calculating system sensible part-load ratio.");
                         ShowContinueErrorTimeStamp(
                             state,
-                            format("Sensible load to be met = {:.2T} (watts), sensible output = {:.2T} (watts), and the simulation continues.",
-                                   ZoneLoad,
-                                   TempSensOutput));
+                            EnergyPlus::format(
+                                "Sensible load to be met = {:.2T} (watts), sensible output = {:.2T} (watts), and the simulation continues.",
+                                ZoneLoad,
+                                TempSensOutput));
                     }
                     ShowRecurringWarningErrorAtEnd(
                         state,
@@ -1072,9 +1078,11 @@ namespace SZVAVModel {
                 }
             } else if (SolFlag == -2) {
                 if (SZVAVModel.RegulaFalsiFailedIndex == 0) {
-                    ShowWarningMessage(state, format("{}Coil control failed for {}:{}", MessagePrefix, SZVAVModel.UnitType, SZVAVModel.Name));
+                    ShowWarningMessage(state,
+                                       EnergyPlus::format("{}Coil control failed for {}:{}", MessagePrefix, SZVAVModel.UnitType, SZVAVModel.Name));
                     ShowContinueError(state, "  sensible part-load ratio determined to be outside the range of 0-1.");
-                    ShowContinueErrorTimeStamp(state, format("Sensible load to be met = {:.2T} (watts), and the simulation continues.", ZoneLoad));
+                    ShowContinueErrorTimeStamp(
+                        state, EnergyPlus::format("Sensible load to be met = {:.2T} (watts), and the simulation continues.", ZoneLoad));
                 }
                 ShowRecurringWarningErrorAtEnd(state,
                                                SZVAVModel.UnitType + " \"" + SZVAVModel.Name +

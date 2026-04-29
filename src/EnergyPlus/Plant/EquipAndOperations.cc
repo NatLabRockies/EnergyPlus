@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -193,11 +193,9 @@ namespace DataPlant {
                 for (int BranchNum = 1; BranchNum <= this_plant_loopside.TotalBranches; ++BranchNum) {
                     for (int CompNum = 1; CompNum <= this_plant_loopside.Branch(BranchNum).TotalComponents; ++CompNum) {
                         if (this_plant_loopside.Branch(BranchNum).Comp(CompNum).Type == DataPlant::PlantEquipmentType::PlantLoadProfile) {
-                            PlantLocation foundLoc;
-                            foundLoc.loopNum = LoopNum;
-                            foundLoc.loopSideNum = DataPlant::LoopSideLocation::Demand;
-                            foundLoc.branchNum = BranchNum;
-                            foundLoc.compNum = CompNum;
+                            PlantLocation foundLoc{LoopNum, DataPlant::LoopSideLocation::Demand, BranchNum, CompNum};
+                            PlantUtilities::SetPlantLocationLinks(state, foundLoc);
+
                             PlantLoadProfileComps(loadProfileCompNum) = foundLoc;
                             ++loadProfileCompNum;
                         }
@@ -231,11 +229,8 @@ namespace DataPlant {
                 for (int BranchNum = 1; BranchNum <= this_plant_loopside.TotalBranches; ++BranchNum) {
                     for (int CompNum = 1; CompNum <= this_plant_loopside.Branch(BranchNum).TotalComponents; ++CompNum) {
                         if (this_plant_loopside.Branch(BranchNum).Comp(CompNum).Type == DataPlant::PlantEquipmentType::Boiler_Simple) {
-                            PlantLocation foundLoc;
-                            foundLoc.loopNum = LoopNum;
-                            foundLoc.loopSideNum = DataPlant::LoopSideLocation::Supply;
-                            foundLoc.branchNum = BranchNum;
-                            foundLoc.compNum = CompNum;
+                            PlantLocation foundLoc{LoopNum, DataPlant::LoopSideLocation::Supply, BranchNum, CompNum};
+                            PlantUtilities::SetPlantLocationLinks(state, foundLoc);
                             PlantBoilerComps(BoilerCompNum) = foundLoc;
                             ++BoilerCompNum;
                         }
@@ -271,11 +266,8 @@ namespace DataPlant {
                 for (int BranchNum = 1; BranchNum <= this_plant_loopside.TotalBranches; ++BranchNum) {
                     for (int CompNum = 1; CompNum <= this_plant_loopside.Branch(BranchNum).TotalComponents; ++CompNum) {
                         if (this_plant_loopside.Branch(BranchNum).Comp(CompNum).Type == DataPlant::PlantEquipmentType::FluidToFluidPlantHtExchg) {
-                            PlantLocation foundLoc;
-                            foundLoc.loopNum = LoopNum;
-                            foundLoc.loopSideNum = DataPlant::LoopSideLocation::Supply;
-                            foundLoc.branchNum = BranchNum;
-                            foundLoc.compNum = CompNum;
+                            PlantLocation foundLoc{LoopNum, DataPlant::LoopSideLocation::Supply, BranchNum, CompNum};
+                            PlantUtilities::SetPlantLocationLinks(state, foundLoc);
                             PlantHXComps(HXCompNum) = foundLoc;
                             ++HXCompNum;
 
@@ -331,15 +323,17 @@ namespace DataPlant {
                             }
                         }
                         if (!foundit) {
-                            ShowSevereError(state,
-                                            format("ChillerHeaterSupervisoryOperationData::OneTimeInitChillerHeaterChangeoverOpScheme problem=\"{}\" "
+                            ShowSevereError(
+                                state,
+                                EnergyPlus::format("ChillerHeaterSupervisoryOperationData::OneTimeInitChillerHeaterChangeoverOpScheme problem=\"{}\" "
                                                    "component \"{}\" was not found on a cooling plant loop.",
                                                    this->Name,
                                                    this_equip.Name));
                         }
                     } else if (NumSearchResults == 0) {
-                        ShowSevereError(state,
-                                        format("ChillerHeaterSupervisoryOperationData::OneTimeInitChillerHeaterChangeoverOpScheme problem=\"{}\" "
+                        ShowSevereError(
+                            state,
+                            EnergyPlus::format("ChillerHeaterSupervisoryOperationData::OneTimeInitChillerHeaterChangeoverOpScheme problem=\"{}\" "
                                                "component \"{}\" was not found on a plant loop.",
                                                this->Name,
                                                this_equip.Name));
@@ -419,15 +413,17 @@ namespace DataPlant {
                             }
                         }
                         if (!foundit) {
-                            ShowSevereError(state,
-                                            format("ChillerHeaterSupervisoryOperationData::OneTimeInitChillerHeaterChangeoverOpScheme problem=\"{}\" "
+                            ShowSevereError(
+                                state,
+                                EnergyPlus::format("ChillerHeaterSupervisoryOperationData::OneTimeInitChillerHeaterChangeoverOpScheme problem=\"{}\" "
                                                    "component \"{}\" was not found on a heating plant loop.",
                                                    this->Name,
                                                    this_equip.Name));
                         }
                     } else if (NumSearchResults == 0) {
-                        ShowSevereError(state,
-                                        format("ChillerHeaterSupervisoryOperationData::OneTimeInitChillerHeaterChangeoverOpScheme problem=\"{}\" "
+                        ShowSevereError(
+                            state,
+                            EnergyPlus::format("ChillerHeaterSupervisoryOperationData::OneTimeInitChillerHeaterChangeoverOpScheme problem=\"{}\" "
                                                "component \"{}\" was not found on a plant loop.",
                                                this->Name,
                                                this_equip.Name));
@@ -507,15 +503,17 @@ namespace DataPlant {
                             }
                         }
                         if (!foundit) {
-                            ShowSevereError(state,
-                                            format("ChillerHeaterSupervisoryOperationData::OneTimeInitChillerHeaterChangeoverOpScheme problem=\"{}\" "
+                            ShowSevereError(
+                                state,
+                                EnergyPlus::format("ChillerHeaterSupervisoryOperationData::OneTimeInitChillerHeaterChangeoverOpScheme problem=\"{}\" "
                                                    "component \"{}\" was not found on a cooling plant loop.",
                                                    this->Name,
                                                    this_equip.Name));
                         }
                     } else if (NumSearchResults == 0) {
-                        ShowSevereError(state,
-                                        format("ChillerHeaterSupervisoryOperationData::OneTimeInitChillerHeaterChangeoverOpScheme problem=\"{}\" "
+                        ShowSevereError(
+                            state,
+                            EnergyPlus::format("ChillerHeaterSupervisoryOperationData::OneTimeInitChillerHeaterChangeoverOpScheme problem=\"{}\" "
                                                "component \"{}\" was not found on a plant loop.",
                                                this->Name,
                                                this_equip.Name));
@@ -595,15 +593,17 @@ namespace DataPlant {
                             }
                         }
                         if (!foundit) {
-                            ShowSevereError(state,
-                                            format("ChillerHeaterSupervisoryOperationData::OneTimeInitChillerHeaterChangeoverOpScheme problem=\"{}\" "
+                            ShowSevereError(
+                                state,
+                                EnergyPlus::format("ChillerHeaterSupervisoryOperationData::OneTimeInitChillerHeaterChangeoverOpScheme problem=\"{}\" "
                                                    "component \"{}\" was not found on a heating plant loop.",
                                                    this->Name,
                                                    this_equip.Name));
                         }
                     } else if (NumSearchResults == 0) {
-                        ShowSevereError(state,
-                                        format("ChillerHeaterSupervisoryOperationData::OneTimeInitChillerHeaterChangeoverOpScheme problem=\"{}\" "
+                        ShowSevereError(
+                            state,
+                            EnergyPlus::format("ChillerHeaterSupervisoryOperationData::OneTimeInitChillerHeaterChangeoverOpScheme problem=\"{}\" "
                                                "component \"{}\" was not found on a plant loop.",
                                                this->Name,
                                                this_equip.Name));
@@ -682,45 +682,19 @@ namespace DataPlant {
                     this->DedicatedHR_CoolingPLHP = thisHP; // store pointer to cooling side of heat pump
                     founditCooling = true;
 
-                    int pltSizNum = state.dataPlnt->PlantLoop(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.loopNum).PlantSizNum;
+                    int pltSizNum = this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.loop->PlantSizNum;
                     this->PlantOps.DedicatedHR_SecChW_DesignCapacity = state.dataSize->PlantSizData(pltSizNum).DesCapacity;
                     this->PlantOps.SecondaryChWLoopIndex = this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.loopNum;
 
                     // set up load side plant loop information for cooling side of heat pump
-                    state.dataPlnt->PlantLoop(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.loopNum)
-                        .LoopSide(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.loopSideNum)
-                        .Branch(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.branchNum)
-                        .Comp(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.compNum)
-                        .OpScheme.allocate(1);
-                    state.dataPlnt->PlantLoop(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.loopNum)
-                        .LoopSide(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.loopSideNum)
-                        .Branch(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.branchNum)
-                        .Comp(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.compNum)
-                        .OpScheme(1)
-                        .OpSchemePtr = 1;
-                    state.dataPlnt->PlantLoop(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.loopNum)
-                        .LoopSide(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.loopSideNum)
-                        .Branch(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.branchNum)
-                        .Comp(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.compNum)
-                        .CurOpSchemeType = this->Type;
+                    this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.comp->OpScheme.allocate(1);
+                    this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.comp->OpScheme(1).OpSchemePtr = 1;
+                    this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.comp->CurOpSchemeType = this->Type;
 
                     // setup source side plant loop data structure information for cooling side of heat pump
-                    state.dataPlnt->PlantLoop(this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.loopNum)
-                        .LoopSide(this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.loopSideNum)
-                        .Branch(this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.branchNum)
-                        .Comp(this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.compNum)
-                        .OpScheme.allocate(1);
-                    state.dataPlnt->PlantLoop(this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.loopNum)
-                        .LoopSide(this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.loopSideNum)
-                        .Branch(this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.branchNum)
-                        .Comp(this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.compNum)
-                        .OpScheme(1)
-                        .OpSchemePtr = 1;
-                    state.dataPlnt->PlantLoop(this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.loopNum)
-                        .LoopSide(this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.loopSideNum)
-                        .Branch(this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.branchNum)
-                        .Comp(this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.compNum)
-                        .CurOpSchemeType = this->Type;
+                    this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.comp->OpScheme.allocate(1);
+                    this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.comp->OpScheme(1).OpSchemePtr = 1;
+                    this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.comp->CurOpSchemeType = this->Type;
                 }
 
                 // find heating side heat pump
@@ -729,57 +703,33 @@ namespace DataPlant {
                     this->DedicatedHR_HeatingPLHP = thisHP; // store pointer to heating side of heat pump
                     founditHeating = true;
 
-                    int pltSizNum = state.dataPlnt->PlantLoop(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.loopNum).PlantSizNum;
+                    int pltSizNum = this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.loop->PlantSizNum;
                     this->PlantOps.DedicatedHR_SecHW_DesignCapacity = state.dataSize->PlantSizData(pltSizNum).DesCapacity;
                     this->PlantOps.SecondaryHWLoopIndex = this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.loopNum;
 
-                    state.dataPlnt->PlantLoop(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.loopNum)
-                        .LoopSide(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.loopSideNum)
-                        .Branch(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.branchNum)
-                        .Comp(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.compNum)
-                        .OpScheme.allocate(1);
-                    state.dataPlnt->PlantLoop(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.loopNum)
-                        .LoopSide(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.loopSideNum)
-                        .Branch(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.branchNum)
-                        .Comp(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.compNum)
-                        .OpScheme(1)
-                        .OpSchemePtr = 1;
-                    state.dataPlnt->PlantLoop(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.loopNum)
-                        .LoopSide(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.loopSideNum)
-                        .Branch(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.branchNum)
-                        .Comp(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.compNum)
-                        .CurOpSchemeType = this->Type;
+                    this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.comp->OpScheme.allocate(1);
+                    this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.comp->OpScheme(1).OpSchemePtr = 1;
+                    this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.comp->CurOpSchemeType = this->Type;
 
                     // setup source side plant loop data structure information for heating side of heat pump
-                    state.dataPlnt->PlantLoop(this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.loopNum)
-                        .LoopSide(this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.loopSideNum)
-                        .Branch(this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.branchNum)
-                        .Comp(this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.compNum)
-                        .OpScheme.allocate(1);
-                    state.dataPlnt->PlantLoop(this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.loopNum)
-                        .LoopSide(this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.loopSideNum)
-                        .Branch(this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.branchNum)
-                        .Comp(this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.compNum)
-                        .OpScheme(1)
-                        .OpSchemePtr = 1;
-                    state.dataPlnt->PlantLoop(this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.loopNum)
-                        .LoopSide(this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.loopSideNum)
-                        .Branch(this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.branchNum)
-                        .Comp(this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.compNum)
-                        .CurOpSchemeType = this->Type;
+                    this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.comp->OpScheme.allocate(1);
+                    this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.comp->OpScheme(1).OpSchemePtr = 1;
+                    this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.comp->CurOpSchemeType = this->Type;
                 }
             }
 
             if (!founditCooling) {
-                ShowSevereError(state,
-                                format("ChillerHeaterSupervisoryOperationData::OneTimeInitChillerHeaterChangeoverOpScheme problem=\"{}\" component "
+                ShowSevereError(
+                    state,
+                    EnergyPlus::format("ChillerHeaterSupervisoryOperationData::OneTimeInitChillerHeaterChangeoverOpScheme problem=\"{}\" component "
                                        "\"{}\" was not found on a cooling plant loop.",
                                        this->Name,
                                        this->DedicatedHR_ChWRetControl_Name));
             }
             if (!founditHeating) {
-                ShowSevereError(state,
-                                format("ChillerHeaterSupervisoryOperationData::OneTimeInitChillerHeaterChangeoverOpScheme problem=\"{}\" component "
+                ShowSevereError(
+                    state,
+                    EnergyPlus::format("ChillerHeaterSupervisoryOperationData::OneTimeInitChillerHeaterChangeoverOpScheme problem=\"{}\" component "
                                        "\"{}\" was not found on a heating plant loop.",
                                        this->Name,
                                        this->DedicatedHR_ChWRetControl_Name));
@@ -1298,47 +1248,15 @@ namespace DataPlant {
         }
 
         // initialize off
-        state.dataPlnt->PlantLoop(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.loopNum)
-            .LoopSide(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.loopSideNum)
-            .Branch(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.branchNum)
-            .Comp(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.compNum)
-            .Available = false;
-        state.dataPlnt->PlantLoop(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.loopNum)
-            .LoopSide(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.loopSideNum)
-            .Branch(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.branchNum)
-            .Comp(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.compNum)
-            .ON = false;
-        state.dataPlnt->PlantLoop(this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.loopNum)
-            .LoopSide(this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.loopSideNum)
-            .Branch(this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.branchNum)
-            .Comp(this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.compNum)
-            .Available = false;
-        state.dataPlnt->PlantLoop(this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.loopNum)
-            .LoopSide(this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.loopSideNum)
-            .Branch(this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.branchNum)
-            .Comp(this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.compNum)
-            .ON = false;
+        this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.comp->Available = false;
+        this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.comp->ON = false;
+        this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.comp->Available = false;
+        this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.comp->ON = false;
 
-        state.dataPlnt->PlantLoop(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.loopNum)
-            .LoopSide(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.loopSideNum)
-            .Branch(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.branchNum)
-            .Comp(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.compNum)
-            .Available = false;
-        state.dataPlnt->PlantLoop(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.loopNum)
-            .LoopSide(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.loopSideNum)
-            .Branch(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.branchNum)
-            .Comp(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.compNum)
-            .ON = false;
-        state.dataPlnt->PlantLoop(this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.loopNum)
-            .LoopSide(this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.loopSideNum)
-            .Branch(this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.branchNum)
-            .Comp(this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.compNum)
-            .Available = false;
-        state.dataPlnt->PlantLoop(this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.loopNum)
-            .LoopSide(this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.loopSideNum)
-            .Branch(this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.branchNum)
-            .Comp(this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.compNum)
-            .ON = false;
+        this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.comp->Available = false;
+        this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.comp->ON = false;
+        this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.comp->Available = false;
+        this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.comp->ON = false;
 
         // Dedicated Heat Recovery Water To Water Heat Pump Control.
         // Assume there are two companion machines, one leads for cooling the return chilled water, the other leads for heating the return hot
@@ -1346,16 +1264,9 @@ namespace DataPlant {
         // are on the secondary loops.  Need to decide if it runs and which of cooling or heating companion coils gets to lead.
         //
         // Step 1. get the mass flow rates of the returns.  both must be non-zero for the WWHP to run
-        int inletChWReturnNodeNum = state.dataPlnt->PlantLoop(this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.loopNum)
-                                        .LoopSide(this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.loopSideNum)
-                                        .Branch(this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.branchNum)
-                                        .Comp(this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.compNum)
-                                        .NodeNumIn;
-        int inletHWReturnNodeNum = state.dataPlnt->PlantLoop(this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.loopNum)
-                                       .LoopSide(this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.loopSideNum)
-                                       .Branch(this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.branchNum)
-                                       .Comp(this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.compNum)
-                                       .NodeNumIn;
+        int inletChWReturnNodeNum = this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.comp->NodeNumIn;
+        int inletHWReturnNodeNum = this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.comp->NodeNumIn;
+
         Real64 CW_RetMdot = state.dataLoopNodes->Node(inletChWReturnNodeNum).MassFlowRate;
         Real64 HW_RetMdot = state.dataLoopNodes->Node(inletHWReturnNodeNum).MassFlowRate;
 
@@ -1369,15 +1280,13 @@ namespace DataPlant {
 
         // step 2. calculate the loads to adjust the
         // returns to hit the associated setpoints at their current mass flow
-        Real64 const CpCW =
-            state.dataPlnt->PlantLoop(this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.loopNum)
-                .glycol->getSpecificHeat(state, state.dataLoopNodes->Node(inletChWReturnNodeNum).Temp, "EvaluateChillerHeaterChangeoverOpScheme");
+        Real64 const CpCW = this->DedicatedHR_HeatingPLHP.sourceSidePlantLoc.loop->glycol->getSpecificHeat(
+            state, state.dataLoopNodes->Node(inletChWReturnNodeNum).Temp, "EvaluateChillerHeaterChangeoverOpScheme");
         Real64 CW_Qdot =
             CW_RetMdot * CpCW *
             (this->Setpoint.SecCW - state.dataLoopNodes->Node(inletChWReturnNodeNum).Temp); // power = Mdot Cp Delta T, cooling load is negative
-        Real64 const CpHW =
-            state.dataPlnt->PlantLoop(this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.loopNum)
-                .glycol->getSpecificHeat(state, state.dataLoopNodes->Node(inletHWReturnNodeNum).Temp, "EvaluateChillerHeaterChangeoverOpScheme");
+        Real64 const CpHW = this->DedicatedHR_CoolingPLHP.sourceSidePlantLoc.loop->glycol->getSpecificHeat(
+            state, state.dataLoopNodes->Node(inletHWReturnNodeNum).Temp, "EvaluateChillerHeaterChangeoverOpScheme");
         Real64 HW_Qdot = HW_RetMdot * CpHW * (this->Setpoint.SecHW - state.dataLoopNodes->Node(inletHWReturnNodeNum).Temp); // power = Mdot Cp Delta T
 
         // store for reporting
@@ -1440,37 +1349,15 @@ namespace DataPlant {
         if (CoolLedNeed) {
             this->Report.DedicHR_OpMode = 2;
             // turn ON load side of this water to water heat pump
-            state.dataPlnt->PlantLoop(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.loopNum)
-                .LoopSide(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.loopSideNum)
-                .Branch(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.branchNum)
-                .Comp(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.compNum)
-                .Available = true;
-            state.dataPlnt->PlantLoop(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.loopNum)
-                .LoopSide(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.loopSideNum)
-                .Branch(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.branchNum)
-                .Comp(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.compNum)
-                .ON = true;
+            this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.comp->Available = true;
+            this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.comp->ON = true;
+            this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.comp->CurOpSchemeType = this->Type;
+            this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.comp->MyLoad = CW_Qdot; // cooling load is negative
 
-            state.dataPlnt->PlantLoop(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.loopNum)
-                .LoopSide(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.loopSideNum)
-                .Branch(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.branchNum)
-                .Comp(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.compNum)
-                .CurOpSchemeType = this->Type;
+            int OutletChWReturnNodeNum = this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.comp->NodeNumOut;
 
-            state.dataPlnt->PlantLoop(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.loopNum)
-                .LoopSide(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.loopSideNum)
-                .Branch(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.branchNum)
-                .Comp(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.compNum)
-                .MyLoad = CW_Qdot; // cooling load is negative
-
-            int OutletChWReturnNodeNum = state.dataPlnt->PlantLoop(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.loopNum)
-                                             .LoopSide(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.loopSideNum)
-                                             .Branch(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.branchNum)
-                                             .Comp(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.compNum)
-                                             .NodeNumOut;
             state.dataLoopNodes->Node(OutletChWReturnNodeNum).TempSetPoint = this->Setpoint.SecCW;
-            state.dataLoopNodes->Node(state.dataPlnt->PlantLoop(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.loopNum).TempSetPointNodeNum)
-                .TempSetPoint = this->Setpoint.SecCW;
+            state.dataLoopNodes->Node(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.loop->TempSetPointNodeNum).TempSetPoint = this->Setpoint.SecCW;
 
             if (this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.loopNum ==
                 SecondaryPlantLoopIndicesBeingSupervised(this->DedicatedHR_CoolingPLHP.loadSidePlantLoc.loopNum)) {
@@ -1490,47 +1377,22 @@ namespace DataPlant {
         } else if (HeatLedNeed) {
             this->Report.DedicHR_OpMode = 1;
             // turn load side of this water to water heat pump
-            state.dataPlnt->PlantLoop(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.loopNum)
-                .LoopSide(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.loopSideNum)
-                .Branch(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.branchNum)
-                .Comp(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.compNum)
-                .Available = true;
-            state.dataPlnt->PlantLoop(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.loopNum)
-                .LoopSide(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.loopSideNum)
-                .Branch(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.branchNum)
-                .Comp(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.compNum)
-                .ON = true;
-            state.dataPlnt->PlantLoop(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.loopNum)
-                .LoopSide(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.loopSideNum)
-                .Branch(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.branchNum)
-                .Comp(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.compNum)
-                .CurOpSchemeType = this->Type;
-            state.dataPlnt->PlantLoop(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.loopNum)
-                .LoopSide(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.loopSideNum)
-                .Branch(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.branchNum)
-                .Comp(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.compNum)
-                .MyLoad = HW_Qdot;
+            this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.comp->Available = true;
+            this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.comp->ON = true;
+            this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.comp->CurOpSchemeType = this->Type;
+            this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.comp->MyLoad = HW_Qdot;
 
-            int OutletHWReturnNodeNum = state.dataPlnt->PlantLoop(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.loopNum)
-                                            .LoopSide(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.loopSideNum)
-                                            .Branch(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.branchNum)
-                                            .Comp(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.compNum)
-                                            .NodeNumOut;
+            int OutletHWReturnNodeNum = this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.comp->NodeNumOut;
 
             state.dataLoopNodes->Node(OutletHWReturnNodeNum).TempSetPoint = this->Setpoint.SecHW;
-            state.dataLoopNodes->Node(state.dataPlnt->PlantLoop(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.loopNum).TempSetPointNodeNum)
-                .TempSetPoint = this->Setpoint.SecHW;
+            state.dataLoopNodes->Node(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.loop->TempSetPointNodeNum).TempSetPoint = this->Setpoint.SecHW;
 
             if (this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.loopNum ==
                 SecondaryPlantLoopIndicesBeingSupervised(this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.loopNum)) {
                 // search for HX on this loop and place setpoint on outlet
                 for (int HXnum = 1; HXnum <= this->PlantOps.numPlantHXs; ++HXnum) {
                     if (this->PlantHXComps(HXnum).loopNum == this->DedicatedHR_HeatingPLHP.loadSidePlantLoc.loopNum) {
-                        int outletnode = state.dataPlnt->PlantLoop(this->PlantHXComps(HXnum).loopNum)
-                                             .LoopSide(this->PlantHXComps(HXnum).loopSideNum)
-                                             .Branch(this->PlantHXComps(HXnum).branchNum)
-                                             .Comp(this->PlantHXComps(HXnum).compNum)
-                                             .NodeNumOut;
+                        int outletnode = this->PlantHXComps(HXnum).comp->NodeNumOut;
                         state.dataLoopNodes->Node(outletnode).TempSetPoint = min(this->Setpoint.SecHW, this->DetermineHWSetpointOARest(state));
                     }
                 }
@@ -1550,21 +1412,9 @@ namespace DataPlant {
         // first initialize them to be off
         if (this->PlantOps.numBoilers > 0) {
             for (int BoilerNum = 1; BoilerNum <= this->PlantOps.numBoilers; ++BoilerNum) {
-                state.dataPlnt->PlantLoop(this->PlantBoilerComps(BoilerNum).loopNum)
-                    .LoopSide(this->PlantBoilerComps(BoilerNum).loopSideNum)
-                    .Branch(this->PlantBoilerComps(BoilerNum).branchNum)
-                    .Comp(this->PlantBoilerComps(BoilerNum).compNum)
-                    .Available = false;
-                state.dataPlnt->PlantLoop(this->PlantBoilerComps(BoilerNum).loopNum)
-                    .LoopSide(this->PlantBoilerComps(BoilerNum).loopSideNum)
-                    .Branch(this->PlantBoilerComps(BoilerNum).branchNum)
-                    .Comp(this->PlantBoilerComps(BoilerNum).compNum)
-                    .ON = false;
-                state.dataPlnt->PlantLoop(this->PlantBoilerComps(BoilerNum).loopNum)
-                    .LoopSide(this->PlantBoilerComps(BoilerNum).loopSideNum)
-                    .Branch(this->PlantBoilerComps(BoilerNum).branchNum)
-                    .Comp(this->PlantBoilerComps(BoilerNum).compNum)
-                    .MyLoad = 0.0;
+                this->PlantBoilerComps(BoilerNum).comp->Available = false;
+                this->PlantBoilerComps(BoilerNum).comp->ON = false;
+                this->PlantBoilerComps(BoilerNum).comp->MyLoad = 0.0;
             }
         }
 
@@ -1590,18 +1440,14 @@ namespace DataPlant {
                 HWsetpt = HWsetpt - this->TempReset.BoilerTemperatureOffset;
 
                 // check inlet temperature
-                int inletBoilerNodeNum = state.dataPlnt->PlantLoop(this->PlantBoilerComps(BoilerNum).loopNum)
-                                             .LoopSide(this->PlantBoilerComps(BoilerNum).loopSideNum)
-                                             .Branch(this->PlantBoilerComps(BoilerNum).branchNum)
-                                             .Comp(this->PlantBoilerComps(BoilerNum).compNum)
-                                             .NodeNumIn;
+                int inletBoilerNodeNum = this->PlantBoilerComps(BoilerNum).comp->NodeNumIn;
                 Real64 Tin = state.dataLoopNodes->Node(inletBoilerNodeNum).Temp;
                 Real64 Mdot = state.dataLoopNodes->Node(inletBoilerNodeNum).MassFlowRate;
 
-                Real64 const CpHW = state.dataPlnt->PlantLoop(this->PlantBoilerComps(BoilerNum).loopNum)
-                                        .glycol->getSpecificHeat(state, Tin, "ChillerHeaterSupervisoryOperationData::ProcessAndSetAuxilBoiler");
+                Real64 const CpHW = this->PlantBoilerComps(BoilerNum).loop->glycol->getSpecificHeat(
+                    state, Tin, "ChillerHeaterSupervisoryOperationData::ProcessAndSetAuxilBoiler");
                 Real64 LoadToSetpoint = max(0.0, Mdot * CpHW * (HWsetpt - Tin));
-                int pltSizNum = state.dataPlnt->PlantLoop(this->PlantBoilerComps(BoilerNum).loopNum).PlantSizNum;
+                int pltSizNum = this->PlantBoilerComps(BoilerNum).loop->PlantSizNum;
                 Real64 const thresholdPlantLoad =
                     0.001 * state.dataSize->PlantSizData(pltSizNum).DesCapacity; // model an operating threshold at 0.1% of loop capacity, only run if
                                                                                  // larger than that
@@ -1613,45 +1459,19 @@ namespace DataPlant {
                      (this->Report.AirSourcePlant_OpMode ==
                       2))) { // run boiler if there is a somewhat significant heating load and heat pumps in cooling only mode
 
-                    state.dataPlnt->PlantLoop(this->PlantBoilerComps(BoilerNum).loopNum)
-                        .LoopSide(this->PlantBoilerComps(BoilerNum).loopSideNum)
-                        .Branch(this->PlantBoilerComps(BoilerNum).branchNum)
-                        .Comp(this->PlantBoilerComps(BoilerNum).compNum)
-                        .Available = true;
-                    state.dataPlnt->PlantLoop(this->PlantBoilerComps(BoilerNum).loopNum)
-                        .LoopSide(this->PlantBoilerComps(BoilerNum).loopSideNum)
-                        .Branch(this->PlantBoilerComps(BoilerNum).branchNum)
-                        .Comp(this->PlantBoilerComps(BoilerNum).compNum)
-                        .ON = true;
-                    state.dataPlnt->PlantLoop(this->PlantBoilerComps(BoilerNum).loopNum)
-                        .LoopSide(this->PlantBoilerComps(BoilerNum).loopSideNum)
-                        .Branch(this->PlantBoilerComps(BoilerNum).branchNum)
-                        .Comp(this->PlantBoilerComps(BoilerNum).compNum)
-                        .CurOpSchemeType = this->Type;
+                    this->PlantBoilerComps(BoilerNum).comp->Available = true;
+                    this->PlantBoilerComps(BoilerNum).comp->ON = true;
+                    this->PlantBoilerComps(BoilerNum).comp->CurOpSchemeType = this->Type;
                     // boilers don't really have setpoint control mode, so set value for myLoad
-                    state.dataPlnt->PlantLoop(this->PlantBoilerComps(BoilerNum).loopNum)
-                        .LoopSide(this->PlantBoilerComps(BoilerNum).loopSideNum)
-                        .Branch(this->PlantBoilerComps(BoilerNum).branchNum)
-                        .Comp(this->PlantBoilerComps(BoilerNum).compNum)
-                        .MyLoad = LoadToSetpoint;
-                    int OutletBoilerNodeNum = state.dataPlnt->PlantLoop(this->PlantBoilerComps(BoilerNum).loopNum)
-                                                  .LoopSide(this->PlantBoilerComps(BoilerNum).loopSideNum)
-                                                  .Branch(this->PlantBoilerComps(BoilerNum).branchNum)
-                                                  .Comp(this->PlantBoilerComps(BoilerNum).compNum)
-                                                  .NodeNumOut;
+                    this->PlantBoilerComps(BoilerNum).comp->MyLoad = LoadToSetpoint;
+                    int OutletBoilerNodeNum = this->PlantBoilerComps(BoilerNum).comp->NodeNumOut;
                     state.dataLoopNodes->Node(OutletBoilerNodeNum).TempSetPoint = HWsetpt;
-                    state.dataLoopNodes->Node(state.dataPlnt->PlantLoop(this->PlantBoilerComps(BoilerNum).loopNum).TempSetPointNodeNum).TempSetPoint =
-                        HWsetpt;
+                    state.dataLoopNodes->Node(this->PlantBoilerComps(BoilerNum).loop->TempSetPointNodeNum).TempSetPoint = HWsetpt;
                     this->Report.BoilerAux_OpMode = 1;
                 } else { // still apply the setpoint, but don't turn on
-                    int OutletBoilerNodeNum = state.dataPlnt->PlantLoop(this->PlantBoilerComps(BoilerNum).loopNum)
-                                                  .LoopSide(this->PlantBoilerComps(BoilerNum).loopSideNum)
-                                                  .Branch(this->PlantBoilerComps(BoilerNum).branchNum)
-                                                  .Comp(this->PlantBoilerComps(BoilerNum).compNum)
-                                                  .NodeNumOut;
+                    int OutletBoilerNodeNum = this->PlantBoilerComps(BoilerNum).comp->NodeNumOut;
                     state.dataLoopNodes->Node(OutletBoilerNodeNum).TempSetPoint = HWsetpt;
-                    state.dataLoopNodes->Node(state.dataPlnt->PlantLoop(this->PlantBoilerComps(BoilerNum).loopNum).TempSetPointNodeNum).TempSetPoint =
-                        HWsetpt;
+                    state.dataLoopNodes->Node(this->PlantBoilerComps(BoilerNum).loop->TempSetPointNodeNum).TempSetPoint = HWsetpt;
                 }
             }
         }

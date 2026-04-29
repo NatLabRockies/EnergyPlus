@@ -1135,7 +1135,7 @@ where:
 
 \(\dot{Q}_{cap,crankcase}\) is the crankcase heater capacity (W).
 
-If this cooling coil is used as part of an air-to-air heat pump (Ref. AirLoopHVAC:UnitaryHeat-Pump:AirToAir), the crankcase heater defined for this DX cooling coil is disregarded and the associated output variable is omitted. Instead, the crankcase heater defined for the DX heating coil (Coil:Heating:DX:SingleSpeed) is enabled during the time that the compressor is not running for either heating or cooling. In this instance, RTF in the above equations would be the runtime fraction of the heat pump's heating coil or cooling coil, whichever is greater.
+If this cooling coil is used as part of an air-to-air heat pump (e.g., AirLoopHVAC:UnitaryHeatPump:AirToAir, AirLoopHVAC:UnitarySystem, or ZoneHVAC:PackagedTerminalHeatPump), the crankcase heater defined for this DX cooling coil is disregarded and the associated output variable is omitted. Instead, the crankcase heater defined for the DX heating coil (e.g., Coil:Heating:DX:SingleSpeed) is enabled during the time that the compressor is not running for either heating or cooling. In this instance, RTF in the above equations would be the runtime fraction of the heat pump's heating coil or cooling coil, whichever is greater.
 
 In addition to calculating the total cooling capacity provided by the DX air conditioner, it is important to properly determine the break down of total cooling capacity into its sensible (temperature) and latent (dehumidification) components. The model computes the sensible/ latent split using the rated SHR and the ADP/BF approach (Carrier et al. 1959). When the DX coil model is initially called during an EnergyPlus simulation, the rated total capacity and rated SHR are used to calculate the coil bypass factor (BF) at rated conditions. The rated total capacity and rated SHR are first used to determine the ratio of change in air humidity ratio to air dry-bulb temperature:
 
@@ -2070,7 +2070,7 @@ Using the above averaged outlet humidity ratio and specific enthalpy, the averag
 
 The main reason using the above approach is that outlet conditions are calculated in the same way in low and high speed operation.
 
-The crankcase heater defined for this DX cooling coil is enabled during the time that the compressor is not running for either heating or cooling. The crankcase heater power use from either heating or cooling is reported in the heating coil (Coil:Heating:DX:MultiSpeed).
+The crankcase heater defined for this DX cooling coil is enabled during the time that the compressor is not running for either heating or cooling. The crankcase heater power use from either heating or cooling is reported in the heating coil (e.g., Coil:Heating:DX:MultiSpeed).
 
 \subsubsection{Higher Speed Operation}\label{higher-speed-operation-000}
 
@@ -3547,7 +3547,7 @@ If PLF \textless{} 0.7 a warning message is issued, the program resets the PLF v
 A typical part load fraction correlation for a conventional, single-speed DX heating coil (e.g., residential heat pump) would be:  PLF = 0.85 + 0.15(PLR).
 
   \item
-The defrost energy input ratio (EIR) modifier curve (function of temperature) is a bi-quadratic curve with two independent variables: outdoor air dry-bulb temperature and the heating coil entering air wet-bulb temperature. The output of this curve is multiplied by the heating coil capacity, the fractional defrost time period and the runtime fraction of the heating coil to give the defrost power at the specific temperatures at which the coil is operating. This curve is only required when a reverse-cycle defrost strategy is specified.
+The defrost energy input ratio (EIR) curve (function of temperature) is a bi-quadratic curve with two independent variables: outdoor air dry-bulb temperature and the heating coil entering air wet-bulb temperature. The output of this curve represents the defrost power divided by the rated heating capacity (i.e., an energy input ratio, not a modifier applied to a rated EIR). It is multiplied by the heating coil capacity, the fractional defrost time period and the runtime fraction of the heating coil to give the defrost power at the specific temperatures at which the coil is operating. This curve is only required when a reverse-cycle defrost strategy is specified.
 
 \begin{equation}
 DefrostEIRTempModFac = \,a + \,b\left( {{T_{wb,i}}} \right)\,\, + \,\,c{\left( {{T_{wb,i}}} \right)^2} + \,\,d\left( {{T_{db,o}}} \right)\,\, + \,\,e{\left( {{T_{db,o}}} \right)^2} + f\left( {{T_{wb,i}}} \right)\left( {{T_{db,o}}} \right)
@@ -3666,7 +3666,7 @@ where:
 
 \({Q_{cap,defrost}}\) is the capacity of the resistive defrost heating element (W)
 
-\emph{DefrostEIRTempModFac} is the energy input ratio modifier curve applicable during defrost
+\emph{DefrostEIRTempModFac} is the defrost energy input ratio (EIR) at the specific operating temperatures. Note: despite the variable name, this value represents an EIR (defrost power / rated capacity), not a modifier applied to a rated EIR
 
 \begin{equation}
 RTF = \left( \frac{PLR}{PartLoadFrac} \right) = runtime~fraction~of~the~heating~coil
@@ -3732,7 +3732,7 @@ where:
 
 \({Q_{cap,crankcase}}\) is the crankcase heater capacity (W).
 
-If this heating coil is used as part of an air-to-air heat pump (Ref. AirLoopHVAC:UnitaryHeat-Pump:AirToAir), the crankcase heater defined for this DX heating coil is enabled during the time that the compressor is not running for either heating or cooling (and the crankcase heater power defined in the DX cooling coil object is disregarded in this case). In this instance, RTF in the above equations would be the runtime fraction of the heat pump's heating coil or cooling coil, whichever is greater.
+If this heating coil is used as part of an air-to-air heat pump (e.g., AirLoopHVAC:UnitaryHeatPump:AirToAir, AirLoopHVAC:UnitarySystem, or ZoneHVAC:PackagedTerminalHeatPump), the crankcase heater defined for this DX heating coil is enabled during the time that the compressor is not running for either heating or cooling (and the crankcase heater power defined in the DX cooling coil object is disregarded in this case). In this instance, RTF in the above equations would be the runtime fraction of the heat pump's heating coil or cooling coil, whichever is greater.
 
 The properties of the air leaving the heating coil at full-load operation are calculated using the following equations:
 
@@ -4153,7 +4153,7 @@ The heating coil's outlet air humidity ratio equals the inlet air humidity ratio
 
 The main reason for using the above approach is that outlet air conditions are calculated in the same way for all operating speeds.
 
-The crankcase heater defined for this DX heating coil is enabled during the time that the compressor is not running for either heating or cooling. The crankcase heater power use from either heating or cooling is reported in the heating coil.
+The crankcase heater defined for this DX heating coil is enabled during the time that the compressor is not running for either heating or cooling. The crankcase heater power use from either heating or cooling is reported in the heating coil (e.g., Coil:Heating:DX:MultiSpeed).
 
 \subsubsection{Higher Speed Operation}\label{higher-speed-operation-2}
 
@@ -4334,7 +4334,7 @@ where:
 
 \({Q_{total,rated,n}}\) is the capacity of the resistive defrost heating element at Speed n (W)
 
-DefrostEIRTempModFac is the defrost energy input ratio (EIR) modifier curve (Ref. Coil:Heating:DX:SingleSpeed).
+DefrostEIRTempModFac is the defrost energy input ratio (EIR) curve value (Ref. Coil:Heating:DX:SingleSpeed). Note: this represents an EIR (defrost power / rated capacity), not a modifier applied to a rated EIR.
 
 T\(_{frac,defrost}\) is the fractional defrost time (Ref. Coil:Heating:DX:SingleSpeed).
 
@@ -4914,7 +4914,7 @@ If the speed reaches the highest level, the speed ratio becomes 1.0, and Speed x
 
 The defrost operation of a variable-speed DX heating coil is treated the same as the single-speed DX heating coil, except using the total heating capacity at the max speed level to replace the rated heating capacity of the single-speed DX coil, when a reverse-cycle defrost strategy is specified.
 
-We keep the defrost energy input ratio (EIR) modifier curve (function of temperature) as the single speed DX heating coil. It is a biquadratic curve with two independent variables: outdoor air dry-bulb temperature and the heating coil entering air wet-bulb temperature. The output of this curve is multiplied by the heating coil capacity, the fractional defrost time period and the runtime fraction of the heating coil to give the defrost power at the specific temperatures at which the coil is operating. This curve is only required when a reverse-cycle defrost strategy is specified.
+The defrost energy input ratio (EIR) curve (function of temperature) is the same as the single speed DX heating coil. It is a biquadratic curve with two independent variables: outdoor air dry-bulb temperature and the heating coil entering air wet-bulb temperature. The output of this curve represents the defrost power divided by the rated heating capacity (i.e., an energy input ratio, not a modifier applied to a rated EIR). It is multiplied by the heating coil capacity, the fractional defrost time period and the runtime fraction of the heating coil to give the defrost power at the specific temperatures at which the coil is operating. This curve is only required when a reverse-cycle defrost strategy is specified.
 
 \begin{equation}
 {\rm{DefrostEIRTempModFac}} = {\rm{a}} + {\rm{b*W}}{{\rm{B}}_{\rm{i}}} + {\rm{c*WB}}_{\rm{i}}^2 + {\rm{d*D}}{{\rm{B}}_{\rm{o}}} + {\rm{e*D}}{{\rm{B}}_{\rm{o}}}^2 + {\rm{f*W}}{{\rm{B}}_{\rm{i}}}{\rm{*D}}{{\rm{B}}_{\rm{o}}}

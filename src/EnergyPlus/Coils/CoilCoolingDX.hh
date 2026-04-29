@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -106,7 +106,7 @@ struct CoilCoolingDX
                             Real64 &normalModeRatedCapacity,
                             std::vector<Real64> &normalModeFlowRates,
                             std::vector<Real64> &normalModeRatedCapacities);
-    static void inline passThroughNodeData(DataLoopNode::NodeData &in, DataLoopNode::NodeData &out);
+    static void inline passThroughNodeData(Node::NodeData &in, Node::NodeData &out);
     void size(EnergyPlusData &state);
 
     int getNumModes();
@@ -115,6 +115,8 @@ struct CoilCoolingDX
 
     CoilCoolingDXInputSpecification original_input_specs;
     std::string name;
+    HVAC::CoilType coilType = HVAC::CoilType::Invalid;
+    int coilReportNum = -1;
     bool myOneTimeInitFlag = true;
     int evapInletNodeIndex = 0;
     int evapOutletNodeIndex = 0;
@@ -187,6 +189,7 @@ struct CoilCoolingDXData : BaseGlobalStruct
     std::vector<CoilCoolingDX> coilCoolingDXs;
     bool coilCoolingDXGetInputFlag = true;
     std::string const coilCoolingDXObjectName = "Coil:Cooling:DX";
+    HVAC::CoilType coilType = HVAC::CoilType::CoolingDX;
     bool stillNeedToReportStandardRatings = true; // standard ratings flag for all coils to report at the same time
 
     void init_constant_state([[maybe_unused]] EnergyPlusData &state) override

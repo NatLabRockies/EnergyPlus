@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -352,7 +352,7 @@ TEST_F(EnergyPlusFixture, OARequirements_calcDesignSpecificationOutdoorAir)
     HeatBalanceManager::GetZoneData(*state, ErrorsFound);
 
     std::string const error_string = delimited_string(
-        {format("   ** Warning ** Version: missing in IDF, processing for EnergyPlus version=\"{}\"", DataStringGlobals::MatchVersion),
+        {EnergyPlus::format("   ** Warning ** Version: missing in IDF, processing for EnergyPlus version=\"{}\"", DataStringGlobals::MatchVersion),
          "   ** Warning ** No Timestep object found.  Number of TimeSteps in Hour defaulted to 4."});
 
     EXPECT_TRUE(compare_err_stream(error_string, true));

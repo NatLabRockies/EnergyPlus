@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -216,42 +216,6 @@ namespace Util {
         return 0; // Not found
     }
 
-    int FindItemInSortedList(std::string_view const String, Array1S_string const ListOfItems, int const NumItems)
-    {
-
-        // FUNCTION INFORMATION:
-        //       AUTHOR         Linda K. Lawrie
-        //       DATE WRITTEN   September 1997
-
-        // PURPOSE OF THIS FUNCTION:
-        // This function looks up a string in a similar list of
-        // items and returns the index of the item in the list, if
-        // found.  This routine is case insensitive.
-
-        // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        int Probe = 0;
-        int LBnd = 0;
-        int UBnd = NumItems + 1;
-        bool Found = false;
-        while ((!Found) || (Probe != 0)) {
-            Probe = (UBnd - LBnd) / 2;
-            if (Probe == 0) {
-                break;
-            }
-            Probe += LBnd;
-            if (equali(String, ListOfItems(Probe))) {
-                Found = true;
-                break;
-            }
-            if (lessthani(String, ListOfItems(Probe))) {
-                UBnd = Probe;
-            } else {
-                LBnd = Probe;
-            }
-        }
-        return Probe;
-    }
-
     int FindItem(std::string_view const String, Array1D_string const &ListOfItems, int const NumItems)
     {
 
@@ -304,89 +268,6 @@ namespace Util {
         return 0; // Not found
     }
 
-    void VerifyName(EnergyPlusData &state,
-                    std::string const &NameToVerify,
-                    Array1D_string const &NamesList,
-                    int const NumOfNames,
-                    bool &ErrorFound,
-                    bool &IsBlank,
-                    std::string const &StringToDisplay)
-    {
-
-        // SUBROUTINE INFORMATION:
-        //       AUTHOR         Linda Lawrie
-        //       DATE WRITTEN   February 2000
-
-        // PURPOSE OF THIS SUBROUTINE:
-        // This subroutine verifies that a new name can be added to the
-        // list of names for this item (i.e., that there isn't one of that
-        // name already and that this name is not blank).
-
-        ErrorFound = false;
-        if (NumOfNames > 0) {
-            int Found = FindItem(NameToVerify, NamesList, NumOfNames);
-            if (Found != 0) {
-                ShowSevereError(state, format("{}, duplicate name={}", StringToDisplay, NameToVerify));
-                ErrorFound = true;
-            }
-        }
-
-        if (NameToVerify.empty()) {
-            ShowSevereError(state, format("{}, cannot be blank", StringToDisplay));
-            ErrorFound = true;
-            IsBlank = true;
-        } else {
-            IsBlank = false;
-        }
-    }
-
-    void VerifyName(EnergyPlusData &state,
-                    std::string const &NameToVerify,
-                    Array1S_string const NamesList,
-                    int const NumOfNames,
-                    bool &ErrorFound,
-                    bool &IsBlank,
-                    std::string const &StringToDisplay)
-    {
-
-        // SUBROUTINE INFORMATION:
-        //       AUTHOR         Linda Lawrie
-        //       DATE WRITTEN   February 2000
-
-        // PURPOSE OF THIS SUBROUTINE:
-        // This subroutine verifies that a new name can be added to the
-        // list of names for this item (i.e., that there isn't one of that
-        // name already and that this name is not blank).
-
-        ErrorFound = false;
-        if (NumOfNames > 0) {
-            int Found = FindItem(NameToVerify, NamesList, NumOfNames);
-            if (Found != 0) {
-                ShowSevereError(state, format("{}, duplicate name={}", StringToDisplay, NameToVerify));
-                ErrorFound = true;
-            }
-        }
-
-        if (NameToVerify.empty()) {
-            ShowSevereError(state, format("{}, cannot be blank", StringToDisplay));
-            ErrorFound = true;
-            IsBlank = true;
-        } else {
-            IsBlank = false;
-        }
-    }
-
-    bool IsNameEmpty(EnergyPlusData &state, std::string &NameToVerify, std::string_view StringToDisplay, bool &ErrorFound)
-    {
-        if (NameToVerify.empty()) {
-            ShowSevereError(state, format("{} Name, cannot be blank", StringToDisplay));
-            ErrorFound = true;
-            NameToVerify = "xxxxx";
-            return true;
-        }
-        return false;
-    }
-
     void setDesignObjectNameAndPointer(EnergyPlusData &state,
                                        std::string &nameToBeSet,
                                        int &ptrToBeSet,
@@ -404,9 +285,10 @@ namespace Util {
         // sent to this routine.
         if (ptrToBeSet <= 0) { // No valid pointer--error in user input
             errorFound = true;
-            ShowSevereError(state, format("Object = {} with the Name = {} has an invalid Design Object Name = {}.", itemType, itemName, nameToBeSet));
+            ShowSevereError(
+                state, EnergyPlus::format("Object = {} with the Name = {} has an invalid Design Object Name = {}.", itemType, itemName, nameToBeSet));
             ShowContinueError(state, "  The Design Object Name was not found or was left blank.  This is not allowed.");
-            ShowContinueError(state, format("  A valid Design Object Name must be provided for any {} object.", itemType));
+            ShowContinueError(state, EnergyPlus::format("  A valid Design Object Name must be provided for any {} object.", itemType));
         }
     }
 
@@ -443,9 +325,9 @@ namespace Util {
                 if (state.files.outputControl.perflog) {
                     fsPerfLog.open(state.dataStrGlobals->outputPerfLogFilePath, std::fstream::out); // open file normally
                     if (!fsPerfLog) {
-                        ShowFatalError(
-                            state,
-                            format("appendPerfLog: Could not open file \"{}\" for output (write).", state.dataStrGlobals->outputPerfLogFilePath));
+                        ShowFatalError(state,
+                                       EnergyPlus::format("appendPerfLog: Could not open file \"{}\" for output (write).",
+                                                          state.dataStrGlobals->outputPerfLogFilePath));
                     }
                     fsPerfLog << state.dataUtilityRoutines->appendPerfLog_headerRow << std::endl;
                     fsPerfLog << state.dataUtilityRoutines->appendPerfLog_valuesRow << std::endl;
@@ -454,9 +336,9 @@ namespace Util {
                 if (state.files.outputControl.perflog) {
                     fsPerfLog.open(state.dataStrGlobals->outputPerfLogFilePath, std::fstream::app); // append to already existing file
                     if (!fsPerfLog) {
-                        ShowFatalError(
-                            state,
-                            format("appendPerfLog: Could not open file \"{}\" for output (append).", state.dataStrGlobals->outputPerfLogFilePath));
+                        ShowFatalError(state,
+                                       EnergyPlus::format("appendPerfLog: Could not open file \"{}\" for output (append).",
+                                                          state.dataStrGlobals->outputPerfLogFilePath));
                     }
                     fsPerfLog << state.dataUtilityRoutines->appendPerfLog_valuesRow << std::endl;
                 }
@@ -496,7 +378,7 @@ int AbortEnergyPlus(EnergyPlusData &state)
         state.dataErrTracking->AskForConnectionsReport = false; // Set false here in case any further fatal errors in below processing...
 
         ShowMessage(state, "Fatal error -- final processing.  More error messages may appear.");
-        NodeInputManager::SetupNodeVarsForReporting(state);
+        Node::SetupNodeVarsForReporting(state);
 
         bool ErrFound = false;
         bool TerminalError = false;
@@ -508,15 +390,15 @@ int AbortEnergyPlus(EnergyPlusData &state)
         if (ErrFound) {
             TerminalError = true;
         }
-        NodeInputManager::CheckMarkedNodes(state, ErrFound);
+        Node::CheckMarkedNodes(state, ErrFound);
         if (ErrFound) {
             TerminalError = true;
         }
-        BranchNodeConnections::CheckNodeConnections(state, ErrFound);
+        Node::CheckNodeConnections(state, ErrFound);
         if (ErrFound) {
             TerminalError = true;
         }
-        BranchNodeConnections::TestCompSetInletOutletNodes(state, ErrFound);
+        Node::TestCompSetInletOutletNodes(state, ErrFound);
         if (ErrFound) {
             TerminalError = true;
         }
@@ -556,14 +438,15 @@ int AbortEnergyPlus(EnergyPlusData &state)
     state.dataResultsFramework->resultsFramework->SimulationInformation.setNumErrorsSizing(NumWarningsDuringSizing, NumSevereDuringSizing);
     state.dataResultsFramework->resultsFramework->SimulationInformation.setNumErrorsSummary(NumWarnings, NumSevere);
 
-    ShowMessage(
-        state,
-        format("EnergyPlus Warmup Error Summary. During Warmup: {} Warning; {} Severe Errors.", NumWarningsDuringWarmup, NumSevereDuringWarmup));
-    ShowMessage(
-        state,
-        format("EnergyPlus Sizing Error Summary. During Sizing: {} Warning; {} Severe Errors.", NumWarningsDuringSizing, NumSevereDuringSizing));
-    ShowMessage(
-        state, format("EnergyPlus Terminated--Fatal Error Detected. {} Warning; {} Severe Errors; Elapsed Time={}", NumWarnings, NumSevere, Elapsed));
+    ShowMessage(state,
+                EnergyPlus::format(
+                    "EnergyPlus Warmup Error Summary. During Warmup: {} Warning; {} Severe Errors.", NumWarningsDuringWarmup, NumSevereDuringWarmup));
+    ShowMessage(state,
+                EnergyPlus::format(
+                    "EnergyPlus Sizing Error Summary. During Sizing: {} Warning; {} Severe Errors.", NumWarningsDuringSizing, NumSevereDuringSizing));
+    ShowMessage(state,
+                EnergyPlus::format(
+                    "EnergyPlus Terminated--Fatal Error Detected. {} Warning; {} Severe Errors; Elapsed Time={}", NumWarnings, NumSevere, Elapsed));
     DisplayString(state, "EnergyPlus Run Time=" + Elapsed);
 
     {
@@ -663,7 +546,7 @@ int EndEnergyPlus(EnergyPlusData &state)
 
     state.dataSysVars->runtimeTimer.tock();
     if (state.dataGlobal->createPerfLog) {
-        Util::appendPerfLog(state, "Run Time [seconds]", format("{:.2R}", state.dataSysVars->runtimeTimer.elapsedSeconds()));
+        Util::appendPerfLog(state, "Run Time [seconds]", EnergyPlus::format("{:.2R}", state.dataSysVars->runtimeTimer.elapsedSeconds()));
     }
     const std::string Elapsed = state.dataSysVars->runtimeTimer.formatAsHourMinSecs();
     state.dataResultsFramework->resultsFramework->SimulationInformation.setRunTime(Elapsed);
@@ -676,13 +559,15 @@ int EndEnergyPlus(EnergyPlusData &state)
         Util::appendPerfLog(state, "Number of Warnings", NumWarnings);
         Util::appendPerfLog(state, "Number of Severe", NumSevere, true); // last item so write the perfLog file
     }
+    ShowMessage(state,
+                EnergyPlus::format(
+                    "EnergyPlus Warmup Error Summary. During Warmup: {} Warning; {} Severe Errors.", NumWarningsDuringWarmup, NumSevereDuringWarmup));
+    ShowMessage(state,
+                EnergyPlus::format(
+                    "EnergyPlus Sizing Error Summary. During Sizing: {} Warning; {} Severe Errors.", NumWarningsDuringSizing, NumSevereDuringSizing));
     ShowMessage(
         state,
-        format("EnergyPlus Warmup Error Summary. During Warmup: {} Warning; {} Severe Errors.", NumWarningsDuringWarmup, NumSevereDuringWarmup));
-    ShowMessage(
-        state,
-        format("EnergyPlus Sizing Error Summary. During Sizing: {} Warning; {} Severe Errors.", NumWarningsDuringSizing, NumSevereDuringSizing));
-    ShowMessage(state, format("EnergyPlus Completed Successfully-- {} Warning; {} Severe Errors; Elapsed Time={}", NumWarnings, NumSevere, Elapsed));
+        EnergyPlus::format("EnergyPlus Completed Successfully-- {} Warning; {} Severe Errors; Elapsed Time={}", NumWarnings, NumSevere, Elapsed));
     DisplayString(state, "EnergyPlus Run Time=" + Elapsed);
 
     {
@@ -889,12 +774,13 @@ ShowFatalError(EnergyPlusData &state, std::string const &ErrorMessage, OptionalO
 
     using namespace DataErrorTracking;
 
-    ShowErrorMessage(state, format(" **  Fatal  ** {}", ErrorMessage), OutUnit1, OutUnit2);
+    ShowErrorMessage(state, EnergyPlus::format(" **  Fatal  ** {}", ErrorMessage), OutUnit1, OutUnit2);
     DisplayString(state, "**FATAL:" + ErrorMessage);
 
     ShowErrorMessage(state, " ...Summary of Errors that led to program termination:", OutUnit1, OutUnit2);
-    ShowErrorMessage(state, format(" ..... Reference severe error count={}", state.dataErrTracking->TotalSevereErrors), OutUnit1, OutUnit2);
-    ShowErrorMessage(state, format(" ..... Last severe error={}", state.dataErrTracking->LastSevereError), OutUnit1, OutUnit2);
+    ShowErrorMessage(
+        state, EnergyPlus::format(" ..... Reference severe error count={}", state.dataErrTracking->TotalSevereErrors), OutUnit1, OutUnit2);
+    ShowErrorMessage(state, EnergyPlus::format(" ..... Last severe error={}", state.dataErrTracking->LastSevereError), OutUnit1, OutUnit2);
     if (state.dataSQLiteProcedures->sqlite) {
         state.dataSQLiteProcedures->sqlite->createSQLiteErrorRecord(1, 2, ErrorMessage, 1);
         if (state.dataSQLiteProcedures->sqlite->sqliteWithinTransaction()) {
@@ -935,7 +821,7 @@ void ShowSevereError(EnergyPlusData &state, std::string const &ErrorMessage, Opt
     if (state.dataGlobal->DoingSizing) {
         ++state.dataErrTracking->TotalSevereErrorsDuringSizing;
     }
-    ShowErrorMessage(state, format(" ** Severe  ** {}", ErrorMessage), OutUnit1, OutUnit2);
+    ShowErrorMessage(state, EnergyPlus::format(" ** Severe  ** {}", ErrorMessage), OutUnit1, OutUnit2);
     state.dataErrTracking->LastSevereError = ErrorMessage;
 
     //  Could set a variable here that gets checked at some point?
@@ -968,7 +854,7 @@ void ShowSevereMessage(EnergyPlusData &state, std::string const &ErrorMessage, O
         }
     }
 
-    ShowErrorMessage(state, format(" ** Severe  ** {}", ErrorMessage), OutUnit1, OutUnit2);
+    ShowErrorMessage(state, EnergyPlus::format(" ** Severe  ** {}", ErrorMessage), OutUnit1, OutUnit2);
     state.dataErrTracking->LastSevereError = ErrorMessage;
 
     //  Could set a variable here that gets checked at some point?
@@ -994,7 +880,7 @@ void ShowContinueError(EnergyPlusData &state, std::string const &Message, Option
     // METHODOLOGY EMPLOYED:
     // Calls ShowErrorMessage utility routine.
 
-    ShowErrorMessage(state, format(" **   ~~~   ** {}", Message), OutUnit1, OutUnit2);
+    ShowErrorMessage(state, EnergyPlus::format(" **   ~~~   ** {}", Message), OutUnit1, OutUnit2);
     if (state.dataSQLiteProcedures->sqlite) {
         state.dataSQLiteProcedures->sqlite->updateSQLiteErrorRecord(Message);
     }
@@ -1033,14 +919,14 @@ void ShowContinueErrorTimeStamp(EnergyPlusData &state, std::string const &Messag
     }
 
     if (len(Message) < 50) {
-        const std::string m = format("{}{}{}, at Simulation time={} {}",
-                                     Message,
-                                     cEnvHeader,
-                                     state.dataEnvrn->EnvironmentName,
-                                     state.dataEnvrn->CurMnDy,
-                                     General::CreateSysTimeIntervalString(state));
+        const std::string m = EnergyPlus::format("{}{}{}, at Simulation time={} {}",
+                                                 Message,
+                                                 cEnvHeader,
+                                                 state.dataEnvrn->EnvironmentName,
+                                                 state.dataEnvrn->CurMnDy,
+                                                 General::CreateSysTimeIntervalString(state));
 
-        ShowErrorMessage(state, format(" **   ~~~   ** {}", m), OutUnit1, OutUnit2);
+        ShowErrorMessage(state, EnergyPlus::format(" **   ~~~   ** {}", m), OutUnit1, OutUnit2);
         if (state.dataSQLiteProcedures->sqlite) {
             state.dataSQLiteProcedures->sqlite->updateSQLiteErrorRecord(m);
         }
@@ -1048,13 +934,13 @@ void ShowContinueErrorTimeStamp(EnergyPlusData &state, std::string const &Messag
             state.dataGlobal->errorCallback(Error::Continue, m);
         }
     } else {
-        const std::string postfix = format("{}{}, at Simulation time={} {}",
-                                           cEnvHeader,
-                                           state.dataEnvrn->EnvironmentName,
-                                           state.dataEnvrn->CurMnDy,
-                                           General::CreateSysTimeIntervalString(state));
-        ShowErrorMessage(state, format(" **   ~~~   ** {}", Message));
-        ShowErrorMessage(state, format(" **   ~~~   ** {}", postfix), OutUnit1, OutUnit2);
+        const std::string postfix = EnergyPlus::format("{}{}, at Simulation time={} {}",
+                                                       cEnvHeader,
+                                                       state.dataEnvrn->EnvironmentName,
+                                                       state.dataEnvrn->CurMnDy,
+                                                       General::CreateSysTimeIntervalString(state));
+        ShowErrorMessage(state, EnergyPlus::format(" **   ~~~   ** {}", Message));
+        ShowErrorMessage(state, EnergyPlus::format(" **   ~~~   ** {}", postfix), OutUnit1, OutUnit2);
         if (state.dataSQLiteProcedures->sqlite) {
             state.dataSQLiteProcedures->sqlite->updateSQLiteErrorRecord(Message);
         }
@@ -1081,7 +967,7 @@ void ShowMessage(EnergyPlusData &state, std::string const &Message, OptionalOutp
     if (Message.empty()) {
         ShowErrorMessage(state, " *************", OutUnit1, OutUnit2);
     } else {
-        ShowErrorMessage(state, format(" ************* {}", Message), OutUnit1, OutUnit2);
+        ShowErrorMessage(state, EnergyPlus::format(" ************* {}", Message), OutUnit1, OutUnit2);
         if (state.dataSQLiteProcedures->sqlite) {
             state.dataSQLiteProcedures->sqlite->createSQLiteErrorRecord(1, -1, Message, 0);
         }
@@ -1119,7 +1005,7 @@ void ShowWarningError(EnergyPlusData &state, std::string const &ErrorMessage, Op
     if (state.dataGlobal->DoingSizing) {
         ++state.dataErrTracking->TotalWarningErrorsDuringSizing;
     }
-    ShowErrorMessage(state, format(" ** Warning ** {}", ErrorMessage), OutUnit1, OutUnit2);
+    ShowErrorMessage(state, EnergyPlus::format(" ** Warning ** {}", ErrorMessage), OutUnit1, OutUnit2);
 
     if (state.dataSQLiteProcedures->sqlite) {
         state.dataSQLiteProcedures->sqlite->createSQLiteErrorRecord(1, 0, ErrorMessage, 1);
@@ -1151,7 +1037,7 @@ void ShowWarningMessage(EnergyPlusData &state, std::string const &ErrorMessage, 
         }
     }
 
-    ShowErrorMessage(state, format(" ** Warning ** {}", ErrorMessage), OutUnit1, OutUnit2);
+    ShowErrorMessage(state, EnergyPlus::format(" ** Warning ** {}", ErrorMessage), OutUnit1, OutUnit2);
     if (state.dataSQLiteProcedures->sqlite) {
         state.dataSQLiteProcedures->sqlite->createSQLiteErrorRecord(1, 0, ErrorMessage, 0);
     }
@@ -1563,7 +1449,7 @@ void SummarizeErrors(EnergyPlusData &state)
                     EndC = len(thisMoreDetails) - 1;
                     while (EndC != std::string::npos) {
                         EndC = index(thisMoreDetails.substr(StartC), "<CR");
-                        ShowMessage(state, format("..{}", thisMoreDetails.substr(StartC, EndC)));
+                        ShowMessage(state, EnergyPlus::format("..{}", thisMoreDetails.substr(StartC, EndC)));
                         if (thisMoreDetails.substr(StartC + EndC, 5) == "<CRE>") {
                             break;
                         }
@@ -1611,9 +1497,9 @@ void ShowRecurringErrors(EnergyPlusData &state)
 
                 ShowMessage(state, "");
                 ShowMessage(state, error.Message);
-                ShowMessage(state, format("{}  This error occurred {} total times;", StatMessageStart, error.Count));
-                ShowMessage(state, format("{}  during Warmup {} times;", StatMessageStart, error.WarmupCount));
-                ShowMessage(state, format("{}  during Sizing {} times.", StatMessageStart, error.SizingCount));
+                ShowMessage(state, EnergyPlus::format("{}  This error occurred {} total times;", StatMessageStart, error.Count));
+                ShowMessage(state, EnergyPlus::format("{}  during Warmup {} times;", StatMessageStart, error.WarmupCount));
+                ShowMessage(state, EnergyPlus::format("{}  during Sizing {} times.", StatMessageStart, error.SizingCount));
                 if (state.dataSQLiteProcedures->sqlite) {
                     if (warning) {
                         state.dataSQLiteProcedures->sqlite->createSQLiteErrorRecord(1, 0, error.Message.substr(15), error.Count);
@@ -1632,28 +1518,28 @@ void ShowRecurringErrors(EnergyPlusData &state)
             }
             std::string StatMessage;
             if (error.ReportMax) {
-                std::string MaxOut = format("{:.6f}", error.MaxValue);
+                std::string MaxOut = EnergyPlus::format("{:.6f}", error.MaxValue);
                 StatMessage += "  Max=" + MaxOut;
                 if (!error.MaxUnits.empty()) {
                     StatMessage += ' ' + error.MaxUnits;
                 }
             }
             if (error.ReportMin) {
-                std::string MinOut = format("{:.6f}", error.MinValue);
+                std::string MinOut = EnergyPlus::format("{:.6f}", error.MinValue);
                 StatMessage += "  Min=" + MinOut;
                 if (!error.MinUnits.empty()) {
                     StatMessage += ' ' + error.MinUnits;
                 }
             }
             if (error.ReportSum) {
-                std::string SumOut = format("{:.6f}", error.SumValue);
+                std::string SumOut = EnergyPlus::format("{:.6f}", error.SumValue);
                 StatMessage += "  Sum=" + SumOut;
                 if (!error.SumUnits.empty()) {
                     StatMessage += ' ' + error.SumUnits;
                 }
             }
             if (error.ReportMax || error.ReportMin || error.ReportSum) {
-                ShowMessage(state, format("{}{}", StatMessageStart, StatMessage));
+                ShowMessage(state, EnergyPlus::format("{}{}", StatMessageStart, StatMessage));
             }
         }
         ShowMessage(state, "");
@@ -1662,74 +1548,78 @@ void ShowRecurringErrors(EnergyPlusData &state)
 
 void ShowSevereDuplicateName(EnergyPlusData &state, ErrorObjectHeader const &eoh)
 {
-    ShowSevereError(state, format("{}: {} = {}, duplicate name.", eoh.routineName, eoh.objectType, eoh.objectName));
+    ShowSevereError(state, EnergyPlus::format("{}: {} = {}, duplicate name.", eoh.routineName, eoh.objectType, eoh.objectName));
 }
 
 void ShowSevereEmptyField(
     EnergyPlusData &state, ErrorObjectHeader const &eoh, std::string_view fieldName, std::string_view depFieldName, std::string_view depFieldVal)
 {
-    ShowSevereError(state, format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
+    ShowSevereError(state, EnergyPlus::format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
     ShowContinueError(state,
-                      format("{} cannot be empty{}.", fieldName, depFieldName.empty() ? "" : format(" when {} = {}", depFieldName, depFieldVal)));
+                      EnergyPlus::format("{} cannot be empty{}.",
+                                         fieldName,
+                                         depFieldName.empty() ? "" : EnergyPlus::format(" when {} = {}", depFieldName, depFieldVal)));
 }
 
 void ShowSevereItemNotFound(EnergyPlusData &state, ErrorObjectHeader const &eoh, std::string_view fieldName, std::string_view fieldVal)
 {
-    ShowSevereError(state, format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
-    ShowContinueError(state, format("{} = {}, item not found.", fieldName, fieldVal));
+    ShowSevereError(state, EnergyPlus::format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
+    ShowContinueError(state, EnergyPlus::format("{} = {}, item not found.", fieldName, fieldVal));
 }
 
 void ShowDetailedSevereItemNotFound(EnergyPlusData &state, ErrorObjectHeader const &eoh, std::string_view fieldName, std::string_view fieldVal)
 {
-    ShowSevereError(state, format("{}: {} = {}, item not found.", eoh.routineName, fieldName, fieldVal));
-    ShowContinueError(state, format("{} = {}, item not found.", fieldName, fieldVal));
+    ShowSevereError(state, EnergyPlus::format("{}: {} = {}, item not found.", eoh.routineName, fieldName, fieldVal));
+    ShowContinueError(state, EnergyPlus::format("{} = {}, item not found.", fieldName, fieldVal));
 }
 void ShowSevereItemNotFoundAudit(EnergyPlusData &state, ErrorObjectHeader const &eoh, std::string_view fieldName, std::string_view fieldVal)
 {
-    ShowSevereError(state, format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName), OptionalOutputFileRef{state.files.audit});
-    ShowContinueError(state, format("{} = {}, item not found.", fieldName, fieldVal), OptionalOutputFileRef{state.files.audit});
+    ShowSevereError(
+        state, EnergyPlus::format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName), OptionalOutputFileRef{state.files.audit});
+    ShowContinueError(state, EnergyPlus::format("{} = {}, item not found.", fieldName, fieldVal), OptionalOutputFileRef{state.files.audit});
 }
 
 void ShowSevereDuplicateAssignment(
     EnergyPlusData &state, ErrorObjectHeader const &eoh, std::string_view fieldName, std::string_view fieldVal, std::string_view prevVal)
 {
-    ShowSevereError(state, format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
-    ShowContinueError(state, format("{} = {}, field previously assigned to {}.", fieldName, fieldVal, prevVal));
+    ShowSevereError(state, EnergyPlus::format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
+    ShowContinueError(state, EnergyPlus::format("{} = {}, field previously assigned to {}.", fieldName, fieldVal, prevVal));
 }
 
 void ShowSevereInvalidKey(
     EnergyPlusData &state, ErrorObjectHeader const &eoh, std::string_view fieldName, std::string_view fieldVal, std::string_view msg)
 {
-    ShowSevereError(state, format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
-    ShowContinueError(state, format("{} = {}, invalid key.", fieldName, fieldVal));
+    ShowSevereError(state, EnergyPlus::format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
+    ShowContinueError(state, EnergyPlus::format("{} = {}, invalid key.", fieldName, fieldVal));
     if (!msg.empty()) {
-        ShowContinueError(state, format(msg));
+        ShowContinueError(state, EnergyPlus::format(msg));
     }
 }
 
 void ShowSevereInvalidBool(EnergyPlusData &state, ErrorObjectHeader const &eoh, std::string_view fieldName, std::string_view fieldVal)
 {
-    ShowSevereError(state, format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
-    ShowContinueError(state, format("{} = {}, invalid boolean (\"Yes\"/\"No\").", fieldName, fieldVal));
+    ShowSevereError(state, EnergyPlus::format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
+    ShowContinueError(state, EnergyPlus::format("{} = {}, invalid boolean (\"Yes\"/\"No\").", fieldName, fieldVal));
 }
 
 void ShowSevereCustom(EnergyPlusData &state, ErrorObjectHeader const &eoh, std::string_view msg)
 {
-    ShowSevereError(state, format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
-    ShowContinueError(state, format("{}", msg));
+    ShowSevereError(state, EnergyPlus::format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
+    ShowContinueError(state, EnergyPlus::format("{}", msg));
 }
 
 void ShowSevereCustomAudit(EnergyPlusData &state, ErrorObjectHeader const &eoh, std::string_view msg)
 {
-    ShowSevereError(state, format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName), OptionalOutputFileRef{state.files.audit});
-    ShowContinueError(state, format("{}", msg), OptionalOutputFileRef{state.files.audit});
+    ShowSevereError(
+        state, EnergyPlus::format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName), OptionalOutputFileRef{state.files.audit});
+    ShowContinueError(state, EnergyPlus::format("{}", msg), OptionalOutputFileRef{state.files.audit});
 }
 
 void ShowSevereCustomField(
     EnergyPlusData &state, ErrorObjectHeader const &eoh, std::string_view fieldName, std::string_view fieldValue, std::string_view msg)
 {
-    ShowSevereError(state, format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
-    ShowContinueError(state, format("{} = {}, {}", fieldName, fieldValue, msg));
+    ShowSevereError(state, EnergyPlus::format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
+    ShowContinueError(state, EnergyPlus::format("{} = {}, {}", fieldName, fieldValue, msg));
 }
 
 void ShowSevereBadMin(EnergyPlusData &state,
@@ -1740,10 +1630,10 @@ void ShowSevereBadMin(EnergyPlusData &state,
                       Real64 minVal,
                       std::string_view msg)
 {
-    ShowSevereError(state, format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
-    ShowContinueError(state, format("{} = {}, but must be {} {}", fieldName, fieldVal, cluMin == Clusive::In ? ">=" : ">", minVal));
+    ShowSevereError(state, EnergyPlus::format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
+    ShowContinueError(state, EnergyPlus::format("{} = {}, but must be {} {}", fieldName, fieldVal, cluMin == Clusive::In ? ">=" : ">", minVal));
     if (!msg.empty()) {
-        ShowContinueError(state, format("{}", msg));
+        ShowContinueError(state, EnergyPlus::format("{}", msg));
     }
 }
 
@@ -1755,10 +1645,10 @@ void ShowSevereBadMax(EnergyPlusData &state,
                       Real64 maxVal,
                       std::string_view msg)
 {
-    ShowSevereError(state, format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
-    ShowContinueError(state, format("{} = {}, but must be {} {}", fieldName, fieldVal, cluMax == Clusive::In ? "<=" : "<", maxVal));
+    ShowSevereError(state, EnergyPlus::format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
+    ShowContinueError(state, EnergyPlus::format("{} = {}, but must be {} {}", fieldName, fieldVal, cluMax == Clusive::In ? "<=" : "<", maxVal));
     if (!msg.empty()) {
-        ShowContinueError(state, format("{}", msg));
+        ShowContinueError(state, EnergyPlus::format("{}", msg));
     }
 }
 
@@ -1772,37 +1662,37 @@ void ShowSevereBadMinMax(EnergyPlusData &state,
                          Real64 maxVal,
                          std::string_view msg)
 {
-    ShowSevereError(state, format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
+    ShowSevereError(state, EnergyPlus::format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
     ShowContinueError(state,
-                      format("{} = {}, but must be {} {} and {} {}",
-                             fieldName,
-                             fieldVal,
-                             cluMin == Clusive::In ? ">=" : ">",
-                             minVal,
-                             cluMax == Clusive::In ? "<=" : "<",
-                             maxVal));
+                      EnergyPlus::format("{} = {}, but must be {} {} and {} {}",
+                                         fieldName,
+                                         fieldVal,
+                                         cluMin == Clusive::In ? ">=" : ">",
+                                         minVal,
+                                         cluMax == Clusive::In ? "<=" : "<",
+                                         maxVal));
     if (!msg.empty()) {
-        ShowContinueError(state, format("{}", msg));
+        ShowContinueError(state, EnergyPlus::format("{}", msg));
     }
 }
 
 void ShowWarningItemNotFound(EnergyPlusData &state, ErrorObjectHeader const &eoh, std::string_view fieldName, std::string_view fieldVal)
 {
-    ShowWarningError(state, format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
-    ShowContinueError(state, format("{} = {}, item not found", fieldName, fieldVal));
+    ShowWarningError(state, EnergyPlus::format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
+    ShowContinueError(state, EnergyPlus::format("{} = {}, item not found", fieldName, fieldVal));
 }
 
 void ShowWarningCustom(EnergyPlusData &state, ErrorObjectHeader const &eoh, std::string_view msg)
 {
-    ShowWarningError(state, format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
-    ShowContinueError(state, format("{}", msg));
+    ShowWarningError(state, EnergyPlus::format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
+    ShowContinueError(state, EnergyPlus::format("{}", msg));
 }
 
 void ShowWarningCustomField(
     EnergyPlusData &state, ErrorObjectHeader const &eoh, std::string_view fieldName, std::string_view fieldValue, std::string_view msg)
 {
-    ShowWarningError(state, format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
-    ShowContinueError(state, format("{} = {}, {}", fieldName, fieldValue, msg));
+    ShowWarningError(state, EnergyPlus::format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
+    ShowContinueError(state, EnergyPlus::format("{} = {}, {}", fieldName, fieldValue, msg));
 }
 
 void ShowWarningInvalidKey(EnergyPlusData &state,
@@ -1812,18 +1702,18 @@ void ShowWarningInvalidKey(EnergyPlusData &state,
                            std::string_view defaultVal,
                            std::string_view msg)
 {
-    ShowWarningError(state, format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
-    ShowContinueError(state, format("{} = {}, invalid key, {} will be used.", fieldName, fieldVal, defaultVal));
+    ShowWarningError(state, EnergyPlus::format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
+    ShowContinueError(state, EnergyPlus::format("{} = {}, invalid key, {} will be used.", fieldName, fieldVal, defaultVal));
     if (!msg.empty()) {
-        ShowContinueError(state, format(msg));
+        ShowContinueError(state, EnergyPlus::format(msg));
     }
 }
 
 void ShowWarningInvalidBool(
     EnergyPlusData &state, ErrorObjectHeader const &eoh, std::string_view fieldName, std::string_view fieldVal, std::string_view defaultVal)
 {
-    ShowWarningError(state, format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
-    ShowContinueError(state, format("{} = {}, invalid boolean (\"Yes\"/\"No\"), {} will be used.", fieldName, fieldVal, defaultVal));
+    ShowWarningError(state, EnergyPlus::format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
+    ShowContinueError(state, EnergyPlus::format("{} = {}, invalid boolean (\"Yes\"/\"No\"), {} will be used.", fieldName, fieldVal, defaultVal));
 }
 
 void ShowWarningEmptyField(EnergyPlusData &state,
@@ -1833,35 +1723,35 @@ void ShowWarningEmptyField(EnergyPlusData &state,
                            std::string_view depFieldName,
                            std::string_view depFieldVal)
 {
-    ShowWarningError(state, format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
-    ShowContinueError(state, format("{} is empty.", fieldName));
+    ShowWarningError(state, EnergyPlus::format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
+    ShowContinueError(state, EnergyPlus::format("{} is empty.", fieldName));
 
     if (!depFieldName.empty()) {
-        ShowContinueError(state, format("Cannot be empty when {} = {}", depFieldName, depFieldVal));
+        ShowContinueError(state, EnergyPlus::format("Cannot be empty when {} = {}", depFieldName, depFieldVal));
     }
     if (!defaultVal.empty()) {
-        ShowContinueError(state, format("{} will be used.", defaultVal));
+        ShowContinueError(state, EnergyPlus::format("{} will be used.", defaultVal));
     }
 }
 
 void ShowWarningNonEmptyField(
     EnergyPlusData &state, ErrorObjectHeader const &eoh, std::string_view fieldName, std::string_view depFieldName, std::string_view depFieldValue)
 {
-    ShowWarningError(state, format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
-    ShowContinueError(state, format("{} is not empty.", fieldName));
+    ShowWarningError(state, EnergyPlus::format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
+    ShowContinueError(state, EnergyPlus::format("{} is not empty.", fieldName));
     if (!depFieldName.empty()) {
-        ShowContinueError(state, format("{} is ignored when {} = {}.", fieldName, depFieldName, depFieldValue));
+        ShowContinueError(state, EnergyPlus::format("{} is ignored when {} = {}.", fieldName, depFieldName, depFieldValue));
     }
 }
 
 void ShowWarningItemNotFound(
     EnergyPlusData &state, ErrorObjectHeader const &eoh, std::string_view fieldName, std::string_view fieldVal, std::string_view defaultVal)
 {
-    ShowWarningError(state, format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
+    ShowWarningError(state, EnergyPlus::format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
     if (defaultVal.empty()) {
-        ShowContinueError(state, format("{} = {}, item not found.", fieldName, fieldVal));
+        ShowContinueError(state, EnergyPlus::format("{} = {}, item not found.", fieldName, fieldVal));
     } else {
-        ShowContinueError(state, format("{} = {}, item not found, {} will be used.", fieldName, fieldVal, defaultVal));
+        ShowContinueError(state, EnergyPlus::format("{} = {}, item not found, {} will be used.", fieldName, fieldVal, defaultVal));
     }
 }
 
@@ -1873,10 +1763,11 @@ void ShowWarningBadMin(EnergyPlusData &state,
                        Real64 minVal,
                        std::string_view msg)
 {
-    ShowWarningError(state, format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
-    ShowContinueError(state, format("{} = {}, but must be {} {}", fieldName, fieldVal, cluMin == Clusive::In ? ">=" : ">", minVal));
+    ShowWarningError(state, EnergyPlus::format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
+    ShowContinueError(state,
+                      EnergyPlus::format("{} = {:.2R}, but must be {} {:.2R}", fieldName, fieldVal, cluMin == Clusive::In ? ">=" : ">", minVal));
     if (!msg.empty()) {
-        ShowContinueError(state, format("{}", msg));
+        ShowContinueError(state, EnergyPlus::format("{}", msg));
     }
 }
 
@@ -1888,11 +1779,11 @@ void ShowWarningBadMax(EnergyPlusData &state,
                        Real64 maxVal,
                        std::string_view msg)
 {
-    ShowWarningError(state, format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
-    ShowContinueError(state, format("{} = {}, but must be {} {}", fieldName, fieldVal, cluMax == Clusive::In ? "<=" : "<", maxVal));
-    ShowContinueError(state, format("{} = {}, but must be {} {}", fieldName, fieldVal, cluMax == Clusive::In ? "<=" : "<", maxVal));
+    ShowWarningError(state, EnergyPlus::format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
+    ShowContinueError(state,
+                      EnergyPlus::format("{} = {:.2R}, but must be {} {:.2R}", fieldName, fieldVal, cluMax == Clusive::In ? "<=" : "<", maxVal));
     if (!msg.empty()) {
-        ShowContinueError(state, format("{}", msg));
+        ShowContinueError(state, EnergyPlus::format("{}", msg));
     }
 }
 
@@ -1906,17 +1797,17 @@ void ShowWarningBadMinMax(EnergyPlusData &state,
                           Real64 maxVal,
                           std::string_view msg)
 {
-    ShowWarningError(state, format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
+    ShowWarningError(state, EnergyPlus::format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
     ShowContinueError(state,
-                      format("{} = {}, but must be {} {} and {} {}",
-                             fieldName,
-                             fieldVal,
-                             cluMin == Clusive::In ? ">=" : ">",
-                             minVal,
-                             cluMax == Clusive::In ? "<=" : "<",
-                             maxVal));
+                      EnergyPlus::format("{} = {}, but must be {} {} and {} {}",
+                                         fieldName,
+                                         fieldVal,
+                                         cluMin == Clusive::In ? ">=" : ">",
+                                         minVal,
+                                         cluMax == Clusive::In ? "<=" : "<",
+                                         maxVal));
     if (!msg.empty()) {
-        ShowContinueError(state, format("{}", msg));
+        ShowContinueError(state, EnergyPlus::format("{}", msg));
     }
 }
 

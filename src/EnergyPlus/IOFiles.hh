@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -291,17 +291,17 @@ public:
                         // add '.' to match old RoundSigDigits
                         buffer.push_back('.');
                         std::string_view fmt_buffer(buffer.data(), buffer.size());
-                        return fmt::format_to(ctx.out(), fmt_buffer, val);
+                        return fmt::format_to(ctx.out(), fmt::runtime(fmt_buffer), val);
                     }
-                    return fmt::format_to(ctx.out(), spec_builder(), val);
+                    return fmt::format_to(ctx.out(), fmt::runtime(spec_builder()), val);
                 }
                 if (val == 0.0 || val == -0.0) {
-                    return fmt::format_to(ctx.out(), spec_builder(), 0.0);
+                    return fmt::format_to(ctx.out(), fmt::runtime(spec_builder()), 0.0);
                 } // nudge up to next rounded val
-                return fmt::format_to(ctx.out(), spec_builder(), next_float(next_float(next_float(val))));
+                return fmt::format_to(ctx.out(), fmt::runtime(spec_builder()), next_float(next_float(next_float(val))));
             }
             specs_.type = 'E';
-            auto str = fmt::format(spec_builder(), next_float(val));
+            auto str = fmt::format(fmt::runtime(spec_builder()), next_float(val));
             return fmt::format_to(ctx.out(), "{}", zero_pad_exponent(str));
         }
         if (specs_.type == 'T') { // matches TrimSigDigits behavior
@@ -312,13 +312,13 @@ public:
                 const auto adjusted = (val * magnitude) + 0.0001;
                 const auto truncated = std::trunc(adjusted) / magnitude;
                 specs_.type = 'F';
-                return fmt::format_to(ctx.out(), spec_builder(), truncated);
+                return fmt::format_to(ctx.out(), fmt::runtime(spec_builder()), truncated);
             }
             specs_.type = 'E';
             specs_.precision += 2;
 
             // write the `E` formatted float to a std::string
-            auto str = fmt::format(spec_builder(), val);
+            auto str = fmt::format(fmt::runtime(spec_builder()), val);
             str = zero_pad_exponent(str);
 
             // Erase last 2 numbers to truncate the value
@@ -329,7 +329,7 @@ public:
 
             return fmt::format_to(ctx.out(), "{}", str);
         }
-        return fmt::format_to(ctx.out(), spec_builder(), val);
+        return fmt::format_to(ctx.out(), fmt::runtime(spec_builder()), val);
     }
 };
 } // namespace fmt
@@ -700,7 +700,7 @@ template <typename... Args> void vprint(std::ostream &os, std::string_view forma
     //    assert(os.good());
     auto buffer = fmt::memory_buffer();
     try {
-        fmt::format_to(std::back_inserter(buffer), format_str, args...);
+        fmt::format_to(std::back_inserter(buffer), fmt::runtime(format_str), args...);
     } catch (const fmt::format_error &) {
         throw EnergyPlus::FatalError(fmt::format("Error with format, '{}', passed {} args", format_str, sizeof...(Args)));
     }
@@ -711,7 +711,7 @@ template <typename... Args> std::string vprint(std::string_view format_str, cons
 {
     auto buffer = fmt::memory_buffer();
     try {
-        fmt::format_to(std::back_inserter(buffer), format_str, args...);
+        fmt::format_to(std::back_inserter(buffer), fmt::runtime(format_str), args...);
     } catch (const fmt::format_error &) {
         throw EnergyPlus::FatalError(fmt::format("Error with format, '{}', passed {} args", format_str, sizeof...(Args)));
     }
@@ -749,7 +749,7 @@ void print(std::ostream &os, std::string_view format_str, Args &&...args)
     if constexpr (formatSyntax == FormatSyntax::Fortran) {
         print_fortran_syntax(os, format_str, args...);
     } else if constexpr (formatSyntax == FormatSyntax::FMT) {
-        fmt::print(os, format_str, std::forward<Args>(args)...);
+        fmt::print(os, fmt::runtime(format_str), std::forward<Args>(args)...);
     } else {
         static_assert(!(formatSyntax == FormatSyntax::Fortran || formatSyntax == FormatSyntax::FMT), "Invalid FormatSyntax selection");
     }
@@ -781,7 +781,7 @@ template <FormatSyntax formatSyntax = FormatSyntax::Fortran, typename... Args> s
     if constexpr (formatSyntax == FormatSyntax::Fortran) {
         return format_fortran_syntax(format_str, args...);
     } else if constexpr (formatSyntax == FormatSyntax::FMT) {
-        return fmt::format(format_str, std::forward<Args>(args)...);
+        return fmt::format(fmt::runtime(format_str), std::forward<Args>(args)...);
     } else if constexpr (formatSyntax == FormatSyntax::Printf) {
         return fmt::sprintf(format_str, std::forward<Args>(args)...);
     }

@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -1264,7 +1264,7 @@ void SetupCommonPipes(EnergyPlusData &state)
             if (first_supply_component_type == DataPlant::PlantEquipmentType::PumpVariableSpeed) {
                 // If/when the model supports variable-pumping primary, this can be removed.
                 ShowWarningError(state, "SetupCommonPipes: detected variable speed pump on supply inlet of CommonPipe plant loop");
-                ShowContinueError(state, format("Occurs on plant loop name = {}", thisPlantLoop.Name));
+                ShowContinueError(state, EnergyPlus::format("Occurs on plant loop name = {}", thisPlantLoop.Name));
                 ShowContinueError(state, "The common pipe model does not support varying the flow rate on the primary/supply side");
                 ShowContinueError(state, "The primary/supply side will operate as if constant speed, and the simulation continues");
             }
@@ -1307,7 +1307,7 @@ void SetupCommonPipes(EnergyPlusData &state)
                 thisCommonPipe.SupplySideInletPumpType = FlowType::Variable;
                 // If/when the model supports variable-pumping primary, this can be removed.
                 ShowWarningError(state, "SetupCommonPipes: detected variable speed pump on supply inlet of TwoWayCommonPipe plant loop");
-                ShowContinueError(state, format("Occurs on plant loop name = {}", thisPlantLoop.Name));
+                ShowContinueError(state, EnergyPlus::format("Occurs on plant loop name = {}", thisPlantLoop.Name));
                 ShowContinueError(state, "The common pipe model does not support varying the flow rate on the primary/supply side");
                 ShowContinueError(state, "The primary/supply side will operate as if constant speed, and the simulation continues");
             }

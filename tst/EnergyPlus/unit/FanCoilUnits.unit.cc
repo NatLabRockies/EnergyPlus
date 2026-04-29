@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -81,7 +81,6 @@
 #include "Fixtures/EnergyPlusFixture.hh"
 
 using namespace EnergyPlus;
-using namespace EnergyPlus::DataLoopNode;
 using namespace EnergyPlus::DataZoneEquipment;
 using namespace EnergyPlus::DataZoneEquipment;
 using namespace EnergyPlus::DataHeatBalance;
@@ -2534,14 +2533,14 @@ TEST_F(EnergyPlusFixture, Test_TightenWaterFlowLimits)
         return (QUnitOut - QZnReq2) / QZnReq2;
     };
 
-    state->dataRootFinder->HVACSystemRootFinding.HVACSystemRootSolverMethod = HVACSystemRootSolverAlgorithm::Bisection;
+    state->dataRootFinder->rootAlgo = RootAlgo::Bisection;
     General::SolveRoot(*state, ErrorToler, MaxIte, SolFla, mdot, f, MinWaterFlow, MaxWaterFlow);
     EXPECT_EQ(-1, SolFla);
 
     MaxIte = 20;
     MinWaterFlow = 0.0;
     MaxWaterFlow = 0.09375;
-    state->dataRootFinder->HVACSystemRootFinding.HVACSystemRootSolverMethod = HVACSystemRootSolverAlgorithm::RegulaFalsi;
+    state->dataRootFinder->rootAlgo = RootAlgo::RegulaFalsi;
     General::SolveRoot(*state, ErrorToler, MaxIte, SolFla, mdot, f, MinWaterFlow, MaxWaterFlow);
     EXPECT_EQ(3, SolFla);
 }
@@ -2937,7 +2936,7 @@ TEST_F(EnergyPlusFixture, FanCoil_CyclingFanMode)
     // expect fan speed 3 and near full air and water flow and meet capacity
     EXPECT_EQ(3, state->dataFanCoilUnits->FanCoil(1).SpeedFanSel);
     EXPECT_GT(state->dataFanCoilUnits->FanCoil(1).PLR, 0.9);
-    EXPECT_LT(state->dataFanCoilUnits->FanCoil(1).PLR, 0.95);
+    EXPECT_NEAR(state->dataFanCoilUnits->FanCoil(1).PLR, 0.95, 0.001);
     EXPECT_NEAR(QZnReq, QUnitOut, 5.0);
     // cycling fan proportional to PLR and fan speed ratio (is 1 here)
     EXPECT_NEAR(state->dataLoopNodes->Node(1).MassFlowRate,

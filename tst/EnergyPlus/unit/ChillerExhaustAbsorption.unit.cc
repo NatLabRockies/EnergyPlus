@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -58,6 +58,7 @@
 #include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/FluidProperties.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
+#include <EnergyPlus/PlantUtilities.hh>
 
 #include "Fixtures/EnergyPlusFixture.hh"
 
@@ -363,7 +364,9 @@ TEST_F(EnergyPlusFixture, ExhAbsorption_getDesignCapacities_Test)
     thisChillerHeater.HeatReturnNodeNum = 222;
     thisChillerHeater.CondReturnNodeNum = 333;
 
-    PlantLocation loc_1 = PlantLocation(1, DataPlant::LoopSideLocation::Demand, 1, 1);
+    PlantLocation loc_1{1, DataPlant::LoopSideLocation::Demand, 1, 1};
+    PlantUtilities::SetPlantLocationLinks(*state, loc_1);
+
     Real64 maxload(-1.0);
     Real64 minload(-1.0);
     Real64 optload(-1.0);
@@ -381,7 +384,8 @@ TEST_F(EnergyPlusFixture, ExhAbsorption_getDesignCapacities_Test)
     EXPECT_NEAR(optload, 80000.0, 0.001);
 
     thisChillerHeater.NomHeatCoolRatio = 0.9;
-    PlantLocation loc_2 = PlantLocation(2, DataPlant::LoopSideLocation::Demand, 1, 1);
+    PlantLocation loc_2{2, DataPlant::LoopSideLocation::Demand, 1, 1};
+    PlantUtilities::SetPlantLocationLinks(*state, loc_2);
 
     // Heater
     thisChillerHeater.getDesignCapacities(*state, loc_2, maxload, minload, optload);
@@ -390,7 +394,8 @@ TEST_F(EnergyPlusFixture, ExhAbsorption_getDesignCapacities_Test)
     EXPECT_NEAR(maxload, 81000.0, 0.001);
     EXPECT_NEAR(optload, 72000.0, 0.001);
 
-    PlantLocation loc_3 = PlantLocation(3, DataPlant::LoopSideLocation::Demand, 1, 1);
+    PlantLocation loc_3{3, DataPlant::LoopSideLocation::Demand, 1, 1};
+    PlantUtilities::SetPlantLocationLinks(*state, loc_3);
 
     // Condenser
     thisChillerHeater.getDesignCapacities(*state, loc_3, maxload, minload, optload);
@@ -1450,8 +1455,8 @@ TEST_F(EnergyPlusFixture, ExhAbsorption_calcChiller_Err_Msg_Test)
     state->dataPlnt->TotNumLoops = 1;
     state->dataPlnt->PlantLoop.allocate(state->dataPlnt->TotNumLoops);
 
-    thisChillerHeater.CWPlantLoc.loopNum = 1;
-    thisChillerHeater.CWPlantLoc.loopSideNum = DataPlant::LoopSideLocation::Demand;
+    thisChillerHeater.CWPlantLoc = {1, DataPlant::LoopSideLocation::Demand, 0, 0};
+    PlantUtilities::SetPlantLocationLinks(*state, thisChillerHeater.CWPlantLoc);
 
     state->dataPlnt->PlantLoop(1).FluidName = "WATER";
     state->dataPlnt->PlantLoop(1).glycol = Fluid::GetWater(*state);

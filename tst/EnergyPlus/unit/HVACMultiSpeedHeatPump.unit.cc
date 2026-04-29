@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -67,6 +67,7 @@
 #include <EnergyPlus/HeatingCoils.hh>
 #include <EnergyPlus/IOFiles.hh>
 #include <EnergyPlus/MixedAir.hh>
+#include <EnergyPlus/PlantUtilities.hh>
 #include <EnergyPlus/Psychrometrics.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/SimAirServingZones.hh>
@@ -1473,6 +1474,9 @@ TEST_F(EnergyPlusFixture, HVACMultiSpeedHeatPump_HeatRecoveryTest)
     state->dataPlnt->PlantLoop.allocate(1);
     state->dataPlnt->PlantLoop(1).FluidName = "WATER";
     state->dataPlnt->PlantLoop(1).glycol = Fluid::GetWater(*state);
+
+    state->dataHVACMultiSpdHP->MSHeatPump(1).HRPlantLoc.loopNum = 1;
+    PlantUtilities::SetPlantLocationLinks(*state, state->dataHVACMultiSpdHP->MSHeatPump(1).HRPlantLoc);
 
     state->dataLoopNodes->Node(HeatRecInNode).MassFlowRate = 0.0; // test heat recovery result with 0 water flow rate
     HVACMultiSpeedHeatPump::MSHPHeatRecovery(*state, 1);

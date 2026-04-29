@@ -102,7 +102,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,26.1;
+  Version,26.2;
 
   Building,
     NONE,                    !- Name
@@ -2111,7 +2111,7 @@
 
   Output:Variable,*,Heating Coil Defrost Electricity Energy,timestep;
 
-  Output:Meter,Cooling:Electricity,timestep; !- [J]
+  Output:Meter,Cooling:Electricity,timestep;
 
   Output:Meter,Cooling:Electricity,timestep;
 

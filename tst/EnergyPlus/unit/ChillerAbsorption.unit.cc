@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -69,7 +69,6 @@
 
 using namespace EnergyPlus;
 using namespace EnergyPlus::ChillerAbsorption;
-using namespace EnergyPlus::DataLoopNode;
 using namespace EnergyPlus::DataPlant;
 using namespace EnergyPlus::SimulationManager;
 
@@ -1938,7 +1937,7 @@ TEST_F(EnergyPlusFixture, ChillerAbsorption_Autosize)
     EXPECT_TRUE(thisChiller.GenInputOutputNodesUsed);
     EXPECT_GT(thisChiller.GeneratorInletNodeNum, 0);
     EXPECT_GT(thisChiller.GeneratorOutletNodeNum, 0);
-    EXPECT_ENUM_EQ(thisChiller.GenHeatSourceType, DataLoopNode::NodeFluidType::Water);
+    EXPECT_ENUM_EQ(thisChiller.GenHeatSourceType, Node::FluidType::Water);
     EXPECT_TRUE(thisChiller.GeneratorVolFlowRateWasAutoSized);
 
     EXPECT_DOUBLE_EQ(2.0, thisChiller.GeneratorSubcool);

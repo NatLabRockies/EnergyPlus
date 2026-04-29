@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -247,7 +247,7 @@ namespace Avail {
         {
         }
 
-        void SetOptStartFlag(EnergyPlusData &state, int const AirLoopNum);
+        void SetOptStartFlag(EnergyPlusData &state, int const AirLoopNum, int const zoneNum);
     };
 
     struct DefineASHRAEAdaptiveOptimumStartCoeffs // Derived type for Differential Thermostat Sys Avail Managers
@@ -466,6 +466,7 @@ namespace Avail {
                               int &SysAvailNum,
                               int const PriAirSysNum, // Primary Air System index. If being called for a ZoneHVAC:* component
                               Status const previousStatus,
+                              int const zoneNum = 0,                           // Index of ZoneHVAC:* equipment component
                               ObjexxFCL::Optional_int_const ZoneEquipType = _, // Type of ZoneHVAC:* equipment component
                               ObjexxFCL::Optional_int_const CompNum = _        // Index of ZoneHVAC:* equipment component
     );
@@ -504,6 +505,7 @@ namespace Avail {
     Status CalcOptStartSysAvailMgr(EnergyPlusData &state,
                                    int const SysAvailNum,  // number of the current scheduled system availability manager
                                    int const PriAirSysNum, // number of the primary air system affected by this Avail. Manager
+                                   int const zoneNum,      // Index of ZoneHVAC:* equipment component
                                    ObjexxFCL::Optional_int_const ZoneEquipType = _, // Type of ZoneHVAC equipment component
                                    ObjexxFCL::Optional_int_const CompNum = _        // Index of ZoneHVAC equipment component
     );

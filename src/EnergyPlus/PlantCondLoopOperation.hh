@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -78,11 +78,11 @@ namespace PlantCondLoopOperation {
     );
 
     void FindDeltaTempRangeInput(EnergyPlusData &state,
-                                 DataLoopNode::ConnectionObjectType const CurrentModuleObject, // for ease in renaming
-                                 int const NumSchemes,                                         // May be set here and passed on
-                                 int const LoopNum,                                            // May be set here and passed on
-                                 int const SchemeNum,                                          // May be set here and passed on
-                                 bool &ErrorsFound                                             // May be set here and passed on
+                                 Node::ConnectionObjectType const CurrentModuleObject, // for ease in renaming
+                                 int const NumSchemes,                                 // May be set here and passed on
+                                 int const LoopNum,                                    // May be set here and passed on
+                                 int const SchemeNum,                                  // May be set here and passed on
+                                 bool &ErrorsFound                                     // May be set here and passed on
     );
 
     void LoadEquipList(EnergyPlusData &state,

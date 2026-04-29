@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -305,6 +305,7 @@ TEST_F(EnergyPlusFixture, OutputReportTabularAnnual_GatherResults_MinMaxHrsShown
 {
     using namespace OutputProcessor;
     state->dataGlobal->TimeStepZone = 1.0;
+    state->dataGlobal->TimeStepZoneSec = state->dataGlobal->TimeStepZone * Constant::rSecsInHour;
     state->dataHVACGlobal->TimeStepSys = 1.0;
     state->dataHVACGlobal->TimeStepSysSec = state->dataHVACGlobal->TimeStepSys * Constant::rSecsInHour;
 
@@ -332,8 +333,9 @@ TEST_F(EnergyPlusFixture, OutputReportTabularAnnual_GatherResults_MinMaxHrsShown
     EXPECT_EQ(fieldSetParams[13], "0.000000");             // m_cell[0].result
 
     fieldSetParams = annualTables.back().inspectTableFieldSets(1);
-    EXPECT_EQ(fieldSetParams[0], "ELECTRICITY:MYTH");                  // m_colHead
-    EXPECT_EQ(fieldSetParams[13].std::string::substr(0, 6), "-99000"); // m_cell[0].result
+    EXPECT_EQ(fieldSetParams[0], "ELECTRICITY:MYTH"); // m_colHead
+    std::string const limit = std::to_string(std::numeric_limits<Real64>::lowest());
+    EXPECT_EQ(fieldSetParams[13].std::string::substr(0, 6), limit.substr(0, 6)); // m_cell[0].result
 
     meter1->CurTSValue = 15.;
     meter2->CurTSValue = 55.;
@@ -346,6 +348,37 @@ TEST_F(EnergyPlusFixture, OutputReportTabularAnnual_GatherResults_MinMaxHrsShown
     fieldSetParams = annualTables.back().inspectTableFieldSets(1);
     EXPECT_EQ(fieldSetParams[0], "ELECTRICITY:MYTH");                  // m_colHead
     EXPECT_EQ(fieldSetParams[13].std::string::substr(0, 6), "0.0152"); // m_cell[0].result
+}
+
+TEST_F(EnergyPlusFixture, OutputReportTabularAnnual_Maximum_SummedVariable_UsesZoneSeconds)
+{
+    using namespace OutputProcessor;
+
+    // Make zone and system timesteps different so a swapped mapping is detectable
+    state->dataGlobal->TimeStepZone = 0.25;                                                       // hours
+    state->dataGlobal->TimeStepZoneSec = state->dataGlobal->TimeStepZone * Constant::rSecsInHour; // 900 s
+
+    state->dataHVACGlobal->TimeStepSys = 1.0;                                                           // hours
+    state->dataHVACGlobal->TimeStepSysSec = state->dataHVACGlobal->TimeStepSys * Constant::rSecsInHour; // 3600 s
+
+    Meter *meter = new Meter("ELECTRICITY:MYTH");
+    meter->units = Constant::Units::None;
+    state->dataOutputProcessor->meters.push_back(meter);
+    state->dataOutputProcessor->meterMap.insert_or_assign("ELECTRICITY:MYTH", state->dataOutputProcessor->meters.size() - 1);
+
+    std::vector<AnnualTable> annualTables;
+    annualTables.emplace_back(*state, "TEST MAX RATE FROM SUM", "", "");
+    annualTables.back().addFieldSet("ELECTRICITY:MYTH", AnnualFieldSet::AggregationKind::maximum, 6);
+    annualTables.back().setupGathering(*state);
+
+    // CurTSValue behaves like a summed timestep quantity here; maximum aggregation converts to a rate by dividing by secondsInTimeStep
+    meter->CurTSValue = 55.0;
+    annualTables.back().gatherForTimestep(*state, OutputProcessor::TimeStepType::Zone);
+
+    // Expect 55 / 900 = 0.061111...
+    std::vector<std::string> fieldSetParams = annualTables.back().inspectTableFieldSets(0);
+    EXPECT_EQ(fieldSetParams[0], "ELECTRICITY:MYTH");                  // m_colHead
+    EXPECT_EQ(fieldSetParams[13].std::string::substr(0, 6), "0.0611"); // m_cell[0].result
 }
 
 TEST_F(EnergyPlusFixture, OutputReportTabularAnnual_columnHeadersToTitleCase)

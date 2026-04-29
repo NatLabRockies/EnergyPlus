@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -326,7 +326,7 @@ Real64 CoolingAirFlowSizer::size(EnergyPlusData &state, Real64 _originalValue, b
             std::string msg = this->callingRoutine + ' ' + this->compType + ' ' + this->compName + ", Developer Error: Component sizing incomplete.";
             ShowSevereError(state, msg);
             this->addErrorMessage(msg);
-            msg = format("SizingString = {}, SizingResult = {:.1T}", this->sizingString, this->autoSizedValue);
+            msg = EnergyPlus::format("SizingString = {}, SizingResult = {:.1T}", this->sizingString, this->autoSizedValue);
             ShowContinueError(state, msg);
             this->addErrorMessage(msg);
             errorsFound = true;
@@ -336,25 +336,14 @@ Real64 CoolingAirFlowSizer::size(EnergyPlusData &state, Real64 _originalValue, b
         if (this->overrideSizeString) {
             if (Util::SameString(this->compType, "ZoneHVAC:FourPipeFanCoil")) {
                 this->sizingString = "Maximum Supply Air Flow Rate [m3/s]";
-                if (this->isEpJSON) {
-                    this->sizingString = "maximum_supply_air_flow_rate [m3/s]";
-                }
-            } else if (this->coilType_Num == HVAC::CoilDX_CoolingTwoSpeed) {
+            } else if (this->coilType == HVAC::CoilType::CoolingDXTwoSpeed) {
                 if (this->dataDXSpeedNum == 1) { // mode 1 is high speed in DXCoils loop
-                    if (this->isEpJSON) {
-                        this->sizingString = "high_speed_rated_air_flow_rate [m3/s]";
-                    } else {
-                        this->sizingString = "High Speed Rated Air Flow Rate [m3/s]";
-                    }
+                    this->sizingString = "High Speed Rated Air Flow Rate [m3/s]";
                 } else if (this->dataDXSpeedNum == 2) {
-                    if (this->isEpJSON) {
-                        this->sizingString = "low_speed_rated_air_flow_rate [m3/s]";
-                    } else {
-                        this->sizingString = "Low Speed Rated Air Flow Rate [m3/s]";
-                    }
+                    this->sizingString = "Low Speed Rated Air Flow Rate [m3/s]";
                 }
             } else if (this->isEpJSON) {
-                this->sizingString = "cooling_supply_air_flow_rate [m3/s]";
+                this->sizingString = "Cooling Supply Air Flow Rate [m3/s]";
             }
         }
         if (this->dataScalableSizingON) {
@@ -378,8 +367,7 @@ Real64 CoolingAirFlowSizer::size(EnergyPlusData &state, Real64 _originalValue, b
 
     if (this->isCoilReportObject) {
         // SizingResult is airflow in m3/s
-        state.dataRptCoilSelection->coilSelectionReportObj->setCoilAirFlow(
-            state, this->compName, this->compType, this->autoSizedValue, this->wasAutoSized);
+        ReportCoilSelection::setCoilAirFlow(state, this->coilReportNum, this->autoSizedValue, this->wasAutoSized);
     }
     if (this->isFanReportObject) {
         //  fill fan peak day and time here
@@ -393,21 +381,21 @@ Real64 CoolingAirFlowSizer::size(EnergyPlusData &state, Real64 _originalValue, b
                 if (this->finalZoneSizing(this->curZoneEqNum).CoolDDNum > 0 &&
                     this->finalZoneSizing(this->curZoneEqNum).CoolDDNum <= state.dataEnvrn->TotDesDays) {
                     DDNameFanPeak = state.dataWeather->DesDayInput(this->finalZoneSizing(this->curZoneEqNum).CoolDDNum).Title;
-                    dateTimeFanPeak = format("{}/{} {}",
-                                             state.dataWeather->DesDayInput(this->finalZoneSizing(this->curZoneEqNum).CoolDDNum).Month,
-                                             state.dataWeather->DesDayInput(this->finalZoneSizing(this->curZoneEqNum).CoolDDNum).DayOfMonth,
-                                             state.dataRptCoilSelection->coilSelectionReportObj->getTimeText(
-                                                 state, this->finalZoneSizing(this->curZoneEqNum).TimeStepNumAtCoolMax));
+                    dateTimeFanPeak =
+                        EnergyPlus::format("{}/{} {}",
+                                           state.dataWeather->DesDayInput(this->finalZoneSizing(this->curZoneEqNum).CoolDDNum).Month,
+                                           state.dataWeather->DesDayInput(this->finalZoneSizing(this->curZoneEqNum).CoolDDNum).DayOfMonth,
+                                           ReportCoilSelection::getTimeText(state, this->finalZoneSizing(this->curZoneEqNum).TimeStepNumAtCoolMax));
                 }
             } else if (heatingFlow) {
                 if (this->finalZoneSizing(this->curZoneEqNum).HeatDDNum > 0 &&
                     this->finalZoneSizing(this->curZoneEqNum).HeatDDNum <= state.dataEnvrn->TotDesDays) {
                     DDNameFanPeak = state.dataWeather->DesDayInput(this->finalZoneSizing(this->curZoneEqNum).HeatDDNum).Title;
-                    dateTimeFanPeak = format("{}/{} {}",
-                                             state.dataWeather->DesDayInput(this->finalZoneSizing(this->curZoneEqNum).HeatDDNum).Month,
-                                             state.dataWeather->DesDayInput(this->finalZoneSizing(this->curZoneEqNum).HeatDDNum).DayOfMonth,
-                                             state.dataRptCoilSelection->coilSelectionReportObj->getTimeText(
-                                                 state, this->finalZoneSizing(this->curZoneEqNum).TimeStepNumAtHeatMax));
+                    dateTimeFanPeak =
+                        EnergyPlus::format("{}/{} {}",
+                                           state.dataWeather->DesDayInput(this->finalZoneSizing(this->curZoneEqNum).HeatDDNum).Month,
+                                           state.dataWeather->DesDayInput(this->finalZoneSizing(this->curZoneEqNum).HeatDDNum).DayOfMonth,
+                                           ReportCoilSelection::getTimeText(state, this->finalZoneSizing(this->curZoneEqNum).TimeStepNumAtHeatMax));
                 }
             }
         }

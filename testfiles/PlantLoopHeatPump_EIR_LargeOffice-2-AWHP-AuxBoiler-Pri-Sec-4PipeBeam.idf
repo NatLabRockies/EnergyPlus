@@ -41,7 +41,7 @@
 ! Chillers:                       HeatPump:PlantLoop:EIR:Cooling, HeatPump:PlantLoop:EIR:Heating
 ! Number of Zones: 19
 
-  Version,26.1;
+  Version,26.2;
 
   SimulationControl,
     YES,                     !- Do Zone Sizing Calculation

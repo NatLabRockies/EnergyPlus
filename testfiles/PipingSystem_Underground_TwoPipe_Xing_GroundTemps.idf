@@ -51,7 +51,7 @@
 !****** SIMULATION CONTROLS ********************************
 !***********************************************************
 
-  Version,26.1;
+  Version,26.2;
 
   Building,
     Piping System Example,   !- Name

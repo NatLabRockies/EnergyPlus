@@ -104,11 +104,11 @@ runs:
         ../
 
       if [ "${{ inputs.minimal-targets }}" == "true" ]; then
-        begin_group "Builing only energyplus and fortran targets"
+        begin_group "Building only energyplus and Fortran targets"
         ninja energyplus ExpandObjects ReadVarsESO Slab Basement AppGPostProcess ParametricPreprocessor
         echo "::endgroup::"
       else
-        begin_group "Builing full energyplus"
+        begin_group "Building full energyplus"
         ninja
         echo "::endgroup::"
       fi;

@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -74,8 +74,7 @@ namespace HVACDXHeatPumpSystem {
         std::string DXHeatPumpSystemType; // Type of DXHeatingSystem
         std::string Name;                 // Name of the DXHeatingSystem
         Sched::Schedule *availSched = nullptr;
-        std::string HeatPumpCoilType;
-        int HeatPumpCoilType_Num;
+        HVAC::CoilType coilType = HVAC::CoilType::Invalid;
         std::string HeatPumpCoilName;
         int HeatPumpCoilIndex;
         int DXHeatPumpCoilInletNodeNum;
@@ -103,10 +102,9 @@ namespace HVACDXHeatPumpSystem {
 
         // Default Constructor
         DXHeatPumpSystemStruct()
-            : HeatPumpCoilType_Num(0), HeatPumpCoilIndex(0), DXHeatPumpCoilInletNodeNum(0), DXHeatPumpCoilOutletNodeNum(0), DXSystemControlNodeNum(0),
-              DesiredOutletTemp(0.0), PartLoadFrac(0.0), SpeedRatio(0.0), CycRatio(0.0), DXCoilSensPLRIter(0), DXCoilSensPLRIterIndex(0),
-              DXCoilSensPLRFail(0), DXCoilSensPLRFailIndex(0), OAUnitSetTemp(0.0), SpeedNum(0), FaultyCoilSATFlag(false), FaultyCoilSATIndex(0),
-              FaultyCoilSATOffset(0.0)
+            : HeatPumpCoilIndex(0), DXHeatPumpCoilInletNodeNum(0), DXHeatPumpCoilOutletNodeNum(0), DXSystemControlNodeNum(0), DesiredOutletTemp(0.0),
+              PartLoadFrac(0.0), SpeedRatio(0.0), CycRatio(0.0), DXCoilSensPLRIter(0), DXCoilSensPLRIterIndex(0), DXCoilSensPLRFail(0),
+              DXCoilSensPLRFailIndex(0), OAUnitSetTemp(0.0), SpeedNum(0), FaultyCoilSATFlag(false), FaultyCoilSATIndex(0), FaultyCoilSATOffset(0.0)
         {
         }
     };

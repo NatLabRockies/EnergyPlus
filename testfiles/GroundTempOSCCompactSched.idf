@@ -3,7 +3,7 @@
 !-NOTE: All comments with '!-' are ignored by the IDFEditor and are generated automatically.
 !-      Use '!' comments if they need to be retained when using the IDFEditor.
 
-  Version,26.1;
+  Version,26.2;
 
   Building,
     anyplace Load Calc,      !- Name

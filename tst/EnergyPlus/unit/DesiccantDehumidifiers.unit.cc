@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -5504,7 +5504,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_RegenAirHeaterHWCoilSizingTest)
     EXPECT_EQ(1, state->dataDesiccantDehumidifiers->NumGenericDesicDehums);
     EXPECT_EQ("DESICCANT 1", state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).Name);
     EXPECT_EQ("DESICCANT REGEN COIL", state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).RegenCoilName);
-    EXPECT_EQ("COIL:HEATING:WATER", state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).RegenCoilType);
+    EXPECT_ENUM_EQ(HVAC::CoilType::HeatingWater, state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).regenCoilType);
 
     CompName = state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).Name;
     CompIndex = state->dataDesiccantDehumidifiers->NumGenericDesicDehums;
@@ -6760,7 +6760,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_VSCoolingCoilOnPrimaryAirSystemTest)
     EXPECT_EQ("DESICCANT 1", state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).Name);
     EXPECT_EQ("DESICCANT REGEN COIL", state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).RegenCoilName);
 
-    EXPECT_EQ(state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).coolingCoil_TypeNum, HVAC::Coil_CoolingAirToAirVariableSpeed);
+    EXPECT_ENUM_EQ(state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).coolCoilType, HVAC::CoilType::CoolingDXVariableSpeed);
 
     EXPECT_ENUM_EQ(state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).CoilUpstreamOfProcessSide, Selection::Yes);
 

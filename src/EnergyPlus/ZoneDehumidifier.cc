@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -103,9 +103,6 @@ namespace ZoneDehumidifier {
     //   http://www.thermastor.com/HI-E-DRY-100/HI-E-DRY-100-Spec.pdf
     //   http://www.thermastor.com/HI-E-DRY-195/HI-E-DRY-195-Spec.pdf
 
-    // Using/Aliasing
-    using namespace DataLoopNode;
-
     void SimZoneDehumidifier(EnergyPlusData &state,
                              std::string const &CompName,                    // Name of the zone dehumidifier
                              int const ZoneNum,                              // Number of zone being served
@@ -142,7 +139,7 @@ namespace ZoneDehumidifier {
         if (CompIndex == 0) {
             ZoneDehumidNum = Util::FindItemInList(CompName, state.dataZoneDehumidifier->ZoneDehumid);
             if (ZoneDehumidNum == 0) {
-                ShowFatalError(state, format("SimZoneDehumidifier: Unit not found= {}", CompName));
+                ShowFatalError(state, EnergyPlus::format("SimZoneDehumidifier: Unit not found= {}", CompName));
             }
             CompIndex = ZoneDehumidNum;
         } else {
@@ -150,18 +147,19 @@ namespace ZoneDehumidifier {
             int NumDehumidifiers = (int)state.dataZoneDehumidifier->ZoneDehumid.size();
             if (ZoneDehumidNum > NumDehumidifiers || ZoneDehumidNum < 1) {
                 ShowFatalError(state,
-                               format("SimZoneDehumidifier:  Invalid CompIndex passed= {}, Number of Units= {}, Entered Unit name= {}",
-                                      ZoneDehumidNum,
-                                      NumDehumidifiers,
-                                      CompName));
+                               EnergyPlus::format("SimZoneDehumidifier:  Invalid CompIndex passed= {}, Number of Units= {}, Entered Unit name= {}",
+                                                  ZoneDehumidNum,
+                                                  NumDehumidifiers,
+                                                  CompName));
             }
             if (state.dataZoneDehumidifier->ZoneDehumid(ZoneDehumidNum).CheckEquipName) {
                 if (CompName != state.dataZoneDehumidifier->ZoneDehumid(ZoneDehumidNum).Name) {
-                    ShowFatalError(state,
-                                   format("SimZoneDehumidifier: Invalid CompIndex passed={}, Unit name= {}, stored Unit Name for that index= {}",
-                                          ZoneDehumidNum,
-                                          CompName,
-                                          state.dataZoneDehumidifier->ZoneDehumid(ZoneDehumidNum).Name));
+                    ShowFatalError(
+                        state,
+                        EnergyPlus::format("SimZoneDehumidifier: Invalid CompIndex passed={}, Unit name= {}, stored Unit Name for that index= {}",
+                                           ZoneDehumidNum,
+                                           CompName,
+                                           state.dataZoneDehumidifier->ZoneDehumid(ZoneDehumidNum).Name));
                 }
                 state.dataZoneDehumidifier->ZoneDehumid(ZoneDehumidNum).CheckEquipName = false;
             }
@@ -194,7 +192,7 @@ namespace ZoneDehumidifier {
         // Standard EnergyPlus methodology using available utility routines where appropriate.
 
         // Using/Aliasing
-        using NodeInputManager::GetOnlySingleNode;
+        using Node::GetOnlySingleNode;
         using WaterManager::SetupTankSupplyComponent;
 
         // SUBROUTINE PARAMETER DEFINITIONS:
@@ -204,210 +202,211 @@ namespace ZoneDehumidifier {
         Real64 constexpr RatedInletAirRH(60.0);
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        int ZoneDehumidIndex;          // Loop index
-        int NumAlphas(0);              // Number of Alphas to allocate arrays, then used for each GetObjectItem call
-        int NumNumbers(0);             // Number of Numbers to allocate arrays, then used for each GetObjectItem call
-        int IOStatus;                  // Used in GetObjectItem
-        bool ErrorsFound(false);       // Set to true if errors in input, fatal at end of routine
-        Array1D_string Alphas;         // Alpha input items for object
-        Array1D_string cAlphaFields;   // Alpha field names
-        Array1D_string cNumericFields; // Numeric field names
-        Array1D<Real64> Numbers;       // Numeric input items for object
-        Array1D_bool lAlphaBlanks;     // Logical array, alpha field input BLANK = .TRUE.
-        Array1D_bool lNumericBlanks;   // Logical array, numeric field input BLANK = .TRUE.
-        int TotalArgs(0);              // Total number of alpha and numeric arguments (max)
+        int ZoneDehumidIndex;    // Loop index
+        bool ErrorsFound(false); // Set to true if errors in input, fatal at end of routine
 
-        int NumDehumidifiers = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, CurrentModuleObject);
+        auto *inputProcessor = state.dataInputProcessing->inputProcessor.get();
+        int NumDehumidifiers = inputProcessor->getNumObjectsFound(state, CurrentModuleObject);
 
         state.dataZoneDehumidifier->ZoneDehumid.allocate(NumDehumidifiers);
+        auto const &objectSchemaProps = inputProcessor->getObjectSchemaProps(state, CurrentModuleObject);
+        auto const dehumidObjects = inputProcessor->epJSON.find(CurrentModuleObject);
+        ZoneDehumidIndex = 1;
 
-        state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state, CurrentModuleObject, TotalArgs, NumAlphas, NumNumbers);
+        if (dehumidObjects != inputProcessor->epJSON.end()) {
+            for (auto const &dehumidInstance : dehumidObjects.value().items()) {
+                auto const &dehumidFields = dehumidInstance.value();
+                auto const dehumidName = Util::makeUPPER(dehumidInstance.key());
+                auto const availabilityScheduleName =
+                    inputProcessor->getAlphaFieldValue(dehumidFields, objectSchemaProps, "availability_schedule_name");
+                auto const airInletNodeName = inputProcessor->getAlphaFieldValue(dehumidFields, objectSchemaProps, "air_inlet_node_name");
+                auto const airOutletNodeName = inputProcessor->getAlphaFieldValue(dehumidFields, objectSchemaProps, "air_outlet_node_name");
+                auto const waterRemovalCurveName = inputProcessor->getAlphaFieldValue(dehumidFields, objectSchemaProps, "water_removal_curve_name");
+                auto const energyFactorCurveName = inputProcessor->getAlphaFieldValue(dehumidFields, objectSchemaProps, "energy_factor_curve_name");
+                auto const partLoadFractionCorrelationCurveName =
+                    inputProcessor->getAlphaFieldValue(dehumidFields, objectSchemaProps, "part_load_fraction_correlation_curve_name");
+                auto const condensateCollectionWaterStorageTankName =
+                    inputProcessor->getAlphaFieldValue(dehumidFields, objectSchemaProps, "condensate_collection_water_storage_tank_name");
 
-        Alphas.allocate(NumAlphas);
-        cAlphaFields.allocate(NumAlphas);
-        cNumericFields.allocate(NumNumbers);
-        Numbers.dimension(NumNumbers, 0.0);
-        lAlphaBlanks.dimension(NumAlphas, true);
-        lNumericBlanks.dimension(NumNumbers, true);
+                inputProcessor->markObjectAsUsed(CurrentModuleObject, dehumidInstance.key());
 
-        for (ZoneDehumidIndex = 1; ZoneDehumidIndex <= NumDehumidifiers; ++ZoneDehumidIndex) {
+                ErrorObjectHeader eoh{routineName, CurrentModuleObject, dehumidName};
 
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     CurrentModuleObject,
-                                                                     ZoneDehumidIndex,
-                                                                     Alphas,
-                                                                     NumAlphas,
-                                                                     Numbers,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     lNumericBlanks,
-                                                                     lAlphaBlanks,
-                                                                     cAlphaFields,
-                                                                     cNumericFields);
+                auto &dehumid = state.dataZoneDehumidifier->ZoneDehumid(ZoneDehumidIndex);
+                // A1,  \field Name
+                dehumid.Name = dehumidName;
+                dehumid.UnitType = CurrentModuleObject; // 'ZoneHVAC:Dehumidifier:DX'
 
-            ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
-
-            auto &dehumid = state.dataZoneDehumidifier->ZoneDehumid(ZoneDehumidIndex);
-            // A1,  \field Name
-            dehumid.Name = Alphas(1);
-            dehumid.UnitType = CurrentModuleObject; // 'ZoneHVAC:Dehumidifier:DX'
-
-            // A2,  \field Availability Schedule Name
-            if (lAlphaBlanks(2)) {
-                dehumid.availSched = Sched::GetScheduleAlwaysOn(state);
-            } else if ((dehumid.availSched = Sched::GetSchedule(state, Alphas(2))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFields(2), Alphas(2));
-                ErrorsFound = true;
-            }
-
-            // A3 , \field Air Inlet Node Name
-            dehumid.AirInletNodeNum = GetOnlySingleNode(state,
-                                                        Alphas(3),
-                                                        ErrorsFound,
-                                                        DataLoopNode::ConnectionObjectType::ZoneHVACDehumidifierDX,
-                                                        Alphas(1),
-                                                        DataLoopNode::NodeFluidType::Air,
-                                                        DataLoopNode::ConnectionType::Inlet,
-                                                        NodeInputManager::CompFluidStream::Primary,
-                                                        ObjectIsNotParent);
-
-            // A4 , \field Air Outlet Node Name
-            dehumid.AirOutletNodeNum = GetOnlySingleNode(state,
-                                                         Alphas(4),
-                                                         ErrorsFound,
-                                                         DataLoopNode::ConnectionObjectType::ZoneHVACDehumidifierDX,
-                                                         Alphas(1),
-                                                         DataLoopNode::NodeFluidType::Air,
-                                                         DataLoopNode::ConnectionType::Outlet,
-                                                         NodeInputManager::CompFluidStream::Primary,
-                                                         ObjectIsNotParent);
-
-            // N1,  \field Rated Water Removal
-            dehumid.RatedWaterRemoval = Numbers(1);
-            if (dehumid.RatedWaterRemoval <= 0.0) {
-                ShowSevereError(state, format("{} must be greater than zero.", cNumericFields(1)));
-                ShowContinueError(state, format("Value specified = {:.5T}", Numbers(1)));
-                ShowContinueError(state, format("Occurs in {} = {}", CurrentModuleObject, dehumid.Name));
-                ErrorsFound = true;
-            }
-
-            // N2,  \field Rated Energy Factor
-            dehumid.RatedEnergyFactor = Numbers(2);
-            if (dehumid.RatedEnergyFactor <= 0.0) {
-                ShowSevereError(state, format("{} must be greater than zero.", cNumericFields(2)));
-                ShowContinueError(state, format("Value specified = {:.5T}", Numbers(2)));
-                ShowContinueError(state, format("Occurs in {} = {}", CurrentModuleObject, dehumid.Name));
-                ErrorsFound = true;
-            }
-
-            // N3,  \field Rated Air Flow Rate
-            dehumid.RatedAirVolFlow = Numbers(3);
-            if (dehumid.RatedAirVolFlow <= 0.0) {
-                ShowSevereError(state, format("{} must be greater than zero.", cNumericFields(3)));
-                ShowContinueError(state, format("Value specified = {:.5T}", Numbers(3)));
-                ShowContinueError(state, format("Occurs in {} = {}", CurrentModuleObject, dehumid.Name));
-                ErrorsFound = true;
-            }
-
-            // A5,  \field Water Removal Curve Name
-            if (lAlphaBlanks(5)) {
-                ShowSevereEmptyField(state, eoh, cAlphaFields(5));
-                ErrorsFound = true;
-            } else if ((dehumid.WaterRemovalCurve = Curve::GetCurve(state, Alphas(5))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFields(5), Alphas(5));
-                ErrorsFound = true;
-            } else if (dehumid.WaterRemovalCurve->numDims != 2) {
-                Curve::ShowSevereCurveDims(state, eoh, cAlphaFields(5), Alphas(5), "2", dehumid.WaterRemovalCurve->numDims);
-                ErrorsFound = true;
-            } else {
-                Real64 CurveVal = dehumid.WaterRemovalCurve->value(state, RatedInletAirTemp, RatedInletAirRH);
-                if (CurveVal > 1.10 || CurveVal < 0.90) {
-                    ShowWarningError(state, format("{} output is not equal to 1.0", cAlphaFields(5)));
-                    ShowContinueError(state, format("(+ or -10%) at rated conditions for {} = {}", CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state, format("Curve output at rated conditions = {:.3T}", CurveVal));
+                // A2,  \field Availability Schedule Name
+                if (availabilityScheduleName.empty()) {
+                    dehumid.availSched = Sched::GetScheduleAlwaysOn(state);
+                } else if ((dehumid.availSched = Sched::GetSchedule(state, availabilityScheduleName)) == nullptr) {
+                    ShowSevereItemNotFound(state, eoh, "Availability Schedule Name", availabilityScheduleName);
+                    ErrorsFound = true;
                 }
-            }
 
-            // A6,  \field Energy Factor Curve Name
-            if (lAlphaBlanks(6)) {
-                ShowSevereEmptyField(state, eoh, cAlphaFields(6));
-                ErrorsFound = true;
-            } else if ((dehumid.EnergyFactorCurve = Curve::GetCurve(state, Alphas(6))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFields(6), Alphas(6));
-                ErrorsFound = true;
-            } else if (dehumid.EnergyFactorCurve->numDims != 2) {
-                Curve::ShowSevereCurveDims(state, eoh, cAlphaFields(6), Alphas(6), "2", dehumid.EnergyFactorCurve->numDims);
-                ErrorsFound = true;
-            } else {
-                Real64 CurveVal = dehumid.EnergyFactorCurve->value(state, RatedInletAirTemp, RatedInletAirRH);
-                if (CurveVal > 1.10 || CurveVal < 0.90) {
-                    ShowWarningError(state, format("{} output is not equal to 1.0", cAlphaFields(6)));
-                    ShowContinueError(state, format("(+ or -10%) at rated conditions for {} = {}", CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state, format("Curve output at rated conditions = {:.3T}", CurveVal));
+                // A3 , \field Air Inlet Node Name
+                dehumid.AirInletNodeNum = GetOnlySingleNode(state,
+                                                            airInletNodeName,
+                                                            ErrorsFound,
+                                                            Node::ConnectionObjectType::ZoneHVACDehumidifierDX,
+                                                            dehumidName,
+                                                            Node::FluidType::Air,
+                                                            Node::ConnectionType::Inlet,
+                                                            Node::CompFluidStream::Primary,
+                                                            Node::ObjectIsNotParent);
+
+                // A4 , \field Air Outlet Node Name
+                dehumid.AirOutletNodeNum = GetOnlySingleNode(state,
+                                                             airOutletNodeName,
+                                                             ErrorsFound,
+                                                             Node::ConnectionObjectType::ZoneHVACDehumidifierDX,
+                                                             dehumidName,
+                                                             Node::FluidType::Air,
+                                                             Node::ConnectionType::Outlet,
+                                                             Node::CompFluidStream::Primary,
+                                                             Node::ObjectIsNotParent);
+
+                // N1,  \field Rated Water Removal
+                dehumid.RatedWaterRemoval = inputProcessor->getRealFieldValue(dehumidFields, objectSchemaProps, "rated_water_removal");
+                if (dehumid.RatedWaterRemoval <= 0.0) {
+                    ShowSevereError(state, "Rated Water Removal must be greater than zero.");
+                    ShowContinueError(state, EnergyPlus::format("Value specified = {:.5T}", dehumid.RatedWaterRemoval));
+                    ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, dehumid.Name));
+                    ErrorsFound = true;
                 }
-            }
 
-            // A7,  \field Part Load Fraction Correlation Curve Name
-            if (lAlphaBlanks(7)) {
-                ShowSevereEmptyField(state, eoh, cAlphaFields(7));
-                ErrorsFound = true;
-            } else if ((dehumid.PartLoadCurve = Curve::GetCurve(state, Alphas(7))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, cAlphaFields(7), Alphas(7));
-                ErrorsFound = true;
-            } else if (dehumid.PartLoadCurve->numDims != 1) {
-                Curve::ShowSevereCurveDims(state, eoh, cAlphaFields(7), Alphas(7), "1", dehumid.PartLoadCurve->numDims);
-                ErrorsFound = true;
-            }
+                // N2,  \field Rated Energy Factor
+                dehumid.RatedEnergyFactor = inputProcessor->getRealFieldValue(dehumidFields, objectSchemaProps, "rated_energy_factor");
+                if (dehumid.RatedEnergyFactor <= 0.0) {
+                    ShowSevereError(state, "Rated Energy Factor must be greater than zero.");
+                    ShowContinueError(state, EnergyPlus::format("Value specified = {:.5T}", dehumid.RatedEnergyFactor));
+                    ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, dehumid.Name));
+                    ErrorsFound = true;
+                }
 
-            // N4,  \field Minimum Dry-Bulb Temperature for Dehumidifier Operation
-            // N5,  \field Maximum Dry-Bulb Temperature for Dehumidifier Operation
-            dehumid.MinInletAirTemp = Numbers(4);
-            dehumid.MaxInletAirTemp = Numbers(5);
+                // N3,  \field Rated Air Flow Rate
+                dehumid.RatedAirVolFlow = inputProcessor->getRealFieldValue(dehumidFields, objectSchemaProps, "rated_air_flow_rate");
+                if (dehumid.RatedAirVolFlow <= 0.0) {
+                    ShowSevereError(state, "Rated Air Flow Rate must be greater than zero.");
+                    ShowContinueError(state, EnergyPlus::format("Value specified = {:.5T}", dehumid.RatedAirVolFlow));
+                    ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, dehumid.Name));
+                    ErrorsFound = true;
+                }
 
-            if (dehumid.MinInletAirTemp >= dehumid.MaxInletAirTemp) {
-                ShowSevereError(state, format("{} must be greater than {}", cNumericFields(5), cNumericFields(4)));
-                ShowContinueError(state, format("{} specified = {:.1T}", cNumericFields(5), Numbers(5)));
-                ShowContinueError(state, format("{} specified = {:.1T}", cNumericFields(4), Numbers(4)));
-                ShowContinueError(state, format("Occurs in {} = {}", CurrentModuleObject, dehumid.Name));
-                ErrorsFound = true;
-            }
+                // A5,  \field Water Removal Curve Name
+                if (waterRemovalCurveName.empty()) {
+                    ShowSevereEmptyField(state, eoh, "Water Removal Curve Name");
+                    ErrorsFound = true;
+                } else if ((dehumid.WaterRemovalCurve = Curve::GetCurve(state, waterRemovalCurveName)) == nullptr) {
+                    ShowSevereItemNotFound(state, eoh, "Water Removal Curve Name", waterRemovalCurveName);
+                    ErrorsFound = true;
+                } else if (dehumid.WaterRemovalCurve->numDims != 2) {
+                    Curve::ShowSevereCurveDims(
+                        state, eoh, "Water Removal Curve Name", waterRemovalCurveName, "2", dehumid.WaterRemovalCurve->numDims);
+                    ErrorsFound = true;
+                } else {
+                    Real64 CurveVal = dehumid.WaterRemovalCurve->value(state, RatedInletAirTemp, RatedInletAirRH);
+                    if (CurveVal > 1.10 || CurveVal < 0.90) {
+                        ShowWarningError(state, "Water Removal Curve Name output is not equal to 1.0");
+                        ShowContinueError(state, EnergyPlus::format("(+ or -10%) at rated conditions for {} = {}", CurrentModuleObject, dehumidName));
+                        ShowContinueError(state, EnergyPlus::format("Curve output at rated conditions = {:.3T}", CurveVal));
+                    }
+                }
 
-            // N6,  \field Off Cycle Parasitic Electric Load
-            dehumid.OffCycleParasiticLoad = Numbers(6); // Off Cycle Parasitic Load [W]
+                // A6,  \field Energy Factor Curve Name
+                if (energyFactorCurveName.empty()) {
+                    ShowSevereEmptyField(state, eoh, "Energy Factor Curve Name");
+                    ErrorsFound = true;
+                } else if ((dehumid.EnergyFactorCurve = Curve::GetCurve(state, energyFactorCurveName)) == nullptr) {
+                    ShowSevereItemNotFound(state, eoh, "Energy Factor Curve Name", energyFactorCurveName);
+                    ErrorsFound = true;
+                } else if (dehumid.EnergyFactorCurve->numDims != 2) {
+                    Curve::ShowSevereCurveDims(
+                        state, eoh, "Energy Factor Curve Name", energyFactorCurveName, "2", dehumid.EnergyFactorCurve->numDims);
+                    ErrorsFound = true;
+                } else {
+                    Real64 CurveVal = dehumid.EnergyFactorCurve->value(state, RatedInletAirTemp, RatedInletAirRH);
+                    if (CurveVal > 1.10 || CurveVal < 0.90) {
+                        ShowWarningError(state, "Energy Factor Curve Name output is not equal to 1.0");
+                        ShowContinueError(state, EnergyPlus::format("(+ or -10%) at rated conditions for {} = {}", CurrentModuleObject, dehumidName));
+                        ShowContinueError(state, EnergyPlus::format("Curve output at rated conditions = {:.3T}", CurveVal));
+                    }
+                }
 
-            if (dehumid.OffCycleParasiticLoad < 0.0) {
-                ShowSevereError(state, format("{} must be >= zero.", cNumericFields(6)));
-                ShowContinueError(state, format("Value specified = {:.2T}", Numbers(6)));
-                ShowContinueError(state, format("Occurs in {} = {}", CurrentModuleObject, dehumid.Name));
-                ErrorsFound = true;
-            }
+                // A7,  \field Part Load Fraction Correlation Curve Name
+                if (partLoadFractionCorrelationCurveName.empty()) {
+                    ShowSevereEmptyField(state, eoh, "Part Load Fraction Correlation Curve Name");
+                    ErrorsFound = true;
+                } else if ((dehumid.PartLoadCurve = Curve::GetCurve(state, partLoadFractionCorrelationCurveName)) == nullptr) {
+                    ShowSevereItemNotFound(state, eoh, "Part Load Fraction Correlation Curve Name", partLoadFractionCorrelationCurveName);
+                    ErrorsFound = true;
+                } else if (dehumid.PartLoadCurve->numDims != 1) {
+                    Curve::ShowSevereCurveDims(state,
+                                               eoh,
+                                               "Part Load Fraction Correlation Curve Name",
+                                               partLoadFractionCorrelationCurveName,
+                                               "1",
+                                               dehumid.PartLoadCurve->numDims);
+                    ErrorsFound = true;
+                }
 
-            // A8;  \field Condensate Collection Water Storage Tank Name
-            dehumid.CondensateCollectName = Alphas(8);
-            if (lAlphaBlanks(8)) {
-                dehumid.CondensateCollectMode = CondensateOutlet::Discarded;
-            } else {
-                dehumid.CondensateCollectMode = CondensateOutlet::ToTank;
-                SetupTankSupplyComponent(state,
-                                         dehumid.Name,
-                                         CurrentModuleObject,
-                                         dehumid.CondensateCollectName,
-                                         ErrorsFound,
-                                         dehumid.CondensateTankID,
-                                         dehumid.CondensateTankSupplyARRID);
-            }
+                // N4,  \field Minimum Dry-Bulb Temperature for Dehumidifier Operation
+                // N5,  \field Maximum Dry-Bulb Temperature for Dehumidifier Operation
+                dehumid.MinInletAirTemp =
+                    inputProcessor->getRealFieldValue(dehumidFields, objectSchemaProps, "minimum_dry_bulb_temperature_for_dehumidifier_operation");
+                dehumid.MaxInletAirTemp =
+                    inputProcessor->getRealFieldValue(dehumidFields, objectSchemaProps, "maximum_dry_bulb_temperature_for_dehumidifier_operation");
 
-        } //   DO ZoneDehumidIndex=1,NumDehumidifiers
+                if (dehumid.MinInletAirTemp >= dehumid.MaxInletAirTemp) {
+                    ShowSevereError(state,
+                                    "Maximum Dry-Bulb Temperature for Dehumidifier Operation must be greater than Minimum Dry-Bulb Temperature for "
+                                    "Dehumidifier Operation");
+                    ShowContinueError(state,
+                                      EnergyPlus::format("{} specified = {:.1T}",
+                                                         "Maximum Dry-Bulb Temperature for Dehumidifier Operation",
+                                                         dehumid.MaxInletAirTemp));
+                    ShowContinueError(state,
+                                      EnergyPlus::format("{} specified = {:.1T}",
+                                                         "Minimum Dry-Bulb Temperature for Dehumidifier Operation",
+                                                         dehumid.MinInletAirTemp));
+                    ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, dehumid.Name));
+                    ErrorsFound = true;
+                }
 
-        Alphas.deallocate();
-        cAlphaFields.deallocate();
-        cNumericFields.deallocate();
-        Numbers.deallocate();
-        lAlphaBlanks.deallocate();
-        lNumericBlanks.deallocate();
+                // N6,  \field Off Cycle Parasitic Electric Load
+                dehumid.OffCycleParasiticLoad = inputProcessor->getRealFieldValue(
+                    dehumidFields, objectSchemaProps, "off_cycle_parasitic_electric_load"); // Off Cycle Parasitic Load [W]
+
+                if (dehumid.OffCycleParasiticLoad < 0.0) {
+                    ShowSevereError(state, "Off-Cycle Parasitic Electric Load must be >= zero.");
+                    ShowContinueError(state, EnergyPlus::format("Value specified = {:.2T}", dehumid.OffCycleParasiticLoad));
+                    ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, dehumid.Name));
+                    ErrorsFound = true;
+                }
+
+                // A8;  \field Condensate Collection Water Storage Tank Name
+                dehumid.CondensateCollectName = condensateCollectionWaterStorageTankName;
+                if (condensateCollectionWaterStorageTankName.empty()) {
+                    dehumid.CondensateCollectMode = CondensateOutlet::Discarded;
+                } else {
+                    dehumid.CondensateCollectMode = CondensateOutlet::ToTank;
+                    SetupTankSupplyComponent(state,
+                                             dehumid.Name,
+                                             CurrentModuleObject,
+                                             condensateCollectionWaterStorageTankName,
+                                             ErrorsFound,
+                                             dehumid.CondensateTankID,
+                                             dehumid.CondensateTankSupplyARRID);
+                }
+
+                ++ZoneDehumidIndex;
+
+            } //   DO ZoneDehumidIndex=1,NumDehumidifiers
+        }
 
         if (ErrorsFound) {
-            ShowFatalError(state, format("{}:{}: Errors found in input.", routineName, CurrentModuleObject));
+            ShowFatalError(state, EnergyPlus::format("{}:{}: Errors found in input.", routineName, CurrentModuleObject));
         }
 
         for (ZoneDehumidIndex = 1; ZoneDehumidIndex <= NumDehumidifiers; ++ZoneDehumidIndex) {
@@ -552,9 +551,10 @@ namespace ZoneDehumidifier {
             if (!CheckZoneEquipmentList(state, dehumid.UnitType, dehumid.Name)) {
                 ShowSevereError(
                     state,
-                    format("InitZoneDehumidifier: Zone Dehumidifier=\"{},{}\" is not on any ZoneHVAC:EquipmentList.  It will not be simulated.",
-                           dehumid.UnitType,
-                           dehumid.Name));
+                    EnergyPlus::format(
+                        "InitZoneDehumidifier: Zone Dehumidifier=\"{},{}\" is not on any ZoneHVAC:EquipmentList.  It will not be simulated.",
+                        dehumid.UnitType,
+                        dehumid.Name));
             }
         }
 
@@ -697,11 +697,11 @@ namespace ZoneDehumidifier {
             if (WaterRemovalRateFactor <= 0.0) {
                 if (dehumid.WaterRemovalCurveErrorCount < 1) {
                     ++dehumid.WaterRemovalCurveErrorCount;
-                    ShowWarningError(state, format("{} \"{}\":", dehumid.UnitType, dehumid.Name));
-                    ShowContinueError(state, format(" Water Removal Rate Curve output is <= 0.0 ({:.5T}).", WaterRemovalRateFactor));
+                    ShowWarningError(state, EnergyPlus::format("{} \"{}\":", dehumid.UnitType, dehumid.Name));
+                    ShowContinueError(state, EnergyPlus::format(" Water Removal Rate Curve output is <= 0.0 ({:.5T}).", WaterRemovalRateFactor));
                     ShowContinueError(
                         state,
-                        format(
+                        EnergyPlus::format(
                             " Negative value occurs using an inlet air dry-bulb temperature of {:.2T} and an inlet air relative humidity of {:.1T}.",
                             InletAirTemp,
                             InletAirRH));
@@ -736,11 +736,11 @@ namespace ZoneDehumidifier {
             if (EnergyFactorAdjFactor <= 0.0) {
                 if (dehumid.EnergyFactorCurveErrorCount < 1) {
                     ++dehumid.EnergyFactorCurveErrorCount;
-                    ShowWarningError(state, format("{} \"{}\":", dehumid.UnitType, dehumid.Name));
-                    ShowContinueError(state, format(" Energy Factor Curve output is <= 0.0 ({:.5T}).", EnergyFactorAdjFactor));
+                    ShowWarningError(state, EnergyPlus::format("{} \"{}\":", dehumid.UnitType, dehumid.Name));
+                    ShowContinueError(state, EnergyPlus::format(" Energy Factor Curve output is <= 0.0 ({:.5T}).", EnergyFactorAdjFactor));
                     ShowContinueError(
                         state,
-                        format(
+                        EnergyPlus::format(
                             " Negative value occurs using an inlet air dry-bulb temperature of {:.2T} and an inlet air relative humidity of {:.1T}.",
                             InletAirTemp,
                             InletAirRH));
@@ -769,9 +769,10 @@ namespace ZoneDehumidifier {
                 if (PLF < 0.7) {
                     if (dehumid.LowPLFErrorCount < 1) {
                         ++dehumid.LowPLFErrorCount;
-                        ShowWarningError(state, format("{} \"{}\":", dehumid.UnitType, dehumid.Name));
-                        ShowContinueError(
-                            state, format(" The Part Load Fraction Correlation Curve output is ({:.2T}) at a part-load ratio ={:.3T}", PLF, PLR));
+                        ShowWarningError(state, EnergyPlus::format("{} \"{}\":", dehumid.UnitType, dehumid.Name));
+                        ShowContinueError(state,
+                                          EnergyPlus::format(
+                                              " The Part Load Fraction Correlation Curve output is ({:.2T}) at a part-load ratio ={:.3T}", PLF, PLR));
                         ShowContinueErrorTimeStamp(state,
                                                    " PLF curve values must be >= 0.7.  PLF has been reset to 0.7 and simulation is continuing.");
                     } else {
@@ -788,19 +789,20 @@ namespace ZoneDehumidifier {
                 if (PLF > 1.0) {
                     if (dehumid.HighPLFErrorCount < 1) {
                         ++dehumid.HighPLFErrorCount;
-                        ShowWarningError(state, format("{} \"{}\":", dehumid.UnitType, dehumid.Name));
-                        ShowContinueError(
-                            state, format(" The Part Load Fraction Correlation Curve output is ({:.2T}) at a part-load ratio ={:.3T}", PLF, PLR));
+                        ShowWarningError(state, EnergyPlus::format("{} \"{}\":", dehumid.UnitType, dehumid.Name));
+                        ShowContinueError(state,
+                                          EnergyPlus::format(
+                                              " The Part Load Fraction Correlation Curve output is ({:.2T}) at a part-load ratio ={:.3T}", PLF, PLR));
                         ShowContinueErrorTimeStamp(state,
                                                    " PLF curve values must be < 1.0.  PLF has been reset to 1.0 and simulation is continuing.");
                     } else {
-                        ShowRecurringWarningErrorAtEnd(state,
-                                                       format("{} \"{}\": Part Load Fraction Correlation Curve output > 1.0 warning continues...",
-                                                              dehumid.UnitType,
-                                                              dehumid.Name),
-                                                       dehumid.HighPLFErrorIndex,
-                                                       PLF,
-                                                       PLF);
+                        ShowRecurringWarningErrorAtEnd(
+                            state,
+                            EnergyPlus::format(
+                                "{} \"{}\": Part Load Fraction Correlation Curve output > 1.0 warning continues...", dehumid.UnitType, dehumid.Name),
+                            dehumid.HighPLFErrorIndex,
+                            PLF,
+                            PLF);
                     }
                     PLF = 1.0;
                 }
@@ -810,12 +812,13 @@ namespace ZoneDehumidifier {
                 } else {
                     if (dehumid.PLFPLRErrorCount < 1) {
                         ++dehumid.PLFPLRErrorCount;
-                        ShowWarningError(state, format("{} \"{}\":", dehumid.UnitType, dehumid.Name));
+                        ShowWarningError(state, EnergyPlus::format("{} \"{}\":", dehumid.UnitType, dehumid.Name));
                         ShowContinueError(
                             state,
-                            format("The part load fraction was less than the part load ratio calculated for this time step [PLR={:.4T}, PLF={:.4T}].",
-                                   PLR,
-                                   PLF));
+                            EnergyPlus::format(
+                                "The part load fraction was less than the part load ratio calculated for this time step [PLR={:.4T}, PLF={:.4T}].",
+                                PLR,
+                                PLF));
                         ShowContinueError(state, "Runtime fraction reset to 1 and the simulation will continue.");
                         ShowContinueErrorTimeStamp(state, "");
                     } else {
@@ -830,8 +833,9 @@ namespace ZoneDehumidifier {
                 if (RunTimeFraction > 1.0 && std::abs(RunTimeFraction - 1.0) > 0.001) {
                     if (dehumid.HighRTFErrorCount < 1) {
                         ++dehumid.HighRTFErrorCount;
-                        ShowWarningError(state, format("{} \"{}\":", dehumid.UnitType, dehumid.Name));
-                        ShowContinueError(state, format("The runtime fraction for this zone dehumidifier exceeded 1.0 [{:.4T}].", RunTimeFraction));
+                        ShowWarningError(state, EnergyPlus::format("{} \"{}\":", dehumid.UnitType, dehumid.Name));
+                        ShowContinueError(
+                            state, EnergyPlus::format("The runtime fraction for this zone dehumidifier exceeded 1.0 [{:.4T}].", RunTimeFraction));
                         ShowContinueError(state, "Runtime fraction reset to 1 and the simulation will continue.");
                         ShowContinueErrorTimeStamp(state, "");
                     } else {

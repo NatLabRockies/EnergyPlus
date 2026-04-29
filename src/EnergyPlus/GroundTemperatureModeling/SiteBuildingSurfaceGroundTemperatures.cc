@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -45,11 +45,13 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
+#include <array>
+
 // EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataGlobals.hh>
-#include <EnergyPlus/DataIPShortCuts.hh>
 #include <EnergyPlus/GroundTemperatureModeling/SiteBuildingSurfaceGroundTemperatures.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
@@ -69,6 +71,7 @@ namespace GroundTemp {
         // Reads input and creates instance of Site:GroundTemperature:BuildingSurface object
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
+        constexpr int numMonths = 12;
         bool errorsFound = false;
 
         // New shared pointer for this model object
@@ -76,32 +79,39 @@ namespace GroundTemp {
 
         ModelType modelType = GroundTemp::ModelType::SiteBuildingSurface;
 
-        std::string_view const cCurrentModuleObject = GroundTemp::modelTypeNamesUC[(int)modelType];
-        const int numCurrObjects = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
+        std::string_view const cCurrentModuleObject = GroundTemp::modelTypeNames[(int)modelType];
+        std::string const currentModuleObject(cCurrentModuleObject);
+        auto *inputProcessor = state.dataInputProcessing->inputProcessor.get();
+        const int numCurrObjects = inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
 
         thisModel->modelType = modelType;
         thisModel->Name = objectName;
 
         if (numCurrObjects == 1) {
-
-            int NumNums;
-            int NumAlphas;
-            int IOStat;
             bool genErrorMessage = false;
-
-            // Get the object names for each construction from the input processor
-            state.dataInputProcessing->inputProcessor->getObjectItem(
-                state, cCurrentModuleObject, 1, state.dataIPShortCut->cAlphaArgs, NumAlphas, state.dataIPShortCut->rNumericArgs, NumNums, IOStat);
-
-            if (NumNums < 12) {
-                ShowSevereError(state, fmt::format("{}: Less than 12 values entered.", GroundTemp::modelTypeNames[(int)modelType]));
-                errorsFound = true;
-            }
+            auto const &groundTempsInstances = inputProcessor->epJSON.at(currentModuleObject);
+            auto const groundTempsInstance = groundTempsInstances.begin();
+            auto const &groundTempsFields = groundTempsInstance.value();
+            auto const &groundTempsSchemaProps = inputProcessor->getObjectSchemaProps(state, currentModuleObject);
+            inputProcessor->markObjectAsUsed(currentModuleObject, groundTempsInstance.key());
+            static constexpr std::array<std::string_view, numMonths> fieldNames = {"january_ground_temperature",
+                                                                                   "february_ground_temperature",
+                                                                                   "march_ground_temperature",
+                                                                                   "april_ground_temperature",
+                                                                                   "may_ground_temperature",
+                                                                                   "june_ground_temperature",
+                                                                                   "july_ground_temperature",
+                                                                                   "august_ground_temperature",
+                                                                                   "september_ground_temperature",
+                                                                                   "october_ground_temperature",
+                                                                                   "november_ground_temperature",
+                                                                                   "december_ground_temperature"};
 
             // Assign the ground temps to the variable
-            for (int i = 1; i <= 12; ++i) {
-                thisModel->buildingSurfaceGroundTemps[i - 1] = state.dataIPShortCut->rNumericArgs(i);
-                if (thisModel->buildingSurfaceGroundTemps[i - 1] < 15.0 || thisModel->buildingSurfaceGroundTemps[i - 1] > 25.0) {
+            for (int i = 0; i < numMonths; ++i) {
+                thisModel->buildingSurfaceGroundTemps[i] =
+                    inputProcessor->getRealFieldValue(groundTempsFields, groundTempsSchemaProps, std::string(fieldNames[i]));
+                if (thisModel->buildingSurfaceGroundTemps[i] < 15.0 || thisModel->buildingSurfaceGroundTemps[i] > 25.0) {
                     genErrorMessage = true;
                 }
             }

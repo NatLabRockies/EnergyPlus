@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -162,7 +162,7 @@ namespace Python {
                     if (!traceback_line.empty() && traceback_line[traceback_line.length() - 1] == '\n') {
                         traceback_line.erase(traceback_line.length() - 1);
                     }
-                    EnergyPlus::ShowContinueError(state, format(" >>> {}", traceback_line));
+                    EnergyPlus::ShowContinueError(state, EnergyPlus::format(" >>> {}", traceback_line));
                 }
                 // PyList_GetItem returns a borrowed reference, do not decrement
             }
@@ -194,7 +194,7 @@ namespace Python {
         }
         if (unicodeIncludePath == nullptr) {
             EnergyPlus::ShowFatalError(
-                state, format("ERROR converting the path \"{}\" for addition to the sys.path in Python", includePath.generic_string()));
+                state, EnergyPlus::format("ERROR converting the path \"{}\" for addition to the sys.path in Python", includePath.generic_string()));
         }
 
         PyObject *sysPath = PySys_GetObject("path"); // Borrowed reference
@@ -205,11 +205,12 @@ namespace Python {
             if (PyErr_Occurred() != nullptr) {
                 reportPythonError(state);
             }
-            EnergyPlus::ShowFatalError(state, format("ERROR adding \"{}\" to the sys.path in Python", includePath.generic_string()));
+            EnergyPlus::ShowFatalError(state, EnergyPlus::format("ERROR adding \"{}\" to the sys.path in Python", includePath.generic_string()));
         }
 
         if (userDefinedPath) {
-            EnergyPlus::ShowMessage(state, format("Successfully added path \"{}\" to the sys.path in Python", includePath.generic_string()));
+            EnergyPlus::ShowMessage(state,
+                                    EnergyPlus::format("Successfully added path \"{}\" to the sys.path in Python", includePath.generic_string()));
         }
 
         // PyRun_SimpleString)("print(' EPS : ' + str(sys.path))");

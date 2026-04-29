@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -243,9 +243,9 @@ namespace SolarReflectionManager {
                 // Warning if any receiving surface vertex is below ground level, taken to be at Z = 0 in absolute coords
                 for (loop = 1; loop <= state.dataSurface->Surface(SurfNum).Sides; ++loop) {
                     if (state.dataSurface->Surface(SurfNum).Vertex(loop).z < state.dataSurface->GroundLevelZ) {
-                        ShowWarningError(
-                            state,
-                            format("Calculation of reflected solar onto surface={} may be inaccurate", state.dataSurface->Surface(SurfNum).Name));
+                        ShowWarningError(state,
+                                         EnergyPlus::format("Calculation of reflected solar onto surface={} may be inaccurate",
+                                                            state.dataSurface->Surface(SurfNum).Name));
                         ShowContinueError(state, "because it has one or more vertices below ground level.");
                         break;
                     }

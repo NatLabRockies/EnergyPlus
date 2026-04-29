@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -135,42 +135,20 @@ void CoolingSHRSizer::updateSizingString(EnergyPlusData &state)
         return;
     }
     // override sizingString to match existing text
-    if (this->coilType_Num == HVAC::CoilDX_CoolingTwoSpeed) {
+    if (this->coilType == HVAC::CoilType::CoolingDXTwoSpeed) {
         if (this->dataDXSpeedNum == 1) { // mode 1 is high speed in DXCoils loop
-            if (this->isEpJSON) {
-                this->sizingString = "high_speed_rated_sensible_heat_ratio";
-            } else {
-                this->sizingString = "High Speed Rated Sensible Heat Ratio";
-            }
+            this->sizingString = "High Speed Rated Sensible Heat Ratio";
         } else if (this->dataDXSpeedNum == 2) {
-            if (this->isEpJSON) {
-                this->sizingString = "low_speed_gross_rated_sensible_heat_ratio";
-            } else {
-                this->sizingString = "Low Speed Gross Rated Sensible Heat Ratio";
-            }
+            this->sizingString = "Low Speed Gross Rated Sensible Heat Ratio";
         }
-    } else if (this->coilType_Num == HVAC::CoilDX_MultiSpeedCooling) {
-        if (this->isEpJSON) {
-            this->sizingString = fmt::format("speed_{}_rated_sensible_heat_ratio", state.dataSize->DataDXSpeedNum);
-        } else {
-            this->sizingString = fmt::format("Speed {} Rated Sensible Heat Ratio", state.dataSize->DataDXSpeedNum);
-        }
-    } else if (this->coilType_Num == HVAC::CoilVRF_FluidTCtrl_Cooling) {
-        if (this->isEpJSON) {
-            this->sizingString = "rated_sensible_heat_ratio";
-        } else {
-            this->sizingString = "Rated Sensible Heat Ratio";
-        }
-    } else if (this->coilType_Num == HVAC::CoilDX_CurveFit_Speed) {
-        if (this->isEpJSON) {
-            this->sizingString = "gross_sensible_heat_ratio";
-        } else {
-            this->sizingString = "Gross Sensible Heat Ratio";
-        }
+    } else if (this->coilType == HVAC::CoilType::CoolingDXMultiSpeed) {
+        this->sizingString = fmt::format("Speed {} Rated Sensible Heat Ratio", state.dataSize->DataDXSpeedNum);
+    } else if (this->coilType == HVAC::CoilType::CoolingVRFFluidTCtrl) {
+        this->sizingString = "Rated Sensible Heat Ratio";
+    } else if (this->coilType == HVAC::CoilType::CoolingDXCurveFit) {
+        this->sizingString = "Gross Sensible Heat Ratio";
     } else {
-        if (this->isEpJSON) {
-            this->sizingString = "gross_rated_sensible_heat_ratio";
-        }
+        this->sizingString = "Gross Rated Sensible Heat Ratio";
     }
 }
 

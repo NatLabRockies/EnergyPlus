@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -62,7 +62,6 @@
 #include <EnergyPlus/CurveManager.hh>
 #include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataGlobals.hh>
-#include <EnergyPlus/DataHeatBalFanSys.hh>
 #include <EnergyPlus/DataHeatBalSurface.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataIPShortCuts.hh>
@@ -88,6 +87,51 @@
 
 using namespace EnergyPlus;
 using namespace EnergyPlus::Window;
+
+TEST_F(EnergyPlusFixture, W5InitGlassParameters_ClearsCoefficients)
+{
+    state->dataHeatBal->MaxSolidWinLayers = 1;
+    state->dataHeatBal->TotConstructs = 1;
+    state->dataConstruction->Construct.allocate(state->dataHeatBal->TotConstructs);
+
+    auto &construct = state->dataConstruction->Construct(1);
+    construct.setArraysBasedOnMaxSolidWinLayers(*state);
+    construct.TypeIsWindow = true;
+    construct.TotLayers = 1;
+    construct.TotSolidLayers = 1;
+    construct.TotGlassLayers = 1;
+    construct.LayerPoint.allocate(1);
+    construct.LayerPoint(1) = 1;
+    construct.AbsBeamShadeCoef = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0};
+    construct.TransSolBeamCoef = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0};
+    construct.ReflSolBeamFrontCoef = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0};
+    construct.ReflSolBeamBackCoef = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0};
+    construct.TransVisBeamCoef = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0};
+
+    state->dataSurface->TotSurfaces = 0;
+
+    W5InitGlassParameters(*state);
+
+    for (auto const &coeff : construct.AbsBeamShadeCoef) {
+        EXPECT_EQ(0.0, coeff);
+    }
+
+    for (auto const &coeff : construct.TransSolBeamCoef) {
+        EXPECT_EQ(0.0, coeff);
+    }
+
+    for (auto const &coeff : construct.ReflSolBeamFrontCoef) {
+        EXPECT_EQ(0.0, coeff);
+    }
+
+    for (auto const &coeff : construct.ReflSolBeamBackCoef) {
+        EXPECT_EQ(0.0, coeff);
+    }
+
+    for (auto const &coeff : construct.TransVisBeamCoef) {
+        EXPECT_EQ(0.0, coeff);
+    }
+}
 
 TEST_F(EnergyPlusFixture, WindowFrameTest)
 {

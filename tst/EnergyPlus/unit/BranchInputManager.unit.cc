@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -91,8 +91,6 @@ TEST_F(EnergyPlusFixture, GetBranchInput_One_SingleComponentBranch)
     int NumParams;
     int NumAlphas;           // Used to retrieve names from IDF
     int NumNumbers;          // Used to retrieve numbers from IDF
-    bool IsNotOK;            // Flag to verify name
-    bool IsBlank;            // Flag for blank name
     Array1D_string Alphas;   // Used to retrieve names from IDF
     Array1D_int NodeNums;    // Possible Array of Node Numbers (only 1 allowed)
     Array1D<Real64> Numbers; // Used to retrieve numbers from IDF
@@ -131,15 +129,6 @@ TEST_F(EnergyPlusFixture, GetBranchInput_One_SingleComponentBranch)
                                                                       lAlphaBlanks,
                                                                       cAlphaFields,
                                                                       cNumericFields);
-            IsNotOK = false;
-            IsBlank = false;
-            Util::VerifyName(*state, Alphas(1), state->dataBranchInputManager->Branch, BCount, IsNotOK, IsBlank, CurrentModuleObject + " Name");
-            if (IsNotOK) {
-                if (IsBlank) {
-                    continue;
-                }
-                Alphas(1) = Alphas(1) + "--dup";
-            }
             ++BCount;
 
             GetSingleBranchInput(*state, RoutineName, BCount, Alphas, cAlphaFields, NumAlphas, NodeNums, lAlphaBlanks);
@@ -256,8 +245,6 @@ TEST_F(EnergyPlusFixture, GetBranchInput_One_FourComponentBranch)
     int NumParams;
     int NumAlphas;           // Used to retrieve names from IDF
     int NumNumbers;          // Used to retrieve numbers from IDF
-    bool IsNotOK;            // Flag to verify name
-    bool IsBlank;            // Flag for blank name
     Array1D_string Alphas;   // Used to retrieve names from IDF
     Array1D_int NodeNums;    // Possible Array of Node Numbers (only 1 allowed)
     Array1D<Real64> Numbers; // Used to retrieve numbers from IDF
@@ -296,15 +283,7 @@ TEST_F(EnergyPlusFixture, GetBranchInput_One_FourComponentBranch)
                                                                       lAlphaBlanks,
                                                                       cAlphaFields,
                                                                       cNumericFields);
-            IsNotOK = false;
-            IsBlank = false;
-            Util::VerifyName(*state, Alphas(1), state->dataBranchInputManager->Branch, BCount, IsNotOK, IsBlank, CurrentModuleObject + " Name");
-            if (IsNotOK) {
-                if (IsBlank) {
-                    continue;
-                }
-                Alphas(1) = Alphas(1) + "--dup";
-            }
+
             ++BCount;
 
             GetSingleBranchInput(*state, RoutineName, BCount, Alphas, cAlphaFields, NumAlphas, NodeNums, lAlphaBlanks);

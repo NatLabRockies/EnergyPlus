@@ -4,7 +4,7 @@
 !-      Use '!' comments if they need to be retained when using the IDFEditor.
 !-   ===========  ALL OBJECTS IN CLASS: VERSION ===========
 
-  Version,26.1;
+  Version,26.2;
 
 !-   ===========  ALL OBJECTS IN CLASS: SIMULATIONCONTROL ===========
 
@@ -291,16 +291,6 @@
     Number;                  !- Name
 
 !-   ===========  ALL OBJECTS IN CLASS: SCHEDULE:COMPACT ===========
-                             !- Field 4
-                             !- Field 14
-                             !- Field 16
-                             !- Field 18
-                             !- Field 31
-                             !- Field 33
-                             !- Field 35
-                             !- Field 50
-                             !- Field 52
-                             !- Field 56
 
   Schedule:Compact,
     BLDG_LIGHT_DINING_SCH,   !- Name
@@ -337,8 +327,6 @@
     Until: 22:00,0.56313753, !- Field 53
     Until: 23:00,0.469281275,!- Field 55
     Until: 24:00,0.281568765;!- Field 57
-
-                             !- Field 58
 
   Schedule:Compact,
     BLDG_LIGHT_KITCHEN_SCH,  !- Name
@@ -411,54 +399,6 @@
     Until: 23:00,0.5,        !- Field 53
     Until: 24:00,0.3;        !- Field 55
 
-                             !- Field 4
-                             !- Field 6
-                             !- Field 8
-                             !- Field 10
-                             !- Field 12
-                             !- Field 14
-                             !- Field 16
-                             !- Field 18
-                             !- Field 20
-                             !- Field 22
-                             !- Field 24
-                             !- Field 26
-                             !- Field 28
-                             !- Field 30
-                             !- Field 32
-                             !- Field 34
-                             !- Field 36
-                             !- Field 38
-                             !- Field 40
-                             !- Field 42
-                             !- Field 44
-                             !- Field 46
-                             !- Field 48
-                             !- Field 50
-                             !- Field 59
-                             !- Field 61
-                             !- Field 63
-                             !- Field 65
-                             !- Field 67
-                             !- Field 69
-                             !- Field 71
-                             !- Field 73
-                             !- Field 75
-                             !- Field 77
-                             !- Field 79
-                             !- Field 81
-                             !- Field 83
-                             !- Field 85
-                             !- Field 87
-                             !- Field 89
-                             !- Field 91
-                             !- Field 93
-                             !- Field 95
-                             !- Field 97
-                             !- Field 99
-                             !- Field 101
-                             !- Field 103
-
   Schedule:Compact,
     BLDG_EQUIP_SCH,          !- Name
     Fraction,                !- Schedule Type Limits Name
@@ -517,8 +457,6 @@
     Until: 22:00,0.17980058574, !- Field 100
     Until: 23:00,0.08990029287, !- Field 102
     Until: 24:00,0.02996676429; !- Field 104
-
-                             !- Field 105
 
   Schedule:Compact,
     Rest_GAS_EQUIP_SCH,      !- Name
@@ -1568,12 +1506,6 @@
     Until: 06:00,0.5,        !- Field 3
     Until: 24:00,1;          !- Field 5
 
-                             !- Field 4
-                             !- Field 8
-                             !- Field 11
-                             !- Field 15
-                             !- Field 18
-
   Schedule:Compact,
     Kitchen Exhaust Fan Balanced Exhaust Fraction Schedule,  !- Name
     Fraction,                !- Schedule Type Limits Name
@@ -1591,7 +1523,6 @@
     Until: 05:00,1.0,        !- Field 19
     Until: 24:00,0.522434224875208; !- Field 21
 
-                             !- Field 22
 !-   ===========  ALL OBJECTS IN CLASS: SCHEDULE:CONSTANT ===========
 
   Schedule:Constant,SZ_system_OA_Max_Frac_SCH,Fraction,0.75;
@@ -2470,10 +2401,6 @@
     0.0000,0.6029,1.0671,  !- X,Y,Z ==> Vertex 3 {m}
     0.0000,0.6029,1.9817;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Kitchen_Wall_East_Door,  !- Name
     Door,                    !- Surface Type
@@ -2489,7 +2416,6 @@
     22.608700000000,19.208705362758,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     22.608700000000,19.208705362758,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
 !-   ===========  ALL OBJECTS IN CLASS: INTERNALMASS ===========
 
   InternalMass,

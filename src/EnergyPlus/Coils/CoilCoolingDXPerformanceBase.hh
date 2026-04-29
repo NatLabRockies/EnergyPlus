@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -85,6 +85,7 @@ struct CoilCoolingDXPerformanceBase
     Real64 wasteHeatRate = 0.0;
     Real64 recoveredEnergyRate = 0.0;
 
+    bool ReportCoolingCoilCrankcasePower = true; // logical determines if the cooling coil crankcase heater power is reported
     Real64 crankcaseHeaterCap = 0.0;
     Real64 crankcaseHeaterPower = 0.0;
     int crankcaseHeaterCapacityCurveIndex = 0;
@@ -117,15 +118,15 @@ struct CoilCoolingDXPerformanceBase
     }
 
     virtual void simulate(EnergyPlusData &,
-                          const DataLoopNode::NodeData &,
-                          DataLoopNode::NodeData &,
+                          const Node::NodeData &,
+                          Node::NodeData &,
                           HVAC::CoilMode,
                           // Real64 &,
                           int,
                           Real64,
                           HVAC::FanOp const,
-                          DataLoopNode::NodeData &,
-                          DataLoopNode::NodeData &,
+                          Node::NodeData &,
+                          Node::NodeData &,
                           bool const,
                           Real64 = 0.0)
     {

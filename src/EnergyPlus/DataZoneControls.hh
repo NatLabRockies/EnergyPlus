@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -88,6 +88,17 @@ namespace DataZoneControls {
     constexpr std::array<std::string_view, (int)TempCtrl::Num> tempCtrlNames = {"None", "Constant", "Scheduled"};
     constexpr std::array<std::string_view, (int)TempCtrl::Num> tempCtrlNamesUC = {"NONE", "CONSTANT", "SCHEDULED"};
 
+    enum class HumidityCtrlVarType
+    {
+        Invalid = -1,
+        DewPoint,
+        RelativeHumidity,
+        Num
+    };
+
+    static constexpr std::array<std::string_view, (int)HumidityCtrlVarType::Num> humidityCtrlVarTypeNames = {"Dewpoint", "RelativeHumidity"};
+    static constexpr std::array<std::string_view, (int)HumidityCtrlVarType::Num> humidityCtrlVarTypeNamesUC = {"DEWPOINT", "RELATIVEHUMIDITY"};
+
     struct TempSetptType
     {
         std::string Name;
@@ -159,13 +170,14 @@ namespace DataZoneControls {
         std::string ControlName; // Name of this humidity controller
         std::string ZoneName;    // Name of the zone
         int ActualZoneNum;
-        Sched::Schedule *humidifyingSched = nullptr;   // humidifying schedule
-        Sched::Schedule *dehumidifyingSched = nullptr; // dehumidifying schedule
-        int ErrorIndex;                                // Error index when LowRH setpoint > HighRH setpoint
-        bool EMSOverrideHumidifySetPointOn;            // EMS is calling to override humidifying setpoint
-        Real64 EMSOverrideHumidifySetPointValue;       // value EMS is directing to use for humidifying setpoint
-        bool EMSOverrideDehumidifySetPointOn;          // EMS is calling to override dehumidifying setpoint
-        Real64 EMSOverrideDehumidifySetPointValue;     // value EMS is directing to use for dehumidifying setpoint
+        Sched::Schedule *humidifyingSched = nullptr;                                             // humidifying schedule
+        Sched::Schedule *dehumidifyingSched = nullptr;                                           // dehumidifying schedule
+        HumidityCtrlVarType humidityControlVariableType = HumidityCtrlVarType::RelativeHumidity; // Control variable type
+        int ErrorIndex;                                                                          // Error index when LowRH setpoint > HighRH setpoint
+        bool EMSOverrideHumidifySetPointOn;                                                      // EMS is calling to override humidifying setpoint
+        Real64 EMSOverrideHumidifySetPointValue;   // value EMS is directing to use for humidifying setpoint
+        bool EMSOverrideDehumidifySetPointOn;      // EMS is calling to override dehumidifying setpoint
+        Real64 EMSOverrideDehumidifySetPointValue; // value EMS is directing to use for dehumidifying setpoint
 
         // Default Constructor
         ZoneHumidityControls()

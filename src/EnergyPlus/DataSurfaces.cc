@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -80,7 +80,6 @@ using namespace DataVectorTypes;
 using namespace DataBSDFWindow;
 using namespace DataHeatBalance;
 using namespace DataZoneEquipment;
-using namespace DataLoopNode;
 using namespace Psychrometrics;
 using namespace DataEnvironment;
 using namespace Window;
@@ -234,8 +233,8 @@ Real64 SurfaceData::getInsideAirTemperature(EnergyPlusData &state, const int t_S
         // check whether this zone is a controlled zone or not
         if (!state.dataHeatBal->Zone(Zone).IsControlled) {
             ShowFatalError(state,
-                           format("Zones must be controlled for Ceiling-Diffuser Convection model. No system serves zone {}",
-                                  state.dataHeatBal->Zone(Zone).Name));
+                           EnergyPlus::format("Zones must be controlled for Ceiling-Diffuser Convection model. No system serves zone {}",
+                                              state.dataHeatBal->Zone(Zone).Name));
             // return;
         }
         // determine supply air conditions
@@ -506,7 +505,7 @@ Real64 SurfaceData::get_average_height(EnergyPlusData &state) const
     if (totalWidth == 0.0) {
         // This should never happen, but if it does, print a somewhat meaningful fatal error
         // (instead of allowing a divide by zero).
-        ShowFatalError(state, format("Calculated projected surface width is zero for surface=\"{}\"", Name));
+        ShowFatalError(state, EnergyPlus::format("Calculated projected surface width is zero for surface=\"{}\"", Name));
     }
 
     Real64 averageHeight = 0.0;
@@ -769,10 +768,11 @@ void GetVariableAbsorptanceSurfaceList(EnergyPlusData &state)
         if (mat->absorpVarCtrlSignal != Material::VariableAbsCtrlSignal::Invalid) {
             // check for dynamic coating defined on interior surface
             if (thisSurface.ExtBoundCond != ExternalEnvironment) {
-                ShowWarningError(state,
-                                 format("MaterialProperty:VariableAbsorptance defined on an interior surface, {}. This VariableAbsorptance property "
-                                        "will be ignored here",
-                                        thisSurface.Name));
+                ShowWarningError(
+                    state,
+                    EnergyPlus::format("MaterialProperty:VariableAbsorptance defined on an interior surface, {}. This VariableAbsorptance property "
+                                       "will be ignored here",
+                                       thisSurface.Name));
             } else {
                 state.dataSurface->AllVaryAbsOpaqSurfaceList.push_back(surfNum);
             }
@@ -787,10 +787,11 @@ void GetVariableAbsorptanceSurfaceList(EnergyPlusData &state)
                 continue;
             }
             if (mat->absorpVarCtrlSignal != Material::VariableAbsCtrlSignal::Invalid) {
-                ShowWarningError(state,
-                                 format("MaterialProperty:VariableAbsorptance defined on a inside-layer materials, {}. This VariableAbsorptance "
-                                        "property will be ignored here",
-                                        mat->Name));
+                ShowWarningError(
+                    state,
+                    EnergyPlus::format("MaterialProperty:VariableAbsorptance defined on a inside-layer materials, {}. This VariableAbsorptance "
+                                       "property will be ignored here",
+                                       mat->Name));
             }
         }
     }

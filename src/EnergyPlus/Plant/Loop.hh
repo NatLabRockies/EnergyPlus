@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -107,9 +107,9 @@ namespace DataPlant {
     struct PlantLoopData
     {
         // Members
-        std::string Name;                      // Name of the component list
-        std::string FluidName;                 // Name of the fluid specified for this loop
-        DataLoopNode::NodeFluidType FluidType; // Type of fluid in the loop
+        std::string Name;          // Name of the component list
+        std::string FluidName;     // Name of the fluid specified for this loop
+        Node::FluidType FluidType; // Type of fluid in the loop
         int FluidIndex = 0;
 
         Fluid::GlycolProps *glycol = nullptr;
@@ -179,11 +179,11 @@ namespace DataPlant {
 
         // Default Constructor
         PlantLoopData()
-            : FluidType(DataLoopNode::NodeFluidType::Blank), MFErrIndex(0), MFErrIndex1(0), MFErrIndex2(0), TempSetPointNodeNum(0), MaxBranch(0),
-              MinTemp(0.0), MaxTemp(0.0), MinTempErrIndex(0), MaxTempErrIndex(0), MinVolFlowRate(0.0), MaxVolFlowRate(0.0),
-              MaxVolFlowRateWasAutoSized(false), MinMassFlowRate(0.0), MaxMassFlowRate(0.0), Volume(0.0), VolumeWasAutoSized(false),
-              CirculationTime(2.0), Mass(0.0), EMSCtrl(false), EMSValue(0.0), NumOpSchemes(0), LoadDistribution(DataPlant::LoadingScheme::Invalid),
-              PlantSizNum(0), LoopDemandCalcScheme(DataPlant::LoopDemandCalcScheme::Invalid), CommonPipeType(DataPlant::CommonPipeType::No),
+            : FluidType(Node::FluidType::Blank), MFErrIndex(0), MFErrIndex1(0), MFErrIndex2(0), TempSetPointNodeNum(0), MaxBranch(0), MinTemp(0.0),
+              MaxTemp(0.0), MinTempErrIndex(0), MaxTempErrIndex(0), MinVolFlowRate(0.0), MaxVolFlowRate(0.0), MaxVolFlowRateWasAutoSized(false),
+              MinMassFlowRate(0.0), MaxMassFlowRate(0.0), Volume(0.0), VolumeWasAutoSized(false), CirculationTime(2.0), Mass(0.0), EMSCtrl(false),
+              EMSValue(0.0), NumOpSchemes(0), LoadDistribution(DataPlant::LoadingScheme::Invalid), PlantSizNum(0),
+              LoopDemandCalcScheme(DataPlant::LoopDemandCalcScheme::Invalid), CommonPipeType(DataPlant::CommonPipeType::No),
               EconPlantSideSensedNodeNum(0), EconCondSideSensedNodeNum(0), EconPlacement(0), EconBranch(0), EconComp(0), EconControlTempDiff(0.0),
               LoopHasConnectionComp(false), TypeOfLoop(LoopType::Invalid), PressureSimType(DataPlant::PressSimType::NoPressure),
               HasPressureComponents(false), PressureDrop(0.0), UsePressureForPumpCalcs(false), PressureEffectiveK(0.0), CoolingDemand(0.0),

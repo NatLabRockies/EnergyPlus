@@ -108,7 +108,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,26.1;
+  Version,26.2;
 
 !-   ===========  ALL OBJECTS IN CLASS: SIMULATIONCONTROL ===========
 
@@ -1359,6 +1359,7 @@
     0.4,                     !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
     45,                      !- Latent Capacity Time Constant {s}
     1000,                    !- Nominal Time for Condensate Removal to Begin {s}
+    ,                        !- Apply Part Load Fraction to Speeds Greater than 1
     ,                        !- Apply Latent Degradation to Speeds Greater than 1
     ,                        !- Condenser Type
     ,                        !- Nominal Evaporative Condenser Pump Power {W}

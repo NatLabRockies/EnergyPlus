@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -338,7 +338,7 @@ TEST_F(EnergyPlusFixture, UnderwaterBoundaryConditionFullyPopulated)
 
     // need to populate the OSCM array by calling the get input for it
     bool errorsFound = false;
-    SurfaceGeometry::GetOSCMData(*state, errorsFound);
+    SurfaceGeometry::GetOSCMData(*state);
     EXPECT_FALSE(errorsFound);
     EXPECT_EQ(state->dataSurface->TotOSCM, 1);
 
@@ -363,7 +363,7 @@ TEST_F(EnergyPlusFixture, UnderwaterBoundaryConditionMissingVelocityOK)
 
     // need to populate the OSCM array by calling the get input for it
     bool errorsFound = false;
-    SurfaceGeometry::GetOSCMData(*state, errorsFound);
+    SurfaceGeometry::GetOSCMData(*state);
     EXPECT_FALSE(errorsFound);
     EXPECT_EQ(state->dataSurface->TotOSCM, 1);
 

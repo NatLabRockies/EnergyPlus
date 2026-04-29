@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -327,7 +327,7 @@ namespace SystemReports {
                        int const BranchNum   // counter for zone air distribution inlets
     );
 
-    void FindDemandSideMatch(EnergyPlusData &state,
+    void FindDemandSideMatch(EnergyPlusData const &state,
                              std::string const &CompType, // Inlet node of the component to find the match of
                              std::string_view CompName,   // Outlet node of the component to find the match of
                              bool &MatchFound,            // Set to .TRUE. when a match is found

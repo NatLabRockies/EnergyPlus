@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -85,6 +85,7 @@
 #include <EnergyPlus/Plant/PlantLocation.hh>
 #include <EnergyPlus/Plant/PlantManager.hh>
 #include <EnergyPlus/Psychrometrics.hh>
+#include <EnergyPlus/ReportCoilSelection.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/SimulationManager.hh>
 #include <EnergyPlus/SizingManager.hh>
@@ -98,7 +99,6 @@ using namespace EnergyPlus::BranchInputManager;
 using namespace EnergyPlus::Curve;
 using namespace EnergyPlus::DataEnvironment;
 using namespace EnergyPlus::DataHeatBalFanSys;
-using namespace EnergyPlus::DataLoopNode;
 using namespace EnergyPlus::DataPlant;
 using namespace EnergyPlus::DataSizing;
 using namespace EnergyPlus::DataZoneEquipment;
@@ -469,8 +469,8 @@ protected:
         VRFTU.HeatCoilIndex = heatCoilIndex;
         VRFTU.heatCoilAirInNode = heatCoilAirInNode;
         VRFTU.heatCoilAirOutNode = heatCoilAirOutNode;
-        VRFTU.DXCoolCoilType_Num = HVAC::CoilVRF_Cooling;
-        VRFTU.DXHeatCoilType_Num = HVAC::CoilVRF_Heating;
+        VRFTU.coolCoilType = HVAC::CoilType::CoolingVRF;
+        VRFTU.heatCoilType = HVAC::CoilType::HeatingVRF;
         VRFTU.CoolingCoilPresent = true;
         VRFTU.HeatingCoilPresent = true;
         VRFTU.HVACSizingIndex = 0;
@@ -478,39 +478,42 @@ protected:
         // DX coil set up
         state->dataDXCoils->DXCoilNumericFields(1).PerfMode.allocate(5);
         state->dataDXCoils->DXCoilNumericFields(1).PerfMode(1).FieldNames.allocate(30);
-        state->dataDXCoils->DXCoil(1).Name = "VRFTUDXCOOLCOIL";
-        state->dataDXCoils->DXCoil(1).DXCoilType = "Coil:Cooling:DX:VariableRefrigerantFlow";
-        state->dataDXCoils->DXCoil(1).AirInNode = coolCoilAirInNode;
-        state->dataDXCoils->DXCoil(1).AirOutNode = coolCoilAirOutNode;
-        state->dataDXCoils->DXCoil(1).DXCoilType_Num = HVAC::CoilVRF_Cooling;
-        state->dataDXCoils->DXCoil(1).RatedAirVolFlowRate = DataSizing::AutoSize;
-        state->dataDXCoils->DXCoil(1).RatedTotCap = DataSizing::AutoSize;
-        state->dataDXCoils->DXCoil(1).RatedSHR = DataSizing::AutoSize;
-        state->dataDXCoils->DXCoil(1).availSched = sched1;
-        state->dataDXCoils->DXCoil(1).CCapFTemp.allocate(1);
-        state->dataDXCoils->DXCoil(1).CCapFTemp(1) = Sch1;
-        state->dataDXCoils->DXCoil(1).CCapFFlow.allocate(1);
-        state->dataDXCoils->DXCoil(1).CCapFFlow(1) = Sch1;
-        state->dataDXCoils->DXCoil(1).PLFFPLR.allocate(1);
-        state->dataDXCoils->DXCoil(1).PLFFPLR(1) = Sch1;
+        auto &dxCoil1 = state->dataDXCoils->DXCoil(1);
+        dxCoil1.Name = "VRFTUDXCOOLCOIL";
+        dxCoil1.AirInNode = coolCoilAirInNode;
+        dxCoil1.AirOutNode = coolCoilAirOutNode;
+        dxCoil1.coilType = HVAC::CoilType::CoolingVRF;
+        dxCoil1.coilReportNum = ReportCoilSelection::getReportIndex(*state, dxCoil1.Name, dxCoil1.coilType);
+
+        dxCoil1.RatedAirVolFlowRate = DataSizing::AutoSize;
+        dxCoil1.RatedTotCap = DataSizing::AutoSize;
+        dxCoil1.RatedSHR = DataSizing::AutoSize;
+        dxCoil1.availSched = sched1;
+        dxCoil1.CCapFTemp.allocate(1);
+        dxCoil1.CCapFTemp(1) = Sch1;
+        dxCoil1.CCapFFlow.allocate(1);
+        dxCoil1.CCapFFlow(1) = Sch1;
+        dxCoil1.PLFFPLR.allocate(1);
+        dxCoil1.PLFFPLR(1) = Sch1;
 
         state->dataDXCoils->DXCoilNumericFields(2).PerfMode.allocate(5);
         state->dataDXCoils->DXCoilNumericFields(2).PerfMode(1).FieldNames.allocate(30);
-        state->dataDXCoils->DXCoil(2).Name = "VRFTUDXHEATCOIL";
-        state->dataDXCoils->DXCoil(2).DXCoilType = "Coil:Heating:DX:VariableRefrigerantFlow";
-        state->dataDXCoils->DXCoil(2).AirInNode = heatCoilAirInNode;
-        state->dataDXCoils->DXCoil(2).AirOutNode = heatCoilAirOutNode;
-        state->dataDXCoils->DXCoil(2).DXCoilType_Num = HVAC::CoilVRF_Heating;
-        state->dataDXCoils->DXCoil(2).RatedAirVolFlowRate = DataSizing::AutoSize;
-        state->dataDXCoils->DXCoil(2).RatedTotCap = DataSizing::AutoSize;
-        state->dataDXCoils->DXCoil(2).RatedSHR = DataSizing::AutoSize;
-        state->dataDXCoils->DXCoil(2).availSched = sched1;
-        state->dataDXCoils->DXCoil(2).CCapFTemp.allocate(1);
-        state->dataDXCoils->DXCoil(2).CCapFTemp(1) = Sch1;
-        state->dataDXCoils->DXCoil(2).CCapFFlow.allocate(1);
-        state->dataDXCoils->DXCoil(2).CCapFFlow(1) = Sch1;
-        state->dataDXCoils->DXCoil(2).PLFFPLR.allocate(1);
-        state->dataDXCoils->DXCoil(2).PLFFPLR(1) = Sch1;
+        auto &dxCoil2 = state->dataDXCoils->DXCoil(2);
+        dxCoil2.Name = "VRFTUDXHEATCOIL";
+        dxCoil2.coilType = HVAC::CoilType::HeatingVRF;
+        dxCoil2.coilReportNum = ReportCoilSelection::getReportIndex(*state, dxCoil2.Name, dxCoil2.coilType);
+        dxCoil2.AirInNode = heatCoilAirInNode;
+        dxCoil2.AirOutNode = heatCoilAirOutNode;
+        dxCoil2.RatedAirVolFlowRate = DataSizing::AutoSize;
+        dxCoil2.RatedTotCap = DataSizing::AutoSize;
+        dxCoil2.RatedSHR = DataSizing::AutoSize;
+        dxCoil2.availSched = sched1;
+        dxCoil2.CCapFTemp.allocate(1);
+        dxCoil2.CCapFTemp(1) = Sch1;
+        dxCoil2.CCapFFlow.allocate(1);
+        dxCoil2.CCapFFlow(1) = Sch1;
+        dxCoil2.PLFFPLR.allocate(1);
+        dxCoil2.PLFFPLR(1) = Sch1;
     }
 
     virtual void TearDown()
@@ -2907,7 +2910,7 @@ TEST_F(EnergyPlusFixture, VRF_FluidTCtrl_GetCoilInput)
 
     // Check the results
     ASSERT_EQ(1, state->dataDXCoils->NumDXCoils);
-    EXPECT_EQ(state->dataDXCoils->DXCoil(1).DXCoilType_Num, 33);
+    EXPECT_ENUM_EQ(state->dataDXCoils->DXCoil(1).coilType, HVAC::CoilType::CoolingVRFFluidTCtrl);
     EXPECT_EQ(state->dataDXCoils->DXCoil(1).RatedTotCap(1), 2200);
     EXPECT_EQ(state->dataDXCoils->DXCoil(1).RatedSHR(1), 0.865);
     EXPECT_EQ(state->dataDXCoils->DXCoil(1).C1Te, 0);
@@ -3927,6 +3930,7 @@ TEST_F(EnergyPlusFixture, VRFTest_SysCurve)
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand(CurZoneNum).RemainingOutputReqToCoolSP =
         state->dataHVACVarRefFlow->VRF(VRFCond).HeatingCapacity + 1000.0; // simulates a dual Tstat with load to cooling SP > load to heating SP
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand(CurZoneNum).RemainingOutputReqToHeatSP = state->dataHVACVarRefFlow->VRF(VRFCond).HeatingCapacity;
+    state->dataEnvrn->OutDryBulbTemp = 5.0;
 
     SimulateVRF(*state,
                 state->dataHVACVarRefFlow->VRFTU(VRFTUNum).Name,
@@ -3945,6 +3949,12 @@ TEST_F(EnergyPlusFixture, VRFTest_SysCurve)
     DefrostWatts = state->dataHVACVarRefFlow->VRF(VRFCond).VRFCondRTF * (state->dataHVACVarRefFlow->VRF(VRFCond).HeatingCapacity / 1.01667) *
                    state->dataHVACVarRefFlow->VRF(VRFCond).DefrostFraction;
     ASSERT_EQ(DefrostWatts, state->dataHVACVarRefFlow->VRF(VRFCond).DefrostPower); // defrost power calculation check
+    // check crankcase heater operation
+    EXPECT_EQ(1.0, state->dataHVACVarRefFlow->VRF(VRFCond).VRFCondRTF);
+    // OAT is low enough to allow CCH operation
+    EXPECT_LT(state->dataEnvrn->OutDryBulbTemp, state->dataHVACVarRefFlow->VRF(VRFCond).MaxOATCCHeater);
+    // CCH is off when RTF = 1 even though OAT is less than maximum OAT for crankcase heater operation
+    EXPECT_EQ(0.0, state->dataHVACVarRefFlow->VRF(VRFCond).CrankCaseHeaterPower);
 
     // test that correct performance curve is used (i.e., lo or hi performance curves based on OAT)
     int DXHeatingCoilIndex = 2;
@@ -5059,7 +5069,7 @@ TEST_F(EnergyPlusFixture, VRFTest_SysCurve_WaterCooled)
         "  ,                        !- Piping Correction Factor for Height in Heating Mode Coefficient {1/m}",
         "  15,                      !- Crankcase Heater Power per Compressor {W}",
         "  3,                       !- Number of Compressors {dimensionless}",
-        "  0.33,                    !- Ratio of Compressor Size to Total Compressor Capacity {W/W}",
+        "  0.13,                    !- Ratio of Compressor Size to Total Compressor Capacity {W/W}",
         "  7,                       !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater {C}",
         "  ReverseCycle,            !- Defrost Strategy",
         "  Timed,                   !- Defrost Control",
@@ -6025,6 +6035,67 @@ TEST_F(EnergyPlusFixture, VRFTest_SysCurve_WaterCooled)
               0.0); // flow should be > 0 at no load flow rate for constant fan mode in this example
     EXPECT_GT(state->dataLoopNodes->Node(state->dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUOutletNodeNum).MassFlowRate,
               0.0); // flow should be > 0 at no load flow rate for constant fan mode in this example
+
+    // set zone load to heating
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(CurZoneNum).RemainingOutputRequired =
+        state->dataHVACVarRefFlow->VRF(VRFCond).HeatingCapacity / 10.0; // set load equal to fraction of the VRF heating capacity
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(CurZoneNum).RemainingOutputReqToCoolSP =
+        state->dataHVACVarRefFlow->VRF(VRFCond).HeatingCapacity / 10.0 +
+        1000.0; // simulates a dual Tstat with load to cooling SP > load to heating SP
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(CurZoneNum).RemainingOutputReqToHeatSP =
+        state->dataHVACVarRefFlow->VRF(VRFCond).HeatingCapacity / 10.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(CurZoneNum).OutputRequiredToCoolingSP =
+        state->dataZoneEnergyDemand->ZoneSysEnergyDemand(CurZoneNum).RemainingOutputReqToCoolSP;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(CurZoneNum).OutputRequiredToHeatingSP =
+        state->dataZoneEnergyDemand->ZoneSysEnergyDemand(CurZoneNum).RemainingOutputReqToHeatSP;
+
+    state->dataLoopNodes->Node(state->dataHVACVarRefFlow->VRF(VRFCond).CondenserNodeNum).Temp = 7.0;             // water inlet temperature
+    state->dataLoopNodes->Node(state->dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUInletNodeNum).Temp = 20.0;        // TU inlet air temp
+    state->dataLoopNodes->Node(state->dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUInletNodeNum).HumRat = 0.0056;    // TU inlet air humrat
+    state->dataLoopNodes->Node(state->dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUInletNodeNum).Enthalpy = 34823.5; // TU inlet air enthalpy
+    state->dataLoopNodes->Node(state->dataHVACVarRefFlow->VRFTU(VRFTUNum).ZoneAirNode).Temp = 20.0;              // also set zone conditions
+    state->dataLoopNodes->Node(state->dataHVACVarRefFlow->VRFTU(VRFTUNum).ZoneAirNode).HumRat = 0.0056;
+    state->dataLoopNodes->Node(state->dataHVACVarRefFlow->VRFTU(VRFTUNum).ZoneAirNode).Enthalpy = 34823.5;
+    state->dataEnvrn->OutDryBulbTemp = 5.0;
+    state->dataEnvrn->OutHumRat = 0.00269; // 50% RH
+    state->dataEnvrn->OutBaroPress = 101325.0;
+    state->dataEnvrn->OutWetBulbTemp = 1.34678;
+    SimulateVRF(*state,
+                state->dataHVACVarRefFlow->VRFTU(VRFTUNum).Name,
+                FirstHVACIteration,
+                CurZoneNum,
+                state->dataZoneEquip->ZoneEquipList(state->dataSize->CurZoneEqNum).EquipIndex(EquipPtr),
+                HeatingActive,
+                CoolingActive,
+                OAUnitNum,
+                OAUCoilOutTemp,
+                ZoneEquipment,
+                SysOutputProvided,
+                LatOutputProvided);
+    EXPECT_TRUE(state->dataHVACVarRefFlow->VRF(VRFCond).VRFCondPLR > 0.0);
+    EXPECT_NEAR(state->dataHVACVarRefFlow->VRF(VRFCond).VRFCondRTF, 0.127, 0.001);
+    // RTF is less than 1/3 capacity so 2 compressors are off and 1 is cycling, 15 W + 15 W + 15 * (1 - (0.12726/0.13)) = 30.316 W
+    EXPECT_NEAR(state->dataHVACVarRefFlow->VRF(VRFCond).CrankCaseHeaterPower, 30.316, 0.001);
+
+    // same conditions as above except OAT is higher than maximum OAT for crankcase heater operation
+    state->dataEnvrn->OutDryBulbTemp = 8.0;
+    SimulateVRF(*state,
+                state->dataHVACVarRefFlow->VRFTU(VRFTUNum).Name,
+                FirstHVACIteration,
+                CurZoneNum,
+                state->dataZoneEquip->ZoneEquipList(state->dataSize->CurZoneEqNum).EquipIndex(EquipPtr),
+                HeatingActive,
+                CoolingActive,
+                OAUnitNum,
+                OAUCoilOutTemp,
+                ZoneEquipment,
+                SysOutputProvided,
+                LatOutputProvided);
+    EXPECT_TRUE(state->dataHVACVarRefFlow->VRF(VRFCond).VRFCondPLR > 0.0);
+    EXPECT_NEAR(state->dataHVACVarRefFlow->VRF(VRFCond).VRFCondRTF, 0.127, 0.001);
+    // Outdoor temperature is greater than max crankcase heater limit so CCH of off
+    EXPECT_GT(state->dataEnvrn->OutDryBulbTemp, state->dataHVACVarRefFlow->VRF(VRFCond).MaxOATCCHeater);
+    EXPECT_NEAR(state->dataHVACVarRefFlow->VRF(VRFCond).CrankCaseHeaterPower, 0.0, 0.001);
 }
 
 TEST_F(EnergyPlusFixture, VRFTest_TU_NoLoad_OAMassFlowRateTest)
@@ -8216,9 +8287,8 @@ TEST_F(EnergyPlusFixture, VRFTU_CalcVRFSupplementalHeatingCoilElectric)
 
     int VRFTUNum(1);
     thisVRFTU.Name = "TU1";
-    thisVRFTU.SuppHeatCoilType = "COIL:HEATING:ELECTRIC";
     thisVRFTU.SuppHeatCoilName = "TU1 SUPP HEATING COIL";
-    thisVRFTU.SuppHeatCoilType_Num = HVAC::Coil_HeatingElectric;
+    thisVRFTU.suppHeatCoilType = HVAC::CoilType::HeatingElectric;
     thisVRFTU.fanOp = HVAC::FanOp::Continuous;
     thisVRFTU.type = TUType::ConstantVolume;
     thisVRFTU.SuppHeatCoilAirInletNode = 1;
@@ -8234,27 +8304,28 @@ TEST_F(EnergyPlusFixture, VRFTU_CalcVRFSupplementalHeatingCoilElectric)
     state->dataHeatingCoils->GetCoilsInputFlag = false;
     state->dataHeatingCoils->HeatingCoil.allocate(state->dataHeatingCoils->NumHeatingCoils);
     state->dataHeatingCoils->CoilIsSuppHeater = true;
-    state->dataHeatingCoils->HeatingCoil(CoilNum).Name = thisVRFTU.SuppHeatCoilName;
-    state->dataHeatingCoils->HeatingCoil(CoilNum).HeatingCoilType = thisVRFTU.SuppHeatCoilType;
-    state->dataHeatingCoils->HeatingCoil(CoilNum).FuelType = Constant::eFuel::Electricity;
-    state->dataHeatingCoils->HeatingCoil(CoilNum).HCoilType_Num = thisVRFTU.SuppHeatCoilType_Num;
-    state->dataHeatingCoils->HeatingCoil(CoilNum).AirInletNodeNum = thisVRFTU.SuppHeatCoilAirInletNode;
-    state->dataHeatingCoils->HeatingCoil(CoilNum).AirOutletNodeNum = thisVRFTU.SuppHeatCoilAirOutletNode;
-    state->dataHeatingCoils->HeatingCoil(CoilNum).availSched = Sched::GetScheduleAlwaysOn(*state); // fan is always on
-    state->dataHeatingCoils->HeatingCoil(CoilNum).NominalCapacity = 10000.0;
-    state->dataHeatingCoils->HeatingCoil(CoilNum).Efficiency = 1.0;
+    auto &heatingCoil = state->dataHeatingCoils->HeatingCoil(CoilNum);
+    heatingCoil.Name = thisVRFTU.SuppHeatCoilName;
+    heatingCoil.HeatingCoilType = thisVRFTU.SuppHeatCoilType;
+    heatingCoil.FuelType = Constant::eFuel::Electricity;
+    heatingCoil.coilType = thisVRFTU.suppHeatCoilType;
+    heatingCoil.coilReportNum = ReportCoilSelection::getReportIndex(*state, heatingCoil.Name, heatingCoil.coilType);
+    heatingCoil.AirInletNodeNum = thisVRFTU.SuppHeatCoilAirInletNode;
+    heatingCoil.AirOutletNodeNum = thisVRFTU.SuppHeatCoilAirOutletNode;
+    heatingCoil.availSched = Sched::GetScheduleAlwaysOn(*state); // fan is always on
+    heatingCoil.NominalCapacity = 10000.0;
+    heatingCoil.Efficiency = 1.0;
     state->dataHeatingCoils->CheckEquipName.dimension(state->dataHeatingCoils->NumHeatingCoils, true);
     state->dataHeatingCoils->ValidSourceType.dimension(state->dataHeatingCoils->NumHeatingCoils, true);
 
     state->dataGlobal->SysSizingCalc = true;
     state->dataEnvrn->OutDryBulbTemp = 5.0;
     // init coil inlet condition
-    state->dataLoopNodes->Node(state->dataHeatingCoils->HeatingCoil(CoilNum).AirInletNodeNum).MassFlowRate = 1.0;
-    state->dataLoopNodes->Node(state->dataHeatingCoils->HeatingCoil(CoilNum).AirInletNodeNum).Temp = 15.0;
-    state->dataLoopNodes->Node(state->dataHeatingCoils->HeatingCoil(CoilNum).AirInletNodeNum).HumRat = 0.0070;
-    state->dataLoopNodes->Node(state->dataHeatingCoils->HeatingCoil(CoilNum).AirInletNodeNum).Enthalpy =
-        Psychrometrics::PsyHFnTdbW(state->dataLoopNodes->Node(state->dataHeatingCoils->HeatingCoil(CoilNum).AirInletNodeNum).Temp,
-                                   state->dataLoopNodes->Node(state->dataHeatingCoils->HeatingCoil(CoilNum).AirInletNodeNum).HumRat);
+    state->dataLoopNodes->Node(heatingCoil.AirInletNodeNum).MassFlowRate = 1.0;
+    state->dataLoopNodes->Node(heatingCoil.AirInletNodeNum).Temp = 15.0;
+    state->dataLoopNodes->Node(heatingCoil.AirInletNodeNum).HumRat = 0.0070;
+    state->dataLoopNodes->Node(heatingCoil.AirInletNodeNum).Enthalpy = Psychrometrics::PsyHFnTdbW(
+        state->dataLoopNodes->Node(heatingCoil.AirInletNodeNum).Temp, state->dataLoopNodes->Node(heatingCoil.AirInletNodeNum).HumRat);
 
     bool FirstHVACIteration(false);
     Real64 SuppHeatCoilLoad = 10000.0;
@@ -8262,14 +8333,14 @@ TEST_F(EnergyPlusFixture, VRFTU_CalcVRFSupplementalHeatingCoilElectric)
     thisVRFTU.CalcVRFSuppHeatingCoil(*state, VRFTUNum, FirstHVACIteration, thisVRFTU.SuppHeatPartLoadRatio, SuppHeatCoilLoad);
     // check the coil load delivered
     EXPECT_EQ(10000.0, SuppHeatCoilLoad);
-    EXPECT_EQ(10000.0, state->dataHeatingCoils->HeatingCoil(CoilNum).ElecUseRate);
+    EXPECT_EQ(10000.0, heatingCoil.ElecUseRate);
     // test heating load larger than coil nominal capacity
-    state->dataLoopNodes->Node(state->dataHeatingCoils->HeatingCoil(CoilNum).AirInletNodeNum).MassFlowRate = 1.0;
+    state->dataLoopNodes->Node(heatingCoil.AirInletNodeNum).MassFlowRate = 1.0;
     SuppHeatCoilLoad = 12000.0;
     thisVRFTU.CalcVRFSuppHeatingCoil(*state, VRFTUNum, FirstHVACIteration, thisVRFTU.SuppHeatPartLoadRatio, SuppHeatCoilLoad);
     // delivered heat cannot exceed coil capacity
     EXPECT_EQ(10000.0, SuppHeatCoilLoad);
-    EXPECT_EQ(10000.0, state->dataHeatingCoils->HeatingCoil(CoilNum).ElecUseRate);
+    EXPECT_EQ(10000.0, heatingCoil.ElecUseRate);
 }
 
 TEST_F(EnergyPlusFixture, VRFTU_CalcVRFSupplementalHeatingCoilFuel)
@@ -8281,9 +8352,8 @@ TEST_F(EnergyPlusFixture, VRFTU_CalcVRFSupplementalHeatingCoilFuel)
 
     int VRFTUNum(1);
     thisVRFTU.Name = "TU2";
-    thisVRFTU.SuppHeatCoilType = "COIL:HEATING:FUEL";
     thisVRFTU.SuppHeatCoilName = "TU2 SUPP HEATING COIL";
-    thisVRFTU.SuppHeatCoilType_Num = HVAC::Coil_HeatingGasOrOtherFuel;
+    thisVRFTU.suppHeatCoilType = HVAC::CoilType::HeatingGasOrOtherFuel;
     thisVRFTU.fanOp = HVAC::FanOp::Continuous;
     thisVRFTU.type = TUType::ConstantVolume;
     thisVRFTU.SuppHeatCoilAirInletNode = 1;
@@ -8298,28 +8368,29 @@ TEST_F(EnergyPlusFixture, VRFTU_CalcVRFSupplementalHeatingCoilFuel)
     state->dataHeatingCoils->NumHeatingCoils = 1;
     state->dataHeatingCoils->GetCoilsInputFlag = false;
     state->dataHeatingCoils->HeatingCoil.allocate(state->dataHeatingCoils->NumHeatingCoils);
-    state->dataHeatingCoils->CoilIsSuppHeater = true;
-    state->dataHeatingCoils->HeatingCoil(CoilNum).Name = thisVRFTU.SuppHeatCoilName;
-    state->dataHeatingCoils->HeatingCoil(CoilNum).HeatingCoilType = thisVRFTU.SuppHeatCoilType;
-    state->dataHeatingCoils->HeatingCoil(CoilNum).FuelType = Constant::eFuel::NaturalGas;
-    state->dataHeatingCoils->HeatingCoil(CoilNum).HCoilType_Num = thisVRFTU.SuppHeatCoilType_Num;
-    state->dataHeatingCoils->HeatingCoil(CoilNum).AirInletNodeNum = thisVRFTU.SuppHeatCoilAirInletNode;
-    state->dataHeatingCoils->HeatingCoil(CoilNum).AirOutletNodeNum = thisVRFTU.SuppHeatCoilAirOutletNode;
-    state->dataHeatingCoils->HeatingCoil(CoilNum).availSched = Sched::GetScheduleAlwaysOn(*state); // fan is always on
-    state->dataHeatingCoils->HeatingCoil(CoilNum).NominalCapacity = 10000.0;
-    state->dataHeatingCoils->HeatingCoil(CoilNum).Efficiency = 1.0;
+    state->dataHeatingCoils->CoilIsSuppHeater = true; // Why is this a "global" variable and not an instance variable on the coil?
+    auto &heatingCoil = state->dataHeatingCoils->HeatingCoil(CoilNum);
+    heatingCoil.Name = thisVRFTU.SuppHeatCoilName;
+    heatingCoil.HeatingCoilType = thisVRFTU.SuppHeatCoilType;
+    heatingCoil.FuelType = Constant::eFuel::NaturalGas;
+    heatingCoil.coilType = thisVRFTU.suppHeatCoilType;
+    heatingCoil.coilReportNum = ReportCoilSelection::getReportIndex(*state, heatingCoil.Name, heatingCoil.coilType);
+    heatingCoil.AirInletNodeNum = thisVRFTU.SuppHeatCoilAirInletNode;
+    heatingCoil.AirOutletNodeNum = thisVRFTU.SuppHeatCoilAirOutletNode;
+    heatingCoil.availSched = Sched::GetScheduleAlwaysOn(*state); // fan is always on
+    heatingCoil.NominalCapacity = 10000.0;
+    heatingCoil.Efficiency = 1.0;
     state->dataHeatingCoils->CheckEquipName.dimension(state->dataHeatingCoils->NumHeatingCoils, true);
     state->dataHeatingCoils->ValidSourceType.dimension(state->dataHeatingCoils->NumHeatingCoils, true);
 
     state->dataGlobal->SysSizingCalc = true;
     state->dataEnvrn->OutDryBulbTemp = 5.0;
     // init coil inlet condition
-    state->dataLoopNodes->Node(state->dataHeatingCoils->HeatingCoil(CoilNum).AirInletNodeNum).MassFlowRate = 1.0;
-    state->dataLoopNodes->Node(state->dataHeatingCoils->HeatingCoil(CoilNum).AirInletNodeNum).Temp = 15.0;
-    state->dataLoopNodes->Node(state->dataHeatingCoils->HeatingCoil(CoilNum).AirInletNodeNum).HumRat = 0.0070;
-    state->dataLoopNodes->Node(state->dataHeatingCoils->HeatingCoil(CoilNum).AirInletNodeNum).Enthalpy =
-        Psychrometrics::PsyHFnTdbW(state->dataLoopNodes->Node(state->dataHeatingCoils->HeatingCoil(CoilNum).AirInletNodeNum).Temp,
-                                   state->dataLoopNodes->Node(state->dataHeatingCoils->HeatingCoil(CoilNum).AirInletNodeNum).HumRat);
+    state->dataLoopNodes->Node(heatingCoil.AirInletNodeNum).MassFlowRate = 1.0;
+    state->dataLoopNodes->Node(heatingCoil.AirInletNodeNum).Temp = 15.0;
+    state->dataLoopNodes->Node(heatingCoil.AirInletNodeNum).HumRat = 0.0070;
+    state->dataLoopNodes->Node(heatingCoil.AirInletNodeNum).Enthalpy = Psychrometrics::PsyHFnTdbW(
+        state->dataLoopNodes->Node(heatingCoil.AirInletNodeNum).Temp, state->dataLoopNodes->Node(heatingCoil.AirInletNodeNum).HumRat);
 
     bool FirstHVACIteration(false);
     Real64 SuppHeatCoilLoad = 10000.0;
@@ -8327,14 +8398,14 @@ TEST_F(EnergyPlusFixture, VRFTU_CalcVRFSupplementalHeatingCoilFuel)
     thisVRFTU.CalcVRFSuppHeatingCoil(*state, VRFTUNum, FirstHVACIteration, thisVRFTU.SuppHeatPartLoadRatio, SuppHeatCoilLoad);
     // check the coil load delivered
     EXPECT_EQ(10000.0, SuppHeatCoilLoad);
-    EXPECT_EQ(10000.0, state->dataHeatingCoils->HeatingCoil(CoilNum).FuelUseRate);
+    EXPECT_EQ(10000.0, heatingCoil.FuelUseRate);
     // test heating load larger than coil nominal capacity
-    state->dataLoopNodes->Node(state->dataHeatingCoils->HeatingCoil(CoilNum).AirInletNodeNum).MassFlowRate = 1.0;
+    state->dataLoopNodes->Node(heatingCoil.AirInletNodeNum).MassFlowRate = 1.0;
     SuppHeatCoilLoad = 12000.0;
     thisVRFTU.CalcVRFSuppHeatingCoil(*state, VRFTUNum, FirstHVACIteration, thisVRFTU.SuppHeatPartLoadRatio, SuppHeatCoilLoad);
     // delivered heat cannot exceed coil capacity
     EXPECT_EQ(10000.0, SuppHeatCoilLoad);
-    EXPECT_EQ(10000.0, state->dataHeatingCoils->HeatingCoil(CoilNum).FuelUseRate);
+    EXPECT_EQ(10000.0, heatingCoil.FuelUseRate);
 }
 
 TEST_F(EnergyPlusFixture, VRFTU_CalcVRFSupplementalHeatingCoilWater)
@@ -8346,9 +8417,8 @@ TEST_F(EnergyPlusFixture, VRFTU_CalcVRFSupplementalHeatingCoilWater)
 
     int VRFTUNum(1);
     thisVRFTU.Name = "TU3";
-    thisVRFTU.SuppHeatCoilType = "COIL:HEATING:WATER";
     thisVRFTU.SuppHeatCoilName = "TU3 SUPP HEATING COIL";
-    thisVRFTU.SuppHeatCoilType_Num = HVAC::Coil_HeatingWater;
+    thisVRFTU.suppHeatCoilType = HVAC::CoilType::HeatingWater;
     thisVRFTU.fanOp = HVAC::FanOp::Continuous;
     thisVRFTU.type = TUType::ConstantVolume;
     thisVRFTU.SuppHeatCoilAirInletNode = 1;
@@ -8467,9 +8537,8 @@ TEST_F(EnergyPlusFixture, VRFTU_CalcVRFSupplementalHeatingCoilSteam)
 
     int VRFTUNum(1);
     thisVRFTU.Name = "TU4";
-    thisVRFTU.SuppHeatCoilType = "COIL:HEATING:STEAM";
     thisVRFTU.SuppHeatCoilName = "TU4 SUPP HEATING COIL";
-    thisVRFTU.SuppHeatCoilType_Num = HVAC::Coil_HeatingSteam;
+    thisVRFTU.suppHeatCoilType = HVAC::CoilType::HeatingSteam;
     thisVRFTU.fanOp = HVAC::FanOp::Continuous;
     thisVRFTU.SuppHeatCoilAirInletNode = 1;
     thisVRFTU.SuppHeatCoilAirOutletNode = 2;
@@ -8487,7 +8556,6 @@ TEST_F(EnergyPlusFixture, VRFTU_CalcVRFSupplementalHeatingCoilSteam)
     state->dataSteamCoils->SteamCoil.allocate(state->dataSteamCoils->NumSteamCoils);
     state->dataSteamCoils->SteamCoil(CoilNum).Name = thisVRFTU.SuppHeatCoilName;
     state->dataSteamCoils->SteamCoil(CoilNum).plantLoc.loopNum = 1;
-    state->dataSteamCoils->SteamCoil(CoilNum).SteamCoilTypeA = "Heating";
     state->dataSteamCoils->SteamCoil(CoilNum).availSched = Sched::GetScheduleAlwaysOn(*state);
     state->dataSteamCoils->SteamCoil(CoilNum).InletSteamTemp = 100.0;
     state->dataSteamCoils->SteamCoil(CoilNum).InletSteamPress = 101325.0;

@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -81,7 +81,6 @@
 using namespace EnergyPlus;
 using namespace DataEnvironment;
 using namespace EnergyPlus::DataSizing;
-using namespace EnergyPlus::DataLoopNode;
 using namespace EnergyPlus::DataAirSystems;
 using namespace EnergyPlus::Fans;
 using namespace EnergyPlus::HeatRecovery;
@@ -479,15 +478,15 @@ TEST_F(EnergyPlusFixture, ZoneExhaustCtrl_CheckSupplyNode_Test)
     auto &ZoneEquipConf1 = state->dataZoneEquip->ZoneEquipConfig(1);
 
     bool ErrorsFound = false;
-    int inletNodeNum = NodeInputManager::GetOnlySingleNode(*state,
-                                                           Zone1InletName,
-                                                           ErrorsFound,
-                                                           DataLoopNode::ConnectionObjectType::ZoneHVACExhaustControl,
-                                                           thisExhCtrl1.Name,
-                                                           DataLoopNode::NodeFluidType::Air,
-                                                           DataLoopNode::ConnectionType::ZoneInlet,
-                                                           NodeInputManager::CompFluidStream::Primary,
-                                                           DataLoopNode::ObjectIsParent);
+    int inletNodeNum = Node::GetOnlySingleNode(*state,
+                                               Zone1InletName,
+                                               ErrorsFound,
+                                               Node::ConnectionObjectType::ZoneHVACExhaustControl,
+                                               thisExhCtrl1.Name,
+                                               Node::FluidType::Air,
+                                               Node::ConnectionType::ZoneInlet,
+                                               Node::CompFluidStream::Primary,
+                                               Node::ObjectIsParent);
 
     ZoneEquipConf1.ZoneName = "ZONE1";
     ZoneEquipConf1.NumInletNodes = 1;
@@ -511,15 +510,15 @@ TEST_F(EnergyPlusFixture, ZoneExhaustCtrl_CheckSupplyNode_Test)
 
     thisExhCtrl1.SuppNodeNums.dimension(NumParams, 0);
 
-    thisExhCtrl1.SuppNodeNums = NodeInputManager::GetOnlySingleNode(*state,
-                                                                    thisExhCtrl1.SupplyNodeOrNodelistName,
-                                                                    ErrorsFound,
-                                                                    DataLoopNode::ConnectionObjectType::ZoneHVACExhaustControl,
-                                                                    thisExhCtrl1.Name,
-                                                                    DataLoopNode::NodeFluidType::Air,
-                                                                    DataLoopNode::ConnectionType::Sensor,
-                                                                    NodeInputManager::CompFluidStream::Primary,
-                                                                    DataLoopNode::ObjectIsParent);
+    thisExhCtrl1.SuppNodeNums = Node::GetOnlySingleNode(*state,
+                                                        thisExhCtrl1.SupplyNodeOrNodelistName,
+                                                        ErrorsFound,
+                                                        Node::ConnectionObjectType::ZoneHVACExhaustControl,
+                                                        thisExhCtrl1.Name,
+                                                        Node::FluidType::Air,
+                                                        Node::ConnectionType::Sensor,
+                                                        Node::CompFluidStream::Primary,
+                                                        Node::ObjectIsParent);
 
     bool NodeNotFound = false;
     ExhaustAirSystemManager::CheckForSupplyNode(*state, ExhCtrlNum, NodeNotFound);
@@ -532,15 +531,15 @@ TEST_F(EnergyPlusFixture, ZoneExhaustCtrl_CheckSupplyNode_Test)
     auto &ZoneEquipConf2 = state->dataZoneEquip->ZoneEquipConfig(2);
 
     ErrorsFound = false;
-    inletNodeNum = NodeInputManager::GetOnlySingleNode(*state,
-                                                       Zone2InletName,
-                                                       ErrorsFound,
-                                                       DataLoopNode::ConnectionObjectType::ZoneHVACExhaustControl,
-                                                       thisExhCtrl2.Name,
-                                                       DataLoopNode::NodeFluidType::Air,
-                                                       DataLoopNode::ConnectionType::ZoneInlet,
-                                                       NodeInputManager::CompFluidStream::Primary,
-                                                       DataLoopNode::ObjectIsParent);
+    inletNodeNum = Node::GetOnlySingleNode(*state,
+                                           Zone2InletName,
+                                           ErrorsFound,
+                                           Node::ConnectionObjectType::ZoneHVACExhaustControl,
+                                           thisExhCtrl2.Name,
+                                           Node::FluidType::Air,
+                                           Node::ConnectionType::ZoneInlet,
+                                           Node::CompFluidStream::Primary,
+                                           Node::ObjectIsParent);
 
     ZoneEquipConf2.ZoneName = "ZONE2";
     ZoneEquipConf2.NumInletNodes = 1;
@@ -564,15 +563,15 @@ TEST_F(EnergyPlusFixture, ZoneExhaustCtrl_CheckSupplyNode_Test)
 
     thisExhCtrl2.SuppNodeNums.dimension(NumParams, 0);
 
-    thisExhCtrl2.SuppNodeNums = NodeInputManager::GetOnlySingleNode(*state,
-                                                                    thisExhCtrl2.SupplyNodeOrNodelistName,
-                                                                    ErrorsFound,
-                                                                    DataLoopNode::ConnectionObjectType::ZoneHVACExhaustControl,
-                                                                    thisExhCtrl2.Name,
-                                                                    DataLoopNode::NodeFluidType::Air,
-                                                                    DataLoopNode::ConnectionType::Sensor,
-                                                                    NodeInputManager::CompFluidStream::Primary,
-                                                                    DataLoopNode::ObjectIsParent);
+    thisExhCtrl2.SuppNodeNums = Node::GetOnlySingleNode(*state,
+                                                        thisExhCtrl2.SupplyNodeOrNodelistName,
+                                                        ErrorsFound,
+                                                        Node::ConnectionObjectType::ZoneHVACExhaustControl,
+                                                        thisExhCtrl2.Name,
+                                                        Node::FluidType::Air,
+                                                        Node::ConnectionType::Sensor,
+                                                        Node::CompFluidStream::Primary,
+                                                        Node::ObjectIsParent);
 
     NodeNotFound = false;
     ExhaustAirSystemManager::CheckForSupplyNode(*state, ExhCtrlNum, NodeNotFound);

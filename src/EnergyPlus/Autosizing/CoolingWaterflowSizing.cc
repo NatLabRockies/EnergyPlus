@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -139,32 +139,23 @@ Real64 CoolingWaterflowSizer::size(EnergyPlusData &state, Real64 _originalValue,
     }
     // override sizing string for detailed coil model
     if (this->overrideSizeString) {
-        if (this->coilType_Num == HVAC::Coil_CoolingWaterDetailed) {
-            if (this->isEpJSON) {
-                this->sizingString = "maximum_water_flow_rate [m3/s]";
-            } else {
-                this->sizingString = "Maximum Water Flow Rate [m3/s]";
-            }
+        if (this->coilType == HVAC::CoilType::CoolingWaterDetailed) {
+            this->sizingString = "Maximum Water Flow Rate [m3/s]";
         } else {
-            if (this->isEpJSON) {
-                this->sizingString = "design_water_flow_rate [m3/s]";
-            }
+            this->sizingString = "Design Water Flow Rate [m3/s]";
         }
     }
     this->selectSizerOutput(state, errorsFound);
     if (this->isCoilReportObject) {
-        state.dataRptCoilSelection->coilSelectionReportObj->setCoilWaterFlowPltSizNum(
-            state, this->compName, this->compType, this->autoSizedValue, this->wasAutoSized, this->dataPltSizCoolNum, this->dataWaterLoopNum);
-        state.dataRptCoilSelection->coilSelectionReportObj->setCoilWaterDeltaT(state, this->compName, this->compType, CoilDesWaterDeltaT);
+        ReportCoilSelection::setCoilWaterFlowPltSizNum(
+            state, this->coilReportNum, this->autoSizedValue, this->wasAutoSized, this->dataPltSizCoolNum, this->dataWaterLoopNum);
+        ReportCoilSelection::setCoilWaterDeltaT(state, this->coilReportNum, CoilDesWaterDeltaT);
         if (this->dataDesInletWaterTemp > 0.0) {
-            state.dataRptCoilSelection->coilSelectionReportObj->setCoilEntWaterTemp(
-                state, this->compName, this->compType, this->dataDesInletWaterTemp);
-            state.dataRptCoilSelection->coilSelectionReportObj->setCoilLvgWaterTemp(
-                state, this->compName, this->compType, this->dataDesInletWaterTemp + CoilDesWaterDeltaT);
+            ReportCoilSelection::setCoilEntWaterTemp(state, this->coilReportNum, this->dataDesInletWaterTemp);
+            ReportCoilSelection::setCoilLvgWaterTemp(state, this->coilReportNum, this->dataDesInletWaterTemp + CoilDesWaterDeltaT);
         } else {
-            state.dataRptCoilSelection->coilSelectionReportObj->setCoilEntWaterTemp(state, this->compName, this->compType, Constant::CWInitConvTemp);
-            state.dataRptCoilSelection->coilSelectionReportObj->setCoilLvgWaterTemp(
-                state, this->compName, this->compType, Constant::CWInitConvTemp + CoilDesWaterDeltaT);
+            ReportCoilSelection::setCoilEntWaterTemp(state, this->coilReportNum, Constant::CWInitConvTemp);
+            ReportCoilSelection::setCoilLvgWaterTemp(state, this->coilReportNum, Constant::CWInitConvTemp + CoilDesWaterDeltaT);
         }
         this->calcCoilWaterFlowRates(state,
                                      this->compName,

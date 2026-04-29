@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -369,7 +369,6 @@ namespace DataPlant {
 
         // Using/Aliasing
         using namespace DataPlant;
-        using namespace DataLoopNode;
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         Real64 InletAvgTemp;
@@ -738,7 +737,7 @@ namespace DataPlant {
 
         Real64 WeightedInletTemp = SumMdotTimesTemp / SumMdot;
 
-        if (thisPlantLoop.FluidType == DataLoopNode::NodeFluidType::Water) {
+        if (thisPlantLoop.FluidType == Node::FluidType::Water) {
 
             Real64 Cp = thisPlantLoop.glycol->getSpecificHeat(state, WeightedInletTemp, RoutineName);
 
@@ -778,11 +777,12 @@ namespace DataPlant {
                                               "For example, if using SetpointManager:Scheduled:DualSetpoint, then check that the low setpoint is "
                                               "below the high setpoint.");
                             ShowContinueError(state, "Occurs in PlantLoop=" + thisPlantLoop.Name);
-                            ShowContinueError(
-                                state,
-                                format("LoadToHeatingSetPoint={:.3R}, LoadToCoolingSetPoint={:.3R}", LoadToHeatingSetPoint, LoadToCoolingSetPoint));
-                            ShowContinueError(state, format("Loop Heating Low Setpoint={:.2R}", LoopSetPointTemperatureLo));
-                            ShowContinueError(state, format("Loop Cooling High Setpoint={:.2R}", LoopSetPointTemperatureHi));
+                            ShowContinueError(state,
+                                              EnergyPlus::format("LoadToHeatingSetPoint={:.3R}, LoadToCoolingSetPoint={:.3R}",
+                                                                 LoadToHeatingSetPoint,
+                                                                 LoadToCoolingSetPoint));
+                            ShowContinueError(state, EnergyPlus::format("Loop Heating Low Setpoint={:.2R}", LoopSetPointTemperatureLo));
+                            ShowContinueError(state, EnergyPlus::format("Loop Cooling High Setpoint={:.2R}", LoopSetPointTemperatureHi));
 
                             ShowFatalError(state, "Program terminates due to above conditions.");
                         }
@@ -797,11 +797,12 @@ namespace DataPlant {
                                             "DualSetPointWithDeadBand: Unanticipated combination of heating and cooling loads - report to EnergyPlus "
                                             "Development Team");
                             ShowContinueError(state, "occurs in PlantLoop=" + thisPlantLoop.Name);
-                            ShowContinueError(
-                                state,
-                                format("LoadToHeatingSetPoint={:.3R}, LoadToCoolingSetPoint={:.3R}", LoadToHeatingSetPoint, LoadToCoolingSetPoint));
-                            ShowContinueError(state, format("Loop Heating Setpoint={:.2R}", LoopSetPointTemperatureLo));
-                            ShowContinueError(state, format("Loop Cooling Setpoint={:.2R}", LoopSetPointTemperatureHi));
+                            ShowContinueError(state,
+                                              EnergyPlus::format("LoadToHeatingSetPoint={:.3R}, LoadToCoolingSetPoint={:.3R}",
+                                                                 LoadToHeatingSetPoint,
+                                                                 LoadToCoolingSetPoint));
+                            ShowContinueError(state, EnergyPlus::format("Loop Heating Setpoint={:.2R}", LoopSetPointTemperatureLo));
+                            ShowContinueError(state, EnergyPlus::format("Loop Cooling Setpoint={:.2R}", LoopSetPointTemperatureHi));
                             ShowFatalError(state, "Program terminates due to above conditions.");
                         }
                     } else {
@@ -810,7 +811,7 @@ namespace DataPlant {
                 }
             }
 
-        } else if (thisPlantLoop.FluidType == DataLoopNode::NodeFluidType::Steam) {
+        } else if (thisPlantLoop.FluidType == Node::FluidType::Steam) {
 
             Real64 Cp = thisPlantLoop.glycol->getSpecificHeat(state, WeightedInletTemp, RoutineName);
 
@@ -1661,9 +1662,9 @@ namespace DataPlant {
                 // Call fatal diagnostic error. !The math should work out!
                 ShowSevereError(state, "ResolveParallelFlows: Dev note, failed to redistribute restricted flow");
                 ShowContinueErrorTimeStamp(state, "");
-                ShowContinueError(state, format("Loop side flow = {:.8R} (kg/s)", ThisLoopSideFlow));
-                ShowContinueError(state, format("Flow Remaining = {:.8R} (kg/s)", FlowRemaining));
-                ShowContinueError(state, format("Parallel Branch requests  = {:.8R} (kg/s)", TotParallelBranchFlowReq));
+                ShowContinueError(state, EnergyPlus::format("Loop side flow = {:.8R} (kg/s)", ThisLoopSideFlow));
+                ShowContinueError(state, EnergyPlus::format("Flow Remaining = {:.8R} (kg/s)", FlowRemaining));
+                ShowContinueError(state, EnergyPlus::format("Parallel Branch requests  = {:.8R} (kg/s)", TotParallelBranchFlowReq));
             }
 
             // 2)  ! Reset the flow on the Mixer outlet branch
@@ -1727,6 +1728,8 @@ namespace DataPlant {
 
                 auto &this_comp(branch.Comp(CompCounter));
                 PlantLocation this_plantLoc = {this->plantLoc.loopNum, this->plantLoc.loopSideNum, BranchCounter, CompCounter};
+                PlantUtilities::SetPlantLocationLinks(state, this_plantLoc);
+
                 DataPlant::OpScheme const CurOpSchemeType(this_comp.CurOpSchemeType);
 
                 switch (CurOpSchemeType) {
@@ -1815,13 +1818,13 @@ namespace DataPlant {
         bool EncounteredNonLBObjDuringPass2(false);
         for (int BranchCounter = FirstBranchNum; BranchCounter <= LastBranchNum; ++BranchCounter) {
             auto &branch(this->Branch(BranchCounter));
-
             //~ Always start from the last component we did the last time around + 1 and
             //~  try to make it all the way to the end of the loop
             int const StartingComponent = branch.lastComponentSimulated + 1;
             int const EndingComponent = branch.TotalComponents;
             for (int CompCounter = StartingComponent; CompCounter <= EndingComponent; ++CompCounter) {
                 PlantLocation this_plantLoc = {this->plantLoc.loopNum, this->plantLoc.loopSideNum, BranchCounter, CompCounter};
+                PlantUtilities::SetPlantLocationLinks(state, this_plantLoc);
 
                 DataPlant::OpScheme const CurOpSchemeType(branch.Comp(CompCounter).CurOpSchemeType);
 
@@ -1833,7 +1836,7 @@ namespace DataPlant {
                 case DataPlant::OpScheme::CompSetPtBased:
                 case DataPlant::OpScheme::FreeRejection: //~ other control types
                     EncounteredNonLBObjDuringPass2 = true;
-                    goto components2_end;       // don't do anymore components on this branch
+                    goto components2_end;       // don't do anymore components on this branch // This is not good
                 case DataPlant::OpScheme::Pump: //~ pump
                     PumpLocation.loopNum = this->plantLoc.loopNum;
                     PumpLocation.loopSideNum = this->plantLoc.loopSideNum;

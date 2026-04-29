@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
-# of Illinois, The Regents of the University of California, through Lawrence
-# Berkeley National Laboratory (subject to receipt of any required approvals
-# from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
-# rights reserved.
+# EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the
+# University of Illinois, The Regents of the University of California, through
+# Lawrence Berkeley National Laboratory (subject to receipt of any required
+# approvals from the U.S. Dept. of Energy), Oak Ridge National Laboratory,
+# managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
+# contributors. All rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
 # Energy and the U.S. Government consequently retains certain rights. As such,
@@ -158,11 +158,29 @@ def report_status(opt_base_msg: LogMessage | None, verbose: bool = False):
 
 if __name__ == "__main__":
     parser = get_base_parser(description="License checker")
+    parser.add_argument(
+        "--original", dest="original", action="store_true", default=False, help="write out the original license"
+    )
+    parser.add_argument(
+        "--previous", dest="previous", action="store_true", default=False, help="write out the previous license"
+    )
+    parser.add_argument(
+        "--current", dest="current", action="store_true", default=False, help="write out the current license"
+    )
 
     opt_base_msg = check_root_license_txt()
 
     args = parser.parse_args()
-    if not args.files:
+    if args.original:
+        print(licensetext.original())
+        exit_hook(True)
+    elif args.previous:
+        print(licensetext.previous())
+        exit_hook(True)
+    elif args.current:
+        print(licensetext.current())
+        exit_hook(True)
+    elif not args.files:
         success = check_full_repo()
     else:
         files = args.files

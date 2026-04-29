@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -6987,6 +6987,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_Coil_Defrost_Power_Fix_Test)
     state->dataLoopNodes->Node(2).MassFlowRate = 0.2;
     state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).AirMassFlowRate = 0.2;
     state->dataEnvrn->OutDryBulbTemp = -5.0;
+    state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).FindCompanionUpStreamCoil = false;
 
     // Run a compressor "On" scenario first
     HVAC::CompressorOp compressorOp = HVAC::CompressorOp::On;
@@ -7001,7 +7002,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_Coil_Defrost_Power_Fix_Test)
                                               SensLoad,
                                               LatentLoad,
                                               OnOffAirFlowRatio);
-
     EXPECT_NEAR(state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).DefrostPower, 908.10992432432420, 1e-3);
     // Real64 COPwDefrost = state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).COP;
     EXPECT_LT(state->dataVariableSpeedCoils->HeatingCapacityMultiplier, 1.0);
@@ -7451,7 +7451,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_UpdateVarSpeedCoil_Test)
     thisInletNode.GenContam = 12.345;
     thisOutletNode.GenContam = 0.0;
     thisVarSpeedCoil.reportCoilFinalSizes = false;
-    thisVarSpeedCoil.VSCoilType = HVAC::Coil_CoolingAirToAirVariableSpeed;
+    thisVarSpeedCoil.coilType = HVAC::CoilType::CoolingDXVariableSpeed;
 
     // Run the test
     VariableSpeedCoils::UpdateVarSpeedCoil(*state, coilNum);

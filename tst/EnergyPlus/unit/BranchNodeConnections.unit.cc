@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -79,10 +79,7 @@
 #include <EnergyPlus/UtilityRoutines.hh>
 
 using namespace EnergyPlus;
-using namespace EnergyPlus::BranchNodeConnections;
-using namespace EnergyPlus::DataBranchNodeConnections;
 using namespace EnergyPlus::DataHeatBalance;
-using namespace EnergyPlus::DataLoopNode;
 using namespace EnergyPlus::DataSizing;
 using namespace EnergyPlus::HeatBalanceManager;
 using namespace EnergyPlus::OutputProcessor;
@@ -97,15 +94,15 @@ TEST_F(EnergyPlusFixture, BranchNodeErrorCheck_SingleNode)
     RegisterNodeConnection(*state,
                            1,
                            "BadNode",
-                           DataLoopNode::ConnectionObjectType::FanOnOff,
+                           Node::ConnectionObjectType::FanOnOff,
                            "Object1",
-                           DataLoopNode::ConnectionType::ZoneNode,
-                           NodeInputManager::CompFluidStream::Primary,
+                           Node::ConnectionType::ZoneNode,
+                           Node::CompFluidStream::Primary,
                            false,
                            errFlag);
     bool ErrorsFound = false;
 
-    CheckNodeConnections(*state, ErrorsFound);
+    Node::CheckNodeConnections(*state, ErrorsFound);
 
     EXPECT_FALSE(errFlag);     // Node should register without error
     EXPECT_FALSE(ErrorsFound); // Node check should not fail on Check 10 -- zone node name must be unique
@@ -117,42 +114,42 @@ TEST_F(EnergyPlusFixture, BranchNodeErrorCheck11Test)
     RegisterNodeConnection(*state,
                            1,
                            "BadNode",
-                           DataLoopNode::ConnectionObjectType::FanOnOff,
+                           Node::ConnectionObjectType::FanOnOff,
                            "Object1",
-                           DataLoopNode::ConnectionType::ZoneNode,
-                           NodeInputManager::CompFluidStream::Primary,
+                           Node::ConnectionType::ZoneNode,
+                           Node::CompFluidStream::Primary,
                            false,
                            errFlag);
     RegisterNodeConnection(*state,
                            2,
                            "GoodNode",
-                           DataLoopNode::ConnectionObjectType::FanOnOff,
+                           Node::ConnectionObjectType::FanOnOff,
                            "Object2",
-                           DataLoopNode::ConnectionType::Sensor,
-                           NodeInputManager::CompFluidStream::Primary,
+                           Node::ConnectionType::Sensor,
+                           Node::CompFluidStream::Primary,
                            false,
                            errFlag);
     RegisterNodeConnection(*state,
                            1,
                            "BadNode",
-                           DataLoopNode::ConnectionObjectType::FanOnOff,
+                           Node::ConnectionObjectType::FanOnOff,
                            "Object3",
-                           DataLoopNode::ConnectionType::ZoneNode,
-                           NodeInputManager::CompFluidStream::Primary,
+                           Node::ConnectionType::ZoneNode,
+                           Node::CompFluidStream::Primary,
                            false,
                            errFlag);
     RegisterNodeConnection(*state,
                            2,
                            "GoodNode",
-                           DataLoopNode::ConnectionObjectType::FanOnOff,
+                           Node::ConnectionObjectType::FanOnOff,
                            "Object4",
-                           DataLoopNode::ConnectionType::Outlet,
-                           NodeInputManager::CompFluidStream::Primary,
+                           Node::ConnectionType::Outlet,
+                           Node::CompFluidStream::Primary,
                            false,
                            errFlag);
     bool ErrorsFound = false;
 
-    CheckNodeConnections(*state, ErrorsFound);
+    Node::CheckNodeConnections(*state, ErrorsFound);
     std::string const error_string =
         delimited_string({"   ** Severe  ** Node Connection Error, Node Name=\"BadNode\", The same zone node appears more than once.",
                           "   **   ~~~   ** Reference Object=Fan:OnOff, Object Name=Object1",
@@ -1180,7 +1177,7 @@ TEST_F(EnergyPlusFixture, BranchNodeConnections_ReturnPlenumNodeCheckFailure)
     SizingManager::ManageSizing(*state);
 
     bool ErrorsFound(false);
-    BranchNodeConnections::CheckNodeConnections(*state, ErrorsFound);
+    Node::CheckNodeConnections(*state, ErrorsFound);
     EXPECT_TRUE(ErrorsFound); // Node check will fail on Check 11 -- AirLoopHVAC:ReturnPlenum zone node name must be unique
 }
 
@@ -2202,7 +2199,7 @@ TEST_F(EnergyPlusFixture, BranchNodeConnections_ReturnPlenumNodeCheck)
     SizingManager::ManageSizing(*state);
 
     bool ErrorsFound(false);
-    BranchNodeConnections::CheckNodeConnections(*state, ErrorsFound);
+    Node::CheckNodeConnections(*state, ErrorsFound);
     EXPECT_FALSE(ErrorsFound);
 }
 
@@ -2212,120 +2209,120 @@ TEST_F(EnergyPlusFixture, Fix_BranchNodeErrorCheck10Test)
     RegisterNodeConnection(*state,
                            1,
                            "FirstNode",
-                           DataLoopNode::ConnectionObjectType::FanOnOff,
+                           Node::ConnectionObjectType::FanOnOff,
                            "Object1",
-                           DataLoopNode::ConnectionType::ZoneNode,
-                           NodeInputManager::CompFluidStream::Primary,
+                           Node::ConnectionType::ZoneNode,
+                           Node::CompFluidStream::Primary,
                            false,
                            errFlag);
     RegisterNodeConnection(*state,
                            2,
                            "GoodNode",
-                           DataLoopNode::ConnectionObjectType::FanOnOff,
+                           Node::ConnectionObjectType::FanOnOff,
                            "Object2",
-                           DataLoopNode::ConnectionType::Sensor,
-                           NodeInputManager::CompFluidStream::Primary,
+                           Node::ConnectionType::Sensor,
+                           Node::CompFluidStream::Primary,
                            false,
                            errFlag);
     RegisterNodeConnection(*state,
                            1,
                            "OkNode",
-                           DataLoopNode::ConnectionObjectType::FanOnOff,
+                           Node::ConnectionObjectType::FanOnOff,
                            "Object3",
-                           DataLoopNode::ConnectionType::ZoneNode,
-                           NodeInputManager::CompFluidStream::Primary,
+                           Node::ConnectionType::ZoneNode,
+                           Node::CompFluidStream::Primary,
                            false,
                            errFlag);
     RegisterNodeConnection(*state,
                            2,
                            "GoodNode",
-                           DataLoopNode::ConnectionObjectType::FanOnOff,
+                           Node::ConnectionObjectType::FanOnOff,
                            "Object4",
-                           DataLoopNode::ConnectionType::Outlet,
-                           NodeInputManager::CompFluidStream::Primary,
+                           Node::ConnectionType::Outlet,
+                           Node::CompFluidStream::Primary,
                            false,
                            errFlag);
 
     RegisterNodeConnection(*state,
                            3,
                            "PSZ-AC:4_OA-PSZ-AC:4_UNITARY_PACKAGENODE",
-                           DataLoopNode::ConnectionObjectType::ControllerOutdoorAir,
+                           Node::ConnectionObjectType::ControllerOutdoorAir,
                            "PSZ-AC4_OA_CONTROLLER",
-                           DataLoopNode::ConnectionType::Sensor,
-                           NodeInputManager::CompFluidStream::Primary,
+                           Node::ConnectionType::Sensor,
+                           Node::CompFluidStream::Primary,
                            false,
                            errFlag);
     RegisterNodeConnection(*state,
                            4,
                            "PSZ-AC:4_OAINLET NODE",
-                           DataLoopNode::ConnectionObjectType::ControllerOutdoorAir,
+                           Node::ConnectionObjectType::ControllerOutdoorAir,
                            "PSZ-AC4_OA_CONTROLLER",
-                           DataLoopNode::ConnectionType::Actuator,
-                           NodeInputManager::CompFluidStream::Primary,
+                           Node::ConnectionType::Actuator,
+                           Node::CompFluidStream::Primary,
                            false,
                            errFlag);
     RegisterNodeConnection(*state,
                            5,
                            "PSZ-AC:4_OARELIEF NODE",
-                           DataLoopNode::ConnectionObjectType::ControllerOutdoorAir,
+                           Node::ConnectionObjectType::ControllerOutdoorAir,
                            "PSZ-AC4_OA_CONTROLLER",
-                           DataLoopNode::ConnectionType::Actuator,
-                           NodeInputManager::CompFluidStream::Primary,
+                           Node::ConnectionType::Actuator,
+                           Node::CompFluidStream::Primary,
                            false,
                            errFlag);
     RegisterNodeConnection(*state,
                            6,
                            "PSZ-AC:4 SUPPLY EQUIPMENT INLET NODE",
-                           DataLoopNode::ConnectionObjectType::ControllerOutdoorAir,
+                           Node::ConnectionObjectType::ControllerOutdoorAir,
                            "PSZ-AC4_OA_CONTROLLER",
-                           DataLoopNode::ConnectionType::Sensor,
-                           NodeInputManager::CompFluidStream::Primary,
+                           Node::ConnectionType::Sensor,
+                           Node::CompFluidStream::Primary,
                            false,
                            errFlag);
 
     RegisterNodeConnection(*state,
                            7,
                            "PSZ-AC:1_OAINLET NODE",
-                           DataLoopNode::ConnectionObjectType::CoilUserDefined,
+                           Node::ConnectionObjectType::CoilUserDefined,
                            "PSZ-AC:1 OA HEAT RECOVERY",
-                           DataLoopNode::ConnectionType::Inlet,
-                           NodeInputManager::CompFluidStream::Primary,
+                           Node::ConnectionType::Inlet,
+                           Node::CompFluidStream::Primary,
                            false,
                            errFlag);
 
     RegisterNodeConnection(*state,
                            8,
                            "PSZ-AC:1 HEAT RECOVERY OUTLET NODE",
-                           DataLoopNode::ConnectionObjectType::CoilUserDefined,
+                           Node::ConnectionObjectType::CoilUserDefined,
                            "PSZ-AC:1 OA HEAT RECOVERY",
-                           DataLoopNode::ConnectionType::Outlet,
-                           NodeInputManager::CompFluidStream::Primary,
+                           Node::ConnectionType::Outlet,
+                           Node::CompFluidStream::Primary,
                            false,
                            errFlag);
 
     RegisterNodeConnection(*state,
                            9,
                            "PSZ-AC:1_OARELIEF NODE",
-                           DataLoopNode::ConnectionObjectType::CoilUserDefined,
+                           Node::ConnectionObjectType::CoilUserDefined,
                            "PSZ-AC:1 OA HEAT RECOVERY",
-                           DataLoopNode::ConnectionType::Inlet,
-                           NodeInputManager::CompFluidStream::Primary,
+                           Node::ConnectionType::Inlet,
+                           Node::CompFluidStream::Primary,
                            false,
                            errFlag);
 
     RegisterNodeConnection(*state,
                            10,
                            "PSZ-AC:1 HEAT RECOVERY SECONDARY OUTLET NODE",
-                           DataLoopNode::ConnectionObjectType::CoilUserDefined,
+                           Node::ConnectionObjectType::CoilUserDefined,
                            "PSZ-AC:1 OA HEAT RECOVERY",
-                           DataLoopNode::ConnectionType::Outlet,
-                           NodeInputManager::CompFluidStream::Primary,
+                           Node::ConnectionType::Outlet,
+                           Node::CompFluidStream::Primary,
                            false,
                            errFlag);
 
     bool ErrorsFound = false;
 
-    CheckNodeConnections(*state, ErrorsFound);
+    Node::CheckNodeConnections(*state, ErrorsFound);
 
     EXPECT_TRUE(ErrorsFound); // Node check will fail on Check 10 -- having both inelt and outlet connections > 1 on a flow stream
     EXPECT_EQ(state->dataErrTracking->LastSevereError, "(Developer) Node Connection Error, Object=Coil:UserDefined:PSZ-AC:1 OA HEAT RECOVERY");
