@@ -11362,7 +11362,7 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
                                       Ncomp,
                                       CyclingRatio);
 
-                converged_10 = (std::abs(Ncomp - Ncomp_new) <= (Tolerance * Ncomp_new)) || (Counter >= 30);
+                converged_10 = (std::abs(Ncomp - Ncomp_new) <= (Tolerance * Ncomp_new)) || (Counter++ >= 30);
                 if (!converged_10) {
                     Ncomp_new = Ncomp;
                 }
@@ -11581,8 +11581,7 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
                                       Ncomp_new,
                                       CyclingRatio);
 
-                converged_20 = (std::abs(Ncomp_new - Ncomp) <= (Tolerance * Ncomp)) || (Counter >= 30);
-                Counter = Counter + 1;
+                converged_20 = (std::abs(Ncomp_new - Ncomp) <= (Tolerance * Ncomp)) || (Counter++ >= 30);
                 if (!converged_20) {
                     Ncomp = Ncomp_new;
                 }
