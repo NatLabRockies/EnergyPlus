@@ -631,7 +631,7 @@
     Electricity,             !- First Fuel Type
     NaturalGas,              !- Second Fuel Type
     DistrictCooling,         !- Third Fuel Type
-    ,                        !- Objective Function to Minimize
+    ,                        !- Objective Function to Optimize
     SZ DSOA SPACE2-1,        !- Design Specification Outdoor Air Object Name
     Mode0 Standby,           !- Mode 0 Name
     ,                        !- Mode 0 Supply Air Temperature Lookup Table Name
