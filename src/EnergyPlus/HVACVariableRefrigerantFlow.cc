@@ -11380,9 +11380,10 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
 
             if (iterationLimitReached && !ncompConverged) {
                 ShowWarningMessage(state, EnergyPlus::format("{} \"{}\":", cVRFTypes(VRF_HeatPump), this->Name));
-                ShowContinueError(state,
-                                  EnergyPlus::format(
-                                      "...{}: Iteration limit exceeded calculating compressor power, maximum iterations = {}", RoutineName, Counter));
+                ShowContinueError(
+                    state,
+                    EnergyPlus::format(
+                        "...{}: Iteration limit exceeded calculating cooling mode compressor power, maximum iterations = {}", RoutineName, Counter));
             }
 
             // Update h_IU_evap_in in iterations Label12
@@ -11569,18 +11570,25 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
             } // CompEvaporatingCAPSpdMin < (Q_c_OU * C_cap_operation) <= CompEvaporatingCAPSpdMaxCurrentTsuc + CompEvaporatingPWRSpdMaxCurrentTsuc
             // Required heating load is greater than or equal to the min heating capacity
 
-            // Iteration_Ncomp: Perform iterations to calculate Ncomp (Label20)
-            Counter = 1;
-            bool converged_20;
+            // Iteration_Ncomp: Perform iterations to calculate Ncomp
+            Counter = 0;
+
+            bool ncompConverged = false;
+            bool iterationLimitReached = false;
+
             do {
+                ++Counter;
+
                 Ncomp_new = Ncomp;
                 Q_c_OU = max(0.0, Q_h_TU_PL - Ncomp);
 
                 // *VRF OU Te calculations
                 m_air = this->OUAirFlowRate * RhoAir;
                 SH_OU = this->SH;
+
                 this->VRFOU_TeTc(
                     state, HXOpMode::EvapMode, Q_c_OU, SH_OU, m_air, OutdoorDryBulb, OutdoorHumRat, OutdoorPressure, Tfs, this->EvaporatingTemp);
+
                 this->SH = SH_OU;
 
                 // *VRF OU Compressor Simulation at heating mode: Specify the compressor speed and power consumption
@@ -11598,11 +11606,23 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
                                       Ncomp_new,
                                       CyclingRatio);
 
-                converged_20 = (std::abs(Ncomp_new - Ncomp) <= (Tolerance * Ncomp)) || (Counter++ >= 30);
-                if (!converged_20) {
+                ncompConverged = std::abs(Ncomp_new - Ncomp) <= (Tolerance * std::abs(Ncomp));
+
+                iterationLimitReached = Counter >= 30;
+
+                if (!ncompConverged && !iterationLimitReached) {
                     Ncomp = Ncomp_new;
                 }
-            } while (!converged_20);
+
+            } while (!ncompConverged && !iterationLimitReached);
+
+            if (iterationLimitReached && !ncompConverged) {
+                ShowWarningMessage(state, EnergyPlus::format("{} \"{}\":", cVRFTypes(VRF_HeatPump), this->Name));
+                ShowContinueError(
+                    state,
+                    EnergyPlus::format(
+                        "...{}: Iteration limit exceeded calculating heating mode compressor power, maximum iterations = {}", RoutineName, Counter));
+            }
 
             // Update h_comp_out in iteration Label23
             P_comp_in = this->refrig->getSatPressure(state, this->EvaporatingTemp, RoutineName);
