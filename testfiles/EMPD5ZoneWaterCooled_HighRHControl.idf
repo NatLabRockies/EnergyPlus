@@ -2314,7 +2314,7 @@
   ZoneControl:Humidistat,
     Space2-1 Humidistat,     !- Name
     SPACE2-1,                !- Zone Name
-    Seasonal Relative Humidity Sch;  !- Humidifying Relative Humidity Setpoint Schedule Name
+    Seasonal Relative Humidity Sch;  !- Humidifying Setpoint Schedule Name
 
   ZoneControl:Thermostat,
     SPACE3-1 Control,        !- Name

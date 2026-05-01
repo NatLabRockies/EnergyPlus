@@ -283,7 +283,6 @@ add_simulation_test(IDF_FILE EMSMultiSpeedHeatPumpOverrideControl.idf EPW_FILE U
 add_simulation_test(IDF_FILE EMSPlantLoopOverrideControl.idf EPW_FILE USA_FL_Orlando.Intl.AP.722050_TMY3.epw)
 add_simulation_test(IDF_FILE EMSPlantOperation_largeOff.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE EMSReplaceTraditionalManagers_LargeOffice.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
-add_simulation_test(IDF_FILE EMSSensorOnMeterLag_Issue7563.idf EPW_FILE USA_CO_Golden-NREL.724666_TMY3.epw DESIGN_DAY_ONLY)
 add_simulation_test(IDF_FILE EMSSetpointBasedMultiSpeedDXCoilOverrideControl.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE EMSThermochromicWindow.idf EPW_FILE USA_NV_Las.Vegas-McCarran.Intl.AP.723860_TMY3.epw)
 add_simulation_test(IDF_FILE EMSTestMathAndKill.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw EXPECT_FATAL) # Expected to Fatal

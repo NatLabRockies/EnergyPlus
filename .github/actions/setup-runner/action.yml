@@ -14,6 +14,9 @@ outputs:
   python-root-dir:
     description: "The Python_ROOT_DIR"
     value: ${{ steps.install-deps.outputs.python-root-dir }}
+  python-executable:
+    description: "The Python_EXECUTABLE"
+    value: ${{ steps.install-deps.outputs.python-executable }}
   ccache-dir:
     description: "The ccache directory"
     value: ${{ steps.install-deps.outputs.ccache-dir }}
@@ -110,8 +113,15 @@ runs:
 
       begin_group "App Python_ROOT_DIR env variable"
       Python_ROOT_DIR="$RUNNER_TOOL_CACHE/Python/${{ steps.setup-python.outputs.python-version }}/${{ inputs.python-arch }}"
+      if [ "$RUNNER_OS" == "Windows" ]; then
+        Python_EXECUTABLE="$Python_ROOT_DIR/python.exe"
+      else
+        Python_EXECUTABLE="$Python_ROOT_DIR/bin/python"
+      fi
       echo "Python_ROOT_DIR=$Python_ROOT_DIR" >> $GITHUB_ENV
+      echo "Python_EXECUTABLE=$Python_EXECUTABLE" >> $GITHUB_ENV
       echo "python-root-dir=$Python_ROOT_DIR" >> $GITHUB_OUTPUT
+      echo "python-executable=$Python_EXECUTABLE" >> $GITHUB_OUTPUT
       echo "::endgroup::"
 
       begin_group "Install python dependencies"

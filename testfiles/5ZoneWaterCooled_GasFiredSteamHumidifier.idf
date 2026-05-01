@@ -2276,8 +2276,8 @@
   ZoneControl:Humidistat,
     Space1-1 Humidistat,     !- Name
     SPACE1-1,                !- Zone Name
-    HumidifyingHumSetSch,    !- Humidifying Relative Humidity Setpoint Schedule Name
-    DehumidifyingHumSetSch;  !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    HumidifyingHumSetSch,    !- Humidifying Setpoint Schedule Name
+    DehumidifyingHumSetSch;  !- Dehumidifying Setpoint Schedule Name
 
   ZoneControl:Thermostat,
     SPACE2-1 Control,        !- Name
@@ -2289,8 +2289,8 @@
   ZoneControl:Humidistat,
     Space2-1 Humidistat,     !- Name
     SPACE2-1,                !- Zone Name
-    HumidifyingHumSetSch,    !- Humidifying Relative Humidity Setpoint Schedule Name
-    DehumidifyingHumSetSch;  !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    HumidifyingHumSetSch,    !- Humidifying Setpoint Schedule Name
+    DehumidifyingHumSetSch;  !- Dehumidifying Setpoint Schedule Name
 
   ZoneControl:Thermostat,
     SPACE3-1 Control,        !- Name
@@ -2302,8 +2302,8 @@
   ZoneControl:Humidistat,
     Space3-1 Humidistat,     !- Name
     SPACE3-1,                !- Zone Name
-    HumidifyingHumSetSch,    !- Humidifying Relative Humidity Setpoint Schedule Name
-    DehumidifyingHumSetSch;  !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    HumidifyingHumSetSch,    !- Humidifying Setpoint Schedule Name
+    DehumidifyingHumSetSch;  !- Dehumidifying Setpoint Schedule Name
 
   ZoneControl:Thermostat,
     SPACE4-1 Control,        !- Name
@@ -2315,8 +2315,8 @@
   ZoneControl:Humidistat,
     Space4-1 Humidistat,     !- Name
     SPACE4-1,                !- Zone Name
-    HumidifyingHumSetSch,    !- Humidifying Relative Humidity Setpoint Schedule Name
-    DehumidifyingHumSetSch;  !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    HumidifyingHumSetSch,    !- Humidifying Setpoint Schedule Name
+    DehumidifyingHumSetSch;  !- Dehumidifying Setpoint Schedule Name
 
   ZoneControl:Thermostat,
     SPACE5-1 Control,        !- Name
@@ -2328,8 +2328,8 @@
   ZoneControl:Humidistat,
     Space5-1 Humidistat,     !- Name
     SPACE5-1,                !- Zone Name
-    HumidifyingHumSetSch,    !- Humidifying Relative Humidity Setpoint Schedule Name
-    DehumidifyingHumSetSch;  !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    HumidifyingHumSetSch,    !- Humidifying Setpoint Schedule Name
+    DehumidifyingHumSetSch;  !- Dehumidifying Setpoint Schedule Name
 
   ThermostatSetpoint:DualSetpoint,
     DualSetPoint,            !- Name

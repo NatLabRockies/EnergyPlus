@@ -153,6 +153,7 @@ jobs:
         nproc: ${{ steps.setup-runner.outputs.nproc }}
         python-version: ${{ env.Python_REQUIRED_VERSION }}
         python-root-dir: ${{ steps.setup-runner.outputs.python-root-dir }}
+        python-executable: ${{ steps.setup-runner.outputs.python-executable }}
 
     - name: Baseline Test
       if: matrix.run_regressions && steps.cachebaselineregression.outputs.cache-hit != 'true'
@@ -200,6 +201,7 @@ jobs:
         nproc: ${{ steps.setup-runner.outputs.nproc }}
         python-version: ${{ env.Python_REQUIRED_VERSION }}
         python-root-dir: ${{ steps.setup-runner.outputs.python-root-dir }}
+        python-executable: ${{ steps.setup-runner.outputs.python-executable }}
 
     - name: Remove problem matcher
       shell: bash

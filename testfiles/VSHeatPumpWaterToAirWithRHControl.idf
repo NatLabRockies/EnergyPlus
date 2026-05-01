@@ -3887,8 +3887,8 @@
   ZoneControl:Humidistat,
     SPACE1-1 Humidistat,     !- Name
     SPACE1-1,                !- Zone Name
-    Humidification Seasonal Relative Humidity Sch,  !- Humidifying Relative Humidity Setpoint Schedule Name
-    Dehumidification Seasonal Relative Humidity Sch;  !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    Humidification Seasonal Relative Humidity Sch,  !- Humidifying Setpoint Schedule Name
+    Dehumidification Seasonal Relative Humidity Sch;  !- Dehumidifying Setpoint Schedule Name
 
   AirLoopHVAC:SupplyPath,
     Sys 1 HeatPumpSupplyPath,!- Name
@@ -4095,8 +4095,8 @@
   ZoneControl:Humidistat,
     SPACE2-1 Humidistat,     !- Name
     SPACE2-1,                !- Zone Name
-    Humidification Seasonal Relative Humidity Sch,  !- Humidifying Relative Humidity Setpoint Schedule Name
-    Dehumidification Seasonal Relative Humidity Sch;  !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    Humidification Seasonal Relative Humidity Sch,  !- Humidifying Setpoint Schedule Name
+    Dehumidification Seasonal Relative Humidity Sch;  !- Dehumidifying Setpoint Schedule Name
 
   AirLoopHVAC:SupplyPath,
     Sys 2 HeatPumpSupplyPath,!- Name
@@ -4296,8 +4296,8 @@
   ZoneControl:Humidistat,
     SPACE3-1 Humidistat,     !- Name
     SPACE3-1,                !- Zone Name
-    Humidification Seasonal Relative Humidity Sch,  !- Humidifying Relative Humidity Setpoint Schedule Name
-    Dehumidification Seasonal Relative Humidity Sch;  !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    Humidification Seasonal Relative Humidity Sch,  !- Humidifying Setpoint Schedule Name
+    Dehumidification Seasonal Relative Humidity Sch;  !- Dehumidifying Setpoint Schedule Name
 
   AirLoopHVAC:SupplyPath,
     Sys 3 HeatPumpSupplyPath,!- Name
@@ -4497,8 +4497,8 @@
   ZoneControl:Humidistat,
     SPACE4-1 Humidistat,     !- Name
     SPACE4-1,                !- Zone Name
-    Humidification Seasonal Relative Humidity Sch,  !- Humidifying Relative Humidity Setpoint Schedule Name
-    Dehumidification Seasonal Relative Humidity Sch;  !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    Humidification Seasonal Relative Humidity Sch,  !- Humidifying Setpoint Schedule Name
+    Dehumidification Seasonal Relative Humidity Sch;  !- Dehumidifying Setpoint Schedule Name
 
   AirLoopHVAC:SupplyPath,
     Sys 4 HeatPumpSupplyPath,!- Name
@@ -4698,8 +4698,8 @@
   ZoneControl:Humidistat,
     SPACE5-1 Humidistat,     !- Name
     SPACE5-1,                !- Zone Name
-    Humidification Seasonal Relative Humidity Sch,  !- Humidifying Relative Humidity Setpoint Schedule Name
-    Dehumidification Seasonal Relative Humidity Sch;  !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    Humidification Seasonal Relative Humidity Sch,  !- Humidifying Setpoint Schedule Name
+    Dehumidification Seasonal Relative Humidity Sch;  !- Dehumidifying Setpoint Schedule Name
 
   AirLoopHVAC:SupplyPath,
     Sys 5 HeatPumpSupplyPath,!- Name

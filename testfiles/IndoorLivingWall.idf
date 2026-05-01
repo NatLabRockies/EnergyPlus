@@ -1837,32 +1837,32 @@
   ZoneControl:Humidistat,
     SPACE1-1 Humidistat,     !- Name
     SPACE1-1,                !- Zone Name
-    HVACTemplate-Always 1,   !- Humidifying Relative Humidity Setpoint Schedule Name
-    HVACTemplate-Always 70;  !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    HVACTemplate-Always 1,   !- Humidifying Setpoint Schedule Name
+    HVACTemplate-Always 70;  !- Dehumidifying Setpoint Schedule Name
 
   ZoneControl:Humidistat,
     SPACE2-1 Humidistat,     !- Name
     SPACE2-1,                !- Zone Name
-    HVACTemplate-Always 1,   !- Humidifying Relative Humidity Setpoint Schedule Name
-    HVACTemplate-Always 70;  !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    HVACTemplate-Always 1,   !- Humidifying Setpoint Schedule Name
+    HVACTemplate-Always 70;  !- Dehumidifying Setpoint Schedule Name
 
   ZoneControl:Humidistat,
     SPACE3-1 Humidistat,     !- Name
     SPACE3-1,                !- Zone Name
-    HVACTemplate-Always 1,   !- Humidifying Relative Humidity Setpoint Schedule Name
-    HVACTemplate-Always 70;  !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    HVACTemplate-Always 1,   !- Humidifying Setpoint Schedule Name
+    HVACTemplate-Always 70;  !- Dehumidifying Setpoint Schedule Name
 
   ZoneControl:Humidistat,
     SPACE4-1 Humidistat,     !- Name
     SPACE4-1,                !- Zone Name
-    HVACTemplate-Always 1,   !- Humidifying Relative Humidity Setpoint Schedule Name
-    HVACTemplate-Always 70;  !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    HVACTemplate-Always 1,   !- Humidifying Setpoint Schedule Name
+    HVACTemplate-Always 70;  !- Dehumidifying Setpoint Schedule Name
 
   ZoneControl:Humidistat,
     SPACE5-1 Humidistat,     !- Name
     SPACE5-1,                !- Zone Name
-    HVACTemplate-Always 1,   !- Humidifying Relative Humidity Setpoint Schedule Name
-    HVACTemplate-Always 70;  !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    HVACTemplate-Always 1,   !- Humidifying Setpoint Schedule Name
+    HVACTemplate-Always 70;  !- Dehumidifying Setpoint Schedule Name
 
 !-   ===========  ALL OBJECTS IN CLASS: ZONECONTROL:THERMOSTAT ===========
 

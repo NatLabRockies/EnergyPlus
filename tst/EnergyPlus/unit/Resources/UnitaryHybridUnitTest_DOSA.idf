@@ -560,8 +560,8 @@
   ZoneControl:Humidistat,
     Main Zone Humidistat,    !- Name
     Main Zone,               !- Zone Name
-    HumidifyingHumSetSch,    !- Humidifying Relative Humidity Setpoint Schedule Name
-    DehumidifyingHumSetSch;  !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    HumidifyingHumSetSch,    !- Humidifying Setpoint Schedule Name
+    DehumidifyingHumSetSch;  !- Dehumidifying Setpoint Schedule Name
 
   Schedule:Compact,
     HumidifyingHumSetSch,    !- Name

@@ -18909,8 +18909,8 @@ Dimensionless;	!- Output Unit Type
   ZoneControl:Humidistat,
     SPACE1-1 Humidistat,  !- Name
     ZONE ONE,                !- Zone Name
-    HVACTemplate-Always 4,   !- Humidifying Relative Humidity Setpoint Schedule Name
-    HVACTemplate-Always 60;  !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    HVACTemplate-Always 4,   !- Humidifying Setpoint Schedule Name
+    HVACTemplate-Always 60;  !- Dehumidifying Setpoint Schedule Name
 
   ThermostatSetpoint:DualSetpoint,
     All Zones Dual SP Control,  !- Name

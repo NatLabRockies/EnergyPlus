@@ -6,7 +6,6 @@
 !-NOTE: All comments with '!-' are ignored by the IDFEditor and are generated automatically.
 !-      Use '!' comments if they need to be retained when using the IDFEditor.
 
-
 !-   ===========  ALL OBJECTS IN CLASS: MATERIALS ===========
 
 Materials,
@@ -20,7 +19,6 @@ Materials,
     6.13,                    !- HIN: Indoor HConv: Downward Flow {W/m2-K}
     9.26;                    !- HIN: Indoor HConv: Upward {W/m2-K}
 
-
 !-   ===========  ALL OBJECTS IN CLASS: MATLPROPS ===========
 
 MatlProps,
@@ -30,7 +28,6 @@ MatlProps,
     1200,                    !- CP: Soil CP {J/kg-K}
     0.93,                    !- TCON: Slab k {W/m-K}
     1;                       !- TCON: Soil k {W/m-K}
-
 
 !-   ===========  ALL OBJECTS IN CLASS: BOUNDCONDS ===========
 
@@ -62,7 +59,6 @@ BldgProps,
     0,                       !- TINAmp: Daily sine wave variation amplitude {C}
     0.10;                    !- ConvTol: Convergence Tolerance
 
-
 !-   ===========  ALL OBJECTS IN CLASS: INSULATION ===========
 
 Insulation,
@@ -72,7 +68,6 @@ Insulation,
     2.0,                     !- ZVINS: Depth of vertical insulation {m}
     1;                       !- IVINS: Flag: Is there vertical insulation
 
-
 !-   ===========  ALL OBJECTS IN CLASS: EQUIVALENTSLAB ===========
 
 EquivalentSlab,
@@ -80,5 +75,4 @@ EquivalentSlab,
     0.1,                     !- SLABDEPTH: Thickness of slab on grade {m}
     15,                      !- CLEARANCE: Distance from edge of slab to domain edge {m}
     10.;                      !- ZCLEARANCE: Depth of region below slab, m
-
 

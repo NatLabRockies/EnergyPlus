@@ -134,6 +134,7 @@ jobs:
         nproc: ${{ steps.setup-runner.outputs.nproc }}
         python-version: ${{ matrix.python-version }}
         python-root-dir: ${{ steps.setup-runner.outputs.python-root-dir }}
+        python-executable: ${{ steps.setup-runner.outputs.python-executable }}
 
     - name: Remove problem matcher
       shell: bash

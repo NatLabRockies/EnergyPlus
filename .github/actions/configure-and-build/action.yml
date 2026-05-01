@@ -14,6 +14,8 @@ inputs:
     required: true
   python-root-dir:
     required: true
+  python-executable:
+    required: true
   enable-pch:
     description: "Turn on ENABLE_PCH to have pre-compiled headers. Pass ON or OFF"
     default: "OFF"
@@ -55,6 +57,7 @@ runs:
         -DPYTHON_CLI:BOOL=ON `
         -DPython_REQUIRED_VERSION:STRING=${{ inputs.python-version }} `
         -DPython_ROOT_DIR:PATH=${{ inputs.python-root-dir }} `
+        -DPython_EXECUTABLE:FILEPATH=${{ inputs.python-executable }} `
         -DBUILD_TESTING:BOOL=ON `
         -DBUILD_FORTRAN:BOOL=ON `
         -DBUILD_PACKAGE:BOOL=OFF `
@@ -96,6 +99,7 @@ runs:
         -DPYTHON_CLI:BOOL=ON \
         -DPython_REQUIRED_VERSION:STRING=${{ inputs.python-version }} \
         -DPython_ROOT_DIR:PATH=${{ inputs.python-root-dir }} \
+        -DPython_EXECUTABLE:FILEPATH=${{ inputs.python-executable }} \
         -DBUILD_TESTING:BOOL=ON \
         -DBUILD_FORTRAN:BOOL=ON \
         -DBUILD_PACKAGE:BOOL=OFF \

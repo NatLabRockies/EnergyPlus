@@ -4594,7 +4594,7 @@ namespace Fluid {
         if (!state.dataGlobal->WarmupFlag && error != GlycolError::Invalid) {
             df->glycolErrorLimits[(int)error] = ++this->errors[(int)error].count;
 
-            if (error == GlycolError::ViscosityHigh) {
+            if (error == GlycolError::ViscosityLow) {
                 if (df->glycolErrorLimits[(int)error] <= df->GlycolErrorLimitTest) {
                     ShowWarningMessage(
                         state, EnergyPlus::format("{}: Temperature is out of range (too low) for fluid [{}] viscosity **", routineName, this->Name));
