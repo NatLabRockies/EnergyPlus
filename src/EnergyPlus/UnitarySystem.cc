@@ -277,10 +277,30 @@ namespace UnitarySystems {
                     coolingCoilRTF = state.dataVariableSpeedCoils->VarSpeedCoil(this->m_CoolingCoilIndex).RunFrac;
                 }
             } break;
+            case HVAC::CoilType::CoolingDXHXAssisted: {
+                if (this->m_CoolingCoilIndex > 0) {
+                    auto const &hxCoil = state.dataHVACAssistedCC->HXAssistedCoil(this->m_CoolingCoilIndex);
+                    if (hxCoil.CoolingCoilIndex > 0) {
+                        switch (hxCoil.coolCoilType) {
+                        case HVAC::CoilType::CoolingDX: {
+                            coolingCoilRTF = state.dataCoilCoolingDX->coilCoolingDXs[hxCoil.CoolingCoilIndex].coolingCoilRuntimeFraction;
+                        } break;
+                        case HVAC::CoilType::CoolingDXSingleSpeed: {
+                            coolingCoilRTF = state.dataDXCoils->DXCoil(hxCoil.CoolingCoilIndex).CoolingCoilRuntimeFraction;
+                        } break;
+                        case HVAC::CoilType::CoolingDXVariableSpeed: {
+                            coolingCoilRTF = state.dataVariableSpeedCoils->VarSpeedCoil(hxCoil.CoolingCoilIndex).RunFrac;
+                        } break;
+                        default: {
+                            coolingCoilRTF = this->m_CoolingPartLoadFrac;
+                        } break;
+                        }
+                    }
+                }
+            } break;
             case HVAC::CoilType::CoolingWater:
             case HVAC::CoilType::CoolingWaterDetailed:
             case HVAC::CoilType::UserDefined:
-            case HVAC::CoilType::CoolingDXHXAssisted:
             case HVAC::CoilType::CoolingWaterHXAssisted: {
                 coolingCoilRTF = this->m_CoolingPartLoadFrac;
             } break;
