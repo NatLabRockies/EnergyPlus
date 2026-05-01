@@ -1,0 +1,47 @@
+name: Test Debug Builds
+
+on:
+  pull_request:
+    branches: [ develop ]
+
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Branch, tag, or SHA to test (leave empty for current ref)"
+        required: false
+        default: ""
+
+jobs:
+  build_and_test:
+    # Never run forked PR code on self-hosted infrastructure.
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+    name: Build and Test (Ubuntu matrix)
+    strategy:
+      fail-fast: false
+      matrix:
+        runner:
+          - [self-hosted, linux, x64, ubuntu-24.04]
+          - [self-hosted, linux, x64, ubuntu-26.04]
+
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Checkout EnergyPlus
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.inputs.ref || github.ref }}
+
+      - name: Configure
+        run: >
+          cmake -S . -B build
+          -G "Unix Makefiles"
+          -DCMAKE_BUILD_TYPE=Debug
+          -DFORCE_DEBUG_ARITHM_GCC_OR_CLANG=ON
+          -DBUILD_TESTING=ON
+          -DBUILD_PACKAGE=OFF
+          -DDOCUMENTATION_BUILD=DoNotBuild
+
+      - name: Build
+        run: cmake --build build -j "$(nproc)"
+
+      - name: Run tests
+        run: ctest --test-dir build -j "$(nproc)"
