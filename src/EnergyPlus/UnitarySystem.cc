@@ -230,7 +230,7 @@ namespace UnitarySystems {
             case HVAC::CoilType::HeatingSteam:
             case HVAC::CoilType::HeatingWater:
             case HVAC::CoilType::UserDefined: {
-                suppHeatingCoilRTF = 1.0;
+                suppHeatingCoilRTF = this->m_SuppHeatPartLoadFrac;
             } break;
             default:;
             }
