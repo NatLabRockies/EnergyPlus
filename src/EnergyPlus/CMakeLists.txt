@@ -309,6 +309,8 @@ set(SRC
     GroundHeatExchangers/BoreholeArray.hh
     GroundHeatExchangers/BoreholeSingle.cc
     GroundHeatExchangers/BoreholeSingle.hh
+    GroundHeatExchangers/GLHEC/Model.cc
+    GroundHeatExchangers/GLHEC/Model.hh
     GroundHeatExchangers/Properties.cc
     GroundHeatExchangers/Properties.hh
     GroundHeatExchangers/ResponseFactors.cc

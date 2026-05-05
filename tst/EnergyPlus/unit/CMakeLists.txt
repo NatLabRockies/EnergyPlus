@@ -132,6 +132,8 @@ set(test_src
     GroundHeatExchangers/Base.unit.cc
     GroundHeatExchangers/BoreholeArray.unit.cc
     GroundHeatExchangers/BoreholeSingle.unit.cc
+    GroundHeatExchangers/GLHEC.unit.cc
+    GroundHeatExchangers/GLHECModel.unit.cc
     GroundHeatExchangers/Properties.unit.cc
     GroundHeatExchangers/ResponseFactors.unit.cc
     GroundHeatExchangers/Slinky.unit.cc

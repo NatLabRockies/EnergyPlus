@@ -47,7 +47,10 @@
 
 #pragma once
 
+#include <memory>
+
 #include <EnergyPlus/GroundHeatExchangers/Base.hh>
+#include <EnergyPlus/GroundHeatExchangers/GLHEC/Model.hh>
 
 namespace EnergyPlus {
 
@@ -81,6 +84,13 @@ namespace GroundHeatExchangers {
         Real64 bhLength = 0.0;    // Length of borehole {m}
         Real64 bhUTubeDist = 0.0; // Distance between u-tube legs {m}
         GFuncCalcMethod gFuncCalcMethod = GFuncCalcMethod::Invalid;
+        bool useGLHEC = false;
+        int glhecNumSegments = 10;
+        int glhecNumIterations = 2;
+        Real64 glhecGroutFraction = 0.5;
+        Real64 glhecAggExpansionRate = 1.62;
+        int glhecAggBinsPerLevel = 9;
+        std::unique_ptr<GLHEC::Model> glhecModel;
 
         // Parameters for the multipole method
         Real64 theta_1 = 0.0;
@@ -96,6 +106,10 @@ namespace GroundHeatExchangers {
 
         GLHEVert() = default;
         GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::json const &j);
+        GLHEVert(GLHEVert const &) = delete;
+        GLHEVert &operator=(GLHEVert const &) = delete;
+        GLHEVert(GLHEVert &&) noexcept = default;
+        GLHEVert &operator=(GLHEVert &&) noexcept = default;
         ~GLHEVert() override = default;
 
         void simulate([[maybe_unused]] EnergyPlusData &state,
@@ -161,6 +175,8 @@ namespace GroundHeatExchangers {
         void oneTimeInit_new(EnergyPlusData &state) override;
 
         void setupTimeVectors() const;
+
+        void setupGLHECModel(EnergyPlusData &state);
     };
 
 } // namespace GroundHeatExchangers

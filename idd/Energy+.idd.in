@@ -79994,6 +79994,7 @@ GroundHeatExchanger:System,
         \key UHFcalc
         \key UBHWTcalc
         \key FullDesign
+        \key GLHECcalc
         \default UHFcalc
   A8,   \field GHE:Vertical:Sizing Object Type
         \type choice
@@ -80303,9 +80304,30 @@ GroundHeatExchanger:System,
   A109, \field GHE:Vertical:Single Object Name 99
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A110; \field GHE:Vertical:Single Object Name 100
+  A110, \field GHE:Vertical:Single Object Name 100
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
+  N111, \field GLHEC Number of Borehole Segments
+        \type integer
+        \minimum 1
+        \default 10
+  N112, \field GLHEC Number of Iterations
+        \type integer
+        \minimum 1
+        \default 2
+  N113, \field GLHEC Grout Fraction
+        \type real
+        \minimum 0.0
+        \maximum 1.0
+        \default 0.5
+  N114, \field GLHEC Aggregation Expansion Rate
+        \type real
+        \minimum 1.0
+        \default 1.62
+  N115; \field GLHEC Aggregation Bins Per Level
+        \type integer
+        \minimum 1
+        \default 9
 
 GroundHeatExchanger:Vertical:Sizing:Rectangle,
         \memo Specifies parameters to be used for Ground Heat Exchanger borehole

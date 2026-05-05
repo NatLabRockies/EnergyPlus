@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.19...4.0.3)  # policy_max is set, so that will impliclty invoke cmake_policy(VERSION <min>[...<max>])
+cmake_minimum_required(VERSION 3.19...4.0.3)  # policy_max is set, so that will implicitly invoke cmake_policy(VERSION <min>[...<max>])
 
 # Use ccache if available, has to be before "project()"
 find_program(CCACHE_PROGRAM NAMES ccache sccache)
