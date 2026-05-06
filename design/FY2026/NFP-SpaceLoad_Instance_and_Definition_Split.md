@@ -13,7 +13,7 @@ OpenStudio has long used an Instance/Definition split for internal gains objects
 
 By introducing the same Instance/Definition pattern in EnergyPlus, we achieve three concrete benefits:
 
-1. **Alignment of EnergyPlus and OpenStudio** — the EnergyPlus IDD and the OpenStudio Model API now share the same conceptual shape, reducing the translation surface and the associated maintenance burden. Allowing usage of OpenStudio directly on an IDF will provide ability to work on **any** IDF, including fully unsupported objects (objects not wrapped in OpenStudio model/ namespace) and objects which don't have ReverseTranslator rules (the ReverseTranslator IDF -> OSM is lacking in terms of HVAC especially).
+1. **Alignment of EnergyPlus and OpenStudio** — the EnergyPlus IDD and the OpenStudio Model API now share the same conceptual shape, reducing the translation surface and the associated maintenance burden. Allowing usage of OpenStudio directly on an IDF will provide the ability to work on **any** IDF, including fully unsupported objects (objects not wrapped in OpenStudio model/ namespace) and objects which don't have ReverseTranslator rules (the ReverseTranslator IDF -> OSM is lacking in terms of HVAC especially).
 2. **DRY input data** — a single `ElectricEquipment:Definition` describing, say, a standard office workstation can be referenced by any number of `ElectricEquipment` instances across the building, each with its own zone/space assignment and schedule, without repeating the physical characteristics.
 3. **Cleaner IDD semantics** — the split makes explicit which properties are intrinsic to the load type (the definition) and which are extrinsic, installation-specific concerns (the instance).
 
@@ -86,11 +86,11 @@ ElectricEquipment,
 ### C++ changes (`InternalHeatGains.cc`)
 
 A helper `GetSpaceLoadDefinition` function is introduced. It reads all objects of a given Definition type from the IDD and returns a vector of `ZoneEquipDefinitionData` structs containing the pre-parsed physical fields.
-The existing per-type `GetInternalHeatGains*` logic then looks up the matching definition by name for each instance object and merges the two sets of data before populating the internal data structures that unique per space/zone (e.g., `state.dataHeatBal->ZoneElectric`).
+The existing per-type `GetInternalHeatGains*` logic then looks up the matching definition by name for each instance object and merges the two sets of data before populating the internal data structures that are unique per space/zone (e.g., `state.dataHeatBal->ZoneElectric`).
 
 No changes are needed to the downstream simulation code — the internal `ZoneEquip*` structs remain unchanged; only input parsing is affected.
 
-The `ZoneEquipmentDefinitionData` and similar structs are Plain Old Data (POD) structs, which are populated directly from epJSON without allocating any arrays, and it scoped only to the relevant portion of GetInternalHeatGains, therefore not increasing the memory burden of the `EnergyPlusData state`.
+The `ZoneEquipDefinitionData` and similar structs are Plain Old Data (POD) structs, which are populated directly from epJSON without allocating any arrays, and is scoped only to the relevant portion of GetInternalHeatGains, therefore not increasing the memory burden of the `EnergyPlusData state`.
 
 
 ### Backward compatibility / Transition
@@ -141,8 +141,6 @@ No changes to the Engineering Reference are required. The split is purely an inp
 
 - All existing test files are updated by the Transition rules.
 - Transition: `CreateNewIDFUsingRulesV26_2_0` implements the rules for all eight object types.
-
-- A new example file `XXX.imf` demonstrates the shared-definition pattern. <-- IS THIS NEEDED?
 
 ## References ##
 
