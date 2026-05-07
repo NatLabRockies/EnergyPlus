@@ -40,6 +40,7 @@ jobs:
           python-arch: x64
 
       - name: Select GCC 13.3 toolchain
+        id: compiler
         shell: bash
         run: |
           sudo apt-get -qq update
@@ -59,9 +60,38 @@ jobs:
             echo "CXX=$(command -v g++-13)"
             echo "FC=$(command -v gfortran-13)"
           } >> "$GITHUB_ENV"
+          echo "compiler-id=gcc-${gcc_version}" >> "$GITHUB_OUTPUT"
           gcc-13 --version
           g++-13 --version
           gfortran-13 --version
+
+      - name: Restore ccache
+        id: cacheccache-restore
+        uses: actions/cache/restore@v5
+        with:
+          path: |
+            ${{ steps.setup-runner.outputs.ccache-dir }}
+          key: ccache-self-hosted-decent-ci-${{ runner.os }}-${{ steps.compiler.outputs.compiler-id }}-pr-${{ github.event.pull_request.number }}
+
+      - name: Show restored ccache state
+        shell: bash
+        run: |
+          begin_group() { echo -e "::group::\033[93m$1\033[0m"; }
+
+          if [ "${{ steps.cacheccache-restore.outputs.cache-hit }}" = "true" ]; then
+            echo "CCache primary key was hit"
+          else
+            echo "No exact ccache hit"
+          fi
+
+          begin_group "Existing ccache stats"
+          ccache --show-stats -vv || ccache --show-stats
+          echo "::endgroup::"
+
+          ccache --zero-stats
+          begin_group "CCache config"
+          ccache -p
+          echo "::endgroup::"
 
       - name: Configure build
         shell: bash
@@ -93,6 +123,20 @@ jobs:
           echo "::add-matcher::./.github/workflows/cpp-problem-matcher.json"
           cmake --build "$BUILD_DIR" -j "${NPROC:-$(nproc)}"
           echo "::remove-matcher owner=gcc-problem-matcher::"
+
+      - name: Show build ccache stats
+        if: always()
+        shell: bash
+        run: |
+          ccache --show-stats -vv || ccache --show-stats
+
+      - name: Save ccache
+        if: always() && steps.cacheccache-restore.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            ${{ steps.setup-runner.outputs.ccache-dir }}
+          key: ${{ steps.cacheccache-restore.outputs.cache-primary-key }}
 
       - name: Run unit tests
         working-directory: ${{ env.BUILD_DIR }}
