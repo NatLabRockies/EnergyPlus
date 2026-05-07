@@ -46,6 +46,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #include <cmath>
+#include <cstdlib>
+#include <cstring>
 
 #include <ObjexxFCL/ArrayS.functions.hh>
 #include <ObjexxFCL/time.hh>
@@ -68,6 +70,20 @@
 #include <EnergyPlus/api/runtime.h>
 
 using namespace EnergyPlus;
+
+namespace {
+
+char *copyStringForAPI(std::string const &value)
+{
+    auto *result = static_cast<char *>(std::malloc(value.size() + 1));
+    if (result == nullptr) {
+        return nullptr;
+    }
+    std::memcpy(result, value.c_str(), value.size() + 1);
+    return result;
+}
+
+} // namespace
 
 APIDataEntry *getAPIData(EnergyPlusState state, unsigned int *resultingSize)
 {
@@ -215,13 +231,7 @@ char *listAllAPIDataCSV(EnergyPlusState state)
                                              ? variable->unitNameCustomEMS
                                              : EnergyPlus::Constant::unitNames[(int)variable->units]));
     }
-    // note that we cannot just return a c_str to the local string, as the string will be destructed upon leaving
-    // this function, and undefined behavior will occur.
-    // instead make a deep copy, and the user must manage the new char * pointer
-    // strcpy copies including the null-terminator, strlen doesn't include it
-    char *p = new char[std::strlen(output.c_str()) + 1];
-    std::strcpy(p, output.c_str());
-    return p;
+    return copyStringForAPI(output);
 }
 
 int apiDataFullyReady(EnergyPlusState state)
@@ -252,18 +262,14 @@ char *inputFilePath(EnergyPlusState state)
 {
     const auto *thisState = static_cast<EnergyPlus::EnergyPlusData *>(state);
     std::string const path_utf8 = EnergyPlus::FileSystem::toGenericString(thisState->dataStrGlobals->inputFilePath);
-    char *p = new char[std::strlen(path_utf8.c_str()) + 1];
-    std::strcpy(p, path_utf8.c_str());
-    return p;
+    return copyStringForAPI(path_utf8);
 }
 
 char *epwFilePath(EnergyPlusState state)
 {
     const auto *thisState = static_cast<EnergyPlus::EnergyPlusData *>(state);
     std::string const path_utf8 = EnergyPlus::FileSystem::toGenericString(thisState->files.inputWeatherFilePath.filePath);
-    char *p = new char[std::strlen(path_utf8.c_str()) + 1];
-    std::strcpy(p, path_utf8.c_str());
-    return p;
+    return copyStringForAPI(path_utf8);
 }
 
 char **getObjectNames(EnergyPlusState state, const char *objectType, unsigned int *resultingSize)
