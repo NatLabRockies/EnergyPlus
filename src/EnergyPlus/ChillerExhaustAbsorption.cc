@@ -48,6 +48,7 @@
 // C++ Headers
 #include <cassert>
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -318,7 +319,7 @@ void GetExhaustAbsorberInput(EnergyPlusData &state)
 
         // Get_ErrorsFound will be set to True if problem was found, left untouched otherwise
         GlobalNames::VerifyUniqueChillerName(
-            state, cCurrentModuleObject, s_ipsc->cAlphaArgs(1), Get_ErrorsFound, fmt::format("{} Name", cCurrentModuleObject));
+            state, cCurrentModuleObject, s_ipsc->cAlphaArgs(1), Get_ErrorsFound, EnergyPlus::format("{} Name", cCurrentModuleObject));
 
         auto &thisChiller = state.dataChillerExhaustAbsorption->ExhaustAbsorber(AbsorberNum);
         thisChiller.Name = s_ipsc->cAlphaArgs(1);
@@ -928,7 +929,7 @@ void ExhaustAbsorberSpecs::oneTimeInit_new(EnergyPlusData &state)
             state.dataLoopNodes->NodeSetpointCheck(this->HeatSupplyNodeNum).needsSetpointChecking = false;
             if (errFlag) {
                 if (!this->HeatSetPointErrDone) {
-                    ShowWarningError(state, EnergyPlus::format("Missing temperature setpoint on heat side for chiller heater named {}", this->Name));
+                    ShowWarningError(state, std::format("Missing temperature setpoint on heat side for chiller heater named {}", this->Name));
                     ShowContinueError(state, "  A temperature setpoint is needed at the outlet node of this chiller heater ");
                     ShowContinueError(state, "  use a Setpoint Manager to establish a setpoint at the heater side outlet node ");
                     ShowContinueError(state, "  or use an EMS actuator to establish a setpoint at the outlet node ");
@@ -1118,9 +1119,9 @@ void ExhaustAbsorberSpecs::size(EnergyPlusData &state)
                                                      NomCapUser);
                         if (state.dataGlobal->DisplayExtraWarnings) {
                             if ((std::abs(tmpNomCap - NomCapUser) / NomCapUser) > state.dataSize->AutoVsHardSizingThreshold) {
-                                ShowMessage(state,
-                                            EnergyPlus::format(
-                                                "SizeChillerHeaterAbsorptionDoubleEffect: Potential issue with equipment sizing for {}", this->Name));
+                                ShowMessage(
+                                    state,
+                                    std::format("SizeChillerHeaterAbsorptionDoubleEffect: Potential issue with equipment sizing for {}", this->Name));
                                 ShowContinueError(state, EnergyPlus::format("User-Specified Nominal Capacity of {:.2R} [W]", NomCapUser));
                                 ShowContinueError(state, EnergyPlus::format("differs from Design Size Nominal Capacity of {:.2R} [W]", tmpNomCap));
                                 ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
@@ -1135,8 +1136,7 @@ void ExhaustAbsorberSpecs::size(EnergyPlusData &state)
     } else {
         if (this->NomCoolingCapWasAutoSized) {
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
-                ShowSevereError(state,
-                                EnergyPlus::format("SizeExhaustAbsorber: ChillerHeater:Absorption:DoubleEffect=\"{}\", autosize error.", this->Name));
+                ShowSevereError(state, std::format("SizeExhaustAbsorber: ChillerHeater:Absorption:DoubleEffect=\"{}\", autosize error.", this->Name));
                 ShowContinueError(state, "Autosizing of Exhaust Fired Absorption Chiller nominal cooling capacity requires");
                 ShowContinueError(state, "a cooling loop Sizing:Plant object.");
                 ErrorsFound = true;
@@ -1194,9 +1194,9 @@ void ExhaustAbsorberSpecs::size(EnergyPlusData &state)
                         if (state.dataGlobal->DisplayExtraWarnings) {
                             if ((std::abs(tmpEvapVolFlowRate - EvapVolFlowRateUser) / EvapVolFlowRateUser) >
                                 state.dataSize->AutoVsHardSizingThreshold) {
-                                ShowMessage(state,
-                                            EnergyPlus::format("SizeChillerAbsorptionDoubleEffect: Potential issue with equipment sizing for {}",
-                                                               this->Name));
+                                ShowMessage(
+                                    state,
+                                    std::format("SizeChillerAbsorptionDoubleEffect: Potential issue with equipment sizing for {}", this->Name));
                                 ShowContinueError(
                                     state, EnergyPlus::format("User-Specified Design Chilled Water Flow Rate of {:.5R} [m3/s]", EvapVolFlowRateUser));
                                 ShowContinueError(state,
@@ -1214,8 +1214,7 @@ void ExhaustAbsorberSpecs::size(EnergyPlusData &state)
     } else {
         if (this->EvapVolFlowRateWasAutoSized) {
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
-                ShowSevereError(state,
-                                EnergyPlus::format("SizeExhaustAbsorber: ChillerHeater:Absorption:DoubleEffect=\"{}\", autosize error.", this->Name));
+                ShowSevereError(state, std::format("SizeExhaustAbsorber: ChillerHeater:Absorption:DoubleEffect=\"{}\", autosize error.", this->Name));
                 ShowContinueError(state, "Autosizing of Exhaust Fired Absorption Chiller evap flow rate requires");
                 ShowContinueError(state, "a cooling loop Sizing:Plant object.");
                 ErrorsFound = true;
@@ -1278,9 +1277,9 @@ void ExhaustAbsorberSpecs::size(EnergyPlusData &state)
                         if (state.dataGlobal->DisplayExtraWarnings) {
                             if ((std::abs(tmpHeatRecVolFlowRate - HeatRecVolFlowRateUser) / HeatRecVolFlowRateUser) >
                                 state.dataSize->AutoVsHardSizingThreshold) {
-                                ShowMessage(state,
-                                            EnergyPlus::format(
-                                                "SizeChillerHeaterAbsorptionDoubleEffect: Potential issue with equipment sizing for {}", this->Name));
+                                ShowMessage(
+                                    state,
+                                    std::format("SizeChillerHeaterAbsorptionDoubleEffect: Potential issue with equipment sizing for {}", this->Name));
                                 ShowContinueError(
                                     state, EnergyPlus::format("User-Specified Design Hot Water Flow Rate of {:.5R} [m3/s]", HeatRecVolFlowRateUser));
                                 ShowContinueError(state,
@@ -1298,8 +1297,7 @@ void ExhaustAbsorberSpecs::size(EnergyPlusData &state)
     } else {
         if (this->HeatVolFlowRateWasAutoSized) {
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
-                ShowSevereError(state,
-                                EnergyPlus::format("SizeExhaustAbsorber: ChillerHeater:Absorption:DoubleEffect=\"{}\", autosize error.", this->Name));
+                ShowSevereError(state, std::format("SizeExhaustAbsorber: ChillerHeater:Absorption:DoubleEffect=\"{}\", autosize error.", this->Name));
                 ShowContinueError(state, "Autosizing of Exhaust Fired Absorption Chiller hot water flow rate requires");
                 ShowContinueError(state, "a heating loop Sizing:Plant object.");
                 ErrorsFound = true;
@@ -1365,9 +1363,9 @@ void ExhaustAbsorberSpecs::size(EnergyPlusData &state)
                         if (state.dataGlobal->DisplayExtraWarnings) {
                             if ((std::abs(tmpCondVolFlowRate - CondVolFlowRateUser) / CondVolFlowRateUser) >
                                 state.dataSize->AutoVsHardSizingThreshold) {
-                                ShowMessage(state,
-                                            EnergyPlus::format("SizeChillerAbsorptionDoubleEffect: Potential issue with equipment sizing for {}",
-                                                               this->Name));
+                                ShowMessage(
+                                    state,
+                                    std::format("SizeChillerAbsorptionDoubleEffect: Potential issue with equipment sizing for {}", this->Name));
                                 ShowContinueError(
                                     state,
                                     EnergyPlus::format("User-Specified Design Condenser Water Flow Rate of {:.5R} [m3/s]", CondVolFlowRateUser));
@@ -1386,8 +1384,7 @@ void ExhaustAbsorberSpecs::size(EnergyPlusData &state)
     } else {
         if (this->CondVolFlowRateWasAutoSized) {
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
-                ShowSevereError(state,
-                                EnergyPlus::format("SizeExhaustAbsorber: ChillerHeater:Absorption:DoubleEffect=\"{}\", autosize error.", this->Name));
+                ShowSevereError(state, std::format("SizeExhaustAbsorber: ChillerHeater:Absorption:DoubleEffect=\"{}\", autosize error.", this->Name));
                 ShowContinueError(state, "Autosizing of Exhaust Fired Absorption Chiller condenser flow rate requires a condenser");
                 ShowContinueError(state, "loop Sizing:Plant object.");
                 ErrorsFound = true;
@@ -1744,12 +1741,12 @@ void ExhaustAbsorberSpecs::calcChiller(EnergyPlusData &state, Real64 &MyLoad)
 
         if (lExhHeatRecPotentialCool < lCoolThermalEnergyUseRate) {
             if (this->ExhTempLTAbsLeavingTempIndex == 0) {
-                ShowWarningError(state, EnergyPlus::format("ChillerHeater:Absorption:DoubleEffect \"{}\"", this->Name));
+                ShowWarningError(state, std::format("ChillerHeater:Absorption:DoubleEffect \"{}\"", this->Name));
                 ShowContinueError(state,
                                   "...Exhaust temperature and flow input from Micro Turbine is not sufficient during cooling to run the chiller ");
-                ShowContinueError(state, EnergyPlus::format("...Value of Exhaust air inlet temp ={:.4T} C.", lExhaustInTemp));
-                ShowContinueError(state, EnergyPlus::format("... and Exhaust air flow rate of {:.2T} kg/s.", lExhaustInFlow));
-                ShowContinueError(state, EnergyPlus::format("...Value of minimum absorber leaving temp ={:.4T} C.", AbsLeavingTemp));
+                ShowContinueError(state, std::format("...Value of Exhaust air inlet temp ={:.4f} C.", lExhaustInTemp));
+                ShowContinueError(state, std::format("... and Exhaust air flow rate of {:.2f} kg/s.", lExhaustInFlow));
+                ShowContinueError(state, std::format("...Value of minimum absorber leaving temp ={:.4f} C.", AbsLeavingTemp));
                 ShowContinueError(state,
                                   "...Either increase the Exhaust temperature (min required = 350 C )  or flow or both of Micro Turbine to meet "
                                   "the min available potential criteria.");
@@ -1777,18 +1774,16 @@ void ExhaustAbsorberSpecs::calcChiller(EnergyPlusData &state, Real64 &MyLoad)
                 lCondSupplyTemp = lCondReturnTemp + lTowerLoad / (lCondWaterMassFlowRate * Cp_CD);
             } else {
                 if (this->lCondWaterMassFlowRate_Index == 0) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format("CalcExhaustAbsorberChillerModel: Condenser flow = 0, for Exhaust Absorber Chiller={}", this->Name));
+                    ShowSevereError(state,
+                                    std::format("CalcExhaustAbsorberChillerModel: Condenser flow = 0, for Exhaust Absorber Chiller={}", this->Name));
                     ShowContinueErrorTimeStamp(state, "");
                     // ShowFatalError(state, "Program Terminates due to previous error condition.");
                 }
-                ShowRecurringSevereErrorAtEnd(
-                    state,
-                    EnergyPlus::format("CalcExhaustAbsorberChillerModel: Condenser flow = 0, for Exhaust Absorber Chiller={}: "
-                                       "Condenser flow rate = 0 severe error warning continues...",
-                                       this->Name),    // Message automatically written to "error file" at end of simulation
-                    this->lCondWaterMassFlowRate_Index // Recurring message index, if zero, next available index is assigned
+                ShowRecurringSevereErrorAtEnd(state,
+                                              std::format("CalcExhaustAbsorberChillerModel: Condenser flow = 0, for Exhaust Absorber Chiller={}: "
+                                                          "Condenser flow rate = 0 severe error warning continues...",
+                                                          this->Name),           // Message automatically written to "error file" at end of simulation
+                                              this->lCondWaterMassFlowRate_Index // Recurring message index, if zero, next available index is assigned
                 );
             }
         } else {
@@ -1943,7 +1938,7 @@ void ExhaustAbsorberSpecs::calcHeater(EnergyPlusData &state, Real64 &MyLoad, boo
                 lHotWaterMassFlowRate = 0.0;
                 ShowRecurringWarningErrorAtEnd(
                     state,
-                    EnergyPlus::format("ExhaustAbsorberChillerModel:Heating\"{}\", DeltaTemp = 0 in mass flow calculation", this->Name),
+                    std::format("ExhaustAbsorberChillerModel:Heating\"{}\", DeltaTemp = 0 in mass flow calculation", this->Name),
                     this->DeltaTempHeatErrCount);
             }
             lHotWaterSupplyTemp = HeatSupplySetPointTemp;
@@ -1988,25 +1983,24 @@ void ExhaustAbsorberSpecs::calcHeater(EnergyPlusData &state, Real64 &MyLoad, boo
         lExhHeatRecPotentialHeat = lExhaustInFlow * CpAir * (lExhaustInTemp - AbsLeavingTemp);
         if (lExhHeatRecPotentialHeat < lHeatThermalEnergyUseRate) {
             if (this->ExhTempLTAbsLeavingHeatingTempIndex == 0) {
-                ShowWarningError(state, EnergyPlus::format("ChillerHeater:Absorption:DoubleEffect \"{}\"", this->Name));
+                ShowWarningError(state, std::format("ChillerHeater:Absorption:DoubleEffect \"{}\"", this->Name));
                 ShowContinueError(state,
                                   "...Exhaust temperature and flow input from Micro Turbine is not sufficient to run the chiller during heating .");
-                ShowContinueError(state, EnergyPlus::format("...Value of Exhaust air inlet temp ={:.4T} C.", lExhaustInTemp));
-                ShowContinueError(state, EnergyPlus::format("... and Exhaust air flow rate of {:.2T} kg/s.", lExhaustInFlow));
-                ShowContinueError(state, EnergyPlus::format("...Value of minimum absorber leaving temp ={:.4T} C.", AbsLeavingTemp));
+                ShowContinueError(state, std::format("...Value of Exhaust air inlet temp ={:.4f} C.", lExhaustInTemp));
+                ShowContinueError(state, std::format("... and Exhaust air flow rate of {:.2f} kg/s.", lExhaustInFlow));
+                ShowContinueError(state, std::format("...Value of minimum absorber leaving temp ={:.4f} C.", AbsLeavingTemp));
                 ShowContinueError(state,
                                   "...Either increase the Exhaust temperature (min required = 350 C) or flow or both of Micro Turbine to meet "
                                   "the min available potential criteria.");
                 ShowContinueErrorTimeStamp(state, "... Simulation will continue.");
             }
-            ShowRecurringWarningErrorAtEnd(
-                state,
-                EnergyPlus::format("ChillerHeater:Absorption:DoubleEffect \"{}\": Exhaust temperature from Micro Turbine is not "
-                                   "sufficient to run the chiller during heating warning continues...",
-                                   this->Name),
-                this->ExhTempLTAbsLeavingHeatingTempIndex,
-                lExhaustInTemp,
-                AbsLeavingTemp);
+            ShowRecurringWarningErrorAtEnd(state,
+                                           std::format("ChillerHeater:Absorption:DoubleEffect \"{}\": Exhaust temperature from Micro Turbine is not "
+                                                       "sufficient to run the chiller during heating warning continues...",
+                                                       this->Name),
+                                           this->ExhTempLTAbsLeavingHeatingTempIndex,
+                                           lExhaustInTemp,
+                                           AbsLeavingTemp);
             // If exhaust is not available, it means the available thermal energy is 0.0 and Chiller is not available
             lHeatThermalEnergyUseRate = 0.0;
             lHeatElectricPower = 0.0;

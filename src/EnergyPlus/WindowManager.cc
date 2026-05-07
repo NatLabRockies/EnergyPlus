@@ -49,6 +49,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <format>
 #include <memory>
 #include <string>
 
@@ -8357,9 +8358,9 @@ namespace Window {
                     // overwrite the default solar spectrum
                     if (NumNumbers > 2 * nume) {
                         ShowSevereError(state,
-                                        EnergyPlus::format("Solar spectrum data pair is more than 107 - {} - {}",
-                                                           cCurrentModuleObject,
-                                                           state.dataIPShortCut->cAlphaArgs(1)));
+                                        std::format("Solar spectrum data pair is more than 107 - {} - {}",
+                                                    cCurrentModuleObject,
+                                                    state.dataIPShortCut->cAlphaArgs(1)));
                         ErrorsFound = true;
                     } else {
                         // Step 3 - overwrite default solar spectrum data
@@ -8379,9 +8380,9 @@ namespace Window {
                     // overwrite the default solar spectrum
                     if (NumNumbers > 2 * numt3) {
                         ShowSevereError(state,
-                                        EnergyPlus::format("Visible spectrum data pair is more than 81 - {} - {}",
-                                                           cCurrentModuleObject,
-                                                           state.dataIPShortCut->cAlphaArgs(1)));
+                                        std::format("Visible spectrum data pair is more than 81 - {} - {}",
+                                                    cCurrentModuleObject,
+                                                    state.dataIPShortCut->cAlphaArgs(1)));
                         ErrorsFound = true;
                     } else {
                         // Step 3 - overwrite default visible spectrum data

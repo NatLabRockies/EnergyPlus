@@ -48,6 +48,7 @@
 // C++ Headers
 #include <cassert>
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -1026,7 +1027,7 @@ void BLASTAbsorberSpecs::sizeChiller(EnergyPlusData &state)
                                                  NomPumpPowerUser);
                     if (state.dataGlobal->DisplayExtraWarnings) {
                         if ((std::abs(tmpNomPumpPower - NomPumpPowerUser) / NomPumpPowerUser) > state.dataSize->AutoVsHardSizingThreshold) {
-                            ShowMessage(state, EnergyPlus::format("SizeChillerAbsorption: Potential issue with equipment sizing for {}", this->Name));
+                            ShowMessage(state, std::format("SizeChillerAbsorption: Potential issue with equipment sizing for {}", this->Name));
                             ShowContinueError(state, EnergyPlus::format("User-Specified Nominal Pumping Power of {:.2R} [W]", NomPumpPowerUser));
                             ShowContinueError(state,
                                               EnergyPlus::format("differs from Design Size Nominal Pumping Power of {:.2R} [W]", tmpNomPumpPower));
@@ -1077,8 +1078,7 @@ void BLASTAbsorberSpecs::sizeChiller(EnergyPlusData &state)
                         if (state.dataGlobal->DisplayExtraWarnings) {
                             if ((std::abs(tmpEvapVolFlowRate - EvapVolFlowRateUser) / EvapVolFlowRateUser) >
                                 state.dataSize->AutoVsHardSizingThreshold) {
-                                ShowMessage(state,
-                                            EnergyPlus::format("SizeChillerAbsorption: Potential issue with equipment sizing for {}", this->Name));
+                                ShowMessage(state, std::format("SizeChillerAbsorption: Potential issue with equipment sizing for {}", this->Name));
                                 ShowContinueError(
                                     state, EnergyPlus::format("User-Specified Design Chilled Water Flow Rate of {:.5R} [m3/s]", EvapVolFlowRateUser));
                                 ShowContinueError(state,
@@ -1096,7 +1096,7 @@ void BLASTAbsorberSpecs::sizeChiller(EnergyPlusData &state)
     } else {
         if (this->EvapVolFlowRateWasAutoSized && state.dataPlnt->PlantFirstSizesOkayToFinalize) {
             ShowSevereError(state, "Autosizing of Absorption Chiller evap flow rate requires a loop Sizing:Plant object");
-            ShowContinueError(state, EnergyPlus::format("Occurs in CHILLER:ABSORPTION object={}", this->Name));
+            ShowContinueError(state, std::format("Occurs in CHILLER:ABSORPTION object={}", this->Name));
             ErrorsFound = true;
         }
         if (!this->EvapVolFlowRateWasAutoSized && state.dataPlnt->PlantFinalSizesOkayToReport && this->EvapVolFlowRate > 0.0) {
@@ -1151,8 +1151,7 @@ void BLASTAbsorberSpecs::sizeChiller(EnergyPlusData &state)
                         if (state.dataGlobal->DisplayExtraWarnings) {
                             if ((std::abs(tmpCondVolFlowRate - CondVolFlowRateUser) / CondVolFlowRateUser) >
                                 state.dataSize->AutoVsHardSizingThreshold) {
-                                ShowMessage(state,
-                                            EnergyPlus::format("SizeChillerAbsorption: Potential issue with equipment sizing for {}", this->Name));
+                                ShowMessage(state, std::format("SizeChillerAbsorption: Potential issue with equipment sizing for {}", this->Name));
                                 ShowContinueError(
                                     state,
                                     EnergyPlus::format("User-Specified Design Condenser Water Flow Rate of {:.5R} [m3/s]", CondVolFlowRateUser));
@@ -1172,7 +1171,7 @@ void BLASTAbsorberSpecs::sizeChiller(EnergyPlusData &state)
         if (this->CondVolFlowRateWasAutoSized && state.dataPlnt->PlantFirstSizesOkayToFinalize) {
             ShowSevereError(state, "Autosizing of Absorption Chiller condenser flow rate requires a condenser");
             ShowContinueError(state, "loop Sizing:Plant object");
-            ShowContinueError(state, EnergyPlus::format("Occurs in CHILLER:ABSORPTION object={}", this->Name));
+            ShowContinueError(state, std::format("Occurs in CHILLER:ABSORPTION object={}", this->Name));
             ErrorsFound = true;
         }
         if (!this->CondVolFlowRateWasAutoSized && state.dataPlnt->PlantFirstSizesOkayToFinalize && (this->CondVolFlowRate > 0.0)) {
@@ -1226,9 +1225,8 @@ void BLASTAbsorberSpecs::sizeChiller(EnergyPlusData &state)
                                 if (state.dataGlobal->DisplayExtraWarnings) {
                                     if ((std::abs(tmpGeneratorVolFlowRate - GeneratorVolFlowRateUser) / GeneratorVolFlowRateUser) >
                                         state.dataSize->AutoVsHardSizingThreshold) {
-                                        ShowMessage(
-                                            state,
-                                            EnergyPlus::format("SizeChillerAbsorption: Potential issue with equipment sizing for {}", this->Name));
+                                        ShowMessage(state,
+                                                    std::format("SizeChillerAbsorption: Potential issue with equipment sizing for {}", this->Name));
                                         ShowContinueError(state,
                                                           EnergyPlus::format("User-Specified Design Generator Fluid Flow Rate of {:.5R} [m3/s]",
                                                                              GeneratorVolFlowRateUser));
@@ -1294,9 +1292,8 @@ void BLASTAbsorberSpecs::sizeChiller(EnergyPlusData &state)
                                 if (state.dataGlobal->DisplayExtraWarnings) {
                                     if ((std::abs(tmpGeneratorVolFlowRate - GeneratorVolFlowRateUser) / GeneratorVolFlowRateUser) >
                                         state.dataSize->AutoVsHardSizingThreshold) {
-                                        ShowMessage(
-                                            state,
-                                            EnergyPlus::format("SizeChillerAbsorption: Potential issue with equipment sizing for {}", this->Name));
+                                        ShowMessage(state,
+                                                    std::format("SizeChillerAbsorption: Potential issue with equipment sizing for {}", this->Name));
                                         ShowContinueError(state,
                                                           EnergyPlus::format("User-Specified Design Generator Fluid Flow Rate of {:.5R} [m3/s]",
                                                                              GeneratorVolFlowRateUser));
@@ -1329,7 +1326,7 @@ void BLASTAbsorberSpecs::sizeChiller(EnergyPlusData &state)
             ShowSevereError(state, "Autosizing of Absorption Chiller generator flow rate requires a loop Sizing:Plant object.");
             ShowContinueError(state, " For steam loops, use a steam Sizing:Plant object.");
             ShowContinueError(state, " For hot water loops, use a heating Sizing:Plant object.");
-            ShowContinueError(state, EnergyPlus::format("Occurs in Chiller:Absorption object={}", this->Name));
+            ShowContinueError(state, std::format("Occurs in Chiller:Absorption object={}", this->Name));
             ErrorsFound = true;
         }
         if (!this->GeneratorVolFlowRateWasAutoSized && state.dataPlnt->PlantFinalSizesOkayToReport && (this->GeneratorVolFlowRate > 0.0)) {

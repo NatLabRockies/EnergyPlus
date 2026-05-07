@@ -57,8 +57,14 @@
 // The water coil should size to use sizing data or Data* globals. After a coil is sized, the Data* variables should all be reset.
 // Defect file showed a second coil in the input that autosized the same as the first (incorrect based on zone flow rates).
 
+// C++ Headers
+#include <format>
+
 // Google Test Headers
 #include <gtest/gtest.h>
+
+// Fixture Headers
+#include "Fixtures/EnergyPlusFixture.hh"
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
@@ -87,8 +93,6 @@
 #include <EnergyPlus/SizingManager.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
 #include <EnergyPlus/WaterCoils.hh>
-
-#include "Fixtures/EnergyPlusFixture.hh"
 
 using namespace EnergyPlus;
 using namespace DataAirLoop;
@@ -1166,10 +1170,9 @@ TEST_F(WaterCoilsTest, CoilCoolingWaterDetailed_WarningMath)
         EnergyPlus::format("   ** Warning ** Version: missing in IDF, processing for EnergyPlus version=\"{}\"", DataStringGlobals::MatchVersion),
         "   ** Warning ** Coil:Cooling:Water:DetailedGeometry in Coil =Test Detailed Water Cooling Coil",
         "   **   ~~~   ** Air Flow Rate Velocity has greatly exceeded upper design guidelines of ~2.5 m/s",
-        EnergyPlus::format("   **   ~~~   ** Air Mass Flow Rate[kg/s]={:.6T}", waterCoil1.InletAirMassFlowRate),
-        EnergyPlus::format("   **   ~~~   ** Air Face Velocity[m/s]={:.6T}", AirMassFlow / (waterCoil1.MinAirFlowArea * AirDensity)),
-        EnergyPlus::format("   **   ~~~   ** Approximate Mass Flow Rate limit for Face Area[kg/s]={:.6T}",
-                           2.5 * waterCoil1.MinAirFlowArea * AirDensity),
+        std::format("   **   ~~~   ** Air Mass Flow Rate[kg/s]={:.6f}", waterCoil1.InletAirMassFlowRate),
+        std::format("   **   ~~~   ** Air Face Velocity[m/s]={:.6f}", AirMassFlow / (waterCoil1.MinAirFlowArea * AirDensity)),
+        std::format("   **   ~~~   ** Approximate Mass Flow Rate limit for Face Area[kg/s]={:.6f}", 2.5 * waterCoil1.MinAirFlowArea * AirDensity),
         "   **   ~~~   ** Coil:Cooling:Water:DetailedGeometry could be resized/autosized to handle capacity",
     });
 
@@ -1189,10 +1192,9 @@ TEST_F(WaterCoilsTest, CoilCoolingWaterDetailed_WarningMath)
     std::string expected_fatal_error = delimited_string({
         "   ** Severe  ** Coil:Cooling:Water:DetailedGeometry in Coil =Test Detailed Water Cooling Coil",
         "   **   ~~~   ** Air Flow Rate Velocity is > 100MPH (44.7m/s) and simulation cannot continue",
-        EnergyPlus::format("   **   ~~~   ** Air Mass Flow Rate[kg/s]={:.6T}", waterCoil1.InletAirMassFlowRate),
-        EnergyPlus::format("   **   ~~~   ** Air Face Velocity[m/s]={:.6T}", AirMassFlow / (waterCoil1.MinAirFlowArea * AirDensity)),
-        EnergyPlus::format("   **   ~~~   ** Approximate Mass Flow Rate limit for Face Area[kg/s]={:.6T}",
-                           44.7 * waterCoil1.MinAirFlowArea * AirDensity),
+        std::format("   **   ~~~   ** Air Mass Flow Rate[kg/s]={:.6f}", waterCoil1.InletAirMassFlowRate),
+        std::format("   **   ~~~   ** Air Face Velocity[m/s]={:.6f}", AirMassFlow / (waterCoil1.MinAirFlowArea * AirDensity)),
+        std::format("   **   ~~~   ** Approximate Mass Flow Rate limit for Face Area[kg/s]={:.6f}", 44.7 * waterCoil1.MinAirFlowArea * AirDensity),
         "   **  Fatal  ** Coil:Cooling:Water:DetailedGeometry needs to be resized/autosized to handle capacity",
         "   ...Summary of Errors that led to program termination:",
         "   ..... Reference severe error count=1",

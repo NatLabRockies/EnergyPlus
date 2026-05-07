@@ -48,14 +48,17 @@
 // C++ Headers
 #include <cassert>
 #include <cmath>
+#include <format>
 #include <string>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
 #include <ObjexxFCL/Fmath.hh>
 
-// EnergyPlus Headers
+// Third Party Headers
 #include <AirflowNetwork/Solver.hpp>
+
+// EnergyPlus Headers
 #include <EnergyPlus/Construction.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
@@ -939,7 +942,7 @@ namespace HeatBalFiniteDiffManager {
                 // Setup material layer names actuators
                 int matLay = state.dataConstruction->Construct(ConstrNum).LayerPoint(lay);
                 // Actuator name format: "{SurfName}:{MaterialLayerName}"
-                std::string actName = fmt::format("{}:{}", state.dataSurface->Surface(Surf).Name, state.dataMaterial->materials(matLay)->Name);
+                std::string actName = EnergyPlus::format("{}:{}", state.dataSurface->Surface(Surf).Name, state.dataMaterial->materials(matLay)->Name);
                 SurfaceFD(Surf).condMaterialActuators(lay).actuatorName = actName;
                 SurfaceFD(Surf).specHeatMaterialActuators(lay).actuatorName = actName;
 
@@ -1068,42 +1071,42 @@ namespace HeatBalFiniteDiffManager {
                                     OutputProcessor::StoreType::Average,
                                     state.dataSurface->Surface(SurfNum).Name);
                 SetupOutputVariable(state,
-                                    EnergyPlus::format("CondFD Surface Heat Flux Node {}", node),
+                                    std::format("CondFD Surface Heat Flux Node {}", node),
                                     Constant::Units::W_m2,
                                     SurfaceFD(SurfNum).QDreport(node),
                                     OutputProcessor::TimeStepType::Zone,
                                     OutputProcessor::StoreType::Average,
                                     state.dataSurface->Surface(SurfNum).Name);
                 SetupOutputVariable(state,
-                                    EnergyPlus::format("CondFD Phase Change State {}", node),
+                                    std::format("CondFD Phase Change State {}", node),
                                     Constant::Units::None,
                                     SurfaceFD(SurfNum).PhaseChangeStateRep(node),
                                     OutputProcessor::TimeStepType::Zone,
                                     OutputProcessor::StoreType::Average,
                                     state.dataSurface->Surface(SurfNum).Name);
                 SetupOutputVariable(state,
-                                    EnergyPlus::format("CondFD Phase Change Previous State {}", node),
+                                    std::format("CondFD Phase Change Previous State {}", node),
                                     Constant::Units::None,
                                     SurfaceFD(SurfNum).PhaseChangeStateOldRep(node),
                                     OutputProcessor::TimeStepType::Zone,
                                     OutputProcessor::StoreType::Average,
                                     state.dataSurface->Surface(SurfNum).Name);
                 SetupOutputVariable(state,
-                                    EnergyPlus::format("CondFD Phase Change Node Temperature {}", node),
+                                    std::format("CondFD Phase Change Node Temperature {}", node),
                                     Constant::Units::C,
                                     SurfaceFD(SurfNum).TDT(node),
                                     OutputProcessor::TimeStepType::Zone,
                                     OutputProcessor::StoreType::Average,
                                     state.dataSurface->Surface(SurfNum).Name);
                 SetupOutputVariable(state,
-                                    EnergyPlus::format("CondFD Phase Change Node Conductivity {}", node),
+                                    std::format("CondFD Phase Change Node Conductivity {}", node),
                                     Constant::Units::W_mK,
                                     SurfaceFD(SurfNum).condNodeReport(node),
                                     OutputProcessor::TimeStepType::Zone,
                                     OutputProcessor::StoreType::Average,
                                     state.dataSurface->Surface(SurfNum).Name);
                 SetupOutputVariable(state,
-                                    EnergyPlus::format("CondFD Phase Change Node Specific Heat {}", node),
+                                    std::format("CondFD Phase Change Node Specific Heat {}", node),
                                     Constant::Units::J_kgK,
                                     SurfaceFD(SurfNum).specHeatNodeReport(node),
                                     OutputProcessor::TimeStepType::Zone,
@@ -1111,14 +1114,14 @@ namespace HeatBalFiniteDiffManager {
                                     state.dataSurface->Surface(SurfNum).Name);
                 if (state.dataGlobal->DisplayAdvancedReportVariables) {
                     SetupOutputVariable(state,
-                                        EnergyPlus::format("CondFD Surface Heat Capacitance Outer Half Node {}", node),
+                                        std::format("CondFD Surface Heat Capacitance Outer Half Node {}", node),
                                         Constant::Units::W_m2K,
                                         SurfaceFD(SurfNum).CpDelXRhoS1(node),
                                         OutputProcessor::TimeStepType::Zone,
                                         OutputProcessor::StoreType::Average,
                                         state.dataSurface->Surface(SurfNum).Name);
                     SetupOutputVariable(state,
-                                        EnergyPlus::format("CondFD Surface Heat Capacitance Inner Half Node {}", node),
+                                        std::format("CondFD Surface Heat Capacitance Inner Half Node {}", node),
                                         Constant::Units::W_m2K,
                                         SurfaceFD(SurfNum).CpDelXRhoS2(node),
                                         OutputProcessor::TimeStepType::Zone,
@@ -1480,7 +1483,7 @@ namespace HeatBalFiniteDiffManager {
                         if (Inodes == 1) {
                             print(state.files.eio,
                                   Format_702,
-                                  EnergyPlus::format("Node #{}", Inodes),
+                                  std::format("Node #{}", Inodes),
                                   constructFD.NodeXlocation(Inodes),
                                   construct.Name,
                                   "Surface Outside Face",
@@ -1491,7 +1494,7 @@ namespace HeatBalFiniteDiffManager {
                             if (OutwardMatLayerNum > 0 && OutwardMatLayerNum <= construct.TotLayers) {
                                 print(state.files.eio,
                                       Format_702,
-                                      EnergyPlus::format("Node #{}", Inodes),
+                                      std::format("Node #{}", Inodes),
                                       constructFD.NodeXlocation(Inodes),
                                       construct.Name,
                                       constructFD.Name(OutwardMatLayerNum),
@@ -1501,7 +1504,7 @@ namespace HeatBalFiniteDiffManager {
                             OutwardMatLayerNum = Layer;
                             print(state.files.eio,
                                   Format_702,
-                                  EnergyPlus::format("Node #{}", Inodes),
+                                  std::format("Node #{}", Inodes),
                                   constructFD.NodeXlocation(Inodes),
                                   construct.Name,
                                   constructFD.Name(OutwardMatLayerNum),
@@ -1514,7 +1517,7 @@ namespace HeatBalFiniteDiffManager {
                 ++Inodes;
                 print(state.files.eio,
                       Format_702,
-                      EnergyPlus::format("Node #{}", Inodes),
+                      std::format("Node #{}", Inodes),
                       constructFD.NodeXlocation(Inodes),
                       construct.Name,
                       constructFD.Name(Layer),
@@ -2135,7 +2138,7 @@ namespace HeatBalFiniteDiffManager {
                     if (actuatedVal >= 0) {
                         QSSFlux += heatFluxActuator.actuatedValue;
                     } else {
-                        ShowSevereError(state, fmt::format("Surface: {}, Material: {}", surface.Name, mat->Name));
+                        ShowSevereError(state, std::format("Surface: {}, Material: {}", surface.Name, mat->Name));
                         ShowContinueError(state, "EMS Actuator does not support negative values");
                         ShowFatalError(state, "Program terminates due to preceding conditions.");
                     }
@@ -2586,7 +2589,7 @@ namespace HeatBalFiniteDiffManager {
                                                          state.dataSurface->Surface(SurfNum).Name));
                     ShowContinueErrorTimeStamp(state, "");
                     if (!state.dataHeatBal->Zone(ZoneNum).TempOutOfBoundsReported) {
-                        ShowContinueError(state, EnergyPlus::format("Zone=\"{}\", Diagnostic Details:", state.dataHeatBal->Zone(ZoneNum).Name));
+                        ShowContinueError(state, std::format("Zone=\"{}\", Diagnostic Details:", state.dataHeatBal->Zone(ZoneNum).Name));
                         if (state.dataHeatBal->Zone(ZoneNum).FloorArea > 0.0) {
                             ShowContinueError(
                                 state,
@@ -2642,7 +2645,7 @@ namespace HeatBalFiniteDiffManager {
                                                          state.dataSurface->Surface(SurfNum).Name));
                     ShowContinueErrorTimeStamp(state, "");
                     if (!state.dataHeatBal->Zone(ZoneNum).TempOutOfBoundsReported) {
-                        ShowContinueError(state, EnergyPlus::format("Zone=\"{}\", Diagnostic Details:", state.dataHeatBal->Zone(ZoneNum).Name));
+                        ShowContinueError(state, std::format("Zone=\"{}\", Diagnostic Details:", state.dataHeatBal->Zone(ZoneNum).Name));
                         if (state.dataHeatBal->Zone(ZoneNum).FloorArea > 0.0) {
                             ShowContinueError(
                                 state,

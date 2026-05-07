@@ -48,6 +48,7 @@
 // C++ Headers
 #include <cassert>
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Fmath.hh>
@@ -549,7 +550,7 @@ void GetFluidHeatExchangerInput(EnergyPlusData &state)
     }
 
     if (ErrorsFound) {
-        ShowFatalError(state, EnergyPlus::format("{}Errors found in processing {} input.", RoutineName, cCurrentModuleObject));
+        ShowFatalError(state, std::format("{}Errors found in processing {} input.", RoutineName, cCurrentModuleObject));
     }
 }
 
@@ -742,7 +743,7 @@ void HeatExchangerStruct::size(EnergyPlusData &state)
         } else {
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                 ShowSevereError(state, "SizeFluidHeatExchanger: Autosizing of requires a loop Sizing:Plant object");
-                ShowContinueError(state, EnergyPlus::format("Occurs in heat exchanger object={}", this->Name));
+                ShowContinueError(state, std::format("Occurs in heat exchanger object={}", this->Name));
             }
         }
     }
@@ -845,7 +846,7 @@ void HeatExchangerStruct::size(EnergyPlusData &state)
         } else {
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                 ShowSevereError(state, "SizeFluidHeatExchanger: Autosizing of heat Exchanger UA requires a loop Sizing:Plant objects for both loops");
-                ShowContinueError(state, EnergyPlus::format("Occurs in heat exchanger object={}", this->Name));
+                ShowContinueError(state, std::format("Occurs in heat exchanger object={}", this->Name));
             }
         }
     }
@@ -1741,9 +1742,9 @@ void HeatExchangerStruct::findDemandSideLoopFlow(EnergyPlusData &state, Real64 c
                     if (this->DmdSideModulatSolvNoConvergeErrorCount < 1) {
                         ++this->DmdSideModulatSolvNoConvergeErrorCount;
                         ShowWarningError(state,
-                                         EnergyPlus::format("{} named {} - Iteration Limit exceeded calculating demand side loop flow rate",
-                                                            ComponentClassName,
-                                                            this->Name));
+                                         std::format("{} named {} - Iteration Limit exceeded calculating demand side loop flow rate",
+                                                     ComponentClassName,
+                                                     this->Name));
                         ShowContinueError(
                             state, EnergyPlus::format("Simulation continues with calculated demand side mass flow rate = {:.7R}", DmdSideMdot));
                     }
@@ -1760,9 +1761,9 @@ void HeatExchangerStruct::findDemandSideLoopFlow(EnergyPlusData &state, Real64 c
                 if (!state.dataGlobal->WarmupFlag) {
                     if (this->DmdSideModulatSolvFailErrorCount < 1) {
                         ++this->DmdSideModulatSolvFailErrorCount;
-                        ShowWarningError(state,
-                                         EnergyPlus::format(
-                                             "{} named {} - Solver failed to calculate demand side loop flow rate", ComponentClassName, this->Name));
+                        ShowWarningError(
+                            state,
+                            std::format("{} named {} - Solver failed to calculate demand side loop flow rate", ComponentClassName, this->Name));
                         ShowContinueError(state,
                                           EnergyPlus::format("Simulation continues with estimated demand side mass flow rate = {:.7R}", DmdSideMdot));
                     }
@@ -1807,9 +1808,9 @@ void HeatExchangerStruct::findDemandSideLoopFlow(EnergyPlusData &state, Real64 c
                     if (this->DmdSideModulatSolvNoConvergeErrorCount < 1) {
                         ++this->DmdSideModulatSolvNoConvergeErrorCount;
                         ShowWarningError(state,
-                                         EnergyPlus::format("{} named {} - Iteration Limit exceeded calculating demand side loop flow rate",
-                                                            ComponentClassName,
-                                                            this->Name));
+                                         std::format("{} named {} - Iteration Limit exceeded calculating demand side loop flow rate",
+                                                     ComponentClassName,
+                                                     this->Name));
                         ShowContinueError(
                             state, EnergyPlus::format("Simulation continues with calculated demand side mass flow rate = {:.7R}", DmdSideMdot));
                     }
@@ -1826,9 +1827,9 @@ void HeatExchangerStruct::findDemandSideLoopFlow(EnergyPlusData &state, Real64 c
                 if (!state.dataGlobal->WarmupFlag) {
                     if (this->DmdSideModulatSolvFailErrorCount < 1) {
                         ++this->DmdSideModulatSolvFailErrorCount;
-                        ShowWarningError(state,
-                                         EnergyPlus::format(
-                                             "{} named {} - Solver failed to calculate demand side loop flow rate", ComponentClassName, this->Name));
+                        ShowWarningError(
+                            state,
+                            std::format("{} named {} - Solver failed to calculate demand side loop flow rate", ComponentClassName, this->Name));
                         ShowContinueError(state,
                                           EnergyPlus::format("Simulation continues with estimated demand side mass flow rate = {:.7R}", DmdSideMdot));
                     }
@@ -1888,12 +1889,11 @@ void HeatExchangerStruct::oneTimeInit(EnergyPlusData &state)
                                                 _);
 
         if (this->DemandSideLoop.loopSideNum != DataPlant::LoopSideLocation::Demand) { // throw error
-            ShowSevereError(
-                state,
-                EnergyPlus::format("{} Invalid connections for {} name = \"{}\"",
-                                   RoutineName,
-                                   DataPlant::PlantEquipTypeNames[static_cast<int>(DataPlant::PlantEquipmentType::FluidToFluidPlantHtExchg)],
-                                   this->Name));
+            ShowSevereError(state,
+                            std::format("{} Invalid connections for {} name = \"{}\"",
+                                        RoutineName,
+                                        DataPlant::PlantEquipTypeNames[static_cast<int>(DataPlant::PlantEquipmentType::FluidToFluidPlantHtExchg)],
+                                        this->Name));
             ShowContinueError(state, "The \"Loop Demand Side\" connections are not on the Demand Side of a plant loop");
             errFlag = true;
         }
@@ -1910,24 +1910,22 @@ void HeatExchangerStruct::oneTimeInit(EnergyPlusData &state)
                                                 _);
 
         if (this->SupplySideLoop.loopSideNum != DataPlant::LoopSideLocation::Supply) { // throw error
-            ShowSevereError(
-                state,
-                EnergyPlus::format("{} Invalid connections for {} name = \"{}\"",
-                                   RoutineName,
-                                   DataPlant::PlantEquipTypeNames[static_cast<int>(DataPlant::PlantEquipmentType::FluidToFluidPlantHtExchg)],
-                                   this->Name));
+            ShowSevereError(state,
+                            std::format("{} Invalid connections for {} name = \"{}\"",
+                                        RoutineName,
+                                        DataPlant::PlantEquipTypeNames[static_cast<int>(DataPlant::PlantEquipmentType::FluidToFluidPlantHtExchg)],
+                                        this->Name));
             ShowContinueError(state, "The \"Loop Supply Side\" connections are not on the Supply Side of a plant loop");
             errFlag = true;
         }
 
         // make sure it is not the same loop on both sides.
         if (this->SupplySideLoop.loopNum == this->DemandSideLoop.loopNum) { // user is being too tricky, don't allow
-            ShowSevereError(
-                state,
-                EnergyPlus::format("{} Invalid connections for {} name = \"{}\"",
-                                   RoutineName,
-                                   DataPlant::PlantEquipTypeNames[static_cast<int>(DataPlant::PlantEquipmentType::FluidToFluidPlantHtExchg)],
-                                   this->Name));
+            ShowSevereError(state,
+                            std::format("{} Invalid connections for {} name = \"{}\"",
+                                        RoutineName,
+                                        DataPlant::PlantEquipTypeNames[static_cast<int>(DataPlant::PlantEquipmentType::FluidToFluidPlantHtExchg)],
+                                        this->Name));
             ShowContinueError(state, R"(The "Loop Supply Side" and "Loop Demand Side" need to be on different loops.)");
             errFlag = true;
         } else {
@@ -2006,7 +2004,7 @@ void HeatExchangerStruct::oneTimeInit(EnergyPlusData &state)
         }
 
         if (errFlag) {
-            ShowFatalError(state, EnergyPlus::format("{} Program terminated due to previous condition(s).", RoutineName));
+            ShowFatalError(state, std::format("{} Program terminated due to previous condition(s).", RoutineName));
         }
         this->MyFlag = false;
     }

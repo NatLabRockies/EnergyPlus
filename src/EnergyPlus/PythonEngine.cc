@@ -45,11 +45,10 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include <EnergyPlus/DataStringGlobals.hh>
-#include <EnergyPlus/PluginManager.hh>
-#include <EnergyPlus/PythonEngine.hh>
-#include <EnergyPlus/UtilityRoutines.hh>
+// C++ Headers
+#include <format>
 
+// Third Party Headers
 #if LINK_WITH_PYTHON
 #    ifdef _DEBUG
 // We don't want to try to import a debug build of Python here
@@ -79,15 +78,15 @@ template <> struct formatter<PyStatus>
             return ctx.out();
         }
         if (PyStatus_IsExit(status) != 0) {
-            return fmt::format_to(ctx.out(), "Exited with code {}", status.exitcode);
+            return std::format_to(ctx.out(), "Exited with code {}", status.exitcode);
         }
         if (PyStatus_IsError(status) != 0) {
             auto it = ctx.out();
-            it = fmt::format_to(it, "Fatal Python error: ");
+            it = std::format_to(it, "Fatal Python error: ");
             if (status.func != nullptr) {
-                it = fmt::format_to(it, "{}: ", status.func);
+                it = std::format_to(it, "{}: ", status.func);
             }
-            it = fmt::format_to(it, "{}", status.err_msg);
+            it = std::format_to(it, "{}", status.err_msg);
             return it;
         }
         return ctx.out();
@@ -96,6 +95,12 @@ template <> struct formatter<PyStatus>
 } // namespace fmt
 
 #endif
+
+// EnergyPlus Headers
+#include <EnergyPlus/DataStringGlobals.hh>
+#include <EnergyPlus/PluginManager.hh>
+#include <EnergyPlus/PythonEngine.hh>
+#include <EnergyPlus/UtilityRoutines.hh>
 
 namespace EnergyPlus {
 
@@ -229,7 +234,7 @@ namespace Python {
         preConfig.utf8_mode = 1;
         status = Py_PreInitialize(&preConfig);
         if (PyStatus_Exception(status) != 0) {
-            ShowFatalError(state, fmt::format("Could not pre-initialize Python to speak UTF-8... {}", status));
+            ShowFatalError(state, EnergyPlus::format("Could not pre-initialize Python to speak UTF-8... {}", status));
         }
 
         PyConfig config;
@@ -238,12 +243,12 @@ namespace Python {
 
         status = PyConfig_SetBytesString(&config, &config.program_name, PluginManagement::programName);
         if (PyStatus_Exception(status) != 0) {
-            ShowFatalError(state, fmt::format("Could not initialize program_name on PyConfig... {}", status));
+            ShowFatalError(state, EnergyPlus::format("Could not initialize program_name on PyConfig... {}", status));
         }
 
         status = PyConfig_Read(&config);
         if (PyStatus_Exception(status) != 0) {
-            ShowFatalError(state, fmt::format("Could not read back the PyConfig... {}", status));
+            ShowFatalError(state, EnergyPlus::format("Could not read back the PyConfig... {}", status));
         }
 
         if constexpr (std::is_same_v<typename fs::path::value_type, wchar_t>) {
@@ -253,18 +258,20 @@ namespace Python {
 
             status = PyConfig_SetString(&config, &config.home, wcharPath);
             if (PyStatus_Exception(status) != 0) {
-                ShowFatalError(state, fmt::format("Could not set home to {} on PyConfig... {}", pathToPythonPackages.generic_string(), status));
+                ShowFatalError(state,
+                               EnergyPlus::format("Could not set home to {} on PyConfig... {}", pathToPythonPackages.generic_string(), status));
             }
             status = PyConfig_SetString(&config, &config.base_prefix, wcharPath);
             if (PyStatus_Exception(status) != 0) {
-                ShowFatalError(state,
-                               fmt::format("Could not set base_prefix to {} on PyConfig... {}", pathToPythonPackages.generic_string(), status));
+                ShowFatalError(
+                    state, EnergyPlus::format("Could not set base_prefix to {} on PyConfig... {}", pathToPythonPackages.generic_string(), status));
             }
             config.module_search_paths_set = 1;
             status = PyWideStringList_Append(&config.module_search_paths, wcharPath);
             if (PyStatus_Exception(status) != 0) {
                 ShowFatalError(
-                    state, fmt::format("Could not add {} to module_search_paths on PyConfig... {}", pathToPythonPackages.generic_string(), status));
+                    state,
+                    EnergyPlus::format("Could not add {} to module_search_paths on PyConfig... {}", pathToPythonPackages.generic_string(), status));
             }
 
         } else {
@@ -275,18 +282,20 @@ namespace Python {
 
             status = PyConfig_SetString(&config, &config.home, wcharPath);
             if (PyStatus_Exception(status) != 0) {
-                ShowFatalError(state, fmt::format("Could not set home to {} on PyConfig... {}", pathToPythonPackages.generic_string(), status));
+                ShowFatalError(state,
+                               EnergyPlus::format("Could not set home to {} on PyConfig... {}", pathToPythonPackages.generic_string(), status));
             }
             status = PyConfig_SetString(&config, &config.base_prefix, wcharPath);
             if (PyStatus_Exception(status) != 0) {
-                ShowFatalError(state,
-                               fmt::format("Could not set base_prefix to {} on PyConfig... {}", pathToPythonPackages.generic_string(), status));
+                ShowFatalError(
+                    state, EnergyPlus::format("Could not set base_prefix to {} on PyConfig... {}", pathToPythonPackages.generic_string(), status));
             }
             config.module_search_paths_set = 1;
             status = PyWideStringList_Append(&config.module_search_paths, wcharPath);
             if (PyStatus_Exception(status) != 0) {
                 ShowFatalError(
-                    state, fmt::format("Could not add {} to module_search_paths on PyConfig... {}", pathToPythonPackages.generic_string(), status));
+                    state,
+                    EnergyPlus::format("Could not add {} to module_search_paths on PyConfig... {}", pathToPythonPackages.generic_string(), status));
             }
 
             PyMem_RawFree(wcharPath);
@@ -372,7 +381,7 @@ sys.argv.append("energyplus")
         fs::path const pathToPythonPackages = programDir / "python_lib";
         std::string sPathToPythonPackages = std::string(pathToPythonPackages.string());
         std::replace(sPathToPythonPackages.begin(), sPathToPythonPackages.end(), '\\', '/');
-        cmd += fmt::format("sys.path.insert(0, \"{}\")\n", sPathToPythonPackages);
+        cmd += EnergyPlus::format("sys.path.insert(0, \"{}\")\n", sPathToPythonPackages);
         return cmd;
     }
 
@@ -383,13 +392,13 @@ sys.argv.clear()
 sys.argv.append("energyplus")
 )python";
         for (const auto &arg : python_fwd_args) {
-            cmd += fmt::format("sys.argv.append(\"{}\")\n", arg);
+            cmd += EnergyPlus::format("sys.argv.append(\"{}\")\n", arg);
         }
         fs::path programDir = FileSystem::getParentDirectoryPath(FileSystem::getAbsolutePath(FileSystem::getProgramPath()));
         fs::path const pathToPythonPackages = programDir / "python_lib";
         std::string sPathToPythonPackages = std::string(pathToPythonPackages.string());
         std::replace(sPathToPythonPackages.begin(), sPathToPythonPackages.end(), '\\', '/');
-        cmd += fmt::format("sys.path.insert(0, \"{}\")\n", sPathToPythonPackages);
+        cmd += EnergyPlus::format("sys.path.insert(0, \"{}\")\n", sPathToPythonPackages);
         std::string tclConfigDir;
         std::string tkConfigDir;
         for (auto &p : std::filesystem::directory_iterator(pathToPythonPackages)) {
@@ -407,8 +416,8 @@ sys.argv.append("energyplus")
             }
         }
         cmd += "from os import environ\n";
-        cmd += fmt::format("environ[\'TCL_LIBRARY\'] = \"{}/{}\"\n", sPathToPythonPackages, tclConfigDir);
-        cmd += fmt::format("environ[\'TK_LIBRARY\'] = \"{}/{}\"\n", sPathToPythonPackages, tkConfigDir);
+        cmd += EnergyPlus::format("environ[\'TCL_LIBRARY\'] = \"{}/{}\"\n", sPathToPythonPackages, tclConfigDir);
+        cmd += EnergyPlus::format("environ[\'TK_LIBRARY\'] = \"{}/{}\"\n", sPathToPythonPackages, tkConfigDir);
         return cmd;
     }
 

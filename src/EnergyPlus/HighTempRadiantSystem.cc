@@ -48,6 +48,7 @@
 // C++ Headers
 #include <cassert>
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -290,7 +291,7 @@ namespace HighTempRadiantSystem {
                     if (highTempRadSys.ScaledHeatingCapacity < 0.0 && highTempRadSys.ScaledHeatingCapacity != DataSizing::AutoSize) {
                         ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, highTempRadSys.Name));
                         ShowContinueError(state,
-                                          EnergyPlus::format("Illegal {} = {:.7T}",
+                                          EnergyPlus::format("Illegal {} = {:.7f}",
                                                              state.dataIPShortCut->cNumericFieldNames(iHeatDesignCapacityNumericNum),
                                                              state.dataIPShortCut->rNumericArgs(iHeatDesignCapacityNumericNum)));
                         ErrorsFound = true;
@@ -316,7 +317,7 @@ namespace HighTempRadiantSystem {
                                                              state.dataIPShortCut->cAlphaFieldNames(iHeatCAPMAlphaNum),
                                                              state.dataIPShortCut->cAlphaArgs(iHeatCAPMAlphaNum)));
                         ShowContinueError(state,
-                                          EnergyPlus::format("Illegal {} = {:.7T}",
+                                          EnergyPlus::format("Illegal {} = {:.7f}",
                                                              state.dataIPShortCut->cNumericFieldNames(iHeatCapacityPerFloorAreaNumericNum),
                                                              state.dataIPShortCut->rNumericArgs(iHeatCapacityPerFloorAreaNumericNum)));
                         ErrorsFound = true;
@@ -337,31 +338,31 @@ namespace HighTempRadiantSystem {
                                       EnergyPlus::format("Input for {} = {}",
                                                          state.dataIPShortCut->cAlphaFieldNames(iHeatCAPMAlphaNum),
                                                          state.dataIPShortCut->cAlphaArgs(iHeatCAPMAlphaNum)));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("Blank field not allowed for {}",
-                                                         state.dataIPShortCut->cNumericFieldNames(iHeatCapacityPerFloorAreaNumericNum)));
+                    ShowContinueError(
+                        state,
+                        std::format("Blank field not allowed for {}", state.dataIPShortCut->cNumericFieldNames(iHeatCapacityPerFloorAreaNumericNum)));
                     ErrorsFound = true;
                 }
             } else if (highTempRadSys.HeatingCapMethod == DataSizing::DesignSizingType::FractionOfAutosizedHeatingCapacity) {
                 if (!state.dataIPShortCut->lNumericFieldBlanks(iHeatFracOfAutosizedCapacityNumericNum)) {
                     highTempRadSys.ScaledHeatingCapacity = state.dataIPShortCut->rNumericArgs(iHeatFracOfAutosizedCapacityNumericNum);
                     if (highTempRadSys.ScaledHeatingCapacity < 0.0) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, highTempRadSys.Name));
+                        ShowSevereError(state, std::format("{} = {}", cCurrentModuleObject, highTempRadSys.Name));
                         ShowContinueError(state,
-                                          EnergyPlus::format("Illegal {} = {:.7T}",
-                                                             state.dataIPShortCut->cNumericFieldNames(iHeatFracOfAutosizedCapacityNumericNum),
-                                                             state.dataIPShortCut->rNumericArgs(iHeatFracOfAutosizedCapacityNumericNum)));
+                                          std::format("Illegal {} = {:.7f}",
+                                                      state.dataIPShortCut->cNumericFieldNames(iHeatFracOfAutosizedCapacityNumericNum),
+                                                      state.dataIPShortCut->rNumericArgs(iHeatFracOfAutosizedCapacityNumericNum)));
                         ErrorsFound = true;
                     }
                 } else {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, highTempRadSys.Name));
+                    ShowSevereError(state, std::format("{} = {}", cCurrentModuleObject, highTempRadSys.Name));
                     ShowContinueError(state,
-                                      EnergyPlus::format("Input for {} = {}",
-                                                         state.dataIPShortCut->cAlphaFieldNames(iHeatCAPMAlphaNum),
-                                                         state.dataIPShortCut->cAlphaArgs(iHeatCAPMAlphaNum)));
+                                      std::format("Input for {} = {}",
+                                                  state.dataIPShortCut->cAlphaFieldNames(iHeatCAPMAlphaNum),
+                                                  state.dataIPShortCut->cAlphaArgs(iHeatCAPMAlphaNum)));
                     ShowContinueError(state,
-                                      EnergyPlus::format("Blank field not allowed for {}",
-                                                         state.dataIPShortCut->cNumericFieldNames(iHeatFracOfAutosizedCapacityNumericNum)));
+                                      std::format("Blank field not allowed for {}",
+                                                  state.dataIPShortCut->cNumericFieldNames(iHeatFracOfAutosizedCapacityNumericNum)));
                     ErrorsFound = true;
                 }
             }
@@ -374,17 +375,17 @@ namespace HighTempRadiantSystem {
                 // Limit the combustion efficiency to between zero and one...
                 if (highTempRadSys.CombustionEffic < MinCombustionEffic) {
                     highTempRadSys.CombustionEffic = MinCombustionEffic;
-                    ShowWarningError(state,
-                                     EnergyPlus::format("{} was less than the allowable minimum, reset to minimum value.",
-                                                        state.dataIPShortCut->cNumericFieldNames(4)));
-                    ShowContinueError(state, EnergyPlus::format("Occurs for {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+                    ShowWarningError(
+                        state,
+                        std::format("{} was less than the allowable minimum, reset to minimum value.", state.dataIPShortCut->cNumericFieldNames(4)));
+                    ShowContinueError(state, std::format("Occurs for {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
                 }
                 if (highTempRadSys.CombustionEffic > MaxCombustionEffic) {
                     highTempRadSys.CombustionEffic = MaxCombustionEffic;
                     ShowWarningError(state,
-                                     EnergyPlus::format("{} was greater than the allowable maximum, reset to maximum value.",
-                                                        state.dataIPShortCut->cNumericFieldNames(4)));
-                    ShowContinueError(state, EnergyPlus::format("Occurs for {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+                                     std::format("{} was greater than the allowable maximum, reset to maximum value.",
+                                                 state.dataIPShortCut->cNumericFieldNames(4)));
+                    ShowContinueError(state, std::format("Occurs for {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
                 }
             } else {
                 highTempRadSys.CombustionEffic = MaxCombustionEffic; // No inefficiency in the heater
@@ -393,58 +394,57 @@ namespace HighTempRadiantSystem {
             highTempRadSys.FracRadiant = state.dataIPShortCut->rNumericArgs(5);
             if (highTempRadSys.FracRadiant < MinFraction) {
                 highTempRadSys.FracRadiant = MinFraction;
-                ShowWarningError(state,
-                                 EnergyPlus::format("{} was less than the allowable minimum, reset to minimum value.",
-                                                    state.dataIPShortCut->cNumericFieldNames(5)));
-                ShowContinueError(state, EnergyPlus::format("Occurs for {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+                ShowWarningError(
+                    state,
+                    std::format("{} was less than the allowable minimum, reset to minimum value.", state.dataIPShortCut->cNumericFieldNames(5)));
+                ShowContinueError(state, std::format("Occurs for {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
             }
             if (highTempRadSys.FracRadiant > MaxFraction) {
                 highTempRadSys.FracRadiant = MaxFraction;
-                ShowWarningError(state,
-                                 EnergyPlus::format("{} was greater than the allowable maximum, reset to maximum value.",
-                                                    state.dataIPShortCut->cNumericFieldNames(5)));
-                ShowContinueError(state, EnergyPlus::format("Occurs for {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+                ShowWarningError(
+                    state,
+                    std::format("{} was greater than the allowable maximum, reset to maximum value.", state.dataIPShortCut->cNumericFieldNames(5)));
+                ShowContinueError(state, std::format("Occurs for {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
             }
 
             highTempRadSys.FracLatent = state.dataIPShortCut->rNumericArgs(6);
             if (highTempRadSys.FracLatent < MinFraction) {
                 highTempRadSys.FracLatent = MinFraction;
-                ShowWarningError(state,
-                                 EnergyPlus::format("{} was less than the allowable minimum, reset to minimum value.",
-                                                    state.dataIPShortCut->cNumericFieldNames(6)));
-                ShowContinueError(state, EnergyPlus::format("Occurs for {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+                ShowWarningError(
+                    state,
+                    std::format("{} was less than the allowable minimum, reset to minimum value.", state.dataIPShortCut->cNumericFieldNames(6)));
+                ShowContinueError(state, std::format("Occurs for {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
             }
             if (highTempRadSys.FracLatent > MaxFraction) {
                 highTempRadSys.FracLatent = MaxFraction;
-                ShowWarningError(state,
-                                 EnergyPlus::format("{} was greater than the allowable maximum, reset to maximum value.",
-                                                    state.dataIPShortCut->cNumericFieldNames(6)));
-                ShowContinueError(state, EnergyPlus::format("Occurs for {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+                ShowWarningError(
+                    state,
+                    std::format("{} was greater than the allowable maximum, reset to maximum value.", state.dataIPShortCut->cNumericFieldNames(6)));
+                ShowContinueError(state, std::format("Occurs for {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
             }
 
             highTempRadSys.FracLost = state.dataIPShortCut->rNumericArgs(7);
             if (highTempRadSys.FracLost < MinFraction) {
                 highTempRadSys.FracLost = MinFraction;
-                ShowWarningError(state,
-                                 EnergyPlus::format("{} was less than the allowable minimum, reset to minimum value.",
-                                                    state.dataIPShortCut->cNumericFieldNames(7)));
-                ShowContinueError(state, EnergyPlus::format("Occurs for {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+                ShowWarningError(
+                    state,
+                    std::format("{} was less than the allowable minimum, reset to minimum value.", state.dataIPShortCut->cNumericFieldNames(7)));
+                ShowContinueError(state, std::format("Occurs for {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
             }
             if (highTempRadSys.FracLost > MaxFraction) {
                 highTempRadSys.FracLost = MaxFraction;
-                ShowWarningError(state,
-                                 EnergyPlus::format("{} was greater than the allowable maximum, reset to maximum value.",
-                                                    state.dataIPShortCut->cNumericFieldNames(7)));
-                ShowContinueError(state, EnergyPlus::format("Occurs for {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+                ShowWarningError(
+                    state,
+                    std::format("{} was greater than the allowable maximum, reset to maximum value.", state.dataIPShortCut->cNumericFieldNames(7)));
+                ShowContinueError(state, std::format("Occurs for {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
             }
 
             // Based on the input for fractions radiant, latent, and lost, determine the fraction convective (remaining fraction)
             Real64 AllFracsSummed = highTempRadSys.FracRadiant + highTempRadSys.FracLatent + highTempRadSys.FracLost;
             if (AllFracsSummed > MaxFraction) {
                 ShowSevereError(
-                    state,
-                    EnergyPlus::format("Fractions radiant, latent, and lost sum up to greater than 1 for{}", state.dataIPShortCut->cAlphaArgs(1)));
-                ShowContinueError(state, EnergyPlus::format("Occurs for {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+                    state, std::format("Fractions radiant, latent, and lost sum up to greater than 1 for{}", state.dataIPShortCut->cAlphaArgs(1)));
+                ShowContinueError(state, std::format("Occurs for {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
                 ErrorsFound = true;
                 highTempRadSys.FracConvect = 0.0;
             } else {
@@ -464,8 +464,8 @@ namespace HighTempRadiantSystem {
             highTempRadSys.ThrottlRange = state.dataIPShortCut->rNumericArgs(8);
             if (highTempRadSys.ThrottlRange < MinThrottlingRange) {
                 highTempRadSys.ThrottlRange = 1.0;
-                ShowWarningError(state, EnergyPlus::format("{} is below the minimum allowed.", state.dataIPShortCut->cNumericFieldNames(8)));
-                ShowContinueError(state, EnergyPlus::format("Occurs for {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+                ShowWarningError(state, std::format("{} is below the minimum allowed.", state.dataIPShortCut->cNumericFieldNames(8)));
+                ShowContinueError(state, std::format("Occurs for {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
                 ShowContinueError(state, "Thus, the throttling range value has been reset to 1.0");
             }
 
@@ -484,17 +484,17 @@ namespace HighTempRadiantSystem {
             highTempRadSys.FracDistribPerson = state.dataIPShortCut->rNumericArgs(9);
             if (highTempRadSys.FracDistribPerson < MinFraction) {
                 highTempRadSys.FracDistribPerson = MinFraction;
-                ShowWarningError(state,
-                                 EnergyPlus::format("{} was less than the allowable minimum, reset to minimum value.",
-                                                    state.dataIPShortCut->cNumericFieldNames(9)));
-                ShowContinueError(state, EnergyPlus::format("Occurs for {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+                ShowWarningError(
+                    state,
+                    std::format("{} was less than the allowable minimum, reset to minimum value.", state.dataIPShortCut->cNumericFieldNames(9)));
+                ShowContinueError(state, std::format("Occurs for {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
             }
             if (highTempRadSys.FracDistribPerson > MaxFraction) {
                 highTempRadSys.FracDistribPerson = MaxFraction;
-                ShowWarningError(state,
-                                 EnergyPlus::format("{} was greater than the allowable maximum, reset to maximum value.",
-                                                    state.dataIPShortCut->cNumericFieldNames(9)));
-                ShowContinueError(state, EnergyPlus::format("Occurs for {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+                ShowWarningError(
+                    state,
+                    std::format("{} was greater than the allowable maximum, reset to maximum value.", state.dataIPShortCut->cNumericFieldNames(9)));
+                ShowContinueError(state, std::format("Occurs for {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
             }
 
             highTempRadSys.TotSurfToDistrib = NumNumbers - 9;
@@ -517,16 +517,16 @@ namespace HighTempRadiantSystem {
                 if (highTempRadSys.FracDistribToSurf(SurfNum) < MinFraction) {
                     highTempRadSys.FracDistribToSurf(SurfNum) = MinFraction;
                     ShowWarningError(state,
-                                     EnergyPlus::format("{} was less than the allowable minimum, reset to minimum value.",
-                                                        state.dataIPShortCut->cNumericFieldNames(SurfNum + 9)));
-                    ShowContinueError(state, EnergyPlus::format("Occurs for {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+                                     std::format("{} was less than the allowable minimum, reset to minimum value.",
+                                                 state.dataIPShortCut->cNumericFieldNames(SurfNum + 9)));
+                    ShowContinueError(state, std::format("Occurs for {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
                 }
                 if (highTempRadSys.FracDistribToSurf(SurfNum) > MaxFraction) {
                     highTempRadSys.FracDistribToSurf(SurfNum) = MaxFraction;
                     ShowWarningError(state,
-                                     EnergyPlus::format("{} was greater than the allowable maximum, reset to maximum value.",
-                                                        state.dataIPShortCut->cNumericFieldNames(SurfNum + 9)));
-                    ShowContinueError(state, EnergyPlus::format("Occurs for {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+                                     std::format("{} was greater than the allowable maximum, reset to maximum value.",
+                                                 state.dataIPShortCut->cNumericFieldNames(SurfNum + 9)));
+                    ShowContinueError(state, std::format("Occurs for {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
                 }
 
                 if (highTempRadSys.SurfacePtr(SurfNum) != 0) {
@@ -541,30 +541,30 @@ namespace HighTempRadiantSystem {
             // Error trap if the fractions add up to greater than 1.0
             if (AllFracsSummed > (MaxFraction + 0.01)) {
                 ShowSevereError(state,
-                                EnergyPlus::format("Fraction of radiation distributed to surfaces sums up to greater than 1 for {}",
-                                                   state.dataIPShortCut->cAlphaArgs(1)));
-                ShowContinueError(state, EnergyPlus::format("Occurs for {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+                                std::format("Fraction of radiation distributed to surfaces sums up to greater than 1 for {}",
+                                            state.dataIPShortCut->cAlphaArgs(1)));
+                ShowContinueError(state, std::format("Occurs for {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
                 ErrorsFound = true;
             }
             if (AllFracsSummed < (MaxFraction - 0.01)) { // User didn't distribute all of the radiation warn that some will be lost
                 Real64 TotalFracToSurfs = AllFracsSummed - highTempRadSys.FracDistribPerson;
                 FracOfRadPotentiallyLost = 1.0 - AllFracsSummed;
                 ShowSevereError(state,
-                                EnergyPlus::format("Fraction of radiation distributed to surfaces and people sums up to less than 1 for {}",
-                                                   state.dataIPShortCut->cAlphaArgs(1)));
+                                std::format("Fraction of radiation distributed to surfaces and people sums up to less than 1 for {}",
+                                            state.dataIPShortCut->cAlphaArgs(1)));
                 ShowContinueError(state, "This would result in some of the radiant energy delivered by the high temp radiant heater being lost.");
-                ShowContinueError(state, EnergyPlus::format("The sum of all radiation fractions to surfaces = {:.5T}", TotalFracToSurfs));
-                ShowContinueError(state, EnergyPlus::format("The radiant fraction to people = {:.5T}", highTempRadSys.FracDistribPerson));
-                ShowContinueError(state, EnergyPlus::format("So, all radiant fractions including surfaces and people = {:.5T}", AllFracsSummed));
+                ShowContinueError(state, std::format("The sum of all radiation fractions to surfaces = {:.5f}", TotalFracToSurfs));
+                ShowContinueError(state, std::format("The radiant fraction to people = {:.5f}", highTempRadSys.FracDistribPerson));
+                ShowContinueError(state, std::format("So, all radiant fractions including surfaces and people = {:.5f}", AllFracsSummed));
                 ShowContinueError(
                     state,
-                    EnergyPlus::format("This means that the fraction of radiant energy that would be lost from the high temperature radiant heater "
-                                       "would be = {:.5T}",
-                                       FracOfRadPotentiallyLost));
+                    std::format("This means that the fraction of radiant energy that would be lost from the high temperature radiant heater "
+                                "would be = {:.5f}",
+                                FracOfRadPotentiallyLost));
                 ShowContinueError(state,
-                                  EnergyPlus::format("Please check and correct this so that all radiant energy is accounted for in {} = {}",
-                                                     cCurrentModuleObject,
-                                                     state.dataIPShortCut->cAlphaArgs(1)));
+                                  std::format("Please check and correct this so that all radiant energy is accounted for in {} = {}",
+                                              cCurrentModuleObject,
+                                              state.dataIPShortCut->cAlphaArgs(1)));
                 ErrorsFound = true;
             }
 
@@ -665,9 +665,9 @@ namespace HighTempRadiantSystem {
                 }
                 ShowSevereError(
                     state,
-                    EnergyPlus::format("InitHighTempRadiantSystem: Unit=[ZoneHVAC:HighTemperatureRadiant,{}] is not on any ZoneHVAC:EquipmentList.  "
-                                       "It will not be simulated.",
-                                       thisHTRSys.Name));
+                    std::format("InitHighTempRadiantSystem: Unit=[ZoneHVAC:HighTemperatureRadiant,{}] is not on any ZoneHVAC:EquipmentList.  "
+                                "It will not be simulated.",
+                                thisHTRSys.Name));
             }
         }
 
@@ -738,7 +738,7 @@ namespace HighTempRadiantSystem {
             int SizingMethod = HVAC::HeatingCapacitySizing;
             int FieldNum = 1;
             std::string const SizingString =
-                EnergyPlus::format("{} [W]", state.dataHighTempRadSys->HighTempRadSysNumericFields(RadSysNum).FieldNames(FieldNum));
+                std::format("{} [W]", state.dataHighTempRadSys->HighTempRadSysNumericFields(RadSysNum).FieldNames(FieldNum));
             // capacity sizing methods (HeatingDesignCapacity, CapacityPerFloorArea, FractionOfAutosizedCoolingCapacity, and
             // FractionOfAutosizedHeatingCapacity )
             int CapSizingMethod = static_cast<int>(thisHTR.HeatingCapMethod);
@@ -1191,18 +1191,18 @@ namespace HighTempRadiantSystem {
 
                     if (ThisSurfIntensity > DataHeatBalFanSys::MaxRadHeatFlux) { // CR 8074, trap excessive intensity (throws off surface balance )
                         ShowSevereError(state, "DistributeHTRadGains:  excessive thermal radiation heat flux intensity detected");
-                        ShowContinueError(state, EnergyPlus::format("Surface = {}", state.dataSurface->Surface(SurfNum).Name));
+                        ShowContinueError(state, std::format("Surface = {}", state.dataSurface->Surface(SurfNum).Name));
                         ShowContinueError(state, EnergyPlus::format("Surface area = {:.3R} [m2]", state.dataSurface->Surface(SurfNum).Area));
-                        ShowContinueError(state, EnergyPlus::format("Occurs in ZoneHVAC:HighTemperatureRadiant = {}", thisHTR.Name));
+                        ShowContinueError(state, std::format("Occurs in ZoneHVAC:HighTemperatureRadiant = {}", thisHTR.Name));
                         ShowContinueError(state, EnergyPlus::format("Radiation intensity = {:.2R} [W/m2]", ThisSurfIntensity));
                         ShowContinueError(state, "Assign a larger surface area or more surfaces in ZoneHVAC:HighTemperatureRadiant");
                         ShowFatalError(state, "DistributeHTRadGains:  excessive thermal radiation heat flux intensity detected");
                     }
                 } else { // small surface
                     ShowSevereError(state, "DistributeHTRadGains:  surface not large enough to receive thermal radiation heat flux");
-                    ShowContinueError(state, EnergyPlus::format("Surface = {}", state.dataSurface->Surface(SurfNum).Name));
+                    ShowContinueError(state, std::format("Surface = {}", state.dataSurface->Surface(SurfNum).Name));
                     ShowContinueError(state, EnergyPlus::format("Surface area = {:.3R} [m2]", state.dataSurface->Surface(SurfNum).Area));
-                    ShowContinueError(state, EnergyPlus::format("Occurs in ZoneHVAC:HighTemperatureRadiant = {}", thisHTR.Name));
+                    ShowContinueError(state, std::format("Occurs in ZoneHVAC:HighTemperatureRadiant = {}", thisHTR.Name));
                     ShowContinueError(state, "Assign a larger surface area or more surfaces in ZoneHVAC:HighTemperatureRadiant");
                     ShowFatalError(state, "DistributeHTRadGains:  surface not large enough to receive thermal radiation heat flux");
                 }

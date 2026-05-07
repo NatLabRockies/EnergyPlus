@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -670,7 +671,7 @@ bool FluidCoolerspecs::validateTwoSpeedInputs(EnergyPlusData &state,
     if (this->DesignEnteringAirTemp <= this->DesignEnteringAirWetBulbTemp) {
         ShowSevereError(
             state,
-            EnergyPlus::format(
+            std::format(
                 "{} = \"{}\", {} must be greater than {}.", cCurrentModuleObject, AlphArray(1), cNumericFieldNames(8), cNumericFieldNames(9)));
         ErrorsFound = true;
     }
@@ -678,69 +679,67 @@ bool FluidCoolerspecs::validateTwoSpeedInputs(EnergyPlusData &state,
     //   Check various inputs for both the performance input methods
     if (this->DesignWaterFlowRate <= 0.0 && !this->DesignWaterFlowRateWasAutoSized) {
         ShowSevereError(state,
-                        EnergyPlus::format("{}= \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {}= \"{}\".",
-                                           cCurrentModuleObject,
-                                           AlphArray(1),
-                                           cNumericFieldNames(10),
-                                           cAlphaFieldNames(4),
-                                           AlphArray(4)));
+                        std::format("{}= \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {}= \"{}\".",
+                                    cCurrentModuleObject,
+                                    AlphArray(1),
+                                    cNumericFieldNames(10),
+                                    cAlphaFieldNames(4),
+                                    AlphArray(4)));
         ErrorsFound = true;
     }
     if (this->HighSpeedAirFlowRate <= 0.0 && !this->HighSpeedAirFlowRateWasAutoSized) {
         ShowSevereError(state,
-                        EnergyPlus::format("{}= \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {}= \"{}\".",
-                                           cCurrentModuleObject,
-                                           AlphArray(1),
-                                           cNumericFieldNames(11),
-                                           cAlphaFieldNames(4),
-                                           AlphArray(4)));
+                        std::format("{}= \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {}= \"{}\".",
+                                    cCurrentModuleObject,
+                                    AlphArray(1),
+                                    cNumericFieldNames(11),
+                                    cAlphaFieldNames(4),
+                                    AlphArray(4)));
         ErrorsFound = true;
     }
     if (this->LowSpeedAirFlowRate <= 0.0 && !this->LowSpeedAirFlowRateWasAutoSized) {
         ShowSevereError(state,
-                        EnergyPlus::format("{}= \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {}= \"{}\".",
-                                           cCurrentModuleObject,
-                                           AlphArray(1),
-                                           cNumericFieldNames(13),
-                                           cAlphaFieldNames(4),
-                                           AlphArray(4)));
+                        std::format("{}= \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {}= \"{}\".",
+                                    cCurrentModuleObject,
+                                    AlphArray(1),
+                                    cNumericFieldNames(13),
+                                    cAlphaFieldNames(4),
+                                    AlphArray(4)));
         ErrorsFound = true;
     }
     //   High speed air flow rate must be greater than low speed air flow rate.
     //   Can't tell yet if autosized, check later in InitFluidCooler.
     if (this->HighSpeedAirFlowRate <= this->LowSpeedAirFlowRate && !this->HighSpeedAirFlowRateWasAutoSized) {
-        ShowSevereError(
-            state,
-            EnergyPlus::format("{}= \"{}\". Fluid cooler air flow rate at low fan speed must be less than the air flow rate at high fan speed.",
-                               cCurrentModuleObject,
-                               this->Name));
+        ShowSevereError(state,
+                        std::format("{}= \"{}\". Fluid cooler air flow rate at low fan speed must be less than the air flow rate at high fan speed.",
+                                    cCurrentModuleObject,
+                                    this->Name));
         ErrorsFound = true;
     }
     if (this->HighSpeedFanPower <= 0.0 && !this->HighSpeedFanPowerWasAutoSized) {
         ShowSevereError(state,
-                        EnergyPlus::format("{} = \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {} = \"{}\".",
-                                           cCurrentModuleObject,
-                                           AlphArray(1),
-                                           cNumericFieldNames(12),
-                                           cAlphaFieldNames(4),
-                                           AlphArray(4)));
+                        std::format("{} = \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {} = \"{}\".",
+                                    cCurrentModuleObject,
+                                    AlphArray(1),
+                                    cNumericFieldNames(12),
+                                    cAlphaFieldNames(4),
+                                    AlphArray(4)));
         ErrorsFound = true;
     }
     if (this->LowSpeedFanPower <= 0.0 && !this->LowSpeedFanPowerWasAutoSized) {
         ShowSevereError(state,
-                        EnergyPlus::format("{} = \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {} = \"{}\".",
-                                           cCurrentModuleObject,
-                                           AlphArray(1),
-                                           cNumericFieldNames(15),
-                                           cAlphaFieldNames(4),
-                                           AlphArray(4)));
+                        std::format("{} = \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {} = \"{}\".",
+                                    cCurrentModuleObject,
+                                    AlphArray(1),
+                                    cNumericFieldNames(15),
+                                    cAlphaFieldNames(4),
+                                    AlphArray(4)));
         ErrorsFound = true;
     }
     if (this->HighSpeedFanPower <= this->LowSpeedFanPower && !this->HighSpeedFanPowerWasAutoSized) {
-        ShowSevereError(state,
-                        EnergyPlus::format("{}= \"{}\". Fluid cooler low speed fan power must be less than high speed fan power.",
-                                           cCurrentModuleObject,
-                                           this->Name));
+        ShowSevereError(
+            state,
+            std::format("{}= \"{}\". Fluid cooler low speed fan power must be less than high speed fan power.", cCurrentModuleObject, this->Name));
         ErrorsFound = true;
     }
 
@@ -748,65 +747,63 @@ bool FluidCoolerspecs::validateTwoSpeedInputs(EnergyPlusData &state,
         this->PerformanceInputMethod_Num = PerfInputMethod::U_FACTOR;
         if (this->HighSpeedFluidCoolerUA <= 0.0 && !this->HighSpeedFluidCoolerUAWasAutoSized) {
             ShowSevereError(state,
-                            EnergyPlus::format("{} = \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {} = \"{}\".",
-                                               cCurrentModuleObject,
-                                               AlphArray(1),
-                                               cNumericFieldNames(1),
-                                               cAlphaFieldNames(4),
-                                               AlphArray(4)));
+                            std::format("{} = \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {} = \"{}\".",
+                                        cCurrentModuleObject,
+                                        AlphArray(1),
+                                        cNumericFieldNames(1),
+                                        cAlphaFieldNames(4),
+                                        AlphArray(4)));
             ErrorsFound = true;
         }
         if (this->LowSpeedFluidCoolerUA <= 0.0 && !this->LowSpeedFluidCoolerUAWasAutoSized) {
             ShowSevereError(state,
-                            EnergyPlus::format("{} = \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {} = \"{}\".",
-                                               cCurrentModuleObject,
-                                               AlphArray(1),
-                                               cNumericFieldNames(2),
-                                               cAlphaFieldNames(4),
-                                               AlphArray(4)));
+                            std::format("{} = \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {} = \"{}\".",
+                                        cCurrentModuleObject,
+                                        AlphArray(1),
+                                        cNumericFieldNames(2),
+                                        cAlphaFieldNames(4),
+                                        AlphArray(4)));
             ErrorsFound = true;
         }
         if (this->HighSpeedFluidCoolerUA <= this->LowSpeedFluidCoolerUA && !this->HighSpeedFluidCoolerUAWasAutoSized) {
-            ShowSevereError(
-                state,
-                EnergyPlus::format("{}= \"{}\". Fluid cooler UA at low fan speed must be less than the fluid cooler UA at high fan speed.",
-                                   cCurrentModuleObject,
-                                   this->Name));
+            ShowSevereError(state,
+                            std::format("{}= \"{}\". Fluid cooler UA at low fan speed must be less than the fluid cooler UA at high fan speed.",
+                                        cCurrentModuleObject,
+                                        this->Name));
             ErrorsFound = true;
         }
     } else if (Util::SameString(AlphArray(4), "NominalCapacity")) {
         this->PerformanceInputMethod_Num = PerfInputMethod::NOMINAL_CAPACITY;
         if (this->FluidCoolerNominalCapacity <= 0.0) {
             ShowSevereError(state,
-                            EnergyPlus::format("{} = \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {}= \"{}\".",
-                                               cCurrentModuleObject,
-                                               AlphArray(1),
-                                               cNumericFieldNames(4),
-                                               cAlphaFieldNames(4),
-                                               AlphArray(4)));
+                            std::format("{} = \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {}= \"{}\".",
+                                        cCurrentModuleObject,
+                                        AlphArray(1),
+                                        cNumericFieldNames(4),
+                                        cAlphaFieldNames(4),
+                                        AlphArray(4)));
             ErrorsFound = true;
         }
         if (this->FluidCoolerLowSpeedNomCap <= 0.0 && !this->FluidCoolerLowSpeedNomCapWasAutoSized) {
             ShowSevereError(state,
-                            EnergyPlus::format("{} = \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {}= \"{}\".",
-                                               cCurrentModuleObject,
-                                               AlphArray(1),
-                                               cNumericFieldNames(5),
-                                               cAlphaFieldNames(4),
-                                               AlphArray(4)));
+                            std::format("{} = \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {}= \"{}\".",
+                                        cCurrentModuleObject,
+                                        AlphArray(1),
+                                        cNumericFieldNames(5),
+                                        cAlphaFieldNames(4),
+                                        AlphArray(4)));
             ErrorsFound = true;
         }
         if (this->HighSpeedFluidCoolerUA != 0.0) {
             if (this->HighSpeedFluidCoolerUA > 0.0) {
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format("{}= \"{}\". Nominal capacity input method and fluid cooler UA at high fan speed have been specified.",
-                                       cCurrentModuleObject,
-                                       this->Name));
+                ShowSevereError(state,
+                                std::format("{}= \"{}\". Nominal capacity input method and fluid cooler UA at high fan speed have been specified.",
+                                            cCurrentModuleObject,
+                                            this->Name));
             } else {
                 ShowSevereError(
                     state,
-                    EnergyPlus::format(
+                    std::format(
                         "{}= \"{}\". Nominal capacity input method has been specified and fluid cooler UA at high fan speed is being autosized.",
                         cCurrentModuleObject,
                         this->Name));
@@ -817,15 +814,14 @@ bool FluidCoolerspecs::validateTwoSpeedInputs(EnergyPlusData &state,
         }
         if (this->LowSpeedFluidCoolerUA != 0.0) {
             if (this->LowSpeedFluidCoolerUA > 0.0) {
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format("{}= \"{}\". Nominal capacity input method and fluid cooler UA at low fan speed have been specified.",
-                                       cCurrentModuleObject,
-                                       this->Name));
+                ShowSevereError(state,
+                                std::format("{}= \"{}\". Nominal capacity input method and fluid cooler UA at low fan speed have been specified.",
+                                            cCurrentModuleObject,
+                                            this->Name));
             } else {
                 ShowSevereError(
                     state,
-                    EnergyPlus::format(
+                    std::format(
                         "{}= \"{}\". Nominal capacity input method has been specified and fluid cooler UA at low fan speed is being autosized.",
                         cCurrentModuleObject,
                         this->Name));
@@ -836,14 +832,13 @@ bool FluidCoolerspecs::validateTwoSpeedInputs(EnergyPlusData &state,
         }
         if (this->FluidCoolerLowSpeedNomCap >= this->FluidCoolerNominalCapacity) {
             ShowSevereError(state,
-                            EnergyPlus::format("{} = \"{}\". Low-speed nominal capacity must be less than the high-speed nominal capacity.",
-                                               cCurrentModuleObject,
-                                               this->Name));
+                            std::format("{} = \"{}\". Low-speed nominal capacity must be less than the high-speed nominal capacity.",
+                                        cCurrentModuleObject,
+                                        this->Name));
             ErrorsFound = true;
         }
     } else { // Fluid cooler performance input method is not specified as a valid "choice"
-        ShowSevereError(state,
-                        EnergyPlus::format("{}= \"{}\", invalid {}= \"{}\".", cCurrentModuleObject, AlphArray(1), cAlphaFieldNames(4), AlphArray(4)));
+        ShowSevereError(state, std::format("{}= \"{}\", invalid {}= \"{}\".", cCurrentModuleObject, AlphArray(1), cAlphaFieldNames(4), AlphArray(4)));
         ShowContinueError(state, R"(... must be "UFactorTimesAreaAndDesignWaterFlowRate" or "NominalCapacity".)");
         ErrorsFound = true;
     }
@@ -968,7 +963,7 @@ void FluidCoolerspecs::size(EnergyPlusData &state)
     // temperature
     auto ensureSizingPlantExitTempIsNotLessThanDesignEnteringAirTemp = [this, &state, PltSizCondNum]() {
         if (state.dataSize->PlantSizData(PltSizCondNum).ExitTemp <= this->DesignEnteringAirTemp && state.dataPlnt->PlantFirstSizesOkayToFinalize) {
-            ShowSevereError(state, EnergyPlus::format("Error when autosizing the UA value for fluid cooler = {}.", this->Name));
+            ShowSevereError(state, std::format("Error when autosizing the UA value for fluid cooler = {}.", this->Name));
             ShowContinueError(
                 state,
                 EnergyPlus::format("Design Loop Exit Temperature ({:.2R} C) must be greater than design entering air dry-bulb temperature "
@@ -1020,7 +1015,7 @@ void FluidCoolerspecs::size(EnergyPlusData &state)
             this->DesignLeavingWaterTemp = state.dataSize->PlantSizData(PltSizCondNum).ExitTemp;
         } else {
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
-                ShowSevereError(state, EnergyPlus::format("Autosizing error for fluid cooler object = {}", this->Name));
+                ShowSevereError(state, std::format("Autosizing error for fluid cooler object = {}", this->Name));
                 ShowFatalError(state, "Autosizing of fluid cooler condenser flow rate requires a loop Sizing:Plant object.");
             }
         }
@@ -1078,7 +1073,7 @@ void FluidCoolerspecs::size(EnergyPlusData &state)
             } else {
                 if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                     ShowSevereError(state, "Autosizing of fluid cooler fan power requires a loop Sizing:Plant object.");
-                    ShowFatalError(state, EnergyPlus::format(" Occurs in fluid cooler object = {}", this->Name));
+                    ShowFatalError(state, std::format(" Occurs in fluid cooler object = {}", this->Name));
                 }
             }
         }
@@ -1153,7 +1148,7 @@ void FluidCoolerspecs::size(EnergyPlusData &state)
             } else {
                 if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                     ShowSevereError(state, "Autosizing of fluid cooler air flow rate requires a loop Sizing:Plant object");
-                    ShowFatalError(state, EnergyPlus::format(" Occurs in fluid cooler object = {}", this->Name));
+                    ShowFatalError(state, std::format(" Occurs in fluid cooler object = {}", this->Name));
                 }
             }
         }
@@ -1221,13 +1216,12 @@ void FluidCoolerspecs::size(EnergyPlusData &state)
                 General::SolveRoot(state, Acc, MaxIte, SolFla, UA, f, UA0, UA1);
                 if (SolFla == -1) {
                     ShowWarningError(state, "Iteration limit exceeded in calculating fluid cooler UA.");
-                    ShowContinueError(state, EnergyPlus::format("Autosizing of fluid cooler UA failed for fluid cooler = {}", this->Name));
+                    ShowContinueError(state, std::format("Autosizing of fluid cooler UA failed for fluid cooler = {}", this->Name));
                     ShowContinueError(state, EnergyPlus::format("The final UA value ={:.2R} W/K, and the simulation continues...", UA));
                 } else if (SolFla == -2) {
                     CalcFluidCoolerOutlet(state, this->indexInArray, rho * tmpDesignWaterFlowRate, tmpHighSpeedAirFlowRate, UA0, OutWaterTempAtUA0);
                     CalcFluidCoolerOutlet(state, this->indexInArray, rho * tmpDesignWaterFlowRate, tmpHighSpeedAirFlowRate, UA1, OutWaterTempAtUA1);
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}: The combination of design input values did not allow the calculation of a ", CalledFrom));
+                    ShowSevereError(state, std::format("{}: The combination of design input values did not allow the calculation of a ", CalledFrom));
                     ShowContinueError(state, "reasonable UA value. Review and revise design input values as appropriate. Specifying hard");
                     ShowContinueError(state, R"(sizes for some "autosizable" fields while autosizing other "autosizable" fields may be )");
                     ShowContinueError(state, "contributing to this problem.");
@@ -1258,7 +1252,7 @@ void FluidCoolerspecs::size(EnergyPlusData &state)
                         state, EnergyPlus::format("Calculated water outlet temp at low UA [C] (UA = {:.2R} W/K) = {:.2R}", UA0, OutWaterTempAtUA0));
                     ShowContinueError(
                         state, EnergyPlus::format("Calculated water outlet temp at high UA [C](UA = {:.2R} W/K) = {:.2R}", UA1, OutWaterTempAtUA1));
-                    ShowFatalError(state, EnergyPlus::format("Autosizing of Fluid Cooler UA failed for fluid cooler = {}", this->Name));
+                    ShowFatalError(state, std::format("Autosizing of Fluid Cooler UA failed for fluid cooler = {}", this->Name));
                 }
                 tmpHighSpeedEvapFluidCoolerUA = UA;
                 if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
@@ -1308,7 +1302,7 @@ void FluidCoolerspecs::size(EnergyPlusData &state)
             }
         } else {
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
-                ShowSevereError(state, EnergyPlus::format("Autosizing error for fluid cooler object = {}", this->Name));
+                ShowSevereError(state, std::format("Autosizing error for fluid cooler object = {}", this->Name));
                 ShowFatalError(state, "Autosizing of fluid cooler UA requires a loop Sizing:Plant object.");
             }
         }
@@ -1337,14 +1331,13 @@ void FluidCoolerspecs::size(EnergyPlusData &state)
             if (SolFla == -1) {
                 ShowWarningError(state, "Iteration limit exceeded in calculating fluid cooler UA.");
                 if (PltSizCondNum > 0) {
-                    ShowContinueError(state, EnergyPlus::format("Autosizing of fluid cooler UA failed for fluid cooler = {}", this->Name));
+                    ShowContinueError(state, std::format("Autosizing of fluid cooler UA failed for fluid cooler = {}", this->Name));
                 }
                 ShowContinueError(state, EnergyPlus::format("The final UA value ={:.2R} W/K, and the simulation continues...", UA));
             } else if (SolFla == -2) {
                 CalcFluidCoolerOutlet(state, this->indexInArray, rho * tmpDesignWaterFlowRate, tmpHighSpeedAirFlowRate, UA0, OutWaterTempAtUA0);
                 CalcFluidCoolerOutlet(state, this->indexInArray, rho * tmpDesignWaterFlowRate, tmpHighSpeedAirFlowRate, UA1, OutWaterTempAtUA1);
-                ShowSevereError(state,
-                                EnergyPlus::format("{}: The combination of design input values did not allow the calculation of a ", CalledFrom));
+                ShowSevereError(state, std::format("{}: The combination of design input values did not allow the calculation of a ", CalledFrom));
                 ShowContinueError(state, "reasonable UA value. Review and revise design input values as appropriate. Specifying hard");
                 ShowContinueError(state, R"(sizes for some "autosizable" fields while autosizing other "autosizable" fields may be )");
                 ShowContinueError(state, "contributing to this problem.");
@@ -1377,7 +1370,7 @@ void FluidCoolerspecs::size(EnergyPlusData &state)
                 ShowContinueError(
                     state, EnergyPlus::format("Calculated water outlet temp at high UA [C] (UA = {:.2R} W/K) = {:.2R}", UA1, OutWaterTempAtUA1));
                 if (PltSizCondNum > 0) {
-                    ShowFatalError(state, EnergyPlus::format("Autosizing of Fluid Cooler UA failed for fluid cooler = {}", this->Name));
+                    ShowFatalError(state, std::format("Autosizing of Fluid Cooler UA failed for fluid cooler = {}", this->Name));
                 }
             }
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
@@ -1520,13 +1513,12 @@ void FluidCoolerspecs::size(EnergyPlusData &state)
             General::SolveRoot(state, Acc, MaxIte, SolFla, UA, f, UA0, UA1);
             if (SolFla == -1) {
                 ShowWarningError(state, "Iteration limit exceeded in calculating fluid cooler UA.");
-                ShowContinueError(state, EnergyPlus::format("Autosizing of fluid cooler UA failed for fluid cooler = {}", this->Name));
+                ShowContinueError(state, std::format("Autosizing of fluid cooler UA failed for fluid cooler = {}", this->Name));
                 ShowContinueError(state, EnergyPlus::format("The final UA value at low fan speed ={:.2R} W/C, and the simulation continues...", UA));
             } else if (SolFla == -2) {
                 CalcFluidCoolerOutlet(state, this->indexInArray, rho * tmpDesignWaterFlowRate, this->LowSpeedAirFlowRate, UA0, OutWaterTempAtUA0);
                 CalcFluidCoolerOutlet(state, this->indexInArray, rho * tmpDesignWaterFlowRate, this->LowSpeedAirFlowRate, UA1, OutWaterTempAtUA1);
-                ShowSevereError(state,
-                                EnergyPlus::format("{}: The combination of design input values did not allow the calculation of a ", CalledFrom));
+                ShowSevereError(state, std::format("{}: The combination of design input values did not allow the calculation of a ", CalledFrom));
                 ShowContinueError(state, "reasonable low-speed UA value. Review and revise design input values as appropriate. ");
                 ShowContinueError(state, R"(Specifying hard sizes for some "autosizable" fields while autosizing other "autosizable" )");
                 ShowContinueError(state, "fields may be contributing to this problem.");
@@ -1557,7 +1549,7 @@ void FluidCoolerspecs::size(EnergyPlusData &state)
                                   EnergyPlus::format("Calculated water outlet temp at low UA [C](UA = {:.2R} W/C) = {:.2R}", UA0, OutWaterTempAtUA0));
                 ShowContinueError(
                     state, EnergyPlus::format("Calculated water outlet temp at high UA [C](UA = {:.2R} W/C) = {:.2R}", UA1, OutWaterTempAtUA1));
-                ShowFatalError(state, EnergyPlus::format("Autosizing of Fluid Cooler UA failed for fluid cooler = {}", this->Name));
+                ShowFatalError(state, std::format("Autosizing of Fluid Cooler UA failed for fluid cooler = {}", this->Name));
             }
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                 this->LowSpeedFluidCoolerUA = UA;
@@ -1636,15 +1628,15 @@ void FluidCoolerspecs::size(EnergyPlusData &state)
     if (this->FluidCoolerType == DataPlant::PlantEquipmentType::FluidCooler_TwoSpd && state.dataPlnt->PlantFirstSizesOkayToFinalize) {
         if (this->DesignWaterFlowRate > 0.0) {
             if (this->HighSpeedAirFlowRate <= this->LowSpeedAirFlowRate) {
-                ShowSevereError(state,
-                                EnergyPlus::format(
-                                    "FluidCooler:TwoSpeed  \"{}\". Low speed air flow rate must be less than high speed air flow rate.", this->Name));
+                ShowSevereError(
+                    state,
+                    std::format("FluidCooler:TwoSpeed  \"{}\". Low speed air flow rate must be less than high speed air flow rate.", this->Name));
                 ErrorsFound = true;
             }
             if (this->HighSpeedFluidCoolerUA <= this->LowSpeedFluidCoolerUA) {
                 ShowSevereError(
                     state,
-                    EnergyPlus::format(
+                    std::format(
                         "FluidCooler:TwoSpeed  \"{}\". Fluid cooler UA at low fan speed must be less than the fluid cooler UA at high fan speed.",
                         this->Name));
                 ErrorsFound = true;
@@ -1960,17 +1952,15 @@ void FluidCoolerspecs::update(EnergyPlusData &state)
     if (state.dataLoopNodes->Node(waterOutletNode).MassFlowRate > this->DesWaterMassFlowRate * this->FluidCoolerMassFlowRateMultiplier) {
         ++this->HighMassFlowErrorCount;
         if (this->HighMassFlowErrorCount < 2) {
-            ShowWarningError(state,
-                             EnergyPlus::format("{} \"{}\"", DataPlant::PlantEquipTypeNames[static_cast<int>(this->FluidCoolerType)], this->Name));
+            ShowWarningError(state, std::format("{} \"{}\"", DataPlant::PlantEquipTypeNames[static_cast<int>(this->FluidCoolerType)], this->Name));
             ShowContinueError(state, " Condenser Loop Mass Flow Rate is much greater than the fluid coolers design mass flow rate.");
-            ShowContinueError(state,
-                              EnergyPlus::format(" Condenser Loop Mass Flow Rate = {:.6T}", state.dataLoopNodes->Node(waterOutletNode).MassFlowRate));
-            ShowContinueError(state, EnergyPlus::format(" Fluid Cooler Design Mass Flow Rate   = {:.6T}", this->DesWaterMassFlowRate));
+            ShowContinueError(state, std::format(" Condenser Loop Mass Flow Rate = {:.6f}", state.dataLoopNodes->Node(waterOutletNode).MassFlowRate));
+            ShowContinueError(state, std::format(" Fluid Cooler Design Mass Flow Rate   = {:.6f}", this->DesWaterMassFlowRate));
             ShowContinueErrorTimeStamp(state, "");
         } else {
             ShowRecurringWarningErrorAtEnd(
                 state,
-                EnergyPlus::format(
+                std::format(
                     "{} \"{}\"  Condenser Loop Mass Flow Rate is much greater than the fluid coolers design mass flow rate. Error continues...",
                     DataPlant::PlantEquipTypeNames[static_cast<int>(this->FluidCoolerType)],
                     this->Name),
@@ -1986,21 +1976,19 @@ void FluidCoolerspecs::update(EnergyPlusData &state)
         ++this->OutletWaterTempErrorCount;
 
         if (this->OutletWaterTempErrorCount < 2) {
-            ShowWarningError(state,
-                             EnergyPlus::format("{} \"{}\"", DataPlant::PlantEquipTypeNames[static_cast<int>(this->FluidCoolerType)], this->Name));
+            ShowWarningError(state, std::format("{} \"{}\"", DataPlant::PlantEquipTypeNames[static_cast<int>(this->FluidCoolerType)], this->Name));
             ShowContinueError(
                 state,
-                EnergyPlus::format(" Fluid cooler water outlet temperature ({:.2F} C) is below the specified minimum condenser loop temp of {:.2F} C",
-                                   this->OutletWaterTemp,
-                                   LoopMinTemp));
+                std::format(" Fluid cooler water outlet temperature ({:.2F} C) is below the specified minimum condenser loop temp of {:.2F} C",
+                            this->OutletWaterTemp,
+                            LoopMinTemp));
             ShowContinueErrorTimeStamp(state, "");
         } else {
             ShowRecurringWarningErrorAtEnd(
                 state,
-                EnergyPlus::format(
-                    "{} \"{}\"  Fluid cooler water outlet temperature is below the specified minimum condenser loop temp. Error continues...",
-                    DataPlant::PlantEquipTypeNames[static_cast<int>(this->FluidCoolerType)],
-                    this->Name),
+                std::format("{} \"{}\"  Fluid cooler water outlet temperature is below the specified minimum condenser loop temp. Error continues...",
+                            DataPlant::PlantEquipTypeNames[static_cast<int>(this->FluidCoolerType)],
+                            this->Name),
                 this->OutletWaterTempErrorIndex,
                 this->OutletWaterTemp,
                 this->OutletWaterTemp);
@@ -2011,16 +1999,15 @@ void FluidCoolerspecs::update(EnergyPlusData &state)
     if (this->WaterMassFlowRate > 0.0 && this->WaterMassFlowRate <= DataBranchAirLoopPlant::MassFlowTolerance) {
         ++this->SmallWaterMassFlowErrorCount;
         if (this->SmallWaterMassFlowErrorCount < 2) {
-            ShowWarningError(state,
-                             EnergyPlus::format("{} \"{}\"", DataPlant::PlantEquipTypeNames[static_cast<int>(this->FluidCoolerType)], this->Name));
+            ShowWarningError(state, std::format("{} \"{}\"", DataPlant::PlantEquipTypeNames[static_cast<int>(this->FluidCoolerType)], this->Name));
             ShowContinueError(state, " Fluid cooler water mass flow rate near zero.");
             ShowContinueErrorTimeStamp(state, "");
-            ShowContinueError(state, EnergyPlus::format("Actual Mass flow = {:.2T}", this->WaterMassFlowRate));
+            ShowContinueError(state, std::format("Actual Mass flow = {:.2f}", this->WaterMassFlowRate));
         } else {
             ShowRecurringWarningErrorAtEnd(state,
-                                           EnergyPlus::format("{} \"{}\"  Fluid cooler water mass flow rate is near zero. Error continues...",
-                                                              DataPlant::PlantEquipTypeNames[static_cast<int>(this->FluidCoolerType)],
-                                                              this->Name),
+                                           std::format("{} \"{}\"  Fluid cooler water mass flow rate is near zero. Error continues...",
+                                                       DataPlant::PlantEquipTypeNames[static_cast<int>(this->FluidCoolerType)],
+                                                       this->Name),
                                            this->SmallWaterMassFlowErrorIndex,
                                            this->WaterMassFlowRate,
                                            this->WaterMassFlowRate);

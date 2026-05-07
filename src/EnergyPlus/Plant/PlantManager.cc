@@ -48,6 +48,7 @@
 // C++ Headers
 #include <algorithm>
 #include <cassert>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -80,7 +81,6 @@
 #include <EnergyPlus/FluidCoolers.hh>
 #include <EnergyPlus/FluidProperties.hh>
 #include <EnergyPlus/FuelCellElectricGenerator.hh>
-#include <EnergyPlus/GroundHeatExchangers/Slinky.hh>
 #include <EnergyPlus/GroundHeatExchangers/Vertical.hh>
 #include <EnergyPlus/HVACInterfaceManager.hh>
 #include <EnergyPlus/HVACVariableRefrigerantFlow.hh>
@@ -2254,9 +2254,9 @@ void fillPlantToplogyComponentRow2(EnergyPlusData &state,
     OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantLoopType2, EnergyPlus::format("{}", rowCounter), loopType);
     OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantLoopName2, EnergyPlus::format("{}", rowCounter), loopName);
     OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantSide2, EnergyPlus::format("{}", rowCounter), side);
-    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantBranchName2, EnergyPlus::format("{}", rowCounter), branchName);
-    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantCompType2, EnergyPlus::format("{}", rowCounter), compType);
-    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantCompName2, EnergyPlus::format("{}", rowCounter), compName);
+    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantBranchName2, std::format("{}", rowCounter), branchName);
+    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantCompType2, std::format("{}", rowCounter), compType);
+    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantCompName2, std::format("{}", rowCounter), compName);
     ++rowCounter;
 }
 
@@ -2281,7 +2281,7 @@ void FillPlantEquipmentOperationLoad(EnergyPlusData &state)
         for (int jScheme = 1; jScheme <= thisLoop.NumOpSchemes; ++jScheme) {
             for (int kList = 1; kList <= thisLoop.OpScheme(jScheme).NumEquipLists; ++kList) {
                 ++row;
-                std::string rowS = EnergyPlus::format("{}", row);
+                std::string rowS = std::format("{}", row);
                 OutputReportPredefined::PreDefTableEntry(state, orp->pdchPLtEqOpLbPltLpNm, rowS, thisLoop.Name);
                 OutputReportPredefined::PreDefTableEntry(state, orp->pdchPLtEqOpLbNm, rowS, thisLoop.OpScheme(jScheme).Name);
                 OutputReportPredefined::PreDefTableEntry(state, orp->pdchPLtEqOpLbType, rowS, thisLoop.OpScheme(jScheme).TypeOf);
@@ -2290,7 +2290,7 @@ void FillPlantEquipmentOperationLoad(EnergyPlusData &state)
                 } else {
                     OutputReportPredefined::PreDefTableEntry(state, orp->pdchPLtEqOpLbSchNm, rowS, "n/a");
                 }
-                OutputReportPredefined::PreDefTableEntry(state, orp->pdchPLtEqOpLbIndex, rowS, EnergyPlus::format("{}", kList));
+                OutputReportPredefined::PreDefTableEntry(state, orp->pdchPLtEqOpLbIndex, rowS, std::format("{}", kList));
                 OutputReportPredefined::PreDefTableEntry(state, orp->pdchPLtEqOpLbEqLstNm, rowS, thisLoop.OpScheme(jScheme).EquipList(kList).Name);
                 OutputReportPredefined::PreDefTableEntry(
                     state, orp->pdchPLtEqOpLbLow, rowS, thisLoop.OpScheme(jScheme).EquipList(kList).RangeLowerLimit);

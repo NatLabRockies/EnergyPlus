@@ -45,6 +45,9 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
+#include <format>
+
 // EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataHeatBalFanSys.hh>
@@ -265,7 +268,7 @@ void ZoneSystemMoistureDemand::setUpOutputVars(EnergyPlusData &state,
                             OutputProcessor::StoreType::Average,
                             name);
         SetupOutputVariable(state,
-                            EnergyPlus::format("{} Air Vapor Pressure Difference", prefix),
+                            std::format("{} Air Vapor Pressure Difference", prefix),
                             Constant::Units::Pa,
                             this->vaporPressureDifference,
                             OutputProcessor::TimeStepType::System,
@@ -276,21 +279,21 @@ void ZoneSystemMoistureDemand::setUpOutputVars(EnergyPlusData &state,
     // There are two sets of data available: one where zone and group multipliers have been applied and another where the multipliers have
     // not. First, these report variables are NOT multiplied by zone and group multipliers
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} Predicted Moisture Load Moisture Transfer Rate", prefix),
+                        std::format("{} Predicted Moisture Load Moisture Transfer Rate", prefix),
                         Constant::Units::kgWater_s,
                         this->predictedRate,
                         OutputProcessor::TimeStepType::System,
                         OutputProcessor::StoreType::Average,
                         name);
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} Predicted Moisture Load to Humidifying Setpoint Moisture Transfer Rate", prefix),
+                        std::format("{} Predicted Moisture Load to Humidifying Setpoint Moisture Transfer Rate", prefix),
                         Constant::Units::kgWater_s,
                         this->predictedHumSPRate,
                         OutputProcessor::TimeStepType::System,
                         OutputProcessor::StoreType::Average,
                         name);
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} Predicted Moisture Load to Dehumidifying Setpoint Moisture Transfer Rate", prefix),
+                        std::format("{} Predicted Moisture Load to Dehumidifying Setpoint Moisture Transfer Rate", prefix),
                         Constant::Units::kgWater_s,
                         this->predictedDehumSPRate,
                         OutputProcessor::TimeStepType::System,
@@ -298,21 +301,21 @@ void ZoneSystemMoistureDemand::setUpOutputVars(EnergyPlusData &state,
                         name);
     // Second, these report variable ARE multiplied by zone and group multipliers
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} System Predicted Moisture Load Moisture Transfer Rate", prefix),
+                        std::format("{} System Predicted Moisture Load Moisture Transfer Rate", prefix),
                         Constant::Units::kgWater_s,
                         this->TotalOutputRequired,
                         OutputProcessor::TimeStepType::System,
                         OutputProcessor::StoreType::Average,
                         name);
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} System Predicted Moisture Load to Humidifying Setpoint Moisture Transfer Rate", prefix),
+                        std::format("{} System Predicted Moisture Load to Humidifying Setpoint Moisture Transfer Rate", prefix),
                         Constant::Units::kgWater_s,
                         this->OutputRequiredToHumidifyingSP,
                         OutputProcessor::TimeStepType::System,
                         OutputProcessor::StoreType::Average,
                         name);
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} System Predicted Moisture Load to Dehumidifying Setpoint Moisture Transfer Rate", prefix),
+                        std::format("{} System Predicted Moisture Load to Dehumidifying Setpoint Moisture Transfer Rate", prefix),
                         Constant::Units::kgWater_s,
                         this->OutputRequiredToDehumidifyingSP,
                         OutputProcessor::TimeStepType::System,

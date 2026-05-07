@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -572,8 +573,8 @@ void CheckAndSetConstructionProperties(EnergyPlusData &state,
                 ++GlassLayNum;
                 if (GlassLayNum < TotGlassLayers && matGlass->SolarDiffusing) {
                     ErrorsFound = true;
-                    ShowSevereError(state, EnergyPlus::format("CheckAndSetConstructionProperties: Window construction={}", thisConstruct.Name));
-                    ShowContinueError(state, EnergyPlus::format("has diffusing glass={} that is not the innermost glass layer.", matGlass->Name));
+                    ShowSevereError(state, std::format("CheckAndSetConstructionProperties: Window construction={}", thisConstruct.Name));
+                    ShowContinueError(state, std::format("has diffusing glass={} that is not the innermost glass layer.", matGlass->Name));
                 }
             }
         }
@@ -667,8 +668,8 @@ void CheckAndSetConstructionProperties(EnergyPlusData &state,
                             assert(matBlind != nullptr);
                             if ((matGapL->Thickness + matGapR->Thickness) < matBlind->SlatWidth) {
                                 ErrorsFound = true;
-                                ShowSevereError(
-                                    state, EnergyPlus::format("CheckAndSetConstructionProperties: For window construction {}", thisConstruct.Name));
+                                ShowSevereError(state,
+                                                std::format("CheckAndSetConstructionProperties: For window construction {}", thisConstruct.Name));
                                 ShowContinueError(state, "the slat width of the between-glass blind is greater than");
                                 ShowContinueError(state, "the sum of the widths of the gas layers adjacent to the blind.");
                             }
@@ -690,14 +691,14 @@ void CheckAndSetConstructionProperties(EnergyPlusData &state,
                     auto const *mat = s_mat->materials(MaterNum);
                     if (mat->group == Material::Group::Glass) {
                         ErrorsFound = true;
-                        ShowSevereError(
-                            state, EnergyPlus::format("CheckAndSetConstructionProperties: Error in window construction {}--", thisConstruct.Name));
+                        ShowSevereError(state,
+                                        std::format("CheckAndSetConstructionProperties: Error in window construction {}--", thisConstruct.Name));
                         ShowContinueError(state, "For simple window constructions, no other glazing layers are allowed.");
                     }
                     if (mat->group == Material::Group::Gas) {
                         ErrorsFound = true;
-                        ShowSevereError(
-                            state, EnergyPlus::format("CheckAndSetConstructionProperties: Error in window construction {}--", thisConstruct.Name));
+                        ShowSevereError(state,
+                                        std::format("CheckAndSetConstructionProperties: Error in window construction {}--", thisConstruct.Name));
                         ShowContinueError(state, "For simple window constructions, no other gas layers are allowed.");
                     }
                 }
@@ -705,7 +706,7 @@ void CheckAndSetConstructionProperties(EnergyPlusData &state,
         }
 
         if (WrongWindowLayering) {
-            ShowSevereError(state, EnergyPlus::format("CheckAndSetConstructionProperties: Error in window construction {}--", thisConstruct.Name));
+            ShowSevereError(state, std::format("CheckAndSetConstructionProperties: Error in window construction {}--", thisConstruct.Name));
             ShowContinueError(state, "  For multi-layer window constructions the following rules apply:");
             ShowContinueError(state, "    --The first and last layer must be a solid layer (glass or shade/screen/blind),");
             ShowContinueError(state, "    --Adjacent glass layers must be separated by one and only one gas layer,");
@@ -758,15 +759,14 @@ void CheckAndSetConstructionProperties(EnergyPlusData &state,
     thisConstruct.OutsideRoughness = matOutside->Roughness;
 
     if (matOutside->group == Material::Group::AirGap) {
-        ShowSevereError(state, EnergyPlus::format("CheckAndSetConstructionProperties: Outside Layer is Air for construction {}", thisConstruct.Name));
-        ShowContinueError(state, EnergyPlus::format("  Error in material {}", matOutside->Name));
+        ShowSevereError(state, std::format("CheckAndSetConstructionProperties: Outside Layer is Air for construction {}", thisConstruct.Name));
+        ShowContinueError(state, std::format("  Error in material {}", matOutside->Name));
         ErrorsFound = true;
     }
     if (InsideLayer > 0) {
         if (matInside->group == Material::Group::AirGap) {
-            ShowSevereError(state,
-                            EnergyPlus::format("CheckAndSetConstructionProperties: Inside Layer is Air for construction {}", thisConstruct.Name));
-            ShowContinueError(state, EnergyPlus::format("  Error in material {}", matInside->Name));
+            ShowSevereError(state, std::format("CheckAndSetConstructionProperties: Inside Layer is Air for construction {}", thisConstruct.Name));
+            ShowContinueError(state, std::format("  Error in material {}", matInside->Name));
             ErrorsFound = true;
         }
     }
@@ -776,10 +776,9 @@ void CheckAndSetConstructionProperties(EnergyPlusData &state,
         // need to check EcoRoof is not non-outside layer
         for (int Layer = 2; Layer <= TotLayers; ++Layer) {
             if (s_mat->materials(thisConstruct.LayerPoint(Layer))->group == Material::Group::EcoRoof) {
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format("CheckAndSetConstructionProperties: Interior Layer is EcoRoof for construction {}", thisConstruct.Name));
-                ShowContinueError(state, EnergyPlus::format("  Error in material {}", s_mat->materials(thisConstruct.LayerPoint(Layer))->Name));
+                ShowSevereError(state,
+                                std::format("CheckAndSetConstructionProperties: Interior Layer is EcoRoof for construction {}", thisConstruct.Name));
+                ShowContinueError(state, std::format("  Error in material {}", s_mat->materials(thisConstruct.LayerPoint(Layer))->Name));
                 ErrorsFound = true;
             }
         }
@@ -789,8 +788,8 @@ void CheckAndSetConstructionProperties(EnergyPlusData &state,
         thisConstruct.TypeIsIRT = true;
         if (thisConstruct.TotLayers != 1) {
             ShowSevereError(state,
-                            EnergyPlus::format("CheckAndSetConstructionProperties: Infrared Transparent (IRT) Construction is limited to 1 layer {}",
-                                               thisConstruct.Name));
+                            std::format("CheckAndSetConstructionProperties: Infrared Transparent (IRT) Construction is limited to 1 layer {}",
+                                        thisConstruct.Name));
             ShowContinueError(state, "  Too many layers in referenced construction.");
             ErrorsFound = true;
         }

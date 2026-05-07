@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -304,8 +305,8 @@ namespace FanCoilUnits {
             if (fanCoil.LowSpeedRatio > fanCoil.MedSpeedRatio) {
                 ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\",", RoutineName, CurrentModuleObject, fanCoil.Name));
                 ShowContinueError(state, EnergyPlus::format("... {} is greater than the medium speed supply air flow ratio.", cNumericFields(2)));
-                ShowContinueError(state, EnergyPlus::format("... Fan Coil Unit low speed supply air flow ratio = {:.5T} ", fanCoil.LowSpeedRatio));
-                ShowContinueError(state, EnergyPlus::format("... Fan Coit Unit medium speed supply air flow ratio = {:.5T} ", fanCoil.MedSpeedRatio));
+                ShowContinueError(state, EnergyPlus::format("... Fan Coil Unit low speed supply air flow ratio = {:.5f} ", fanCoil.LowSpeedRatio));
+                ShowContinueError(state, EnergyPlus::format("... Fan Coit Unit medium speed supply air flow ratio = {:.5f} ", fanCoil.MedSpeedRatio));
                 ShowContinueError(state,
                                   "... Fan Coil Unit low speed supply air flow ratio and medium speed supply air flow ratio set to default values");
                 fanCoil.LowSpeedRatio = 1.0 / 3.0;
@@ -448,7 +449,7 @@ namespace FanCoilUnits {
                     // mine the hot water node from the coil object
                     int coilIndex = WaterCoils::GetWaterCoilIndex(state, fanCoil.HCoilType, fanCoil.HCoilName, IsNotOK);
                     if (IsNotOK) {
-                        ShowContinueError(state, EnergyPlus::format("...specified in {}=\"{}\".", CurrentModuleObject, fanCoil.Name));
+                        ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, fanCoil.Name));
                         ErrorsFound = true;
                     } else {
                         fanCoil.HeatCoilFluidInletNode = state.dataWaterCoils->WaterCoil(coilIndex).WaterInletNodeNum;
@@ -461,13 +462,13 @@ namespace FanCoilUnits {
                 IsNotOK = false;
                 ValidateComponent(state, fanCoil.HCoilType, fanCoil.HCoilName, IsNotOK, CurrentModuleObject);
                 if (IsNotOK) {
-                    ShowContinueError(state, EnergyPlus::format("...specified in {}=\"{}\".", CurrentModuleObject, fanCoil.Name));
+                    ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, fanCoil.Name));
                     ErrorsFound = true;
                 } else {
                     int coilIndex;
                     HeatingCoils::GetCoilIndex(state, fanCoil.HCoilName, coilIndex, IsNotOK);
                     if (IsNotOK) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, fanCoil.Name));
+                        ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, fanCoil.Name));
                         ErrorsFound = true;
                     } else {
                         fanCoil.DesignHeatingCapacity = state.dataHeatingCoils->HeatingCoil(coilIndex).NominalCapacity;
@@ -476,8 +477,8 @@ namespace FanCoilUnits {
                     }
                 }
             } else {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, fanCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("illegal value: {}=\"{}\".", cAlphaFields(13), Alphas(13)));
+                ShowSevereError(state, std::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, fanCoil.Name));
+                ShowContinueError(state, std::format("illegal value: {}=\"{}\".", cAlphaFields(13), Alphas(13)));
                 ErrorsFound = true;
             }
 
@@ -491,8 +492,8 @@ namespace FanCoilUnits {
             if (!lAlphaBlanks(16)) {
                 fanCoil.HVACSizingIndex = Util::FindItemInList(Alphas(16), state.dataSize->ZoneHVACSizing);
                 if (fanCoil.HVACSizingIndex == 0) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {} not found.", cAlphaFields(16), Alphas(16)));
-                    ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", state.dataFanCoilUnits->cMO_FanCoil, fanCoil.Name));
+                    ShowSevereError(state, std::format("{} = {} not found.", cAlphaFields(16), Alphas(16)));
+                    ShowContinueError(state, std::format("Occurs in {} = {}", state.dataFanCoilUnits->cMO_FanCoil, fanCoil.Name));
                     ErrorsFound = true;
                 }
             }
@@ -515,10 +516,10 @@ namespace FanCoilUnits {
                 if (fanCoil.fanType != fan->type) {
                     ShowSevereCustom(state,
                                      eoh,
-                                     EnergyPlus::format("{} was specified as having type {}, but has type {}",
-                                                        fanCoil.FanName,
-                                                        HVAC::fanTypeNamesUC[(int)fanCoil.fanType],
-                                                        HVAC::fanTypeNamesUC[(int)fan->type]));
+                                     std::format("{} was specified as having type {}, but has type {}",
+                                                 fanCoil.FanName,
+                                                 HVAC::fanTypeNamesUC[(int)fanCoil.fanType],
+                                                 HVAC::fanTypeNamesUC[(int)fan->type]));
                     ErrorsFound = true;
                 }
 
@@ -526,11 +527,11 @@ namespace FanCoilUnits {
                 fanCoil.FanAirVolFlow = fan->maxAirFlowRate;
 
                 if (fanCoil.MaxAirVolFlow > fanCoil.FanAirVolFlow && fanCoil.FanAirVolFlow != DataSizing::AutoSize) {
-                    ShowWarningError(state, EnergyPlus::format("{}{}: {}", RoutineName, fanCoil.UnitType, fanCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("... {} is greater than the maximum fan flow rate.", cNumericFields(1)));
-                    ShowContinueError(state, EnergyPlus::format("... Fan Coil Unit flow = {:.5T} m3/s.", fanCoil.MaxAirVolFlow));
-                    ShowContinueError(state, EnergyPlus::format("... Fan = {}: {}", HVAC::fanTypeNames[(int)fanCoil.fanType], fanCoil.FanName));
-                    ShowContinueError(state, EnergyPlus::format("... Fan flow = {:.5T} m3/s.", fanCoil.FanAirVolFlow));
+                    ShowWarningError(state, std::format("{}{}: {}", RoutineName, fanCoil.UnitType, fanCoil.Name));
+                    ShowContinueError(state, std::format("... {} is greater than the maximum fan flow rate.", cNumericFields(1)));
+                    ShowContinueError(state, std::format("... Fan Coil Unit flow = {:.5f} m3/s.", fanCoil.MaxAirVolFlow));
+                    ShowContinueError(state, std::format("... Fan = {}: {}", HVAC::fanTypeNames[(int)fanCoil.fanType], fanCoil.FanName));
+                    ShowContinueError(state, std::format("... Fan flow = {:.5f} m3/s.", fanCoil.FanAirVolFlow));
                     ShowContinueError(state, "... Fan Coil Unit flow rate reduced to match the fan flow rate and the simulation continues.");
                     fanCoil.MaxAirVolFlow = fanCoil.FanAirVolFlow;
                 }
@@ -544,13 +545,12 @@ namespace FanCoilUnits {
                         (fanCoil.CapCtrlMeth_Num == CCM::CycFan && fanCoil.fanType != HVAC::FanType::OnOff) ||
                         (fanCoil.CapCtrlMeth_Num == CCM::VarFanVarFlow && fanCoil.fanType != HVAC::FanType::VAV) ||
                         (fanCoil.CapCtrlMeth_Num == CCM::VarFanConsFlow && fanCoil.fanType != HVAC::FanType::VAV)) {
-                        ShowSevereError(state, EnergyPlus::format("{}{}: {}", RoutineName, fanCoil.UnitType, fanCoil.Name));
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format("...the fan type of the object : {} does not match with the capacity control method selected : "
-                                               "{} please see I/O reference",
-                                               fanCoil.FanName,
-                                               capCtrlMeth));
+                        ShowSevereError(state, std::format("{}{}: {}", RoutineName, fanCoil.UnitType, fanCoil.Name));
+                        ShowContinueError(state,
+                                          std::format("...the fan type of the object : {} does not match with the capacity control method selected : "
+                                                      "{} please see I/O reference",
+                                                      fanCoil.FanName,
+                                                      capCtrlMeth));
                         ShowContinueError(state, "...for ConstantFanVariableFlow a Fan:OnOff or Fan:ConstantVolume is valid.");
                         ShowContinueError(state, "...for CyclingFan a Fan:OnOff is valid.");
                         ShowContinueError(state, "...for VariableFanVariableFlow or VariableFanConstantFlow a Fan:VariableVolume is valid.");
@@ -561,13 +561,13 @@ namespace FanCoilUnits {
                     if (fanCoil.CapCtrlMeth_Num == CCM::VarFanVarFlow || fanCoil.CapCtrlMeth_Num == CCM::VarFanConsFlow ||
                         fanCoil.CapCtrlMeth_Num == CCM::ASHRAE) { // then expect continuous speed control fan
                         if (dynamic_cast<Fans::FanSystem *>(state.dataFans->fans(fanCoil.FanIndex))->speedControl != Fans::SpeedControl::Continuous) {
-                            ShowSevereError(state, EnergyPlus::format("{}{}: {}", RoutineName, fanCoil.UnitType, fanCoil.Name));
+                            ShowSevereError(state, std::format("{}{}: {}", RoutineName, fanCoil.UnitType, fanCoil.Name));
                             ShowContinueError(
                                 state,
-                                EnergyPlus::format("...the fan type of the object : {} does not match with the capacity control method selected : "
-                                                   "{} please see I/O reference",
-                                                   fanCoil.FanName,
-                                                   capCtrlMeth));
+                                std::format("...the fan type of the object : {} does not match with the capacity control method selected : "
+                                            "{} please see I/O reference",
+                                            fanCoil.FanName,
+                                            capCtrlMeth));
                             ShowContinueError(
                                 state,
                                 "...for VariableFanVariableFlow or VariableFanConstantFlow a Fan:SystemModel should have Continuous speed control.");
@@ -580,13 +580,12 @@ namespace FanCoilUnits {
             // check low speed fan ratio when using ASHRAE90.1 capacity control method
             if (fanCoil.CapCtrlMeth_Num == CCM::ASHRAE) {
                 if (fanCoil.LowSpeedRatio > 0.5) {
-                    ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\",", RoutineName, CurrentModuleObject, fanCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("... {} is greater than the 50% of the supply air flow ratio.", cNumericFields(2)));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("... Fan Coil Unit low speed supply air flow ratio = {:.5T} ", fanCoil.LowSpeedRatio));
+                    ShowWarningError(state, std::format("{}{}=\"{}\",", RoutineName, CurrentModuleObject, fanCoil.Name));
+                    ShowContinueError(state, std::format("... {} is greater than the 50% of the supply air flow ratio.", cNumericFields(2)));
+                    ShowContinueError(state, std::format("... Fan Coil Unit low speed supply air flow ratio = {:.5f} ", fanCoil.LowSpeedRatio));
                 } else if (fanCoil.LowSpeedRatio == 0.0) {
-                    ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\",", RoutineName, CurrentModuleObject, fanCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("... {} is equal to 0.", cNumericFields(2)));
+                    ShowWarningError(state, std::format("{}{}=\"{}\",", RoutineName, CurrentModuleObject, fanCoil.Name));
+                    ShowContinueError(state, std::format("... {} is equal to 0.", cNumericFields(2)));
                     ShowContinueError(state, "... Fan Coil Unit low speed supply air flow ratio should be greater than 0 to comply with ASHRAE90.1.");
                     ShowContinueError(state, "... Fan Coil Unit low speed supply air flow ratio set to 0.5");
                     fanCoil.LowSpeedRatio = 0.5;
@@ -628,20 +627,19 @@ namespace FanCoilUnits {
                 // check that fan coil doesn' have local outside air
                 if (!lAlphaBlanks(8)) {
                     ShowSevereError(state,
-                                    EnergyPlus::format("{} = \"{}\". Fan coil unit has local as well as central outdoor air specified",
-                                                       CurrentModuleObject,
-                                                       fanCoil.Name));
+                                    std::format("{} = \"{}\". Fan coil unit has local as well as central outdoor air specified",
+                                                CurrentModuleObject,
+                                                fanCoil.Name));
                 }
                 // check that the air terminal mixer out node is the fan coil inlet node
                 if (fanCoil.AirInNode != state.dataFanCoilUnits->ATMixerOutNode) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format(
-                                        "{} = \"{}\". Fan coil unit air inlet node name must be the same as an air terminal mixer outlet node name.",
-                                        CurrentModuleObject,
-                                        fanCoil.Name));
+                    ShowSevereError(
+                        state,
+                        std::format("{} = \"{}\". Fan coil unit air inlet node name must be the same as an air terminal mixer outlet node name.",
+                                    CurrentModuleObject,
+                                    fanCoil.Name));
                     ShowContinueError(state, "..Air terminal mixer outlet node name is specified in AirTerminal:SingleDuct:InletSideMixer object.");
-                    ShowContinueError(state,
-                                      EnergyPlus::format("..Fan coil unit air inlet node name = {}", state.dataLoopNodes->NodeID(fanCoil.AirInNode)));
+                    ShowContinueError(state, std::format("..Fan coil unit air inlet node name = {}", state.dataLoopNodes->NodeID(fanCoil.AirInNode)));
                     ErrorsFound = true;
                 }
                 // check for supply side air terminal mixer
@@ -657,22 +655,22 @@ namespace FanCoilUnits {
                 // check that fan coil doesn' have local outside air
                 if (!lAlphaBlanks(8)) {
                     ShowSevereError(state,
-                                    EnergyPlus::format("{} = \"{}\". Fan coil unit has local as well as central outdoor air specified",
-                                                       CurrentModuleObject,
-                                                       fanCoil.Name));
+                                    std::format("{} = \"{}\". Fan coil unit has local as well as central outdoor air specified",
+                                                CurrentModuleObject,
+                                                fanCoil.Name));
                 }
                 // check that the air terminal mixer secondary air inlet node is the fan coil outlet node
                 if (fanCoil.AirOutNode != state.dataFanCoilUnits->ATMixerSecNode) {
                     ShowSevereError(
                         state,
-                        EnergyPlus::format("{} = \"{}\". Fan coil unit air outlet node name must be the same as the air terminal mixer secondary air "
-                                           "inlet node name.",
-                                           CurrentModuleObject,
-                                           fanCoil.Name));
+                        std::format("{} = \"{}\". Fan coil unit air outlet node name must be the same as the air terminal mixer secondary air "
+                                    "inlet node name.",
+                                    CurrentModuleObject,
+                                    fanCoil.Name));
                     ShowContinueError(
                         state, "..Air terminal mixer secondary inlet node name is specified in AirTerminal:SingleDuct:SupplySideMixer object.");
-                    ShowContinueError(
-                        state, EnergyPlus::format("..Fan coil unit air outlet node name = {}", state.dataLoopNodes->NodeID(fanCoil.AirOutNode)));
+                    ShowContinueError(state,
+                                      std::format("..Fan coil unit air outlet node name = {}", state.dataLoopNodes->NodeID(fanCoil.AirOutNode)));
                     ErrorsFound = true;
                 }
                 bool ZoneNodeNotFound = true;
@@ -691,14 +689,13 @@ namespace FanCoilUnits {
                                                                          state.dataZoneEquip->ZoneEquipConfig(fanCoil.ControlZoneNum).ReturnNode);
                     }
                     if (!InletNodeFound) {
-                        ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\"", RoutineName, CurrentModuleObject, fanCoil.Name));
+                        ShowSevereError(state, std::format("{}{}=\"{}\"", RoutineName, CurrentModuleObject, fanCoil.Name));
                         ShowContinueError(state,
                                           "..FanCoil inlet node name must be the same as either a zone exhaust node name or an induced "
                                           "air node in ZonePlenum.");
                         ShowContinueError(state, "..Zone exhaust node name is specified in ZoneHVAC:EquipmentConnections object.");
                         ShowContinueError(state, "..Induced Air Outlet Node name is specified in AirLoopHVAC:ReturnPlenum object.");
-                        ShowContinueError(state,
-                                          EnergyPlus::format("..FanCoil inlet node name = {}", state.dataLoopNodes->NodeID(fanCoil.AirInNode)));
+                        ShowContinueError(state, std::format("..FanCoil inlet node name = {}", state.dataLoopNodes->NodeID(fanCoil.AirInNode)));
                         ErrorsFound = true;
                     }
                 }
@@ -722,14 +719,14 @@ namespace FanCoilUnits {
                     if (!InletNodeFound) {
                         ShowSevereError(
                             state,
-                            EnergyPlus::format("{} = \"{}\". Fan coil unit air inlet node name must be the same either as a zone exhaust node name "
-                                               "or an induce air node in ZoePlenum.",
-                                               CurrentModuleObject,
-                                               fanCoil.Name));
+                            std::format("{} = \"{}\". Fan coil unit air inlet node name must be the same either as a zone exhaust node name "
+                                        "or an induce air node in ZoePlenum.",
+                                        CurrentModuleObject,
+                                        fanCoil.Name));
                         ShowContinueError(state, "..Zone exhaust node name is specified in ZoneHVAC:EquipmentConnections object.");
                         ShowContinueError(state, "..Induced Air Outlet Node name is specified in AirLoopHVAC:ReturnPlenum object.");
-                        ShowContinueError(
-                            state, EnergyPlus::format("..Fan coil unit air inlet node name = {}", state.dataLoopNodes->NodeID(fanCoil.AirInNode)));
+                        ShowContinueError(state,
+                                          std::format("..Fan coil unit air inlet node name = {}", state.dataLoopNodes->NodeID(fanCoil.AirInNode)));
                         ErrorsFound = true;
                     }
                 }
@@ -742,12 +739,12 @@ namespace FanCoilUnits {
 
                 if (state.dataFanCoilUnits->ZoneInNodeNotFound) {
                     ShowSevereError(state,
-                                    EnergyPlus::format("{} = \"{}\". Fan coil unit air outlet node name must be the same as a zone inlet node name.",
-                                                       CurrentModuleObject,
-                                                       fanCoil.Name));
+                                    std::format("{} = \"{}\". Fan coil unit air outlet node name must be the same as a zone inlet node name.",
+                                                CurrentModuleObject,
+                                                fanCoil.Name));
                     ShowContinueError(state, "..Zone inlet node name is specified in ZoneHVAC:EquipmentConnections object.");
-                    ShowContinueError(
-                        state, EnergyPlus::format("..Fan coil unit air outlet node name = {}", state.dataLoopNodes->NodeID(fanCoil.AirOutNode)));
+                    ShowContinueError(state,
+                                      std::format("..Fan coil unit air outlet node name = {}", state.dataLoopNodes->NodeID(fanCoil.AirOutNode)));
 
                     ErrorsFound = true;
                 }
@@ -756,9 +753,9 @@ namespace FanCoilUnits {
                 if (!lAlphaBlanks(17)) {
                     fanCoil.fanOpModeSched = Sched::GetSchedule(state, Alphas(17));
                     if (fanCoil.fanType != HVAC::FanType::OnOff && fanCoil.fanType != HVAC::FanType::SystemModel) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, fanCoil.Name));
-                        ShowContinueError(state, EnergyPlus::format("For {} = {}", cAlphaFields(17), Alphas(17)));
-                        ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(9), Alphas(9)));
+                        ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, fanCoil.Name));
+                        ShowContinueError(state, std::format("For {} = {}", cAlphaFields(17), Alphas(17)));
+                        ShowContinueError(state, std::format("Illegal {} = {}", cAlphaFields(9), Alphas(9)));
                         ShowContinueError(state, "...fan operating schedule is allowed for on off or system model fan type only )");
                         ErrorsFound = true;
                     } else if (fanCoil.fanOpModeSched == nullptr) {
@@ -773,8 +770,8 @@ namespace FanCoilUnits {
             if (!lNumericBlanks(11)) {
                 fanCoil.DesignMinOutletTemp = Numbers(11);
                 if (lNumericBlanks(12)) {
-                    ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\",", RoutineName, CurrentModuleObject, fanCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("... {} and {} must be used in unison.", cNumericFields(11), cNumericFields(12)));
+                    ShowWarningError(state, std::format("{}{}=\"{}\",", RoutineName, CurrentModuleObject, fanCoil.Name));
+                    ShowContinueError(state, std::format("... {} and {} must be used in unison.", cNumericFields(11), cNumericFields(12)));
                     ErrorsFound = true;
                 }
             }
@@ -783,16 +780,16 @@ namespace FanCoilUnits {
                 fanCoil.DesignMaxOutletTemp = Numbers(12);
                 if (fanCoil.DesignMinOutletTemp != DataSizing::AutoSize && fanCoil.DesignMaxOutletTemp != DataSizing::AutoSize) {
                     if (fanCoil.DesignMaxOutletTemp < fanCoil.DesignMinOutletTemp) {
-                        ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\",", RoutineName, CurrentModuleObject, fanCoil.Name));
-                        ShowContinueError(state, EnergyPlus::format("... {} is greater than {}.", cNumericFields(11), cNumericFields(12)));
-                        ShowContinueError(state, EnergyPlus::format("... {} = {:.2T} [C].", cNumericFields(11), fanCoil.DesignMinOutletTemp));
-                        ShowContinueError(state, EnergyPlus::format("... {} = {:.2T} [C].", cNumericFields(12), fanCoil.DesignMaxOutletTemp));
+                        ShowWarningError(state, std::format("{}{}=\"{}\",", RoutineName, CurrentModuleObject, fanCoil.Name));
+                        ShowContinueError(state, std::format("... {} is greater than {}.", cNumericFields(11), cNumericFields(12)));
+                        ShowContinueError(state, std::format("... {} = {:.2f} [C].", cNumericFields(11), fanCoil.DesignMinOutletTemp));
+                        ShowContinueError(state, std::format("... {} = {:.2f} [C].", cNumericFields(12), fanCoil.DesignMaxOutletTemp));
                         ErrorsFound = true;
                     }
                 }
                 if (lNumericBlanks(11)) {
-                    ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\",", RoutineName, CurrentModuleObject, fanCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("... {} and {} must be used in unison.", cNumericFields(11), cNumericFields(12)));
+                    ShowWarningError(state, std::format("{}{}=\"{}\",", RoutineName, CurrentModuleObject, fanCoil.Name));
+                    ShowContinueError(state, std::format("... {} and {} must be used in unison.", cNumericFields(11), cNumericFields(12)));
                     ErrorsFound = true;
                 }
             }
@@ -853,7 +850,7 @@ namespace FanCoilUnits {
         lNumericBlanks.deallocate();
 
         if (ErrorsFound) {
-            ShowFatalError(state, EnergyPlus::format("{}Errors found in input. Preceding condition(s) cause termination.", RoutineName));
+            ShowFatalError(state, std::format("{}Errors found in input. Preceding condition(s) cause termination.", RoutineName));
         }
 
         for (auto &fanCoil : state.dataFanCoilUnits->FanCoil) {
@@ -1030,7 +1027,7 @@ namespace FanCoilUnits {
                     state, fanCoil.HCoilName, fanCoil.HCoilPlantTypeOf, fanCoil.HeatCoilPlantLoc, errFlag, _, _, _, _, _);
 
                 if (errFlag) {
-                    ShowContinueError(state, EnergyPlus::format("Reference Unit=\"{}\", type={}", fanCoil.Name, fanCoil.UnitType));
+                    ShowContinueError(state, std::format("Reference Unit=\"{}\", type={}", fanCoil.Name, fanCoil.UnitType));
                     ShowFatalError(state, "InitFanCoilUnits: Program terminated for previous conditions.");
                 }
 
@@ -1039,8 +1036,7 @@ namespace FanCoilUnits {
             } else if (fanCoil.heatCoilType == HVAC::CoilType::HeatingElectric) {
                 // do nothing, valid type
             } else {
-                ShowFatalError(state,
-                               EnergyPlus::format("InitFanCoilUnits: FanCoil={}, invalid heating coil type. Program terminated.", fanCoil.Name));
+                ShowFatalError(state, std::format("InitFanCoilUnits: FanCoil={}, invalid heating coil type. Program terminated.", fanCoil.Name));
             }
 
             if ((fanCoil.CCoilPlantType == DataPlant::PlantEquipmentType::CoilWaterCooling) ||
@@ -1048,13 +1044,12 @@ namespace FanCoilUnits {
                 PlantUtilities::ScanPlantLoopsForObject(
                     state, fanCoil.CCoilPlantName, fanCoil.CCoilPlantType, fanCoil.CoolCoilPlantLoc, errFlag, _, _, _, _, _);
                 if (errFlag) {
-                    ShowContinueError(state, EnergyPlus::format("Reference Unit=\"{}\", type={}", fanCoil.Name, fanCoil.UnitType));
+                    ShowContinueError(state, std::format("Reference Unit=\"{}\", type={}", fanCoil.Name, fanCoil.UnitType));
                     ShowFatalError(state, "InitFanCoilUnits: Program terminated for previous conditions.");
                 }
                 fanCoil.CoolCoilFluidOutletNodeNum = DataPlant::CompData::getPlantComponent(state, fanCoil.CoolCoilPlantLoc).NodeNumOut;
             } else {
-                ShowFatalError(state,
-                               EnergyPlus::format("InitFanCoilUnits: FanCoil={}, invalid cooling coil type. Program terminated.", fanCoil.Name));
+                ShowFatalError(state, std::format("InitFanCoilUnits: FanCoil={}, invalid cooling coil type. Program terminated.", fanCoil.Name));
             }
 
             state.dataFanCoilUnits->MyPlantScanFlag(FanCoilNum) = false;
@@ -1067,11 +1062,10 @@ namespace FanCoilUnits {
                         state, state.dataFanCoilUnits->FanCoil(Loop).UnitType, state.dataFanCoilUnits->FanCoil(Loop).Name)) {
                     continue;
                 }
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format("InitFanCoil: FanCoil Unit=[{},{}] is not on any ZoneHVAC:EquipmentList.  It will not be simulated.",
-                                       state.dataFanCoilUnits->FanCoil(Loop).UnitType,
-                                       state.dataFanCoilUnits->FanCoil(Loop).Name));
+                ShowSevereError(state,
+                                std::format("InitFanCoil: FanCoil Unit=[{},{}] is not on any ZoneHVAC:EquipmentList.  It will not be simulated.",
+                                            state.dataFanCoilUnits->FanCoil(Loop).UnitType,
+                                            state.dataFanCoilUnits->FanCoil(Loop).Name));
             }
         }
 
@@ -1413,11 +1407,11 @@ namespace FanCoilUnits {
                 }
                 //     Check that the fan volumetric flow rate is greater than or equal to the FCU volumetric flow rate
                 if (MaxAirVolFlowDes > fanCoil.FanAirVolFlow) {
-                    ShowWarningError(state, EnergyPlus::format("{}{}: {}", RoutineName, fanCoil.UnitType, fanCoil.Name));
+                    ShowWarningError(state, std::format("{}{}: {}", RoutineName, fanCoil.UnitType, fanCoil.Name));
                     ShowContinueError(state, "... Maximum supply air flow rate is greater than the maximum fan flow rate.");
-                    ShowContinueError(state, EnergyPlus::format("... Fan Coil Unit flow = {:.5T} [m3/s].", MaxAirVolFlowDes));
-                    ShowContinueError(state, EnergyPlus::format("... Fan = {}: {}", HVAC::fanTypeNames[(int)fanCoil.fanType], fanCoil.FanName));
-                    ShowContinueError(state, EnergyPlus::format("... Fan flow = {:.5T} [m3/s].", fanCoil.FanAirVolFlow));
+                    ShowContinueError(state, std::format("... Fan Coil Unit flow = {:.5f} [m3/s].", MaxAirVolFlowDes));
+                    ShowContinueError(state, std::format("... Fan = {}: {}", HVAC::fanTypeNames[(int)fanCoil.fanType], fanCoil.FanName));
+                    ShowContinueError(state, std::format("... Fan flow = {:.5f} [m3/s].", fanCoil.FanAirVolFlow));
                     ShowContinueError(state, "... Fan Coil Unit flow rate reduced to match the fan flow rate and the simulation continues.");
                     MaxAirVolFlowDes = fanCoil.FanAirVolFlow;
                 }
@@ -1429,9 +1423,9 @@ namespace FanCoilUnits {
                         MaxAirVolFlowUser = fanCoil.MaxAirVolFlow;
                         if (state.dataGlobal->DisplayExtraWarnings) {
                             if ((std::abs(MaxAirVolFlowDes - MaxAirVolFlowUser) / MaxAirVolFlowUser) > state.dataSize->AutoVsHardSizingThreshold) {
-                                ShowMessage(state,
-                                            EnergyPlus::format(
-                                                "SizeFanCoilUnit: Potential issue with equipment sizing for {} {}", fanCoil.UnitType, fanCoil.Name));
+                                ShowMessage(
+                                    state,
+                                    std::format("SizeFanCoilUnit: Potential issue with equipment sizing for {} {}", fanCoil.UnitType, fanCoil.Name));
                                 ShowContinueError(
                                     state, EnergyPlus::format("User-Specified Supply Air Maximum Flow Rate of {:.5R} [m3/s]", MaxAirVolFlowUser));
                                 ShowContinueError(
@@ -1450,11 +1444,11 @@ namespace FanCoilUnits {
 
             //   Check that the fan volumetric flow rate is greater than or equal to the FCU volumetric flow rate
             if (fanCoil.MaxAirVolFlow > fanCoil.FanAirVolFlow) {
-                ShowWarningError(state, EnergyPlus::format("{}{}: {}", RoutineName, fanCoil.UnitType, fanCoil.Name));
+                ShowWarningError(state, std::format("{}{}: {}", RoutineName, fanCoil.UnitType, fanCoil.Name));
                 ShowContinueError(state, "... Maximum supply air flow rate is greater than the maximum fan flow rate.");
-                ShowContinueError(state, EnergyPlus::format("... Fan Coil Unit flow = {:.5T} m3/s.", fanCoil.MaxAirVolFlow));
-                ShowContinueError(state, EnergyPlus::format("... Fan = {}: {}", HVAC::fanTypeNames[(int)fanCoil.fanType], fanCoil.FanName));
-                ShowContinueError(state, EnergyPlus::format("... Fan flow = {:.5T} m3/s.", fanCoil.FanAirVolFlow));
+                ShowContinueError(state, std::format("... Fan Coil Unit flow = {:.5f} m3/s.", fanCoil.MaxAirVolFlow));
+                ShowContinueError(state, std::format("... Fan = {}: {}", HVAC::fanTypeNames[(int)fanCoil.fanType], fanCoil.FanName));
+                ShowContinueError(state, std::format("... Fan flow = {:.5f} m3/s.", fanCoil.FanAirVolFlow));
                 ShowContinueError(state, "... Fan Coil Unit flow rate reduced to match the fan flow rate and the simulation continues.");
                 fanCoil.MaxAirVolFlow = fanCoil.FanAirVolFlow;
             }
@@ -1493,9 +1487,9 @@ namespace FanCoilUnits {
                                                      OutAirVolFlowUser);
                         if (state.dataGlobal->DisplayExtraWarnings) {
                             if ((std::abs(OutAirVolFlowDes - OutAirVolFlowUser) / OutAirVolFlowUser) > state.dataSize->AutoVsHardSizingThreshold) {
-                                ShowMessage(state,
-                                            EnergyPlus::format(
-                                                "SizeFanCoilUnit: Potential issue with equipment sizing for {} {}", fanCoil.UnitType, fanCoil.Name));
+                                ShowMessage(
+                                    state,
+                                    std::format("SizeFanCoilUnit: Potential issue with equipment sizing for {} {}", fanCoil.UnitType, fanCoil.Name));
                                 ShowContinueError(
                                     state, EnergyPlus::format("User-Specified Maximum Outdoor Air Flow Rate of {:.5R} [m3/s]", OutAirVolFlowUser));
                                 ShowContinueError(
@@ -1553,7 +1547,7 @@ namespace FanCoilUnits {
                                 DoWaterCoilSizing = false;
                                 // If there is no heating Plant Sizing object and autosizing was requested, issue fatal error message
                                 ShowSevereError(state, "Autosizing of water coil requires a heating loop Sizing:Plant object");
-                                ShowContinueError(state, EnergyPlus::format("Occurs in {} Object={}", fanCoil.UnitType, fanCoil.Name));
+                                ShowContinueError(state, std::format("Occurs in {} Object={}", fanCoil.UnitType, fanCoil.Name));
                                 ErrorsFound = true;
                             }
                         }
@@ -1659,9 +1653,9 @@ namespace FanCoilUnits {
                         if (state.dataGlobal->DisplayExtraWarnings) {
                             if ((std::abs(MaxHotWaterVolFlowDes - MaxHotWaterVolFlowUser) / MaxHotWaterVolFlowUser) >
                                 state.dataSize->AutoVsHardSizingThreshold) {
-                                ShowMessage(state,
-                                            EnergyPlus::format(
-                                                "SizeFanCoilUnit: Potential issue with equipment sizing for {} {}", fanCoil.UnitType, fanCoil.Name));
+                                ShowMessage(
+                                    state,
+                                    std::format("SizeFanCoilUnit: Potential issue with equipment sizing for {} {}", fanCoil.UnitType, fanCoil.Name));
                                 ShowContinueError(
                                     state, EnergyPlus::format("User-Specified Maximum Hot Water Flow of {:.5R} [m3/s]", MaxHotWaterVolFlowUser));
                                 ShowContinueError(
@@ -1732,7 +1726,7 @@ namespace FanCoilUnits {
                             DoWaterCoilSizing = false;
                             // If there is no cooling Plant Sizing object and autosizing was requested, issue fatal error message
                             ShowSevereError(state, "Autosizing of water coil requires a cooling loop Sizing:Plant object");
-                            ShowContinueError(state, EnergyPlus::format("Occurs in {} Object={}", fanCoil.UnitType, fanCoil.Name));
+                            ShowContinueError(state, std::format("Occurs in {} Object={}", fanCoil.UnitType, fanCoil.Name));
                             ErrorsFound = true;
                         }
                     }
@@ -1833,9 +1827,9 @@ namespace FanCoilUnits {
                         if (state.dataGlobal->DisplayExtraWarnings) {
                             if ((std::abs(MaxColdWaterVolFlowDes - MaxColdWaterVolFlowUser) / MaxColdWaterVolFlowUser) >
                                 state.dataSize->AutoVsHardSizingThreshold) {
-                                ShowMessage(state,
-                                            EnergyPlus::format(
-                                                "SizeFanCoilUnit: Potential issue with equipment sizing for {} {}", fanCoil.UnitType, fanCoil.Name));
+                                ShowMessage(
+                                    state,
+                                    std::format("SizeFanCoilUnit: Potential issue with equipment sizing for {} {}", fanCoil.UnitType, fanCoil.Name));
                                 ShowContinueError(
                                     state, EnergyPlus::format("User-Specified Maximum Cold Water Flow of {:.5R}[m3/s]", MaxColdWaterVolFlowUser));
                                 ShowContinueError(
@@ -2122,17 +2116,17 @@ namespace FanCoilUnits {
                         if (SolFlag == -1) {
                             ++fanCoil.ConvgErrCountC;
                             if (fanCoil.ConvgErrCountC < 2) {
-                                ShowWarningError(state, EnergyPlus::format("Cold Water control failed in fan coil unit {}", fanCoil.Name));
+                                ShowWarningError(state, std::format("Cold Water control failed in fan coil unit {}", fanCoil.Name));
                                 ShowContinueError(state, "  Iteration limit exceeded in calculating water flow rate ");
                                 state.dataLoopNodes->Node(fanCoil.CoolCoilFluidInletNode).MassFlowRate = CWFlow;
                                 Calc4PipeFanCoil(state, FanCoilNum, ControlledZoneNum, FirstHVACIteration, QUnitOut);
-                                ShowContinueErrorTimeStamp(state, EnergyPlus::format("Load Request = {}, Final Capacity = {}", QZnReq, QUnitOut));
+                                ShowContinueErrorTimeStamp(state, std::format("Load Request = {}, Final Capacity = {}", QZnReq, QUnitOut));
                                 ShowContinueErrorTimeStamp(
                                     state,
-                                    EnergyPlus::format("Min water flow used during iterations = {}, Max water flow used during iterations = {}",
-                                                       MinWaterFlow,
-                                                       MaxWaterFlow));
-                                ShowContinueErrorTimeStamp(state, EnergyPlus::format("Water flow rate on last iteration = {}", CWFlow));
+                                    std::format("Min water flow used during iterations = {}, Max water flow used during iterations = {}",
+                                                MinWaterFlow,
+                                                MaxWaterFlow));
+                                ShowContinueErrorTimeStamp(state, std::format("Water flow rate on last iteration = {}", CWFlow));
                                 ShowContinueErrorTimeStamp(state, "..Water flow rate set to last iteration value ");
                             } else {
                                 ShowRecurringWarningErrorAtEnd(
@@ -2141,7 +2135,7 @@ namespace FanCoilUnits {
                         } else if (SolFlag == -2) {
                             ++fanCoil.LimitErrCountC;
                             if (fanCoil.LimitErrCountC < 2) {
-                                ShowWarningError(state, EnergyPlus::format("Cold Water control failed in fan coil unit {}", fanCoil.Name));
+                                ShowWarningError(state, std::format("Cold Water control failed in fan coil unit {}", fanCoil.Name));
                                 ShowContinueError(state, "  Bad cold water mass flow limits");
                                 ShowContinueErrorTimeStamp(state, "..Water flow rate set to lower limit ");
                             } else {
@@ -2152,7 +2146,7 @@ namespace FanCoilUnits {
                     } else if (SolFlag == -2) {
                         ++fanCoil.LimitErrCountC;
                         if (fanCoil.LimitErrCountC < 2) {
-                            ShowWarningError(state, EnergyPlus::format("Cold Water control failed in fan coil unit {}", fanCoil.Name));
+                            ShowWarningError(state, std::format("Cold Water control failed in fan coil unit {}", fanCoil.Name));
                             ShowContinueError(state, "  Bad cold water mass flow limits");
                             ShowContinueErrorTimeStamp(state, "..Water flow rate set to lower limit ");
                         } else {
@@ -2268,17 +2262,17 @@ namespace FanCoilUnits {
                             if (SolFlag == -1) {
                                 ++fanCoil.ConvgErrCountH;
                                 if (fanCoil.ConvgErrCountH < 2) {
-                                    ShowWarningError(state, EnergyPlus::format("Hot Water control failed in fan coil unit {}", fanCoil.Name));
+                                    ShowWarningError(state, std::format("Hot Water control failed in fan coil unit {}", fanCoil.Name));
                                     ShowContinueError(state, "  Iteration limit exceeded in calculating water flow rate ");
                                     state.dataLoopNodes->Node(fanCoil.HeatCoilFluidInletNode).MassFlowRate = HWFlow;
                                     Calc4PipeFanCoil(state, FanCoilNum, ControlledZoneNum, FirstHVACIteration, QUnitOut);
-                                    ShowContinueErrorTimeStamp(state, EnergyPlus::format("Load Request = {}, Final Capacity = {}", QZnReq, QUnitOut));
+                                    ShowContinueErrorTimeStamp(state, std::format("Load Request = {}, Final Capacity = {}", QZnReq, QUnitOut));
                                     ShowContinueErrorTimeStamp(
                                         state,
-                                        EnergyPlus::format("Min water flow used during iterations = {}, Max water flow used during iterations = {}",
-                                                           MinWaterFlow,
-                                                           MaxWaterFlow));
-                                    ShowContinueErrorTimeStamp(state, EnergyPlus::format("Water flow rate on last iteration = {}", HWFlow));
+                                        std::format("Min water flow used during iterations = {}, Max water flow used during iterations = {}",
+                                                    MinWaterFlow,
+                                                    MaxWaterFlow));
+                                    ShowContinueErrorTimeStamp(state, std::format("Water flow rate on last iteration = {}", HWFlow));
                                     ShowContinueErrorTimeStamp(state, "..Water flow rate set to last iteration value ");
                                 } else {
                                     ShowRecurringWarningErrorAtEnd(
@@ -2287,7 +2281,7 @@ namespace FanCoilUnits {
                             } else if (SolFlag == -2) {
                                 ++fanCoil.LimitErrCountH;
                                 if (fanCoil.LimitErrCountH < 2) {
-                                    ShowWarningError(state, EnergyPlus::format("Hot Water control failed in fan coil unit {}", fanCoil.Name));
+                                    ShowWarningError(state, std::format("Hot Water control failed in fan coil unit {}", fanCoil.Name));
                                     ShowContinueError(state, "  Bad hot water mass flow limits");
                                     ShowContinueErrorTimeStamp(state, "..Water flow rate set to lower limit ");
                                 } else {
@@ -2298,7 +2292,7 @@ namespace FanCoilUnits {
                         } else if (SolFlag == -2) {
                             ++fanCoil.LimitErrCountH;
                             if (fanCoil.LimitErrCountH < 2) {
-                                ShowWarningError(state, EnergyPlus::format("Hot Water control failed in fan coil unit {}", fanCoil.Name));
+                                ShowWarningError(state, std::format("Hot Water control failed in fan coil unit {}", fanCoil.Name));
                                 ShowContinueError(state, "  Bad hot water mass flow limits");
                                 ShowContinueErrorTimeStamp(state, "..Water flow rate set to lower limit ");
                             } else {
@@ -2487,17 +2481,16 @@ namespace FanCoilUnits {
                         if (SolFlag == -1) {
                             ++fanCoil.ConvgErrCountC;
                             if (fanCoil.ConvgErrCountC < 2) {
-                                ShowWarningError(state,
-                                                 EnergyPlus::format("Part-load ratio cooling control failed in fan coil unit {}", fanCoil.Name));
+                                ShowWarningError(state, std::format("Part-load ratio cooling control failed in fan coil unit {}", fanCoil.Name));
                                 ShowContinueError(state, "  Iteration limit exceeded in calculating FCU part-load ratio ");
                                 state.dataLoopNodes->Node(fanCoil.CoolCoilFluidInletNode).MassFlowRate = PLR * fanCoil.MaxCoolCoilFluidFlow;
                                 Calc4PipeFanCoil(state, FanCoilNum, ControlledZoneNum, FirstHVACIteration, QUnitOut, PLR);
-                                ShowContinueErrorTimeStamp(state, EnergyPlus::format("Load Request = {}, Final Capacity = {}", QZnReq, QUnitOut));
+                                ShowContinueErrorTimeStamp(state, std::format("Load Request = {}, Final Capacity = {}", QZnReq, QUnitOut));
                                 ShowContinueErrorTimeStamp(
                                     state,
-                                    EnergyPlus::format(
+                                    std::format(
                                         "Min part-load used during iterations = {}, Max part-load used during iterations = {}", PLRMin, PLRMax));
-                                ShowContinueErrorTimeStamp(state, EnergyPlus::format("Part-load ratio on last iteration = {}", PLR));
+                                ShowContinueErrorTimeStamp(state, std::format("Part-load ratio on last iteration = {}", PLR));
                                 ShowContinueErrorTimeStamp(state, "..Part-load ratio set to last iteration value ");
                             } else {
                                 ShowRecurringWarningErrorAtEnd(state,
@@ -2507,10 +2500,9 @@ namespace FanCoilUnits {
                         } else if (SolFlag == -2) {
                             ++fanCoil.LimitErrCountC;
                             if (fanCoil.LimitErrCountC < 2) {
-                                ShowWarningError(state,
-                                                 EnergyPlus::format("Part-load ratio cooling control failed in fan coil unit {}", fanCoil.Name));
+                                ShowWarningError(state, std::format("Part-load ratio cooling control failed in fan coil unit {}", fanCoil.Name));
                                 ShowContinueError(state, "  Bad part-load ratio limits");
-                                ShowContinueErrorTimeStamp(state, EnergyPlus::format("..Part-load ratio set to {}", PLRMin));
+                                ShowContinueErrorTimeStamp(state, std::format("..Part-load ratio set to {}", PLRMin));
                             } else {
                                 ShowRecurringWarningErrorAtEnd(
                                     state, "Part-load ratio cooling control failed in fan coil unit " + fanCoil.Name, fanCoil.BadMassFlowLimIndexC);
@@ -2519,7 +2511,7 @@ namespace FanCoilUnits {
                     } else if (SolFlag == -2) {
                         ++fanCoil.LimitErrCountC;
                         if (fanCoil.LimitErrCountC < 2) {
-                            ShowWarningError(state, EnergyPlus::format("Part-load ratio control failed in fan coil unit {}", fanCoil.Name));
+                            ShowWarningError(state, std::format("Part-load ratio control failed in fan coil unit {}", fanCoil.Name));
                             ShowContinueError(state, "  Bad part-load ratio limits");
                             ShowContinueErrorTimeStamp(state, "..Part-load ratio set to 0");
                         } else {
@@ -2588,19 +2580,17 @@ namespace FanCoilUnits {
                             if (SolFlag == -1) {
                                 ++fanCoil.ConvgErrCountH;
                                 if (fanCoil.ConvgErrCountH < 2) {
-                                    ShowWarningError(state,
-                                                     EnergyPlus::format("Part-load ratio heating control failed in fan coil unit {}", fanCoil.Name));
+                                    ShowWarningError(state, std::format("Part-load ratio heating control failed in fan coil unit {}", fanCoil.Name));
                                     ShowContinueError(state, "  Iteration limit exceeded in calculating FCU part-load ratio ");
                                     state.dataLoopNodes->Node(fanCoil.HeatCoilFluidInletNode).MassFlowRate = PLR * fanCoil.MaxHeatCoilFluidFlow;
                                     Calc4PipeFanCoil(state, FanCoilNum, ControlledZoneNum, FirstHVACIteration, QUnitOut, PLR);
-                                    ShowContinueErrorTimeStamp(state, EnergyPlus::format("Load Request = {}, Final Capacity = {}", QZnReq, QUnitOut));
+                                    ShowContinueErrorTimeStamp(state, std::format("Load Request = {}, Final Capacity = {}", QZnReq, QUnitOut));
                                     ShowContinueErrorTimeStamp(
                                         state,
-                                        EnergyPlus::format(
-                                            "Min part-load ratio used during iterations = {}, Max part-load used during iterations = {}",
-                                            PLRMin,
-                                            PLRMax));
-                                    ShowContinueErrorTimeStamp(state, EnergyPlus::format("Part-load ratio on last iteration = {}", PLR));
+                                        std::format("Min part-load ratio used during iterations = {}, Max part-load used during iterations = {}",
+                                                    PLRMin,
+                                                    PLRMax));
+                                    ShowContinueErrorTimeStamp(state, std::format("Part-load ratio on last iteration = {}", PLR));
                                     ShowContinueErrorTimeStamp(state, "..Part-load ratio set to last iteration value ");
                                 } else {
                                     ShowRecurringWarningErrorAtEnd(state,
@@ -2611,10 +2601,9 @@ namespace FanCoilUnits {
                             } else if (SolFlag == -2) {
                                 ++fanCoil.LimitErrCountH;
                                 if (fanCoil.LimitErrCountH < 2) {
-                                    ShowWarningError(state,
-                                                     EnergyPlus::format("Part-load ratio heating control failed in fan coil unit {}", fanCoil.Name));
+                                    ShowWarningError(state, std::format("Part-load ratio heating control failed in fan coil unit {}", fanCoil.Name));
                                     ShowContinueError(state, "  Bad hot part-load ratio limits");
-                                    ShowContinueErrorTimeStamp(state, EnergyPlus::format("..Part-load ratio set to {}", PLRMin));
+                                    ShowContinueErrorTimeStamp(state, std::format("..Part-load ratio set to {}", PLRMin));
                                 } else {
                                     ShowRecurringWarningErrorAtEnd(state,
                                                                    "Part-load ratio heating control failed in fan coil unit " + fanCoil.Name,
@@ -2624,8 +2613,7 @@ namespace FanCoilUnits {
                         } else if (SolFlag == -2) {
                             ++fanCoil.LimitErrCountH;
                             if (fanCoil.LimitErrCountH < 2) {
-                                ShowWarningError(state,
-                                                 EnergyPlus::format("Part-load ratio heating control failed in fan coil unit {}", fanCoil.Name));
+                                ShowWarningError(state, std::format("Part-load ratio heating control failed in fan coil unit {}", fanCoil.Name));
                                 ShowContinueError(state, "  Bad part-load ratio limits");
                                 ShowContinueErrorTimeStamp(state, "..Part-load ratio set to 0");
                             } else {
@@ -2893,10 +2881,10 @@ namespace FanCoilUnits {
                     if (fanCoil.MaxIterIndexC == 0) {
                         ShowWarningMessage(
                             state,
-                            EnergyPlus::format("ZoneHVAC:FourPipeFanCoil=\"{}\" -- Exceeded max iterations while adjusting cycling fan sensible "
-                                               "runtime to meet the zone load within the cooling convergence tolerance.",
-                                               fanCoil.Name));
-                        ShowContinueErrorTimeStamp(state, EnergyPlus::format("Iterations={}", MaxIterCycl));
+                            std::format("ZoneHVAC:FourPipeFanCoil=\"{}\" -- Exceeded max iterations while adjusting cycling fan sensible "
+                                        "runtime to meet the zone load within the cooling convergence tolerance.",
+                                        fanCoil.Name));
+                        ShowContinueErrorTimeStamp(state, std::format("Iterations={}", MaxIterCycl));
                     }
                     ShowRecurringWarningErrorAtEnd(state,
                                                    "ZoneHVAC:FourPipeFanCoil=\"" + fanCoil.Name +
@@ -2950,12 +2938,12 @@ namespace FanCoilUnits {
                     if (fanCoil.MaxIterIndexH == 0) {
                         ShowWarningMessage(
                             state,
-                            EnergyPlus::format("ZoneHVAC:FourPipeFanCoil=\"{}\" -- Exceeded max iterations while adjusting cycling fan sensible "
-                                               "runtime to meet the zone load within the heating convergence tolerance.",
-                                               fanCoil.Name));
-                        ShowContinueError(state, EnergyPlus::format("...Requested zone load = {:.3T} [W]", QZnReq));
-                        ShowContinueError(state, EnergyPlus::format("...Fan coil capacity   = {:.3T} [W]", QUnitOut));
-                        ShowContinueErrorTimeStamp(state, EnergyPlus::format("Iterations={}", MaxIterCycl));
+                            std::format("ZoneHVAC:FourPipeFanCoil=\"{}\" -- Exceeded max iterations while adjusting cycling fan sensible "
+                                        "runtime to meet the zone load within the heating convergence tolerance.",
+                                        fanCoil.Name));
+                        ShowContinueError(state, std::format("...Requested zone load = {:.3f} [W]", QZnReq));
+                        ShowContinueError(state, std::format("...Fan coil capacity   = {:.3f} [W]", QUnitOut));
+                        ShowContinueErrorTimeStamp(state, std::format("Iterations={}", MaxIterCycl));
                     }
                     ShowRecurringWarningErrorAtEnd(state,
                                                    "ZoneHVAC:FourPipeFanCoil=\"" + fanCoil.Name +
@@ -3831,10 +3819,10 @@ namespace FanCoilUnits {
                     if (fanCoil.MaxIterIndexC == 0) {
                         ShowWarningMessage(
                             state,
-                            EnergyPlus::format("ZoneHVAC:FourPipeFanCoil=\"{}\" -- Exceeded max iterations while adjusting cycling fan sensible "
-                                               "runtime to meet the zone load within the cooling convergence tolerance.",
-                                               fanCoil.Name));
-                        ShowContinueErrorTimeStamp(state, EnergyPlus::format("Iterations={}", MaxIterCycl));
+                            std::format("ZoneHVAC:FourPipeFanCoil=\"{}\" -- Exceeded max iterations while adjusting cycling fan sensible "
+                                        "runtime to meet the zone load within the cooling convergence tolerance.",
+                                        fanCoil.Name));
+                        ShowContinueErrorTimeStamp(state, std::format("Iterations={}", MaxIterCycl));
                     }
                     ShowRecurringWarningErrorAtEnd(state,
                                                    "ZoneHVAC:FourPipeFanCoil=\"" + fanCoil.Name +
@@ -3965,12 +3953,11 @@ namespace FanCoilUnits {
                     // warning if not converged
                     if (Iter > (MaxIterCycl - 1)) {
                         if (fanCoil.MaxIterIndexH == 0) {
-                            ShowWarningMessage(
-                                state,
-                                EnergyPlus::format("ZoneHVAC:FourPipeFanCoil=\"{}\" -- Exceeded max iterations while adjusting cycling fan "
-                                                   "sensible runtime to meet the zone load within the heating convergence tolerance.",
-                                                   fanCoil.Name));
-                            ShowContinueErrorTimeStamp(state, EnergyPlus::format("Iterations={}", MaxIterCycl));
+                            ShowWarningMessage(state,
+                                               std::format("ZoneHVAC:FourPipeFanCoil=\"{}\" -- Exceeded max iterations while adjusting cycling fan "
+                                                           "sensible runtime to meet the zone load within the heating convergence tolerance.",
+                                                           fanCoil.Name));
+                            ShowContinueErrorTimeStamp(state, std::format("Iterations={}", MaxIterCycl));
                         }
                         ShowRecurringWarningErrorAtEnd(state,
                                                        "ZoneHVAC:FourPipeFanCoil=\"" + fanCoil.Name +
@@ -3998,13 +3985,12 @@ namespace FanCoilUnits {
                         if (SolFlag == -1) {
                             ++fanCoil.ConvgErrCountH;
                             if (fanCoil.ConvgErrCountH < 2) {
-                                ShowWarningError(state, EnergyPlus::format("Electric heating coil control failed in fan coil unit {}", fanCoil.Name));
+                                ShowWarningError(state, std::format("Electric heating coil control failed in fan coil unit {}", fanCoil.Name));
                                 ShowContinueError(state, "  Iteration limit exceeded in calculating electric heating coil capacity modulation ");
                                 Calc4PipeFanCoil(state, FanCoilNum, ZoneNum, FirstHVACIteration, QUnitOut, _, eHeatCoilPLR);
-                                ShowContinueErrorTimeStamp(state, EnergyPlus::format("Load Request = {}, Final Capacity = {}", QZnReq, QUnitOut));
+                                ShowContinueErrorTimeStamp(state, std::format("Load Request = {}, Final Capacity = {}", QZnReq, QUnitOut));
                                 ShowContinueErrorTimeStamp(
-                                    state,
-                                    EnergyPlus::format("Electric heating coil part load ratio used during last iterations = {}", eHeatCoilPLR));
+                                    state, std::format("Electric heating coil part load ratio used during last iterations = {}", eHeatCoilPLR));
                             } else {
                                 ShowRecurringWarningErrorAtEnd(
                                     state, "Electric heating coil Iteration limit exceeded in fan coil unit " + fanCoil.Name, fanCoil.MaxIterIndexH);
@@ -4013,8 +3999,7 @@ namespace FanCoilUnits {
                             ++fanCoil.LimitErrCountH;
                             if (fanCoil.LimitErrCountH < 2) {
                                 ShowWarningError(
-                                    state,
-                                    EnergyPlus::format("Part load ratio electric heating coil control failed in fan coil unit {}", fanCoil.Name));
+                                    state, std::format("Part load ratio electric heating coil control failed in fan coil unit {}", fanCoil.Name));
                                 ShowContinueError(state, "  Bad par load ratio limits");
                                 ShowContinueErrorTimeStamp(state, "..Par load ratio set to 0");
                             } else {
@@ -4450,8 +4435,8 @@ namespace FanCoilUnits {
         } else {
             // developer error
             ShowFatalError(state,
-                           EnergyPlus::format("Developer Error - CalcFanCoilAirAndWaterFlowResidual: Water control node not found for {}",
-                                              state.dataFanCoilUnits->FanCoil(FanCoilNum).Name));
+                           std::format("Developer Error - CalcFanCoilAirAndWaterFlowResidual: Water control node not found for {}",
+                                       state.dataFanCoilUnits->FanCoil(FanCoilNum).Name));
         }
         Real64 QUnitOut; // delivered capacity [W]
         Calc4PipeFanCoil(state,

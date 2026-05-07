@@ -45,14 +45,14 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-// EnergyPlus Headers
-#include <EnergyPlus/DataSurfaces.hh>
-#include <EnergyPlus/SurfaceOctree.hh>
-
 // C++ Headers
 #include <algorithm>
 #include <cmath>
 #include <limits>
+
+// EnergyPlus Headers
+#include <EnergyPlus/DataSurfaces.hh>
+#include <EnergyPlus/SurfaceOctree.hh>
 
 namespace EnergyPlus {
 

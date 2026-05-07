@@ -45,10 +45,12 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// Local Headers
 #include "AirflowNetwork/Elements.hpp"
 #include "AirflowNetwork/Properties.hpp"
 #include "AirflowNetwork/Solver.hpp"
 
+// EnergyPlus Headers
 #include "../../Data/EnergyPlusData.hh"
 #include "../../DataAirLoop.hh"
 #include "../../DataEnvironment.hh"

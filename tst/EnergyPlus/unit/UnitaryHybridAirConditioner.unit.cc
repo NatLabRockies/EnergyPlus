@@ -484,8 +484,8 @@ TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_ValidateFieldsParsing
         "Electricity,             !- First fuel type",
         "NaturalGas,              !- Second fuel type",
         "DistrictCooling,         !- Third fuel type",
-        ",                        !- Objective Function Minimizes",
-        "SZ DSOA SPACE 1,        !- Design Specification Outdoor Air Object Name",
+        "Electricity Use,         !- Objective Function Minimizes",
+        "SZ DSOA SPACE 1,         !- Design Specification Outdoor Air Object Name",
         "Mode0 Standby,           !- Mode0 Name",
         ",                        !- Mode0 Supply Air Temperature Lookup Table Name",
         ",                        !- Mode0 Supply Air Humidity Ratio Lookup Table Name",
@@ -546,8 +546,8 @@ TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_ValidateFieldsParsing
         "Electricity,             !- First fuel type",
         "NaturalGas,              !- Second fuel type",
         "DistrictCooling,         !- Third fuel type",
-        ",                        !- Objective Function Minimizes",
-        "SZ DSOA SPACE 2,        !- Design Specification Outdoor Air Object Name",
+        "Water Use,               !- Objective Function Minimizes",
+        "SZ DSOA SPACE 2,         !- Design Specification Outdoor Air Object Name",
         "Mode0 Standby,           !- Mode0 Name",
         ",                        !- Mode0 Supply Air Temperature Lookup Table Name",
         ",                        !- Mode0 Supply Air Humidity Ratio Lookup Table Name",
@@ -591,12 +591,18 @@ TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_ValidateFieldsParsing
     bool ErrorsFound = false;
     GetInputZoneHybridUnitaryAirConditioners(*state, ErrorsFound);
     unsigned long expectedOperatingModesSize = 2;
+    auto &hybridUnit1 = state->dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(1);
+    auto &hybridUnit2 = state->dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(2);
+
     // check the number of operating modes
-    EXPECT_EQ(state->dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(1).OperatingModes.size(), expectedOperatingModesSize);
-    EXPECT_EQ(state->dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(2).OperatingModes.size(), expectedOperatingModesSize);
+    EXPECT_EQ(hybridUnit1.OperatingModes.size(), expectedOperatingModesSize);
+    EXPECT_EQ(hybridUnit2.OperatingModes.size(), expectedOperatingModesSize);
     // check if names for HybridUnitaryAC are converted to upper case
-    EXPECT_EQ("HYBRID UNIT 1", state->dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(1).Name);
-    EXPECT_EQ("HYBRID UNIT 2", state->dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(2).Name);
+    EXPECT_EQ(hybridUnit1.Name, "HYBRID UNIT 1");
+    EXPECT_EQ(hybridUnit2.Name, "HYBRID UNIT 2");
+    // check that objective function was set or defaulted correctly
+    EXPECT_EQ(hybridUnit1.ObjectiveFunction, HybridEvapCoolingModel::ObjectiveFunctionType::ElectricityUse);
+    EXPECT_EQ(hybridUnit2.ObjectiveFunction, HybridEvapCoolingModel::ObjectiveFunctionType::WaterUse);
 }
 
 TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_ValidateMinimumIdfInput)
@@ -1432,6 +1438,26 @@ TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_ValidateOptionalError
         delimited_string({"   ** Severe  ** GetInputZoneHybridUnitaryAirConditioners: ZoneHVAC:HybridUnitaryHVAC = MUNTERSEPX5000 invalid data",
                           "   **   ~~~   ** Invalid-not found Design Specification Outdoor Air Object Name=\"SZ DSOA SPACE2-1\"."});
     EXPECT_TRUE(compare_err_stream(error_string, true));
+
+    // Check for warnings when changing operating settings
+    EnergyPlus::HybridEvapCoolingModel::CStepInputs StepIns;
+    StepIns.Tosa = 150;
+    state->dataGlobal->HourOfDay = 1;
+    state->dataGlobal->TimeStep = 1;
+    state->dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(1).SetOperatingSetting(*state, StepIns);
+    state->dataGlobal->HourOfDay = 24;
+    state->dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(1).SetOperatingSetting(*state, StepIns);
+
+    std::string const warning_string =
+        delimited_string({"   ** Warning ** In day 0.0 of simulation, MUNTERSEPX5000 was unable to operate for 2.0 timesteps because environment "
+                          "conditions were beyond the allowable operating range for any mode.",
+                          "   ** Warning ** In day 0.0 of simulation, MUNTERSEPX5000 failed to meet supply air humidity ratio for 2.0 timesteps. For "
+                          "these timesteps MUNTERSEPX5000 was set to mode 0.",
+                          "   ** Warning ** In day 0.0 of simulation, MUNTERSEPX5000 failed to meet supply air temperature constraints for 2.0 "
+                          "timesteps. For these timesteps MUNTERSEPX5000 was set to mode 0.",
+                          "   ** Warning ** In day 0.0 of simulation, MUNTERSEPX5000 failed to satisfy sensible load for 2.0 timesteps. For these "
+                          "timesteps settings were selected to provide as much sensible cooling or heating as possible, given other constraints."});
+    EXPECT_TRUE(compare_err_stream(warning_string, true));
 }
 
 TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_RuntimeFraction_Initialization)

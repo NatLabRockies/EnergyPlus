@@ -45,6 +45,10 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
+#include <format>
+
+// EnergyPlus Headers
 #include <EnergyPlus/Autosizing/Base.hh>
 #include <EnergyPlus/BranchNodeConnections.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
@@ -58,7 +62,6 @@
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
 #include <EnergyPlus/PlantUtilities.hh>
-#include <EnergyPlus/UtilityRoutines.hh>
 #include <EnergyPlus/WeatherManager.hh>
 
 namespace EnergyPlus::GroundHeatExchangers {
@@ -131,7 +134,7 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
                 this->gFuncCalcMethod = GFuncCalcMethod::FullDesign;
             } else {
                 errorsFound = true;
-                ShowSevereError(state, fmt::format("g-Function Calculation Method: \"{}\" is invalid", gFunctionMethodStr));
+                ShowSevereError(state, EnergyPlus::format("g-Function Calculation Method: \"{}\" is invalid", gFunctionMethodStr));
             }
         }
 
@@ -653,7 +656,7 @@ nlohmann::json GLHEVert::getCommonGHEDesignerInputs(EnergyPlusData &state) const
     gheDesignerInputs["version"] = 2; // If you update GHEDesigner, you may need to use a new input version here
     gheDesignerInputs["topology"] = {{{"type", "ground_heat_exchanger"}, {"name", "ghe1"}}};
 
-    std::string const p = fmt::format("[G-Function Calculation for GHE Named: {}] ", this->name);
+    std::string const p = EnergyPlus::format("[G-Function Calculation for GHE Named: {}] ", this->name);
 
     // set up the fluid to use in GHEDesigner, note that the concentration is more restrictive than in EnergyPlus
     nlohmann::json fluidObject;
@@ -720,10 +723,10 @@ fs::path GLHEVert::runGHEDesigner(EnergyPlusData &state, nlohmann::json const &i
         exePath = FileSystem::getAbsolutePath(FileSystem::getProgramPath()); // could be /path/to/energyplus(.exe) or /path/to/energyplus_tests(.exe)
         exePath = exePath.parent_path() / ("energyplus" + FileSystem::exeExtension);
     }
-    std::string const cmd = fmt::format(R"("{}" auxiliary ghedesigner "{}" "{}")",
-                                        FileSystem::toString(exePath),
-                                        FileSystem::toGenericString(ghe_designer_input_file_path),
-                                        FileSystem::toGenericString(ghe_designer_output_directory));
+    std::string const cmd = EnergyPlus::format(R"("{}" auxiliary ghedesigner "{}" "{}")",
+                                               FileSystem::toString(exePath),
+                                               FileSystem::toGenericString(ghe_designer_input_file_path),
+                                               FileSystem::toGenericString(ghe_designer_output_directory));
     int const status = FileSystem::systemCall(cmd);
     if (status != 0) {
         ShowFatalError(state, "GHEDesigner failed to calculate G-functions.");
@@ -888,7 +891,7 @@ void GLHEVert::calcUniformBHWallTempGFunctionsWithGHEDesigner(EnergyPlusData &st
 {
     nlohmann::json gheDesignerInputs = this->getCommonGHEDesignerInputs(state);
 
-    std::string const p = fmt::format("[GHEDesigner Calculation for GHE Named: {}] ", this->name);
+    std::string const p = EnergyPlus::format("[GHEDesigner Calculation for GHE Named: {}] ", this->name);
 
     // check the heights of the EnergyPlus boreholes to make sure they don't vary
     auto const &bhs = this->myRespFactors->myBorholes;

@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -434,29 +435,26 @@ void SwimmingPoolData::ErrorCheckSetupPoolSurface(
         ErrorsFound = true;
         // Something present that is not allowed for a swimming pool (non-CTF algorithm, movable insulation, or radiant source/sink
     } else if (state.dataSurface->Surface(this->SurfacePtr).HeatTransferAlgorithm != DataSurfaces::HeatTransferModel::CTF) {
-        ShowSevereError(
-            state,
-            EnergyPlus::format("{} is a pool and is attempting to use a non-CTF solution algorithm.  This is not allowed.  Use the CTF solution "
-                               "algorithm for this surface.",
-                               state.dataSurface->Surface(this->SurfacePtr).Name));
+        ShowSevereError(state,
+                        std::format("{} is a pool and is attempting to use a non-CTF solution algorithm.  This is not allowed.  Use the CTF solution "
+                                    "algorithm for this surface.",
+                                    state.dataSurface->Surface(this->SurfacePtr).Name));
         ErrorsFound = true;
 
     } else if (state.dataSurface->Surface(this->SurfacePtr).Class == DataSurfaces::SurfaceClass::Window) {
-        ShowSevereError(
-            state,
-            EnergyPlus::format("{} is a pool and is defined as a window.  This is not allowed.  A pool must be a floor that is NOT a window.",
-                               state.dataSurface->Surface(this->SurfacePtr).Name));
+        ShowSevereError(state,
+                        std::format("{} is a pool and is defined as a window.  This is not allowed.  A pool must be a floor that is NOT a window.",
+                                    state.dataSurface->Surface(this->SurfacePtr).Name));
         ErrorsFound = true;
     } else if (state.dataSurface->intMovInsuls(this->SurfacePtr).matNum > 0) {
-        ShowSevereError(
-            state,
-            EnergyPlus::format("{} is a pool and has movable insulation.  This is not allowed.  Remove the movable insulation for this surface.",
-                               state.dataSurface->Surface(this->SurfacePtr).Name));
+        ShowSevereError(state,
+                        std::format("{} is a pool and has movable insulation.  This is not allowed.  Remove the movable insulation for this surface.",
+                                    state.dataSurface->Surface(this->SurfacePtr).Name));
         ErrorsFound = true;
     } else if (state.dataConstruction->Construct(state.dataSurface->Surface(this->SurfacePtr).Construction).SourceSinkPresent) {
         ShowSevereError(
             state,
-            EnergyPlus::format(
+            std::format(
                 "{} is a pool and uses a construction with a source/sink.  This is not allowed.  Use a standard construction for this surface.",
                 state.dataSurface->Surface(this->SurfacePtr).Name));
         ErrorsFound = true;
@@ -466,8 +464,7 @@ void SwimmingPoolData::ErrorCheckSetupPoolSurface(
         this->ZonePtr = state.dataSurface->Surface(this->SurfacePtr).Zone;
         // Check to make sure pool surface is a floor
         if (state.dataSurface->Surface(this->SurfacePtr).Class != DataSurfaces::SurfaceClass::Floor) {
-            ShowSevereError(state,
-                            EnergyPlus::format("{}{}=\"{} contains a surface name that is NOT a floor.", RoutineName, CurrentModuleObject, Alpha1));
+            ShowSevereError(state, std::format("{}{}=\"{} contains a surface name that is NOT a floor.", RoutineName, CurrentModuleObject, Alpha1));
             ShowContinueError(
                 state, "A swimming pool must be associated with a surface that is a FLOOR.  Association with other surface types is not permitted.");
             ErrorsFound = true;
@@ -556,20 +553,19 @@ void SwimmingPoolData::initialize(EnergyPlusData &state, bool const FirstHVACIte
         if (this->CurActivityFactor < MinActivityFactor) {
             this->CurActivityFactor = MinActivityFactor;
             ShowWarningError(state,
-                             EnergyPlus::format("{}: Swimming Pool =\"{} Activity Factor Schedule =\"{} has a negative value.  This is not allowed.",
-                                                RoutineName,
-                                                this->Name,
-                                                this->activityFactorSched->Name));
+                             std::format("{}: Swimming Pool =\"{} Activity Factor Schedule =\"{} has a negative value.  This is not allowed.",
+                                         RoutineName,
+                                         this->Name,
+                                         this->activityFactorSched->Name));
             ShowContinueError(state, "The activity factor has been reset to zero.");
         }
         if (this->CurActivityFactor > MaxActivityFactor) {
             this->CurActivityFactor = 1.0;
-            ShowWarningError(
-                state,
-                EnergyPlus::format("{}: Swimming Pool =\"{} Activity Factor Schedule =\"{} has a value larger than 10.  This is not allowed.",
-                                   RoutineName,
-                                   this->Name,
-                                   this->activityFactorSched->Name));
+            ShowWarningError(state,
+                             std::format("{}: Swimming Pool =\"{} Activity Factor Schedule =\"{} has a value larger than 10.  This is not allowed.",
+                                         RoutineName,
+                                         this->Name,
+                                         this->activityFactorSched->Name));
             ShowContinueError(state, "The activity factor has been reset to unity.");
         }
     } else {
@@ -590,20 +586,20 @@ void SwimmingPoolData::initialize(EnergyPlusData &state, bool const FirstHVACIte
     if (this->peopleHeatGainSched != nullptr) {
         if (HeatGainPerPerson < 0.0) {
             ShowWarningError(state,
-                             EnergyPlus::format("{}: Swimming Pool =\"{} Heat Gain Schedule =\"{} has a negative value.  This is not allowed.",
-                                                RoutineName,
-                                                this->Name,
-                                                this->peopleHeatGainSched->Name));
+                             std::format("{}: Swimming Pool =\"{} Heat Gain Schedule =\"{} has a negative value.  This is not allowed.",
+                                         RoutineName,
+                                         this->Name,
+                                         this->peopleHeatGainSched->Name));
             ShowContinueError(state, "The heat gain per person has been reset to zero.");
             HeatGainPerPerson = 0.0;
         }
         if (this->peopleSched != nullptr) {
             if (PeopleModifier < 0.0) {
                 ShowWarningError(state,
-                                 EnergyPlus::format("{}: Swimming Pool =\"{} People Schedule =\"{} has a negative value.  This is not allowed.",
-                                                    RoutineName,
-                                                    this->Name,
-                                                    this->peopleSched->Name));
+                                 std::format("{}: Swimming Pool =\"{} People Schedule =\"{} has a negative value.  This is not allowed.",
+                                             RoutineName,
+                                             this->Name,
+                                             this->peopleSched->Name));
                 ShowContinueError(state, "The number of people has been reset to zero.");
                 PeopleModifier = 0.0;
             }
@@ -621,20 +617,19 @@ void SwimmingPoolData::initialize(EnergyPlusData &state, bool const FirstHVACIte
         this->CurCoverSchedVal = this->coverSched->getCurrentVal();
         // Why is this checking done here as opposed to where the schedule is first retrieved?
         if (this->CurCoverSchedVal > 1.0) {
-            ShowWarningError(
-                state,
-                EnergyPlus::format("{}: Swimming Pool =\"{} Cover Schedule =\"{} has a value greater than 1.0 (100%).  This is not allowed.",
-                                   RoutineName,
-                                   this->Name,
-                                   this->coverSched->Name));
+            ShowWarningError(state,
+                             std::format("{}: Swimming Pool =\"{} Cover Schedule =\"{} has a value greater than 1.0 (100%).  This is not allowed.",
+                                         RoutineName,
+                                         this->Name,
+                                         this->coverSched->Name));
             ShowContinueError(state, "The cover has been reset to one or fully covered.");
             this->CurCoverSchedVal = 1.0;
         } else if (this->CurCoverSchedVal < 0.0) {
             ShowWarningError(state,
-                             EnergyPlus::format("{}: Swimming Pool =\"{} Cover Schedule =\"{} has a negative value.  This is not allowed.",
-                                                RoutineName,
-                                                this->Name,
-                                                this->coverSched->Name));
+                             std::format("{}: Swimming Pool =\"{} Cover Schedule =\"{} has a negative value.  This is not allowed.",
+                                         RoutineName,
+                                         this->Name,
+                                         this->coverSched->Name));
             ShowContinueError(state, "The cover has been reset to zero or uncovered.");
             this->CurCoverSchedVal = 0.0;
         }
@@ -836,7 +831,7 @@ void SwimmingPoolData::initSwimmingPoolPlantLoopIndex(EnergyPlusData &state)
             PlantUtilities::ScanPlantLoopsForObject(
                 state, this->Name, DataPlant::PlantEquipmentType::SwimmingPool_Indoor, this->HWplantLoc, errFlag, _, _, _, this->WaterInletNode, _);
             if (errFlag) {
-                ShowFatalError(state, EnergyPlus::format("{}: Program terminated due to previous condition(s).", RoutineName));
+                ShowFatalError(state, std::format("{}: Program terminated due to previous condition(s).", RoutineName));
             }
         }
         this->MyPlantScanFlagPool = false;

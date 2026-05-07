@@ -48,22 +48,23 @@
 // C++ Headers
 #include <algorithm>
 #include <cmath>
+#include <format>
 #include <limits>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
 #include <ObjexxFCL/Array1D.hh>
 #include <ObjexxFCL/Array2D.hh>
-// #include <ObjexxFCL/Fmath.hh>
+
+// Local Headers
+#include <AirflowNetwork/Solver.hpp>
 
 // EnergyPlus Headers
-#include <AirflowNetwork/Solver.hpp>
 #include <EnergyPlus/BaseboardElectric.hh>
 #include <EnergyPlus/CrossVentMgr.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataErrorTracking.hh>
-#include <EnergyPlus/DataHVACGlobals.hh>
 #include <EnergyPlus/DataHeatBalFanSys.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataIPShortCuts.hh>
@@ -73,7 +74,6 @@
 #include <EnergyPlus/DataZoneEquipment.hh>
 #include <EnergyPlus/DisplacementVentMgr.hh>
 #include <EnergyPlus/FanCoilUnits.hh>
-#include <EnergyPlus/Fans.hh>
 #include <EnergyPlus/General.hh>
 #include <EnergyPlus/HVACStandAloneERV.hh>
 #include <EnergyPlus/HVACVariableRefrigerantFlow.hh>
@@ -789,10 +789,9 @@ namespace RoomAir {
 
             // report warning error since surface names are specified correctly
             if ((NumSurfsInvolved) != SurfCount) {
-                ShowWarningError(state,
-                                 EnergyPlus::format("GetAirNodeData: Mundt Room Air Model: Some surface names specified for {} are not in {}",
-                                                    airNode.Name,
-                                                    zone.Name));
+                ShowWarningError(
+                    state,
+                    std::format("GetAirNodeData: Mundt Room Air Model: Some surface names specified for {} are not in {}", airNode.Name, zone.Name));
             }
         } // for (AirNodeNum)
 
@@ -847,15 +846,14 @@ namespace RoomAir {
         cCurrentModuleObject = "RoomAirSettings:OneNodeDisplacementVentilation";
         NumOfMundtContrl = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
         if (NumOfMundtContrl > state.dataGlobal->NumOfZones) {
-            ShowSevereError(state, EnergyPlus::format("Too many {} objects in input file", cCurrentModuleObject));
-            ShowContinueError(state, EnergyPlus::format("There cannot be more {} objects than number of zones.", cCurrentModuleObject));
+            ShowSevereError(state, std::format("Too many {} objects in input file", cCurrentModuleObject));
+            ShowContinueError(state, std::format("There cannot be more {} objects than number of zones.", cCurrentModuleObject));
             ErrorsFound = true;
         }
 
         if (NumOfMundtContrl == 0) {
             ShowWarningError(
-                state,
-                EnergyPlus::format("No {} objects found, program assumes no convection or infiltration gains near floors", cCurrentModuleObject));
+                state, std::format("No {} objects found, program assumes no convection or infiltration gains near floors", cCurrentModuleObject));
             return;
         }
 
@@ -883,10 +881,10 @@ namespace RoomAir {
                 continue;
             }
             if (state.dataRoomAir->AirModel(ZoneNum).AirModel != RoomAirModel::DispVent1Node) {
-                ShowSevereError(
-                    state, EnergyPlus::format("Zone specified=\"{}\", Air Model type is not OneNodeDisplacementVentilation.", ipsc->cAlphaArgs(1)));
-                ShowContinueError(
-                    state, EnergyPlus::format("Air Model Type for zone={}", roomAirModelNamesUC[(int)state.dataRoomAir->AirModel(ZoneNum).AirModel]));
+                ShowSevereError(state,
+                                std::format("Zone specified=\"{}\", Air Model type is not OneNodeDisplacementVentilation.", ipsc->cAlphaArgs(1)));
+                ShowContinueError(state,
+                                  std::format("Air Model Type for zone={}", roomAirModelNamesUC[(int)state.dataRoomAir->AirModel(ZoneNum).AirModel]));
                 ErrorsFound = true;
                 continue;
             }
@@ -1065,7 +1063,7 @@ namespace RoomAir {
 
             if (Util::FindItemInList(
                     state.dataHeatBal->Zone(zoneCV.ZonePtr).Name, state.afn->MultizoneZoneData, &AirflowNetwork::MultizoneZoneProp::ZoneName) == 0) {
-                ShowSevereError(state, EnergyPlus::format("Problem with {} = {}", ipsc->cCurrentModuleObject, ipsc->cAlphaArgs(1)));
+                ShowSevereError(state, std::format("Problem with {} = {}", ipsc->cCurrentModuleObject, ipsc->cAlphaArgs(1)));
                 ShowContinueError(state, "AirflowNetwork airflow model must be active in this zone");
                 ErrorsFound = true;
             }
@@ -1085,8 +1083,8 @@ namespace RoomAir {
                     if (state.afn->AirflowNetworkCompData(compNum).CompTypeNum == AirflowNetwork::iComponentTypeNum::SCR) {
                         if (state.afn->MultizoneSurfaceCrackData(typeNum).exponent != 0.50) {
                             state.dataRoomAir->AirModel(zoneCV.ZonePtr).AirModel = RoomAirModel::Mixing;
-                            ShowWarningError(state, EnergyPlus::format("Problem with {} = {}", ipsc->cCurrentModuleObject, ipsc->cAlphaArgs(1)));
-                            ShowWarningError(state, EnergyPlus::format("Roomair model will not be applied for Zone={}.", ipsc->cAlphaArgs(1)));
+                            ShowWarningError(state, std::format("Problem with {} = {}", ipsc->cCurrentModuleObject, ipsc->cAlphaArgs(1)));
+                            ShowWarningError(state, std::format("Roomair model will not be applied for Zone={}.", ipsc->cAlphaArgs(1)));
                             ShowContinueError(
                                 state,
                                 EnergyPlus::format(
@@ -1296,8 +1294,8 @@ namespace RoomAir {
             return;
         }
         if (state.dataRoomAir->NumOfRoomAFNControl > state.dataGlobal->NumOfZones) {
-            ShowSevereError(state, EnergyPlus::format("Too many {} objects in input file", ipsc->cCurrentModuleObject));
-            ShowContinueError(state, EnergyPlus::format("There cannot be more {} objects than number of zones.", ipsc->cCurrentModuleObject));
+            ShowSevereError(state, std::format("Too many {} objects in input file", ipsc->cCurrentModuleObject));
+            ShowContinueError(state, std::format("There cannot be more {} objects than number of zones.", ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
 
@@ -1328,11 +1326,9 @@ namespace RoomAir {
             }
             if (state.dataRoomAir->AirModel(ZoneNum).AirModel != RoomAirModel::AirflowNetwork) {
                 ShowSevereError(
-                    state,
-                    EnergyPlus::format("GetRoomAirflowNetworkData: Zone specified='{}', Air Model type is not AirflowNetwork.", ipsc->cAlphaArgs(1)));
+                    state, std::format("GetRoomAirflowNetworkData: Zone specified='{}', Air Model type is not AirflowNetwork.", ipsc->cAlphaArgs(1)));
                 ShowContinueError(
-                    state,
-                    EnergyPlus::format("Air Model Type for zone ={}", roomAirModelNamesUC[(int)state.dataRoomAir->AirModel(ZoneNum).AirModel]));
+                    state, std::format("Air Model Type for zone ={}", roomAirModelNamesUC[(int)state.dataRoomAir->AirModel(ZoneNum).AirModel]));
                 ErrorsFound = true;
                 continue;
             }
@@ -1349,8 +1345,7 @@ namespace RoomAir {
                 roomAFNZoneInfo.Node.allocate(roomAFNZoneInfo.NumOfAirNodes);
             } else {
                 ShowSevereError(
-                    state,
-                    EnergyPlus::format("GetRoomAirflowNetworkData: Incomplete input in {} = {}", ipsc->cCurrentModuleObject, ipsc->cAlphaArgs(1)));
+                    state, std::format("GetRoomAirflowNetworkData: Incomplete input in {} = {}", ipsc->cCurrentModuleObject, ipsc->cAlphaArgs(1)));
                 ErrorsFound = true;
             }
 
@@ -1467,9 +1462,8 @@ namespace RoomAir {
                 auto &roomAFNZoneNode = roomAFNZoneInfo.Node(RAFNNodeNum);
                 if (allocated(roomAFNZoneNode.SurfMask)) {
                     // throw error found twice
-                    ShowSevereError(state,
-                                    EnergyPlus::format("GetRoomAirflowNetworkData: Invalid {} = {}", ipsc->cAlphaFieldNames(1), ipsc->cAlphaArgs(1)));
-                    ShowContinueError(state, EnergyPlus::format("Entered in {} = {}", ipsc->cCurrentModuleObject, ipsc->cAlphaArgs(1)));
+                    ShowSevereError(state, std::format("GetRoomAirflowNetworkData: Invalid {} = {}", ipsc->cAlphaFieldNames(1), ipsc->cAlphaArgs(1)));
+                    ShowContinueError(state, std::format("Entered in {} = {}", ipsc->cCurrentModuleObject, ipsc->cAlphaArgs(1)));
                     ShowContinueError(state, "Duplicate RoomAir:Node:AirflowNetwork:AdjacentSurfaceList name.");
                     ErrorsFound = true;
                     continue;
@@ -1498,18 +1492,16 @@ namespace RoomAir {
                     }
                 }
                 if (NumSurfsThisNode != SurfCount) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("GetRoomAirflowNetworkData: Invalid {} = {}", ipsc->cAlphaFieldNames(1), ipsc->cAlphaArgs(1)));
-                    ShowContinueError(state, EnergyPlus::format("Entered in {} = {}", ipsc->cCurrentModuleObject, ipsc->cAlphaArgs(1)));
+                    ShowSevereError(state, std::format("GetRoomAirflowNetworkData: Invalid {} = {}", ipsc->cAlphaFieldNames(1), ipsc->cAlphaArgs(1)));
+                    ShowContinueError(state, std::format("Entered in {} = {}", ipsc->cCurrentModuleObject, ipsc->cAlphaArgs(1)));
                     ShowContinueError(state, "Some surface names were not found in the zone");
                     ErrorsFound = true;
                 }
             } // for (iZone)
 
             if (!foundList) { // throw error
-                ShowSevereError(state,
-                                EnergyPlus::format("GetRoomAirflowNetworkData: Invalid {} = {}", ipsc->cAlphaFieldNames(1), ipsc->cAlphaArgs(1)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {} = {}", ipsc->cCurrentModuleObject, ipsc->cAlphaArgs(1)));
+                ShowSevereError(state, std::format("GetRoomAirflowNetworkData: Invalid {} = {}", ipsc->cAlphaFieldNames(1), ipsc->cAlphaArgs(1)));
+                ShowContinueError(state, std::format("Entered in {} = {}", ipsc->cCurrentModuleObject, ipsc->cAlphaArgs(1)));
                 ShowContinueError(state, "Did not find a RoomAir:Node:AirflowNetwork object that references this object");
                 ErrorsFound = true;
             }
@@ -1534,10 +1526,10 @@ namespace RoomAir {
             ErrorObjectHeader eoh{routineName, ipsc->cCurrentModuleObject, ipsc->cAlphaArgs(1)};
 
             if (mod((NumAlphas + NumNumbers - 1), 3) != 0) {
-                ShowSevereError(state, EnergyPlus::format("GetRoomAirflowNetworkData: For {}: {}", ipsc->cCurrentModuleObject, ipsc->cAlphaArgs(1)));
-                ShowContinueError(state,
-                                  EnergyPlus::format("Extensible field set are not evenly divisible by 3. Number of data entries = {}",
-                                                     NumAlphas + NumNumbers - 1));
+                ShowSevereError(state, std::format("GetRoomAirflowNetworkData: For {}: {}", ipsc->cCurrentModuleObject, ipsc->cAlphaArgs(1)));
+                ShowContinueError(
+                    state,
+                    std::format("Extensible field set are not evenly divisible by 3. Number of data entries = {}", NumAlphas + NumNumbers - 1));
                 ErrorsFound = true;
                 break;
             }
@@ -1560,10 +1552,9 @@ namespace RoomAir {
                 int maxNumGains = numInputGains * numSpacesInZone;
                 auto &roomAFNZoneNode = roomAFNZoneInfo.Node(RAFNNodeNum);
                 if (allocated(roomAFNZoneNode.IntGain)) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("GetRoomAirflowNetworkData: Invalid {} = {}", ipsc->cAlphaFieldNames(1), ipsc->cAlphaArgs(1)));
-                    ShowContinueError(state, EnergyPlus::format("Entered in {} = {}", ipsc->cCurrentModuleObject, ipsc->cAlphaArgs(1)));
-                    ShowContinueError(state, EnergyPlus::format("Duplicate {} name.", ipsc->cCurrentModuleObject));
+                    ShowSevereError(state, std::format("GetRoomAirflowNetworkData: Invalid {} = {}", ipsc->cAlphaFieldNames(1), ipsc->cAlphaArgs(1)));
+                    ShowContinueError(state, std::format("Entered in {} = {}", ipsc->cCurrentModuleObject, ipsc->cAlphaArgs(1)));
+                    ShowContinueError(state, std::format("Duplicate {} name.", ipsc->cCurrentModuleObject));
                     ErrorsFound = true;
                     continue;
                 }
@@ -1603,10 +1594,10 @@ namespace RoomAir {
                         roomAFNZoneNode.NumIntGains = numGainsFound;
                     } else {
                         ShowSevereError(state,
-                                        EnergyPlus::format("GetRoomAirflowNetworkData: Invalid {} = {}",
-                                                           ipsc->cAlphaFieldNames(gainsLoop * 2 + 1),
-                                                           ipsc->cAlphaArgs(gainsLoop * 2 + 1)));
-                        ShowContinueError(state, EnergyPlus::format("Entered in {} = {}", ipsc->cCurrentModuleObject, ipsc->cAlphaArgs(1)));
+                                        std::format("GetRoomAirflowNetworkData: Invalid {} = {}",
+                                                    ipsc->cAlphaFieldNames(gainsLoop * 2 + 1),
+                                                    ipsc->cAlphaArgs(gainsLoop * 2 + 1)));
+                        ShowContinueError(state, std::format("Entered in {} = {}", ipsc->cCurrentModuleObject, ipsc->cAlphaArgs(1)));
                         ShowContinueError(state, "Internal gain did not match correctly");
                         ErrorsFound = true;
                     }
@@ -1634,10 +1625,10 @@ namespace RoomAir {
             ErrorObjectHeader eoh{routineName, cCurrentModuleObject, ipsc->cAlphaArgs(1)};
 
             if (mod((NumAlphas + NumNumbers - 1), 4) != 0) {
-                ShowSevereError(state, EnergyPlus::format("GetRoomAirflowNetworkData: For {}: {}", cCurrentModuleObject, ipsc->cAlphaArgs(1)));
+                ShowSevereError(state, std::format("GetRoomAirflowNetworkData: For {}: {}", cCurrentModuleObject, ipsc->cAlphaArgs(1)));
                 ShowContinueError(state,
-                                  EnergyPlus::format("Extensible field set are not evenly divisible by 4. Number of data entries = {}",
-                                                     fmt::to_string(NumAlphas + NumNumbers - 1)));
+                                  std::format("Extensible field set are not evenly divisible by 4. Number of data entries = {}",
+                                              fmt::to_string(NumAlphas + NumNumbers - 1)));
                 ErrorsFound = true;
                 break;
             }
@@ -1658,10 +1649,9 @@ namespace RoomAir {
                 // found it
                 auto &roomAFNNode = roomAFNZoneInfo.Node(RAFNNodeNum);
                 if (allocated(roomAFNNode.HVAC)) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("GetRoomAirflowNetworkData: Invalid {} = {}", ipsc->cAlphaFieldNames(1), ipsc->cAlphaArgs(1)));
-                    ShowContinueError(state, EnergyPlus::format("Entered in {} = {}", cCurrentModuleObject, ipsc->cAlphaArgs(1)));
-                    ShowContinueError(state, EnergyPlus::format("Duplicate {} name.", cCurrentModuleObject));
+                    ShowSevereError(state, std::format("GetRoomAirflowNetworkData: Invalid {} = {}", ipsc->cAlphaFieldNames(1), ipsc->cAlphaArgs(1)));
+                    ShowContinueError(state, std::format("Entered in {} = {}", cCurrentModuleObject, ipsc->cAlphaArgs(1)));
+                    ShowContinueError(state, std::format("Duplicate {} name.", cCurrentModuleObject));
                     ErrorsFound = true;
                     continue;
                 }
@@ -1702,10 +1692,10 @@ namespace RoomAir {
 
                     if (!IntEquipFound) {
                         ShowSevereError(state,
-                                        EnergyPlus::format("GetRoomAirflowNetworkData: Invalid {} = {}",
-                                                           ipsc->cAlphaFieldNames(3 + (iEquip - 1) * 2),
-                                                           ipsc->cAlphaArgs(2 + (iEquip - 1) * 2)));
-                        ShowContinueError(state, EnergyPlus::format("Entered in {} = {}", cCurrentModuleObject, ipsc->cAlphaArgs(1)));
+                                        std::format("GetRoomAirflowNetworkData: Invalid {} = {}",
+                                                    ipsc->cAlphaFieldNames(3 + (iEquip - 1) * 2),
+                                                    ipsc->cAlphaArgs(2 + (iEquip - 1) * 2)));
+                        ShowContinueError(state, std::format("Entered in {} = {}", cCurrentModuleObject, ipsc->cAlphaArgs(1)));
                         ShowContinueError(state, "Internal gain did not match correctly");
                         ErrorsFound = true;
                     }
@@ -1730,8 +1720,8 @@ namespace RoomAir {
             }
             if (std::abs(SumFraction - 1.0) > 0.001) {
                 ShowSevereError(state, "GetRoomAirflowNetworkData: Invalid, zone volume fractions do not sum to 1.0");
-                ShowContinueError(
-                    state, EnergyPlus::format("Entered in RoomAir:Node:AirflowNetwork with Zone Name = {}", state.dataHeatBal->Zone(iZone).Name));
+                ShowContinueError(state,
+                                  std::format("Entered in RoomAir:Node:AirflowNetwork with Zone Name = {}", state.dataHeatBal->Zone(iZone).Name));
                 ShowContinueError(state, "The Fraction of Zone Air Volume values across all the nodes needs to sum to 1.0.");
                 ShowContinueError(state, EnergyPlus::format("The sum of fractions entered = {:.3R}", SumFraction));
                 ErrorsFound = true;
@@ -1764,9 +1754,9 @@ namespace RoomAir {
                     if (std::abs(SumFraction - 1.0) > 0.001) {
                         ShowSevereError(state, "GetRoomAirflowNetworkData: Invalid, internal gain fractions do not sum to 1.0");
                         ShowContinueError(state,
-                                          EnergyPlus::format("Entered in RoomAir:Node:AirflowNetwork with Zone Name = {}, Intrnal gain name = {}",
-                                                             state.dataHeatBal->Zone(iZone).Name,
-                                                             intGain.Name));
+                                          std::format("Entered in RoomAir:Node:AirflowNetwork with Zone Name = {}, Intrnal gain name = {}",
+                                                      state.dataHeatBal->Zone(iZone).Name,
+                                                      intGain.Name));
                         ShowContinueError(state, "The Fraction of internal gain across all the nodes needs to sum to 1.0.");
                         ShowContinueError(state, EnergyPlus::format("The sum of fractions entered = {:.3R}", SumFraction));
                         ErrorsFound = true;
@@ -1970,8 +1960,8 @@ namespace RoomAir {
 
                 constexpr Real64 CeilingHeightDiffMaximum = 0.1;
                 if (std::abs((Z2ofZone - Z1ofZone) - state.dataHeatBal->Zone(ZNum).CeilingHeight) > CeilingHeightDiffMaximum) {
-                    ShowWarningError(
-                        state, EnergyPlus::format("RoomAirManager: Inconsistent ceiling heights in Zone: {}", state.dataHeatBal->Zone(ZNum).Name));
+                    ShowWarningError(state,
+                                     std::format("RoomAirManager: Inconsistent ceiling heights in Zone: {}", state.dataHeatBal->Zone(ZNum).Name));
                     ShowContinueError(state, EnergyPlus::format("Lowest height=[{:.3R}].", Z1ofZone));
                     ShowContinueError(state, EnergyPlus::format("Highest height=[{:.3R}].", Z2ofZone));
                     ShowContinueError(state, EnergyPlus::format("Ceiling height=[{:.3R}].", state.dataHeatBal->Zone(ZNum).CeilingHeight));
@@ -2518,11 +2508,10 @@ namespace RoomAir {
                     if (state.dataZoneEquip->ZoneEquipConfig(ZoneEquipConfigNum).IsControlled) {
                         state.dataRoomAir->IsZoneCrossVent(iZone) = false;
                         state.dataRoomAir->AirModel(iZone).SimAirModel = false;
-                        ShowSevereError(state, EnergyPlus::format("Unmixed Flow: Cross Ventilation cannot be applied for Zone={}", zone.Name));
+                        ShowSevereError(state, std::format("Unmixed Flow: Cross Ventilation cannot be applied for Zone={}", zone.Name));
                         ShowContinueError(
                             state,
-                            EnergyPlus::format("An HVAC system is present in the zone. Fully mixed airflow model will be used for Zone={}",
-                                               zone.Name));
+                            std::format("An HVAC system is present in the zone. Fully mixed airflow model will be used for Zone={}", zone.Name));
                         continue;
                     }
                     // CurrentModuleObject='RoomAirSettings:CrossVentilation'
@@ -2744,8 +2733,7 @@ namespace RoomAir {
         if (RAFNNodeNum == 0) {
             Errorfound = true;
             ShowSevereError(
-                state,
-                EnergyPlus::format("Could not find RoomAir:Node:AirflowNetwork number with AirflowNetwork:IntraZone:Node Name='{}", RAFNNodeName));
+                state, std::format("Could not find RoomAir:Node:AirflowNetwork number with AirflowNetwork:IntraZone:Node Name='{}", RAFNNodeName));
         }
     }
 

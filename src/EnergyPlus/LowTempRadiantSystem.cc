@@ -48,6 +48,7 @@
 // C++ Headers
 #include <cassert>
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -507,7 +508,7 @@ namespace LowTempRadiantSystem {
                         ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
                         ShowContinueError(state,
                                           EnergyPlus::format("Input for {} = {}", cAlphaFields(5), thisRadSysDesign.DesignHeatingCapMethodInput));
-                        ShowContinueError(state, EnergyPlus::format("Illegal {} = {:.7T}", cNumericFields(4), Numbers(4)));
+                        ShowContinueError(state, EnergyPlus::format("Illegal {} = {:.7f}", cNumericFields(4), Numbers(4)));
                         ErrorsFound = true;
                     } else if (thisRadSysDesign.DesignScaledHeatingCapacity == AutoSize) {
                         ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
@@ -528,7 +529,7 @@ namespace LowTempRadiantSystem {
                     thisRadSysDesign.DesignScaledHeatingCapacity = Numbers(5);
                     if (thisRadSysDesign.DesignScaledHeatingCapacity < 0.0) {
                         ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
-                        ShowContinueError(state, EnergyPlus::format("Illegal {} = {:.7T}", cNumericFields(5), Numbers(5)));
+                        ShowContinueError(state, EnergyPlus::format("Illegal {} = {:.7f}", cNumericFields(5), Numbers(5)));
                         ErrorsFound = true;
                     }
                 } else {
@@ -538,8 +539,8 @@ namespace LowTempRadiantSystem {
                     ErrorsFound = true;
                 }
             } else {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
-                ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(5), thisRadSysDesign.DesignHeatingCapMethodInput));
+                ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
+                ShowContinueError(state, std::format("Illegal {} = {}", cAlphaFields(5), thisRadSysDesign.DesignHeatingCapMethodInput));
                 ErrorsFound = true;
             }
 
@@ -560,23 +561,20 @@ namespace LowTempRadiantSystem {
                 if (!lNumericBlanks(7)) {
                     thisRadSysDesign.DesignScaledCoolingCapacity = Numbers(7);
                     if (thisRadSysDesign.DesignScaledCoolingCapacity <= 0.0) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Input for {} = {}", cAlphaFields(7), thisRadSysDesign.DesignCoolingCapMethodInput));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Illegal {} = {:.7T}", cNumericFields(7), thisRadSysDesign.DesignScaledCoolingCapacity));
+                        ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
+                        ShowContinueError(state, std::format("Input for {} = {}", cAlphaFields(7), thisRadSysDesign.DesignCoolingCapMethodInput));
+                        ShowContinueError(state, std::format("Illegal {} = {:.7f}", cNumericFields(7), thisRadSysDesign.DesignScaledCoolingCapacity));
                         ErrorsFound = true;
                     } else if (thisRadSysDesign.DesignScaledCoolingCapacity == AutoSize) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Input for {} = {}", cAlphaFields(7), thisRadSysDesign.DesignCoolingCapMethodInput));
-                        ShowContinueError(state, EnergyPlus::format("Illegal {} = Autosize", cNumericFields(7)));
+                        ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
+                        ShowContinueError(state, std::format("Input for {} = {}", cAlphaFields(7), thisRadSysDesign.DesignCoolingCapMethodInput));
+                        ShowContinueError(state, std::format("Illegal {} = Autosize", cNumericFields(7)));
                         ErrorsFound = true;
                     }
                 } else {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
-                    ShowContinueError(state, EnergyPlus::format("Input for {} = {}", cAlphaFields(7), thisRadSysDesign.DesignCoolingCapMethodInput));
-                    ShowContinueError(state, EnergyPlus::format("Blank field not allowed for {}", cNumericFields(7)));
+                    ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
+                    ShowContinueError(state, std::format("Input for {} = {}", cAlphaFields(7), thisRadSysDesign.DesignCoolingCapMethodInput));
+                    ShowContinueError(state, std::format("Blank field not allowed for {}", cNumericFields(7)));
                     ErrorsFound = true;
                 }
             } else if (Util::SameString(thisRadSysDesign.DesignCoolingCapMethodInput, "FractionOfAutosizedCoolingCapacity")) {
@@ -584,19 +582,19 @@ namespace LowTempRadiantSystem {
                 if (!lNumericBlanks(8)) {
                     thisRadSysDesign.DesignScaledCoolingCapacity = Numbers(8);
                     if (thisRadSysDesign.DesignScaledCoolingCapacity < 0.0) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
-                        ShowContinueError(state, EnergyPlus::format("Illegal {} = {:.7T}", cNumericFields(8), Numbers(8)));
+                        ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
+                        ShowContinueError(state, std::format("Illegal {} = {:.7f}", cNumericFields(8), Numbers(8)));
                         ErrorsFound = true;
                     }
                 } else {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
-                    ShowContinueError(state, EnergyPlus::format("Input for {} = {}", cAlphaFields(7), thisRadSysDesign.DesignCoolingCapMethodInput));
-                    ShowContinueError(state, EnergyPlus::format("Blank field not allowed for {}", cNumericFields(8)));
+                    ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
+                    ShowContinueError(state, std::format("Input for {} = {}", cAlphaFields(7), thisRadSysDesign.DesignCoolingCapMethodInput));
+                    ShowContinueError(state, std::format("Blank field not allowed for {}", cNumericFields(8)));
                     ErrorsFound = true;
                 }
             } else {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
-                ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(7), thisRadSysDesign.DesignCoolingCapMethodInput));
+                ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, thisRadSysDesign.designName));
+                ShowContinueError(state, std::format("Illegal {} = {}", cAlphaFields(7), thisRadSysDesign.DesignCoolingCapMethodInput));
                 ErrorsFound = true;
             }
 
@@ -685,8 +683,8 @@ namespace LowTempRadiantSystem {
             thisRadSys.ZoneName = Alphas(4);
             thisRadSys.ZonePtr = Util::FindItemInList(Alphas(4), state.dataHeatBal->Zone);
             if (thisRadSys.ZonePtr == 0) {
-                ShowSevereError(state, EnergyPlus::format("{}Invalid {} = {}", RoutineName, cAlphaFields(3), Alphas(4)));
-                ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, Alphas(1)));
+                ShowSevereError(state, std::format("{}Invalid {} = {}", RoutineName, cAlphaFields(3), Alphas(4)));
+                ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, Alphas(1)));
                 ErrorsFound = true;
             }
 
@@ -721,14 +719,13 @@ namespace LowTempRadiantSystem {
                 thisRadSys.NumCircuits(1) = 0.0;
                 // Error checking for single surfaces
                 if (thisRadSys.SurfacePtr(1) == 0) {
-                    ShowSevereError(state, EnergyPlus::format("{}Invalid {} = {}", RoutineName, cAlphaFields(5), Alphas(5)));
-                    ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, Alphas(1)));
+                    ShowSevereError(state, std::format("{}Invalid {} = {}", RoutineName, cAlphaFields(5), Alphas(5)));
+                    ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, Alphas(1)));
                     ErrorsFound = true;
                 } else if (state.dataSurface->SurfIsRadSurfOrVentSlabOrPool(thisRadSys.SurfacePtr(1))) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", Invalid Surface", RoutineName, CurrentModuleObject, Alphas(1)));
+                    ShowSevereError(state, std::format("{}{}=\"{}\", Invalid Surface", RoutineName, CurrentModuleObject, Alphas(1)));
                     ShowContinueError(
-                        state,
-                        EnergyPlus::format("{}=\"{}\" has been used in another radiant system or ventilated slab.", cAlphaFields(5), Alphas(5)));
+                        state, std::format("{}=\"{}\" has been used in another radiant system or ventilated slab.", cAlphaFields(5), Alphas(5)));
                     ErrorsFound = true;
                 }
                 if (thisRadSys.SurfacePtr(1) != 0) {
@@ -748,15 +745,15 @@ namespace LowTempRadiantSystem {
                 if (!lNumericBlanks(2)) {
                     thisRadSys.ScaledHeatingCapacity = Numbers(2);
                     if (thisRadSys.ScaledHeatingCapacity < 0.0 && thisRadSys.ScaledHeatingCapacity != AutoSize) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSys.Name));
-                        ShowContinueError(state, EnergyPlus::format("Illegal {} = {:.7T}", cNumericFields(2), Numbers(2)));
+                        ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, thisRadSys.Name));
+                        ShowContinueError(state, std::format("Illegal {} = {:.7f}", cNumericFields(2), Numbers(2)));
                         ErrorsFound = true;
                     }
                 } else {
                     if ((!lAlphaBlanks(6)) || (!lAlphaBlanks(7))) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSys.Name));
+                        ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, thisRadSys.Name));
                         ShowContinueError(state, "Input for Heating Design Capacity Method = HeatingDesignCapacity");
-                        ShowContinueError(state, EnergyPlus::format("Blank field not allowed for {}", cNumericFields(2)));
+                        ShowContinueError(state, std::format("Blank field not allowed for {}", cNumericFields(2)));
                         ErrorsFound = true;
                     }
                 }
@@ -798,7 +795,7 @@ namespace LowTempRadiantSystem {
                 (lAlphaBlanks(6) || lAlphaBlanks(7) || (thisRadSys.HotWaterInNode <= 0) || (thisRadSys.HotWaterOutNode <= 0) ||
                  (variableFlowDesignDataObject.heatSetptSched == nullptr))) {
                 ShowSevereError(state, "Hydronic radiant systems may not be autosized without specification of nodes or schedules.");
-                ShowContinueError(state, EnergyPlus::format("Occurs in {} (heating input) = {}", CurrentModuleObject, Alphas(1)));
+                ShowContinueError(state, std::format("Occurs in {} (heating input) = {}", CurrentModuleObject, Alphas(1)));
                 ErrorsFound = true;
             }
 
@@ -808,15 +805,15 @@ namespace LowTempRadiantSystem {
                 if (!lNumericBlanks(4)) {
                     thisRadSys.ScaledCoolingCapacity = Numbers(4);
                     if (thisRadSys.ScaledCoolingCapacity < 0.0 && thisRadSys.ScaledCoolingCapacity != AutoSize) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSys.Name));
-                        ShowContinueError(state, EnergyPlus::format("Illegal {} = {:.7T}", cNumericFields(4), Numbers(4)));
+                        ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, thisRadSys.Name));
+                        ShowContinueError(state, std::format("Illegal {} = {:.7f}", cNumericFields(4), Numbers(4)));
                         ErrorsFound = true;
                     }
                 } else {
                     if ((!lAlphaBlanks(8)) || (!lAlphaBlanks(9))) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisRadSys.Name));
+                        ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, thisRadSys.Name));
                         ShowContinueError(state, "Input for Cooling Design Capacity Method = CoolingDesignCapacity");
-                        ShowContinueError(state, EnergyPlus::format("Blank field not allowed for {}", cNumericFields(4)));
+                        ShowContinueError(state, std::format("Blank field not allowed for {}", cNumericFields(4)));
                         ErrorsFound = true;
                     }
                 }
@@ -872,7 +869,7 @@ namespace LowTempRadiantSystem {
                  (thisRadSys.ColdWaterInNode <= 0) || (thisRadSys.ColdWaterOutNode <= 0) ||
                  (variableFlowDesignDataObject.coolSetptSched == nullptr))) {
                 ShowSevereError(state, "Hydronic radiant systems may not be autosized without specification of nodes or schedules");
-                ShowContinueError(state, EnergyPlus::format("Occurs in {} (cooling input) ={}", CurrentModuleObject, Alphas(1)));
+                ShowContinueError(state, std::format("Occurs in {} (cooling input) ={}", CurrentModuleObject, Alphas(1)));
                 ErrorsFound = true;
             }
         }
@@ -1004,8 +1001,8 @@ namespace LowTempRadiantSystem {
             thisCFloSys.ZoneName = Alphas(4);
             thisCFloSys.ZonePtr = Util::FindItemInList(Alphas(4), state.dataHeatBal->Zone);
             if (thisCFloSys.ZonePtr == 0) {
-                ShowSevereError(state, EnergyPlus::format("{}Invalid {} = {}", RoutineName, cAlphaFields(4), Alphas(4)));
-                ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, Alphas(1)));
+                ShowSevereError(state, std::format("{}Invalid {} = {}", RoutineName, cAlphaFields(4), Alphas(4)));
+                ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, Alphas(1)));
                 ErrorsFound = true;
             }
 
@@ -1043,14 +1040,13 @@ namespace LowTempRadiantSystem {
                 thisCFloSys.NumCircuits(1) = 0.0;
                 // Error checking for single surfaces
                 if (thisCFloSys.SurfacePtr(1) == 0) {
-                    ShowSevereError(state, EnergyPlus::format("{}Invalid {} = {}", RoutineName, cAlphaFields(4), Alphas(4)));
-                    ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, Alphas(1)));
+                    ShowSevereError(state, std::format("{}Invalid {} = {}", RoutineName, cAlphaFields(4), Alphas(4)));
+                    ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, Alphas(1)));
                     ErrorsFound = true;
                 } else if (state.dataSurface->SurfIsRadSurfOrVentSlabOrPool(thisCFloSys.SurfacePtr(1))) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", Invalid Surface", RoutineName, CurrentModuleObject, Alphas(1)));
+                    ShowSevereError(state, std::format("{}{}=\"{}\", Invalid Surface", RoutineName, CurrentModuleObject, Alphas(1)));
                     ShowContinueError(
-                        state,
-                        EnergyPlus::format("{}=\"{}\" has been used in another radiant system or ventilated slab.", cAlphaFields(5), Alphas(5)));
+                        state, std::format("{}=\"{}\" has been used in another radiant system or ventilated slab.", cAlphaFields(5), Alphas(5)));
                     ErrorsFound = true;
                 }
                 if (thisCFloSys.SurfacePtr(1) != 0) {
@@ -1232,8 +1228,8 @@ namespace LowTempRadiantSystem {
             thisElecSys.ZoneName = Alphas(3);
             thisElecSys.ZonePtr = Util::FindItemInList(Alphas(3), state.dataHeatBal->Zone);
             if (thisElecSys.ZonePtr == 0) {
-                ShowSevereError(state, EnergyPlus::format("{}Invalid {} = {}", RoutineName, cAlphaFields(3), Alphas(3)));
-                ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, Alphas(1)));
+                ShowSevereError(state, std::format("{}Invalid {} = {}", RoutineName, cAlphaFields(3), Alphas(3)));
+                ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, Alphas(1)));
                 ErrorsFound = true;
             }
 
@@ -1262,14 +1258,13 @@ namespace LowTempRadiantSystem {
                 thisElecSys.SurfaceFrac(1) = 1.0;
                 // Error checking for single surfaces
                 if (thisElecSys.SurfacePtr(1) == 0) {
-                    ShowSevereError(state, EnergyPlus::format("{}Invalid {} = {}", RoutineName, cAlphaFields(4), Alphas(4)));
-                    ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, Alphas(1)));
+                    ShowSevereError(state, std::format("{}Invalid {} = {}", RoutineName, cAlphaFields(4), Alphas(4)));
+                    ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, Alphas(1)));
                     ErrorsFound = true;
                 } else if (state.dataSurface->SurfIsRadSurfOrVentSlabOrPool(thisElecSys.SurfacePtr(1))) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", Invalid Surface", RoutineName, CurrentModuleObject, Alphas(1)));
+                    ShowSevereError(state, std::format("{}{}=\"{}\", Invalid Surface", RoutineName, CurrentModuleObject, Alphas(1)));
                     ShowContinueError(
-                        state,
-                        EnergyPlus::format("{}=\"{}\" has been used in another radiant system or ventilated slab.", cAlphaFields(4), Alphas(4)));
+                        state, std::format("{}=\"{}\" has been used in another radiant system or ventilated slab.", cAlphaFields(4), Alphas(4)));
                     ErrorsFound = true;
                 }
                 if (thisElecSys.SurfacePtr(1) != 0) {
@@ -1288,17 +1283,17 @@ namespace LowTempRadiantSystem {
                     thisElecSys.ScaledHeatingCapacity = Numbers(iHeatDesignCapacityNumericNum);
                     thisElecSys.MaxElecPower = thisElecSys.ScaledHeatingCapacity;
                     if (thisElecSys.ScaledHeatingCapacity < 0.0 && thisElecSys.ScaledHeatingCapacity != AutoSize) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisElecSys.Name));
+                        ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, thisElecSys.Name));
                         ShowContinueError(state,
-                                          EnergyPlus::format("Illegal {} = {:.7T}",
-                                                             cNumericFields(iHeatDesignCapacityNumericNum),
-                                                             Numbers(iHeatDesignCapacityNumericNum)));
+                                          std::format("Illegal {} = {:.7f}",
+                                                      cNumericFields(iHeatDesignCapacityNumericNum),
+                                                      Numbers(iHeatDesignCapacityNumericNum)));
                         ErrorsFound = true;
                     }
                 } else {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisElecSys.Name));
-                    ShowContinueError(state, EnergyPlus::format("Input for {} = {}", cAlphaFields(iHeatCAPMAlphaNum), Alphas(iHeatCAPMAlphaNum)));
-                    ShowContinueError(state, EnergyPlus::format("Blank field not allowed for {}", cNumericFields(iHeatDesignCapacityNumericNum)));
+                    ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, thisElecSys.Name));
+                    ShowContinueError(state, std::format("Input for {} = {}", cAlphaFields(iHeatCAPMAlphaNum), Alphas(iHeatCAPMAlphaNum)));
+                    ShowContinueError(state, std::format("Blank field not allowed for {}", cNumericFields(iHeatDesignCapacityNumericNum)));
                     ErrorsFound = true;
                 }
             } else if (Util::SameString(Alphas(iHeatCAPMAlphaNum), "CapacityPerFloorArea")) {
@@ -1307,24 +1302,23 @@ namespace LowTempRadiantSystem {
                     thisElecSys.ScaledHeatingCapacity = Numbers(iHeatCapacityPerFloorAreaNumericNum);
                     thisElecSys.MaxElecPower = thisElecSys.ScaledHeatingCapacity;
                     if (thisElecSys.ScaledHeatingCapacity <= 0.0) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisElecSys.Name));
-                        ShowContinueError(state, EnergyPlus::format("Input for {} = {}", cAlphaFields(iHeatCAPMAlphaNum), Alphas(iHeatCAPMAlphaNum)));
+                        ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, thisElecSys.Name));
+                        ShowContinueError(state, std::format("Input for {} = {}", cAlphaFields(iHeatCAPMAlphaNum), Alphas(iHeatCAPMAlphaNum)));
                         ShowContinueError(state,
-                                          EnergyPlus::format("Illegal {} = {:.7T}",
-                                                             cNumericFields(iHeatCapacityPerFloorAreaNumericNum),
-                                                             Numbers(iHeatCapacityPerFloorAreaNumericNum)));
+                                          std::format("Illegal {} = {:.7f}",
+                                                      cNumericFields(iHeatCapacityPerFloorAreaNumericNum),
+                                                      Numbers(iHeatCapacityPerFloorAreaNumericNum)));
                         ErrorsFound = true;
                     } else if (thisElecSys.ScaledHeatingCapacity == AutoSize) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisElecSys.Name));
-                        ShowContinueError(state, EnergyPlus::format("Input for {} = {}", cAlphaFields(iHeatCAPMAlphaNum), Alphas(iHeatCAPMAlphaNum)));
-                        ShowContinueError(state, EnergyPlus::format("Illegal {} = Autosize", cNumericFields(iHeatCapacityPerFloorAreaNumericNum)));
+                        ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, thisElecSys.Name));
+                        ShowContinueError(state, std::format("Input for {} = {}", cAlphaFields(iHeatCAPMAlphaNum), Alphas(iHeatCAPMAlphaNum)));
+                        ShowContinueError(state, std::format("Illegal {} = Autosize", cNumericFields(iHeatCapacityPerFloorAreaNumericNum)));
                         ErrorsFound = true;
                     }
                 } else {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisElecSys.Name));
-                    ShowContinueError(state, EnergyPlus::format("Input for {} = {}", cAlphaFields(iHeatCAPMAlphaNum), Alphas(iHeatCAPMAlphaNum)));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("Blank field not allowed for {}", cNumericFields(iHeatCapacityPerFloorAreaNumericNum)));
+                    ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, thisElecSys.Name));
+                    ShowContinueError(state, std::format("Input for {} = {}", cAlphaFields(iHeatCAPMAlphaNum), Alphas(iHeatCAPMAlphaNum)));
+                    ShowContinueError(state, std::format("Blank field not allowed for {}", cNumericFields(iHeatCapacityPerFloorAreaNumericNum)));
                     ErrorsFound = true;
                 }
             } else if (Util::SameString(Alphas(iHeatCAPMAlphaNum), "FractionOfAutosizedHeatingCapacity")) {
@@ -1333,23 +1327,22 @@ namespace LowTempRadiantSystem {
                     thisElecSys.ScaledHeatingCapacity = Numbers(iHeatFracOfAutosizedCapacityNumericNum);
                     thisElecSys.MaxElecPower = thisElecSys.ScaledHeatingCapacity;
                     if (thisElecSys.ScaledHeatingCapacity < 0.0) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisElecSys.Name));
+                        ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, thisElecSys.Name));
                         ShowContinueError(state,
-                                          EnergyPlus::format("Illegal {} = {:.7T}",
-                                                             cNumericFields(iHeatFracOfAutosizedCapacityNumericNum),
-                                                             Numbers(iHeatFracOfAutosizedCapacityNumericNum)));
+                                          std::format("Illegal {} = {:.7f}",
+                                                      cNumericFields(iHeatFracOfAutosizedCapacityNumericNum),
+                                                      Numbers(iHeatFracOfAutosizedCapacityNumericNum)));
                         ErrorsFound = true;
                     }
                 } else {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisElecSys.Name));
-                    ShowContinueError(state, EnergyPlus::format("Input for {} = {}", cAlphaFields(iHeatCAPMAlphaNum), Alphas(iHeatCAPMAlphaNum)));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("Blank field not allowed for {}", cNumericFields(iHeatFracOfAutosizedCapacityNumericNum)));
+                    ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, thisElecSys.Name));
+                    ShowContinueError(state, std::format("Input for {} = {}", cAlphaFields(iHeatCAPMAlphaNum), Alphas(iHeatCAPMAlphaNum)));
+                    ShowContinueError(state, std::format("Blank field not allowed for {}", cNumericFields(iHeatFracOfAutosizedCapacityNumericNum)));
                     ErrorsFound = true;
                 }
             } else {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisElecSys.Name));
-                ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(iHeatCAPMAlphaNum), Alphas(iHeatCAPMAlphaNum)));
+                ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, thisElecSys.Name));
+                ShowContinueError(state, std::format("Illegal {} = {}", cAlphaFields(iHeatCAPMAlphaNum), Alphas(iHeatCAPMAlphaNum)));
                 ErrorsFound = true;
             }
 
@@ -1395,8 +1388,8 @@ namespace LowTempRadiantSystem {
                     continue;
                 }
                 if (AssignedAsRadiantSurface(CheckSurfNum)) {
-                    ShowSevereError(
-                        state, EnergyPlus::format("Surface {} is referenced by more than one radiant system--this is not allowed", checkSurf.Name));
+                    ShowSevereError(state,
+                                    std::format("Surface {} is referenced by more than one radiant system--this is not allowed", checkSurf.Name));
                     ErrorsFound = true;
                 } else {
                     AssignedAsRadiantSurface(CheckSurfNum) = true;
@@ -1405,8 +1398,8 @@ namespace LowTempRadiantSystem {
                 if ((checkSurf.ExtBoundCond > 0) && (checkSurf.ExtBoundCond != CheckSurfNum)) {
                     if (AssignedAsRadiantSurface(checkSurf.ExtBoundCond)) {
                         ShowSevereError(state,
-                                        EnergyPlus::format("Interzone surface {} is referenced by more than one radiant system--this is not allowed",
-                                                           state.dataSurface->Surface(checkSurf.ExtBoundCond).Name));
+                                        std::format("Interzone surface {} is referenced by more than one radiant system--this is not allowed",
+                                                    state.dataSurface->Surface(checkSurf.ExtBoundCond).Name));
                         ErrorsFound = true;
                     } else {
                         AssignedAsRadiantSurface(checkSurf.ExtBoundCond) = true;
@@ -1423,8 +1416,8 @@ namespace LowTempRadiantSystem {
                     continue;
                 }
                 if (AssignedAsRadiantSurface(CheckSurfNum)) {
-                    ShowSevereError(
-                        state, EnergyPlus::format("Surface {} is referenced by more than one radiant system--this is not allowed", checkSurf.Name));
+                    ShowSevereError(state,
+                                    std::format("Surface {} is referenced by more than one radiant system--this is not allowed", checkSurf.Name));
                     ErrorsFound = true;
                 } else {
                     AssignedAsRadiantSurface(CheckSurfNum) = true;
@@ -1433,8 +1426,8 @@ namespace LowTempRadiantSystem {
                 if ((checkSurf.ExtBoundCond > 0) && (checkSurf.ExtBoundCond != CheckSurfNum)) {
                     if (AssignedAsRadiantSurface(checkSurf.ExtBoundCond)) {
                         ShowSevereError(state,
-                                        EnergyPlus::format("Interzone surface {} is referenced by more than one radiant system--this is not allowed",
-                                                           state.dataSurface->Surface(checkSurf.ExtBoundCond).Name));
+                                        std::format("Interzone surface {} is referenced by more than one radiant system--this is not allowed",
+                                                    state.dataSurface->Surface(checkSurf.ExtBoundCond).Name));
                         ErrorsFound = true;
                     } else {
                         AssignedAsRadiantSurface(checkSurf.ExtBoundCond) = true;
@@ -1451,8 +1444,8 @@ namespace LowTempRadiantSystem {
                     continue;
                 }
                 if (AssignedAsRadiantSurface(CheckSurfNum)) {
-                    ShowSevereError(
-                        state, EnergyPlus::format("Surface {} is referenced by more than one radiant system--this is not allowed", checkSurf.Name));
+                    ShowSevereError(state,
+                                    std::format("Surface {} is referenced by more than one radiant system--this is not allowed", checkSurf.Name));
                     ErrorsFound = true;
                 } else {
                     AssignedAsRadiantSurface(CheckSurfNum) = true;
@@ -1461,8 +1454,8 @@ namespace LowTempRadiantSystem {
                 if ((checkSurf.ExtBoundCond > 0) && (checkSurf.ExtBoundCond != CheckSurfNum)) {
                     if (AssignedAsRadiantSurface(checkSurf.ExtBoundCond)) {
                         ShowSevereError(state,
-                                        EnergyPlus::format("Interzone surface {} is referenced by more than one radiant system--this is not allowed",
-                                                           state.dataSurface->Surface(checkSurf.ExtBoundCond).Name));
+                                        std::format("Interzone surface {} is referenced by more than one radiant system--this is not allowed",
+                                                    state.dataSurface->Surface(checkSurf.ExtBoundCond).Name));
                         ErrorsFound = true;
                     } else {
                         AssignedAsRadiantSurface(checkSurf.ExtBoundCond) = true;
@@ -1480,7 +1473,7 @@ namespace LowTempRadiantSystem {
         lNumericBlanks.deallocate();
 
         if (ErrorsFound) {
-            ShowFatalError(state, EnergyPlus::format("{}Errors found in input. Preceding conditions cause termination.", RoutineName));
+            ShowFatalError(state, std::format("{}Errors found in input. Preceding conditions cause termination.", RoutineName));
         }
 
         // Set up the output variables for low temperature radiant systems
@@ -1852,12 +1845,11 @@ namespace LowTempRadiantSystem {
                 if (surf.Zone != this->ZonePtr) {
                     ShowWarningError(state,
                                      "A surface referenced in a Low Temperature Radiant System is not in same zone as the radiant system itself");
-                    ShowContinueError(state, EnergyPlus::format("Surface = {}", surf.Name));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("Surface in Zone = {}. Radiant System in Zone = {}",
-                                                         state.dataHeatBal->Zone(surf.Zone).Name,
-                                                         this->ZoneName));
-                    ShowContinueError(state, EnergyPlus::format("Occurs in Low Temperature Radiant System = {}", this->Name));
+                    ShowContinueError(state, std::format("Surface = {}", surf.Name));
+                    ShowContinueError(
+                        state,
+                        std::format("Surface in Zone = {}. Radiant System in Zone = {}", state.dataHeatBal->Zone(surf.Zone).Name, this->ZoneName));
+                    ShowContinueError(state, std::format("Occurs in Low Temperature Radiant System = {}", this->Name));
                     ShowContinueError(state, "If this is intentionally a radiant system with surfaces in more than one thermal zone,");
                     ShowContinueError(state, "then ignore this warning message.  Otherwise, check the surfaces in this radiant system.");
                 }
@@ -1873,17 +1865,16 @@ namespace LowTempRadiantSystem {
             if (std::abs(zoneMultipliers - zoneMultipliersSurface) > zoneMultiplersTolerance) {
                 ShowSevereError(state, "The zone multipliers are not the same for all surfaces contained in this radiant system");
                 ShowContinueError(state, "This is not allowed and must be fixed for the simulation to run.");
-                ShowContinueError(state, EnergyPlus::format("Occurs in Low Temperature Radiant System = {}", this->Name));
+                ShowContinueError(state, std::format("Occurs in Low Temperature Radiant System = {}", this->Name));
                 errorsFound = true;
             }
 
             // make sure that this construction is defined with a source/sink--this must be the case or it can't serve as a radiant system surface
             if (!state.dataConstruction->Construct(surf.Construction).SourceSinkPresent) {
                 ShowSevereError(state, "Construction referenced in Radiant System Surface does not have a source/sink present");
-                ShowContinueError(state,
-                                  EnergyPlus::format("Surface name= {}  Construction name = {}",
-                                                     surf.Name,
-                                                     state.dataConstruction->Construct(surf.Construction).Name));
+                ShowContinueError(
+                    state,
+                    std::format("Surface name= {}  Construction name = {}", surf.Name, state.dataConstruction->Construct(surf.Construction).Name));
                 ShowContinueError(state, "Construction needs to be referenced by a \"ConstructionProperty:InternalHeatSource\" object.");
                 errorsFound = true;
             }
@@ -2017,8 +2008,7 @@ namespace LowTempRadiantSystem {
                     // Autosize is not an error but it does not need to check pump efficiency here
                     if (thisCFLRadSys.WaterVolFlowMax != AutoSize) {
                         ShowSevereError(
-                            state,
-                            EnergyPlus::format("Check input.  Pump nominal power and motor efficiency cannot be 0, for pump={}", thisCFLRadSys.Name));
+                            state, std::format("Check input.  Pump nominal power and motor efficiency cannot be 0, for pump={}", thisCFLRadSys.Name));
                         InitErrorsFound = true;
                     }
                 }
@@ -2115,30 +2105,28 @@ namespace LowTempRadiantSystem {
                     if (CheckZoneEquipmentList(state, "ZoneHVAC:LowTemperatureRadiant:VariableFlow", thisRadSys.Name)) {
                         continue;
                     }
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format("InitLowTempRadiantSystem: Unit=[ZoneHVAC:LowTemperatureRadiant:VariableFlow,{}] is not on any "
-                                           "ZoneHVAC:EquipmentList.  It will not be simulated.",
-                                           thisRadSys.Name));
+                    ShowSevereError(state,
+                                    std::format("InitLowTempRadiantSystem: Unit=[ZoneHVAC:LowTemperatureRadiant:VariableFlow,{}] is not on any "
+                                                "ZoneHVAC:EquipmentList.  It will not be simulated.",
+                                                thisRadSys.Name));
                 } break;
                 case SystemType::ConstantFlow: {
                     if (CheckZoneEquipmentList(state, "ZoneHVAC:LowTemperatureRadiant:ConstantFlow", thisRadSys.Name)) {
                         continue;
                     }
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format("InitLowTempRadiantSystem: Unit=[ZoneHVAC:LowTemperatureRadiant:ConstantFlow,{}] is not on any "
-                                           "ZoneHVAC:EquipmentList.  It will not be simulated.",
-                                           thisRadSys.Name));
+                    ShowSevereError(state,
+                                    std::format("InitLowTempRadiantSystem: Unit=[ZoneHVAC:LowTemperatureRadiant:ConstantFlow,{}] is not on any "
+                                                "ZoneHVAC:EquipmentList.  It will not be simulated.",
+                                                thisRadSys.Name));
                 } break;
                 case SystemType::Electric: {
                     if (CheckZoneEquipmentList(state, "ZoneHVAC:LowTemperatureRadiant:Electric", thisRadSys.Name)) {
                         continue;
                     }
                     ShowSevereError(state,
-                                    EnergyPlus::format("InitLowTempRadiantSystem: Unit=[ZoneHVAC:LowTemperatureRadiant:Electric,{}] is not on any "
-                                                       "ZoneHVAC:EquipmentList.  It will not be simulated.",
-                                                       thisRadSys.Name));
+                                    std::format("InitLowTempRadiantSystem: Unit=[ZoneHVAC:LowTemperatureRadiant:Electric,{}] is not on any "
+                                                "ZoneHVAC:EquipmentList.  It will not be simulated.",
+                                                thisRadSys.Name));
                 } break;
                 default: { // Illegal system, but checked earlier
                 } break;
@@ -2690,8 +2678,7 @@ namespace LowTempRadiantSystem {
                         state.dataSize->DataScalableCapSizingON = false;
                         elecRadSys.MaxElecPower = TempSize;
                     } else if (CapSizingMethod == FractionOfAutosizedHeatingCapacity) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}: auto-sizing cannot be done for {} = {}\".", RoutineName, CompType, elecRadSys.Name));
+                        ShowSevereError(state, std::format("{}: auto-sizing cannot be done for {} = {}\".", RoutineName, CompType, elecRadSys.Name));
                         ShowContinueError(state,
                                           "The \"SimulationControl\" object must have the field \"Do Zone Sizing Calculation\" set to Yes when the "
                                           "Heating Design Capacity Method = \"FractionOfAutosizedHeatingCapacity\".");
@@ -2780,8 +2767,8 @@ namespace LowTempRadiantSystem {
                         state.dataSize->DataScalableCapSizingON = false;
                     } else if (CapSizingMethod == FractionOfAutosizedHeatingCapacity) {
                         if (hydrRadSys.WaterVolFlowMaxHeat == AutoSize) {
-                            ShowSevereError(
-                                state, EnergyPlus::format("{}: auto-sizing cannot be done for {} = {}\".", RoutineName, CompType, hydrRadSys.Name));
+                            ShowSevereError(state,
+                                            std::format("{}: auto-sizing cannot be done for {} = {}\".", RoutineName, CompType, hydrRadSys.Name));
                             ShowContinueError(state,
                                               "The \"SimulationControl\" object must have the field \"Do Zone Sizing Calculation\" set to Yes when "
                                               "the Heating Design Capacity Method = \"FractionOfAutosizedHeatingCapacity\".");
@@ -2860,8 +2847,7 @@ namespace LowTempRadiantSystem {
                             }
                         } else {
                             ShowSevereError(state, "Autosizing of water flow requires a heating loop Sizing:Plant object");
-                            ShowContinueError(state,
-                                              EnergyPlus::format("Occurs in ZoneHVAC:LowTemperatureRadiant:VariableFlow Object={}", hydrRadSys.Name));
+                            ShowContinueError(state, std::format("Occurs in ZoneHVAC:LowTemperatureRadiant:VariableFlow Object={}", hydrRadSys.Name));
                             ErrorsFound = true;
                         }
                     }
@@ -2884,9 +2870,9 @@ namespace LowTempRadiantSystem {
                                 if ((std::abs(WaterVolFlowMaxHeatDes - WaterVolFlowMaxHeatUser) / WaterVolFlowMaxHeatUser) >
                                     state.dataSize->AutoVsHardSizingThreshold) {
                                     ShowMessage(state,
-                                                EnergyPlus::format("SizeLowTempRadiantSystem: Potential issue with equipment sizing for "
-                                                                   "ZoneHVAC:LowTemperatureRadiant:VariableFlow = \"{}\".",
-                                                                   hydrRadSys.Name));
+                                                std::format("SizeLowTempRadiantSystem: Potential issue with equipment sizing for "
+                                                            "ZoneHVAC:LowTemperatureRadiant:VariableFlow = \"{}\".",
+                                                            hydrRadSys.Name));
                                     ShowContinueError(
                                         state, EnergyPlus::format("User-Specified Maximum Hot Water Flow of {:.5R} [m3/s]", WaterVolFlowMaxHeatUser));
                                     ShowContinueError(state,
@@ -2933,8 +2919,8 @@ namespace LowTempRadiantSystem {
                         state.dataSize->DataScalableCapSizingON = false;
                     } else if (CapSizingMethod == FractionOfAutosizedCoolingCapacity) {
                         if (hydrRadSys.WaterVolFlowMaxCool == AutoSize) {
-                            ShowSevereError(
-                                state, EnergyPlus::format("{}: auto-sizing cannot be done for {} = {}\".", RoutineName, CompType, hydrRadSys.Name));
+                            ShowSevereError(state,
+                                            std::format("{}: auto-sizing cannot be done for {} = {}\".", RoutineName, CompType, hydrRadSys.Name));
                             ShowContinueError(state,
                                               "The \"SimulationControl\" object must have the field \"Do Zone Sizing Calculation\" set to Yes when "
                                               "the Cooling Design Capacity Method = \"FractionOfAutosizedCoolingCapacity\".");
@@ -3013,8 +2999,7 @@ namespace LowTempRadiantSystem {
                             }
                         } else {
                             ShowSevereError(state, "Autosizing of water flow requires a cooling loop Sizing:Plant object");
-                            ShowContinueError(state,
-                                              EnergyPlus::format("Occurs in ZoneHVAC:LowTemperatureRadiant:VariableFlow Object={}", hydrRadSys.Name));
+                            ShowContinueError(state, std::format("Occurs in ZoneHVAC:LowTemperatureRadiant:VariableFlow Object={}", hydrRadSys.Name));
                             ErrorsFound = true;
                         }
                     }
@@ -3037,9 +3022,9 @@ namespace LowTempRadiantSystem {
                                 if ((std::abs(WaterVolFlowMaxCoolDes - WaterVolFlowMaxCoolUser) / WaterVolFlowMaxCoolUser) >
                                     state.dataSize->AutoVsHardSizingThreshold) {
                                     ShowMessage(state,
-                                                EnergyPlus::format("SizeLowTempRadiantSystem: Potential issue with equipment sizing for "
-                                                                   "ZoneHVAC:LowTemperatureRadiant:VariableFlow = \"{}\".",
-                                                                   hydrRadSys.Name));
+                                                std::format("SizeLowTempRadiantSystem: Potential issue with equipment sizing for "
+                                                            "ZoneHVAC:LowTemperatureRadiant:VariableFlow = \"{}\".",
+                                                            hydrRadSys.Name));
                                     ShowContinueError(
                                         state,
                                         EnergyPlus::format("User-Specified Maximum Cool Water Flow of {:.5R} [m3/s]", WaterVolFlowMaxCoolUser));
@@ -3084,9 +3069,9 @@ namespace LowTempRadiantSystem {
                             if (state.dataGlobal->DisplayExtraWarnings) {
                                 if ((std::abs(TubeLengthDes - TubeLengthUser) / TubeLengthUser) > state.dataSize->AutoVsHardSizingThreshold) {
                                     ShowMessage(state,
-                                                EnergyPlus::format("SizeLowTempRadiantSystem: Potential issue with equipment sizing for "
-                                                                   "ZoneHVAC:LowTemperatureRadiant:VariableFlow = \"{}\".",
-                                                                   hydrRadSys.Name));
+                                                std::format("SizeLowTempRadiantSystem: Potential issue with equipment sizing for "
+                                                            "ZoneHVAC:LowTemperatureRadiant:VariableFlow = \"{}\".",
+                                                            hydrRadSys.Name));
                                     ShowContinueError(state,
                                                       EnergyPlus::format("User-Specified Hydronic Tubing Length of {:.5R} [m]", TubeLengthUser));
                                     ShowContinueError(
@@ -3164,8 +3149,7 @@ namespace LowTempRadiantSystem {
                     } else {
                         if (OpMode == OperatingMode::ClgHtg || OpMode == OperatingMode::HtgOnly) {
                             ShowSevereError(state, "Autosizing of water flow requires a heating loop Sizing:Plant object");
-                            ShowContinueError(state,
-                                              EnergyPlus::format("Occurs in ZoneHVAC:LowTemperatureRadiant:ConstantFlow Object={}", cfloRadSys.Name));
+                            ShowContinueError(state, std::format("Occurs in ZoneHVAC:LowTemperatureRadiant:ConstantFlow Object={}", cfloRadSys.Name));
                             ErrorsFound = true;
                         }
                     }
@@ -3187,8 +3171,7 @@ namespace LowTempRadiantSystem {
                     } else {
                         if (OpMode == OperatingMode::ClgHtg || OpMode == OperatingMode::ClgOnly) {
                             ShowSevereError(state, "Autosizing of water flow requires a cooling loop Sizing:Plant object");
-                            ShowContinueError(state,
-                                              EnergyPlus::format("Occurs in ZoneHVAC:LowTemperatureRadiant:ConstantFlow Object={}", cfloRadSys.Name));
+                            ShowContinueError(state, std::format("Occurs in ZoneHVAC:LowTemperatureRadiant:ConstantFlow Object={}", cfloRadSys.Name));
                             ErrorsFound = true;
                         }
                     }
@@ -3221,9 +3204,9 @@ namespace LowTempRadiantSystem {
                                 if ((std::abs(WaterVolFlowMaxDes - WaterVolFlowMaxUser) / WaterVolFlowMaxUser) >
                                     state.dataSize->AutoVsHardSizingThreshold) {
                                     ShowMessage(state,
-                                                EnergyPlus::format("SizeLowTempRadiantSystem: Potential issue with equipment sizing for "
-                                                                   "ZoneHVAC:LowTemperatureRadiant:ConstantFlow = \" {}\".",
-                                                                   cfloRadSys.Name));
+                                                std::format("SizeLowTempRadiantSystem: Potential issue with equipment sizing for "
+                                                            "ZoneHVAC:LowTemperatureRadiant:ConstantFlow = \" {}\".",
+                                                            cfloRadSys.Name));
                                     ShowContinueError(state,
                                                       EnergyPlus::format("User-Specified Maximum Water Flow of {:.5R} [m3/s]", WaterVolFlowMaxUser));
                                     ShowContinueError(
@@ -3275,9 +3258,9 @@ namespace LowTempRadiantSystem {
                             if (state.dataGlobal->DisplayExtraWarnings) {
                                 if ((std::abs(TubeLengthDes - TubeLengthUser) / TubeLengthUser) > state.dataSize->AutoVsHardSizingThreshold) {
                                     ShowMessage(state,
-                                                EnergyPlus::format("SizeLowTempRadiantSystem: Potential issue with equipment sizing for "
-                                                                   "ZoneHVAC:LowTemperatureRadiant:ConstantFlow = \" {}\".",
-                                                                   cfloRadSys.Name));
+                                                std::format("SizeLowTempRadiantSystem: Potential issue with equipment sizing for "
+                                                            "ZoneHVAC:LowTemperatureRadiant:ConstantFlow = \" {}\".",
+                                                            cfloRadSys.Name));
                                     ShowContinueError(state,
                                                       EnergyPlus::format("User-Specified Hydronic Tubing Length of {:.5R} [m]", TubeLengthUser));
                                     ShowContinueError(
@@ -3446,7 +3429,7 @@ namespace LowTempRadiantSystem {
             // potentially be heating or cooling at a particular control temperature
             if (OffTempHeat > OffTempCool) {
                 MassFlowFrac = 0.0;
-                ShowSevereError(state, EnergyPlus::format("Overlapping heating and cooling control temps in radiant system: {}", this->Name));
+                ShowSevereError(state, std::format("Overlapping heating and cooling control temps in radiant system: {}", this->Name));
                 ShowFatalError(state, "Preceding condition causes termination.");
 
             } else { // Temperatures for heating and cooling do not overlap--calculate the mass flow fraction
@@ -3579,7 +3562,7 @@ namespace LowTempRadiantSystem {
         default: {
             WaterNodeIn = 0; // Suppress uninitialized warning
             ShowSevereError(state, "Illegal low temperature radiant system operating mode");
-            ShowContinueError(state, EnergyPlus::format("Occurs in Radiant System={}", this->Name));
+            ShowContinueError(state, std::format("Occurs in Radiant System={}", this->Name));
             ShowFatalError(state, "Preceding condition causes termination.");
         } break;
         }
@@ -3777,11 +3760,11 @@ namespace LowTempRadiantSystem {
                         // Produce a warning message so that user knows the system was shut-off due to potential for condensation
                         if (!state.dataGlobal->WarmupFlag) {
                             if (this->CondErrIndex == 0) { // allow errors up to number of radiant systems
-                                ShowWarningMessage(state, EnergyPlus::format("{} [{}]", cHydronicSystem, this->Name));
+                                ShowWarningMessage(state, std::format("{} [{}]", cHydronicSystem, this->Name));
                                 ShowContinueError(
                                     state,
-                                    EnergyPlus::format("Surface [{}] temperature below dew-point temperature--potential for condensation exists",
-                                                       state.dataSurface->Surface(SurfNum2).Name));
+                                    std::format("Surface [{}] temperature below dew-point temperature--potential for condensation exists",
+                                                state.dataSurface->Surface(SurfNum2).Name));
                                 ShowContinueError(state, "Flow to the radiant system will be shut-off to avoid condensation");
                                 ShowContinueError(state,
                                                   EnergyPlus::format("Predicted radiant system surface temperature = {:.2R}",
@@ -3797,7 +3780,7 @@ namespace LowTempRadiantSystem {
                             }
                             ShowRecurringWarningErrorAtEnd(
                                 state,
-                                EnergyPlus::format("{} [{}] condensation shut-off occurrence continues.", cHydronicSystem, this->Name),
+                                std::format("{} [{}] condensation shut-off occurrence continues.", cHydronicSystem, this->Name),
                                 this->CondErrIndex,
                                 DewPointTemp,
                                 DewPointTemp,
@@ -3957,11 +3940,11 @@ namespace LowTempRadiantSystem {
                         // Produce a warning message so that user knows the system was shut-off due to potential for condensation
                         if (!state.dataGlobal->WarmupFlag) {
                             if (this->CondErrIndex == 0) { // allow errors up to number of radiant systems
-                                ShowWarningMessage(state, EnergyPlus::format("{} [{}]", cHydronicSystem, this->Name));
+                                ShowWarningMessage(state, std::format("{} [{}]", cHydronicSystem, this->Name));
                                 ShowContinueError(
                                     state,
-                                    EnergyPlus::format("Surface [{}] temperature below dew-point temperature--potential for condensation exists",
-                                                       state.dataSurface->Surface(this->SurfacePtr(CondSurfNum)).Name));
+                                    std::format("Surface [{}] temperature below dew-point temperature--potential for condensation exists",
+                                                state.dataSurface->Surface(this->SurfacePtr(CondSurfNum)).Name));
                                 ShowContinueError(state, "Flow to the radiant system will be shut-off to avoid condensation");
                                 ShowContinueError(state,
                                                   EnergyPlus::format("Predicted radiant system surface temperature = {:.2R}",
@@ -3977,7 +3960,7 @@ namespace LowTempRadiantSystem {
                             }
                             ShowRecurringWarningErrorAtEnd(
                                 state,
-                                EnergyPlus::format("{} [{}] condensation shut-off occurrence continues.", cHydronicSystem, this->Name),
+                                std::format("{} [{}] condensation shut-off occurrence continues.", cHydronicSystem, this->Name),
                                 this->CondErrIndex,
                                 DewPointTemp,
                                 DewPointTemp,
@@ -4110,7 +4093,7 @@ namespace LowTempRadiantSystem {
                     SetPointTempHi = this->hotCtrlHiTempSched->getCurrentVal();
                     SetPointTempLo = this->hotCtrlLoTempSched->getCurrentVal();
                     if (SetPointTempHi < SetPointTempLo) {
-                        ShowSevereError(state, EnergyPlus::format("Heating setpoint temperature mismatch in{}", this->Name));
+                        ShowSevereError(state, std::format("Heating setpoint temperature mismatch in{}", this->Name));
                         ShowContinueError(state, "High setpoint temperature is less than low setpoint temperature--check your schedule input");
                         ShowFatalError(state, "Preceding condition causes termination.");
                     }
@@ -4118,7 +4101,7 @@ namespace LowTempRadiantSystem {
                     WaterTempHi = this->hotWaterHiTempSched->getCurrentVal();
                     WaterTempLo = this->hotWaterLoTempSched->getCurrentVal();
                     if (WaterTempHi < WaterTempLo) {
-                        ShowSevereError(state, EnergyPlus::format("Heating water temperature mismatch in{}", this->Name));
+                        ShowSevereError(state, std::format("Heating water temperature mismatch in{}", this->Name));
                         ShowContinueError(state, "High water temperature is less than low water temperature--check your schedule input");
                         ShowFatalError(state, "Preceding condition causes termination.");
                     }
@@ -4149,7 +4132,7 @@ namespace LowTempRadiantSystem {
                     SetPointTempHi = this->coldCtrlHiTempSched->getCurrentVal();
                     SetPointTempLo = this->coldCtrlLoTempSched->getCurrentVal();
                     if (SetPointTempHi < SetPointTempLo) {
-                        ShowSevereError(state, EnergyPlus::format("Cooling setpoint temperature mismatch in{}", this->Name));
+                        ShowSevereError(state, std::format("Cooling setpoint temperature mismatch in{}", this->Name));
                         ShowContinueError(state, "High setpoint temperature is less than low setpoint temperature--check your schedule input");
                         ShowFatalError(state, "Preceding condition causes termination.");
                     }
@@ -4157,7 +4140,7 @@ namespace LowTempRadiantSystem {
                     WaterTempHi = this->coldWaterHiTempSched->getCurrentVal();
                     WaterTempLo = this->coldWaterLoTempSched->getCurrentVal();
                     if (WaterTempHi < WaterTempLo) {
-                        ShowSevereError(state, EnergyPlus::format("Cooling water temperature mismatch in{}", this->Name));
+                        ShowSevereError(state, std::format("Cooling water temperature mismatch in{}", this->Name));
                         ShowContinueError(state, "High water temperature is less than low water temperature--check your schedule input");
                         ShowFatalError(state, "Preceding condition causes termination.");
                     }
@@ -4493,8 +4476,7 @@ namespace LowTempRadiantSystem {
             // Error check, just in case
             if (this->WaterRecircRate < 0.0) {
                 ShowWarningError(state, "Flow mismatch in radiant system--result will be an energy imbalance--should not get this error");
-                ShowContinueErrorTimeStamp(state,
-                                           EnergyPlus::format("WaterRecircRate={:.2T}, in Radiant System={},", this->WaterRecircRate, this->Name));
+                ShowContinueErrorTimeStamp(state, std::format("WaterRecircRate={:.2f}, in Radiant System={},", this->WaterRecircRate, this->Name));
                 this->WaterRecircRate = 0.0;
                 this->WaterInjectionRate = this->WaterMassFlowRate;
             }
@@ -4867,11 +4849,11 @@ namespace LowTempRadiantSystem {
                         // Produce a warning message so that user knows the system was shut-off due to potential for condensation
                         if (!state.dataGlobal->WarmupFlag) {
                             if (this->CondErrIndex == 0) { // allow errors up to number of radiant systems
-                                ShowWarningMessage(state, EnergyPlus::format("{} [{}]", cConstantFlowSystem, this->Name));
+                                ShowWarningMessage(state, std::format("{} [{}]", cConstantFlowSystem, this->Name));
                                 ShowContinueError(
                                     state,
-                                    EnergyPlus::format("Surface [{}] temperature below dew-point temperature--potential for condensation exists",
-                                                       state.dataSurface->Surface(this->SurfacePtr(RadSurfNum2)).Name));
+                                    std::format("Surface [{}] temperature below dew-point temperature--potential for condensation exists",
+                                                state.dataSurface->Surface(this->SurfacePtr(RadSurfNum2)).Name));
                                 ShowContinueError(state, "Flow to the radiant system will be shut-off to avoid condensation");
                                 ShowContinueError(state,
                                                   EnergyPlus::format("Predicted radiant system surface temperature = {:.2R}",
@@ -4887,7 +4869,7 @@ namespace LowTempRadiantSystem {
                             }
                             ShowRecurringWarningErrorAtEnd(
                                 state,
-                                EnergyPlus::format("{} [{}] condensation shut-off occurrence continues.", cConstantFlowSystem, this->Name),
+                                std::format("{} [{}] condensation shut-off occurrence continues.", cConstantFlowSystem, this->Name),
                                 this->CondErrIndex,
                                 DewPointTemp,
                                 DewPointTemp,
@@ -4932,11 +4914,11 @@ namespace LowTempRadiantSystem {
                             // Produce a warning message so that user knows the system was shut-off due to potential for condensation
                             if (!state.dataGlobal->WarmupFlag) {
                                 if (this->CondErrIndex == 0) { // allow errors up to number of radiant systems
-                                    ShowWarningMessage(state, EnergyPlus::format("{} [{}]", cConstantFlowSystem, this->Name));
+                                    ShowWarningMessage(state, std::format("{} [{}]", cConstantFlowSystem, this->Name));
                                     ShowContinueError(
                                         state,
-                                        EnergyPlus::format("Surface [{}] temperature below dew-point temperature--potential for condensation exists",
-                                                           state.dataSurface->Surface(this->SurfacePtr(RadSurfNum2)).Name));
+                                        std::format("Surface [{}] temperature below dew-point temperature--potential for condensation exists",
+                                                    state.dataSurface->Surface(this->SurfacePtr(RadSurfNum2)).Name));
                                     ShowContinueError(state, "Flow to the radiant system will be shut-off to avoid condensation");
                                     ShowContinueError(
                                         state,
@@ -4954,7 +4936,7 @@ namespace LowTempRadiantSystem {
                                 }
                                 ShowRecurringWarningErrorAtEnd(
                                     state,
-                                    EnergyPlus::format("{} [{}] condensation shut-off occurrence continues.", cConstantFlowSystem, this->Name),
+                                    std::format("{} [{}] condensation shut-off occurrence continues.", cConstantFlowSystem, this->Name),
                                     this->CondErrIndex,
                                     DewPointTemp,
                                     DewPointTemp,
@@ -5358,7 +5340,7 @@ namespace LowTempRadiantSystem {
             if (state.dataLowTempRadSys->warnTooLow) {
                 if (this->OutRangeLoErrorCount == 0) {
                     ShowSevereMessage(state, "UpdateLowTempRadiantSystem: model result for fluid outlet temperature is not physical.");
-                    ShowContinueError(state, EnergyPlus::format("Occurs for radiant system name = {}", this->Name));
+                    ShowContinueError(state, std::format("Occurs for radiant system name = {}", this->Name));
                     ShowContinueError(state, EnergyPlus::format("Calculated radiant system outlet temperature = {:.3R} [C]", outletTemp));
                     ShowContinueError(state, EnergyPlus::format("Radiant system inlet temperature = {:.3R} [C]", inletTemp));
                     ShowContinueError(
@@ -5375,7 +5357,7 @@ namespace LowTempRadiantSystem {
             if (state.dataLowTempRadSys->warnTooHigh) {
                 if (this->OutRangeHiErrorCount == 0) {
                     ShowSevereMessage(state, "UpdateLowTempRadiantSystem: model result for fluid outlet temperature is not physical.");
-                    ShowContinueError(state, EnergyPlus::format("Occurs for radiant system name = {}", this->Name));
+                    ShowContinueError(state, std::format("Occurs for radiant system name = {}", this->Name));
                     ShowContinueError(state, EnergyPlus::format("Calculated radiant system outlet temperature = {:.3R} [C]", outletTemp));
                     ShowContinueError(state, EnergyPlus::format("Radiant system inlet temperature = {:.3R} [C]", inletTemp));
                     ShowContinueError(
@@ -5413,8 +5395,7 @@ namespace LowTempRadiantSystem {
         case CtrlType::RunningMeanODB:
             return this->todayRunningMeanOutdoorDryBulbTemperature;
         default:
-            ShowSevereError(state,
-                            EnergyPlus::format("Illegal control type in low temperature radiant system or it's design object: {}", this->Name));
+            ShowSevereError(state, std::format("Illegal control type in low temperature radiant system or it's design object: {}", this->Name));
             ShowFatalError(state, "Preceding condition causes termination.");
             return 0.0; // hush the compiler
         }
@@ -5445,7 +5426,7 @@ namespace LowTempRadiantSystem {
         case SetpointType::ZeroFlowPower:
             return scheduleValue;
         default:
-            ShowSevereError(state, EnergyPlus::format("Illegal setpoint type in low temperature radiant system: {}", this->Name));
+            ShowSevereError(state, std::format("Illegal setpoint type in low temperature radiant system: {}", this->Name));
             ShowFatalError(state, "Preceding condition causes termination.");
             return scheduleValue + 0.5 * throttlingRange; // hush the compiler
         }

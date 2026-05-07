@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 #include <string>
 
 // ObjexxFCL Headers
@@ -740,19 +741,19 @@ namespace HeatBalanceHAMTManager {
                 }
                 if (matHAMT->ntc < 0) {
                     if (mat->Conductivity > 0) {
-                        ShowWarningError(state, EnergyPlus::format("{}Construction={}", RoutineName, constr.Name));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Reference Material=\"{}\" does not have thermal conductivity data. Using fixed value.",
-                                                             matHAMT->Name));
+                        ShowWarningError(state, std::format("{}Construction={}", RoutineName, constr.Name));
+                        ShowContinueError(
+                            state,
+                            std::format("Reference Material=\"{}\" does not have thermal conductivity data. Using fixed value.", matHAMT->Name));
                         matHAMT->ntc = 2;
                         matHAMT->tcwater(1) = 0.0;
                         matHAMT->tcdata(1) = matHAMT->Conductivity;
                         matHAMT->tcwater(2) = matHAMT->isodata(matHAMT->niso);
                         matHAMT->tcdata(2) = matHAMT->Conductivity;
                     } else {
-                        ShowSevereError(state, EnergyPlus::format("{}Construction={}", RoutineName, constr.Name));
-                        ShowContinueError(
-                            state, EnergyPlus::format("Reference Material=\"{}\" does not have required thermal conductivity data.", matHAMT->Name));
+                        ShowSevereError(state, std::format("{}Construction={}", RoutineName, constr.Name));
+                        ShowContinueError(state,
+                                          std::format("Reference Material=\"{}\" does not have required thermal conductivity data.", matHAMT->Name));
                         ++errorCount;
                     }
                 }
@@ -776,8 +777,8 @@ namespace HeatBalanceHAMTManager {
                     }
                     --matHAMT->divs;
                     if (matHAMT->divs < 1) {
-                        ShowSevereError(state, EnergyPlus::format("{}Construction={}", RoutineName, constr.Name));
-                        ShowContinueError(state, EnergyPlus::format("Reference Material=\"{}\" is too thin.", matHAMT->Name));
+                        ShowSevereError(state, std::format("{}Construction={}", RoutineName, constr.Name));
+                        ShowContinueError(state, std::format("Reference Material=\"{}\" is too thin.", matHAMT->Name));
                         ++errorCount;
                         break;
                     }
@@ -1049,7 +1050,7 @@ namespace HeatBalanceHAMTManager {
 
             for (int cellid = s_hbh->Extcell(sid), concell = 1; cellid <= s_hbh->Intcell(sid); ++cellid, ++concell) {
                 SetupOutputVariable(state,
-                                    EnergyPlus::format("HAMT Surface Temperature Cell {}", concell),
+                                    std::format("HAMT Surface Temperature Cell {}", concell),
                                     Constant::Units::C,
                                     s_hbh->cells(cellid).temp,
                                     OutputProcessor::TimeStepType::Zone,
@@ -1058,7 +1059,7 @@ namespace HeatBalanceHAMTManager {
             }
             for (int cellid = s_hbh->Extcell(sid), concell = 1; cellid <= s_hbh->Intcell(sid); ++cellid, ++concell) {
                 SetupOutputVariable(state,
-                                    EnergyPlus::format("HAMT Surface Water Content Cell {}", concell),
+                                    std::format("HAMT Surface Water Content Cell {}", concell),
                                     Constant::Units::kg_kg,
                                     s_hbh->cells(cellid).wreport,
                                     OutputProcessor::TimeStepType::Zone,
@@ -1067,7 +1068,7 @@ namespace HeatBalanceHAMTManager {
             }
             for (int cellid = s_hbh->Extcell(sid), concell = 1; cellid <= s_hbh->Intcell(sid); ++cellid, ++concell) {
                 SetupOutputVariable(state,
-                                    EnergyPlus::format("HAMT Surface Relative Humidity Cell {}", concell),
+                                    std::format("HAMT Surface Relative Humidity Cell {}", concell),
                                     Constant::Units::Perc,
                                     s_hbh->cells(cellid).rhp,
                                     OutputProcessor::TimeStepType::Zone,
@@ -1365,9 +1366,9 @@ namespace HeatBalanceHAMTManager {
                     if (!state.dataGlobal->WarmupFlag) {
                         ++s_hbh->qvpErrCount;
                         if (s_hbh->qvpErrCount < 16) {
-                            ShowWarningError(state,
-                                             EnergyPlus::format("HeatAndMoistureTransfer: Large Latent Heat for Surface {}",
-                                                                state.dataSurface->Surface(sid).Name));
+                            ShowWarningError(
+                                state,
+                                std::format("HeatAndMoistureTransfer: Large Latent Heat for Surface {}", state.dataSurface->Surface(sid).Name));
                         } else {
                             ShowRecurringWarningErrorAtEnd(state, "HeatAndMoistureTransfer: Large Latent Heat Errors ", s_hbh->qvpErrReport);
                         }
@@ -1510,7 +1511,7 @@ namespace HeatBalanceHAMTManager {
                     cell.rhp1 = (phiorsum + vporsum + (wcap * cell.rh) / s_hbh->deltat) / denominator;
                 } else {
                     ShowSevereError(state, "CalcHeatBalHAMT: denominator in calculating RH is zero.  Check material properties for accuracy.");
-                    ShowContinueError(state, EnergyPlus::format("...Problem occurs in Material=\"{}\".", s_mat->materials(cell.matid)->Name));
+                    ShowContinueError(state, std::format("...Problem occurs in Material=\"{}\".", s_mat->materials(cell.matid)->Name));
                     ShowFatalError(state, "Program terminates due to preceding condition.");
                 }
 

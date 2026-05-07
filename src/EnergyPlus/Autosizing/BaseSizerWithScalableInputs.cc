@@ -45,12 +45,15 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
+#include <string>
+
+// EnergyPlus Headers
 #include <EnergyPlus/Autosizing/BaseSizerWithFanHeatInputs.hh>
 #include <EnergyPlus/Autosizing/BaseSizerWithScalableInputs.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/Fans.hh>
-#include <string>
 
 namespace EnergyPlus {
 

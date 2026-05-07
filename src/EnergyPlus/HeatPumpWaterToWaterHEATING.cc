@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/string.functions.hh>
@@ -640,7 +641,7 @@ void GshpPeHeatingSpecs::calculate(EnergyPlusData &state, Real64 &MyLoad)
             ShowSevereError(state,
                             EnergyPlus::format("{}=\"{}\" Heating Source Side Pressure Less than the Design Minimum", ModuleCompName, this->Name));
             ShowContinueError(state,
-                              EnergyPlus::format("Source Side Pressure={:.2T} and user specified Design Minimum Pressure={:.2T}",
+                              EnergyPlus::format("Source Side Pressure={:.2f} and user specified Design Minimum Pressure={:.2f}",
                                                  SourceSidePressure,
                                                  this->LowPressCutoff));
             ShowFatalError(state, "Preceding Conditions cause termination.");
@@ -648,10 +649,9 @@ void GshpPeHeatingSpecs::calculate(EnergyPlusData &state, Real64 &MyLoad)
         if (LoadSidePressure > this->HighPressCutoff) {
             ShowSevereError(state,
                             EnergyPlus::format("{}=\"{}\" Heating Load Side Pressure greater than the Design Maximum", ModuleCompName, this->Name));
-            ShowContinueError(state,
-                              EnergyPlus::format("Load Side Pressure={:.2T} and user specified Design Maximum Pressure={:.2T}",
-                                                 LoadSidePressure,
-                                                 this->HighPressCutoff));
+            ShowContinueError(
+                state,
+                std::format("Load Side Pressure={:.2f} and user specified Design Maximum Pressure={:.2f}", LoadSidePressure, this->HighPressCutoff));
             ShowFatalError(state, "Preceding Conditions cause termination.");
         }
 
@@ -661,20 +661,18 @@ void GshpPeHeatingSpecs::calculate(EnergyPlusData &state, Real64 &MyLoad)
         Real64 DischargePr = LoadSidePressure + this->CompSucPressDrop;
         // check cutoff pressures
         if (SuctionPr < this->LowPressCutoff) {
-            ShowSevereError(state, EnergyPlus::format("{}=\"{}\" Heating Suction Pressure Less than the Design Minimum", ModuleCompName, this->Name));
-            ShowContinueError(state,
-                              EnergyPlus::format("Heating Suction Pressure={:.2T} and user specified Design Minimum Pressure={:.2T}",
-                                                 SuctionPr,
-                                                 this->LowPressCutoff));
+            ShowSevereError(state, std::format("{}=\"{}\" Heating Suction Pressure Less than the Design Minimum", ModuleCompName, this->Name));
+            ShowContinueError(
+                state,
+                std::format("Heating Suction Pressure={:.2f} and user specified Design Minimum Pressure={:.2f}", SuctionPr, this->LowPressCutoff));
             ShowFatalError(state, "Preceding Conditions cause termination.");
         }
         if (DischargePr > this->HighPressCutoff) {
-            ShowSevereError(state,
-                            EnergyPlus::format("{}=\"{}\" Heating Discharge Pressure greater than the Design Maximum", ModuleCompName, this->Name));
+            ShowSevereError(state, std::format("{}=\"{}\" Heating Discharge Pressure greater than the Design Maximum", ModuleCompName, this->Name));
             ShowContinueError(state,
-                              EnergyPlus::format("Heating Discharge Pressure={:.2T} and user specified Design Maximum Pressure={:.2T}",
-                                                 DischargePr,
-                                                 this->HighPressCutoff));
+                              std::format("Heating Discharge Pressure={:.2f} and user specified Design Maximum Pressure={:.2f}",
+                                          DischargePr,
+                                          this->HighPressCutoff));
             ShowFatalError(state, "Preceding Conditions cause termination.");
         }
 
@@ -736,18 +734,18 @@ void GshpPeHeatingSpecs::calculate(EnergyPlusData &state, Real64 &MyLoad)
         // convergence and iteration limit check
         if (std::abs((this->QLoad - initialQLoad) / (initialQLoad + SmallNum)) < HeatBalTol || IterationCount > IterationLimit) {
             if (IterationCount > IterationLimit) {
-                ShowWarningError(state, EnergyPlus::format("{} did not converge", ModuleCompName));
+                ShowWarningError(state, std::format("{} did not converge", ModuleCompName));
                 ShowContinueErrorTimeStamp(state, "");
-                ShowContinueError(state, EnergyPlus::format("Heatpump Name = {}", this->Name));
-                ShowContinueError(state,
-                                  EnergyPlus::format("Heat Imbalance (%)             = {:G}",
-                                                     std::abs(100.0 * (this->QLoad - initialQLoad) / (initialQLoad + SmallNum))));
-                ShowContinueError(state, EnergyPlus::format("Load-side heat transfer rate   = {:G}", this->QLoad));
-                ShowContinueError(state, EnergyPlus::format("Source-side heat transfer rate = {:G}", this->QSource));
-                ShowContinueError(state, EnergyPlus::format("Source-side mass flow rate     = {:G}", this->SourceSideWaterMassFlowRate));
-                ShowContinueError(state, EnergyPlus::format("Load-side mass flow rate       = {:G}", this->LoadSideWaterMassFlowRate));
-                ShowContinueError(state, EnergyPlus::format("Source-side inlet temperature  = {:G}", this->SourceSideWaterInletTemp));
-                ShowContinueError(state, EnergyPlus::format("Load-side inlet temperature    = {:G}", this->LoadSideWaterInletTemp));
+                ShowContinueError(state, std::format("Heatpump Name = {}", this->Name));
+                ShowContinueError(
+                    state,
+                    std::format("Heat Imbalance (%)             = {:G}", std::abs(100.0 * (this->QLoad - initialQLoad) / (initialQLoad + SmallNum))));
+                ShowContinueError(state, std::format("Load-side heat transfer rate   = {:G}", this->QLoad));
+                ShowContinueError(state, std::format("Source-side heat transfer rate = {:G}", this->QSource));
+                ShowContinueError(state, std::format("Source-side mass flow rate     = {:G}", this->SourceSideWaterMassFlowRate));
+                ShowContinueError(state, std::format("Load-side mass flow rate       = {:G}", this->LoadSideWaterMassFlowRate));
+                ShowContinueError(state, std::format("Source-side inlet temperature  = {:G}", this->SourceSideWaterInletTemp));
+                ShowContinueError(state, std::format("Load-side inlet temperature    = {:G}", this->LoadSideWaterInletTemp));
             }
             goto LOOPLoadEnth_exit;
 

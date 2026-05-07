@@ -46,11 +46,11 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <format>
 #include <utility>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/environment.hh>
-#include <ObjexxFCL/string.functions.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
@@ -193,7 +193,7 @@ namespace DataSystemVariables {
         }
 
         // If we get here, we didn't find the file
-        ShowSevereError(state, EnergyPlus::format("{}\"{}\" not found.", contextString, originalInputFilePath));
+        ShowSevereError(state, EnergyPlus::format("{}\"{}\" not found.", contextString, originalInputFilePath.string()));
         ShowContinueError(state, "  Paths searched:");
         for (auto &path : pathsChecked) {
             ShowContinueError(state, EnergyPlus::format("    {}: \"{}\"", path.second, path.first));

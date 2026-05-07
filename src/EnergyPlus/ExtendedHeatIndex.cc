@@ -59,8 +59,10 @@
 // }
 //
 
+// C++ Headers
 #include <cmath>
 
+// EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/ExtendedHeatIndex.hh>
 #include <EnergyPlus/General.hh>

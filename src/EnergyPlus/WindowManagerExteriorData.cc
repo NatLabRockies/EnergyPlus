@@ -45,8 +45,13 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
 #include <cassert>
 
+// Third Party Headers
+#include <WCEMultiLayerOptics.hpp>
+
+// EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataBSDFWindow.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
@@ -54,8 +59,6 @@
 #include <EnergyPlus/WindowComplexManager.hh>
 #include <EnergyPlus/WindowManager.hh>
 #include <EnergyPlus/WindowManagerExteriorData.hh>
-
-#include <WCEMultiLayerOptics.hpp>
 
 namespace EnergyPlus {
 

@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 #include <memory>
 
 // ObjexxFCL Headers
@@ -372,7 +373,7 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
             ShowSevereError(state,
                             EnergyPlus::format("GetPipesHeatTransfer: invalid {} of {:.4R}", s_ipsc->cNumericFieldNames(2), s_ipsc->rNumericArgs(2)));
             ShowContinueError(state, EnergyPlus::format("{} must be > 0.0", s_ipsc->cNumericFieldNames(2)));
-            ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
         }
 
@@ -418,8 +419,8 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
         state.dataPipeHT->PipeHT(Item).ConstructionNum = Util::FindItemInList(s_ipsc->cAlphaArgs(2), state.dataConstruction->Construct);
 
         if (state.dataPipeHT->PipeHT(Item).ConstructionNum == 0) {
-            ShowSevereError(state, EnergyPlus::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2)));
-            ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
         }
 
@@ -435,8 +436,8 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
                                                                         Node::CompFluidStream::Primary,
                                                                         Node::ObjectIsNotParent);
         if (state.dataPipeHT->PipeHT(Item).InletNodeNum == 0) {
-            ShowSevereError(state, EnergyPlus::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3)));
-            ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
         }
 
@@ -452,8 +453,8 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
                                                                          Node::CompFluidStream::Primary,
                                                                          Node::ObjectIsNotParent);
         if (state.dataPipeHT->PipeHT(Item).OutletNodeNum == 0) {
-            ShowSevereError(state, EnergyPlus::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4)));
-            ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
         }
 
@@ -475,15 +476,15 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
                                                                           Node::ObjectIsNotParent);
         if (!s_ipsc->lAlphaFieldBlanks(5)) {
             if (!CheckOutAirNodeNumber(state, state.dataPipeHT->PipeHT(Item).EnvrAirNodeNum)) {
-                ShowSevereError(state, EnergyPlus::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(5), s_ipsc->cAlphaArgs(5)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+                ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(5), s_ipsc->cAlphaArgs(5)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
                 ShowContinueError(state, "Outdoor Air Node not on OutdoorAir:NodeList or OutdoorAir:Node");
                 ErrorsFound = true;
             }
         } else {
-            ShowSevereError(state, EnergyPlus::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(5), s_ipsc->cAlphaArgs(5)));
-            ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-            ShowContinueError(state, EnergyPlus::format("An {} must be used ", s_ipsc->cAlphaFieldNames(5)));
+            ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(5), s_ipsc->cAlphaArgs(5)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowContinueError(state, std::format("An {} must be used ", s_ipsc->cAlphaFieldNames(5)));
             ErrorsFound = true;
         }
 
@@ -491,16 +492,16 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
         state.dataPipeHT->PipeHT(Item).PipeID = s_ipsc->rNumericArgs(1);
         if (s_ipsc->rNumericArgs(1) <= 0.0) { // not really necessary because idd field has "minimum> 0"
             ShowSevereError(state, EnergyPlus::format("Invalid {} of {:.4R}", s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1)));
-            ShowContinueError(state, EnergyPlus::format("{} must be > 0.0", s_ipsc->cNumericFieldNames(1)));
-            ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowContinueError(state, std::format("{} must be > 0.0", s_ipsc->cNumericFieldNames(1)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
         }
 
         state.dataPipeHT->PipeHT(Item).Length = s_ipsc->rNumericArgs(2);
         if (s_ipsc->rNumericArgs(2) <= 0.0) { // not really necessary because idd field has "minimum> 0"
             ShowSevereError(state, EnergyPlus::format("Invalid {} of {:.4R}", s_ipsc->cNumericFieldNames(2), s_ipsc->rNumericArgs(2)));
-            ShowContinueError(state, EnergyPlus::format("{} must be > 0.0", s_ipsc->cNumericFieldNames(2)));
-            ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowContinueError(state, std::format("{} must be > 0.0", s_ipsc->cNumericFieldNames(2)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
         }
 
@@ -548,8 +549,8 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
         state.dataPipeHT->PipeHT(Item).ConstructionNum = Util::FindItemInList(s_ipsc->cAlphaArgs(2), state.dataConstruction->Construct);
 
         if (state.dataPipeHT->PipeHT(Item).ConstructionNum == 0) {
-            ShowSevereError(state, EnergyPlus::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2)));
-            ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
         }
 
@@ -565,8 +566,8 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
                                                                         Node::CompFluidStream::Primary,
                                                                         Node::ObjectIsNotParent);
         if (state.dataPipeHT->PipeHT(Item).InletNodeNum == 0) {
-            ShowSevereError(state, EnergyPlus::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3)));
-            ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
         }
 
@@ -582,8 +583,8 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
                                                                          Node::CompFluidStream::Primary,
                                                                          Node::ObjectIsNotParent);
         if (state.dataPipeHT->PipeHT(Item).OutletNodeNum == 0) {
-            ShowSevereError(state, EnergyPlus::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4)));
-            ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
         }
 
@@ -598,8 +599,8 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
         } else if (Util::SameString(s_ipsc->cAlphaArgs(5), "NOSUN")) {
             state.dataPipeHT->PipeHT(Item).SolarExposed = false;
         } else {
-            ShowSevereError(state, EnergyPlus::format("GetPipesHeatTransfer: invalid key for sun exposure flag for {}", s_ipsc->cAlphaArgs(1)));
-            ShowContinueError(state, EnergyPlus::format("Key should be either SunExposed or NoSun.  Entered Key: {}", s_ipsc->cAlphaArgs(5)));
+            ShowSevereError(state, std::format("GetPipesHeatTransfer: invalid key for sun exposure flag for {}", s_ipsc->cAlphaArgs(1)));
+            ShowContinueError(state, std::format("Key should be either SunExposed or NoSun.  Entered Key: {}", s_ipsc->cAlphaArgs(5)));
             ErrorsFound = true;
         }
 
@@ -607,16 +608,16 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
         state.dataPipeHT->PipeHT(Item).PipeID = s_ipsc->rNumericArgs(1);
         if (s_ipsc->rNumericArgs(1) <= 0.0) { // not really necessary because idd field has "minimum> 0"
             ShowSevereError(state, EnergyPlus::format("Invalid {} of {:.4R}", s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1)));
-            ShowContinueError(state, EnergyPlus::format("{} must be > 0.0", s_ipsc->cNumericFieldNames(1)));
-            ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowContinueError(state, std::format("{} must be > 0.0", s_ipsc->cNumericFieldNames(1)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
         }
 
         state.dataPipeHT->PipeHT(Item).Length = s_ipsc->rNumericArgs(2);
         if (s_ipsc->rNumericArgs(2) <= 0.0) { // not really necessary because idd field has "minimum> 0"
             ShowSevereError(state, EnergyPlus::format("Invalid {} of {:.4R}", s_ipsc->cNumericFieldNames(2), s_ipsc->rNumericArgs(2)));
-            ShowContinueError(state, EnergyPlus::format("{} must be > 0.0", s_ipsc->cNumericFieldNames(2)));
-            ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowContinueError(state, std::format("{} must be > 0.0", s_ipsc->cNumericFieldNames(2)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
         }
 
@@ -881,9 +882,9 @@ void PipeHTData::ValidatePipeConstruction(EnergyPlusData &state,
         this->InsulationOD = this->PipeOD + 2.0 * this->InsulationThickness;
 
     } else {
-        ShowSevereError(state,
-                        EnergyPlus::format(
-                            "{}: invalid {}=\"{}\", too many layers=[{}], only 1 or 2 allowed.", PipeType, FieldName, ConstructionName, TotalLayers));
+        ShowSevereError(
+            state,
+            std::format("{}: invalid {}=\"{}\", too many layers=[{}], only 1 or 2 allowed.", PipeType, FieldName, ConstructionName, TotalLayers));
         ErrorsFound = true;
     }
 }
@@ -1358,7 +1359,7 @@ void PipeHTData::CalcBuriedPipeSoil(EnergyPlusData &state) // Current Simulation
 
     for (IterationIndex = 1; IterationIndex <= MaxIterations; ++IterationIndex) {
         if (IterationIndex == MaxIterations) {
-            ShowWarningError(state, EnergyPlus::format("BuriedPipeHeatTransfer: Large number of iterations detected in object: {}", this->Name));
+            ShowWarningError(state, std::format("BuriedPipeHeatTransfer: Large number of iterations detected in object: {}", this->Name));
         }
 
         // Store computed values in T_O array
@@ -1862,8 +1863,7 @@ Real64 PipeHTData::OutsidePipeHeatTransCoef(EnergyPlusData &state)
         AirVisc = DynVisc[NumOfPropDivisions - 1];
         if (AirTemp > Temperature[NumOfPropDivisions - 1]) {
             ShowWarningError(
-                state,
-                EnergyPlus::format("Heat Transfer Pipe = {}Viscosity out of range, air temperature too high, setting to upper limit.", this->Name));
+                state, std::format("Heat Transfer Pipe = {}Viscosity out of range, air temperature too high, setting to upper limit.", this->Name));
         }
     }
 
@@ -1886,8 +1886,8 @@ Real64 PipeHTData::OutsidePipeHeatTransCoef(EnergyPlusData &state)
         Coef = CCoef[NumOfParamDivisions - 1];
         rExp = mExp[NumOfParamDivisions - 1];
         if (ReD > UpperBound[NumOfParamDivisions - 1]) {
-            ShowWarningError(
-                state, EnergyPlus::format("Heat Transfer Pipe = {}Reynolds Number out of range, setting coefficients to upper limit.", this->Name));
+            ShowWarningError(state,
+                             std::format("Heat Transfer Pipe = {}Reynolds Number out of range, setting coefficients to upper limit.", this->Name));
         }
     }
 

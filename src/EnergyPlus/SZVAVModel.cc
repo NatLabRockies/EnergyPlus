@@ -535,7 +535,7 @@ namespace SZVAVModel {
                         ShowContinueErrorTimeStamp(
                             state,
                             EnergyPlus::format(
-                                "Sensible load to be met = {:.2T} (watts), sensible output = {:.2T} (watts), and the simulation continues.",
+                                "Sensible load to be met = {:.2f} (watts), sensible output = {:.2f} (watts), and the simulation continues.",
                                 ZoneLoad,
                                 TempSensOutput));
                     }
@@ -553,7 +553,7 @@ namespace SZVAVModel {
                                        EnergyPlus::format("{}Coil control failed for {}:{}", MessagePrefix, SZVAVModel.UnitType, SZVAVModel.Name));
                     ShowContinueError(state, "  sensible part-load ratio determined to be outside the range of 0-1.");
                     ShowContinueErrorTimeStamp(
-                        state, EnergyPlus::format("Sensible load to be met = {:.2T} (watts), and the simulation continues.", ZoneLoad));
+                        state, EnergyPlus::format("Sensible load to be met = {:.2f} (watts), and the simulation continues.", ZoneLoad));
                 }
                 ShowRecurringWarningErrorAtEnd(state,
                                                SZVAVModel.UnitType + " \"" + SZVAVModel.Name +
@@ -1064,7 +1064,7 @@ namespace SZVAVModel {
                         ShowContinueErrorTimeStamp(
                             state,
                             EnergyPlus::format(
-                                "Sensible load to be met = {:.2T} (watts), sensible output = {:.2T} (watts), and the simulation continues.",
+                                "Sensible load to be met = {:.2f} (watts), sensible output = {:.2f} (watts), and the simulation continues.",
                                 ZoneLoad,
                                 TempSensOutput));
                     }
@@ -1082,7 +1082,7 @@ namespace SZVAVModel {
                                        EnergyPlus::format("{}Coil control failed for {}:{}", MessagePrefix, SZVAVModel.UnitType, SZVAVModel.Name));
                     ShowContinueError(state, "  sensible part-load ratio determined to be outside the range of 0-1.");
                     ShowContinueErrorTimeStamp(
-                        state, EnergyPlus::format("Sensible load to be met = {:.2T} (watts), and the simulation continues.", ZoneLoad));
+                        state, EnergyPlus::format("Sensible load to be met = {:.2f} (watts), and the simulation continues.", ZoneLoad));
                 }
                 ShowRecurringWarningErrorAtEnd(state,
                                                SZVAVModel.UnitType + " \"" + SZVAVModel.Name +

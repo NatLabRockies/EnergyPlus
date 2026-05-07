@@ -45,6 +45,10 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
+#include <format>
+
+// EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/DataSystemVariables.hh>
@@ -367,7 +371,7 @@ void GLHEBase::updateGHX(EnergyPlusData &state)
         ShowContinueError(state, "This can be encountered in cases where the GLHE mass flow rate is either significantly");
         ShowContinueError(state, " lower than the design value, or cases where the mass flow rate rapidly changes.");
         ShowContinueError(
-            state, EnergyPlus::format("GLHE Current Flow Rate={:.3T}; GLHE Design Flow Rate={:.3T}", this->massFlowRate, this->designMassFlow));
+            state, EnergyPlus::format("GLHE Current Flow Rate={:.3f}; GLHE Design Flow Rate={:.3f}", this->massFlowRate, this->designMassFlow));
         ++this->numErrorCalls;
     }
 }

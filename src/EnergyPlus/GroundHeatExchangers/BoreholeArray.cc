@@ -45,6 +45,7 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/GroundHeatExchangers/BoreholeArray.hh>
 #include <EnergyPlus/GroundHeatExchangers/State.hh>
@@ -78,7 +79,7 @@ std::shared_ptr<GLHEVertArray> GLHEVertArray::GetVertArray(EnergyPlusData &state
         return *thisObj;
     }
 
-    ShowSevereError(state, fmt::format("Object=GroundHeatExchanger:Vertical:Array, Name={} - not found.", objectName));
+    ShowSevereError(state, EnergyPlus::format("Object=GroundHeatExchanger:Vertical:Array, Name={} - not found.", objectName));
     ShowFatalError(state, "Preceding errors cause program termination");
 }
 

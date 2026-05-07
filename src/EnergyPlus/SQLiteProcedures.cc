@@ -45,7 +45,7 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-// C++ headers
+// C++ Headers
 #include <ios>
 #include <memory>
 #include <sstream>
@@ -1246,12 +1246,12 @@ void SQLite::initializeTabularDataTable()
 
     sqliteExecuteCommand(sql);
 
-    sqliteExecuteCommand(format("INSERT INTO StringTypes VALUES({},'ReportName');", ReportNameId));
-    sqliteExecuteCommand(format("INSERT INTO StringTypes VALUES({},'ReportForString');", ReportForStringId));
-    sqliteExecuteCommand(format("INSERT INTO StringTypes VALUES({},'TableName');", TableNameId));
-    sqliteExecuteCommand(format("INSERT INTO StringTypes VALUES({},'RowName');", RowNameId));
-    sqliteExecuteCommand(format("INSERT INTO StringTypes VALUES({},'ColumnName');", ColumnNameId));
-    sqliteExecuteCommand(format("INSERT INTO StringTypes VALUES({},'Units');", UnitsId));
+    sqliteExecuteCommand(EnergyPlus::format("INSERT INTO StringTypes VALUES({},'ReportName');", ReportNameId));
+    sqliteExecuteCommand(EnergyPlus::format("INSERT INTO StringTypes VALUES({},'ReportForString');", ReportForStringId));
+    sqliteExecuteCommand(EnergyPlus::format("INSERT INTO StringTypes VALUES({},'TableName');", TableNameId));
+    sqliteExecuteCommand(EnergyPlus::format("INSERT INTO StringTypes VALUES({},'RowName');", RowNameId));
+    sqliteExecuteCommand(EnergyPlus::format("INSERT INTO StringTypes VALUES({},'ColumnName');", ColumnNameId));
+    sqliteExecuteCommand(EnergyPlus::format("INSERT INTO StringTypes VALUES({},'Units');", UnitsId));
 
     constexpr std::string_view sql2 = "CREATE TABLE Strings ( "
                                       "StringIndex INTEGER PRIMARY KEY, "

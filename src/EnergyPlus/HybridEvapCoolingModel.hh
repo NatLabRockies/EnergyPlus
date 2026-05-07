@@ -91,6 +91,19 @@ namespace HybridEvapCoolingModel {
         Num
     };
 
+    enum class ObjectiveFunctionType
+    {
+        Invalid = -1,
+        ElectricityUse,
+        SecondFuelUse,
+        ThirdFuelUse,
+        WaterUse,
+        Num
+    };
+
+    constexpr std::array<std::string_view, (int)ObjectiveFunctionType::Num> objectiveFunctionNamesUC = {
+        "ELECTRICITY USE", "SECOND FUEL USE", "THIRD FUEL USE", "WATER USE"};
+
     class CModeSolutionSpace
     {
     public:
@@ -244,10 +257,11 @@ namespace HybridEvapCoolingModel {
         Real64 FanHeatInAirFrac;                         // the fraction of fan heat in air stream to calculate fan heat gain if not in lookup tables
         Real64 ScalingFactor;                            // taken from IDF N3, linear scaling factor.
         Real64 ScaledSystemMaximumSupplyAirMassFlowRate; // the scaled system max supply mass flow rate in m3/s.
-        Real64 ScaledSystemMaximumSupplyAirVolumeFlowRate;     // the scaled system max supply volume flow rate in m3/s.
-        Constant::eFuel firstFuel = Constant::eFuel::Invalid;  // First fuel type, currently electricity is only option
-        Constant::eFuel secondFuel = Constant::eFuel::Invalid; // Second fuel type
-        Constant::eFuel thirdFuel = Constant::eFuel::Invalid;  // Third fuel type
+        Real64 ScaledSystemMaximumSupplyAirVolumeFlowRate;                               // the scaled system max supply volume flow rate in m3/s.
+        Constant::eFuel firstFuel = Constant::eFuel::Invalid;                            // First fuel type, currently electricity is only option
+        Constant::eFuel secondFuel = Constant::eFuel::Invalid;                           // Second fuel type
+        Constant::eFuel thirdFuel = Constant::eFuel::Invalid;                            // Third fuel type
+        ObjectiveFunctionType ObjectiveFunction = ObjectiveFunctionType::ElectricityUse; // Objective function to minimize
 
         int UnitOn;                          // feels like it should be a bool but its an output and I couldn't get it to work as a bool
         Real64 UnitTotalCoolingRate;         // unit output to zone, total cooling rate [W]

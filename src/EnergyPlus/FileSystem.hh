@@ -48,13 +48,7 @@
 #ifndef FileSystem_hh_INCLUDED
 #define FileSystem_hh_INCLUDED
 
-#include <algorithm>
-#include <fmt/format.h>
-#include <fmt/os.h>
-#include <fmt/ostream.h>
-#include <fmt/ranges.h>
-#include <nlohmann/json.hpp>
-#include <string>
+// C++ Headers
 #ifndef __cppcheck__
 #    if __has_include(<filesystem>)
 #        include <filesystem>
@@ -67,19 +61,18 @@ namespace fs = std::experimental::filesystem;
 #        error "no filesystem support"
 #    endif
 #endif
+#include <format>
+#include <string>
 
+// Third Party Headers
+// #include <fmt/format.h>
+#include <fmt/os.h>
+#include <fmt/ostream.h>
+#include <fmt/ranges.h>
+#include <nlohmann/json.hpp>
+
+// EnergyPlus Headers
 #include <EnergyPlus/EnergyPlus.hh>
-
-// If we want to allow this kind of stuff
-// fs::path p = "folder/eplus";
-// std::string suffixStr = "out.audit";
-//
-// fs::path filePath = p + suffixStr; => folder/eplusout.audit (would throw)
-// std::string message = "Cannot find " + p + "." => would throw now, need p.string() instead
-
-// inline fs::path operator+(fs::path const &left, fs::path const &right) {
-//    return fs::path(left)+=right;
-// }
 
 namespace EnergyPlus {
 namespace FileSystem {
@@ -244,7 +237,7 @@ namespace FileSystem {
             auto close_file = [](FILE *f) { fclose(f); };
             auto holder = std::unique_ptr<FILE, decltype(close_file)>(fopen(path, "wb"), close_file);
             if (!holder) {
-                throw FatalError(fmt::format("Could not open file: {}", path));
+                throw FatalError(fmt::format("Could not open file: {}", static_cast<std::string>(path)));
             }
 
             auto f = holder.get();

@@ -650,6 +650,12 @@ void GetInputZoneHybridUnitaryAirConditioners(EnergyPlusData &state, bool &Error
             }
 
             // A18, \field Objective Function Minimizes
+            if (!lAlphaBlanks(18) && (hybridUnitaryAC.ObjectiveFunction = static_cast<HybridEvapCoolingModel::ObjectiveFunctionType>(
+                                          getEnumValue(HybridEvapCoolingModel::objectiveFunctionNamesUC, Util::makeUPPER(Alphas(18))))) ==
+                                         HybridEvapCoolingModel::ObjectiveFunctionType::Invalid) {
+                ShowSevereInvalidKey(state, eoh, cAlphaFields(18), Alphas(18));
+                ErrorsFound = true;
+            }
 
             // A19, \ OA requirement pointer
             if (!lAlphaBlanks(19)) {

@@ -47,15 +47,17 @@
 
 // C++ Headers
 #include <algorithm>
-
+#include <format>
 #include <string>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
 #include <ObjexxFCL/Fmath.hh>
 
-// EnergyPlus Headers
+// Local Headers
 #include <AirflowNetwork/Solver.hpp>
+
+// EnergyPlus Headers
 #include <EnergyPlus/Coils/CoilCoolingDX.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataAirLoop.hh>
@@ -2971,10 +2973,9 @@ void SetHeatToReturnAirFlag(EnergyPlusData &state)
                     auto const &thisSpace = state.dataHeatBal->space(spaceNum);
                     for (int SurfNum = thisSpace.HTSurfaceFirst; SurfNum <= thisSpace.HTSurfaceLast; ++SurfNum) {
                         if (state.dataSurface->SurfWinAirflowDestination(SurfNum) == DataSurfaces::WindowAirFlowDestination::Return) {
-                            ShowWarningError(
-                                state,
-                                EnergyPlus::format("For zone={} return air heat gain from air flow windows will be applied to the zone air.",
-                                                   thisZone.Name));
+                            ShowWarningError(state,
+                                             std::format("For zone={} return air heat gain from air flow windows will be applied to the zone air.",
+                                                         thisZone.Name));
                             ShowContinueError(state, "  This zone has no return air or is served by an on/off HVAC system.");
                         }
                     }
@@ -3056,8 +3057,8 @@ void CheckAirLoopFlowBalance(EnergyPlusData &state)
                 Real64 unbalancedExhaustDelta = thisAirLoopFlow.SupFlow - thisAirLoopFlow.OAFlow - thisAirLoopFlow.SysRetFlow;
                 if (unbalancedExhaustDelta > HVAC::SmallMassFlow) {
                     ShowSevereError(state,
-                                    EnergyPlus::format("CheckAirLoopFlowBalance: AirLoopHVAC {} is unbalanced. Supply is > return plus outdoor air.",
-                                                       state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Name));
+                                    std::format("CheckAirLoopFlowBalance: AirLoopHVAC {} is unbalanced. Supply is > return plus outdoor air.",
+                                                state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Name));
                     ShowContinueErrorTimeStamp(state, "");
                     ShowContinueError(state,
                                       EnergyPlus::format("  Flows [m3/s at standard density]: Supply={:.6R}  Return={:.6R}  Outdoor Air={:.6R}",
@@ -3087,30 +3088,28 @@ void ConvergenceErrors(EnergyPlusData &state,
     const auto &arrayRef = HVACNotConverged;
     if (std::any_of(std::begin(arrayRef), std::end(arrayRef), [](bool i) { return i; })) {
 
-        ShowContinueError(state,
-                          EnergyPlus::format("Air System Named = {} did not converge for {}",
-                                             state.dataAirLoop->AirToZoneNodeInfo(AirSysNum).AirLoopName,
-                                             CaseName));
+        ShowContinueError(
+            state,
+            std::format("Air System Named = {} did not converge for {}", state.dataAirLoop->AirToZoneNodeInfo(AirSysNum).AirLoopName, CaseName));
         ShowContinueError(state, "Check values should be zero. Most Recent values listed first.");
         std::string HistoryTrace;
         for (int StackDepth = 0; StackDepth < DataConvergParams::ConvergLogStackDepth; ++StackDepth) {
             HistoryTrace += EnergyPlus::format("{:.6R},", DemandToSupply[StackDepth]);
         }
-        ShowContinueError(state, EnergyPlus::format("Demand-to-Supply interface {} check value iteration history trace: {}", CaseName, HistoryTrace));
+        ShowContinueError(state, std::format("Demand-to-Supply interface {} check value iteration history trace: {}", CaseName, HistoryTrace));
         HistoryTrace = "";
         for (int StackDepth = 0; StackDepth < DataConvergParams::ConvergLogStackDepth; ++StackDepth) {
             HistoryTrace += EnergyPlus::format("{:.6R},", SupplyDeck1ToDemand[StackDepth]);
         }
-        ShowContinueError(state,
-                          EnergyPlus::format("Supply-to-demand interface deck 1 {} check value iteration history trace: {}", CaseName, HistoryTrace));
+        ShowContinueError(state, std::format("Supply-to-demand interface deck 1 {} check value iteration history trace: {}", CaseName, HistoryTrace));
 
         if (state.dataAirLoop->AirToZoneNodeInfo(AirSysNum).NumSupplyNodes >= 2) {
             HistoryTrace = "";
             for (int StackDepth = 0; StackDepth < DataConvergParams::ConvergLogStackDepth; ++StackDepth) {
                 HistoryTrace += EnergyPlus::format("{:.6R},", SupplyDeck2ToDemand[StackDepth]);
             }
-            ShowContinueError(
-                state, EnergyPlus::format("Supply-to-demand interface deck 2 {} check value iteration history trace: {}", CaseName, HistoryTrace));
+            ShowContinueError(state,
+                              std::format("Supply-to-demand interface deck 2 {} check value iteration history trace: {}", CaseName, HistoryTrace));
         }
     } // energy not converged
 }

@@ -49,6 +49,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <format>
 #include <numeric>
 #include <string>
 #include <unordered_map>
@@ -197,10 +198,10 @@ void InitIntConvCoeff(EnergyPlusData &state,
                 }
                 ShowSevereError(
                     state,
-                    EnergyPlus::format("InitInteriorConvectionCoeffs: Inside Convection=CeilingDiffuser, but no system inlet node defined, Zone={}",
-                                       zone.Name));
-                ShowContinueError(
-                    state, EnergyPlus::format("Defaulting inside convection to TARP. Check ZoneHVAC:EquipmentConnections for Zone={}", zone.Name));
+                    std::format("InitInteriorConvectionCoeffs: Inside Convection=CeilingDiffuser, but no system inlet node defined, Zone={}",
+                                zone.Name));
+                ShowContinueError(state,
+                                  std::format("Defaulting inside convection to TARP. Check ZoneHVAC:EquipmentConnections for Zone={}", zone.Name));
                 zone.IntConvAlgo = HcInt::ASHRAETARP;
             }
             // insert one-time setup for adaptive inside face
@@ -642,8 +643,7 @@ void InitExtConvCoeff(EnergyPlusData &state,
     } break;
 
     default: {
-        ShowFatalError(state,
-                       EnergyPlus::format("InitExtConvection Coefficients: invalid parameter -- outside convection type, Surface={}", surface.Name));
+        ShowFatalError(state, std::format("InitExtConvection Coefficients: invalid parameter -- outside convection type, Surface={}", surface.Name));
     } break;
     }
 
@@ -965,14 +965,14 @@ void GetUserConvCoeffs(EnergyPlusData &state)
             ++state.dataSurface->TotUserExtConvModels;
         }
         if (NumAlphas >= 2 && ipsc->lAlphaFieldBlanks(2)) {
-            ShowWarningError(
-                state, EnergyPlus::format("GetUserConvectionCoefficients: {}, for {}={}", CurrentModuleObject, ipsc->cAlphaFieldNames(1), Alphas(1)));
-            ShowContinueError(state, EnergyPlus::format("{} is blank and rest of fields will not be processed.", ipsc->cAlphaFieldNames(2)));
+            ShowWarningError(state,
+                             std::format("GetUserConvectionCoefficients: {}, for {}={}", CurrentModuleObject, ipsc->cAlphaFieldNames(1), Alphas(1)));
+            ShowContinueError(state, std::format("{} is blank and rest of fields will not be processed.", ipsc->cAlphaFieldNames(2)));
         }
         if (NumAlphas >= 6 && ipsc->lAlphaFieldBlanks(6)) {
-            ShowWarningError(
-                state, EnergyPlus::format("GetUserConvectionCoefficients: {}, for {}={}", CurrentModuleObject, ipsc->cAlphaFieldNames(1), Alphas(1)));
-            ShowContinueError(state, EnergyPlus::format("{} is blank and rest of fields will not be processed.", ipsc->cAlphaFieldNames(6)));
+            ShowWarningError(state,
+                             std::format("GetUserConvectionCoefficients: {}, for {}={}", CurrentModuleObject, ipsc->cAlphaFieldNames(1), Alphas(1)));
+            ShowContinueError(state, std::format("{} is blank and rest of fields will not be processed.", ipsc->cAlphaFieldNames(6)));
         }
     }
     CurrentModuleObject = "SurfaceProperty:ConvectionCoefficients";
@@ -1002,14 +1002,14 @@ void GetUserConvCoeffs(EnergyPlusData &state)
             ++state.dataSurface->TotUserExtConvModels;
         }
         if (NumAlphas >= 2 && ipsc->lAlphaFieldBlanks(2)) {
-            ShowWarningError(
-                state, EnergyPlus::format("GetUserConvectionCoefficients: {}, for {}={}", CurrentModuleObject, ipsc->cAlphaFieldNames(1), Alphas(1)));
-            ShowContinueError(state, EnergyPlus::format("{} is blank and rest of fields will not be processed.", ipsc->cAlphaFieldNames(2)));
+            ShowWarningError(state,
+                             std::format("GetUserConvectionCoefficients: {}, for {}={}", CurrentModuleObject, ipsc->cAlphaFieldNames(1), Alphas(1)));
+            ShowContinueError(state, std::format("{} is blank and rest of fields will not be processed.", ipsc->cAlphaFieldNames(2)));
         }
         if (NumAlphas >= 6 && ipsc->lAlphaFieldBlanks(6)) {
-            ShowWarningError(
-                state, EnergyPlus::format("GetUserConvectionCoefficients: {}, for {}={}", CurrentModuleObject, ipsc->cAlphaFieldNames(1), Alphas(1)));
-            ShowContinueError(state, EnergyPlus::format("{} is blank and rest of fields will not be processed.", ipsc->cAlphaFieldNames(6)));
+            ShowWarningError(state,
+                             std::format("GetUserConvectionCoefficients: {}, for {}={}", CurrentModuleObject, ipsc->cAlphaFieldNames(1), Alphas(1)));
+            ShowContinueError(state, std::format("{} is blank and rest of fields will not be processed.", ipsc->cAlphaFieldNames(6)));
         }
     }
 
@@ -1055,11 +1055,10 @@ void GetUserConvCoeffs(EnergyPlusData &state)
                 if (Surface(surfNum).OSCPtr > 0) {
                     ShowSevereError(
                         state,
-                        EnergyPlus::format(
-                            "GetUserSuppliedConvectionCoefficients: {}, OUTSIDE {} cannot be specified for OtherSideCoefficient Surface={}",
-                            CurrentModuleObject,
-                            CurrentModuleObject,
-                            Alphas(1)));
+                        std::format("GetUserSuppliedConvectionCoefficients: {}, OUTSIDE {} cannot be specified for OtherSideCoefficient Surface={}",
+                                    CurrentModuleObject,
+                                    CurrentModuleObject,
+                                    Alphas(1)));
                     ErrorsFound = true;
                 }
 
@@ -1081,7 +1080,7 @@ void GetUserConvCoeffs(EnergyPlusData &state)
                     userExtConvModel.SurfaceName = Alphas(1);
                     userExtConvModel.WhichSurface = surfNum;
                     if (Numbers(NumField) < state.dataHeatBal->LowHConvLimit || Numbers(NumField) > state.dataHeatBal->HighHConvLimit) {
-                        ShowSevereError(state, EnergyPlus::format("{}{}=\"{}, out of range value", RoutineName, CurrentModuleObject, Alphas(1)));
+                        ShowSevereError(state, std::format("{}{}=\"{}, out of range value", RoutineName, CurrentModuleObject, Alphas(1)));
                         ShowContinueError(state,
                                           EnergyPlus::format("{}={}, {}=[{:.5R}].",
                                                              ipsc->cAlphaFieldNames(Ptr),
@@ -1098,12 +1097,12 @@ void GetUserConvCoeffs(EnergyPlusData &state)
                     userExtConvModel.overrideType = OverrideType::Value;
                     userExtConvModel.OverrideValue = Numbers(NumField);
                     if (!ipsc->lAlphaFieldBlanks(Ptr + 2)) {
-                        ShowWarningError(state, EnergyPlus::format("{}{}=\"{}, duplicate value", RoutineName, CurrentModuleObject, Alphas(1)));
+                        ShowWarningError(state, std::format("{}{}=\"{}, duplicate value", RoutineName, CurrentModuleObject, Alphas(1)));
                         ShowContinueError(state,
-                                          EnergyPlus::format("Since VALUE is used for \"{}\", {}={} is ignored.",
-                                                             ipsc->cAlphaFieldNames(FieldNo + 2),
-                                                             ipsc->cAlphaFieldNames(Ptr + 2),
-                                                             Alphas(Ptr + 2)));
+                                          std::format("Since VALUE is used for \"{}\", {}={} is ignored.",
+                                                      ipsc->cAlphaFieldNames(FieldNo + 2),
+                                                      ipsc->cAlphaFieldNames(Ptr + 2),
+                                                      Alphas(Ptr + 2)));
                     }
                     ApplyExtConvValue(state, surfNum, hcExt, state.dataSurface->TotUserExtConvModels);
                 } break;
@@ -1153,8 +1152,8 @@ void GetUserConvCoeffs(EnergyPlusData &state)
                 case HcExt::ASHRAETARP:
                 case HcExt::BLASTHcOutside:
                 case HcExt::None: {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}, check input", RoutineName, CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state, EnergyPlus::format("Check Input Entered :{}", Alphas(Ptr + 1)));
+                    ShowSevereError(state, std::format("{}{}=\"{}, check input", RoutineName, CurrentModuleObject, Alphas(1)));
+                    ShowContinueError(state, std::format("Check Input Entered :{}", Alphas(Ptr + 1)));
                     ErrorsFound = true;
                 } break;
 
@@ -1173,7 +1172,7 @@ void GetUserConvCoeffs(EnergyPlusData &state)
             } else if (Alphas(Ptr) == "INSIDE") {
 
                 if (state.dataSurface->surfIntConv(surfNum).userModelNum != 0) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}, duplicate (inside)", RoutineName, CurrentModuleObject, Alphas(1)));
+                    ShowSevereError(state, std::format("{}{}=\"{}, duplicate (inside)", RoutineName, CurrentModuleObject, Alphas(1)));
                     ShowContinueError(state, "Duplicate (Inside) assignment attempt.");
                     ErrorsFound = true;
                     continue;
@@ -1186,20 +1185,20 @@ void GetUserConvCoeffs(EnergyPlusData &state)
                 case HcInt::UserValue:
                 case HcInt::UserSchedule:
                 case HcInt::SetByZone: {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}, invalid value", RoutineName, CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state, EnergyPlus::format("Invalid Value Entered, for {}={}", ipsc->cAlphaFieldNames(Ptr), Alphas(Ptr)));
-                    ShowContinueError(state, EnergyPlus::format("invalid value in {}={}", ipsc->cAlphaFieldNames(Ptr + 1), Alphas(Ptr + 1)));
+                    ShowSevereError(state, std::format("{}{}=\"{}, invalid value", RoutineName, CurrentModuleObject, Alphas(1)));
+                    ShowContinueError(state, std::format("Invalid Value Entered, for {}={}", ipsc->cAlphaFieldNames(Ptr), Alphas(Ptr)));
+                    ShowContinueError(state, std::format("invalid value in {}={}", ipsc->cAlphaFieldNames(Ptr + 1), Alphas(Ptr + 1)));
                     ErrorsFound = true;
                 } break;
 
                 case HcInt::CeilingDiffuser:
                 case HcInt::TrombeWall: {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}, invalid value", RoutineName, CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state, EnergyPlus::format("Invalid Value Entered, for {}={}", ipsc->cAlphaFieldNames(Ptr), Alphas(Ptr)));
+                    ShowSevereError(state, std::format("{}{}=\"{}, invalid value", RoutineName, CurrentModuleObject, Alphas(1)));
+                    ShowContinueError(state, std::format("Invalid Value Entered, for {}={}", ipsc->cAlphaFieldNames(Ptr), Alphas(Ptr)));
                     ShowContinueError(state,
-                                      EnergyPlus::format("invalid value in {}={}\". This type is only applicable at a Zone level.",
-                                                         ipsc->cAlphaFieldNames(Ptr + 1),
-                                                         Alphas(Ptr + 1)));
+                                      std::format("invalid value in {}={}\". This type is only applicable at a Zone level.",
+                                                  ipsc->cAlphaFieldNames(Ptr + 1),
+                                                  Alphas(Ptr + 1)));
                     ErrorsFound = true;
                 } break;
 
@@ -1230,12 +1229,12 @@ void GetUserConvCoeffs(EnergyPlusData &state)
                     userIntConvModel.overrideType = OverrideType::Value;
                     userIntConvModel.OverrideValue = Numbers(NumField);
                     if (!ipsc->lAlphaFieldBlanks(Ptr + 2)) {
-                        ShowWarningError(state, EnergyPlus::format("{}{}=\"{}, duplicate value", RoutineName, CurrentModuleObject, Alphas(1)));
+                        ShowWarningError(state, std::format("{}{}=\"{}, duplicate value", RoutineName, CurrentModuleObject, Alphas(1)));
                         ShowContinueError(state,
-                                          EnergyPlus::format("Since VALUE is used for \"{}\", {}={} is ignored.",
-                                                             ipsc->cAlphaFieldNames(FieldNo + 1),
-                                                             ipsc->cAlphaFieldNames(Ptr + 2),
-                                                             Alphas(Ptr + 2)));
+                                          std::format("Since VALUE is used for \"{}\", {}={} is ignored.",
+                                                      ipsc->cAlphaFieldNames(FieldNo + 1),
+                                                      ipsc->cAlphaFieldNames(Ptr + 2),
+                                                      Alphas(Ptr + 2)));
                     }
                     ApplyIntConvValue(state, surfNum, hcInt, state.dataSurface->TotUserIntConvModels);
                 } break;
@@ -1330,8 +1329,8 @@ void GetUserConvCoeffs(EnergyPlusData &state)
                 case HcExt::BLASTHcOutside:
                 case HcExt::UserValue:
                 case HcExt::UserSchedule: {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}, check input", RoutineName, CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state, EnergyPlus::format("Check Input Entered :{}", Alphas(Ptr + 1)));
+                    ShowSevereError(state, std::format("{}{}=\"{}, check input", RoutineName, CurrentModuleObject, Alphas(1)));
+                    ShowContinueError(state, std::format("Check Input Entered :{}", Alphas(Ptr + 1)));
                     ErrorsFound = true;
                 } break;
 
@@ -1364,12 +1363,12 @@ void GetUserConvCoeffs(EnergyPlusData &state)
                     userExtConvModel.overrideType = OverrideType::Value;
                     userExtConvModel.OverrideValue = Numbers(NumField);
                     if (!ipsc->lAlphaFieldBlanks(Ptr + 2)) {
-                        ShowWarningError(state, EnergyPlus::format("{}{}=\"{}, duplicate value", RoutineName, CurrentModuleObject, Alphas(1)));
+                        ShowWarningError(state, std::format("{}{}=\"{}, duplicate value", RoutineName, CurrentModuleObject, Alphas(1)));
                         ShowContinueError(state,
-                                          EnergyPlus::format("Since VALUE is used for \"{}\", {}={} is ignored.",
-                                                             ipsc->cAlphaFieldNames(FieldNo + 2),
-                                                             ipsc->cAlphaFieldNames(Ptr + 2),
-                                                             Alphas(Ptr + 2)));
+                                          std::format("Since VALUE is used for \"{}\", {}={} is ignored.",
+                                                      ipsc->cAlphaFieldNames(FieldNo + 2),
+                                                      ipsc->cAlphaFieldNames(Ptr + 2),
+                                                      Alphas(Ptr + 2)));
                     }
                     ApplyExtConvValueMulti(state, surfaceFilter, hcExt, state.dataSurface->TotUserExtConvModels);
                 } break;
@@ -1434,19 +1433,19 @@ void GetUserConvCoeffs(EnergyPlusData &state)
                 case HcInt::SetByZone:
                 case HcInt::UserValue:
                 case HcInt::UserSchedule: {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}, invalid value", RoutineName, CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state, EnergyPlus::format(" Invalid {} entered={}", ipsc->cAlphaFieldNames(Ptr + 1), Alphas(Ptr + 1)));
+                    ShowSevereError(state, std::format("{}{}=\"{}, invalid value", RoutineName, CurrentModuleObject, Alphas(1)));
+                    ShowContinueError(state, std::format(" Invalid {} entered={}", ipsc->cAlphaFieldNames(Ptr + 1), Alphas(Ptr + 1)));
                     ErrorsFound = true;
                 } break;
 
                 case HcInt::CeilingDiffuser:
                 case HcInt::TrombeWall: {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}, invalid value", RoutineName, CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state, EnergyPlus::format(" Invalid {} entered={}", ipsc->cAlphaFieldNames(Ptr), Alphas(Ptr)));
+                    ShowSevereError(state, std::format("{}{}=\"{}, invalid value", RoutineName, CurrentModuleObject, Alphas(1)));
+                    ShowContinueError(state, std::format(" Invalid {} entered={}", ipsc->cAlphaFieldNames(Ptr), Alphas(Ptr)));
                     ShowContinueError(state,
-                                      EnergyPlus::format("invalid value in {}={}\". This type is only applicable at a Zone level.",
-                                                         ipsc->cAlphaFieldNames(Ptr + 1),
-                                                         Alphas(Ptr + 1)));
+                                      std::format("invalid value in {}={}\". This type is only applicable at a Zone level.",
+                                                  ipsc->cAlphaFieldNames(Ptr + 1),
+                                                  Alphas(Ptr + 1)));
                     ErrorsFound = true;
                 } break;
 
@@ -1478,12 +1477,12 @@ void GetUserConvCoeffs(EnergyPlusData &state)
                     userIntConvModel.overrideType = OverrideType::Value;
                     userIntConvModel.OverrideValue = Numbers(NumField);
                     if (!ipsc->lAlphaFieldBlanks(Ptr + 2)) {
-                        ShowWarningError(state, EnergyPlus::format("{}{}=\"{}, duplicate value", RoutineName, CurrentModuleObject, Alphas(1)));
+                        ShowWarningError(state, std::format("{}{}=\"{}, duplicate value", RoutineName, CurrentModuleObject, Alphas(1)));
                         ShowContinueError(state,
-                                          EnergyPlus::format("Since VALUE is used for \"{}\", {}={} is ignored.",
-                                                             ipsc->cAlphaFieldNames(FieldNo + 2),
-                                                             ipsc->cAlphaFieldNames(Ptr + 2),
-                                                             Alphas(Ptr + 2)));
+                                          std::format("Since VALUE is used for \"{}\", {}={} is ignored.",
+                                                      ipsc->cAlphaFieldNames(FieldNo + 2),
+                                                      ipsc->cAlphaFieldNames(Ptr + 2),
+                                                      Alphas(Ptr + 2)));
                     }
                     ApplyIntConvValueMulti(state, surfaceFilter, hcInt, state.dataSurface->TotUserIntConvModels);
                 } break;
@@ -1543,8 +1542,8 @@ void GetUserConvCoeffs(EnergyPlusData &state)
                 } // switch (hcIn)
 
             } else { // Error Case
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}, invalid value", RoutineName, CurrentModuleObject, Alphas(1)));
-                ShowContinueError(state, EnergyPlus::format(" Invalid {} entered={}", ipsc->cAlphaFieldNames(Ptr), Alphas(Ptr)));
+                ShowSevereError(state, std::format("{}{}=\"{}, invalid value", RoutineName, CurrentModuleObject, Alphas(1)));
+                ShowContinueError(state, std::format(" Invalid {} entered={}", ipsc->cAlphaFieldNames(Ptr), Alphas(Ptr)));
                 ErrorsFound = true;
             }
         } // for (Pass)
@@ -1568,17 +1567,17 @@ void GetUserConvCoeffs(EnergyPlusData &state)
                  userExtConvModel.overrideType != OverrideType::SpecifiedModel)) {
                 ++Count;
                 if (state.dataGlobal->DisplayExtraWarnings) {
-                    ShowSevereError(state, EnergyPlus::format("{}Surface=\"{}\", mixed algorithms.", RoutineName, userExtConvModel.SurfaceName));
+                    ShowSevereError(state, std::format("{}Surface=\"{}\", mixed algorithms.", RoutineName, userExtConvModel.SurfaceName));
                     ShowContinueError(
                         state, "Zone Outside Convection Algorithm specifies \"SimpleCombined\". SimpleCombined will be used for this surface.");
                 }
             }
         }
         if (Count > 0) {
-            ShowSevereMessage(
-                state,
-                EnergyPlus::format(
-                    "{}{}", RoutineName, EnergyPlus::format("{} surfaces had different outside convection algorithms specified when", Count)));
+            ShowSevereMessage(state,
+                              std::format("{}{}",
+                                          RoutineName,
+                                          EnergyPlus::format("{} surfaces had different outside convection algorithms specified when", Count)));
             ShowContinueError(state,
                               "the Zone Outside Convection Algorithm specifies \"SimpleCombined\". SimpleCombined will be used for these surfaces.");
             if (!state.dataGlobal->DisplayExtraWarnings) {
@@ -1665,7 +1664,7 @@ void GetUserConvCoeffs(EnergyPlusData &state)
     } // if (Count == 1)
 
     if (ErrorsFound) {
-        ShowFatalError(state, EnergyPlus::format("{}Errors found getting input.  Program termination.", RoutineName));
+        ShowFatalError(state, std::format("{}Errors found getting input.  Program termination.", RoutineName));
     }
 
     SetupAdaptiveConvStaticMetaData(state);
@@ -1681,8 +1680,8 @@ void ApplyIntConvValue(EnergyPlusData &state, int surfNum, HcInt model, int conv
         surfIntConv.userModelNum = convUserCoeffNum;
     } else {
         ShowWarningError(state,
-                         EnergyPlus::format("User Supplied Convection Coefficients not overwriting already assigned value for (Inside) in Surface={}",
-                                            state.dataSurface->Surface(surfNum).Name));
+                         std::format("User Supplied Convection Coefficients not overwriting already assigned value for (Inside) in Surface={}",
+                                     state.dataSurface->Surface(surfNum).Name));
     }
 }
 
@@ -1699,9 +1698,9 @@ void ApplyIntConvValueMulti(EnergyPlusData &state, SurfaceFilter surfaceFilter, 
     if (state.dataSurface->SurfaceFilterLists[(int)surfaceFilter].empty()) {
         ShowWarningError(
             state,
-            EnergyPlus::format("User Supplied Convection Coefficients, Multiple Surface Assignments=\"{}\", there were no surfaces of that type "
-                               "found for Inside assignment.",
-                               SurfaceFilterNamesUC[(int)surfaceFilter]));
+            std::format("User Supplied Convection Coefficients, Multiple Surface Assignments=\"{}\", there were no surfaces of that type "
+                        "found for Inside assignment.",
+                        SurfaceFilterNamesUC[(int)surfaceFilter]));
         return;
     }
 
@@ -1715,22 +1714,21 @@ void ApplyIntConvValueMulti(EnergyPlusData &state, SurfaceFilter surfaceFilter, 
             surfIntConv.userModelNum = userModelNum;
         } else if (state.dataGlobal->DisplayExtraWarnings) {
             ShowWarningError(state,
-                             EnergyPlus::format("User Supplied Convection Coefficients, Multiple Surface Assignments=\"{}\", not overwriting already "
-                                                "assigned value for (Inside) in Surface={}",
-                                                SurfaceFilterNamesUC[(int)surfaceFilter],
-                                                state.dataSurface->Surface(surfNum).Name));
+                             std::format("User Supplied Convection Coefficients, Multiple Surface Assignments=\"{}\", not overwriting already "
+                                         "assigned value for (Inside) in Surface={}",
+                                         SurfaceFilterNamesUC[(int)surfaceFilter],
+                                         state.dataSurface->Surface(surfNum).Name));
         } else {
             ++numWarnings;
         }
     } // for (surfNum)
 
     if (!state.dataGlobal->DisplayExtraWarnings && numWarnings > 0) {
-        ShowWarningError(
-            state,
-            EnergyPlus::format("User Supplied Convection Coefficients, Multiple Surface Assignments=\"{}\", not overwriting already assigned "
-                               "values for {} Inside assignments.",
-                               SurfaceFilterNamesUC[(int)surfaceFilter],
-                               numWarnings));
+        ShowWarningError(state,
+                         std::format("User Supplied Convection Coefficients, Multiple Surface Assignments=\"{}\", not overwriting already assigned "
+                                     "values for {} Inside assignments.",
+                                     SurfaceFilterNamesUC[(int)surfaceFilter],
+                                     numWarnings));
     }
 }
 
@@ -1747,10 +1745,9 @@ void ApplyExtConvValue(EnergyPlusData &state, int surfNum, HcExt model, int user
         surfExtConv.model = model;
         surfExtConv.userModelNum = userModelNum;
     } else {
-        ShowWarningError(
-            state,
-            EnergyPlus::format("User Supplied Convection Coefficients not overwriting already assigned value for (Outside) in Surface={}",
-                               state.dataSurface->Surface(surfNum).Name));
+        ShowWarningError(state,
+                         std::format("User Supplied Convection Coefficients not overwriting already assigned value for (Outside) in Surface={}",
+                                     state.dataSurface->Surface(surfNum).Name));
     }
 }
 
@@ -1781,22 +1778,21 @@ void ApplyExtConvValueMulti(EnergyPlusData &state, SurfaceFilter surfaceFilter, 
             surfExtConv.userModelNum = convUserCoeffNum;
         } else if (state.dataGlobal->DisplayExtraWarnings) {
             ShowWarningError(state,
-                             EnergyPlus::format("User Supplied Convection Coefficients, Multiple Surface Assignments=\"{}\", not overwriting already "
-                                                "assigned value for (Outside) in Surface={}",
-                                                SurfaceFilterNamesUC[(int)surfaceFilter],
-                                                state.dataSurface->Surface(surfNum).Name));
+                             std::format("User Supplied Convection Coefficients, Multiple Surface Assignments=\"{}\", not overwriting already "
+                                         "assigned value for (Outside) in Surface={}",
+                                         SurfaceFilterNamesUC[(int)surfaceFilter],
+                                         state.dataSurface->Surface(surfNum).Name));
         } else {
             ++numWarnings;
         }
     } // for (surfNum)
 
     if (!state.dataGlobal->DisplayExtraWarnings && numWarnings > 0) {
-        ShowWarningError(
-            state,
-            EnergyPlus::format("User Supplied Convection Coefficients, Multiple Surface Assignments=\"{}\", not overwriting already assigned "
-                               "values for {} Outside assignments.",
-                               SurfaceFilterNamesUC[(int)surfaceFilter],
-                               numWarnings));
+        ShowWarningError(state,
+                         std::format("User Supplied Convection Coefficients, Multiple Surface Assignments=\"{}\", not overwriting already assigned "
+                                     "values for {} Outside assignments.",
+                                     SurfaceFilterNamesUC[(int)surfaceFilter],
+                                     numWarnings));
     }
 }
 
@@ -2438,7 +2434,7 @@ void CalcTrombeWallIntConvCoeff(EnergyPlusData &state,
             // assign the convection coefficient to the major surfaces and any subsurfaces on them
             if ((surface.BaseSurf == Surf1) || (surface.BaseSurf == Surf2)) {
                 if (surface.ExtBoundCond == DataSurfaces::KivaFoundation) {
-                    ShowFatalError(state, EnergyPlus::format("Trombe wall convection model not applicable for foundation surface ={}", surface.Name));
+                    ShowFatalError(state, std::format("Trombe wall convection model not applicable for foundation surface ={}", surface.Name));
                 }
                 state.dataHeatBalSurf->SurfHConvInt(SurfNum) = 2.0 * HConvNet;
             }
@@ -2778,7 +2774,7 @@ void CalcISO15099WindowIntConvCoeff(EnergyPlusData &state,
     Real64 sineTilt = surface.SinTilt;
 
     if (surface.ExtBoundCond == DataSurfaces::KivaFoundation) {
-        ShowFatalError(state, EnergyPlus::format("ISO15099 convection model not applicable for foundation surface ={}", surface.Name));
+        ShowFatalError(state, std::format("ISO15099 convection model not applicable for foundation surface ={}", surface.Name));
     }
 
     state.dataHeatBalSurf->SurfHConvInt(SurfNum) =
@@ -3662,7 +3658,7 @@ Real64 EvaluateExtHcModels(EnergyPlusData &state, int const SurfNum, HcExt const
     case HcExt::FohannoPolidoriVerticalWall: {
         if (surface.ExtBoundCond == DataSurfaces::KivaFoundation) {
             // Not compatible with Kiva (Exterior surfaces in Kiva are not currently reported. Also need to add cell-level convection.)
-            ShowFatalError(state, EnergyPlus::format("Fohanno Polidori convection model not applicable for foundation surface ={}", surface.Name));
+            ShowFatalError(state, std::format("Fohanno Polidori convection model not applicable for foundation surface ={}", surface.Name));
         }
         Hn = CallCalcFohannoPolidoriVerticalWall(state,
                                                  (SurfOutTemp - state.dataSurface->SurfOutDryBulbTemp(SurfNum)),
@@ -3889,7 +3885,7 @@ Real64 EvaluateExtHcModels(EnergyPlusData &state, int const SurfNum, HcExt const
         Hf = CalcBlockenWindward(state, state.dataEnvrn->WindSpeed, state.dataEnvrn->WindDir, surface.Azimuth, SurfNum);
         // Not compatible with Kiva (doesn't use weather station windspeed)
         if (surface.ExtBoundCond == DataSurfaces::KivaFoundation) {
-            ShowFatalError(state, EnergyPlus::format("Blocken Windward convection model not applicable for foundation surface ={}", surface.Name));
+            ShowFatalError(state, std::format("Blocken Windward convection model not applicable for foundation surface ={}", surface.Name));
         }
     } break;
 
@@ -3897,7 +3893,7 @@ Real64 EvaluateExtHcModels(EnergyPlusData &state, int const SurfNum, HcExt const
         Hf = CalcEmmelVertical(state.dataEnvrn->WindSpeed, state.dataEnvrn->WindDir, surface.Azimuth);
         // Not compatible with Kiva (doesn't use weather station windspeed)
         if (surface.ExtBoundCond == DataSurfaces::KivaFoundation) {
-            ShowFatalError(state, EnergyPlus::format("Emmel Vertical convection model not applicable for foundation surface ={}", surface.Name));
+            ShowFatalError(state, std::format("Emmel Vertical convection model not applicable for foundation surface ={}", surface.Name));
         }
     } break;
 
@@ -3905,7 +3901,7 @@ Real64 EvaluateExtHcModels(EnergyPlusData &state, int const SurfNum, HcExt const
         Hf = CalcEmmelRoof(state.dataEnvrn->WindSpeed, state.dataEnvrn->WindDir, state.dataConvect->RoofLongAxisOutwardAzimuth);
         // Not compatible with Kiva (doesn't use weather station windspeed)
         if (surface.ExtBoundCond == DataSurfaces::KivaFoundation) {
-            ShowFatalError(state, EnergyPlus::format("Emmel Roof convection model not applicable for foundation surface ={}", surface.Name));
+            ShowFatalError(state, std::format("Emmel Roof convection model not applicable for foundation surface ={}", surface.Name));
         }
         break;
     } break;
@@ -4446,8 +4442,8 @@ void DynamicIntConvSurfaceClassification(EnergyPlusData &state, int const SurfNu
         }
 
         if (surfIntConv.convClass == IntConvClass::Invalid) {
-            ShowSevereError(
-                state, EnergyPlus::format("DynamicIntConvSurfaceClassification: failed to resolve Hc model for A1 surface named{}", surface.Name));
+            ShowSevereError(state,
+                            std::format("DynamicIntConvSurfaceClassification: failed to resolve Hc model for A1 surface named{}", surface.Name));
         }
 
     } break; // A1
@@ -4474,8 +4470,8 @@ void DynamicIntConvSurfaceClassification(EnergyPlusData &state, int const SurfNu
         }
 
         if (surfIntConv.convClass == IntConvClass::Invalid) {
-            ShowSevereError(
-                state, EnergyPlus::format("DynamicIntConvSurfaceClassification: failed to resolve Hc model for A2 surface named{}", surface.Name));
+            ShowSevereError(state,
+                            std::format("DynamicIntConvSurfaceClassification: failed to resolve Hc model for A2 surface named{}", surface.Name));
         }
 
     } break; // A2
@@ -4503,8 +4499,8 @@ void DynamicIntConvSurfaceClassification(EnergyPlusData &state, int const SurfNu
         }
 
         if (surfIntConv.convClass == IntConvClass::Invalid) {
-            ShowSevereError(
-                state, EnergyPlus::format("DynamicIntConvSurfaceClassification: failed to resolve Hc model for A3 surface named{}", surface.Name));
+            ShowSevereError(state,
+                            std::format("DynamicIntConvSurfaceClassification: failed to resolve Hc model for A3 surface named{}", surface.Name));
         }
 
     } break; // A3
@@ -4534,8 +4530,8 @@ void DynamicIntConvSurfaceClassification(EnergyPlusData &state, int const SurfNu
         }
 
         if (surfIntConv.convClass == IntConvClass::Invalid) {
-            ShowSevereError(
-                state, EnergyPlus::format("DynamicIntConvSurfaceClassification: failed to resolve Hc model for B surface named{}", surface.Name));
+            ShowSevereError(state,
+                            std::format("DynamicIntConvSurfaceClassification: failed to resolve Hc model for B surface named{}", surface.Name));
         }
     } break; // B
 
@@ -4565,8 +4561,8 @@ void DynamicIntConvSurfaceClassification(EnergyPlusData &state, int const SurfNu
         }
 
         if (surfIntConv.convClass == IntConvClass::Invalid) {
-            ShowSevereError(
-                state, EnergyPlus::format("DynamicIntConvSurfaceClassification: failed to resolve Hc model for C surface named{}", surface.Name));
+            ShowSevereError(state,
+                            std::format("DynamicIntConvSurfaceClassification: failed to resolve Hc model for C surface named{}", surface.Name));
         }
 
     } break; // C
@@ -4594,8 +4590,8 @@ void DynamicIntConvSurfaceClassification(EnergyPlusData &state, int const SurfNu
         }
 
         if (surfIntConv.convClass == IntConvClass::Invalid) {
-            ShowSevereError(
-                state, EnergyPlus::format("DynamicIntConvSurfaceClassification: failed to resolve Hc model for D surface named{}", surface.Name));
+            ShowSevereError(state,
+                            std::format("DynamicIntConvSurfaceClassification: failed to resolve Hc model for D surface named{}", surface.Name));
         }
 
     } break; // D
@@ -4649,17 +4645,15 @@ void DynamicIntConvSurfaceClassification(EnergyPlusData &state, int const SurfNu
         }
 
             if (surfIntConv.convClass == IntConvClass::Invalid) {
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format("DynamicIntConvSurfaceClassification: failed to resolve Hc model for E surface named {}", surface.Name));
+                ShowSevereError(state,
+                                std::format("DynamicIntConvSurfaceClassification: failed to resolve Hc model for E surface named {}", surface.Name));
             }
         }
     } break; // E
 
     default:
-        ShowSevereError(
-            state,
-            EnergyPlus::format("DynamicIntConvSurfaceClassification: failed to determine zone flow regime for surface named {}", surface.Name));
+        ShowSevereError(state,
+                        std::format("DynamicIntConvSurfaceClassification: failed to determine zone flow regime for surface named {}", surface.Name));
     }
 
     // Set report var after surface has been classified
@@ -5466,76 +5460,75 @@ Real64 CalcBeausoleilMorrisonMixedStableFloor(Real64 const DeltaTemp,         //
 void ShowWarningHydraulicDiameterZero(EnergyPlusData &state, int &errorIdx, ErrorObjectHeader const &eoh)
 {
     if (errorIdx == 0) {
-        ShowWarningMessage(state, EnergyPlus::format("{}: Convection model not evaluated (would divide by zero)", eoh.routineName));
-        ShowContinueError(state,
-                          EnergyPlus::format("Effective hydraulic diameter is zero, convection model not applicable for {} named {}",
-                                             eoh.objectType,
-                                             eoh.objectName));
+        ShowWarningMessage(state, std::format("{}: Convection model not evaluated (would divide by zero)", eoh.routineName));
+        ShowContinueError(
+            state,
+            std::format("Effective hydraulic diameter is zero, convection model not applicable for {} named {}", eoh.objectType, eoh.objectName));
         ShowContinueError(state, "Convection heat transfer coefficient set to 9.999 [W/m2-K] and the simulation continues");
     }
     ShowRecurringWarningErrorAtEnd(state,
-                                   EnergyPlus::format("{}: Convection model not evaluated because effective hydraulic diameter is zero "
-                                                      "and set to 9.999 [W/m2-K]",
-                                                      eoh.routineName),
+                                   std::format("{}: Convection model not evaluated because effective hydraulic diameter is zero "
+                                               "and set to 9.999 [W/m2-K]",
+                                               eoh.routineName),
                                    errorIdx);
 }
 
 void ShowWarningDeltaTempZero(EnergyPlusData &state, int &errorIdx, ErrorObjectHeader const &eoh)
 {
     if (errorIdx == 0) {
-        ShowWarningMessage(state, EnergyPlus::format("{}: Convection model not evaluated (would divide by zero)", eoh.routineName));
+        ShowWarningMessage(state, std::format("{}: Convection model not evaluated (would divide by zero)", eoh.routineName));
         ShowContinueError(state, "The temperature difference between surface and air is zero");
-        ShowContinueError(state, EnergyPlus::format("Occurs for {} named {}", eoh.objectType, eoh.objectName));
+        ShowContinueError(state, std::format("Occurs for {} named {}", eoh.objectType, eoh.objectName));
         ShowContinueError(state, "Convection surface heat transfer coefficient set to 9.999 [W/m2-K] and the simulation continues");
     }
 
     ShowRecurringWarningErrorAtEnd(state,
-                                   EnergyPlus::format("{}: Convection model not evaluated because of zero temperature "
-                                                      "difference and set to 9.999 [W/m2-K]",
-                                                      eoh.routineName),
+                                   std::format("{}: Convection model not evaluated because of zero temperature "
+                                               "difference and set to 9.999 [W/m2-K]",
+                                               eoh.routineName),
                                    errorIdx);
 }
 
 void ShowWarningWindowLocation(EnergyPlusData &state, int &errorIdx, ErrorObjectHeader const &eoh, IntConvWinLoc winLoc)
 {
     if (errorIdx == 0) {
-        ShowSevereMessage(state, EnergyPlus::format("{}: Convection model not evaluated (bad relative window location)", eoh.routineName));
+        ShowSevereMessage(state, std::format("{}: Convection model not evaluated (bad relative window location)", eoh.routineName));
         ShowContinueError(state, EnergyPlus::format("Value for window location = {}", winLoc));
-        ShowContinueError(state, EnergyPlus::format("Occurs for {} named {}", eoh.objectType, eoh.objectName));
+        ShowContinueError(state, std::format("Occurs for {} named {}", eoh.objectType, eoh.objectName));
         ShowContinueError(state, "Convection surface heat transfer coefficient set to 9.999 [W/m2-K] and the simulation continues");
     }
     ShowRecurringSevereErrorAtEnd(state,
-                                  EnergyPlus::format("{}: Convection model not evaluated because bad window "
-                                                     "location and set to 9.999 [W/m2-K]",
-                                                     eoh.routineName),
+                                  std::format("{}: Convection model not evaluated because bad window "
+                                              "location and set to 9.999 [W/m2-K]",
+                                              eoh.routineName),
                                   errorIdx);
 }
 
 void ShowWarningPerimeterLengthZero(EnergyPlusData &state, int &errorIdx, ErrorObjectHeader const &eoh)
 {
     if (errorIdx == 0) {
-        ShowWarningError(state, EnergyPlus::format("{}: Convection model not evaluated (zero zone exterior perimeter length)", eoh.routineName));
+        ShowWarningError(state, std::format("{}: Convection model not evaluated (zero zone exterior perimeter length)", eoh.routineName));
         ShowContinueError(state, "Value for zone exterior perimeter length = 0.0");
-        ShowContinueError(state, EnergyPlus::format("Occurs for {} named {}", eoh.objectType, eoh.objectName));
+        ShowContinueError(state, std::format("Occurs for {} named {}", eoh.objectType, eoh.objectName));
         ShowContinueError(state, "Convection surface heat transfer coefficient set to 9.999 [W/m2-K] and the simulation continues");
     }
     ShowRecurringSevereErrorAtEnd(state,
-                                  EnergyPlus::format("{}: Convection model not evaluated because bad perimeter "
-                                                     "length and set to 9.999 [W/m2-K]",
-                                                     eoh.routineName),
+                                  std::format("{}: Convection model not evaluated because bad perimeter "
+                                              "length and set to 9.999 [W/m2-K]",
+                                              eoh.routineName),
                                   errorIdx);
 }
 
 void ShowWarningFaceAreaZero(EnergyPlusData &state, int &errorIdx, ErrorObjectHeader const &eoh)
 {
     if (errorIdx == 0) {
-        ShowSevereMessage(state, EnergyPlus::format("{}: Convection model not evaluated (bad face area)", eoh.routineName));
+        ShowSevereMessage(state, std::format("{}: Convection model not evaluated (bad face area)", eoh.routineName));
         ShowContinueError(state, "Value for effective face area = 0.0");
-        ShowContinueError(state, EnergyPlus::format("Occurs for {} named {}", eoh.objectType, eoh.objectName));
+        ShowContinueError(state, std::format("Occurs for {} named {}", eoh.objectType, eoh.objectName));
         ShowContinueError(state, "Convection surface heat transfer coefficient set to 9.999 [W/m2-K] and the simulation continues");
     }
     ShowRecurringSevereErrorAtEnd(
-        state, EnergyPlus::format("{}: Convection model not evaluated because bad face area and set to 9.999 [W/m2-k]", eoh.routineName), errorIdx);
+        state, std::format("{}: Convection model not evaluated because bad face area and set to 9.999 [W/m2-k]", eoh.routineName), errorIdx);
 }
 
 Real64 CalcBeausoleilMorrisonMixedStableFloor(EnergyPlusData &state,
@@ -6222,7 +6215,7 @@ Real64 CalcMitchell(EnergyPlusData &state, Real64 const WindAtZ, Real64 const Le
     if (state.dataConvect->CalcMitchellErrorIDX == 0) {
         ShowSevereMessage(state, "CalcMitchell: Convection model not evaluated (bad length scale)");
         ShowContinueError(state, EnergyPlus::format("Value for effective length scale = {:.5R}", LengthScale));
-        ShowContinueError(state, EnergyPlus::format("Occurs for surface named = {}", state.dataSurface->Surface(SurfNum).Name));
+        ShowContinueError(state, std::format("Occurs for surface named = {}", state.dataSurface->Surface(SurfNum).Name));
         ShowContinueError(state, "Convection surface heat transfer coefficient set to 9.999 [W/m2-K] and the simulation continues");
     }
     ShowRecurringSevereErrorAtEnd(state,
@@ -6282,7 +6275,7 @@ Real64 CalcBlockenWindward(EnergyPlusData &state,
     if (state.dataConvect->CalcBlockenWindwardErrorIDX == 0) {
         ShowSevereMessage(state, "CalcBlockenWindward: Convection model wind angle calculation suspect (developer issue)");
         ShowContinueError(state, EnergyPlus::format("Value for theta angle = {:.5R}", Theta));
-        ShowContinueError(state, EnergyPlus::format("Occurs for surface named = {}", state.dataSurface->Surface(SurfNum).Name));
+        ShowContinueError(state, std::format("Occurs for surface named = {}", state.dataSurface->Surface(SurfNum).Name));
         ShowContinueError(state, "Convection model uses EmmelVertical correlation and the simulation continues");
     }
     ShowRecurringSevereErrorAtEnd(
@@ -6423,7 +6416,7 @@ Real64 CalcClearRoof(EnergyPlusData &state,
         if (state.dataConvect->CalcClearRoofErrorIDX == 0) {
             ShowSevereMessage(state, "CalcClearRoof: Convection model not evaluated (bad value for distance to roof edge)");
             ShowContinueError(state, EnergyPlus::format("Value for distance to roof edge ={:.3R}", x));
-            ShowContinueError(state, EnergyPlus::format("Occurs for surface named = {}", state.dataSurface->Surface(SurfNum).Name));
+            ShowContinueError(state, std::format("Occurs for surface named = {}", state.dataSurface->Surface(SurfNum).Name));
             ShowContinueError(state, "Convection surface heat transfer coefficient set to 9.999 [W/m2-K] and the simulation continues");
         }
         ShowRecurringSevereErrorAtEnd(

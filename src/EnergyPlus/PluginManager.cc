@@ -45,18 +45,11 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include <EnergyPlus/Data/EnergyPlusData.hh>
-#include <EnergyPlus/DataGlobalConstants.hh>
-#include <EnergyPlus/DataStringGlobals.hh>
-#include <EnergyPlus/FileSystem.hh>
-#include <EnergyPlus/InputProcessing/InputProcessor.hh>
-#include <EnergyPlus/OutputProcessor.hh>
-#include <EnergyPlus/PluginManager.hh>
-#include <EnergyPlus/UtilityRoutines.hh>
-
+// C++ Headers
 #include <algorithm>
-#include <nlohmann/json.hpp>
+#include <format>
 
+// Third Party Headers
 #if LINK_WITH_PYTHON
 
 #    ifdef _DEBUG
@@ -101,6 +94,17 @@ template <> struct fmt::formatter<PyStatus>
     }
 }; // namespace fmt
 #endif
+#include <nlohmann/json.hpp>
+
+// EnergyPlus Headers
+#include <EnergyPlus/Data/EnergyPlusData.hh>
+#include <EnergyPlus/DataGlobalConstants.hh>
+#include <EnergyPlus/DataStringGlobals.hh>
+#include <EnergyPlus/FileSystem.hh>
+#include <EnergyPlus/InputProcessing/InputProcessor.hh>
+#include <EnergyPlus/OutputProcessor.hh>
+#include <EnergyPlus/PluginManager.hh>
+#include <EnergyPlus/UtilityRoutines.hh>
 
 namespace EnergyPlus::PluginManagement {
 
@@ -397,7 +401,7 @@ void initPython(EnergyPlusData &state, fs::path const &pathToPythonPackages)
     preConfig.utf8_mode = 1;
     status = Py_PreInitialize(&preConfig);
     if (PyStatus_Exception(status) != 0) {
-        ShowFatalError(state, fmt::format("Could not pre-initialize Python to speak UTF-8... {}", status));
+        ShowFatalError(state, EnergyPlus::format("Could not pre-initialize Python to speak UTF-8... {}", status));
     }
 
     PyConfig config;
@@ -406,12 +410,12 @@ void initPython(EnergyPlusData &state, fs::path const &pathToPythonPackages)
 
     status = PyConfig_SetBytesString(&config, &config.program_name, PluginManagement::programName);
     if (PyStatus_Exception(status) != 0) {
-        ShowFatalError(state, fmt::format("Could not initialize program_name on PyConfig... {}", status));
+        ShowFatalError(state, EnergyPlus::format("Could not initialize program_name on PyConfig... {}", status));
     }
 
     status = PyConfig_Read(&config);
     if (PyStatus_Exception(status) != 0) {
-        ShowFatalError(state, fmt::format("Could not read back the PyConfig... {}", status));
+        ShowFatalError(state, EnergyPlus::format("Could not read back the PyConfig... {}", status));
     }
 
     // ReSharper disable once CppRedundantTypenameKeyword
@@ -423,16 +427,16 @@ void initPython(EnergyPlusData &state, fs::path const &pathToPythonPackages)
 
         status = PyConfig_SetString(&config, &config.home, wcharPath);
         if (PyStatus_Exception(status) != 0) {
-            ShowFatalError(state, fmt::format("Could not set home to {:g} on PyConfig... {}", pathToPythonPackages, status));
+            ShowFatalError(state, EnergyPlus::format("Could not set home to {:g} on PyConfig... {}", pathToPythonPackages, status));
         }
         status = PyConfig_SetString(&config, &config.base_prefix, wcharPath);
         if (PyStatus_Exception(status) != 0) {
-            ShowFatalError(state, fmt::format("Could not set base_prefix to {:g} on PyConfig... {}", pathToPythonPackages, status));
+            ShowFatalError(state, EnergyPlus::format("Could not set base_prefix to {:g} on PyConfig... {}", pathToPythonPackages, status));
         }
         config.module_search_paths_set = 1;
         status = PyWideStringList_Append(&config.module_search_paths, wcharPath);
         if (PyStatus_Exception(status) != 0) {
-            ShowFatalError(state, fmt::format("Could not add {:g} to module_search_paths on PyConfig... {}", pathToPythonPackages, status));
+            ShowFatalError(state, EnergyPlus::format("Could not add {:g} to module_search_paths on PyConfig... {}", pathToPythonPackages, status));
         }
 
     } else {
@@ -443,16 +447,16 @@ void initPython(EnergyPlusData &state, fs::path const &pathToPythonPackages)
 
         status = PyConfig_SetString(&config, &config.home, wcharPath);
         if (PyStatus_Exception(status) != 0) {
-            ShowFatalError(state, fmt::format("Could not set home to {:g} on PyConfig... {}", pathToPythonPackages, status));
+            ShowFatalError(state, EnergyPlus::format("Could not set home to {:g} on PyConfig... {}", pathToPythonPackages, status));
         }
         status = PyConfig_SetString(&config, &config.base_prefix, wcharPath);
         if (PyStatus_Exception(status) != 0) {
-            ShowFatalError(state, fmt::format("Could not set base_prefix to {:g} on PyConfig... {}", pathToPythonPackages, status));
+            ShowFatalError(state, EnergyPlus::format("Could not set base_prefix to {:g} on PyConfig... {}", pathToPythonPackages, status));
         }
         config.module_search_paths_set = 1;
         status = PyWideStringList_Append(&config.module_search_paths, wcharPath);
         if (PyStatus_Exception(status) != 0) {
-            ShowFatalError(state, fmt::format("Could not add {:g} to module_search_paths on PyConfig... {}", pathToPythonPackages, status));
+            ShowFatalError(state, EnergyPlus::format("Could not add {:g} to module_search_paths on PyConfig... {}", pathToPythonPackages, status));
         }
 
         PyMem_RawFree(wcharPath);
@@ -917,18 +921,17 @@ void PluginInstance::setup([[maybe_unused]] EnergyPlusData &state)
         } else {
             ShowContinueError(state, "This is available on the base class and should not be overridden...strange.");
         }
-        ShowFatalError(state, EnergyPlus::format("Program terminates after call to _detect_overridden() on {} failed!", this->stringIdentifier));
+        ShowFatalError(state, std::format("Program terminates after call to _detect_overridden() on {} failed!", this->stringIdentifier));
     }
     if (!PyList_Check(pFunctionResponse)) { // NOLINT(hicpp-signed-bitwise)
-        ShowFatalError(state, EnergyPlus::format("Invalid return from _detect_overridden() on class \"{}\", this is weird", this->stringIdentifier));
+        ShowFatalError(state, std::format("Invalid return from _detect_overridden() on class \"{}\", this is weird", this->stringIdentifier));
     }
     Py_ssize_t numVals = PyList_Size(pFunctionResponse);
     // at this point we know which base class methods are being overridden by the derived class
     // we can loop over them and based on the name check the appropriate flag and assign the function pointer
     if (numVals == 0) {
         ShowFatalError(
-            state,
-            EnergyPlus::format("Python plugin \"{}\" did not override any base class methods; must override at least one", this->stringIdentifier));
+            state, std::format("Python plugin \"{}\" did not override any base class methods; must override at least one", this->stringIdentifier));
     }
     for (Py_ssize_t itemNum = 0; itemNum < numVals; itemNum++) {
         PyObject *item = PyList_GetItem(pFunctionResponse, itemNum);
@@ -1172,30 +1175,28 @@ bool PluginInstance::run(EnergyPlusData &state, EMSManager::EMSCallFrom iCalledF
     Py_DECREF(pStateInstance);
     if (pFunctionResponse == nullptr) {
         std::string const functionNameAsString(functionName); // only convert to string if an error occurs
-        ShowSevereError(state, EnergyPlus::format("Call to {}() on {} failed!", functionNameAsString, this->stringIdentifier));
+        ShowSevereError(state, std::format("Call to {}() on {} failed!", functionNameAsString, this->stringIdentifier));
         if (PyErr_Occurred() != nullptr) {
             reportPythonError(state);
         } else {
             ShowContinueError(state, "This could happen for any number of reasons, check the plugin code.");
         }
-        ShowFatalError(state,
-                       EnergyPlus::format("Program terminates after call to {}() on {} failed!", functionNameAsString, this->stringIdentifier));
+        ShowFatalError(state, std::format("Program terminates after call to {}() on {} failed!", functionNameAsString, this->stringIdentifier));
     }
     if (PyLong_Check(pFunctionResponse)) { // NOLINT(hicpp-signed-bitwise)
         long exitCode = PyLong_AsLong(pFunctionResponse);
         if (exitCode == 0) {
             // success
         } else if (exitCode == 1) {
-            ShowFatalError(state, EnergyPlus::format("Python Plugin \"{}\" returned 1 to indicate EnergyPlus should abort", this->stringIdentifier));
+            ShowFatalError(state, std::format("Python Plugin \"{}\" returned 1 to indicate EnergyPlus should abort", this->stringIdentifier));
         }
     } else {
         std::string const functionNameAsString(functionName); // only convert to string if an error occurs
         ShowFatalError(
             state,
-            EnergyPlus::format(
-                "Invalid return from {}() on class \"{}, make sure it returns an integer exit code, either zero (success) or one (failure)",
-                functionNameAsString,
-                this->stringIdentifier));
+            std::format("Invalid return from {}() on class \"{}, make sure it returns an integer exit code, either zero (success) or one (failure)",
+                        functionNameAsString,
+                        this->stringIdentifier));
     }
     Py_DECREF(pFunctionResponse); // PyObject_CallFunction returns new reference, decrement
     if (state.dataPluginManager->apiErrorFlag) {
@@ -1302,9 +1303,9 @@ int PluginManager::getGlobalVariableHandle(EnergyPlusData &state, const std::str
         return -1;
     }
     ShowSevereError(state, "Tried to retrieve handle for a nonexistent plugin global variable");
-    ShowContinueError(state, EnergyPlus::format("Name looked up: \"{}\", available names: ", varNameUC));
+    ShowContinueError(state, std::format("Name looked up: \"{}\", available names: ", varNameUC));
     for (auto const &gvName : gVarNames) {
-        ShowContinueError(state, EnergyPlus::format("    \"{}\"", gvName));
+        ShowContinueError(state, std::format("    \"{}\"", gvName));
     }
     ShowFatalError(state, "Plugin global variable problem causes program termination");
     return -1; // hush the compiler warning
@@ -1476,9 +1477,8 @@ Real64 PluginManager::getGlobalVariableValue(EnergyPlusData &state, int handle)
     try {
         return state.dataPluginManager->globalVariableValues[handle]; // TODO: This won't be caught as an exception I think
     } catch (...) {
-        ShowSevereError(state, EnergyPlus::format("Tried to access plugin global variable value at index {}", handle));
-        ShowContinueError(state,
-                          EnergyPlus::format("Available handles range from 0 to {}", state.dataPluginManager->globalVariableValues.size() - 1));
+        ShowSevereError(state, std::format("Tried to access plugin global variable value at index {}", handle));
+        ShowContinueError(state, std::format("Available handles range from 0 to {}", state.dataPluginManager->globalVariableValues.size() - 1));
         ShowFatalError(state, "Plugin global variable problem causes program termination");
     }
     return 0.0;
@@ -1501,9 +1501,8 @@ void PluginManager::setGlobalVariableValue(EnergyPlusData &state, int handle, Re
     try {
         state.dataPluginManager->globalVariableValues[handle] = value; // TODO: This won't be caught as an exception I think
     } catch (...) {
-        ShowSevereError(state, EnergyPlus::format("Tried to set plugin global variable value at index {}", handle));
-        ShowContinueError(state,
-                          EnergyPlus::format("Available handles range from 0 to {}", state.dataPluginManager->globalVariableValues.size() - 1));
+        ShowSevereError(state, std::format("Tried to set plugin global variable value at index {}", handle));
+        ShowContinueError(state, std::format("Available handles range from 0 to {}", state.dataPluginManager->globalVariableValues.size() - 1));
         ShowFatalError(state, "Plugin global variable problem causes program termination");
     }
 }
@@ -1571,7 +1570,7 @@ bool PluginManager::anyUnexpectedPluginObjects(EnergyPlusData &state)
             ShowSevereMessage(state, "Found PythonPlugin objects in an IDF that is running in an API/Library workflow...this is invalid");
         }
         if (instances > 0) {
-            ShowContinueError(state, EnergyPlus::format("Invalid PythonPlugin object type: {}", objToFind));
+            ShowContinueError(state, std::format("Invalid PythonPlugin object type: {}", objToFind));
         }
     }
     return numTotalThings > 0;

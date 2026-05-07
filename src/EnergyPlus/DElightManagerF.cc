@@ -55,6 +55,11 @@
 #include <ObjexxFCL/Array1D.hh>
 #include <ObjexxFCL/string.functions.hh>
 
+// Third Party Headers
+extern "C" {
+#include <DElight/DElightManagerC.h>
+}
+
 // EnergyPlus Headers
 #include <EnergyPlus/Construction.hh>
 #include <EnergyPlus/DElightManagerF.hh>
@@ -74,10 +79,6 @@
 #include <EnergyPlus/Material.hh>
 #include <EnergyPlus/OutputProcessor.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
-
-extern "C" {
-#include <DElight/DElightManagerC.h>
-}
 
 namespace EnergyPlus {
 

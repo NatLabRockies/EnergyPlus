@@ -52,8 +52,10 @@
 // ObjexxFCL Headers
 #include <ObjexxFCL/Fmath.hh>
 
-// EnergyPlus Headers
+// Local Headers
 #include <AirflowNetwork/Solver.hpp>
+
+// EnergyPlus Headers
 #include <EnergyPlus/ConvectionCoefficients.hh>
 #include <EnergyPlus/CrossVentMgr.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>

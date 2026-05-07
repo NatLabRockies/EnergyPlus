@@ -48,6 +48,7 @@
 // C++ Headers
 #include <algorithm>
 #include <cmath>
+#include <format>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
@@ -509,9 +510,8 @@ void GetZonePlenumInput(EnergyPlusData &state)
                                                    AlphArray(2),
                                                    CurrentModuleObject));
                 ShowContinueError(
-                    state,
-                    EnergyPlus::format("..Only one {} or AirLoopHVAC:ReturnPlenum object may be connected to a given zone.", CurrentModuleObject));
-                ShowContinueError(state, EnergyPlus::format("..occurs in {} = {}", CurrentModuleObject, AlphArray(1)));
+                    state, std::format("..Only one {} or AirLoopHVAC:ReturnPlenum object may be connected to a given zone.", CurrentModuleObject));
+                ShowContinueError(state, std::format("..occurs in {} = {}", CurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
         }
@@ -533,12 +533,12 @@ void GetZonePlenumInput(EnergyPlusData &state)
             ZoneEquipConfigLoop = Util::FindItemInList(AlphArray(2), state.dataZoneEquip->ZoneEquipConfig, &EquipConfiguration::ZoneName);
             if (ZoneEquipConfigLoop != 0) {
                 ShowSevereError(state,
-                                EnergyPlus::format("{}{} \"{}\" is a controlled zone. It cannot be used as a {} or AirLoopHVAC:ReturnPlenum.",
-                                                   RoutineName,
-                                                   cAlphaFields(2),
-                                                   AlphArray(2),
-                                                   CurrentModuleObject));
-                ShowContinueError(state, EnergyPlus::format("..occurs in {} = {}", CurrentModuleObject, AlphArray(1)));
+                                std::format("{}{} \"{}\" is a controlled zone. It cannot be used as a {} or AirLoopHVAC:ReturnPlenum.",
+                                            RoutineName,
+                                            cAlphaFields(2),
+                                            AlphArray(2),
+                                            CurrentModuleObject));
+                ShowContinueError(state, std::format("..occurs in {} = {}", CurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
         }
@@ -640,7 +640,7 @@ void GetZonePlenumInput(EnergyPlusData &state)
     NodeNums.deallocate();
 
     if (ErrorsFound) {
-        ShowFatalError(state, EnergyPlus::format("{}Errors found in input.  Preceding condition(s) cause termination.", RoutineName));
+        ShowFatalError(state, std::format("{}Errors found in input.  Preceding condition(s) cause termination.", RoutineName));
     }
 }
 
@@ -721,9 +721,9 @@ void InitAirZoneReturnPlenum(EnergyPlusData &state, int const ZonePlenumNum)
             // TODO: the first half of this IF condition was a duplicated OR, if issues around this code, might want to check the history of this line
             if (thisADU.DownStreamLeak && (thisADU.RetPlenumNum == 0)) {
                 ShowWarningError(state,
-                                 EnergyPlus::format("No return plenum found for simple duct leakage for ZoneHVAC:AirDistributionUnit={} in Zone={}",
-                                                    thisADU.Name,
-                                                    state.dataZoneEquip->ZoneEquipConfig(thisADU.ZoneEqNum).ZoneName));
+                                 std::format("No return plenum found for simple duct leakage for ZoneHVAC:AirDistributionUnit={} in Zone={}",
+                                             thisADU.Name,
+                                             state.dataZoneEquip->ZoneEquipConfig(thisADU.ZoneEqNum).ZoneName));
                 ShowContinueError(state, "Leakage will be ignored for this ADU.");
                 thisADU.UpStreamLeak = false;
                 thisADU.DownStreamLeak = false;

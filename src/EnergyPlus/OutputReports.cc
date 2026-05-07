@@ -408,7 +408,7 @@ static void WriteDXFCommon(EnergyPlusData &state, InputOutputFile &of, const std
     print(of, Format_710, "Zone Names");
 
     for (int zones = 1; zones <= state.dataGlobal->NumOfZones; ++zones) {
-        print<check_syntax(Format_710)>(of, Format_710, fmt::format("Zone={}:{}", zones, normalizeName(state.dataHeatBal->Zone(zones).Name)));
+        print<check_syntax(Format_710)>(of, Format_710, EnergyPlus::format("Zone={}:{}", zones, normalizeName(state.dataHeatBal->Zone(zones).Name)));
     }
 }
 

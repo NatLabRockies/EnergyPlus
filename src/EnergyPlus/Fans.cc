@@ -47,12 +47,15 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Fmath.hh>
 
-// EnergyPlus Headers
+// Local Headers
 #include <AirflowNetwork/Solver.hpp>
+
+// EnergyPlus Headers
 #include <EnergyPlus/AirLoopHVACDOAS.hh>
 #include <EnergyPlus/Autosizing/SystemAirFlowSizing.hh>
 #include <EnergyPlus/BranchNodeConnections.hh>
@@ -1022,7 +1025,7 @@ void GetFanInput(EnergyPlusData &state)
             }
             if (foundMissingPowerFraction) {
                 // field set input does not match number of speeds, throw warning
-                ShowSevereError(state, EnergyPlus::format("{}: {}=\"{}\", invalid entry.", routineName, cCurrentModuleObject, cAlphaArgs(1)));
+                ShowSevereError(state, std::format("{}: {}=\"{}\", invalid entry.", routineName, cCurrentModuleObject, cAlphaArgs(1)));
                 ShowContinueError(
                     state,
                     "Fan with Discrete speed control does not have input for power fraction at all speed levels and does not have a power curve.");
@@ -1035,7 +1038,7 @@ void GetFanInput(EnergyPlusData &state)
                 state, fan->zoneNum, fan->Name, DataHeatBalance::IntGainType::FanSystemModel, &fan->qdotConvZone, nullptr, &fan->qdotRadZone);
         }
         if (ErrorsFound) {
-            ShowFatalError(state, EnergyPlus::format("{}: Errors found in input for fan name = {}.  Program terminates.", routineName, fan->Name));
+            ShowFatalError(state, std::format("{}: Errors found in input for fan name = {}.  Program terminates.", routineName, fan->Name));
         }
 
     } // for (iFanSystemModel)
@@ -1059,23 +1062,23 @@ void GetFanInput(EnergyPlusData &state)
                 ErrorsFound = true;
                 ShowSevereError(state, "GetFanInput, duplicate fan inlet node names, must be unique for fans.");
                 ShowContinueError(state,
-                                  EnergyPlus::format("Fan={}:{} and Fan={}:{}.",
-                                                     HVAC::fanTypeNames[(int)fan1->type],
-                                                     fan1->Name,
-                                                     HVAC::fanTypeNames[(int)fan2->type],
-                                                     fan2->Name));
-                ShowContinueError(state, EnergyPlus::format("Inlet Node Name=\"{}\".", state.dataLoopNodes->NodeID(fan1->inletNodeNum)));
+                                  std::format("Fan={}:{} and Fan={}:{}.",
+                                              HVAC::fanTypeNames[(int)fan1->type],
+                                              fan1->Name,
+                                              HVAC::fanTypeNames[(int)fan2->type],
+                                              fan2->Name));
+                ShowContinueError(state, std::format("Inlet Node Name=\"{}\".", state.dataLoopNodes->NodeID(fan1->inletNodeNum)));
             }
             if (fan1->outletNodeNum == fan2->outletNodeNum) {
                 ErrorsFound = true;
                 ShowSevereError(state, "GetFanInput, duplicate fan outlet node names, must be unique for fans.");
                 ShowContinueError(state,
-                                  EnergyPlus::format("Fan={}:{} and Fan={}:{}.",
-                                                     HVAC::fanTypeNames[(int)fan1->type],
-                                                     fan1->Name,
-                                                     HVAC::fanTypeNames[(int)fan2->type],
-                                                     fan2->Name));
-                ShowContinueError(state, EnergyPlus::format("Outlet Node Name=\"{}\".", state.dataLoopNodes->NodeID(fan1->outletNodeNum)));
+                                  std::format("Fan={}:{} and Fan={}:{}.",
+                                              HVAC::fanTypeNames[(int)fan1->type],
+                                              fan1->Name,
+                                              HVAC::fanTypeNames[(int)fan2->type],
+                                              fan2->Name));
+                ShowContinueError(state, std::format("Outlet Node Name=\"{}\".", state.dataLoopNodes->NodeID(fan1->outletNodeNum)));
             }
         }
     }
@@ -1173,7 +1176,7 @@ void GetFanInput(EnergyPlusData &state)
             } else {
                 for (int speedLoop = 0; speedLoop < fanSystem->numSpeeds; ++speedLoop) {
                     SetupOutputVariable(state,
-                                        EnergyPlus::format("Fan Runtime Fraction Speed {}", speedLoop + 1),
+                                        std::format("Fan Runtime Fraction Speed {}", speedLoop + 1),
                                         Constant::Units::None,
                                         fanSystem->runtimeFracAtSpeed[speedLoop],
                                         OutputProcessor::TimeStepType::System,
@@ -1233,9 +1236,9 @@ void FanComponent::init(EnergyPlusData &state)
                 continue;
             }
             ShowSevereError(state,
-                            EnergyPlus::format("InitFans: Fan=[{},{}] is not on any ZoneHVAC:EquipmentList.  It will not be simulated.",
-                                               HVAC::fanTypeNames[(int)fan->type],
-                                               fan->Name));
+                            std::format("InitFans: Fan=[{},{}] is not on any ZoneHVAC:EquipmentList.  It will not be simulated.",
+                                        HVAC::fanTypeNames[(int)fan->type],
+                                        fan->Name));
         }
     }
 
@@ -1430,9 +1433,9 @@ void FanComponent::set_size(EnergyPlusData &state)
         // Check for inconsistent drive ratio and motor speed, and report design fan speed with warning
         if (_motorSpeed > (motorMaxSpeed + 1.e-5)) {
             ShowWarningError(state,
-                             EnergyPlus::format("Drive ratio for {}: {} is too low at design conditions -- check motor speed and drive ratio inputs",
-                                                HVAC::fanTypeNames[(int)type],
-                                                Name));
+                             std::format("Drive ratio for {}: {} is too low at design conditions -- check motor speed and drive ratio inputs",
+                                         HVAC::fanTypeNames[(int)type],
+                                         Name));
             ShowContinueError(state, EnergyPlus::format("...Design fan speed [rev/min]: {:.2R}", fanSpeed));
         }
 
@@ -1448,8 +1451,7 @@ void FanComponent::set_size(EnergyPlusData &state)
         // Check for undersized belt and report design size with warning
         if (fanTorque > (beltMaxTorque + 1.e-5)) {
             ShowWarningError(
-                state,
-                EnergyPlus::format("Belt for {}: {} is undersized at design conditions -- check belt inputs", HVAC::fanTypeNames[(int)type], Name));
+                state, std::format("Belt for {}: {} is undersized at design conditions -- check belt inputs", HVAC::fanTypeNames[(int)type], Name));
             ShowContinueError(state, EnergyPlus::format("...Design belt output torque (without oversizing) [Nm]: {:.2R}", fanTorque));
         }
 
@@ -1484,8 +1486,7 @@ void FanComponent::set_size(EnergyPlusData &state)
         // Check for undersized motor and report design size with warning
         if (beltInputPower > (motorMaxOutPower + 1.e-5)) {
             ShowWarningError(
-                state,
-                EnergyPlus::format("Motor for {}: {} is undersized at design conditions -- check motor inputs", HVAC::fanTypeNames[(int)type], Name));
+                state, std::format("Motor for {}: {} is undersized at design conditions -- check motor inputs", HVAC::fanTypeNames[(int)type], Name));
             ShowContinueError(state, EnergyPlus::format("...Design motor output power (without oversizing) [W]: {:.2R}", beltInputPower));
         }
 
@@ -1518,8 +1519,7 @@ void FanComponent::set_size(EnergyPlusData &state)
             // Check for undersized VFD and report design size with warning
             if (motorInputPower > (vfdMaxOutPower + 1.e-5)) {
                 ShowWarningError(
-                    state,
-                    EnergyPlus::format("VFD for {}: {} is undersized at design conditions -- check VFD inputs", HVAC::fanTypeNames[(int)type], Name));
+                    state, std::format("VFD for {}: {} is undersized at design conditions -- check VFD inputs", HVAC::fanTypeNames[(int)type], Name));
                 ShowContinueError(state, EnergyPlus::format("...Design VFD output power (without oversizing) [W]: {:.2R}", motorInputPower));
             }
 
@@ -1623,12 +1623,11 @@ void FanComponent::set_size(EnergyPlusData &state)
 
         // Check fault availability schedules
         if (!fault.CheckFaultyAirFilterFanCurve(state)) {
-            ShowSevereError(state, EnergyPlus::format("FaultModel:Fouling:AirFilter = \"{}\"", fault.Name));
+            ShowSevereError(state, std::format("FaultModel:Fouling:AirFilter = \"{}\"", fault.Name));
             ShowContinueError(
-                state,
-                EnergyPlus::format("Invalid Fan Curve Name = \"{}\" does not cover ", state.dataCurveManager->curves(fault.fanCurveNum)->Name));
-            ShowContinueError(state, EnergyPlus::format("the operational point of Fan {}", Name));
-            ShowFatalError(state, EnergyPlus::format("SizeFan: Invalid FaultModel:Fouling:AirFilter={}", fault.Name));
+                state, std::format("Invalid Fan Curve Name = \"{}\" does not cover ", state.dataCurveManager->curves(fault.fanCurveNum)->Name));
+            ShowContinueError(state, std::format("the operational point of Fan {}", Name));
+            ShowFatalError(state, std::format("SizeFan: Invalid FaultModel:Fouling:AirFilter={}", fault.Name));
         }
     }
 } // FanComponent::set_size()
@@ -2009,10 +2008,9 @@ void FanComponent::simulateOnOff(EnergyPlusData &state, ObjexxFCL::Optional<Real
                 Real64 _speedRaisedToPower = Curve::CurveValue(state, powerRatioAtSpeedRatioCurveNum, _speedRatio);
                 if (_speedRaisedToPower < 0.0) {
                     if (oneTimePowerRatioCheck && !state.dataGlobal->WarmupFlag) {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}\"", HVAC::fanTypeNames[(int)type], Name));
+                        ShowSevereError(state, std::format("{} = {}\"", HVAC::fanTypeNames[(int)type], Name));
                         ShowContinueError(state, "Error in Fan Power Ratio curve. Curve output less than 0.0.");
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Curve output = {:.5T}, fan speed ratio = {:.5T}", _speedRaisedToPower, _speedRatio));
+                        ShowContinueError(state, std::format("Curve output = {:.5f}, fan speed ratio = {:.5f}", _speedRaisedToPower, _speedRatio()));
                         ShowContinueError(state, "Check curve coefficients to ensure proper power ratio as a function of fan speed ratio.");
                         ShowContinueError(state, "Resetting Fan Power Ratio curve output to 0.0 and the simulation continues.");
                         ShowContinueErrorTimeStamp(state, "Occurrence info:");
@@ -2024,10 +2022,10 @@ void FanComponent::simulateOnOff(EnergyPlusData &state, ObjexxFCL::Optional<Real
                     _effRatioAtSpeedRatio = Curve::CurveValue(state, effRatioCurveNum, _speedRatio);
                     if (_effRatioAtSpeedRatio < 0.01) {
                         if (oneTimeEffRatioCheck && !state.dataGlobal->WarmupFlag) {
-                            ShowSevereError(state, EnergyPlus::format("{} = {}\"", HVAC::fanTypeNames[(int)type], Name));
+                            ShowSevereError(state, std::format("{} = {}\"", HVAC::fanTypeNames[(int)type], Name));
                             ShowContinueError(state, "Error in Fan Efficiency Ratio curve. Curve output less than 0.01.");
-                            ShowContinueError(
-                                state, EnergyPlus::format("Curve output = {:.5T}, fan speed ratio = {:.5T}", _effRatioAtSpeedRatio, _speedRatio));
+                            ShowContinueError(state,
+                                              std::format("Curve output = {:.5f}, fan speed ratio = {:.5f}", _effRatioAtSpeedRatio, _speedRatio()));
                             ShowContinueError(state, "Check curve coefficients to ensure proper efficiency ratio as a function of fan speed ratio.");
                             ShowContinueError(state, "Resetting Fan Efficiency Ratio curve output to 0.01 and the simulation continues.");
                             ShowContinueErrorTimeStamp(state, "Occurrence info:");
@@ -2466,7 +2464,7 @@ Real64 CalFaultyFanAirFlowReduction(EnergyPlusData &state,
     // Check whether the fan curve covers the design operational point of the fan
     Real64 FanCalDeltaPress = Curve::CurveValue(state, FanCurvePtr, FanDesignAirFlowRate); // [Pa]
     if ((FanCalDeltaPress < 0.9 * FanDesignDeltaPress) || (FanCalDeltaPress > 1.1 * FanDesignDeltaPress)) {
-        ShowWarningError(state, EnergyPlus::format("The design operational point of the fan {} does not fall ", FanName));
+        ShowWarningError(state, std::format("The design operational point of the fan {} does not fall ", FanName));
         ShowContinueError(state, "on the fan curve provided in the FaultModel:Fouling:AirFilter object. ");
         return 0.0;
     }
@@ -2482,7 +2480,7 @@ Real64 CalFaultyFanAirFlowReduction(EnergyPlusData &state,
 
         if ((FanCalDeltaPresstemp <= FanCalDeltaPress) || (FanFaultyAirFlowRate <= state.dataCurveManager->curves(FanCurvePtr)->inputLimits[0].min)) {
             // The new operational point of the fan go beyond the fan selection range
-            ShowWarningError(state, EnergyPlus::format("The operational point of the fan {} may go beyond the fan selection ", FanName));
+            ShowWarningError(state, std::format("The operational point of the fan {} may go beyond the fan selection ", FanName));
             ShowContinueError(state, "range in the faulty fouling air filter cases");
             break;
         }
