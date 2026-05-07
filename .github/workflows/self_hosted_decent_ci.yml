@@ -1,0 +1,127 @@
+name: Self-Hosted Decent CI
+
+on:
+  pull_request:
+    branches: [ develop ]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  BUILD_DIR: build-decent-ci
+  Python_REQUIRED_VERSION: "3.12.2"
+
+jobs:
+  build_and_test:
+    name: GCC 13.3 build and split tests
+    if: >-
+      ${{
+        github.event.pull_request.head.repo.full_name == github.repository &&
+        github.event.pull_request.head.repo.fork == false
+      }}
+    runs-on: [ self-hosted, linux, x64, ubuntu-24.04 ]
+
+    steps:
+      - name: Checkout EnergyPlus
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+
+      - name: Setup runner
+        id: setup-runner
+        uses: ./.github/actions/setup-runner
+        with:
+          python-version: ${{ env.Python_REQUIRED_VERSION }}
+          python-arch: x64
+
+      - name: Select GCC 13.3 toolchain
+        shell: bash
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get -qq install -y gcc-13 g++-13 gfortran-13
+
+          gcc_version="$(gcc-13 -dumpfullversion -dumpversion)"
+          case "$gcc_version" in
+            13.3*) ;;
+            *)
+              echo "::error::Expected GCC 13.3.x, found ${gcc_version}"
+              exit 1
+              ;;
+          esac
+
+          {
+            echo "CC=$(command -v gcc-13)"
+            echo "CXX=$(command -v g++-13)"
+            echo "FC=$(command -v gfortran-13)"
+          } >> "$GITHUB_ENV"
+          gcc-13 --version
+          g++-13 --version
+          gfortran-13 --version
+
+      - name: Configure build
+        shell: bash
+        run: |
+          cmake -S . -B "$BUILD_DIR" \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo \
+            -DCMAKE_C_COMPILER:FILEPATH="$CC" \
+            -DCMAKE_CXX_COMPILER:FILEPATH="$CXX" \
+            -DCMAKE_Fortran_COMPILER:FILEPATH="$FC" \
+            -DLINK_WITH_PYTHON:BOOL=ON \
+            -DPYTHON_CLI:BOOL=OFF \
+            -DPython_REQUIRED_VERSION:STRING="$Python_REQUIRED_VERSION" \
+            -DPython_ROOT_DIR:PATH="${{ steps.setup-runner.outputs.python-root-dir }}" \
+            -DPython_EXECUTABLE:FILEPATH="${{ steps.setup-runner.outputs.python-executable }}" \
+            -DBUILD_FORTRAN:BOOL=ON \
+            -DBUILD_TESTING:BOOL=ON \
+            -DENABLE_REGRESSION_TESTING:BOOL=OFF \
+            -DCOMMIT_SHA:STRING="${{ github.event.pull_request.head.sha }}" \
+            -DENABLE_GTEST_DEBUG_MODE:BOOL=OFF \
+            -DENABLE_PCH:BOOL=OFF \
+            -DFORCE_DEBUG_ARITHM_GCC_OR_CLANG:BOOL=ON \
+            -DBUILD_PACKAGE:BOOL=OFF \
+            -DDOCUMENTATION_BUILD:STRING=DoNotBuild
+
+      - name: Build
+        shell: bash
+        run: |
+          echo "::add-matcher::./.github/workflows/cpp-problem-matcher.json"
+          cmake --build "$BUILD_DIR" -j "${NPROC:-$(nproc)}"
+          echo "::remove-matcher owner=gcc-problem-matcher::"
+
+      - name: Run unit tests
+        working-directory: ${{ env.BUILD_DIR }}
+        shell: bash
+        run: |
+          begin_group() { echo -e "::group::\033[93m$1\033[0m"; }
+
+          begin_group "Running non-integration CTests"
+          if ctest -j "${NPROC:-$(nproc)}" --output-on-failure -E "integration.*"; then
+            echo "::endgroup::"
+          else
+            echo "::endgroup::"
+            begin_group "Re-running failed non-integration tests verbosely"
+            ctest --rerun-failed -VV
+            echo "::endgroup::"
+          fi
+
+      - name: Run integration tests
+        working-directory: ${{ env.BUILD_DIR }}
+        shell: bash
+        run: |
+          begin_group() { echo -e "::group::\033[93m$1\033[0m"; }
+
+          begin_group "Running integration CTests"
+          if ctest -j "${NPROC:-$(nproc)}" --output-on-failure -R "integration.*"; then
+            echo "::endgroup::"
+          else
+            echo "::endgroup::"
+            begin_group "Re-running failed integration tests verbosely"
+            ctest --rerun-failed -VV
+            echo "::endgroup::"
+          fi
