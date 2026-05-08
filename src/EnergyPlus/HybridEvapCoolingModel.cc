@@ -1545,6 +1545,7 @@ namespace HybridEvapCoolingModel {
 
             if (Conditioning_load_met && Humidification_load_met) {
                 bool store_best_performing_mode = false;
+
                 if (ObjectiveFunction == ObjectiveFunctionType::SupplyTemperature) {
                     if (CoolingRequested && RunFractionSupplyTemperature < OptimalSetting_RunFractionSupplyTemperature) {
                         store_best_performing_mode = true;
@@ -1564,6 +1565,7 @@ namespace HybridEvapCoolingModel {
                     store_best_performing_mode = true;
                     OptimalSetting_RunFractionTotalFuel = RunFractionTotalFuel;
                 }
+
                 if (store_best_performing_mode) {
                     OptimalSetting = thisSetting;
                     DidWeMeetLoad = true;
@@ -1595,20 +1597,17 @@ namespace HybridEvapCoolingModel {
                             PreviousMaxiumConditioningOutput = SensibleRoomORZone;
                         }
                     }
+
                     if (store_best_attempt) {
                         if (ObjectiveFunction == ObjectiveFunctionType::SupplyTemperature) {
-                            if (CoolingRequested && RunFractionSupplyTemperature < OptimalSetting_RunFractionSupplyTemperature) {
-                                OptimalSetting_RunFractionSupplyTemperature = RunFractionSupplyTemperature;
-                            }
-                            if (HeatingRequested && RunFractionSupplyTemperature > OptimalSetting_RunFractionSupplyTemperature) {
+                            if (CoolingRequested || HeatingRequested) {
                                 OptimalSetting_RunFractionSupplyTemperature = RunFractionSupplyTemperature;
                             }
                             // fall back to ElectricityUse since ventilation-only is just fan operation
-                            if (!CoolingRequested && !HeatingRequested && VentilationRequested &&
-                                RunFractionTotalFuel < OptimalSetting_RunFractionTotalFuel) {
+                            if (!CoolingRequested && !HeatingRequested && VentilationRequested) {
                                 OptimalSetting_RunFractionTotalFuel = RunFractionTotalFuel;
                             }
-                        } else if (RunFractionTotalFuel < OptimalSetting_RunFractionTotalFuel) {
+                        } else {
                             OptimalSetting_RunFractionTotalFuel = RunFractionTotalFuel;
                         }
                         OptimalSetting = thisSetting;
