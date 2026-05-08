@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 #include <string>
 
 // ObjexxFCL Headers
@@ -604,8 +605,8 @@ namespace HybridEvapCoolingModel {
         // N11, \field Mode1  Maximum Outdoor Air Humidity Ratio
         ok = InitializeOutdoorAirHumidityRatioConstraints(Numbers(inter_Number), Numbers(inter_Number + 1));
         if (!ok) {
-            ShowSevereError(state, EnergyPlus::format("Invalid {}Or Invalid{}", cNumericFields(inter_Number), cNumericFields(inter_Number + 1)));
-            ShowContinueError(state, EnergyPlus::format("Entered in {}", cCurrentModuleObject));
+            ShowSevereError(state, std::format("Invalid {}Or Invalid{}", cNumericFields(inter_Number), cNumericFields(inter_Number + 1)));
+            ShowContinueError(state, std::format("Entered in {}", cCurrentModuleObject));
             ErrorsFound = true;
         }
         inter_Number = inter_Number + 2;
@@ -613,8 +614,8 @@ namespace HybridEvapCoolingModel {
         // N13, \field Mode1 Maximum Outdoor Air Relative Humidity
         ok = InitializeOutdoorAirRelativeHumidityConstraints(Numbers(inter_Number), Numbers(inter_Number + 1));
         if (!ok) {
-            ShowSevereError(state, EnergyPlus::format("Invalid {}Or Invalid{}", cNumericFields(inter_Number), cNumericFields(inter_Number + 1)));
-            ShowContinueError(state, EnergyPlus::format("Entered in {}", cCurrentModuleObject));
+            ShowSevereError(state, std::format("Invalid {}Or Invalid{}", cNumericFields(inter_Number), cNumericFields(inter_Number + 1)));
+            ShowContinueError(state, std::format("Entered in {}", cCurrentModuleObject));
             ErrorsFound = true;
         }
         inter_Number = inter_Number + 2;
@@ -622,8 +623,8 @@ namespace HybridEvapCoolingModel {
         // N15, \field Mode1 Maximum Return Air Temperature
         ok = InitializeReturnAirTemperatureConstraints(Numbers(inter_Number), Numbers(inter_Number + 1));
         if (!ok) {
-            ShowSevereError(state, EnergyPlus::format("Invalid {}Or Invalid{}", cNumericFields(inter_Number), cNumericFields(inter_Number + 1)));
-            ShowContinueError(state, EnergyPlus::format("Entered in {}", cCurrentModuleObject));
+            ShowSevereError(state, std::format("Invalid {}Or Invalid{}", cNumericFields(inter_Number), cNumericFields(inter_Number + 1)));
+            ShowContinueError(state, std::format("Entered in {}", cCurrentModuleObject));
             ErrorsFound = true;
         }
         inter_Number = inter_Number + 2;
@@ -631,8 +632,8 @@ namespace HybridEvapCoolingModel {
         // N17, \field Mode1 Maximum Return Air Humidity Ratio
         ok = InitializeReturnAirHumidityRatioConstraints(Numbers(inter_Number), Numbers(inter_Number + 1));
         if (!ok) {
-            ShowSevereError(state, EnergyPlus::format("Invalid {}Or Invalid{}", cNumericFields(inter_Number), cNumericFields(inter_Number + 1)));
-            ShowContinueError(state, EnergyPlus::format("Entered in {}", cCurrentModuleObject));
+            ShowSevereError(state, std::format("Invalid {}Or Invalid{}", cNumericFields(inter_Number), cNumericFields(inter_Number + 1)));
+            ShowContinueError(state, std::format("Entered in {}", cCurrentModuleObject));
             ErrorsFound = true;
         }
         inter_Number = inter_Number + 2;
@@ -641,12 +642,12 @@ namespace HybridEvapCoolingModel {
         ok = InitializeReturnAirRelativeHumidityConstraints(Numbers(inter_Number), Numbers(inter_Number + 1));
         if (!ok) {
             ShowSevereError(state,
-                            EnergyPlus::format("Invalid {}={}Or Invalid{}={}",
-                                               cAlphaFields(inter_Number),
-                                               Alphas(inter_Number),
-                                               cAlphaFields(inter_Number + 1),
-                                               Alphas(inter_Number + 1)));
-            ShowContinueError(state, EnergyPlus::format("Entered in {}", cCurrentModuleObject));
+                            std::format("Invalid {}={}Or Invalid{}={}",
+                                        cAlphaFields(inter_Number),
+                                        Alphas(inter_Number),
+                                        cAlphaFields(inter_Number + 1),
+                                        Alphas(inter_Number + 1)));
+            ShowContinueError(state, std::format("Entered in {}", cCurrentModuleObject));
             ErrorsFound = true;
         }
         inter_Number = inter_Number + 2;
@@ -655,9 +656,8 @@ namespace HybridEvapCoolingModel {
 
         ok = InitializeOSAFConstraints(Numbers(inter_Number), Numbers(inter_Number + 1));
         if (!ok) {
-            ShowSevereError(state,
-                            EnergyPlus::format("Error in OSAFConstraints{}through{}", cAlphaFields(inter_Number), cAlphaFields(inter_Number + 1)));
-            ShowContinueError(state, EnergyPlus::format("Entered in {}", cCurrentModuleObject));
+            ShowSevereError(state, std::format("Error in OSAFConstraints{}through{}", cAlphaFields(inter_Number), cAlphaFields(inter_Number + 1)));
+            ShowContinueError(state, std::format("Entered in {}", cCurrentModuleObject));
             ErrorsFound = true;
         }
         // N22, \field Mode1 Minimum Supply Air Mass Flow Rate Ratio
@@ -665,9 +665,8 @@ namespace HybridEvapCoolingModel {
         inter_Number = inter_Number + 2;
         ok = InitializeMsaRatioConstraints(Numbers(inter_Number), Numbers(inter_Number + 1));
         if (!ok) {
-            ShowSevereError(state,
-                            EnergyPlus::format("Error in OSAFConstraints{}through{}", cAlphaFields(inter_Number), cAlphaFields(inter_Number + 1)));
-            ShowContinueError(state, EnergyPlus::format("Entered in {}", cCurrentModuleObject));
+            ShowSevereError(state, std::format("Error in OSAFConstraints{}through{}", cAlphaFields(inter_Number), cAlphaFields(inter_Number + 1)));
+            ShowContinueError(state, std::format("Entered in {}", cCurrentModuleObject));
             ErrorsFound = true;
         }
         (*OperatingModes).push_back(*this);
@@ -932,8 +931,7 @@ namespace HybridEvapCoolingModel {
     Real64 Model::CheckVal_T(EnergyPlusData &state, Real64 T)
     {
         if ((T > 100) || (T < 0)) {
-            ShowWarningError(state,
-                             EnergyPlus::format("Supply air temperature exceeded realistic range error called in {}, check performance curve", Name));
+            ShowWarningError(state, std::format("Supply air temperature exceeded realistic range error called in {}, check performance curve", Name));
         }
         return T;
     }
@@ -1264,16 +1262,14 @@ namespace HybridEvapCoolingModel {
         std::string ObjectID = Name.c_str();
         if (StepIns.RHosa > 1) {
             ShowSevereError(
-                state,
-                EnergyPlus::format("Unitary hybrid system error, required relative humidity value 0-1, called in object{}.Check inputs", ObjectID));
+                state, std::format("Unitary hybrid system error, required relative humidity value 0-1, called in object{}.Check inputs", ObjectID));
             assert(true);
             return -1;
         } // because it should be fractional, this should only really be possible if its called from a unit test
 
         if (StepIns.RHra > 1) {
             ShowSevereError(
-                state,
-                EnergyPlus::format("Unitary hybrid system error,  required relative humidity value 0-1, called in object{}.Check inputs", ObjectID));
+                state, std::format("Unitary hybrid system error,  required relative humidity value 0-1, called in object{}.Check inputs", ObjectID));
             assert(true);
             return -1;
         } // because it should be fractional, this should only really be possible if its called from a unit test
@@ -1517,40 +1513,38 @@ namespace HybridEvapCoolingModel {
 
             // Calculate partload fraction required to meet all requirements
             // Fraction can be above 1 meaning its not able to do it completely in a time step
-            Real64 PartRuntimeFraction = CalculatePartRuntimeFraction(MinOA_Msa,
-                                                                      thisSetting.Supply_Air_Ventilation_Volume * state.dataEnvrn->StdRhoAir,
-                                                                      StepIns.RequestedCoolingLoad,
-                                                                      StepIns.RequestedHeatingLoad,
-                                                                      SensibleRoomORZone,
-                                                                      StepIns.ZoneDehumidificationLoad,
-                                                                      StepIns.ZoneMoistureLoad,
-                                                                      latentRoomORZone);
+            thisSetting.Runtime_Fraction = CalculatePartRuntimeFraction(MinOA_Msa,
+                                                                        thisSetting.Supply_Air_Ventilation_Volume * state.dataEnvrn->StdRhoAir,
+                                                                        StepIns.RequestedCoolingLoad,
+                                                                        StepIns.RequestedHeatingLoad,
+                                                                        SensibleRoomORZone,
+                                                                        StepIns.ZoneDehumidificationLoad,
+                                                                        StepIns.ZoneMoistureLoad,
+                                                                        latentRoomORZone);
 
-            Real64 RunFractionTotalFuel;
+            Real64 RunFractionTotalFuel(0);
+            Real64 RunFractionSupplyTemperature(0);
             switch (ObjectiveFunction) {
             default:
             case ObjectiveFunctionType::ElectricityUse:
-                RunFractionTotalFuel = thisSetting.ElectricalPower * PartRuntimeFraction;
+                RunFractionTotalFuel = thisSetting.ElectricalPower * thisSetting.Runtime_Fraction;
                 break;
             case ObjectiveFunctionType::SecondFuelUse:
-                RunFractionTotalFuel = thisSetting.SecondaryFuelConsumptionRate * PartRuntimeFraction;
+                RunFractionTotalFuel = thisSetting.SecondaryFuelConsumptionRate * thisSetting.Runtime_Fraction;
                 break;
             case ObjectiveFunctionType::ThirdFuelUse:
-                RunFractionTotalFuel = thisSetting.ThirdFuelConsumptionRate * PartRuntimeFraction;
+                RunFractionTotalFuel = thisSetting.ThirdFuelConsumptionRate * thisSetting.Runtime_Fraction;
                 break;
             case ObjectiveFunctionType::WaterUse:
-                RunFractionTotalFuel = thisSetting.WaterConsumptionRate * PartRuntimeFraction;
+                RunFractionTotalFuel = thisSetting.WaterConsumptionRate * thisSetting.Runtime_Fraction;
+                break;
+            case ObjectiveFunctionType::SupplyTemperature:
+                RunFractionSupplyTemperature = thisSetting.SupplyAirTemperature * thisSetting.Runtime_Fraction;
                 break;
             }
-            Real64 RunFractionSupplyTemperature = thisSetting.SupplyAirTemperature * PartRuntimeFraction;
-            thisSetting.Runtime_Fraction = PartRuntimeFraction;
 
             if (Conditioning_load_met && Humidification_load_met) {
                 bool store_best_performing_mode = false;
-                if (ObjectiveFunction == ObjectiveFunctionType::ElectricityUse && RunFractionTotalFuel < OptimalSetting_RunFractionTotalFuel) {
-                    store_best_performing_mode = true;
-                    OptimalSetting_RunFractionTotalFuel = RunFractionTotalFuel;
-                }
                 if (ObjectiveFunction == ObjectiveFunctionType::SupplyTemperature) {
                     if (CoolingRequested && RunFractionSupplyTemperature < OptimalSetting_RunFractionSupplyTemperature) {
                         store_best_performing_mode = true;
@@ -1566,6 +1560,9 @@ namespace HybridEvapCoolingModel {
                         store_best_performing_mode = true;
                         OptimalSetting_RunFractionTotalFuel = RunFractionTotalFuel;
                     }
+                } else if (RunFractionTotalFuel < OptimalSetting_RunFractionTotalFuel) {
+                    store_best_performing_mode = true;
+                    OptimalSetting_RunFractionTotalFuel = RunFractionTotalFuel;
                 }
                 if (store_best_performing_mode) {
                     OptimalSetting = thisSetting;
@@ -1599,10 +1596,6 @@ namespace HybridEvapCoolingModel {
                         }
                     }
                     if (store_best_attempt) {
-                        if (ObjectiveFunction == ObjectiveFunctionType::ElectricityUse &&
-                            RunFractionTotalFuel < OptimalSetting_RunFractionTotalFuel) {
-                            OptimalSetting_RunFractionTotalFuel = RunFractionTotalFuel;
-                        }
                         if (ObjectiveFunction == ObjectiveFunctionType::SupplyTemperature) {
                             if (CoolingRequested && RunFractionSupplyTemperature < OptimalSetting_RunFractionSupplyTemperature) {
                                 OptimalSetting_RunFractionSupplyTemperature = RunFractionSupplyTemperature;
@@ -1615,6 +1608,8 @@ namespace HybridEvapCoolingModel {
                                 RunFractionTotalFuel < OptimalSetting_RunFractionTotalFuel) {
                                 OptimalSetting_RunFractionTotalFuel = RunFractionTotalFuel;
                             }
+                        } else if (RunFractionTotalFuel < OptimalSetting_RunFractionTotalFuel) {
+                            OptimalSetting_RunFractionTotalFuel = RunFractionTotalFuel;
                         }
                         OptimalSetting = thisSetting;
                         DidWePartlyMeetLoad = true;
@@ -1899,9 +1894,9 @@ namespace HybridEvapCoolingModel {
             std::string ObjectID = Name.c_str();
             ShowSevereError(
                 state,
-                EnergyPlus::format("Standby mode not defined correctly, as the mode is defined there are zero combinations of acceptable outside air "
-                                   "fractions and supply air mass flow rate, called in object {}",
-                                   ObjectID));
+                std::format("Standby mode not defined correctly, as the mode is defined there are zero combinations of acceptable outside air "
+                            "fractions and supply air mass flow rate, called in object {}",
+                            ObjectID));
         }
         // Test system availability status
         UnitOn = 1;
@@ -1972,7 +1967,7 @@ namespace HybridEvapCoolingModel {
                 if (CoolingRequested || HeatingRequested) {
                     ShowSevereError(
                         state,
-                        EnergyPlus::format(
+                        std::format(
                             "Outlet air mass flow rate of zero during period with conditioning need, check mode definition. Called in object {}",
                             Name));
                 }
