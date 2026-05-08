@@ -45,6 +45,9 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
+#include <format>
+
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
 
@@ -348,27 +351,26 @@ namespace HybridModel {
                         } else {
                             ShowWarningError(
                                 state,
-                                EnergyPlus::format(
-                                    "Field \"{}\": default people sensible heat rate is not provided, default value of 0.6 will be used.",
-                                    cAlphaFieldNames(10)));
+                                std::format("Field \"{}\": default people sensible heat rate is not provided, default value of 0.6 will be used.",
+                                            cAlphaFieldNames(10)));
                         }
                         if (peopleRadiantFractionSched != nullptr) {
                             hmZone.peopleRadiantFracSched = peopleRadiantFractionSched;
                         } else {
                             ShowWarningError(
                                 state,
-                                EnergyPlus::format("Field \"{}\": default people radiant heat portion (of sensible heat) is not provided, default "
-                                                   "value of 0.7 will be used.",
-                                                   cAlphaFieldNames(11)));
+                                std::format("Field \"{}\": default people radiant heat portion (of sensible heat) is not provided, default "
+                                            "value of 0.7 will be used.",
+                                            cAlphaFieldNames(11)));
                         }
                         if (peopleCO2GenRateSched != nullptr) {
                             hmZone.peopleCO2GenRateSched = peopleCO2GenRateSched;
                         } else {
                             ShowWarningError(
                                 state,
-                                EnergyPlus::format("Field \"{}\": default people CO2 generation rate is not provided, default value of 0.0000000382 "
-                                                   "kg/W will be used.",
-                                                   cAlphaFieldNames(12)));
+                                std::format("Field \"{}\": default people CO2 generation rate is not provided, default value of 0.0000000382 "
+                                            "kg/W will be used.",
+                                            cAlphaFieldNames(12)));
                         }
                     }
 
@@ -445,7 +447,7 @@ namespace HybridModel {
                 } else {
                     ShowSevereError(
                         state,
-                        EnergyPlus::format(
+                        std::format(
                             "{}=\"{}\" invalid {}=\"{}\" not found.", CurrentModuleObject, cAlphaArgs(1), cAlphaFieldNames(2), cAlphaArgs(2)));
                     ErrorsFound = true;
                 }

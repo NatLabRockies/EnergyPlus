@@ -2436,8 +2436,8 @@
   ZoneControl:Humidistat,
     Sys 1 Furnace DX Cool Dehumidification Humidistat,  !- Name
     SPACE1-1,                !- Zone Name
-    HVACTemplate-Always 1,   !- Humidifying Relative Humidity Setpoint Schedule Name
-    HVACTemplate-Always 60;  !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    HVACTemplate-Always 1,   !- Humidifying Setpoint Schedule Name
+    HVACTemplate-Always 60;  !- Dehumidifying Setpoint Schedule Name
 
   AirLoopHVAC:UnitarySystem,
     Sys 1 Furnace DX Cool Unitary System,  !- Name
@@ -2938,8 +2938,8 @@
   ZoneControl:Humidistat,
     Sys 2 Furnace DX Cool Dehumidification Humidistat,  !- Name
     SPACE2-1,                !- Zone Name
-    HVACTemplate-Always 1,   !- Humidifying Relative Humidity Setpoint Schedule Name
-    HVACTemplate-Always 60;  !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    HVACTemplate-Always 1,   !- Humidifying Setpoint Schedule Name
+    HVACTemplate-Always 60;  !- Dehumidifying Setpoint Schedule Name
 
   AirLoopHVAC:UnitarySystem,
     Sys 2 Furnace DX Cool Unitary System,  !- Name
@@ -3427,8 +3427,8 @@
   ZoneControl:Humidistat,
     Sys 3 Heat Pump Air Source Dehumidification Humidistat,  !- Name
     SPACE3-1,                !- Zone Name
-    HVACTemplate-Always 1,   !- Humidifying Relative Humidity Setpoint Schedule Name
-    HVACTemplate-Always 60;  !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    HVACTemplate-Always 1,   !- Humidifying Setpoint Schedule Name
+    HVACTemplate-Always 60;  !- Dehumidifying Setpoint Schedule Name
 
   AirLoopHVAC:UnitarySystem,
     Sys 3 Heat Pump Air Source Unitary System,  !- Name
@@ -4004,8 +4004,8 @@
   ZoneControl:Humidistat,
     Sys 4 Heat Pump Air Source Dehumidification Humidistat,  !- Name
     SPACE4-1,                !- Zone Name
-    HVACTemplate-Always 1,   !- Humidifying Relative Humidity Setpoint Schedule Name
-    HVACTemplate-Always 60;  !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    HVACTemplate-Always 1,   !- Humidifying Setpoint Schedule Name
+    HVACTemplate-Always 60;  !- Dehumidifying Setpoint Schedule Name
 
   AirLoopHVAC:UnitarySystem,
     Sys 4 Heat Pump Air Source Unitary System,  !- Name

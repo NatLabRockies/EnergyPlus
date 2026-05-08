@@ -2500,6 +2500,8 @@ WindowMaterial:SimpleGlazingSystem,
 }
 
 TEST_F(EnergyPlusFixture, SolarShadingTest_GetBuildingDataUsesShadowCalculationSettingsDuringGeometrySetup)
+// Tests that GetShadowingInput must be called before SetupZoneGeometry to get the CheckConvexity warning -- related to issue #9275
+// Also provides coverage for Polygon Clipping Algorithm = ConvexWeilerAtherton -- issue #5558
 {
     std::string const idf_objects = R"IDF(
 RunPeriod,
@@ -2785,7 +2787,28 @@ WindowMaterial:SimpleGlazingSystem,
 
     HeatBalanceManager::GetBuildingData(*state, FoundError);
     ASSERT_FALSE(FoundError);
-    ASSERT_TRUE(match_err_stream("CheckConvexity: Zone=\"ZONE A\", Surface=\"69C03D\" is non-convex."));
+    state->dataGlobal->BeginSimFlag = true;
+    EXPECT_TRUE(state->dataSolarShading->GetInputFlag);
+    SolarShading::InitSolarCalculations(*state);
+    EXPECT_FALSE(state->dataSysVars->SutherlandHodgman);
+    EXPECT_FALSE(state->dataSysVars->SlaterBarsky);
+
+    std::string const error_string =
+        delimited_string({"   ** Warning ** CheckConvexity: Zone=\"ZONE A\", Surface=\"69C03D\" is non-convex.",
+                          "   **   ~~~   ** ...vertex 4 to vertex 5 to vertex 6",
+                          "   **   ~~~   ** ...vertex 4=[0.00,0.00,3.05]",
+                          "   **   ~~~   ** ...vertex 5=[0.00,3.05,3.05]",
+                          "   **   ~~~   ** ...vertex 6=[0.00,3.05,6.10]",
+                          "   ** Warning ** CheckConvexity: Zone=\"ZONE A\", Surface=\"5BB552\" is non-convex.",
+                          "   **   ~~~   ** ...vertex 2 to vertex 3 to vertex 4",
+                          "   **   ~~~   ** ...vertex 2=[6.10,3.05,3.05]",
+                          "   **   ~~~   ** ...vertex 3=[6.10,0.00,3.05]",
+                          "   **   ~~~   ** ...vertex 4=[6.10,0.00,0.00]",
+                          "   ** Warning ** DetermineShadowingCombinations: Surface=\"5BB552\" is a receiving surface and is non-convex.",
+                          "   **   ~~~   ** ...Shadowing values may be inaccurate. Check .shd report file for more surface shading details",
+                          "   ** Severe  ** DetermineShadowingCombinations: Surface=\"5BB552\" is a casting surface and is non-convex.",
+                          "   **   ~~~   ** ...Shadowing values may be inaccurate. Check .shd report file for more surface shading details"});
+    EXPECT_TRUE(compare_err_stream(error_string, true));
 }
 
 TEST_F(EnergyPlusFixture, SolarShadingTest_GPUNonConvexErrors)
@@ -5549,7 +5572,7 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_PolygonOverlap3)
 }
 
 TEST_F(EnergyPlusFixture, SolarShadingTest_checkSurfaceExternalShadingSchedules_Scheduled)
-// Test of check to see if all surfaces have a sunlit schedule when shadow calculations are set to "Scheduled"
+// Test of check to see if all surfaces have a sunlit schedule when shadow calculations are set to "Scheduled" -- related to issue #9275
 {
     // Set up data for test. Shading surfaces are skipped so they should not report any errors.
     // Some surfaces will be correctly defined while two other surfaces will not be correctly defined and will generate errors.
@@ -5920,7 +5943,7 @@ WindowMaterial:SimpleGlazingSystem,
 }
 
 TEST_F(EnergyPlusFixture, SolarShadingTest_checkSurfaceExternalShadingSchedules_Imported)
-// Test of check to see if all surfaces have a sunlit schedule when shadow calculations are set to "Imported"
+// Test of check to see if all surfaces have a sunlit schedule when shadow calculations are set to "Imported" -- related to issue #9275
 {
     // Set up data for test. Shading surfaces are skipped so they should not report any errors.
     // Some surfaces will be correctly defined while two other surfaces will not be correctly defined and will generate errors.
@@ -6269,7 +6292,8 @@ WindowMaterial:SimpleGlazingSystem,
 }
 
 TEST_F(EnergyPlusFixture, SolarShadingTest_checkSurfaceExternalShadingSchedules_PolygonClipping)
-// Test of check to see if all surfaces do not have a sunlit schedule when shadow calculations are not set to "Scheduled" or "Imported"
+// Test of check to see if all surfaces do not have a sunlit schedule when shadow calculations are not set to "Scheduled" or "Imported" -- related to
+// issue #9275
 {
     // Set up data for test. Shading surfaces are skipped so they should not report any errors.
     // Some surfaces will be correctly defined while two other surfaces will not be correctly defined and will generate errors.

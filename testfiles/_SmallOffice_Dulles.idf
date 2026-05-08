@@ -3132,22 +3132,22 @@
   ZoneControl:Humidistat,
     ReheatHumidistat_SouthZone_1stFloor,  !- Name
     SouthZone_1stFloor,      !- Zone Name
-    Humidity Setpoint Schedule;  !- Humidifying Relative Humidity Setpoint Schedule Name
+    Humidity Setpoint Schedule;  !- Humidifying Setpoint Schedule Name
 
   ZoneControl:Humidistat,
     ReheatHumidistat_NorthZone_1stFloor,  !- Name
     NorthZone_1stFloor,      !- Zone Name
-    Humidity Setpoint Schedule;  !- Humidifying Relative Humidity Setpoint Schedule Name
+    Humidity Setpoint Schedule;  !- Humidifying Setpoint Schedule Name
 
   ZoneControl:Humidistat,
     ReheatHumidistat_SouthZone_2ndFloor,  !- Name
     SouthZone_2ndFloor,      !- Zone Name
-    Humidity Setpoint Schedule;  !- Humidifying Relative Humidity Setpoint Schedule Name
+    Humidity Setpoint Schedule;  !- Humidifying Setpoint Schedule Name
 
   ZoneControl:Humidistat,
     ReheatHumidistat_NorthZone_2ndFloor,  !- Name
     NorthZone_2ndFloor,      !- Zone Name
-    Humidity Setpoint Schedule;  !- Humidifying Relative Humidity Setpoint Schedule Name
+    Humidity Setpoint Schedule;  !- Humidifying Setpoint Schedule Name
 
   ZoneControl:Thermostat,
     Thermostat_SouthZone_1stFloor,  !- Name

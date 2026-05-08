@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -1619,8 +1620,7 @@ namespace SteamCoils {
         }
 
         if (CoilIndex == 0) {
-            ShowSevereError(state,
-                            EnergyPlus::format("GetCoilAirInletNode: Could not find CoilType = \"Coil:Heating:Steam\" with Name = {}", CoilName));
+            ShowSevereError(state, std::format("GetCoilAirInletNode: Could not find CoilType = \"Coil:Heating:Steam\" with Name = {}", CoilName));
             ErrorsFound = true;
             NodeNumber = 0;
         } else {
@@ -1667,8 +1667,7 @@ namespace SteamCoils {
         }
 
         if (CoilIndex == 0) {
-            ShowSevereError(state,
-                            EnergyPlus::format("GetCoilAirOutletNode: Could not find CoilType = \"Coil:Heating:Steam\" with Name = {}", CoilName));
+            ShowSevereError(state, std::format("GetCoilAirOutletNode: Could not find CoilType = \"Coil:Heating:Steam\" with Name = {}", CoilName));
             ErrorsFound = true;
             NodeNumber = 0;
         } else {
@@ -1751,8 +1750,7 @@ namespace SteamCoils {
         }
 
         if (CoilIndex == 0) {
-            ShowSevereError(state,
-                            EnergyPlus::format("GetCoilSteamInletNode: Could not find CoilType = \"Coil:Heating:Steam\" with Name = {}", CoilName));
+            ShowSevereError(state, std::format("GetCoilSteamInletNode: Could not find CoilType = \"Coil:Heating:Steam\" with Name = {}", CoilName));
             ErrorsFound = true;
             NodeNumber = 0;
         } else {
@@ -1799,8 +1797,7 @@ namespace SteamCoils {
         }
 
         if (IndexNum == 0) {
-            ShowSevereError(state,
-                            EnergyPlus::format("GetCoilSteamInletNode: Could not find CoilType = \"Coil:Heating:Steam\" with Name = {}", CoilName));
+            ShowSevereError(state, std::format("GetCoilSteamInletNode: Could not find CoilType = \"Coil:Heating:Steam\" with Name = {}", CoilName));
             ErrorsFound = true;
             NodeNumber = 0;
         } else {
@@ -1838,8 +1835,7 @@ namespace SteamCoils {
         }
 
         if (CoilIndex == 0) {
-            ShowSevereError(state,
-                            EnergyPlus::format("GetCoilSteamInletNode: Could not find CoilType = \"Coil:Heating:Steam\" with Name = {}", CoilName));
+            ShowSevereError(state, std::format("GetCoilSteamInletNode: Could not find CoilType = \"Coil:Heating:Steam\" with Name = {}", CoilName));
             ErrorsFound = true;
             NodeNumber = 0;
         } else {
@@ -1886,8 +1882,7 @@ namespace SteamCoils {
         }
 
         if (IndexNum == 0) {
-            ShowSevereError(state,
-                            EnergyPlus::format("GetCoilSteamInletNode: Could not find CoilType = \"Coil:Heating:Steam\" with Name = {}", CoilName));
+            ShowSevereError(state, std::format("GetCoilSteamInletNode: Could not find CoilType = \"Coil:Heating:Steam\" with Name = {}", CoilName));
             ErrorsFound = true;
             NodeNumber = 0;
         } else {
@@ -1938,7 +1933,7 @@ namespace SteamCoils {
         }
 
         if (WhichCoil == 0) {
-            ShowSevereError(state, EnergyPlus::format("GetCoilSteamInletNode: Could not find CoilType=\"{}\" with Name=\"{}\"", CoilType, CoilName));
+            ShowSevereError(state, std::format("GetCoilSteamInletNode: Could not find CoilType=\"{}\" with Name=\"{}\"", CoilType, CoilName));
             ErrorsFound = true;
             Capacity = 0.0;
         }
@@ -1971,8 +1966,7 @@ namespace SteamCoils {
         }
 
         if (CoilIndex == 0) {
-            ShowSevereError(state,
-                            EnergyPlus::format("GetCoilSteamInletNode: Could not find CoilType = \"Coil:Heating:Steam\" with Name = {}", CoilName));
+            ShowSevereError(state, std::format("GetCoilSteamInletNode: Could not find CoilType = \"Coil:Heating:Steam\" with Name = {}", CoilName));
             ErrorsFound = true;
             return CoilControlType::Invalid;
         }
@@ -2021,8 +2015,7 @@ namespace SteamCoils {
         }
 
         if (WhichCoil == 0) {
-            ShowSevereError(state,
-                            EnergyPlus::format("GetSteamCoilControlNodeNum: Could not find Coil, Type=\"{}\" Name=\"{}\"", CoilType, CoilName));
+            ShowSevereError(state, std::format("GetSteamCoilControlNodeNum: Could not find Coil, Type=\"{}\" Name=\"{}\"", CoilType, CoilName));
             ErrorFlag = true;
             NodeNumber = 0;
         }
@@ -2073,7 +2066,7 @@ namespace SteamCoils {
         }
 
         if (WhichCoil == 0) {
-            ShowSevereError(state, EnergyPlus::format("GetCoilAvailScheduleIndex: Could not find Coil, Type=\"{}\" Name=\"{}\"", CoilType, CoilName));
+            ShowSevereError(state, std::format("GetCoilAvailScheduleIndex: Could not find Coil, Type=\"{}\" Name=\"{}\"", CoilType, CoilName));
             ErrorsFound = true;
             AvailSchIndex = 0;
         }
@@ -2105,9 +2098,9 @@ namespace SteamCoils {
 
         if (CoilNum <= 0 || CoilNum > state.dataSteamCoils->NumSteamCoils) {
             ShowSevereError(state,
-                            EnergyPlus::format("SetHeatingCoilData: called with heating coil Number out of range={} should be >0 and <{}",
-                                               CoilNum,
-                                               state.dataSteamCoils->NumSteamCoils));
+                            std::format("SetHeatingCoilData: called with heating coil Number out of range={} should be >0 and <{}",
+                                        CoilNum,
+                                        state.dataSteamCoils->NumSteamCoils));
             ErrorsFound = true;
             return;
         }

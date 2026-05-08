@@ -45,33 +45,33 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-// Standard C++ library
-#include <cerrno>
-#include <cstdio>
-#include <cstdlib>
-#include <fstream>
-#include <iostream>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <type_traits>
-
+// C++ Headers
 #ifdef _WIN32
 #    include <Shlwapi.h>
 #    include <windows.h>
 #else
 #    include <unistd.h>
 #endif
-
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
+#include <format>
+#include <fstream>
+#include <iostream>
 #ifdef __APPLE__
 #    include <mach-o/dyld.h>
 #endif
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <type_traits>
+
+// Third Party Headers
+#include <CLI/CLI11.hpp>
 
 // EnergyPlus Headers
 #include <EnergyPlus/DataStringGlobals.hh>
 #include <EnergyPlus/FileSystem.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
-
-#include <CLI/CLI11.hpp>
 
 namespace EnergyPlus {
 
@@ -348,7 +348,7 @@ namespace FileSystem {
     {
         // Shenanigans would not be needed with fmt 10+ (maybe earlier), because fmt has native fs::path support
         if (!fileExists(filePath)) {
-            throw FatalError(fmt::format("File does not exists: {}", filePath));
+            throw FatalError(EnergyPlus::format("File does not exists: {}", filePath.string()));
         }
 
         // Can only be 'r', 'b' or 'rb'
@@ -359,7 +359,7 @@ namespace FileSystem {
         const std::uintmax_t file_size = fs::file_size(filePath);
         std::ifstream file(filePath, mode);
         if (!file.is_open()) {
-            throw FatalError(fmt::format("Could not open file: {}", filePath));
+            throw FatalError(EnergyPlus::format("Could not open file: {}", filePath.string()));
         }
         std::string result(file_size, '\0');
         file.read(result.data(), file_size);
@@ -371,7 +371,7 @@ namespace FileSystem {
 
         // Shenanigans would not be needed with fmt 10+ (maybe earlier), because fmt has native fs::path support
         if (!fileExists(filePath)) {
-            throw FatalError(fmt::format("File does not exists: {}", filePath));
+            throw FatalError(EnergyPlus::format("File does not exists: {}", filePath.string()));
         }
 
         // Can only be 'r', 'b' or 'rb'
@@ -381,7 +381,7 @@ namespace FileSystem {
 
         std::ifstream file(filePath, mode);
         if (!file.is_open()) {
-            throw FatalError(fmt::format("Could not open file: {}", filePath));
+            throw FatalError(EnergyPlus::format("Could not open file: {}", filePath.string()));
         }
 
         FileTypes const ext = getFileType(filePath);

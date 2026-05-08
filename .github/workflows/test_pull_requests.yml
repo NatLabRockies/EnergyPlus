@@ -153,6 +153,7 @@ jobs:
         nproc: ${{ steps.setup-runner.outputs.nproc }}
         python-version: ${{ env.Python_REQUIRED_VERSION }}
         python-root-dir: ${{ steps.setup-runner.outputs.python-root-dir }}
+        python-executable: ${{ steps.setup-runner.outputs.python-executable }}
 
     - name: Baseline Test
       if: matrix.run_regressions && steps.cachebaselineregression.outputs.cache-hit != 'true'
@@ -200,6 +201,7 @@ jobs:
         nproc: ${{ steps.setup-runner.outputs.nproc }}
         python-version: ${{ env.Python_REQUIRED_VERSION }}
         python-root-dir: ${{ steps.setup-runner.outputs.python-root-dir }}
+        python-executable: ${{ steps.setup-runner.outputs.python-executable }}
 
     - name: Remove problem matcher
       shell: bash
@@ -279,5 +281,5 @@ jobs:
     - name: Fail on Regressions from Forked Repository
       if: always() && matrix.run_regressions && steps.regressions.outcome == 'failure' && github.event.pull_request.head.repo.full_name != 'NatLabRockies/EnergyPlus'
       run: |
-        echo "::error::Regressions detected in pull request from forked repository, check job summary for details and to download regression results"
+        echo "::error::Regressions detected in pull request from forked repository. Download regression results: ${{ steps.upload_regressions.outputs.artifact-url }}"
         exit 1

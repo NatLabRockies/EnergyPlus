@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -367,8 +368,8 @@ namespace WindowAC {
                 if (FanVolFlow != AutoSize) {
                     if (FanVolFlow < windAC.MaxAirVolFlow) {
                         ShowWarningError(state,
-                                         EnergyPlus::format("Air flow rate = {:.7T} in fan object {} is less than the maximum supply air flow "
-                                                            "rate ({:.7T}) in the {} object.",
+                                         EnergyPlus::format("Air flow rate = {:.7f} in fan object {} is less than the maximum supply air flow "
+                                                            "rate ({:.7f}) in the {} object.",
                                                             FanVolFlow,
                                                             windAC.FanName,
                                                             windAC.MaxAirVolFlow,
@@ -738,11 +739,10 @@ namespace WindowAC {
                                                               state.dataWindowAC->WindAC(Loop).Name)) {
                     continue;
                 }
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format("InitWindowAC: Window AC Unit=[{},{}] is not on any ZoneHVAC:EquipmentList.  It will not be simulated.",
-                                       state.dataWindowAC->cWindowAC_UnitTypes(state.dataWindowAC->WindAC(Loop).UnitType),
-                                       state.dataWindowAC->WindAC(Loop).Name));
+                ShowSevereError(state,
+                                std::format("InitWindowAC: Window AC Unit=[{},{}] is not on any ZoneHVAC:EquipmentList.  It will not be simulated.",
+                                            state.dataWindowAC->cWindowAC_UnitTypes(state.dataWindowAC->WindAC(Loop).UnitType),
+                                            state.dataWindowAC->WindAC(Loop).Name));
             }
         }
 
@@ -1330,12 +1330,11 @@ namespace WindowAC {
         }
         if (Iter > MaxIter) {
             if (windAC.MaxIterIndex1 == 0) {
-                ShowWarningMessage(
-                    state,
-                    EnergyPlus::format("ZoneHVAC:WindowAirConditioner=\"{}\" -- Exceeded max iterations while adjusting compressor sensible "
-                                       "runtime to meet the zone load within the cooling convergence tolerance.",
-                                       windAC.Name));
-                ShowContinueErrorTimeStamp(state, EnergyPlus::format("Iterations={}", MaxIter));
+                ShowWarningMessage(state,
+                                   std::format("ZoneHVAC:WindowAirConditioner=\"{}\" -- Exceeded max iterations while adjusting compressor sensible "
+                                               "runtime to meet the zone load within the cooling convergence tolerance.",
+                                               windAC.Name));
+                ShowContinueErrorTimeStamp(state, std::format("Iterations={}", MaxIter));
             }
             ShowRecurringWarningErrorAtEnd(state,
                                            "ZoneHVAC:WindowAirConditioner=\"" + windAC.Name +
@@ -1380,10 +1379,10 @@ namespace WindowAC {
                 if (windAC.MaxIterIndex2 == 0) {
                     ShowWarningMessage(
                         state,
-                        EnergyPlus::format("ZoneHVAC:WindowAirConditioner=\"{}\" -- Exceeded max iterations while adjusting compressor latent "
-                                           "runtime to meet the zone load within the cooling convergence tolerance.",
-                                           windAC.Name));
-                    ShowContinueErrorTimeStamp(state, EnergyPlus::format("Iterations={}", MaxIter));
+                        std::format("ZoneHVAC:WindowAirConditioner=\"{}\" -- Exceeded max iterations while adjusting compressor latent "
+                                    "runtime to meet the zone load within the cooling convergence tolerance.",
+                                    windAC.Name));
+                    ShowContinueErrorTimeStamp(state, std::format("Iterations={}", MaxIter));
                 }
                 ShowRecurringWarningErrorAtEnd(state,
                                                "ZoneHVAC:WindowAirConditioner=\"" + windAC.Name +

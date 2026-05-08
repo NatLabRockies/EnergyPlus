@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -467,7 +468,7 @@ namespace DesiccantDehumidifiers {
                     errFlag = false;
                     desicDehum.CoilControlNode = SteamCoils::GetCoilSteamInletNode(state, "Coil:Heating:Steam", RegenCoilName, errFlag);
                     if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
+                        ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
                         ErrorsFound = true;
                     }
 
@@ -483,7 +484,7 @@ namespace DesiccantDehumidifiers {
                     int RegenCoilAirInletNode = SteamCoils::GetCoilAirInletNode(state, desicDehum.RegenCoilIndex, RegenCoilName, errFlag);
                     desicDehum.RegenCoilInletNode = RegenCoilAirInletNode;
                     if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
+                        ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
                         ErrorsFound = true;
                     }
 
@@ -492,13 +493,13 @@ namespace DesiccantDehumidifiers {
                     int RegenCoilAirOutletNode = SteamCoils::GetCoilAirOutletNode(state, desicDehum.RegenCoilIndex, RegenCoilName, errFlag);
                     desicDehum.RegenCoilOutletNode = RegenCoilAirOutletNode;
                     if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
+                        ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
                         ErrorsFound = true;
                     }
                 }
             } else {
-                ShowSevereError(state, EnergyPlus::format("{}{} = {}", RoutineName, CurrentModuleObject, Alphas(1)));
-                ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(8), Alphas(8)));
+                ShowSevereError(state, std::format("{}{} = {}", RoutineName, CurrentModuleObject, Alphas(1)));
+                ShowContinueError(state, std::format("Illegal {} = {}", cAlphaFields(8), Alphas(8)));
                 ErrorsFound = true;
             }
 
@@ -517,46 +518,46 @@ namespace DesiccantDehumidifiers {
                 desicDehum.PerformanceModel_Num = PerformanceModel::UserCurves;
                 desicDehum.ProcDryBulbCurvefTW = Curve::GetCurveIndex(state, Alphas(13));
                 if (desicDehum.ProcDryBulbCurvefTW == 0) {
-                    ShowSevereError(state, EnergyPlus::format("{}Curve object={} not found.", RoutineName, Alphas(13)));
+                    ShowSevereError(state, std::format("{}Curve object={} not found.", RoutineName, Alphas(13)));
                     ErrorsFound2 = true;
                 }
                 desicDehum.ProcDryBulbCurvefV = Curve::GetCurveIndex(state, Alphas(14));
                 if (desicDehum.ProcDryBulbCurvefV == 0) {
-                    ShowSevereError(state, EnergyPlus::format("{}Curve object={} not found.", RoutineName, Alphas(14)));
+                    ShowSevereError(state, std::format("{}Curve object={} not found.", RoutineName, Alphas(14)));
                     ErrorsFound2 = true;
                 }
                 desicDehum.ProcHumRatCurvefTW = Curve::GetCurveIndex(state, Alphas(15));
                 if (desicDehum.ProcHumRatCurvefTW == 0) {
-                    ShowSevereError(state, EnergyPlus::format("{}Curve object={} not found.", RoutineName, Alphas(15)));
+                    ShowSevereError(state, std::format("{}Curve object={} not found.", RoutineName, Alphas(15)));
                     ErrorsFound2 = true;
                 }
                 desicDehum.ProcHumRatCurvefV = Curve::GetCurveIndex(state, Alphas(16));
                 if (desicDehum.ProcHumRatCurvefV == 0) {
-                    ShowSevereError(state, EnergyPlus::format("{}Curve object={} not found.", RoutineName, Alphas(16)));
+                    ShowSevereError(state, std::format("{}Curve object={} not found.", RoutineName, Alphas(16)));
                     ErrorsFound2 = true;
                 }
                 desicDehum.RegenEnergyCurvefTW = Curve::GetCurveIndex(state, Alphas(17));
                 if (desicDehum.RegenEnergyCurvefTW == 0) {
-                    ShowSevereError(state, EnergyPlus::format("{}Curve object={} not found.", RoutineName, Alphas(17)));
+                    ShowSevereError(state, std::format("{}Curve object={} not found.", RoutineName, Alphas(17)));
                     ErrorsFound2 = true;
                 }
                 desicDehum.RegenEnergyCurvefV = Curve::GetCurveIndex(state, Alphas(18));
                 if (desicDehum.RegenEnergyCurvefV == 0) {
-                    ShowSevereError(state, EnergyPlus::format("{}Curve object={} not found.", RoutineName, Alphas(18)));
+                    ShowSevereError(state, std::format("{}Curve object={} not found.", RoutineName, Alphas(18)));
                     ErrorsFound2 = true;
                 }
                 desicDehum.RegenVelCurvefTW = Curve::GetCurveIndex(state, Alphas(19));
                 if (desicDehum.RegenVelCurvefTW == 0) {
-                    ShowSevereError(state, EnergyPlus::format("{}Curve object={} not found.", RoutineName, Alphas(19)));
+                    ShowSevereError(state, std::format("{}Curve object={} not found.", RoutineName, Alphas(19)));
                     ErrorsFound2 = true;
                 }
                 desicDehum.RegenVelCurvefV = Curve::GetCurveIndex(state, Alphas(20));
                 if (desicDehum.RegenVelCurvefV == 0) {
-                    ShowSevereError(state, EnergyPlus::format("{}Curve object={} not found.", RoutineName, Alphas(20)));
+                    ShowSevereError(state, std::format("{}Curve object={} not found.", RoutineName, Alphas(20)));
                     ErrorsFound2 = true;
                 }
                 if (ErrorsFound2) {
-                    ShowSevereError(state, EnergyPlus::format("{}{} = {}", RoutineName, CurrentModuleObject, Alphas(1)));
+                    ShowSevereError(state, std::format("{}{} = {}", RoutineName, CurrentModuleObject, Alphas(1)));
                     ShowContinueError(state, "Errors found in getting performance curves.");
                     ErrorsFound = true;
                 }
@@ -574,8 +575,8 @@ namespace DesiccantDehumidifiers {
                         ErrorsFound = true;
                     }
                 } else {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(10), Alphas(10)));
+                    ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, Alphas(1)));
+                    ShowContinueError(state, std::format("Illegal {} = {}", cAlphaFields(10), Alphas(10)));
                     ErrorsFound = true;
                 }
             } else {
@@ -589,17 +590,17 @@ namespace DesiccantDehumidifiers {
                 //  If DEFAULT performance model, warn if curve names and nominal regen temp have values
                 if ((!lAlphaBlanks(13)) || (!lAlphaBlanks(14)) || (!lAlphaBlanks(15)) || (!lAlphaBlanks(16)) || (!lAlphaBlanks(17)) ||
                     (!lAlphaBlanks(18)) || (!lAlphaBlanks(19)) || (!lAlphaBlanks(20))) {
-                    ShowWarningError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("{} = {}", CurrentModuleObject, Alphas(1)));
                     ShowContinueError(state, "DEFAULT performance selected, curve names and nominal regen temp will be ignored.");
                 }
                 if (desicDehum.NomProcAirVel > 4.064) {
-                    ShowWarningError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("{} = {}", CurrentModuleObject, Alphas(1)));
                     ShowContinueError(state,
                                       EnergyPlus::format("{} > 4.064 m/s.; Value in input={:.3R}", cNumericFields(3), desicDehum.NomProcAirVel));
                     ShowContinueError(state, "DEFAULT performance curves not valid outside 2.032 to 4.064 m/s (400 to 800 fpm).");
                 }
                 if (desicDehum.NomProcAirVel < 2.032) {
-                    ShowWarningError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("{} = {}", CurrentModuleObject, Alphas(1)));
                     ShowContinueError(state,
                                       EnergyPlus::format("{} < 2.032 m/s.; Value in input={:.3R}", cNumericFields(3), desicDehum.NomProcAirVel));
                     ShowContinueError(state, "DEFAULT performance curves not valid outside 2.032 to 4.064 m/s (400 to 800 fpm).");
@@ -615,8 +616,8 @@ namespace DesiccantDehumidifiers {
                         ErrorsFound = true;
                     }
                 } else {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(10), Alphas(10)));
+                    ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, Alphas(1)));
+                    ShowContinueError(state, std::format("Illegal {} = {}", cAlphaFields(10), Alphas(10)));
                     ShowContinueError(state, "For DEFAULT performance model, the regen fan type must be Fan:VariableVolume");
                     ErrorsFound = true;
                 }
@@ -667,7 +668,7 @@ namespace DesiccantDehumidifiers {
             ErrorsFound2 = false;
             ValidateComponent(state, desicDehum.DehumType, desicDehum.Name, ErrorsFound2, desicDehum.DehumType + " = \"" + desicDehum.Name + "\"");
             if (ErrorsFound2) {
-                ShowSevereError(state, EnergyPlus::format("{} \"{}\" is not unique", desicDehum.DehumType, desicDehum.Name));
+                ShowSevereError(state, std::format("{} \"{}\" is not unique", desicDehum.DehumType, desicDehum.Name));
                 ErrorsFoundGeneric = true;
             }
 
@@ -683,8 +684,8 @@ namespace DesiccantDehumidifiers {
             desicDehum.HXName = Alphas(4);
 
             if (!Util::SameString(desicDehum.HXType, "HeatExchanger:Desiccant:BalancedFlow")) {
-                ShowWarningError(state, EnergyPlus::format("{} = \"{}\"", desicDehum.DehumType, desicDehum.Name));
-                ShowContinueError(state, EnergyPlus::format("Invalid {} = {}", cAlphaFields(3), desicDehum.HXType));
+                ShowWarningError(state, std::format("{} = \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                ShowContinueError(state, std::format("Invalid {} = {}", cAlphaFields(3), desicDehum.HXType));
                 ErrorsFoundGeneric = true;
             } else {
                 desicDehum.HXTypeNum = BalancedHX;
@@ -699,7 +700,7 @@ namespace DesiccantDehumidifiers {
             ErrorsFound2 = false;
             desicDehum.HXProcInNode = HeatRecovery::GetSecondaryInletNode(state, desicDehum.HXName, ErrorsFound2);
             if (ErrorsFound2) {
-                ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                ShowContinueError(state, std::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.Name));
                 ErrorsFoundGeneric = true;
             }
 
@@ -718,7 +719,7 @@ namespace DesiccantDehumidifiers {
             ErrorsFound2 = false;
             desicDehum.HXProcOutNode = HeatRecovery::GetSecondaryOutletNode(state, desicDehum.HXName, ErrorsFound2);
             if (ErrorsFound2) {
-                ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                ShowContinueError(state, std::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.Name));
                 ErrorsFoundGeneric = true;
             }
 
@@ -739,14 +740,14 @@ namespace DesiccantDehumidifiers {
             ErrorsFound2 = false;
             desicDehum.HXRegenInNode = HeatRecovery::GetSupplyInletNode(state, desicDehum.HXName, ErrorsFound2);
             if (ErrorsFound2) {
-                ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                ShowContinueError(state, std::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.Name));
                 ErrorsFoundGeneric = true;
             }
 
             ErrorsFound2 = false;
             desicDehum.HXRegenOutNode = HeatRecovery::GetSupplyOutletNode(state, desicDehum.HXName, ErrorsFound2);
             if (ErrorsFound2) {
-                ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                ShowContinueError(state, std::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.Name));
                 ErrorsFoundGeneric = true;
             }
 
@@ -761,8 +762,8 @@ namespace DesiccantDehumidifiers {
                                                                 Node::ObjectIsNotParent);
 
             if (desicDehum.ControlNodeNum == 0) {
-                ShowSevereError(state, EnergyPlus::format("{} = \"{}\"", desicDehum.DehumType, desicDehum.Name));
-                ShowContinueError(state, EnergyPlus::format("{} must be specified.", cAlphaFields(5)));
+                ShowSevereError(state, std::format("{} = \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                ShowContinueError(state, std::format("{} must be specified.", cAlphaFields(5)));
                 ErrorsFoundGeneric = true;
             }
 
@@ -783,8 +784,8 @@ namespace DesiccantDehumidifiers {
                     ErrorsFoundGeneric = true;
                 }
             } else {
-                ShowSevereError(state, EnergyPlus::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
-                ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(6), HVAC::fanTypeNamesUC[(int)desicDehum.regenFanType]));
+                ShowSevereError(state, std::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                ShowContinueError(state, std::format("Illegal {} = {}", cAlphaFields(6), HVAC::fanTypeNamesUC[(int)desicDehum.regenFanType]));
                 ErrorsFoundGeneric = true;
             }
 
@@ -824,50 +825,50 @@ namespace DesiccantDehumidifiers {
                     }
 
                     if (desicDehum.RegenSetPointTemp <= 0.0) {
-                        ShowSevereError(state, EnergyPlus::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
-                        ShowContinueError(state, EnergyPlus::format("{} must be greater than 0.", cNumericFields(1)));
+                        ShowSevereError(state, std::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                        ShowContinueError(state, std::format("{} must be greater than 0.", cNumericFields(1)));
                         ErrorsFoundGeneric = true;
                     }
 
                     ErrorsFound2 = false;
                     desicDehum.RegenCoilInletNode = HeatingCoils::GetCoilInletNode(state, Alphas(9), RegenCoilName, ErrorsFound2);
                     if (ErrorsFound2) {
-                        ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                        ShowContinueError(state, std::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.Name));
                         ErrorsFoundGeneric = true;
                     }
 
                     ErrorsFound2 = false;
                     desicDehum.RegenCoilOutletNode = HeatingCoils::GetCoilOutletNode(state, Alphas(9), RegenCoilName, ErrorsFound2);
                     if (ErrorsFound2) {
-                        ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                        ShowContinueError(state, std::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.Name));
                         ErrorsFoundGeneric = true;
                     }
 
                     ErrorsFound2 = false;
                     HeatingCoils::GetCoilIndex(state, RegenCoilName, desicDehum.RegenCoilIndex, ErrorsFound2);
                     if (ErrorsFound2) {
-                        ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                        ShowContinueError(state, std::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.Name));
                         ErrorsFoundGeneric = true;
                     }
 
                     ErrorsFound2 = false;
                     RegenCoilControlNodeNum = HeatingCoils::GetCoilControlNodeNum(state, Alphas(9), RegenCoilName, ErrorsFound2);
                     if (ErrorsFound2) {
-                        ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                        ShowContinueError(state, std::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.Name));
                         ErrorsFoundGeneric = true;
                     }
 
                     if (RegenCoilControlNodeNum > 0) {
-                        ShowSevereError(state, EnergyPlus::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                        ShowSevereError(state, std::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
                         ShowContinueError(
                             state,
                             EnergyPlus::format("{} is specified as {:.3R} C in this object.", cNumericFields(1), desicDehum.RegenSetPointTemp));
                         ShowContinueError(state, " Do not specify a coil temperature setpoint node name in the regeneration air heater object.");
-                        ShowContinueError(state, EnergyPlus::format("...{} = {}", cAlphaFields(9), Alphas(9)));
-                        ShowContinueError(state, EnergyPlus::format("...{} = {}", cAlphaFields(10), desicDehum.RegenCoilName));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("...heating coil temperature setpoint node = {}",
-                                                             state.dataLoopNodes->NodeID(RegenCoilControlNodeNum)));
+                        ShowContinueError(state, std::format("...{} = {}", cAlphaFields(9), Alphas(9)));
+                        ShowContinueError(state, std::format("...{} = {}", cAlphaFields(10), desicDehum.RegenCoilName));
+                        ShowContinueError(
+                            state,
+                            std::format("...heating coil temperature setpoint node = {}", state.dataLoopNodes->NodeID(RegenCoilControlNodeNum)));
                         ShowContinueError(state, "...leave the heating coil temperature setpoint node name blank in the regen heater object.");
                         ErrorsFoundGeneric = true;
                     }
@@ -875,7 +876,7 @@ namespace DesiccantDehumidifiers {
                     RegairHeatingCoilFlag = true;
                     HeatingCoils::SetHeatingCoilData(state, desicDehum.RegenCoilIndex, ErrorsFound2, RegairHeatingCoilFlag, DesicDehumNum);
                     if (ErrorsFound2) {
-                        ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                        ShowContinueError(state, std::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.Name));
                         ErrorsFoundGeneric = true;
                     }
 
@@ -883,20 +884,20 @@ namespace DesiccantDehumidifiers {
                     desicDehum.regenCoilType = HVAC::CoilType::HeatingWater;
                     ValidateComponent(state, Alphas(9), RegenCoilName, IsNotOK, CurrentModuleObject);
                     if (IsNotOK) {
-                        ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
+                        ShowContinueError(state, std::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
                         ErrorsFound = true;
                     } else { // mine data from heating coil object
                         errFlag = false;
                         desicDehum.RegenCoilIndex = WaterCoils::GetWaterCoilIndex(state, "COIL:HEATING:WATER", RegenCoilName, errFlag);
                         if (desicDehum.RegenCoilIndex == 0) {
-                            ShowSevereError(state, EnergyPlus::format("{} illegal {} = {}", CurrentModuleObject, cAlphaFields(9), RegenCoilName));
-                            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
+                            ShowSevereError(state, std::format("{} illegal {} = {}", CurrentModuleObject, cAlphaFields(9), RegenCoilName));
+                            ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
                             ErrorsFound = true;
                         }
 
                         if (desicDehum.RegenSetPointTemp <= 0.0) {
-                            ShowSevereError(state, EnergyPlus::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
-                            ShowContinueError(state, EnergyPlus::format("{} must be greater than 0.", cNumericFields(1)));
+                            ShowSevereError(state, std::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                            ShowContinueError(state, std::format("{} must be greater than 0.", cNumericFields(1)));
                             ErrorsFoundGeneric = true;
                         }
 
@@ -904,7 +905,7 @@ namespace DesiccantDehumidifiers {
                         errFlag = false;
                         desicDehum.CoilControlNode = WaterCoils::GetCoilWaterInletNode(state, "Coil:Heating:Water", RegenCoilName, errFlag);
                         if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
+                            ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
                             ErrorsFound = true;
                         }
 
@@ -912,7 +913,7 @@ namespace DesiccantDehumidifiers {
                         errFlag = false;
                         desicDehum.MaxCoilFluidFlow = WaterCoils::GetCoilMaxWaterFlowRate(state, "Coil:Heating:Water", RegenCoilName, errFlag);
                         if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
+                            ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
                             ErrorsFound = true;
                         }
 
@@ -921,7 +922,7 @@ namespace DesiccantDehumidifiers {
                         int RegenCoilAirInletNode = WaterCoils::GetCoilInletNode(state, "Coil:Heating:Water", RegenCoilName, errFlag);
                         desicDehum.RegenCoilInletNode = RegenCoilAirInletNode;
                         if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
+                            ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
                             ErrorsFound = true;
                         }
 
@@ -930,14 +931,14 @@ namespace DesiccantDehumidifiers {
                         int RegenCoilAirOutletNode = WaterCoils::GetCoilOutletNode(state, "Coil:Heating:Water", RegenCoilName, errFlag);
                         desicDehum.RegenCoilOutletNode = RegenCoilAirOutletNode;
                         if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
+                            ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
                             ErrorsFound = true;
                         }
 
                         RegairHeatingCoilFlag = true;
                         WaterCoils::SetWaterCoilData(state, desicDehum.RegenCoilIndex, ErrorsFound2, RegairHeatingCoilFlag, DesicDehumNum);
                         if (ErrorsFound2) {
-                            ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                            ShowContinueError(state, std::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.Name));
                             ErrorsFoundGeneric = true;
                         }
                     }
@@ -945,20 +946,20 @@ namespace DesiccantDehumidifiers {
                     desicDehum.regenCoilType = HVAC::CoilType::HeatingSteam;
                     ValidateComponent(state, Alphas(9), RegenCoilName, IsNotOK, CurrentModuleObject);
                     if (IsNotOK) {
-                        ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
+                        ShowContinueError(state, std::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
                         ErrorsFound = true;
                     } else { // mine data from the regeneration heating coil object
                         if (desicDehum.RegenSetPointTemp <= 0.0) {
-                            ShowSevereError(state, EnergyPlus::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
-                            ShowContinueError(state, EnergyPlus::format("{} must be greater than 0.", cNumericFields(1)));
+                            ShowSevereError(state, std::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                            ShowContinueError(state, std::format("{} must be greater than 0.", cNumericFields(1)));
                             ErrorsFoundGeneric = true;
                         }
 
                         errFlag = false;
                         desicDehum.RegenCoilIndex = SteamCoils::GetSteamCoilIndex(state, "COIL:HEATING:STEAM", RegenCoilName, errFlag);
                         if (desicDehum.RegenCoilIndex == 0) {
-                            ShowSevereError(state, EnergyPlus::format("{} illegal {} = {}", CurrentModuleObject, cAlphaFields(9), RegenCoilName));
-                            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
+                            ShowSevereError(state, std::format("{} illegal {} = {}", CurrentModuleObject, cAlphaFields(9), RegenCoilName));
+                            ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
                             ErrorsFound = true;
                         }
 
@@ -966,7 +967,7 @@ namespace DesiccantDehumidifiers {
                         errFlag = false;
                         desicDehum.CoilControlNode = SteamCoils::GetCoilSteamInletNode(state, "Coil:Heating:Steam", RegenCoilName, errFlag);
                         if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
+                            ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
                             ErrorsFound = true;
                         }
 
@@ -982,7 +983,7 @@ namespace DesiccantDehumidifiers {
                         int RegenCoilAirInletNode = SteamCoils::GetCoilAirInletNode(state, desicDehum.RegenCoilIndex, RegenCoilName, errFlag);
                         desicDehum.RegenCoilInletNode = RegenCoilAirInletNode;
                         if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
+                            ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
                             ErrorsFound = true;
                         }
 
@@ -991,7 +992,7 @@ namespace DesiccantDehumidifiers {
                         int RegenCoilAirOutletNode = SteamCoils::GetCoilAirOutletNode(state, desicDehum.RegenCoilIndex, RegenCoilName, errFlag);
                         desicDehum.RegenCoilOutletNode = RegenCoilAirOutletNode;
                         if (errFlag) {
-                            ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
+                            ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
                             ErrorsFound = true;
                         }
                     }
@@ -1000,21 +1001,21 @@ namespace DesiccantDehumidifiers {
                     RegenCoilControlNodeNum = SteamCoils::GetSteamCoilControlNodeNum(state, Alphas(9), RegenCoilName, ErrorsFound2);
 
                     if (ErrorsFound2) {
-                        ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                        ShowContinueError(state, std::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.Name));
                         ErrorsFoundGeneric = true;
                     }
 
                     if (RegenCoilControlNodeNum > 0) {
-                        ShowSevereError(state, EnergyPlus::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                        ShowSevereError(state, std::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
                         ShowContinueError(
                             state,
                             EnergyPlus::format("{} is specified as {:.3R} C in this object.", cNumericFields(1), desicDehum.RegenSetPointTemp));
                         ShowContinueError(state, " Do not specify a coil temperature setpoint node name in the regeneration air heater object.");
-                        ShowContinueError(state, EnergyPlus::format("...{} = {}", cAlphaFields(9), Alphas(9)));
-                        ShowContinueError(state, EnergyPlus::format("...{} = {}", cAlphaFields(10), desicDehum.RegenCoilName));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("...heating coil temperature setpoint node = {}",
-                                                             state.dataLoopNodes->NodeID(RegenCoilControlNodeNum)));
+                        ShowContinueError(state, std::format("...{} = {}", cAlphaFields(9), Alphas(9)));
+                        ShowContinueError(state, std::format("...{} = {}", cAlphaFields(10), desicDehum.RegenCoilName));
+                        ShowContinueError(
+                            state,
+                            std::format("...heating coil temperature setpoint node = {}", state.dataLoopNodes->NodeID(RegenCoilControlNodeNum)));
                         ShowContinueError(state, "...leave the heating coil temperature setpoint node name blank in the regen heater object.");
                         ErrorsFoundGeneric = true;
                     }
@@ -1022,13 +1023,13 @@ namespace DesiccantDehumidifiers {
                     RegairHeatingCoilFlag = true;
                     SteamCoils::SetSteamCoilData(state, desicDehum.RegenCoilIndex, ErrorsFound2, RegairHeatingCoilFlag, DesicDehumNum);
                     if (ErrorsFound2) {
-                        ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                        ShowContinueError(state, std::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.Name));
                         ErrorsFoundGeneric = true;
                     }
 
                 } else {
-                    ShowSevereError(state, EnergyPlus::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
-                    ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(9), Alphas(9)));
+                    ShowSevereError(state, std::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                    ShowContinueError(state, std::format("Illegal {} = {}", cAlphaFields(9), Alphas(9)));
                     ErrorsFoundGeneric = true;
                 }
             }
@@ -1088,37 +1089,36 @@ namespace DesiccantDehumidifiers {
                                                                      Node::ObjectIsParent);
                 if (!lAlphaBlanks(10)) {
                     if (desicDehum.RegenFanOutNode != desicDehum.RegenCoilInletNode) {
-                        ShowSevereError(state, EnergyPlus::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                        ShowSevereError(state, std::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
                         ShowContinueError(state,
                                           "Regen fan outlet node name and regen heater inlet node name do not match for fan placement: Blow Through");
-                        ShowContinueError(
-                            state, EnergyPlus::format("...Regen fan outlet node   = {}", state.dataLoopNodes->NodeID(desicDehum.RegenFanOutNode)));
-                        ShowContinueError(
-                            state, EnergyPlus::format("...Regen heater inlet node = {}", state.dataLoopNodes->NodeID(desicDehum.RegenCoilInletNode)));
+                        ShowContinueError(state,
+                                          std::format("...Regen fan outlet node   = {}", state.dataLoopNodes->NodeID(desicDehum.RegenFanOutNode)));
+                        ShowContinueError(state,
+                                          std::format("...Regen heater inlet node = {}", state.dataLoopNodes->NodeID(desicDehum.RegenCoilInletNode)));
                         ErrorsFoundGeneric = true;
                     }
                     if (desicDehum.RegenCoilOutletNode != desicDehum.HXRegenInNode) {
-                        ShowSevereError(state, EnergyPlus::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                        ShowSevereError(state, std::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
                         ShowContinueError(state,
                                           "Regen heater outlet node name and desiccant heat exchanger regen inlet node name do not match for fan "
                                           "placement: Blow Through");
                         ShowContinueError(
-                            state,
-                            EnergyPlus::format("...Regen heater outlet node = {}", state.dataLoopNodes->NodeID(desicDehum.RegenCoilOutletNode)));
-                        ShowContinueError(
-                            state, EnergyPlus::format("...HX regen inlet node      = {}", state.dataLoopNodes->NodeID(desicDehum.HXRegenInNode)));
+                            state, std::format("...Regen heater outlet node = {}", state.dataLoopNodes->NodeID(desicDehum.RegenCoilOutletNode)));
+                        ShowContinueError(state,
+                                          std::format("...HX regen inlet node      = {}", state.dataLoopNodes->NodeID(desicDehum.HXRegenInNode)));
                         ErrorsFoundGeneric = true;
                     }
                 } else {
                     if (desicDehum.RegenFanOutNode != desicDehum.HXRegenInNode) {
-                        ShowSevereError(state, EnergyPlus::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                        ShowSevereError(state, std::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
                         ShowContinueError(
                             state,
                             "Regen fan outlet node name and desiccant heat exchanger inlet node name do not match for fan placement: Blow Through");
-                        ShowContinueError(
-                            state, EnergyPlus::format("...Regen fan outlet node   = {}", state.dataLoopNodes->NodeID(desicDehum.RegenFanOutNode)));
-                        ShowContinueError(
-                            state, EnergyPlus::format("...Desiccant HX inlet node = {}", state.dataLoopNodes->NodeID(desicDehum.HXRegenInNode)));
+                        ShowContinueError(state,
+                                          std::format("...Regen fan outlet node   = {}", state.dataLoopNodes->NodeID(desicDehum.RegenFanOutNode)));
+                        ShowContinueError(state,
+                                          std::format("...Desiccant HX inlet node = {}", state.dataLoopNodes->NodeID(desicDehum.HXRegenInNode)));
                         ErrorsFoundGeneric = true;
                     }
                 }
@@ -1143,15 +1143,14 @@ namespace DesiccantDehumidifiers {
                                                                         Node::CompFluidStream::Primary,
                                                                         Node::ObjectIsParent);
                     if (desicDehum.RegenCoilOutletNode != desicDehum.HXRegenInNode) {
-                        ShowSevereError(state, EnergyPlus::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                        ShowSevereError(state, std::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
                         ShowContinueError(state,
                                           "Regen heater outlet node name and desiccant heat exchanger regen inlet node name do not match for fan "
                                           "placement: Draw Through");
                         ShowContinueError(
-                            state,
-                            EnergyPlus::format("...Regen heater outlet node = {}", state.dataLoopNodes->NodeID(desicDehum.RegenCoilOutletNode)));
-                        ShowContinueError(
-                            state, EnergyPlus::format("...HX regen inlet node      = {}", state.dataLoopNodes->NodeID(desicDehum.HXRegenInNode)));
+                            state, std::format("...Regen heater outlet node = {}", state.dataLoopNodes->NodeID(desicDehum.RegenCoilOutletNode)));
+                        ShowContinueError(state,
+                                          std::format("...HX regen inlet node      = {}", state.dataLoopNodes->NodeID(desicDehum.HXRegenInNode)));
                         ErrorsFoundGeneric = true;
                     }
                 } else {
@@ -1166,14 +1165,12 @@ namespace DesiccantDehumidifiers {
                                                                         Node::ObjectIsParent);
                 }
                 if (desicDehum.RegenFanInNode != desicDehum.HXRegenOutNode) {
-                    ShowSevereError(state, EnergyPlus::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                    ShowSevereError(state, std::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
                     ShowContinueError(
                         state,
                         "Regen fan inlet node name and desiccant heat exchanger regen outlet node name do not match for fan placement: Draw Through");
-                    ShowContinueError(state,
-                                      EnergyPlus::format("...Regen fan inlet node = {}", state.dataLoopNodes->NodeID(desicDehum.RegenFanInNode)));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("...HX regen outlet node = {}", state.dataLoopNodes->NodeID(desicDehum.HXRegenOutNode)));
+                    ShowContinueError(state, std::format("...Regen fan inlet node = {}", state.dataLoopNodes->NodeID(desicDehum.RegenFanInNode)));
+                    ShowContinueError(state, std::format("...HX regen outlet node = {}", state.dataLoopNodes->NodeID(desicDehum.HXRegenOutNode)));
                     ErrorsFoundGeneric = true;
                 }
             }
@@ -1204,8 +1201,8 @@ namespace DesiccantDehumidifiers {
                     }
 
                 } else {
-                    ShowSevereError(state, EnergyPlus::format("{}={}", desicDehum.DehumType, desicDehum.Name));
-                    ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(11), desicDehum.CoolingCoilType));
+                    ShowSevereError(state, std::format("{}={}", desicDehum.DehumType, desicDehum.Name));
+                    ShowContinueError(state, std::format("Illegal {} = {}", cAlphaFields(11), desicDehum.CoolingCoilType));
                     ErrorsFoundGeneric = true;
                 }
 
@@ -1217,13 +1214,13 @@ namespace DesiccantDehumidifiers {
                     desicDehum.CompanionCoilCapacity =
                         DXCoils::GetCoilCapacity(state, desicDehum.CoolingCoilType, desicDehum.CoolingCoilName, ErrorsFound2);
                     if (ErrorsFound2) {
-                        ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.CoolingCoilName));
+                        ShowContinueError(state, std::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.CoolingCoilName));
                     }
 
                     ErrorsFound2 = false;
                     DXCoils::GetDXCoilIndex(state, desicDehum.CoolingCoilName, desicDehum.DXCoilIndex, ErrorsFound2, desicDehum.CoolingCoilType);
                     if (ErrorsFound2) {
-                        ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.CoolingCoilName));
+                        ShowContinueError(state, std::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.CoolingCoilName));
                     }
                 } else if (desicDehum.coolCoilType == HVAC::CoilType::CoolingDXVariableSpeed) {
                     ErrorsFound2 = false;
@@ -1233,13 +1230,13 @@ namespace DesiccantDehumidifiers {
                     desicDehum.CompanionCoilCapacity =
                         VariableSpeedCoils::GetCoilCapacityVariableSpeed(state, desicDehum.CoolingCoilType, desicDehum.CoolingCoilName, ErrorsFound2);
                     if (ErrorsFound2) {
-                        ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.CoolingCoilName));
+                        ShowContinueError(state, std::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.CoolingCoilName));
                     }
                     ErrorsFound2 = false;
                     desicDehum.DXCoilIndex =
                         VariableSpeedCoils::GetCoilIndexVariableSpeed(state, desicDehum.CoolingCoilType, desicDehum.CoolingCoilName, ErrorsFound2);
                     if (ErrorsFound2) {
-                        ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.CoolingCoilName));
+                        ShowContinueError(state, std::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.CoolingCoilName));
                     }
                 }
 
@@ -1252,8 +1249,8 @@ namespace DesiccantDehumidifiers {
             } else if (Util::SameString(Alphas(13), "No")) {
                 desicDehum.CoilUpstreamOfProcessSide = Selection::No;
             } else {
-                ShowWarningError(state, EnergyPlus::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
-                ShowContinueError(state, EnergyPlus::format("Invalid choice for {} = {}", cAlphaFields(13), Alphas(13)));
+                ShowWarningError(state, std::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                ShowContinueError(state, std::format("Invalid choice for {} = {}", cAlphaFields(13), Alphas(13)));
                 ShowContinueError(state, "...resetting to the default value of No");
                 desicDehum.CoilUpstreamOfProcessSide = Selection::No;
             }
@@ -1265,8 +1262,8 @@ namespace DesiccantDehumidifiers {
             } else if (lAlphaBlanks(14)) {
                 desicDehum.Preheat = Selection::No;
             } else {
-                ShowWarningError(state, EnergyPlus::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
-                ShowContinueError(state, EnergyPlus::format("Invalid choice for {} = {}", cAlphaFields(14), Alphas(14)));
+                ShowWarningError(state, std::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                ShowContinueError(state, std::format("Invalid choice for {} = {}", cAlphaFields(14), Alphas(14)));
                 ShowContinueError(state, "...resetting to the default value of NO");
                 desicDehum.Preheat = Selection::No;
             }
@@ -1278,20 +1275,19 @@ namespace DesiccantDehumidifiers {
                     DesuperHeaterIndex =
                         HeatingCoils::GetHeatReclaimSourceIndex(state, desicDehum.CoolingCoilType, desicDehum.CoolingCoilName, ErrorsFound2);
                     if (ErrorsFound2) {
-                        ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                        ShowContinueError(state, std::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.Name));
                         ErrorsFoundGeneric = true;
                     }
 
                     if (DesuperHeaterIndex > 0) {
-                        ShowWarningError(state, EnergyPlus::format("{}={}", desicDehum.DehumType, desicDehum.Name));
+                        ShowWarningError(state, std::format("{}={}", desicDehum.DehumType, desicDehum.Name));
                         ShowContinueError(state,
                                           "A Coil:Heating:Desuperheater object should not be used when condenser waste heat is reclaimed for "
                                           "desiccant regeneration.");
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format("A Coil:Heating:Desuperheater object was found using waste heat from the {} \"{}\" object.",
-                                               desicDehum.CoolingCoilType,
-                                               desicDehum.CoolingCoilName));
+                        ShowContinueError(state,
+                                          std::format("A Coil:Heating:Desuperheater object was found using waste heat from the {} \"{}\" object.",
+                                                      desicDehum.CoolingCoilType,
+                                                      desicDehum.CoolingCoilName));
                         //          ErrorsFoundGeneric = .TRUE.
                     }
                 }
@@ -1316,28 +1312,26 @@ namespace DesiccantDehumidifiers {
                                                                             Node::ObjectIsNotParent);
                     OutAirNodeManager::CheckAndAddAirNodeNumber(state, desicDehum.CondenserInletNode, OANodeError);
                     if (!OANodeError) {
-                        ShowWarningError(state, EnergyPlus::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                        ShowWarningError(state, std::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
                         ShowContinueError(
                             state,
-                            EnergyPlus::format("The {} input is specified as Yes and a condenser air inlet node name was not specified for the "
-                                               "companion cooling coil.",
-                                               cAlphaFields(14)));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Adding condenser inlet air node for {} \"{}\"",
-                                                             desicDehum.CoolingCoilType,
-                                                             desicDehum.CoolingCoilName));
+                            std::format("The {} input is specified as Yes and a condenser air inlet node name was not specified for the "
+                                        "companion cooling coil.",
+                                        cAlphaFields(14)));
                         ShowContinueError(
                             state,
-                            EnergyPlus::format("...condenser inlet air node name = {}", state.dataLoopNodes->NodeID(desicDehum.CondenserInletNode)));
+                            std::format("Adding condenser inlet air node for {} \"{}\"", desicDehum.CoolingCoilType, desicDehum.CoolingCoilName));
+                        ShowContinueError(
+                            state, std::format("...condenser inlet air node name = {}", state.dataLoopNodes->NodeID(desicDehum.CondenserInletNode)));
                         ShowContinueError(state, "...this node name will be specified as an outdoor air node.");
                     }
                 } else if (desicDehum.Preheat == Selection::Yes) {
                     if (!OutAirNodeManager::CheckOutAirNodeNumber(state, desicDehum.CondenserInletNode)) {
-                        ShowSevereError(state, EnergyPlus::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
-                        ShowContinueError(state,
-                                          EnergyPlus::format(
-                                              "The regeneration air inlet node must be specified as an outdoor air node when {} is specified as Yes.",
-                                              cAlphaFields(14)));
+                        ShowSevereError(state, std::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                        ShowContinueError(
+                            state,
+                            std::format("The regeneration air inlet node must be specified as an outdoor air node when {} is specified as Yes.",
+                                        cAlphaFields(14)));
                         ErrorsFoundGeneric = true;
                     }
                 }
@@ -1348,12 +1342,12 @@ namespace DesiccantDehumidifiers {
             }
 
             if (desicDehum.DXCoilIndex == 0 && desicDehum.Preheat == Selection::Yes) {
-                ShowWarningError(state, EnergyPlus::format("{}={}", desicDehum.DehumType, desicDehum.Name));
-                ShowContinueError(state,
-                                  EnergyPlus::format("A valid {} must be used when condenser waste heat is reclaimed for desiccant regeneration.",
-                                                     cAlphaFields(12)));
-                ShowContinueError(state, EnergyPlus::format("... {} = {}", cAlphaFields(11), desicDehum.CoolingCoilType));
-                ShowContinueError(state, EnergyPlus::format("... {} = {}", cAlphaFields(12), desicDehum.CoolingCoilName));
+                ShowWarningError(state, std::format("{}={}", desicDehum.DehumType, desicDehum.Name));
+                ShowContinueError(
+                    state,
+                    std::format("A valid {} must be used when condenser waste heat is reclaimed for desiccant regeneration.", cAlphaFields(12)));
+                ShowContinueError(state, std::format("... {} = {}", cAlphaFields(11), desicDehum.CoolingCoilType));
+                ShowContinueError(state, std::format("... {} = {}", cAlphaFields(12), desicDehum.CoolingCoilName));
                 ErrorsFoundGeneric = true;
             }
 
@@ -1368,56 +1362,53 @@ namespace DesiccantDehumidifiers {
                     CoilBypassedFlowFrac = 0.0; // bypass flow fraction not in VS coil model
                 }
                 if (ErrorsFound2) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.CoolingCoilName));
+                    ShowContinueError(state, std::format("...occurs in {} \"{}\"", desicDehum.DehumType, desicDehum.CoolingCoilName));
                 }
                 if (CoilBypassedFlowFrac > 0.0) {
-                    ShowWarningError(state, EnergyPlus::format("{}={}", desicDehum.DehumType, desicDehum.Name));
+                    ShowWarningError(state, std::format("{}={}", desicDehum.DehumType, desicDehum.Name));
                     ShowContinueError(
                         state,
-                        EnergyPlus::format(
-                            "A DX coil bypassed air flow fraction greater than 0 may not be used when the input for {} is specified as Yes.",
-                            cAlphaFields(13)));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("A DX coil with a bypassed air flow fraction greater than 0 may be upstream of the process inlet "
-                                           "however the input for {} must be specified as No.",
-                                           cAlphaFields(13)));
-                    ShowContinueError(state, EnergyPlus::format("... {} = {}", cAlphaFields(11), desicDehum.CoolingCoilType));
-                    ShowContinueError(state, EnergyPlus::format("... {} = {}", cAlphaFields(12), desicDehum.CoolingCoilName));
+                        std::format("A DX coil bypassed air flow fraction greater than 0 may not be used when the input for {} is specified as Yes.",
+                                    cAlphaFields(13)));
+                    ShowContinueError(state,
+                                      std::format("A DX coil with a bypassed air flow fraction greater than 0 may be upstream of the process inlet "
+                                                  "however the input for {} must be specified as No.",
+                                                  cAlphaFields(13)));
+                    ShowContinueError(state, std::format("... {} = {}", cAlphaFields(11), desicDehum.CoolingCoilType));
+                    ShowContinueError(state, std::format("... {} = {}", cAlphaFields(12), desicDehum.CoolingCoilName));
                     ErrorsFoundGeneric = true;
                 }
             } else if (desicDehum.DXCoilIndex == 0 && desicDehum.CoilUpstreamOfProcessSide == Selection::Yes) {
-                ShowSevereError(state, EnergyPlus::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
-                ShowContinueError(state,
-                                  EnergyPlus::format("A valid companion coil must be specified when {} is specified as Yes.", cAlphaFields(13)));
+                ShowSevereError(state, std::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                ShowContinueError(state, std::format("A valid companion coil must be specified when {} is specified as Yes.", cAlphaFields(13)));
                 ErrorsFoundGeneric = true;
             }
 
             if (!desicDehum.RegenInletIsOutsideAirNode && desicDehum.Preheat == Selection::Yes) {
-                ShowWarningError(state, EnergyPlus::format("{}={}", desicDehum.DehumType, desicDehum.Name));
+                ShowWarningError(state, std::format("{}={}", desicDehum.DehumType, desicDehum.Name));
                 ShowContinueError(
                     state,
-                    EnergyPlus::format(
+                    std::format(
                         "The desiccant dehumidifier regeneration air inlet must be specified as an outdoor air node when {} is specified as Yes.",
                         cAlphaFields(14)));
                 ShowContinueError(state,
-                                  EnergyPlus::format("... desiccant dehumidifier regeneration air inlet node name = {}",
-                                                     state.dataLoopNodes->NodeID(desicDehum.RegenAirInNode)));
+                                  std::format("... desiccant dehumidifier regeneration air inlet node name = {}",
+                                              state.dataLoopNodes->NodeID(desicDehum.RegenAirInNode)));
                 ErrorsFoundGeneric = true;
             }
 
             if (desicDehum.CoilUpstreamOfProcessSide == Selection::Yes) {
                 if (desicDehum.ProcAirInNode != desicDehum.CoolingCoilOutletNode) {
-                    ShowSevereError(state, EnergyPlus::format("For {} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                    ShowSevereError(state, std::format("For {} \"{}\"", desicDehum.DehumType, desicDehum.Name));
                     ShowContinueError(state, "Node names are inconsistent in companion cooling coil and desiccant heat exchanger objects.");
-                    ShowContinueError(
-                        state, EnergyPlus::format("For companion cooling coil = {} \"{}\"", desicDehum.CoolingCoilType, desicDehum.CoolingCoilName));
                     ShowContinueError(state,
-                                      EnergyPlus::format("The outlet node name in cooling coil = {}",
-                                                         state.dataLoopNodes->NodeID(desicDehum.CoolingCoilOutletNode)));
-                    ShowContinueError(state, EnergyPlus::format("For desiccant heat exchanger = {} \"{}\"", desicDehum.HXType, desicDehum.HXName));
+                                      std::format("For companion cooling coil = {} \"{}\"", desicDehum.CoolingCoilType, desicDehum.CoolingCoilName));
                     ShowContinueError(
-                        state, EnergyPlus::format("The process air inlet node name = {}", state.dataLoopNodes->NodeID(desicDehum.ProcAirInNode)));
+                        state,
+                        std::format("The outlet node name in cooling coil = {}", state.dataLoopNodes->NodeID(desicDehum.CoolingCoilOutletNode)));
+                    ShowContinueError(state, std::format("For desiccant heat exchanger = {} \"{}\"", desicDehum.HXType, desicDehum.HXName));
+                    ShowContinueError(state,
+                                      std::format("The process air inlet node name = {}", state.dataLoopNodes->NodeID(desicDehum.ProcAirInNode)));
                     ShowFatalError(state, "...previous error causes program termination.");
                 }
             }
@@ -1446,17 +1437,16 @@ namespace DesiccantDehumidifiers {
                     ErrorsFound2 = true;
                 }
                 if (ErrorsFound2) {
-                    ShowSevereError(state, EnergyPlus::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                    ShowSevereError(state, std::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
                     ShowContinueError(
                         state,
-                        EnergyPlus::format(
-                            "{} and {} must be defined if {} field is \"Yes\".", cNumericFields(2), cNumericFields(3), cAlphaFields(14)));
+                        std::format("{} and {} must be defined if {} field is \"Yes\".", cNumericFields(2), cNumericFields(3), cAlphaFields(14)));
                 }
             } else if (desicDehum.Preheat == Selection::No) {
                 if (desicDehum.ExhaustFanMaxVolFlowRate > 0.0) {
-                    ShowWarningError(state, EnergyPlus::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
-                    ShowContinueError(state, EnergyPlus::format("{} should be 0 if {} field is \"No\".", cNumericFields(2), cAlphaFields(14)));
-                    ShowContinueError(state, EnergyPlus::format("...{} will not be used and is reset to 0.", cNumericFields(2)));
+                    ShowWarningError(state, std::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
+                    ShowContinueError(state, std::format("{} should be 0 if {} field is \"No\".", cNumericFields(2), cAlphaFields(14)));
+                    ShowContinueError(state, std::format("...{} will not be used and is reset to 0.", cNumericFields(2)));
                     desicDehum.ExhaustFanMaxVolFlowRate = 0.0;
                 }
             }
@@ -1726,8 +1716,8 @@ namespace DesiccantDehumidifiers {
                         if (state.dataLoopNodes->Node(ControlNode).HumRatMax == Node::SensedNodeFlagValue) {
                             if (!state.dataGlobal->AnyEnergyManagementSystemInModel) {
                                 ShowSevereError(state, "Missing humidity ratio setpoint (HumRatMax) for ");
-                                ShowContinueError(state, EnergyPlus::format("Dehumidifier:Desiccant:NoFans: {}", desicDehum.Name));
-                                ShowContinueError(state, EnergyPlus::format("Node Referenced={}", state.dataLoopNodes->NodeID(ControlNode)));
+                                ShowContinueError(state, std::format("Dehumidifier:Desiccant:NoFans: {}", desicDehum.Name));
+                                ShowContinueError(state, std::format("Node Referenced={}", state.dataLoopNodes->NodeID(ControlNode)));
                                 ShowContinueError(state, "use a Setpoint Manager to establish a setpoint at the process air outlet node.");
                                 state.dataHVACGlobal->SetPointErrorFlag = true;
                             } else {
@@ -1735,8 +1725,8 @@ namespace DesiccantDehumidifiers {
                                     state, ControlNode, HVAC::CtrlVarType::MaxHumRat, state.dataHVACGlobal->SetPointErrorFlag);
                                 if (state.dataHVACGlobal->SetPointErrorFlag) {
                                     ShowSevereError(state, "Missing humidity ratio setpoint (HumRatMax) for ");
-                                    ShowContinueError(state, EnergyPlus::format("Dehumidifier:Desiccant:NoFans: {}", desicDehum.Name));
-                                    ShowContinueError(state, EnergyPlus::format("Node Referenced={}", state.dataLoopNodes->NodeID(ControlNode)));
+                                    ShowContinueError(state, std::format("Dehumidifier:Desiccant:NoFans: {}", desicDehum.Name));
+                                    ShowContinueError(state, std::format("Node Referenced={}", state.dataLoopNodes->NodeID(ControlNode)));
                                     ShowContinueError(state, "use a Setpoint Manager to establish a setpoint at the process air outlet node.");
                                     ShowContinueError(state, "Or use EMS Actuator to establish a setpoint at the process air outlet node.");
                                 }
@@ -1821,8 +1811,8 @@ namespace DesiccantDehumidifiers {
                     if (state.dataLoopNodes->Node(ControlNode).HumRatMax == Node::SensedNodeFlagValue) {
                         if (!state.dataGlobal->AnyEnergyManagementSystemInModel) {
                             ShowSevereError(state, "Missing maximum humidity ratio setpoint (MaxHumRat) for ");
-                            ShowContinueError(state, EnergyPlus::format("{}: {}", desicDehum.DehumType, desicDehum.Name));
-                            ShowContinueError(state, EnergyPlus::format("Node Referenced={}", state.dataLoopNodes->NodeID(ControlNode)));
+                            ShowContinueError(state, std::format("{}: {}", desicDehum.DehumType, desicDehum.Name));
+                            ShowContinueError(state, std::format("Node Referenced={}", state.dataLoopNodes->NodeID(ControlNode)));
                             ShowContinueError(state, "use a Setpoint Manager to establish a \"MaxHumRat\" setpoint at the process air control node.");
                             state.dataHVACGlobal->SetPointErrorFlag = true;
                         } else {
@@ -1830,8 +1820,8 @@ namespace DesiccantDehumidifiers {
                                 state, ControlNode, HVAC::CtrlVarType::MaxHumRat, state.dataHVACGlobal->SetPointErrorFlag);
                             if (state.dataHVACGlobal->SetPointErrorFlag) {
                                 ShowSevereError(state, "Missing maximum humidity ratio setpoint (MaxHumRat) for ");
-                                ShowContinueError(state, EnergyPlus::format("{}: {}", desicDehum.DehumType, desicDehum.Name));
-                                ShowContinueError(state, EnergyPlus::format("Node Referenced={}", state.dataLoopNodes->NodeID(ControlNode)));
+                                ShowContinueError(state, std::format("{}: {}", desicDehum.DehumType, desicDehum.Name));
+                                ShowContinueError(state, std::format("Node Referenced={}", state.dataLoopNodes->NodeID(ControlNode)));
                                 ShowContinueError(state,
                                                   "use a Setpoint Manager to establish a \"MaxHumRat\" setpoint at the process air control node.");
                                 ShowContinueError(state, "Or use EMS Actuator to establish a setpoint at the process air outlet node.");
@@ -1922,8 +1912,8 @@ namespace DesiccantDehumidifiers {
                 case DesicDehumCtrlType::FixedHumratBypass: {
                     HumRatNeeded = desicDehum.HumRatSet;
                     if (HumRatNeeded <= 0.0) {
-                        ShowSevereError(state, EnergyPlus::format("Dehumidifier:Desiccant:NoFans: {}", desicDehum.Name));
-                        ShowContinueError(state, EnergyPlus::format("Invalid Leaving Max Humidity Ratio Setpoint={:.8T}", HumRatNeeded));
+                        ShowSevereError(state, std::format("Dehumidifier:Desiccant:NoFans: {}", desicDehum.Name));
+                        ShowContinueError(state, std::format("Invalid Leaving Max Humidity Ratio Setpoint={:.8f}", HumRatNeeded));
                         ShowFatalError(state, "must be > 0.0");
                     }
                 } break;
@@ -1931,7 +1921,7 @@ namespace DesiccantDehumidifiers {
                     HumRatNeeded = state.dataLoopNodes->Node(desicDehum.ProcAirOutNode).HumRatMax;
                 } break;
                 default: {
-                    ShowFatalError(state, EnergyPlus::format("Invalid control type in desiccant dehumidifier = {}", desicDehum.Name));
+                    ShowFatalError(state, std::format("Invalid control type in desiccant dehumidifier = {}", desicDehum.Name));
                 } break;
                 }
 
@@ -2328,7 +2318,7 @@ namespace DesiccantDehumidifiers {
             ShowRecurringContinueErrorAtEnd(state, desicDehum.DehumType + '=' + desicDehum.Name, desicDehum.RegenFanErrorIndex2);
             ShowRecurringContinueErrorAtEnd(
                 state,
-                EnergyPlus::format("Flow requested [m3/s] from {} = {}", HVAC::fanTypeNames[(int)desicDehum.regenFanType], desicDehum.RegenFanName),
+                std::format("Flow requested [m3/s] from {} = {}", HVAC::fanTypeNames[(int)desicDehum.regenFanType], desicDehum.RegenFanName),
                 desicDehum.RegenFanErrorIndex3,
                 (RegenAirMassFlowRate / state.dataEnvrn->StdRhoAir));
             ShowRecurringContinueErrorAtEnd(
@@ -2348,7 +2338,7 @@ namespace DesiccantDehumidifiers {
             ShowRecurringContinueErrorAtEnd(state, desicDehum.DehumType + '=' + desicDehum.Name, desicDehum.RegenCapErrorIndex2);
             ShowRecurringContinueErrorAtEnd(
                 state,
-                EnergyPlus::format("Load requested [W] from {} = {}", HVAC::coilTypeNames[(int)desicDehum.regenCoilType], desicDehum.RegenCoilName),
+                std::format("Load requested [W] from {} = {}", HVAC::coilTypeNames[(int)desicDehum.regenCoilType], desicDehum.RegenCoilName),
                 desicDehum.RegenCapErrorIndex3,
                 QRegen);
             ShowRecurringContinueErrorAtEnd(state, "Load request exceeded delivered by [W]", desicDehum.RegenCapErrorIndex4, (QRegen - QDelivered));
@@ -2823,16 +2813,15 @@ namespace DesiccantDehumidifiers {
             if (!state.dataGlobal->WarmupFlag && (VolFlowPerRatedTotQ < MinVolFlowPerRatedTotQ)) {
                 ++desicDehum.ErrCount;
                 if (desicDehum.ErrCount < 2) {
-                    ShowWarningError(
-                        state,
-                        EnergyPlus::format("{} \"{}\" - Air volume flow rate per watt of total condenser waste heat is below the minimum "
-                                           "recommended at {:G} m3/s/W.",
-                                           desicDehum.DehumType,
-                                           desicDehum.Name,
-                                           VolFlowPerRatedTotQ));
+                    ShowWarningError(state,
+                                     std::format("{} \"{}\" - Air volume flow rate per watt of total condenser waste heat is below the minimum "
+                                                 "recommended at {:G} m3/s/W.",
+                                                 desicDehum.DehumType,
+                                                 desicDehum.Name,
+                                                 VolFlowPerRatedTotQ));
                     ShowContinueErrorTimeStamp(state, "");
-                    ShowContinueError(
-                        state, EnergyPlus::format("Expected minimum for VolumeFlowperRatedTotalCondenserWasteHeat = [{:G}]", MinVolFlowPerRatedTotQ));
+                    ShowContinueError(state,
+                                      std::format("Expected minimum for VolumeFlowperRatedTotalCondenserWasteHeat = [{:G}]", MinVolFlowPerRatedTotQ));
                     ShowContinueError(state, "Possible causes include inconsistent air flow rates in system components ");
                     ShowContinueError(state, "on the regeneration side of the desiccant dehumidifier.");
                 } else {
@@ -3018,27 +3007,26 @@ namespace DesiccantDehumidifiers {
                     if (SolFlag == -1) {
                         if (desicDehum.HotWaterCoilMaxIterIndex == 0) {
                             ShowWarningMessage(state,
-                                               EnergyPlus::format("CalcNonDXHeatingCoils: Hot water coil control failed for {}=\"{}\"",
-                                                                  desicDehum.DehumType,
-                                                                  desicDehum.Name));
+                                               std::format("CalcNonDXHeatingCoils: Hot water coil control failed for {}=\"{}\"",
+                                                           desicDehum.DehumType,
+                                                           desicDehum.Name));
                             ShowContinueErrorTimeStamp(state, "");
-                            ShowContinueError(
-                                state, EnergyPlus::format("...Iteration limit [{}] exceeded in calculating hot water mass flow rate", SolveMaxIter));
+                            ShowContinueError(state,
+                                              std::format("...Iteration limit [{}] exceeded in calculating hot water mass flow rate", SolveMaxIter));
                         }
                         ShowRecurringWarningErrorAtEnd(
                             state,
-                            EnergyPlus::format("CalcNonDXHeatingCoils: Hot water coil control failed (iteration limit [{}]) for {}=\"{}\"",
-                                               SolveMaxIter,
-                                               desicDehum.DehumType,
-                                               desicDehum.Name),
+                            std::format("CalcNonDXHeatingCoils: Hot water coil control failed (iteration limit [{}]) for {}=\"{}\"",
+                                        SolveMaxIter,
+                                        desicDehum.DehumType,
+                                        desicDehum.Name),
                             desicDehum.HotWaterCoilMaxIterIndex);
                     } else if (SolFlag == -2) {
                         if (desicDehum.HotWaterCoilMaxIterIndex2 == 0) {
-                            ShowWarningMessage(
-                                state,
-                                EnergyPlus::format("CalcNonDXHeatingCoils: Hot water coil control failed (maximum flow limits) for {}=\"{}\"",
-                                                   desicDehum.DehumType,
-                                                   desicDehum.Name));
+                            ShowWarningMessage(state,
+                                               std::format("CalcNonDXHeatingCoils: Hot water coil control failed (maximum flow limits) for {}=\"{}\"",
+                                                           desicDehum.DehumType,
+                                                           desicDehum.Name));
                             ShowContinueErrorTimeStamp(state, "");
                             ShowContinueError(state, "...Bad hot water maximum flow rate limits");
                             ShowContinueError(state, EnergyPlus::format("...Given minimum water flow rate={:.3R} kg/s", MinWaterFlow));
@@ -3123,7 +3111,7 @@ namespace DesiccantDehumidifiers {
         if (WhichDesicDehum != 0) {
             return state.dataDesiccantDehumidifiers->DesicDehum(WhichDesicDehum).ProcAirInNode;
         }
-        ShowSevereError(state, EnergyPlus::format("GetProcAirInletNodeNum: Could not find Desciccant Dehumidifier = \"{}\"", DesicDehumName));
+        ShowSevereError(state, std::format("GetProcAirInletNodeNum: Could not find Desciccant Dehumidifier = \"{}\"", DesicDehumName));
         ErrorsFound = true;
         return 0;
     }
@@ -3148,7 +3136,7 @@ namespace DesiccantDehumidifiers {
         if (WhichDesicDehum != 0) {
             return state.dataDesiccantDehumidifiers->DesicDehum(WhichDesicDehum).ProcAirOutNode;
         }
-        ShowSevereError(state, EnergyPlus::format("GetProcAirInletNodeNum: Could not find Desciccant Dehumidifier = \"{}\"", DesicDehumName));
+        ShowSevereError(state, std::format("GetProcAirInletNodeNum: Could not find Desciccant Dehumidifier = \"{}\"", DesicDehumName));
         ErrorsFound = true;
         return 0;
     }

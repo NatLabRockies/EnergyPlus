@@ -1416,7 +1416,7 @@
   ZoneControl:Humidistat,
     Zone 2 Humidistat,       !- Name
     EAST ZONE,               !- Zone Name
-    Seasonal Relative Humidity Sch;  !- Humidifying Relative Humidity Setpoint Schedule Name
+    Seasonal Relative Humidity Sch;  !- Humidifying Setpoint Schedule Name
 
   ZoneControl:Thermostat,
     Zone 2 Thermostat,       !- Name

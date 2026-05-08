@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <format>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Autosizing/HeatingCapacitySizing.hh>
@@ -234,7 +235,7 @@ namespace BaseboardElectric {
                         if (thisBaseboard.ScaledHeatingCapacity < 0.0 && thisBaseboard.ScaledHeatingCapacity != AutoSize) {
                             ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
                             ShowContinueError(state,
-                                              EnergyPlus::format("Illegal {} = {:.7T}",
+                                              EnergyPlus::format("Illegal {} = {:.7f}",
                                                                  s_ipsc->cNumericFieldNames(iHeatDesignCapacityNumericNum),
                                                                  s_ipsc->rNumericArgs(iHeatDesignCapacityNumericNum)));
                             ErrorsFound = true;
@@ -260,7 +261,7 @@ namespace BaseboardElectric {
                                                                  s_ipsc->cAlphaFieldNames(iHeatCAPMAlphaNum),
                                                                  s_ipsc->cAlphaArgs(iHeatCAPMAlphaNum)));
                             ShowContinueError(state,
-                                              EnergyPlus::format("Illegal {} = {:.7T}",
+                                              EnergyPlus::format("Illegal {} = {:.7f}",
                                                                  s_ipsc->cNumericFieldNames(iHeatCapacityPerFloorAreaNumericNum),
                                                                  s_ipsc->rNumericArgs(iHeatCapacityPerFloorAreaNumericNum)));
                             ErrorsFound = true;
@@ -290,29 +291,26 @@ namespace BaseboardElectric {
                     if (!s_ipsc->lNumericFieldBlanks(iHeatFracOfAutosizedCapacityNumericNum)) {
                         thisBaseboard.ScaledHeatingCapacity = s_ipsc->rNumericArgs(iHeatFracOfAutosizedCapacityNumericNum);
                         if (thisBaseboard.ScaledHeatingCapacity < 0.0) {
-                            ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
+                            ShowSevereError(state, std::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
                             ShowContinueError(state,
-                                              EnergyPlus::format("Illegal {} = {:.7T}",
-                                                                 s_ipsc->cNumericFieldNames(iHeatFracOfAutosizedCapacityNumericNum),
-                                                                 s_ipsc->rNumericArgs(iHeatFracOfAutosizedCapacityNumericNum)));
+                                              std::format("Illegal {} = {:.7f}",
+                                                          s_ipsc->cNumericFieldNames(iHeatFracOfAutosizedCapacityNumericNum),
+                                                          s_ipsc->rNumericArgs(iHeatFracOfAutosizedCapacityNumericNum)));
                             ErrorsFound = true;
                         }
                     } else {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Input for {} = {}",
-                                                             s_ipsc->cAlphaFieldNames(iHeatCAPMAlphaNum),
-                                                             s_ipsc->cAlphaArgs(iHeatCAPMAlphaNum)));
+                        ShowSevereError(state, std::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
                         ShowContinueError(
                             state,
-                            EnergyPlus::format("Blank field not allowed for {}", s_ipsc->cNumericFieldNames(iHeatFracOfAutosizedCapacityNumericNum)));
+                            std::format("Input for {} = {}", s_ipsc->cAlphaFieldNames(iHeatCAPMAlphaNum), s_ipsc->cAlphaArgs(iHeatCAPMAlphaNum)));
+                        ShowContinueError(
+                            state, std::format("Blank field not allowed for {}", s_ipsc->cNumericFieldNames(iHeatFracOfAutosizedCapacityNumericNum)));
                         ErrorsFound = true;
                     }
                 } else {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
+                    ShowSevereError(state, std::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
                     ShowContinueError(
-                        state,
-                        EnergyPlus::format("Illegal {} = {}", s_ipsc->cAlphaFieldNames(iHeatCAPMAlphaNum), s_ipsc->cAlphaArgs(iHeatCAPMAlphaNum)));
+                        state, std::format("Illegal {} = {}", s_ipsc->cAlphaFieldNames(iHeatCAPMAlphaNum), s_ipsc->cAlphaArgs(iHeatCAPMAlphaNum)));
                     ErrorsFound = true;
                 }
 
@@ -321,8 +319,7 @@ namespace BaseboardElectric {
             }
 
             if (ErrorsFound) {
-                ShowFatalError(state,
-                               EnergyPlus::format("{} Errors found in getting input.  Preceding condition(s) cause termination.", RoutineName));
+                ShowFatalError(state, std::format("{} Errors found in getting input.  Preceding condition(s) cause termination.", RoutineName));
             }
         }
 
@@ -436,7 +433,7 @@ namespace BaseboardElectric {
             state.dataSize->DataZoneNumber = baseboard.ZonePtr;
             int SizingMethod = HVAC::HeatingCapacitySizing;
             int FieldNum = 1;
-            std::string const SizingString = EnergyPlus::format("{} [W]", baseboard.FieldNames[FieldNum - 1]);
+            std::string const SizingString = std::format("{} [W]", baseboard.FieldNames[FieldNum - 1]);
             int CapSizingMethod = baseboard.HeatingCapMethod;
             ZoneEqSizing.SizingMethod(SizingMethod) = CapSizingMethod;
             if (CapSizingMethod == DataSizing::HeatingDesignCapacity || CapSizingMethod == DataSizing::CapacityPerFloorArea ||

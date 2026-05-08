@@ -1250,7 +1250,7 @@ namespace HybridEvapCoolingModel {
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         bool DidWeMeetLoad = false;
-        bool DidWeMeetHumidificaiton = false;
+        bool DidWeMeetHumidification = false;
         bool DidWePartlyMeetLoad = false;
         Real64 OptimalSetting_RunFractionTotalFuel = IMPLAUSIBLE_POWER;
         Real64 OptimalSetting_RunFractionSupplyTemperature =
@@ -1492,16 +1492,12 @@ namespace HybridEvapCoolingModel {
             }
 
             bool Humidification_load_met = false;
-
-            Real64 RequestedDeHumidificationLoad = StepIns.ZoneDehumidificationLoad;
-            if (DehumidificationRequested && latentRoomORZone > RequestedDeHumidificationLoad) {
+            if (DehumidificationRequested && latentRoomORZone > StepIns.ZoneDehumidificationLoad) {
                 Humidification_load_met = true;
             }
-            Real64 RequestedHumidificationLoad = StepIns.ZoneMoistureLoad;
-            if (HumidificationRequested && latentRoomORZone < RequestedHumidificationLoad) {
+            if (HumidificationRequested && latentRoomORZone < StepIns.ZoneMoistureLoad) {
                 Humidification_load_met = true;
             }
-
             if (!(HumidificationRequested || DehumidificationRequested)) {
                 Humidification_load_met = true;
             }
@@ -1520,18 +1516,32 @@ namespace HybridEvapCoolingModel {
                 thisSetting.oMode.CalculateCurveVal(state, StepIns.Tosa, Wosa, StepIns.Tra, Wra, UnscaledMsa, OSAF, WATER_USE);
 
             // Calculate partload fraction required to meet all requirements
-            Real64 PartRuntimeFraction = 0;
-            PartRuntimeFraction = CalculatePartRuntimeFraction(MinOA_Msa,
-                                                               thisSetting.Supply_Air_Ventilation_Volume * state.dataEnvrn->StdRhoAir,
-                                                               StepIns.RequestedCoolingLoad,
-                                                               StepIns.RequestedHeatingLoad,
-                                                               SensibleRoomORZone,
-                                                               StepIns.ZoneDehumidificationLoad,
-                                                               StepIns.ZoneMoistureLoad,
-                                                               latentRoomORZone); //
+            // Fraction can be above 1 meaning its not able to do it completely in a time step
+            Real64 PartRuntimeFraction = CalculatePartRuntimeFraction(MinOA_Msa,
+                                                                      thisSetting.Supply_Air_Ventilation_Volume * state.dataEnvrn->StdRhoAir,
+                                                                      StepIns.RequestedCoolingLoad,
+                                                                      StepIns.RequestedHeatingLoad,
+                                                                      SensibleRoomORZone,
+                                                                      StepIns.ZoneDehumidificationLoad,
+                                                                      StepIns.ZoneMoistureLoad,
+                                                                      latentRoomORZone);
 
-            Real64 RunFractionTotalFuel =
-                thisSetting.ElectricalPower * PartRuntimeFraction; // fraction can be above 1 meaning its not able to do it completely in a time step.
+            Real64 RunFractionTotalFuel;
+            switch (ObjectiveFunction) {
+            default:
+            case ObjectiveFunctionType::ElectricityUse:
+                RunFractionTotalFuel = thisSetting.ElectricalPower * PartRuntimeFraction;
+                break;
+            case ObjectiveFunctionType::SecondFuelUse:
+                RunFractionTotalFuel = thisSetting.SecondaryFuelConsumptionRate * PartRuntimeFraction;
+                break;
+            case ObjectiveFunctionType::ThirdFuelUse:
+                RunFractionTotalFuel = thisSetting.ThirdFuelConsumptionRate * PartRuntimeFraction;
+                break;
+            case ObjectiveFunctionType::WaterUse:
+                RunFractionTotalFuel = thisSetting.WaterConsumptionRate * PartRuntimeFraction;
+                break;
+            }
             Real64 RunFractionSupplyTemperature = thisSetting.SupplyAirTemperature * PartRuntimeFraction;
             thisSetting.Runtime_Fraction = PartRuntimeFraction;
 
@@ -1560,10 +1570,10 @@ namespace HybridEvapCoolingModel {
                 if (store_best_performing_mode) {
                     OptimalSetting = thisSetting;
                     DidWeMeetLoad = true;
-                    DidWeMeetHumidificaiton = true;
+                    DidWeMeetHumidification = true;
                 }
             } else {
-                if (!DidWeMeetLoad && !DidWeMeetHumidificaiton) {
+                if (!DidWeMeetLoad && !DidWeMeetHumidification) {
                     bool store_best_attempt = false;
 
                     if (Conditioning_load_met) {
@@ -1671,7 +1681,7 @@ namespace HybridEvapCoolingModel {
             if (count_EnvironmentConditionsNotMet > 0) {
                 ShowWarningError(
                     state,
-                    EnergyPlus::format("In day {:.1R} was unable to operate for  of simulation, {}{:.1R} timesteps because environment conditions "
+                    EnergyPlus::format("In day {:.1R} of simulation, {} was unable to operate for {:.1R} timesteps because environment conditions "
                                        "were beyond the allowable operating range for any mode.",
                                        (Real64)state.dataGlobal->DayOfSim,
                                        Name,
@@ -1680,8 +1690,8 @@ namespace HybridEvapCoolingModel {
             if (count_SAHR_OC_MetOnce > 0) {
                 ShowWarningError(
                     state,
-                    EnergyPlus::format("In day {:.1R} of simulation, {} failed to meet supply air humidity ratio for {:.1R} time steps. For these "
-                                       "time steps For these time steps was set to mode 0{}",
+                    EnergyPlus::format("In day {:.1R} of simulation, {} failed to meet supply air humidity ratio for {:.1R} timesteps. For these "
+                                       "timesteps {} was set to mode 0.",
                                        (Real64)state.dataGlobal->DayOfSim,
                                        Name,
                                        Real64(count_SAHR_OC_MetOnce),
@@ -1690,8 +1700,8 @@ namespace HybridEvapCoolingModel {
             if (count_SAT_OC_MetOnce > 0) {
                 ShowWarningError(
                     state,
-                    EnergyPlus::format("In day {:.1R} of simulation, {} failed to meet supply air temperature constraints for {:.1R} time steps. "
-                                       "For these time steps For these time steps{} was set to mode 0",
+                    EnergyPlus::format("In day {:.1R} of simulation, {} failed to meet supply air temperature constraints for {:.1R} timesteps. "
+                                       "For these timesteps {} was set to mode 0.",
                                        (Real64)state.dataGlobal->DayOfSim,
                                        Name,
                                        Real64(count_SAT_OC_MetOnce),
@@ -1700,7 +1710,7 @@ namespace HybridEvapCoolingModel {
 
             ShowWarningError(
                 state,
-                EnergyPlus::format("In day {:.1R} of simulation, {} failed to  satisfy sensible load for {:.1R} time steps. For these time steps "
+                EnergyPlus::format("In day {:.1R} of simulation, {} failed to satisfy sensible load for {:.1R} timesteps. For these timesteps "
                                    "settings were selected to provide as much sensible cooling or heating as possible, given other constraints.",
                                    (Real64)state.dataGlobal->DayOfSim,
                                    Name,
@@ -1983,7 +1993,7 @@ namespace HybridEvapCoolingModel {
             QLatentZoneOutMass = OutletMassFlowRateDry * (InletHumRat - OutletHumRat); // Watts
             QLatentZoneOut = QLatentZoneOutMass * LambdaSa;
             QTotZoneOut = OutletMassFlowRateDry * (InletEnthalpy - OutletEnthalpy); // Watts
-            Real64 QLatentCheck = QTotZoneOut - QSensZoneOut;                       // Watts
+            // Real64 QLatentCheck = QTotZoneOut - QSensZoneOut;                       // Watts
 
             // System Sensible Cooling{ W } = m'SA {kg/s} * 0.5*(cpRA + OSAF*(cpOSA-cpRA) + cpSA) {kJ/kg-C} * (T_RA + OSAF*(T_OSA - T_RA)  - T_SA)
             // System Latent Cooling{ W } = m'SAdryair {kg/s} * L {kJ/kgWater} * (HR_RA + OSAF *(HR_OSA - HR_RA) - HR_SA) {kgWater/kgDryAir}
@@ -1996,7 +2006,7 @@ namespace HybridEvapCoolingModel {
 
             QLatentSystemOut = LambdaSa * OutletMassFlowRateDry * SystemTimeStepW;       // Watts
             QTotSystemOut = OutletMassFlowRateDry * (MixedAirEnthalpy - OutletEnthalpy); // Watts
-            QLatentCheck = QTotSystemOut - QSensSystemOut;                               // Watts
+            // QLatentCheck = QTotSystemOut - QSensSystemOut;                               // Watts
 
             // reset outputs
             ResetOutputs();

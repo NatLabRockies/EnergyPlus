@@ -47,13 +47,13 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Autosizing/Base.hh>
 #include <EnergyPlus/BranchNodeConnections.hh>
 #include <EnergyPlus/CurveManager.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
-#include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
 #include <EnergyPlus/DataIPShortCuts.hh>
 #include <EnergyPlus/DataLoopNode.hh>
@@ -68,7 +68,6 @@
 #include <EnergyPlus/OutputReportPredefined.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
 #include <EnergyPlus/Plant/PlantLocation.hh>
-#include <EnergyPlus/PlantComponent.hh>
 #include <EnergyPlus/PlantUtilities.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
 
@@ -1619,12 +1618,12 @@ void GshpSpecs::CalcWatertoWaterHPCooling(EnergyPlusData &state, Real64 const My
             if (this->CoolCapNegativeCounter < 1) {
                 ++this->CoolCapNegativeCounter;
                 ShowWarningError(state, EnergyPlus::format("{} \"{}\":", HPEqFitCooling, this->Name));
-                ShowContinueError(state, EnergyPlus::format(" Cooling capacity curve output is <= 0.0 ({:.4T}).", QLoad));
+                ShowContinueError(state, EnergyPlus::format(" Cooling capacity curve output is <= 0.0 ({:.4f}).", QLoad));
                 ShowContinueError(
-                    state, EnergyPlus::format(" Zero or negative value occurs with a load-side inlet temperature of {:.2T} C,", LoadSideInletTemp));
-                ShowContinueError(state, EnergyPlus::format(" a source-side inlet temperature of {:.2T} C,", SourceSideInletTemp));
-                ShowContinueError(state, EnergyPlus::format(" a load-side mass flow rate of {:.3T} kg/s,", LoadSideMassFlowRate));
-                ShowContinueError(state, EnergyPlus::format(" and a source-side mass flow rate of {:.3T} kg/s.", SourceSideMassFlowRate));
+                    state, EnergyPlus::format(" Zero or negative value occurs with a load-side inlet temperature of {:.2f} C,", LoadSideInletTemp));
+                ShowContinueError(state, EnergyPlus::format(" a source-side inlet temperature of {:.2f} C,", SourceSideInletTemp));
+                ShowContinueError(state, std::format(" a load-side mass flow rate of {:.3f} kg/s,", LoadSideMassFlowRate));
+                ShowContinueError(state, std::format(" and a source-side mass flow rate of {:.3f} kg/s.", SourceSideMassFlowRate));
                 ShowContinueErrorTimeStamp(state, " The heat pump is turned off for this time step but simulation continues.");
             } else {
                 ShowRecurringWarningErrorAtEnd(state,
@@ -1638,13 +1637,13 @@ void GshpSpecs::CalcWatertoWaterHPCooling(EnergyPlusData &state, Real64 const My
         if (Power <= 0.0) {
             if (this->CoolPowerNegativeCounter < 1) {
                 ++this->CoolPowerNegativeCounter;
-                ShowWarningError(state, EnergyPlus::format("{} \"{}\":", HPEqFitCooling, this->Name));
-                ShowContinueError(state, EnergyPlus::format(" Cooling compressor power curve output is <= 0.0 ({:.4T}).", Power));
-                ShowContinueError(
-                    state, EnergyPlus::format(" Zero or negative value occurs with a load-side inlet temperature of {:.2T} C,", LoadSideInletTemp));
-                ShowContinueError(state, EnergyPlus::format(" a source-side inlet temperature of {:.2T} C,", SourceSideInletTemp));
-                ShowContinueError(state, EnergyPlus::format(" a load-side mass flow rate of {:.3T} kg/s,", LoadSideMassFlowRate));
-                ShowContinueError(state, EnergyPlus::format(" and a source-side mass flow rate of {:.3T} kg/s.", SourceSideMassFlowRate));
+                ShowWarningError(state, std::format("{} \"{}\":", HPEqFitCooling, this->Name));
+                ShowContinueError(state, std::format(" Cooling compressor power curve output is <= 0.0 ({:.4f}).", Power));
+                ShowContinueError(state,
+                                  std::format(" Zero or negative value occurs with a load-side inlet temperature of {:.2f} C,", LoadSideInletTemp));
+                ShowContinueError(state, std::format(" a source-side inlet temperature of {:.2f} C,", SourceSideInletTemp));
+                ShowContinueError(state, std::format(" a load-side mass flow rate of {:.3f} kg/s,", LoadSideMassFlowRate));
+                ShowContinueError(state, std::format(" and a source-side mass flow rate of {:.3f} kg/s.", SourceSideMassFlowRate));
                 ShowContinueErrorTimeStamp(state, " The heat pump is turned off for this time step but simulation continues.");
             } else {
                 ShowRecurringWarningErrorAtEnd(state,
@@ -1767,13 +1766,13 @@ void GshpSpecs::CalcWatertoWaterHPHeating(EnergyPlusData &state, Real64 const My
         if (QLoad <= 0.0) {
             if (this->HeatCapNegativeCounter < 1) {
                 ++this->HeatCapNegativeCounter;
-                ShowWarningError(state, EnergyPlus::format("{} \"{}\":", HPEqFitHeating, this->Name));
-                ShowContinueError(state, EnergyPlus::format(" Heating capacity curve output is <= 0.0 ({:.4T}).", QLoad));
-                ShowContinueError(
-                    state, EnergyPlus::format(" Zero or negative value occurs with a load-side inlet temperature of {:.2T} C,", LoadSideInletTemp));
-                ShowContinueError(state, EnergyPlus::format(" a source-side inlet temperature of {:.2T} C,", SourceSideInletTemp));
-                ShowContinueError(state, EnergyPlus::format(" a load-side mass flow rate of {:.3T} kg/s,", LoadSideMassFlowRate));
-                ShowContinueError(state, EnergyPlus::format(" and a source-side mass flow rate of {:.3T} kg/s.", SourceSideMassFlowRate));
+                ShowWarningError(state, std::format("{} \"{}\":", HPEqFitHeating, this->Name));
+                ShowContinueError(state, std::format(" Heating capacity curve output is <= 0.0 ({:.4f}).", QLoad));
+                ShowContinueError(state,
+                                  std::format(" Zero or negative value occurs with a load-side inlet temperature of {:.2f} C,", LoadSideInletTemp));
+                ShowContinueError(state, std::format(" a source-side inlet temperature of {:.2f} C,", SourceSideInletTemp));
+                ShowContinueError(state, std::format(" a load-side mass flow rate of {:.3f} kg/s,", LoadSideMassFlowRate));
+                ShowContinueError(state, std::format(" and a source-side mass flow rate of {:.3f} kg/s.", SourceSideMassFlowRate));
                 ShowContinueErrorTimeStamp(state, " The heat pump is turned off for this time step but simulation continues.");
             } else {
                 ShowRecurringWarningErrorAtEnd(state,
@@ -1787,13 +1786,13 @@ void GshpSpecs::CalcWatertoWaterHPHeating(EnergyPlusData &state, Real64 const My
         if (Power <= 0.0) {
             if (this->HeatPowerNegativeCounter < 1) {
                 ++this->HeatPowerNegativeCounter;
-                ShowWarningError(state, EnergyPlus::format("{} \"{}\":", HPEqFitHeating, this->Name));
-                ShowContinueError(state, EnergyPlus::format(" Heating compressor power curve output is <= 0.0 ({:.4T}).", Power));
-                ShowContinueError(
-                    state, EnergyPlus::format(" Zero or negative value occurs with a load-side inlet temperature of {:.2T} C,", LoadSideInletTemp));
-                ShowContinueError(state, EnergyPlus::format(" a source-side inlet temperature of {:.2T} C,", SourceSideInletTemp));
-                ShowContinueError(state, EnergyPlus::format(" a load-side mass flow rate of {:.3T} kg/s,", LoadSideMassFlowRate));
-                ShowContinueError(state, EnergyPlus::format(" and a source-side mass flow rate of {:.3T} kg/s.", SourceSideMassFlowRate));
+                ShowWarningError(state, std::format("{} \"{}\":", HPEqFitHeating, this->Name));
+                ShowContinueError(state, std::format(" Heating compressor power curve output is <= 0.0 ({:.4f}).", Power));
+                ShowContinueError(state,
+                                  std::format(" Zero or negative value occurs with a load-side inlet temperature of {:.2f} C,", LoadSideInletTemp));
+                ShowContinueError(state, std::format(" a source-side inlet temperature of {:.2f} C,", SourceSideInletTemp));
+                ShowContinueError(state, std::format(" a load-side mass flow rate of {:.3f} kg/s,", LoadSideMassFlowRate));
+                ShowContinueError(state, std::format(" and a source-side mass flow rate of {:.3f} kg/s.", SourceSideMassFlowRate));
                 ShowContinueErrorTimeStamp(state, " The heat pump is turned off for this time step but simulation continues.");
             } else {
                 ShowRecurringWarningErrorAtEnd(state,

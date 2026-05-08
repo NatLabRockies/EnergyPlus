@@ -45,6 +45,9 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
+#include <format>
+
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
 #include <ObjexxFCL/Fmath.hh>
@@ -102,16 +105,16 @@ constexpr std::array<std::string_view, static_cast<int>(ZoneEquipType::Num)> zon
     "DUMMY", // DUMMY,
 
     "ZONEHVAC:FOURPIPEFANCOIL",                      // FanCoilFourPipe
-    "ZONEHVAC:PACKAGEDTERMINALHEATPUMP",             //   PackagedTerminalHeatPump
-    "ZONEHVAC:PACKAGEDTERMINALAIRCONDITIONER",       //  PackagedTerminalAirConditioner
-    "ZONEHVAC:WATERTOAIRHEATPUMP",                   //   PackagedTerminalHeatPumpWaterToAir
-    "ZONEHVAC:WINDOWAIRCONDITIONER",                 //  WindowAirConditioner
-    "ZONEHVAC:UNITHEATER",                           //  UnitHeater
-    "ZONEHVAC:UNITVENTILATOR",                       //  UnitVentilator
+    "ZONEHVAC:PACKAGEDTERMINALHEATPUMP",             // PackagedTerminalHeatPump
+    "ZONEHVAC:PACKAGEDTERMINALAIRCONDITIONER",       // PackagedTerminalAirConditioner
+    "ZONEHVAC:WATERTOAIRHEATPUMP",                   // PackagedTerminalHeatPumpWaterToAir
+    "ZONEHVAC:WINDOWAIRCONDITIONER",                 // WindowAirConditioner
+    "ZONEHVAC:UNITHEATER",                           // UnitHeater
+    "ZONEHVAC:UNITVENTILATOR",                       // UnitVentilator
     "ZONEHVAC:ENERGYRECOVERYVENTILATOR",             // EnergyRecoveryVentilator
     "ZONEHVAC:VENTILATEDSLAB",                       // VentilatedSlab
     "ZONEHVAC:OUTDOORAIRUNIT",                       // OutdoorAirUnit
-    "ZONEHVAC:TERMINALUNIT:VARIABLEREFRIGERANTFLOW", //  VariableRefrigerantFlowTerminal
+    "ZONEHVAC:TERMINALUNIT:VARIABLEREFRIGERANTFLOW", // VariableRefrigerantFlowTerminal
     "ZONEHVAC:IDEALLOADSAIRSYSTEM",                  // IdealLoadsAirSystem
     "ZONEHVAC:EVAPORATIVECOOLERUNIT",                // EvaporativeCooler
     "ZONEHVAC:HYBRIDUNITARYHVAC",                    // HybridEvaporativeCooler,
@@ -493,11 +496,11 @@ void GetZoneEquipmentData(EnergyPlusData &state)
                 ShowContinueError(
                     state,
                     EnergyPlus::format("Equipment: Type={}, Name={}", ZoneEquipListAcct(Loop1).ObjectType, ZoneEquipListAcct(Loop1).ObjectName));
-                ShowContinueError(
-                    state, EnergyPlus::format("Found on List=\"{}\".", state.dataZoneEquip->ZoneEquipList(ZoneEquipListAcct(Loop1).OnListNum).Name));
                 ShowContinueError(state,
-                                  EnergyPlus::format("Equipment Duplicated on List=\"{}\".",
-                                                     state.dataZoneEquip->ZoneEquipList(ZoneEquipListAcct(Loop2).OnListNum).Name));
+                                  std::format("Found on List=\"{}\".", state.dataZoneEquip->ZoneEquipList(ZoneEquipListAcct(Loop1).OnListNum).Name));
+                ShowContinueError(
+                    state,
+                    std::format("Equipment Duplicated on List=\"{}\".", state.dataZoneEquip->ZoneEquipList(ZoneEquipListAcct(Loop2).OnListNum).Name));
                 state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
             }
         }
@@ -524,10 +527,9 @@ void GetZoneEquipmentData(EnergyPlusData &state)
         if (!state.dataHeatBal->doSpaceHeatBalanceSimulation) {
             ShowWarningError(
                 state,
-                EnergyPlus::format(
-                    "{} requires \"Do Space Heat Balance for Simulation = Yes\" in ZoneAirHeatBalanceAlgorithm. {} objects will be ignored.",
-                    CurrentModuleObject,
-                    CurrentModuleObject));
+                std::format("{} requires \"Do Space Heat Balance for Simulation = Yes\" in ZoneAirHeatBalanceAlgorithm. {} objects will be ignored.",
+                            CurrentModuleObject,
+                            CurrentModuleObject));
         } else {
             auto const &objectSchemaProps = ip->getObjectSchemaProps(state, CurrentModuleObject);
             auto &instancesValue = instances.value();
@@ -545,18 +547,17 @@ void GetZoneEquipmentData(EnergyPlusData &state)
                 std::string zoneName = ip->getAlphaFieldValue(objectFields, objectSchemaProps, "zone_name");
                 int zoneNum = Util::FindItemInList(zoneName, state.dataHeatBal->Zone);
                 if (zoneNum == 0) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\"", RoutineName, CurrentModuleObject, thisZeqSplitter.Name));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("..Zone Name={} not found, remaining items for this object not processed.", zoneName));
+                    ShowSevereError(state, std::format("{}{}=\"{}\"", RoutineName, CurrentModuleObject, thisZeqSplitter.Name));
+                    ShowContinueError(state, std::format("..Zone Name={} not found, remaining items for this object not processed.", zoneName));
                     state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
                     continue;
                 }
                 if (!state.dataHeatBal->Zone(zoneNum).IsControlled) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\"", RoutineName, CurrentModuleObject, thisZeqSplitter.Name));
+                    ShowSevereError(state, std::format("{}{}=\"{}\"", RoutineName, CurrentModuleObject, thisZeqSplitter.Name));
                     ShowContinueError(
                         state,
-                        EnergyPlus::format(
-                            "..Zone Name={} is not a controlled zone. A ZoneHVAC:EquipmentConnections object is required for this zone.", zoneName));
+                        std::format("..Zone Name={} is not a controlled zone. A ZoneHVAC:EquipmentConnections object is required for this zone.",
+                                    zoneName));
                     state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
                     continue;
                 }
@@ -572,10 +573,9 @@ void GetZoneEquipmentData(EnergyPlusData &state)
         if (!state.dataHeatBal->doSpaceHeatBalanceSimulation) {
             ShowWarningError(
                 state,
-                EnergyPlus::format(
-                    "{} requires \"Do Space Heat Balance for Simulation = Yes\" in ZoneAirHeatBalanceAlgorithm. {} objects will be ignored.",
-                    CurrentModuleObject,
-                    CurrentModuleObject));
+                std::format("{} requires \"Do Space Heat Balance for Simulation = Yes\" in ZoneAirHeatBalanceAlgorithm. {} objects will be ignored.",
+                            CurrentModuleObject,
+                            CurrentModuleObject));
         } else {
             auto const &objectSchemaProps = ip->getObjectSchemaProps(state, CurrentModuleObject);
             auto &instancesValue = instances.value();
@@ -593,18 +593,17 @@ void GetZoneEquipmentData(EnergyPlusData &state)
                 std::string zoneName = ip->getAlphaFieldValue(objectFields, objectSchemaProps, "zone_name");
                 int zoneNum = Util::FindItemInList(zoneName, state.dataHeatBal->Zone);
                 if (zoneNum == 0) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\"", RoutineName, CurrentModuleObject, thisZeqMixer.Name));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("..Zone Name={} not found, remaining items for this object not processed.", zoneName));
+                    ShowSevereError(state, std::format("{}{}=\"{}\"", RoutineName, CurrentModuleObject, thisZeqMixer.Name));
+                    ShowContinueError(state, std::format("..Zone Name={} not found, remaining items for this object not processed.", zoneName));
                     state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
                     continue;
                 }
                 if (!state.dataHeatBal->Zone(zoneNum).IsControlled) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\"", RoutineName, CurrentModuleObject, thisZeqMixer.Name));
+                    ShowSevereError(state, std::format("{}{}=\"{}\"", RoutineName, CurrentModuleObject, thisZeqMixer.Name));
                     ShowContinueError(
                         state,
-                        EnergyPlus::format(
-                            "..Zone Name={} is not a controlled zone. A ZoneHVAC:EquipmentConnections object is required for this zone.", zoneName));
+                        std::format("..Zone Name={} is not a controlled zone. A ZoneHVAC:EquipmentConnections object is required for this zone.",
+                                    zoneName));
                     state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
                     continue;
                 }
@@ -620,10 +619,9 @@ void GetZoneEquipmentData(EnergyPlusData &state)
         if (!state.dataHeatBal->doSpaceHeatBalanceSimulation) {
             ShowWarningError(
                 state,
-                EnergyPlus::format(
-                    "{} requires \"Do Space Heat Balance for Simulation = Yes\" in ZoneAirHeatBalanceAlgorithm. {} objects will be ignored.",
-                    CurrentModuleObject,
-                    CurrentModuleObject));
+                std::format("{} requires \"Do Space Heat Balance for Simulation = Yes\" in ZoneAirHeatBalanceAlgorithm. {} objects will be ignored.",
+                            CurrentModuleObject,
+                            CurrentModuleObject));
         } else {
             auto const &objectSchemaProps = ip->getObjectSchemaProps(state, CurrentModuleObject);
             auto &instancesValue = instances.value();
@@ -641,18 +639,17 @@ void GetZoneEquipmentData(EnergyPlusData &state)
                 std::string zoneName = ip->getAlphaFieldValue(objectFields, objectSchemaProps, "zone_name");
                 int zoneNum = Util::FindItemInList(zoneName, state.dataHeatBal->Zone);
                 if (zoneNum == 0) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\"", RoutineName, CurrentModuleObject, thisZretMixer.Name));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("..Zone Name={} not found, remaining items for this object not processed.", zoneName));
+                    ShowSevereError(state, std::format("{}{}=\"{}\"", RoutineName, CurrentModuleObject, thisZretMixer.Name));
+                    ShowContinueError(state, std::format("..Zone Name={} not found, remaining items for this object not processed.", zoneName));
                     state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
                     continue;
                 }
                 if (!state.dataHeatBal->Zone(zoneNum).IsControlled) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\"", RoutineName, CurrentModuleObject, thisZretMixer.Name));
+                    ShowSevereError(state, std::format("{}{}=\"{}\"", RoutineName, CurrentModuleObject, thisZretMixer.Name));
                     ShowContinueError(
                         state,
-                        EnergyPlus::format(
-                            "..Zone Name={} is not a controlled zone. A ZoneHVAC:EquipmentConnections object is required for this zone.", zoneName));
+                        std::format("..Zone Name={} is not a controlled zone. A ZoneHVAC:EquipmentConnections object is required for this zone.",
+                                    zoneName));
                     state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
                     continue;
                 }
@@ -717,9 +714,8 @@ void GetZoneEquipmentData(EnergyPlusData &state)
                 state.dataZoneEquip->SupplyAirPath(PathNum).ComponentTypeEnum(CompNum) =
                     (AirLoopHVACZone)getEnumValue(AirLoopHVACTypeNamesUC, AlphArray(Counter));
             } else {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}{}=\"{}\"", RoutineName, cAlphaFields(1), state.dataZoneEquip->SupplyAirPath(PathNum).Name));
-                ShowContinueError(state, EnergyPlus::format("Unhandled component type =\"{}\".", AlphArray(Counter)));
+                ShowSevereError(state, std::format("{}{}=\"{}\"", RoutineName, cAlphaFields(1), state.dataZoneEquip->SupplyAirPath(PathNum).Name));
+                ShowContinueError(state, std::format("Unhandled component type =\"{}\".", AlphArray(Counter)));
                 ShowContinueError(state, R"(Must be "AirLoopHVAC:ZoneSplitter" or "AirLoopHVAC:SupplyPlenum")");
                 state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
             }
@@ -781,15 +777,14 @@ void GetZoneEquipmentData(EnergyPlusData &state)
                                   IsNotOK,
                                   CurrentModuleObject);
                 if (IsNotOK) {
-                    ShowContinueError(state, EnergyPlus::format("In {} = {}", CurrentModuleObject, state.dataZoneEquip->ReturnAirPath(PathNum).Name));
+                    ShowContinueError(state, std::format("In {} = {}", CurrentModuleObject, state.dataZoneEquip->ReturnAirPath(PathNum).Name));
                     state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
                 }
                 state.dataZoneEquip->ReturnAirPath(PathNum).ComponentTypeEnum(CompNum) =
                     static_cast<AirLoopHVACZone>(getEnumValue(AirLoopHVACTypeNamesUC, AlphArray(Counter)));
             } else {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}{}=\"{}\"", RoutineName, cAlphaFields(1), state.dataZoneEquip->ReturnAirPath(PathNum).Name));
-                ShowContinueError(state, EnergyPlus::format("Unhandled component type =\"{}\".", AlphArray(Counter)));
+                ShowSevereError(state, std::format("{}{}=\"{}\"", RoutineName, cAlphaFields(1), state.dataZoneEquip->ReturnAirPath(PathNum).Name));
+                ShowContinueError(state, std::format("Unhandled component type =\"{}\".", AlphArray(Counter)));
                 ShowContinueError(state, R"(Must be "AirLoopHVAC:ZoneMixer" or "AirLoopHVAC:ReturnPlenum")");
                 state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
             }
@@ -807,7 +802,7 @@ void GetZoneEquipmentData(EnergyPlusData &state)
     lNumericBlanks.deallocate();
 
     if (state.dataZoneEquip->GetZoneEquipmentDataErrorsFound) {
-        ShowFatalError(state, EnergyPlus::format("{}Errors found in getting Zone Equipment input.", RoutineName));
+        ShowFatalError(state, std::format("{}Errors found in getting Zone Equipment input.", RoutineName));
     }
 }
 
@@ -840,7 +835,7 @@ void processZoneEquipmentInput(EnergyPlusData &state,
     GlobalNames::IntraObjUniquenessCheck(
         state, AlphArray(2), zoneEqModuleObject, cAlphaFields(2), state.dataZoneEquip->UniqueZoneEquipListNames, IsNotOK);
     if (IsNotOK) {
-        ShowContinueError(state, EnergyPlus::format("..another Controlled Zone has been assigned that {}.", cAlphaFields(2)));
+        ShowContinueError(state, std::format("..another Controlled Zone has been assigned that {}.", cAlphaFields(2)));
         state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
     }
     thisEquipConfig.EquipListName = AlphArray(2); // the name of the list containing all the zone eq.
@@ -856,8 +851,8 @@ void processZoneEquipmentInput(EnergyPlusData &state,
                                                  Node::CompFluidStream::Primary,
                                                  Node::ObjectIsNotParent); // all zone air state variables are
     if (thisEquipConfig.ZoneNode == 0) {
-        ShowSevereError(state, EnergyPlus::format("{}{}: {}=\"{}\", invalid", RoutineName, zoneEqModuleObject, cAlphaFields(1), AlphArray(1)));
-        ShowContinueError(state, EnergyPlus::format("{} must be present.", cAlphaFields(5 + spaceFieldShift)));
+        ShowSevereError(state, std::format("{}{}: {}=\"{}\", invalid", RoutineName, zoneEqModuleObject, cAlphaFields(1), AlphArray(1)));
+        ShowContinueError(state, std::format("{} must be present.", cAlphaFields(5 + spaceFieldShift)));
         state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
     } else {
         bool UniqueNodeError = false;
@@ -887,8 +882,8 @@ void processZoneEquipmentInput(EnergyPlusData &state,
         int ZoneEquipListNum = ip->getObjectItemNum(state, CurrentModuleObject, thisEquipConfig.EquipListName);
 
         if (ZoneEquipListNum <= 0) {
-            ShowSevereError(state, EnergyPlus::format("{}{} not found = {}", RoutineName, CurrentModuleObject, thisEquipConfig.EquipListName));
-            ShowContinueError(state, EnergyPlus::format("In ZoneHVAC:EquipmentConnections object, for Zone = {}", thisEquipConfig.ZoneName));
+            ShowSevereError(state, std::format("{}{} not found = {}", RoutineName, CurrentModuleObject, thisEquipConfig.EquipListName));
+            ShowContinueError(state, std::format("In ZoneHVAC:EquipmentConnections object, for Zone = {}", thisEquipConfig.ZoneName));
             state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
         } else {
             auto const &epListFields = ip->getJSONObjectItem(state, CurrentModuleObject, thisEquipConfig.EquipListName);
@@ -903,9 +898,8 @@ void processZoneEquipmentInput(EnergyPlusData &state,
             thisZoneEquipList.LoadDistScheme =
                 static_cast<DataZoneEquipment::LoadDist>(getEnumValue(DataZoneEquipment::LoadDistNamesUC, Util::makeUPPER(loadDistName)));
             if (thisZoneEquipList.LoadDistScheme == DataZoneEquipment::LoadDist::Invalid) {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}{} = \"{}, Invalid choice\".", RoutineName, CurrentModuleObject, thisZoneEquipList.Name));
-                ShowContinueError(state, EnergyPlus::format("...load_distribution_scheme=\"{}\".", loadDistName));
+                ShowSevereError(state, std::format("{}{} = \"{}, Invalid choice\".", RoutineName, CurrentModuleObject, thisZoneEquipList.Name));
+                ShowContinueError(state, std::format("...load_distribution_scheme=\"{}\".", loadDistName));
                 state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
             }
 
@@ -962,7 +956,7 @@ void processZoneEquipmentInput(EnergyPlusData &state,
                                       IsNotOK,
                                       CurrentModuleObject);
                     if (IsNotOK) {
-                        ShowContinueError(state, EnergyPlus::format("In {}={}", CurrentModuleObject, thisZoneEquipList.Name));
+                        ShowContinueError(state, std::format("In {}={}", CurrentModuleObject, thisZoneEquipList.Name));
                         state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
                     }
 
@@ -972,13 +966,12 @@ void processZoneEquipmentInput(EnergyPlusData &state,
 
                     if ((thisZoneEquipList.CoolingPriority(ZoneEquipTypeNum) < 0) ||
                         (thisZoneEquipList.CoolingPriority(ZoneEquipTypeNum) > thisZoneEquipList.NumOfEquipTypes)) {
-                        ShowSevereError(state, EnergyPlus::format("{}{} = \"{}\".", RoutineName, CurrentModuleObject, thisZoneEquipList.Name));
+                        ShowSevereError(state, std::format("{}{} = \"{}\".", RoutineName, CurrentModuleObject, thisZoneEquipList.Name));
                         ShowContinueError(
-                            state,
-                            EnergyPlus::format("invalid zone_equipment_cooling_sequence=[{}].", thisZoneEquipList.CoolingPriority(ZoneEquipTypeNum)));
+                            state, std::format("invalid zone_equipment_cooling_sequence=[{}].", thisZoneEquipList.CoolingPriority(ZoneEquipTypeNum)));
                         ShowContinueError(state, "equipment sequence must be > 0 and <= number of equipment in the list.");
                         if (thisZoneEquipList.CoolingPriority(ZoneEquipTypeNum) > 0) {
-                            ShowContinueError(state, EnergyPlus::format("only {} in the list.", thisZoneEquipList.NumOfEquipTypes));
+                            ShowContinueError(state, std::format("only {} in the list.", thisZoneEquipList.NumOfEquipTypes));
                         }
                         state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
                     }
@@ -987,13 +980,12 @@ void processZoneEquipmentInput(EnergyPlusData &state,
                         ip->getIntFieldValue(extensibleInstance, extensionSchemaProps, "zone_equipment_heating_or_no_load_sequence");
                     if ((thisZoneEquipList.HeatingPriority(ZoneEquipTypeNum) < 0) ||
                         (thisZoneEquipList.HeatingPriority(ZoneEquipTypeNum) > thisZoneEquipList.NumOfEquipTypes)) {
-                        ShowSevereError(state, EnergyPlus::format("{}{} = \"{}\".", RoutineName, CurrentModuleObject, thisZoneEquipList.Name));
+                        ShowSevereError(state, std::format("{}{} = \"{}\".", RoutineName, CurrentModuleObject, thisZoneEquipList.Name));
                         ShowContinueError(
-                            state,
-                            EnergyPlus::format("invalid zone_equipment_heating_sequence=[{}].", thisZoneEquipList.HeatingPriority(ZoneEquipTypeNum)));
+                            state, std::format("invalid zone_equipment_heating_sequence=[{}].", thisZoneEquipList.HeatingPriority(ZoneEquipTypeNum)));
                         ShowContinueError(state, "equipment sequence must be > 0 and <= number of equipment in the list.");
                         if (thisZoneEquipList.HeatingPriority(ZoneEquipTypeNum) > 0) {
-                            ShowContinueError(state, EnergyPlus::format("only {} in the list.", thisZoneEquipList.NumOfEquipTypes));
+                            ShowContinueError(state, std::format("only {} in the list.", thisZoneEquipList.NumOfEquipTypes));
                         }
                         state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
                     }
@@ -1047,7 +1039,7 @@ void processZoneEquipmentInput(EnergyPlusData &state,
                     }
 
                     if (thisZoneEquipList.EquipType(ZoneEquipTypeNum) == ZoneEquipType::Invalid) {
-                        ShowSevereError(state, EnergyPlus::format("{}{} = {}", RoutineName, CurrentModuleObject, thisZoneEquipList.Name));
+                        ShowSevereError(state, std::format("{}{} = {}", RoutineName, CurrentModuleObject, thisZoneEquipList.Name));
                         ShowContinueError(state, EnergyPlus::format("..Invalid Equipment Type = {}", thisZoneEquipList.EquipType(ZoneEquipTypeNum)));
                         state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
                     }
@@ -1057,35 +1049,33 @@ void processZoneEquipmentInput(EnergyPlusData &state,
             // Check for multiple assignments
             for (int ZoneEquipTypeNum = 1; ZoneEquipTypeNum <= thisZoneEquipList.NumOfEquipTypes; ++ZoneEquipTypeNum) {
                 if (count_eq(thisZoneEquipList.CoolingPriority, ZoneEquipTypeNum) > 1) {
-                    ShowSevereError(state, EnergyPlus::format("{}{} = {}", RoutineName, CurrentModuleObject, thisZoneEquipList.Name));
+                    ShowSevereError(state, std::format("{}{} = {}", RoutineName, CurrentModuleObject, thisZoneEquipList.Name));
                     ShowContinueError(
                         state,
-                        EnergyPlus::format("...multiple assignments for Zone Equipment Cooling Sequence={}, must be 1-1 correspondence between "
-                                           "sequence assignments and number of equipment.",
-                                           ZoneEquipTypeNum));
+                        std::format("...multiple assignments for Zone Equipment Cooling Sequence={}, must be 1-1 correspondence between "
+                                    "sequence assignments and number of equipment.",
+                                    ZoneEquipTypeNum));
                     state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
                 } else if (count_eq(thisZoneEquipList.CoolingPriority, ZoneEquipTypeNum) == 0) {
-                    ShowWarningError(state, EnergyPlus::format("{}{} = {}", RoutineName, CurrentModuleObject, thisZoneEquipList.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("...zero assigned to Zone Equipment Cooling Sequence={}, apparent gap in sequence assignments in "
-                                           "this equipment list.",
-                                           ZoneEquipTypeNum));
+                    ShowWarningError(state, std::format("{}{} = {}", RoutineName, CurrentModuleObject, thisZoneEquipList.Name));
+                    ShowContinueError(state,
+                                      std::format("...zero assigned to Zone Equipment Cooling Sequence={}, apparent gap in sequence assignments in "
+                                                  "this equipment list.",
+                                                  ZoneEquipTypeNum));
                 }
                 if (count_eq(thisZoneEquipList.HeatingPriority, ZoneEquipTypeNum) > 1) {
-                    ShowSevereError(state, EnergyPlus::format("{}{} = {}", RoutineName, CurrentModuleObject, thisZoneEquipList.Name));
+                    ShowSevereError(state, std::format("{}{} = {}", RoutineName, CurrentModuleObject, thisZoneEquipList.Name));
                     ShowContinueError(state,
-                                      EnergyPlus::format("...multiple assignments for Zone Equipment Heating or No-Load Sequence={}, must be 1-1 "
-                                                         "correspondence between sequence assignments and number of equipment.",
-                                                         ZoneEquipTypeNum));
+                                      std::format("...multiple assignments for Zone Equipment Heating or No-Load Sequence={}, must be 1-1 "
+                                                  "correspondence between sequence assignments and number of equipment.",
+                                                  ZoneEquipTypeNum));
                     state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
                 } else if (count_eq(thisZoneEquipList.HeatingPriority, ZoneEquipTypeNum) == 0) {
-                    ShowWarningError(state, EnergyPlus::format("{}{} = {}", RoutineName, CurrentModuleObject, thisZoneEquipList.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("...zero assigned to Zone Equipment Heating or No-Load Sequence={}, apparent gap in sequence "
-                                           "assignments in this equipment list.",
-                                           ZoneEquipTypeNum));
+                    ShowWarningError(state, std::format("{}{} = {}", RoutineName, CurrentModuleObject, thisZoneEquipList.Name));
+                    ShowContinueError(state,
+                                      std::format("...zero assigned to Zone Equipment Heating or No-Load Sequence={}, apparent gap in sequence "
+                                                  "assignments in this equipment list.",
+                                                  ZoneEquipTypeNum));
                 }
             }
         } // End ZoneHVAC:EquipmentList
@@ -1134,8 +1124,8 @@ void processZoneEquipmentInput(EnergyPlusData &state,
         }
     } else {
         ShowContinueError(state,
-                          EnergyPlus::format("Invalid Zone Air Inlet Node or NodeList Name in ZoneHVAC:EquipmentConnections object, for Zone = {}",
-                                             thisEquipConfig.ZoneName));
+                          std::format("Invalid Zone Air Inlet Node or NodeList Name in ZoneHVAC:EquipmentConnections object, for Zone = {}",
+                                      thisEquipConfig.ZoneName));
         state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
     }
 
@@ -1168,8 +1158,8 @@ void processZoneEquipmentInput(EnergyPlusData &state,
         }
     } else {
         ShowContinueError(state,
-                          EnergyPlus::format("Invalid Zone Air Exhaust Node or NodeList Name in ZoneHVAC:EquipmentConnections object, for Zone={}",
-                                             thisEquipConfig.ZoneName));
+                          std::format("Invalid Zone Air Exhaust Node or NodeList Name in ZoneHVAC:EquipmentConnections object, for Zone={}",
+                                      thisEquipConfig.ZoneName));
         state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
     }
 
@@ -1223,8 +1213,8 @@ void processZoneEquipmentInput(EnergyPlusData &state,
         }
     } else {
         ShowContinueError(state,
-                          EnergyPlus::format("Invalid Zone Return Air Node or NodeList Name in ZoneHVAC:EquipmentConnections object, for Zone={}",
-                                             thisEquipConfig.ZoneName));
+                          std::format("Invalid Zone Return Air Node or NodeList Name in ZoneHVAC:EquipmentConnections object, for Zone={}",
+                                      thisEquipConfig.ZoneName));
         state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
     }
 
@@ -1252,9 +1242,8 @@ void processZoneEquipmentInput(EnergyPlusData &state,
     } else {
         ShowContinueError(
             state,
-            EnergyPlus::format(
-                "Invalid Zone Return Air Node 1 Flow Rate Basis Node or NodeList Name in ZoneHVAC:EquipmentConnections object, for Zone={}",
-                thisEquipConfig.ZoneName));
+            std::format("Invalid Zone Return Air Node 1 Flow Rate Basis Node or NodeList Name in ZoneHVAC:EquipmentConnections object, for Zone={}",
+                        thisEquipConfig.ZoneName));
         state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
     }
 }
@@ -1273,8 +1262,8 @@ void processZoneEquipSplitterInput(EnergyPlusData &state,
     std::string const zeqTypeName = ip->getAlphaFieldValue(objectFields, objectSchemaProps, "zone_equipment_object_type");
     thisZeqSplitter.zoneEquipType = DataZoneEquipment::ZoneEquipType(getEnumValue(zoneEquipTypeNamesUC, zeqTypeName));
     if (thisZeqSplitter.zoneEquipType == ZoneEquipType::Invalid) {
-        ShowSevereError(state, EnergyPlus::format("{}{} = {}", RoutineName, zeqSplitterModuleObject, thisZeqSplitter.Name));
-        ShowContinueError(state, EnergyPlus::format("..Invalid Equipment Type = {}", zeqTypeName));
+        ShowSevereError(state, std::format("{}{} = {}", RoutineName, zeqSplitterModuleObject, thisZeqSplitter.Name));
+        ShowContinueError(state, std::format("..Invalid Equipment Type = {}", zeqTypeName));
         state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
     }
 
@@ -1296,11 +1285,10 @@ void processZoneEquipSplitterInput(EnergyPlusData &state,
         }
     }
     if (!found) {
-        ShowSevereError(state, EnergyPlus::format("{}{} = {}", RoutineName, zeqSplitterModuleObject, thisZeqSplitter.Name));
+        ShowSevereError(state, std::format("{}{} = {}", RoutineName, zeqSplitterModuleObject, thisZeqSplitter.Name));
         ShowContinueError(
-            state,
-            EnergyPlus::format(".. Zone Equipment Object Type={} and Zone Equipment Name={} not found", zeqTypeName, thisZeqSplitter.zoneEquipName));
-        ShowContinueError(state, EnergyPlus::format(".. in ZoneHVAC:EquipmentList={}", thisZoneEqList.Name));
+            state, std::format(".. Zone Equipment Object Type={} and Zone Equipment Name={} not found", zeqTypeName, thisZeqSplitter.zoneEquipName));
+        ShowContinueError(state, std::format(".. in ZoneHVAC:EquipmentList={}", thisZoneEqList.Name));
         state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
         return;
     }
@@ -1323,8 +1311,8 @@ void processZoneEquipSplitterInput(EnergyPlusData &state,
         std::string spaceName = ip->getAlphaFieldValue(objectFields, objectSchemaProps, "control_space_name");
         thisZeqSplitter.controlSpaceIndex = Util::FindItemInList(spaceName, state.dataHeatBal->space);
         if (thisZeqSplitter.controlSpaceIndex == 0) {
-            ShowSevereError(state, EnergyPlus::format("{}{}={}", RoutineName, zeqSplitterModuleObject, thisZeqSplitter.Name));
-            ShowContinueError(state, EnergyPlus::format("Space Name={} not found.", spaceName));
+            ShowSevereError(state, std::format("{}{}={}", RoutineName, zeqSplitterModuleObject, thisZeqSplitter.Name));
+            ShowContinueError(state, std::format("Space Name={} not found.", spaceName));
             state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
         }
     }
@@ -1344,8 +1332,8 @@ void processZoneEquipSplitterInput(EnergyPlusData &state,
             std::string const spaceName = ip->getAlphaFieldValue(extensibleInstance, extensionSchemaProps, "space_name");
             thisZeqSpace.spaceIndex = Util::FindItemInList(spaceName, state.dataHeatBal->space);
             if (thisZeqSpace.spaceIndex == 0) {
-                ShowSevereError(state, EnergyPlus::format("{}{}={}", RoutineName, zeqSplitterModuleObject, thisZeqSplitter.Name));
-                ShowContinueError(state, EnergyPlus::format("Space Name={} not found.", spaceName));
+                ShowSevereError(state, std::format("{}{}={}", RoutineName, zeqSplitterModuleObject, thisZeqSplitter.Name));
+                ShowContinueError(state, std::format("Space Name={} not found.", spaceName));
                 state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
             } else {
                 thisZeqSpace.fraction = ip->getRealFieldValue(extensibleInstance, extensionSchemaProps, "space_fraction");
@@ -1397,11 +1385,11 @@ void processZoneEquipMixerInput(EnergyPlusData &state,
         }
     }
     if (!found) {
-        ShowSevereError(state, EnergyPlus::format("{}{}={}", RoutineName, zeqMixerModuleObject, thisZeqMixer.Name));
+        ShowSevereError(state, std::format("{}{}={}", RoutineName, zeqMixerModuleObject, thisZeqMixer.Name));
         ShowContinueError(state,
-                          EnergyPlus::format("Zone Equipment Inlet Node Name={} is not an exhaust node for ZoneHVAC:EquipmentConnections={}.",
-                                             state.dataLoopNodes->NodeID(thisZeqMixer.outletNodeNum),
-                                             thisZoneEquipConfig.ZoneName));
+                          std::format("Zone Equipment Inlet Node Name={} is not an exhaust node for ZoneHVAC:EquipmentConnections={}.",
+                                      state.dataLoopNodes->NodeID(thisZeqMixer.outletNodeNum),
+                                      thisZoneEquipConfig.ZoneName));
         state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
     }
 
@@ -1421,8 +1409,8 @@ void processZoneEquipMixerInput(EnergyPlusData &state,
             std::string const spaceName = ip->getAlphaFieldValue(extensibleInstance, extensionSchemaProps, "space_name");
             thisZeqSpace.spaceIndex = Util::FindItemInList(spaceName, state.dataHeatBal->space);
             if (thisZeqSpace.spaceIndex == 0) {
-                ShowSevereError(state, EnergyPlus::format("{}{}={}", RoutineName, zeqMixerModuleObject, thisZeqMixer.Name));
-                ShowContinueError(state, EnergyPlus::format("Space Name={} not found.", spaceName));
+                ShowSevereError(state, std::format("{}{}={}", RoutineName, zeqMixerModuleObject, thisZeqMixer.Name));
+                ShowContinueError(state, std::format("Space Name={} not found.", spaceName));
                 state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
             } else {
                 thisZeqSpace.fraction = ip->getRealFieldValue(extensibleInstance, extensionSchemaProps, "space_fraction");
@@ -1445,11 +1433,11 @@ void processZoneEquipMixerInput(EnergyPlusData &state,
                     }
                 }
                 if (!found) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}={}", RoutineName, zeqMixerModuleObject, thisZeqMixer.Name));
+                    ShowSevereError(state, std::format("{}{}={}", RoutineName, zeqMixerModuleObject, thisZeqMixer.Name));
                     ShowContinueError(state,
-                                      EnergyPlus::format("Space Node Name={} is not an exhaust node for SpaceHVAC:EquipmentConnections={}.",
-                                                         state.dataLoopNodes->NodeID(thisZeqSpace.spaceNodeNum),
-                                                         thisSpaceEquipConfig.ZoneName));
+                                      std::format("Space Node Name={} is not an exhaust node for SpaceHVAC:EquipmentConnections={}.",
+                                                  state.dataLoopNodes->NodeID(thisZeqSpace.spaceNodeNum),
+                                                  thisSpaceEquipConfig.ZoneName));
                     state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
                 }
             }
@@ -1492,11 +1480,11 @@ void processZoneReturnMixerInput(EnergyPlusData &state,
         }
     }
     if (!found) {
-        ShowSevereError(state, EnergyPlus::format("{}{}={}", RoutineName, zeqMixerModuleObject, thisZretMixer.Name));
+        ShowSevereError(state, std::format("{}{}={}", RoutineName, zeqMixerModuleObject, thisZretMixer.Name));
         ShowContinueError(state,
-                          EnergyPlus::format("Zone Equipment Return Air Node Name={} is not a return air node for ZoneHVAC:EquipmentConnections={}.",
-                                             state.dataLoopNodes->NodeID(thisZretMixer.outletNodeNum),
-                                             thisZoneEquipConfig.ZoneName));
+                          std::format("Zone Equipment Return Air Node Name={} is not a return air node for ZoneHVAC:EquipmentConnections={}.",
+                                      state.dataLoopNodes->NodeID(thisZretMixer.outletNodeNum),
+                                      thisZoneEquipConfig.ZoneName));
         state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
     }
 
@@ -1513,8 +1501,8 @@ void processZoneReturnMixerInput(EnergyPlusData &state,
             std::string const spaceName = ip->getAlphaFieldValue(extensibleInstance, extensionSchemaProps, "space_name");
             thisZeqSpace.spaceIndex = Util::FindItemInList(spaceName, state.dataHeatBal->space);
             if (thisZeqSpace.spaceIndex == 0) {
-                ShowSevereError(state, EnergyPlus::format("{}{}={}", RoutineName, zeqMixerModuleObject, thisZretMixer.Name));
-                ShowContinueError(state, EnergyPlus::format("Space Name={} not found.", spaceName));
+                ShowSevereError(state, std::format("{}{}={}", RoutineName, zeqMixerModuleObject, thisZretMixer.Name));
+                ShowContinueError(state, std::format("Space Name={} not found.", spaceName));
                 state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
             } else {
                 thisZeqSpace.spaceNodeNum =
@@ -1537,12 +1525,11 @@ void processZoneReturnMixerInput(EnergyPlusData &state,
                     }
                 }
                 if (!found) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}={}", RoutineName, zeqMixerModuleObject, thisZretMixer.Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Space Return Air Node Name={} is not a return air node for SpaceHVAC:EquipmentConnections={}.",
-                                           state.dataLoopNodes->NodeID(thisZeqSpace.spaceNodeNum),
-                                           thisSpaceEquipConfig.ZoneName));
+                    ShowSevereError(state, std::format("{}{}={}", RoutineName, zeqMixerModuleObject, thisZretMixer.Name));
+                    ShowContinueError(state,
+                                      std::format("Space Return Air Node Name={} is not a return air node for SpaceHVAC:EquipmentConnections={}.",
+                                                  state.dataLoopNodes->NodeID(thisZeqSpace.spaceNodeNum),
+                                                  thisSpaceEquipConfig.ZoneName));
                     state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
                 }
             }
@@ -1698,12 +1685,11 @@ int GetReturnAirNodeForZone(EnergyPlusData &state,
                     ReturnAirNodeNumber = thisZoneEquip.ReturnNode(1);
                     if (thisZoneEquip.NumReturnNodes > 1) {
                         ShowWarningError(
-                            state,
-                            EnergyPlus::format("GetReturnAirNodeForZone: {}, request for zone return node is ambiguous.", calledFromDescription));
+                            state, std::format("GetReturnAirNodeForZone: {}, request for zone return node is ambiguous.", calledFromDescription));
                         ShowContinueError(state,
-                                          EnergyPlus::format("Zone={} has {} return nodes. First return node will be used.",
-                                                             thisZoneEquip.ZoneName,
-                                                             thisZoneEquip.NumReturnNodes));
+                                          std::format("Zone={} has {} return nodes. First return node will be used.",
+                                                      thisZoneEquip.ZoneName,
+                                                      thisZoneEquip.NumReturnNodes));
                     }
                 } else {
                     for (int nodeCount = 1; nodeCount <= thisZoneEquip.NumReturnNodes; ++nodeCount) {
@@ -1831,7 +1817,7 @@ int GetZoneEquipControlledZoneNum(EnergyPlusData &state, DataZoneEquipment::Zone
         }
     }
     ShowSevereError(state,
-                    fmt::format("{}{}=\"{}\" is not on any ZoneHVAC:Equipmentlist. It will not be simulated.",
+                    std::format("{}{}=\"{}\" is not on any ZoneHVAC:Equipmentlist. It will not be simulated.",
                                 RoutineName,
                                 zoneEquipTypeNamesUC[(int)zoneEquipType],
                                 EquipmentName));
@@ -1912,10 +1898,10 @@ void ZoneEquipmentSplitterMixer::size(EnergyPlusData &state)
     if (!state.dataHeatBal->doSpaceHeatBalanceSizing && (this->spaceSizingBasis == DataZoneEquipment::SpaceEquipSizingBasis::DesignCoolingLoad ||
                                                          (this->spaceSizingBasis == DataZoneEquipment::SpaceEquipSizingBasis::DesignHeatingLoad))) {
         ShowSevereError(state,
-                        EnergyPlus::format("ZoneEquipmentSplitterMixer::size: {} is unknown for {}={}. Unable to autosize Space Fractions.",
-                                           DataZoneEquipment::spaceEquipSizingBasisNamesUC[(int)this->spaceSizingBasis],
-                                           Node::ConnectionObjectTypeNames[(int)this->spaceEquipType],
-                                           this->Name));
+                        std::format("ZoneEquipmentSplitterMixer::size: {} is unknown for {}={}. Unable to autosize Space Fractions.",
+                                    DataZoneEquipment::spaceEquipSizingBasisNamesUC[(int)this->spaceSizingBasis],
+                                    Node::ConnectionObjectTypeNames[(int)this->spaceEquipType],
+                                    this->Name));
         ShowFatalError(state,
                        "Set \"Do Space Heat Balance for Sizing\" to Yes in ZoneAirHeatBalanceAlgorithm or choose a different Space Fraction Method.");
         return;
@@ -1958,12 +1944,12 @@ void ZoneEquipmentSplitterMixer::size(EnergyPlusData &state)
 
     if (spacesTotal < 0.00001) {
         ShowSevereError(state,
-                        EnergyPlus::format("ZoneEquipmentSplitterMixer::size: Total {} is zero for {}={}. Unable to autosize Space Fractions.",
-                                           DataZoneEquipment::spaceEquipSizingBasisNamesUC[(int)this->spaceSizingBasis],
-                                           Node::ConnectionObjectTypeNames[(int)this->spaceEquipType],
-                                           this->Name));
+                        std::format("ZoneEquipmentSplitterMixer::size: Total {} is zero for {}={}. Unable to autosize Space Fractions.",
+                                    DataZoneEquipment::spaceEquipSizingBasisNamesUC[(int)this->spaceSizingBasis],
+                                    Node::ConnectionObjectTypeNames[(int)this->spaceEquipType],
+                                    this->Name));
         Real64 spaceFrac = 1.0 / (int)this->spaces.size();
-        ShowContinueError(state, EnergyPlus::format("Setting space fractions to 1/number of spaces = {}.", spaceFrac));
+        ShowContinueError(state, std::format("Setting space fractions to 1/number of spaces = {}.", spaceFrac));
         for (auto &thisSpace : this->spaces) {
             thisSpace.fraction = spaceFrac;
         }
@@ -2000,7 +1986,7 @@ void ZoneEquipmentSplitterMixer::size(EnergyPlusData &state)
         BaseSizer::reportSizerOutput(state,
                                      Node::ConnectionObjectTypeNames[(int)this->spaceEquipType],
                                      this->Name,
-                                     EnergyPlus::format("Space {} Fraction", spaceCounter),
+                                     std::format("Space {} Fraction", spaceCounter),
                                      thisSpace.fraction);
     }
 }

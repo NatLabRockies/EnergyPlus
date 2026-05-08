@@ -48,6 +48,7 @@
 // C++ Headers
 #include <cassert>
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -1739,8 +1740,8 @@ namespace HeatBalanceIntRadExchange {
                     }
                     ShowWarningError(
                         state,
-                        EnergyPlus::format("FixViewFactors: View factors not complete. Check for bad surface descriptions or unenclosed zone=\"{}\".",
-                                           enclName));
+                        std::format("FixViewFactors: View factors not complete. Check for bad surface descriptions or unenclosed zone=\"{}\".",
+                                    enclName));
                     ShowContinueError(state,
                                       EnergyPlus::format("Enforced reciprocity has tolerance (ideal is "
                                                          "0)=[{:.6R}], Row Sum (ideal is {})=[{:.2R}].",
@@ -1782,8 +1783,8 @@ namespace HeatBalanceIntRadExchange {
             } else {
                 ShowWarningError(
                     state,
-                    EnergyPlus::format("FixViewFactors: View factors not complete. Check for bad surface descriptions or unenclosed zone=\"{}\".",
-                                       enclName));
+                    std::format("FixViewFactors: View factors not complete. Check for bad surface descriptions or unenclosed zone=\"{}\".",
+                                enclName));
             }
         }
         if (severeErrorPresent) {
@@ -2080,14 +2081,14 @@ namespace HeatBalanceIntRadExchange {
 
         // Trap for surfaces that do not exist
         if (surfNum == 0) {
-            ShowSevereError(state, EnergyPlus::format("{}Invalid Surface name = {}", routineName, SurfaceName));
-            ShowContinueError(state, EnergyPlus::format("Occurs for {} = {}", cCurrentModuleObject, RadSysName));
+            ShowSevereError(state, std::format("{}Invalid Surface name = {}", routineName, SurfaceName));
+            ShowContinueError(state, std::format("Occurs for {} = {}", cCurrentModuleObject, RadSysName));
             ErrorsFound = true;
             return surfNum;
         }
 
         if (RadSysZoneNum == 0) {
-            ShowSevereError(state, EnergyPlus::format("{}Invalid Zone number passed by {} = {}", routineName, cCurrentModuleObject, RadSysName));
+            ShowSevereError(state, std::format("{}Invalid Zone number passed by {} = {}", routineName, cCurrentModuleObject, RadSysName));
             ErrorsFound = true;
             return surfNum;
         }
@@ -2097,17 +2098,17 @@ namespace HeatBalanceIntRadExchange {
         if (surfZoneNum == 0) {
             // This should never happen
             ShowSevereError(state,
-                            EnergyPlus::format("{}Somehow  the surface zone number is zero for{} = {} and Surface = {}",
-                                               routineName,
-                                               cCurrentModuleObject,
-                                               RadSysName,
-                                               SurfaceName)); // LCOV_EXCL_LINE
-            ErrorsFound = true;                               // LCOV_EXCL_LINE
+                            std::format("{}Somehow  the surface zone number is zero for{} = {} and Surface = {}",
+                                        routineName,
+                                        cCurrentModuleObject,
+                                        RadSysName,
+                                        SurfaceName)); // LCOV_EXCL_LINE
+            ErrorsFound = true;                        // LCOV_EXCL_LINE
         } else if (surfZoneNum != RadSysZoneNum) {
-            ShowSevereError(state, EnergyPlus::format("{}Surface = {} is not in the same zone  as the radiant equipment.", routineName, SurfaceName));
-            ShowContinueError(state, EnergyPlus::format("Surface zone or enclosure = {}", state.dataHeatBal->Zone(surfZoneNum).Name));
-            ShowContinueError(state, EnergyPlus::format("Radiant equipment zone or enclosure = {}", state.dataHeatBal->Zone(RadSysZoneNum).Name));
-            ShowContinueError(state, EnergyPlus::format("Occurs for {} = {}", cCurrentModuleObject, RadSysName));
+            ShowSevereError(state, std::format("{}Surface = {} is not in the same zone  as the radiant equipment.", routineName, SurfaceName));
+            ShowContinueError(state, std::format("Surface zone or enclosure = {}", state.dataHeatBal->Zone(surfZoneNum).Name));
+            ShowContinueError(state, std::format("Radiant equipment zone or enclosure = {}", state.dataHeatBal->Zone(RadSysZoneNum).Name));
+            ShowContinueError(state, std::format("Occurs for {} = {}", cCurrentModuleObject, RadSysName));
             ErrorsFound = true;
         }
         return surfNum;

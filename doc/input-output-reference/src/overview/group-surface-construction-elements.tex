@@ -4071,6 +4071,10 @@ This output is the heat power added after material layer N from the EMS heat flu
 
 This output is the heat energy added after material layer N from the EMS heat flux actuator (Component type: ``CondFD Surface Material Layer''; Control type: ``Heat Flux''). Energy is aggregated on the electricity meter and is only valid for the CondFD solution algorithm.
 
+\paragraph{CondFD EMS Sky Longwave Radiation Override Heat Flux}
+
+This output is the user-specified net sky longwave radiation heat flux applied to the exterior surface via the EMS actuator (Component type: ``CondFD Surface''; Control type: ``Sky Longwave Radiation Override''). Reports 0.0 when not actuated. Only valid for exterior CondFD surfaces.
+
 \subsection{Construction:AirBoundary}\label{constructionairboundary}
 
 Construction:AirBoundary indicates an open boundary between two zones. It may be used for base surfaces and fenestration surfaces.

@@ -7280,6 +7280,11 @@
 !-   ===========  ALL OBJECTS IN CLASS: ENERGYMANAGEMENTSYSTEM:PROGRAMCALLINGMANAGER ===========
 
   EnergyManagementSystem:ProgramCallingManager,
+    init calling manager,  !- Name
+    BeginNewEnvironment,  !- EnergyPlus Model Calling Point
+    init;  !- Program Name 1
+
+  EnergyManagementSystem:ProgramCallingManager,
     attic_unvented_1_duct_leakage_imbalance_infil_program calling manager,  !- Name
     BeginZoneTimestepAfterInitHeatBalance,  !- EnergyPlus Model Calling Point
     attic_unvented_1_duct_leakage_imbalance_infil_program;  !- Program Name 1
@@ -7335,6 +7340,13 @@
     water_heater_EC_adj;     !- Program Name 1
 
 !-   ===========  ALL OBJECTS IN CLASS: ENERGYMANAGEMENTSYSTEM:PROGRAM ===========
+
+  EnergyManagementSystem:Program,
+    init,  !- Name
+    Set CENTRAL_AC_AND_FURNACE_AIRLOOP_0_DUCTIMBALLKSUPFANEQUIVDZ = 0.0,   !- Program Line 1
+    Set CENTRAL_AC_AND_FURNACE_AIRLOOP_0_DUCTIMBALLKEXHFANEQUIVDZ = 0.0,   !- Program Line 2
+    Set CENTRAL_AC_AND_FURNACE_AIRLOOP_0_DUCTIMBALLKSUPFANEQUIVCOND = 0.0, !- <none>
+    Set CENTRAL_AC_AND_FURNACE_AIRLOOP_0_DUCTIMBALLKEXHFANEQUIVCOND = 0.0; !- <none>
 
   EnergyManagementSystem:Program,
     attic_unvented_1_duct_leakage_imbalance_infil_program,  !- Name
@@ -7784,11 +7796,6 @@
 
   EnergyManagementSystem:GlobalVariable,
     natural_vent_program_Qwhf;  !- Erl Variable 1 Name
-
-  EnergyManagementSystem:GlobalVariable,
-    Qducts,                  !- Erl Variable 1 Name
-    Qsupply,                 !- Erl Variable 2 Name
-    Qexhaust;                !- Erl Variable 3 Name
 
 !-   ===========  ALL OBJECTS IN CLASS: ENERGYMANAGEMENTSYSTEM:OUTPUTVARIABLE ===========
 

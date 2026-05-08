@@ -2653,7 +2653,7 @@
   ZoneControl:Humidistat,
     Air Loop 2 Humidistat,   !- Name
     ZNF1,                    !- Zone Name
-    Relative Humidity Sch;   !- Humidifying Relative Humidity Setpoint Schedule Name
+    Relative Humidity Sch;   !- Humidifying Setpoint Schedule Name
 
   Schedule:Compact,
     Relative Humidity Sch,   !- Name

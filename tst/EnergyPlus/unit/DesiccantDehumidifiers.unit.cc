@@ -2782,7 +2782,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_OnOASystemTest)
         "  ZoneControl:Humidistat,",
         "    SPACE1-1 Humidistat,     !- Name",
         "    SPACE1-1,                !- Zone Name",
-        "    Relative Humidity Sched; !- Humidifying Relative Humidity Setpoint Schedule Name",
+        "    Relative Humidity Sched; !- Humidifying Setpoint Schedule Name",
 
         "  HeatExchanger:Desiccant:BalancedFlow,",
         "    OA Desiccant Heat Exchanger,  !- Name",
@@ -3852,7 +3852,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_OnPrimaryAirSystemTest)
         "  ZoneControl:Humidistat,",
         "    Main Zone Humidistat,     !- Name",
         "    Main Zone,                !- Zone Name",
-        "    Relative Humidity Sched; !- Humidifying Relative Humidity Setpoint Schedule Name",
+        "    Relative Humidity Sched; !- Humidifying Setpoint Schedule Name",
 
         "  Schedule:Compact,",
         "    Relative Humidity Sched, !- Name",
@@ -5039,7 +5039,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_RegenAirHeaterHWCoilSizingTest)
         "  ZoneControl:Humidistat,",
         "    Main Zone Humidistat,     !- Name",
         "    Main Zone,                !- Zone Name",
-        "    Relative Humidity Sched; !- Humidifying Relative Humidity Setpoint Schedule Name",
+        "    Relative Humidity Sched; !- Humidifying Setpoint Schedule Name",
 
         "  Schedule:Compact,",
         "    Relative Humidity Sched, !- Name",
@@ -6472,7 +6472,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_VSCoolingCoilOnPrimaryAirSystemTest)
         "  ZoneControl:Humidistat,",
         "    Main Zone Humidistat,     !- Name",
         "    Main Zone,                !- Zone Name",
-        "    Relative Humidity Sched; !- Humidifying Relative Humidity Setpoint Schedule Name",
+        "    Relative Humidity Sched; !- Humidifying Setpoint Schedule Name",
 
         "  Schedule:Compact,",
         "    Relative Humidity Sched, !- Name",

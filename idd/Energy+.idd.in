@@ -35256,7 +35256,7 @@ OutputControl:Sizing:Style,
 \group Zone HVAC Controls and Thermostats
 
 ZoneControl:Humidistat,
-       \memo Specifies zone relative humidity setpoint schedules for humidifying and dehumidifying.
+  \memo Specifies zone relative humidity setpoint schedules for humidifying and dehumidifying.
   \min-fields 3
   A1 , \field Name
        \required-field

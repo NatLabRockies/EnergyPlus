@@ -47,10 +47,10 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
-// #include <ObjexxFCL/Fmath.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Autosizing/HeatingCapacitySizing.hh>
@@ -309,7 +309,7 @@ namespace BaseboardRadiator {
                             if (thisBaseboard.ScaledHeatingCapacity < 0.0 && thisBaseboard.ScaledHeatingCapacity != AutoSize) {
                                 ShowSevereError(state, EnergyPlus::format("{} = {}", cCMO_BBRadiator_Water, thisBaseboard.EquipID));
                                 ShowContinueError(state,
-                                                  EnergyPlus::format("Illegal {} = {:.7T}",
+                                                  EnergyPlus::format("Illegal {} = {:.7f}",
                                                                      numericFieldNames[iHeatDesignCapacityNumericNum - 1],
                                                                      thisBaseboard.ScaledHeatingCapacity));
                                 ErrorsFound = true;
@@ -334,7 +334,7 @@ namespace BaseboardRadiator {
                                     state,
                                     EnergyPlus::format("Input for {} = {}", heatingDesignCapacityMethodFieldName, heatingDesignCapacityMethod));
                                 ShowContinueError(state,
-                                                  EnergyPlus::format("Illegal {} = {:.7T}",
+                                                  EnergyPlus::format("Illegal {} = {:.7f}",
                                                                      numericFieldNames[iHeatCapacityPerFloorAreaNumericNum - 1],
                                                                      thisBaseboard.ScaledHeatingCapacity));
                                 ErrorsFound = true;
@@ -365,24 +365,22 @@ namespace BaseboardRadiator {
                             if (thisBaseboard.ScaledHeatingCapacity < 0.0) {
                                 ShowSevereError(state, EnergyPlus::format("{} = {}", cCMO_BBRadiator_Water, thisBaseboard.EquipID));
                                 ShowContinueError(state,
-                                                  EnergyPlus::format("Illegal {} = {:.7T}",
+                                                  EnergyPlus::format("Illegal {} = {:.7f}",
                                                                      numericFieldNames[iHeatFracOfAutosizedCapacityNumericNum - 1],
                                                                      thisBaseboard.ScaledHeatingCapacity));
                                 ErrorsFound = true;
                             }
                         } else {
-                            ShowSevereError(state, EnergyPlus::format("{} = {}", cCMO_BBRadiator_Water, thisBaseboard.EquipID));
+                            ShowSevereError(state, std::format("{} = {}", cCMO_BBRadiator_Water, thisBaseboard.EquipID));
+                            ShowContinueError(state,
+                                              std::format("Input for {} = {}", heatingDesignCapacityMethodFieldName, heatingDesignCapacityMethod));
                             ShowContinueError(
-                                state, EnergyPlus::format("Input for {} = {}", heatingDesignCapacityMethodFieldName, heatingDesignCapacityMethod));
-                            ShowContinueError(
-                                state,
-                                EnergyPlus::format("Blank field not allowed for {}", numericFieldNames[iHeatFracOfAutosizedCapacityNumericNum - 1]));
+                                state, std::format("Blank field not allowed for {}", numericFieldNames[iHeatFracOfAutosizedCapacityNumericNum - 1]));
                             ErrorsFound = true;
                         }
                     } else {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", cCMO_BBRadiator_Water, thisBaseboard.EquipID));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Illegal {} = {}", heatingDesignCapacityMethodFieldName, heatingDesignCapacityMethod));
+                        ShowSevereError(state, std::format("{} = {}", cCMO_BBRadiator_Water, thisBaseboard.EquipID));
+                        ShowContinueError(state, std::format("Illegal {} = {}", heatingDesignCapacityMethodFieldName, heatingDesignCapacityMethod));
                         ErrorsFound = true;
                     }
 
@@ -403,7 +401,7 @@ namespace BaseboardRadiator {
             }
 
             if (ErrorsFound) {
-                ShowFatalError(state, EnergyPlus::format("{}Errors found in getting input.  Preceding condition(s) cause termination.", RoutineName));
+                ShowFatalError(state, std::format("{}Errors found in getting input.  Preceding condition(s) cause termination.", RoutineName));
             }
         }
 
@@ -616,7 +614,7 @@ namespace BaseboardRadiator {
                     state.dataSize->DataZoneNumber = this->ZonePtr;
                     int SizingMethod = HVAC::HeatingCapacitySizing;
                     int FieldNum = 1;
-                    std::string const SizingString = EnergyPlus::format("{} [W]", this->FieldNames[FieldNum - 1]);
+                    std::string const SizingString = std::format("{} [W]", this->FieldNames[FieldNum - 1]);
                     int CapSizingMethod = this->HeatingCapMethod;
                     zoneEqSizing.SizingMethod(SizingMethod) = CapSizingMethod;
                     if (CapSizingMethod == DataSizing::HeatingDesignCapacity || CapSizingMethod == DataSizing::CapacityPerFloorArea ||
@@ -684,7 +682,7 @@ namespace BaseboardRadiator {
                                     state.dataSize->AutoVsHardSizingThreshold) {
                                     ShowMessage(
                                         state,
-                                        EnergyPlus::format(
+                                        std::format(
                                             "SizeBaseboard: Potential issue with equipment sizing for ZoneHVAC:Baseboard:Convective:Water=\"{}\".",
                                             this->EquipID));
                                     ShowContinueError(
@@ -729,7 +727,7 @@ namespace BaseboardRadiator {
                     state.dataSize->DataZoneNumber = this->ZonePtr;
                     int SizingMethod = HVAC::HeatingCapacitySizing;
                     int FieldNum = 1;
-                    std::string const SizingString = EnergyPlus::format("{} [W]", this->FieldNames[FieldNum - 1]);
+                    std::string const SizingString = std::format("{} [W]", this->FieldNames[FieldNum - 1]);
                     int CapSizingMethod = this->HeatingCapMethod;
                     zoneEqSizing.SizingMethod(SizingMethod) = CapSizingMethod;
                     if (CapSizingMethod == DataSizing::HeatingDesignCapacity || CapSizingMethod == DataSizing::CapacityPerFloorArea ||
@@ -797,9 +795,9 @@ namespace BaseboardRadiator {
                                 // if the numerical inversion failed, issue error messages.
                                 if (SolFla == -1) {
                                     ShowSevereError(state,
-                                                    EnergyPlus::format("SizeBaseboard: Autosizing of HW baseboard UA failed for {}=\"{}\"",
-                                                                       cCMO_BBRadiator_Water,
-                                                                       this->EquipID));
+                                                    std::format("SizeBaseboard: Autosizing of HW baseboard UA failed for {}=\"{}\"",
+                                                                cCMO_BBRadiator_Water,
+                                                                this->EquipID));
                                     ShowContinueError(state, "Iteration limit exceeded in calculating coil UA");
                                     if (UAAutoSize) {
                                         ErrorsFound = true;
@@ -810,9 +808,9 @@ namespace BaseboardRadiator {
                                     }
                                 } else if (SolFla == -2) {
                                     ShowSevereError(state,
-                                                    EnergyPlus::format("SizeBaseboard: Autosizing of HW baseboard UA failed for {}=\"{}\"",
-                                                                       cCMO_BBRadiator_Water,
-                                                                       this->EquipID));
+                                                    std::format("SizeBaseboard: Autosizing of HW baseboard UA failed for {}=\"{}\"",
+                                                                cCMO_BBRadiator_Water,
+                                                                this->EquipID));
                                     ShowContinueError(state, "Bad starting values for UA");
                                     if (UAAutoSize) {
                                         ErrorsFound = true;
@@ -827,13 +825,12 @@ namespace BaseboardRadiator {
                                 UADes = UA1;
                                 if (UAAutoSize) {
                                     ShowWarningError(state,
-                                                     EnergyPlus::format("SizeBaseboard: Autosizing of HW baseboard UA failed for {}=\"{}\"",
-                                                                        cCMO_BBRadiator_Water,
-                                                                        this->EquipID));
-                                    ShowContinueError(state,
-                                                      EnergyPlus::format("Design UA set equal to design coil load for {}=\"{}\"",
-                                                                         cCMO_BBRadiator_Water,
-                                                                         this->EquipID));
+                                                     std::format("SizeBaseboard: Autosizing of HW baseboard UA failed for {}=\"{}\"",
+                                                                 cCMO_BBRadiator_Water,
+                                                                 this->EquipID));
+                                    ShowContinueError(
+                                        state,
+                                        std::format("Design UA set equal to design coil load for {}=\"{}\"", cCMO_BBRadiator_Water, this->EquipID));
                                     ShowContinueError(state, EnergyPlus::format("Design coil load used during sizing = {:.5R} W.", DesCoilLoad));
                                     ShowContinueError(
                                         state, EnergyPlus::format("Inlet water temperature used during sizing = {:.5R} C.", this->WaterInletTemp));
@@ -843,13 +840,13 @@ namespace BaseboardRadiator {
                             UADes = UA0;
                             if (UAAutoSize) {
                                 ShowWarningError(state,
-                                                 EnergyPlus::format("SizeBaseboard: Autosizing of HW baseboard UA failed for {}=\"{}\"",
-                                                                    cCMO_BBRadiator_Water,
-                                                                    this->EquipID));
+                                                 std::format("SizeBaseboard: Autosizing of HW baseboard UA failed for {}=\"{}\"",
+                                                             cCMO_BBRadiator_Water,
+                                                             this->EquipID));
                                 ShowContinueError(state,
-                                                  EnergyPlus::format("Design UA set equal to 0.001 * design coil load for {}=\"{}\"",
-                                                                     cCMO_BBRadiator_Water,
-                                                                     this->EquipID));
+                                                  std::format("Design UA set equal to 0.001 * design coil load for {}=\"{}\"",
+                                                              cCMO_BBRadiator_Water,
+                                                              this->EquipID));
                                 ShowContinueError(state, EnergyPlus::format("Design coil load used during sizing = {:.5R} W.", DesCoilLoad));
                                 ShowContinueError(state,
                                                   EnergyPlus::format("Inlet water temperature used during sizing = {:.5R} C.", this->WaterInletTemp));
@@ -879,7 +876,7 @@ namespace BaseboardRadiator {
                                 if ((std::abs(UADes - UAUser) / UAUser) > state.dataSize->AutoVsHardSizingThreshold) {
                                     ShowMessage(
                                         state,
-                                        EnergyPlus::format(
+                                        std::format(
                                             "SizeBaseboard: Potential issue with equipment sizing for ZoneHVAC:Baseboard:Convective:Water=\"{}\".",
                                             this->EquipID));
                                     ShowContinueError(state, EnergyPlus::format("User-Specified U-Factor Times Area Value of {:.2R} [W/K]", UAUser));
@@ -896,7 +893,7 @@ namespace BaseboardRadiator {
         } else {
             // if there is no heating Sizing:Plant object and autosizing was requested, issue an error message
             if (this->WaterVolFlowRateMax == DataSizing::AutoSize || this->UA == DataSizing::AutoSize) {
-                ShowSevereError(state, EnergyPlus::format("SizeBaseboard: {}=\"{}\"", cCMO_BBRadiator_Water, this->EquipID));
+                ShowSevereError(state, std::format("SizeBaseboard: {}=\"{}\"", cCMO_BBRadiator_Water, this->EquipID));
                 ShowContinueError(state, "...Autosizing of hot water baseboard requires a heating loop Sizing:Plant object");
                 ErrorsFound = true;
             }

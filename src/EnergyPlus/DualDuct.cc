@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 #include <string>
 
 // ObjexxFCL Headers
@@ -694,12 +695,12 @@ namespace DualDuct {
                                                                            // do nothing, okay since no per person requirement involved
                     } else if ((DummyOAFlow > 0.0) && (lAlphaBlanks(7))) { // missing input
                         ShowSevereError(state, EnergyPlus::format("{} was blank.", cAlphaFields(7)));
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", cCMO_DDVarVolOA, thisDD.Name));
+                        ShowContinueError(state, std::format("Occurs in {} = {}", cCMO_DDVarVolOA, thisDD.Name));
                         ShowContinueError(state, R"(Valid choices are "CurrentOccupancy" or "DesignOccupancy")");
                         ErrorsFound = true;
                     } else if ((DummyOAFlow > 0.0) && !(lAlphaBlanks(7))) { // incorrect input
-                        ShowSevereError(state, EnergyPlus::format("{} = {} not a valid key choice.", cAlphaFields(7), AlphArray(7)));
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", cCMO_DDVarVolOA, thisDD.Name));
+                        ShowSevereError(state, std::format("{} = {} not a valid key choice.", cAlphaFields(7), AlphArray(7)));
+                        ShowContinueError(state, std::format("Occurs in {} = {}", cCMO_DDVarVolOA, thisDD.Name));
                         ShowContinueError(state, R"(Valid choices are "CurrentOccupancy" or "DesignOccupancy")");
                         ErrorsFound = true;
                     }
@@ -732,7 +733,7 @@ namespace DualDuct {
         }
 
         if (ErrorsFound) {
-            ShowFatalError(state, EnergyPlus::format("{}Errors found in input.  Preceding condition(s) cause termination.", RoutineName));
+            ShowFatalError(state, std::format("{}Errors found in input.  Preceding condition(s) cause termination.", RoutineName));
         }
     }
 
@@ -772,18 +773,16 @@ namespace DualDuct {
                     continue;
                 }
                 ShowSevereError(state,
-                                EnergyPlus::format("InitDualDuct: ADU=[Air Distribution Unit,{}] is not on any ZoneHVAC:EquipmentList.",
-                                                   state.dataDefineEquipment->AirDistUnit(this->ADUNum).Name));
+                                std::format("InitDualDuct: ADU=[Air Distribution Unit,{}] is not on any ZoneHVAC:EquipmentList.",
+                                            state.dataDefineEquipment->AirDistUnit(this->ADUNum).Name));
                 if (this->DamperType == DualDuctDamper::ConstantVolume) {
-                    ShowContinueError(state,
-                                      EnergyPlus::format("...Dual Duct Damper=[{},{}] will not be simulated.", cCMO_DDConstantVolume, this->Name));
+                    ShowContinueError(state, std::format("...Dual Duct Damper=[{},{}] will not be simulated.", cCMO_DDConstantVolume, this->Name));
                 } else if (this->DamperType == DualDuctDamper::VariableVolume) {
-                    ShowContinueError(state,
-                                      EnergyPlus::format("...Dual Duct Damper=[{},{}] will not be simulated.", cCMO_DDVariableVolume, this->Name));
+                    ShowContinueError(state, std::format("...Dual Duct Damper=[{},{}] will not be simulated.", cCMO_DDVariableVolume, this->Name));
                 } else if (this->DamperType == DualDuctDamper::OutdoorAir) {
-                    ShowContinueError(state, EnergyPlus::format("...Dual Duct Damper=[{},{}] will not be simulated.", cCMO_DDVarVolOA, this->Name));
+                    ShowContinueError(state, std::format("...Dual Duct Damper=[{},{}] will not be simulated.", cCMO_DDVarVolOA, this->Name));
                 } else {
-                    ShowContinueError(state, EnergyPlus::format("...Dual Duct Damper=[unknown/invalid,{}] will not be simulated.", this->Name));
+                    ShowContinueError(state, std::format("...Dual Duct Damper=[unknown/invalid,{}] will not be simulated.", this->Name));
                 }
             }
         }
@@ -1716,8 +1715,7 @@ namespace DualDuct {
         if (this->NoOAFlowInputFromUser) {
             ShowSevereError(
                 state,
-                EnergyPlus::format("CalcOAOnlyMassFlow: Problem in AirTerminal:DualDuct:VAV:OutdoorAir = {}, check outdoor air specification",
-                                   this->Name));
+                std::format("CalcOAOnlyMassFlow: Problem in AirTerminal:DualDuct:VAV:OutdoorAir = {}, check outdoor air specification", this->Name));
             if (present(MaxOAVolFlow)) {
                 MaxOAVolFlow = 0.0;
             }

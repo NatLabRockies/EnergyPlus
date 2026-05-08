@@ -1,9 +1,3 @@
-!  Version,
-!    26.1;                   !- Version Identifier
-
-!  Version,
-!    26.1;                   !- Version Identifier
-
   Material,
     A1 - 1 IN STUCCO,        !- Name
     Smooth,                  !- Roughness

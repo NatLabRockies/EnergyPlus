@@ -48,13 +48,13 @@
 // C++ Headers
 #include <cassert>
 #include <cmath>
+#include <format>
 #include <string>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Fmath.hh>
 
 // EnergyPlus Headers
-#include "rs0001_factory.h"
 #include <EnergyPlus/Autosizing/All_Simple_Sizing.hh>
 #include <EnergyPlus/BranchNodeConnections.hh>
 #include <EnergyPlus/ChillerElectricASHRAE205.hh>
@@ -88,6 +88,9 @@
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
 #include <EnergyPlus/ZoneTempPredictorCorrector.hh>
+
+// Local Headers
+#include "rs0001_factory.h"
 
 namespace EnergyPlus::ChillerElectricASHRAE205 {
 
@@ -156,7 +159,7 @@ void getChillerASHRAE205Input(EnergyPlusData &state)
         thisChiller.Representation = std::dynamic_pointer_cast<tk205::rs0001_ns::RS0001>(
             RSInstanceFactory::create("RS0001", FileSystem::toString(rep_file_path).c_str(), std::make_shared<EnergyPlusLogger>()));
         if (nullptr == thisChiller.Representation) {
-            ShowSevereError(state, EnergyPlus::format("{} is not an instance of an ASHRAE205 Chiller.", rep_file_path));
+            ShowSevereError(state, EnergyPlus::format("{} is not an instance of an ASHRAE205 Chiller.", rep_file_path.string()));
             ErrorsFound = true;
         }
         thisChiller.Representation->performance.performance_map_cooling.get_logger()->set_message_context(&thisChiller.LoggerContext);
@@ -754,7 +757,7 @@ void ASHRAE205ChillerSpecs::size([[maybe_unused]] EnergyPlusData &state)
     } else {
         if (this->EvapVolFlowRateWasAutoSized && state.dataPlnt->PlantFirstSizesOkayToFinalize) {
             ShowSevereError(state, "Autosizing of Electric Chiller evap flow rate requires a loop Sizing:Plant object");
-            ShowContinueError(state, EnergyPlus::format("Occurs in Electric Chiller object={}", this->Name));
+            ShowContinueError(state, std::format("Occurs in Electric Chiller object={}", this->Name));
             ErrorsFound = true;
         }
         if (!this->EvapVolFlowRateWasAutoSized && state.dataPlnt->PlantFinalSizesOkayToReport && (this->EvapVolFlowRate > 0.0)) {
@@ -805,7 +808,7 @@ void ASHRAE205ChillerSpecs::size([[maybe_unused]] EnergyPlusData &state)
                         if (state.dataGlobal->DisplayExtraWarnings) {
                             if ((std::abs(tmpCondVolFlowRate - CondVolFlowRateUser) / CondVolFlowRateUser) >
                                 state.dataSize->AutoVsHardSizingThreshold) {
-                                ShowMessage(state, EnergyPlus::format("{}: Potential issue with equipment sizing for {}", RoutineName, this->Name));
+                                ShowMessage(state, std::format("{}: Potential issue with equipment sizing for {}", RoutineName, this->Name));
                                 ShowContinueError(
                                     state,
                                     EnergyPlus::format("User-Specified Condenser Maximum Requested Flow Rate of {:.5R} [m3/s]", CondVolFlowRateUser));
@@ -828,7 +831,7 @@ void ASHRAE205ChillerSpecs::size([[maybe_unused]] EnergyPlusData &state)
             if (this->CondVolFlowRateWasAutoSized && state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                 ShowSevereError(state, "Autosizing of Electric ASHRAE 205 Chiller condenser fluid flow rate requires a condenser");
                 ShowContinueError(state, "loop Sizing:Plant object");
-                ShowContinueError(state, EnergyPlus::format("Occurs in Electric ASHRAE 205 Chiller object={}", this->Name));
+                ShowContinueError(state, std::format("Occurs in Electric ASHRAE 205 Chiller object={}", this->Name));
                 ErrorsFound = true;
             }
             if (!this->CondVolFlowRateWasAutoSized && state.dataPlnt->PlantFinalSizesOkayToReport && (this->CondVolFlowRate > 0.0)) {
@@ -901,7 +904,7 @@ void ASHRAE205ChillerSpecs::size([[maybe_unused]] EnergyPlusData &state)
                                                      RefCapUser);
                         if (state.dataGlobal->DisplayExtraWarnings) {
                             if ((std::abs(tmpNomCap - RefCapUser) / RefCapUser) > state.dataSize->AutoVsHardSizingThreshold) {
-                                ShowMessage(state, EnergyPlus::format("{}: Potential issue with equipment sizing for {}", RoutineName, this->Name));
+                                ShowMessage(state, std::format("{}: Potential issue with equipment sizing for {}", RoutineName, this->Name));
                                 ShowContinueError(state, EnergyPlus::format("User-Specified Rated Capacity of {:.2R} [W]", RefCapUser));
                                 ShowContinueError(state, EnergyPlus::format("differs from Design Size Rated Capacity of {:.2R} [W]", tmpNomCap));
                                 ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
@@ -916,7 +919,7 @@ void ASHRAE205ChillerSpecs::size([[maybe_unused]] EnergyPlusData &state)
     } else {
         if (this->RefCapWasAutoSized && state.dataPlnt->PlantFirstSizesOkayToFinalize) {
             ShowSevereError(state, "Autosizing of Electric Chiller reference capacity requires a loop Sizing:Plant object");
-            ShowContinueError(state, EnergyPlus::format("Occurs in Electric Chiller object={}", this->Name));
+            ShowContinueError(state, std::format("Occurs in Electric Chiller object={}", this->Name));
             ErrorsFound = true;
         }
         if (!this->RefCapWasAutoSized && state.dataPlnt->PlantFinalSizesOkayToReport && (this->RefCap > 0.0)) { // Hard-sized with no sizing data
@@ -1220,13 +1223,13 @@ void ASHRAE205ChillerSpecs::findEvaporatorMassFlowRate(EnergyPlusData &state, Re
                     ShowContinueErrorTimeStamp(state, "");
                 } else if (!state.dataGlobal->WarmupFlag) {
                     ++this->ChillerCapFTError;
-                    ShowRecurringWarningErrorAtEnd(
-                        state,
-                        EnergyPlus::format(
-                            "{} \"{}\": Evaporator DeltaTemp = 0 in mass flow calculation warning continues...", this->ObjectType, this->Name),
-                        this->DeltaTErrCountIndex,
-                        evapDeltaTemp,
-                        evapDeltaTemp);
+                    ShowRecurringWarningErrorAtEnd(state,
+                                                   std::format("{} \"{}\": Evaporator DeltaTemp = 0 in mass flow calculation warning continues...",
+                                                               this->ObjectType,
+                                                               this->Name),
+                                                   this->DeltaTErrCountIndex,
+                                                   evapDeltaTemp,
+                                                   evapDeltaTemp);
                 }
             }
         }

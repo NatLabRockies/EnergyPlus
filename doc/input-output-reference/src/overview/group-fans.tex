@@ -127,6 +127,7 @@ This numeric field is used to specify the number of different speed levels avail
 A field set is pair of values for the flow fraction and electric power fraction at each speed. The sets should be arranged in increasing order so that the flow fractions become larger in subsequent field sets.  Typically the highest speed level will match the design maximum and have fractions of 1.0.  This object is extensible, so additional sets of the following two fields can be added to the end of this object.
 
 \paragraph{Field: Speed <\#> Flow Fraction}\label{field-speed-flow-fraction-fansysmodel}
+
 This is the flow fraction for the fan speed. This value is multiplied by the Design Maximum Air Flow Rate to obtain the flow rate when operating at this speed.
 
 \paragraph{Field: Speed <\#> Electric Power Fraction}\label{field-speed-power-fraction-fansysmodel}
@@ -225,13 +226,30 @@ Fan:SystemModel,
 
 \begin{itemize}
 \item
-HVAC,Average,Fan Electricity Rate {[}W{]}
+  HVAC,Average,Fan Electricity Rate {[}W{]}
 \item
-HVAC,Sum,Fan Electricity Energy {[}J{]}
+  HVAC,Sum,Fan Electricity Energy {[}J{]}
 \item
-HVAC,Average,Fan Rise in Air Temperature{[}deltaC{]}
+  HVAC,Average,Fan Rise in Air Temperature {[}deltaC{]}
 \item
-HVAC,Average,Fan Air Mass Flow Rate{[}kg/s{]}
+  HVAC,Average,Fan Air Mass Flow Rate {[}kg/s{]}
+\item
+  HVAC,Average,Fan Heat Gain to Air {[}W{]}
+\end{itemize}
+
+There are additional variables for fans that can be discretely varied.
+For single-speed fans:
+
+\begin{itemize}
+\item
+  HVAC,Average,Fan Runtime Fraction {[]}
+\end{itemize}
+
+For two-speed and multi-speed fans:
+
+\begin{itemize}
+\item
+  HVAC,Average,Fan Runtime Fraction Speed <\#> {[]}
 \end{itemize}
 
 \paragraph{Fan Electricity Rate {[}W{]}}\label{fan-electric-power-fansysmodel}
@@ -246,9 +264,21 @@ This output contains the electricity consumption of the fan in Joules for the ti
 
 This output contains the average rise in air temperature across the fan (outlet air temperature minus inlet air temperature) in degrees Celsius for the time interval being reported.
 
-\paragraph{Fan Air Mass Flow Rate{[}kg/s{]}}\label{fan-air-mass-flow-fansysmodel}
+\paragraph{Fan Air Mass Flow Rate {[}kg/s{]}}\label{fan-air-mass-flow-fansysmodel}
 
 This output contains the average air mass flow rate in kg/s for the time interval being reported.
+
+\paragraph{Fan Heat Gain to Air {[}W{]}}\label{fan-heat-gain-to-air-fansysmodel}
+
+This output contains the average power in Watts lost to the process air stream for the time interval being reported.
+
+\paragraph{Fan Runtime Fraction {[]}}\label{fan-runtime-fraction-fansysmodel}
+
+This output contains the fraction of time that this fan operated for the timestep being reported. Applicable only for single-speed fans that can be discretely varied (i.e., Speed Control Method = Discrete).
+
+\paragraph{Fan Runtime Fraction Speed <\#> {[]}}\label{fan-runtime-fraction-speed-fansysmodel}
+
+This output contains the fraction of time that this fan operated at each speed for the timestep being reported. The overall runtime fraction is the sum of the runtime fractions for each speed. Applicable only for two-speed and multi-speed fans that can be discretely varied (i.e., Speed Control Method = Discrete).
 
 \subsection{Fan:ConstantVolume}\label{fanconstantvolume}
 
@@ -309,6 +339,10 @@ Allows you to specify a user-defined end-use subcategory, e.g., ``Central System
   HVAC,Average,Fan Rise in Air Temperature {[}deltaC{]}
 \item
   HVAC,Sum,Fan Electricity Energy {[}J{]}
+\item
+  HVAC,Average,Fan Air Mass Flow Rate {[}kg/s{]}
+\item
+  HVAC,Average,Fan Heat Gain to Air {[}W{]}
 \end{itemize}
 
 \paragraph{Fan Electricity Rate {[}W{]}}\label{fan-electric-power-w}
@@ -322,6 +356,14 @@ This output field contains the average rise in air temperature across the fan (o
 \paragraph{Fan Electricity Energy {[}J{]}}\label{fan-electric-energy-j}
 
 This output field contains the electricity consumption of the fan in Joules for the timestep being reported. This output is also added to a meter with Resource Type = Electricity, End Use Key = Fans, Group Key = System (ref. Output:Meter objects).
+
+\paragraph{Fan Air Mass Flow Rate {[}kg/s{]}}\label{fan-air-mass-flow-kgs}
+
+This output contains the average air mass flow rate in kg/s for the time interval being reported.
+
+\paragraph{Fan Heat Gain to Air {[}W{]}}\label{fan-heat-gain-to-air-w}
+
+This output contains the average power in Watts lost to the process air stream for the time interval being reported.
 
 \subsection{Fan:OnOff}\label{fanonoff}
 
@@ -397,13 +439,20 @@ Fan:OnOff,
 
 \subsubsection{Outputs}\label{outputs-1-011}
 
-HVAC,Average,Fan Electricity Rate {[}W{]}
-
-HVAC,Average,Fan Rise in Air Temperature {[}deltaC{]}
-
-HVAC,Sum,Fan Electricity Energy {[}J{]}
-
-HVAC,Average,Fan Runtime Fraction {[]}
+\begin{itemize}
+\item
+  HVAC,Average,Fan Electricity Rate {[}W{]}
+\item
+  HVAC,Average,Fan Rise in Air Temperature {[}deltaC{]}
+\item
+  HVAC,Sum,Fan Electricity Energy {[}J{]}
+\item
+  HVAC,Average,Fan Air Mass Flow Rate {[}kg/s{]}
+\item
+  HVAC,Average,Fan Heat Gain to Air {[}W{]}
+\item
+  HVAC,Average,Fan Runtime Fraction {[]}
+\end{itemize}
 
 \paragraph{Fan Electricity Rate {[}W{]}}\label{fan-electric-power-w-1}
 
@@ -416,6 +465,14 @@ This output field contains the average rise in air temperature across the fan (o
 \paragraph{Fan Electricity Energy {[}J{]}}\label{fan-electric-energy-j-1}
 
 This output field contains the electricity consumption of the fan in Joules for the timestep being reported. This output is also added to a meter with Resource Type = Electricity, End Use Key = Fans, Group Key = System (ref. Output:Meter objects).
+
+\paragraph{Fan Air Mass Flow Rate {[}kg/s{]}}\label{fan-air-mass-flow-kgs-1}
+
+This output contains the average air mass flow rate in kg/s for the time interval being reported.
+
+\paragraph{Fan Heat Gain to Air {[}W{]}}\label{fan-heat-gain-to-air-w-1}
+
+This output contains the average power in Watts lost to the process air stream for the time interval being reported.
 
 \paragraph{Fan Runtime Fraction {[]}}\label{fan-runtime-fraction}
 
@@ -542,6 +599,10 @@ Allows you to specify a user-defined end-use subcategory, e.g., ``Central System
   HVAC,Average,Fan Rise in Air Temperature {[}deltaC{]}
 \item
   HVAC,Sum,Fan Electricity Energy {[}J{]}
+\item
+  HVAC,Average,Fan Air Mass Flow Rate {[}kg/s{]}
+\item
+  HVAC,Average,Fan Heat Gain to Air {[}W{]}
 \end{itemize}
 
 \paragraph{Fan Electricity Rate {[}W{]}}\label{fan-electric-power-w-2}
@@ -555,6 +616,14 @@ This output field contains the average rise in air temperature across the fan (o
 \paragraph{Fan Electricity Energy {[}J{]}}\label{fan-electric-energy-j-2}
 
 This output field contains the electricity consumption of the fan in Joules for the timestep being reported. This output is also added to a meter with Resource Type = Electricity, End Use Key = Fans, Group Key = System (ref. Output:Meter objects).
+
+\paragraph{Fan Air Mass Flow Rate {[}kg/s{]}}\label{fan-air-mass-flow-kgs-2}
+
+This output contains the average air mass flow rate in kg/s for the time interval being reported.
+
+\paragraph{Fan Heat Gain to Air {[}W{]}}\label{fan-heat-gain-to-air-w-2}
+
+This output contains the average power in Watts lost to the process air stream for the time interval being reported.
 
 \subsection{Fan:ZoneExhaust}\label{fanzoneexhaust}
 
@@ -624,9 +693,13 @@ This field is optional. If it is not used, then all the exhaust air flow is assu
 \item
   HVAC,Average,Fan Electricity Rate {[}W{]}
 \item
-  HVAC,Average,Fan Rise in Air Temperature{[}deltaC{]}
+  HVAC,Average,Fan Rise in Air Temperature {[}deltaC{]}
 \item
   HVAC,Sum,Fan Electricity Energy {[}J{]}
+\item
+  HVAC,Average,Fan Air Mass Flow Rate {[}kg/s{]}
+\item
+  HVAC,Average,Fan Heat Gain to Air {[}W{]}
 \item
   HVAC,Average,Fan Unbalanced Air Mass Flow Rate {[}kg/s{]}
 \item
@@ -644,6 +717,14 @@ This output field contains the average rise in air temperature across the fan (o
 \paragraph{Fan Electricity Energy {[}J{]}}\label{fan-electric-energy-j-3}
 
 This output field contains the electricity consumption of the fan in Joules for the timestep being reported. This output is also added to an output meter with Resource Type = Electricity, End Use Key = Fans, Group Key = System (ref. Output:Meter objects).
+
+\paragraph{Fan Air Mass Flow Rate {[}kg/s{]}}\label{fan-air-mass-flow-kgs-3}
+
+This output contains the average air mass flow rate in kg/s for the time interval being reported.
+
+\paragraph{Fan Heat Gain to Air {[}W{]}}\label{fan-heat-gain-to-air-w-3}
+
+This output contains the average power in Watts lost to the process air stream for the time interval being reported.
 
 \paragraph{Fan Unbalanced Air Mass Flow Rate {[}kg/s{]}}\label{fan-unbalanced-air-mass-flow-rate-kgs}
 
@@ -1099,6 +1180,10 @@ Fan:ComponentModel,
   HVAC,Average,Fan Rise in Air Temperature {[}deltaC{]}
 \item
   HVAC,Sum,Fan Electricity Energy {[}J{]}
+\item
+  HVAC,Average,Fan Air Mass Flow Rate {[}kg/s{]}
+\item
+  HVAC,Average,Fan Heat Gain to Air {[}W{]}
 \end{itemize}
 
 \paragraph{Fan Electricity Rate {[}W{]}}\label{fan-electric-power-w-4}
@@ -1112,6 +1197,14 @@ This output field contains the average rise in air temperature across the fan (o
 \paragraph{Fan Electricity Energy {[}J{]}}\label{fan-electric-energy-j-4}
 
 This output field contains the electricity consumption of the fan in Joules for the timestep being reported. This output is also added to a meter with Resource Type = Electricity, End Use Key = Fans, Group Key = System (ref. Output:Meter objects).
+
+\paragraph{Fan Air Mass Flow Rate {[}kg/s{]}}\label{fan-air-mass-flow-kgs-4}
+
+This output contains the average air mass flow rate in kg/s for the time interval being reported.
+
+\paragraph{Fan Heat Gain to Air {[}W{]}}\label{fan-heat-gain-to-air-w-4}
+
+This output contains the average power in Watts lost to the process air stream for the time interval being reported.
 
 \paragraph{Other Outputs}\label{other-outputs}
 

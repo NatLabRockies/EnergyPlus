@@ -49,6 +49,7 @@
 #include <cassert>
 #include <cmath>
 #include <cstdlib>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Fmath.hh>
@@ -1002,10 +1003,10 @@ int FindNumberInList(int const WhichNumber, Array1A_int const ListOfItems, int c
 }
 
 void DecodeMonDayHrMin(int const Item, // word containing encoded month, day, hour, minute
-                       int &Month,     // month in integer format (1-12)
-                       int &Day,       // day in integer format (1-31)
-                       int &Hour,      // hour in integer format (1-24)
-                       int &Minute     // minute in integer format (0:59)
+                       int &Month,     // month in integer EnergyPlus::format(1-12)
+                       int &Day,       // day in integer EnergyPlus::format(1-31)
+                       int &Hour,      // hour in integer EnergyPlus::format(1-24)
+                       int &Minute     // minute in integer EnergyPlus::format(0:59)
 )
 {
 
@@ -1039,10 +1040,10 @@ void DecodeMonDayHrMin(int const Item, // word containing encoded month, day, ho
 }
 
 void EncodeMonDayHrMin(int &Item,       // word containing encoded month, day, hour, minute
-                       int const Month, // month in integer format (1:12)
-                       int const Day,   // day in integer format (1:31)
-                       int const Hour,  // hour in integer format (1:24)
-                       int const Minute // minute in integer format (0:59)
+                       int const Month, // month in integer EnergyPlus::format(1:12)
+                       int const Day,   // day in integer EnergyPlus::format(1:31)
+                       int const Hour,  // hour in integer EnergyPlus::format(1:24)
+                       int const Minute // minute in integer EnergyPlus::format(0:59)
 )
 {
 
@@ -1087,7 +1088,7 @@ std::string CreateTimeString(Real64 const Time) // Time in seconds
 
     // TimeStamp written with formatting
     // "hh:mm:ss.s"
-    return fmt::format("{:02d}:{:02d}:{:04.1f}", Hours, Minutes, Seconds);
+    return EnergyPlus::format("{:02d}:{:02d}:{:04.1f}", Hours, Minutes, Seconds);
 }
 
 void ParseTime(Real64 const Time, // Time value in seconds
@@ -1496,7 +1497,8 @@ void CheckCreatedZoneItemName(EnergyPlusData &state,
     ResultName = ZoneName + ' ' + ItemName;
     bool TooLong = false;
     if (ItemLength > Constant::MaxNameLength) {
-        ShowWarningError(state, fmt::format("{}{} Combination of ZoneList and Object Name generate a name too long.", calledFrom, CurrentObject));
+        ShowWarningError(state,
+                         EnergyPlus::format("{}{} Combination of ZoneList and Object Name generate a name too long.", calledFrom, CurrentObject));
         ShowContinueError(state, EnergyPlus::format("Object Name=\"{}\".", ItemName));
         ShowContinueError(state, EnergyPlus::format("ZoneList/Zone Name=\"{}\".", ZoneName));
         ShowContinueError(
@@ -1512,9 +1514,9 @@ void CheckCreatedZoneItemName(EnergyPlusData &state,
     int FoundItem = Util::FindItemInList(ResultName, ItemNames, NumItems);
 
     if (FoundItem != 0) {
-        ShowSevereError(state, fmt::format("{}{}=\"{}\", Duplicate Generated name encountered.", calledFrom, CurrentObject, ItemName));
-        ShowContinueError(
-            state, EnergyPlus::format("name=\"{}\" has already been generated or entered as {} item=[{}].", ResultName, CurrentObject, FoundItem));
+        ShowSevereError(state, std::format("{}{}=\"{}\", Duplicate Generated name encountered.", calledFrom, CurrentObject, ItemName));
+        ShowContinueError(state,
+                          std::format("name=\"{}\" has already been generated or entered as {} item=[{}].", ResultName, CurrentObject, FoundItem));
         if (TooLong) {
             ShowContinueError(state, "Duplicate name likely caused by the previous \"too long\" warning.");
         }

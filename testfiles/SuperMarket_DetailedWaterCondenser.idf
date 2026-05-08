@@ -1439,7 +1439,7 @@
   ZoneControl:Humidistat,
     SalesFloor Humidistat,   !- Name
     SalesFloor,              !- Zone Name
-    Relative Humidity Sch;   !- Humidifying Relative Humidity Setpoint Schedule Name
+    Relative Humidity Sch;   !- Humidifying Setpoint Schedule Name
 
 !-   ===========  ALL OBJECTS IN CLASS: AIRTERMINAL:SINGLEDUCT:UNCONTROLLED ===========
 

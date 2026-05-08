@@ -45,6 +45,9 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
+#include <format>
+
 // ObjexxFCL Headers
 #include <ObjexxFCL/Fmath.hh>
 
@@ -1408,7 +1411,7 @@ namespace Humidifiers {
         if (WhichHumidifier != 0) {
             return state.dataHumidifiers->Humidifier(WhichHumidifier).AirOutNode;
         }
-        ShowSevereError(state, EnergyPlus::format("GetAirInletNodeNum: Could not find Humidifier = \"{}\"", HumidifierName));
+        ShowSevereError(state, std::format("GetAirInletNodeNum: Could not find Humidifier = \"{}\"", HumidifierName));
         ErrorsFound = true;
         return 0;
     }

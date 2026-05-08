@@ -46,12 +46,13 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <format>
 #include <thread>
 
 // CLI Headers
 #include <CLI/CLI11.hpp>
 
-// Project headers
+// EnergyPlus Headers
 #include <EnergyPlus/CommandLineInterface.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataStringGlobals.hh>
@@ -59,11 +60,10 @@
 #include <EnergyPlus/EnergyPlus.hh>
 #include <EnergyPlus/FileSystem.hh>
 #include <EnergyPlus/PluginManager.hh>
-#include <EnergyPlus/UtilityRoutines.hh>
-
 #if LINK_WITH_PYTHON
 #    include <EnergyPlus/PythonEngine.hh>
 #endif
+#include <EnergyPlus/UtilityRoutines.hh>
 
 namespace EnergyPlus {
 
@@ -114,13 +114,13 @@ namespace CommandLineInterface {
         // opt.add("", false, 0, 0, "Display version information", "-v", "--version");
         app.set_version_flag("-v,--version", EnergyPlus::DataStringGlobals::VerString);
 
-        std::string const description = fmt::format(R"({}
+        std::string const description = EnergyPlus::format(R"({}
 PythonLinkage: {}
 Built on Platform: {}
 )",
-                                                    state.dataStrGlobals->VerStringVar,
-                                                    PluginManagement::pythonStringForUsage(state),
-                                                    DataStringGlobals::BuildPlatformString);
+                                                           state.dataStrGlobals->VerStringVar,
+                                                           PluginManagement::pythonStringForUsage(state),
+                                                           DataStringGlobals::BuildPlatformString);
         app.description(description);
 
         auto *annualOpt = app.add_flag("-a,--annual", state.dataGlobal->AnnualSimulation, "Force annual simulation");
@@ -180,15 +180,16 @@ Built on Platform: {}
                 bool const converted = CLI::detail::lexical_cast(input, number_of_threads);
                 if (!converted) {
                     // CLI::ValidationError
-                    return fmt::format("Argument should be an integer, not '{}'", input);
+                    return EnergyPlus::format("Argument should be an integer, not '{}'", input);
                 }
                 if (number_of_threads <= 0) {
                     DisplayString(state, "Invalid value for -j arg. Defaulting to 1.");
                     return "1";
                 }
                 if (number_of_threads > MAX_N) {
-                    DisplayString(state,
-                                  fmt::format("Invalid value for -j arg. Value exceeds num available. Defaulting to num available. -j {}", MAX_N));
+                    DisplayString(
+                        state,
+                        EnergyPlus::format("Invalid value for -j arg. Value exceeds num available. Defaulting to num available. -j {}", MAX_N));
                     return std::to_string(MAX_N);
                 }
                 return input;
@@ -396,7 +397,8 @@ state.dataStrGlobals->inputFilePath='{:g}',
                 break;
             default:
                 DisplayString(state,
-                              fmt::format("ERROR: Input file must have IDF, IMF, or epJSON extension: {:g}", state.dataStrGlobals->inputFilePath));
+                              EnergyPlus::format("ERROR: Input file must have IDF, IMF, or epJSON extension: {}",
+                                                 state.dataStrGlobals->inputFilePath.generic_string()));
                 if (eplusRunningViaAPI) {
                     return static_cast<int>(ReturnCodes::Failure);
                 }
@@ -606,7 +608,7 @@ state.dataStrGlobals->inputFilePath='{:g}',
         if (FileSystem::fileExists(state.files.iniFile.filePath)) {
             EnergyPlus::InputFile iniFile = state.files.iniFile.try_open();
             if (!iniFile.good()) {
-                DisplayString(state, fmt::format("ERROR: Could not open file {} for input (read).", iniFile.filePath));
+                DisplayString(state, EnergyPlus::format("ERROR: Could not open file {} for input (read).", iniFile.filePath.string()));
                 if (eplusRunningViaAPI) {
                     return static_cast<int>(ReturnCodes::Failure);
                 }
@@ -633,8 +635,9 @@ state.dataStrGlobals->inputFilePath='{:g}',
 
         // Check if specified files exist
         if (!FileSystem::fileExists(state.dataStrGlobals->inputFilePath)) {
-            DisplayString(
-                state, fmt::format("ERROR: Could not find input data file: {}.", FileSystem::getAbsolutePath(state.dataStrGlobals->inputFilePath)));
+            DisplayString(state,
+                          EnergyPlus::format("ERROR: Could not find input data file: {}.",
+                                             FileSystem::getAbsolutePath(state.dataStrGlobals->inputFilePath).string()));
             DisplayString(state, errorFollowUp);
             if (eplusRunningViaAPI) {
                 return static_cast<int>(ReturnCodes::Failure);
@@ -644,9 +647,9 @@ state.dataStrGlobals->inputFilePath='{:g}',
 
         if ((weatherPathOpt->count() > 0) && !state.dataGlobal->DDOnlySimulation) {
             if (!FileSystem::fileExists(state.files.inputWeatherFilePath.filePath)) {
-                DisplayString(
-                    state,
-                    fmt::format("ERROR: Could not find weather file: {}.", FileSystem::getAbsolutePath(state.files.inputWeatherFilePath.filePath)));
+                DisplayString(state,
+                              EnergyPlus::format("ERROR: Could not find weather file: {}.",
+                                                 FileSystem::getAbsolutePath(state.files.inputWeatherFilePath.filePath).string()));
                 DisplayString(state, errorFollowUp);
                 if (eplusRunningViaAPI) {
                     return static_cast<int>(ReturnCodes::Failure);
@@ -661,7 +664,8 @@ state.dataStrGlobals->inputFilePath='{:g}',
         if (runEPMacro) {
             fs::path epMacroPath = (state.dataStrGlobals->exeDirectoryPath / "EPMacro").replace_extension(FileSystem::exeExtension);
             if (!FileSystem::fileExists(epMacroPath)) {
-                DisplayString(state, fmt::format("ERROR: Could not find EPMacro executable: {}.", FileSystem::getAbsolutePath(epMacroPath)));
+                DisplayString(state,
+                              EnergyPlus::format("ERROR: Could not find EPMacro executable: {}.", FileSystem::getAbsolutePath(epMacroPath).string()));
                 if (eplusRunningViaAPI) {
                     return static_cast<int>(ReturnCodes::Failure);
                 }
@@ -688,7 +692,8 @@ state.dataStrGlobals->inputFilePath='{:g}',
                 (state.dataStrGlobals->exeDirectoryPath / fs::path("ExpandObjects")).replace_extension(FileSystem::exeExtension);
             if (!FileSystem::fileExists(expandObjectsPath)) {
                 DisplayString(state,
-                              fmt::format("ERROR: Could not find ExpandObjects executable: {}.", FileSystem::getAbsolutePath(expandObjectsPath)));
+                              EnergyPlus::format("ERROR: Could not find ExpandObjects executable: {}.",
+                                                 FileSystem::getAbsolutePath(expandObjectsPath).string()));
                 if (eplusRunningViaAPI) {
                     return static_cast<int>(ReturnCodes::Failure);
                 }
@@ -700,8 +705,8 @@ state.dataStrGlobals->inputFilePath='{:g}',
             // check if IDD actually exists since ExpandObjects still requires it
             if (!FileSystem::fileExists(state.dataStrGlobals->inputIddFilePath)) {
                 DisplayString(state,
-                              fmt::format("ERROR: Could not find input data dictionary: {}.",
-                                          FileSystem::getAbsolutePath(state.dataStrGlobals->inputIddFilePath)));
+                              EnergyPlus::format("ERROR: Could not find input data dictionary: {}.",
+                                                 FileSystem::getAbsolutePath(state.dataStrGlobals->inputIddFilePath).string()));
                 DisplayString(state, errorFollowUp);
                 if (eplusRunningViaAPI) {
                     return static_cast<int>(ReturnCodes::Failure);
@@ -894,7 +899,9 @@ state.dataStrGlobals->inputFilePath='{:g}',
                         state,
                         "ERROR: Could not find ReadVarsESO executable.  When calling through C API, make sure to call setEnergyPlusRootDirectory");
                 } else {
-                    DisplayString(state, fmt::format("ERROR: Could not find ReadVarsESO executable: {}.", FileSystem::getAbsolutePath(readVarsPath)));
+                    DisplayString(
+                        state,
+                        EnergyPlus::format("ERROR: Could not find ReadVarsESO executable: {}.", FileSystem::getAbsolutePath(readVarsPath).string()));
                 }
                 return static_cast<int>(ReturnCodes::Failure);
             }
@@ -907,7 +914,7 @@ state.dataStrGlobals->inputFilePath='{:g}',
         if (!rviFileExists) {
             std::ofstream ofs{RVIfile};
             if (!ofs.good()) {
-                ShowFatalError(state, EnergyPlus::format("EnergyPlus: Could not open file \"{}\" for output (write).", RVIfile));
+                ShowFatalError(state, EnergyPlus::format("EnergyPlus: Could not open file \"{}\" for output (write).", RVIfile.string()));
             } else {
                 ofs << FileSystem::toString(state.files.eso.filePath) << '\n';
                 ofs << FileSystem::toString(state.files.csv.filePath) << '\n';
@@ -918,7 +925,7 @@ state.dataStrGlobals->inputFilePath='{:g}',
         if (!mviFileExists) {
             std::ofstream ofs{MVIfile};
             if (!ofs.good()) {
-                ShowFatalError(state, EnergyPlus::format("EnergyPlus: Could not open file \"{}\" for output (write).", RVIfile));
+                ShowFatalError(state, EnergyPlus::format("EnergyPlus: Could not open file \"{}\" for output (write).", RVIfile.string()));
             } else {
                 ofs << FileSystem::toString(state.files.mtr.filePath) << '\n';
                 ofs << FileSystem::toString(state.files.mtr_csv.filePath) << '\n';

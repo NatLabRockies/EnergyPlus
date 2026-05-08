@@ -49,7 +49,12 @@
 #include <math.h>
 #include <stdexcept>
 
-// ObjexxFCL Headers
+// Third Party Headers
+// #include <../third_party/ssc/shared/lib_irradproc.h>
+// #include <../third_party/ssc/shared/lib_pv_incidence_modifier.h>
+// #include <../third_party/ssc/shared/lib_pvshade.h>
+// #include <../third_party/ssc/shared/lib_pvwatts.h>
+#include <../third_party/ssc/ssc/sscapi.h>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
@@ -64,13 +69,6 @@
 #include <EnergyPlus/PVWatts.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
 #include <EnergyPlus/WeatherManager.hh>
-
-// SAM Headers
-// #include <../third_party/ssc/shared/lib_irradproc.h>
-// #include <../third_party/ssc/shared/lib_pvwatts.h>
-// #include <../third_party/ssc/shared/lib_pvshade.h>
-// #include <../third_party/ssc/shared/lib_pv_incidence_modifier.h>
-#include <../third_party/ssc/ssc/sscapi.h>
 
 namespace EnergyPlus {
 

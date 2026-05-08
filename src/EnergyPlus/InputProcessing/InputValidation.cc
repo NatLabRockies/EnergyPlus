@@ -45,17 +45,15 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-// C++ Headers
-
-// ObjexxFCL Headers
-
-// EnergyPlus Headers
-#include <EnergyPlus/InputProcessing/InputValidation.hh>
+// Third Party Headers
 #include <valijson/adapters/nlohmann_json_adapter.hpp>
 #include <valijson/schema.hpp>
 #include <valijson/schema_parser.hpp>
 #include <valijson/utils/nlohmann_json_utils.hpp>
 #include <valijson/validator.hpp>
+
+// EnergyPlus Headers
+#include <EnergyPlus/InputProcessing/InputValidation.hh>
 
 using json = nlohmann::json;
 

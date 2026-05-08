@@ -48,6 +48,7 @@
 // C++ Headers
 #include <cassert>
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -609,10 +610,10 @@ namespace WindTurbine {
             if (windTurbine.rotorType == RotorType::VerticalAxis && windTurbine.LiftCoeff == 0.0) {
                 if (lNumericBlanks(16)) {
                     ShowSevereError(state,
-                                    EnergyPlus::format("{}=\"{}\" invalid {} is required but input is blank.",
-                                                       CurrentModuleObject,
-                                                       state.dataIPShortCut->cAlphaArgs(1),
-                                                       cNumericFields(16)));
+                                    std::format("{}=\"{}\" invalid {} is required but input is blank.",
+                                                CurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                cNumericFields(16)));
                 } else {
                     ShowSevereError(state,
                                     EnergyPlus::format("{}=\"{}\" invalid {}=[{:.2R}] must be greater than zero.",
@@ -658,7 +659,7 @@ namespace WindTurbine {
         lNumericBlanks.deallocate();
 
         if (ErrorsFound) {
-            ShowFatalError(state, EnergyPlus::format("{} errors occurred in input.  Program terminates.", CurrentModuleObject));
+            ShowFatalError(state, std::format("{} errors occurred in input.  Program terminates.", CurrentModuleObject));
         }
 
         for (WindTurbineNum = 1; WindTurbineNum <= NumWindTurbines; ++WindTurbineNum) {
@@ -811,9 +812,9 @@ namespace WindTurbine {
                                     if (!warningShown) {
                                         ShowWarningError(
                                             state,
-                                            EnergyPlus::format("InitWindTurbine: read from {} file shows <365 days in weather file. Annual average "
-                                                               "wind speed used will be inaccurate.",
-                                                               state.files.inStatFilePath.filePath));
+                                            std::format("InitWindTurbine: read from {} file shows <365 days in weather file. Annual average "
+                                                        "wind speed used will be inaccurate.",
+                                                        state.files.inStatFilePath.filePath.string()));
                                         lineIn.data.erase(0, lnPtr + 1);
                                         warningShown = true;
                                     }
@@ -822,9 +823,9 @@ namespace WindTurbine {
                                 if (!warningShown) {
                                     ShowWarningError(
                                         state,
-                                        EnergyPlus::format("InitWindTurbine: read from {} file shows <365 days in weather file. Annual average wind "
-                                                           "speed used will be inaccurate.",
-                                                           state.files.inStatFilePath.filePath));
+                                        std::format("InitWindTurbine: read from {} file shows <365 days in weather file. Annual average wind "
+                                                    "speed used will be inaccurate.",
+                                                    state.files.inStatFilePath.filePath.string()));
                                     lineIn.data.erase(0, lnPtr + 1);
                                     warningShown = true;
                                 }

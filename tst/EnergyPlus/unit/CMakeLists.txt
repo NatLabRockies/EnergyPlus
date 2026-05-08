@@ -30,6 +30,7 @@ set(test_src
     AirflowNetworkHVAC.unit.cc
     AirflowNetworkConditions.unit.cc
     AirflowNetworkComponents.unit.cc
+    api/datatransfer.unit.cc
     Autosizing/All_Simple_Sizing.unit.cc
     Autosizing/AutosizingFixture.hh
     Autosizing/BaseClassSizing.unit.cc

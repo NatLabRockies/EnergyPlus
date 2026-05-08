@@ -586,7 +586,8 @@ namespace OutAirNodeManager {
         }
 
         state.dataLoopNodes->Node(NodeNum).Temp = state.dataLoopNodes->Node(NodeNum).OutAirDryBulb;
-        if (state.dataLoopNodes->Node(NodeNum).IsLocalNode) {
+        if (state.dataLoopNodes->Node(NodeNum).IsLocalNode || state.dataLoopNodes->Node(NodeNum).EMSOverrideOutAirDryBulb ||
+            state.dataLoopNodes->Node(NodeNum).EMSOverrideOutAirWetBulb) {
             if (InitCall) {
                 if (state.dataLoopNodes->Node(NodeNum).OutAirWetBulb > state.dataLoopNodes->Node(NodeNum).OutAirDryBulb) {
                     state.dataLoopNodes->Node(NodeNum).OutAirWetBulb = state.dataLoopNodes->Node(NodeNum).OutAirDryBulb;

@@ -91,7 +91,8 @@ namespace GroundTemp {
         auto *inputProcessor = state.dataInputProcessing->inputProcessor.get();
         auto const modelInstances = inputProcessor->epJSON.find(currentModuleObject);
         if (modelInstances == inputProcessor->epJSON.end()) {
-            ShowFatalError(state, fmt::format("{}--Errors getting input for ground temperature model", GroundTemp::modelTypeNames[(int)modelType]));
+            ShowFatalError(state,
+                           EnergyPlus::format("{}--Errors getting input for ground temperature model", GroundTemp::modelTypeNames[(int)modelType]));
         }
         auto const &modelSchemaProps = inputProcessor->getObjectSchemaProps(state, currentModuleObject);
 
@@ -130,7 +131,8 @@ namespace GroundTemp {
             return thisModel;
         }
 
-        ShowFatalError(state, fmt::format("{}--Errors getting input for ground temperature model", GroundTemp::modelTypeNames[(int)modelType]));
+        ShowFatalError(state,
+                       EnergyPlus::format("{}--Errors getting input for ground temperature model", GroundTemp::modelTypeNames[(int)modelType]));
         return nullptr;
     }
 

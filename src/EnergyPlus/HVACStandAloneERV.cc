@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -462,49 +463,47 @@ void GetStandAloneERV(EnergyPlusData &state)
         standAloneERV.AirVolFlowPerOccupant = Numbers(4);
 
         if (standAloneERV.SupplyAirVolFlow == DataSizing::AutoSize && standAloneERV.DesignSAFanVolFlowRate != DataSizing::AutoSize) {
-            ShowSevereError(state, EnergyPlus::format("{} \"{}\"", CurrentModuleObject, standAloneERV.Name));
+            ShowSevereError(state, std::format("{} \"{}\"", CurrentModuleObject, standAloneERV.Name));
             ShowContinueError(state,
-                              EnergyPlus::format("... When autosizing ERV, supply air fan = {} \"{}\" must also be autosized.",
-                                                 HVAC::fanTypeNames[(int)standAloneERV.supplyAirFanType],
-                                                 standAloneERV.SupplyAirFanName));
+                              std::format("... When autosizing ERV, supply air fan = {} \"{}\" must also be autosized.",
+                                          HVAC::fanTypeNames[(int)standAloneERV.supplyAirFanType],
+                                          standAloneERV.SupplyAirFanName));
         }
 
         if (standAloneERV.ExhaustAirVolFlow == DataSizing::AutoSize && standAloneERV.DesignEAFanVolFlowRate != DataSizing::AutoSize) {
-            ShowSevereError(state, EnergyPlus::format("{} \"{}\"", CurrentModuleObject, standAloneERV.Name));
+            ShowSevereError(state, std::format("{} \"{}\"", CurrentModuleObject, standAloneERV.Name));
             ShowContinueError(state,
-                              EnergyPlus::format("... When autosizing ERV, exhaust air fan = {} \"{}\" must also be autosized.",
-                                                 HVAC::fanTypeNames[(int)standAloneERV.exhaustAirFanType],
-                                                 standAloneERV.ExhaustAirFanName));
+                              std::format("... When autosizing ERV, exhaust air fan = {} \"{}\" must also be autosized.",
+                                          HVAC::fanTypeNames[(int)standAloneERV.exhaustAirFanType],
+                                          standAloneERV.ExhaustAirFanName));
         }
 
         if (standAloneERV.SupplyAirVolFlow == DataSizing::AutoSize && HXSupAirFlowRate != DataSizing::AutoSize) {
-            ShowSevereError(state, EnergyPlus::format("{} \"{}\"", CurrentModuleObject, standAloneERV.Name));
+            ShowSevereError(state, std::format("{} \"{}\"", CurrentModuleObject, standAloneERV.Name));
             ShowContinueError(
                 state,
-                EnergyPlus::format(
-                    "... When autosizing ERV {}, nominal supply air flow rate for heat exchanger with name = {} must also be autosized.",
-                    cNumericFields(1),
-                    standAloneERV.HeatExchangerName));
+                std::format("... When autosizing ERV {}, nominal supply air flow rate for heat exchanger with name = {} must also be autosized.",
+                            cNumericFields(1),
+                            standAloneERV.HeatExchangerName));
         }
 
         if (standAloneERV.ExhaustAirVolFlow == DataSizing::AutoSize && HXSupAirFlowRate != DataSizing::AutoSize) {
-            ShowSevereError(state, EnergyPlus::format("{} \"{}\"", CurrentModuleObject, standAloneERV.Name));
+            ShowSevereError(state, std::format("{} \"{}\"", CurrentModuleObject, standAloneERV.Name));
             ShowContinueError(
                 state,
-                EnergyPlus::format(
-                    "... When autosizing ERV {}, nominal supply air flow rate for heat exchanger with name = {} must also be autosized.",
-                    cNumericFields(2),
-                    standAloneERV.HeatExchangerName));
+                std::format("... When autosizing ERV {}, nominal supply air flow rate for heat exchanger with name = {} must also be autosized.",
+                            cNumericFields(2),
+                            standAloneERV.HeatExchangerName));
         }
 
         // Compare the ERV SA flow rates to SA fan object.
         if (standAloneERV.DesignSAFanVolFlowRate != DataSizing::AutoSize && standAloneERV.SupplyAirVolFlow != DataSizing::AutoSize) {
             if (standAloneERV.SupplyAirVolFlow > standAloneERV.DesignSAFanVolFlowRate) {
                 ShowWarningError(state,
-                                 EnergyPlus::format("{} = {} has a {} > Max Volume Flow Rate defined in the associated fan object, should be <=",
-                                                    CurrentModuleObject,
-                                                    standAloneERV.Name,
-                                                    cNumericFields(1)));
+                                 std::format("{} = {} has a {} > Max Volume Flow Rate defined in the associated fan object, should be <=",
+                                             CurrentModuleObject,
+                                             standAloneERV.Name,
+                                             cNumericFields(1)));
                 ShowContinueError(state,
                                   EnergyPlus::format("... Entered value={:.2R}... Fan [{} \"{}\"] Max Value = {:.2R}",
                                                      standAloneERV.SupplyAirVolFlow,
@@ -512,33 +511,30 @@ void GetStandAloneERV(EnergyPlusData &state)
                                                      standAloneERV.SupplyAirFanName,
                                                      standAloneERV.DesignSAFanVolFlowRate));
                 ShowContinueError(
-                    state,
-                    EnergyPlus::format(" The ERV {} is reset to the supply air fan flow rate and the simulation continues.", cNumericFields(1)));
+                    state, std::format(" The ERV {} is reset to the supply air fan flow rate and the simulation continues.", cNumericFields(1)));
                 standAloneERV.SupplyAirVolFlow = standAloneERV.DesignSAFanVolFlowRate;
             }
         }
         if (standAloneERV.SupplyAirVolFlow != DataSizing::AutoSize) {
             if (standAloneERV.SupplyAirVolFlow <= 0.0) {
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format("{} = {} has a {} <= 0.0, it must be >0.0", CurrentModuleObject, standAloneERV.Name, cNumericFields(1)));
+                ShowSevereError(state,
+                                std::format("{} = {} has a {} <= 0.0, it must be >0.0", CurrentModuleObject, standAloneERV.Name, cNumericFields(1)));
                 ShowContinueError(state, EnergyPlus::format("... Entered value={:.2R}", standAloneERV.SupplyAirVolFlow));
                 ErrorsFound = true;
             }
         } else {
             if (standAloneERV.AirVolFlowPerFloorArea == 0.0 && standAloneERV.AirVolFlowPerOccupant == 0.0) {
-                ShowSevereError(state, EnergyPlus::format("{} \"{}\"", CurrentModuleObject, standAloneERV.Name));
+                ShowSevereError(state, std::format("{} \"{}\"", CurrentModuleObject, standAloneERV.Name));
                 ShowContinueError(
                     state,
-                    EnergyPlus::format(
+                    std::format(
                         "... Autosizing {} requires at least one input for {} or {}.", cNumericFields(1), cNumericFields(3), cNumericFields(4)));
                 ErrorsFound = true;
             }
             // both inputs must be autosized
             if (standAloneERV.ExhaustAirVolFlow != DataSizing::AutoSize) {
-                ShowSevereError(state, EnergyPlus::format("{} \"{}\"", CurrentModuleObject, standAloneERV.Name));
-                ShowContinueError(state,
-                                  EnergyPlus::format("... When autosizing, {} and {} must both be autosized.", cNumericFields(1), cNumericFields(2)));
+                ShowSevereError(state, std::format("{} \"{}\"", CurrentModuleObject, standAloneERV.Name));
+                ShowContinueError(state, std::format("... When autosizing, {} and {} must both be autosized.", cNumericFields(1), cNumericFields(2)));
                 ErrorsFound = true;
             }
         }
@@ -547,10 +543,10 @@ void GetStandAloneERV(EnergyPlusData &state)
         if (standAloneERV.DesignEAFanVolFlowRate != DataSizing::AutoSize && standAloneERV.ExhaustAirVolFlow != DataSizing::AutoSize) {
             if (standAloneERV.ExhaustAirVolFlow > standAloneERV.DesignEAFanVolFlowRate) {
                 ShowWarningError(state,
-                                 EnergyPlus::format("{} = {} has an {} > Max Volume Flow Rate defined in the associated fan object, should be <=",
-                                                    CurrentModuleObject,
-                                                    standAloneERV.Name,
-                                                    cNumericFields(2)));
+                                 std::format("{} = {} has an {} > Max Volume Flow Rate defined in the associated fan object, should be <=",
+                                             CurrentModuleObject,
+                                             standAloneERV.Name,
+                                             cNumericFields(2)));
                 ShowContinueError(state,
                                   EnergyPlus::format("... Entered value={:.2R}... Fan [{}:{}] Max Value = {:.2R}",
                                                      standAloneERV.ExhaustAirVolFlow,
@@ -558,32 +554,29 @@ void GetStandAloneERV(EnergyPlusData &state)
                                                      standAloneERV.ExhaustAirFanName,
                                                      standAloneERV.DesignEAFanVolFlowRate));
                 ShowContinueError(
-                    state,
-                    EnergyPlus::format(" The ERV {} is reset to the exhaust air fan flow rate and the simulation continues.", cNumericFields(2)));
+                    state, std::format(" The ERV {} is reset to the exhaust air fan flow rate and the simulation continues.", cNumericFields(2)));
                 standAloneERV.ExhaustAirVolFlow = standAloneERV.DesignEAFanVolFlowRate;
             }
         }
         if (standAloneERV.ExhaustAirVolFlow != DataSizing::AutoSize) {
             if (standAloneERV.ExhaustAirVolFlow <= 0.0) {
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format("{} = {} has an {} <= 0.0, it must be >0.0", CurrentModuleObject, standAloneERV.Name, cNumericFields(2)));
+                ShowSevereError(state,
+                                std::format("{} = {} has an {} <= 0.0, it must be >0.0", CurrentModuleObject, standAloneERV.Name, cNumericFields(2)));
                 ShowContinueError(state, EnergyPlus::format("... Entered value={:.2R}", standAloneERV.ExhaustAirVolFlow));
                 ErrorsFound = true;
             }
         } else {
             if (standAloneERV.AirVolFlowPerFloorArea == 0.0 && standAloneERV.AirVolFlowPerOccupant == 0.0) {
-                ShowSevereError(state, EnergyPlus::format("{} \"{}\"", CurrentModuleObject, standAloneERV.Name));
+                ShowSevereError(state, std::format("{} \"{}\"", CurrentModuleObject, standAloneERV.Name));
                 ShowContinueError(
                     state,
-                    EnergyPlus::format(
+                    std::format(
                         "... Autosizing {} requires at least one input for {} or {}.", cNumericFields(2), cNumericFields(3), cNumericFields(4)));
                 ErrorsFound = true;
             }
             if (standAloneERV.SupplyAirVolFlow != DataSizing::AutoSize) {
-                ShowSevereError(state, EnergyPlus::format("{} \"{}\"", CurrentModuleObject, standAloneERV.Name));
-                ShowContinueError(state,
-                                  EnergyPlus::format("... When autosizing, {} and {} must both be autosized.", cNumericFields(1), cNumericFields(2)));
+                ShowSevereError(state, std::format("{} \"{}\"", CurrentModuleObject, standAloneERV.Name));
+                ShowContinueError(state, std::format("... When autosizing, {} and {} must both be autosized.", cNumericFields(1), cNumericFields(2)));
                 ErrorsFound = true;
             }
         }
@@ -624,23 +617,22 @@ void GetStandAloneERV(EnergyPlusData &state)
         if (state.dataInputProcessing->inputProcessor->getObjectItemNum(
                 state, "HeatExchanger:AirToAir:SensibleAndLatent", standAloneERV.HeatExchangerName) <= 0) {
             ShowSevereError(state,
-                            EnergyPlus::format("{} heat exchanger type HeatExchanger:AirToAir:SensibleAndLatent not found = {}",
-                                               CurrentModuleObject,
-                                               standAloneERV.HeatExchangerName));
+                            std::format("{} heat exchanger type HeatExchanger:AirToAir:SensibleAndLatent not found = {}",
+                                        CurrentModuleObject,
+                                        standAloneERV.HeatExchangerName));
             ErrorsFound = true;
         }
         // Verify supply air fan name in Stand Alone ERV object matches name of valid fan object
         if (standAloneERV.supplyAirFanType != HVAC::FanType::SystemModel) {
             if (state.dataInputProcessing->inputProcessor->getObjectItemNum(state, "Fan:OnOff", standAloneERV.SupplyAirFanName) <= 0) {
-                ShowSevereError(
-                    state, EnergyPlus::format("{} supply fan type Fan:OnOff not found = {}", CurrentModuleObject, standAloneERV.SupplyAirFanName));
+                ShowSevereError(state,
+                                std::format("{} supply fan type Fan:OnOff not found = {}", CurrentModuleObject, standAloneERV.SupplyAirFanName));
                 ErrorsFound = true;
             }
         } else {
             if (state.dataInputProcessing->inputProcessor->getObjectItemNum(state, "Fan:SystemModel", standAloneERV.SupplyAirFanName) <= 0) {
                 ShowSevereError(
-                    state,
-                    EnergyPlus::format("{} supply fan type Fan:SystemModel not found = {}", CurrentModuleObject, standAloneERV.SupplyAirFanName));
+                    state, std::format("{} supply fan type Fan:SystemModel not found = {}", CurrentModuleObject, standAloneERV.SupplyAirFanName));
                 ErrorsFound = true;
             }
         }
@@ -648,15 +640,14 @@ void GetStandAloneERV(EnergyPlusData &state)
         // Verify exhaust air fan name in Stand Alone ERV object matches name of valid fan object
         if (standAloneERV.exhaustAirFanType != HVAC::FanType::SystemModel) {
             if (state.dataInputProcessing->inputProcessor->getObjectItemNum(state, "Fan:OnOff", standAloneERV.ExhaustAirFanName) <= 0) {
-                ShowSevereError(
-                    state, EnergyPlus::format("{} exhaust fan type Fan:OnOff not found = {}", CurrentModuleObject, standAloneERV.ExhaustAirFanName));
+                ShowSevereError(state,
+                                std::format("{} exhaust fan type Fan:OnOff not found = {}", CurrentModuleObject, standAloneERV.ExhaustAirFanName));
                 ErrorsFound = true;
             }
         } else {
             if (state.dataInputProcessing->inputProcessor->getObjectItemNum(state, "Fan:SystemModel", standAloneERV.ExhaustAirFanName) <= 0) {
                 ShowSevereError(
-                    state,
-                    EnergyPlus::format("{} exhaust fan type Fan:SystemModel not found = {}", CurrentModuleObject, standAloneERV.ExhaustAirFanName));
+                    state, std::format("{} exhaust fan type Fan:SystemModel not found = {}", CurrentModuleObject, standAloneERV.ExhaustAirFanName));
                 ErrorsFound = true;
             }
         }
@@ -690,9 +681,9 @@ void GetStandAloneERV(EnergyPlusData &state)
             AirFlowRate = state.dataHVACStandAloneERV->StandAloneERV(WhichERV).SupplyAirVolFlow;
             state.dataHVACStandAloneERV->StandAloneERV(WhichERV).ControllerIndex = OutAirNum;
         } else {
-            ShowSevereError(state,
-                            EnergyPlus::format(
-                                "GetERVController: Could not find ZoneHVAC:EnergyRecoveryVentilator with {} = \"{}\"", cAlphaFields(1), Alphas(1)));
+            ShowSevereError(
+                state,
+                std::format("GetERVController: Could not find ZoneHVAC:EnergyRecoveryVentilator with {} = \"{}\"", cAlphaFields(1), Alphas(1)));
             ErrorsFound = true;
             AirFlowRate = -1000.0;
         }
@@ -743,8 +734,8 @@ void GetStandAloneERV(EnergyPlusData &state)
         if (!lAlphaBlanks(2)) {
             thisOAController.EnthalpyCurvePtr = Curve::GetCurveIndex(state, Alphas(2));
             if (Curve::GetCurveIndex(state, Alphas(2)) == 0) {
-                ShowSevereError(state, EnergyPlus::format("{} \"{}\"", CurrentModuleObject, Alphas(1)));
-                ShowContinueError(state, EnergyPlus::format("...{} not found:{}", cAlphaFields(2), Alphas(2)));
+                ShowSevereError(state, std::format("{} \"{}\"", CurrentModuleObject, Alphas(1)));
+                ShowContinueError(state, std::format("...{} not found:{}", cAlphaFields(2), Alphas(2)));
                 ErrorsFound = true;
             } else {
                 // Verify Curve Object, only legal types are Quadratic and Cubic
@@ -773,8 +764,8 @@ void GetStandAloneERV(EnergyPlusData &state)
             }
         } else if ((!lAlphaBlanks(3)) && (!lAlphaBlanks(4))) {
             if ((lNumericBlanks(1)) && (lNumericBlanks(3)) && (lNumericBlanks(4)) && lAlphaBlanks(2)) {
-                ShowWarningError(state, EnergyPlus::format("{} \"{}\"", CurrentModuleObject, Alphas(1)));
-                ShowContinueError(state, EnergyPlus::format("... Invalid {}{} = {}{}", cAlphaFields(3), cAlphaFields(4), Alphas(3), Alphas(4)));
+                ShowWarningError(state, std::format("{} \"{}\"", CurrentModuleObject, Alphas(1)));
+                ShowContinueError(state, std::format("... Invalid {}{} = {}{}", cAlphaFields(3), cAlphaFields(4), Alphas(3), Alphas(4)));
                 ShowContinueError(state, "... Assumed NO EXHAUST AIR TEMP LIMIT and NO EXHAUST AIR ENTHALPY LIMIT.");
                 thisOAController.Econo = MixedAir::EconoOp::NoEconomizer;
             } else {
@@ -784,8 +775,8 @@ void GetStandAloneERV(EnergyPlusData &state)
             }
         } else if ((lAlphaBlanks(3)) && (!lAlphaBlanks(4))) {
             if ((lNumericBlanks(1)) && (lNumericBlanks(3)) && (lNumericBlanks(4)) && lAlphaBlanks(2)) {
-                ShowWarningError(state, EnergyPlus::format("{} \"{}\"", CurrentModuleObject, Alphas(1)));
-                ShowContinueError(state, EnergyPlus::format("... Invalid {} = {}", cAlphaFields(4), Alphas(4)));
+                ShowWarningError(state, std::format("{} \"{}\"", CurrentModuleObject, Alphas(1)));
+                ShowContinueError(state, std::format("... Invalid {} = {}", cAlphaFields(4), Alphas(4)));
                 ShowContinueError(state, "... Assumed  NO EXHAUST AIR ENTHALPY LIMIT.");
                 thisOAController.Econo = MixedAir::EconoOp::NoEconomizer;
             } else {
@@ -795,8 +786,8 @@ void GetStandAloneERV(EnergyPlusData &state)
             }
         } else if ((!lAlphaBlanks(3)) && (lAlphaBlanks(4))) {
             if ((lNumericBlanks(1)) && (lNumericBlanks(3)) && (lNumericBlanks(4)) && lAlphaBlanks(2)) {
-                ShowWarningError(state, EnergyPlus::format("{} \"{}\"", CurrentModuleObject, Alphas(1)));
-                ShowContinueError(state, EnergyPlus::format("... Invalid {} = {}", cAlphaFields(3), Alphas(3)));
+                ShowWarningError(state, std::format("{} \"{}\"", CurrentModuleObject, Alphas(1)));
+                ShowContinueError(state, std::format("... Invalid {} = {}", cAlphaFields(3), Alphas(3)));
                 ShowContinueError(state, "... Assumed NO EXHAUST AIR TEMP LIMIT ");
                 thisOAController.Econo = MixedAir::EconoOp::NoEconomizer;
             } else {
@@ -829,9 +820,9 @@ void GetStandAloneERV(EnergyPlusData &state)
                     ZoneNodeFound = true;
                 }
                 if (!ZoneNodeFound) {
-                    ShowSevereError(state, EnergyPlus::format("{} \"{}\"", CurrentModuleObject, Alphas(1)));
+                    ShowSevereError(state, std::format("{} \"{}\"", CurrentModuleObject, Alphas(1)));
                     ShowContinueError(state, "... Did not find Air Node (Zone with Humidistat)");
-                    ShowContinueError(state, EnergyPlus::format("... Specified {} = {}", cAlphaFields(7), Alphas(7)));
+                    ShowContinueError(state, std::format("... Specified {} = {}", cAlphaFields(7), Alphas(7)));
                     ShowContinueError(state, "... A ZoneHVAC:EquipmentConnections object must be specified for this zone.");
                     ErrorsFound = true;
                 } else {
@@ -844,14 +835,14 @@ void GetStandAloneERV(EnergyPlusData &state)
                         break;
                     }
                     if (!HStatFound) {
-                        ShowSevereError(state, EnergyPlus::format("{} \"{}\"", CurrentModuleObject, Alphas(1)));
+                        ShowSevereError(state, std::format("{} \"{}\"", CurrentModuleObject, Alphas(1)));
                         ShowContinueError(state, "... Did not find zone humidistat");
                         ShowContinueError(state, "... A ZoneControl:Humidistat object must be specified for this zone.");
                         ErrorsFound = true;
                     }
                 }
             } else {
-                ShowSevereError(state, EnergyPlus::format("{} \"{}\"", CurrentModuleObject, Alphas(1)));
+                ShowSevereError(state, std::format("{} \"{}\"", CurrentModuleObject, Alphas(1)));
                 ShowContinueError(state, "... Did not find Air Node (Zone with Humidistat)");
                 ShowContinueError(state, "... A ZoneHVAC:EquipmentConnections object must be specified for this zone.");
                 ErrorsFound = true;
@@ -859,9 +850,9 @@ void GetStandAloneERV(EnergyPlusData &state)
 
             if (Numbers(5) <= 0.0 && NumNumbers > 4) {
 
-                ShowWarningError(state, EnergyPlus::format("{} \"{}\"", CurrentModuleObject, Alphas(1)));
-                ShowContinueError(state, EnergyPlus::format("... {} must be greater than 0.", cNumericFields(5)));
-                ShowContinueError(state, EnergyPlus::format("... {} is reset to 1 and the simulation continues.", cNumericFields(5)));
+                ShowWarningError(state, std::format("{} \"{}\"", CurrentModuleObject, Alphas(1)));
+                ShowContinueError(state, std::format("... {} must be greater than 0.", cNumericFields(5)));
+                ShowContinueError(state, std::format("... {} is reset to 1 and the simulation continues.", cNumericFields(5)));
 
                 HighRHOARatio = 1.0;
 
@@ -881,9 +872,9 @@ void GetStandAloneERV(EnergyPlusData &state)
             }
 
         } else if (!Util::SameString(Alphas(6), "No") && NumAlphas > 4 && (!lAlphaBlanks(5))) {
-            ShowWarningError(state, EnergyPlus::format("{} \"{}\"", CurrentModuleObject, Alphas(1)));
-            ShowContinueError(state, EnergyPlus::format("... Invalid {} = {}", cAlphaFields(6), Alphas(6)));
-            ShowContinueError(state, EnergyPlus::format("... {} is assumed to be \"No\" and the simulation continues.", cAlphaFields(6)));
+            ShowWarningError(state, std::format("{} \"{}\"", CurrentModuleObject, Alphas(1)));
+            ShowContinueError(state, std::format("... Invalid {} = {}", cAlphaFields(6), Alphas(6)));
+            ShowContinueError(state, std::format("... {} is assumed to be \"No\" and the simulation continues.", cAlphaFields(6)));
         } // IF(Util::SameString(Alphas(6),'Yes'))THEN
 
         thisOAController.HighRHOAFlowRatio = HighRHOARatio;
@@ -902,16 +893,15 @@ void GetStandAloneERV(EnergyPlusData &state)
                 state.dataHVACStandAloneERV->StandAloneERV(WhichERV).DesignSAFanVolFlowRate != DataSizing::AutoSize) {
                 if (state.dataHVACStandAloneERV->StandAloneERV(WhichERV).SupplyAirVolFlow * HighRHOARatio >
                     state.dataHVACStandAloneERV->StandAloneERV(WhichERV).DesignSAFanVolFlowRate) {
-                    ShowWarningError(state, EnergyPlus::format("{} \"{}\"", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("{} \"{}\"", CurrentModuleObject, Alphas(1)));
                     ShowContinueError(state, EnergyPlus::format("... A {} was entered as {:.4R}", cNumericFields(5), HighRHOARatio));
                     ShowContinueError(state,
                                       "... This flow ratio results in a Supply Air Volume Flow Rate through the ERV which is greater than the "
                                       "Max Volume specified in the supply air fan object.");
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("... Associated fan object = {} \"{}\"",
-                                           HVAC::fanTypeNames[(int)state.dataHVACStandAloneERV->StandAloneERV(WhichERV).supplyAirFanType],
-                                           state.dataHVACStandAloneERV->StandAloneERV(WhichERV).SupplyAirFanName));
+                    ShowContinueError(state,
+                                      std::format("... Associated fan object = {} \"{}\"",
+                                                  HVAC::fanTypeNames[(int)state.dataHVACStandAloneERV->StandAloneERV(WhichERV).supplyAirFanType],
+                                                  state.dataHVACStandAloneERV->StandAloneERV(WhichERV).SupplyAirFanName));
                     ShowContinueError(state,
                                       EnergyPlus::format("... Modified value                   = {:.2R}",
                                                          state.dataHVACStandAloneERV->StandAloneERV(WhichERV).SupplyAirVolFlow * HighRHOARatio));
@@ -927,16 +917,15 @@ void GetStandAloneERV(EnergyPlusData &state)
                 state.dataHVACStandAloneERV->StandAloneERV(WhichERV).DesignEAFanVolFlowRate != DataSizing::AutoSize) {
                 if (state.dataHVACStandAloneERV->StandAloneERV(WhichERV).ExhaustAirVolFlow * HighRHOARatio >
                     state.dataHVACStandAloneERV->StandAloneERV(WhichERV).DesignEAFanVolFlowRate) {
-                    ShowWarningError(state, EnergyPlus::format("ZoneHVAC:EnergyRecoveryVentilator:Controller \"{}\"", Alphas(1)));
+                    ShowWarningError(state, std::format("ZoneHVAC:EnergyRecoveryVentilator:Controller \"{}\"", Alphas(1)));
                     ShowContinueError(state, EnergyPlus::format("... A {} was entered as {:.4R}", cNumericFields(5), HighRHOARatio));
                     ShowContinueError(state,
                                       "... This flow ratio results in an Exhaust Air Volume Flow Rate through the ERV which is greater than the "
                                       "Max Volume specified in the exhaust air fan object.");
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("... Associated fan object = {} \"{}\"",
-                                           HVAC::fanTypeNames[(int)state.dataHVACStandAloneERV->StandAloneERV(WhichERV).exhaustAirFanType],
-                                           state.dataHVACStandAloneERV->StandAloneERV(WhichERV).ExhaustAirFanName));
+                    ShowContinueError(state,
+                                      std::format("... Associated fan object = {} \"{}\"",
+                                                  HVAC::fanTypeNames[(int)state.dataHVACStandAloneERV->StandAloneERV(WhichERV).exhaustAirFanType],
+                                                  state.dataHVACStandAloneERV->StandAloneERV(WhichERV).ExhaustAirFanName));
                     ShowContinueError(state,
                                       EnergyPlus::format("... Modified value                    = {:.2R}",
                                                          state.dataHVACStandAloneERV->StandAloneERV(WhichERV).ExhaustAirVolFlow * HighRHOARatio));
@@ -1122,9 +1111,9 @@ void InitStandAloneERV(EnergyPlusData &state,
                 continue;
             }
             ShowSevereError(state,
-                            EnergyPlus::format("InitStandAloneERV: Unit=[{},{}] is not on any ZoneHVAC:EquipmentList.  It will not be simulated.",
-                                               state.dataHVACStandAloneERV->StandAloneERV(Loop).UnitType,
-                                               state.dataHVACStandAloneERV->StandAloneERV(Loop).Name));
+                            std::format("InitStandAloneERV: Unit=[{},{}] is not on any ZoneHVAC:EquipmentList.  It will not be simulated.",
+                                        state.dataHVACStandAloneERV->StandAloneERV(Loop).UnitType,
+                                        state.dataHVACStandAloneERV->StandAloneERV(Loop).Name));
         }
     }
 
@@ -1392,11 +1381,10 @@ void SizeStandAloneERV(EnergyPlusData &state, int const StandAloneERVNum)
             if (state.dataGlobal->DisplayExtraWarnings) {
                 if ((std::abs(DesignSAFanVolFlowRateDes - DesignSAFanVolFlowRateUser) / DesignSAFanVolFlowRateUser) >
                     state.dataSize->AutoVsHardSizingThreshold) {
-                    ShowMessage(
-                        state,
-                        EnergyPlus::format("SizeStandAloneERV: Potential issue with equipment sizing for ZoneHVAC:EnergyRecoveryVentilator {} {}",
-                                           HVAC::fanTypeNames[(int)state.dataHVACStandAloneERV->StandAloneERV(StandAloneERVNum).supplyAirFanType],
-                                           state.dataHVACStandAloneERV->StandAloneERV(StandAloneERVNum).SupplyAirFanName));
+                    ShowMessage(state,
+                                std::format("SizeStandAloneERV: Potential issue with equipment sizing for ZoneHVAC:EnergyRecoveryVentilator {} {}",
+                                            HVAC::fanTypeNames[(int)state.dataHVACStandAloneERV->StandAloneERV(StandAloneERVNum).supplyAirFanType],
+                                            state.dataHVACStandAloneERV->StandAloneERV(StandAloneERVNum).SupplyAirFanName));
                     ShowContinueError(state,
                                       EnergyPlus::format("User-Specified Supply Fan Maximum Flow Rate of {:.5R} [m3/s]", DesignSAFanVolFlowRateUser));
                     ShowContinueError(state,
@@ -1524,9 +1512,9 @@ void CalcStandAloneERV(EnergyPlusData &state,
         Real64 TotalSupplyMassFlow = state.dataLoopNodes->Node(SupInletNode).MassFlowRate;
         if (TotalExhaustMassFlow > TotalSupplyMassFlow && !state.dataHeatBal->ZoneAirMassFlow.EnforceZoneMassBalance) {
             ShowWarningError(state,
-                             EnergyPlus::format("For {} \"{}\" there is unbalanced exhaust air flow.",
-                                                state.dataHVACStandAloneERV->StandAloneERV(StandAloneERVNum).UnitType,
-                                                state.dataHVACStandAloneERV->StandAloneERV(StandAloneERVNum).Name));
+                             std::format("For {} \"{}\" there is unbalanced exhaust air flow.",
+                                         state.dataHVACStandAloneERV->StandAloneERV(StandAloneERVNum).UnitType,
+                                         state.dataHVACStandAloneERV->StandAloneERV(StandAloneERVNum).Name));
             ShowContinueError(
                 state, EnergyPlus::format("... The exhaust air mass flow rate = {:.6R}", state.dataLoopNodes->Node(ExhaustInletNode).MassFlowRate));
             ShowContinueError(
@@ -1600,7 +1588,7 @@ Real64 GetSupplyAirFlowRate(EnergyPlusData &state,
         }
     }
 
-    ShowSevereError(state, EnergyPlus::format("Could not find ZoneHVAC:EnergyRecoveryVentilator with Controller Name=\"{}\"", ERVCtrlName));
+    ShowSevereError(state, std::format("Could not find ZoneHVAC:EnergyRecoveryVentilator with Controller Name=\"{}\"", ERVCtrlName));
     ErrorsFound = true;
     return -1000.0;
 }

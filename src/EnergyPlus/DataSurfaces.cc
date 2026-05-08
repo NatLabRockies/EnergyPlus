@@ -512,7 +512,7 @@ Real64 SurfaceData::get_average_height(EnergyPlusData &state) const
     for (Vertices::size_type i = 0; i < n; ++i) {
         Vertex2D const &v(v2d[i]);
 
-        Vertex2D *v2;
+        Vertex2D const *v2;
         if (i == n - 1) {
             v2 = &v2d[0];
         } else {

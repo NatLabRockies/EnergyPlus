@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
@@ -156,7 +157,7 @@ void GetSurfaceListsInputs(EnergyPlusData &state)
                     if (SurfList(Item).SurfPtr(SurfNum) == 0) {
                         ShowSevereError(
                             state,
-                            fmt::format(
+                            EnergyPlus::format(
                                 "{} in {} statement not found = {}", surfaceNameFieldName, CurrentModuleObject1, SurfList(Item).SurfName(SurfNum)));
                         ErrorsFound = true;
                     } else { // Make sure that all of the surfaces are located in the same zone
@@ -264,7 +265,8 @@ void GetSurfaceListsInputs(EnergyPlusData &state)
                     if (SlabList(Item).ZonePtr(SurfNum) == 0) {
                         ShowSevereError(
                             state,
-                            fmt::format("{} in {} Zone not found = {}", zoneNameFieldName, CurrentModuleObject2, SlabList(Item).ZoneName(SurfNum)));
+                            EnergyPlus::format(
+                                "{} in {} Zone not found = {}", zoneNameFieldName, CurrentModuleObject2, SlabList(Item).ZoneName(SurfNum)));
                         ErrorsFound = true;
                     }
 
@@ -273,10 +275,10 @@ void GetSurfaceListsInputs(EnergyPlusData &state)
                     SlabList(Item).SurfPtr(SurfNum) = Util::FindItemInList(SlabList(Item).SurfName(SurfNum), state.dataSurface->Surface);
                     if (SlabList(Item).SurfPtr(SurfNum) == 0) {
                         ShowSevereError(state,
-                                        fmt::format("{} in {} statement not found = {}",
-                                                    slabSurfaceNameFieldName,
-                                                    CurrentModuleObject2,
-                                                    SlabList(Item).SurfName(SurfNum)));
+                                        EnergyPlus::format("{} in {} statement not found = {}",
+                                                           slabSurfaceNameFieldName,
+                                                           CurrentModuleObject2,
+                                                           SlabList(Item).SurfName(SurfNum)));
                         ErrorsFound = true;
                     }
                     for (int SrfList = 1; SrfList <= NumOfSurfaceLists; ++SrfList) {

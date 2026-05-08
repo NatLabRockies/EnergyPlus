@@ -1,9 +1,3 @@
-!  Version,
-!    26.1;                   !- Version Identifier
-
-!  Version,
-!    26.1;                   !- Version Identifier
-
   GlobalGeometryRules,
     UpperLeftCorner,         !- Starting Vertex Position
     CounterClockWise,        !- Vertex Entry Direction

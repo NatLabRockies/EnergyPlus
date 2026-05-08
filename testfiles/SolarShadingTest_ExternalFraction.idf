@@ -4744,8 +4744,6 @@
 
   Output:Variable,*,Zone Mean Radiant Temperature,hourly;
 
-  Output:Variable,*,Zone Mean Radiant Temperature,hourly;
-
   Output:Variable,*,Surface Inside Face Temperature,daily;
 
   Output:Variable,*,Surface Outside Face Temperature,daily;
