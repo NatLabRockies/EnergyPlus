@@ -49,7 +49,6 @@
 
 // Google test headers
 #include <gtest/gtest.h>
-
 // EnergyPlus Headers
 #include <AirflowNetwork/Elements.hpp>
 #include <AirflowNetwork/Properties.hpp>
@@ -4456,17 +4455,21 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestFanModel)
             state->afn->AirflowNetworkNodeSimu(i).WZ = state->dataEnvrn->OutHumRat;
         }
     }
+    int constexpr supplyFanLinkNum = 13;
+    int constexpr zoneSupplyLinkNum = 20;
+    int constexpr zoneReturnLinkNum = 17;
+
     state->dataAirLoop->AirLoopAFNInfo.allocate(1);
     state->dataAirLoop->AirLoopAFNInfo(1).LoopFanOperationMode = HVAC::FanOp::Cycling;
     state->dataAirLoop->AirLoopAFNInfo(1).LoopOnOffFanPartLoadRatio = 0.0;
     state->dataAirLoop->AirLoopAFNInfo(1).LoopSystemOnMassFlowrate = 1.23;
-    state->afn->AirflowNetworkLinkageData(17).AirLoopNum = 1;
-    state->dataLoopNodes->Node(4).MassFlowRate = 1.23;
-    state->afn->AirflowNetworkLinkageData(13).AirLoopNum = 1;
+    state->afn->AirflowNetworkLinkageData(zoneReturnLinkNum).AirLoopNum = 1;
+    state->dataLoopNodes->Node(state->afn->DisSysCompCVFData(1).InletNode).MassFlowRate = 1.23;
+    state->afn->AirflowNetworkLinkageData(supplyFanLinkNum).AirLoopNum = 1;
 
     state->afn->calculate_balance();
     // Fan:SystemModel
-    EXPECT_NEAR(1.06274, state->afn->AirflowNetworkLinkSimu(20).FLOW, 0.0001);
+    EXPECT_NEAR(1.06274, state->afn->AirflowNetworkLinkSimu(zoneSupplyLinkNum).FLOW, 0.0001);
     EXPECT_TRUE(state->afn->DisSysCompCVFData(1).FanModelFlag);
 
     for (i = 1; i <= 21; ++i) {
@@ -4481,7 +4484,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestFanModel)
     // Fan:OnOff
     state->afn->DisSysCompCVFData(1).FanModelFlag = false;
     state->afn->calculate_balance();
-    EXPECT_NEAR(1.06274, state->afn->AirflowNetworkLinkSimu(20).FLOW, 0.0001);
+    EXPECT_NEAR(1.06274, state->afn->AirflowNetworkLinkSimu(zoneSupplyLinkNum).FLOW, 0.0001);
 
     state->dataAirLoop->AirLoopAFNInfo.deallocate();
 }
