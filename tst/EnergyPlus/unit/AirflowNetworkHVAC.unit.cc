@@ -8068,7 +8068,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_DuplicatedNodeNameTest)
         "    Heating Coil Air Inlet Node,  !- Node 1 Name",
         "    Air Loop Outlet Node;    !- Node 2 Name",
 
-       "  Curve:Biquadratic,",
+        "  Curve:Biquadratic,",
         "    WindACCoolCapFT,         !- Name",
         "    0.942587793,             !- Coefficient1 Constant",
         "    0.009543347,             !- Coefficient2 x",
@@ -8128,7 +8128,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_DuplicatedNodeNameTest)
         "    0.0,                     !- Minimum Value of x",
         "    1.0;                     !- Maximum Value of x",
 
-     });
+    });
 
     ASSERT_TRUE(process_idf(idf_objects));
 
@@ -16797,8 +16797,6 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_DuctSizingTest)
     state->dataAirLoop->AirLoopAFNInfo(1).LoopFanOperationMode = HVAC::FanOp::Cycling;
     state->dataAirLoop->AirLoopAFNInfo(1).LoopOnOffFanPartLoadRatio = 0.0;
     state->dataAirLoop->AirLoopAFNInfo(1).LoopSystemOnMassFlowrate = 1.23;
-    state->afn->AirflowNetworkLinkageData(17).AirLoopNum = 1;
-    state->dataLoopNodes->Node(4).MassFlowRate = 1.23;
 
     // Duct sizing test
     state->afn->simulation_control.autosize_ducts = true;
@@ -16817,20 +16815,31 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_DuctSizingTest)
         thisZoneHB.airHumRat = 0.0008400;
     }
 
-    // I don't know what's going on here
+    auto findAFNNodeNum = [&](std::string const &nodeName) {
+        for (int nodeNum = 1; nodeNum <= state->afn->AirflowNetworkNumOfNodes; ++nodeNum) {
+            if (Util::SameString(state->afn->AirflowNetworkNodeData(nodeNum).Name, nodeName)) {
+                return nodeNum;
+            }
+        }
+        return 0;
+    };
+
+    // SizeDucts only needs the supply/return loop nodes and the active zone inlet/outlet markers.
+    int const equipmentInletNodeNum = findAFNNodeNum("EquipmentInletNode");
+    int const mainReturnNodeNum = findAFNNodeNum("MainReturnNode");
+    int const zoneSupplyRegisterNodeNum = findAFNNodeNum("ZoneSupplyRegisterNode");
+    int const zoneOutletNodeNum = findAFNNodeNum("ZoneOutletNode");
+    ASSERT_NE(0, equipmentInletNodeNum);
+    ASSERT_NE(0, mainReturnNodeNum);
+    ASSERT_NE(0, zoneSupplyRegisterNodeNum);
+    ASSERT_NE(0, zoneOutletNodeNum);
+
     state->dataZoneEquip->ZoneEquipList(1).EquipIndex(1) = 1;
     state->dataDefineEquipment->AirDistUnit(1).MassFlowRateTU = 1.23;
-    state->afn->AirflowNetworkNodeData(8).EPlusNodeNum = 8;
-    state->afn->AirflowNetworkNodeData(11).EPlusNodeNum = 1;
-    state->afn->AirflowNetworkNodeData(12).EPlusNodeNum = 7;
-    state->afn->AirflowNetworkNodeData(15).EPlusNodeNum = 9;
-    state->afn->AirflowNetworkNodeData(17).EPlusNodeNum = 4;
-    state->afn->AirflowNetworkNodeData(18).EPlusNodeNum = 5;
-    state->afn->AirflowNetworkNodeData(19).EPlusNodeNum = 2;
-    state->afn->AirflowNetworkNodeData(20).EPlusNodeNum = 11;
-    state->afn->AirflowNetworkNodeData(21).EPlusNodeNum = 3;
-    state->afn->AirflowNetworkNodeData(11).EPlusTypeNum = AirflowNetwork::iEPlusNodeType::ZIN;
-    state->afn->AirflowNetworkNodeData(12).EPlusTypeNum = AirflowNetwork::iEPlusNodeType::ZOU;
+    state->afn->AirflowNetworkNodeData(equipmentInletNodeNum).EPlusNodeNum = state->dataAirLoop->AirToZoneNodeInfo(1).ZoneEquipSupplyNodeNum(1);
+    state->afn->AirflowNetworkNodeData(mainReturnNodeNum).EPlusNodeNum = state->dataAirLoop->AirToZoneNodeInfo(1).ZoneEquipReturnNodeNum(1);
+    state->afn->AirflowNetworkNodeData(zoneSupplyRegisterNodeNum).EPlusTypeNum = AirflowNetwork::iEPlusNodeType::ZIN;
+    state->afn->AirflowNetworkNodeData(zoneOutletNodeNum).EPlusTypeNum = AirflowNetwork::iEPlusNodeType::ZOU;
     state->dataEnvrn->StdRhoAir = 1.2;
     state->afn->DisSysCompCVFData(1).FlowRate = 1.23;
     state->afn->SizeDucts();
