@@ -16901,7 +16901,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_CheckMultistageHeatingCoil)
         " Constant-1.0, !-Availability Schedule Name",
         " heating coil air inlet node_unit1, !-Air Inlet Node Name",
         " Supp Heating Coil Air Inlet Node_unit1, !-Air Outlet Node Name,",
-        " !-Temperature Setpoint Node Name",
+        " , !-Temperature Setpoint Node Name",
         " 2, !-Number of Stages ",
         " 1.00, !-Stage 1 Efficiency{W / W}",
         " 4000.0, !-Stage 1 Nominal Capacity {W}",
@@ -16926,7 +16926,6 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_CheckMultistageHeatingCoil)
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
-    state->init_state(*state);
 
     state->dataGlobal->NumOfZones = 1;
     state->dataHeatBal->Zone.allocate(1);
