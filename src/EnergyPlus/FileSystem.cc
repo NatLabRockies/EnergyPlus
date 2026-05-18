@@ -314,7 +314,7 @@ namespace FileSystem {
         // Note: on Windows, system(command) will already send the command through "cmd /C command"
         // cf C:\Program Files (x86)\Windows Kits\10\Source\10.0.17763.0\ucrt\exec
         // Ends up calling something that looks like the following:
-        // cmd /C ""C:\path\to\ReadVarsESO.exe" "A folder with spaces\1ZoneUncontrolled.mvi" unlimited"
+        // cmd /C ""C:\path\to\ReadVarsESO.bat" "A folder with spaces\1ZoneUncontrolled.mvi" unlimited"
         return system(("\"" + command + "\"").c_str());
 #else
         return system(command.c_str());

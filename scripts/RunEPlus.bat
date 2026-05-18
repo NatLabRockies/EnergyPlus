@@ -59,10 +59,10 @@
 :       Run the Slab preprocessor program if necessary
 :   5.  Execute EnergyPlus
 :   6.  If available Copy %1.rvi (post processor commands) into Eplusout.inp
-:   7.  Execute ReadVarsESO.exe (the Post Processing Program)
+:   7.  Execute ReadVarsESO (the Post Processing Program)
 :   8.  If available Copy %1.mvi (post processor commands) into test.mvi
 :       or create appropriate input to get meter output from eplusout.mtr
-:   9.  Execute ReadVarsESO.exe (the Post Processing Program) for meter output
+:   9.  Execute ReadVarsESO (the Post Processing Program) for meter output
 :  10.  Copy Eplusout.* to %1.*
 :  11.  Clean up working directory.
 :
@@ -324,12 +324,12 @@ if %maxcol%==nolimit SET rvset=unlimited
 : readvars creates audit in append mode.  start it off
 echo %date% %time% ReadVars >readvars.audit
 
-IF EXIST eplusout.inp %post_proc%ReadVarsESO.exe eplusout.inp %rvset%
-IF NOT EXIST eplusout.inp %post_proc%ReadVarsESO.exe " " %rvset%
-IF EXIST eplusmtr.inp %post_proc%ReadVarsESO.exe eplusmtr.inp %rvset%
+IF EXIST eplusout.inp %post_proc%ReadVarsESO.bat eplusout.inp %rvset%
+IF NOT EXIST eplusout.inp %post_proc%ReadVarsESO.bat " " %rvset%
+IF EXIST eplusmtr.inp %post_proc%ReadVarsESO.bat eplusmtr.inp %rvset%
 IF NOT EXIST eplusmtr.inp echo eplusout.mtr >test.mvi
 IF NOT EXIST eplusmtr.inp echo eplusmtr.csv >>test.mvi
-IF NOT EXIST eplusmtr.inp %post_proc%ReadVarsESO.exe test.mvi %rvset%
+IF NOT EXIST eplusmtr.inp %post_proc%ReadVarsESO.bat test.mvi %rvset%
 :skipReadVars
 
 IF EXIST eplusout.bnd %post_proc%HVAC-Diagram.exe

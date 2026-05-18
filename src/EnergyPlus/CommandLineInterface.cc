@@ -883,18 +883,35 @@ state.dataStrGlobals->inputFilePath='{:g}',
 
     int runReadVarsESO(EnergyPlusData &state)
     {
-        fs::path readVarsPath = (state.dataStrGlobals->exeDirectoryPath / "ReadVarsESO").replace_extension(FileSystem::exeExtension);
+        auto findReadVarsPath = [](fs::path const &directory) -> fs::path {
+            std::vector<fs::path> candidates;
+#ifdef _WIN32
+            candidates.emplace_back(directory / "ReadVarsESO.bat");
+            candidates.emplace_back(directory / "ReadVarsESO.exe");
+#else
+            candidates.emplace_back(directory / "ReadVarsESO");
+#endif
+            for (auto const &candidate : candidates) {
+                if (FileSystem::fileExists(candidate)) {
+                    return candidate;
+                }
+            }
+            return {};
+        };
 
-        if (!FileSystem::fileExists(readVarsPath)) {
-            readVarsPath = (state.dataStrGlobals->exeDirectoryPath / "PostProcess" / "ReadVarsESO").replace_extension(FileSystem::exeExtension);
-            if (!FileSystem::fileExists(readVarsPath)) {
+        fs::path readVarsPath = findReadVarsPath(state.dataStrGlobals->exeDirectoryPath);
+
+        if (readVarsPath.empty()) {
+            readVarsPath = findReadVarsPath(state.dataStrGlobals->exeDirectoryPath / "PostProcess");
+            if (readVarsPath.empty()) {
                 // should report the error differently if the user is calling into E+ through EXE or DLL
                 if (state.dataGlobal->eplusRunningViaAPI) {
                     DisplayString(
                         state,
-                        "ERROR: Could not find ReadVarsESO executable.  When calling through C API, make sure to call setEnergyPlusRootDirectory");
+                        "ERROR: Could not find ReadVarsESO program.  When calling through C API, make sure to call setEnergyPlusRootDirectory");
                 } else {
-                    DisplayString(state, fmt::format("ERROR: Could not find ReadVarsESO executable: {}.", FileSystem::getAbsolutePath(readVarsPath)));
+                    DisplayString(state, fmt::format("ERROR: Could not find ReadVarsESO program under: {}.",
+                                                     FileSystem::getAbsolutePath(state.dataStrGlobals->exeDirectoryPath)));
                 }
                 return static_cast<int>(ReturnCodes::Failure);
             }

@@ -85,23 +85,21 @@ function(ADD_SIMULATION_TEST)
     set(ANNUAL_SIMULATION false)
   endif()
 
-  # Note JM 2018-11-23: -r means "Call ReadVarEso", which unless you actually have BUILD_FORTRAN=TRUE shouldn't exist
+  # -r means "Call ReadVarsESO".
   if(ANNUAL_SIMULATION)
     set(ENERGYPLUS_FLAGS "${ADD_SIM_TEST_ENERGYPLUS_FLAGS} -a")
   else()
     set(ENERGYPLUS_FLAGS "${ADD_SIM_TEST_ENERGYPLUS_FLAGS} -D")
   endif()
 
-  # Add -r flag if BUILD_FORTRAN is on, regardless of whether we run regression/performance tests
-  # So that it'll produce the CSV output automatically for convenience
+  # Preserve the historical test behavior: when auxiliary Fortran tools are enabled,
+  # also ask EnergyPlus to produce CSV output through ReadVarsESO.
   if(BUILD_FORTRAN)
     set(ENERGYPLUS_FLAGS "${ENERGYPLUS_FLAGS} -r")
   else()
-    # Now, if you don't have BUILD_FORTRAN, but you actually need that because of regression/performance testing, we issue messages
-
     if(ADD_SIM_TEST_PERFORMANCE)
-      # For performance testing, it's more problematic, because that'll cut on the ReadVarEso time
-      message(WARNING "Will not be able to call ReadVarEso unless BUILD_FORTRAN=TRUE, skipping flag -r.")
+      # For performance testing, changing whether ReadVarsESO is included changes the measured time.
+      message(WARNING "BUILD_FORTRAN=FALSE, preserving historical behavior and skipping automatic ReadVarsESO execution.")
     endif()
   endif()
 

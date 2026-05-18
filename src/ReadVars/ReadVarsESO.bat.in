@@ -1,0 +1,10 @@
+@echo off
+setlocal
+
+where python >NUL 2>NUL
+if %ERRORLEVEL% EQU 0 (
+  python "%~dp0ReadVarsESO.py" %*
+) else (
+  py -3 "%~dp0ReadVarsESO.py" %*
+)
+exit /b %ERRORLEVEL%
