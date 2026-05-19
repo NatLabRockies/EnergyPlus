@@ -102,10 +102,10 @@ Real64 CoolingWaterDesAirOutletHumRatSizer::size(EnergyPlusData &state, Real64 _
                 this->callingRoutine + ":" + " Coil=\"" + this->compName + "\", Cooling Coil has leaving humidity ratio > entering humidity ratio.";
             this->addErrorMessage(msg);
             ShowWarningError(state, msg);
-            msg = EnergyPlus::format("    Wair,in =  {:.6R} [kgWater/kgDryAir]", this->dataDesInletAirHumRat);
+            msg = std::format("    Wair,in =  {:.3E} [kgWater/kgDryAir]", this->dataDesInletAirHumRat);
             this->addErrorMessage(msg);
             ShowContinueError(state, msg);
-            msg = EnergyPlus::format("    Wair,out = {:.6R} [kgWater/kgDryAir]", this->autoSizedValue);
+            msg = std::format("    Wair,out = {:.3E} [kgWater/kgDryAir]", this->autoSizedValue);
             this->addErrorMessage(msg);
             ShowContinueError(state, msg);
             if (this->dataDesInletAirHumRat > 0.016) {
@@ -116,7 +116,7 @@ Real64 CoolingWaterDesAirOutletHumRatSizer::size(EnergyPlusData &state, Real64 _
             msg = "....coil leaving humidity ratio will be reset to:";
             this->addErrorMessage(msg);
             ShowContinueError(state, msg);
-            msg = EnergyPlus::format("    Wair,out = {:.6R} [kgWater/kgDryAir]", this->autoSizedValue);
+            msg = std::format("    Wair,out = {:.3E} [kgWater/kgDryAir]", this->autoSizedValue);
             this->addErrorMessage(msg);
             ShowContinueError(state, msg);
         }
@@ -132,24 +132,24 @@ Real64 CoolingWaterDesAirOutletHumRatSizer::size(EnergyPlusData &state, Real64 _
                                   "temperature > design air entering humidity ratio.";
                 this->addErrorMessage(msg);
                 ShowWarningError(state, msg);
-                msg = EnergyPlus::format("    Wair,in =  {:.6R} [kgWater/kgDryAir]", this->dataDesInletAirHumRat);
+                msg = std::format("    Wair,in =  {:.3E} [kgWater/kgDryAir]", this->dataDesInletAirHumRat);
                 this->addErrorMessage(msg);
                 ShowContinueError(state, msg);
-                msg = EnergyPlus::format("    Wair,out = {:.6R} [kgWater/kgDryAir]", this->autoSizedValue);
+                msg = std::format("    Wair,out = {:.3E} [kgWater/kgDryAir]", this->autoSizedValue);
                 this->addErrorMessage(msg);
                 ShowContinueError(state, msg);
-                msg = EnergyPlus::format("    Inlet chilled water temperature = {:.3R} [C]", this->dataDesInletWaterTemp);
+                msg = std::format("    Inlet chilled water temperature = {:.3f} [C]", this->dataDesInletWaterTemp);
                 this->addErrorMessage(msg);
                 ShowContinueError(state, msg);
-                msg = EnergyPlus::format("    Minimum humidity ratio at saturation for inlet chilled water temperature = {:.6R} [kgWater/kgDryAir]",
-                                         desHumRatAtWaterInTemp);
+                msg = std::format("    Minimum humidity ratio at saturation for inlet chilled water temperature = {:.3E} [kgWater/kgDryAir]",
+                                  desHumRatAtWaterInTemp);
                 this->addErrorMessage(msg);
                 ShowContinueError(state, msg);
                 this->autoSizedValue = this->dataDesInletAirHumRat;
                 msg = "....coil leaving humidity ratio will be reset to:";
                 this->addErrorMessage(msg);
                 ShowContinueError(state, msg);
-                msg = EnergyPlus::format("    Wair,out = {:.6R} [kgWater/kgDryAir]", this->autoSizedValue);
+                msg = std::format("    Wair,out = {:.3E} [kgWater/kgDryAir]", this->autoSizedValue);
                 this->addErrorMessage(msg);
                 ShowContinueError(state, msg);
             }

@@ -975,7 +975,7 @@ namespace RoomAir {
             state.dataRoomAir->TCMF(ZoneNum) = ZTAveraged;
         } else {
             if (HeightComfort >= 0.0 && HeightComfort < HeightFloorSubzoneAve) {
-                ShowWarningError(state, EnergyPlus::format("Displacement ventilation comfort height is in floor subzone in Zone: {}", zone.Name));
+                ShowWarningError(state, std::format("Displacement ventilation comfort height is in floor subzone in Zone: {}", zone.Name));
                 state.dataRoomAir->TCMF(ZoneNum) = state.dataRoomAir->ZTFloor(ZoneNum);
             } else if (HeightComfort >= HeightFloorSubzoneAve && HeightComfort < HeightOccupiedSubzoneAve) {
                 state.dataRoomAir->TCMF(ZoneNum) = (state.dataRoomAir->ZTFloor(ZoneNum) * (HeightOccupiedSubzoneAve - HeightComfort) +
@@ -991,8 +991,7 @@ namespace RoomAir {
             } else if (HeightComfort >= HeightMixedSubzoneAve && HeightComfort <= CeilingHeight) {
                 state.dataRoomAir->TCMF(ZoneNum) = state.dataRoomAir->ZTMX(ZoneNum);
             } else {
-                ShowFatalError(state,
-                               EnergyPlus::format("Displacement ventilation comfort height is above ceiling or below floor in Zone: {}", zone.Name));
+                ShowFatalError(state, std::format("Displacement ventilation comfort height is above ceiling or below floor in Zone: {}", zone.Name));
             }
         }
 
@@ -1002,7 +1001,7 @@ namespace RoomAir {
             state.dataHeatBalFanSys->TempTstatAir(ZoneNum) = ZTAveraged;
         } else {
             if (HeightThermostat >= 0.0 && HeightThermostat < HeightFloorSubzoneAve) {
-                ShowWarningError(state, EnergyPlus::format("Displacement thermostat is in floor subzone in Zone: {}", zone.Name));
+                ShowWarningError(state, std::format("Displacement thermostat is in floor subzone in Zone: {}", zone.Name));
                 state.dataHeatBalFanSys->TempTstatAir(ZoneNum) = state.dataRoomAir->ZTFloor(ZoneNum);
             } else if (HeightThermostat >= HeightFloorSubzoneAve && HeightThermostat < HeightOccupiedSubzoneAve) {
                 state.dataHeatBalFanSys->TempTstatAir(ZoneNum) =
@@ -1019,8 +1018,8 @@ namespace RoomAir {
             } else if (HeightThermostat >= HeightMixedSubzoneAve && HeightThermostat <= CeilingHeight) {
                 state.dataHeatBalFanSys->TempTstatAir(ZoneNum) = state.dataRoomAir->ZTMX(ZoneNum);
             } else {
-                ShowFatalError(
-                    state, EnergyPlus::format("Displacement ventilation thermostat height is above ceiling or below floor in Zone: {}", zone.Name));
+                ShowFatalError(state,
+                               std::format("Displacement ventilation thermostat height is above ceiling or below floor in Zone: {}", zone.Name));
             }
         }
 

@@ -473,8 +473,10 @@ namespace Util {
 
     template <typename Container, class = typename std::enable_if<!std::is_same<typename Container::value_type, std::string>::value>::type>
     // Container needs operator[i] and value_type
-    inline int
-    FindItemInList(std::string_view const String, Container const &ListOfItems, std::string Container::value_type::*const name_p, int const NumItems)
+    inline int FindItemInList(std::string_view const String,
+                              Container const &ListOfItems,
+                              const std::string Container::value_type::*const name_p,
+                              int const NumItems)
     {
         for (typename Container::size_type i = 0, e = NumItems; i < e; ++i) {
             if (String == ListOfItems[i].*name_p) {

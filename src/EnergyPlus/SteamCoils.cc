@@ -1315,7 +1315,7 @@ namespace SteamCoils {
         int AirOutletNode;
         int SteamOutletNode;
 
-        auto &steamCoil = state.dataSteamCoils->SteamCoil(CoilNum);
+        auto const &steamCoil = state.dataSteamCoils->SteamCoil(CoilNum);
 
         AirInletNode = steamCoil.AirInletNodeNum;
         SteamInletNode = steamCoil.SteamInletNodeNum;

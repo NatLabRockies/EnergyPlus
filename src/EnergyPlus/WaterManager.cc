@@ -199,7 +199,6 @@ namespace WaterManager {
         Array1D_bool lAlphaFieldBlanks;
         Array1D_string cAlphaArgs;
         Array1D<Real64> rNumericArgs;
-        std::string cCurrentModuleObject;
 
         if ((state.dataWaterManager->MyOneTimeFlag) && (!(state.dataWaterData->WaterSystemGetInputCalled))) { // big block for entire subroutine
 
@@ -216,7 +215,7 @@ namespace WaterManager {
             // initialize rainfall model
             state.dataWaterData->RainFall.ModeID = RainfallMode::None;
 
-            cCurrentModuleObject = "WaterUse:Storage";
+            std::string cCurrentModuleObject = "WaterUse:Storage";
             state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state, cCurrentModuleObject, TotalArgs, NumAlphas, NumNumbers);
             MaxNumNumbers = NumNumbers;
             MaxNumAlphas = NumAlphas;

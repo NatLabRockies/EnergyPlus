@@ -5384,8 +5384,6 @@ namespace Weather {
             if (runPerInput1.dayOfWeek != 0 && !ErrorsFound) {
                 SetupWeekDaysByMonth(state, runPerInput1.startMonth, runPerInput1.startDay, runPerInput1.dayOfWeek, runPerInput1.monWeekDay);
             }
-        } else {
-            nRunPeriods = 1;
         }
     }
 

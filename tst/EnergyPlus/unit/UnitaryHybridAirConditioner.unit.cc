@@ -569,14 +569,14 @@ TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_ValidateFieldsParsing
         ",                        !- Mode1 System Second Fuel Consumption Lookup Table Name",
         ",                        !- Mode1 System Third Fuel Consumption Lookup Table Name",
         ",                        !- Mode1 System Water Use Lookup Table Name",
-        "-20,                     !- Mode1 Minimum Outside Air Temperature {C}",
-        "100,                     !- Mode1 Maximum Outside Air Temperature {C}",
+        ",                        !- Mode1 Minimum Outside Air Temperature {C}",
+        ",                        !- Mode1 Maximum Outside Air Temperature {C}",
         "0,                       !- Mode1 Minimum Outside Air Humidity Ratio {kgWater/kgDryAir}",
         "0.03,                    !- Mode1 Maximum Outside Air Humidity Ratio {kgWater/kgDryAir}",
         "0,                       !- Mode1 Minimum Outside Air Relative Humidity {percent}",
         "100,                     !- Mode1 Maximum Outside Air Relative Humidity {percent}",
-        "-20,                     !- Mode1 Minimum Return Air Temperature {C}",
-        "100,                     !- Mode1 Maximum Return Air Temperature {C}",
+        ",                        !- Mode1 Minimum Return Air Temperature {C}",
+        ",                        !- Mode1 Maximum Return Air Temperature {C}",
         "0,                       !- Mode1 Minimum Return Air Humidity Ratio {kgWater/kgDryAir}",
         "0.03,                    !- Mode1 Maximum Return Air Humidity Ratio {kgWater/kgDryAir}",
         "0,                       !- Mode1 Minimum Return Air Relative Humidity {percent}",
@@ -594,7 +594,6 @@ TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_ValidateFieldsParsing
     unsigned long expectedOperatingModesSize = 2;
     auto &hybridUnit1 = state->dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(1);
     auto &hybridUnit2 = state->dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(2);
-
     // check the number of operating modes
     EXPECT_EQ(hybridUnit1.OperatingModes.size(), expectedOperatingModesSize);
     EXPECT_EQ(hybridUnit2.OperatingModes.size(), expectedOperatingModesSize);
@@ -604,6 +603,30 @@ TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_ValidateFieldsParsing
     // check that objective function was set or defaulted correctly
     EXPECT_EQ(hybridUnit1.ObjectiveFunction, HybridEvapCoolingModel::ObjectiveFunctionType::ElectricityUse);
     EXPECT_EQ(hybridUnit2.ObjectiveFunction, HybridEvapCoolingModel::ObjectiveFunctionType::WaterUse);
+    // check constraints for hybrid unit 1, mode 1
+    auto &mode1 = hybridUnit1.OperatingModes[1];
+    EXPECT_EQ(mode1.Minimum_Outdoor_Air_Temperature_Blank, false);
+    EXPECT_EQ(mode1.Minimum_Outdoor_Air_Temperature, -20);
+    EXPECT_EQ(mode1.Maximum_Outdoor_Air_Temperature_Blank, false);
+    EXPECT_EQ(mode1.Maximum_Outdoor_Air_Temperature, 100);
+    EXPECT_EQ(mode1.Minimum_Return_Air_Temperature_Blank, false);
+    EXPECT_EQ(mode1.Minimum_Return_Air_Temperature, -20);
+    EXPECT_EQ(mode1.Maximum_Return_Air_Temperature_Blank, false);
+    EXPECT_EQ(mode1.Maximum_Return_Air_Temperature, 100);
+    EXPECT_EQ(mode1.MeetsConstraints(120, 0.01, 30, 120, 0.01, 30), false);
+    EXPECT_EQ(mode1.MeetsConstraints(20, 0.01, 30, 20, 0.01, 30), true);
+    // check constraints for hybrid unit 2, mode 1
+    mode1 = hybridUnit2.OperatingModes[1];
+    EXPECT_EQ(mode1.Minimum_Outdoor_Air_Temperature_Blank, true);
+    EXPECT_EQ(mode1.Minimum_Outdoor_Air_Temperature, 0);
+    EXPECT_EQ(mode1.Maximum_Outdoor_Air_Temperature_Blank, true);
+    EXPECT_EQ(mode1.Maximum_Outdoor_Air_Temperature, 0);
+    EXPECT_EQ(mode1.Minimum_Return_Air_Temperature_Blank, true);
+    EXPECT_EQ(mode1.Minimum_Return_Air_Temperature, 0);
+    EXPECT_EQ(mode1.Maximum_Return_Air_Temperature_Blank, true);
+    EXPECT_EQ(mode1.Maximum_Return_Air_Temperature, 0);
+    EXPECT_EQ(mode1.MeetsConstraints(120, 0.01, 30, 120, 0.01, 30), true);
+    EXPECT_EQ(mode1.MeetsConstraints(20, 0.01, 30, 20, 0.01, 30), true);
 }
 
 TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_ValidateMinimumIdfInput)

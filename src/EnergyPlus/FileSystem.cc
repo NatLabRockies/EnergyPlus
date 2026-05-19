@@ -207,7 +207,7 @@ namespace FileSystem {
         // *
         // * To resolve symlinks, wrap this call in getAbsolutePath().
         // */
-        char executableRelativePath[1024];
+        char executableRelativePath[1024] = {'\0'};
 
 #ifdef __APPLE__
         uint32_t pathSize = sizeof(executableRelativePath);

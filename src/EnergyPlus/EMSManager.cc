@@ -325,7 +325,7 @@ namespace EMSManager {
                                      state.dataRuntimeLang->NumExternalInterfaceFunctionalMockupUnitImportActuatorsUsed +
                                      state.dataRuntimeLang->NumExternalInterfaceFunctionalMockupUnitExportActuatorsUsed;
              ++ActuatorUsedLoop) {
-            auto &thisActuatorUsed = state.dataRuntimeLang->EMSActuatorUsed(ActuatorUsedLoop);
+            auto const &thisActuatorUsed = state.dataRuntimeLang->EMSActuatorUsed(ActuatorUsedLoop);
 
             int ErlVariableNum = thisActuatorUsed.ErlVariableNum;
             if (ErlVariableNum <= 0) {

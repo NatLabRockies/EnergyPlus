@@ -5041,12 +5041,12 @@ namespace AirflowNetwork {
         if (simulation_control.DuctLoss) {
             // Assign node num based on Distribution node
             for (int i = 1; i <= AirflowNetworkNumOfLinks; ++i) {
-                for (int k = 1; k <= DisSysNumOfNodes; ++k) {
-                    if (Util::SameString(AirflowNetworkLinkageData(i).NodeNames[0], DisSysNodeData(k).Name)) {
-                        AirflowNetworkLinkageData(i).NodeNums[0] = k;
+                for (int l = 1; l <= DisSysNumOfNodes; ++l) {
+                    if (Util::SameString(AirflowNetworkLinkageData(i).NodeNames[0], DisSysNodeData(l).Name)) {
+                        AirflowNetworkLinkageData(i).NodeNums[0] = l;
                     }
-                    if (Util::SameString(AirflowNetworkLinkageData(i).NodeNames[1], DisSysNodeData(k).Name)) {
-                        AirflowNetworkLinkageData(i).NodeNums[1] = k;
+                    if (Util::SameString(AirflowNetworkLinkageData(i).NodeNames[1], DisSysNodeData(l).Name)) {
+                        AirflowNetworkLinkageData(i).NodeNums[1] = l;
                     }
                 }
                 if (AirflowNetworkLinkageData(i).NodeNums[0] == 0) {

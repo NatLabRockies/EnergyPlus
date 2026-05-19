@@ -681,7 +681,7 @@ void GetInputZoneHybridUnitaryAirConditioners(EnergyPlusData &state, bool &Error
             }
 
             for (int modeIter = 0; modeIter <= Numberofoperatingmodes - 1; ++modeIter) {
-                ErrorsFound = hybridUnitaryAC.ParseMode(state, Alphas, cAlphaFields, Numbers, cNumericFields, lAlphaBlanks, cCurrentModuleObject);
+                ErrorsFound = hybridUnitaryAC.ParseMode(state, Alphas, cAlphaFields, Numbers, lAlphaBlanks, lNumericBlanks, cCurrentModuleObject);
                 if (ErrorsFound) {
                     ShowFatalError(state, EnergyPlus::format("{}: Errors found parsing modes", routineName));
                     ShowContinueError(state, "... Preceding condition causes termination.");

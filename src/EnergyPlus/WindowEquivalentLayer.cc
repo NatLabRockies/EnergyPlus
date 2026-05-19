@@ -3685,7 +3685,7 @@ void VB_SOL46_CURVE(EnergyPlusData const &state,
     int CORR;
 
     DE = 0.0; // INITIALIZE DE
-    CORR = 1;
+    CORR = 1; // TODO: make this a parameter if no-correction path is needed
 
     // limit slat angle to +/- 90 deg
     PHI = max(-Constant::DegToRad * 90.0, min(Constant::DegToRad * 90.0, PHIx));

@@ -542,7 +542,8 @@ namespace IndoorGreen {
         Real64 rhoair = Psychrometrics::PsyRhoAirFnPbTdbW(state, OutPb * 1000, ZonePreTemp, ZonePreHum); // kg/m3
         Real64 ETRate;                                                                                   // mm/s; kg/(m2s)
         Real64 rs = 60 * (1500 + ZonePPFD) / (200 + ZonePPFD);                                           // stomatal resistance s/m
-        Real64 ra = 350 * std::pow((0.1 / 0.1), 0.5) * (1 / (LAI + 1e-10));                              // aerodynamic resistance s/m
+        // cppcheck-suppress duplicateExpression -- room air velocity is assumed to be 0.1 m/s & mean leaf diameter is assumed to be 0.1 m
+        Real64 ra = 350 * std::pow((0.1 / 0.1), 0.5) * (1 / (LAI + 1e-10)); // aerodynamic resistance s/m
         ETRate = (1 / hfg) * (slopepat * (In - G) + (SwitchF * rhoair * CpAir * ZoneVPD) / ra) /
                  (slopepat + psyconst * (1 + rs / ra)); // Penman-Monteith ET model
         return ETRate;                                  // mm/s; kg/(m2s)

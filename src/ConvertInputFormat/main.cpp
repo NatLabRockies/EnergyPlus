@@ -569,7 +569,6 @@ Select one (case insensitive):
 #else
     if (number_of_threads > 1) {
         displayMessage("ConvertInputFormat is not compiled with OpenMP. Only running on 1 thread, not requested {} threads.", number_of_threads);
-        number_of_threads = 1;
     }
 
     for (auto const &file : files) {

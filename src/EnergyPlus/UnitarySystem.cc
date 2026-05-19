@@ -4901,7 +4901,7 @@ namespace UnitarySystems {
                             if (this->m_heatCoilType == HVAC::CoilType::HeatingDXVariableSpeed ||
                                 this->m_heatCoilType == HVAC::CoilType::HeatingDXMultiSpeed ||
                                 this->m_heatCoilType == HVAC::CoilType::HeatingDXSingleSpeed) {
-                                auto &newCoil = state.dataCoilCoolingDX->coilCoolingDXs[this->m_CoolingCoilIndex];
+                                auto const &newCoil = state.dataCoilCoolingDX->coilCoolingDXs[this->m_CoolingCoilIndex];
                                 newCoil.performance->ReportCoolingCoilCrankcasePower = false;
                             }
                         }
@@ -5986,9 +5986,9 @@ namespace UnitarySystems {
                         ShowSevereError(state, std::format("{} = {}", cCurrentModuleObject, thisObjectName));
                         ShowContinueError(state, "Input for Cooling Supply Air Flow Rate Method = FlowPerCoolingCapacity.");
                         ShowContinueError(state,
-                                          EnergyPlus::format("Suspicious Cooling Supply Air Flow Rate Per Unit of Capacity = {:.7R} [m3/s/W] when "
-                                                             "cooling coil is present.",
-                                                             this->m_MaxCoolAirVolFlow));
+                                          std::format("Suspicious Cooling Supply Air Flow Rate Per Unit of Capacity = {:#G} [m3/s/W] when "
+                                                      "cooling coil is present.",
+                                                      this->m_MaxCoolAirVolFlow));
                         if (this->m_MaxCoolAirVolFlow < 0.0) {
                             errorsFound = true;
                         }
@@ -6118,9 +6118,9 @@ namespace UnitarySystems {
                         ShowSevereError(state, std::format("{} = {}", cCurrentModuleObject, thisObjectName));
                         ShowContinueError(state, "Input for Heating Supply Air Flow Rate Method = FlowPerHeatingCapacity.");
                         ShowContinueError(state,
-                                          EnergyPlus::format("Suspicious Heating Supply Air Flow Rate Per Unit of Capacity = {:.7R} [m3/s/W] when "
-                                                             "heating coil is present.",
-                                                             this->m_MaxHeatAirVolFlow));
+                                          std::format("Suspicious Heating Supply Air Flow Rate Per Unit of Capacity = {:#G} [m3/s/W] when "
+                                                      "heating coil is present.",
+                                                      this->m_MaxHeatAirVolFlow));
                         if (this->m_MaxHeatAirVolFlow < 0.0) {
                             errorsFound = true;
                         }
@@ -6284,9 +6284,8 @@ namespace UnitarySystems {
                         ShowContinueError(state, "Input for No Load Supply Air Flow Rate Method = FlowPerCoolingCapacity.");
                         ShowContinueError(
                             state,
-                            EnergyPlus::format(
-                                "Suspicious No Load Supply Air Flow Rate Per Unit of Capacity During Cooling Operation = {:.7R} [m3/s/W].",
-                                this->m_MaxNoCoolHeatAirVolFlow));
+                            std::format("Suspicious No Load Supply Air Flow Rate Per Unit of Capacity During Cooling Operation = {:#G} [m3/s/W].",
+                                        this->m_MaxNoCoolHeatAirVolFlow));
                         if (this->m_MaxNoCoolHeatAirVolFlow < 0.0) {
                             errorsFound = true;
                         }
@@ -6315,9 +6314,8 @@ namespace UnitarySystems {
                         ShowContinueError(state, "Input for No Load Supply Air Flow Rate Method = FlowPerHeatingCapacity.");
                         ShowContinueError(
                             state,
-                            EnergyPlus::format(
-                                "Suspicious No Load Supply Air Flow Rate Per Unit of Capacity During Heating Operation = {:.7R} [m3/s/W].",
-                                this->m_MaxNoCoolHeatAirVolFlow));
+                            std::format("Suspicious No Load Supply Air Flow Rate Per Unit of Capacity During Heating Operation = {:#G} [m3/s/W].",
+                                        this->m_MaxNoCoolHeatAirVolFlow));
                         if (this->m_MaxNoCoolHeatAirVolFlow < 0.0) {
                             errorsFound = true;
                         }

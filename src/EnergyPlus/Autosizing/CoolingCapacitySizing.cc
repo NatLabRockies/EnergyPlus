@@ -225,33 +225,28 @@ Real64 CoolingCapacitySizer::size(EnergyPlusData &state, Real64 _originalValue, 
                 if (state.dataGlobal->DisplayExtraWarnings && this->autoSizedValue <= 0.0) {
                     ShowWarningMessage(state,
                                        this->callingRoutine + ": Potential issue with equipment sizing for " + this->compType + ' ' + this->compName);
-                    ShowContinueError(state, EnergyPlus::format("...Rated Total Cooling Capacity = {:.2f} [W]", this->autoSizedValue));
+                    ShowContinueError(state, std::format("...Rated Total Cooling Capacity = {:.2f} [W]", this->autoSizedValue));
                     if (this->zoneEqSizing(this->curZoneEqNum).CoolingCapacity) {
                         ShowContinueError(
-                            state,
-                            EnergyPlus::format("...Capacity passed by parent object to size child component = {:.2f} [W]", this->autoSizedValue));
+                            state, std::format("...Capacity passed by parent object to size child component = {:.2f} [W]", this->autoSizedValue));
                     } else {
                         if (Util::SameString(this->compType, "COIL:COOLING:WATER") ||
                             Util::SameString(this->compType, "COIL:COOLING:WATER:DETAILEDGEOMETRY") ||
                             Util::SameString(this->compType, "ZONEHVAC:IDEALLOADSAIRSYSTEM")) {
                             if (this->termUnitIU || this->zoneEqFanCoil) {
-                                ShowContinueError(state,
-                                                  EnergyPlus::format("...Capacity passed by parent object to size child component = {:.2f} [W]",
-                                                                     this->autoSizedValue));
+                                ShowContinueError(
+                                    state,
+                                    std::format("...Capacity passed by parent object to size child component = {:.2f} [W]", this->autoSizedValue));
                             } else {
-                                ShowContinueError(state, EnergyPlus::format("...Air flow rate used for sizing = {:.5f} [m3/s]", DesVolFlow));
-                                ShowContinueError(state,
-                                                  EnergyPlus::format("...Coil inlet air temperature used for sizing = {:.2f} [C]", CoilInTemp));
-                                ShowContinueError(state,
-                                                  EnergyPlus::format("...Coil outlet air temperature used for sizing = {:.2f} [C]", CoilOutTemp));
+                                ShowContinueError(state, std::format("...Air flow rate used for sizing = {:.5f} [m3/s]", DesVolFlow));
+                                ShowContinueError(state, std::format("...Coil inlet air temperature used for sizing = {:.2f} [C]", CoilInTemp));
+                                ShowContinueError(state, std::format("...Coil outlet air temperature used for sizing = {:.2f} [C]", CoilOutTemp));
                             }
                         } else {
                             if (CoilOutTemp > -999.0) {
-                                ShowContinueError(state, EnergyPlus::format("...Air flow rate used for sizing = {:.5f} [m3/s]", DesVolFlow));
-                                ShowContinueError(state,
-                                                  EnergyPlus::format("...Coil inlet air temperature used for sizing = {:.2f} [C]", CoilInTemp));
-                                ShowContinueError(state,
-                                                  EnergyPlus::format("...Coil outlet air temperature used for sizing = {:.2f} [C]", CoilOutTemp));
+                                ShowContinueError(state, std::format("...Air flow rate used for sizing = {:.5f} [m3/s]", DesVolFlow));
+                                ShowContinueError(state, std::format("...Coil inlet air temperature used for sizing = {:.2f} [C]", CoilInTemp));
+                                ShowContinueError(state, std::format("...Coil outlet air temperature used for sizing = {:.2f} [C]", CoilOutTemp));
                             } else {
                                 ShowContinueError(state, "...Capacity used to size child component set to 0 [W]");
                             }
@@ -455,19 +450,18 @@ Real64 CoolingCapacitySizer::size(EnergyPlusData &state, Real64 _originalValue, 
                 if (state.dataGlobal->DisplayExtraWarnings && this->autoSizedValue <= 0.0) {
                     ShowWarningMessage(state,
                                        this->callingRoutine + ": Potential issue with equipment sizing for " + this->compType + ' ' + this->compName);
-                    ShowContinueError(state, EnergyPlus::format("...Rated Total Cooling Capacity = {:.2f} [W]", this->autoSizedValue));
+                    ShowContinueError(state, std::format("...Rated Total Cooling Capacity = {:.2f} [W]", this->autoSizedValue));
                     if (this->oaSysFlag || this->airLoopSysFlag ||
                         this->finalSysSizing(this->curSysNum).CoolingCapMethod == DataSizing::CapacityPerFloorArea ||
                         (this->finalSysSizing(this->curSysNum).CoolingCapMethod == DataSizing::CoolingDesignCapacity &&
                          (this->finalSysSizing(this->curSysNum).CoolingTotalCapacity != 0.0))) {
                         ShowContinueError(
-                            state,
-                            EnergyPlus::format("...Capacity passed by parent object to size child component = {:.2f} [W]", this->autoSizedValue));
+                            state, std::format("...Capacity passed by parent object to size child component = {:.2f} [W]", this->autoSizedValue));
                     } else {
-                        ShowContinueError(state, EnergyPlus::format("...Air flow rate used for sizing = {:.5f} [m3/s]", DesVolFlow));
-                        ShowContinueError(state, EnergyPlus::format("...Outdoor air fraction used for sizing = {:.2f}", OutAirFrac));
-                        ShowContinueError(state, EnergyPlus::format("...Coil inlet air temperature used for sizing = {:.2f} [C]", CoilInTemp));
-                        ShowContinueError(state, EnergyPlus::format("...Coil outlet air temperature used for sizing = {:.2f} [C]", CoilOutTemp));
+                        ShowContinueError(state, std::format("...Air flow rate used for sizing = {:.5f} [m3/s]", DesVolFlow));
+                        ShowContinueError(state, std::format("...Outdoor air fraction used for sizing = {:.2f}", OutAirFrac));
+                        ShowContinueError(state, std::format("...Coil inlet air temperature used for sizing = {:.2f} [C]", CoilInTemp));
+                        ShowContinueError(state, std::format("...Coil outlet air temperature used for sizing = {:.2f} [C]", CoilOutTemp));
                     }
                 }
             }
@@ -479,7 +473,7 @@ Real64 CoolingCapacitySizer::size(EnergyPlusData &state, Real64 _originalValue, 
             std::string msg = this->callingRoutine + ' ' + this->compType + ' ' + this->compName + ", Developer Error: Component sizing incomplete.";
             ShowSevereError(state, msg);
             this->addErrorMessage(msg);
-            msg = EnergyPlus::format("SizingString = {}, SizingResult = {:.1f}", this->sizingString, this->autoSizedValue);
+            msg = std::format("SizingString = {}, SizingResult = {:.1f}", this->sizingString, this->autoSizedValue);
             ShowContinueError(state, msg);
             this->addErrorMessage(msg);
             errorsFound = true;
@@ -508,11 +502,11 @@ Real64 CoolingCapacitySizer::size(EnergyPlusData &state, Real64 _originalValue, 
                         ShowWarningError(state, this->callingRoutine + ' ' + this->compType + ' ' + this->compName);
                         ShowContinueError(
                             state, "..." + this->sizingString + " will be limited by the minimum rated volume flow per rated total capacity ratio.");
-                        ShowContinueError(state, EnergyPlus::format("...DX coil volume flow rate [m3/s] = {:.6f}", DesVolFlow));
-                        ShowContinueError(state, EnergyPlus::format("...Requested capacity [W] = {:.3f}", this->autoSizedValue));
-                        ShowContinueError(state, std::format("...Requested flow/capacity ratio [m3/s/W] = {:.3f}", RatedVolFlowPerRatedTotCap));
+                        ShowContinueError(state, std::format("...DX coil volume flow rate [m3/s] = {:.6f}", DesVolFlow));
+                        ShowContinueError(state, std::format("...Requested capacity [W] = {:.3f}", this->autoSizedValue));
+                        ShowContinueError(state, std::format("...Requested flow/capacity ratio [m3/s/W] = {:#G}", RatedVolFlowPerRatedTotCap));
                         ShowContinueError(state,
-                                          std::format("...Minimum flow/capacity ratio [m3/s/W] = {:.3f}",
+                                          std::format("...Minimum flow/capacity ratio [m3/s/W] = {:#G}",
                                                       HVAC::MinRatedVolFlowPerRatedTotCap[(int)state.dataHVACGlobal->DXCT]));
                     }
 
@@ -530,9 +524,9 @@ Real64 CoolingCapacitySizer::size(EnergyPlusData &state, Real64 _originalValue, 
                             state, "..." + this->sizingString + " will be limited by the maximum rated volume flow per rated total capacity ratio.");
                         ShowContinueError(state, std::format("...DX coil volume flow rate [m3/s] = {:.6f}", DesVolFlow));
                         ShowContinueError(state, std::format("...Requested capacity [W] = {:.3f}", this->autoSizedValue));
-                        ShowContinueError(state, std::format("...Requested flow/capacity ratio [m3/s/W] = {:.3f}", RatedVolFlowPerRatedTotCap));
+                        ShowContinueError(state, std::format("...Requested flow/capacity ratio [m3/s/W] = {:#G}", RatedVolFlowPerRatedTotCap));
                         ShowContinueError(state,
-                                          std::format("...Maximum flow/capacity ratio [m3/s/W] = {:.3f}",
+                                          std::format("...Maximum flow/capacity ratio [m3/s/W] = {:#G}",
                                                       HVAC::MaxRatedVolFlowPerRatedTotCap[(int)state.dataHVACGlobal->DXCT]));
                     }
 

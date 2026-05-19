@@ -981,7 +981,7 @@ void WriteTrace(EnergyPlusData &state, int const StackNum, int const Instruction
     std::string LineString;
     std::string cValueString;
     std::string TimeString;
-    std::string DuringWarmup;
+    std::string OccurrenceTimingInfo;
 
     if ((!state.dataRuntimeLang->OutputFullEMSTrace) && (!state.dataRuntimeLang->OutputEMSErrors) && (!seriousErrorFound)) {
         return;
@@ -1009,19 +1009,27 @@ void WriteTrace(EnergyPlusData &state, int const StackNum, int const Instruction
 
     // put together timestamp info
     if (state.dataGlobal->WarmupFlag) {
-        if (!state.dataGlobal->DoingSizing) {
-            DuringWarmup = " During Warmup, Occurrence info=";
+        if (!state.dataGlobal->SetupFlag) {
+            if (!state.dataGlobal->DoingSizing) {
+                OccurrenceTimingInfo = " During Warmup, Occurrence info=";
+            } else {
+                OccurrenceTimingInfo = " During Warmup & Sizing, Occurrence info=";
+            }
         } else {
-            DuringWarmup = " During Warmup & Sizing, Occurrence info=";
+            if (!state.dataGlobal->DoingSizing) {
+                OccurrenceTimingInfo = " During Setup, Occurrence info=";
+            } else {
+                OccurrenceTimingInfo = " During Setup & Sizing, Occurrence info=";
+            }
         }
     } else {
         if (!state.dataGlobal->DoingSizing) {
-            DuringWarmup = " Occurrence info=";
+            OccurrenceTimingInfo = " Occurrence info=";
         } else {
-            DuringWarmup = " During Sizing, Occurrence info=";
+            OccurrenceTimingInfo = " During Sizing, Occurrence info=";
         }
     }
-    TimeString = DuringWarmup + state.dataEnvrn->EnvironmentName + ", " + state.dataEnvrn->CurMnDy + ' ' + CreateSysTimeIntervalString(state);
+    TimeString = OccurrenceTimingInfo + state.dataEnvrn->EnvironmentName + ", " + state.dataEnvrn->CurMnDy + ' ' + CreateSysTimeIntervalString(state);
 
     if (state.dataRuntimeLang->OutputFullEMSTrace || (state.dataRuntimeLang->OutputEMSErrors && (ReturnValue.Type == Value::Error))) {
         print(state.files.edd, "{},Line {},{},{},{}\n", NameString, LineNumString, LineString, cValueString, TimeString);
@@ -3861,7 +3869,7 @@ std::string ValueToString(ErlValueType const &Value)
         } else if (std::abs(Value.Number) > floatToSciCutoff) {
             String = std::format("{:.6f}", Value.Number); // floating point representation
         } else {
-            String = std::format("{:.6e}", Value.Number); // scientific notation representation for small numbers
+            String = std::format("{:.6E}", Value.Number); // scientific notation representation for small numbers
         }
         break;
 

@@ -212,8 +212,8 @@ namespace ElectricBaseboardRadiator {
         static constexpr std::string_view radiantSurfaceFractionFieldName = "Fraction of Radiant Energy to Surface";
         auto const &surfaceFractionSchemaProps = elecBaseboardSchemaProps.at("surface_fractions").at("items").at("properties");
 
-        int BaseboardNum = 0;
         if (elecBaseboardObjects != inputProcessor->epJSON.end()) {
+            int BaseboardNum = 0;
             for (auto const &elecBaseboardInstance : elecBaseboardObjects.value().items()) {
                 auto const &elecBaseboardFields = elecBaseboardInstance.value();
                 auto const elecBaseboardName = Util::makeUPPER(elecBaseboardInstance.key());

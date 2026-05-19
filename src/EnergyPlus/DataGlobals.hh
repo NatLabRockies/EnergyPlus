@@ -111,6 +111,7 @@ struct DataGlobal : BaseGlobalStruct
     int numSpaceTypes = 0;           // Number of unique space types
     int TimeStep = 0;                // Counter for time steps (fractional hours)
     Real64 TimeStepZone = 0.0;       // Zone time step in fractional hours
+    bool SetupFlag = false;          // True during the setup portion of a simulation
     bool WarmupFlag = false;         // True during the warmup portion of a simulation
     Int64 StdOutputRecordCount = 0;  // Count of Standard output records
     Int64 StdMeterRecordCount = 0;   // Count of Meter output records

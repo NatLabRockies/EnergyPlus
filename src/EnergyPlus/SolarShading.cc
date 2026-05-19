@@ -4172,8 +4172,8 @@ void CLIPRECT(EnergyPlusData &state, int const NS2, int const NV1, int &NV3)
     // Re-populate XTEMP/YTEMP
     if (NV3 > 1) {
         int LastEdgeIndex = -1, incr = 0;
-        double cornerXs[4] = {minX, minX, maxX, maxX};
-        double cornerYs[4] = {minY, maxY, maxY, minY};
+        const double cornerXs[4] = {minX, minX, maxX, maxX};
+        const double cornerYs[4] = {minY, maxY, maxY, minY};
         Real64 edges[4] = {minX, maxY, maxX, minY};
         Real64 LastEdgeX, LastEdgeY;
         for (int i = 0; i <= arrc; i++) {
@@ -4284,8 +4284,8 @@ void CLIPRECT(EnergyPlusData &state, int const NS2, int const NV1, int &NV3)
             state.dataSolarShading->YTEMP[0] = arry[0];
         }
         if (NV3 == 0) {
-            double cornerXs[4] = {minX, minX, maxX, maxX};
-            double cornerYs[4] = {minY, maxY, maxY, minY};
+            const double cornerXs[4] = {minX, minX, maxX, maxX};
+            const double cornerYs[4] = {minY, maxY, maxY, minY};
             Real64 cornerX = cornerXs[0];
             Real64 cornerY = cornerYs[0];
             bool insideFlag = true;

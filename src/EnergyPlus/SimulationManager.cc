@@ -348,7 +348,9 @@ namespace SimulationManager {
 
         Weather::ResetEnvironmentCounter(state);
 
+        state.dataGlobal->SetupFlag = true; // #11550: During Warmup -> During Setup
         SetupSimulation(state, ErrorsFound);
+        state.dataGlobal->SetupFlag = false;
 
         FaultsManager::CheckAndReadFaults(state);
 

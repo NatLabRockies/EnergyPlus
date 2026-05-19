@@ -4572,16 +4572,15 @@ namespace Window {
         Real64 constexpr gaslaw(8314.51); // Molar gas constant (J/kMol-K)
         Real64 const two_sqrt_2(2.0 * std::sqrt(2.0));
 
-        int NMix;                                          // Number of gases in a mixture
-        Real64 molmix;                                     // Molecular weight of mixture
-        std::array<Real64, Material::maxMixGases> mukpdwn; // Denominator term
-        Real64 mumix;                                      // For accumulating viscosity of gas mixture
-        Real64 phimup;                                     // Numerator factor
-        Real64 downer;                                     // Denominator factor
-        Real64 rhomix;                                     // Density of gas mixture (kg/m3)
-        std::array<Real64, Material::maxMixGases> frct;    // Fraction of each gas in a mixture
-        std::array<Real64, Material::maxMixGases> fvis;    // Viscosity of each gas in a mixture (g/m-s)
-        std::array<Real64, Material::maxMixGases> fdens;   // Density of each gas in a mixture (kg/m3)
+        int NMix;                                        // Number of gases in a mixture
+        Real64 molmix;                                   // Molecular weight of mixture
+        Real64 mumix;                                    // For accumulating viscosity of gas mixture
+        Real64 phimup;                                   // Numerator factor
+        Real64 downer;                                   // Denominator factor
+        Real64 rhomix;                                   // Density of gas mixture (kg/m3)
+        std::array<Real64, Material::maxMixGases> frct;  // Fraction of each gas in a mixture
+        std::array<Real64, Material::maxMixGases> fvis;  // Viscosity of each gas in a mixture (g/m-s)
+        std::array<Real64, Material::maxMixGases> fdens; // Density of each gas in a mixture (kg/m3)
 
         auto const &wm = state.dataWindowManager;
 
@@ -4604,6 +4603,8 @@ namespace Window {
 
             // Initialize summations for eqns 60-66
             mumix = 0.0;
+
+            std::array<Real64, Material::maxMixGases> mukpdwn; // Denominator term
             mukpdwn[0] = 1.0;
 
             // Calculate properties of mixture constituents
@@ -4664,8 +4665,7 @@ namespace Window {
         constexpr Real64 hrad(5.3);    // Typical radiative conductance (W/m2-K)
         constexpr Real64 resgap(0.21); // Typical gap resistance (m2-K/W)
 
-        WinShadingType ShadeFlag;      // Shading flag
-        std::array<Real64, 11> rguess; // Combined radiative/convective resistance (m2-K/W) of
+        WinShadingType ShadeFlag; // Shading flag
         // inside or outside air film, or gap
         Real64 restot; // Total window resistance including outside
         //   and inside air films (m2-K/W)
@@ -4691,6 +4691,7 @@ namespace Window {
             // Interaction with shade or blind, if one of these is present, is ignored. See below for
             // separate calculation of shade/blind temperature.
 
+            std::array<Real64, 11> rguess; // Combined radiative/convective resistance (m2-K/W) of
             rguess[0] = 1.0 / (wm->hcout + hrad);
             rguess[wm->nglface] = 1.0 / (wm->hcin + hrad);
 
@@ -6431,11 +6432,9 @@ namespace Window {
         Real64 hcinprev;                     // Value of hcin from previous iteration
         int d;                               // +1 if number of row interchanges is even,
         // -1 if odd (in LU decomposition)
-        std::array<int, maxArraySize> indx;                               // Vector of row permutations in LU decomposition
-        std::array<std::array<Real64, maxArraySize>, maxArraySize> Aface; // Coefficient in equation Aface*thetas = Bface
-        std::array<Real64, maxArraySize> Bface;                           // Coefficient in equation Aface*thetas = Bface
-        int iter;                                                         // Iteration number
-        Real64 errtemp;                                                   // Absolute value of sum of face temperature differences
+        std::array<int, maxArraySize> indx; // Vector of row permutations in LU decomposition
+        int iter;                           // Iteration number
+        Real64 errtemp;                     // Absolute value of sum of face temperature differences
         //   between iterations, divided by number of faces
         Real64 TmeanFilm;       // mean film temperature
         Real64 TmeanFilmKelvin; // mean film temperature for property evaluation
@@ -6470,8 +6469,8 @@ namespace Window {
                 //! fw 3/4/03 if ( iter >= 1 ) hr(i) = 0.5*(hrprev(i)+hr(i))
             }
 
-            Aface = {{0.0}};
-            Bface = {0.0};
+            std::array<std::array<Real64, maxArraySize>, maxArraySize> Aface = {{0.0}}; // Coefficient in equation Aface*thetas = Bface
+            std::array<Real64, maxArraySize> Bface = {0.0};                             // Coefficient in equation Aface*thetas = Bface
 
             // Inside convective film conductance for vertical window
             if (iter >= 1) {
@@ -7997,7 +7996,6 @@ namespace Window {
 
         std::array<std::array<Real64, maxArraySize>, maxArraySize> X;    // X*J = Q
         std::array<std::array<Real64, maxArraySize>, maxArraySize> Xinv; // J = Xinv*Q
-        std::array<int, maxArraySize> indx;                              // Indices for LU decomposition
 
         Real64 fEdge; // Slat edge correction factor
         Real64 fEdge1;
@@ -8067,7 +8065,7 @@ namespace Window {
                 ++X[k][k];
             }
 
-            indx = {0};
+            std::array<int, maxArraySize> indx = {0}; // Indices for LU decomposition
             // In the following, note that InvertMatrix changes X
             InvertMatrix(state, X, Xinv, indx, 4);
 

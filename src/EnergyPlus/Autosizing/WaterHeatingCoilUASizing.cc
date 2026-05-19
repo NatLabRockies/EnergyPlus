@@ -96,56 +96,55 @@ Real64 WaterHeatingCoilUASizer::size(EnergyPlusData &state, Real64 _originalValu
                     msg = "  Iteration limit exceeded in calculating coil UA";
                     this->addErrorMessage(msg);
                     ShowContinueError(state, msg);
-                    msg = EnergyPlus::format("  Lower UA estimate = {:.6f} W/m2-K (0.1% of Design Coil Load)", UA0);
+                    msg = std::format("  Lower UA estimate = {:.6f} W/m2-K (0.1% of Design Coil Load)", UA0);
                     this->addErrorMessage(msg);
                     ShowContinueError(state, msg);
-                    msg = EnergyPlus::format("  Upper UA estimate = {:.6f} W/m2-K (100% of Design Coil Load)", UA1);
+                    msg = std::format("  Upper UA estimate = {:.6f} W/m2-K (100% of Design Coil Load)", UA1);
                     this->addErrorMessage(msg);
                     ShowContinueError(state, msg);
-                    msg = EnergyPlus::format("  Final UA estimate when iterations exceeded limit = {:.6f} W/m2-K", this->autoSizedValue);
+                    msg = std::format("  Final UA estimate when iterations exceeded limit = {:.6f} W/m2-K", this->autoSizedValue);
                     this->addErrorMessage(msg);
                     ShowContinueError(state, msg);
                     msg = "  Zone \"" + this->finalZoneSizing(this->curZoneEqNum).ZoneName +
                           "\" coil sizing conditions (may be different than Sizing inputs):";
                     this->addErrorMessage(msg);
                     ShowContinueError(state, msg);
-                    msg = EnergyPlus::format("  Coil inlet air temperature     = {:.3f} C", this->dataDesInletAirTemp);
+                    msg = std::format("  Coil inlet air temperature     = {:.3f} C", this->dataDesInletAirTemp);
                     this->addErrorMessage(msg);
                     ShowContinueError(state, msg);
-                    msg = EnergyPlus::format("  Coil inlet air humidity ratio  = {:.3f} kgWater/kgDryAir", this->dataDesInletAirHumRat);
+                    msg = std::format("  Coil inlet air humidity ratio  = {:.3f} kgWater/kgDryAir", this->dataDesInletAirHumRat);
                     this->addErrorMessage(msg);
                     ShowContinueError(state, msg);
-                    msg = EnergyPlus::format("  Coil inlet air mass flow rate  = {:.6f} kg/s", this->dataFlowUsedForSizing);
+                    msg = std::format("  Coil inlet air mass flow rate  = {:.6f} kg/s", this->dataFlowUsedForSizing);
                     this->addErrorMessage(msg);
                     ShowContinueError(state, msg);
                     // TotWaterHeatingCoilRate is set in CALL to CalcSimpleHeatingCoil
-                    msg = EnergyPlus::format("  Design Coil Capacity           = {:.3f} W", this->dataDesignCoilCapacity);
+                    msg = std::format("  Design Coil Capacity           = {:.3f} W", this->dataDesignCoilCapacity);
                     this->addErrorMessage(msg);
                     ShowContinueError(state, msg);
                     if (this->dataNomCapInpMeth) {
-                        msg = EnergyPlus::format("  Design Coil Load               = {:.3f} W", this->dataCapacityUsedForSizing);
+                        msg = std::format("  Design Coil Load               = {:.3f} W", this->dataCapacityUsedForSizing);
                         this->addErrorMessage(msg);
                         ShowContinueError(state, msg);
-                        msg = EnergyPlus::format("  Coil outlet air temperature    = {:.3f} C", this->dataDesOutletAirTemp);
+                        msg = std::format("  Coil outlet air temperature    = {:.3f} C", this->dataDesOutletAirTemp);
                         this->addErrorMessage(msg);
                         ShowContinueError(state, msg);
-                        msg = EnergyPlus::format("  Coil outlet air humidity ratio = {:.3f} kgWater/kgDryAir", this->dataDesOutletAirHumRat);
+                        msg = std::format("  Coil outlet air humidity ratio = {:.3f} kgWater/kgDryAir", this->dataDesOutletAirHumRat);
                         this->addErrorMessage(msg);
                         ShowContinueError(state, msg);
                     } else if (this->termUnitSingDuct || this->termUnitPIU || this->termUnitIU || this->zoneEqFanCoil) {
-                        msg = EnergyPlus::format("  Design Coil Load               = {:.3f} W", this->dataCapacityUsedForSizing);
+                        msg = std::format("  Design Coil Load               = {:.3f} W", this->dataCapacityUsedForSizing);
                         this->addErrorMessage(msg);
                         ShowContinueError(state, msg);
                     } else {
-                        msg = EnergyPlus::format("  Design Coil Load               = {:.3f} W", this->dataCapacityUsedForSizing);
+                        msg = std::format("  Design Coil Load               = {:.3f} W", this->dataCapacityUsedForSizing);
                         this->addErrorMessage(msg);
                         ShowContinueError(state, msg);
-                        msg =
-                            EnergyPlus::format("  Coil outlet air temperature    = {:.3f} C", this->finalZoneSizing(this->curZoneEqNum).HeatDesTemp);
+                        msg = std::format("  Coil outlet air temperature    = {:.3f} C", this->finalZoneSizing(this->curZoneEqNum).HeatDesTemp);
                         this->addErrorMessage(msg);
                         ShowContinueError(state, msg);
-                        msg = EnergyPlus::format("  Coil outlet air humidity ratio = {:.3f} kgWater/kgDryAir",
-                                                 this->finalZoneSizing(this->curZoneEqNum).HeatDesHumRat);
+                        msg = std::format("  Coil outlet air humidity ratio = {:.3f} kgWater/kgDryAir",
+                                          this->finalZoneSizing(this->curZoneEqNum).HeatDesHumRat);
                         this->addErrorMessage(msg);
                         ShowContinueError(state, msg);
                     }
@@ -160,20 +159,20 @@ Real64 WaterHeatingCoilUASizer::size(EnergyPlusData &state, Real64 _originalValu
                     msg = "  Bad starting values for UA";
                     this->addErrorMessage(msg);
                     ShowContinueError(state, msg);
-                    msg = EnergyPlus::format("  Lower UA estimate = {:.6f} W/m2-K (0.1% of Design Coil Load)", UA0);
+                    msg = std::format("  Lower UA estimate = {:.6f} W/m2-K (0.1% of Design Coil Load)", UA0);
                     this->addErrorMessage(msg);
                     ShowContinueError(state, msg);
-                    msg = EnergyPlus::format("  Upper UA estimate = {:.6f} W/m2-K (100% of Design Coil Load)", UA1);
+                    msg = std::format("  Upper UA estimate = {:.6f} W/m2-K (100% of Design Coil Load)", UA1);
                     this->addErrorMessage(msg);
                     ShowContinueError(state, msg);
                     msg = "  Zone \"" + this->finalZoneSizing(this->curZoneEqNum).ZoneName +
                           "\" coil sizing conditions (may be different than Sizing inputs):";
                     this->addErrorMessage(msg);
                     ShowContinueError(state, msg);
-                    msg = EnergyPlus::format("  Coil inlet air temperature     = {:.3f} C", this->dataDesInletAirTemp);
+                    msg = std::format("  Coil inlet air temperature     = {:.3f} C", this->dataDesInletAirTemp);
                     this->addErrorMessage(msg);
                     ShowContinueError(state, msg);
-                    msg = EnergyPlus::format("  Coil inlet air humidity ratio  = {:.3f} kgWater/kgDryAir", this->dataDesInletAirHumRat);
+                    msg = std::format("  Coil inlet air humidity ratio  = {:.3f} kgWater/kgDryAir", this->dataDesInletAirHumRat);
                     this->addErrorMessage(msg);
                     ShowContinueError(state, msg);
                     msg = std::format("  Coil inlet air mass flow rate  = {:.6f} kg/s", this->dataFlowUsedForSizing);

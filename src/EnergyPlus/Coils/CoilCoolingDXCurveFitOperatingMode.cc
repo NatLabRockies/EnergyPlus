@@ -167,7 +167,7 @@ CoilCoolingDXCurveFitOperatingMode::CoilCoolingDXCurveFitOperatingMode(EnergyPlu
             inputProcessor->getRealFieldValue(modeFields, modeSchemaProps, "nominal_evaporative_condenser_pump_power");
         input_specs.nominal_speed_number = inputProcessor->getIntFieldValue(modeFields, modeSchemaProps, "nominal_speed_number");
         for (int fieldNum = 1; fieldNum <= 10; ++fieldNum) {
-            auto const speedFieldName = EnergyPlus::format("speed_{}_name", fieldNum);
+            auto const speedFieldName = std::format("speed_{}_name", fieldNum);
             auto const speedName = inputProcessor->getAlphaFieldValue(modeFields, modeSchemaProps, speedFieldName);
             if (speedName.empty()) {
                 break;

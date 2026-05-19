@@ -78,6 +78,7 @@
 
 namespace EnergyPlus::HeatBalanceKivaManager {
 
+// cppcheck-suppress passedByValueCallback
 void kivaErrorCallback(const int messageType, const std::string message, void *contextPtr)
 {
     if (contextPtr == nullptr) {

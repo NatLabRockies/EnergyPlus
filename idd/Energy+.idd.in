@@ -13086,7 +13086,7 @@ WindowProperty:FrameAndDivider,
          \memo Specifies the dimensions of a window frame, dividers, and inside reveal surfaces.
          \memo Referenced by the surface objects for exterior windows and glass doors
          \memo (ref: FenestrationSurface:Detailed, Window, and GlazedDoor).
-      \min-fields 26
+         \min-fields 26
     A1 , \field Name
          \required-field
          \type alpha
@@ -13119,6 +13119,7 @@ WindowProperty:FrameAndDivider,
          \units W/m2-K
          \type real
          \minimum 0.0
+         \default 0.0
          \note Effective conductance of frame
          \note Excludes air films
          \note Obtained from WINDOW 5 or other 2-D calculation
@@ -13160,12 +13161,12 @@ WindowProperty:FrameAndDivider,
          \note Width of dividers in plane of window
          \note Width assumed the same for all dividers
     N10, \field Number of Horizontal Dividers
-         \type real
+         \type integer
          \minimum 0
          \default 0
          \note "Horizontal" means parallel to local window X-axis
     N11, \field Number of Vertical Dividers
-         \type real
+         \type integer
          \minimum 0
          \default 0
          \note "Vertical" means parallel to local window Y-axis

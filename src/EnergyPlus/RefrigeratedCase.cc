@@ -15204,7 +15204,6 @@ void SecondaryLoopData::CalculateSecondary(EnergyPlusData &state, int const Seco
     Real64 constexpr ErrorTol(0.001); // Iterative solution tolerance
 
     bool AtPartLoad;          // Whether or not need to iterate on pump power
-    bool DeRate;              // If true, need to derate aircoils because don't carry over unmet energy
     Real64 CpBrine;           // Specific heat (W/kg)
     Real64 DensityBrine;      // Density (kg/m3)
     Real64 DiffTemp;          // (C)
@@ -15424,10 +15423,7 @@ void SecondaryLoopData::CalculateSecondary(EnergyPlusData &state, int const Seco
         } //>my large number
 
     } else { // air coils on secondary loop, no "unmet" energy accounting, just reduce amount of cooling provided to zone by coils
-        DeRate = false;
-        if (TotalLoad > this->MaxLoad) {
-            DeRate = true;
-        }
+        bool DeRate = (TotalLoad > this->MaxLoad); // If true, need to derate aircoils because don't carry over unmet energy
         FinalRateCoils(
             state, DeRate, SourceType::SecondarySystem, SecondaryNum, TotalLoad, this->MaxLoad); // assign case credits for coils on this loop
         // Bug TotalCoolingLoad not set but used below

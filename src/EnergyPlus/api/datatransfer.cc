@@ -604,7 +604,7 @@ Real64 getInternalVariableValue(EnergyPlusState state, int handle)
 
 int getEMSGlobalVariableHandle(EnergyPlusState state, const char *name)
 {
-    auto *thisState = static_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto const *thisState = static_cast<EnergyPlus::EnergyPlusData *>(state);
     int index = 0;
     for (auto const &erlVar : thisState->dataRuntimeLang->ErlVariable) {
         index++;

@@ -7403,8 +7403,6 @@ namespace SurfaceGeometry {
         int Dummy;         // argument for call to GetObjectDefMaxArgs
         int IOStatus;      // Used in GetObjectItem
         int Found;
-        int AlphaOffset; // local temp var
-        std::string Roughness;
         int ThisSurf;                   // do loop counter
         Real64 AvgAzimuth;              // temp for error checking
         Real64 AvgTilt;                 // temp for error checking
@@ -7467,7 +7465,7 @@ namespace SurfaceGeometry {
             }
             state.dataHeatBal->ExtVentedCavity(Item).OSCMPtr = Found;
 
-            Roughness = s_ipsc->cAlphaArgs(3);
+            std::string Roughness = s_ipsc->cAlphaArgs(3);
             // Select the correct Number for the associated ascii name for the roughness type
             if (Util::SameString(Roughness, "VerySmooth")) {
                 state.dataHeatBal->ExtVentedCavity(Item).BaffleRoughness = Material::SurfaceRoughness::VerySmooth;
@@ -7494,7 +7492,7 @@ namespace SurfaceGeometry {
                 ErrorsFound = true;
             }
 
-            AlphaOffset = 3;
+            constexpr int AlphaOffset = 3; // local temp var
             state.dataHeatBal->ExtVentedCavity(Item).NumSurfs = NumAlphas - AlphaOffset;
             if (state.dataHeatBal->ExtVentedCavity(Item).NumSurfs == 0) {
                 ShowSevereError(state,
@@ -9635,13 +9633,10 @@ namespace SurfaceGeometry {
         int ControlNumAlpha; // Number of control alpha names being passed
         int ControlNumProp;  // Number of control properties being passed
         int ControlNum;      // DO loop counter/index for window shading control number
-        int IShadedConst;    // Construction number of shaded construction
-        int IShadingDevice;  // Material number of shading device
         int NLayers;         // Layers in shaded construction
         int Loop;
         bool BGShadeBlindError; // True if problem with construction that is supposed to have between-glass
         // shade or blind
-        int Found;
 
         auto &s_mat = state.dataMaterial;
         auto &s_ipsc = state.dataIPShortCut;
@@ -9715,7 +9710,7 @@ namespace SurfaceGeometry {
             }
 
             // Check for illegal shading type name
-            Found = Util::FindItemInList(s_ipsc->cAlphaArgs(3), cValidShadingTypes, NumValidShadingTypes);
+            int Found = Util::FindItemInList(s_ipsc->cAlphaArgs(3), cValidShadingTypes, NumValidShadingTypes);
             if (Found <= 1) {
                 ErrorsFound = true;
                 ShowSevereError(state,
@@ -9895,8 +9890,8 @@ namespace SurfaceGeometry {
             }
 
             DataSurfaces::WinShadingType ShTyp = windowShadingControl.ShadingType;
-            IShadedConst = windowShadingControl.getInputShadedConstruction;
-            IShadingDevice = windowShadingControl.ShadingDevice;
+            int IShadedConst = windowShadingControl.getInputShadedConstruction; // Construction number of shaded construction
+            int IShadingDevice = windowShadingControl.ShadingDevice;            // Material number of shading device
 
             if (IShadedConst == 0 && IShadingDevice == 0) {
                 ShowSevereError(state,

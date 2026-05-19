@@ -472,7 +472,7 @@ TEST_F(EnergyPlusFixture, EvapFluidCooler_SingleSpeed_DesignEnteringWaterIsAutos
     EXPECT_EQ(expected_ewt, ptr->DesignEnteringWaterTemp);
 
     EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, EvaporativeFluidCooler:SingleSpeed, BIG EVAPORATIVEFLUIDCOOLER, "
-                                             "Design Entering Water Temperature [C], 40.00000"));
+                                             "Design Entering Water Temperature [C], 40.0000"));
 }
 
 TEST_F(EnergyPlusFixture, EvapFluidCooler_TwoSpeed_DesignEnteringWaterIsAutosized)
@@ -590,7 +590,7 @@ TEST_F(EnergyPlusFixture, EvapFluidCooler_TwoSpeed_DesignEnteringWaterIsAutosize
     EXPECT_EQ(expected_ewt, ptr->DesignEnteringWaterTemp);
 
     EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, EvaporativeFluidCooler:TwoSpeed, BIG EVAPORATIVEFLUIDCOOLER, "
-                                             "Design Entering Water Temperature [C], 40.00000"));
+                                             "Design Entering Water Temperature [C], 40.0000"));
 }
 
 TEST_F(EnergyPlusFixture, EvapFluidCooler_TwoSpeed_UserSpecifiedDesignCapacity_LowSpeed_CanAutocalculate)

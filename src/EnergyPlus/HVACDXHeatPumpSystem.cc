@@ -1116,7 +1116,7 @@ namespace HVACDXHeatPumpSystem {
         if (state.dataHVACDXHeatPumpSys->NumDXHeatPumpSystems > 0) {
             int DXHeatSysNum = Util::FindItemInList(DXHeatCoilSysName, state.dataHVACDXHeatPumpSys->DXHeatPumpSystem);
             if (DXHeatSysNum > 0 && DXHeatSysNum <= state.dataHVACDXHeatPumpSys->NumDXHeatPumpSystems) {
-                auto &dxhpSystem = state.dataHVACDXHeatPumpSys->DXHeatPumpSystem(DXHeatSysNum);
+                auto const &dxhpSystem = state.dataHVACDXHeatPumpSys->DXHeatPumpSystem(DXHeatSysNum);
                 NodeNum = dxhpSystem.DXHeatPumpCoilInletNodeNum;
             }
         }

@@ -7326,7 +7326,7 @@ void SetCompFlowRate(EnergyPlusData &state, int const VRFTUNum, int const VRFCon
     int IndexToTUInTUList; // - index to TU in specific list for this VRF system
     int TUListIndex;       // index to TU list for this VRF system
 
-    auto &vrfTU = state.dataHVACVarRefFlow->VRFTU(VRFTUNum);
+    auto const &vrfTU = state.dataHVACVarRefFlow->VRFTU(VRFTUNum);
     IndexToTUInTUList = vrfTU.IndexToTUInTUList;
     TUListIndex = vrfTU.TUListIndex;
 
@@ -8272,9 +8272,9 @@ void SizeVRF(EnergyPlusData &state, int const VRFTUNum)
         auto &vrfTUList = state.dataHVACVarRefFlow->TerminalUnitList(TUListNum);
         for (int NumTU = 1; NumTU <= vrfTUList.NumTUInList; ++NumTU) {
             int TUIndex = vrfTUList.ZoneTUPtr(NumTU);
-            auto &vrfTU = state.dataHVACVarRefFlow->VRFTU(TUIndex);
-            if (vrfTU.CoolCoilIndex > 0) {
-                DXCoilCap = DXCoils::GetCoilCapacityByIndexType(state, vrfTU.CoolCoilIndex, vrfTU.coolCoilType, errFlag);
+            auto &vrfTUobj = state.dataHVACVarRefFlow->VRFTU(TUIndex);
+            if (vrfTUobj.CoolCoilIndex > 0) {
+                DXCoilCap = DXCoils::GetCoilCapacityByIndexType(state, vrfTUobj.CoolCoilIndex, vrfTUobj.coolCoilType, errFlag);
                 TUCoolingCapacity += DXCoilCap;
                 if (DXCoilCap == AutoSize) {
                     FoundAll = false;
@@ -8282,8 +8282,8 @@ void SizeVRF(EnergyPlusData &state, int const VRFTUNum)
                 }
             }
 
-            if (vrfTU.HeatCoilIndex > 0) {
-                DXCoilCap = DXCoils::GetCoilCapacityByIndexType(state, vrfTU.HeatCoilIndex, vrfTU.heatCoilType, errFlag);
+            if (vrfTUobj.HeatCoilIndex > 0) {
+                DXCoilCap = DXCoils::GetCoilCapacityByIndexType(state, vrfTUobj.HeatCoilIndex, vrfTUobj.heatCoilType, errFlag);
                 TUHeatingCapacity += DXCoilCap;
                 if (DXCoilCap == AutoSize) {
                     FoundAll = false;
@@ -10455,7 +10455,7 @@ int GetVRFTUOutAirNode(EnergyPlusData &state, int const VRFTUNum)
     }
 
     if (VRFTUNum > 0 && VRFTUNum <= state.dataHVACVarRefFlow->NumVRFTU) {
-        auto &vrfTU = state.dataHVACVarRefFlow->VRFTU(VRFTUNum);
+        auto const &vrfTU = state.dataHVACVarRefFlow->VRFTU(VRFTUNum);
         return vrfTU.VRFTUOAMixerOANodeNum;
     }
     return 0;
@@ -10479,7 +10479,7 @@ int GetVRFTUZoneInletAirNode(EnergyPlusData &state, int const VRFTUNum)
     }
 
     if (VRFTUNum > 0 && VRFTUNum <= state.dataHVACVarRefFlow->NumVRFTU) {
-        auto &vrfTU = state.dataHVACVarRefFlow->VRFTU(VRFTUNum);
+        auto const &vrfTU = state.dataHVACVarRefFlow->VRFTU(VRFTUNum);
         return vrfTU.VRFTUOutletNodeNum;
     }
     return 0;
@@ -10547,7 +10547,7 @@ int GetVRFTUMixedAirNode(EnergyPlusData &state, int const VRFTUNum)
     }
 
     if (VRFTUNum > 0 && VRFTUNum <= state.dataHVACVarRefFlow->NumVRFTU) {
-        auto &vrfTU = state.dataHVACVarRefFlow->VRFTU(VRFTUNum);
+        auto const &vrfTU = state.dataHVACVarRefFlow->VRFTU(VRFTUNum);
         return vrfTU.VRFTUOAMixerOANodeNum;
     }
     return 0;
@@ -10571,7 +10571,7 @@ int GetVRFTUReturnAirNode(EnergyPlusData &state, int const VRFTUNum)
     }
 
     if (VRFTUNum > 0 && VRFTUNum <= state.dataHVACVarRefFlow->NumVRFTU) {
-        auto &vrfTU = state.dataHVACVarRefFlow->VRFTU(VRFTUNum);
+        auto const &vrfTU = state.dataHVACVarRefFlow->VRFTU(VRFTUNum);
         return vrfTU.VRFTUOAMixerRetNodeNum;
     }
     return 0;
@@ -14936,7 +14936,7 @@ void VRFCondenserEquipment::VRFOU_PipeLossC(
     NumIUActivated = 0;
     for (int NumTU = 1; NumTU <= NumTUInList; ++NumTU) {
         int TUIndex = vrfTUList.ZoneTUPtr(NumTU);
-        auto &vrfTU = state.dataHVACVarRefFlow->VRFTU(TUIndex);
+        auto const &vrfTU = state.dataHVACVarRefFlow->VRFTU(TUIndex);
         int CoilIndex = vrfTU.CoolCoilIndex;
 
         if (state.dataDXCoils->DXCoil(CoilIndex).TotalCoolingEnergyRate > 0.0) {
@@ -15096,7 +15096,7 @@ void VRFCondenserEquipment::VRFOU_PipeLossH(
     NumIUActivated = 0;
     for (int NumTU = 1; NumTU <= NumTUInList; ++NumTU) {
         int TUIndex = vrfTUList.ZoneTUPtr(NumTU);
-        auto &vrfTU = state.dataHVACVarRefFlow->VRFTU(TUIndex);
+        auto const &vrfTU = state.dataHVACVarRefFlow->VRFTU(TUIndex);
         int CoilIndex = vrfTU.HeatCoilIndex;
 
         if (state.dataDXCoils->DXCoil(CoilIndex).TotalHeatingEnergyRate > 0.0) {

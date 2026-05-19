@@ -133,7 +133,7 @@ void WrapperSpecs::getDesignCapacities(
     if (calledFromLocation.loopNum == this->CWPlantLoc.loopNum) { // Chilled water loop
         if (this->ControlMode == CondenserType::SmartMixing) {    // control mode is SmartMixing
             for (int NumChillerHeater = 1; NumChillerHeater <= this->ChillerHeaterNums; ++NumChillerHeater) {
-                auto &chillerHeater = this->ChillerHeater(NumChillerHeater);
+                auto const &chillerHeater = this->ChillerHeater(NumChillerHeater);
                 MaxLoad += chillerHeater.RefCapCooling * chillerHeater.MaxPartLoadRatCooling;
                 OptLoad += chillerHeater.RefCapCooling * chillerHeater.OptPartLoadRatCooling;
                 MinLoad += chillerHeater.RefCapCooling * chillerHeater.MinPartLoadRatCooling;
@@ -142,7 +142,7 @@ void WrapperSpecs::getDesignCapacities(
     } else if (calledFromLocation.loopNum == this->HWPlantLoc.loopNum) { // Hot water loop
         if (this->ControlMode == CondenserType::SmartMixing) {           // control mode is SmartMixing
             for (int NumChillerHeater = 1; NumChillerHeater <= this->ChillerHeaterNums; ++NumChillerHeater) {
-                auto &chillerHeater = this->ChillerHeater(NumChillerHeater);
+                auto const &chillerHeater = this->ChillerHeater(NumChillerHeater);
                 MaxLoad += chillerHeater.RefCapClgHtg * chillerHeater.MaxPartLoadRatClgHtg;
                 OptLoad += chillerHeater.RefCapClgHtg * chillerHeater.OptPartLoadRatClgHtg;
                 MinLoad += chillerHeater.RefCapClgHtg * chillerHeater.MinPartLoadRatClgHtg;
@@ -517,7 +517,7 @@ void WrapperSpecs::SizeWrapper(EnergyPlusData &state)
         Real64 TotalCondVolFlowRate = 0.0;
         Real64 TotalHotWaterVolFlowRate = 0.0;
         for (int NumChillerHeater = 1; NumChillerHeater <= this->ChillerHeaterNums; ++NumChillerHeater) {
-            auto &chillerHeater = this->ChillerHeater(NumChillerHeater);
+            auto const &chillerHeater = this->ChillerHeater(NumChillerHeater);
             TotalEvapVolFlowRate += chillerHeater.tmpEvapVolFlowRate;
             TotalCondVolFlowRate += chillerHeater.tmpCondVolFlowRate;
             TotalHotWaterVolFlowRate += chillerHeater.DesignHotWaterVolFlowRate;
@@ -2794,7 +2794,7 @@ void WrapperSpecs::CalcWrapperModel(EnergyPlusData &state, Real64 &MyLoad, int c
                 GLHEOutletMassFlowRate = 0.0;
 
                 for (int ChillerHeaterNum = 1; ChillerHeaterNum <= this->ChillerHeaterNums; ++ChillerHeaterNum) {
-                    auto &chillerHeater = this->ChillerHeater(ChillerHeaterNum);
+                    auto const &chillerHeater = this->ChillerHeater(ChillerHeaterNum);
 
                     // Calculated mass flow rate used by individual chiller heater and bypasses
                     CHWOutletMassFlowRate += chillerHeater.Report.Evapmdot;
@@ -2954,7 +2954,7 @@ void WrapperSpecs::CalcWrapperModel(EnergyPlusData &state, Real64 &MyLoad, int c
                 if (this->SimulHtgDominant || this->SimulClgDominant) {
                     if (this->SimulClgDominant) {
                         for (int ChillerHeaterNum = 1; ChillerHeaterNum <= this->ChillerHeaterNums; ++ChillerHeaterNum) {
-                            auto &chillerHeater = this->ChillerHeater(ChillerHeaterNum);
+                            auto const &chillerHeater = this->ChillerHeater(ChillerHeaterNum);
                             int CurrentMode = chillerHeater.Report.CurrentMode;
                             CHWInletTemp = this->Report.CHWInletTempSimul;
                             GLHEInletTemp = this->Report.GLHEInletTempSimul;
@@ -2974,8 +2974,8 @@ void WrapperSpecs::CalcWrapperModel(EnergyPlusData &state, Real64 &MyLoad, int c
                                         HWOutletTemp = HWInletTemp;
                                     }
                                 } else { // Mode 4. Cooling-only mode with other heat recovery units. Condenser flows.
-                                    CHWOutletMassFlowRate += this->ChillerHeater(ChillerHeaterNum)
-                                                                 .Report.EvapmdotSimul; // Wrapper evaporator side to plant chilled water loop
+                                    CHWOutletMassFlowRate +=
+                                        chillerHeater.Report.EvapmdotSimul; // Wrapper evaporator side to plant chilled water loop
                                     // Sum condenser node mass flow rates and mass weighed temperatures
                                     if (GLHEInletMassFlowRate > 0.0) {
                                         GLHEOutletMassFlowRate += chillerHeater.Report.CondmdotSimul;
@@ -3076,8 +3076,8 @@ void WrapperSpecs::CalcWrapperModel(EnergyPlusData &state, Real64 &MyLoad, int c
 
                             if (CurrentMode != 0) {     // This chiller heater unit is on
                                 if (CurrentMode == 3) { // Heat recovery mode. Both chilled water and hot water connections
-                                    CHWOutletMassFlowRate += this->ChillerHeater(ChillerHeaterNum)
-                                                                 .Report.EvapmdotSimul;    // Wrapper evaporator side to plant chilled water loop
+                                    CHWOutletMassFlowRate +=
+                                        chillerHeater.Report.EvapmdotSimul;                // Wrapper evaporator side to plant chilled water loop
                                     HWOutletMassFlowRate += chillerHeater.Report.Condmdot; // Wrapper condenser side to plant hot water loop
                                     if (CHWInletMassFlowRate > 0.0) {
                                         CHWOutletTemp += chillerHeater.Report.EvapOutletTempSimul *
@@ -3184,7 +3184,7 @@ void WrapperSpecs::CalcWrapperModel(EnergyPlusData &state, Real64 &MyLoad, int c
                 } else { // Heating only mode (mode 2)
 
                     for (int ChillerHeaterNum = 1; ChillerHeaterNum <= this->ChillerHeaterNums; ++ChillerHeaterNum) {
-                        auto &chillerHeater = this->ChillerHeater(ChillerHeaterNum);
+                        auto const &chillerHeater = this->ChillerHeater(ChillerHeaterNum);
                         HWOutletMassFlowRate += chillerHeater.Report.Condmdot;
                         HWOutletTemp += chillerHeater.Report.CondOutletTemp * chillerHeater.Report.Condmdot / HWInletMassFlowRate;
                         WrapperElecPowerHeat += chillerHeater.Report.HeatingPower;

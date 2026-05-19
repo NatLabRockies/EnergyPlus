@@ -136,26 +136,25 @@ void SimCoolingPanel(
                                                &CoolingPanelParams::Name,
                                                (int)state.dataChilledCeilingPanelSimple->CoolingPanel.size());
         if (CoolingPanelNum == 0) {
-            ShowFatalError(state, EnergyPlus::format("SimCoolingPanelSimple: Unit not found={}", EquipName));
+            ShowFatalError(state, std::format("SimCoolingPanelSimple: Unit not found={}", EquipName));
         }
         CompIndex = CoolingPanelNum;
     } else {
         CoolingPanelNum = CompIndex;
         if (CoolingPanelNum > (int)state.dataChilledCeilingPanelSimple->CoolingPanel.size() || CoolingPanelNum < 1) {
             ShowFatalError(state,
-                           EnergyPlus::format("SimCoolingPanelSimple:  Invalid CompIndex passed={}, Number of Units={}, Entered Unit name={}",
-                                              CoolingPanelNum,
-                                              (int)state.dataChilledCeilingPanelSimple->CoolingPanel.size(),
-                                              EquipName));
+                           std::format("SimCoolingPanelSimple:  Invalid CompIndex passed={}, Number of Units={}, Entered Unit name={}",
+                                       CoolingPanelNum,
+                                       (int)state.dataChilledCeilingPanelSimple->CoolingPanel.size(),
+                                       EquipName));
         }
         if (state.dataChilledCeilingPanelSimple->CoolingPanel(CoolingPanelNum).CheckEquipName) {
             if (EquipName != state.dataChilledCeilingPanelSimple->CoolingPanel(CoolingPanelNum).Name) {
-                ShowFatalError(
-                    state,
-                    EnergyPlus::format("SimCoolingPanelSimple: Invalid CompIndex passed={}, Unit name={}, stored Unit Name for that index={}",
-                                       CoolingPanelNum,
-                                       EquipName,
-                                       state.dataChilledCeilingPanelSimple->CoolingPanel(CoolingPanelNum).Name));
+                ShowFatalError(state,
+                               std::format("SimCoolingPanelSimple: Invalid CompIndex passed={}, Unit name={}, stored Unit Name for that index={}",
+                                           CoolingPanelNum,
+                                           EquipName,
+                                           state.dataChilledCeilingPanelSimple->CoolingPanel(CoolingPanelNum).Name));
             }
             state.dataChilledCeilingPanelSimple->CoolingPanel(CoolingPanelNum).CheckEquipName = false;
         }
@@ -185,11 +184,11 @@ void SimCoolingPanel(
         } break;
         default: {
             ShowSevereError(state,
-                            EnergyPlus::format("SimCoolingPanelSimple: Errors in CoolingPanel={}",
-                                               state.dataChilledCeilingPanelSimple->CoolingPanel(CoolingPanelNum).Name));
+                            std::format("SimCoolingPanelSimple: Errors in CoolingPanel={}",
+                                        state.dataChilledCeilingPanelSimple->CoolingPanel(CoolingPanelNum).Name));
             ShowContinueError(state,
-                              EnergyPlus::format("Invalid or unimplemented equipment type={}",
-                                                 state.dataChilledCeilingPanelSimple->CoolingPanel(CoolingPanelNum).EquipType));
+                              std::format("Invalid or unimplemented equipment type={}",
+                                          static_cast<int>(state.dataChilledCeilingPanelSimple->CoolingPanel(CoolingPanelNum).EquipType)));
             ShowFatalError(state, "Preceding condition causes termination.");
         } break;
         }
@@ -201,7 +200,7 @@ void SimCoolingPanel(
         state.dataChilledCeilingPanelSimple->CoolingPanel(CoolingPanelNum).ReportCoolingPanel(state);
 
     } else {
-        ShowFatalError(state, EnergyPlus::format("SimCoolingPanelSimple: Unit not found={}", EquipName));
+        ShowFatalError(state, std::format("SimCoolingPanelSimple: Unit not found={}", EquipName));
     }
 }
 
@@ -280,7 +279,7 @@ void GetCoolingPanelInput(EnergyPlusData &state)
             for (int CoolPanelNumI = 2; CoolPanelNumI <= NumCoolingPanels; ++CoolPanelNumI) {
                 if (s_ipsc->cAlphaArgs(1) == state.dataChilledCeilingPanelSimple->CoolingPanel(CoolPanelNumI).Name) {
                     ErrorsFound = true;
-                    ShowSevereError(state, EnergyPlus::format("{} is used as a name for more than one simple COOLING PANEL.", s_ipsc->cAlphaArgs(1)));
+                    ShowSevereError(state, std::format("{} is used as a name for more than one simple COOLING PANEL.", s_ipsc->cAlphaArgs(1)));
                     ShowContinueError(state, "This is not allowed.");
                 }
             }
@@ -326,54 +325,54 @@ void GetCoolingPanelInput(EnergyPlusData &state)
         thisCP.RatedWaterTemp = s_ipsc->rNumericArgs(1);
         if (thisCP.RatedWaterTemp > MaxWaterTempAvg + 0.001) {
             ShowWarningError(state,
-                             EnergyPlus::format("{}{}=\"{}\", {} was higher than the allowable maximum.",
-                                                RoutineName,
-                                                cCMO_CoolingPanel_Simple,
-                                                s_ipsc->cAlphaArgs(1),
-                                                s_ipsc->cNumericFieldNames(1)));
-            ShowContinueError(state, EnergyPlus::format("...reset to maximum value=[{:.2R}].", MaxWaterTempAvg));
+                             std::format("{}{}=\"{}\", {} was higher than the allowable maximum.",
+                                         RoutineName,
+                                         cCMO_CoolingPanel_Simple,
+                                         s_ipsc->cAlphaArgs(1),
+                                         s_ipsc->cNumericFieldNames(1)));
+            ShowContinueError(state, std::format("...reset to maximum value=[{:.2f}].", MaxWaterTempAvg));
             thisCP.RatedWaterTemp = MaxWaterTempAvg;
         } else if (thisCP.RatedWaterTemp < MinWaterTempAvg - 0.001) {
             ShowWarningError(state,
-                             EnergyPlus::format("{}{}=\"{}\", {} was lower than the allowable minimum.",
-                                                RoutineName,
-                                                cCMO_CoolingPanel_Simple,
-                                                s_ipsc->cAlphaArgs(1),
-                                                s_ipsc->cNumericFieldNames(1)));
-            ShowContinueError(state, EnergyPlus::format("...reset to minimum value=[{:.2R}].", MinWaterTempAvg));
+                             std::format("{}{}=\"{}\", {} was lower than the allowable minimum.",
+                                         RoutineName,
+                                         cCMO_CoolingPanel_Simple,
+                                         s_ipsc->cAlphaArgs(1),
+                                         s_ipsc->cNumericFieldNames(1)));
+            ShowContinueError(state, std::format("...reset to minimum value=[{:.2f}].", MinWaterTempAvg));
             thisCP.RatedWaterTemp = MinWaterTempAvg;
         }
 
         thisCP.RatedZoneAirTemp = s_ipsc->rNumericArgs(2);
         if (thisCP.RatedZoneAirTemp > MaxWaterTempAvg + 0.001) {
             ShowWarningError(state,
-                             EnergyPlus::format("{}{}=\"{}\", {} was higher than the allowable maximum.",
-                                                RoutineName,
-                                                cCMO_CoolingPanel_Simple,
-                                                s_ipsc->cAlphaArgs(1),
-                                                s_ipsc->cNumericFieldNames(2)));
-            ShowContinueError(state, EnergyPlus::format("...reset to maximum value=[{:.2R}].", MaxWaterTempAvg));
+                             std::format("{}{}=\"{}\", {} was higher than the allowable maximum.",
+                                         RoutineName,
+                                         cCMO_CoolingPanel_Simple,
+                                         s_ipsc->cAlphaArgs(1),
+                                         s_ipsc->cNumericFieldNames(2)));
+            ShowContinueError(state, std::format("...reset to maximum value=[{:.2f}].", MaxWaterTempAvg));
             thisCP.RatedZoneAirTemp = MaxWaterTempAvg;
         } else if (thisCP.RatedZoneAirTemp < MinWaterTempAvg - 0.001) {
             ShowWarningError(state,
-                             EnergyPlus::format("{}{}=\"{}\", {} was lower than the allowable minimum.",
-                                                RoutineName,
-                                                cCMO_CoolingPanel_Simple,
-                                                s_ipsc->cAlphaArgs(1),
-                                                s_ipsc->cNumericFieldNames(2)));
-            ShowContinueError(state, EnergyPlus::format("...reset to minimum value=[{:.2R}].", MinWaterTempAvg));
+                             std::format("{}{}=\"{}\", {} was lower than the allowable minimum.",
+                                         RoutineName,
+                                         cCMO_CoolingPanel_Simple,
+                                         s_ipsc->cAlphaArgs(1),
+                                         s_ipsc->cNumericFieldNames(2)));
+            ShowContinueError(state, std::format("...reset to minimum value=[{:.2f}].", MinWaterTempAvg));
             thisCP.RatedZoneAirTemp = MinWaterTempAvg;
         }
 
         thisCP.RatedWaterFlowRate = s_ipsc->rNumericArgs(3);
         if (thisCP.RatedWaterFlowRate < 0.00001 || thisCP.RatedWaterFlowRate > 10.0) {
             ShowWarningError(state,
-                             EnergyPlus::format("{}{}=\"{}\", {} is an invalid Standard Water mass flow rate.",
-                                                RoutineName,
-                                                cCMO_CoolingPanel_Simple,
-                                                s_ipsc->cAlphaArgs(1),
-                                                s_ipsc->cNumericFieldNames(2)));
-            ShowContinueError(state, EnergyPlus::format("...reset to a default value=[{:.1R}].", WaterMassFlowDefault));
+                             std::format("{}{}=\"{}\", {} is an invalid Standard Water mass flow rate.",
+                                         RoutineName,
+                                         cCMO_CoolingPanel_Simple,
+                                         s_ipsc->cAlphaArgs(1),
+                                         s_ipsc->cNumericFieldNames(2)));
+            ShowContinueError(state, std::format("...reset to a default value=[{:.1f}].", WaterMassFlowDefault));
             thisCP.RatedWaterFlowRate = WaterMassFlowDefault;
         }
 
@@ -382,15 +381,15 @@ void GetCoolingPanelInput(EnergyPlusData &state)
             if (!s_ipsc->lNumericFieldBlanks(4)) {
                 thisCP.ScaledCoolingCapacity = s_ipsc->rNumericArgs(4);
                 if (thisCP.ScaledCoolingCapacity < 0.0 && thisCP.ScaledCoolingCapacity != DataSizing::AutoSize) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", cCMO_CoolingPanel_Simple, thisCP.Name));
-                    ShowContinueError(state, EnergyPlus::format("Illegal {} = {:.7f}", s_ipsc->cNumericFieldNames(4), s_ipsc->rNumericArgs(4)));
+                    ShowSevereError(state, std::format("{} = {}", cCMO_CoolingPanel_Simple, thisCP.Name));
+                    ShowContinueError(state, std::format("Illegal {} = {:.7f}", s_ipsc->cNumericFieldNames(4), s_ipsc->rNumericArgs(4)));
                     ErrorsFound = true;
                 }
             } else {
                 if ((!s_ipsc->lAlphaFieldBlanks(6)) || (!s_ipsc->lAlphaFieldBlanks(7))) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", cCMO_CoolingPanel_Simple, thisCP.Name));
-                    ShowContinueError(state, EnergyPlus::format("Input for {} = {}", s_ipsc->cAlphaFieldNames(5), s_ipsc->cAlphaArgs(5)));
-                    ShowContinueError(state, EnergyPlus::format("Blank field not allowed for {}", s_ipsc->cNumericFieldNames(4)));
+                    ShowSevereError(state, std::format("{} = {}", cCMO_CoolingPanel_Simple, thisCP.Name));
+                    ShowContinueError(state, std::format("Input for {} = {}", s_ipsc->cAlphaFieldNames(5), s_ipsc->cAlphaArgs(5)));
+                    ShowContinueError(state, std::format("Blank field not allowed for {}", s_ipsc->cNumericFieldNames(4)));
                     ErrorsFound = true;
                 }
             }
@@ -399,8 +398,8 @@ void GetCoolingPanelInput(EnergyPlusData &state)
             if (!s_ipsc->lNumericFieldBlanks(5)) {
                 thisCP.ScaledCoolingCapacity = s_ipsc->rNumericArgs(5);
                 if (thisCP.ScaledCoolingCapacity < 0.0) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", cCMO_CoolingPanel_Simple, thisCP.Name));
-                    ShowContinueError(state, EnergyPlus::format("Input for {} = {}", s_ipsc->cAlphaFieldNames(5), s_ipsc->cAlphaArgs(5)));
+                    ShowSevereError(state, std::format("{} = {}", cCMO_CoolingPanel_Simple, thisCP.Name));
+                    ShowContinueError(state, std::format("Input for {} = {}", s_ipsc->cAlphaFieldNames(5), s_ipsc->cAlphaArgs(5)));
                     ShowContinueError(state, std::format("Illegal {} = {:.7f}", s_ipsc->cNumericFieldNames(5), s_ipsc->rNumericArgs(5)));
                     ErrorsFound = true;
                 } else if (thisCP.ScaledCoolingCapacity == DataSizing::AutoSize) {
@@ -444,7 +443,7 @@ void GetCoolingPanelInput(EnergyPlusData &state)
                                          cCMO_CoolingPanel_Simple,
                                          s_ipsc->cAlphaArgs(1),
                                          s_ipsc->cNumericFieldNames(7)));
-            ShowContinueError(state, EnergyPlus::format("...reset to minimum value=[{:.2R}].", MinWaterFlowRate));
+            ShowContinueError(state, std::format("...reset to minimum value=[{:#G}].", MinWaterFlowRate));
             thisCP.WaterVolFlowRateMax = MinWaterFlowRate;
         } else if (thisCP.WaterVolFlowRateMax > MaxWaterFlowRate) {
             ShowWarningError(state,
@@ -453,7 +452,7 @@ void GetCoolingPanelInput(EnergyPlusData &state)
                                          cCMO_CoolingPanel_Simple,
                                          s_ipsc->cAlphaArgs(1),
                                          s_ipsc->cNumericFieldNames(7)));
-            ShowContinueError(state, EnergyPlus::format("...reset to maximum value=[{:.2R}].", MaxWaterFlowRate));
+            ShowContinueError(state, std::format("...reset to maximum value=[{:#G}].", MaxWaterFlowRate));
             thisCP.WaterVolFlowRateMax = MaxWaterFlowRate;
         }
 
@@ -514,7 +513,7 @@ void GetCoolingPanelInput(EnergyPlusData &state)
                                          cCMO_CoolingPanel_Simple,
                                          s_ipsc->cAlphaArgs(1),
                                          s_ipsc->cNumericFieldNames(10)));
-            ShowContinueError(state, EnergyPlus::format("...reset to minimum value=[{:.2R}].", MinFraction));
+            ShowContinueError(state, std::format("...reset to minimum value=[{:.2f}].", MinFraction));
             thisCP.FracRadiant = MinFraction;
         }
         if (thisCP.FracRadiant > MaxFraction) {
@@ -524,7 +523,7 @@ void GetCoolingPanelInput(EnergyPlusData &state)
                                          cCMO_CoolingPanel_Simple,
                                          s_ipsc->cAlphaArgs(1),
                                          s_ipsc->cNumericFieldNames(10)));
-            ShowContinueError(state, EnergyPlus::format("...reset to maximum value=[{:.2R}].", MaxFraction));
+            ShowContinueError(state, std::format("...reset to maximum value=[{:.2f}].", MaxFraction));
             thisCP.FracRadiant = MaxFraction;
         }
 
@@ -549,7 +548,7 @@ void GetCoolingPanelInput(EnergyPlusData &state)
                                          cCMO_CoolingPanel_Simple,
                                          s_ipsc->cAlphaArgs(1),
                                          s_ipsc->cNumericFieldNames(11)));
-            ShowContinueError(state, EnergyPlus::format("...reset to minimum value=[{:.3R}].", MinFraction));
+            ShowContinueError(state, std::format("...reset to minimum value=[{:.3f}].", MinFraction));
             thisCP.FracDistribPerson = MinFraction;
         }
         if (thisCP.FracDistribPerson > MaxFraction) {
@@ -559,7 +558,7 @@ void GetCoolingPanelInput(EnergyPlusData &state)
                                          cCMO_CoolingPanel_Simple,
                                          s_ipsc->cAlphaArgs(1),
                                          s_ipsc->cNumericFieldNames(11)));
-            ShowContinueError(state, EnergyPlus::format("...reset to maximum value=[{:.3R}].", MaxFraction));
+            ShowContinueError(state, std::format("...reset to maximum value=[{:.3f}].", MaxFraction));
             thisCP.FracDistribPerson = MaxFraction;
         }
 
@@ -611,7 +610,7 @@ void GetCoolingPanelInput(EnergyPlusData &state)
                                              cCMO_CoolingPanel_Simple,
                                              s_ipsc->cAlphaArgs(1),
                                              s_ipsc->cNumericFieldNames(SurfNum + 8)));
-                ShowContinueError(state, EnergyPlus::format("...reset to maximum value=[{:.2R}].", MaxFraction));
+                ShowContinueError(state, std::format("...reset to maximum value=[{:.2f}].", MaxFraction));
                 thisCP.TotSurfToDistrib = MaxFraction;
             }
             if (thisCP.FracDistribToSurf(SurfNum) < MinFraction) {
@@ -621,7 +620,7 @@ void GetCoolingPanelInput(EnergyPlusData &state)
                                              cCMO_CoolingPanel_Simple,
                                              s_ipsc->cAlphaArgs(1),
                                              s_ipsc->cNumericFieldNames(SurfNum + 8)));
-                ShowContinueError(state, EnergyPlus::format("...reset to maximum value=[{:.2R}].", MinFraction));
+                ShowContinueError(state, std::format("...reset to maximum value=[{:.2f}].", MinFraction));
                 thisCP.TotSurfToDistrib = MinFraction;
             }
             if (thisCP.SurfacePtr(SurfNum) != 0) {
@@ -1043,11 +1042,9 @@ void SizeCoolingPanel(EnergyPlusData &state, int const CoolingPanelNum)
                                         std::format("SizeCoolingPanel: Potential issue with equipment sizing for "
                                                     "ZoneHVAC:CoolingPanel:RadiantConvective:Water = \"{}\".",
                                                     thisCP.Name));
-                            ShowContinueError(state,
-                                              EnergyPlus::format("User-Specified Maximum Cool Water Flow of {:.5R} [m3/s]", WaterVolFlowMaxCoolUser));
+                            ShowContinueError(state, std::format("User-Specified Maximum Cool Water Flow of {:#G} [m3/s]", WaterVolFlowMaxCoolUser));
                             ShowContinueError(
-                                state,
-                                EnergyPlus::format("differs from Design Size Maximum Cool Water Flow of {:.5R} [m3/s]", WaterVolFlowMaxCoolDes));
+                                state, std::format("differs from Design Size Maximum Cool Water Flow of {:#G} [m3/s]", WaterVolFlowMaxCoolDes));
                             ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                             ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                         }
@@ -1239,13 +1236,12 @@ void CoolingPanelParams::CalcCoolingPanel(EnergyPlusData &state, int const Cooli
                                                    cCMO_CoolingPanel_Simple,
                                                    this->Name));
                     ShowContinueError(state, "Flow to the simple cooling panel will be shut-off to avoid condensation");
-                    ShowContinueError(state, EnergyPlus::format("Water inlet temperature = {:.2R}", waterInletTemp));
-                    ShowContinueError(
-                        state, EnergyPlus::format("Zone dew-point temperature + safety delta T= {:.2R}", DewPointTemp + this->CondDewPtDeltaT));
+                    ShowContinueError(state, std::format("Water inlet temperature = {:.2f}", waterInletTemp));
+                    ShowContinueError(state,
+                                      std::format("Zone dew-point temperature + safety delta T= {:.2f}", DewPointTemp + this->CondDewPtDeltaT));
                     ShowContinueErrorTimeStamp(state, "");
                     ShowContinueError(
-                        state,
-                        EnergyPlus::format("Note that a {:.4R} C safety was chosen in the input for the shut-off criteria", this->CondDewPtDeltaT));
+                        state, std::format("Note that a {:.4f} C safety was chosen in the input for the shut-off criteria", this->CondDewPtDeltaT));
                 }
                 ShowRecurringWarningErrorAtEnd(state,
                                                cCMO_CoolingPanel_Simple + " [" + this->Name + "] condensation shut-off occurrence continues.",
@@ -1592,16 +1588,16 @@ void DistributeCoolingPanelRadGains(EnergyPlusData &state)
                 if (ThisSurfIntensity > DataHeatBalFanSys::MaxRadHeatFlux) {
                     ShowSevereError(state, "DistributeCoolingPanelRadGains:  excessive thermal radiation heat flux intensity detected");
                     ShowContinueError(state, std::format("Surface = {}", ThisSurf.Name));
-                    ShowContinueError(state, EnergyPlus::format("Surface area = {:.3R} [m2]", ThisSurf.Area));
+                    ShowContinueError(state, std::format("Surface area = {:.3f} [m2]", ThisSurf.Area));
                     ShowContinueError(state, std::format("Occurs in {} = {}", cCMO_CoolingPanel_Simple, thisCP.Name));
-                    ShowContinueError(state, EnergyPlus::format("Radiation intensity = {:.2R} [W/m2]", ThisSurfIntensity));
+                    ShowContinueError(state, std::format("Radiation intensity = {:.2f} [W/m2]", ThisSurfIntensity));
                     ShowContinueError(state, std::format("Assign a larger surface area or more surfaces in {}", cCMO_CoolingPanel_Simple));
                     ShowFatalError(state, "DistributeCoolingPanelRadGains:  excessive thermal radiation heat flux intensity detected");
                 }
             } else {
                 ShowSevereError(state, "DistributeCoolingPanelRadGains:  surface not large enough to receive thermal radiation heat flux");
                 ShowContinueError(state, std::format("Surface = {}", ThisSurf.Name));
-                ShowContinueError(state, EnergyPlus::format("Surface area = {:.3R} [m2]", ThisSurf.Area));
+                ShowContinueError(state, std::format("Surface area = {:.3f} [m2]", ThisSurf.Area));
                 ShowContinueError(state, std::format("Occurs in {} = {}", cCMO_CoolingPanel_Simple, thisCP.Name));
                 ShowContinueError(state, std::format("Assign a larger surface area or more surfaces in {}", cCMO_CoolingPanel_Simple));
                 ShowFatalError(state, "DistributeCoolingPanelRadGains:  surface not large enough to receive thermal radiation heat flux");

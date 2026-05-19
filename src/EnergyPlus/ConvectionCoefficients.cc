@@ -1082,15 +1082,15 @@ void GetUserConvCoeffs(EnergyPlusData &state)
                     if (Numbers(NumField) < state.dataHeatBal->LowHConvLimit || Numbers(NumField) > state.dataHeatBal->HighHConvLimit) {
                         ShowSevereError(state, std::format("{}{}=\"{}, out of range value", RoutineName, CurrentModuleObject, Alphas(1)));
                         ShowContinueError(state,
-                                          EnergyPlus::format("{}={}, {}=[{:.5R}].",
-                                                             ipsc->cAlphaFieldNames(Ptr),
-                                                             Alphas(Ptr),
-                                                             ipsc->cNumericFieldNames(NumField),
-                                                             Numbers(NumField)));
+                                          std::format("{}={}, {}=[{:.5f}].",
+                                                      ipsc->cAlphaFieldNames(Ptr),
+                                                      Alphas(Ptr),
+                                                      ipsc->cNumericFieldNames(NumField),
+                                                      Numbers(NumField)));
                         ShowContinueError(state,
-                                          EnergyPlus::format("Out-of-range from low/high limits=[>={:.9R}, <={:.1R}].",
-                                                             state.dataHeatBal->LowHConvLimit,
-                                                             state.dataHeatBal->HighHConvLimit));
+                                          std::format("Out-of-range from low/high limits=[>={:.9f}, <={:.1f}].",
+                                                      state.dataHeatBal->LowHConvLimit,
+                                                      state.dataHeatBal->HighHConvLimit));
                         ShowContinueError(state, "Limits are set (or default) in HeatBalanceAlgorithm object.");
                         ErrorsFound = true;
                     }
@@ -1574,10 +1574,9 @@ void GetUserConvCoeffs(EnergyPlusData &state)
             }
         }
         if (Count > 0) {
-            ShowSevereMessage(state,
-                              std::format("{}{}",
-                                          RoutineName,
-                                          EnergyPlus::format("{} surfaces had different outside convection algorithms specified when", Count)));
+            ShowSevereMessage(
+                state,
+                std::format("{}{}", RoutineName, std::format("{} surfaces had different outside convection algorithms specified when", Count)));
             ShowContinueError(state,
                               "the Zone Outside Convection Algorithm specifies \"SimpleCombined\". SimpleCombined will be used for these surfaces.");
             if (!state.dataGlobal->DisplayExtraWarnings) {
@@ -3018,7 +3017,7 @@ void SetupAdaptiveConvStaticMetaData(EnergyPlusData &state)
             }
 
             static constexpr std::string_view Format_901(
-                "Surface Convection Parameters,{},{},{:.2R},{:.2R},{:.2R},{},{:.2R},{:.2R},{:.2R},{:.2R},{},{},{}\n");
+                "Surface Convection Parameters,{},{},{:.2f},{:.2f},{:.2f},{},{:.2f},{:.2f},{:.2f},{:.3G},{},{},{}\n");
 
             // This reporting rubric (using numbers instead of strings, using negative numbers for "built-in" coefficients) is stupid,
             // but we are maintaining compatibility here
@@ -3058,7 +3057,7 @@ void SetupAdaptiveConvStaticMetaData(EnergyPlusData &state)
             static constexpr std::string_view Format_8000 =
                 "! <Building Convection Parameters:{} Facade>, Perimeter, Height, Xmin, Xmax, Ymin, Ymax, Zmin, Zmax \n";
             static constexpr std::string_view Format_8001 =
-                "Building Convection Parameters:{} Facade, {:.2R},{:.2R},{:.2R},{:.2R},{:.2R},{:.2R},{:.2R},{:.2R}\n";
+                "Building Convection Parameters:{} Facade, {:.2f},{:.2f},{:.2f},{:.2f},{:.2f},{:.2f},{:.2f},{:.2f}\n";
 
             for (int c8 = 0; c8 < (int)DataSurfaces::Compass8::Num; ++c8) {
 
@@ -3082,7 +3081,7 @@ void SetupAdaptiveConvStaticMetaData(EnergyPlusData &state)
             static constexpr std::string_view Format_8800(
                 "! <Building Convection Parameters:Roof>, Area [m2], Perimeter [m], Height [m], Tilt [deg], Azimuth [deg]\n");
             print(state.files.eio, Format_8800); // header for roof
-            static constexpr std::string_view Format_8801("Building Convection Parameters:Roof,{:.2R},{:.2R},{:.2R},{:.2R},{:.2R}\n");
+            static constexpr std::string_view Format_8801("Building Convection Parameters:Roof,{:.2f},{:.2f},{:.2f},{:.2f},{:.2f}\n");
             print(state.files.eio,
                   Format_8801,
                   geoSummaryRoof.Area,
@@ -5493,7 +5492,7 @@ void ShowWarningWindowLocation(EnergyPlusData &state, int &errorIdx, ErrorObject
 {
     if (errorIdx == 0) {
         ShowSevereMessage(state, std::format("{}: Convection model not evaluated (bad relative window location)", eoh.routineName));
-        ShowContinueError(state, EnergyPlus::format("Value for window location = {}", winLoc));
+        ShowContinueError(state, std::format("Value for window location = {}", static_cast<int>(winLoc)));
         ShowContinueError(state, std::format("Occurs for {} named {}", eoh.objectType, eoh.objectName));
         ShowContinueError(state, "Convection surface heat transfer coefficient set to 9.999 [W/m2-K] and the simulation continues");
     }
@@ -6214,7 +6213,7 @@ Real64 CalcMitchell(EnergyPlusData &state, Real64 const WindAtZ, Real64 const Le
     }
     if (state.dataConvect->CalcMitchellErrorIDX == 0) {
         ShowSevereMessage(state, "CalcMitchell: Convection model not evaluated (bad length scale)");
-        ShowContinueError(state, EnergyPlus::format("Value for effective length scale = {:.5R}", LengthScale));
+        ShowContinueError(state, std::format("Value for effective length scale = {:.5f}", LengthScale));
         ShowContinueError(state, std::format("Occurs for surface named = {}", state.dataSurface->Surface(SurfNum).Name));
         ShowContinueError(state, "Convection surface heat transfer coefficient set to 9.999 [W/m2-K] and the simulation continues");
     }
@@ -6274,7 +6273,7 @@ Real64 CalcBlockenWindward(EnergyPlusData &state,
     }
     if (state.dataConvect->CalcBlockenWindwardErrorIDX == 0) {
         ShowSevereMessage(state, "CalcBlockenWindward: Convection model wind angle calculation suspect (developer issue)");
-        ShowContinueError(state, EnergyPlus::format("Value for theta angle = {:.5R}", Theta));
+        ShowContinueError(state, std::format("Value for theta angle = {:.5f}", Theta));
         ShowContinueError(state, std::format("Occurs for surface named = {}", state.dataSurface->Surface(SurfNum).Name));
         ShowContinueError(state, "Convection model uses EmmelVertical correlation and the simulation continues");
     }
@@ -6415,7 +6414,7 @@ Real64 CalcClearRoof(EnergyPlusData &state,
     if (state.dataSurface->Surface(SurfNum).ExtBoundCond != DataSurfaces::OtherSideCondModeledExt) {
         if (state.dataConvect->CalcClearRoofErrorIDX == 0) {
             ShowSevereMessage(state, "CalcClearRoof: Convection model not evaluated (bad value for distance to roof edge)");
-            ShowContinueError(state, EnergyPlus::format("Value for distance to roof edge ={:.3R}", x));
+            ShowContinueError(state, std::format("Value for distance to roof edge ={:.3f}", x));
             ShowContinueError(state, std::format("Occurs for surface named = {}", state.dataSurface->Surface(SurfNum).Name));
             ShowContinueError(state, "Convection surface heat transfer coefficient set to 9.999 [W/m2-K] and the simulation continues");
         }

@@ -3205,6 +3205,7 @@ namespace WindowComplexManager {
                  edgeGlCorrFac);
 
         // process results from TARCOG
+        // cppcheck-suppress knownConditionTrueFalse -- nperr is initialized to 0 but gets modified inside TARCOG90() via reference
         if ((nperr > 0) && (nperr < 1000)) { // process error signal from tarcog
 
             ShowSevereError(state, "Window tarcog returned an error");

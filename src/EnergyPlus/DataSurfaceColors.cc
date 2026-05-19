@@ -153,8 +153,8 @@ void SetUpSchemeColors(EnergyPlusData &state, std::string const &SchemeName, std
             inputProcessor->markObjectAsUsed(std::string(CurrentModuleObject), matchedScheme.key());
 
             for (int numargs = 1;; ++numargs) {
-                auto const drawingElementKey = EnergyPlus::format("drawing_element_{}_type", numargs);
-                auto const colorKey = EnergyPlus::format("color_for_drawing_element_{}", numargs);
+                auto const drawingElementKey = std::format("drawing_element_{}_type", numargs);
+                auto const colorKey = std::format("color_for_drawing_element_{}", numargs);
                 auto const drawingElementIt = schemeFields.find(drawingElementKey);
                 auto const colorIt = schemeFields.find(colorKey);
 
@@ -162,19 +162,19 @@ void SetUpSchemeColors(EnergyPlusData &state, std::string const &SchemeName, std
                     break;
                 }
 
-                std::string const drawingElementFieldName = EnergyPlus::format("Drawing Element {} Type", numargs);
-                std::string const colorFieldName = EnergyPlus::format("Color for Drawing Element {}", numargs);
+                std::string const drawingElementFieldName = std::format("Drawing Element {} Type", numargs);
+                std::string const colorFieldName = std::format("Color for Drawing Element {}", numargs);
                 std::string const drawingElement = (drawingElementIt != schemeFields.end()) ? drawingElementIt->get<std::string>() : "";
 
                 if (colorIt == schemeFields.end()) {
                     if (!drawingElement.empty()) {
                         ShowWarningError(state,
-                                         EnergyPlus::format("SetUpSchemeColors: {}={}, {}={}, {} was blank.  Default color retained.",
-                                                            "Name",
-                                                            SchemeName,
-                                                            drawingElementFieldName,
-                                                            drawingElement,
-                                                            colorFieldName));
+                                         std::format("SetUpSchemeColors: {}={}, {}={}, {} was blank.  Default color retained.",
+                                                     "Name",
+                                                     SchemeName,
+                                                     drawingElementFieldName,
+                                                     drawingElement,
+                                                     colorFieldName));
                     }
                     continue;
                 }
@@ -182,18 +182,18 @@ void SetUpSchemeColors(EnergyPlusData &state, std::string const &SchemeName, std
                 int const numptr = colorIt->get<int>();
                 if (!MatchAndSetColorTextString(state, drawingElement, numptr, ColorType)) {
                     ShowWarningError(state,
-                                     EnergyPlus::format("SetUpSchemeColors: {}={}, {}={}, is invalid.  No color set.",
-                                                        "Name",
-                                                        SchemeName,
-                                                        drawingElementFieldName,
-                                                        drawingElement));
+                                     std::format("SetUpSchemeColors: {}={}, {}={}, is invalid.  No color set.",
+                                                 "Name",
+                                                 SchemeName,
+                                                 drawingElementFieldName,
+                                                 drawingElement));
                 }
             }
         } else {
-            ShowWarningError(state, EnergyPlus::format("SetUpSchemeColors: Name={} not on input file. Default colors will be used.", SchemeName));
+            ShowWarningError(state, std::format("SetUpSchemeColors: Name={} not on input file. Default colors will be used.", SchemeName));
         }
     } else {
-        ShowWarningError(state, EnergyPlus::format("SetUpSchemeColors: Name={} not on input file. Default colors will be used.", SchemeName));
+        ShowWarningError(state, std::format("SetUpSchemeColors: Name={} not on input file. Default colors will be used.", SchemeName));
     }
 }
 

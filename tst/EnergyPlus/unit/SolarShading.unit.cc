@@ -6802,6 +6802,132 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_CalcBeamSolarOnWinRevealSurface)
     EXPECT_NEAR(state->dataSurface->SurfWinBmSolAbsdInsReveal(1), 0.0326, 0.001);
     EXPECT_NEAR(state->dataSurface->SurfWinBmSolAbsdInsReveal(2), 0.0225, 0.001);
 }
+
+TEST_F(EnergyPlusFixture, SolarShadingTest_HorAndVertDividersAreAlwaysIntegers)
+{
+    state->dataGlobal->TimeStepsInHour = 6;
+
+    state->dataSurface->FrameDivider.allocate(3);
+    auto &frameDivider1 = state->dataSurface->FrameDivider(1);
+    frameDivider1.Name = "FrameDivider1";
+    frameDivider1.DividerWidth = 0.2;
+    frameDivider1.HorDividers = 2;
+    frameDivider1.VertDividers = 2;
+
+    auto &frameDivider2 = state->dataSurface->FrameDivider(2);
+    frameDivider2.Name = "FrameDivider2";
+    frameDivider2.DividerWidth = 0.2;
+    frameDivider2.HorDividers = static_cast<int>(2.25);
+    frameDivider2.VertDividers = static_cast<int>(2.99);
+
+    auto &frameDivider3 = state->dataSurface->FrameDivider(3);
+    frameDivider3.Name = "FrameDivider3";
+    frameDivider3.DividerWidth = 0.2;
+    frameDivider3.HorDividers = 3;
+    frameDivider3.VertDividers = 3;
+
+    int NumSurf = 3;
+    state->dataSurface->TotSurfaces = NumSurf;
+    state->dataSurface->Surface.allocate(NumSurf);
+    state->dataSurface->SurfaceWindow.allocate(NumSurf);
+    EnergyPlus::SurfaceGeometry::AllocateSurfaceWindows(*state, NumSurf);
+    Window::initWindowModel(*state);
+    SolarShading::AllocateModuleArrays(*state);
+
+    auto &surf1 = state->dataSurface->Surface(1);
+    auto &surf2 = state->dataSurface->Surface(2);
+    auto &surf3 = state->dataSurface->Surface(3);
+    surf1.Name = "Surface1";
+    surf2.Name = "Surface2";
+    surf3.Name = "Surface3";
+    surf1.Zone = 1;
+    surf2.Zone = 1;
+    surf3.Zone = 1;
+    surf1.spaceNum = 1;
+    surf2.spaceNum = 1;
+    surf3.spaceNum = 1;
+    surf1.Class = DataSurfaces::SurfaceClass::Window;
+    surf2.Class = DataSurfaces::SurfaceClass::Window;
+    surf3.Class = DataSurfaces::SurfaceClass::Window;
+    surf1.ExtBoundCond = DataSurfaces::ExternalEnvironment;
+    surf2.ExtBoundCond = DataSurfaces::ExternalEnvironment;
+    surf3.ExtBoundCond = DataSurfaces::ExternalEnvironment;
+    surf1.HasShadeControl = false;
+    surf2.HasShadeControl = false;
+    surf3.HasShadeControl = false;
+    surf1.Construction = 1;
+    surf2.Construction = 1;
+    surf3.Construction = 1;
+    surf1.FrameDivider = 1;
+    surf2.FrameDivider = 2;
+    surf3.FrameDivider = 3;
+    surf1.Sides = 4;
+    surf2.Sides = 4;
+    surf3.Sides = 4;
+    surf1.Height = 2.0;
+    surf2.Height = 2.0;
+    surf3.Height = 2.0;
+    surf1.Width = 1.0;
+    surf2.Width = 1.0;
+    surf3.Width = 1.0;
+    surf1.SinAzim = 0.0;
+    surf2.SinAzim = 0.0;
+    surf3.SinAzim = 0.0;
+    surf1.CosAzim = 1.0;
+    surf2.CosAzim = 1.0;
+    surf3.CosAzim = 1.0;
+    surf1.SinTilt = 1.0;
+    surf2.SinTilt = 1.0;
+    surf3.SinTilt = 1.0;
+    surf1.CosTilt = 0.0;
+    surf2.CosTilt = 0.0;
+    surf3.CosTilt = 0.0;
+    surf1.Area = 2.0;
+    surf2.Area = 2.0;
+    surf3.Area = 2.0;
+    state->dataSurface->SurfWinFrameArea(1) = 0.64;
+    state->dataSurface->SurfWinFrameArea(2) = 0.64;
+    state->dataSurface->SurfWinFrameArea(3) = 0.64;
+
+    state->dataSurface->SurfActiveConstruction(1) = 1;
+    state->dataSurface->SurfActiveConstruction(2) = 1;
+    state->dataSurface->SurfActiveConstruction(3) = 1;
+
+    state->dataHeatBal->TotConstructs = 1;
+    state->dataConstruction->Construct.allocate(state->dataHeatBal->TotConstructs);
+    auto &construct1 = state->dataConstruction->Construct(1);
+    construct1.TotLayers = 1;
+    construct1.LayerPoint.allocate(1);
+    construct1.LayerPoint(1) = 1;
+    construct1.Name = "Construction1";
+    construct1.TotGlassLayers = 1;
+    construct1.TransSolBeamCoef[0] = 0.9;
+
+    auto &s_mat = state->dataMaterial;
+
+    auto *mat1 = new Material::MaterialGlass;
+    mat1->Name = "GLASS";
+    mat1->group = Material::Group::Glass;
+    s_mat->materials.push_back(mat1);
+    mat1->Num = s_mat->materials.isize();
+    s_mat->materialMap.insert_or_assign(mat1->Name, mat1->Num);
+
+    state->dataGlobal->NumOfZones = 1;
+    state->dataHeatBal->Zone.allocate(1);
+    state->dataHeatBal->Zone(1).spaceIndexes.allocate(1);
+    state->dataHeatBal->Zone(1).spaceIndexes[0] = 1;
+    state->dataHeatBal->space.allocate(1);
+    state->dataHeatBal->space(1).WindowSurfaceFirst = 1;
+    state->dataHeatBal->space(1).WindowSurfaceLast = 3;
+
+    Window::W5InitGlassParameters(*state);
+
+    // fractional parts of HorDividers and VertDividers are truncated
+    EXPECT_EQ(state->dataSurface->SurfWinFrameEdgeArea(1), state->dataSurface->SurfWinFrameEdgeArea(2));
+    EXPECT_NE(state->dataSurface->SurfWinFrameEdgeArea(1), state->dataSurface->SurfWinFrameEdgeArea(3));
+    EXPECT_NE(state->dataSurface->SurfWinFrameEdgeArea(2), state->dataSurface->SurfWinFrameEdgeArea(3));
+}
+
 TEST_F(EnergyPlusFixture, SolarShadingTest_CalcInteriorSolarDistribution_Detailed)
 {
     // Test for detailed window model

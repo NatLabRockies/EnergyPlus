@@ -169,7 +169,7 @@ namespace BranchInputManager {
         //  Find this BranchList in the master BranchList Names
         Found = Util::FindItemInList(BranchListName, state.dataBranchInputManager->BranchList);
         if (Found == 0) {
-            ShowFatalError(state, EnergyPlus::format("GetBranchList: BranchList Name not found={}", BranchListName));
+            ShowFatalError(state, std::format("GetBranchList: BranchList Name not found={}", BranchListName));
         }
 
         // Set data
@@ -179,10 +179,10 @@ namespace BranchInputManager {
         } else if (state.dataBranchInputManager->BranchList(Found).LoopName != LoopName) {
             ShowSevereError(state, "GetBranchList: BranchList Loop Name already assigned");
             ShowContinueError(state,
-                              EnergyPlus::format("BranchList={}, already assigned to loop={}",
-                                                 state.dataBranchInputManager->BranchList(Found).Name,
-                                                 state.dataBranchInputManager->BranchList(Found).LoopName));
-            ShowContinueError(state, EnergyPlus::format("Now requesting assignment to Loop={}", LoopName));
+                              std::format("BranchList={}, already assigned to loop={}",
+                                          state.dataBranchInputManager->BranchList(Found).Name,
+                                          state.dataBranchInputManager->BranchList(Found).LoopName));
+            ShowContinueError(state, std::format("Now requesting assignment to Loop={}", LoopName));
             ErrFound = true;
         }
 
@@ -190,8 +190,8 @@ namespace BranchInputManager {
         NumBranchNames = state.dataBranchInputManager->BranchList(Found).NumOfBranchNames;
         if (isize(BranchNames) < NumBranchNames) {
             ShowSevereError(state, "GetBranchList: Branch Names array not big enough to hold Branch Names");
-            ShowContinueError(state, EnergyPlus::format("Input BranchListName={}, in Loop={}", BranchListName, LoopName));
-            ShowContinueError(state, EnergyPlus::format("BranchName Array size={}, but input size={}", size(BranchNames), (NumBranchNames)));
+            ShowContinueError(state, std::format("Input BranchListName={}, in Loop={}", BranchListName, LoopName));
+            ShowContinueError(state, std::format("BranchName Array size={}, but input size={}", size(BranchNames), (NumBranchNames)));
             ErrFound = true;
         } else {
             BranchNames = "";
@@ -230,7 +230,7 @@ namespace BranchInputManager {
         //  Find this BranchList in the master BranchList Names
         Found = Util::FindItemInList(BranchListName, state.dataBranchInputManager->BranchList);
         if (Found == 0) {
-            ShowFatalError(state, EnergyPlus::format("NumBranchesInBranchList: BranchList Name not found={}", BranchListName));
+            ShowFatalError(state, std::format("NumBranchesInBranchList: BranchList Name not found={}", BranchListName));
         }
 
         NumBranchesInBranchList = state.dataBranchInputManager->BranchList(Found).NumOfBranchNames;
@@ -281,8 +281,8 @@ namespace BranchInputManager {
             size(CompType), size(CompName), size(CompInletNodeNames), size(CompInletNodeNums), size(CompOutletNodeNames), size(CompOutletNodeNums));
         if (MinCompsAllowed < NumComps) {
             ShowSevereError(state, "GetBranchData: Component List arrays not big enough to hold Number of Components");
-            ShowContinueError(state, EnergyPlus::format("Input BranchName={}, in Loop={}", BranchName, LoopName));
-            ShowContinueError(state, EnergyPlus::format("Max Component Array size={}, but input size={}", MinCompsAllowed, NumComps));
+            ShowContinueError(state, std::format("Input BranchName={}, in Loop={}", BranchName, LoopName));
+            ShowContinueError(state, std::format("Max Component Array size={}, but input size={}", MinCompsAllowed, NumComps));
             ShowFatalError(state, "Program terminates due to preceding conditions.");
         }
 
@@ -323,7 +323,7 @@ namespace BranchInputManager {
 
         Found = Util::FindItemInList(BranchName, state.dataBranchInputManager->Branch);
         if (Found == 0) {
-            ShowSevereError(state, EnergyPlus::format("NumCompsInBranch:  Branch not found={}", BranchName));
+            ShowSevereError(state, std::format("NumCompsInBranch:  Branch not found={}", BranchName));
             NumCompsInBranch = 0;
         } else {
             NumCompsInBranch = state.dataBranchInputManager->Branch(Found).NumOfComponents;
@@ -361,7 +361,7 @@ namespace BranchInputManager {
         NumBranches = size(state.dataBranchInputManager->Branch);
 
         if (NumBranches == 0) {
-            ShowSevereError(state, EnergyPlus::format("GetAirBranchIndex:  Branch not found with component = {} \"{}\"", CompType, CompName));
+            ShowSevereError(state, std::format("GetAirBranchIndex:  Branch not found with component = {} \"{}\"", CompType, CompName));
         } else {
             for (BranchNum = 1; BranchNum <= NumBranches; ++BranchNum) {
                 for (CompNum = 1; CompNum <= state.dataBranchInputManager->Branch(BranchNum).NumOfComponents; ++CompNum) {
@@ -414,7 +414,7 @@ namespace BranchInputManager {
         FanName = std::string();
 
         if (NumBranches == 0) {
-            ShowSevereError(state, EnergyPlus::format("GetBranchFanTypeName:  Branch index not found = {}", BranchNum));
+            ShowSevereError(state, std::format("GetBranchFanTypeName:  Branch index not found = {}", BranchNum));
             ErrFound = true;
         } else {
             if (BranchNum > 0 && BranchNum <= NumBranches) {
@@ -432,7 +432,7 @@ namespace BranchInputManager {
                     ErrFound = true;
                 }
             } else {
-                ShowSevereError(state, EnergyPlus::format("GetBranchFanTypeName:  Branch index not found = {}", BranchNum));
+                ShowSevereError(state, std::format("GetBranchFanTypeName:  Branch index not found = {}", BranchNum));
                 ErrFound = true;
             }
         }
@@ -470,7 +470,7 @@ namespace BranchInputManager {
 
         Found = Util::FindItemInList(BranchName, state.dataBranchInputManager->Branch);
         if (Found == 0) {
-            ShowSevereError(state, EnergyPlus::format("GetInternalBranchData:  Branch not found={}", BranchName));
+            ShowSevereError(state, std::format("GetInternalBranchData:  Branch not found={}", BranchName));
             ErrorsFound = true;
             NumComps = 0;
         } else {
@@ -481,10 +481,10 @@ namespace BranchInputManager {
                 NumComps = state.dataBranchInputManager->Branch(Found).NumOfComponents;
                 BComponents({1, NumComps}) = state.dataBranchInputManager->Branch(Found).Component({1, NumComps});
             } else if (state.dataBranchInputManager->Branch(Found).AssignedLoopName != LoopName) {
-                ShowSevereError(state, EnergyPlus::format("Attempt to assign branch to two different loops, Branch={}", BranchName));
-                ShowContinueError(
-                    state, EnergyPlus::format("Branch already assigned to loop={}", state.dataBranchInputManager->Branch(Found).AssignedLoopName));
-                ShowContinueError(state, EnergyPlus::format("New attempt to assign to loop={}", LoopName));
+                ShowSevereError(state, std::format("Attempt to assign branch to two different loops, Branch={}", BranchName));
+                ShowContinueError(state,
+                                  std::format("Branch already assigned to loop={}", state.dataBranchInputManager->Branch(Found).AssignedLoopName));
+                ShowContinueError(state, std::format("New attempt to assign to loop={}", LoopName));
                 ErrorsFound = true;
                 NumComps = 0;
             } else {
@@ -531,7 +531,7 @@ namespace BranchInputManager {
             numSplitters = state.dataBranchInputManager->ConnectorLists(ConnNum).NumOfSplitters;
             numMixers = state.dataBranchInputManager->ConnectorLists(ConnNum).NumOfMixers;
         } else {
-            ShowSevereError(state, EnergyPlus::format("Ref: Loop={}, Connector List not found={}", LoopName, ConnectorListName));
+            ShowSevereError(state, std::format("Ref: Loop={}, Connector List not found={}", LoopName, ConnectorListName));
             ErrorsFound = true;
         }
     }
@@ -575,7 +575,7 @@ namespace BranchInputManager {
         if (not_blank(ConnectorListName)) {
             int Count = Util::FindItemInList(ConnectorListName, state.dataBranchInputManager->ConnectorLists);
             if (Count == 0) {
-                ShowFatalError(state, EnergyPlus::format("GetConnectorList: Connector List not found={}", ConnectorListName));
+                ShowFatalError(state, std::format("GetConnectorList: Connector List not found={}", ConnectorListName));
             }
             Connectoid = state.dataBranchInputManager->ConnectorLists(Count);
             if (present(NumInList)) {
@@ -2464,6 +2464,8 @@ namespace BranchInputManager {
 
         NumDanglingCount = 0;
         NeverFound = true;
+        std::string_view const compType = present(CompType) ? std::string_view{CompType()} : std::string_view{};
+        std::string_view const compName = present(CompName) ? std::string_view{CompName()} : std::string_view{};
         for (BrN = 1; BrN <= (int)state.dataBranchInputManager->Branch.size(); ++BrN) {
             int Found = 0;
             std::string FoundBranchName;
@@ -2495,7 +2497,7 @@ namespace BranchInputManager {
                         state,
                         std::format("AuditBranches: Branch=\"{}\" not found on any BranchLists.", state.dataBranchInputManager->Branch(BrN).Name));
                     if (!FoundBranchName.empty()) {
-                        ShowContinueError(state, EnergyPlus::format("Branch contains component, type=\"{}\", name=\"{}\"", CompType, CompName));
+                        ShowContinueError(state, std::format("Branch contains component, type=\"{}\", name=\"{}\"", compType, compName));
                     }
                 } else {
                     ShowSevereMessage(
@@ -2506,7 +2508,7 @@ namespace BranchInputManager {
             }
         }
         if (mustprint && NeverFound) { // this may be caught during branch input, not sure
-            ShowContinueError(state, EnergyPlus::format("Component, type=\"{}\", name=\"{}\" was not found on any Branch.", CompType, CompName));
+            ShowContinueError(state, std::format("Component, type=\"{}\", name=\"{}\" was not found on any Branch.", compType, compName));
             ShowContinueError(state, "Look for mistyped branch or component names/types.");
         }
         if (!mustprint && NumDanglingCount > 0) {

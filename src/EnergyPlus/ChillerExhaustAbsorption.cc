@@ -126,7 +126,7 @@ ExhaustAbsorberSpecs *ExhaustAbsorberSpecs::factory(EnergyPlusData &state, std::
         return thisObj;
     }
     // If we didn't find it, fatal
-    ShowFatalError(state, EnergyPlus::format("LocalExhaustAbsorberFactory: Error getting inputs for comp named: {}", objectName)); // LCOV_EXCL_LINE
+    ShowFatalError(state, std::format("LocalExhaustAbsorberFactory: Error getting inputs for comp named: {}", objectName)); // LCOV_EXCL_LINE
     // Shut up the compiler
     return nullptr; // LCOV_EXCL_LINE
 }
@@ -184,7 +184,7 @@ void ExhaustAbsorberSpecs::simulate(
         }
     } else {
         // Error, nodes do not match
-        ShowSevereError(state, EnergyPlus::format("Invalid call to Exhaust Absorber Chiller {}", this->Name));
+        ShowSevereError(state, std::format("Invalid call to Exhaust Absorber Chiller {}", this->Name));
         ShowContinueError(state, "Node connections in branch are not consistent with object nodes.");
         ShowFatalError(state, "Preceding conditions cause termination.");
     }
@@ -229,7 +229,7 @@ void ExhaustAbsorberSpecs::getDesignCapacities(
 
     if (!matchfound) {
         // Error, nodes do not match
-        ShowSevereError(state, EnergyPlus::format("SimExhaustAbsorber: Invalid call to Exhaust Absorption Chiller-Heater {}", this->Name));
+        ShowSevereError(state, std::format("SimExhaustAbsorber: Invalid call to Exhaust Absorption Chiller-Heater {}", this->Name));
         ShowContinueError(state, "Node connections in branch are not consistent with object nodes.");
         ShowFatalError(state, "Preceding conditions cause termination.");
     } // Operate as Chiller or Heater
@@ -288,7 +288,7 @@ void GetExhaustAbsorberInput(EnergyPlusData &state)
     int NumExhaustAbsorbers = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
 
     if (NumExhaustAbsorbers <= 0) {
-        ShowSevereError(state, EnergyPlus::format("No {} equipment found in input file", cCurrentModuleObject));
+        ShowSevereError(state, std::format("No {} equipment found in input file", cCurrentModuleObject));
         Get_ErrorsFound = true;
     }
 
@@ -319,7 +319,7 @@ void GetExhaustAbsorberInput(EnergyPlusData &state)
 
         // Get_ErrorsFound will be set to True if problem was found, left untouched otherwise
         GlobalNames::VerifyUniqueChillerName(
-            state, cCurrentModuleObject, s_ipsc->cAlphaArgs(1), Get_ErrorsFound, EnergyPlus::format("{} Name", cCurrentModuleObject));
+            state, cCurrentModuleObject, s_ipsc->cAlphaArgs(1), Get_ErrorsFound, std::format("{} Name", cCurrentModuleObject));
 
         auto &thisChiller = state.dataChillerExhaustAbsorption->ExhaustAbsorber(AbsorberNum);
         thisChiller.Name = s_ipsc->cAlphaArgs(1);
@@ -377,7 +377,7 @@ void GetExhaustAbsorberInput(EnergyPlusData &state)
                                                                 Node::ObjectIsNotParent);
         Node::TestCompSet(state, cCurrentModuleObject, s_ipsc->cAlphaArgs(1), s_ipsc->cAlphaArgs(6), s_ipsc->cAlphaArgs(7), "Hot Water Nodes");
         if (Get_ErrorsFound) {
-            ShowFatalError(state, EnergyPlus::format("Errors found in processing node input for {}={}", cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowFatalError(state, std::format("Errors found in processing node input for {}={}", cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             Get_ErrorsFound = false;
         }
 
@@ -462,8 +462,7 @@ void GetExhaustAbsorberInput(EnergyPlusData &state)
         }
 
         if (Get_ErrorsFound) {
-            ShowFatalError(state,
-                           EnergyPlus::format("Errors found in processing curve input for {}={}", cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowFatalError(state, std::format("Errors found in processing curve input for {}={}", cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             Get_ErrorsFound = false;
         }
         if (Util::SameString(s_ipsc->cAlphaArgs(15), "LeavingCondenser")) {
@@ -472,8 +471,8 @@ void GetExhaustAbsorberInput(EnergyPlusData &state)
             thisChiller.isEnterCondensTemp = true;
         } else {
             thisChiller.isEnterCondensTemp = true;
-            ShowWarningError(state, EnergyPlus::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(15), s_ipsc->cAlphaArgs(15)));
-            ShowContinueError(state, EnergyPlus::format("Entered in {}={}", cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowWarningError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(15), s_ipsc->cAlphaArgs(15)));
+            ShowContinueError(state, std::format("Entered in {}={}", cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ShowContinueError(state, "resetting to ENTERING-CONDENSER, simulation continues");
         }
         // Assign Other Parameters
@@ -483,19 +482,19 @@ void GetExhaustAbsorberInput(EnergyPlusData &state)
             thisChiller.isWaterCooled = true;
         } else {
             thisChiller.isWaterCooled = true;
-            ShowWarningError(state, EnergyPlus::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(16), s_ipsc->cAlphaArgs(16)));
-            ShowContinueError(state, EnergyPlus::format("Entered in {}={}", cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowWarningError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(16), s_ipsc->cAlphaArgs(16)));
+            ShowContinueError(state, std::format("Entered in {}={}", cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ShowContinueError(state, "resetting to WATER-COOLED, simulation continues");
         }
         if (!thisChiller.isEnterCondensTemp && !thisChiller.isWaterCooled) {
             thisChiller.isEnterCondensTemp = true;
-            ShowWarningError(state, EnergyPlus::format("{}=\"{}\", invalid value", cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowWarningError(state, std::format("{}=\"{}\", invalid value", cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ShowContinueError(state, "Invalid to have both LeavingCondenser and AirCooled.");
             ShowContinueError(state, "resetting to EnteringCondenser, simulation continues");
         }
         if (thisChiller.isWaterCooled) {
             if (s_ipsc->lAlphaFieldBlanks(5)) {
-                ShowSevereError(state, EnergyPlus::format("{}=\"{}\", invalid value", cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+                ShowSevereError(state, std::format("{}=\"{}\", invalid value", cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
                 ShowContinueError(state, "For WaterCooled chiller the condenser outlet node is required.");
                 Get_ErrorsFound = true;
             }
@@ -533,7 +532,7 @@ void GetExhaustAbsorberInput(EnergyPlusData &state)
             // Connection not required for air or evap cooled condenser so no call to TestCompSet here
             OutAirNodeManager::CheckAndAddAirNodeNumber(state, thisChiller.CondReturnNodeNum, Okay);
             if (!Okay) {
-                ShowWarningError(state, EnergyPlus::format("{}, Adding OutdoorAir:Node={}", cCurrentModuleObject, s_ipsc->cAlphaArgs(4)));
+                ShowWarningError(state, std::format("{}, Adding OutdoorAir:Node={}", cCurrentModuleObject, s_ipsc->cAlphaArgs(4)));
             }
         }
 
@@ -551,7 +550,7 @@ void GetExhaustAbsorberInput(EnergyPlusData &state)
     }
 
     if (Get_ErrorsFound) {
-        ShowFatalError(state, EnergyPlus::format("Errors found in processing input for {}", cCurrentModuleObject));
+        ShowFatalError(state, std::format("Errors found in processing input for {}", cCurrentModuleObject));
     }
 }
 
@@ -885,7 +884,7 @@ void ExhaustAbsorberSpecs::oneTimeInit_new(EnergyPlusData &state)
         (state.dataLoopNodes->Node(this->ChillSupplyNodeNum).TempSetPointHi == Node::SensedNodeFlagValue)) {
         if (!state.dataGlobal->AnyEnergyManagementSystemInModel) {
             if (!this->ChillSetPointErrDone) {
-                ShowWarningError(state, EnergyPlus::format("Missing temperature setpoint on cool side for chiller heater named {}", this->Name));
+                ShowWarningError(state, std::format("Missing temperature setpoint on cool side for chiller heater named {}", this->Name));
                 ShowContinueError(state, "  A temperature setpoint is needed at the outlet node of this chiller, use a SetpointManager");
                 ShowContinueError(state, "  The overall loop setpoint will be assumed for chiller. The simulation continues ... ");
                 this->ChillSetPointErrDone = true;
@@ -897,7 +896,7 @@ void ExhaustAbsorberSpecs::oneTimeInit_new(EnergyPlusData &state)
             state.dataLoopNodes->NodeSetpointCheck(this->ChillSupplyNodeNum).needsSetpointChecking = false;
             if (errFlag) {
                 if (!this->ChillSetPointErrDone) {
-                    ShowWarningError(state, EnergyPlus::format("Missing temperature setpoint on cool side for chiller heater named {}", this->Name));
+                    ShowWarningError(state, std::format("Missing temperature setpoint on cool side for chiller heater named {}", this->Name));
                     ShowContinueError(state, "  A temperature setpoint is needed at the outlet node of this chiller evaporator ");
                     ShowContinueError(state, "  use a Setpoint Manager to establish a setpoint at the chiller evaporator outlet node ");
                     ShowContinueError(state, "  or use an EMS actuator to establish a setpoint at the outlet node ");
@@ -917,7 +916,7 @@ void ExhaustAbsorberSpecs::oneTimeInit_new(EnergyPlusData &state)
         (state.dataLoopNodes->Node(this->HeatSupplyNodeNum).TempSetPointLo == Node::SensedNodeFlagValue)) {
         if (!state.dataGlobal->AnyEnergyManagementSystemInModel) {
             if (!this->HeatSetPointErrDone) {
-                ShowWarningError(state, EnergyPlus::format("Missing temperature setpoint on heat side for chiller heater named {}", this->Name));
+                ShowWarningError(state, std::format("Missing temperature setpoint on heat side for chiller heater named {}", this->Name));
                 ShowContinueError(state, "  A temperature setpoint is needed at the outlet node of this chiller, use a SetpointManager");
                 ShowContinueError(state, "  The overall loop setpoint will be assumed for chiller. The simulation continues ... ");
                 this->HeatSetPointErrDone = true;
@@ -1122,8 +1121,8 @@ void ExhaustAbsorberSpecs::size(EnergyPlusData &state)
                                 ShowMessage(
                                     state,
                                     std::format("SizeChillerHeaterAbsorptionDoubleEffect: Potential issue with equipment sizing for {}", this->Name));
-                                ShowContinueError(state, EnergyPlus::format("User-Specified Nominal Capacity of {:.2R} [W]", NomCapUser));
-                                ShowContinueError(state, EnergyPlus::format("differs from Design Size Nominal Capacity of {:.2R} [W]", tmpNomCap));
+                                ShowContinueError(state, std::format("User-Specified Nominal Capacity of {:.2f} [W]", NomCapUser));
+                                ShowContinueError(state, std::format("differs from Design Size Nominal Capacity of {:.2f} [W]", tmpNomCap));
                                 ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                 ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                             }
@@ -1197,11 +1196,11 @@ void ExhaustAbsorberSpecs::size(EnergyPlusData &state)
                                 ShowMessage(
                                     state,
                                     std::format("SizeChillerAbsorptionDoubleEffect: Potential issue with equipment sizing for {}", this->Name));
-                                ShowContinueError(
-                                    state, EnergyPlus::format("User-Specified Design Chilled Water Flow Rate of {:.5R} [m3/s]", EvapVolFlowRateUser));
                                 ShowContinueError(state,
-                                                  EnergyPlus::format("differs from Design Size Design Chilled Water Flow Rate of {:.5R} [m3/s]",
-                                                                     tmpEvapVolFlowRate));
+                                                  std::format("User-Specified Design Chilled Water Flow Rate of {:#G} [m3/s]", EvapVolFlowRateUser));
+                                ShowContinueError(
+                                    state,
+                                    std::format("differs from Design Size Design Chilled Water Flow Rate of {:#G} [m3/s]", tmpEvapVolFlowRate));
                                 ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                 ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                             }
@@ -1280,11 +1279,10 @@ void ExhaustAbsorberSpecs::size(EnergyPlusData &state)
                                 ShowMessage(
                                     state,
                                     std::format("SizeChillerHeaterAbsorptionDoubleEffect: Potential issue with equipment sizing for {}", this->Name));
-                                ShowContinueError(
-                                    state, EnergyPlus::format("User-Specified Design Hot Water Flow Rate of {:.5R} [m3/s]", HeatRecVolFlowRateUser));
                                 ShowContinueError(state,
-                                                  EnergyPlus::format("differs from Design Size Design Hot Water Flow Rate of {:.5R} [m3/s]",
-                                                                     tmpHeatRecVolFlowRate));
+                                                  std::format("User-Specified Design Hot Water Flow Rate of {:#G} [m3/s]", HeatRecVolFlowRateUser));
+                                ShowContinueError(
+                                    state, std::format("differs from Design Size Design Hot Water Flow Rate of {:#G} [m3/s]", tmpHeatRecVolFlowRate));
                                 ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                 ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                             }
@@ -1367,11 +1365,10 @@ void ExhaustAbsorberSpecs::size(EnergyPlusData &state)
                                     state,
                                     std::format("SizeChillerAbsorptionDoubleEffect: Potential issue with equipment sizing for {}", this->Name));
                                 ShowContinueError(
+                                    state, std::format("User-Specified Design Condenser Water Flow Rate of {:#G} [m3/s]", CondVolFlowRateUser));
+                                ShowContinueError(
                                     state,
-                                    EnergyPlus::format("User-Specified Design Condenser Water Flow Rate of {:.5R} [m3/s]", CondVolFlowRateUser));
-                                ShowContinueError(state,
-                                                  EnergyPlus::format("differs from Design Size Design Condenser Water Flow Rate of {:.5R} [m3/s]",
-                                                                     tmpCondVolFlowRate));
+                                    std::format("differs from Design Size Design Condenser Water Flow Rate of {:#G} [m3/s]", tmpCondVolFlowRate));
                                 ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                 ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                             }

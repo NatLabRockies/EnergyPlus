@@ -4136,7 +4136,7 @@ This input object is used to describe the properties of a single state for compl
 
 The optical properties are given as a two-dimensional matrix describing the basis and four two-dimensional matrices of system bidirectional optical properties.
 
-These input objects will generally be exported directly from the WINDOW program and it is expected that users usually will not develop the input themselves. However, this is an option for users who prefer to use a different method (e.g., Monte-Carlo ray-trace or measurement) of determining optical properties.
+These input objects will generally be exported directly from the \href{https://windows.lbl.gov/software-tools#window-heading}{WINDOW} program and it is expected that users usually will not develop the input themselves. However, this is an option for users who prefer to use a different method (e.g., Monte-Carlo ray-trace or measurement) of determining optical properties.
 
 Multiple instances of this object are used to define the separate operating states of complex fenestration.~ For example, blinds could be deployed or redirected to create a new state, or electrochromic glazings could change transmittance.~ Each separate state defines the materials present and the overall optical performance.~ If the glazing system has only one state, then only one of these objects is needed.
 
@@ -4449,17 +4449,17 @@ Construction:WindowEquivalentLayer,
 
 \subsection{Construction:WindowDataFile}\label{constructionwindowdatafile}
 
-The WINDOW program, which does a thermal and optical analysis of a window under different design conditions, writes a data file (``Window data file'') containing a description of the window that was analyzed. The Construction:WindowDataFile object allows a window to be read in from the WINDOW data file---see ``Importing Windows from WINDOW.'' For information on adding a shading device to the window see ``\hyperref[windowpropertyshadingcontrol]{WindowShadingControl}.''
+The \href{https://windows.lbl.gov/software-tools#window-heading}{WINDOW} program, which does a thermal and optical analysis of a window under different design conditions, writes a data file (``Window data file'') containing a description of the window that was analyzed. The Construction:WindowDataFile object allows a window to be read in from the ``Window data file''---see \hyperref[importing-windows-from-window-program]{Importing Windows from WINDOW Program}. For information on adding a shading device to the window see ``\hyperref[windowpropertyshadingcontrol]{WindowShadingControl}.''
 
 \subsubsection{Inputs}\label{inputs-42}
 
 \paragraph{Field: Name}\label{field-name-36}
 
-This is the name of a window on the Window data file. An error will result if EnergyPlus cannot find a window of this name on the file, or if the file, shown in the next field, is not present. The location of the data file should be specified in the File Name field. For details on what is done with the data if a matching window is found on the file see ``Importing Windows from WINDOW.''
+This is the name of a window on the ``Window data file''. An error will result if EnergyPlus cannot find a window of this name on the file, or if the file, shown in the next field, is not present. The location of the data file should be specified in the File Name field. For details on what is done with the data if a matching window is found on the file see \hyperref[importing-windows-from-window-program]{Importing Windows from WINDOW Program}.
 
 \paragraph{Field: File Name}\label{field-file-name-000}
 
-This is the file name of the Window data file that contains the Window referenced in the previous field. The field may include a full path with file name, for precise results. The field must be \textless{}= 100 characters. The file name must not include commas or an exclamation point. A relative path or a simple file name should work with version 7.0 or later when using EP-Launch even though EP-Launch uses temporary directories as part of the execution of EnergyPlus. If using RunEPlus.bat to run EnergyPlus from the command line, a relative path or a simple file name may work if RunEPlus.bat is run from the folder that contains EnergyPlus.exe.
+This is the file name of the ``Window data file'' that contains the Window referenced in the previous field. The field may include a full path with file name, for precise results. The field must be \textless{}= 100 characters. The file name must not include commas or an exclamation point. A relative path or a simple file name should work with version 7.0 or later when using EP-Launch even though EP-Launch uses temporary directories as part of the execution of EnergyPlus. If using RunEPlus.bat to run EnergyPlus from the command line, a relative path or a simple file name may work if RunEPlus.bat is run from the folder that contains EnergyPlus.exe.
 
 If this field is left blank, the file name is defaulted to Window5DataFile.dat.
 

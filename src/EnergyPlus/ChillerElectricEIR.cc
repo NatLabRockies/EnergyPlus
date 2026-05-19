@@ -127,7 +127,7 @@ ElectricEIRChillerSpecs *ElectricEIRChillerSpecs::factory(EnergyPlusData &state,
         return thisObj;
     }
     // If we didn't find it, fatal
-    ShowFatalError(state, EnergyPlus::format("LocalElectEIRChillerFactory: Error getting inputs for object named: {}", objectName)); // LCOV_EXCL_LINE
+    ShowFatalError(state, std::format("LocalElectEIRChillerFactory: Error getting inputs for object named: {}", objectName)); // LCOV_EXCL_LINE
     // Shut up the compiler
     return nullptr; // LCOV_EXCL_LINE
 }
@@ -234,7 +234,7 @@ void GetElectricEIRChillerInput(EnergyPlusData &state)
     int NumElectricEIRChillers = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
 
     if (NumElectricEIRChillers <= 0) {
-        ShowSevereError(state, EnergyPlus::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
+        ShowSevereError(state, std::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
         ErrorsFound = true;
     }
 
@@ -271,22 +271,22 @@ void GetElectricEIRChillerInput(EnergyPlusData &state)
         //   Performance curves
         thisChiller.ChillerCapFTIndex = Curve::GetCurveIndex(state, s_ipsc->cAlphaArgs(2));
         if (thisChiller.ChillerCapFTIndex == 0) {
-            ShowSevereError(state, EnergyPlus::format("{}{} \"{}\"", RoutineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-            ShowContinueError(state, EnergyPlus::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2)));
+            ShowSevereError(state, std::format("{}{} \"{}\"", RoutineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowContinueError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2)));
             ErrorsFound = true;
         }
 
         thisChiller.ChillerEIRFTIndex = Curve::GetCurveIndex(state, s_ipsc->cAlphaArgs(3));
         if (thisChiller.ChillerEIRFTIndex == 0) {
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\"", RoutineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-            ShowContinueError(state, EnergyPlus::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3)));
+            ShowSevereError(state, std::format("{}{}=\"{}\"", RoutineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowContinueError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3)));
             ErrorsFound = true;
         }
 
         thisChiller.ChillerEIRFPLRIndex = Curve::GetCurveIndex(state, s_ipsc->cAlphaArgs(4));
         if (thisChiller.ChillerEIRFPLRIndex == 0) {
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\"", RoutineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-            ShowContinueError(state, EnergyPlus::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4)));
+            ShowSevereError(state, std::format("{}{}=\"{}\"", RoutineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowContinueError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4)));
             ErrorsFound = true;
         }
 
@@ -318,8 +318,8 @@ void GetElectricEIRChillerInput(EnergyPlusData &state)
         } else if (Util::SameString(s_ipsc->cAlphaArgs(9), "EvaporativelyCooled")) {
             thisChiller.CondenserType = DataPlant::CondenserType::EvapCooled;
         } else {
-            ShowSevereError(state, EnergyPlus::format("{}{}: {}", RoutineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-            ShowContinueError(state, EnergyPlus::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(9), s_ipsc->cAlphaArgs(9)));
+            ShowSevereError(state, std::format("{}{}: {}", RoutineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowContinueError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(9), s_ipsc->cAlphaArgs(9)));
             ShowContinueError(state, "Valid entries are AirCooled, WaterCooled, or EvaporativelyCooled");
             ErrorsFound = true;
         }
@@ -355,8 +355,8 @@ void GetElectricEIRChillerInput(EnergyPlusData &state)
             bool Okay = true;
             OutAirNodeManager::CheckAndAddAirNodeNumber(state, thisChiller.CondInletNodeNum, Okay);
             if (!Okay) {
-                ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\"", RoutineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-                ShowContinueError(state, EnergyPlus::format("Adding OutdoorAir:Node={}", s_ipsc->cAlphaArgs(7)));
+                ShowWarningError(state, std::format("{}{}=\"{}\"", RoutineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+                ShowContinueError(state, std::format("Adding OutdoorAir:Node={}", s_ipsc->cAlphaArgs(7)));
             }
 
             thisChiller.CondOutletNodeNum = Node::GetOnlySingleNode(state,
@@ -372,7 +372,7 @@ void GetElectricEIRChillerInput(EnergyPlusData &state)
         } else if (thisChiller.CondenserType == DataPlant::CondenserType::WaterCooled) {
             // Condenser inlet node name is necessary for water-cooled condenser
             if (s_ipsc->lAlphaFieldBlanks(7) || s_ipsc->lAlphaFieldBlanks(8)) {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\"", RoutineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+                ShowSevereError(state, std::format("{}{}=\"{}\"", RoutineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
                 ShowContinueError(state, "Condenser Inlet or Outlet Node Name is blank.");
                 ErrorsFound = true;
             }
@@ -403,7 +403,7 @@ void GetElectricEIRChillerInput(EnergyPlusData &state)
         } else {
             // Condenser inlet node name is necessary (never should reach this part of code)
             if (s_ipsc->lAlphaFieldBlanks(7) || s_ipsc->lAlphaFieldBlanks(8)) {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\"", RoutineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+                ShowSevereError(state, std::format("{}{}=\"{}\"", RoutineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
                 ShowContinueError(state, "Condenser Inlet or Outlet Node Name is blank.");
                 ErrorsFound = true;
             }
@@ -437,8 +437,8 @@ void GetElectricEIRChillerInput(EnergyPlusData &state)
 
         thisChiller.FlowMode = static_cast<DataPlant::FlowMode>(getEnumValue(DataPlant::FlowModeNamesUC, s_ipsc->cAlphaArgs(10)));
         if (thisChiller.FlowMode == DataPlant::FlowMode::Invalid) {
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\",", RoutineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-            ShowContinueError(state, EnergyPlus::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(10), s_ipsc->cAlphaArgs(10)));
+            ShowSevereError(state, std::format("{}{}=\"{}\",", RoutineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowContinueError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(10), s_ipsc->cAlphaArgs(10)));
             ShowContinueError(state, "Available choices are ConstantFlow, NotModulated, or LeavingSetpointModulated");
             ShowContinueError(state, "Flow mode NotModulated is assumed and the simulation continues.");
             thisChiller.FlowMode = DataPlant::FlowMode::NotModulated;
@@ -450,14 +450,14 @@ void GetElectricEIRChillerInput(EnergyPlusData &state)
             thisChiller.RefCapWasAutoSized = true;
         }
         if (s_ipsc->rNumericArgs(1) == 0.0) {
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\"", RoutineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-            ShowContinueError(state, EnergyPlus::format("Invalid {}={:.2R}", s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1)));
+            ShowSevereError(state, std::format("{}{}=\"{}\"", RoutineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowContinueError(state, std::format("Invalid {}={:.2f}", s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1)));
             ErrorsFound = true;
         }
         thisChiller.RefCOP = s_ipsc->rNumericArgs(2);
         if (s_ipsc->rNumericArgs(2) == 0.0) {
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\"", RoutineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-            ShowContinueError(state, EnergyPlus::format("Invalid {}={:.2R}", s_ipsc->cNumericFieldNames(2), s_ipsc->rNumericArgs(2)));
+            ShowSevereError(state, std::format("{}{}=\"{}\"", RoutineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowContinueError(state, std::format("Invalid {}={:.2f}", s_ipsc->cNumericFieldNames(2), s_ipsc->rNumericArgs(2)));
             ErrorsFound = true;
         }
         thisChiller.TempRefEvapOut = s_ipsc->rNumericArgs(3);
@@ -483,18 +483,18 @@ void GetElectricEIRChillerInput(EnergyPlusData &state)
         if (thisChiller.MinPartLoadRat > thisChiller.MaxPartLoadRat) {
             ShowSevereError(state, std::format("{}{}=\"{}\"", RoutineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ShowContinueError(state,
-                              EnergyPlus::format("{} [{:.3R}] > {} [{:.3R}]",
-                                                 s_ipsc->cNumericFieldNames(7),
-                                                 s_ipsc->rNumericArgs(7),
-                                                 s_ipsc->cNumericFieldNames(8),
-                                                 s_ipsc->rNumericArgs(8)));
+                              std::format("{} [{:.3f}] > {} [{:.3f}]",
+                                          s_ipsc->cNumericFieldNames(7),
+                                          s_ipsc->rNumericArgs(7),
+                                          s_ipsc->cNumericFieldNames(8),
+                                          s_ipsc->rNumericArgs(8)));
             ShowContinueError(state, "Minimum part load ratio must be less than or equal to the maximum part load ratio ");
             ErrorsFound = true;
         }
 
         if (thisChiller.MinUnloadRat < thisChiller.MinPartLoadRat || thisChiller.MinUnloadRat > thisChiller.MaxPartLoadRat) {
             ShowSevereError(state, std::format("{}{}=\"{}\"", RoutineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-            ShowContinueError(state, EnergyPlus::format("{} = {:.3R}", s_ipsc->cNumericFieldNames(10), s_ipsc->rNumericArgs(10)));
+            ShowContinueError(state, std::format("{} = {:.3f}", s_ipsc->cNumericFieldNames(10), s_ipsc->rNumericArgs(10)));
             ShowContinueError(
                 state, std::format("{} must be greater than or equal to the {}", s_ipsc->cNumericFieldNames(10), s_ipsc->cNumericFieldNames(7)));
             ShowContinueError(state,
@@ -504,7 +504,7 @@ void GetElectricEIRChillerInput(EnergyPlusData &state)
 
         if (thisChiller.OptPartLoadRat < thisChiller.MinPartLoadRat || thisChiller.OptPartLoadRat > thisChiller.MaxPartLoadRat) {
             ShowSevereError(state, std::format("{}{}=\"{}\"", RoutineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-            ShowContinueError(state, EnergyPlus::format("{} = {:.3R}", s_ipsc->cNumericFieldNames(9), s_ipsc->rNumericArgs(9)));
+            ShowContinueError(state, std::format("{} = {:.3f}", s_ipsc->cNumericFieldNames(9), s_ipsc->rNumericArgs(9)));
             ShowContinueError(
                 state, std::format("{} must be greater than or equal to the {}", s_ipsc->cNumericFieldNames(9), s_ipsc->cNumericFieldNames(7)));
             ShowContinueError(state,
@@ -517,7 +517,7 @@ void GetElectricEIRChillerInput(EnergyPlusData &state)
 
         if (thisChiller.CompPowerToCondenserFrac < 0.0 || thisChiller.CompPowerToCondenserFrac > 1.0) {
             ShowSevereError(state, std::format("{}{}=\"{}\"", RoutineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-            ShowContinueError(state, EnergyPlus::format("{} = {:.3R}", s_ipsc->cNumericFieldNames(12), s_ipsc->rNumericArgs(12)));
+            ShowContinueError(state, std::format("{} = {:.3f}", s_ipsc->cNumericFieldNames(12), s_ipsc->rNumericArgs(12)));
             ShowContinueError(state, std::format("{} must be greater than or equal to zero", s_ipsc->cNumericFieldNames(12)));
             ShowContinueError(state, std::format("{} must be less than or equal to one", s_ipsc->cNumericFieldNames(12)));
             ErrorsFound = true;
@@ -1410,11 +1410,10 @@ void ElectricEIRChillerSpecs::size(EnergyPlusData &state)
                                 state.dataSize->AutoVsHardSizingThreshold) {
                                 ShowMessage(state, std::format("SizeChillerElectricEIR: Potential issue with equipment sizing for {}", this->Name));
                                 ShowContinueError(
+                                    state, std::format("User-Specified Reference Chilled Water Flow Rate of {:#G} [m3/s]", EvapVolFlowRateUser));
+                                ShowContinueError(
                                     state,
-                                    EnergyPlus::format("User-Specified Reference Chilled Water Flow Rate of {:.5R} [m3/s]", EvapVolFlowRateUser));
-                                ShowContinueError(state,
-                                                  EnergyPlus::format("differs from Design Size Reference Chilled Water Flow Rate of {:.5R} [m3/s]",
-                                                                     tmpEvapVolFlowRate));
+                                    std::format("differs from Design Size Reference Chilled Water Flow Rate of {:#G} [m3/s]", tmpEvapVolFlowRate));
                                 ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                 ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                             }
@@ -1470,8 +1469,8 @@ void ElectricEIRChillerSpecs::size(EnergyPlusData &state)
                         if (state.dataGlobal->DisplayExtraWarnings) {
                             if ((std::abs(tmpNomCap - RefCapUser) / RefCapUser) > state.dataSize->AutoVsHardSizingThreshold) {
                                 ShowMessage(state, std::format("SizeChillerElectricEIR: Potential issue with equipment sizing for {}", this->Name));
-                                ShowContinueError(state, EnergyPlus::format("User-Specified Reference Capacity of {:.2R} [W]", RefCapUser));
-                                ShowContinueError(state, EnergyPlus::format("differs from Design Size Reference Capacity of {:.2R} [W]", tmpNomCap));
+                                ShowContinueError(state, std::format("User-Specified Reference Capacity of {:.2f} [W]", RefCapUser));
+                                ShowContinueError(state, std::format("differs from Design Size Reference Capacity of {:.2f} [W]", tmpNomCap));
                                 ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                 ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                             }
@@ -1535,11 +1534,10 @@ void ElectricEIRChillerSpecs::size(EnergyPlusData &state)
                                 state.dataSize->AutoVsHardSizingThreshold) {
                                 ShowMessage(state, std::format("SizeChillerElectricEIR: Potential issue with equipment sizing for {}", this->Name));
                                 ShowContinueError(
+                                    state, std::format("User-Specified Reference Condenser Fluid Flow Rate of {:#G} [m3/s]", CondVolFlowRateUser));
+                                ShowContinueError(
                                     state,
-                                    EnergyPlus::format("User-Specified Reference Condenser Fluid Flow Rate of {:.5R} [m3/s]", CondVolFlowRateUser));
-                                ShowContinueError(state,
-                                                  EnergyPlus::format("differs from Design Size Reference Condenser Fluid Flow Rate of {:.5R} [m3/s]",
-                                                                     tmpCondVolFlowRate));
+                                    std::format("differs from Design Size Reference Condenser Fluid Flow Rate of {:#G} [m3/s]", tmpCondVolFlowRate));
                                 ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                 ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                             }
@@ -1640,12 +1638,10 @@ void ElectricEIRChillerSpecs::size(EnergyPlusData &state)
                         if ((std::abs(tempHeatRecVolFlowRate - nomHeatRecVolFlowRateUser) / nomHeatRecVolFlowRateUser) >
                             state.dataSize->AutoVsHardSizingThreshold) {
                             ShowMessage(state, std::format("SizeChillerElectricEIR: Potential issue with equipment sizing for {}", this->Name));
-                            ShowContinueError(
-                                state,
-                                EnergyPlus::format("User-Specified Heat Recovery Water Flow Rate of {:.5R} [m3/s]", nomHeatRecVolFlowRateUser));
                             ShowContinueError(state,
-                                              EnergyPlus::format("differs from Design Size Heat Recovery Water Flow Rate of {:.5R} [m3/s]",
-                                                                 tempHeatRecVolFlowRate));
+                                              std::format("User-Specified Heat Recovery Water Flow Rate of {:#G} [m3/s]", nomHeatRecVolFlowRateUser));
+                            ShowContinueError(
+                                state, std::format("differs from Design Size Heat Recovery Water Flow Rate of {:#G} [m3/s]", tempHeatRecVolFlowRate));
                             ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                             ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                         }
@@ -1986,13 +1982,12 @@ void ElectricEIRChillerSpecs::calculate(EnergyPlusData &state, Real64 &MyLoad, b
         if (this->ChillerCapFTError < 1 && this->CWPlantLoc.side->FlowLock != DataPlant::FlowLock::Unlocked && !state.dataGlobal->WarmupFlag) {
             ++this->ChillerCapFTError;
             ShowWarningError(state, std::format("CHILLER:ELECTRIC:EIR \"{}\":", this->Name));
-            ShowContinueError(
-                state, EnergyPlus::format(" Chiller Capacity as a Function of Temperature curve output is negative ({:.3R}).", this->ChillerCapFT));
-            ShowContinueError(
-                state,
-                EnergyPlus::format(" Negative value occurs using an Evaporator Outlet Temp of {:.1R} and a Condenser Inlet Temp of {:.1R}.",
-                                   EvapOutletTempSetPoint,
-                                   condInletTemp));
+            ShowContinueError(state,
+                              std::format(" Chiller Capacity as a Function of Temperature curve output is negative ({:.3f}).", this->ChillerCapFT));
+            ShowContinueError(state,
+                              std::format(" Negative value occurs using an Evaporator Outlet Temp of {:.1f} and a Condenser Inlet Temp of {:.1f}.",
+                                          EvapOutletTempSetPoint,
+                                          condInletTemp));
             ShowContinueErrorTimeStamp(state, " Resetting curve output to zero and continuing simulation.");
         } else if (this->CWPlantLoc.side->FlowLock != DataPlant::FlowLock::Unlocked && !state.dataGlobal->WarmupFlag) {
             ++this->ChillerCapFTError;
@@ -2259,13 +2254,11 @@ void ElectricEIRChillerSpecs::calculate(EnergyPlusData &state, Real64 &MyLoad, b
         if (this->ChillerEIRFTError < 1 && this->CWPlantLoc.side->FlowLock != DataPlant::FlowLock::Unlocked && !state.dataGlobal->WarmupFlag) {
             ++this->ChillerEIRFTError;
             ShowWarningError(state, std::format("CHILLER:ELECTRIC:EIR \"{}\":", this->Name));
+            ShowContinueError(state, std::format(" Chiller EIR as a Function of Temperature curve output is negative ({:.3f}).", this->ChillerEIRFT));
             ShowContinueError(state,
-                              EnergyPlus::format(" Chiller EIR as a Function of Temperature curve output is negative ({:.3R}).", this->ChillerEIRFT));
-            ShowContinueError(
-                state,
-                EnergyPlus::format(" Negative value occurs using an Evaporator Outlet Temp of {:.1R} and a Condenser Inlet Temp of {:.1R}.",
-                                   this->EvapOutletTemp,
-                                   condInletTemp));
+                              std::format(" Negative value occurs using an Evaporator Outlet Temp of {:.1f} and a Condenser Inlet Temp of {:.1f}.",
+                                          this->EvapOutletTemp,
+                                          condInletTemp));
             ShowContinueErrorTimeStamp(state, " Resetting curve output to zero and continuing simulation.");
         } else if (this->CWPlantLoc.side->FlowLock != DataPlant::FlowLock::Unlocked && !state.dataGlobal->WarmupFlag) {
             ++this->ChillerEIRFTError;
@@ -2284,9 +2277,8 @@ void ElectricEIRChillerSpecs::calculate(EnergyPlusData &state, Real64 &MyLoad, b
         if (this->ChillerEIRFPLRError < 1 && this->CWPlantLoc.side->FlowLock != DataPlant::FlowLock::Unlocked && !state.dataGlobal->WarmupFlag) {
             ++this->ChillerEIRFPLRError;
             ShowWarningError(state, std::format("CHILLER:ELECTRIC:EIR \"{}\":", this->Name));
-            ShowContinueError(state,
-                              EnergyPlus::format(" Chiller EIR as a function of PLR curve output is negative ({:.3R}).", this->ChillerEIRFPLR));
-            ShowContinueError(state, EnergyPlus::format(" Negative value occurs using a part-load ratio of {:.3R}.", PartLoadRat));
+            ShowContinueError(state, std::format(" Chiller EIR as a function of PLR curve output is negative ({:.3f}).", this->ChillerEIRFPLR));
+            ShowContinueError(state, std::format(" Negative value occurs using a part-load ratio of {:.3f}.", PartLoadRat));
             ShowContinueErrorTimeStamp(state, " Resetting curve output to zero and continuing simulation.");
         } else if (this->CWPlantLoc.side->FlowLock != DataPlant::FlowLock::Unlocked && !state.dataGlobal->WarmupFlag) {
             ++this->ChillerEIRFPLRError;

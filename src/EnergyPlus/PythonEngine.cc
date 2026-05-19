@@ -404,10 +404,10 @@ sys.argv.append("energyplus")
         for (auto &p : std::filesystem::directory_iterator(pathToPythonPackages)) {
             if (p.is_directory()) {
                 std::string dirName = p.path().filename().string();
-                if (dirName.starts_with("tcl") && dirName.find('.', 0) > 0) {
+                if (dirName.starts_with("tcl") && dirName.find('.') != std::string::npos) {
                     tclConfigDir = dirName;
                 }
-                if (dirName.starts_with("tk") && dirName.find('.', 0) > 0) {
+                if (dirName.starts_with("tk") && dirName.find('.') != std::string::npos) {
                     tkConfigDir = dirName;
                 }
                 if (!tclConfigDir.empty() && !tkConfigDir.empty()) {

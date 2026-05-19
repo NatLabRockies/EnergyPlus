@@ -5310,10 +5310,8 @@ void UpdateThermalHistories(EnergyPlusData &state)
                         SurfOutsideTempCurr * construct.CTFTUserOut[0] + state.dataHeatBalSurf->SurfTempIn(SurfNum) * construct.CTFTUserIn[0] +
                         state.dataHeatBalSurf->SurfQsrcHist(SurfNum, 1) * construct.CTFTUserSource[0] +
                         state.dataHeatBalFanSys->CTFTuserConstPart(SurfNum);
-                }
 
-                // Set current outside flux:
-                if (construct.SourceSinkPresent) {
+                    // Set current outside flux:
                     state.dataHeatBalSurf->SurfOutsideFluxHist(1)(SurfNum) =
                         SurfOutsideTempCurr * construct.CTFOutside[0] - state.dataHeatBalSurf->SurfTempIn(SurfNum) * construct.CTFCross[0] +
                         state.dataHeatBalSurf->SurfQsrcHist(SurfNum, 1) * construct.CTFSourceOut[0] +
@@ -9936,7 +9934,7 @@ void InitSurfacePropertyViewFactors(EnergyPlusData &state)
             }
             if (Surface.IsSurfPropertyGndSurfacesDefined) {
                 GndSurfsNum = Surface.SurfPropertyGndSurfIndex;
-                auto &GrndSurfsProperty = state.dataSurface->GroundSurfsProperty(GndSurfsNum);
+                auto const &GrndSurfsProperty = state.dataSurface->GroundSurfsProperty(GndSurfsNum);
                 GroundSurfsViewFactor = GrndSurfsProperty.SurfsViewFactorSum;
                 IsGroundViewFactorSet = GrndSurfsProperty.IsGroundViewFactorSet;
                 SrdSurfsViewFactor += GroundSurfsViewFactor;

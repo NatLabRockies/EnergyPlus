@@ -152,25 +152,24 @@ namespace DesiccantDehumidifiers {
         if (CompIndex == 0) {
             DesicDehumNum = Util::FindItemInList(CompName, state.dataDesiccantDehumidifiers->DesicDehum);
             if (DesicDehumNum == 0) {
-                ShowFatalError(state, EnergyPlus::format("SimDesiccantDehumidifier: Unit not found={}", CompName));
+                ShowFatalError(state, std::format("SimDesiccantDehumidifier: Unit not found={}", CompName));
             }
             CompIndex = DesicDehumNum;
         } else {
             DesicDehumNum = CompIndex;
             if (DesicDehumNum > state.dataDesiccantDehumidifiers->NumDesicDehums || DesicDehumNum < 1) {
                 ShowFatalError(state,
-                               EnergyPlus::format("SimDesiccantDehumidifier:  Invalid CompIndex passed={}, Number of Units={}, Entered Unit name={}",
-                                                  DesicDehumNum,
-                                                  state.dataDesiccantDehumidifiers->NumDesicDehums,
-                                                  CompName));
+                               std::format("SimDesiccantDehumidifier:  Invalid CompIndex passed={}, Number of Units={}, Entered Unit name={}",
+                                           DesicDehumNum,
+                                           state.dataDesiccantDehumidifiers->NumDesicDehums,
+                                           CompName));
             }
             if (CompName != state.dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).Name) {
-                ShowFatalError(
-                    state,
-                    EnergyPlus::format("SimDesiccantDehumidifier: Invalid CompIndex passed={}, Unit name={}, stored Unit Name for that index={}",
-                                       DesicDehumNum,
-                                       CompName,
-                                       state.dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).Name));
+                ShowFatalError(state,
+                               std::format("SimDesiccantDehumidifier: Invalid CompIndex passed={}, Unit name={}, stored Unit Name for that index={}",
+                                           DesicDehumNum,
+                                           CompName,
+                                           state.dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).Name));
             }
         }
 
@@ -188,8 +187,7 @@ namespace DesiccantDehumidifiers {
         } break;
         default: {
             ShowFatalError(
-                state,
-                EnergyPlus::format("Invalid type, Desiccant Dehumidifer={}", state.dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).DehumType));
+                state, std::format("Invalid type, Desiccant Dehumidifer={}", state.dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).DehumType));
         } break;
         }
 
@@ -353,8 +351,8 @@ namespace DesiccantDehumidifiers {
                                                                 Node::ObjectIsParent);
 
             if (Util::SameString(Alphas(7), "LEAVING HUMRAT:BYPASS")) {
-                ShowWarningError(state, EnergyPlus::format("{}{} = {}", RoutineName, CurrentModuleObject, desicDehum.Name));
-                ShowContinueError(state, EnergyPlus::format("Obsolete {} = {}", cAlphaFields(7), Alphas(7)));
+                ShowWarningError(state, std::format("{}{} = {}", RoutineName, CurrentModuleObject, desicDehum.Name));
+                ShowContinueError(state, std::format("Obsolete {} = {}", cAlphaFields(7), Alphas(7)));
                 ShowContinueError(state, "setting to LeavingMaximumHumidityRatioSetpoint");
                 desicDehum.controlType = DesicDehumCtrlType::FixedHumratBypass;
             }
@@ -365,8 +363,8 @@ namespace DesiccantDehumidifiers {
                 desicDehum.controlType = DesicDehumCtrlType::NodeHumratBypass;
             }
             if (desicDehum.controlType == DesicDehumCtrlType::Invalid) {
-                ShowWarningError(state, EnergyPlus::format("{}{} = {}", RoutineName, CurrentModuleObject, desicDehum.Name));
-                ShowContinueError(state, EnergyPlus::format("Invalid {} = {}", cAlphaFields(7), Alphas(7)));
+                ShowWarningError(state, std::format("{}{} = {}", RoutineName, CurrentModuleObject, desicDehum.Name));
+                ShowContinueError(state, std::format("Invalid {} = {}", cAlphaFields(7), Alphas(7)));
                 ShowContinueError(state, "setting to LeavingMaximumHumidityRatioSetpoint");
                 desicDehum.controlType = DesicDehumCtrlType::FixedHumratBypass;
             }
@@ -401,15 +399,14 @@ namespace DesiccantDehumidifiers {
                 desicDehum.regenCoilType = HVAC::CoilType::HeatingWater;
                 ValidateComponent(state, Alphas(8), RegenCoilName, IsNotOK, CurrentModuleObject);
                 if (IsNotOK) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
+                    ShowContinueError(state, std::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
                     ErrorsFound = true;
                 } else { // mine data from heating coil object
                     errFlag = false;
                     desicDehum.RegenCoilIndex = WaterCoils::GetWaterCoilIndex(state, "COIL:HEATING:WATER", RegenCoilName, errFlag);
                     if (desicDehum.RegenCoilIndex == 0) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{} illegal {} = {}", RoutineName, CurrentModuleObject, cAlphaFields(9), RegenCoilName));
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
+                        ShowSevereError(state, std::format("{}{} illegal {} = {}", RoutineName, CurrentModuleObject, cAlphaFields(9), RegenCoilName));
+                        ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
                         ErrorsFound = true;
                     }
 
@@ -417,7 +414,7 @@ namespace DesiccantDehumidifiers {
                     errFlag = false;
                     desicDehum.CoilControlNode = WaterCoils::GetCoilWaterInletNode(state, "Coil:Heating:Water", RegenCoilName, errFlag);
                     if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
+                        ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
                         ErrorsFound = true;
                     }
 
@@ -425,7 +422,7 @@ namespace DesiccantDehumidifiers {
                     errFlag = false;
                     desicDehum.MaxCoilFluidFlow = WaterCoils::GetCoilMaxWaterFlowRate(state, "Coil:Heating:Water", RegenCoilName, errFlag);
                     if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
+                        ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
                         ErrorsFound = true;
                     }
 
@@ -434,7 +431,7 @@ namespace DesiccantDehumidifiers {
                     int RegenCoilAirInletNode = WaterCoils::GetCoilInletNode(state, "Coil:Heating:Water", RegenCoilName, errFlag);
                     desicDehum.RegenCoilInletNode = RegenCoilAirInletNode;
                     if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
+                        ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
                         ErrorsFound = true;
                     }
 
@@ -443,7 +440,7 @@ namespace DesiccantDehumidifiers {
                     int RegenCoilAirOutletNode = WaterCoils::GetCoilOutletNode(state, "Coil:Heating:Water", RegenCoilName, errFlag);
                     desicDehum.RegenCoilOutletNode = RegenCoilAirOutletNode;
                     if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
+                        ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
                         ErrorsFound = true;
                     }
                 }
@@ -451,16 +448,15 @@ namespace DesiccantDehumidifiers {
                 desicDehum.regenCoilType = HVAC::CoilType::HeatingSteam;
                 ValidateComponent(state, Alphas(8), RegenCoilName, IsNotOK, CurrentModuleObject);
                 if (IsNotOK) {
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
+                    ShowContinueError(state, std::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
                     ErrorsFound = true;
                 } else { // mine data from the regeneration heating coil object
 
                     errFlag = false;
                     desicDehum.RegenCoilIndex = SteamCoils::GetSteamCoilIndex(state, "COIL:HEATING:STEAM", RegenCoilName, errFlag);
                     if (desicDehum.RegenCoilIndex == 0) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}{} illegal {} = {}", RoutineName, CurrentModuleObject, cAlphaFields(9), RegenCoilName));
-                        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
+                        ShowSevereError(state, std::format("{}{} illegal {} = {}", RoutineName, CurrentModuleObject, cAlphaFields(9), RegenCoilName));
+                        ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
                         ErrorsFound = true;
                     }
 
@@ -595,14 +591,12 @@ namespace DesiccantDehumidifiers {
                 }
                 if (desicDehum.NomProcAirVel > 4.064) {
                     ShowWarningError(state, std::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("{} > 4.064 m/s.; Value in input={:.3R}", cNumericFields(3), desicDehum.NomProcAirVel));
+                    ShowContinueError(state, std::format("{} > 4.064 m/s.; Value in input={:.3f}", cNumericFields(3), desicDehum.NomProcAirVel));
                     ShowContinueError(state, "DEFAULT performance curves not valid outside 2.032 to 4.064 m/s (400 to 800 fpm).");
                 }
                 if (desicDehum.NomProcAirVel < 2.032) {
                     ShowWarningError(state, std::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("{} < 2.032 m/s.; Value in input={:.3R}", cNumericFields(3), desicDehum.NomProcAirVel));
+                    ShowContinueError(state, std::format("{} < 2.032 m/s.; Value in input={:.3f}", cNumericFields(3), desicDehum.NomProcAirVel));
                     ShowContinueError(state, "DEFAULT performance curves not valid outside 2.032 to 4.064 m/s (400 to 800 fpm).");
                 }
                 // Validate regen fan type, for default curves, can only variable volume
@@ -861,8 +855,7 @@ namespace DesiccantDehumidifiers {
                     if (RegenCoilControlNodeNum > 0) {
                         ShowSevereError(state, std::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
                         ShowContinueError(
-                            state,
-                            EnergyPlus::format("{} is specified as {:.3R} C in this object.", cNumericFields(1), desicDehum.RegenSetPointTemp));
+                            state, std::format("{} is specified as {:.3f} C in this object.", cNumericFields(1), desicDehum.RegenSetPointTemp));
                         ShowContinueError(state, " Do not specify a coil temperature setpoint node name in the regeneration air heater object.");
                         ShowContinueError(state, std::format("...{} = {}", cAlphaFields(9), Alphas(9)));
                         ShowContinueError(state, std::format("...{} = {}", cAlphaFields(10), desicDehum.RegenCoilName));
@@ -1008,8 +1001,7 @@ namespace DesiccantDehumidifiers {
                     if (RegenCoilControlNodeNum > 0) {
                         ShowSevereError(state, std::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
                         ShowContinueError(
-                            state,
-                            EnergyPlus::format("{} is specified as {:.3R} C in this object.", cNumericFields(1), desicDehum.RegenSetPointTemp));
+                            state, std::format("{} is specified as {:.3f} C in this object.", cNumericFields(1), desicDehum.RegenSetPointTemp));
                         ShowContinueError(state, " Do not specify a coil temperature setpoint node name in the regeneration air heater object.");
                         ShowContinueError(state, std::format("...{} = {}", cAlphaFields(9), Alphas(9)));
                         ShowContinueError(state, std::format("...{} = {}", cAlphaFields(10), desicDehum.RegenCoilName));
@@ -2142,8 +2134,9 @@ namespace DesiccantDehumidifiers {
 
             default: {
 
-                ShowFatalError(state,
-                               EnergyPlus::format("Invalid performance model in desiccant dehumidifier = {}", desicDehum.PerformanceModel_Num));
+                ShowFatalError(
+                    state,
+                    std::format("Invalid performance model in desiccant dehumidifier = {}", static_cast<int>(desicDehum.PerformanceModel_Num)));
             } break;
             } // Performance Model Part A
 
@@ -2259,8 +2252,9 @@ namespace DesiccantDehumidifiers {
             } break;
             default: {
 
-                ShowFatalError(state,
-                               EnergyPlus::format("Invalid performance model in desiccant dehumidifier = {}", desicDehum.PerformanceModel_Num));
+                ShowFatalError(
+                    state,
+                    std::format("Invalid performance model in desiccant dehumidifier = {}", static_cast<int>(desicDehum.PerformanceModel_Num)));
 
                 // Suppress uninitialized warnings
                 ProcAirOutTemp = 0.0;
@@ -2815,7 +2809,7 @@ namespace DesiccantDehumidifiers {
                 if (desicDehum.ErrCount < 2) {
                     ShowWarningError(state,
                                      std::format("{} \"{}\" - Air volume flow rate per watt of total condenser waste heat is below the minimum "
-                                                 "recommended at {:G} m3/s/W.",
+                                                 "recommended at {:#G} m3/s/W.",
                                                  desicDehum.DehumType,
                                                  desicDehum.Name,
                                                  VolFlowPerRatedTotQ));
@@ -3029,8 +3023,8 @@ namespace DesiccantDehumidifiers {
                                                            desicDehum.Name));
                             ShowContinueErrorTimeStamp(state, "");
                             ShowContinueError(state, "...Bad hot water maximum flow rate limits");
-                            ShowContinueError(state, EnergyPlus::format("...Given minimum water flow rate={:.3R} kg/s", MinWaterFlow));
-                            ShowContinueError(state, EnergyPlus::format("...Given maximum water flow rate={:.3R} kg/s", MaxHotWaterFlow));
+                            ShowContinueError(state, std::format("...Given minimum water flow rate={:.3f} kg/s", MinWaterFlow));
+                            ShowContinueError(state, std::format("...Given maximum water flow rate={:.3f} kg/s", MaxHotWaterFlow));
                         }
                         ShowRecurringWarningErrorAtEnd(state,
                                                        "CalcNonDXHeatingCoils: Hot water coil control failed (flow limits) for " +

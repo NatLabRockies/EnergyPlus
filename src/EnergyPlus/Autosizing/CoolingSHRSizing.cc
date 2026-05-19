@@ -146,7 +146,7 @@ void CoolingSHRSizer::updateSizingString(EnergyPlusData &state)
             this->sizingString = "Low Speed Gross Rated Sensible Heat Ratio";
         }
     } else if (this->coilType == HVAC::CoilType::CoolingDXMultiSpeed) {
-        this->sizingString = EnergyPlus::format("Speed {} Rated Sensible Heat Ratio", state.dataSize->DataDXSpeedNum);
+        this->sizingString = std::format("Speed {} Rated Sensible Heat Ratio", state.dataSize->DataDXSpeedNum);
     } else if (this->coilType == HVAC::CoilType::CoolingVRFFluidTCtrl) {
         this->sizingString = "Rated Sensible Heat Ratio";
     } else if (this->coilType == HVAC::CoilType::CoolingDXCurveFit) {

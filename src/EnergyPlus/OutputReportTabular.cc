@@ -13879,7 +13879,7 @@ void WriteHeatEmissionTable(EnergyPlusData &state)
 
     if (state.dataOutRptTab->displayHeatEmissionsSummary) {
 
-        for (auto &currentStyle : ort->tabularReportPasses) {
+        for (auto const &currentStyle : ort->tabularReportPasses) {
 
             if (currentStyle.produceTabular) {
                 WriteReportHeaders(state, "Annual Heat Emissions Report", "Entire Facility", OutputProcessor::StoreType::Average);
@@ -14964,7 +14964,7 @@ void ComputeLoadComponentDecayCurve(EnergyPlusData &state)
         int coolDesSelected = state.dataSize->CalcFinalZoneSizing(zoneNum).CoolDDNum;
         // loop over timesteps after pulse occurred
         if (coolDesSelected != 0) {
-            auto &surfCLClDay = ort->surfCompLoads[coolDesSelected - 1];
+            auto const &surfCLClDay = ort->surfCompLoads[coolDesSelected - 1];
             int timeOfPulse = ort->radiantPulseTimestep(coolDesSelected, zoneNum);
             // if the CoolDesSelected time is on a different day than
             // when the pulse occurred, need to scan back and find when
@@ -14992,7 +14992,7 @@ void ComputeLoadComponentDecayCurve(EnergyPlusData &state)
         }
         int const heatDesSelected = state.dataSize->CalcFinalZoneSizing(zoneNum).HeatDDNum;
         if (heatDesSelected != 0) {
-            auto &surfCLHtDay = ort->surfCompLoads[heatDesSelected - 1];
+            auto const &surfCLHtDay = ort->surfCompLoads[heatDesSelected - 1];
             int timeOfPulse = ort->radiantPulseTimestep(heatDesSelected, zoneNum);
             // scan back to the day that the heating pulse occurs, if necessary
             if (timeOfPulse == 0) {

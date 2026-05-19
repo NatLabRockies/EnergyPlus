@@ -1429,7 +1429,7 @@ namespace WindowAC {
             state.dataWindowAC->GetWindowACInputFlag = false;
         }
 
-        auto &windAC = state.dataWindowAC->WindAC(WindACNum);
+        auto const &windAC = state.dataWindowAC->WindAC(WindACNum);
         return windAC.AirOutNode;
     }
 
@@ -1448,7 +1448,7 @@ namespace WindowAC {
             state.dataWindowAC->GetWindowACInputFlag = false;
         }
 
-        auto &windAC = state.dataWindowAC->WindAC(WindACNum);
+        auto const &windAC = state.dataWindowAC->WindAC(WindACNum);
         return windAC.OutsideAirNode;
     }
 

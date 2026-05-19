@@ -94,7 +94,7 @@ std::shared_ptr<CoilCoolingDXPerformanceBase> CoilCoolingDX::makePerformanceSubc
         return std::make_shared<CoilCoolingDXCurveFitPerformance>(state, performance_object_name);
     }
 
-    ShowFatalError(state, EnergyPlus::format("Could not find Coil:Cooling:DX:Performance object with name: {}", performance_object_name));
+    ShowFatalError(state, std::format("Could not find Coil:Cooling:DX:Performance object with name: {}", performance_object_name));
     return nullptr;
 }
 
@@ -323,14 +323,14 @@ void CoilCoolingDX::oneTimeInit(EnergyPlusData &state)
     if (this->performance->compressorFuelType != Constant::eFuel::Electricity) {
         std::string_view const sFuelType = Constant::eFuelNames[static_cast<int>(this->performance->compressorFuelType)];
         SetupOutputVariable(state,
-                            EnergyPlus::format("Cooling Coil {} Rate", sFuelType),
+                            std::format("Cooling Coil {} Rate", sFuelType),
                             Constant::Units::W,
                             this->performance->compressorFuelRate,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Average,
                             this->name);
         SetupOutputVariable(state,
-                            EnergyPlus::format("Cooling Coil {} Energy", sFuelType),
+                            std::format("Cooling Coil {} Energy", sFuelType),
                             Constant::Units::J,
                             this->performance->compressorFuelConsumption,
                             OutputProcessor::TimeStepType::System,

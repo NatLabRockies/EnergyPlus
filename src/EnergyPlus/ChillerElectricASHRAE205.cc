@@ -120,7 +120,7 @@ void getChillerASHRAE205Input(EnergyPlusData &state)
     int numElectric205Chillers = s_ip->getNumObjectsFound(state, state.dataIPShortCut->cCurrentModuleObject);
 
     if (numElectric205Chillers <= 0) {
-        ShowSevereError(state, EnergyPlus::format("No {} equipment specified in input file", state.dataIPShortCut->cCurrentModuleObject));
+        ShowSevereError(state, std::format("No {} equipment specified in input file", state.dataIPShortCut->cCurrentModuleObject));
         ErrorsFound = true;
     }
 
@@ -155,11 +155,11 @@ void getChillerASHRAE205Input(EnergyPlusData &state)
             ShowFatalError(state, "Program terminates due to the missing ASHRAE 205 RS0001 representation file.");
         }
         // Since logger context must persist across all calls to libtk205/btwxt, it must be a member
-        thisChiller.LoggerContext = {&state, EnergyPlus::format("{} \"{}\"", state.dataIPShortCut->cCurrentModuleObject, thisObjectName)};
+        thisChiller.LoggerContext = {&state, std::format("{} \"{}\"", state.dataIPShortCut->cCurrentModuleObject, thisObjectName)};
         thisChiller.Representation = std::dynamic_pointer_cast<tk205::rs0001_ns::RS0001>(
             RSInstanceFactory::create("RS0001", FileSystem::toString(rep_file_path).c_str(), std::make_shared<EnergyPlusLogger>()));
         if (nullptr == thisChiller.Representation) {
-            ShowSevereError(state, EnergyPlus::format("{} is not an instance of an ASHRAE205 Chiller.", rep_file_path.string()));
+            ShowSevereError(state, std::format("{} is not an instance of an ASHRAE205 Chiller.", rep_file_path.string()));
             ErrorsFound = true;
         }
         thisChiller.Representation->performance.performance_map_cooling.get_logger()->set_message_context(&thisChiller.LoggerContext);
@@ -174,8 +174,8 @@ void getChillerASHRAE205Input(EnergyPlusData &state)
         thisChiller.MaxSequenceNumber = *(minmaxSequenceNum.second);
 
         if (fields.count("rated_capacity") != 0u) {
-            ShowWarningError(
-                state, EnergyPlus::format("{}{}=\"{}\"", std::string{RoutineName}, state.dataIPShortCut->cCurrentModuleObject, thisChiller.Name));
+            ShowWarningError(state,
+                             std::format("{}{}=\"{}\"", std::string{RoutineName}, state.dataIPShortCut->cCurrentModuleObject, thisChiller.Name));
             ShowContinueError(state, "Rated Capacity field is not yet supported for ASHRAE 205 representations.");
         }
 
@@ -188,15 +188,15 @@ void getChillerASHRAE205Input(EnergyPlusData &state)
         //        if (thisChiller.RefCap == 0.0) {
         //            ShowSevereError(
         //                state, format("{}{}=\"{}\"",std::string{RoutineName},state.dataIPShortCut->cCurrentModuleObject,thisChiller.Name);
-        //            ShowContinueError(state, format("Invalid {}={:.2R}", "Rated Capacity", thisChiller.RefCap));
+        //            ShowContinueError(state, format("Invalid {}={:.2f}", "Rated Capacity", thisChiller.RefCap));
         //            ErrorsFound = true;
         //        }
 
         std::string const evap_inlet_node_name = s_ip->getAlphaFieldValue(fields, objectSchemaProps, "chilled_water_inlet_node_name");
         std::string const evap_outlet_node_name = s_ip->getAlphaFieldValue(fields, objectSchemaProps, "chilled_water_outlet_node_name");
         if (evap_inlet_node_name.empty() || evap_outlet_node_name.empty()) {
-            ShowSevereError(
-                state, EnergyPlus::format("{}{}=\"{}\"", std::string{RoutineName}, state.dataIPShortCut->cCurrentModuleObject, thisChiller.Name));
+            ShowSevereError(state,
+                            std::format("{}{}=\"{}\"", std::string{RoutineName}, state.dataIPShortCut->cCurrentModuleObject, thisChiller.Name));
             ShowContinueError(state, "Evaporator Inlet or Outlet Node Name is blank.");
             ErrorsFound = true;
         }
@@ -226,8 +226,8 @@ void getChillerASHRAE205Input(EnergyPlusData &state)
         std::string const cond_inlet_node_name = s_ip->getAlphaFieldValue(fields, objectSchemaProps, "condenser_inlet_node_name");
         std::string const cond_outlet_node_name = s_ip->getAlphaFieldValue(fields, objectSchemaProps, "condenser_outlet_node_name");
         if (cond_inlet_node_name.empty() || cond_outlet_node_name.empty()) {
-            ShowSevereError(
-                state, EnergyPlus::format("{}{}=\"{}\"", std::string{RoutineName}, state.dataIPShortCut->cCurrentModuleObject, thisChiller.Name));
+            ShowSevereError(state,
+                            std::format("{}{}=\"{}\"", std::string{RoutineName}, state.dataIPShortCut->cCurrentModuleObject, thisChiller.Name));
             ShowContinueError(state, "Condenser Inlet or Outlet Node Name is blank.");
             ErrorsFound = true;
         }
@@ -262,9 +262,8 @@ void getChillerASHRAE205Input(EnergyPlusData &state)
             getEnumValue(DataPlant::FlowModeNamesUC, s_ip->getAlphaFieldValue(fields, objectSchemaProps, "chiller_flow_mode")));
 
         if (thisChiller.FlowMode == DataPlant::FlowMode::Invalid) {
-            ShowSevereError(state,
-                            EnergyPlus::format("{}{}=\"{}\"", std::string{RoutineName}, state.dataIPShortCut->cCurrentModuleObject, thisObjectName));
-            ShowContinueError(state, EnergyPlus::format("Invalid Chiller Flow Mode = {}", fields.at("chiller_flow_mode").get<std::string>()));
+            ShowSevereError(state, std::format("{}{}=\"{}\"", std::string{RoutineName}, state.dataIPShortCut->cCurrentModuleObject, thisObjectName));
+            ShowContinueError(state, std::format("Invalid Chiller Flow Mode = {}", fields.at("chiller_flow_mode").get<std::string>()));
             ShowContinueError(state, "Available choices are ConstantFlow, NotModulated, or LeavingSetpointModulated");
             ShowContinueError(state, "Flow mode NotModulated is assumed and the simulation continues.");
             thisChiller.FlowMode = DataPlant::FlowMode::NotModulated;
@@ -311,10 +310,10 @@ void getChillerASHRAE205Input(EnergyPlusData &state)
             thisChiller.AmbientTempZone = Util::FindItemInList(ambient_temp_zone_name, state.dataHeatBal->Zone);
             if (thisChiller.AmbientTempZone == 0) {
                 ShowSevereError(state,
-                                EnergyPlus::format("{} = {}:  Ambient Temperature Zone not found = {}",
-                                                   state.dataIPShortCut->cCurrentModuleObject,
-                                                   thisObjectName,
-                                                   ambient_temp_zone_name));
+                                std::format("{} = {}:  Ambient Temperature Zone not found = {}",
+                                            state.dataIPShortCut->cCurrentModuleObject,
+                                            thisObjectName,
+                                            ambient_temp_zone_name));
                 ErrorsFound = true;
             } else {
                 SetupZoneInternalGain(state,
@@ -340,14 +339,14 @@ void getChillerASHRAE205Input(EnergyPlusData &state)
             if (fields.count("ambient_temperature_outdoor_air_node_name") != 0u) {
                 if (!OutAirNodeManager::CheckOutAirNodeNumber(state, thisChiller.AmbientTempOutsideAirNode)) {
                     ShowSevereError(state,
-                                    EnergyPlus::format("{} = {}: Outdoor Air Node not on OutdoorAir:NodeList or OutdoorAir:Node",
-                                                       state.dataIPShortCut->cCurrentModuleObject,
-                                                       thisObjectName));
-                    ShowContinueError(state, EnergyPlus::format("...Referenced Node Name={}", ambient_temp_outdoor_node));
+                                    std::format("{} = {}: Outdoor Air Node not on OutdoorAir:NodeList or OutdoorAir:Node",
+                                                state.dataIPShortCut->cCurrentModuleObject,
+                                                thisObjectName));
+                    ShowContinueError(state, std::format("...Referenced Node Name={}", ambient_temp_outdoor_node));
                     ErrorsFound = true;
                 }
             } else {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", state.dataIPShortCut->cCurrentModuleObject, ambient_temp_outdoor_node));
+                ShowSevereError(state, std::format("{} = {}", state.dataIPShortCut->cCurrentModuleObject, ambient_temp_outdoor_node));
                 ShowContinueError(state, "An Ambient Outdoor Air Node name must be used when the Ambient Temperature Indicator is Outdoors.");
                 ErrorsFound = true;
             }
@@ -356,10 +355,10 @@ void getChillerASHRAE205Input(EnergyPlusData &state)
         }
         default: {
             ShowSevereError(state,
-                            EnergyPlus::format("{} = {}:  Invalid Ambient Temperature Indicator entered={}",
-                                               state.dataIPShortCut->cCurrentModuleObject,
-                                               thisObjectName,
-                                               s_ip->getAlphaFieldValue(fields, objectSchemaProps, "ambient_temperature_indicator")));
+                            std::format("{} = {}:  Invalid Ambient Temperature Indicator entered={}",
+                                        state.dataIPShortCut->cCurrentModuleObject,
+                                        thisObjectName,
+                                        s_ip->getAlphaFieldValue(fields, objectSchemaProps, "ambient_temperature_indicator")));
             ShowContinueError(state, " Valid entries are SCHEDULE, ZONE, and OUTDOORS.");
             ErrorsFound = true;
             break;
@@ -443,7 +442,7 @@ void getChillerASHRAE205Input(EnergyPlusData &state)
     }
 
     if (ErrorsFound) {
-        ShowFatalError(state, EnergyPlus::format("Errors found in processing input for {}", state.dataIPShortCut->cCurrentModuleObject));
+        ShowFatalError(state, std::format("Errors found in processing input for {}", state.dataIPShortCut->cCurrentModuleObject));
     }
 }
 
@@ -460,8 +459,7 @@ ASHRAE205ChillerSpecs *ASHRAE205ChillerSpecs::factory(EnergyPlusData &state, std
         return thisObj;
     }
     // If we didn't find it, fatal
-    ShowFatalError(state,
-                   EnergyPlus::format("ASHRAE205ChillerSpecs::factory: Error getting inputs for object named: {}", objectName)); // LCOV_EXCL_LINE
+    ShowFatalError(state, std::format("ASHRAE205ChillerSpecs::factory: Error getting inputs for object named: {}", objectName)); // LCOV_EXCL_LINE
     return nullptr;                                                                                                              // LCOV_EXCL_LINE
 }
 
@@ -550,8 +548,8 @@ void ASHRAE205ChillerSpecs::oneTimeInit_new(EnergyPlusData &state)
             (state.dataLoopNodes->Node(this->EvapOutletNodeNum).TempSetPointHi == Node::SensedNodeFlagValue)) {
             if (!state.dataGlobal->AnyEnergyManagementSystemInModel) {
                 if (!this->ModulatedFlowErrDone) {
-                    ShowWarningError(
-                        state, EnergyPlus::format("Missing temperature setpoint for LeavingSetpointModulated mode chiller named {}", this->Name));
+                    ShowWarningError(state,
+                                     std::format("Missing temperature setpoint for LeavingSetpointModulated mode chiller named {}", this->Name));
                     ShowContinueError(
                         state, "  A temperature setpoint is needed at the outlet node of a chiller in variable flow mode, use a SetpointManager");
                     ShowContinueError(state, "  The overall loop setpoint will be assumed for chiller. The simulation continues ... ");
@@ -564,8 +562,8 @@ void ASHRAE205ChillerSpecs::oneTimeInit_new(EnergyPlusData &state)
                 state.dataLoopNodes->NodeSetpointCheck(this->EvapOutletNodeNum).needsSetpointChecking = false;
                 if (fatalError) {
                     if (!this->ModulatedFlowErrDone) {
-                        ShowWarningError(
-                            state, EnergyPlus::format("Missing temperature setpoint for LeavingSetpointModulated mode chiller named {}", this->Name));
+                        ShowWarningError(state,
+                                         std::format("Missing temperature setpoint for LeavingSetpointModulated mode chiller named {}", this->Name));
                         ShowContinueError(state,
                                           "  A temperature setpoint is needed at the outlet node of a chiller evaporator in variable flow mode");
                         ShowContinueError(state, "  use a Setpoint Manager to establish a setpoint at the chiller evaporator outlet node ");
@@ -737,14 +735,13 @@ void ASHRAE205ChillerSpecs::size([[maybe_unused]] EnergyPlusData &state)
                         if (state.dataGlobal->DisplayExtraWarnings) {
                             if ((std::abs(tmpEvapVolFlowRate - EvapVolFlowRateUser) / EvapVolFlowRateUser) >
                                 state.dataSize->AutoVsHardSizingThreshold) {
-                                ShowMessage(state, EnergyPlus::format("{}: Potential issue with equipment sizing for {}", RoutineName, this->Name));
-                                ShowContinueError(state,
-                                                  EnergyPlus::format("User-Specified Chilled Water Maximum Requested Flow Rate of {:.5R} [m3/s]",
-                                                                     EvapVolFlowRateUser));
+                                ShowMessage(state, std::format("{}: Potential issue with equipment sizing for {}", RoutineName, this->Name));
                                 ShowContinueError(
                                     state,
-                                    EnergyPlus::format("differs from Design Size Chilled Water Maximum Requested Flow Rate of {:.5R} [m3/s]",
-                                                       tmpEvapVolFlowRate));
+                                    std::format("User-Specified Chilled Water Maximum Requested Flow Rate of {:#G} [m3/s]", EvapVolFlowRateUser));
+                                ShowContinueError(state,
+                                                  std::format("differs from Design Size Chilled Water Maximum Requested Flow Rate of {:#G} [m3/s]",
+                                                              tmpEvapVolFlowRate));
                                 ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                 ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                             }
@@ -810,12 +807,10 @@ void ASHRAE205ChillerSpecs::size([[maybe_unused]] EnergyPlusData &state)
                                 state.dataSize->AutoVsHardSizingThreshold) {
                                 ShowMessage(state, std::format("{}: Potential issue with equipment sizing for {}", RoutineName, this->Name));
                                 ShowContinueError(
-                                    state,
-                                    EnergyPlus::format("User-Specified Condenser Maximum Requested Flow Rate of {:.5R} [m3/s]", CondVolFlowRateUser));
-                                ShowContinueError(
-                                    state,
-                                    EnergyPlus::format("differs from Design Size Condenser Maximum Requested Flow Rate of {:.5R} [m3/s]",
-                                                       tmpCondVolFlowRate));
+                                    state, std::format("User-Specified Condenser Maximum Requested Flow Rate of {:#G} [m3/s]", CondVolFlowRateUser));
+                                ShowContinueError(state,
+                                                  std::format("differs from Design Size Condenser Maximum Requested Flow Rate of {:#G} [m3/s]",
+                                                              tmpCondVolFlowRate));
                                 ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                 ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                             }
@@ -905,8 +900,8 @@ void ASHRAE205ChillerSpecs::size([[maybe_unused]] EnergyPlusData &state)
                         if (state.dataGlobal->DisplayExtraWarnings) {
                             if ((std::abs(tmpNomCap - RefCapUser) / RefCapUser) > state.dataSize->AutoVsHardSizingThreshold) {
                                 ShowMessage(state, std::format("{}: Potential issue with equipment sizing for {}", RoutineName, this->Name));
-                                ShowContinueError(state, EnergyPlus::format("User-Specified Rated Capacity of {:.2R} [W]", RefCapUser));
-                                ShowContinueError(state, EnergyPlus::format("differs from Design Size Rated Capacity of {:.2R} [W]", tmpNomCap));
+                                ShowContinueError(state, std::format("User-Specified Rated Capacity of {:.2f} [W]", RefCapUser));
+                                ShowContinueError(state, std::format("differs from Design Size Rated Capacity of {:.2f} [W]", tmpNomCap));
                                 ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                 ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                             }
