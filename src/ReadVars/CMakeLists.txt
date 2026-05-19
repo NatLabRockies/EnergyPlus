@@ -46,3 +46,8 @@ endif()
 
 install(FILES "${READVARS_SCRIPT}" DESTINATION PostProcess)
 install(PROGRAMS "${READVARS_WRAPPER}" DESTINATION PostProcess)
+
+if(BUILD_TESTING)
+  add_test(NAME ReadVarsESO.CLI COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/test_readvars_cli.py")
+  set_tests_properties(ReadVarsESO.CLI PROPERTIES LABELS ReadVars)
+endif()

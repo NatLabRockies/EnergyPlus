@@ -9,7 +9,10 @@ filter, optional ``unlimited``/``nolimit`` column handling, and optional
 
 from __future__ import annotations
 
+import argparse
+import csv
 from dataclasses import dataclass
+import json
 from pathlib import Path
 import sys
 import time
@@ -26,6 +29,24 @@ FREQUENCY_MARKERS = {
     3: "!Daily",
     4: "!Monthly",
     5: "!RunPeriod",
+}
+
+FREQUENCY_ALIASES = {
+    "timestep": 1,
+    "time-step": 1,
+    "detailed": 1,
+    "detail": 1,
+    "hourly": 2,
+    "daily": 3,
+    "monthly": 4,
+    "annual": 5,
+    "runperiod": 5,
+    "run-period": 5,
+}
+
+MODERN_COMMAND_ALIASES = {
+    "--list": "list",
+    "--variables": "list",
 }
 
 MONTHS = [
@@ -67,6 +88,11 @@ class DictionaryRecord:
     number: int
     line: str
     label: str
+    key: str = ""
+    variable: str = ""
+    units: str = ""
+    frequency: str = ""
+    raw_frequency: str = ""
 
 
 @dataclass
@@ -132,6 +158,62 @@ def parse_options(argv: list[str]) -> Options:
             fix_header = True
 
     return Options(var_file_name, get_vars_from_eso, frequency, limited, fix_header)
+
+
+def is_modern_cli(argv: list[str]) -> bool:
+    if not argv:
+        return False
+
+    first = argv[0].lower()
+    return first in {"list", "variables", "-h", "--help"} or first in MODERN_COMMAND_ALIASES
+
+
+def normalized_modern_args(argv: list[str]) -> list[str]:
+    if not argv:
+        return argv
+
+    first = argv[0].lower()
+    replacement = MODERN_COMMAND_ALIASES.get(first)
+    if replacement is None:
+        return argv
+
+    return [replacement] + argv[1:]
+
+
+def build_modern_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="ReadVarsESO",
+        description="Convert EnergyPlus ESO/MTR files or inspect their available output variables.",
+        epilog=(
+            "Examples:\n"
+            "  ReadVarsESO list eplusout.eso --frequency hourly --search temperature\n"
+            "  ReadVarsESO --list eplusout.eso --format csv"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    subparsers = parser.add_subparsers(dest="command")
+
+    list_parser = subparsers.add_parser("list", aliases=["variables"], help="List variables in an ESO/MTR data dictionary.")
+    list_parser.add_argument("input_file", nargs="?", default="eplusout.eso", help="ESO/MTR file to inspect.")
+    list_parser.add_argument(
+        "-f",
+        "--frequency",
+        choices=sorted(FREQUENCY_ALIASES),
+        help="Only show variables reported at this frequency.",
+    )
+    list_parser.add_argument(
+        "-s",
+        "--search",
+        help="Only show variables whose key, variable name, units, frequency, or label contains this text.",
+    )
+    list_parser.add_argument(
+        "--format",
+        choices=["table", "csv", "json"],
+        default="table",
+        help="Output format.",
+    )
+
+    return parser
 
 
 def read_lines(path: Path) -> list[str]:
@@ -373,6 +455,70 @@ def build_header_label(line: str) -> str:
     return label.replace(",", ":")
 
 
+def split_variable_units(variable_with_units: str) -> tuple[str, str]:
+    variable_with_units = variable_with_units.strip()
+    close_position = variable_with_units.rfind("]")
+    open_position = variable_with_units.rfind("[", 0, close_position)
+    if open_position == -1 or close_position == -1:
+        return variable_with_units, ""
+
+    variable = variable_with_units[:open_position].rstrip()
+    units = variable_with_units[open_position + 1 : close_position].strip()
+    return variable, units
+
+
+def normalized_frequency(raw_frequency: str) -> str:
+    raw_frequency = raw_frequency.strip()
+    bracket_position = raw_frequency.find("[")
+    if bracket_position != -1:
+        raw_frequency = raw_frequency[:bracket_position].rstrip()
+
+    comma_position = raw_frequency.find(",")
+    if comma_position != -1:
+        raw_frequency = raw_frequency[:comma_position].rstrip()
+
+    return raw_frequency
+
+
+def parse_dictionary_record(line: str) -> DictionaryRecord | None:
+    number = parse_report_number(line)
+    if number is None or number <= 5:
+        return None
+
+    fields = line.split(",", 2)
+    if len(fields) < 3:
+        return DictionaryRecord(number, line, build_header_label(line))
+
+    remainder = fields[2]
+    bang_position = remainder.find("!")
+    if bang_position == -1:
+        definition = remainder.strip()
+        raw_frequency = ""
+    else:
+        definition = remainder[:bang_position].strip()
+        raw_frequency = remainder[bang_position + 1 :].strip()
+
+    comma_position = definition.find(",")
+    if comma_position == -1:
+        key = ""
+        variable_with_units = definition
+    else:
+        key = definition[:comma_position].strip()
+        variable_with_units = definition[comma_position + 1 :].strip()
+
+    variable, units = split_variable_units(variable_with_units)
+    return DictionaryRecord(
+        number=number,
+        line=line,
+        label=build_header_label(line),
+        key=key,
+        variable=variable,
+        units=units,
+        frequency=normalized_frequency(raw_frequency),
+        raw_frequency=raw_frequency,
+    )
+
+
 def dictionary_records(eso_lines: list[str], audit: TextIO | None) -> tuple[list[DictionaryRecord], int]:
     end_index = None
     for index, line in enumerate(eso_lines):
@@ -392,10 +538,9 @@ def dictionary_records(eso_lines: list[str], audit: TextIO | None) -> tuple[list
 
     records: list[DictionaryRecord] = []
     for line in eso_lines[:end_index]:
-        number = parse_report_number(line)
-        if number is None or number <= 5:
-            continue
-        records.append(DictionaryRecord(number, line, build_header_label(line)))
+        record = parse_dictionary_record(line)
+        if record is not None:
+            records.append(record)
 
     return records, end_index
 
@@ -565,6 +710,134 @@ def select_variables(
                 remaining.remove(record)
 
     return selected_with_limit(selected, limited, audit)
+
+
+def record_matches_search(record: DictionaryRecord, search_text: str | None) -> bool:
+    if not search_text:
+        return True
+
+    haystack = " ".join(
+        [
+            record.key,
+            record.variable,
+            record.units,
+            record.frequency,
+            record.label,
+            record.line,
+        ]
+    ).upper()
+    return search_text.upper() in haystack
+
+
+def is_dictionary_time_stamp_record(record: DictionaryRecord) -> bool:
+    raw_frequency = record.raw_frequency.strip().upper()
+    return raw_frequency.startswith("WHEN ") and raw_frequency.endswith("REQUESTED")
+
+
+def records_for_modern_cli(input_file: str) -> list[DictionaryRecord]:
+    input_path = Path(input_file)
+    if not input_path.is_file():
+        raise ReadVarsFatal([f"Input file does not exist: {input_file}"])
+
+    records, _ = dictionary_records(read_lines(input_path), None)
+    return [record for record in records if not is_dictionary_time_stamp_record(record)]
+
+
+def truncate_for_table(value: object, width: int) -> str:
+    text = str(value)
+    if len(text) <= width:
+        return text
+    if width <= 3:
+        return text[:width]
+    return text[: width - 3] + "..."
+
+
+def print_table(rows: list[dict[str, object]], columns: list[tuple[str, str, int]], empty_message: str) -> None:
+    if not rows:
+        print(empty_message)
+        return
+
+    widths = []
+    for header, key, maximum_width in columns:
+        content_width = max(len(str(row.get(key, ""))) for row in rows)
+        widths.append(min(max(len(header), content_width), maximum_width))
+
+    header_line = "  ".join(header.ljust(widths[index]) for index, (header, _, _) in enumerate(columns))
+    divider_line = "  ".join(("-" * widths[index]) for index in range(len(columns)))
+    print(header_line)
+    print(divider_line)
+
+    for row in rows:
+        values = []
+        for index, (_, key, _) in enumerate(columns):
+            values.append(truncate_for_table(row.get(key, ""), widths[index]).ljust(widths[index]))
+        print("  ".join(values))
+
+
+def dictionary_record_as_row(record: DictionaryRecord) -> dict[str, object]:
+    return {
+        "number": record.number,
+        "frequency": record.frequency,
+        "key": record.key,
+        "variable": record.variable,
+        "units": record.units,
+        "label": record.label,
+    }
+
+
+def write_records(records: list[DictionaryRecord], output_format: str) -> None:
+    rows = [dictionary_record_as_row(record) for record in records]
+
+    if output_format == "json":
+        print(json.dumps(rows, indent=2))
+        return
+
+    if output_format == "csv":
+        writer = csv.DictWriter(
+            sys.stdout,
+            fieldnames=["number", "frequency", "key", "variable", "units", "label"],
+            lineterminator="\n",
+        )
+        writer.writeheader()
+        writer.writerows(rows)
+        return
+
+    print_table(
+        rows,
+        [
+            ("Report #", "number", 8),
+            ("Frequency", "frequency", 12),
+            ("Key", "key", 36),
+            ("Variable", "variable", 70),
+            ("Units", "units", 24),
+        ],
+        "No variables matched.",
+    )
+
+
+def run_modern_cli(argv: list[str]) -> int:
+    parser = build_modern_parser()
+    args = parser.parse_args(normalized_modern_args(argv))
+    if args.command is None:
+        parser.print_help()
+        return 0
+
+    try:
+        records = records_for_modern_cli(args.input_file)
+    except ReadVarsFatal as err:
+        for message in err.messages:
+            print(message, file=sys.stderr)
+        return err.exit_code
+
+    if args.command in {"list", "variables"}:
+        if args.frequency:
+            records = [record for record in records if is_allowed_frequency(record.line, FREQUENCY_ALIASES[args.frequency])]
+        records = [record for record in records if record_matches_search(record, args.search)]
+        write_records(records, args.format)
+        return 0
+
+    parser.print_help()
+    return 1
 
 
 def write_header(output: TextIO, selected: list[SelectedVariable], separator: str, fix_header: bool, audit: TextIO | None) -> None:
@@ -800,6 +1073,9 @@ def elapsed_string(start_time: float) -> str:
 
 
 def run(argv: list[str]) -> int:
+    if is_modern_cli(argv):
+        return run_modern_cli(argv)
+
     display_string("ReadVarsESO program starting.")
     start_time = time.process_time()
     audit: TextIO | None = None
