@@ -2,9 +2,8 @@
 """Read EnergyPlus ESO/MTR output files and write delimited tables.
 
 This is a Python port of the historical ReadVarsESO Fortran utility.  It keeps
-the same command-line interface: an optional RVI/MVI file, optional frequency
-filter, optional ``unlimited``/``nolimit`` column handling, and optional
-``fixheader`` output.
+the same legacy command-line interface while also exposing modern ``list`` and
+``read`` subcommands for inspecting and converting ESO/MTR files directly.
 """
 
 from __future__ import annotations
@@ -44,9 +43,23 @@ FREQUENCY_ALIASES = {
     "run-period": 5,
 }
 
+MODERN_FREQUENCY_ALIASES = {
+    "timestep": {"timestep", "time step", "time-step"},
+    "time-step": {"timestep", "time step", "time-step"},
+    "detailed": {"detailed"},
+    "detail": {"detailed"},
+    "hourly": {"hourly"},
+    "daily": {"daily"},
+    "monthly": {"monthly"},
+    "annual": {"annual"},
+    "runperiod": {"runperiod", "run period", "environment"},
+    "run-period": {"runperiod", "run period", "environment"},
+}
+
 MODERN_COMMAND_ALIASES = {
     "--list": "list",
     "--variables": "list",
+    "--read": "read",
 }
 
 MONTHS = [
@@ -165,7 +178,7 @@ def is_modern_cli(argv: list[str]) -> bool:
         return False
 
     first = argv[0].lower()
-    return first in {"list", "variables", "-h", "--help"} or first in MODERN_COMMAND_ALIASES
+    return first in {"list", "variables", "read", "-h", "--help"} or first in MODERN_COMMAND_ALIASES
 
 
 def normalized_modern_args(argv: list[str]) -> list[str]:
@@ -187,7 +200,8 @@ def build_modern_parser() -> argparse.ArgumentParser:
         epilog=(
             "Examples:\n"
             "  ReadVarsESO list eplusout.eso --frequency hourly --search temperature\n"
-            "  ReadVarsESO --list eplusout.eso --format csv"
+            "  ReadVarsESO --list eplusout.eso --format csv\n"
+            "  ReadVarsESO read eplusout.eso --output hourly.csv --frequency hourly"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -198,7 +212,7 @@ def build_modern_parser() -> argparse.ArgumentParser:
     list_parser.add_argument(
         "-f",
         "--frequency",
-        choices=sorted(FREQUENCY_ALIASES),
+        choices=sorted(MODERN_FREQUENCY_ALIASES),
         help="Only show variables reported at this frequency.",
     )
     list_parser.add_argument(
@@ -211,6 +225,25 @@ def build_modern_parser() -> argparse.ArgumentParser:
         choices=["table", "csv", "json"],
         default="table",
         help="Output format.",
+    )
+
+    read_parser = subparsers.add_parser("read", help="Convert an ESO/MTR file to CSV.")
+    read_parser.add_argument("input_file", nargs="?", default="eplusout.eso", help="ESO/MTR file to convert.")
+    read_parser.add_argument(
+        "-o",
+        "--output",
+        help="CSV output file. Defaults to the input file name with a .csv extension.",
+    )
+    read_parser.add_argument(
+        "-f",
+        "--frequency",
+        choices=sorted(MODERN_FREQUENCY_ALIASES),
+        help="Only include variables reported at this frequency.",
+    )
+    read_parser.add_argument(
+        "-s",
+        "--search",
+        help="Only include variables whose key, variable name, units, frequency, or label contains this text.",
     )
 
     return parser
@@ -550,6 +583,14 @@ def is_allowed_frequency(line: str, frequency: int) -> bool:
     return marker is None or marker in line
 
 
+def record_matches_modern_frequency(record: DictionaryRecord, frequency_alias: str | None) -> bool:
+    if not frequency_alias:
+        return True
+
+    normalized = record.frequency.strip().lower().replace("-", " ")
+    return normalized in MODERN_FREQUENCY_ALIASES[frequency_alias]
+
+
 def myindex(text: str, substring: str) -> int:
     if not substring:
         return -1
@@ -743,6 +784,65 @@ def records_for_modern_cli(input_file: str) -> list[DictionaryRecord]:
     return [record for record in records if not is_dictionary_time_stamp_record(record)]
 
 
+def filter_modern_records(
+    records: list[DictionaryRecord],
+    frequency: str | None,
+    search: str | None,
+) -> list[DictionaryRecord]:
+    filtered = [record for record in records if not is_dictionary_time_stamp_record(record)]
+
+    if frequency:
+        filtered = [record for record in filtered if record_matches_modern_frequency(record, frequency)]
+
+    return [record for record in filtered if record_matches_search(record, search)]
+
+
+def default_modern_output_file(input_file: str) -> Path:
+    return Path(input_file).with_suffix(".csv")
+
+
+def convert_modern_read(
+    input_file: str,
+    output_file: str | None,
+    frequency: str | None,
+    search: str | None,
+) -> Path:
+    input_path = Path(input_file)
+    if not input_path.is_file():
+        raise ReadVarsFatal([f"Input file does not exist: {input_file}"])
+
+    output_path = Path(output_file) if output_file else default_modern_output_file(input_file)
+    eso_lines = read_lines(input_path)
+    records, dictionary_end_index = dictionary_records(eso_lines, None)
+    selected = [
+        SelectedVariable(record.number, record.label, True)
+        for record in filter_modern_records(records, frequency, search)
+    ]
+
+    try:
+        with output_path.open("w", encoding="utf-8", newline="") as output:
+            write_header(output, selected, ",", True, None)
+            process_data_records(
+                eso_lines,
+                dictionary_end_index + 2,
+                selected,
+                output,
+                str(output_path),
+                ",",
+                None,
+                legacy_spacing=False,
+            )
+    except OSError as err:
+        raise ReadVarsFatal(
+            [
+                f"Output file cannot be opened: {output_path}",
+                str(err),
+            ]
+        ) from err
+
+    return output_path
+
+
 def truncate_for_table(value: object, width: int) -> str:
     text = str(value)
     if len(text) <= width:
@@ -823,18 +923,19 @@ def run_modern_cli(argv: list[str]) -> int:
         return 0
 
     try:
-        records = records_for_modern_cli(args.input_file)
+        if args.command in {"list", "variables"}:
+            records = filter_modern_records(records_for_modern_cli(args.input_file), args.frequency, args.search)
+            write_records(records, args.format)
+            return 0
+
+        if args.command == "read":
+            output_path = convert_modern_read(args.input_file, args.output, args.frequency, args.search)
+            print(f"Wrote {output_path}")
+            return 0
     except ReadVarsFatal as err:
         for message in err.messages:
             print(message, file=sys.stderr)
         return err.exit_code
-
-    if args.command in {"list", "variables"}:
-        if args.frequency:
-            records = [record for record in records if is_allowed_frequency(record.line, FREQUENCY_ALIASES[args.frequency])]
-        records = [record for record in records if record_matches_search(record, args.search)]
-        write_records(records, args.format)
-        return 0
 
     parser.print_help()
     return 1
@@ -883,6 +984,7 @@ def flush_row(
     out_data: list[str],
     out_found: list[bool],
     separator: str,
+    legacy_spacing: bool = True,
 ) -> None:
     if not any(out_found):
         return
@@ -891,7 +993,7 @@ def flush_row(
     for index, found in enumerate(out_found):
         row_parts.append(out_data[index].rstrip() if found else "")
     output.write(separator.join(row_parts))
-    output.write(" \n")
+    output.write(" \n" if legacy_spacing else "\n")
 
     for index in range(len(out_data)):
         out_data[index] = ""
@@ -906,6 +1008,7 @@ def process_data_records(
     output_file_name: str,
     separator: str,
     audit: TextIO | None,
+    legacy_spacing: bool = True,
 ) -> None:
     out_data = [""] * len(selected)
     out_found = [False] * len(selected)
@@ -931,7 +1034,7 @@ def process_data_records(
                 label = current_month
             else:
                 label = current_period
-            flush_row(output, label, out_data, out_found, separator)
+            flush_row(output, label, out_data, out_found, separator, legacy_spacing)
             return
 
         if line.strip() == "":
@@ -972,7 +1075,7 @@ def process_data_records(
             end_minute = fields[7]
 
             if current_date and (hour_of_day != previous_hour_of_day or end_minute != previous_end_minute):
-                flush_row(output, current_date, out_data, out_found, separator)
+                flush_row(output, current_date, out_data, out_found, separator, legacy_spacing)
 
             previous_hour_of_day = hour_of_day
             previous_end_minute = end_minute
@@ -988,7 +1091,7 @@ def process_data_records(
                     processing_error(output_file_name, line, audit)
 
                 if current_month_day:
-                    flush_row(output, current_month_day, out_data, out_found, separator)
+                    flush_row(output, current_month_day, out_data, out_found, separator, legacy_spacing)
 
                 month = int(fields[2])
                 day = int(fields[3])
@@ -1004,7 +1107,7 @@ def process_data_records(
                     processing_error(output_file_name, line, audit)
 
                 if current_month:
-                    flush_row(output, current_month, out_data, out_found, separator)
+                    flush_row(output, current_month, out_data, out_found, separator, legacy_spacing)
 
                 month_index = int(fields[2]) - 1
                 if month_index < 0 or month_index >= len(MONTHS):
@@ -1020,7 +1123,7 @@ def process_data_records(
                     processing_error(output_file_name, line, audit)
 
                 if current_period:
-                    flush_row(output, current_period, out_data, out_found, separator)
+                    flush_row(output, current_period, out_data, out_found, separator, legacy_spacing)
 
                 current_period = f"simdays={int(fields[1])}"
             continue

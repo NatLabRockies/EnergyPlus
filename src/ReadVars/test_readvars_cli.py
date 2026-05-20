@@ -51,6 +51,57 @@ def test_list_command_filters_time_stamp_records():
     assert all(row["variable"] != "Calendar Year of Simulation" for row in rows)
 
 
+def test_read_command_converts_everything_by_default():
+    run_dir = Path.cwd() / "readvars_read_all_runtime"
+    if run_dir.exists():
+        shutil.rmtree(run_dir)
+    run_dir.mkdir()
+    try:
+        shutil.copy(TEST_ESO, run_dir / "eplusout.eso")
+
+        run_readvars(["read", "eplusout.eso"], cwd=run_dir)
+        output = (run_dir / "eplusout.csv").read_text(encoding="utf-8")
+        assert output.splitlines() == [
+            "Date/Time,Environment:Outdoor Dry Bulb [C](Hourly),ZONE ONE:Zone Mean Air Temperature [C](Hourly),ZONE ONE:Zone Air System Sensible Heating Rate [W](TimeStep)",
+            " 01/01  01:00:00,-5.0,20.0,",
+            " 01/01  02:00:00,-4.0,21.0,",
+        ]
+        assert not (run_dir / "readvars.audit").exists()
+    finally:
+        shutil.rmtree(run_dir, ignore_errors=True)
+
+
+def test_read_command_supports_output_and_filters():
+    run_dir = Path.cwd() / "readvars_read_filtered_runtime"
+    if run_dir.exists():
+        shutil.rmtree(run_dir)
+    run_dir.mkdir()
+    try:
+        shutil.copy(TEST_ESO, run_dir / "eplusout.eso")
+
+        run_readvars(
+            [
+                "read",
+                "eplusout.eso",
+                "--output",
+                "selected.csv",
+                "--frequency",
+                "hourly",
+                "--search",
+                "temperature",
+            ],
+            cwd=run_dir,
+        )
+        output = (run_dir / "selected.csv").read_text(encoding="utf-8")
+        assert output.splitlines() == [
+            "Date/Time,ZONE ONE:Zone Mean Air Temperature [C](Hourly)",
+            " 01/01  01:00:00,20.0",
+            " 01/01  02:00:00,21.0",
+        ]
+    finally:
+        shutil.rmtree(run_dir, ignore_errors=True)
+
+
 def test_legacy_conversion_still_works():
     run_dir = Path.cwd() / "readvars_cli_test_runtime"
     if run_dir.exists():
@@ -79,4 +130,6 @@ def test_legacy_conversion_still_works():
 if __name__ == "__main__":
     test_list_command()
     test_list_command_filters_time_stamp_records()
+    test_read_command_converts_everything_by_default()
+    test_read_command_supports_output_and_filters()
     test_legacy_conversion_still_works()
