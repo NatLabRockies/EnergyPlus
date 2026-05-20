@@ -1,0 +1,368 @@
+
+ Meters for 10,ZONE_0 GENERAL LIGHTING:Lights Electricity Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:Building [J]
+  OnMeter=Electricity:Zone:ZONE_0 [J]
+  OnMeter=Electricity:SpaceType:GENERAL [J]
+  OnMeter=InteriorLights:Electricity [J]
+  OnMeter=InteriorLights:Electricity:Zone:ZONE_0 [J]
+  OnMeter=InteriorLights:Electricity:SpaceType:GENERAL [J]
+  OnMeter=General:InteriorLights:Electricity [J]
+  OnMeter=General:InteriorLights:Electricity:Zone:ZONE_0 [J]
+  OnMeter=General:InteriorLights:Electricity:SpaceType:GENERAL [J]
+
+ Meters for 132,ZONE_0 EQUIPMENT:Electric Equipment Electricity Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:Building [J]
+  OnMeter=Electricity:Zone:ZONE_0 [J]
+  OnMeter=Electricity:SpaceType:GENERAL [J]
+  OnMeter=InteriorEquipment:Electricity [J]
+  OnMeter=InteriorEquipment:Electricity:Zone:ZONE_0 [J]
+  OnMeter=InteriorEquipment:Electricity:SpaceType:GENERAL [J]
+  OnMeter=General:InteriorEquipment:Electricity [J]
+  OnMeter=General:InteriorEquipment:Electricity:Zone:ZONE_0 [J]
+  OnMeter=General:InteriorEquipment:Electricity:SpaceType:GENERAL [J]
+
+ Meters for 369,ZONE_0:Zone Air System Sensible Heating Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:Building [J]
+  OnMeter=EnergyTransfer:Zone:ZONE_0 [J]
+  OnMeter=Heating:EnergyTransfer [J]
+  OnMeter=Heating:EnergyTransfer:Zone:ZONE_0 [J]
+  OnMeter=General:Heating:EnergyTransfer [J]
+  OnMeter=General:Heating:EnergyTransfer:Zone:ZONE_0 [J]
+
+ Meters for 454,ZONE_0:Zone Air System Sensible Cooling Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:Building [J]
+  OnMeter=EnergyTransfer:Zone:ZONE_0 [J]
+  OnMeter=Cooling:EnergyTransfer [J]
+  OnMeter=Cooling:EnergyTransfer:Zone:ZONE_0 [J]
+  OnMeter=General:Cooling:EnergyTransfer [J]
+  OnMeter=General:Cooling:EnergyTransfer:Zone:ZONE_0 [J]
+
+ Meters for 503,DHW ZONE_0:Water Use Equipment Total Volume [m3]
+  OnMeter=Water:Facility [m3]
+  OnMeter=Water:Plant [m3]
+  OnMeter=WaterSystems:Water [m3]
+  OnMeter=DHW Zone_0:WaterSystems:Water [m3]
+
+ Meters for 552,DHW ZONE_0:Water Use Equipment Mains Water Volume [m3]
+  OnMeter=MainsWater:Facility [m3]
+  OnMeter=MainsWater:Plant [m3]
+  OnMeter=WaterSystems:MainsWater [m3]
+  OnMeter=DHW Zone_0:WaterSystems:MainsWater [m3]
+
+ Meters for 602,DHW ZONE_0:Water Use Equipment Heating Energy [J]
+  OnMeter=DistrictHeatingWater:Facility [J]
+  OnMeter=DistrictHeatingWater:Plant [J]
+  OnMeter=WaterSystems:DistrictHeatingWater [J]
+  OnMeter=DHW Zone_0:WaterSystems:DistrictHeatingWater [J]
+
+ Meters for 651,SIMPLE IDEAL INVERTER:Inverter Conversion Loss Decrement Energy [J]
+  OnMeter=ElectricityProduced:Facility [J]
+  OnMeter=ElectricityProduced:Plant [J]
+  OnMeter=PowerConversion:ElectricityProduced [J]
+
+ Meters for 688,SIMPLE IDEAL INVERTER:Inverter Ancillary AC Electricity Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:Plant [J]
+  OnMeter=Cogeneration:Electricity [J]
+  OnMeter=DCtoACInverter Ancillary:Cogeneration:Electricity [J]
+
+ Meters for 725,Whole Building:Facility Total Purchased Electricity Energy [J]
+  OnMeter=ElectricityPurchased:Facility [J]
+  OnMeter=ElectricityPurchased:Plant [J]
+  OnMeter=Cogeneration:ElectricityPurchased [J]
+  OnMeter=General:Cogeneration:ElectricityPurchased [J]
+
+ Meters for 774,Whole Building:Facility Total Surplus Electricity Energy [J]
+  OnMeter=ElectricitySurplusSold:Facility [J]
+  OnMeter=ElectricitySurplusSold:Plant [J]
+  OnMeter=Cogeneration:ElectricitySurplusSold [J]
+  OnMeter=General:Cogeneration:ElectricitySurplusSold [J]
+
+ Meters for 823,Whole Building:Facility Net Purchased Electricity Energy [J]
+  OnMeter=ElectricityNet:Facility [J]
+  OnMeter=ElectricityNet:Plant [J]
+  OnMeter=Cogeneration:ElectricityNet [J]
+  OnMeter=General:Cogeneration:ElectricityNet [J]
+
+ Meters for 873,PANEL0:Generator Produced DC Electricity Energy [J]
+  OnMeter=ElectricityProduced:Facility [J]
+  OnMeter=ElectricityProduced:Plant [J]
+  OnMeter=Photovoltaic:ElectricityProduced [J]
+
+ Meters for 894,ZONE_0 IDEAL LOADS AIR:Zone Ideal Loads Supply Air Total Heating Fuel Energy [J]
+  OnMeter=DistrictHeatingWater:Facility [J]
+  OnMeter=DistrictHeatingWater:HVAC [J]
+  OnMeter=Heating:DistrictHeatingWater [J]
+  OnMeter=General:Heating:DistrictHeatingWater [J]
+
+ Meters for 931,ZONE_0 IDEAL LOADS AIR:Zone Ideal Loads Supply Air Total Cooling Fuel Energy [J]
+  OnMeter=DistrictCooling:Facility [J]
+  OnMeter=DistrictCooling:HVAC [J]
+  OnMeter=Cooling:DistrictCooling [J]
+  OnMeter=General:Cooling:DistrictCooling [J]
+
+ Meters for 988,ZONE_0_DHWFUEL:Exterior Equipment NaturalGas Energy [J]
+  OnMeter=NaturalGas:Facility [J]
+  OnMeter=ExteriorEquipment:NaturalGas [J]
+  OnMeter=General:ExteriorEquipment:NaturalGas [J]
+
+ Meters for 1025,ZONE_0_HEATFUEL:Exterior Equipment NaturalGas Energy [J]
+  OnMeter=NaturalGas:Facility [J]
+  OnMeter=ExteriorEquipment:NaturalGas [J]
+  OnMeter=General:ExteriorEquipment:NaturalGas [J]
+
+ Meters for 1026,ZONE_0_COOLFUEL:Exterior Equipment Electricity Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=ExteriorEquipment:Electricity [J]
+  OnMeter=General:ExteriorEquipment:Electricity [J]
+
+ Meters for 1051,Site:Environmental Impact Total N2O Emissions Carbon Equivalent Mass [kg]
+  OnMeter=Carbon Equivalent:Facility [kg]
+  OnMeter=CarbonEquivalentEmissions:Carbon Equivalent [kg]
+
+ Meters for 1076,Site:Environmental Impact Total CH4 Emissions Carbon Equivalent Mass [kg]
+  OnMeter=Carbon Equivalent:Facility [kg]
+  OnMeter=CarbonEquivalentEmissions:Carbon Equivalent [kg]
+
+ Meters for 1077,Site:Environmental Impact Total CO2 Emissions Carbon Equivalent Mass [kg]
+  OnMeter=Carbon Equivalent:Facility [kg]
+  OnMeter=CarbonEquivalentEmissions:Carbon Equivalent [kg]
+
+ For Meter=Electricity:Facility [J], ResourceType=Electricity, contents are:
+  ZONE_0 GENERAL LIGHTING:Lights Electricity Energy
+  ZONE_0 EQUIPMENT:Electric Equipment Electricity Energy
+  SIMPLE IDEAL INVERTER:Inverter Ancillary AC Electricity Energy
+  ZONE_0_COOLFUEL:Exterior Equipment Electricity Energy
+
+ For Meter=Electricity:Building [J], ResourceType=Electricity, Group=Building, contents are:
+  ZONE_0 GENERAL LIGHTING:Lights Electricity Energy
+  ZONE_0 EQUIPMENT:Electric Equipment Electricity Energy
+
+ For Meter=Electricity:Zone:ZONE_0 [J], ResourceType=Electricity, Group=Zone, contents are:
+  ZONE_0 GENERAL LIGHTING:Lights Electricity Energy
+  ZONE_0 EQUIPMENT:Electric Equipment Electricity Energy
+
+ For Meter=Electricity:SpaceType:GENERAL [J], ResourceType=Electricity, Group=SpaceType, contents are:
+  ZONE_0 GENERAL LIGHTING:Lights Electricity Energy
+  ZONE_0 EQUIPMENT:Electric Equipment Electricity Energy
+
+ For Meter=InteriorLights:Electricity [J], ResourceType=Electricity, EndUse=InteriorLights, contents are:
+  ZONE_0 GENERAL LIGHTING:Lights Electricity Energy
+
+ For Meter=InteriorLights:Electricity:Zone:ZONE_0 [J], ResourceType=Electricity, EndUse=InteriorLights, Group=Zone, contents are:
+  ZONE_0 GENERAL LIGHTING:Lights Electricity Energy
+
+ For Meter=InteriorLights:Electricity:SpaceType:GENERAL [J], ResourceType=Electricity, EndUse=InteriorLights, Group=SpaceType, contents are:
+  ZONE_0 GENERAL LIGHTING:Lights Electricity Energy
+
+ For Meter=General:InteriorLights:Electricity [J], ResourceType=Electricity, EndUse=InteriorLights, contents are:
+  ZONE_0 GENERAL LIGHTING:Lights Electricity Energy
+
+ For Meter=General:InteriorLights:Electricity:Zone:ZONE_0 [J], ResourceType=Electricity, EndUse=InteriorLights, Group=Zone, contents are:
+  ZONE_0 GENERAL LIGHTING:Lights Electricity Energy
+
+ For Meter=General:InteriorLights:Electricity:SpaceType:GENERAL [J], ResourceType=Electricity, EndUse=InteriorLights, Group=SpaceType, contents are:
+  ZONE_0 GENERAL LIGHTING:Lights Electricity Energy
+
+ For Meter=InteriorEquipment:Electricity [J], ResourceType=Electricity, EndUse=InteriorEquipment, contents are:
+  ZONE_0 EQUIPMENT:Electric Equipment Electricity Energy
+
+ For Meter=InteriorEquipment:Electricity:Zone:ZONE_0 [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=Zone, contents are:
+  ZONE_0 EQUIPMENT:Electric Equipment Electricity Energy
+
+ For Meter=InteriorEquipment:Electricity:SpaceType:GENERAL [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=SpaceType, contents are:
+  ZONE_0 EQUIPMENT:Electric Equipment Electricity Energy
+
+ For Meter=General:InteriorEquipment:Electricity [J], ResourceType=Electricity, EndUse=InteriorEquipment, contents are:
+  ZONE_0 EQUIPMENT:Electric Equipment Electricity Energy
+
+ For Meter=General:InteriorEquipment:Electricity:Zone:ZONE_0 [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=Zone, contents are:
+  ZONE_0 EQUIPMENT:Electric Equipment Electricity Energy
+
+ For Meter=General:InteriorEquipment:Electricity:SpaceType:GENERAL [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=SpaceType, contents are:
+  ZONE_0 EQUIPMENT:Electric Equipment Electricity Energy
+
+ For Meter=EnergyTransfer:Facility [J], ResourceType=EnergyTransfer, contents are:
+  ZONE_0:Zone Air System Sensible Heating Energy
+  ZONE_0:Zone Air System Sensible Cooling Energy
+
+ For Meter=EnergyTransfer:Building [J], ResourceType=EnergyTransfer, Group=Building, contents are:
+  ZONE_0:Zone Air System Sensible Heating Energy
+  ZONE_0:Zone Air System Sensible Cooling Energy
+
+ For Meter=EnergyTransfer:Zone:ZONE_0 [J], ResourceType=EnergyTransfer, Group=Zone, contents are:
+  ZONE_0:Zone Air System Sensible Heating Energy
+  ZONE_0:Zone Air System Sensible Cooling Energy
+
+ For Meter=Heating:EnergyTransfer [J], ResourceType=EnergyTransfer, EndUse=Heating, contents are:
+  ZONE_0:Zone Air System Sensible Heating Energy
+
+ For Meter=Heating:EnergyTransfer:Zone:ZONE_0 [J], ResourceType=EnergyTransfer, EndUse=Heating, Group=Zone, contents are:
+  ZONE_0:Zone Air System Sensible Heating Energy
+
+ For Meter=General:Heating:EnergyTransfer [J], ResourceType=EnergyTransfer, EndUse=Heating, contents are:
+  ZONE_0:Zone Air System Sensible Heating Energy
+
+ For Meter=General:Heating:EnergyTransfer:Zone:ZONE_0 [J], ResourceType=EnergyTransfer, EndUse=Heating, Group=Zone, contents are:
+  ZONE_0:Zone Air System Sensible Heating Energy
+
+ For Meter=Cooling:EnergyTransfer [J], ResourceType=EnergyTransfer, EndUse=Cooling, contents are:
+  ZONE_0:Zone Air System Sensible Cooling Energy
+
+ For Meter=Cooling:EnergyTransfer:Zone:ZONE_0 [J], ResourceType=EnergyTransfer, EndUse=Cooling, Group=Zone, contents are:
+  ZONE_0:Zone Air System Sensible Cooling Energy
+
+ For Meter=General:Cooling:EnergyTransfer [J], ResourceType=EnergyTransfer, EndUse=Cooling, contents are:
+  ZONE_0:Zone Air System Sensible Cooling Energy
+
+ For Meter=General:Cooling:EnergyTransfer:Zone:ZONE_0 [J], ResourceType=EnergyTransfer, EndUse=Cooling, Group=Zone, contents are:
+  ZONE_0:Zone Air System Sensible Cooling Energy
+
+ For Meter=Water:Facility [m3], ResourceType=Water, contents are:
+  DHW ZONE_0:Water Use Equipment Total Volume
+
+ For Meter=Water:Plant [m3], ResourceType=Water, Group=Plant, contents are:
+  DHW ZONE_0:Water Use Equipment Total Volume
+
+ For Meter=WaterSystems:Water [m3], ResourceType=Water, EndUse=WaterSystems, contents are:
+  DHW ZONE_0:Water Use Equipment Total Volume
+
+ For Meter=DHW Zone_0:WaterSystems:Water [m3], ResourceType=Water, EndUse=WaterSystems, contents are:
+  DHW ZONE_0:Water Use Equipment Total Volume
+
+ For Meter=MainsWater:Facility [m3], ResourceType=MainsWater, contents are:
+  DHW ZONE_0:Water Use Equipment Mains Water Volume
+
+ For Meter=MainsWater:Plant [m3], ResourceType=MainsWater, Group=Plant, contents are:
+  DHW ZONE_0:Water Use Equipment Mains Water Volume
+
+ For Meter=WaterSystems:MainsWater [m3], ResourceType=MainsWater, EndUse=WaterSystems, contents are:
+  DHW ZONE_0:Water Use Equipment Mains Water Volume
+
+ For Meter=DHW Zone_0:WaterSystems:MainsWater [m3], ResourceType=MainsWater, EndUse=WaterSystems, contents are:
+  DHW ZONE_0:Water Use Equipment Mains Water Volume
+
+ For Meter=DistrictHeatingWater:Facility [J], ResourceType=DistrictHeatingWater, contents are:
+  DHW ZONE_0:Water Use Equipment Heating Energy
+  ZONE_0 IDEAL LOADS AIR:Zone Ideal Loads Supply Air Total Heating Fuel Energy
+
+ For Meter=DistrictHeatingWater:Plant [J], ResourceType=DistrictHeatingWater, Group=Plant, contents are:
+  DHW ZONE_0:Water Use Equipment Heating Energy
+
+ For Meter=WaterSystems:DistrictHeatingWater [J], ResourceType=DistrictHeatingWater, EndUse=WaterSystems, contents are:
+  DHW ZONE_0:Water Use Equipment Heating Energy
+
+ For Meter=DHW Zone_0:WaterSystems:DistrictHeatingWater [J], ResourceType=DistrictHeatingWater, EndUse=WaterSystems, contents are:
+  DHW ZONE_0:Water Use Equipment Heating Energy
+
+ For Meter=ElectricityProduced:Facility [J], ResourceType=ElectricityProduced, contents are:
+  SIMPLE IDEAL INVERTER:Inverter Conversion Loss Decrement Energy
+  PANEL0:Generator Produced DC Electricity Energy
+
+ For Meter=ElectricityProduced:Plant [J], ResourceType=ElectricityProduced, Group=Plant, contents are:
+  SIMPLE IDEAL INVERTER:Inverter Conversion Loss Decrement Energy
+  PANEL0:Generator Produced DC Electricity Energy
+
+ For Meter=PowerConversion:ElectricityProduced [J], ResourceType=ElectricityProduced, EndUse=PowerConversion, contents are:
+  SIMPLE IDEAL INVERTER:Inverter Conversion Loss Decrement Energy
+
+ For Meter=Electricity:Plant [J], ResourceType=Electricity, Group=Plant, contents are:
+  SIMPLE IDEAL INVERTER:Inverter Ancillary AC Electricity Energy
+
+ For Meter=Cogeneration:Electricity [J], ResourceType=Electricity, EndUse=Cogeneration, contents are:
+  SIMPLE IDEAL INVERTER:Inverter Ancillary AC Electricity Energy
+
+ For Meter=DCtoACInverter Ancillary:Cogeneration:Electricity [J], ResourceType=Electricity, EndUse=Cogeneration, contents are:
+  SIMPLE IDEAL INVERTER:Inverter Ancillary AC Electricity Energy
+
+ For Meter=ElectricityPurchased:Facility [J], ResourceType=ElectricityPurchased, contents are:
+  Whole Building:Facility Total Purchased Electricity Energy
+
+ For Meter=ElectricityPurchased:Plant [J], ResourceType=ElectricityPurchased, Group=Plant, contents are:
+  Whole Building:Facility Total Purchased Electricity Energy
+
+ For Meter=Cogeneration:ElectricityPurchased [J], ResourceType=ElectricityPurchased, EndUse=Cogeneration, contents are:
+  Whole Building:Facility Total Purchased Electricity Energy
+
+ For Meter=General:Cogeneration:ElectricityPurchased [J], ResourceType=ElectricityPurchased, EndUse=Cogeneration, contents are:
+  Whole Building:Facility Total Purchased Electricity Energy
+
+ For Meter=ElectricitySurplusSold:Facility [J], ResourceType=ElectricitySurplusSold, contents are:
+  Whole Building:Facility Total Surplus Electricity Energy
+
+ For Meter=ElectricitySurplusSold:Plant [J], ResourceType=ElectricitySurplusSold, Group=Plant, contents are:
+  Whole Building:Facility Total Surplus Electricity Energy
+
+ For Meter=Cogeneration:ElectricitySurplusSold [J], ResourceType=ElectricitySurplusSold, EndUse=Cogeneration, contents are:
+  Whole Building:Facility Total Surplus Electricity Energy
+
+ For Meter=General:Cogeneration:ElectricitySurplusSold [J], ResourceType=ElectricitySurplusSold, EndUse=Cogeneration, contents are:
+  Whole Building:Facility Total Surplus Electricity Energy
+
+ For Meter=ElectricityNet:Facility [J], ResourceType=ElectricityNet, contents are:
+  Whole Building:Facility Net Purchased Electricity Energy
+
+ For Meter=ElectricityNet:Plant [J], ResourceType=ElectricityNet, Group=Plant, contents are:
+  Whole Building:Facility Net Purchased Electricity Energy
+
+ For Meter=Cogeneration:ElectricityNet [J], ResourceType=ElectricityNet, EndUse=Cogeneration, contents are:
+  Whole Building:Facility Net Purchased Electricity Energy
+
+ For Meter=General:Cogeneration:ElectricityNet [J], ResourceType=ElectricityNet, EndUse=Cogeneration, contents are:
+  Whole Building:Facility Net Purchased Electricity Energy
+
+ For Meter=Photovoltaic:ElectricityProduced [J], ResourceType=ElectricityProduced, EndUse=Photovoltaic, contents are:
+  PANEL0:Generator Produced DC Electricity Energy
+
+ For Meter=DistrictHeatingWater:HVAC [J], ResourceType=DistrictHeatingWater, Group=HVAC, contents are:
+  ZONE_0 IDEAL LOADS AIR:Zone Ideal Loads Supply Air Total Heating Fuel Energy
+
+ For Meter=Heating:DistrictHeatingWater [J], ResourceType=DistrictHeatingWater, EndUse=Heating, contents are:
+  ZONE_0 IDEAL LOADS AIR:Zone Ideal Loads Supply Air Total Heating Fuel Energy
+
+ For Meter=General:Heating:DistrictHeatingWater [J], ResourceType=DistrictHeatingWater, EndUse=Heating, contents are:
+  ZONE_0 IDEAL LOADS AIR:Zone Ideal Loads Supply Air Total Heating Fuel Energy
+
+ For Meter=DistrictCooling:Facility [J], ResourceType=DistrictCooling, contents are:
+  ZONE_0 IDEAL LOADS AIR:Zone Ideal Loads Supply Air Total Cooling Fuel Energy
+
+ For Meter=DistrictCooling:HVAC [J], ResourceType=DistrictCooling, Group=HVAC, contents are:
+  ZONE_0 IDEAL LOADS AIR:Zone Ideal Loads Supply Air Total Cooling Fuel Energy
+
+ For Meter=Cooling:DistrictCooling [J], ResourceType=DistrictCooling, EndUse=Cooling, contents are:
+  ZONE_0 IDEAL LOADS AIR:Zone Ideal Loads Supply Air Total Cooling Fuel Energy
+
+ For Meter=General:Cooling:DistrictCooling [J], ResourceType=DistrictCooling, EndUse=Cooling, contents are:
+  ZONE_0 IDEAL LOADS AIR:Zone Ideal Loads Supply Air Total Cooling Fuel Energy
+
+ For Meter=NaturalGas:Facility [J], ResourceType=NaturalGas, contents are:
+  ZONE_0_DHWFUEL:Exterior Equipment NaturalGas Energy
+  ZONE_0_HEATFUEL:Exterior Equipment NaturalGas Energy
+
+ For Meter=ExteriorEquipment:NaturalGas [J], ResourceType=NaturalGas, EndUse=ExteriorEquipment, contents are:
+  ZONE_0_DHWFUEL:Exterior Equipment NaturalGas Energy
+  ZONE_0_HEATFUEL:Exterior Equipment NaturalGas Energy
+
+ For Meter=General:ExteriorEquipment:NaturalGas [J], ResourceType=NaturalGas, EndUse=ExteriorEquipment, contents are:
+  ZONE_0_DHWFUEL:Exterior Equipment NaturalGas Energy
+  ZONE_0_HEATFUEL:Exterior Equipment NaturalGas Energy
+
+ For Meter=ExteriorEquipment:Electricity [J], ResourceType=Electricity, EndUse=ExteriorEquipment, contents are:
+  ZONE_0_COOLFUEL:Exterior Equipment Electricity Energy
+
+ For Meter=General:ExteriorEquipment:Electricity [J], ResourceType=Electricity, EndUse=ExteriorEquipment, contents are:
+  ZONE_0_COOLFUEL:Exterior Equipment Electricity Energy
+
+ For Meter=Carbon Equivalent:Facility [kg], ResourceType=Carbon Equivalent, contents are:
+  Site:Environmental Impact Total N2O Emissions Carbon Equivalent Mass
+  Site:Environmental Impact Total CH4 Emissions Carbon Equivalent Mass
+  Site:Environmental Impact Total CO2 Emissions Carbon Equivalent Mass
+
+ For Meter=CarbonEquivalentEmissions:Carbon Equivalent [kg], ResourceType=Carbon Equivalent, EndUse=CarbonEquivalentEmissions, contents are:
+  Site:Environmental Impact Total N2O Emissions Carbon Equivalent Mass
+  Site:Environmental Impact Total CH4 Emissions Carbon Equivalent Mass
+  Site:Environmental Impact Total CO2 Emissions Carbon Equivalent Mass

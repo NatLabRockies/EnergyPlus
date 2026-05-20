@@ -1,0 +1,161 @@
+Program Version,EnergyPlus, Version 26.1.0-e6064cf3c2, YMD=2026.04.22 02:56
+! <Version>, Version ID
+ Version, 25.2
+! <Timesteps per Hour>, #TimeSteps, Minutes per TimeStep {minutes}
+ Timesteps per Hour,  6, 10
+! <System Convergence Limits>, Minimum System TimeStep {minutes}, Max HVAC Iterations, Minimum Plant Iterations, Maximum Plant Iterations
+ System Convergence Limits, 10, 100, 3, 10
+! <Simulation Control>, Do Zone Sizing, Do System Sizing, Do Plant Sizing, Do Design Days, Do Weather Simulation, Do HVAC Sizing Simulation
+ Simulation Control, Yes, Yes, Yes, No, Yes, No
+! <Performance Precision Tradeoffs>, Use Coil Direct Simulation, Zone Radiant Exchange Algorithm, Override Mode, Number of Timestep In Hour, Force Euler Method, Minimum Number of Warmup Days, Force Suppress All Begin Environment Resets, Minimum System Timestep, MaxZoneTempDiff, MaxAllowedDelTemp
+ Performance Precision Tradeoffs, No, ScriptF, Normal, 6, No, 1, No, 10.0, 0.300, 2.0000E-003
+! <Output Reporting Tolerances>, Tolerance for Time Heating Setpoint Not Met, Tolerance for Zone Cooling Setpoint Not Met Time
+ Output Reporting Tolerances, 0.200, 0.200, 
+! <Site:GroundTemperature:BuildingSurface>,Jan{C},Feb{C},Mar{C},Apr{C},May{C},Jun{C},Jul{C},Aug{C},Sep{C},Oct{C},Nov{C},Dec{C}
+ Site:GroundTemperature:BuildingSurface,  18.00,  18.00,  18.00,  18.00,  18.00,  18.00,  18.00,  18.00,  18.00,  18.00,  18.00,  18.00
+! <Site:GroundTemperature:FCfactorMethod>,Jan{C},Feb{C},Mar{C},Apr{C},May{C},Jun{C},Jul{C},Aug{C},Sep{C},Oct{C},Nov{C},Dec{C}
+ Site:GroundTemperature:FCfactorMethod,  13.01,  15.04,  18.98,  22.72,  29.80,  33.52,  34.55,  32.66,  28.30,  22.86,  17.51,  13.97
+! <Site:GroundTemperature:Shallow>,Jan{C},Feb{C},Mar{C},Apr{C},May{C},Jun{C},Jul{C},Aug{C},Sep{C},Oct{C},Nov{C},Dec{C}
+ Site:GroundTemperature:Shallow,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00
+! <Site:GroundTemperature:Deep>,Jan{C},Feb{C},Mar{C},Apr{C},May{C},Jun{C},Jul{C},Aug{C},Sep{C},Oct{C},Nov{C},Dec{C}
+ Site:GroundTemperature:Deep,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00
+! <Site:GroundReflectance>,Jan{dimensionless},Feb{dimensionless},Mar{dimensionless},Apr{dimensionless},May{dimensionless},Jun{dimensionless},Jul{dimensionless},Aug{dimensionless},Sep{dimensionless},Oct{dimensionless},Nov{dimensionless},Dec{dimensionless}
+ Site:GroundReflectance,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20
+! <Site:GroundReflectance:SnowModifier>, Normal, Daylighting {dimensionless}
+ Site:GroundReflectance:SnowModifier,   1.000,   1.000
+! <Site:GroundReflectance:Snow>,Jan{dimensionless},Feb{dimensionless},Mar{dimensionless},Apr{dimensionless},May{dimensionless},Jun{dimensionless},Jul{dimensionless},Aug{dimensionless},Sep{dimensionless},Oct{dimensionless},Nov{dimensionless},Dec{dimensionless}
+ Site:GroundReflectance:Snow,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20
+! <Site:GroundReflectance:Snow:Daylighting>,Jan{dimensionless},Feb{dimensionless},Mar{dimensionless},Apr{dimensionless},May{dimensionless},Jun{dimensionless},Jul{dimensionless},Aug{dimensionless},Sep{dimensionless},Oct{dimensionless},Nov{dimensionless},Dec{dimensionless}
+ Site:GroundReflectance:Snow:Daylighting,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20
+! <Environment:Weather Station>,Wind Sensor Height Above Ground {m},Wind Speed Profile Exponent {},Wind Speed Profile Boundary Layer Thickness {m},Air Temperature Sensor Height Above Ground {m},Wind Speed Modifier Coefficient-Internal,Temperature Modifier Coefficient-Internal
+Environment:Weather Station,10.000,0.220,370.000,1.500,2.213,9.750E-003
+! <Site:Location>, Location Name, Latitude {N+/S- Deg}, Longitude {E+/W- Deg},  Time Zone Number {GMT+/-}, Elevation {m},  Standard Pressure at Elevation {Pa}, Standard RhoAir at Elevation
+Site:Location,Phoenix Sky Harbor Intl Ap AZ USA TMY3 WMO#=722780,33.45,-111.98,-7.00,337.00,97342,1.1570
+! <Site Water Mains Temperature Information>,Calculation Method{},Water Mains Temperature Schedule Name{},Annual Average Outdoor Air Temperature{C},Maximum Difference In Monthly Average Outdoor Air Temperatures{deltaC},Fixed Default Water Mains Temperature{C}
+Site Water Mains Temperature Information,FixedDefault,NA,NA,NA,10.0
+! <Building Information>, Building Name,North Axis {deg},Terrain,  Loads Convergence Tolerance Value,Temperature Convergence Tolerance Value,  Solar Distribution,Maximum Number of Warmup Days,Minimum Number of Warmup Days
+ Building Information,Building,0.000,Suburbs,4.00000E-002,0.25000,FullExterior,30,7
+! <Inside Convection Algorithm>, Algorithm {Simple | TARP | CeilingDiffuser | AdaptiveConvectionAlgorithm}
+Inside Convection Algorithm,TARP
+! <Outside Convection Algorithm>, Algorithm {SimpleCombined | TARP | MoWitt | DOE-2 | AdaptiveConvectionAlgorithm}
+Outside Convection Algorithm,DOE-2
+! <Sky Radiance Distribution>, Value {Anisotropic}
+Sky Radiance Distribution,Anisotropic
+! <Zone Air Solution Algorithm>, Algorithm {ThirdOrderBackwardDifference | AnalyticalSolution | EulerMethod}, Space Heat Balance Sizing, Space Heat Balance Simulation
+ Zone Air Solution Algorithm, ThirdOrderBackwardDifference, No, No
+! <Zone Air Carbon Dioxide Balance Simulation>, Simulation {Yes/No}, Carbon Dioxide Concentration
+ Zone Air Carbon Dioxide Balance Simulation, Yes,YES
+! <Zone Air Generic Contaminant Balance Simulation>, Simulation {Yes/No}, Generic Contaminant Concentration
+ Zone Air Generic Contaminant Balance Simulation, No,N/A
+! <Zone Air Mass Flow Balance Simulation>, Enforce Mass Balance, Adjust Zone Mixing and Return {AdjustMixingOnly | AdjustReturnOnly | AdjustMixingThenReturn | AdjustReturnThenMixing | None}, Adjust Zone Infiltration {AddInfiltration | AdjustInfiltration | None}, Infiltration Zones {MixingSourceZonesOnly | AllZones}
+ Zone Air Mass Flow Balance Simulation, No,N/A,N/A,N/A
+! <HVACSystemRootFindingAlgorithm>, Value {RegulaFalsi | Bisection | BisectionThenRegulaFalsi | RegulaFalsiThenBisection}
+ HVACSystemRootFindingAlgorithm, RegulaFalsi
+! <Environment:Site Atmospheric Variation>,Wind Speed Profile Exponent {},Wind Speed Profile Boundary Layer Thickness {m},Air Temperature Gradient Coefficient {K/m}
+Environment:Site Atmospheric Variation,0.220,370.000,6.500000E-003
+! <Shadowing/Sun Position Calculations Annual Simulations>, Shading Calculation Method, Shading Calculation Update Frequency Method, Shading Calculation Update Frequency {days}, Maximum Figures in Shadow Overlap Calculations {}, Polygon Clipping Algorithm, Pixel Counting Resolution, Sky Diffuse Modeling Algorithm, Output External Shading Calculation Results, Disable Self-Shading Within Shading Zone Groups, Disable Self-Shading From Shading Zone Groups to Other Zones
+Shadowing/Sun Position Calculations Annual Simulations,Imported,Periodic,20,15000,SutherlandHodgman,512,SimpleSkyDiffuseModeling,Yes,No,No
+! <Surface Geometry>,Starting Corner,Vertex Input Direction,Coordinate System,Daylight Reference Point Coordinate System,Rectangular (Simple) Surface Coordinate System
+ Surface Geometry,LowerLeftCorner,Counterclockwise,RelativeCoordinateSystem,RelativeCoordinateSystem,RelativeToZoneOrigin
+! <Surface Heat Transfer Algorithm>, Value {CTF - ConductionTransferFunction | EMPD - MoisturePenetrationDepthConductionTransferFunction | CondFD - ConductionFiniteDifference | HAMT - CombinedHeatAndMoistureFiniteElement} - Description,Inside Surface Max Temperature Limit{C}, Surface Convection Coefficient Lower Limit {W/m2-K}, Surface Convection Coefficient Upper Limit {W/m2-K}
+Surface Heat Transfer Algorithm, CTF - ConductionTransferFunction,200,0.10,1000.0
+! <Shading Summary>, Number of Fixed Detached Shades, Number of Building Detached Shades, Number of Attached Shades
+ Shading Summary,0,0,0
+! <Zone Summary>, Number of Zones, Number of Zone Surfaces, Number of SubSurfaces
+ Zone Summary,1,9,3
+! <Zone Information>,Zone Name,North Axis {deg},Origin X-Coordinate {m},Origin Y-Coordinate {m},Origin Z-Coordinate {m},Centroid X-Coordinate {m},Centroid Y-Coordinate {m},Centroid Z-Coordinate {m},Type,Zone Multiplier,Zone List Multiplier,Minimum X {m},Maximum X {m},Minimum Y {m},Maximum Y {m},Minimum Z {m},Maximum Z {m},Ceiling Height {m},Volume {m3},Zone Inside Convection Algorithm {Simple-Detailed-CeilingDiffuser-TrombeWall},Zone Outside Convection Algorithm {Simple-Detailed-Tarp-MoWitt-DOE-2-BLAST}, Floor Area {m2},Exterior Gross Wall Area {m2},Exterior Net Wall Area {m2},Exterior Window Area {m2}, Number of Surfaces, Number of SubSurfaces, Number of Shading SubSurfaces,  Part of Total Building Area
+ Zone Information, EF5DBA5F-A145-417F-BC74-166FF4EA5175_0,0.0,0.00,0.00,0.00,-9.88,5.00,8.18,1,1,1,-19.75,0.00,0.00,10.00,6.68,9.68,3.00,592.50,TARP,DOE-2,197.50,178.50,120.00,58.50,6,3,0,Yes
+! <Solar View Factor Check Values>,Zone/Enclosure Name,Original Check Value,Calculated Fixed Check Value,Final Check Value,Number of Iterations,Fixed RowSum Convergence,Used RowSum Convergence
+Solar View Factor Check Values,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0,3.552714E-015,7.584329E-004,7.584329E-004,14,7.584329E-004,7.584329E-004
+! <Zone Internal Gains Nominal>,Zone Name, Floor Area {m2},# Occupants,Area per Occupant {m2/person},Occupant per Area {person/m2},Interior Lighting {W/m2},Electric Load {W/m2},Gas Load {W/m2},Other Load {W/m2},Hot Water Eq {W/m2},Steam Equipment {W/m2},Sum Loads per Area {W/m2},Outdoor Controlled Baseboard Heat
+ Zone Internal Gains Nominal, EF5DBA5F-A145-417F-BC74-166FF4EA5175_0,197.50,39.5,5.000,0.200,12.000,12.000,0.000,0.000,0.000,0.000,24.000,No
+! <People Internal Gains Nominal>,Name,Schedule Name,Zone Name,Zone Floor Area {m2},# Zone Occupants,Number of People {},People/Floor Area {person/m2},Floor Area per person {m2/person},Fraction Radiant,Fraction Convected,Sensible Fraction Calculation,Activity level,ASHRAE 55 Warnings,Carbon Dioxide Generation Rate,Minimum Number of People for All Day Types,Maximum Number of People for All Day Types,Minimum Number of People for Weekdays, Maximum Number of People for Weekdays, Minimum Number of People for Weekends/Holidays, Maximum Number of People for Weekends /Holidays,Minimum Number of People for Summer Design Days, Maximum Number of People for Summer Design Days,Minimum Number of People for Winter Design Days, Maximum Number of People for Winter Design Days,MRT Calculation Type,Work Efficiency, Clothing Insulation Calculation Method,Clothing Insulation Calculation Method Schedule,Clothing,Air Velocity,Fanger Calculation,Pierce Calculation,KSU Calculation,Cooling Effect Calculation,Ankle Draft Calculation
+ People Internal Gains Nominal, PEOPLE EF5DBA5F-A145-417F-BC74-166FF4EA5175_0,ALLON,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0,197.50,39.5,39.5,0.200,5.000,0.300,0.700,AutoCalculate,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0PEOPLEACTIVITY,No,3.8200E-008,39.5,39.5,39.5,39.5,39.5,39.5,39.5,39.5,39.5,39.5,Zone Averaged,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0WORKEFFICIENCY,Dynamic Clothing Model ASHRAE55,N/A,,AIRSPEED 0,Yes,Yes,No,No,No
+! <Lights Internal Gains Nominal>,Name,Schedule Name,Zone Name,Zone Floor Area {m2},# Zone Occupants,Lighting Level {W},Lights/Floor Area {W/m2},Lights per person {W/person},Fraction Return Air,Fraction Radiant,Fraction Short Wave,Fraction Convected,Fraction Replaceable,End-Use, Minimum Lighting Level for All Day Types {W},Maximum Lighting Level for All Day Types {W},Minimum Lighting Level for Weekdays {W}, Maximum Lighting Level for Weekdays {W},Minimum Lighting Level for Weekends/Holidays {W}, Maximum Lighting Level for Weekends /Holidays {W},Minimum Lighting Level for Summer Design Days {W}, Maximum Lighting Level for Summer Design Days {W},Minimum Lighting Level for Winter Design Days {W}, Maximum Lighting Level for Winter Design Days {W}
+ Lights Internal Gains Nominal, EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 GENERAL LIGHTING,ALLON,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0,197.50,39.5,2370.000,12.000,60.000,0.000,0.420,0.180,0.400,1.000,General,2370.000,2370.000,2370.000,2370.0,2370.000,2370.000,2370.000,2370.000,2370.000,2370.000
+! <ElectricEquipment Internal Gains Nominal>,Name,Schedule Name,Zone Name,Zone Floor Area {m2},# Zone Occupants,Equipment Level {W},Equipment/Floor Area {W/m2},Equipment per person {W/person},Fraction Latent,Fraction Radiant,Fraction Lost,Fraction Convected,End-Use SubCategory,Minimum Equipment Level for All Day Types {W},Maximum Equipment Level for All Day Types {W},Minimum Equipment Level for Weekdays {W}, Maximum Equipment Level for Weekdays {W},Minimum Equipment Level for Weekends/Holidays {W}, Maximum Equipment Level for Weekends /Holidays {W},Minimum Equipment Level for Summer Design Days {W}, Maximum Equipment Level for Summer Design Days {W},Minimum Equipment Level for Winter Design Days {W}, Maximum Equipment Level for Winter Design Days {W}
+ ElectricEquipment Internal Gains Nominal, EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 EQUIPMENT,ALLON,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0,197.50,39.5,2370.000,12.000,60.000,0.000,0.200,0.000,0.800,General,2370.000,2370.000,2370.000,2370.000,2370.000,2370.000,2370.000,2370.000,2370.000,2370.000
+! <Surface View Factor Check Values>,Zone/Enclosure Name,Original Check Value,Calculated Fixed Check Value,Final Check Value,Number of Iterations,Fixed RowSum Convergence,Used RowSum Convergence
+! <Surface Convection Parameters>, Surface Name, Outside Model Assignment, Outside Area [m2], Outside Perimeter [m], Outside Height [m], Inside Model Assignment, Inside Height [m], Inside Perimeter Envelope [m], Inside Hydraulic Diameter [m], Window Wall Ratio, Window Location, Near Radiant {Yes/No}, Has Active HVAC {Yes/No}
+Surface Convection Parameters,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:F0,0,30.00,63.63,9.68,0,3.00,59.50,13.28,0.33,3,No,No
+Surface Convection Parameters,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:F1,0,59.25,63.63,9.68,0,3.00,59.50,13.28,0.33,4,No,No
+Surface Convection Parameters,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:F2,0,30.00,39.36,9.68,0,3.00,59.50,13.28,0.33,3,No,No
+Surface Convection Parameters,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:F2:W0,0,30.00,39.36,9.68,0,3.00,59.50,13.28,0.33,2,No,No
+Surface Convection Parameters,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:F3,0,59.25,58.86,9.68,0,3.00,59.50,13.28,0.33,3,No,No
+Surface Convection Parameters,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:F3:W0,0,59.25,58.86,9.68,0,3.00,59.50,13.28,0.33,2,No,No
+Surface Convection Parameters,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:F3:W1,0,59.25,58.86,9.68,0,3.00,59.50,13.28,0.33,2,No,No
+Surface Convection Parameters,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:F5,0,197.50,59.50,0.00,0,3.00,59.50,13.28,0.33,0,No,No
+Surface Convection Parameters,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:F4,0,197.50,59.50,0.00,0,3.00,59.50,13.28,0.33,0,No,No
+! <Building Convection Parameters:North Facade>, Perimeter, Height, Xmin, Xmax, Ymin, Ymax, Zmin, Zmax 
+Building Convection Parameters:North Facade, 63.63,9.68,-19.75,0.00,0.00,10.00,0.00,9.68
+! <Building Convection Parameters:Northeast Facade>, Perimeter, Height, Xmin, Xmax, Ymin, Ymax, Zmin, Zmax 
+Building Convection Parameters:Northeast Facade, 0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00
+! <Building Convection Parameters:East Facade>, Perimeter, Height, Xmin, Xmax, Ymin, Ymax, Zmin, Zmax 
+Building Convection Parameters:East Facade, 39.36,9.68,0.00,0.00,0.00,10.00,0.00,9.68
+! <Building Convection Parameters:Southeast Facade>, Perimeter, Height, Xmin, Xmax, Ymin, Ymax, Zmin, Zmax 
+Building Convection Parameters:Southeast Facade, 0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00
+! <Building Convection Parameters:South Facade>, Perimeter, Height, Xmin, Xmax, Ymin, Ymax, Zmin, Zmax 
+Building Convection Parameters:South Facade, 58.86,9.68,-19.75,0.00,0.00,0.00,0.00,9.68
+! <Building Convection Parameters:Southwest Facade>, Perimeter, Height, Xmin, Xmax, Ymin, Ymax, Zmin, Zmax 
+Building Convection Parameters:Southwest Facade, 0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00
+! <Building Convection Parameters:West Facade>, Perimeter, Height, Xmin, Xmax, Ymin, Ymax, Zmin, Zmax 
+Building Convection Parameters:West Facade, 63.63,9.68,-19.75,0.00,0.00,10.00,0.00,9.68
+! <Building Convection Parameters:Northwest Facade>, Perimeter, Height, Xmin, Xmax, Ymin, Ymax, Zmin, Zmax 
+Building Convection Parameters:Northwest Facade, 0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00
+! <Building Convection Parameters:Roof>, Area [m2], Perimeter [m], Height [m], Tilt [deg], Azimuth [deg]
+Building Convection Parameters:Roof,197.50,59.50,0.00,0.00,180.00
+! <ZoneInfiltration Airflow Stats Nominal>,Name,Input Object, Schedule Name,Zone Name, Zone Floor Area {m2}, # Zone Occupants,Design Volume Flow Rate {m3/s},Volume Flow Rate/Floor Area {m3/s-m2},Volume Flow Rate/Exterior Surface Area {m3/s-m2},ACH - Air Changes per Hour,Equation A - Constant Term Coefficient {},Equation B - Temperature Term Coefficient {1/C},Equation C - Velocity Term Coefficient {s/m}, Equation D - Velocity Squared Term Coefficient {s2/m2}
+ ZoneInfiltration Airflow Stats Nominal, EF5DBA5F-A145-417F-BC74-166FF4EA5175_0INFILTRATION,ZoneInfiltration:DesignFlowRate,ON,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0,197.50,39.5,1.646E-002,8.333E-005,2.870E-005,0.100,1.000,0.000,0.000,0.000
+! <AirFlow Model>, Simple
+ AirFlow Model, Simple
+! <RoomAir Model>, Zone Name, Mixing/Mundt/UCSDDV/UCSDCV/UCSDUFI/UCSDUFE/User Defined
+RoomAir Model,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0,Mixing/Well-Stirred
+! <AirflowNetwork Model:Control>, No Multizone or Distribution/Multizone with Distribution/Multizone without Distribution/Multizone with Distribution only during Fan Operation
+AirflowNetwork Model:Control,NoMultizoneOrDistribution
+! <Zone Volume Capacitance Multiplier>, Sensible Heat Capacity Multiplier, Moisture Capacity Multiplier, Carbon Dioxide Capacity Multiplier, Generic Contaminant Capacity Multiplier
+Zone Volume Capacitance Multiplier,   1.000 ,   1.000,   1.000,   1.000
+! <Load Timesteps in Zone Design Calculation Averaging Window>, Value
+ Load Timesteps in Zone Design Calculation Averaging Window,    6
+! <Heating Sizing Factor Information>, Sizing Factor ID, Value
+ Heating Sizing Factor Information, Global,          1.5
+ Heating Sizing Factor Information, Zone EF5DBA5F-A145-417F-BC74-166FF4EA5175_0,         1.15
+! <Cooling Sizing Factor Information>, Sizing Factor ID, Value
+ Cooling Sizing Factor Information, Global,          1.5
+ Cooling Sizing Factor Information, Zone EF5DBA5F-A145-417F-BC74-166FF4EA5175_0,         1.15
+! <Zone Sizing Information>, Zone Name, Load Type, Calc Des Load {W}, User Des Load {W}, Calc Des Air Flow Rate {m3/s}, User Des Air Flow Rate {m3/s}, Design Day Name, Date/Time of Peak, Temperature at Peak {C}, Humidity Ratio at Peak {kgWater/kgDryAir}, Floor Area {m2}, # Occupants, Calc Outdoor Air Flow Rate {m3/s}, Calc DOAS Heat Addition Rate {W}
+ Zone Sizing Information, EF5DBA5F-A145-417F-BC74-166FF4EA5175_0, Cooling, 15113.49415, 17380.51827, 0.91390, 1.05099, EXTREME SUMMER WEATHER PERIOD FOR DESIGN, 8/9 14:00:00, 40.60000, 1.24911E-002, 197.50000, 39.50000, 0.15800, 0.00000
+ Zone Sizing Information, EF5DBA5F-A145-417F-BC74-166FF4EA5175_0, Heating, 0.00000, 0.00000, 0.00000, 0.15800, ,  00:10:00, 33.80000, 1.25456E-002, 197.50000, 39.50000, 0.15800, 0.00000
+! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value
+ Component Sizing Information, ZoneHVAC:IdealLoadsAirSystem, EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 IDEAL LOADS AIR, Design Size Maximum Heating Air Flow Rate [m3/s], 0.15800
+ Component Sizing Information, ZoneHVAC:IdealLoadsAirSystem, EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 IDEAL LOADS AIR, Design Size Maximum Sensible Heating Capacity [W], 1128.76896
+ Component Sizing Information, ZoneHVAC:IdealLoadsAirSystem, EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 IDEAL LOADS AIR, Design Size Maximum Cooling Air Flow Rate [m3/s], 1.05099
+ Component Sizing Information, ZoneHVAC:IdealLoadsAirSystem, EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 IDEAL LOADS AIR, Design Size Maximum Total Cooling Capacity [W], 24345.80105
+! <Zone Surfaces>,Zone Name,# Surfaces
+! <Shading Surfaces>,Number of Shading Surfaces,# Surfaces
+! <HeatTransfer Surface>,Surface Name,Surface Class,Base Surface,Heat Transfer Algorithm,Construction,Nominal U (w/o film coefs) {W/m2-K},Nominal U (with film coefs) {W/m2-K},Solar Diffusing,Area (Net) {m2},Area (Gross) {m2},Area (Sunlit Calc) {m2},Azimuth {deg},Tilt {deg},~Width {m},~Height {m},Reveal {m},ExtBoundCondition,ExtConvCoeffCalc,IntConvCoeffCalc,SunExposure,WindExposure,ViewFactorToGround,ViewFactorToSky,ViewFactorToGround-IR,ViewFactorToSky-IR,#Sides
+! <Shading Surface>,Surface Name,Surface Class,Base Surface,Heat Transfer Algorithm,Transmittance Schedule,Min Schedule Value,Max Schedule Value,Solar Diffusing,Area (Net) {m2},Area (Gross) {m2},Area (Sunlit Calc) {m2},Azimuth {deg},Tilt {deg},~Width {m},~Height {m},Reveal {m},ExtBoundCondition,ExtConvCoeffCalc,IntConvCoeffCalc,SunExposure,WindExposure,ViewFactorToGround,ViewFactorToSky,ViewFactorToGround-IR,ViewFactorToSky-IR,#Sides
+! <Frame/Divider Surface>,Surface Name,Surface Class,Base Surface,Heat Transfer Algorithm,Construction,Nominal U (w/o film coefs) {W/m2-K},Nominal U (with film coefs) {W/m2-K},Solar Diffusing,Area (Net) {m2},Area (Gross) {m2},Area (Sunlit Calc) {m2},Azimuth {deg},Tilt {deg},~Width {m},~Height {m},Reveal {m}
+Zone Surfaces,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0,9
+HeatTransfer Surface,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:F0,Wall,,CTF - ConductionTransferFunction,120MMINSULATION 200MMCONCRETE,0.276,0.265,,30.00,30.00,30.00,270.00,90.00,10.00,3.00,0.00,ExternalEnvironment,DOE-2,ASHRAETARP,SunExposed,WindExposed,0.50,0.50,0.65,0.35,4
+HeatTransfer Surface,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:F1,Wall,,CTF - ConductionTransferFunction,120MMINSULATION 200MMCONCRETE,0.276,0.265,,59.25,59.25,59.25,0.00,90.00,19.75,3.00,0.00,ExternalEnvironment,DOE-2,ASHRAETARP,SunExposed,WindExposed,0.50,0.50,0.58,0.42,4
+HeatTransfer Surface,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:F2,Wall,,CTF - ConductionTransferFunction,120MMINSULATION 200MMCONCRETE,0.276,0.265,,12.00,30.00,12.00,90.00,90.00,10.00,3.00,0.00,ExternalEnvironment,DOE-2,ASHRAETARP,SunExposed,WindExposed,0.50,0.50,0.62,0.38,4
+HeatTransfer Surface,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:F2:W0,Window,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:F2,Window5 Detailed Fenestration,DEFAULTGLAZING,N/A,5.778,No,18.00,18.00,18.00,90.00,90.00,6.00,3.00,0.00,ExternalEnvironment,DOE-2,ASHRAETARP,SunExposed,WindExposed,0.50,0.50,-0.34,1.34,4
+HeatTransfer Surface,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:F3,Wall,,CTF - ConductionTransferFunction,120MMINSULATION 200MMCONCRETE,0.276,0.265,,18.75,59.25,18.75,180.00,90.00,19.75,3.00,0.00,ExternalEnvironment,DOE-2,ASHRAETARP,SunExposed,WindExposed,0.50,0.50,0.56,0.44,4
+HeatTransfer Surface,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:F3:W0,Window,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:F3,Window5 Detailed Fenestration,DEFAULTGLAZING,N/A,5.778,No,9.00,9.00,9.00,180.00,90.00,3.00,3.00,0.00,ExternalEnvironment,DOE-2,ASHRAETARP,SunExposed,WindExposed,0.50,0.50,-0.37,1.37,4
+HeatTransfer Surface,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:F3:W1,Window,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:F3,Window5 Detailed Fenestration,DEFAULTGLAZING,N/A,5.778,No,31.50,31.50,31.50,180.00,90.00,10.50,3.00,0.00,ExternalEnvironment,DOE-2,ASHRAETARP,SunExposed,WindExposed,0.50,0.50,0.67,0.33,4
+HeatTransfer Surface,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:F5,Floor,,CTF - ConductionTransferFunction,120MMINSULATION 200MMCONCRETE,0.276,0.258,,197.50,197.50,197.50,90.00,180.00,10.00,19.75,0.00,ExternalEnvironment,DOE-2,ASHRAETARP,NoSun,WindExposed,1.00,0.00,1.00,0.00,4
+HeatTransfer Surface,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:F4,Roof,,CTF - ConductionTransferFunction,120MMINSULATION 200MMCONCRETE,0.276,0.262,,197.50,197.50,197.50,180.00,0.00,19.75,10.00,0.00,ExternalEnvironment,DOE-2,ASHRAETARP,SunExposed,WindExposed,0.00,1.00,0.69,0.31,4
+! <Environment>,Environment Name,Environment Type, Start Date, End Date, Start DayOfWeek, Duration {#days}, Source:Start DayOfWeek,  Use Daylight Saving, Use Holidays, Apply Weekend Holiday Rule,  Use Rain Values, Use Snow Values, Sky Temperature Model
+! <Environment:Special Days>, Special Day Name, Special Day Type, Source, Start Date, Duration {#days}
+! <Environment:Daylight Saving>, Daylight Saving Indicator, Source, Start Date, End Date
+! <Environment:WarmupDays>, NumberofWarmupDays
+Environment,CLIMATE STUDIO,WeatherFileRunPeriod,01/01/2017,12/31/2017,Sunday,365,Use RunPeriod Specified Day,No,No,No,Yes,Yes,Clark and Allen
+Environment:Daylight Saving,Yes,InputFile,03/12,11/05
+Environment:WarmupDays,  7
+! <Tabular Report>,Style,Unit Conversion, Format Reals
+Tabular Report,COMMA,None,Yes
+! <Warmup Convergence Information>,Zone Name,Environment Type/Name,Average Warmup Temperature Difference {deltaC},Std Dev Warmup Temperature Difference {deltaC},Max Temperature Pass/Fail Convergence,Min Temperature Pass/Fail Convergence,Average Warmup Load Difference {W},Std Dev Warmup Load Difference {W},Heating Load Pass/Fail Convergence,Cooling Load Pass/Fail Convergence
+ Warmup Convergence Information,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0,RunPeriod: CLIMATE STUDIO,2.3305746050E-002,3.8166294668E-002,Pass,Pass,7.9348802218E-003,8.5275675403E-003,Pass,Pass
+! <Program Control Information:Threads/Parallel Sims>, Threading Supported,Maximum Number of Threads, Env Set Threads (OMP_NUM_THREADS), EP Env Set Threads (EP_OMP_NUM_THREADS), IDF Set Threads, Number of Threads Used (Interior Radiant Exchange), Number Nominal Surfaces, Number Parallel Sims
+Program Control Information:Threads/Parallel Sims, No,1, N/A, N/A, N/A, N/A, N/A, N/A
+End of Data

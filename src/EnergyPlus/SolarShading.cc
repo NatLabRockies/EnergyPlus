@@ -10735,18 +10735,6 @@ void SkyDifSolarShading(EnergyPlusData &state)
                     Real64 ratioHoriz = std::stod(v);
 
                     if (!read_next(ss, v)) break;
-                    Real64 woIso = std::stod(v);
-
-                    if (!read_next(ss, v)) break;
-                    Real64 withIso = std::stod(v);
-
-                    if (!read_next(ss, v)) break;
-                    Real64 woHoriz = std::stod(v);
-
-                    if (!read_next(ss, v)) break;
-                    Real64 withHoriz = std::stod(v);
-
-                    if (!read_next(ss, v)) break;
                     Real64 baseVFSky = std::stod(v);
 
                     if (!read_next(ss, v)) break;
@@ -10754,17 +10742,8 @@ void SkyDifSolarShading(EnergyPlusData &state)
                     (void)baseVFGround;
 
                     if (surfNum >= 1 && surfNum <= s_surf->TotSurfaces) {
-                        // Primary shading ratios
                         state.dataSolarShading->SurfDifShdgRatioIsoSky(surfNum) = ratioIso;
                         state.dataSolarShading->SurfDifShdgRatioHoriz(surfNum)  = ratioHoriz;
-
-                        // Accumulators exactly as exported
-                        state.dataSolarShading->SurfWoShdgIsoSky(surfNum)   = woIso;
-                        state.dataSolarShading->SurfWithShdgIsoSky(surfNum) = withIso;
-                        state.dataSolarShading->SurfWoShdgHoriz(surfNum)    = woHoriz;
-                        state.dataSolarShading->SurfWithShdgHoriz(surfNum)  = withHoriz;
-
-                        // IMPORTANT: set BASE ViewFactorSkyIR only; tail logic applies scaling.
                         s_surf->Surface(surfNum).ViewFactorSkyIR = baseVFSky;
 
                         parsedSurfaces++;
@@ -10908,10 +10887,6 @@ void SkyDifSolarShading(EnergyPlusData &state)
                 // 8 attributes per surface
                 csvOut << "\"" << surface.Name << ": SurfDifShdgRatioIsoSky\","
                     << "\"" << surface.Name << ": SurfDifShdgRatioHoriz\","
-                    << "\"" << surface.Name << ": SurfWoShdgIsoSky\","
-                    << "\"" << surface.Name << ": SurfWithShdgIsoSky\","
-                    << "\"" << surface.Name << ": SurfWoShdgHoriz\","
-                    << "\"" << surface.Name << ": SurfWithShdgHoriz\","
                     << "\"" << surface.Name << ": BaseViewFactorSkyIR\","
                     << "\"" << surface.Name << ": BaseViewFactorGroundIR\"";
             }
@@ -10941,10 +10916,6 @@ void SkyDifSolarShading(EnergyPlusData &state)
 
                 csvOut << ratioIso << ","
                     << ratioHoriz << ","
-                    << state.dataSolarShading->SurfWoShdgIsoSky(SurfNum) << ","
-                    << state.dataSolarShading->SurfWithShdgIsoSky(SurfNum) << ","
-                    << state.dataSolarShading->SurfWoShdgHoriz(SurfNum) << ","
-                    << state.dataSolarShading->SurfWithShdgHoriz(SurfNum) << ","
                     << baseViewFactorSkyIR << ","
                     << baseViewFactorGroundIR;
             }

@@ -1824,4 +1824,4 @@ Output:Diagnostics,
     DisplayAdvancedReportVariables;  !- Key 1
 
 Schedule:File:Shading,
-    cubewall_dumped_0.csv; !- File Name
+    cubewall_0519_0.csv; !- File Name

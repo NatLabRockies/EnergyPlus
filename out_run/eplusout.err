@@ -1,0 +1,12 @@
+Program Version,EnergyPlus, Version 26.1.0-e6064cf3c2, YMD=2026.05.19 22:56,
+   ** Warning ** Version: in IDF="25.2" not the same as expected="26.1"
+   ** Warning ** Version: in IDF="25.2" not the same as expected="26.1"
+   ************* Beginning Zone Sizing Calculations
+   ** Warning ** GetShadowingInput: DetailedSkyDiffuseModeling is chosen but not needed as either the shading transmittance for shading devices does not change throughout the year
+   **   ~~~   **  or MinimalShadowing has been chosen.
+   **   ~~~   ** Simulation should be set to use SimpleSkyDiffuseModeling, but is left at Detailed for simulation.
+   **   ~~~   ** Choose SimpleSkyDiffuseModeling in the ShadowCalculation object to reduce computation time.
+   ** Warning ** CheckUsedConstructions: There are 6 nominally unused constructions in input.
+   **   ~~~   ** For explicit details on each unused construction, use Output:Diagnostics,DisplayExtraWarnings;
+   ** Warning ** No Glare Calculation Daylighting Reference Point Name provided for object named: ZONE_0_DAYLCTRL
+   **   ~~~   ** No glare calculation performed, and the simulation continues.

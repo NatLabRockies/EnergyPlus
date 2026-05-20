@@ -1,0 +1,242 @@
+
+ Meters for 10,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 GENERAL LIGHTING:Lights Electricity Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:Building [J]
+  OnMeter=Electricity:Zone:EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 [J]
+  OnMeter=Electricity:SpaceType:GENERAL [J]
+  OnMeter=InteriorLights:Electricity [J]
+  OnMeter=InteriorLights:Electricity:Zone:EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 [J]
+  OnMeter=InteriorLights:Electricity:SpaceType:GENERAL [J]
+  OnMeter=General:InteriorLights:Electricity [J]
+  OnMeter=General:InteriorLights:Electricity:Zone:EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 [J]
+  OnMeter=General:InteriorLights:Electricity:SpaceType:GENERAL [J]
+
+ Meters for 132,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 EQUIPMENT:Electric Equipment Electricity Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:Building [J]
+  OnMeter=Electricity:Zone:EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 [J]
+  OnMeter=Electricity:SpaceType:GENERAL [J]
+  OnMeter=InteriorEquipment:Electricity [J]
+  OnMeter=InteriorEquipment:Electricity:Zone:EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 [J]
+  OnMeter=InteriorEquipment:Electricity:SpaceType:GENERAL [J]
+  OnMeter=General:InteriorEquipment:Electricity [J]
+  OnMeter=General:InteriorEquipment:Electricity:Zone:EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 [J]
+  OnMeter=General:InteriorEquipment:Electricity:SpaceType:GENERAL [J]
+
+ Meters for 216,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:Zone Air System Sensible Heating Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:Building [J]
+  OnMeter=EnergyTransfer:Zone:EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 [J]
+  OnMeter=Heating:EnergyTransfer [J]
+  OnMeter=Heating:EnergyTransfer:Zone:EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 [J]
+  OnMeter=General:Heating:EnergyTransfer [J]
+  OnMeter=General:Heating:EnergyTransfer:Zone:EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 [J]
+
+ Meters for 301,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:Zone Air System Sensible Cooling Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:Building [J]
+  OnMeter=EnergyTransfer:Zone:EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 [J]
+  OnMeter=Cooling:EnergyTransfer [J]
+  OnMeter=Cooling:EnergyTransfer:Zone:EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 [J]
+  OnMeter=General:Cooling:EnergyTransfer [J]
+  OnMeter=General:Cooling:EnergyTransfer:Zone:EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 [J]
+
+ Meters for 350,Whole Building:Facility Total Purchased Electricity Energy [J]
+  OnMeter=ElectricityPurchased:Facility [J]
+  OnMeter=ElectricityPurchased:Plant [J]
+  OnMeter=Cogeneration:ElectricityPurchased [J]
+  OnMeter=General:Cogeneration:ElectricityPurchased [J]
+
+ Meters for 399,Whole Building:Facility Total Surplus Electricity Energy [J]
+  OnMeter=ElectricitySurplusSold:Facility [J]
+  OnMeter=ElectricitySurplusSold:Plant [J]
+  OnMeter=Cogeneration:ElectricitySurplusSold [J]
+  OnMeter=General:Cogeneration:ElectricitySurplusSold [J]
+
+ Meters for 448,Whole Building:Facility Net Purchased Electricity Energy [J]
+  OnMeter=ElectricityNet:Facility [J]
+  OnMeter=ElectricityNet:Plant [J]
+  OnMeter=Cogeneration:ElectricityNet [J]
+  OnMeter=General:Cogeneration:ElectricityNet [J]
+
+ Meters for 499,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 IDEAL LOADS AIR:Zone Ideal Loads Supply Air Total Heating Fuel Energy [J]
+  OnMeter=DistrictHeatingWater:Facility [J]
+  OnMeter=DistrictHeatingWater:HVAC [J]
+  OnMeter=Heating:DistrictHeatingWater [J]
+  OnMeter=General:Heating:DistrictHeatingWater [J]
+
+ Meters for 548,EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 IDEAL LOADS AIR:Zone Ideal Loads Supply Air Total Cooling Fuel Energy [J]
+  OnMeter=DistrictCooling:Facility [J]
+  OnMeter=DistrictCooling:HVAC [J]
+  OnMeter=Cooling:DistrictCooling [J]
+  OnMeter=General:Cooling:DistrictCooling [J]
+
+ Meters for 603,Site:Environmental Impact Total N2O Emissions Carbon Equivalent Mass [kg]
+  OnMeter=Carbon Equivalent:Facility [kg]
+  OnMeter=CarbonEquivalentEmissions:Carbon Equivalent [kg]
+
+ Meters for 628,Site:Environmental Impact Total CH4 Emissions Carbon Equivalent Mass [kg]
+  OnMeter=Carbon Equivalent:Facility [kg]
+  OnMeter=CarbonEquivalentEmissions:Carbon Equivalent [kg]
+
+ Meters for 629,Site:Environmental Impact Total CO2 Emissions Carbon Equivalent Mass [kg]
+  OnMeter=Carbon Equivalent:Facility [kg]
+  OnMeter=CarbonEquivalentEmissions:Carbon Equivalent [kg]
+
+ For Meter=Electricity:Facility [J], ResourceType=Electricity, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 GENERAL LIGHTING:Lights Electricity Energy
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 EQUIPMENT:Electric Equipment Electricity Energy
+
+ For Meter=Electricity:Building [J], ResourceType=Electricity, Group=Building, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 GENERAL LIGHTING:Lights Electricity Energy
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 EQUIPMENT:Electric Equipment Electricity Energy
+
+ For Meter=Electricity:Zone:EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 [J], ResourceType=Electricity, Group=Zone, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 GENERAL LIGHTING:Lights Electricity Energy
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 EQUIPMENT:Electric Equipment Electricity Energy
+
+ For Meter=Electricity:SpaceType:GENERAL [J], ResourceType=Electricity, Group=SpaceType, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 GENERAL LIGHTING:Lights Electricity Energy
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 EQUIPMENT:Electric Equipment Electricity Energy
+
+ For Meter=InteriorLights:Electricity [J], ResourceType=Electricity, EndUse=InteriorLights, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 GENERAL LIGHTING:Lights Electricity Energy
+
+ For Meter=InteriorLights:Electricity:Zone:EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 [J], ResourceType=Electricity, EndUse=InteriorLights, Group=Zone, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 GENERAL LIGHTING:Lights Electricity Energy
+
+ For Meter=InteriorLights:Electricity:SpaceType:GENERAL [J], ResourceType=Electricity, EndUse=InteriorLights, Group=SpaceType, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 GENERAL LIGHTING:Lights Electricity Energy
+
+ For Meter=General:InteriorLights:Electricity [J], ResourceType=Electricity, EndUse=InteriorLights, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 GENERAL LIGHTING:Lights Electricity Energy
+
+ For Meter=General:InteriorLights:Electricity:Zone:EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 [J], ResourceType=Electricity, EndUse=InteriorLights, Group=Zone, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 GENERAL LIGHTING:Lights Electricity Energy
+
+ For Meter=General:InteriorLights:Electricity:SpaceType:GENERAL [J], ResourceType=Electricity, EndUse=InteriorLights, Group=SpaceType, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 GENERAL LIGHTING:Lights Electricity Energy
+
+ For Meter=InteriorEquipment:Electricity [J], ResourceType=Electricity, EndUse=InteriorEquipment, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 EQUIPMENT:Electric Equipment Electricity Energy
+
+ For Meter=InteriorEquipment:Electricity:Zone:EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=Zone, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 EQUIPMENT:Electric Equipment Electricity Energy
+
+ For Meter=InteriorEquipment:Electricity:SpaceType:GENERAL [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=SpaceType, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 EQUIPMENT:Electric Equipment Electricity Energy
+
+ For Meter=General:InteriorEquipment:Electricity [J], ResourceType=Electricity, EndUse=InteriorEquipment, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 EQUIPMENT:Electric Equipment Electricity Energy
+
+ For Meter=General:InteriorEquipment:Electricity:Zone:EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=Zone, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 EQUIPMENT:Electric Equipment Electricity Energy
+
+ For Meter=General:InteriorEquipment:Electricity:SpaceType:GENERAL [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=SpaceType, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 EQUIPMENT:Electric Equipment Electricity Energy
+
+ For Meter=EnergyTransfer:Facility [J], ResourceType=EnergyTransfer, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:Zone Air System Sensible Heating Energy
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:Zone Air System Sensible Cooling Energy
+
+ For Meter=EnergyTransfer:Building [J], ResourceType=EnergyTransfer, Group=Building, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:Zone Air System Sensible Heating Energy
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:Zone Air System Sensible Cooling Energy
+
+ For Meter=EnergyTransfer:Zone:EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 [J], ResourceType=EnergyTransfer, Group=Zone, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:Zone Air System Sensible Heating Energy
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:Zone Air System Sensible Cooling Energy
+
+ For Meter=Heating:EnergyTransfer [J], ResourceType=EnergyTransfer, EndUse=Heating, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:Zone Air System Sensible Heating Energy
+
+ For Meter=Heating:EnergyTransfer:Zone:EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 [J], ResourceType=EnergyTransfer, EndUse=Heating, Group=Zone, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:Zone Air System Sensible Heating Energy
+
+ For Meter=General:Heating:EnergyTransfer [J], ResourceType=EnergyTransfer, EndUse=Heating, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:Zone Air System Sensible Heating Energy
+
+ For Meter=General:Heating:EnergyTransfer:Zone:EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 [J], ResourceType=EnergyTransfer, EndUse=Heating, Group=Zone, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:Zone Air System Sensible Heating Energy
+
+ For Meter=Cooling:EnergyTransfer [J], ResourceType=EnergyTransfer, EndUse=Cooling, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:Zone Air System Sensible Cooling Energy
+
+ For Meter=Cooling:EnergyTransfer:Zone:EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 [J], ResourceType=EnergyTransfer, EndUse=Cooling, Group=Zone, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:Zone Air System Sensible Cooling Energy
+
+ For Meter=General:Cooling:EnergyTransfer [J], ResourceType=EnergyTransfer, EndUse=Cooling, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:Zone Air System Sensible Cooling Energy
+
+ For Meter=General:Cooling:EnergyTransfer:Zone:EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 [J], ResourceType=EnergyTransfer, EndUse=Cooling, Group=Zone, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:Zone Air System Sensible Cooling Energy
+
+ For Meter=ElectricityPurchased:Facility [J], ResourceType=ElectricityPurchased, contents are:
+  Whole Building:Facility Total Purchased Electricity Energy
+
+ For Meter=ElectricityPurchased:Plant [J], ResourceType=ElectricityPurchased, Group=Plant, contents are:
+  Whole Building:Facility Total Purchased Electricity Energy
+
+ For Meter=Cogeneration:ElectricityPurchased [J], ResourceType=ElectricityPurchased, EndUse=Cogeneration, contents are:
+  Whole Building:Facility Total Purchased Electricity Energy
+
+ For Meter=General:Cogeneration:ElectricityPurchased [J], ResourceType=ElectricityPurchased, EndUse=Cogeneration, contents are:
+  Whole Building:Facility Total Purchased Electricity Energy
+
+ For Meter=ElectricitySurplusSold:Facility [J], ResourceType=ElectricitySurplusSold, contents are:
+  Whole Building:Facility Total Surplus Electricity Energy
+
+ For Meter=ElectricitySurplusSold:Plant [J], ResourceType=ElectricitySurplusSold, Group=Plant, contents are:
+  Whole Building:Facility Total Surplus Electricity Energy
+
+ For Meter=Cogeneration:ElectricitySurplusSold [J], ResourceType=ElectricitySurplusSold, EndUse=Cogeneration, contents are:
+  Whole Building:Facility Total Surplus Electricity Energy
+
+ For Meter=General:Cogeneration:ElectricitySurplusSold [J], ResourceType=ElectricitySurplusSold, EndUse=Cogeneration, contents are:
+  Whole Building:Facility Total Surplus Electricity Energy
+
+ For Meter=ElectricityNet:Facility [J], ResourceType=ElectricityNet, contents are:
+  Whole Building:Facility Net Purchased Electricity Energy
+
+ For Meter=ElectricityNet:Plant [J], ResourceType=ElectricityNet, Group=Plant, contents are:
+  Whole Building:Facility Net Purchased Electricity Energy
+
+ For Meter=Cogeneration:ElectricityNet [J], ResourceType=ElectricityNet, EndUse=Cogeneration, contents are:
+  Whole Building:Facility Net Purchased Electricity Energy
+
+ For Meter=General:Cogeneration:ElectricityNet [J], ResourceType=ElectricityNet, EndUse=Cogeneration, contents are:
+  Whole Building:Facility Net Purchased Electricity Energy
+
+ For Meter=DistrictHeatingWater:Facility [J], ResourceType=DistrictHeatingWater, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 IDEAL LOADS AIR:Zone Ideal Loads Supply Air Total Heating Fuel Energy
+
+ For Meter=DistrictHeatingWater:HVAC [J], ResourceType=DistrictHeatingWater, Group=HVAC, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 IDEAL LOADS AIR:Zone Ideal Loads Supply Air Total Heating Fuel Energy
+
+ For Meter=Heating:DistrictHeatingWater [J], ResourceType=DistrictHeatingWater, EndUse=Heating, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 IDEAL LOADS AIR:Zone Ideal Loads Supply Air Total Heating Fuel Energy
+
+ For Meter=General:Heating:DistrictHeatingWater [J], ResourceType=DistrictHeatingWater, EndUse=Heating, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 IDEAL LOADS AIR:Zone Ideal Loads Supply Air Total Heating Fuel Energy
+
+ For Meter=DistrictCooling:Facility [J], ResourceType=DistrictCooling, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 IDEAL LOADS AIR:Zone Ideal Loads Supply Air Total Cooling Fuel Energy
+
+ For Meter=DistrictCooling:HVAC [J], ResourceType=DistrictCooling, Group=HVAC, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 IDEAL LOADS AIR:Zone Ideal Loads Supply Air Total Cooling Fuel Energy
+
+ For Meter=Cooling:DistrictCooling [J], ResourceType=DistrictCooling, EndUse=Cooling, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 IDEAL LOADS AIR:Zone Ideal Loads Supply Air Total Cooling Fuel Energy
+
+ For Meter=General:Cooling:DistrictCooling [J], ResourceType=DistrictCooling, EndUse=Cooling, contents are:
+  EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 IDEAL LOADS AIR:Zone Ideal Loads Supply Air Total Cooling Fuel Energy
+
+ For Meter=Carbon Equivalent:Facility [kg], ResourceType=Carbon Equivalent, contents are:
+  Site:Environmental Impact Total N2O Emissions Carbon Equivalent Mass
+  Site:Environmental Impact Total CH4 Emissions Carbon Equivalent Mass
+  Site:Environmental Impact Total CO2 Emissions Carbon Equivalent Mass
+
+ For Meter=CarbonEquivalentEmissions:Carbon Equivalent [kg], ResourceType=Carbon Equivalent, EndUse=CarbonEquivalentEmissions, contents are:
+  Site:Environmental Impact Total N2O Emissions Carbon Equivalent Mass
+  Site:Environmental Impact Total CH4 Emissions Carbon Equivalent Mass
+  Site:Environmental Impact Total CO2 Emissions Carbon Equivalent Mass

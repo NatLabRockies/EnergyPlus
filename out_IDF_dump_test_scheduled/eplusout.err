@@ -1,0 +1,75 @@
+Program Version,EnergyPlus, Version 26.1.0-e6064cf3c2, YMD=2026.04.21 22:48,
+   ** Warning ** Version: in IDF="25.2" not the same as expected="26.1"
+   ** Warning ** Version: in IDF="25.2" not the same as expected="26.1"
+   ************* Beginning Zone Sizing Calculations
+   ** Warning ** CheckUsedConstructions: There are 4 nominally unused constructions in input.
+   **   ~~~   ** For explicit details on each unused construction, use Output:Diagnostics,DisplayExtraWarnings;
+   ** Warning ** processShadowingInput: sunlit fraction schedule not found for EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:F0 when using ImportedShading.
+   **   ~~~   ** These values are set to 1.0.
+   ** Warning ** processShadowingInput: sunlit fraction schedule not found for EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:F1 when using ImportedShading.
+   **   ~~~   ** These values are set to 1.0.
+   ** Warning ** processShadowingInput: sunlit fraction schedule not found for EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:F2 when using ImportedShading.
+   **   ~~~   ** These values are set to 1.0.
+   ** Warning ** processShadowingInput: sunlit fraction schedule not found for EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:F3 when using ImportedShading.
+   **   ~~~   ** These values are set to 1.0.
+   ** Warning ** processShadowingInput: sunlit fraction schedule not found for EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:F5 when using ImportedShading.
+   **   ~~~   ** These values are set to 1.0.
+   ** Warning ** processShadowingInput: sunlit fraction schedule not found for EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:F4 when using ImportedShading.
+   **   ~~~   ** These values are set to 1.0.
+   ** Warning ** processShadowingInput: sunlit fraction schedule not found for EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:F2:W0 when using ImportedShading.
+   **   ~~~   ** These values are set to 1.0.
+   ** Warning ** processShadowingInput: sunlit fraction schedule not found for EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:F3:W0 when using ImportedShading.
+   **   ~~~   ** These values are set to 1.0.
+   ** Warning ** processShadowingInput: sunlit fraction schedule not found for EF5DBA5F-A145-417F-BC74-166FF4EA5175_0:F3:W1 when using ImportedShading.
+   **   ~~~   ** These values are set to 1.0.
+   ** Warning ** Calculated design heating load for zone=EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 is zero.
+   **   ~~~   ** Check Sizing:Zone and ZoneControl:Thermostat inputs.
+   ** Warning ** ZoneHVAC:IdealLoadsAirSystem "EF5DBA5F-A145-417F-BC74-166FF4EA5175_0 IDEAL LOADS AIR" Requested outdoor air flow rate = 0.15800 [m3/s] exceeds limit.
+   **   ~~~   **  Will be reduced to the Maximum Heating Air Flow Rate = -99998.99999 [m3/s]
+   **   ~~~   **  During Sizing, Environment=EXTREME WINTER WEATHER PERIOD FOR DESIGN, at Simulation time=12/14 23:50 - 24:00
+   ** Warning ** ManageSizing: For a plant sizing run, there must be at least 1 Sizing:Plant object input. SimulationControl Plant Sizing option ignored.
+   ** Warning ** Output:Meter:MeterFileOnly: invalid Key Name="COOLING:ELECTRICITY" - not found.
+   ** Warning ** Output:Meter:MeterFileOnly: invalid Key Name="HEATING:ELECTRICITY" - not found.
+   ** Warning ** Output:Meter:MeterFileOnly: invalid Key Name="HEATING:NATURALGAS" - not found.
+   ** Warning ** Output:Meter:MeterFileOnly: invalid Key Name="HEATING:FUELOILNO1" - not found.
+   ** Warning ** Output:Meter:MeterFileOnly: invalid Key Name="HEATING:FUELOILNO2" - not found.
+   ** Warning ** Output:Meter:MeterFileOnly: invalid Key Name="HEATING:COAL" - not found.
+   ** Warning ** Output:Meter:MeterFileOnly: invalid Key Name="HEATING:GASOLINE" - not found.
+   ** Warning ** Output:Meter:MeterFileOnly: invalid Key Name="HEATING:PROPANE" - not found.
+   ** Warning ** Output:Meter:MeterFileOnly: invalid Key Name="HEATING:DIESEL" - not found.
+   ** Warning ** Output:Meter:MeterFileOnly: invalid Key Name="HEATING:OTHERFUEL1" - not found.
+   ** Warning ** Output:Meter:MeterFileOnly: invalid Key Name="HEATING:OTHERFUEL2" - not found.
+   ** Warning ** Output:Meter:MeterFileOnly: invalid Key Name="FANS:ELECTRICITY" - not found.
+   ** Warning ** Output:Meter:MeterFileOnly: invalid Key Name="PUMPS:ELECTRICITY" - not found.
+   ** Warning ** Output:Meter:MeterFileOnly: invalid Key Name="HUMIDIFIER:ELECTRICITY" - not found.
+   ** Warning ** Output:Meter:MeterFileOnly: invalid Key Name="HEATREJECTION:ELECTRICITY" - not found.
+   ************* Testing Individual Branch Integrity
+   ************* All Branches passed integrity testing
+   ************* Testing Individual Supply Air Path Integrity
+   ************* All Supply Air Paths passed integrity testing
+   ************* Testing Individual Return Air Path Integrity
+   ************* All Return Air Paths passed integrity testing
+   ************* No node connection errors were found.
+   ************* Beginning Simulation
+   ************* Simulation Error Summary *************
+   ** Warning ** The following Report Variables were requested but not generated -- check.rdd file
+   **   ~~~   ** Either the IDF did not contain these elements, the variable name is misspelled,
+   **   ~~~   ** or the requested variable is an advanced output which requires Output : Diagnostics, DisplayAdvancedReportVariables;
+   ************* Key=*, VarName=ZONE VENTILATION TOTAL HEAT LOSS ENERGY, Frequency=Hourly
+   ************* Key=*, VarName=ZONE VENTILATION TOTAL HEAT GAIN ENERGY, Frequency=Hourly
+   ************* Key=*, VarName=WATER USE EQUIPMENT HEATING ENERGY, Frequency=Hourly
+   ************* There are 9 unused schedules in input.
+   ************* There are 2920 unused week schedules in input.
+   ************* There are 2920 unused day schedules in input.
+   ************* Use Output:Diagnostics,DisplayUnusedSchedules; to see them.
+   *************
+   ************* ===== Final Error Summary =====
+   ************* The following error categories occurred.  Consider correcting or noting.
+   ************* Nominally Unused Constructions
+   ************* ..The nominally unused constructions warning is provided to alert you to potential conditions that can cause
+   ************* ..extra time during simulation. Each construction is calculated by the algorithm indicated in the HeatBalanceAlgorithm
+   ************* ..object. You may remove the constructions indicated (when you use the DisplayExtraWarnings option).
+   *************
+   ************* EnergyPlus Warmup Error Summary. During Warmup: 0 Warning; 0 Severe Errors.
+   ************* EnergyPlus Sizing Error Summary. During Sizing: 13 Warning; 0 Severe Errors.
+   ************* EnergyPlus Completed Successfully-- 30 Warning; 0 Severe Errors; Elapsed Time=00hr 00min  5.62sec
