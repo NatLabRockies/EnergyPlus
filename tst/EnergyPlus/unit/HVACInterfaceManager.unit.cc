@@ -192,4 +192,42 @@ TEST_F(EnergyPlusFixture, UpdateHVACInterface_Test)
     EXPECT_TRUE(state->dataConvergeParams->AirLoopConvergence(1).HVACCO2NotConverged[2]);
     EXPECT_TRUE(state->dataConvergeParams->AirLoopConvergence(1).HVACGenContamNotConverged[2]);
 }
+
+TEST_F(EnergyPlusFixture, SetupCommonPipesTwoWayVariablePrimaryPumpWarnsAndUsesConstantPrimaryFlow)
+{
+    using namespace DataPlant;
+    using namespace HVACInterfaceManager;
+
+    constexpr int loopNum = 1;
+    state->dataPlnt->TotNumLoops = 1;
+    state->dataPlnt->PlantLoop.allocate(1);
+
+    auto &plantLoop = state->dataPlnt->PlantLoop(loopNum);
+    plantLoop.Name = "Test Plant Loop";
+    plantLoop.CommonPipeType = CommonPipeType::TwoWay;
+
+    auto &supplySide = plantLoop.LoopSide(LoopSideLocation::Supply);
+    supplySide.TotalBranches = 1;
+    supplySide.Branch.allocate(1);
+    supplySide.Branch(1).TotalComponents = 1;
+    supplySide.Branch(1).Comp.allocate(1);
+    supplySide.Branch(1).Comp(1).Type = PlantEquipmentType::PumpVariableSpeed;
+
+    auto &demandSide = plantLoop.LoopSide(LoopSideLocation::Demand);
+    demandSide.TotalBranches = 1;
+    demandSide.Branch.allocate(1);
+    demandSide.Branch(1).TotalComponents = 1;
+    demandSide.Branch(1).Comp.allocate(1);
+    demandSide.Branch(1).Comp(1).Type = PlantEquipmentType::PumpConstantSpeed;
+
+    SetupCommonPipes(*state);
+
+    auto const &commonPipe = state->dataHVACInterfaceMgr->PlantCommonPipe(loopNum);
+    EXPECT_EQ(CommonPipeType::TwoWay, commonPipe.CommonPipeType);
+    EXPECT_EQ(FlowType::Constant, commonPipe.SupplySideInletPumpType);
+    EXPECT_EQ(FlowType::Constant, commonPipe.DemandSideInletPumpType);
+    EXPECT_TRUE(compare_err_stream_substring("detected variable speed pump on supply inlet of TwoWayCommonPipe plant loop", false, true));
+    EXPECT_TRUE(compare_err_stream_substring("The primary/supply side will operate as if constant speed", true, true));
+}
+
 } // namespace EnergyPlus
