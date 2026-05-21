@@ -83468,6 +83468,10 @@ PlantLoop,
         \note TwoWayCommonPipe = Primary-secondary with control of secondary supply temperature or
         \note primary return temperature (requires a setpoint be placed on the
         \note plant side or demand side inlet node).
+        \note If a variable speed pump is placed on the plant side inlet branch with
+        \note CommonPipe or TwoWayCommonPipe, the common pipe model does not vary
+        \note primary/supply flow. A warning is issued and the primary/supply side
+        \note is simulated as constant speed.
         \type choice
         \key CommonPipe
         \key TwoWayCommonPipe
