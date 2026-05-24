@@ -148,25 +148,25 @@ namespace FanCoilUnits {
         if (CompIndex == 0) {
             FanCoilNum = Util::FindItemInList(CompName, state.dataFanCoilUnits->FanCoil);
             if (FanCoilNum == 0) {
-                ShowFatalError(state, EnergyPlus::format("SimFanCoil: Unit not found={}", CompName));
+                ShowFatalError(state, std::format("SimFanCoil: Unit not found={}", CompName));
             }
             CompIndex = FanCoilNum;
         } else {
             FanCoilNum = CompIndex;
             if (FanCoilNum > state.dataFanCoilUnits->NumFanCoils || FanCoilNum < 1) {
                 ShowFatalError(state,
-                               EnergyPlus::format("SimFanCoil:  Invalid CompIndex passed={}, Number of Units={}, Entered Unit name={}",
-                                                  FanCoilNum,
-                                                  state.dataFanCoilUnits->NumFanCoils,
-                                                  CompName));
+                               std::format("SimFanCoil:  Invalid CompIndex passed={}, Number of Units={}, Entered Unit name={}",
+                                           FanCoilNum,
+                                           state.dataFanCoilUnits->NumFanCoils,
+                                           CompName));
             }
             if (state.dataFanCoilUnits->CheckEquipName(FanCoilNum)) {
                 if (CompName != state.dataFanCoilUnits->FanCoil(FanCoilNum).Name) {
                     ShowFatalError(state,
-                                   EnergyPlus::format("SimFanCoil: Invalid CompIndex passed={}, Unit name={}, stored Unit Name for that index={}",
-                                                      FanCoilNum,
-                                                      CompName,
-                                                      state.dataFanCoilUnits->FanCoil(FanCoilNum).Name));
+                                   std::format("SimFanCoil: Invalid CompIndex passed={}, Unit name={}, stored Unit Name for that index={}",
+                                               FanCoilNum,
+                                               CompName,
+                                               state.dataFanCoilUnits->FanCoil(FanCoilNum).Name));
                 }
                 state.dataFanCoilUnits->CheckEquipName(FanCoilNum) = false;
             }
@@ -303,10 +303,10 @@ namespace FanCoilUnits {
             fanCoil.MedSpeedRatio = Numbers(3);
             // check if low speed ratio < medium speed ratio, if not : warning & set to default values
             if (fanCoil.LowSpeedRatio > fanCoil.MedSpeedRatio) {
-                ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\",", RoutineName, CurrentModuleObject, fanCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("... {} is greater than the medium speed supply air flow ratio.", cNumericFields(2)));
-                ShowContinueError(state, EnergyPlus::format("... Fan Coil Unit low speed supply air flow ratio = {:.5f} ", fanCoil.LowSpeedRatio));
-                ShowContinueError(state, EnergyPlus::format("... Fan Coit Unit medium speed supply air flow ratio = {:.5f} ", fanCoil.MedSpeedRatio));
+                ShowWarningError(state, std::format("{}{}=\"{}\",", RoutineName, CurrentModuleObject, fanCoil.Name));
+                ShowContinueError(state, std::format("... {} is greater than the medium speed supply air flow ratio.", cNumericFields(2)));
+                ShowContinueError(state, std::format("... Fan Coil Unit low speed supply air flow ratio = {:.5f} ", fanCoil.LowSpeedRatio));
+                ShowContinueError(state, std::format("... Fan Coit Unit medium speed supply air flow ratio = {:.5f} ", fanCoil.MedSpeedRatio));
                 ShowContinueError(state,
                                   "... Fan Coil Unit low speed supply air flow ratio and medium speed supply air flow ratio set to default values");
                 fanCoil.LowSpeedRatio = 1.0 / 3.0;
@@ -342,13 +342,13 @@ namespace FanCoilUnits {
                 errFlag = false;
                 ValidateComponent(state, fanCoil.OAMixType, fanCoil.OAMixName, errFlag, CurrentModuleObject);
                 if (errFlag) {
-                    ShowContinueError(state, EnergyPlus::format("specified in {} = \"{}\".", CurrentModuleObject, fanCoil.Name));
+                    ShowContinueError(state, std::format("specified in {} = \"{}\".", CurrentModuleObject, fanCoil.Name));
                     ErrorsFound = true;
                 } else {
                     // Get outdoor air mixer node numbers
                     OANodeNums = MixedAir::GetOAMixerNodeNumbers(state, fanCoil.OAMixName, errFlag);
                     if (errFlag) {
-                        ShowContinueError(state, EnergyPlus::format("that was specified in {} = {}", CurrentModuleObject, fanCoil.Name));
+                        ShowContinueError(state, std::format("that was specified in {} = {}", CurrentModuleObject, fanCoil.Name));
                         ShowContinueError(state, "..OutdoorAir:Mixer is required. Enter an OutdoorAir:Mixer object with this name.");
                         ErrorsFound = true;
                     } else {
@@ -392,9 +392,9 @@ namespace FanCoilUnits {
                     } else if (Util::SameString(CCoilType, "Coil:Cooling:Water:DetailedGeometry")) {
                         fanCoil.CCoilPlantType = DataPlant::PlantEquipmentType::CoilWaterDetailedFlatCooling;
                     } else {
-                        ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, fanCoil.Name));
-                        ShowContinueError(state, EnergyPlus::format("For: {}=\"{}\".", cAlphaFields(11), Alphas(11)));
-                        ShowContinueError(state, EnergyPlus::format("Invalid Coil Type={}, Name={}", CCoilType, fanCoil.CCoilPlantName));
+                        ShowSevereError(state, std::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, fanCoil.Name));
+                        ShowContinueError(state, std::format("For: {}=\"{}\".", cAlphaFields(11), Alphas(11)));
+                        ShowContinueError(state, std::format("Invalid Coil Type={}, Name={}", CCoilType, fanCoil.CCoilPlantName));
                         ShowContinueError(state, "must be \"Coil:Cooling:Water\" or \"Coil:Cooling:Water:DetailedGeometry\"");
                         ErrorsFound = true;
                     }
@@ -402,7 +402,7 @@ namespace FanCoilUnits {
                 IsNotOK = false;
                 ValidateComponent(state, fanCoil.CCoilType, fanCoil.CCoilName, IsNotOK, fanCoil.UnitType);
                 if (IsNotOK) {
-                    ShowContinueError(state, EnergyPlus::format("...specified in {}=\"{}\".", CurrentModuleObject, fanCoil.Name));
+                    ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, fanCoil.Name));
                     ErrorsFound = true;
                 } else {
                     if (fanCoil.coolCoilType != HVAC::CoilType::CoolingWaterHXAssisted) {
@@ -410,7 +410,7 @@ namespace FanCoilUnits {
                         int coilIndex = WaterCoils::GetWaterCoilIndex(state, fanCoil.CCoilType, fanCoil.CCoilName, IsNotOK);
                         // Other error checks should trap before it gets to this point in the code, but including just in case.
                         if (IsNotOK) {
-                            ShowContinueError(state, EnergyPlus::format("...specified in {}=\"{}\".", CurrentModuleObject, fanCoil.Name));
+                            ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, fanCoil.Name));
                             ErrorsFound = true;
                         } else {
                             fanCoil.CoolCoilFluidInletNode = state.dataWaterCoils->WaterCoil(coilIndex).WaterInletNodeNum;
@@ -422,7 +422,7 @@ namespace FanCoilUnits {
                         int coilIndex = WaterCoils::GetWaterCoilIndex(state, CCoilType, fanCoil.CCoilPlantName, IsNotOK);
                         // Other error checks should trap before it gets to this point in the code, but including just in case.
                         if (IsNotOK) {
-                            ShowContinueError(state, EnergyPlus::format("...specified in {}=\"{}\".", CurrentModuleObject, fanCoil.Name));
+                            ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, fanCoil.Name));
                             ErrorsFound = true;
                         } else {
                             fanCoil.CoolCoilFluidInletNode = state.dataWaterCoils->WaterCoil(coilIndex).WaterInletNodeNum;
@@ -432,8 +432,8 @@ namespace FanCoilUnits {
                     }
                 }
             } else {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, fanCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("illegal value: {}=\"{}\".", cAlphaFields(11), Alphas(11)));
+                ShowSevereError(state, std::format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, fanCoil.Name));
+                ShowContinueError(state, std::format("illegal value: {}=\"{}\".", cAlphaFields(11), Alphas(11)));
                 ErrorsFound = true;
             }
 
@@ -443,7 +443,7 @@ namespace FanCoilUnits {
                 IsNotOK = false;
                 ValidateComponent(state, fanCoil.HCoilType, fanCoil.HCoilName, IsNotOK, CurrentModuleObject);
                 if (IsNotOK) {
-                    ShowContinueError(state, EnergyPlus::format("...specified in {}=\"{}\".", CurrentModuleObject, fanCoil.Name));
+                    ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, fanCoil.Name));
                     ErrorsFound = true;
                 } else {
                     // mine the hot water node from the coil object
@@ -1426,11 +1426,10 @@ namespace FanCoilUnits {
                                 ShowMessage(
                                     state,
                                     std::format("SizeFanCoilUnit: Potential issue with equipment sizing for {} {}", fanCoil.UnitType, fanCoil.Name));
+                                ShowContinueError(state,
+                                                  std::format("User-Specified Supply Air Maximum Flow Rate of {:#G} [m3/s]", MaxAirVolFlowUser));
                                 ShowContinueError(
-                                    state, EnergyPlus::format("User-Specified Supply Air Maximum Flow Rate of {:.5R} [m3/s]", MaxAirVolFlowUser));
-                                ShowContinueError(
-                                    state,
-                                    EnergyPlus::format("differs from Design Size Supply Air Maximum Flow Rate of {:.5R} [m3/s]", MaxAirVolFlowDes));
+                                    state, std::format("differs from Design Size Supply Air Maximum Flow Rate of {:#G} [m3/s]", MaxAirVolFlowDes));
                                 ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                 ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                             }
@@ -1490,11 +1489,10 @@ namespace FanCoilUnits {
                                 ShowMessage(
                                     state,
                                     std::format("SizeFanCoilUnit: Potential issue with equipment sizing for {} {}", fanCoil.UnitType, fanCoil.Name));
+                                ShowContinueError(state,
+                                                  std::format("User-Specified Maximum Outdoor Air Flow Rate of {:#G} [m3/s]", OutAirVolFlowUser));
                                 ShowContinueError(
-                                    state, EnergyPlus::format("User-Specified Maximum Outdoor Air Flow Rate of {:.5R} [m3/s]", OutAirVolFlowUser));
-                                ShowContinueError(
-                                    state,
-                                    EnergyPlus::format("differs from Design Size Maximum Outdoor Air Flow Rate of {:.5R} [m3/s]", OutAirVolFlowDes));
+                                    state, std::format("differs from Design Size Maximum Outdoor Air Flow Rate of {:#G} [m3/s]", OutAirVolFlowDes));
                                 ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                 ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                             }
@@ -1656,11 +1654,10 @@ namespace FanCoilUnits {
                                 ShowMessage(
                                     state,
                                     std::format("SizeFanCoilUnit: Potential issue with equipment sizing for {} {}", fanCoil.UnitType, fanCoil.Name));
+                                ShowContinueError(state,
+                                                  std::format("User-Specified Maximum Hot Water Flow of {:#G} [m3/s]", MaxHotWaterVolFlowUser));
                                 ShowContinueError(
-                                    state, EnergyPlus::format("User-Specified Maximum Hot Water Flow of {:.5R} [m3/s]", MaxHotWaterVolFlowUser));
-                                ShowContinueError(
-                                    state,
-                                    EnergyPlus::format("differs from Design Size Maximum Hot Water Flow of {:.5R} [m3/s]", MaxHotWaterVolFlowDes));
+                                    state, std::format("differs from Design Size Maximum Hot Water Flow of {:#G} [m3/s]", MaxHotWaterVolFlowDes));
                                 ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                 ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                             }
@@ -1830,11 +1827,10 @@ namespace FanCoilUnits {
                                 ShowMessage(
                                     state,
                                     std::format("SizeFanCoilUnit: Potential issue with equipment sizing for {} {}", fanCoil.UnitType, fanCoil.Name));
+                                ShowContinueError(state,
+                                                  std::format("User-Specified Maximum Cold Water Flow of {:#G}[m3/s]", MaxColdWaterVolFlowUser));
                                 ShowContinueError(
-                                    state, EnergyPlus::format("User-Specified Maximum Cold Water Flow of {:.5R}[m3/s]", MaxColdWaterVolFlowUser));
-                                ShowContinueError(
-                                    state,
-                                    EnergyPlus::format("differs from Design Size Maximum Cold Water Flow of {:.5R}[m3/s]", MaxColdWaterVolFlowDes));
+                                    state, std::format("differs from Design Size Maximum Cold Water Flow of {:#G}[m3/s]", MaxColdWaterVolFlowDes));
                                 ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                 ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                             }

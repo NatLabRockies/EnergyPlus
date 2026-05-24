@@ -105,7 +105,7 @@ GshpPeCoolingSpecs *GshpPeCoolingSpecs::factory(EnergyPlusData &state, const std
         return thisObj;
     }
     // If we didn't find it, fatal
-    ShowFatalError(state, EnergyPlus::format("WWHPCoolingFactory: Error getting inputs for heat pump named: {}", objectName)); // LCOV_EXCL_LINE
+    ShowFatalError(state, std::format("WWHPCoolingFactory: Error getting inputs for heat pump named: {}", objectName)); // LCOV_EXCL_LINE
     // Shut up the compiler
     return nullptr; // LCOV_EXCL_LINE
 }
@@ -131,8 +131,7 @@ void GshpPeCoolingSpecs::simulate(
                                                             this->SourceSideWaterMassFlowRate,
                                                             FirstHVACIteration);
     } else {
-        ShowFatalError(state,
-                       EnergyPlus::format("SimHPWatertoWaterCOOLING:: Invalid loop connection {}, Requested Unit={}", ModuleCompName, this->Name));
+        ShowFatalError(state, std::format("SimHPWatertoWaterCOOLING:: Invalid loop connection {}, Requested Unit={}", ModuleCompName, this->Name));
     }
 }
 
@@ -219,7 +218,7 @@ void GetGshpInput(EnergyPlusData &state)
 
         thisGSHP.COP = NumArray(1);
         if (NumArray(1) == 0.0) {
-            ShowSevereError(state, EnergyPlus::format("{}:COP = 0.0, Heatpump={}", ModuleCompName, thisGSHP.Name));
+            ShowSevereError(state, std::format("{}:COP = 0.0, Heatpump={}", ModuleCompName, thisGSHP.Name));
             ErrorsFound = true;
         }
 
@@ -235,60 +234,60 @@ void GetGshpInput(EnergyPlusData &state)
 
         thisGSHP.LoadSideVolFlowRate = NumArray(6);
         if (NumArray(6) == 0.0) {
-            ShowSevereError(state, EnergyPlus::format("{}:Load Side Vol Flow Rate = 0.0, Heatpump={}", ModuleCompName, thisGSHP.Name));
+            ShowSevereError(state, std::format("{}:Load Side Vol Flow Rate = 0.0, Heatpump={}", ModuleCompName, thisGSHP.Name));
             ErrorsFound = true;
         }
 
         thisGSHP.SourceSideVolFlowRate = NumArray(7);
         if (NumArray(7) == 0.0) {
-            ShowSevereError(state, EnergyPlus::format("{}:Source Side Vol Flow Rate = 0.0, Heatpump={}", ModuleCompName, thisGSHP.Name));
+            ShowSevereError(state, std::format("{}:Source Side Vol Flow Rate = 0.0, Heatpump={}", ModuleCompName, thisGSHP.Name));
             ErrorsFound = true;
         }
 
         thisGSHP.LoadSideUACoeff = NumArray(8);
         if (NumArray(9) == 0.0) {
-            ShowSevereError(state, EnergyPlus::format("{}:Load Side Heat Transfer Coefficient = 0.0, Heatpump={}", ModuleCompName, thisGSHP.Name));
+            ShowSevereError(state, std::format("{}:Load Side Heat Transfer Coefficient = 0.0, Heatpump={}", ModuleCompName, thisGSHP.Name));
             ErrorsFound = true;
         }
 
         thisGSHP.SourceSideUACoeff = NumArray(9);
         if (NumArray(8) == 0.0) {
-            ShowSevereError(state, EnergyPlus::format("{}:Source Side Heat Transfer Coefficient = 0.0, Heatpump={}", ModuleCompName, thisGSHP.Name));
+            ShowSevereError(state, std::format("{}:Source Side Heat Transfer Coefficient = 0.0, Heatpump={}", ModuleCompName, thisGSHP.Name));
             ErrorsFound = true;
         }
 
         thisGSHP.CompPistonDisp = NumArray(10);
         if (NumArray(10) == 0.0) {
-            ShowSevereError(state, EnergyPlus::format("{}:Compressor Piston displacement/Stroke = 0.0, Heatpump={}", ModuleCompName, thisGSHP.Name));
+            ShowSevereError(state, std::format("{}:Compressor Piston displacement/Stroke = 0.0, Heatpump={}", ModuleCompName, thisGSHP.Name));
             ErrorsFound = true;
         }
 
         thisGSHP.CompClearanceFactor = NumArray(11);
         if (NumArray(11) == 0.0) {
-            ShowSevereError(state, EnergyPlus::format("{}:Compressor Clearance Factor = 0.0, Heatpump={}", ModuleCompName, thisGSHP.Name));
+            ShowSevereError(state, std::format("{}:Compressor Clearance Factor = 0.0, Heatpump={}", ModuleCompName, thisGSHP.Name));
             ErrorsFound = true;
         }
 
         thisGSHP.CompSucPressDrop = NumArray(12);
         if (NumArray(12) == 0.0) {
-            ShowSevereError(state, EnergyPlus::format("{}: Pressure Drop = 0.0, Heatpump={}", ModuleCompName, thisGSHP.Name));
+            ShowSevereError(state, std::format("{}: Pressure Drop = 0.0, Heatpump={}", ModuleCompName, thisGSHP.Name));
             ErrorsFound = true;
         }
 
         thisGSHP.SuperheatTemp = NumArray(13);
         if (NumArray(13) == 0.0) {
-            ShowSevereError(state, EnergyPlus::format("{}:Source Side SuperHeat = 0.0, Heatpump={}", ModuleCompName, thisGSHP.Name));
+            ShowSevereError(state, std::format("{}:Source Side SuperHeat = 0.0, Heatpump={}", ModuleCompName, thisGSHP.Name));
             ErrorsFound = true;
         }
 
         thisGSHP.PowerLosses = NumArray(14);
         if (NumArray(14) == 0.0) {
-            ShowSevereError(state, EnergyPlus::format("{}:Compressor Power Loss = 0.0, Heatpump={}", ModuleCompName, thisGSHP.Name));
+            ShowSevereError(state, std::format("{}:Compressor Power Loss = 0.0, Heatpump={}", ModuleCompName, thisGSHP.Name));
             ErrorsFound = true;
         }
         thisGSHP.LossFactor = NumArray(15);
         if (NumArray(15) == 0.0) {
-            ShowSevereError(state, EnergyPlus::format("{}:Efficiency = 0.0, Heatpump={}", ModuleCompName, thisGSHP.Name));
+            ShowSevereError(state, std::format("{}:Efficiency = 0.0, Heatpump={}", ModuleCompName, thisGSHP.Name));
             ErrorsFound = true;
         }
 
@@ -683,23 +682,21 @@ void GshpPeCoolingSpecs::calculate(EnergyPlusData &state, Real64 &MyLoad)
         LoadSidePressure = this->refrig->getSatPressure(state, LoadSideRefridgTemp, RoutineName);
 
         if (SourceSidePressure < this->LowPressCutoff) {
-            ShowSevereError(state,
-                            EnergyPlus::format("{}=\"{}\" Cooling Source Side Pressure Less than the Design Minimum", ModuleCompName, this->Name));
+            ShowSevereError(state, std::format("{}=\"{}\" Cooling Source Side Pressure Less than the Design Minimum", ModuleCompName, this->Name));
             ShowContinueError(state,
-                              EnergyPlus::format("Cooling Source Side Pressure={:.2f} and user specified Design Minimum Pressure={:.2f}",
-                                                 SourceSidePressure,
-                                                 this->LowPressCutoff));
+                              std::format("Cooling Source Side Pressure={:.2f} and user specified Design Minimum Pressure={:.2f}",
+                                          SourceSidePressure,
+                                          this->LowPressCutoff));
             ShowContinueErrorTimeStamp(state, "");
             ShowFatalError(state, "Preceding Conditions cause termination.");
         }
 
         if (LoadSidePressure > this->HighPressCutoff) {
-            ShowSevereError(state,
-                            EnergyPlus::format("{}=\"{}\" Cooling Load Side Pressure greater than the Design Maximum", ModuleCompName, this->Name));
+            ShowSevereError(state, std::format("{}=\"{}\" Cooling Load Side Pressure greater than the Design Maximum", ModuleCompName, this->Name));
             ShowContinueError(state,
-                              EnergyPlus::format("Cooling Load Side Pressure={:.2f} and user specified Design Maximum Pressure={:.2f}",
-                                                 LoadSidePressure,
-                                                 this->HighPressCutoff));
+                              std::format("Cooling Load Side Pressure={:.2f} and user specified Design Maximum Pressure={:.2f}",
+                                          LoadSidePressure,
+                                          this->HighPressCutoff));
             ShowContinueErrorTimeStamp(state, "");
             ShowFatalError(state, "Preceding Conditions cause termination.");
         }
@@ -709,7 +706,7 @@ void GshpPeCoolingSpecs::calculate(EnergyPlusData &state, Real64 &MyLoad)
         DischargePr = SourceSidePressure + this->CompSucPressDrop;
 
         if (SuctionPr < this->LowPressCutoff) {
-            ShowSevereError(state, EnergyPlus::format("{}=\"{}\" Cooling Suction Pressure Less than the Design Minimum", ModuleCompName, this->Name));
+            ShowSevereError(state, std::format("{}=\"{}\" Cooling Suction Pressure Less than the Design Minimum", ModuleCompName, this->Name));
             ShowContinueError(
                 state,
                 std::format("Cooling Suction Pressure={:.2f} and user specified Design Minimum Pressure={:.2f}", SuctionPr, this->LowPressCutoff));

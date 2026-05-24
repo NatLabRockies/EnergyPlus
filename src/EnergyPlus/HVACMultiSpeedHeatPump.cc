@@ -153,25 +153,25 @@ namespace HVACMultiSpeedHeatPump {
         if (CompIndex == 0) {
             MSHeatPumpNum = Util::FindItemInList(CompName, state.dataHVACMultiSpdHP->MSHeatPump);
             if (MSHeatPumpNum == 0) {
-                ShowFatalError(state, EnergyPlus::format("MultiSpeed Heat Pump is not found={}", CompName));
+                ShowFatalError(state, std::format("MultiSpeed Heat Pump is not found={}", CompName));
             }
             CompIndex = MSHeatPumpNum;
         } else {
             MSHeatPumpNum = CompIndex;
             if (MSHeatPumpNum > state.dataHVACMultiSpdHP->NumMSHeatPumps || MSHeatPumpNum < 1) {
                 ShowFatalError(state,
-                               EnergyPlus::format("SimMSHeatPump: Invalid CompIndex passed={}, Number of MultiSpeed Heat Pumps={}, Heat Pump name={}",
-                                                  MSHeatPumpNum,
-                                                  state.dataHVACMultiSpdHP->NumMSHeatPumps,
-                                                  CompName));
+                               std::format("SimMSHeatPump: Invalid CompIndex passed={}, Number of MultiSpeed Heat Pumps={}, Heat Pump name={}",
+                                           MSHeatPumpNum,
+                                           state.dataHVACMultiSpdHP->NumMSHeatPumps,
+                                           CompName));
             }
             if (state.dataHVACMultiSpdHP->CheckEquipName(MSHeatPumpNum)) {
                 if (CompName != state.dataHVACMultiSpdHP->MSHeatPump(MSHeatPumpNum).Name) {
                     ShowFatalError(state,
-                                   EnergyPlus::format("SimMSHeatPump: Invalid CompIndex passed={}, Heat Pump name={}{}",
-                                                      MSHeatPumpNum,
-                                                      CompName,
-                                                      state.dataHVACMultiSpdHP->MSHeatPump(MSHeatPumpNum).Name));
+                                   std::format("SimMSHeatPump: Invalid CompIndex passed={}, Heat Pump name={}{}",
+                                               MSHeatPumpNum,
+                                               CompName,
+                                               state.dataHVACMultiSpdHP->MSHeatPump(MSHeatPumpNum).Name));
                 }
                 state.dataHVACMultiSpdHP->CheckEquipName(MSHeatPumpNum) = false;
             }
@@ -514,7 +514,7 @@ namespace HVACMultiSpeedHeatPump {
             state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, state.dataHVACMultiSpdHP->CurrentModuleObject);
 
         if (state.dataHVACMultiSpdHP->NumMSHeatPumps <= 0) {
-            ShowSevereError(state, EnergyPlus::format("No {} objects specified in input file.", state.dataHVACMultiSpdHP->CurrentModuleObject));
+            ShowSevereError(state, std::format("No {} objects specified in input file.", state.dataHVACMultiSpdHP->CurrentModuleObject));
             ErrorsFound = true;
         }
 
@@ -586,11 +586,11 @@ namespace HVACMultiSpeedHeatPump {
             thisMSHP.ControlZoneName = Alphas(5);
             if (thisMSHP.ControlZoneNum == 0) {
                 ShowSevereError(state,
-                                EnergyPlus::format("{}, \"{}\" {} not found: {}",
-                                                   state.dataHVACMultiSpdHP->CurrentModuleObject,
-                                                   thisMSHP.Name,
-                                                   cAlphaFields(5),
-                                                   thisMSHP.ControlZoneName));
+                                std::format("{}, \"{}\" {} not found: {}",
+                                            state.dataHVACMultiSpdHP->CurrentModuleObject,
+                                            thisMSHP.Name,
+                                            cAlphaFields(5),
+                                            thisMSHP.ControlZoneName));
                 ErrorsFound = true;
             }
 
@@ -650,20 +650,19 @@ namespace HVACMultiSpeedHeatPump {
                 }
                 if (!AirNodeFound) {
                     ShowSevereError(state,
-                                    EnergyPlus::format("Did not find Air Node ({}), {} = \"\"{}",
-                                                       cAlphaFields(5),
-                                                       state.dataHVACMultiSpdHP->CurrentModuleObject,
-                                                       thisMSHP.Name));
-                    ShowContinueError(state, EnergyPlus::format("Specified {} = {}", cAlphaFields(5), Alphas(5)));
+                                    std::format("Did not find Air Node ({}), {} = \"\"{}",
+                                                cAlphaFields(5),
+                                                state.dataHVACMultiSpdHP->CurrentModuleObject,
+                                                thisMSHP.Name));
+                    ShowContinueError(state, std::format("Specified {} = {}", cAlphaFields(5), Alphas(5)));
                     ErrorsFound = true;
                 }
                 if (!AirLoopFound) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("Did not find correct AirLoopHVAC for {} = {}",
-                                                       state.dataHVACMultiSpdHP->CurrentModuleObject,
-                                                       thisMSHP.Name));
-                    ShowContinueError(
-                        state, EnergyPlus::format("The {} = {} is not served by this Primary Air Loop equipment.", cAlphaFields(5), Alphas(5)));
+                    ShowSevereError(
+                        state,
+                        std::format("Did not find correct AirLoopHVAC for {} = {}", state.dataHVACMultiSpdHP->CurrentModuleObject, thisMSHP.Name));
+                    ShowContinueError(state,
+                                      std::format("The {} = {} is not served by this Primary Air Loop equipment.", cAlphaFields(5), Alphas(5)));
                     ErrorsFound = true;
                 }
             }
@@ -717,34 +716,33 @@ namespace HVACMultiSpeedHeatPump {
                 thisMSHP.HeatCoilNum = state.dataInputProcessing->inputProcessor->getObjectItemNum(state, "Coil:Heating:DX:MultiSpeed", Alphas(11));
                 thisMSHP.DXHeatCoilName = Alphas(11);
                 if (thisMSHP.HeatCoilNum <= 0) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("Configuration error in {} \"{}\"", state.dataHVACMultiSpdHP->CurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state, EnergyPlus::format("{} \"{}\" not found.", cAlphaFields(11), Alphas(11)));
-                    ShowContinueError(state, EnergyPlus::format("{} must be Coil:Heating:DX:MultiSpeed ", cAlphaFields(10)));
+                    ShowSevereError(state, std::format("Configuration error in {} \"{}\"", state.dataHVACMultiSpdHP->CurrentModuleObject, Alphas(1)));
+                    ShowContinueError(state, std::format("{} \"{}\" not found.", cAlphaFields(11), Alphas(11)));
+                    ShowContinueError(state, std::format("{} must be Coil:Heating:DX:MultiSpeed ", cAlphaFields(10)));
                     ShowFatalError(state,
-                                   EnergyPlus::format("{}Errors found in getting {} input. Preceding condition(s) causes termination.",
-                                                      RoutineName,
-                                                      state.dataHVACMultiSpdHP->CurrentModuleObject));
+                                   std::format("{}Errors found in getting {} input. Preceding condition(s) causes termination.",
+                                               RoutineName,
+                                               state.dataHVACMultiSpdHP->CurrentModuleObject));
                     ErrorsFound = true;
                 }
                 LocalError = false;
                 DXCoils::GetDXCoilIndex(state, thisMSHP.DXHeatCoilName, thisMSHP.DXHeatCoilIndex, LocalError, "Coil:Heating:DX:MultiSpeed");
                 if (LocalError) {
-                    ShowSevereError(state, EnergyPlus::format("The index of {} is not found \"{}\"", cAlphaFields(11), Alphas(11)));
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", state.dataHVACMultiSpdHP->CurrentModuleObject, Alphas(1)));
+                    ShowSevereError(state, std::format("The index of {} is not found \"{}\"", cAlphaFields(11), Alphas(11)));
+                    ShowContinueError(state, std::format("...occurs in {} \"{}\"", state.dataHVACMultiSpdHP->CurrentModuleObject, Alphas(1)));
                     ErrorsFound = true;
                     LocalError = false;
                 }
                 HeatingCoilInletNode = DXCoils::GetCoilInletNode(state, Alphas(10), Alphas(11), LocalError);
                 if (LocalError) {
-                    ShowSevereError(state, EnergyPlus::format("The inlet node number of {} is not found \"{}\"", cAlphaFields(11), Alphas(11)));
-                    ShowContinueError(state, EnergyPlus::format("...occurs in {} \"{}\"", state.dataHVACMultiSpdHP->CurrentModuleObject, Alphas(1)));
+                    ShowSevereError(state, std::format("The inlet node number of {} is not found \"{}\"", cAlphaFields(11), Alphas(11)));
+                    ShowContinueError(state, std::format("...occurs in {} \"{}\"", state.dataHVACMultiSpdHP->CurrentModuleObject, Alphas(1)));
                     ErrorsFound = true;
                     LocalError = false;
                 }
                 HeatingCoilOutletNode = DXCoils::GetCoilOutletNode(state, Alphas(10), Alphas(11), LocalError);
                 if (LocalError) {
-                    ShowSevereError(state, EnergyPlus::format("The outlet node number of {} is not found \"{}\"", cAlphaFields(11), Alphas(11)));
+                    ShowSevereError(state, std::format("The outlet node number of {} is not found \"{}\"", cAlphaFields(11), Alphas(11)));
                     ShowContinueError(state, std::format("...occurs in {} \"{}\"", state.dataHVACMultiSpdHP->CurrentModuleObject, Alphas(1)));
                     ErrorsFound = true;
                     LocalError = false;
@@ -1246,7 +1244,7 @@ namespace HVACMultiSpeedHeatPump {
                     state,
                     std::format(
                         "{}, \"{}\", {} is greater than 21.0", state.dataHVACMultiSpdHP->CurrentModuleObject, thisMSHP.Name, cNumericFields(3)));
-                ShowContinueError(state, EnergyPlus::format("The input value is {:.2R}", Numbers(3)));
+                ShowContinueError(state, std::format("The input value is {}", Numbers(3)));
                 ErrorsFound = true;
             }
             OutputReportPredefined::PreDefTableEntry(
@@ -1370,7 +1368,7 @@ namespace HVACMultiSpeedHeatPump {
                                     std::format("{}, The maximum {} is 4, and the minimum number is 2",
                                                 state.dataHVACMultiSpdHP->CurrentModuleObject,
                                                 cNumericFields(9)));
-                    ShowContinueError(state, EnergyPlus::format("The input value is {:.0R}", Numbers(9)));
+                    ShowContinueError(state, std::format("The input value is {}", Numbers(9)));
                     ErrorsFound = true;
                 }
             }
@@ -1380,7 +1378,7 @@ namespace HVACMultiSpeedHeatPump {
                                 std::format("{}, The maximum {} is 4, and the minimum number is 2",
                                             state.dataHVACMultiSpdHP->CurrentModuleObject,
                                             cNumericFields(10)));
-                ShowContinueError(state, EnergyPlus::format("The input value is {:.0R}", Numbers(10)));
+                ShowContinueError(state, std::format("The input value is {}", Numbers(10)));
                 ErrorsFound = true;
             }
 
@@ -2551,8 +2549,7 @@ namespace HVACMultiSpeedHeatPump {
                                         MSHeatPump(MSHeatPumpNum).Name,
                                         MSHeatPump(MSHeatPumpNum).DXCoolCoilName,
                                         coilAvailSched->Name));
-                        ShowContinueErrorTimeStamp(state,
-                                                   EnergyPlus::format("Availability schedule returned={:.1R}", coilAvailSched->getCurrentVal()));
+                        ShowContinueErrorTimeStamp(state, std::format("Availability schedule returned={:.1f}", coilAvailSched->getCurrentVal()));
                     } else {
                         ++MSHeatPump(MSHeatPumpNum).CoolCountAvail;
                         ShowRecurringWarningErrorAtEnd(state,
@@ -2582,8 +2579,7 @@ namespace HVACMultiSpeedHeatPump {
                                         MSHeatPump(MSHeatPumpNum).Name,
                                         MSHeatPump(MSHeatPumpNum).DXCoolCoilName,
                                         coilAvailSched->Name));
-                        ShowContinueErrorTimeStamp(state,
-                                                   EnergyPlus::format("Availability schedule returned={:.1R}", coilAvailSched->getCurrentVal()));
+                        ShowContinueErrorTimeStamp(state, std::format("Availability schedule returned={:.1f}", coilAvailSched->getCurrentVal()));
                     } else {
                         ++MSHeatPump(MSHeatPumpNum).HeatCountAvail;
                         ShowRecurringWarningErrorAtEnd(state,
@@ -3451,7 +3447,7 @@ namespace HVACMultiSpeedHeatPump {
                                 ++state.dataHVACMultiSpdHP->ErrCountCyc; // TODO: Why is the error count shared among all heat pump units?
                                 ShowWarningError(
                                     state, std::format("Iteration limit exceeded calculating DX unit cycling ratio, for unit={}", MSHeatPump.Name));
-                                ShowContinueErrorTimeStamp(state, EnergyPlus::format("Cycling ratio returned={:.2R}", PartLoadFrac));
+                                ShowContinueErrorTimeStamp(state, std::format("Cycling ratio returned={:.2f}", PartLoadFrac));
                             } else {
                                 ++state.dataHVACMultiSpdHP->ErrCountCyc;
                                 ShowRecurringWarningErrorAtEnd(
@@ -3535,8 +3531,8 @@ namespace HVACMultiSpeedHeatPump {
                                 ++state.dataHVACMultiSpdHP->ErrCountVar;
                                 ShowWarningError(
                                     state, std::format("Iteration limit exceeded calculating DX unit speed ratio, for unit={}", MSHeatPump.Name));
-                                ShowContinueErrorTimeStamp(
-                                    state, EnergyPlus::format("Speed ratio returned=[{:.2R}], Speed number ={}", SpeedRatio, SpeedNum));
+                                ShowContinueErrorTimeStamp(state,
+                                                           std::format("Speed ratio returned=[{:.2f}], Speed number ={}", SpeedRatio, SpeedNum));
                             } else {
                                 ++state.dataHVACMultiSpdHP->ErrCountVar;
                                 ShowRecurringWarningErrorAtEnd(
@@ -3590,7 +3586,7 @@ namespace HVACMultiSpeedHeatPump {
                                         ShowWarningError(
                                             state,
                                             std::format("Iteration limit exceeded calculating DX unit cycling ratio, for unit={}", MSHeatPump.Name));
-                                        ShowContinueErrorTimeStamp(state, EnergyPlus::format("Cycling ratio returned={:.2R}", PartLoadFrac));
+                                        ShowContinueErrorTimeStamp(state, std::format("Cycling ratio returned={:.2f}", PartLoadFrac));
                                     } else {
                                         ++state.dataHVACMultiSpdHP->ErrCountCyc;
                                         ShowRecurringWarningErrorAtEnd(
@@ -3670,7 +3666,7 @@ namespace HVACMultiSpeedHeatPump {
                                                              std::format("Iteration limit exceeded calculating DX unit speed ratio, for unit={}",
                                                                          MSHeatPump.Name));
                                             ShowContinueErrorTimeStamp(
-                                                state, EnergyPlus::format("Speed ratio returned=[{:.2R}], Speed number ={}", SpeedRatio, SpeedNum));
+                                                state, std::format("Speed ratio returned=[{:.2f}], Speed number ={}", SpeedRatio, SpeedNum));
                                         } else {
                                             ++state.dataHVACMultiSpdHP->ErrCountVar;
                                             ShowRecurringWarningErrorAtEnd(
@@ -4399,8 +4395,8 @@ namespace HVACMultiSpeedHeatPump {
                                                 MSHeatPump.Name));
                                 ShowContinueErrorTimeStamp(state, "");
                                 ShowContinueError(state, "...Bad hot water maximum flow rate limits");
-                                ShowContinueError(state, EnergyPlus::format("...Given minimum water flow rate={:.3R} kg/s", MinWaterFlow));
-                                ShowContinueError(state, EnergyPlus::format("...Given maximum water flow rate={:.3R} kg/s", MaxHotWaterFlow));
+                                ShowContinueError(state, std::format("...Given minimum water flow rate={:#G} kg/s", MinWaterFlow));
+                                ShowContinueError(state, std::format("...Given maximum water flow rate={:#G} kg/s", MaxHotWaterFlow));
                             }
                             ShowRecurringWarningErrorAtEnd(state,
                                                            "CalcNonDXHeatingCoils: Hot water coil control failed (flow limits) for " +

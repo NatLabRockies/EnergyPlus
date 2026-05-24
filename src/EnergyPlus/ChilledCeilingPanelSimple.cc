@@ -648,13 +648,13 @@ void GetCoolingPanelInput(EnergyPlusData &state)
                                         s_ipsc->cAlphaArgs(1)));
             ShowContinueError(state, "This would result in some of the radiant energy delivered by the high temp radiant heater being lost.");
             ShowContinueError(state,
-                              std::format("The sum of all radiation fractions to surfaces = {:.5f}", (AllFracsSummed - thisCP.FracDistribPerson)));
-            ShowContinueError(state, std::format("The radiant fraction to people = {:.5f}", thisCP.FracDistribPerson));
-            ShowContinueError(state, std::format("So, all radiant fractions including surfaces and people = {:.5f}", AllFracsSummed));
+                              std::format("The sum of all radiation fractions to surfaces = {:#G}", (AllFracsSummed - thisCP.FracDistribPerson)));
+            ShowContinueError(state, std::format("The radiant fraction to people = {:#G}", thisCP.FracDistribPerson));
+            ShowContinueError(state, std::format("So, all radiant fractions including surfaces and people = {:#G}", AllFracsSummed));
             ShowContinueError(
                 state,
                 std::format("This means that the fraction of radiant energy that would be lost from the high temperature radiant heater "
-                            "would be = {:.5f}",
+                            "would be = {:#G}",
                             (1.0 - AllFracsSummed)));
             ShowContinueError(state,
                               std::format("Please check and correct this so that all radiant energy is accounted for in {} = {}",

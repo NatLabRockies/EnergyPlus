@@ -482,8 +482,8 @@ TEST_F(EnergyPlusFixture, HeatBalFiniteDiffManager_findAnySurfacesUsingConstruct
     std::string const error_string = delimited_string({"   ** Severe  ** InitialInitHeatBalFiniteDiff: Found Material that is too thin and/or too "
                                                        "highly conductive, material name = Reg Mat F05 Ceiling air space resistance",
                                                        "   **   ~~~   ** High conductivity Material layers are not well supported by Conduction "
-                                                       "Finite Difference, material conductivity = 2.000 [W/m-K]",
-                                                       "   **   ~~~   ** Material thermal diffusivity = 1.626E-003 [m2/s]",
+                                                       "Finite Difference, material conductivity = 2.00000 [W/m-K]",
+                                                       "   **   ~~~   ** Material thermal diffusivity = 0.00162602 [m2/s]",
                                                        "   **   ~~~   ** Material with this thermal diffusivity should have thickness > 1.71080 [m]",
                                                        "   **  Fatal  ** Preceding conditions cause termination.",
                                                        "   ...Summary of Errors that led to program termination:",

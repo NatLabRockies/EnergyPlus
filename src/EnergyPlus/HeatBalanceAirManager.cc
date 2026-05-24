@@ -282,7 +282,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
     int ZoneNumB;
 
     // Formats
-    static constexpr std::string_view Format_720(" {} Airflow Stats Nominal, {},{},{},{},{:.2R},{:.1R},");
+    static constexpr std::string_view Format_720(" {} Airflow Stats Nominal, {},{},{},{},{:.2f},{:.2f},");
     static constexpr std::string_view Format_721(
         "! <{} Airflow Stats Nominal>,Name,Input Object, Schedule Name,Zone Name, Zone Floor Area {{m2}}, # Zone Occupants,{}\n");
     static constexpr std::string_view Format_722(" {}, {}\n");
@@ -454,12 +454,12 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
         thisZoneAirBalance.ZonePtr = Util::FindItemInList(cAlphaArgs(2), state.dataHeatBal->Zone);
         if (thisZoneAirBalance.ZonePtr == 0) {
             ShowSevereError(state,
-                            EnergyPlus::format(R"({}{}="{}", invalid (not found) {}="{}".)",
-                                               RoutineName,
-                                               cCurrentModuleObject,
-                                               cAlphaArgs(1),
-                                               cAlphaFieldNames(2),
-                                               cAlphaArgs(2)));
+                            std::format(R"({}{}="{}", invalid (not found) {}="{}".)",
+                                        RoutineName,
+                                        cCurrentModuleObject,
+                                        cAlphaArgs(1),
+                                        cAlphaFieldNames(2),
+                                        cAlphaArgs(2)));
             ErrorsFound = true;
         } else {
             state.dataHeatBal->Zone(thisZoneAirBalance.ZonePtr).zoneOABalanceIndex = Loop;
@@ -468,13 +468,13 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
             state, cAlphaArgs(2), cCurrentModuleObject, cAlphaFieldNames(2), state.dataHeatBalAirMgr->UniqueZoneNames, IsNotOK);
         if (IsNotOK) {
             ShowSevereError(state,
-                            EnergyPlus::format(R"({}{}="{}", a duplicated object {}="{}" is found.)",
-                                               RoutineName,
-                                               cCurrentModuleObject,
-                                               cAlphaArgs(1),
-                                               cAlphaFieldNames(2),
-                                               cAlphaArgs(2)));
-            ShowContinueError(state, EnergyPlus::format("A zone can only have one {} object.", cCurrentModuleObject));
+                            std::format(R"({}{}="{}", a duplicated object {}="{}" is found.)",
+                                        RoutineName,
+                                        cCurrentModuleObject,
+                                        cAlphaArgs(1),
+                                        cAlphaFieldNames(2),
+                                        cAlphaArgs(2)));
+            ShowContinueError(state, std::format("A zone can only have one {} object.", cCurrentModuleObject));
             ErrorsFound = true;
         }
 
@@ -485,12 +485,12 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
             if (thisZoneAirBalance.BalanceMethod == DataHeatBalance::AirBalance::Invalid) {
                 thisZoneAirBalance.BalanceMethod = DataHeatBalance::AirBalance::None;
                 ShowWarningError(state,
-                                 EnergyPlus::format("{}{} = {} not valid choice for {}={}",
-                                                    RoutineName,
-                                                    cAlphaFieldNames(3),
-                                                    cAlphaArgs(3),
-                                                    cCurrentModuleObject,
-                                                    cAlphaArgs(1)));
+                                 std::format("{}{} = {} not valid choice for {}={}",
+                                             RoutineName,
+                                             cAlphaFieldNames(3),
+                                             cAlphaArgs(3),
+                                             cCurrentModuleObject,
+                                             cAlphaArgs(1)));
                 ShowContinueError(state, "The default choice \"NONE\" is assigned");
             }
         }
@@ -498,11 +498,11 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
         thisZoneAirBalance.InducedAirRate = rNumericArgs(1);
         if (rNumericArgs(1) < 0.0) {
             ShowSevereError(state,
-                            EnergyPlus::format("{}{}=\"{}\", invalid Induced Outdoor Air Due to Duct Leakage Unbalance specification [<0.0]={:.3R}",
-                                               RoutineName,
-                                               cCurrentModuleObject,
-                                               cAlphaArgs(1),
-                                               rNumericArgs(1)));
+                            std::format("{}{}=\"{}\", invalid Induced Outdoor Air Due to Duct Leakage Unbalance specification [<0.0]={:#G}",
+                                        RoutineName,
+                                        cCurrentModuleObject,
+                                        cAlphaArgs(1),
+                                        rNumericArgs(1)));
             ErrorsFound = true;
         }
 
@@ -522,11 +522,10 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
             thisZoneAirBalance.BalanceMethod = DataHeatBalance::AirBalance::None;
             ShowWarningError(
                 state,
-                EnergyPlus::format(
-                    "{} = {}: This Zone ({}) is controlled by AvailabilityManager:HybridVentilation with Simple Airflow Control Type option.",
-                    cCurrentModuleObject,
-                    thisZoneAirBalance.Name,
-                    cAlphaArgs(2)));
+                std::format("{} = {}: This Zone ({}) is controlled by AvailabilityManager:HybridVentilation with Simple Airflow Control Type option.",
+                            cCurrentModuleObject,
+                            thisZoneAirBalance.Name,
+                            cAlphaArgs(2)));
             ShowContinueError(state,
                               "Air balance method type QUADRATURE and Simple Airflow Control Type cannot co-exist. The NONE method is assigned");
         }
@@ -726,12 +725,12 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                 case AirflowSpec::FlowPerZone:
                     if (lNumericFieldBlanks(1)) {
                         ShowWarningError(state,
-                                         EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Infiltration will result.",
-                                                            RoutineName,
-                                                            cCurrentModuleObject,
-                                                            thisInfiltration.Name,
-                                                            cAlphaFieldNames(4),
-                                                            cNumericFieldNames(1)));
+                                         std::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Infiltration will result.",
+                                                     RoutineName,
+                                                     cCurrentModuleObject,
+                                                     thisInfiltration.Name,
+                                                     cAlphaFieldNames(4),
+                                                     cNumericFieldNames(1)));
                     } else {
                         Real64 spaceFrac = 1.0;
                         if (!thisInfiltrationInput.spaceListActive && (thisInfiltrationInput.numOfSpaces > 1)) {
@@ -739,11 +738,10 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                             if (zoneVolume > 0.0) {
                                 spaceFrac = thisSpace.Volume / zoneVolume;
                             } else {
-                                ShowSevereError(state,
-                                                EnergyPlus::format("{}Zone volume is zero when allocating Infiltration to Spaces.", RoutineName));
+                                ShowSevereError(state, std::format("{}Zone volume is zero when allocating Infiltration to Spaces.", RoutineName));
                                 ShowContinueError(
                                     state,
-                                    EnergyPlus::format(
+                                    std::format(
                                         "Occurs for {}=\"{}\" in Zone=\"{}\".", cCurrentModuleObject, thisInfiltrationInput.Name, thisZone.Name));
                                 ErrorsFound = true;
                             }
@@ -761,32 +759,32 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                                 if (thisSpace.FloorArea <= 0.0) {
                                     ShowWarningError(
                                         state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but Space Floor Area = 0.  0 Infiltration will result.",
-                                                           RoutineName,
-                                                           cCurrentModuleObject,
-                                                           thisInfiltration.Name,
-                                                           cAlphaFieldNames(4),
-                                                           cNumericFieldNames(2)));
+                                        std::format("{}{}=\"{}\", {} specifies {}, but Space Floor Area = 0.  0 Infiltration will result.",
+                                                    RoutineName,
+                                                    cCurrentModuleObject,
+                                                    thisInfiltration.Name,
+                                                    cAlphaFieldNames(4),
+                                                    cNumericFieldNames(2)));
                                 }
                             }
                         } else {
                             ShowSevereError(state,
-                                            EnergyPlus::format("{}{}=\"{}\", invalid flow/area specification [<0.0]={:.3R}",
-                                                               RoutineName,
-                                                               cCurrentModuleObject,
-                                                               thisInfiltration.Name,
-                                                               rNumericArgs(2)));
+                                            std::format("{}{}=\"{}\", invalid flow/area specification [<0.0]={:#G}",
+                                                        RoutineName,
+                                                        cCurrentModuleObject,
+                                                        thisInfiltration.Name,
+                                                        rNumericArgs(2)));
                             ErrorsFound = true;
                         }
                     }
                     if (lNumericFieldBlanks(2)) {
                         ShowWarningError(state,
-                                         EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Infiltration will result.",
-                                                            RoutineName,
-                                                            cCurrentModuleObject,
-                                                            thisInfiltration.Name,
-                                                            cAlphaFieldNames(4),
-                                                            cNumericFieldNames(2)));
+                                         std::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Infiltration will result.",
+                                                     RoutineName,
+                                                     cCurrentModuleObject,
+                                                     thisInfiltration.Name,
+                                                     cAlphaFieldNames(4),
+                                                     cNumericFieldNames(2)));
                     }
                     break;
 
@@ -797,31 +795,31 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                             if (thisSpace.ExteriorTotalSurfArea <= 0.0) {
                                 ShowWarningError(
                                     state,
-                                    EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but Exterior Surface Area = 0.  0 Infiltration will result.",
-                                                       RoutineName,
-                                                       cCurrentModuleObject,
-                                                       thisInfiltration.Name,
-                                                       cAlphaFieldNames(4),
-                                                       cNumericFieldNames(3)));
+                                    std::format("{}{}=\"{}\", {} specifies {}, but Exterior Surface Area = 0.  0 Infiltration will result.",
+                                                RoutineName,
+                                                cCurrentModuleObject,
+                                                thisInfiltration.Name,
+                                                cAlphaFieldNames(4),
+                                                cNumericFieldNames(3)));
                             }
                         } else {
                             ShowSevereError(state,
-                                            EnergyPlus::format("{}{} = \"{}\", invalid flow/exteriorarea specification [<0.0]={:.3R}",
-                                                               RoutineName,
-                                                               cCurrentModuleObject,
-                                                               thisInfiltration.Name,
-                                                               rNumericArgs(3)));
+                                            std::format("{}{} = \"{}\", invalid flow/exteriorarea specification [<0.0]={:#G}",
+                                                        RoutineName,
+                                                        cCurrentModuleObject,
+                                                        thisInfiltration.Name,
+                                                        rNumericArgs(3)));
                             ErrorsFound = true;
                         }
                     }
                     if (lNumericFieldBlanks(3)) {
                         ShowWarningError(state,
-                                         EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Infiltration will result.",
-                                                            RoutineName,
-                                                            cCurrentModuleObject,
-                                                            thisInfiltration.Name,
-                                                            cAlphaFieldNames(4),
-                                                            cNumericFieldNames(3)));
+                                         std::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Infiltration will result.",
+                                                     RoutineName,
+                                                     cCurrentModuleObject,
+                                                     thisInfiltration.Name,
+                                                     cAlphaFieldNames(4),
+                                                     cNumericFieldNames(3)));
                     }
                     break;
 
@@ -830,33 +828,32 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                         if (rNumericArgs(3) >= 0.0) {
                             thisInfiltration.DesignLevel = rNumericArgs(3) * thisSpace.ExtGrossWallArea;
                             if (thisSpace.ExtGrossWallArea <= 0.0) {
-                                ShowWarningError(
-                                    state,
-                                    EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but Exterior Wall Area = 0.  0 Infiltration will result.",
-                                                       RoutineName,
-                                                       cCurrentModuleObject,
-                                                       thisInfiltration.Name,
-                                                       cAlphaFieldNames(4),
-                                                       cNumericFieldNames(3)));
+                                ShowWarningError(state,
+                                                 std::format("{}{}=\"{}\", {} specifies {}, but Exterior Wall Area = 0.  0 Infiltration will result.",
+                                                             RoutineName,
+                                                             cCurrentModuleObject,
+                                                             thisInfiltration.Name,
+                                                             cAlphaFieldNames(4),
+                                                             cNumericFieldNames(3)));
                             }
                         } else {
                             ShowSevereError(state,
-                                            EnergyPlus::format("{}{} = \"{}\", invalid flow/exteriorwallarea specification [<0.0]={:.3R}",
-                                                               RoutineName,
-                                                               cCurrentModuleObject,
-                                                               thisInfiltration.Name,
-                                                               rNumericArgs(3)));
+                                            std::format("{}{} = \"{}\", invalid flow/exteriorwallarea specification [<0.0]={:#G}",
+                                                        RoutineName,
+                                                        cCurrentModuleObject,
+                                                        thisInfiltration.Name,
+                                                        rNumericArgs(3)));
                             ErrorsFound = true;
                         }
                     }
                     if (lNumericFieldBlanks(3)) {
                         ShowWarningError(state,
-                                         EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Infiltration will result.",
-                                                            RoutineName,
-                                                            cCurrentModuleObject,
-                                                            thisInfiltration.Name,
-                                                            cAlphaFieldNames(4),
-                                                            cNumericFieldNames(3)));
+                                         std::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Infiltration will result.",
+                                                     RoutineName,
+                                                     cCurrentModuleObject,
+                                                     thisInfiltration.Name,
+                                                     cAlphaFieldNames(4),
+                                                     cNumericFieldNames(3)));
                     }
                     break;
 
@@ -865,33 +862,32 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                         if (rNumericArgs(4) >= 0.0) {
                             thisInfiltration.DesignLevel = rNumericArgs(4) * thisSpace.Volume / Constant::rSecsInHour;
                             if (thisSpace.Volume <= 0.0) {
-                                ShowWarningError(
-                                    state,
-                                    EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but Space Volume = 0.  0 Infiltration will result.",
-                                                       RoutineName,
-                                                       cCurrentModuleObject,
-                                                       thisInfiltration.Name,
-                                                       cAlphaFieldNames(4),
-                                                       cNumericFieldNames(4)));
+                                ShowWarningError(state,
+                                                 std::format("{}{}=\"{}\", {} specifies {}, but Space Volume = 0.  0 Infiltration will result.",
+                                                             RoutineName,
+                                                             cCurrentModuleObject,
+                                                             thisInfiltration.Name,
+                                                             cAlphaFieldNames(4),
+                                                             cNumericFieldNames(4)));
                             }
                         } else {
                             ShowSevereError(state,
-                                            EnergyPlus::format("{}In {} = \"{}\", invalid ACH (air changes per hour) specification [<0.0]={:.3R}",
-                                                               RoutineName,
-                                                               cCurrentModuleObject,
-                                                               thisInfiltration.Name,
-                                                               rNumericArgs(4)));
+                                            std::format("{}In {} = \"{}\", invalid ACH (air changes per hour) specification [<0.0]={:#G}",
+                                                        RoutineName,
+                                                        cCurrentModuleObject,
+                                                        thisInfiltration.Name,
+                                                        rNumericArgs(4)));
                             ErrorsFound = true;
                         }
                     }
                     if (lNumericFieldBlanks(4)) {
                         ShowWarningError(state,
-                                         EnergyPlus::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Infiltration will result.",
-                                                            RoutineName,
-                                                            cCurrentModuleObject,
-                                                            thisInfiltrationInput.Name,
-                                                            cAlphaFieldNames(4),
-                                                            cNumericFieldNames(4)));
+                                         std::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Infiltration will result.",
+                                                     RoutineName,
+                                                     cCurrentModuleObject,
+                                                     thisInfiltrationInput.Name,
+                                                     cAlphaFieldNames(4),
+                                                     cNumericFieldNames(4)));
                     }
                     break;
 
@@ -899,7 +895,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                     if (Item1 == 1) {
                         ShowSevereError(
                             state,
-                            EnergyPlus::format(
+                            std::format(
                                 "{}{}=\"{}\", invalid calculation method={}", RoutineName, cCurrentModuleObject, cAlphaArgs(1), cAlphaArgs(4)));
                         ErrorsFound = true;
                     }
@@ -915,7 +911,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                     if (Item1 == 1) {
                         ShowWarningError(
                             state,
-                            EnergyPlus::format(
+                            std::format(
                                 R"({}{}="{}", in {}="{}".)", RoutineName, cCurrentModuleObject, cAlphaArgs(1), cAlphaFieldNames(2), cAlphaArgs(2)));
                         ShowContinueError(state, "Infiltration Coefficients are all zero.  No Infiltration will be reported.");
                     }
@@ -1409,7 +1405,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                     thisVentilation.DesignLevel = rNumericArgs(1);
                     if (lNumericFieldBlanks(1)) {
                         ShowWarningError(state,
-                                         std::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Ventilation will result.",
+                                         std::format("{}{}=\"{}\", {} specifies {}, but that field is blank. Zero ventilation will result.",
                                                      RoutineName,
                                                      cCurrentModuleObject,
                                                      thisVentilation.Name,
@@ -1424,7 +1420,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                             thisVentilation.DesignLevel = rNumericArgs(2) * thisSpace.FloorArea;
                             if (thisSpace.FloorArea <= 0.0) {
                                 ShowWarningError(state,
-                                                 std::format("{}{}=\"{}\", {} specifies {}, but Space Floor Area = 0.  0 Ventilation will result.",
+                                                 std::format("{}{}=\"{}\", {} specifies {}, but Space Floor Area = 0. Zero ventilation will result.",
                                                              RoutineName,
                                                              cCurrentModuleObject,
                                                              thisVentilation.Name,
@@ -1433,17 +1429,17 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                             }
                         } else {
                             ShowSevereError(state,
-                                            EnergyPlus::format("{}{}=\"{}\", invalid flow/area specification [<0.0]={:.3R}",
-                                                               RoutineName,
-                                                               cCurrentModuleObject,
-                                                               thisVentilation.Name,
-                                                               rNumericArgs(2)));
+                                            std::format("{}{}=\"{}\", invalid flow/area specification [<0.0]={:#G}",
+                                                        RoutineName,
+                                                        cCurrentModuleObject,
+                                                        thisVentilation.Name,
+                                                        rNumericArgs(2)));
                             ErrorsFound = true;
                         }
                     }
                     if (lNumericFieldBlanks(2)) {
                         ShowWarningError(state,
-                                         std::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Ventilation will result.",
+                                         std::format("{}{}=\"{}\", {} specifies {}, but that field is blank. Zero ventilation will result.",
                                                      RoutineName,
                                                      cCurrentModuleObject,
                                                      thisVentilation.Name,
@@ -1459,7 +1455,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                             if (thisSpace.TotOccupants <= 0.0) {
                                 ShowWarningError(
                                     state,
-                                    std::format("{}{}=\"{}\", {} specifies {}, but Zone Total Occupants = 0.  0 Ventilation will result.",
+                                    std::format("{}{}=\"{}\", {} specifies {}, but Zone Total Occupants = 0. Zero ventilation will result.",
                                                 RoutineName,
                                                 cCurrentModuleObject,
                                                 thisVentilation.Name,
@@ -1468,17 +1464,17 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                             }
                         } else {
                             ShowSevereError(state,
-                                            EnergyPlus::format("{}{}=\"{}\", invalid flow/person specification [<0.0]={:.3R}",
-                                                               RoutineName,
-                                                               cCurrentModuleObject,
-                                                               thisVentilation.Name,
-                                                               rNumericArgs(3)));
+                                            std::format("{}{}=\"{}\", invalid flow/person specification [<0.0]={:#G}",
+                                                        RoutineName,
+                                                        cCurrentModuleObject,
+                                                        thisVentilation.Name,
+                                                        rNumericArgs(3)));
                             ErrorsFound = true;
                         }
                     }
                     if (lNumericFieldBlanks(3)) {
                         ShowWarningError(state,
-                                         std::format("{}{}=\"{}\", {}specifies {}, but that field is blank.  0 Ventilation will result.",
+                                         std::format("{}{}=\"{}\", {} specifies {}, but that field is blank. Zero Ventilation will result.",
                                                      RoutineName,
                                                      cCurrentModuleObject,
                                                      thisVentilation.Name,
@@ -1493,7 +1489,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                             thisVentilation.DesignLevel = rNumericArgs(4) * thisSpace.Volume / Constant::rSecsInHour;
                             if (thisSpace.Volume <= 0.0) {
                                 ShowWarningError(state,
-                                                 std::format("{}{}=\"{}\", {} specifies {}, but Space Volume = 0.  0 Ventilation will result.",
+                                                 std::format("{}{}=\"{}\", {} specifies {}, but Space Volume = 0. Zero ventilation will result.",
                                                              RoutineName,
                                                              cCurrentModuleObject,
                                                              thisVentilation.Name,
@@ -1502,17 +1498,17 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                             }
                         } else {
                             ShowSevereError(state,
-                                            EnergyPlus::format("{}{}=\"{}\", invalid ACH (air changes per hour) specification [<0.0]={:.3R}",
-                                                               RoutineName,
-                                                               cCurrentModuleObject,
-                                                               thisVentilation.Name,
-                                                               rNumericArgs(5)));
+                                            std::format("{}{}=\"{}\", invalid ACH (air changes per hour) specification [<0.0]={:#G}",
+                                                        RoutineName,
+                                                        cCurrentModuleObject,
+                                                        thisVentilation.Name,
+                                                        rNumericArgs(5)));
                             ErrorsFound = true;
                         }
                     }
                     if (lNumericFieldBlanks(4)) {
                         ShowWarningError(state,
-                                         std::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Ventilation will result.",
+                                         std::format("{}{}=\"{}\", {} specifies {}, but that field is blank. Zero ventilation will result.",
                                                      RoutineName,
                                                      cCurrentModuleObject,
                                                      thisVentilation.Name,
@@ -1608,7 +1604,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                                                     cCurrentModuleObject,
                                                     cAlphaArgs(1),
                                                     cNumericFieldNames(11)));
-                        ShowContinueError(state, EnergyPlus::format("...value entered=[{:.2R}].", rNumericArgs(11)));
+                        ShowContinueError(state, std::format("...value entered=[{:.2f}].", rNumericArgs(11)));
                         ErrorsFound = true;
                     }
                 }
@@ -1620,7 +1616,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                 if (Item1 == 1) { // Item check prevents this error from printing multiple times
                     if (lAlphaFieldBlanks(6)) {
                         if (lNumericFieldBlanks(11)) {
-                            // ShowWarningEmptyField(state, eoh, cNumericFieldNames(11), format("The default value will be used ({:.1R})",
+                            // ShowWarningEmptyField(state, eoh, cNumericFieldNames(11), format("The default value will be used ({:.2f})",
                             // -VentilTempLimit));
                         }
                     } else if (thisVentilation.minIndoorTempSched == nullptr) {
@@ -1628,7 +1624,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                                                 eoh,
                                                 cAlphaFieldNames(6),
                                                 cAlphaArgs(6),
-                                                EnergyPlus::format("The default value will be used ({:.1R})", thisVentilation.MinIndoorTemperature));
+                                                std::format("The default value will be used ({:.2f})", thisVentilation.MinIndoorTemperature));
                     } else if (!thisVentilation.minIndoorTempSched->checkMinMaxVals(
                                    state, Clusive::In, -VentilTempLimit, Clusive::In, VentilTempLimit)) {
                         Sched::ShowSevereBadMinMax(
@@ -1661,7 +1657,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                 if (Item1 == 1) { // Item check prevents this error from printing multiple times
                     if (lAlphaFieldBlanks(7)) {
                         if (lNumericFieldBlanks(12)) {
-                            // ShowWarningEmptyField(state, eoh, cNumericFieldNames(12), format("The default value will be used ({:.1R})",
+                            // ShowWarningEmptyField(state, eoh, cNumericFieldNames(12), format("The default value will be used ({:.2f})",
                             // VentilTempLimit));
                         }
                     } else if (thisVentilation.maxIndoorTempSched == nullptr) {
@@ -1669,7 +1665,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                                                 eoh,
                                                 cAlphaFieldNames(7),
                                                 cAlphaArgs(7),
-                                                EnergyPlus::format("The default value will be used ({:.1R})", thisVentilation.MaxIndoorTemperature));
+                                                std::format("The default value will be used ({:.2f})", thisVentilation.MaxIndoorTemperature));
                     } else if (!thisVentilation.maxIndoorTempSched->checkMinMaxVals(
                                    state, Clusive::In, -VentilTempLimit, Clusive::In, VentilTempLimit)) {
                         Sched::ShowSevereBadMinMax(
@@ -1693,7 +1689,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                 if (Item1 == 1) { // Item check prevents this error from printing multiple times
                     if (lAlphaFieldBlanks(8)) {
                         if (lNumericFieldBlanks(13)) {
-                            // ShowWarningEmptyField(state, eoh, cNumericFieldNames(13), format("The default value will be used ({:.1R})",
+                            // ShowWarningEmptyField(state, eoh, cNumericFieldNames(13), format("The default value will be used ({:.2f})",
                             // VentilTempLimit));
                         }
                     } else if (thisVentilation.deltaTempSched == nullptr) {
@@ -1701,7 +1697,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                                                 eoh,
                                                 cAlphaFieldNames(8),
                                                 cAlphaArgs(8),
-                                                EnergyPlus::format("The default value will be used ({:.1R})", thisVentilation.DelTemperature));
+                                                std::format("The default value will be used ({:.2f})", thisVentilation.DelTemperature));
                     } else if (!thisVentilation.deltaTempSched->checkMinVal(state, Clusive::In, -VentilTempLimit)) {
                         Sched::ShowSevereBadMin(state, eoh, cAlphaFieldNames(8), cAlphaArgs(8), Clusive::In, -100);
                         ErrorsFound = true;
@@ -1733,7 +1729,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                 if (Item1 == 1) { // Item check prevents this error from printing multiple times
                     if (lAlphaFieldBlanks(9)) {
                         if (lNumericFieldBlanks(14)) {
-                            // ShowWarningEmptyField(state, eoh, cNumericFieldNames(14), format("The default value will be used ({:.1R})",
+                            // ShowWarningEmptyField(state, eoh, cNumericFieldNames(14), format("The default value will be used ({:.2f})",
                             // VentilTempLimit));
                         }
                     } else if (thisVentilation.minOutdoorTempSched == nullptr) {
@@ -1741,7 +1737,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                                                 eoh,
                                                 cAlphaFieldNames(9),
                                                 cAlphaArgs(9),
-                                                EnergyPlus::format("The default value will be used ({:.1R})", thisVentilation.MinOutdoorTemperature));
+                                                std::format("The default value will be used ({:.2f})", thisVentilation.MinOutdoorTemperature));
                     } else if (!thisVentilation.minOutdoorTempSched->checkMinMaxVals(
                                    state, Clusive::In, -VentilTempLimit, Clusive::In, VentilTempLimit)) {
                         Sched::ShowSevereBadMinMax(
@@ -1776,7 +1772,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                 if (Item1 == 1) { // Item check prevents this error from printing multiple times
                     if (lAlphaFieldBlanks(10)) {
                         if (lNumericFieldBlanks(15)) {
-                            // ShowWarningEmptyField(state, eoh, cNumericFieldNames(15), format("The default value will be used ({:.1R})",
+                            // ShowWarningEmptyField(state, eoh, cNumericFieldNames(15), format("The default value will be used ({:.2f})",
                             // VentilTempLimit));
                         }
                     } else if (thisVentilation.maxOutdoorTempSched == nullptr) {
@@ -1784,7 +1780,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                                                 eoh,
                                                 cAlphaFieldNames(10),
                                                 cAlphaArgs(10),
-                                                EnergyPlus::format("The default value will be used ({:.1R})", thisVentilation.MaxOutdoorTemperature));
+                                                std::format("The default value will be used ({:.2f})", thisVentilation.MaxOutdoorTemperature));
                     } else if (!thisVentilation.maxOutdoorTempSched->checkMinMaxVals(
                                    state, Clusive::In, -VentilTempLimit, Clusive::In, VentilTempLimit)) {
                         Sched::ShowSevereBadMinMax(
@@ -2071,7 +2067,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
 
                 if (lAlphaFieldBlanks(4)) {
                     if (lNumericFieldBlanks(6)) {
-                        // ShowWarningEmptyField(state, eoh, cAlphaFieldNames(12), format("The default value will be used ({:.1R})",
+                        // ShowWarningEmptyField(state, eoh, cAlphaFieldNames(12), format("The default value will be used ({:.2f})",
                         // VentilTempLimit));
                     }
                 } else if (thisVentilation.minIndoorTempSched == nullptr) {
@@ -2079,7 +2075,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                                             eoh,
                                             cAlphaFieldNames(4),
                                             cAlphaArgs(4),
-                                            EnergyPlus::format("The default value will be used ({:.1R})", thisVentilation.MinIndoorTemperature));
+                                            std::format("The default value will be used ({:.2f})", thisVentilation.MinIndoorTemperature));
                 } else if (!thisVentilation.minIndoorTempSched->checkMinMaxVals(state, Clusive::In, -VentilTempLimit, Clusive::In, VentilTempLimit)) {
                     Sched::ShowSevereBadMinMax(
                         state, eoh, cAlphaFieldNames(4), cAlphaArgs(4), Clusive::In, -VentilTempLimit, Clusive::In, VentilTempLimit);
@@ -2109,7 +2105,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
 
                 if (lAlphaFieldBlanks(5)) {
                     if (lNumericFieldBlanks(7)) {
-                        // ShowWarningEmptyField(state, eoh, cNumericFieldNames(7), format("The default value will be used ({:.1R})",
+                        // ShowWarningEmptyField(state, eoh, cNumericFieldNames(7), format("The default value will be used ({:.2f})",
                         // VentilTempLimit));
                     }
                 } else if (thisVentilation.maxIndoorTempSched == nullptr) {
@@ -2117,7 +2113,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                                             eoh,
                                             cAlphaFieldNames(5),
                                             cAlphaArgs(5),
-                                            EnergyPlus::format("The default value will be used ({:.1R})", thisVentilation.MaxIndoorTemperature));
+                                            std::format("The default value will be used ({:.2f})", thisVentilation.MaxIndoorTemperature));
                 } else if (!thisVentilation.maxIndoorTempSched->checkMinMaxVals(state, Clusive::In, -VentilTempLimit, Clusive::In, VentilTempLimit)) {
                     Sched::ShowSevereBadMinMax(
                         state, eoh, cAlphaFieldNames(5), cAlphaArgs(5), Clusive::In, -VentilTempLimit, Clusive::In, VentilTempLimit);
@@ -2141,7 +2137,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
 
                 if (lAlphaFieldBlanks(6)) {
                     if (lNumericFieldBlanks(8)) {
-                        // ShowWarningEmptyField(state, eoh, cNumericFieldNames(8), format("The default value will be used ({:.1R})",
+                        // ShowWarningEmptyField(state, eoh, cNumericFieldNames(8), format("The default value will be used ({:.2f})",
                         // VentilTempLimit));
                     }
                 } else if (thisVentilation.deltaTempSched == nullptr) {
@@ -2149,7 +2145,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                                             eoh,
                                             cAlphaFieldNames(6),
                                             cAlphaArgs(6),
-                                            EnergyPlus::format("The default value will be used ({:.1R})", thisVentilation.DelTemperature));
+                                            std::format("The default value will be used ({:.2f})", thisVentilation.DelTemperature));
                 } else if (!thisVentilation.deltaTempSched->checkMinVal(state, Clusive::In, -VentilTempLimit)) {
                     Sched::ShowSevereBadMin(state, eoh, cAlphaFieldNames(6), cAlphaArgs(6), Clusive::In, -VentilTempLimit);
                     ErrorsFound = true;
@@ -2178,7 +2174,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
 
                 if (lAlphaFieldBlanks(7)) {
                     if (lNumericFieldBlanks(9)) {
-                        // ShowWarningEmptyField(state, eoh, cNumericFieldNames(9), format("The default value will be used ({:.1R})",
+                        // ShowWarningEmptyField(state, eoh, cNumericFieldNames(9), format("The default value will be used ({:.2f})",
                         // VentilTempLimit));
                     }
                 } else if (thisVentilation.minOutdoorTempSched == nullptr) {
@@ -2186,7 +2182,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                                             eoh,
                                             cAlphaFieldNames(7),
                                             cAlphaArgs(7),
-                                            EnergyPlus::format("The default value will be used ({:.1R})", thisVentilation.MinOutdoorTemperature));
+                                            std::format("The default value will be used ({:.2f})", thisVentilation.MinOutdoorTemperature));
                 } else if (!thisVentilation.minOutdoorTempSched->checkMinMaxVals(
                                state, Clusive::In, -VentilTempLimit, Clusive::In, VentilTempLimit)) {
                     Sched::ShowSevereBadMinMax(
@@ -2217,7 +2213,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
 
                 if (lAlphaFieldBlanks(8)) {
                     if (lNumericFieldBlanks(10)) {
-                        // ShowWarningEmptyField(state, eoh, cNumericFieldNames(10), format("The default value will be used ({:.1R})",
+                        // ShowWarningEmptyField(state, eoh, cNumericFieldNames(10), format("The default value will be used ({:.2f})",
                         // VentilTempLimit));
                     }
                 } else if (thisVentilation.maxOutdoorTempSched == nullptr) {
@@ -2225,7 +2221,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                                             eoh,
                                             cAlphaFieldNames(8),
                                             cAlphaArgs(8),
-                                            EnergyPlus::format("The default value will be used ({:.1R})", thisVentilation.MaxOutdoorTemperature));
+                                            std::format("The default value will be used ({:.2f})", thisVentilation.MaxOutdoorTemperature));
                 } else if (!thisVentilation.maxOutdoorTempSched->checkMinMaxVals(
                                state, Clusive::In, -VentilTempLimit, Clusive::In, VentilTempLimit)) {
                     Sched::ShowSevereBadMinMax(
@@ -2503,11 +2499,11 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                             }
                         } else {
                             ShowSevereError(state,
-                                            EnergyPlus::format("{}{}=\"{}\", invalid flow/area specification [<0.0]={:.3R}",
-                                                               RoutineName,
-                                                               cCurrentModuleObject,
-                                                               thisMixingInput.Name,
-                                                               rNumericArgs(2)));
+                                            std::format("{}{}=\"{}\", invalid flow/area specification [<0.0]={:#G}",
+                                                        RoutineName,
+                                                        cCurrentModuleObject,
+                                                        thisMixingInput.Name,
+                                                        rNumericArgs(2)));
                             ErrorsFound = true;
                         }
                     }
@@ -2537,11 +2533,11 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                             }
                         } else {
                             ShowSevereError(state,
-                                            EnergyPlus::format("{}{}=\"{}\", invalid flow/person specification [<0.0]={:.3R}",
-                                                               RoutineName,
-                                                               cCurrentModuleObject,
-                                                               thisMixingInput.Name,
-                                                               rNumericArgs(3)));
+                                            std::format("{}{}=\"{}\", invalid flow/person specification [<0.0]={:#G}",
+                                                        RoutineName,
+                                                        cCurrentModuleObject,
+                                                        thisMixingInput.Name,
+                                                        rNumericArgs(3)));
                             ErrorsFound = true;
                         }
                     }
@@ -2571,11 +2567,11 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                             }
                         } else {
                             ShowSevereError(state,
-                                            EnergyPlus::format("{}{}=\"{}\", invalid ACH (air changes per hour) specification [<0.0]={:.3R}",
-                                                               RoutineName,
-                                                               cCurrentModuleObject,
-                                                               thisMixingInput.Name,
-                                                               rNumericArgs(4)));
+                                            std::format("{}{}=\"{}\", invalid ACH (air changes per hour) specification [<0.0]={:#G}",
+                                                        RoutineName,
+                                                        cCurrentModuleObject,
+                                                        thisMixingInput.Name,
+                                                        rNumericArgs(4)));
                             ErrorsFound = true;
                         }
                     }
@@ -2614,15 +2610,15 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                         if (lNumericFieldBlanks(5)) {
                             ShowWarningCustom(state,
                                               eoh,
-                                              EnergyPlus::format("{} and {} are empty, a default temperature of {:.1R}C will be used.",
-                                                                 cAlphaFieldNames(6),
-                                                                 cNumericFieldNames(5),
-                                                                 -MixingTempLimit));
+                                              std::format("{} and {} are empty, a default temperature of {:.2f} C will be used.",
+                                                          cAlphaFieldNames(6),
+                                                          cNumericFieldNames(5),
+                                                          -MixingTempLimit));
                         }
                     } else if ((thisMixing.deltaTempSched = Sched::GetSchedule(state, cAlphaArgs(6))) == nullptr) {
                         ShowWarningItemNotFound(state, eoh, cAlphaFieldNames(6), cAlphaArgs(6), "");
                         if (lNumericFieldBlanks(5)) {
-                            ShowContinueError(state, EnergyPlus::format("a default temperature of {:.1R}C will be used.", -MixingTempLimit));
+                            ShowContinueError(state, std::format("a default temperature of {:.2f} C will be used.", -MixingTempLimit));
                         }
                     } else if (!thisMixing.deltaTempSched->checkMinVal(state, Clusive::In, -MixingTempLimit)) {
                         Sched::ShowSevereBadMin(state, eoh, cAlphaFieldNames(6), cAlphaArgs(6), Clusive::In, -MixingTempLimit);
@@ -2962,7 +2958,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                     thisMixing.DesignLevel = rNumericArgs(1);
                     if (lNumericFieldBlanks(1)) {
                         ShowWarningError(state,
-                                         std::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Cross Mixing will result.",
+                                         std::format("{}{}=\"{}\", {} specifies {}, but that field is blank. Zero Cross Mixing will result.",
                                                      RoutineName,
                                                      cCurrentModuleObject,
                                                      thisMixingInput.Name,
@@ -2995,7 +2991,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                                 if (thisZone.FloorArea <= 0.0) {
                                     ShowWarningError(
                                         state,
-                                        std::format("{}{}=\"{}\", {} specifies {}, but Space Floor Area = 0.  0 Cross Mixing will result.",
+                                        std::format("{}{}=\"{}\", {} specifies {}, but Space Floor Area = 0. Zero Cross Mixing will result.",
                                                     RoutineName,
                                                     cCurrentModuleObject,
                                                     thisMixingInput.Name,
@@ -3005,17 +3001,17 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                             }
                         } else {
                             ShowSevereError(state,
-                                            EnergyPlus::format("{}{}=\"{}\", invalid flow/area specification [<0.0]={:.3R}",
-                                                               RoutineName,
-                                                               cCurrentModuleObject,
-                                                               thisMixingInput.Name,
-                                                               rNumericArgs(2)));
+                                            std::format("{}{}=\"{}\", invalid flow/area specification [<0.0]={:#G}",
+                                                        RoutineName,
+                                                        cCurrentModuleObject,
+                                                        thisMixingInput.Name,
+                                                        rNumericArgs(2)));
                             ErrorsFound = true;
                         }
                     }
                     if (lNumericFieldBlanks(2)) {
                         ShowWarningError(state,
-                                         std::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Cross Mixing will result.",
+                                         std::format("{}{}=\"{}\", {} specifies {}, but that field is blank. Zero Cross Mixing will result.",
                                                      RoutineName,
                                                      cCurrentModuleObject,
                                                      thisMixingInput.Name,
@@ -3031,7 +3027,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                             if (thisSpace.TotOccupants <= 0.0) {
                                 ShowWarningError(
                                     state,
-                                    std::format("{}{}=\"{}\", {} specifies {}, but Space Total Occupants = 0.  0 Cross Mixing will result.",
+                                    std::format("{}{}=\"{}\", {} specifies {}, but Space Total Occupants = 0. Zero Cross Mixing will result.",
                                                 RoutineName,
                                                 cCurrentModuleObject,
                                                 thisMixingInput.Name,
@@ -3040,17 +3036,17 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                             }
                         } else {
                             ShowSevereError(state,
-                                            EnergyPlus::format("{}{}=\"{}\", invalid flow/person specification [<0.0]={:.3R}",
-                                                               RoutineName,
-                                                               cCurrentModuleObject,
-                                                               thisMixingInput.Name,
-                                                               rNumericArgs(3)));
+                                            std::format("{}{}=\"{}\", invalid flow/person specification [<0.0]={:#G}",
+                                                        RoutineName,
+                                                        cCurrentModuleObject,
+                                                        thisMixingInput.Name,
+                                                        rNumericArgs(3)));
                             ErrorsFound = true;
                         }
                     }
                     if (lNumericFieldBlanks(3)) {
                         ShowWarningError(state,
-                                         std::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Cross Mixing will result.",
+                                         std::format("{}{}=\"{}\", {} specifies {}, but that field is blank. Zero Cross Mixing will result.",
                                                      RoutineName,
                                                      cCurrentModuleObject,
                                                      thisMixingInput.Name,
@@ -3065,7 +3061,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                             thisMixing.DesignLevel = rNumericArgs(4) * thisSpace.Volume / Constant::rSecsInHour;
                             if (thisSpace.Volume <= 0.0) {
                                 ShowWarningError(state,
-                                                 std::format("{}{}=\"{}\", {} specifies {}, but Space Volume = 0.  0 Cross Mixing will result.",
+                                                 std::format("{}{}=\"{}\", {} specifies {}, but Space Volume = 0. Zero Cross Mixing will result.",
                                                              RoutineName,
                                                              cCurrentModuleObject,
                                                              thisMixingInput.Name,
@@ -3074,17 +3070,17 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                             }
                         } else {
                             ShowSevereError(state,
-                                            EnergyPlus::format("{}{}=\"{}\", invalid ACH (air changes per hour) specification [<0.0]={:.3R}",
-                                                               RoutineName,
-                                                               cCurrentModuleObject,
-                                                               thisMixingInput.Name,
-                                                               rNumericArgs(4)));
+                                            std::format("{}{}=\"{}\", invalid ACH (air changes per hour) specification [<0.0]={:#G}",
+                                                        RoutineName,
+                                                        cCurrentModuleObject,
+                                                        thisMixingInput.Name,
+                                                        rNumericArgs(4)));
                             ErrorsFound = true;
                         }
                     }
                     if (lNumericFieldBlanks(4)) {
                         ShowWarningError(state,
-                                         std::format("{}{}=\"{}\", {} specifies {}, but that field is blank.  0 Cross Mixing will result.",
+                                         std::format("{}{}=\"{}\", {} specifies {}, but that field is blank. Zero Cross Mixing will result.",
                                                      RoutineName,
                                                      cCurrentModuleObject,
                                                      thisMixingInput.Name,
@@ -3123,17 +3119,17 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                         if (lNumericFieldBlanks(5)) {
                             ShowWarningCustom(state,
                                               eoh,
-                                              EnergyPlus::format("{} and {} are empty, a default temperature of {:.1R}C will be used.",
-                                                                 cAlphaFieldNames(6),
-                                                                 cNumericFieldNames(5),
-                                                                 thisMixing.DeltaTemperature));
+                                              std::format("{} and {} are empty, a default temperature of {:.2f} C will be used.",
+                                                          cAlphaFieldNames(6),
+                                                          cNumericFieldNames(5),
+                                                          thisMixing.DeltaTemperature));
                         }
                     } else if ((thisMixing.deltaTempSched = Sched::GetSchedule(state, cAlphaArgs(6))) == nullptr) {
                         ShowWarningItemNotFound(state,
                                                 eoh,
                                                 cAlphaFieldNames(6),
                                                 cAlphaArgs(6),
-                                                EnergyPlus::format("Fixed delta temperature {:.1R}C will be used", thisMixing.DeltaTemperature));
+                                                std::format("Fixed delta temperature {:.2f} C will be used", thisMixing.DeltaTemperature));
                     } else if (!thisMixing.deltaTempSched->checkMinVal(state, Clusive::In, 0.0)) {
                         Sched::ShowSevereBadMin(state, eoh, cAlphaFieldNames(6), cAlphaArgs(6), Clusive::In, 0.0);
                         ErrorsFound = true;
@@ -3870,7 +3866,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
 
     auto divide_and_print_if_greater_than_zero = [&](const Real64 denominator, const Real64 numerator) {
         if (denominator > 0.0) {
-            print(state.files.eio, "{:.3R},", numerator / denominator);
+            print(state.files.eio, "{:#G},", numerator / denominator);
         } else {
             print(state.files.eio, "N/A,");
         }
@@ -3917,7 +3913,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
               state.dataHeatBal->Zone(ZoneNum).Name,
               state.dataHeatBal->Zone(ZoneNum).FloorArea,
               state.dataHeatBal->Zone(ZoneNum).TotOccupants);
-        print(state.files.eio, "{:.3R},", state.dataHeatBal->Infiltration(Loop).DesignLevel);
+        print(state.files.eio, "{:#G},", state.dataHeatBal->Infiltration(Loop).DesignLevel);
 
         divide_and_print_if_greater_than_zero(state.dataHeatBal->Zone(ZoneNum).FloorArea, state.dataHeatBal->Infiltration(Loop).DesignLevel);
         divide_and_print_if_greater_than_zero(state.dataHeatBal->Zone(ZoneNum).ExteriorTotalSurfArea,
@@ -3925,10 +3921,10 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
         divide_and_print_if_greater_than_zero(state.dataHeatBal->Zone(ZoneNum).Volume,
                                               state.dataHeatBal->Infiltration(Loop).DesignLevel * Constant::rSecsInHour);
 
-        print(state.files.eio, "{:.3R},", state.dataHeatBal->Infiltration(Loop).ConstantTermCoef);
-        print(state.files.eio, "{:.3R},", state.dataHeatBal->Infiltration(Loop).TemperatureTermCoef);
-        print(state.files.eio, "{:.3R},", state.dataHeatBal->Infiltration(Loop).VelocityTermCoef);
-        print(state.files.eio, "{:.3R}\n", state.dataHeatBal->Infiltration(Loop).VelocitySQTermCoef);
+        print(state.files.eio, "{:#G},", state.dataHeatBal->Infiltration(Loop).ConstantTermCoef);
+        print(state.files.eio, "{:#G},", state.dataHeatBal->Infiltration(Loop).TemperatureTermCoef);
+        print(state.files.eio, "{:#G},", state.dataHeatBal->Infiltration(Loop).VelocityTermCoef);
+        print(state.files.eio, "{:#G}\n", state.dataHeatBal->Infiltration(Loop).VelocitySQTermCoef);
     }
 
     if (state.dataHeatBal->ZoneAirMassFlow.EnforceZoneMassBalance) {
@@ -3980,7 +3976,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
               state.dataHeatBal->Zone(ZoneNum).FloorArea,
               state.dataHeatBal->Zone(ZoneNum).TotOccupants);
 
-        print(state.files.eio, "{:.3R},", state.dataHeatBal->Ventilation(Loop).DesignLevel);
+        print(state.files.eio, "{:#G},", state.dataHeatBal->Ventilation(Loop).DesignLevel);
 
         divide_and_print_if_greater_than_zero(state.dataHeatBal->Zone(ZoneNum).FloorArea, state.dataHeatBal->Ventilation(Loop).DesignLevel);
         divide_and_print_if_greater_than_zero(state.dataHeatBal->Zone(ZoneNum).TotOccupants, state.dataHeatBal->Ventilation(Loop).DesignLevel);
@@ -3998,25 +3994,25 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
         } else {
             print(state.files.eio, "UNKNOWN,");
         }
-        print(state.files.eio, "{:.3R},", state.dataHeatBal->Ventilation(Loop).FanPressure);
-        print(state.files.eio, "{:.1R},", state.dataHeatBal->Ventilation(Loop).FanEfficiency);
-        print(state.files.eio, "{:.3R},", state.dataHeatBal->Ventilation(Loop).ConstantTermCoef);
-        print(state.files.eio, "{:.3R},", state.dataHeatBal->Ventilation(Loop).TemperatureTermCoef);
-        print(state.files.eio, "{:.3R},", state.dataHeatBal->Ventilation(Loop).VelocityTermCoef);
-        print(state.files.eio, "{:.3R},", state.dataHeatBal->Ventilation(Loop).VelocitySQTermCoef);
+        print(state.files.eio, "{:#G},", state.dataHeatBal->Ventilation(Loop).FanPressure);
+        print(state.files.eio, "{:#G},", state.dataHeatBal->Ventilation(Loop).FanEfficiency);
+        print(state.files.eio, "{:#G},", state.dataHeatBal->Ventilation(Loop).ConstantTermCoef);
+        print(state.files.eio, "{:#G},", state.dataHeatBal->Ventilation(Loop).TemperatureTermCoef);
+        print(state.files.eio, "{:#G},", state.dataHeatBal->Ventilation(Loop).VelocityTermCoef);
+        print(state.files.eio, "{:#G},", state.dataHeatBal->Ventilation(Loop).VelocitySQTermCoef);
 
         // TODO Should this also be prefixed with "Schedule: " like the following ones are?
         if (state.dataHeatBal->Ventilation(Loop).minIndoorTempSched != nullptr) {
             print(state.files.eio, "{},", state.dataHeatBal->Ventilation(Loop).minIndoorTempSched->Name);
         } else {
-            print(state.files.eio, "{:.2R},", state.dataHeatBal->Ventilation(Loop).MinIndoorTemperature);
+            print(state.files.eio, "{:.2f},", state.dataHeatBal->Ventilation(Loop).MinIndoorTemperature);
         }
 
         const auto print_temperature = [&](Sched::Schedule const *ptr, const Real64 value) {
             if (ptr != nullptr) {
                 print(state.files.eio, "Schedule: {},", ptr->Name);
             } else {
-                print(state.files.eio, "{:.2R},", value);
+                print(state.files.eio, "{:.2f},", value);
             }
         };
 
@@ -4025,7 +4021,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
         print_temperature(state.dataHeatBal->Ventilation(Loop).minOutdoorTempSched, state.dataHeatBal->Ventilation(Loop).MinOutdoorTemperature);
         print_temperature(state.dataHeatBal->Ventilation(Loop).maxOutdoorTempSched, state.dataHeatBal->Ventilation(Loop).MaxOutdoorTemperature);
 
-        print(state.files.eio, "{:.2R}\n", state.dataHeatBal->Ventilation(Loop).MaxWindSpeed);
+        print(state.files.eio, "{:.2f}\n", state.dataHeatBal->Ventilation(Loop).MaxWindSpeed);
     }
 
     TotMixingFlow.dimension(state.dataGlobal->NumOfZones, 0.0);
@@ -4053,14 +4049,14 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
               state.dataHeatBal->Zone(ZoneNum).Name,
               state.dataHeatBal->Zone(ZoneNum).FloorArea,
               state.dataHeatBal->Zone(ZoneNum).TotOccupants);
-        print(state.files.eio, "{:.3R},", state.dataHeatBal->Mixing(Loop).DesignLevel);
+        print(state.files.eio, "{:#G},", state.dataHeatBal->Mixing(Loop).DesignLevel);
         divide_and_print_if_greater_than_zero(state.dataHeatBal->Zone(ZoneNum).FloorArea, state.dataHeatBal->Mixing(Loop).DesignLevel);
         divide_and_print_if_greater_than_zero(state.dataHeatBal->Zone(ZoneNum).TotOccupants, state.dataHeatBal->Mixing(Loop).DesignLevel);
         divide_and_print_if_greater_than_zero(state.dataHeatBal->Zone(ZoneNum).Volume,
                                               state.dataHeatBal->Mixing(Loop).DesignLevel * Constant::rSecsInHour);
 
         print(state.files.eio, "{},", state.dataHeatBal->Zone(state.dataHeatBal->Mixing(Loop).FromZone).Name);
-        print(state.files.eio, "{:.2R}\n", state.dataHeatBal->Mixing(Loop).DeltaTemperature);
+        print(state.files.eio, "{:.2f}\n", state.dataHeatBal->Mixing(Loop).DeltaTemperature);
     }
 
     for (int Loop = 1; Loop <= state.dataHeatBal->TotCrossMixing; ++Loop) {
@@ -4088,7 +4084,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
               state.dataHeatBal->Zone(ZoneNum).FloorArea,
               state.dataHeatBal->Zone(ZoneNum).TotOccupants);
 
-        print(state.files.eio, "{:.3R},", state.dataHeatBal->CrossMixing(Loop).DesignLevel);
+        print(state.files.eio, "{:#G},", state.dataHeatBal->CrossMixing(Loop).DesignLevel);
 
         divide_and_print_if_greater_than_zero(state.dataHeatBal->Zone(ZoneNum).FloorArea, state.dataHeatBal->CrossMixing(Loop).DesignLevel);
         divide_and_print_if_greater_than_zero(state.dataHeatBal->Zone(ZoneNum).TotOccupants, state.dataHeatBal->CrossMixing(Loop).DesignLevel);
@@ -4096,7 +4092,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                                               state.dataHeatBal->CrossMixing(Loop).DesignLevel * Constant::rSecsInHour);
 
         print(state.files.eio, "{},", state.dataHeatBal->Zone(state.dataHeatBal->CrossMixing(Loop).FromZone).Name);
-        print(state.files.eio, "{:.2R}\n", state.dataHeatBal->CrossMixing(Loop).DeltaTemperature);
+        print(state.files.eio, "{:.2f}\n", state.dataHeatBal->CrossMixing(Loop).DeltaTemperature);
     }
 
     if (state.dataHeatBal->TotRefDoorMixing > 0) {
@@ -4112,7 +4108,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
             for (ConnectionNumber = 1; ConnectionNumber <= state.dataHeatBal->RefDoorMixing(ZoneNumA).NumRefDoorConnections; ++ConnectionNumber) {
                 ZoneNumB = state.dataHeatBal->RefDoorMixing(ZoneNumA).MateZonePtr(ConnectionNumber);
                 // TotMixingFlow(ZoneNum)=TotMixingFlow(ZoneNum)+RefDoorMixing(Loop)%!DesignLevel
-                static constexpr std::string_view Format_723(" {} Airflow Stats Nominal, {},{},{},{},{:.3R},{:.3R},{}\n");
+                static constexpr std::string_view Format_723(" {} Airflow Stats Nominal, {},{},{},{},{:#G},{:#G},{}\n");
                 print(state.files.eio,
                       Format_723,
                       "RefrigerationDoorMixing",

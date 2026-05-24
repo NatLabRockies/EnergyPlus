@@ -2788,6 +2788,47 @@ The AirflowNetwork linkage used in following output variables includes surfaces 
   HVAC,Average, RoomAirflowNetwork Node Humidity Ratio {[}kgWater/kgDryAir{]}
 \end{itemize}
 
+\textbf{The following are reported only when an integrated model of ZoneAirContaminantBalance is used and either Carbon Dioxide Concentration = Yes or Generic Contaminant Concentration = Yes:}
+
+\begin{lstlisting}
+ZoneAirContaminantBalance,
+  Yes,                     !- Carbon Dioxide Concentration
+  Outdoor CO2 Schedule,    !- Outdoor Carbon Dioxide Schedule Name
+  Yes,                     !- Generic Contaminant Concentration
+  Outdoor Contaminant Schedule;    !- Outdoor Generic Contaminant Schedule Name
+\end{lstlisting}
+
+\begin{itemize}
+\item
+  HVAC,Average,AFN Zone Outdoor Air Mass Flow Rate {[}kg/s{]}
+\item
+  HVAC,Average,AFN Zone Mixing Mass Flow Rate {[}kg/s{]}
+
+\end{itemize}
+
+\textbf{The following are reported only when an integrated model of ZoneAirContaminantBalance is used and Carbon Dioxide Concentration = Yes:}
+
+\begin{itemize}
+\item
+  HVAC,Average,AFN Zone Outdoor Air CO2 Mass Flow Rate {[}kg/s{]}
+\item
+  HVAC,Average,AFN Zone Mixing CO2 Mass Flow Rate {[}kg/s{]}
+\item
+  HVAC,Average,AFN Zone Total CO2 Mass Flow Rate {[}kg/s{]}
+\end{itemize}
+
+\textbf{The following are reported only when an integrated model of ZoneAirContaminantBalance is used and Generic Contaminant Concentration = Yes:}
+
+\begin{itemize}
+\item
+  HVAC,Average,AFN Zone Outdoor Air Generic Air Contaminant Mass Flow Rate {[}kg/s{]}
+\item
+  HVAC,Average,AFN Zone Mixing Generic Air Contaminant Mass Flow Rate {[}kg/s{]}
+\item
+  HVAC,Average,AFN Zone Total Generic Air Contaminant Mass Flow Rate {[}kg/s{]}
+
+\end{itemize}
+
 \paragraph{AFN Node Temperature {[}C{]}}\label{afn-node-temperature-c}
 
 This is the AirflowNetwork node temperature output in degrees C. When a Fan:OnOff object is used and is scheduled to operate in the cycling fan operation mode, this value for AirflowNetwork:Distribution:Node objects reflects the temperature when the fan is operating (ON).

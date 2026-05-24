@@ -290,9 +290,9 @@ void ManageHVACSizingSimulation(EnergyPlusData &state, bool &ErrorsFound)
                     state.dataReportFlag->cWarmupDay = fmt::to_string(state.dataReportFlag->NumOfWarmupDays);
                     DisplayString(state, "Warming up {" + state.dataReportFlag->cWarmupDay + '}');
                 } else if (state.dataGlobal->DayOfSim == 1) {
-                    DisplayString(state,
-                                  EnergyPlus::format(
-                                      "Starting HVAC Sizing Simulation at {} for {}", state.dataEnvrn->CurMnDy, state.dataEnvrn->EnvironmentName));
+                    DisplayString(
+                        state,
+                        std::format("Starting HVAC Sizing Simulation at {} for {}", state.dataEnvrn->CurMnDy, state.dataEnvrn->EnvironmentName));
                     static constexpr std::string_view Format_700("Environment:WarmupDays,{:3}\n");
                     print(state.files.eio, Format_700, state.dataReportFlag->NumOfWarmupDays);
                 } else if (state.dataReportFlag->DisplayPerfSimulationFlag) {

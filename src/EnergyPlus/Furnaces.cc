@@ -226,25 +226,25 @@ namespace Furnaces {
         if (CompIndex == 0) {
             FurnaceNum = Util::FindItemInList(FurnaceName, state.dataFurnaces->Furnace);
             if (FurnaceNum == 0) {
-                ShowFatalError(state, EnergyPlus::format("SimFurnace: Unit not found={}", FurnaceName));
+                ShowFatalError(state, std::format("SimFurnace: Unit not found={}", FurnaceName));
             }
             CompIndex = FurnaceNum;
         } else {
             FurnaceNum = CompIndex;
             if (FurnaceNum > state.dataFurnaces->NumFurnaces || FurnaceNum < 1) {
                 ShowFatalError(state,
-                               EnergyPlus::format("SimFurnace:  Invalid CompIndex passed={}, Number of Units={}, Entered Unit name={}",
-                                                  FurnaceNum,
-                                                  state.dataFurnaces->NumFurnaces,
-                                                  FurnaceName));
+                               std::format("SimFurnace:  Invalid CompIndex passed={}, Number of Units={}, Entered Unit name={}",
+                                           FurnaceNum,
+                                           state.dataFurnaces->NumFurnaces,
+                                           FurnaceName));
             }
             if (state.dataFurnaces->CheckEquipName(FurnaceNum)) {
                 if (FurnaceName != state.dataFurnaces->Furnace(FurnaceNum).Name) {
                     ShowFatalError(state,
-                                   EnergyPlus::format("SimFurnace: Invalid CompIndex passed={}, Unit name={}, stored Unit Name for that index={}",
-                                                      FurnaceNum,
-                                                      FurnaceName,
-                                                      state.dataFurnaces->Furnace(FurnaceNum).Name));
+                                   std::format("SimFurnace: Invalid CompIndex passed={}, Unit name={}, stored Unit Name for that index={}",
+                                               FurnaceNum,
+                                               FurnaceName,
+                                               state.dataFurnaces->Furnace(FurnaceNum).Name));
                 }
                 state.dataFurnaces->CheckEquipName(FurnaceNum) = false;
             }
@@ -687,8 +687,8 @@ namespace Furnaces {
             default:;
             }
             if (errorFound) {
-                ShowSevereError(state, EnergyPlus::format("The index of \"{}\" is not found", thisFurnace.HeatingCoilName));
-                ShowContinueError(state, EnergyPlus::format("...occurs for {}", thisFurnace.Name));
+                ShowSevereError(state, std::format("The index of \"{}\" is not found", thisFurnace.HeatingCoilName));
+                ShowContinueError(state, std::format("...occurs for {}", thisFurnace.Name));
                 errorFound = false;
             }
             switch (thisFurnace.suppHeatCoilType) {
@@ -704,8 +704,8 @@ namespace Furnaces {
             default:;
             }
             if (errorFound) {
-                ShowSevereError(state, EnergyPlus::format("The index of \"{}\" is not found", thisFurnace.SuppHeatCoilName));
-                ShowContinueError(state, EnergyPlus::format("...occurs for {}", thisFurnace.Name));
+                ShowSevereError(state, std::format("The index of \"{}\" is not found", thisFurnace.SuppHeatCoilName));
+                ShowContinueError(state, std::format("...occurs for {}", thisFurnace.Name));
             }
             state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopHeatingCoilMaxRTF =
                 max(refAFNLoopHeatingCoilMaxRTF, heatingCoilRTF, suppHeatingCoilRTF);
@@ -939,8 +939,8 @@ namespace Furnaces {
 
             thisFurnace.ControlZoneNum = Util::FindItemInList(Alphas(6), state.dataHeatBal->Zone);
             if (thisFurnace.ControlZoneNum == 0) {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(6), Alphas(6)));
+                ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, Alphas(1)));
+                ShowContinueError(state, std::format("Illegal {} = {}", cAlphaFields(6), Alphas(6)));
                 ErrorsFound = true;
             }
 
@@ -993,18 +993,18 @@ namespace Furnaces {
                     }
                 }
                 if (!AirNodeFound) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
+                    ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, Alphas(1)));
                     ShowContinueError(state, "Did not find Air Node (Zone with Thermostat).");
-                    ShowContinueError(state, EnergyPlus::format("Specified {} = {}", cAlphaFields(6), Alphas(6)));
+                    ShowContinueError(state, std::format("Specified {} = {}", cAlphaFields(6), Alphas(6)));
                     ShowContinueError(
                         state, "Both a ZoneHVAC:EquipmentConnections object and a ZoneControl:Thermostat object must be specified for this zone.");
                     ErrorsFound = true;
                 }
                 if (!AirLoopFound) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
+                    ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, Alphas(1)));
                     ShowContinueError(state, "Did not find correct Primary Air Loop.");
-                    ShowContinueError(
-                        state, EnergyPlus::format("Specified {} = {} is not served by this AirLoopHVAC equipment.", cAlphaFields(6), Alphas(6)));
+                    ShowContinueError(state,
+                                      std::format("Specified {} = {} is not served by this AirLoopHVAC equipment.", cAlphaFields(6), Alphas(6)));
                     ErrorsFound = true;
                 }
             }
@@ -1015,8 +1015,8 @@ namespace Furnaces {
 
             thisFurnace.fanType = static_cast<HVAC::FanType>(getEnumValue(HVAC::fanTypeNamesUC, Alphas(7)));
             if (thisFurnace.fanType != HVAC::FanType::OnOff && thisFurnace.fanType != HVAC::FanType::Constant) {
-                ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, Alphas(1)));
-                ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(7), Alphas(7)));
+                ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, Alphas(1)));
+                ShowContinueError(state, std::format("Illegal {} = {}", cAlphaFields(7), Alphas(7)));
                 ErrorsFound = true;
 
             } else if ((thisFurnace.FanIndex = Fans::GetFanIndex(state, FanName)) == 0) {
@@ -1033,22 +1033,21 @@ namespace Furnaces {
                 // Check fan's schedule for cycling fan operation if constant volume fan is used
                 if (thisFurnace.fanOpModeSched != nullptr && thisFurnace.fanType == HVAC::FanType::Constant) {
                     if (!thisFurnace.fanOpModeSched->checkMinMaxVals(state, Clusive::Ex, 0.0, Clusive::In, 1.0)) {
-                        Sched::ShowSevereBadMinMax(state,
-                                                   eoh,
-                                                   cAlphaFields(5),
-                                                   Alphas(5),
-                                                   Clusive::Ex,
-                                                   0.0,
-                                                   Clusive::In,
-                                                   1.0,
-                                                   EnergyPlus::format("For {} = {}, Fan operating mode must be continuous (schedule values > 0)",
-                                                                      cAlphaFields(7),
-                                                                      Alphas(7)));
+                        Sched::ShowSevereBadMinMax(
+                            state,
+                            eoh,
+                            cAlphaFields(5),
+                            Alphas(5),
+                            Clusive::Ex,
+                            0.0,
+                            Clusive::In,
+                            1.0,
+                            std::format("For {} = {}, Fan operating mode must be continuous (schedule values > 0)", cAlphaFields(7), Alphas(7)));
                         ErrorsFound = true;
                     }
                 } else if (lAlphaBlanks(5) && thisFurnace.fanType != HVAC::FanType::OnOff) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", CurrentModuleObject, thisFurnace.Name));
-                    ShowContinueError(state, EnergyPlus::format("{} = {}", cAlphaFields(7), Alphas(7)));
+                    ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, thisFurnace.Name));
+                    ShowContinueError(state, std::format("{} = {}", cAlphaFields(7), Alphas(7)));
                     ShowContinueError(state, std::format("Fan type must be Fan:OnOff when {} = Blank.", cAlphaFields(5)));
                     ErrorsFound = true;
                 }
@@ -1368,11 +1367,11 @@ namespace Furnaces {
                         state,
                         std::format("... The {} > Max Volume Flow Rate defined in the associated fan object, should be <=.", cNumericFields(2)));
                     ShowContinueError(state,
-                                      EnergyPlus::format("... Entered value = {:.4R}... Fan [{} = {}] Max Value = {:.4R}",
-                                                         thisFurnace.DesignFanVolFlowRate,
-                                                         HVAC::fanTypeNames[(int)thisFurnace.fanType],
-                                                         FanName,
-                                                         thisFurnace.ActualFanVolFlowRate));
+                                      std::format("... Entered value = {:#G}... Fan [{} = {}] Max Value = {:#G}",
+                                                  thisFurnace.DesignFanVolFlowRate,
+                                                  HVAC::fanTypeNames[(int)thisFurnace.fanType],
+                                                  FanName,
+                                                  thisFurnace.ActualFanVolFlowRate));
                     ShowContinueError(state, " The HVAC system  flow rate is reset to the fan flow rate and the simulation continues.");
                     thisFurnace.DesignFanVolFlowRate = thisFurnace.ActualFanVolFlowRate;
                 }
@@ -1381,7 +1380,7 @@ namespace Furnaces {
                 if (thisFurnace.DesignFanVolFlowRate <= 0.0) {
                     ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, Alphas(1)));
                     ShowContinueError(state, std::format("... The {} <= 0.0, it must be > 0.0.", cNumericFields(2)));
-                    ShowContinueError(state, EnergyPlus::format("... Entered value = {:.2R}", thisFurnace.DesignFanVolFlowRate));
+                    ShowContinueError(state, std::format("... Entered value = {:#G}", thisFurnace.DesignFanVolFlowRate));
                     ErrorsFound = true;
                 }
             }
@@ -4366,18 +4365,18 @@ namespace Furnaces {
                     ShowContinueError(state, std::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
                     ShowContinueError(state, "... has a Cooling or Heating Air Flow Rate > Max Fan Volume Flow Rate, should be <=.");
                     ShowContinueError(state,
-                                      EnergyPlus::format("... Entered value={:.2R}... Fan [{}:{}] Max Value={:.2R}",
-                                                         thisFurnace.DesignFanVolFlowRate,
-                                                         HVAC::fanTypeNames[(int)thisFurnace.fanType],
-                                                         FanName,
-                                                         thisFurnace.ActualFanVolFlowRate));
+                                      std::format("... Entered value={:#G}... Fan [{}:{}] Max Value={:#G}",
+                                                  thisFurnace.DesignFanVolFlowRate,
+                                                  HVAC::fanTypeNames[(int)thisFurnace.fanType],
+                                                  FanName,
+                                                  thisFurnace.ActualFanVolFlowRate));
                 }
             }
             if (thisFurnace.ActualFanVolFlowRate != DataSizing::AutoSize && thisFurnace.DesignFanVolFlowRate != DataSizing::AutoSize) {
                 if (thisFurnace.DesignFanVolFlowRate <= 0.0) {
                     ShowContinueError(state, std::format("...occurs in {} = {}", CurrentModuleObject, Alphas(1)));
                     ShowContinueError(state, "... has a Design Fan Flow Rate <= 0.0, it must be >0.0");
-                    ShowContinueError(state, EnergyPlus::format("... Entered value={:.2R}", thisFurnace.DesignFanVolFlowRate));
+                    ShowContinueError(state, std::format("... Entered value={:#G}", thisFurnace.DesignFanVolFlowRate));
                     ErrorsFound = true;
                 }
             }
@@ -4874,17 +4873,17 @@ namespace Furnaces {
                                                  HVAC::unitarySysTypeNames[(int)thisFurnace.type],
                                                  thisFurnace.Name));
                     ShowContinueError(state,
-                                      EnergyPlus::format("... Entered value={:.2R}... Fan [{}] Max Value={:.2R}",
-                                                         thisFurnace.DesignFanVolFlowRate,
-                                                         HVAC::fanTypeNames[(int)thisFurnace.fanType],
-                                                         thisFurnace.ActualFanVolFlowRate));
+                                      std::format("... Entered value={:#G}... Fan [{}] Max Value={:#G}",
+                                                  thisFurnace.DesignFanVolFlowRate,
+                                                  HVAC::fanTypeNames[(int)thisFurnace.fanType],
+                                                  thisFurnace.ActualFanVolFlowRate));
                 }
                 if (thisFurnace.DesignFanVolFlowRate <= 0.0) {
                     ShowSevereError(state,
                                     std::format("{}={} has a Design Fan Volume Flow Rate <= 0.0, it must be >0.0",
                                                 HVAC::unitarySysTypeNames[(int)thisFurnace.type],
                                                 thisFurnace.Name));
-                    ShowContinueError(state, EnergyPlus::format("... Entered value={:.2R}", thisFurnace.DesignFanVolFlowRate));
+                    ShowContinueError(state, std::format("... Entered value={:#G}", thisFurnace.DesignFanVolFlowRate));
                 }
 
                 state.dataFurnaces->MySecondOneTimeFlag(FurnaceNum) = false;
@@ -5111,10 +5110,9 @@ namespace Furnaces {
                         ShowContinueError(state,
                                           "...Fan power ratio function of speed ratio curve has no impact if fan volumetric flow rate is the same as "
                                           "the unitary system volumetric flow rate.");
-                        ShowContinueError(
-                            state, EnergyPlus::format("...Fan volumetric flow rate            = {:.5R} m3/s.", thisFurnace.ActualFanVolFlowRate));
                         ShowContinueError(state,
-                                          EnergyPlus::format("...Unitary system volumetric flow rate = {:.5R} m3/s.", thisFurnace.MaxHeatAirVolFlow));
+                                          std::format("...Fan volumetric flow rate            = {:#G} m3/s.", thisFurnace.ActualFanVolFlowRate));
+                        ShowContinueError(state, std::format("...Unitary system volumetric flow rate = {:#G} m3/s.", thisFurnace.MaxHeatAirVolFlow));
                     }
                 }
                 state.dataFurnaces->MyFanFlag(FurnaceNum) = false;
@@ -6007,12 +6005,11 @@ namespace Furnaces {
                     auto const &thisCoil = state.dataDXCoils->DXCoil(thisFurnace.CoolingCoilIndex);
                     state.dataSize->DataTotCapCurveIndex = thisCoil.CCapFTemp(thisCoil.NumCapacityStages);
                 } else {
-                    ShowWarningError(
-                        state,
-                        EnergyPlus::format("Developer Error in Heat Pump ACCA Sizing: cooling coil not found for {}:{} with coil type = {}.",
-                                           thisFurnace.type,
-                                           thisFurnace.Name,
-                                           HVAC::coilTypeNames[(int)thisFurnace.coolCoilType]));
+                    ShowWarningError(state,
+                                     std::format("Developer Error in Heat Pump ACCA Sizing: cooling coil not found for {}:{} with coil type = {}.",
+                                                 HVAC::unitarySysTypeNames[(int)thisFurnace.type],
+                                                 thisFurnace.Name,
+                                                 HVAC::coilTypeNames[(int)thisFurnace.coolCoilType]));
                 }
             }
             Real64 TempSize = thisFurnace.DesignCoolingCapacity;
@@ -9572,8 +9569,8 @@ namespace Furnaces {
                                                            thisFurnace.Name));
                             ShowContinueErrorTimeStamp(state, "");
                             ShowContinueError(state, "...Bad hot water maximum flow rate limits");
-                            ShowContinueError(state, EnergyPlus::format("...Given minimum water flow rate={:.3R} kg/s", MinWaterFlow));
-                            ShowContinueError(state, EnergyPlus::format("...Given maximum water flow rate={:.3R} kg/s", MaxHotWaterFlow));
+                            ShowContinueError(state, std::format("...Given minimum water flow rate={:#G} kg/s", MinWaterFlow));
+                            ShowContinueError(state, std::format("...Given maximum water flow rate={:#G} kg/s", MaxHotWaterFlow));
                         }
                         ShowRecurringWarningErrorAtEnd(state,
                                                        std::format("CalcNonDXHeatingCoils: Hot water coil control failed (flow limits) for {}=\"{}\"",
@@ -10122,7 +10119,7 @@ namespace Furnaces {
                                 ShowWarningError(
                                     state,
                                     std::format("Iteration limit exceeded calculating VS WSHP unit cycling ratio, for unit={}", thisFurnace.Name));
-                                ShowContinueErrorTimeStamp(state, EnergyPlus::format("Cycling ratio returned={:.2R}", PartLoadFrac));
+                                ShowContinueErrorTimeStamp(state, std::format("Cycling ratio returned={:.2f}", PartLoadFrac));
                             } else {
                                 ShowRecurringWarningErrorAtEnd(
                                     state,
@@ -10196,8 +10193,8 @@ namespace Furnaces {
                                 ShowWarningError(
                                     state,
                                     std::format("Iteration limit exceeded calculating VS WSHP unit speed ratio, for unit={}", thisFurnace.Name));
-                                ShowContinueErrorTimeStamp(
-                                    state, EnergyPlus::format("Speed ratio returned=[{:.2R}], Speed number ={}", SpeedRatio, SpeedNum));
+                                ShowContinueErrorTimeStamp(state,
+                                                           std::format("Speed ratio returned=[{:.2f}], Speed number ={}", SpeedRatio, SpeedNum));
                             } else {
                                 ShowRecurringWarningErrorAtEnd(
                                     state,
@@ -10275,8 +10272,7 @@ namespace Furnaces {
                             ++thisFurnace.ErrCountVar2;
                             ShowWarningError(
                                 state, std::format("Iteration limit exceeded calculating VS WSHP unit speed ratio, for unit={}", thisFurnace.Name));
-                            ShowContinueErrorTimeStamp(state,
-                                                       EnergyPlus::format("Speed ratio returned=[{:.2R}], Speed number ={}", SpeedRatio, SpeedNum));
+                            ShowContinueErrorTimeStamp(state, std::format("Speed ratio returned=[{:.2f}], Speed number ={}", SpeedRatio, SpeedNum));
                         } else {
                             ShowRecurringWarningErrorAtEnd(state,
                                                            thisFurnace.Name +

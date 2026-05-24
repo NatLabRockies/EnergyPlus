@@ -29,7 +29,7 @@ jobs:
       # fail-fast: Default is true, switch to false to allow one platform to fail and still run others
       fail-fast: false
       matrix:
-        macos_dev_target: [12.1, 13.0]
+        macos_dev_target: [12.1, 14.0]
         include:
         - macos_dev_target: 12.1
           os: macos-15-intel
@@ -37,7 +37,7 @@ jobs:
           arch: x86_64
           python-arch: x64
           pretty: "Mac x64"
-        - macos_dev_target: 13.0
+        - macos_dev_target: 14.0
           os: macos-14
           allow_failure: false
           arch: arm64
@@ -146,7 +146,7 @@ jobs:
         # We use cmake commands to build some subprojects, so setting it globally
         echo MACOSX_DEPLOYMENT_TARGET=${{ matrix.macos_dev_target }} >> $GITHUB_ENV
         echo "Installing gcc@13 for gfortran support of -static-libquadmath"
-        brew list gcc@13 || brew install gcc@13
+        brew reinstall gcc@13
         which gfortran-13 || echo "FC=$(brew --prefix gcc@13)/bin/gfortran-13" >> $GITHUB_ENV
         brew install ninja tcl-tk
 
@@ -287,18 +287,18 @@ jobs:
       # fail-fast: Default is true, switch to false to allow one platform to fail and still run others
       fail-fast: false
       matrix:
-        macos_dev_target: [12.1, 13.0]
+        macos_dev_target: [12.1, 14.0]
         include:
           - macos_dev_target: 12.1
             os: macos-15-intel
             arch: x86_64
             python-arch: x64
             test_key: mac12
-          - macos_dev_target: 13.0
+          - macos_dev_target: 14.0
             os: macos-14
             arch: arm64
             python-arch: arm64
-            test_key: mac13-arm64
+            test_key: mac14-arm64
 
     steps:
     - uses: actions/checkout@v6  # Still need E+ checked out to get testing scripts

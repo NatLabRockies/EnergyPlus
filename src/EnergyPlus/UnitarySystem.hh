@@ -897,22 +897,21 @@ namespace UnitarySystems {
                                               int const ZoneOAUnitNum          // index to zone OA unit
         );
 
-        static Real64 calcUnitarySystemWaterFlowResidual(EnergyPlusData &state,
-                                                         Real64 const PartLoadRatio, // coil part load ratio
-                                                         int UnitarySysNum,
-                                                         bool FirstHVACIteration,
-                                                         Real64 QZnReq,
-                                                         int AirControlNode,
-                                                         Real64 OnOffAirFlowRat,
-                                                         int AirLoopNum,
-                                                         int WaterControlNode,
-                                                         Real64 highWaterMdot,
-                                                         Real64 lowSpeedRatio,
-                                                         Real64 airMdot,
-                                                         Real64 par13_SATempTarget,
-                                                         Real64 systemMaxAirFlowRate,
-                                                         bool isCoolingLoad,
-                                                         Real64 par16_IterationMethod);
+        Real64 calcUnitarySystemWaterFlowResidual(EnergyPlusData &state,
+                                                  Real64 const PartLoadRatio, // coil part load ratio
+                                                  bool FirstHVACIteration,
+                                                  Real64 QZnReq,
+                                                  int AirControlNode,
+                                                  Real64 OnOffAirFlowRat,
+                                                  int AirLoopNum,
+                                                  int WaterControlNode,
+                                                  Real64 highWaterMdot,
+                                                  Real64 lowSpeedRatio,
+                                                  Real64 airMdot,
+                                                  Real64 par13_SATempTarget,
+                                                  Real64 systemMaxAirFlowRate,
+                                                  bool isCoolingLoad,
+                                                  bool const iterWaterAirOrNot);
 
         void simulate(EnergyPlusData &state,
                       std::string_view Name,

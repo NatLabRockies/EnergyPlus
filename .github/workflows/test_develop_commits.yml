@@ -30,7 +30,7 @@ jobs:
 #          pretty: "Standard Build on Mac x64"
 #          alternate: false
         - os: macos-14
-          macos_dev_target: 13.0
+          macos_dev_target: 14.0
           arch: arm64
           python-arch: arm64
           generator: "Unix Makefiles"

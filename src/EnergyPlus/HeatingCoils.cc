@@ -137,24 +137,23 @@ namespace HeatingCoils {
             if (CompIndex == 0) {
                 CoilNum = Util::FindItemInList(CompName, state.dataHeatingCoils->HeatingCoil);
                 if (CoilNum == 0) {
-                    ShowFatalError(state, EnergyPlus::format("SimulateHeatingCoilComponents: Coil not found={}", CompName));
+                    ShowFatalError(state, std::format("SimulateHeatingCoilComponents: Coil not found={}", CompName));
                 }
                 //    CompIndex=CoilNum
             } else {
                 CoilNum = CompIndex;
                 if (CoilNum > state.dataHeatingCoils->NumHeatingCoils || CoilNum < 1) {
-                    ShowFatalError(
-                        state,
-                        EnergyPlus::format("SimulateHeatingCoilComponents: Invalid CompIndex passed={}, Number of Heating Coils={}, Coil name={}",
-                                           CoilNum,
-                                           state.dataHeatingCoils->NumHeatingCoils,
-                                           CompName));
+                    ShowFatalError(state,
+                                   std::format("SimulateHeatingCoilComponents: Invalid CompIndex passed={}, Number of Heating Coils={}, Coil name={}",
+                                               CoilNum,
+                                               state.dataHeatingCoils->NumHeatingCoils,
+                                               CompName));
                 }
                 if (state.dataHeatingCoils->CheckEquipName(CoilNum)) {
                     if (!CompName.empty() && CompName != state.dataHeatingCoils->HeatingCoil(CoilNum).Name) {
                         ShowFatalError(
                             state,
-                            EnergyPlus::format(
+                            std::format(
                                 "SimulateHeatingCoilComponents: Invalid CompIndex passed={}, Coil name={}, stored Coil Name for that index={}",
                                 CoilNum,
                                 CompName,
@@ -165,7 +164,7 @@ namespace HeatingCoils {
             }
         } else {
             ShowSevereError(state, "SimulateHeatingCoilComponents: CompIndex argument not used.");
-            ShowContinueError(state, EnergyPlus::format("..CompName = {}", CompName));
+            ShowContinueError(state, std::format("..CompName = {}", CompName));
             ShowFatalError(state, "Preceding conditions cause termination.");
         }
 
@@ -621,13 +620,13 @@ namespace HeatingCoils {
                   heatingCoil.FuelType == Constant::eFuel::OtherFuel1 || heatingCoil.FuelType == Constant::eFuel::OtherFuel2 ||
                   heatingCoil.FuelType == Constant::eFuel::Coal)) {
                 ShowSevereError(state,
-                                EnergyPlus::format("{}{}: Invalid {} entered ={} for {}={}",
-                                                   RoutineName,
-                                                   CurrentModuleObject,
-                                                   cAlphaFields(3),
-                                                   Alphas(3),
-                                                   cAlphaFields(1),
-                                                   Alphas(1)));
+                                std::format("{}{}: Invalid {} entered ={} for {}={}",
+                                            RoutineName,
+                                            CurrentModuleObject,
+                                            cAlphaFields(3),
+                                            Alphas(3),
+                                            cAlphaFields(1),
+                                            Alphas(1)));
                 state.dataHeatingCoils->InputErrorsFound = true;
             }
             std::string const sFuelType(Constant::eFuelNames[static_cast<int>(heatingCoil.FuelType)]);
@@ -700,7 +699,7 @@ namespace HeatingCoils {
                                 OutputProcessor::StoreType::Average,
                                 heatingCoil.Name);
             SetupOutputVariable(state,
-                                EnergyPlus::format("Heating Coil {} Energy", sFuelType),
+                                std::format("Heating Coil {} Energy", sFuelType),
                                 Constant::Units::J,
                                 heatingCoil.FuelUseLoad,
                                 OutputProcessor::TimeStepType::System,
@@ -710,7 +709,7 @@ namespace HeatingCoils {
                                 OutputProcessor::Group::HVAC,
                                 OutputProcessor::EndUseCat::Heating);
             SetupOutputVariable(state,
-                                EnergyPlus::format("Heating Coil {} Rate", sFuelType),
+                                std::format("Heating Coil {} Rate", sFuelType),
                                 Constant::Units::W,
                                 heatingCoil.FuelUseRate,
                                 OutputProcessor::TimeStepType::System,
@@ -1027,10 +1026,9 @@ namespace HeatingCoils {
                 } else {
                     heatingCoil.Efficiency = Numbers(1);
                     if (Numbers(1) < 0.0 || Numbers(1) > 0.9) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}, \"{}\" heat reclaim recovery efficiency must be >= 0 and <=0.9",
-                                                           CurrentModuleObject,
-                                                           heatingCoil.Name));
+                        ShowSevereError(
+                            state,
+                            std::format("{}, \"{}\" heat reclaim recovery efficiency must be >= 0 and <=0.9", CurrentModuleObject, heatingCoil.Name));
                         state.dataHeatingCoils->InputErrorsFound = true;
                     }
                 }
@@ -1040,10 +1038,9 @@ namespace HeatingCoils {
                 } else {
                     heatingCoil.Efficiency = Numbers(1);
                     if (Numbers(1) < 0.0 || Numbers(1) > 0.3) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("{}, \"{}\" heat reclaim recovery efficiency must be >= 0 and <=0.3",
-                                                           CurrentModuleObject,
-                                                           heatingCoil.Name));
+                        ShowSevereError(
+                            state,
+                            std::format("{}, \"{}\" heat reclaim recovery efficiency must be >= 0 and <=0.3", CurrentModuleObject, heatingCoil.Name));
                         state.dataHeatingCoils->InputErrorsFound = true;
                     }
                 }
@@ -1075,7 +1072,7 @@ namespace HeatingCoils {
                         if (HeatReclaim.ReclaimEfficiencyTotal > 0.3) {
                             ShowSevereError(
                                 state,
-                                EnergyPlus::format(
+                                std::format(
                                     "{}, \"{}\" sum of heat reclaim recovery efficiencies from the same source coil: \"{} \" cannot be over 0.3",
                                     HVAC::coilTypeNames[(int)heatingCoil.coilType],
                                     heatingCoil.Name,
@@ -1102,7 +1099,7 @@ namespace HeatingCoils {
                         if (HeatReclaim.ReclaimEfficiencyTotal > 0.3) {
                             ShowSevereError(
                                 state,
-                                EnergyPlus::format(
+                                std::format(
                                     "{}, \"{}\" sum of heat reclaim recovery efficiencies from the same source coil: \"{} \" cannot be over 0.3",
                                     HVAC::coilTypeNames[(int)heatingCoil.coilType],
                                     heatingCoil.Name,
@@ -1126,7 +1123,7 @@ namespace HeatingCoils {
                         if (HeatReclaim.ReclaimEfficiencyTotal > 0.3) {
                             ShowSevereError(
                                 state,
-                                EnergyPlus::format(
+                                std::format(
                                     "{}, \"{}\" sum of heat reclaim recovery efficiencies from the same source coil: \"{} \" cannot be over 0.3",
                                     HVAC::coilTypeNames[(int)heatingCoil.coilType],
                                     heatingCoil.Name,
@@ -1150,7 +1147,7 @@ namespace HeatingCoils {
                         if (HeatReclaim.ReclaimEfficiencyTotal > 0.3) {
                             ShowSevereError(
                                 state,
-                                EnergyPlus::format(
+                                std::format(
                                     R"({}, "{}" sum of heat reclaim recovery efficiencies from the same source coil: "{} " cannot be over 0.3)",
                                     HVAC::coilTypeNames[(int)heatingCoil.coilType],
                                     heatingCoil.Name,
@@ -1165,8 +1162,7 @@ namespace HeatingCoils {
                 if (heatingCoil.ReclaimHeatingSourceIndexNum < 0) {
                     ShowSevereError(
                         state,
-                        EnergyPlus::format(
-                            "{}={}, could not find desuperheater coil {}={}", CurrentModuleObject, heatingCoil.Name, Alphas(5), Alphas(6)));
+                        std::format("{}={}, could not find desuperheater coil {}={}", CurrentModuleObject, heatingCoil.Name, Alphas(5), Alphas(6)));
                     state.dataHeatingCoils->InputErrorsFound = true;
                 }
                 DataHeatBalance::HeatReclaimDataBase &HeatReclaim =
@@ -1177,18 +1173,18 @@ namespace HeatingCoils {
                 }
                 HeatReclaim.ReclaimEfficiencyTotal += heatingCoil.Efficiency;
                 if (HeatReclaim.ReclaimEfficiencyTotal > 0.3) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format(
-                                        "{}, \"{}\" sum of heat reclaim recovery efficiencies from the same source coil: \"{}\" cannot be over 0.3",
-                                        HVAC::coilTypeNames[(int)heatingCoil.coilType],
-                                        heatingCoil.Name,
-                                        heatingCoil.ReclaimHeatingCoilName));
+                    ShowSevereError(
+                        state,
+                        std::format("{}, \"{}\" sum of heat reclaim recovery efficiencies from the same source coil: \"{}\" cannot be over 0.3",
+                                    HVAC::coilTypeNames[(int)heatingCoil.coilType],
+                                    heatingCoil.Name,
+                                    heatingCoil.ReclaimHeatingCoilName));
                 }
                 state.dataHeatingCoils->ValidSourceType(CoilNum) = true;
             } else {
                 ShowSevereError(
                     state,
-                    EnergyPlus::format(
+                    std::format(
                         "{}, \"{}\" valid desuperheater heat source object type not found: {}", CurrentModuleObject, heatingCoil.Name, Alphas(5)));
                 ShowContinueError(state, "Valid desuperheater heat source objects are:");
                 ShowContinueError(state,
@@ -1216,7 +1212,7 @@ namespace HeatingCoils {
             heatingCoil.ParasiticElecLoad = Numbers(2);
 
             if (Numbers(2) < 0.0) {
-                ShowSevereError(state, EnergyPlus::format("{}, \"{}\" parasitic electric load must be >= 0", CurrentModuleObject, heatingCoil.Name));
+                ShowSevereError(state, std::format("{}, \"{}\" parasitic electric load must be >= 0", CurrentModuleObject, heatingCoil.Name));
                 state.dataHeatingCoils->InputErrorsFound = true;
             }
 
@@ -1266,7 +1262,7 @@ namespace HeatingCoils {
         }
 
         if (state.dataHeatingCoils->InputErrorsFound) {
-            ShowFatalError(state, EnergyPlus::format("{}Errors found in input.  Program terminates.", RoutineName));
+            ShowFatalError(state, std::format("{}Errors found in input.  Program terminates.", RoutineName));
         }
 
         Alphas.deallocate();
@@ -1680,10 +1676,9 @@ namespace HeatingCoils {
                                     state.dataSize->AutoVsHardSizingThreshold) {
                                     ShowMessage(state,
                                                 std::format("SizeHeatingCoil: Potential issue with equipment sizing for {}, {}", CompType, CompName));
+                                    ShowContinueError(state, std::format("User-Specified Nominal Capacity of {:#G} [W]", NominalCapacityUser));
                                     ShowContinueError(state,
-                                                      EnergyPlus::format("User-Specified Nominal Capacity of {:.2R} [W]", NominalCapacityUser));
-                                    ShowContinueError(
-                                        state, EnergyPlus::format("differs from Design Size Nominal Capacity of {:.2R} [W]", NominalCapacityDes));
+                                                      std::format("differs from Design Size Nominal Capacity of {:#G} [W]", NominalCapacityDes));
                                     ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                     ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                                 }
@@ -1703,16 +1698,15 @@ namespace HeatingCoils {
             // Ensure capacity at lower Stage must be lower or equal to the capacity at higher Stage.
             for (int StageNum = 1; StageNum <= heatingCoil.NumOfStages - 1; ++StageNum) {
                 if (heatingCoil.MSNominalCapacity(StageNum) > heatingCoil.MSNominalCapacity(StageNum + 1)) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format("SizeHeatingCoil: {} {}, Stage {} Nominal Capacity ({:.2R} W) must be less than or equal to Stage {} "
-                                           "Nominal Capacity ({:.2R} W).",
-                                           heatingCoil.coilType,
-                                           heatingCoil.Name,
-                                           StageNum,
-                                           heatingCoil.MSNominalCapacity(StageNum),
-                                           StageNum + 1,
-                                           heatingCoil.MSNominalCapacity(StageNum + 1)));
+                    ShowSevereError(state,
+                                    std::format("SizeHeatingCoil: {} {}, Stage {} Nominal Capacity ({:#G} W) must be less than or equal to Stage {} "
+                                                "Nominal Capacity ({:#G} W).",
+                                                static_cast<int>(heatingCoil.coilType),
+                                                heatingCoil.Name,
+                                                StageNum,
+                                                heatingCoil.MSNominalCapacity(StageNum),
+                                                StageNum + 1,
+                                                heatingCoil.MSNominalCapacity(StageNum + 1)));
                     ShowFatalError(state, "Preceding conditions cause termination.");
                 }
             }

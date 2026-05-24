@@ -138,27 +138,27 @@ namespace HVACDXHeatPumpSystem {
         if (CompIndex == 0) {
             DXSystemNum = Util::FindItemInList(DXHeatPumpSystemName, state.dataHVACDXHeatPumpSys->DXHeatPumpSystem);
             if (DXSystemNum == 0) {
-                ShowFatalError(state, EnergyPlus::format("SimDXHeatPumpSystem: DXUnit not found={}", DXHeatPumpSystemName));
+                ShowFatalError(state, std::format("SimDXHeatPumpSystem: DXUnit not found={}", DXHeatPumpSystemName));
             }
             CompIndex = DXSystemNum;
         } else {
             DXSystemNum = CompIndex;
             if (DXSystemNum > NumDXHeatPumpSystems || DXSystemNum < 1) {
                 ShowFatalError(state,
-                               EnergyPlus::format("SimDXHeatPumpSystem:  Invalid CompIndex passed={}, Number of DX Units={}, DX Unit name={}",
-                                                  DXSystemNum,
-                                                  NumDXHeatPumpSystems,
-                                                  DXHeatPumpSystemName));
+                               std::format("SimDXHeatPumpSystem:  Invalid CompIndex passed={}, Number of DX Units={}, DX Unit name={}",
+                                           DXSystemNum,
+                                           NumDXHeatPumpSystems,
+                                           DXHeatPumpSystemName));
             }
             if (state.dataHVACDXHeatPumpSys->CheckEquipName(DXSystemNum)) {
                 auto &dxhpSystem = state.dataHVACDXHeatPumpSys->DXHeatPumpSystem(DXSystemNum);
                 if (DXHeatPumpSystemName != dxhpSystem.Name) {
                     ShowFatalError(
                         state,
-                        EnergyPlus::format("SimDXHeatPumpSystem: Invalid CompIndex passed={}, DX Unit name={}, stored DX Unit Name for that index={}",
-                                           DXSystemNum,
-                                           DXHeatPumpSystemName,
-                                           dxhpSystem.Name));
+                        std::format("SimDXHeatPumpSystem: Invalid CompIndex passed={}, DX Unit name={}, stored DX Unit Name for that index={}",
+                                    DXSystemNum,
+                                    DXHeatPumpSystemName,
+                                    dxhpSystem.Name));
                 }
                 state.dataHVACDXHeatPumpSys->CheckEquipName(DXSystemNum) = false;
             }
@@ -197,8 +197,8 @@ namespace HVACDXHeatPumpSystem {
                                   state.dataHVACDXHeatPumpSys->OnOffAirFlowRatio);
         } break;
         default: {
-            ShowFatalError(
-                state, EnergyPlus::format("SimDXCoolingSystem: Invalid DX Heating System/Coil={}", HVAC::coilTypeNames[(int)dxhpSystem.coilType]));
+            ShowFatalError(state,
+                           std::format("SimDXCoolingSystem: Invalid DX Heating System/Coil={}", HVAC::coilTypeNames[(int)dxhpSystem.coilType]));
         } break;
         }
         // set econo lockout flag
@@ -322,8 +322,8 @@ namespace HVACDXHeatPumpSystem {
                 dxhpSys.HeatPumpCoilName = Alphas(4);
 
             } else {
-                ShowSevereError(state, EnergyPlus::format("Invalid entry for {} :{}", cAlphaFields(3), Alphas(3)));
-                ShowContinueError(state, EnergyPlus::format("In {}=\"{}\".", CurrentModuleObject, dxhpSys.Name));
+                ShowSevereError(state, std::format("Invalid entry for {} :{}", cAlphaFields(3), Alphas(3)));
+                ShowContinueError(state, std::format("In {}=\"{}\".", CurrentModuleObject, dxhpSys.Name));
                 state.dataHVACDXHeatPumpSys->ErrorsFound = true;
             }
 
@@ -352,7 +352,7 @@ namespace HVACDXHeatPumpSystem {
 
             ValidateComponent(state, HVAC::coilTypeNames[(int)dxhpSys.coilType], dxhpSys.HeatPumpCoilName, IsNotOK, CurrentModuleObject);
             if (IsNotOK) {
-                ShowContinueError(state, EnergyPlus::format("In {} = \"{}\".", CurrentModuleObject, dxhpSys.Name));
+                ShowContinueError(state, std::format("In {} = \"{}\".", CurrentModuleObject, dxhpSys.Name));
                 state.dataHVACDXHeatPumpSys->ErrorsFound = true;
             }
 
@@ -376,7 +376,7 @@ namespace HVACDXHeatPumpSystem {
         } // End of the DX System Loop
 
         if (state.dataHVACDXHeatPumpSys->ErrorsFound) {
-            ShowFatalError(state, EnergyPlus::format("{}Errors found in input.  Program terminates.", RoutineName));
+            ShowFatalError(state, std::format("{}Errors found in input.  Program terminates.", RoutineName));
         }
 
         for (DXHeatSysNum = 1; DXHeatSysNum <= NumDXHeatPumpSystems; ++DXHeatSysNum) {
@@ -457,18 +457,18 @@ namespace HVACDXHeatPumpSystem {
                         if (state.dataLoopNodes->Node(ControlNode).TempSetPoint == Node::SensedNodeFlagValue) {
                             if (!state.dataGlobal->AnyEnergyManagementSystemInModel) {
                                 ShowSevereError(state,
-                                                EnergyPlus::format("{}: Missing temperature setpoint for DX unit= {}",
-                                                                   DXHeatPumpSystem.DXHeatPumpSystemType,
-                                                                   DXHeatPumpSystem.Name));
+                                                std::format("{}: Missing temperature setpoint for DX unit= {}",
+                                                            DXHeatPumpSystem.DXHeatPumpSystemType,
+                                                            DXHeatPumpSystem.Name));
                                 ShowContinueError(state, "  use a Set Point Manager to establish a setpoint at the unit control node.");
                                 state.dataHVACGlobal->SetPointErrorFlag = true;
                             } else {
                                 CheckIfNodeSetPointManagedByEMS(state, ControlNode, HVAC::CtrlVarType::Temp, state.dataHVACGlobal->SetPointErrorFlag);
                                 if (state.dataHVACGlobal->SetPointErrorFlag) {
                                     ShowSevereError(state,
-                                                    EnergyPlus::format("{}: Missing temperature setpoint for DX unit= {}",
-                                                                       DXHeatPumpSystem.DXHeatPumpSystemType,
-                                                                       DXHeatPumpSystem.Name));
+                                                    std::format("{}: Missing temperature setpoint for DX unit= {}",
+                                                                DXHeatPumpSystem.DXHeatPumpSystemType,
+                                                                DXHeatPumpSystem.Name));
                                     ShowContinueError(state, "  use a Set Point Manager to establish a setpoint at the unit control node.");
                                     ShowContinueError(state,
                                                       "  or use an EMS actuator to establish a temperature setpoint at the unit control node.");
@@ -675,13 +675,13 @@ namespace HVACDXHeatPumpSystem {
                                                 ++dxhpSystem.DXCoilSensPLRIter;
                                                 ShowWarningError(
                                                     state,
-                                                    EnergyPlus::format(
+                                                    std::format(
                                                         "{} - Iteration limit exceeded calculating DX unit sensible part-load ratio for unit = {}",
                                                         dxhpSystem.DXHeatPumpSystemType,
                                                         dxhpSystem.Name));
-                                                ShowContinueError(
-                                                    state, EnergyPlus::format("Estimated part-load ratio  = {:.3R}", (ReqOutput / FullOutput)));
-                                                ShowContinueError(state, EnergyPlus::format("Calculated part-load ratio = {:.3R}", PartLoadFrac));
+                                                ShowContinueError(state,
+                                                                  std::format("Estimated part-load ratio  = {:.3f}", (ReqOutput / FullOutput)));
+                                                ShowContinueError(state, std::format("Calculated part-load ratio = {:.3f}", PartLoadFrac));
                                                 ShowContinueErrorTimeStamp(
                                                     state,
                                                     "The calculated part-load ratio will be used and the simulation continues. Occurrence info:");
@@ -703,11 +703,11 @@ namespace HVACDXHeatPumpSystem {
                                                 ++dxhpSystem.DXCoilSensPLRFail;
                                                 ShowWarningError(
                                                     state,
-                                                    EnergyPlus::format("{} - DX unit sensible part-load ratio calculation failed: part-load ratio "
-                                                                       "limits exceeded, for unit = {}",
-                                                                       dxhpSystem.DXHeatPumpSystemType,
-                                                                       dxhpSystem.Name));
-                                                ShowContinueError(state, EnergyPlus::format("Estimated part-load ratio = {:.3R}", PartLoadFrac));
+                                                    std::format("{} - DX unit sensible part-load ratio calculation failed: part-load ratio "
+                                                                "limits exceeded, for unit = {}",
+                                                                dxhpSystem.DXHeatPumpSystemType,
+                                                                dxhpSystem.Name));
+                                                ShowContinueError(state, std::format("Estimated part-load ratio = {:.3f}", PartLoadFrac));
                                                 ShowContinueErrorTimeStamp(
                                                     state,
                                                     "The estimated part-load ratio will be used and the simulation continues. Occurrence info:");
@@ -880,13 +880,13 @@ namespace HVACDXHeatPumpSystem {
                                                     ++dxhpSystem.DXCoilSensPLRIter;
                                                     ShowWarningError(
                                                         state,
-                                                        EnergyPlus::format("{} - Iteration limit exceeded calculating DX unit sensible part-load "
-                                                                           "ratio for unit = {}",
-                                                                           dxhpSystem.DXHeatPumpSystemType,
-                                                                           dxhpSystem.Name));
-                                                    ShowContinueError(
-                                                        state, EnergyPlus::format("Estimated part-load ratio  = {:.3R}", (ReqOutput / FullOutput)));
-                                                    ShowContinueError(state, EnergyPlus::format("Calculated part-load ratio = {:.3R}", PartLoadFrac));
+                                                        std::format("{} - Iteration limit exceeded calculating DX unit sensible part-load "
+                                                                    "ratio for unit = {}",
+                                                                    dxhpSystem.DXHeatPumpSystemType,
+                                                                    dxhpSystem.Name));
+                                                    ShowContinueError(state,
+                                                                      std::format("Estimated part-load ratio  = {:.3f}", (ReqOutput / FullOutput)));
+                                                    ShowContinueError(state, std::format("Calculated part-load ratio = {:.3f}", PartLoadFrac));
                                                     ShowContinueErrorTimeStamp(
                                                         state,
                                                         "The calculated part-load ratio will be used and the simulation continues. Occurrence info:");
@@ -908,11 +908,11 @@ namespace HVACDXHeatPumpSystem {
                                                     ++dxhpSystem.DXCoilSensPLRFail;
                                                     ShowWarningError(
                                                         state,
-                                                        EnergyPlus::format("{} - DX unit sensible part-load ratio calculation failed: part-load "
-                                                                           "ratio limits exceeded, for unit = {}",
-                                                                           dxhpSystem.DXHeatPumpSystemType,
-                                                                           dxhpSystem.Name));
-                                                    ShowContinueError(state, EnergyPlus::format("Estimated part-load ratio = {:.3R}", PartLoadFrac));
+                                                        std::format("{} - DX unit sensible part-load ratio calculation failed: part-load "
+                                                                    "ratio limits exceeded, for unit = {}",
+                                                                    dxhpSystem.DXHeatPumpSystemType,
+                                                                    dxhpSystem.Name));
+                                                    ShowContinueError(state, std::format("Estimated part-load ratio = {:.3f}", PartLoadFrac));
                                                     ShowContinueErrorTimeStamp(
                                                         state,
                                                         "The estimated part-load ratio will be used and the simulation continues. Occurrence info:");
@@ -956,13 +956,13 @@ namespace HVACDXHeatPumpSystem {
                                                     ++dxhpSystem.DXCoilSensPLRIter;
                                                     ShowWarningError(
                                                         state,
-                                                        EnergyPlus::format("{} - Iteration limit exceeded calculating DX unit sensible part-load "
-                                                                           "ratio for unit = {}",
-                                                                           dxhpSystem.DXHeatPumpSystemType,
-                                                                           dxhpSystem.Name));
-                                                    ShowContinueError(
-                                                        state, EnergyPlus::format("Estimated part-load ratio  = {:.3R}", (ReqOutput / FullOutput)));
-                                                    ShowContinueError(state, EnergyPlus::format("Calculated part-load ratio = {:.3R}", PartLoadFrac));
+                                                        std::format("{} - Iteration limit exceeded calculating DX unit sensible part-load "
+                                                                    "ratio for unit = {}",
+                                                                    dxhpSystem.DXHeatPumpSystemType,
+                                                                    dxhpSystem.Name));
+                                                    ShowContinueError(state,
+                                                                      std::format("Estimated part-load ratio  = {:.3f}", (ReqOutput / FullOutput)));
+                                                    ShowContinueError(state, std::format("Calculated part-load ratio = {:.3f}", PartLoadFrac));
                                                     ShowContinueErrorTimeStamp(
                                                         state,
                                                         "The calculated part-load ratio will be used and the simulation continues. Occurrence info:");
@@ -984,11 +984,11 @@ namespace HVACDXHeatPumpSystem {
                                                     ++dxhpSystem.DXCoilSensPLRFail;
                                                     ShowWarningError(
                                                         state,
-                                                        EnergyPlus::format("{} - DX unit sensible part-load ratio calculation failed: part-load "
-                                                                           "ratio limits exceeded, for unit = {}",
-                                                                           dxhpSystem.DXHeatPumpSystemType,
-                                                                           dxhpSystem.Name));
-                                                    ShowContinueError(state, EnergyPlus::format("Estimated part-load ratio = {:.3R}", PartLoadFrac));
+                                                        std::format("{} - DX unit sensible part-load ratio calculation failed: part-load "
+                                                                    "ratio limits exceeded, for unit = {}",
+                                                                    dxhpSystem.DXHeatPumpSystemType,
+                                                                    dxhpSystem.Name));
+                                                    ShowContinueError(state, std::format("Estimated part-load ratio = {:.3f}", PartLoadFrac));
                                                     ShowContinueErrorTimeStamp(
                                                         state,
                                                         "The estimated part-load ratio will be used and the simulation continues. Occurrence info:");
@@ -1017,8 +1017,8 @@ namespace HVACDXHeatPumpSystem {
                     } break;
                     default: {
                         ShowFatalError(state,
-                                       EnergyPlus::format("ControlDXHeatingSystem: Invalid DXHeatPumpSystem coil type = {}",
-                                                          HVAC::coilTypeNames[(int)dxhpSystem.coilType]));
+                                       std::format("ControlDXHeatingSystem: Invalid DXHeatPumpSystem coil type = {}",
+                                                   HVAC::coilTypeNames[(int)dxhpSystem.coilType]));
                     } break;
                     }
                 }

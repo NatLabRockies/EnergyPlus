@@ -154,7 +154,7 @@ namespace ExteriorEnergyUse {
                     ErrorsFound = true;
                 } else if (int SchMin = state.dataExteriorEnergyUse->ExteriorLights(Item).sched->getMinVal(state); SchMin < 0.0) {
                     ShowSevereCustom(
-                        state, eoh, EnergyPlus::format("{} = {} minimum is [{:.1R}]. Values must be >= 0.0.", "schedule_name", scheduleName, SchMin));
+                        state, eoh, std::format("{} = {} minimum is [{}]. Values must be >= 0.0.", "schedule_name", scheduleName, SchMin));
                     ErrorsFound = true;
                 }
 
@@ -275,7 +275,7 @@ namespace ExteriorEnergyUse {
                                         OutputProcessor::StoreType::Average,
                                         exteriorEquip.Name);
                     SetupOutputVariable(state,
-                                        EnergyPlus::format("Exterior Equipment {} Energy", Constant::eFuelNames[(int)exteriorEquip.FuelType]),
+                                        std::format("Exterior Equipment {} Energy", Constant::eFuelNames[(int)exteriorEquip.FuelType]),
                                         Constant::Units::J,
                                         exteriorEquip.CurrentUse,
                                         OutputProcessor::TimeStepType::Zone,
@@ -294,7 +294,7 @@ namespace ExteriorEnergyUse {
                                         OutputProcessor::StoreType::Average,
                                         exteriorEquip.Name);
                     SetupOutputVariable(state,
-                                        EnergyPlus::format("Exterior Equipment {} Volume", Constant::eFuelNames[(int)exteriorEquip.FuelType]),
+                                        std::format("Exterior Equipment {} Volume", Constant::eFuelNames[(int)exteriorEquip.FuelType]),
                                         Constant::Units::m3,
                                         exteriorEquip.CurrentUse,
                                         OutputProcessor::TimeStepType::Zone,
@@ -314,7 +314,7 @@ namespace ExteriorEnergyUse {
                     ErrorsFound = true;
                 } else if (int SchMin = exteriorEquip.sched->getMinVal(state); SchMin < 0.0) {
                     ShowSevereCustom(
-                        state, eoh, EnergyPlus::format("{} = {} minimum is [{:.1R}]. Values must be >= 0.0.", "schedule_name", scheduleName, SchMin));
+                        state, eoh, std::format("{} = {} minimum is [{}]. Values must be >= 0.0.", "schedule_name", scheduleName, SchMin));
                     ErrorsFound = true;
                 }
                 exteriorEquip.DesignLevel = inputProcessor->getRealFieldValue(fuelEquipFields, exteriorFuelSchemaProps, "design_level");
@@ -353,7 +353,7 @@ namespace ExteriorEnergyUse {
                     ErrorsFound = true;
                 } else if (int SchMin = exteriorEquip.sched->getMinVal(state); SchMin < 0.0) {
                     ShowSevereCustom(
-                        state, eoh, EnergyPlus::format("{} = {} minimum is [{:.1R}]. Values must be >= 0.0.", "schedule_name", scheduleName, SchMin));
+                        state, eoh, std::format("{} = {} minimum is [{}]. Values must be >= 0.0.", "schedule_name", scheduleName, SchMin));
                     ErrorsFound = true;
                 }
 
@@ -399,7 +399,7 @@ namespace ExteriorEnergyUse {
         }
 
         if (ErrorsFound) {
-            ShowFatalError(state, EnergyPlus::format("{}Errors found in input.  Program terminates.", routineName));
+            ShowFatalError(state, std::format("{}Errors found in input.  Program terminates.", routineName));
         }
     } // GetExteriorEnergyUseInput()
 

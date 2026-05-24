@@ -599,22 +599,22 @@ namespace HeatBalanceManager {
             state.dataHeatBal->LoadsConvergTol = BuildingNumbers(2);
             if (state.dataHeatBal->LoadsConvergTol <= 0.0) {
                 ShowSevereError(state,
-                                EnergyPlus::format("{}{}: {} value invalid, [{:.3R}]",
-                                                   RoutineName,
-                                                   state.dataHeatBalMgr->CurrentModuleObject,
-                                                   state.dataIPShortCut->cNumericFieldNames(2),
-                                                   state.dataHeatBal->LoadsConvergTol));
+                                std::format("{}{}: {} value invalid, [{:#G}]",
+                                            RoutineName,
+                                            state.dataHeatBalMgr->CurrentModuleObject,
+                                            state.dataIPShortCut->cNumericFieldNames(2),
+                                            state.dataHeatBal->LoadsConvergTol));
                 ErrorsFound = true;
             }
             // Temperature Convergence Tolerance Value
             state.dataHeatBal->TempConvergTol = BuildingNumbers(3);
             if (state.dataHeatBal->TempConvergTol <= 0.0) {
                 ShowSevereError(state,
-                                EnergyPlus::format("{}{}: {} value invalid, [{:.3R}]",
-                                                   RoutineName,
-                                                   state.dataHeatBalMgr->CurrentModuleObject,
-                                                   state.dataIPShortCut->cNumericFieldNames(3),
-                                                   state.dataHeatBal->TempConvergTol));
+                                std::format("{}{}: {} value invalid, [{:#G}]",
+                                            RoutineName,
+                                            state.dataHeatBalMgr->CurrentModuleObject,
+                                            state.dataIPShortCut->cNumericFieldNames(3),
+                                            state.dataHeatBal->TempConvergTol));
                 ErrorsFound = true;
             }
             // Solar Distribution
@@ -703,7 +703,7 @@ namespace HeatBalanceManager {
             state.dataHeatBal->MinNumberOfWarmupDays = DataHeatBalance::DefaultMinNumberOfWarmupDays;
         }
 
-        constexpr const char *Format_720(" Building Information,{},{:.3R},{},{:.5R},{:.5R},{},{},{}\n");
+        constexpr const char *Format_720(" Building Information,{},{:.3f},{},{:#G},{:#G},{},{},{}\n");
         constexpr const char *Format_721("! <Building Information>, Building Name,North Axis {{deg}},Terrain,  Loads Convergence Tolerance "
                                          "Value,Temperature Convergence Tolerance Value,  Solar Distribution,Maximum Number of Warmup Days,Minimum "
                                          "Number of Warmup Days\n");
@@ -1264,7 +1264,7 @@ namespace HeatBalanceManager {
         Array1D<Real64> NumArray(3); // Numeric data
 
         // Formats
-        constexpr const char *Format_720("Environment:Site Atmospheric Variation,{:.3R},{:.3R},{:.6R}\n");
+        constexpr const char *Format_720("Environment:Site Atmospheric Variation,{:#G},{:#G},{:#G}\n");
 
         state.dataHeatBalMgr->CurrentModuleObject = "Site:HeightVariation";
         int NumObjects = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, state.dataHeatBalMgr->CurrentModuleObject);
@@ -3151,30 +3151,26 @@ namespace HeatBalanceManager {
                             ShowContinueError(state, std::format("...Environment(SizingPeriod)=\"{}\"", state.dataEnvrn->EnvironmentName));
                         }
 
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format("..Max Temp Comparison = {:.2R} vs Temperature Convergence Tolerance={:.2R} - {} Convergence",
-                                               state.dataHeatBalMgr->WarmupConvergenceValues(ZoneNum).TestMaxTempValue,
-                                               state.dataHeatBal->TempConvergTol,
-                                               PassFail(state.dataHeatBalMgr->WarmupConvergenceValues(ZoneNum).PassFlag(1))));
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format("..Min Temp Comparison = {:.2R} vs Temperature Convergence Tolerance={:.2R} - {} Convergence",
-                                               state.dataHeatBalMgr->WarmupConvergenceValues(ZoneNum).TestMinTempValue,
-                                               state.dataHeatBal->TempConvergTol,
-                                               PassFail(state.dataHeatBalMgr->WarmupConvergenceValues(ZoneNum).PassFlag(2))));
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format("..Max Heat Load Comparison = {:.4R} vs Loads Convergence Tolerance={:.2R} - {} Convergence",
-                                               state.dataHeatBalMgr->WarmupConvergenceValues(ZoneNum).TestMaxHeatLoadValue,
-                                               state.dataHeatBal->LoadsConvergTol,
-                                               PassFail(state.dataHeatBalMgr->WarmupConvergenceValues(ZoneNum).PassFlag(3))));
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format("..Max Cool Load Comparison = {:.4R} vs Loads Convergence Tolerance={:.2R} - {} Convergence",
-                                               state.dataHeatBalMgr->WarmupConvergenceValues(ZoneNum).TestMaxCoolLoadValue,
-                                               state.dataHeatBal->LoadsConvergTol,
-                                               PassFail(state.dataHeatBalMgr->WarmupConvergenceValues(ZoneNum).PassFlag(4))));
+                        ShowContinueError(state,
+                                          std::format("..Max Temp Comparison = {:#G} vs Temperature Convergence Tolerance={:#G} - {} Convergence",
+                                                      state.dataHeatBalMgr->WarmupConvergenceValues(ZoneNum).TestMaxTempValue,
+                                                      state.dataHeatBal->TempConvergTol,
+                                                      PassFail(state.dataHeatBalMgr->WarmupConvergenceValues(ZoneNum).PassFlag(1))));
+                        ShowContinueError(state,
+                                          std::format("..Min Temp Comparison = {:#G} vs Temperature Convergence Tolerance={:#G} - {} Convergence",
+                                                      state.dataHeatBalMgr->WarmupConvergenceValues(ZoneNum).TestMinTempValue,
+                                                      state.dataHeatBal->TempConvergTol,
+                                                      PassFail(state.dataHeatBalMgr->WarmupConvergenceValues(ZoneNum).PassFlag(2))));
+                        ShowContinueError(state,
+                                          std::format("..Max Heat Load Comparison = {:#G} vs Loads Convergence Tolerance={:#G} - {} Convergence",
+                                                      state.dataHeatBalMgr->WarmupConvergenceValues(ZoneNum).TestMaxHeatLoadValue,
+                                                      state.dataHeatBal->LoadsConvergTol,
+                                                      PassFail(state.dataHeatBalMgr->WarmupConvergenceValues(ZoneNum).PassFlag(3))));
+                        ShowContinueError(state,
+                                          std::format("..Max Cool Load Comparison = {:#G} vs Loads Convergence Tolerance={:#G} - {} Convergence",
+                                                      state.dataHeatBalMgr->WarmupConvergenceValues(ZoneNum).TestMaxCoolLoadValue,
+                                                      state.dataHeatBal->LoadsConvergTol,
+                                                      PassFail(state.dataHeatBalMgr->WarmupConvergenceValues(ZoneNum).PassFlag(4))));
                     }
                 }
 
@@ -3515,13 +3511,12 @@ namespace HeatBalanceManager {
                 DataSurfaces::FrameDividerType(getEnumValue(FrameDividerTypeNamesUC, FrameDividerAlphas(2)));
             if (currentDividerType == DataSurfaces::FrameDividerType::Invalid) {
                 ShowWarningError(state,
-                                 EnergyPlus::format("{}={}, Invalid {}",
-                                                    state.dataHeatBalMgr->CurrentModuleObject,
-                                                    std::quoted(FrameDividerAlphas(1)),
-                                                    state.dataIPShortCut->cAlphaFieldNames(2)));
-                ShowContinueError(state,
-                                  EnergyPlus::format("Entered={}, must be DividedLite or Suspended.  Will be set to DividedLite.",
-                                                     std::quoted(FrameDividerAlphas(2))));
+                                 std::format("{}=\"{}\", Invalid {}",
+                                             state.dataHeatBalMgr->CurrentModuleObject,
+                                             FrameDividerAlphas(1),
+                                             state.dataIPShortCut->cAlphaFieldNames(2)));
+                ShowContinueError(
+                    state, std::format("Entered=\"{}\", must be DividedLite or Suspended.  Will be set to DividedLite.", FrameDividerAlphas(2)));
                 frameDivider.DividerType = DataSurfaces::FrameDividerType::DividedLite;
             } else {
                 frameDivider.DividerType = currentDividerType;
@@ -4744,7 +4739,7 @@ namespace HeatBalanceManager {
                                             state.dataHeatBalMgr->CurrentModuleObject,
                                             ConstructAlphas(1),
                                             state.dataIPShortCut->cNumericFieldNames(1)));
-                ShowContinueError(state, EnergyPlus::format("Entered value=[{:.2R}]", Ffactor));
+                ShowContinueError(state, std::format("Entered value=[{:#G}]", Ffactor));
                 ErrorsFound = true;
             }
 
@@ -4754,7 +4749,7 @@ namespace HeatBalanceManager {
                                             state.dataHeatBalMgr->CurrentModuleObject,
                                             ConstructAlphas(1),
                                             state.dataIPShortCut->cNumericFieldNames(2)));
-                ShowContinueError(state, EnergyPlus::format("Entered value=[{:.2R}]", Area));
+                ShowContinueError(state, std::format("Entered value=[{:#G}]", Area));
                 ErrorsFound = true;
             }
 
@@ -4764,7 +4759,7 @@ namespace HeatBalanceManager {
                                             state.dataHeatBalMgr->CurrentModuleObject,
                                             ConstructAlphas(1),
                                             state.dataIPShortCut->cNumericFieldNames(3)));
-                ShowContinueError(state, EnergyPlus::format("Entered value=[{:.2R}]", PerimeterExposed));
+                ShowContinueError(state, std::format("Entered value=[{:#G}]", PerimeterExposed));
                 ErrorsFound = true;
             }
 
@@ -4791,7 +4786,7 @@ namespace HeatBalanceManager {
                                 std::format("{}=\"{}\" has calculated R value <= 0.0, must be > 0.0.",
                                             state.dataHeatBalMgr->CurrentModuleObject,
                                             ConstructAlphas(1)));
-                ShowContinueError(state, EnergyPlus::format("Calculated value=[{:.2R}] Check definition.", Rfic));
+                ShowContinueError(state, std::format("Calculated value=[{:#G}] Check definition.", Rfic));
                 ErrorsFound = true;
             }
 
@@ -4848,7 +4843,7 @@ namespace HeatBalanceManager {
                                             state.dataHeatBalMgr->CurrentModuleObject,
                                             ConstructAlphas(1),
                                             state.dataIPShortCut->cNumericFieldNames(1)));
-                ShowContinueError(state, EnergyPlus::format("Entered value=[{:.2R}]", Cfactor));
+                ShowContinueError(state, std::format("Entered value=[{:#G}]", Cfactor));
                 ErrorsFound = true;
             }
 
@@ -4858,7 +4853,7 @@ namespace HeatBalanceManager {
                                             state.dataHeatBalMgr->CurrentModuleObject,
                                             ConstructAlphas(1),
                                             state.dataIPShortCut->cNumericFieldNames(2)));
-                ShowContinueError(state, EnergyPlus::format("Entered value=[{:.2R}]", Height));
+                ShowContinueError(state, std::format("Entered value=[{:#G}]", Height));
                 ErrorsFound = true;
             }
 
@@ -4889,7 +4884,7 @@ namespace HeatBalanceManager {
                                 std::format("{}=\"{}\" has calculated R value <= 0.0, must be > 0.0.",
                                             state.dataHeatBalMgr->CurrentModuleObject,
                                             ConstructAlphas(1)));
-                ShowContinueError(state, EnergyPlus::format("Calculated value=[{:.2R}] Check definition.", Rfic));
+                ShowContinueError(state, std::format("Calculated value=[{:#G}] Check definition.", Rfic));
                 ErrorsFound = true;
             }
 
@@ -5305,7 +5300,7 @@ namespace HeatBalanceManager {
                 auto &constrNew = state.dataConstruction->Construct(NumNewConst);
 
                 constrNew = constr; // This should be a deep copy
-                constrNew.Name = EnergyPlus::format("{}_TC_{:.0R}", constr.Name, matGlassTC->matRefs(iTC).specTemp);
+                constrNew.Name = std::format("{}_TC_{:.0f}", constr.Name, matGlassTC->matRefs(iTC).specTemp);
                 constrNew.LayerPoint(constrNew.TCLayerNum) = matGlassTC->matRefs(iTC).matNum;
                 constrNew.specTemp = matGlassTC->matRefs(iTC).specTemp;
 
@@ -5394,11 +5389,10 @@ namespace HeatBalanceManager {
 
             windowThermalModel.SDScalar = s_ipsc->rNumericArgs(1);
             if ((s_ipsc->rNumericArgs(1) < 0.0) || (s_ipsc->rNumericArgs(1) > 1.0)) {
-                ShowSevereCustom(state,
-                                 eoh,
-                                 EnergyPlus::format("{} should be >= 0.0 and <= 1.0, entered value = {:.2R}",
-                                                    s_ipsc->cNumericFieldNames(1),
-                                                    s_ipsc->rNumericArgs(1)));
+                ShowSevereCustom(
+                    state,
+                    eoh,
+                    std::format("{} should be >= 0.0 and <= 1.0, entered value = {:.2f}", s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1)));
                 ErrorsFound = true;
             }
 
@@ -5414,27 +5408,21 @@ namespace HeatBalanceManager {
                 if (s_ipsc->rNumericArgs(2) <= 0.0) {
                     ErrorsFound = true;
                     ShowSevereCustom(
-                        state,
-                        eoh,
-                        EnergyPlus::format("{} must be > 0, entered value = {:.2R}", s_ipsc->cNumericFieldNames(2), s_ipsc->rNumericArgs(2)));
+                        state, eoh, std::format("{} must be > 0, entered value = {:.2f}", s_ipsc->cNumericFieldNames(2), s_ipsc->rNumericArgs(2)));
                 }
 
                 windowThermalModel.InitialTemperature = s_ipsc->rNumericArgs(3);
                 if (s_ipsc->rNumericArgs(3) <= 0.0) {
                     ErrorsFound = true;
                     ShowSevereCustom(
-                        state,
-                        eoh,
-                        EnergyPlus::format("{} must be > 0, entered value = {:.2R}", s_ipsc->cNumericFieldNames(3), s_ipsc->rNumericArgs(3)));
+                        state, eoh, std::format("{} must be > 0, entered value = {:.2f}", s_ipsc->cNumericFieldNames(3), s_ipsc->rNumericArgs(3)));
                 }
 
                 windowThermalModel.InitialPressure = s_ipsc->rNumericArgs(4);
                 if (s_ipsc->rNumericArgs(4) <= 0.0) {
                     ErrorsFound = true;
                     ShowSevereCustom(
-                        state,
-                        eoh,
-                        EnergyPlus::format("{} must be > 0, entered value = {:.2R}", s_ipsc->cNumericFieldNames(4), s_ipsc->rNumericArgs(4)));
+                        state, eoh, std::format("{} must be > 0, entered value = {:.2f}", s_ipsc->cNumericFieldNames(4), s_ipsc->rNumericArgs(4)));
                 }
             }
 

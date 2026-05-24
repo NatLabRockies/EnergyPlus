@@ -137,31 +137,31 @@ namespace Humidifiers {
         if (CompIndex == 0) {
             HumNum = Util::FindItemInList(CompName, state.dataHumidifiers->Humidifier);
             if (HumNum == 0) {
-                ShowFatalError(state, EnergyPlus::format("SimHumidifier: Unit not found={}", CompName));
+                ShowFatalError(state, std::format("SimHumidifier: Unit not found={}", CompName));
             }
             CompIndex = HumNum;
         } else {
             HumNum = CompIndex;
             if (HumNum > state.dataHumidifiers->NumHumidifiers || HumNum < 1) {
                 ShowFatalError(state,
-                               EnergyPlus::format("SimHumidifier: Invalid CompIndex passed={}, Number of Units={}, Entered Unit name={}",
-                                                  HumNum,
-                                                  state.dataHumidifiers->NumHumidifiers,
-                                                  CompName));
+                               std::format("SimHumidifier: Invalid CompIndex passed={}, Number of Units={}, Entered Unit name={}",
+                                           HumNum,
+                                           state.dataHumidifiers->NumHumidifiers,
+                                           CompName));
             }
             if (state.dataHumidifiers->CheckEquipName(HumNum)) {
                 if (CompName != state.dataHumidifiers->Humidifier(HumNum).Name) {
                     ShowFatalError(state,
-                                   EnergyPlus::format("SimHumidifier: Invalid CompIndex passed={}, Unit name={}, stored Unit Name for that index={}",
-                                                      HumNum,
-                                                      CompName,
-                                                      state.dataHumidifiers->Humidifier(HumNum).Name));
+                                   std::format("SimHumidifier: Invalid CompIndex passed={}, Unit name={}, stored Unit Name for that index={}",
+                                               HumNum,
+                                               CompName,
+                                               state.dataHumidifiers->Humidifier(HumNum).Name));
                 }
                 state.dataHumidifiers->CheckEquipName(HumNum) = false;
             }
         }
         if (HumNum <= 0) {
-            ShowFatalError(state, EnergyPlus::format("SimHumidifier: Unit not found={}", CompName));
+            ShowFatalError(state, std::format("SimHumidifier: Unit not found={}", CompName));
         }
 
         auto &thisHum = state.dataHumidifiers->Humidifier(HumNum);
@@ -179,8 +179,8 @@ namespace Humidifiers {
             thisHum.CalcGasSteamHumidifier(state, WaterAddNeeded);
         } break;
         default: {
-            ShowSevereError(state, EnergyPlus::format("SimHumidifier: Invalid Humidifier Type Code={}", thisHum.HumType));
-            ShowContinueError(state, EnergyPlus::format("...Component Name=[{}].", CompName));
+            ShowSevereError(state, std::format("SimHumidifier: Invalid Humidifier Type Code={}", static_cast<int>(thisHum.HumType)));
+            ShowContinueError(state, std::format("...Component Name=[{}].", CompName));
             ShowFatalError(state, "Preceding Condition causes termination.");
         } break;
         }
@@ -393,9 +393,9 @@ namespace Humidifiers {
                                                      Humidifier.Name,               // Object Name
                                                      cAlphaFields(3));              // Field Name
             } else if (!lAlphaBlanks(3)) {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\",", RoutineName, CurrentModuleObject, Alphas(1)));
-                ShowContinueError(state, EnergyPlus::format("Invalid {}={}", cAlphaFields(3), Alphas(3)));
-                ShowContinueError(state, EnergyPlus::format("...{} not found.", cAlphaFields(3)));
+                ShowSevereError(state, std::format("{}{}=\"{}\",", RoutineName, CurrentModuleObject, Alphas(1)));
+                ShowContinueError(state, std::format("Invalid {}={}", cAlphaFields(3), Alphas(3)));
+                ShowContinueError(state, std::format("...{} not found.", cAlphaFields(3)));
                 ErrorsFound = true;
             }
 
@@ -581,7 +581,7 @@ namespace Humidifiers {
         lNumericBlanks.deallocate();
 
         if (ErrorsFound) {
-            ShowFatalError(state, EnergyPlus::format("{}Errors found in input.", RoutineName));
+            ShowFatalError(state, std::format("{}Errors found in input.", RoutineName));
         }
     }
 
@@ -620,25 +620,25 @@ namespace Humidifiers {
                 if (state.dataLoopNodes->Node(AirOutNode).HumRatMin == Node::SensedNodeFlagValue) {
                     if (!state.dataGlobal->AnyEnergyManagementSystemInModel) {
                         ShowSevereError(state,
-                                        EnergyPlus::format("Humidifiers: Missing humidity setpoint for {} = {}",
-                                                           EnergyPlus::format(HumidifierType[static_cast<int>(HumType)]),
-                                                           Name));
+                                        std::format("Humidifiers: Missing humidity setpoint for {} = {}",
+                                                    std::string(HumidifierType[static_cast<int>(HumType)]),
+                                                    Name));
                         ShowContinueError(state,
                                           "  use a Setpoint Manager with Control Variable = \"MinimumHumidityRatio\" to establish a setpoint at the "
                                           "humidifier outlet node.");
-                        ShowContinueError(state, EnergyPlus::format("  expecting it on Node=\"{}\".", state.dataLoopNodes->NodeID(AirOutNode)));
+                        ShowContinueError(state, std::format("  expecting it on Node=\"{}\".", state.dataLoopNodes->NodeID(AirOutNode)));
                         state.dataHVACGlobal->SetPointErrorFlag = true;
                     } else {
                         CheckIfNodeSetPointManagedByEMS(state, AirOutNode, HVAC::CtrlVarType::MinHumRat, state.dataHVACGlobal->SetPointErrorFlag);
                         if (state.dataHVACGlobal->SetPointErrorFlag) {
                             ShowSevereError(state,
-                                            EnergyPlus::format("Humidifiers: Missing humidity setpoint for {} = {}",
-                                                               EnergyPlus::format(HumidifierType[static_cast<int>(HumType)]),
-                                                               Name));
+                                            std::format("Humidifiers: Missing humidity setpoint for {} = {}",
+                                                        std::string(HumidifierType[static_cast<int>(HumType)]),
+                                                        Name));
                             ShowContinueError(state,
                                               "  use a Setpoint Manager with Control Variable = \"MinimumHumidityRatio\" to establish a setpoint at "
                                               "the humidifier outlet node.");
-                            ShowContinueError(state, EnergyPlus::format("  expecting it on Node=\"{}\".", state.dataLoopNodes->NodeID(AirOutNode)));
+                            ShowContinueError(state, std::format("  expecting it on Node=\"{}\".", state.dataLoopNodes->NodeID(AirOutNode)));
                             ShowContinueError(
                                 state,
                                 "  or use an EMS actuator to control minimum humidity ratio to establish a setpoint at the humidifier outlet node.");
@@ -751,7 +751,7 @@ namespace Humidifiers {
                     HardSizeNoDesRun = true;
                     if (NomCapVol > 0.0) {
                         BaseSizer::reportSizerOutput(state,
-                                                     EnergyPlus::format(HumidifierType[static_cast<int>(HumType)]),
+                                                     std::string(HumidifierType[static_cast<int>(HumType)]),
                                                      Name,
                                                      "User-Specified Nominal Capacity Volume [m3/s]",
                                                      NomCapVol);
@@ -773,7 +773,7 @@ namespace Humidifiers {
                     HardSizeNoDesRun = true;
                     if (NomCapVol > 0.0) {
                         BaseSizer::reportSizerOutput(state,
-                                                     EnergyPlus::format(HumidifierType[static_cast<int>(HumType)]),
+                                                     std::string(HumidifierType[static_cast<int>(HumType)]),
                                                      Name,
                                                      "User-Specified Nominal Capacity Volume [m3/s]",
                                                      NomCapVol);
@@ -822,7 +822,7 @@ namespace Humidifiers {
                 if (IsAutoSize) {
                     NomCapVol = NomCapVolDes;
                     BaseSizer::reportSizerOutput(state,
-                                                 EnergyPlus::format(HumidifierType[static_cast<int>(HumType)]),
+                                                 std::string(HumidifierType[static_cast<int>(HumType)]),
                                                  Name,
                                                  "Design Size Nominal Capacity Volume [m3/s]",
                                                  NomCapVolDes);
@@ -830,7 +830,7 @@ namespace Humidifiers {
                     if (NomCapVol > 0.0) {
                         NomCapVolUser = NomCapVol;
                         BaseSizer::reportSizerOutput(state,
-                                                     EnergyPlus::format(HumidifierType[static_cast<int>(HumType)]),
+                                                     std::string(HumidifierType[static_cast<int>(HumType)]),
                                                      Name,
                                                      "Design Size Nominal Capacity Volume [m3/s]",
                                                      NomCapVolDes,
@@ -839,13 +839,12 @@ namespace Humidifiers {
                         if (state.dataGlobal->DisplayExtraWarnings) {
                             if ((std::abs(NomCapVolDes - NomCapVolUser) / NomCapVolUser) > state.dataSize->AutoVsHardSizingThreshold) {
                                 ShowMessage(state,
-                                            EnergyPlus::format("SizeHumidifier: Potential issue with equipment sizing for {} = \"{}\".",
-                                                               EnergyPlus::format(HumidifierType[static_cast<int>(HumType)]),
-                                                               Name));
+                                            std::format("SizeHumidifier: Potential issue with equipment sizing for {} = \"{}\".",
+                                                        std::string(HumidifierType[static_cast<int>(HumType)]),
+                                                        Name));
+                                ShowContinueError(state, std::format("User-Specified Nominal Capacity Volume of {:#G} [m3/s]", NomCapVolUser));
                                 ShowContinueError(state,
-                                                  EnergyPlus::format("User-Specified Nominal Capacity Volume of {:.2R} [Wm3/s]", NomCapVolUser));
-                                ShowContinueError(
-                                    state, EnergyPlus::format("differs from Design Size Nominal Capacity Volume of {:.2R} [m3/s]", NomCapVolDes));
+                                                  std::format("differs from Design Size Nominal Capacity Volume of {:#G} [m3/s]", NomCapVolDes));
                                 ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                 ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                             }
@@ -875,18 +874,18 @@ namespace Humidifiers {
                         ThermalEffRated = NominalPower / NomPower;
                     } else {
                         ShowMessage(state,
-                                    EnergyPlus::format("{}: capacity and thermal efficiency mismatch for {} =\"{}\".",
-                                                       CalledFrom,
-                                                       EnergyPlus::format(HumidifierType[static_cast<int>(HumType)]),
-                                                       Name));
-                        ShowContinueError(state, EnergyPlus::format("User-Specified Rated Gas Use Rate of {:.2R} [W]", NomPower));
-                        ShowContinueError(state, EnergyPlus::format("User-Specified or Autosized Rated Capacity of {:.2R} [m3/s]", NomCapVol));
+                                    std::format("{}: capacity and thermal efficiency mismatch for {} =\"{}\".",
+                                                CalledFrom,
+                                                std::string(HumidifierType[static_cast<int>(HumType)]),
+                                                Name));
+                        ShowContinueError(state, std::format("User-Specified Rated Gas Use Rate of {:#G} [W]", NomPower));
+                        ShowContinueError(state, std::format("User-Specified or Autosized Rated Capacity of {:#G} [m3/s]", NomCapVol));
                         ShowContinueError(
                             state,
-                            EnergyPlus::format("Rated Gas Use Rate at the Rated Capacity of {:.2R} [m3/s] must be greater than the ideal, i.e., "
-                                               "100% thermal efficiency gas use rate of {:.2R} [W]",
-                                               NomCapVol,
-                                               NomPowerDes));
+                            std::format("Rated Gas Use Rate at the Rated Capacity of {:#G} [m3/s] must be greater than the ideal, i.e., "
+                                        "100% thermal efficiency gas use rate of {:#G} [W]",
+                                        NomCapVol,
+                                        NomPowerDes));
                         ShowContinueError(state,
                                           "Resize the Rated Gas Use Rate by dividing the ideal gas use rate with expected thermal efficiency. ");
                         // Changing this from a hard-stop condition to just a limiting condition of eta=1.0
@@ -907,12 +906,12 @@ namespace Humidifiers {
             if (IsAutoSize) {
                 NomPower = NomPowerDes;
                 BaseSizer::reportSizerOutput(
-                    state, EnergyPlus::format(HumidifierType[static_cast<int>(HumType)]), Name, "Design Size Rated Power [W]", NomPowerDes);
+                    state, std::string(HumidifierType[static_cast<int>(HumType)]), Name, "Design Size Rated Power [W]", NomPowerDes);
             } else {
                 if (NomPower >= 0.0 && NomCap > 0.0) {
                     NomPowerUser = NomPower;
                     BaseSizer::reportSizerOutput(state,
-                                                 EnergyPlus::format(HumidifierType[static_cast<int>(HumType)]),
+                                                 std::string(HumidifierType[static_cast<int>(HumType)]),
                                                  Name,
                                                  "Design Size Rated Power [W]",
                                                  NomPowerDes,
@@ -921,26 +920,26 @@ namespace Humidifiers {
                     if (state.dataGlobal->DisplayExtraWarnings) {
                         if ((std::abs(NomPowerDes - NomPowerUser) / NomPowerUser) > state.dataSize->AutoVsHardSizingThreshold) {
                             ShowMessage(state,
-                                        EnergyPlus::format("SizeHumidifier: Potential issue with equipment sizing for {} =\"{}\".",
-                                                           EnergyPlus::format(HumidifierType[static_cast<int>(HumType)]),
-                                                           Name));
-                            ShowContinueError(state, EnergyPlus::format("User-Specified Rated Power of {:.2R} [W]", NomPowerUser));
-                            ShowContinueError(state, EnergyPlus::format("differs from Design Size Rated Power of {:.2R} [W]", NomPowerDes));
+                                        std::format("SizeHumidifier: Potential issue with equipment sizing for {} =\"{}\".",
+                                                    std::string(HumidifierType[static_cast<int>(HumType)]),
+                                                    Name));
+                            ShowContinueError(state, std::format("User-Specified Rated Power of {:#G} [W]", NomPowerUser));
+                            ShowContinueError(state, std::format("differs from Design Size Rated Power of {:#G} [W]", NomPowerDes));
                             ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                             ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                         }
                     }
                     if (NomPower < NominalPower) {
                         ShowWarningError(state,
-                                         EnergyPlus::format(HumidifierType[static_cast<int>(HumType)]) +
+                                         std::string(HumidifierType[static_cast<int>(HumType)]) +
                                              ": specified Rated Power is less than nominal Rated Power for " + ModuleObjectType +
                                              " steam humidifier = " + Name + ". ");
-                        ShowContinueError(state, EnergyPlus::format(" specified Rated Power = {:.2R}", NomPower));
-                        ShowContinueError(state, EnergyPlus::format(" while expecting a minimum Rated Power = {:.2R}", NominalPower));
+                        ShowContinueError(state, std::format(" specified Rated Power = {:#G}", NomPower));
+                        ShowContinueError(state, std::format(" while expecting a minimum Rated Power = {:#G}", NominalPower));
                     }
                 } else {
                     ShowWarningError(state,
-                                     EnergyPlus::format(HumidifierType[static_cast<int>(HumType)]) + ": specified nominal capacity is zero for " +
+                                     std::string(HumidifierType[static_cast<int>(HumType)]) + ": specified nominal capacity is zero for " +
                                          ModuleObjectType + " steam humidifier = " + Name + ". ");
                     ShowContinueError(state, " For zero nominal capacity humidifier the rated power is zero.");
                 }
@@ -950,9 +949,9 @@ namespace Humidifiers {
         if (ErrorsFound) {
             ShowFatalError(
                 state,
-                EnergyPlus::format("{}: Mismatch was found in the Rated Gas Use Rate and Thermal Efficiency for gas fired steam humidifier = {}. ",
-                                   CalledFrom,
-                                   Name));
+                std::format("{}: Mismatch was found in the Rated Gas Use Rate and Thermal Efficiency for gas fired steam humidifier = {}. ",
+                            CalledFrom,
+                            Name));
         }
     }
 
@@ -1388,7 +1387,7 @@ namespace Humidifiers {
         if (WhichHumidifier != 0) {
             NodeNum = state.dataHumidifiers->Humidifier(WhichHumidifier).AirInNode;
         } else {
-            ShowSevereError(state, EnergyPlus::format("GetAirInletNodeNum: Could not find Humidifier = \"{}\"", HumidifierName));
+            ShowSevereError(state, std::format("GetAirInletNodeNum: Could not find Humidifier = \"{}\"", HumidifierName));
             ErrorsFound = true;
             NodeNum = 0;
         }

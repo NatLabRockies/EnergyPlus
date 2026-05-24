@@ -200,11 +200,11 @@ void GetEarthTube(EnergyPlusData &state, bool &ErrorsFound) // If errors found i
             for (int otherParams = 1; otherParams < Loop; ++otherParams) {
                 if (Util::SameString(thisEarthTubePars.nameParameters, state.dataEarthTube->EarthTubePars(otherParams).nameParameters)) {
                     ShowSevereError(state,
-                                    EnergyPlus::format("{}: {} = {} is not a unique name.",
-                                                       earthTubeParametersModuleObject,
-                                                       earthTubeModelParametersNameFieldName,
-                                                       thisEarthTubePars.nameParameters));
-                    ShowContinueError(state, EnergyPlus::format("Check the other {} names for a duplicate.", earthTubeParametersModuleObject));
+                                    std::format("{}: {} = {} is not a unique name.",
+                                                earthTubeParametersModuleObject,
+                                                earthTubeModelParametersNameFieldName,
+                                                thisEarthTubePars.nameParameters));
+                    ShowContinueError(state, std::format("Check the other {} names for a duplicate.", earthTubeParametersModuleObject));
                     ErrorsFound = true;
                 }
             }
@@ -251,7 +251,7 @@ void GetEarthTube(EnergyPlusData &state, bool &ErrorsFound) // If errors found i
             // First Alpha is Zone Name
             thisEarthTube.ZonePtr = Util::FindItemInList(zoneName, state.dataHeatBal->Zone);
             if (thisEarthTube.ZonePtr == 0) {
-                ShowSevereError(state, EnergyPlus::format("{}: {} not found={}", earthTubeModuleObject, zoneNameFieldName, zoneName));
+                ShowSevereError(state, std::format("{}: {} not found={}", earthTubeModuleObject, zoneNameFieldName, zoneName));
                 ErrorsFound = true;
             }
 
@@ -271,13 +271,13 @@ void GetEarthTube(EnergyPlusData &state, bool &ErrorsFound) // If errors found i
                 inputProcessor->getRealFieldValue(earthTubeFields, earthTubeSchemaProps, "minimum_zone_temperature_when_cooling");
             if ((thisEarthTube.MinTemperature < -EarthTubeTempLimit) || (thisEarthTube.MinTemperature > EarthTubeTempLimit)) {
                 ShowSevereError(state,
-                                EnergyPlus::format("{}: {}={} must have a minimum temperature between -{:.0R}C and {:.0R}C",
-                                                   earthTubeModuleObject,
-                                                   zoneNameFieldName,
-                                                   zoneName,
-                                                   EarthTubeTempLimit,
-                                                   EarthTubeTempLimit));
-                ShowContinueError(state, EnergyPlus::format("Entered value={:.0R}", thisEarthTube.MinTemperature));
+                                std::format("{}: {}={} must have a minimum temperature between -{:.2f}C and {:.2f}C",
+                                            earthTubeModuleObject,
+                                            zoneNameFieldName,
+                                            zoneName,
+                                            EarthTubeTempLimit,
+                                            EarthTubeTempLimit));
+                ShowContinueError(state, std::format("Entered value={:#G}", thisEarthTube.MinTemperature));
                 ErrorsFound = true;
             }
 
@@ -285,13 +285,13 @@ void GetEarthTube(EnergyPlusData &state, bool &ErrorsFound) // If errors found i
                 inputProcessor->getRealFieldValue(earthTubeFields, earthTubeSchemaProps, "maximum_zone_temperature_when_heating");
             if ((thisEarthTube.MaxTemperature < -EarthTubeTempLimit) || (thisEarthTube.MaxTemperature > EarthTubeTempLimit)) {
                 ShowSevereError(state,
-                                EnergyPlus::format("{}: {}={} must have a maximum temperature between -{:.0R}C and {:.0R}C",
-                                                   earthTubeModuleObject,
-                                                   zoneNameFieldName,
-                                                   zoneName,
-                                                   EarthTubeTempLimit,
-                                                   EarthTubeTempLimit));
-                ShowContinueError(state, EnergyPlus::format("Entered value={:.0R}", thisEarthTube.MaxTemperature));
+                                std::format("{}: {}={} must have a maximum temperature between -{:.2f}C and {:.2f}C",
+                                            earthTubeModuleObject,
+                                            zoneNameFieldName,
+                                            zoneName,
+                                            EarthTubeTempLimit,
+                                            EarthTubeTempLimit));
+                ShowContinueError(state, std::format("Entered value={:#G}", thisEarthTube.MaxTemperature));
                 ErrorsFound = true;
             }
 
@@ -311,48 +311,48 @@ void GetEarthTube(EnergyPlusData &state, bool &ErrorsFound) // If errors found i
             thisEarthTube.FanPressure = inputProcessor->getRealFieldValue(earthTubeFields, earthTubeSchemaProps, "fan_pressure_rise");
             if (thisEarthTube.FanPressure < 0.0) {
                 ShowSevereError(state,
-                                EnergyPlus::format("{}: {}={}, {} must be positive, entered value={:.2R}",
-                                                   earthTubeModuleObject,
-                                                   zoneNameFieldName,
-                                                   zoneName,
-                                                   numericFieldNames[4],
-                                                   thisEarthTube.FanPressure));
+                                std::format("{}: {}={}, {} must be positive, entered value={:#G}",
+                                            earthTubeModuleObject,
+                                            zoneNameFieldName,
+                                            zoneName,
+                                            numericFieldNames[4],
+                                            thisEarthTube.FanPressure));
                 ErrorsFound = true;
             }
 
             thisEarthTube.FanEfficiency = inputProcessor->getRealFieldValue(earthTubeFields, earthTubeSchemaProps, "fan_total_efficiency");
             if ((thisEarthTube.FanEfficiency <= 0.0) || (thisEarthTube.FanEfficiency > 1.0)) {
                 ShowSevereError(state,
-                                EnergyPlus::format("{}: {}={}, {} must be greater than zero and less than or equal to one, entered value={:.2R}",
-                                                   earthTubeModuleObject,
-                                                   zoneNameFieldName,
-                                                   zoneName,
-                                                   numericFieldNames[5],
-                                                   thisEarthTube.FanEfficiency));
+                                std::format("{}: {}={}, {} must be greater than zero and less than or equal to one, entered value={:#G}",
+                                            earthTubeModuleObject,
+                                            zoneNameFieldName,
+                                            zoneName,
+                                            numericFieldNames[5],
+                                            thisEarthTube.FanEfficiency));
                 ErrorsFound = true;
             }
 
             thisEarthTube.r1 = inputProcessor->getRealFieldValue(earthTubeFields, earthTubeSchemaProps, "pipe_radius");
             if (thisEarthTube.r1 <= 0.0) {
                 ShowSevereError(state,
-                                EnergyPlus::format("{}: {}={}, {} must be positive, entered value={:.2R}",
-                                                   earthTubeModuleObject,
-                                                   zoneNameFieldName,
-                                                   zoneName,
-                                                   numericFieldNames[6],
-                                                   thisEarthTube.r1));
+                                std::format("{}: {}={}, {} must be positive, entered value={:#G}",
+                                            earthTubeModuleObject,
+                                            zoneNameFieldName,
+                                            zoneName,
+                                            numericFieldNames[6],
+                                            thisEarthTube.r1));
                 ErrorsFound = true;
             }
 
             thisEarthTube.r2 = inputProcessor->getRealFieldValue(earthTubeFields, earthTubeSchemaProps, "pipe_thickness");
             if (thisEarthTube.r2 <= 0.0) {
                 ShowSevereError(state,
-                                EnergyPlus::format("{}: {}={}, {} must be positive, entered value={:.2R}",
-                                                   earthTubeModuleObject,
-                                                   zoneNameFieldName,
-                                                   zoneName,
-                                                   numericFieldNames[7],
-                                                   thisEarthTube.r2));
+                                std::format("{}: {}={}, {} must be positive, entered value={:#G}",
+                                            earthTubeModuleObject,
+                                            zoneNameFieldName,
+                                            zoneName,
+                                            numericFieldNames[7],
+                                            thisEarthTube.r2));
                 ErrorsFound = true;
             }
 
@@ -361,51 +361,51 @@ void GetEarthTube(EnergyPlusData &state, bool &ErrorsFound) // If errors found i
             thisEarthTube.PipeLength = inputProcessor->getRealFieldValue(earthTubeFields, earthTubeSchemaProps, "pipe_length");
             if (thisEarthTube.PipeLength <= 0.0) {
                 ShowSevereError(state,
-                                EnergyPlus::format("{}: {}={}, {} must be positive, entered value={:.2R}",
-                                                   earthTubeModuleObject,
-                                                   zoneNameFieldName,
-                                                   zoneName,
-                                                   numericFieldNames[8],
-                                                   thisEarthTube.PipeLength));
+                                std::format("{}: {}={}, {} must be positive, entered value={:#G}",
+                                            earthTubeModuleObject,
+                                            zoneNameFieldName,
+                                            zoneName,
+                                            numericFieldNames[8],
+                                            thisEarthTube.PipeLength));
                 ErrorsFound = true;
             }
 
             thisEarthTube.PipeThermCond = inputProcessor->getRealFieldValue(earthTubeFields, earthTubeSchemaProps, "pipe_thermal_conductivity");
             if (thisEarthTube.PipeThermCond <= 0.0) {
                 ShowSevereError(state,
-                                EnergyPlus::format("{}: {}={}, {} must be positive, entered value={:.2R}",
-                                                   earthTubeModuleObject,
-                                                   zoneNameFieldName,
-                                                   zoneName,
-                                                   numericFieldNames[9],
-                                                   thisEarthTube.PipeThermCond));
+                                std::format("{}: {}={}, {} must be positive, entered value={:#G}",
+                                            earthTubeModuleObject,
+                                            zoneNameFieldName,
+                                            zoneName,
+                                            numericFieldNames[9],
+                                            thisEarthTube.PipeThermCond));
                 ErrorsFound = true;
             }
 
             thisEarthTube.z = inputProcessor->getRealFieldValue(earthTubeFields, earthTubeSchemaProps, "pipe_depth_under_ground_surface");
             if (thisEarthTube.z <= 0.0) {
                 ShowSevereError(state,
-                                EnergyPlus::format("{}: {}={}, {} must be positive, entered value={:.2R}",
-                                                   earthTubeModuleObject,
-                                                   zoneNameFieldName,
-                                                   zoneName,
-                                                   numericFieldNames[10],
-                                                   thisEarthTube.z));
+                                std::format("{}: {}={}, {} must be positive, entered value={:#G}",
+                                            earthTubeModuleObject,
+                                            zoneNameFieldName,
+                                            zoneName,
+                                            numericFieldNames[10],
+                                            thisEarthTube.z));
                 ErrorsFound = true;
             }
             if (thisEarthTube.z <= (thisEarthTube.r1 + thisEarthTube.r2 + thisEarthTube.r3)) {
                 // Note that code in initEarthTubeVertical assumes that this check remains in place--if this ever gets changed,
                 // code in initEarthTubeVertical must be modified
                 ShowSevereError(state,
-                                EnergyPlus::format("{}: {}={}, {} must be greater than 3*{} + {} entered value={:.2R} ref sum={:.2R}",
-                                                   earthTubeModuleObject,
-                                                   zoneNameFieldName,
-                                                   zoneName,
-                                                   numericFieldNames[10],
-                                                   numericFieldNames[6],
-                                                   numericFieldNames[7],
-                                                   thisEarthTube.z,
-                                                   thisEarthTube.r1 + thisEarthTube.r2 + thisEarthTube.r3));
+                                std::format("{}: {}={}, {} must be greater than 3*{} + {} entered value={:#G} ref sum={:#G}",
+                                            earthTubeModuleObject,
+                                            zoneNameFieldName,
+                                            zoneName,
+                                            numericFieldNames[10],
+                                            numericFieldNames[6],
+                                            numericFieldNames[7],
+                                            thisEarthTube.z,
+                                            thisEarthTube.r1 + thisEarthTube.r2 + thisEarthTube.r3));
                 ErrorsFound = true;
             }
 
@@ -606,7 +606,7 @@ void GetEarthTube(EnergyPlusData &state, bool &ErrorsFound) // If errors found i
     CheckEarthTubesInZones(state, lastZoneName, earthTubeModuleObject, ErrorsFound);
 
     if (ErrorsFound) {
-        ShowFatalError(state, EnergyPlus::format("{}: Errors getting input.  Program terminates.", earthTubeModuleObject));
+        ShowFatalError(state, std::format("{}: Errors getting input.  Program terminates.", earthTubeModuleObject));
     }
 }
 
@@ -621,8 +621,8 @@ void CheckEarthTubesInZones(EnergyPlusData &state,
     for (int Loop = 1; Loop <= numEarthTubes - 1; ++Loop) {
         for (int Loop1 = Loop + 1; Loop1 <= numEarthTubes; ++Loop1) {
             if (state.dataEarthTube->EarthTubeSys(Loop).ZonePtr == state.dataEarthTube->EarthTubeSys(Loop1).ZonePtr) {
-                ShowSevereError(state, EnergyPlus::format("{} has more than one {} associated with it.", ZoneName, FieldName));
-                ShowContinueError(state, EnergyPlus::format("Only one {} is allowed per zone.  Check the definitions of {}", FieldName, FieldName));
+                ShowSevereError(state, std::format("{} has more than one {} associated with it.", ZoneName, FieldName));
+                ShowContinueError(state, std::format("Only one {} is allowed per zone.  Check the definitions of {}", FieldName, FieldName));
                 ShowContinueError(state, "in your input file and make sure that there is only one defined for each zone.");
                 ErrorsFound = true;
             }
@@ -739,14 +739,14 @@ void initEarthTubeVertical(EnergyPlusData &state)
             auto &zone = state.dataHeatBal->Zone(thisEarthTube.ZonePtr);
             for (int nodeNum = 1; nodeNum <= thisEarthTube.totNodes; ++nodeNum) {
                 SetupOutputVariable(state,
-                                    EnergyPlus::format("Earth Tube Node Temperature {}", nodeNum),
+                                    std::format("Earth Tube Node Temperature {}", nodeNum),
                                     Constant::Units::C,
                                     thisEarthTube.tCurrent[nodeNum - 1],
                                     OutputProcessor::TimeStepType::Zone,
                                     OutputProcessor::StoreType::Average,
                                     zone.Name);
                 SetupOutputVariable(state,
-                                    EnergyPlus::format("Earth Tube Undisturbed Ground Temperature {}", nodeNum),
+                                    std::format("Earth Tube Undisturbed Ground Temperature {}", nodeNum),
                                     Constant::Units::C,
                                     thisEarthTube.tUndist[nodeNum - 1],
                                     OutputProcessor::TimeStepType::Zone,

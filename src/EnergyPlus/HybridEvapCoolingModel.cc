@@ -461,8 +461,8 @@ namespace HybridEvapCoolingModel {
         } else {
             curveID = GetCurveIndex(state, Alphas(inter_Alpha));
             if (curveID == 0) {
-                ShowSevereError(state, EnergyPlus::format("Invalid {}={}", cAlphaFields(inter_Alpha), Alphas(inter_Alpha)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {}", cCurrentModuleObject));
+                ShowSevereError(state, std::format("Invalid {}={}", cAlphaFields(inter_Alpha), Alphas(inter_Alpha)));
+                ShowContinueError(state, std::format("Entered in {}", cCurrentModuleObject));
                 ErrorsFound = true;
                 InitializeCurve(TEMP_CURVE, -1);
             } else {
@@ -479,8 +479,8 @@ namespace HybridEvapCoolingModel {
         } else {
             curveID = GetCurveIndex(state, Alphas(inter_Alpha));
             if (curveID == 0) {
-                ShowSevereError(state, EnergyPlus::format("Invalid {}={}", cAlphaFields(inter_Alpha), Alphas(inter_Alpha)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {}", cCurrentModuleObject));
+                ShowSevereError(state, std::format("Invalid {}={}", cAlphaFields(inter_Alpha), Alphas(inter_Alpha)));
+                ShowContinueError(state, std::format("Entered in {}", cCurrentModuleObject));
                 ErrorsFound = true;
                 InitializeCurve(W_CURVE, -1);
             } else {
@@ -495,8 +495,8 @@ namespace HybridEvapCoolingModel {
         } else {
             curveID = GetCurveIndex(state, Alphas(inter_Alpha));
             if (curveID == 0) {
-                ShowSevereError(state, EnergyPlus::format("Invalid {}={}", cAlphaFields(inter_Alpha), Alphas(inter_Alpha)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {}", cCurrentModuleObject));
+                ShowSevereError(state, std::format("Invalid {}={}", cAlphaFields(inter_Alpha), Alphas(inter_Alpha)));
+                ShowContinueError(state, std::format("Entered in {}", cCurrentModuleObject));
                 ErrorsFound = true;
                 InitializeCurve(POWER_CURVE, -1);
             } else {
@@ -511,8 +511,8 @@ namespace HybridEvapCoolingModel {
         } else {
             curveID = GetCurveIndex(state, Alphas(inter_Alpha));
             if (curveID == 0) {
-                ShowSevereError(state, EnergyPlus::format("Invalid {}={}", cAlphaFields(inter_Alpha), Alphas(inter_Alpha)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {}", cCurrentModuleObject));
+                ShowSevereError(state, std::format("Invalid {}={}", cAlphaFields(inter_Alpha), Alphas(inter_Alpha)));
+                ShowContinueError(state, std::format("Entered in {}", cCurrentModuleObject));
                 ErrorsFound = true;
                 InitializeCurve(SUPPLY_FAN_POWER, -1);
             } else {
@@ -527,8 +527,8 @@ namespace HybridEvapCoolingModel {
         } else {
             curveID = GetCurveIndex(state, Alphas(inter_Alpha));
             if (curveID == 0) {
-                ShowSevereError(state, EnergyPlus::format("Invalid {}={}", cAlphaFields(inter_Alpha), Alphas(inter_Alpha)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {}", cCurrentModuleObject));
+                ShowSevereError(state, std::format("Invalid {}={}", cAlphaFields(inter_Alpha), Alphas(inter_Alpha)));
+                ShowContinueError(state, std::format("Entered in {}", cCurrentModuleObject));
                 ErrorsFound = true;
                 InitializeCurve(EXTERNAL_STATIC_PRESSURE, -1);
             } else {
@@ -544,8 +544,8 @@ namespace HybridEvapCoolingModel {
         } else {
             curveID = GetCurveIndex(state, Alphas(inter_Alpha));
             if (curveID == 0) {
-                ShowSevereError(state, EnergyPlus::format("Invalid {}={}", cAlphaFields(inter_Alpha), Alphas(inter_Alpha)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {}", cCurrentModuleObject));
+                ShowSevereError(state, std::format("Invalid {}={}", cAlphaFields(inter_Alpha), Alphas(inter_Alpha)));
+                ShowContinueError(state, std::format("Entered in {}", cCurrentModuleObject));
                 ErrorsFound = true;
                 InitializeCurve(SECOND_FUEL_USE, -1);
             } else {
@@ -560,8 +560,8 @@ namespace HybridEvapCoolingModel {
         } else {
             curveID = GetCurveIndex(state, Alphas(inter_Alpha));
             if (curveID == 0) {
-                ShowSevereError(state, EnergyPlus::format("Invalid {}={}", cAlphaFields(inter_Alpha), Alphas(inter_Alpha)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {}", cCurrentModuleObject));
+                ShowSevereError(state, std::format("Invalid {}={}", cAlphaFields(inter_Alpha), Alphas(inter_Alpha)));
+                ShowContinueError(state, std::format("Entered in {}", cCurrentModuleObject));
                 ErrorsFound = true;
                 InitializeCurve(THIRD_FUEL_USE, -1);
             } else {
@@ -576,8 +576,8 @@ namespace HybridEvapCoolingModel {
         } else {
             curveID = GetCurveIndex(state, Alphas(inter_Alpha));
             if (curveID == 0) {
-                ShowSevereError(state, EnergyPlus::format("Invalid {}={}", cAlphaFields(inter_Alpha), Alphas(inter_Alpha)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {}", cCurrentModuleObject));
+                ShowSevereError(state, std::format("Invalid {}={}", cAlphaFields(inter_Alpha), Alphas(inter_Alpha)));
+                ShowContinueError(state, std::format("Entered in {}", cCurrentModuleObject));
                 ErrorsFound = true;
                 InitializeCurve(WATER_USE, -1);
             } else {
@@ -1618,40 +1618,40 @@ namespace HybridEvapCoolingModel {
             if (count_EnvironmentConditionsNotMet > 0) {
                 ShowWarningError(
                     state,
-                    EnergyPlus::format("In day {:.1R} of simulation, {} was unable to operate for {:.1R} timesteps because environment conditions "
-                                       "were beyond the allowable operating range for any mode.",
-                                       (Real64)state.dataGlobal->DayOfSim,
-                                       Name,
-                                       (Real64)count_EnvironmentConditionsNotMet));
+                    std::format("In day {:.1f} of simulation, {} was unable to operate for {:.1f} timesteps because environment conditions "
+                                "were beyond the allowable operating range for any mode.",
+                                (Real64)state.dataGlobal->DayOfSim,
+                                Name,
+                                (Real64)count_EnvironmentConditionsNotMet));
             }
             if (count_SAHR_OC_MetOnce > 0) {
                 ShowWarningError(
                     state,
-                    EnergyPlus::format("In day {:.1R} of simulation, {} failed to meet supply air humidity ratio for {:.1R} timesteps. For these "
-                                       "timesteps {} was set to mode 0.",
-                                       (Real64)state.dataGlobal->DayOfSim,
-                                       Name,
-                                       Real64(count_SAHR_OC_MetOnce),
-                                       Name));
+                    std::format("In day {:.1f} of simulation, {} failed to meet supply air humidity ratio for {:.1f} timesteps. For these "
+                                "timesteps {} was set to mode 0.",
+                                (Real64)state.dataGlobal->DayOfSim,
+                                Name,
+                                Real64(count_SAHR_OC_MetOnce),
+                                Name));
             }
             if (count_SAT_OC_MetOnce > 0) {
                 ShowWarningError(
                     state,
-                    EnergyPlus::format("In day {:.1R} of simulation, {} failed to meet supply air temperature constraints for {:.1R} timesteps. "
-                                       "For these timesteps {} was set to mode 0.",
-                                       (Real64)state.dataGlobal->DayOfSim,
-                                       Name,
-                                       Real64(count_SAT_OC_MetOnce),
-                                       Name));
+                    std::format("In day {:.1f} of simulation, {} failed to meet supply air temperature constraints for {:.1f} timesteps. "
+                                "For these timesteps {} was set to mode 0.",
+                                (Real64)state.dataGlobal->DayOfSim,
+                                Name,
+                                Real64(count_SAT_OC_MetOnce),
+                                Name));
             }
 
             ShowWarningError(
                 state,
-                EnergyPlus::format("In day {:.1R} of simulation, {} failed to satisfy sensible load for {:.1R} timesteps. For these timesteps "
-                                   "settings were selected to provide as much sensible cooling or heating as possible, given other constraints.",
-                                   (Real64)state.dataGlobal->DayOfSim,
-                                   Name,
-                                   (Real64)count_DidWeNotMeetLoad));
+                std::format("In day {:.1f} of simulation, {} failed to satisfy sensible load for {:.1f} timesteps. For these timesteps "
+                            "settings were selected to provide as much sensible cooling or heating as possible, given other constraints.",
+                            (Real64)state.dataGlobal->DayOfSim,
+                            Name,
+                            (Real64)count_DidWeNotMeetLoad));
 
             count_SAT_OC_MetOnce = 0;
             count_DidWeNotMeetLoad = 0;

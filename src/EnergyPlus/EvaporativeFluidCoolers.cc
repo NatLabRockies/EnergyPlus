@@ -120,8 +120,7 @@ namespace EvaporativeFluidCoolers {
             return thisObj;
         }
         // If we didn't find it, fatal
-        ShowFatalError(state,
-                       EnergyPlus::format("LocalEvapFluidCoolerFactory: Error getting inputs for object named: {}", objectName)); // LCOV_EXCL_LINE
+        ShowFatalError(state, std::format("LocalEvapFluidCoolerFactory: Error getting inputs for object named: {}", objectName)); // LCOV_EXCL_LINE
         // Shut up the compiler
         return nullptr; // LCOV_EXCL_LINE
     }
@@ -251,10 +250,9 @@ namespace EvaporativeFluidCoolers {
             thisEFC.DesignEnteringAirWetBulbTemp = NumArray(11);
 
             if (state.dataIPShortCut->lAlphaFieldBlanks(4) || AlphArray(4).empty()) {
-                ShowSevereError(state,
-                                EnergyPlus::format("{}, \"{}\" Performance input method is not specified. ",
-                                                   state.dataIPShortCut->cCurrentModuleObject,
-                                                   thisEFC.Name));
+                ShowSevereError(
+                    state,
+                    std::format("{}, \"{}\" Performance input method is not specified. ", state.dataIPShortCut->cCurrentModuleObject, thisEFC.Name));
                 ErrorsFound = true;
             } else {
                 thisEFC.PerformanceInputMethod = AlphArray(4);
@@ -275,10 +273,10 @@ namespace EvaporativeFluidCoolers {
                                                                          Node::ObjectIsNotParent);
                 if (!OutAirNodeManager::CheckOutAirNodeNumber(state, thisEFC.OutdoorAirInletNodeNum)) {
                     ShowSevereError(state,
-                                    EnergyPlus::format("{}, \"{}\" Outdoor Air Inlet Node::Node Name not valid Outdoor Air Node::Node= {}",
-                                                       state.dataIPShortCut->cCurrentModuleObject,
-                                                       thisEFC.Name,
-                                                       AlphArray(5)));
+                                    std::format("{}, \"{}\" Outdoor Air Inlet Node::Node Name not valid Outdoor Air Node::Node= {}",
+                                                state.dataIPShortCut->cCurrentModuleObject,
+                                                thisEFC.Name,
+                                                AlphArray(5)));
                     ShowContinueError(state, "...does not appear in an OutdoorAir:NodeList or as an OutdoorAir:Node::Node.");
                     ErrorsFound = true;
                 }
@@ -291,11 +289,10 @@ namespace EvaporativeFluidCoolers {
                 thisEFC.capacityControl = static_cast<CapacityControl>(getEnumValue(controlNamesUC, Util::makeUPPER(AlphArray(6))));
                 if (thisEFC.capacityControl == CapacityControl::Invalid) {
                     thisEFC.capacityControl = CapacityControl::FanCycling;
-                    ShowWarningError(
-                        state,
-                        EnergyPlus::format("{}, \"{}\" The Capacity Control is not specified correctly. The default Fan Cycling is used.",
-                                           state.dataIPShortCut->cCurrentModuleObject,
-                                           thisEFC.Name));
+                    ShowWarningError(state,
+                                     std::format("{}, \"{}\" The Capacity Control is not specified correctly. The default Fan Cycling is used.",
+                                                 state.dataIPShortCut->cCurrentModuleObject,
+                                                 thisEFC.Name));
                 }
             }
 
@@ -309,8 +306,8 @@ namespace EvaporativeFluidCoolers {
             } else {
                 thisEFC.EvapLossMode = static_cast<EvapLoss>(getEnumValue(evapLossNamesUC, Util::makeUPPER(AlphArray(7))));
                 if (thisEFC.EvapLossMode == EvapLoss::Invalid) {
-                    ShowSevereError(state, EnergyPlus::format("Invalid, {} = {}", state.dataIPShortCut->cAlphaFieldNames(7), AlphArray(7)));
-                    ShowContinueError(state, EnergyPlus::format("Entered in {} = {}", state.dataIPShortCut->cCurrentModuleObject, AlphArray(1)));
+                    ShowSevereError(state, std::format("Invalid, {} = {}", state.dataIPShortCut->cAlphaFieldNames(7), AlphArray(7)));
+                    ShowContinueError(state, std::format("Entered in {} = {}", state.dataIPShortCut->cCurrentModuleObject, AlphArray(1)));
                     ErrorsFound = true;
                 }
             }
@@ -344,8 +341,8 @@ namespace EvaporativeFluidCoolers {
             } else {
                 thisEFC.BlowdownMode = static_cast<Blowdown>(getEnumValue(blowDownNamesUC, Util::makeUPPER(AlphArray(8))));
                 if (thisEFC.BlowdownMode == Blowdown::Invalid) {
-                    ShowSevereError(state, EnergyPlus::format("Invalid, {} = {}", state.dataIPShortCut->cAlphaFieldNames(8), AlphArray(8)));
-                    ShowContinueError(state, EnergyPlus::format("Entered in {} ={}", state.dataIPShortCut->cCurrentModuleObject, AlphArray(1)));
+                    ShowSevereError(state, std::format("Invalid, {} = {}", state.dataIPShortCut->cAlphaFieldNames(8), AlphArray(8)));
+                    ShowContinueError(state, std::format("Entered in {} ={}", state.dataIPShortCut->cCurrentModuleObject, AlphArray(1)));
                     ErrorsFound = true;
                 }
             }
@@ -375,30 +372,30 @@ namespace EvaporativeFluidCoolers {
             if (thisEFC.DesignSprayWaterFlowRate <= 0.0) {
                 ShowSevereError(
                     state,
-                    EnergyPlus::format("{} \"{}\". Evaporative fluid cooler input requires a design spray water flow rate greater than zero for all "
-                                       "performance input methods.",
-                                       state.dataIPShortCut->cCurrentModuleObject,
-                                       thisEFC.Name));
+                    std::format("{} \"{}\". Evaporative fluid cooler input requires a design spray water flow rate greater than zero for all "
+                                "performance input methods.",
+                                state.dataIPShortCut->cCurrentModuleObject,
+                                thisEFC.Name));
                 ErrorsFound = true;
             }
             if (thisEFC.HighSpeedAirFlowRate <= 0.0 && thisEFC.HighSpeedAirFlowRate != DataSizing::AutoSize) {
                 ShowSevereError(state,
-                                EnergyPlus::format("{} = \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {} = \"{}\".",
-                                                   state.dataIPShortCut->cCurrentModuleObject,
-                                                   AlphArray(1),
-                                                   state.dataIPShortCut->cNumericFieldNames(1),
-                                                   state.dataIPShortCut->cAlphaFieldNames(4),
-                                                   AlphArray(4)));
+                                std::format("{} = \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {} = \"{}\".",
+                                            state.dataIPShortCut->cCurrentModuleObject,
+                                            AlphArray(1),
+                                            state.dataIPShortCut->cNumericFieldNames(1),
+                                            state.dataIPShortCut->cAlphaFieldNames(4),
+                                            AlphArray(4)));
                 ErrorsFound = true;
             }
             if (thisEFC.HighSpeedFanPower <= 0.0 && thisEFC.HighSpeedFanPower != DataSizing::AutoSize) {
                 ShowSevereError(state,
-                                EnergyPlus::format("{} = \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {} = \"{}\".",
-                                                   state.dataIPShortCut->cCurrentModuleObject,
-                                                   AlphArray(1),
-                                                   state.dataIPShortCut->cNumericFieldNames(2),
-                                                   state.dataIPShortCut->cAlphaFieldNames(4),
-                                                   AlphArray(4)));
+                                std::format("{} = \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {} = \"{}\".",
+                                            state.dataIPShortCut->cCurrentModuleObject,
+                                            AlphArray(1),
+                                            state.dataIPShortCut->cNumericFieldNames(2),
+                                            state.dataIPShortCut->cAlphaFieldNames(4),
+                                            AlphArray(4)));
                 ErrorsFound = true;
             }
 
@@ -406,76 +403,76 @@ namespace EvaporativeFluidCoolers {
                 thisEFC.PerformanceInputMethod_Num = PIM::UFactor;
                 if (thisEFC.HighSpeedEvapFluidCoolerUA <= 0.0 && thisEFC.HighSpeedEvapFluidCoolerUA != DataSizing::AutoSize) {
                     ShowSevereError(state,
-                                    EnergyPlus::format("{} = \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {} = \"{}\".",
-                                                       state.dataIPShortCut->cCurrentModuleObject,
-                                                       AlphArray(1),
-                                                       state.dataIPShortCut->cNumericFieldNames(6),
-                                                       state.dataIPShortCut->cAlphaFieldNames(4),
-                                                       AlphArray(4)));
+                                    std::format("{} = \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {} = \"{}\".",
+                                                state.dataIPShortCut->cCurrentModuleObject,
+                                                AlphArray(1),
+                                                state.dataIPShortCut->cNumericFieldNames(6),
+                                                state.dataIPShortCut->cAlphaFieldNames(4),
+                                                AlphArray(4)));
                     ErrorsFound = true;
                 }
                 if (thisEFC.DesignWaterFlowRate <= 0.0 && thisEFC.DesignWaterFlowRate != DataSizing::AutoSize) {
                     ShowSevereError(state,
-                                    EnergyPlus::format("{} = \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {} = \"{}\".",
-                                                       state.dataIPShortCut->cCurrentModuleObject,
-                                                       AlphArray(1),
-                                                       state.dataIPShortCut->cNumericFieldNames(7),
-                                                       state.dataIPShortCut->cAlphaFieldNames(4),
-                                                       AlphArray(4)));
+                                    std::format("{} = \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {} = \"{}\".",
+                                                state.dataIPShortCut->cCurrentModuleObject,
+                                                AlphArray(1),
+                                                state.dataIPShortCut->cNumericFieldNames(7),
+                                                state.dataIPShortCut->cAlphaFieldNames(4),
+                                                AlphArray(4)));
                     ErrorsFound = true;
                 }
             } else if (Util::SameString(AlphArray(4), "STANDARDDESIGNCAPACITY")) {
                 thisEFC.PerformanceInputMethod_Num = PIM::StandardDesignCapacity;
                 if (thisEFC.HighSpeedStandardDesignCapacity <= 0.0) {
                     ShowSevereError(state,
-                                    EnergyPlus::format("{} = \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {} = \"{}\".",
-                                                       state.dataIPShortCut->cCurrentModuleObject,
-                                                       AlphArray(1),
-                                                       state.dataIPShortCut->cNumericFieldNames(5),
-                                                       state.dataIPShortCut->cAlphaFieldNames(4),
-                                                       AlphArray(4)));
+                                    std::format("{} = \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {} = \"{}\".",
+                                                state.dataIPShortCut->cCurrentModuleObject,
+                                                AlphArray(1),
+                                                state.dataIPShortCut->cNumericFieldNames(5),
+                                                state.dataIPShortCut->cAlphaFieldNames(4),
+                                                AlphArray(4)));
                     ErrorsFound = true;
                 }
             } else if (Util::SameString(AlphArray(4), "USERSPECIFIEDDESIGNCAPACITY")) {
                 thisEFC.PerformanceInputMethod_Num = PIM::UserSpecifiedDesignCapacity;
                 if (thisEFC.DesignWaterFlowRate <= 0.0 && thisEFC.DesignWaterFlowRate != DataSizing::AutoSize) {
                     ShowSevereError(state,
-                                    EnergyPlus::format("{} = \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {} = \"{}\".",
-                                                       state.dataIPShortCut->cCurrentModuleObject,
-                                                       AlphArray(1),
-                                                       state.dataIPShortCut->cNumericFieldNames(7),
-                                                       state.dataIPShortCut->cAlphaFieldNames(4),
-                                                       AlphArray(4)));
+                                    std::format("{} = \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {} = \"{}\".",
+                                                state.dataIPShortCut->cCurrentModuleObject,
+                                                AlphArray(1),
+                                                state.dataIPShortCut->cNumericFieldNames(7),
+                                                state.dataIPShortCut->cAlphaFieldNames(4),
+                                                AlphArray(4)));
                     ErrorsFound = true;
                 }
                 if (thisEFC.HighSpeedUserSpecifiedDesignCapacity <= 0.0) {
                     ShowSevereError(state,
-                                    EnergyPlus::format("{} = \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {} = \"{}\".",
-                                                       state.dataIPShortCut->cCurrentModuleObject,
-                                                       AlphArray(1),
-                                                       state.dataIPShortCut->cNumericFieldNames(8),
-                                                       state.dataIPShortCut->cAlphaFieldNames(4),
-                                                       AlphArray(4)));
+                                    std::format("{} = \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be > 0 for {} = \"{}\".",
+                                                state.dataIPShortCut->cCurrentModuleObject,
+                                                AlphArray(1),
+                                                state.dataIPShortCut->cNumericFieldNames(8),
+                                                state.dataIPShortCut->cAlphaFieldNames(4),
+                                                AlphArray(4)));
                     ErrorsFound = true;
                 }
                 if (thisEFC.DesignEnteringAirTemp <= 0.0) {
                     ShowSevereError(state,
-                                    EnergyPlus::format("{} = \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be >0 for {} = \"{}\".",
-                                                       state.dataIPShortCut->cCurrentModuleObject,
-                                                       AlphArray(1),
-                                                       state.dataIPShortCut->cNumericFieldNames(10),
-                                                       state.dataIPShortCut->cAlphaFieldNames(4),
-                                                       AlphArray(4)));
+                                    std::format("{} = \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be >0 for {} = \"{}\".",
+                                                state.dataIPShortCut->cCurrentModuleObject,
+                                                AlphArray(1),
+                                                state.dataIPShortCut->cNumericFieldNames(10),
+                                                state.dataIPShortCut->cAlphaFieldNames(4),
+                                                AlphArray(4)));
                     ErrorsFound = true;
                 }
                 if (thisEFC.DesignEnteringAirWetBulbTemp <= 0.0) {
                     ShowSevereError(state,
-                                    EnergyPlus::format("{} = \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be >0 for {} = \"{}\".",
-                                                       state.dataIPShortCut->cCurrentModuleObject,
-                                                       AlphArray(1),
-                                                       state.dataIPShortCut->cNumericFieldNames(11),
-                                                       state.dataIPShortCut->cAlphaFieldNames(4),
-                                                       AlphArray(4)));
+                                    std::format("{} = \"{}\", invalid data for \"{}\", entered value <= 0.0, but must be >0 for {} = \"{}\".",
+                                                state.dataIPShortCut->cCurrentModuleObject,
+                                                AlphArray(1),
+                                                state.dataIPShortCut->cNumericFieldNames(11),
+                                                state.dataIPShortCut->cAlphaFieldNames(4),
+                                                AlphArray(4)));
                     ErrorsFound = true;
                 }
 
@@ -1389,11 +1386,10 @@ namespace EvaporativeFluidCoolers {
                         std::format("Error when autosizing the Design Entering Water Temperature for Evaporative Fluid Cooler = {}.", this->Name));
                     ShowContinueError(
                         state,
-                        EnergyPlus::format(
-                            "Design Entering Water Temperature ({:.2R} C) must be greater than design entering air wet-bulb temperature "
-                            "({:.2R} C).",
-                            this->DesignEnteringWaterTemp,
-                            this->DesignEnteringAirWetBulbTemp));
+                        std::format("Design Entering Water Temperature ({:#G} C) must be greater than design entering air wet-bulb temperature "
+                                    "({:#G} C).",
+                                    this->DesignEnteringWaterTemp,
+                                    this->DesignEnteringAirWetBulbTemp));
                     ShowContinueError(
                         state,
                         "Check the Sizing:Plant object and the Design Entering Air Wet-bulb Temp input field for the Evaporative Fluid Cooler.");
@@ -1426,10 +1422,10 @@ namespace EvaporativeFluidCoolers {
                     ShowSevereError(state, std::format("Error when autosizing the UA value for Evaporative Fluid Cooler = {}.", this->Name));
                     ShowContinueError(
                         state,
-                        EnergyPlus::format("Design Loop Exit Temperature ({:.2R} C) must be greater than design entering air wet-bulb temperature "
-                                           "({:.2R} C) when autosizing the Evaporative Fluid Cooler UA.",
-                                           this->DesignExitWaterTemp,
-                                           DesignEnteringAirWetBulb));
+                        std::format("Design Loop Exit Temperature ({:#G} C) must be greater than design entering air wet-bulb temperature "
+                                    "({:#G} C) when autosizing the Evaporative Fluid Cooler UA.",
+                                    this->DesignExitWaterTemp,
+                                    DesignEnteringAirWetBulb));
                     ShowContinueError(
                         state,
                         "It is recommended that the Design Loop Exit Temperature = Design Entering Air Wet-bulb Temp plus the Evaporative "
@@ -1632,11 +1628,10 @@ namespace EvaporativeFluidCoolers {
                     // temperature is less than design inlet air wet bulb temperature of 25.6 C
                     if (this->DesignExitWaterTemp <= 25.6) {
                         ShowSevereError(state, std::format("Error when autosizing the UA value for Evaporative Fluid Cooler = {}.", this->Name));
-                        ShowContinueError(
-                            state,
-                            EnergyPlus::format("Design Loop Exit Temperature ({:.2R} C) must be greater than 25.6 C when autosizing the "
-                                               "Evaporative Fluid Cooler UA.",
-                                               this->DesignExitWaterTemp));
+                        ShowContinueError(state,
+                                          std::format("Design Loop Exit Temperature ({:#G} C) must be greater than 25.6 C when autosizing the "
+                                                      "Evaporative Fluid Cooler UA.",
+                                                      this->DesignExitWaterTemp));
                         ShowContinueError(state,
                                           std::format("The Design Loop Exit Temperature specified in Sizing:Plant object = {}",
                                                       state.dataSize->PlantSizData(PltSizCondNum).PlantLoopName));
@@ -1671,7 +1666,7 @@ namespace EvaporativeFluidCoolers {
                     if (SolFla == -1) {
                         ShowWarningError(state, "Iteration limit exceeded in calculating evaporative fluid cooler UA.");
                         ShowContinueError(state, std::format("Autosizing of fluid cooler UA failed for evaporative fluid cooler = {}", this->Name));
-                        ShowContinueError(state, EnergyPlus::format("The final UA value = {:.2R}W/C, and the simulation continues...", UA));
+                        ShowContinueError(state, std::format("The final UA value = {:#G} W/C, and the simulation continues...", UA));
                     } else if (SolFla == -2) {
                         this->SimSimpleEvapFluidCooler(state, par1, par2, UA0, OutWaterTempAtUA0);
                         this->SimSimpleEvapFluidCooler(state, par1, par2, UA1, OutWaterTempAtUA1);
@@ -1693,36 +1688,27 @@ namespace EvaporativeFluidCoolers {
                         ShowContinueError(state, "Plant:Sizing object inputs also influence these results (e.g. DeltaT and ExitTemp).");
                         ShowContinueError(state, "Inputs to the evaporative fluid cooler object:");
                         ShowContinueError(
-                            state,
-                            EnergyPlus::format("Design Evaporative Fluid Cooler Load [W]                      = {:.2R}", DesEvapFluidCoolerLoad));
+                            state, std::format("Design Evaporative Fluid Cooler Load [W]                      = {:#G}", DesEvapFluidCoolerLoad));
                         ShowContinueError(
-                            state,
-                            EnergyPlus::format("Design Evaporative Fluid Cooler Water Volume Flow Rate [m3/s] = {:.6R}", this->DesignWaterFlowRate));
-                        ShowContinueError(state, EnergyPlus::format("Design Evaporative Fluid Cooler Air Volume Flow Rate [m3/s]   = {:.2R}", par2));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Design Evaporative Fluid Cooler Air Inlet Wet-bulb Temp [C]   = {:.2R}",
-                                                             this->inletConds.AirWetBulb));
+                            state, std::format("Design Evaporative Fluid Cooler Water Volume Flow Rate [m3/s] = {:#G}", this->DesignWaterFlowRate));
+                        ShowContinueError(state, std::format("Design Evaporative Fluid Cooler Air Volume Flow Rate [m3/s]   = {:#G}", par2));
                         ShowContinueError(
-                            state,
-                            EnergyPlus::format("Design Evaporative Fluid Cooler Water Inlet Temp [C]          = {:.2R}", this->inletConds.WaterTemp));
+                            state, std::format("Design Evaporative Fluid Cooler Air Inlet Wet-bulb Temp [C]   = {:#G}", this->inletConds.AirWetBulb));
+                        ShowContinueError(
+                            state, std::format("Design Evaporative Fluid Cooler Water Inlet Temp [C]          = {:#G}", this->inletConds.WaterTemp));
                         ShowContinueError(state, "Inputs to the plant sizing object:");
                         ShowContinueError(
-                            state,
-                            EnergyPlus::format("Design Exit Water Temp [C]                                    = {:.2R}", this->DesignExitWaterTemp));
+                            state, std::format("Design Exit Water Temp [C]                                    = {:#G}", this->DesignExitWaterTemp));
                         ShowContinueError(state,
-                                          EnergyPlus::format("Loop Design Temperature Difference [C]                        = {:.2R}",
-                                                             state.dataSize->PlantSizData(PltSizCondNum).DeltaT));
+                                          std::format("Loop Design Temperature Difference [C]                        = {:#G}",
+                                                      state.dataSize->PlantSizData(PltSizCondNum).DeltaT));
+                        ShowContinueError(
+                            state, std::format("Design Evaporative Fluid Cooler Water Inlet Temp [C]          = {:#G}", this->inletConds.WaterTemp));
+                        ShowContinueError(
+                            state, std::format("Calculated water outlet temperature at low UA [C](UA = {:#G} W/C)  = {:#G}", UA0, OutWaterTempAtUA0));
                         ShowContinueError(
                             state,
-                            EnergyPlus::format("Design Evaporative Fluid Cooler Water Inlet Temp [C]          = {:.2R}", this->inletConds.WaterTemp));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Calculated water outlet temperature at low UA [C](UA = {:.2R} W/C)  = {:.2R}",
-                                                             UA0,
-                                                             OutWaterTempAtUA0));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Calculated water outlet temperature at high UA [C](UA = {:.2R} W/C)  = {:.2R}",
-                                                             UA1,
-                                                             OutWaterTempAtUA1));
+                            std::format("Calculated water outlet temperature at high UA [C](UA = {:#G} W/C)  = {:#G}", UA1, OutWaterTempAtUA1));
                         ShowFatalError(state,
                                        std::format("Autosizing of Evaporative Fluid Cooler UA failed for Evaporative Fluid Cooler = {}", this->Name));
                     }
@@ -1804,7 +1790,7 @@ namespace EvaporativeFluidCoolers {
                 if (SolFla == -1) {
                     ShowWarningError(state, "Iteration limit exceeded in calculating evaporative fluid cooler UA.");
                     ShowContinueError(state, std::format("Autosizing of fluid cooler UA failed for evaporative fluid cooler = {}", this->Name));
-                    ShowContinueError(state, EnergyPlus::format("The final UA value = {:.2R}W/C, and the simulation continues...", UA));
+                    ShowContinueError(state, std::format("The final UA value = {:#G} W/C, and the simulation continues...", UA));
                 } else if (SolFla == -2) {
                     ShowSevereError(state, std::format("{}: The combination of design input values did not allow the calculation of a ", CalledFrom));
                     ShowContinueError(state, "reasonable UA value. Review and revise design input values as appropriate. ");
@@ -1875,7 +1861,7 @@ namespace EvaporativeFluidCoolers {
                 if (SolFla == -1) {
                     ShowWarningError(state, "Iteration limit exceeded in calculating evaporative fluid cooler UA.");
                     ShowContinueError(state, std::format("Autosizing of fluid cooler UA failed for evaporative fluid cooler = {}", this->Name));
-                    ShowContinueError(state, EnergyPlus::format("The final UA value = {:.2R}W/C, and the simulation continues...", UA));
+                    ShowContinueError(state, std::format("The final UA value = {:#G} W/C, and the simulation continues...", UA));
                 } else if (SolFla == -2) {
                     this->SimSimpleEvapFluidCooler(state, par1, par2, UA0, OutWaterTempAtUA0);
                     this->SimSimpleEvapFluidCooler(state, par1, par2, UA1, OutWaterTempAtUA1);
@@ -1895,36 +1881,29 @@ namespace EvaporativeFluidCoolers {
                         "based on the autosized values shown below or to adjust design evaporative fluid cooler air inlet wet-bulb temperature.");
                     ShowContinueError(state, "Plant:Sizing object inputs also influence these results (e.g. DeltaT and ExitTemp).");
                     ShowContinueError(state, "Inputs to the evaporative fluid cooler object:");
+                    ShowContinueError(state,
+                                      std::format("Design Evaporative Fluid Cooler Load [W]                      = {:#G}", DesEvapFluidCoolerLoad));
                     ShowContinueError(
-                        state, EnergyPlus::format("Design Evaporative Fluid Cooler Load [W]                      = {:.2R}", DesEvapFluidCoolerLoad));
+                        state, std::format("Design Evaporative Fluid Cooler Water Volume Flow Rate [m3/s] = {:#G}", this->DesignWaterFlowRate));
+                    ShowContinueError(state, std::format("Design Evaporative Fluid Cooler Air Volume Flow Rate [m3/s]   = {:#G}", par2));
                     ShowContinueError(
-                        state,
-                        EnergyPlus::format("Design Evaporative Fluid Cooler Water Volume Flow Rate [m3/s] = {:.6R}", this->DesignWaterFlowRate));
-                    ShowContinueError(state, EnergyPlus::format("Design Evaporative Fluid Cooler Air Volume Flow Rate [m3/s]   = {:.2R}", par2));
+                        state, std::format("Design Evaporative Fluid Cooler Air Inlet Wet-bulb Temp [C]   = {:#G}", this->inletConds.AirWetBulb));
                     ShowContinueError(
-                        state,
-                        EnergyPlus::format("Design Evaporative Fluid Cooler Air Inlet Wet-bulb Temp [C]   = {:.2R}", this->inletConds.AirWetBulb));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("Design Evaporative Fluid Cooler Water Inlet Temp [C]          = {:.2R}", this->inletConds.WaterTemp));
+                        state, std::format("Design Evaporative Fluid Cooler Water Inlet Temp [C]          = {:#G}", this->inletConds.WaterTemp));
                     ShowContinueError(state, "Inputs to the plant sizing object:");
                     ShowContinueError(
-                        state,
-                        EnergyPlus::format("Design Exit Water Temp [C]                                    = {:.2R}", this->DesignExitWaterTemp));
+                        state, std::format("Design Exit Water Temp [C]                                    = {:#G}", this->DesignExitWaterTemp));
                     if (PltSizCondNum > 0) {
                         ShowContinueError(state,
-                                          EnergyPlus::format("Loop Design Temperature Difference [C]                        = {:.2R}",
-                                                             state.dataSize->PlantSizData(PltSizCondNum).DeltaT));
+                                          std::format("Loop Design Temperature Difference [C]                        = {:#G}",
+                                                      state.dataSize->PlantSizData(PltSizCondNum).DeltaT));
                     }
                     ShowContinueError(
-                        state,
-                        EnergyPlus::format("Design Evaporative Fluid Cooler Water Inlet Temp [C]          = {:.2R}", this->inletConds.WaterTemp));
+                        state, std::format("Design Evaporative Fluid Cooler Water Inlet Temp [C]          = {:#G}", this->inletConds.WaterTemp));
                     ShowContinueError(
-                        state,
-                        EnergyPlus::format("Calculated water outlet temperature at low UA [C](UA = {:.2R} W/C)  = {:.2R}", UA0, OutWaterTempAtUA0));
+                        state, std::format("Calculated water outlet temperature at low UA [C](UA = {:#G} W/C)  = {:#G}", UA0, OutWaterTempAtUA0));
                     ShowContinueError(
-                        state,
-                        EnergyPlus::format("Calculated water outlet temperature at high UA [C](UA = {:.2R} W/C)  = {:.2R}", UA1, OutWaterTempAtUA1));
+                        state, std::format("Calculated water outlet temperature at high UA [C](UA = {:#G} W/C)  = {:#G}", UA1, OutWaterTempAtUA1));
                     ShowFatalError(state,
                                    std::format("Autosizing of Evaporative Fluid Cooler UA failed for Evaporative Fluid Cooler = {}", this->Name));
                 }
@@ -2034,7 +2013,7 @@ namespace EvaporativeFluidCoolers {
                 if (SolFla == -1) {
                     ShowWarningError(state, "Iteration limit exceeded in calculating evaporative fluid cooler UA.");
                     ShowContinueError(state, std::format("Autosizing of fluid cooler UA failed for evaporative fluid cooler = {}", this->Name));
-                    ShowContinueError(state, EnergyPlus::format("The final UA value = {:.2R}W/C, and the simulation continues...", UA));
+                    ShowContinueError(state, std::format("The final UA value = {:#G} W/C, and the simulation continues...", UA));
                 } else if (SolFla == -2) {
                     ShowSevereError(state, std::format("{}: The combination of design input values did not allow the calculation of a ", CalledFrom));
                     ShowContinueError(state, "reasonable low-speed UA value. Review and revise design input values as appropriate. ");
@@ -2102,22 +2081,19 @@ namespace EvaporativeFluidCoolers {
                     ShowContinueError(state, "temperatures calculated at high and low UA values. If the Design Exit Water Temperature is ");
                     ShowContinueError(state, "out of this range, the solution will not converge and UA will not be calculated. ");
                     ShowContinueError(state, "Inputs to the Evaporative Fluid Cooler model are:");
+                    ShowContinueError(state, std::format("Design Evaporative Fluid Cooler Load                    = {:#G}", DesEvapFluidCoolerLoad));
+                    ShowContinueError(state, std::format("Design Evaporative Fluid Cooler Water Volume Flow Rate  = {:#G}", par1));
+                    ShowContinueError(state, std::format("Design Evaporative Fluid Cooler Air Volume Flow Rate    = {:#G}", par2));
                     ShowContinueError(state,
-                                      EnergyPlus::format("Design Evaporative Fluid Cooler Load                    = {:.2R}", DesEvapFluidCoolerLoad));
-                    ShowContinueError(state, EnergyPlus::format("Design Evaporative Fluid Cooler Water Volume Flow Rate  = {:.2R}", par1));
-                    ShowContinueError(state, EnergyPlus::format("Design Evaporative Fluid Cooler Air Volume Flow Rate    = {:.2R}", par2));
-                    ShowContinueError(
-                        state, EnergyPlus::format("Design Evaporative Fluid Cooler Air Inlet Wet-bulb Temp = {:.2R}", this->inletConds.AirWetBulb));
-                    ShowContinueError(
-                        state, EnergyPlus::format("Design Evaporative Fluid Cooler Water Inlet Temp        = {:.2R}", this->inletConds.WaterTemp));
-                    ShowContinueError(
-                        state, EnergyPlus::format("Design Exit Water Temp                                  = {:.2R}", this->DesignExitWaterTemp));
-                    ShowContinueError(
-                        state, EnergyPlus::format("Design Evaporative Fluid Cooler Water Inlet Temp [C]    = {:.2R}", this->inletConds.WaterTemp));
+                                      std::format("Design Evaporative Fluid Cooler Air Inlet Wet-bulb Temp = {:#G}", this->inletConds.AirWetBulb));
                     ShowContinueError(state,
-                                      EnergyPlus::format("Calculated water outlet temperature at low UA({:.2R})  = {:.2R}", UA0, OutWaterTempAtUA0));
+                                      std::format("Design Evaporative Fluid Cooler Water Inlet Temp        = {:#G}", this->inletConds.WaterTemp));
                     ShowContinueError(state,
-                                      EnergyPlus::format("Calculated water outlet temperature at high UA({:.2R})  = {:.2R}", UA1, OutWaterTempAtUA1));
+                                      std::format("Design Exit Water Temp                                  = {:#G}", this->DesignExitWaterTemp));
+                    ShowContinueError(state,
+                                      std::format("Design Evaporative Fluid Cooler Water Inlet Temp [C]    = {:#G}", this->inletConds.WaterTemp));
+                    ShowContinueError(state, std::format("Calculated water outlet temperature at low UA({:#G})  = {:#G}", UA0, OutWaterTempAtUA0));
+                    ShowContinueError(state, std::format("Calculated water outlet temperature at high UA({:#G})  = {:#G}", UA1, OutWaterTempAtUA1));
                     ShowFatalError(state,
                                    std::format("Autosizing of Evaporative Fluid Cooler UA failed for Evaporative Fluid Cooler = {}", this->Name));
                 }

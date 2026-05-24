@@ -148,11 +148,11 @@ void KivaInstanceMap::initGround(EnergyPlusData &state, const KivaWeatherData &k
         constructionName = state.dataConstruction->Construct(constructionNum).Name;
     }
 
-    ss.dir = EnergyPlus::format("{}/{} {:.2R} {}",
-                                FileSystem::getAbsolutePath(state.dataStrGlobals->outDirPath),
-                                state.dataSurface->Surface(floorSurface).Name,
-                                instance.ground->foundation.foundationDepth,
-                                constructionName);
+    ss.dir = std::format("{}/{} {:.2f} {}",
+                         FileSystem::getAbsolutePath(state.dataStrGlobals->outDirPath),
+                         state.dataSurface->Surface(floorSurface).Name,
+                         instance.ground->foundation.foundationDepth,
+                         constructionName);
 
     debugDir = ss.dir;
     plotNum = 0;
@@ -317,10 +317,10 @@ void KivaInstanceMap::setInitialBoundaryConditions(
             default: {
                 Tin = 0.0;
                 ShowSevereError(state,
-                                EnergyPlus::format("Illegal control type for Zone={}, Found value={}, in Schedule={}",
-                                                   state.dataHeatBal->Zone(zoneNum).Name,
-                                                   controlType,
-                                                   state.dataZoneCtrls->TempControlledZone(zoneControlNum).setptTypeSched->Name));
+                                std::format("Illegal control type for Zone={}, Found value={}, in Schedule={}",
+                                            state.dataHeatBal->Zone(zoneNum).Name,
+                                            static_cast<int>(controlType),
+                                            state.dataZoneCtrls->TempControlledZone(zoneControlNum).setptTypeSched->Name));
             } break;
 
             } // switch (tstatType)
@@ -1106,7 +1106,7 @@ bool KivaManager::setupKivaInstances(EnergyPlusData &state)
             wallSurfaceString += "," + state.dataSurface->Surface(wl).Name;
         }
 
-        static constexpr std::string_view fmt = "{},{},{},{},{:.2R},{:.2R},{:.2R},{},{}{}\n";
+        static constexpr std::string_view fmt = "{},{},{},{},{:.2f},{:.2f},{:.2f},{},{}{}\n";
         print(state.files.eio,
               fmt,
               foundationInputs[state.dataSurface->Surface(kv.floorSurface).OSCPtr].name,
@@ -1177,7 +1177,7 @@ void KivaInstanceMap::plotDomain(EnergyPlusData &state)
 {
     gp.createFrame(*instance.ground, std::format("{}/{} {}:00", state.dataEnvrn->Month, state.dataEnvrn->DayOfMonth, state.dataGlobal->HourOfDay));
 
-    instance.ground->writeCSV(EnergyPlus::format("{}/{}.csv", debugDir, plotNum));
+    instance.ground->writeCSV(std::format("{}/{}.csv", debugDir, plotNum));
 
     plotNum++;
 }
@@ -1219,8 +1219,8 @@ void KivaManager::defineDefaultFoundation(EnergyPlusData &state)
         if (!settings.autocalculateDeepGroundDepth) {
             if (defFnd.deepGroundDepth != settings.deepGroundDepth) {
                 ShowWarningError(state, "Foundation:Kiva:Settings, when Deep-Ground Boundary Condition is Autoselect,");
-                ShowContinueError(state, EnergyPlus::format("the user-specified Deep-Ground Depth ({:.1R} m)", settings.deepGroundDepth));
-                ShowContinueError(state, EnergyPlus::format("will be overridden with the Autoselected depth ({:.1R} m)", defFnd.deepGroundDepth));
+                ShowContinueError(state, std::format("the user-specified Deep-Ground Depth ({:.1f} m)", settings.deepGroundDepth));
+                ShowContinueError(state, std::format("will be overridden with the Autoselected depth ({:.1f} m)", defFnd.deepGroundDepth));
             }
         }
     } else if (settings.deepGroundBoundary == Settings::ZERO_FLUX) {

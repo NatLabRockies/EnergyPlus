@@ -293,9 +293,9 @@ void ElectricPowerServiceManager::getPowerManagerInput(EnergyPlusData &state)
                     facilityPowerInTransformerPresent_ = true;
                 } else {
                     // should only have one transformer in input that is PowerInFromGrid
-                    ShowWarningError(
-                        state, EnergyPlus::format("{}{}=\"{}\", invalid entry.", routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-                    ShowContinueError(state, EnergyPlus::format("Invalid {} = {}", s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3)));
+                    ShowWarningError(state,
+                                     std::format("{}{}=\"{}\", invalid entry.", routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+                    ShowContinueError(state, std::format("Invalid {} = {}", s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3)));
                     ShowContinueError(state,
                                       "Only one transformer with Usage PowerInFromGrid can be used, first one in input file will be used and the "
                                       "simulation continues...");
@@ -602,9 +602,9 @@ void ElectricPowerServiceManager::checkLoadCenters(EnergyPlusData &state)
             if (storageNames[i] == storageNames[j] && i != j) {
                 ShowSevereError(
                     state,
-                    EnergyPlus::format("ElectricPowerServiceManager::checkLoadCenters, the electrical storage device named = {} is used in more than "
-                                       "one ElectricLoadCenter:Distribution input object.",
-                                       storageNames[i]));
+                    std::format("ElectricPowerServiceManager::checkLoadCenters, the electrical storage device named = {} is used in more than "
+                                "one ElectricLoadCenter:Distribution input object.",
+                                storageNames[i]));
                 ShowContinueError(state, "Electric Load Centers cannot share the same storage device.");
                 errorsFound = true;
                 break;
@@ -618,11 +618,10 @@ void ElectricPowerServiceManager::checkLoadCenters(EnergyPlusData &state)
     for (std::size_t i = 0; i < genListNames.size(); ++i) {
         for (std::size_t j = 0; j < genListNames.size(); ++j) {
             if (genListNames[i] == genListNames[j] && i != j) {
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format("ElectricPowerServiceManager::checkLoadCenters, the generator list named = {} is used in more than one "
-                                       "ElectricLoadCenter:Distribution input object.",
-                                       genListNames[i]));
+                ShowSevereError(state,
+                                std::format("ElectricPowerServiceManager::checkLoadCenters, the generator list named = {} is used in more than one "
+                                            "ElectricLoadCenter:Distribution input object.",
+                                            genListNames[i]));
                 ShowContinueError(state, "Electric Load Centers cannot share the same generator list (ElectricLoadCenter:Generators).");
                 errorsFound = true;
                 break;
@@ -636,11 +635,10 @@ void ElectricPowerServiceManager::checkLoadCenters(EnergyPlusData &state)
     for (std::size_t i = 0; i < inverterNames.size(); ++i) {
         for (std::size_t j = 0; j < inverterNames.size(); ++j) {
             if (inverterNames[i] == inverterNames[j] && i != j) {
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format("ElectricPowerServiceManager::checkLoadCenters, the inverter device named = {} is used in more than one "
-                                       "ElectricLoadCenter:Distribution input object.",
-                                       inverterNames[i]));
+                ShowSevereError(state,
+                                std::format("ElectricPowerServiceManager::checkLoadCenters, the inverter device named = {} is used in more than one "
+                                            "ElectricLoadCenter:Distribution input object.",
+                                            inverterNames[i]));
                 ShowContinueError(state, "Electric Load Centers cannot share the same inverter device.");
                 errorsFound = true;
                 break;
@@ -654,11 +652,10 @@ void ElectricPowerServiceManager::checkLoadCenters(EnergyPlusData &state)
     for (std::size_t i = 0; i < converterNames.size(); ++i) {
         for (std::size_t j = 0; j < converterNames.size(); ++j) {
             if (converterNames[i] == converterNames[j] && i != j) {
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format("ElectricPowerServiceManager::checkLoadCenters, the converter device named = {} is used in more than one "
-                                       "ElectricLoadCenter:Distribution input object.",
-                                       converterNames[i]));
+                ShowSevereError(state,
+                                std::format("ElectricPowerServiceManager::checkLoadCenters, the converter device named = {} is used in more than one "
+                                            "ElectricLoadCenter:Distribution input object.",
+                                            converterNames[i]));
                 ShowContinueError(state, "Electric Load Centers cannot share the same converter device.");
                 errorsFound = true;
                 break;
@@ -674,9 +671,9 @@ void ElectricPowerServiceManager::checkLoadCenters(EnergyPlusData &state)
             if (transformerNames[i] == transformerNames[j] && i != j) {
                 ShowSevereError(
                     state,
-                    EnergyPlus::format("ElectricPowerServiceManager::checkLoadCenters, the transformer device named = {} is used in more than one "
-                                       "ElectricLoadCenter:Distribution input object.",
-                                       transformerNames[i]));
+                    std::format("ElectricPowerServiceManager::checkLoadCenters, the transformer device named = {} is used in more than one "
+                                "ElectricLoadCenter:Distribution input object.",
+                                transformerNames[i]));
                 ShowContinueError(state, "Electric Load Centers cannot share the same transformer device.");
                 errorsFound = true;
                 break;
@@ -945,10 +942,10 @@ ElectPowerLoadCenter::ElectPowerLoadCenter(EnergyPlusData &state, int const obje
                 if (g->nominalThermElectRatio <= 0.0) {
                     ShowWarningError(
                         state,
-                        EnergyPlus::format("Generator operation needs to be based on following thermal loads and needs values for Rated Thermal to "
-                                           "Electrical Power Ratio in {} named {}",
-                                           s_ipsc->cCurrentModuleObject,
-                                           s_ipsc->cAlphaArgs(1)));
+                        std::format("Generator operation needs to be based on following thermal loads and needs values for Rated Thermal to "
+                                    "Electrical Power Ratio in {} named {}",
+                                    s_ipsc->cCurrentModuleObject,
+                                    s_ipsc->cAlphaArgs(1)));
                 }
             }
         }
@@ -965,12 +962,12 @@ ElectPowerLoadCenter::ElectPowerLoadCenter(EnergyPlusData &state, int const obje
             for (const auto &generatorController : elecGenCntrlObj) {
                 if (generatorController->generatorType != GeneratorType::PVWatts) {
                     errorsFound = true;
-                    ShowSevereError(state, EnergyPlus::format("{}ElectricLoadCenter:Distribution=\"{}\",", routineName, name_));
+                    ShowSevereError(state, std::format("{}ElectricLoadCenter:Distribution=\"{}\",", routineName, name_));
                     ShowContinueError(state, "ElectricLoadCenter:Inverter:PVWatts can only be used with Generator:PVWatts");
                     ShowContinueError(state,
-                                      EnergyPlus::format("\"{}\" is of type {}",
-                                                         generatorController->name,
-                                                         generatorTypeNames[static_cast<int>(generatorController->generatorType)]));
+                                      std::format("\"{}\" is of type {}",
+                                                  generatorController->name,
+                                                  generatorTypeNames[static_cast<int>(generatorController->generatorType)]));
                 } else {
                     totalDCCapacity += generatorController->pvwattsGenerator->getDCSystemCapacity();
 
@@ -1014,14 +1011,13 @@ ElectPowerLoadCenter::ElectPowerLoadCenter(EnergyPlusData &state, int const obje
             } else {
                 ShowWarningError(
                     state,
-                    EnergyPlus::format(
-                        "Transformer named {} associated with the load center named {} should have {} set to LoadCenterPowerConditioning.",
-                        transformerName_,
-                        name_,
-                        s_ipsc->cAlphaFieldNames(3)));
+                    std::format("Transformer named {} associated with the load center named {} should have {} set to LoadCenterPowerConditioning.",
+                                transformerName_,
+                                name_,
+                                s_ipsc->cAlphaFieldNames(3)));
             }
         } else {
-            ShowSevereError(state, EnergyPlus::format("Transformer named {}, was not found for the load center named {}", transformerName_, name_));
+            ShowSevereError(state, std::format("Transformer named {}, was not found for the load center named {}", transformerName_, name_));
             errorsFound = true;
         }
     }
@@ -1088,7 +1084,7 @@ ElectPowerLoadCenter::ElectPowerLoadCenter(EnergyPlusData &state, int const obje
     }
 
     if (errorsFound) {
-        ShowFatalError(state, EnergyPlus::format("{}Preceding errors terminate program.", routineName));
+        ShowFatalError(state, std::format("{}Preceding errors terminate program.", routineName));
     }
 }
 
@@ -1847,10 +1843,9 @@ void ElectPowerLoadCenter::setupLoadCenterMeterIndices(EnergyPlusData &state)
     if ((demandMeterPtr_ == 0) && (genOperationScheme_ == GeneratorOpScheme::TrackMeter)) { // throw error
         ShowFatalError(
             state,
-            EnergyPlus::format(
-                "ElectPowerLoadCenter::setupLoadCenterMeterIndices  Did not find Meter named: {} in ElectricLoadCenter:Distribution named {}",
-                demandMeterName_,
-                name_));
+            std::format("ElectPowerLoadCenter::setupLoadCenterMeterIndices  Did not find Meter named: {} in ElectricLoadCenter:Distribution named {}",
+                        demandMeterName_,
+                        name_));
     }
 
     if (storageScheme_ == StorageOpScheme::MeterDemandStoreExcessOnSite) {
@@ -1858,7 +1853,7 @@ void ElectPowerLoadCenter::setupLoadCenterMeterIndices(EnergyPlusData &state)
         if (trackStorageOpMeterIndex_ == 0) { //
             ShowFatalError(
                 state,
-                EnergyPlus::format(
+                std::format(
                     "ElectPowerLoadCenter::setupLoadCenterMeterIndices  Did not find Meter named: {} in ElectricLoadCenter:Distribution named {}",
                     trackSorageOpMeterName_,
                     name_));
@@ -2112,7 +2107,7 @@ GeneratorController::GeneratorController(EnergyPlusData &state,
         int ObjNum = state.dataInputProcessing->inputProcessor->getObjectItemNum(state, "Generator:PVWatts", Util::makeUPPER(objectName));
         assert(ObjNum >= 0);
         if (ObjNum == 0) {
-            ShowFatalError(state, EnergyPlus::format("Cannot find Generator:PVWatts {}", objectName));
+            ShowFatalError(state, std::format("Cannot find Generator:PVWatts {}", objectName));
         }
         pvwattsGenerator = PVWatts::PVWattsGenerator::createFromIdfObj(state, ObjNum);
         pvwattsGenerator->setupOutputVariables(state);
@@ -2138,8 +2133,8 @@ GeneratorController::GeneratorController(EnergyPlusData &state,
     }
     default: {
         auto &s_ipsc = state.dataIPShortCut;
-        ShowSevereError(state, EnergyPlus::format("{}{} invalid entry.", routineName, s_ipsc->cCurrentModuleObject));
-        ShowContinueError(state, EnergyPlus::format("Invalid {} associated with generator = {}", objectType, objectName));
+        ShowSevereError(state, std::format("{}{} invalid entry.", routineName, s_ipsc->cCurrentModuleObject));
+        ShowContinueError(state, std::format("Invalid {} associated with generator = {}", objectType, objectName));
         break;
     }
     }
@@ -2334,7 +2329,7 @@ void GeneratorController::simGeneratorGetPowerOutput(EnergyPlusData &state,
                                std::format("{} named {} is producing negative electric power, check generator inputs.",
                                            generatorTypeNames[(int)generatorType],
                                            name));
-            ShowContinueError(state, EnergyPlus::format("Electric power production rate ={:.4R}", electricPowerOutput));
+            ShowContinueError(state, std::format("Electric power production rate ={:#G}", electricPowerOutput));
             ShowContinueError(state, "The power will be set to zero, and the simulation continues... ");
         }
         ShowRecurringWarningErrorAtEnd(state,
@@ -3317,8 +3312,8 @@ ElectricStorage::ElectricStorage( // main constructor
                                               state.dataIPShortCut->cNumericFieldNames(11)));
                 ShowContinueError(state, std::format("which must be greater than {}.", state.dataIPShortCut->cNumericFieldNames(12)));
                 for (int i = 10; i <= 12; ++i) {
-                    ShowContinueError(
-                        state, EnergyPlus::format("{} = {:.3R}", state.dataIPShortCut->cNumericFieldNames(i), state.dataIPShortCut->rNumericArgs(i)));
+                    ShowContinueError(state,
+                                      std::format("{} = {:#G}", state.dataIPShortCut->cNumericFieldNames(i), state.dataIPShortCut->rNumericArgs(i)));
                 }
                 errorsFound = true;
             }
@@ -3338,8 +3333,8 @@ ElectricStorage::ElectricStorage( // main constructor
                                               state.dataIPShortCut->cNumericFieldNames(16),
                                               state.dataIPShortCut->cNumericFieldNames(15)));
                 for (int i = 15; i <= 16; ++i) {
-                    ShowContinueError(
-                        state, EnergyPlus::format("{} = {:.3R}", state.dataIPShortCut->cNumericFieldNames(i), state.dataIPShortCut->rNumericArgs(i)));
+                    ShowContinueError(state,
+                                      std::format("{} = {:.5f}", state.dataIPShortCut->cNumericFieldNames(i), state.dataIPShortCut->rNumericArgs(i)));
                 }
                 errorsFound = true;
             }
@@ -3628,8 +3623,8 @@ void checkChargeDischargeVoltageCurves(
             Real64 dischargeVoltage = E0c + dischargeCurve->value(state, xfd); // E0c+Ad*xfd+Cd*xfd/(Dd-xfd)
             ShowContinueError(
                 state,
-                EnergyPlus::format(
-                    "Charged fraction = {:.1R}, Charging voltage = {:.3R} V, Discharging voltage = {:.3R} V", xfc, chargeVoltage, dischargeVoltage));
+                std::format(
+                    "Charged fraction = {:.2f}, Charging voltage = {:.3f} V, Discharging voltage = {:.3f} V", xfc, chargeVoltage, dischargeVoltage));
         }
     }
 }
@@ -4323,16 +4318,15 @@ bool ElectricStorage::determineCurrentForBatteryDischarge(EnergyPlusData &state,
             // Issue #5301 need more diagnostics for this case
             ShowWarningError(
                 state, "ElectricStorage::determineCurrentForBatteryDischarge, iteration limit exceeded, failed to solve for discharge current.");
-            ShowContinueError(state, EnergyPlus::format("Last timestep charge available, q0 = {:.5R}", q0));
-            ShowContinueError(state, EnergyPlus::format("New Current, Inew = {:.5R} [Amps]", Inew));
-            ShowContinueError(state, EnergyPlus::format("Power discharge per module cell, Pw = {:.5R} ", Pw));
-            ShowContinueError(state,
-                              EnergyPlus::format(
-                                  "Charge Conversion Rate, [1/h] change rate from bound charge energy to available charge, parameter k = {:.5R}", k));
-            ShowContinueError(state, EnergyPlus::format("parameter c = {:.5R}", c));
-            ShowContinueError(state, EnergyPlus::format("parameter qmax = {:.5R}", qmax));
-            ShowContinueError(state, EnergyPlus::format("Fully charged open circuit voltage, parameter E0c  = {:.5R}", E0c));
-            ShowContinueError(state, EnergyPlus::format("parameter InternalR = {:.5R}", InternalR));
+            ShowContinueError(state, std::format("Last timestep charge available, q0 = {:#G}", q0));
+            ShowContinueError(state, std::format("New Current, Inew = {:#G} [Amps]", Inew));
+            ShowContinueError(state, std::format("Power discharge per module cell, Pw = {:#G} ", Pw));
+            ShowContinueError(
+                state, std::format("Charge Conversion Rate, [1/h] change rate from bound charge energy to available charge, parameter k = {:#G}", k));
+            ShowContinueError(state, std::format("parameter c = {:#G}", c));
+            ShowContinueError(state, std::format("parameter qmax = {:#G}", qmax));
+            ShowContinueError(state, std::format("Fully charged open circuit voltage, parameter E0c  = {:#G}", E0c));
+            ShowContinueError(state, std::format("parameter InternalR = {:#G}", InternalR));
             if (qmaxf == 0.0) {
                 ShowContinueError(state, "qmaxf was zero, would have divided by zero.");
             }
@@ -4553,7 +4547,7 @@ ElectricTransformer::ElectricTransformer(EnergyPlusData &state, std::string cons
             if (performanceInputMode_ == TransformerPerformanceInput::LossesMethod) {
                 ShowWarningError(state, std::format("{}{}=\"{}\".", routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
                 ShowContinueError(state, std::format("Specified {} = {}", s_ipsc->cAlphaFieldNames(6), s_ipsc->cAlphaArgs(6)));
-                ShowContinueError(state, EnergyPlus::format("Specified {} = {:.1R}", s_ipsc->cNumericFieldNames(2), ratedCapacity_));
+                ShowContinueError(state, std::format("Specified {} = {:.1f}", s_ipsc->cNumericFieldNames(2), ratedCapacity_));
                 ShowContinueError(state, "Transformer load and no load losses cannot be calculated with 0.0 rated capacity.");
                 ShowContinueError(state, "Simulation continues but transformer losses will be set to zero.");
             }
@@ -4570,7 +4564,7 @@ ElectricTransformer::ElectricTransformer(EnergyPlusData &state, std::string cons
                 maxPUL_ = ratedPUL_;
             } else if (maxPUL_ <= 0 || maxPUL_ > 1) {
                 ShowSevereError(state, std::format("{}{}=\"{}\", invalid entry.", routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-                ShowContinueError(state, EnergyPlus::format("Invalid {}=[{:.3R}].", s_ipsc->cNumericFieldNames(11), s_ipsc->rNumericArgs(11)));
+                ShowContinueError(state, std::format("Invalid {}=[{:#G}].", s_ipsc->cNumericFieldNames(11), s_ipsc->rNumericArgs(11)));
                 ShowContinueError(state, "Entered value must be > 0 and <= 1.");
                 errorsFound = true;
             }
@@ -4737,7 +4731,7 @@ ElectricTransformer::ElectricTransformer(EnergyPlusData &state, std::string cons
     }
 
     if (errorsFound) {
-        ShowFatalError(state, std::format("{}Preceding errors terminate program.", routineName));
+        ShowFatalError(state, std::format("{} Preceding errors terminate program.", routineName));
     }
 }
 

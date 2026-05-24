@@ -195,9 +195,9 @@ void GetInputLifeCycleCostParameters(EnergyPlusData &state)
         for (jFld = 1; jFld <= NumAlphas; ++jFld) {
             if (hasi(AlphaArray(jFld), "LifeCycleCost:")) {
                 ShowWarningError(state,
-                                 EnergyPlus::format("In {} named {} a field was found containing LifeCycleCost: which may indicate a missing comma.",
-                                                    CurrentModuleObject,
-                                                    AlphaArray(1)));
+                                 std::format("In {} named {} a field was found containing LifeCycleCost: which may indicate a missing comma.",
+                                             CurrentModuleObject,
+                                             AlphaArray(1)));
             }
         }
         // start to extract values from input array into appropriate fields
@@ -216,7 +216,7 @@ void GetInputLifeCycleCostParameters(EnergyPlusData &state)
             elcc->discountConvention = DiscConv::EndOfYear;
             ShowWarningError(
                 state,
-                EnergyPlus::format(
+                std::format(
                     "{}: Invalid {}=\"{}\". EndOfYear will be used.", CurrentModuleObject, state.dataIPShortCut->cAlphaFieldNames(2), AlphaArray(2)));
         }
         // A3,  \field Inflation Approach
@@ -228,24 +228,24 @@ void GetInputLifeCycleCostParameters(EnergyPlusData &state)
         if (elcc->inflationApproach == InflAppr::Invalid) {
             elcc->inflationApproach = InflAppr::ConstantDollar;
             ShowWarningError(state,
-                             EnergyPlus::format("{}: Invalid {}=\"{}\". ConstantDollar will be used.",
-                                                CurrentModuleObject,
-                                                state.dataIPShortCut->cAlphaFieldNames(3),
-                                                AlphaArray(3)));
+                             std::format("{}: Invalid {}=\"{}\". ConstantDollar will be used.",
+                                         CurrentModuleObject,
+                                         state.dataIPShortCut->cAlphaFieldNames(3),
+                                         AlphaArray(3)));
         }
         // N1,  \field Real Discount Rate
         //      \type real
         elcc->realDiscountRate = NumArray(1);
         if ((elcc->inflationApproach == InflAppr::ConstantDollar) && state.dataIPShortCut->lNumericFieldBlanks(1)) {
             ShowWarningError(state,
-                             EnergyPlus::format("{}: Invalid for field {} to be blank when ConstantDollar analysis is be used.",
-                                                CurrentModuleObject,
-                                                state.dataIPShortCut->cNumericFieldNames(1)));
+                             std::format("{}: Invalid for field {} to be blank when ConstantDollar analysis is be used.",
+                                         CurrentModuleObject,
+                                         state.dataIPShortCut->cNumericFieldNames(1)));
         }
         if ((elcc->realDiscountRate > 0.30) || (elcc->realDiscountRate < -0.30)) {
             ShowWarningError(
                 state,
-                EnergyPlus::format(
+                std::format(
                     "{}: Invalid value in field {}.  This value is the decimal value not a percentage so most values are between 0.02 and 0.15. ",
                     CurrentModuleObject,
                     state.dataIPShortCut->cNumericFieldNames(1)));
@@ -255,14 +255,14 @@ void GetInputLifeCycleCostParameters(EnergyPlusData &state)
         elcc->nominalDiscountRate = NumArray(2);
         if ((elcc->inflationApproach == InflAppr::CurrentDollar) && state.dataIPShortCut->lNumericFieldBlanks(2)) {
             ShowWarningError(state,
-                             EnergyPlus::format("{}: Invalid for field {} to be blank when CurrentDollar analysis is be used.",
-                                                CurrentModuleObject,
-                                                state.dataIPShortCut->cNumericFieldNames(2)));
+                             std::format("{}: Invalid for field {} to be blank when CurrentDollar analysis is be used.",
+                                         CurrentModuleObject,
+                                         state.dataIPShortCut->cNumericFieldNames(2)));
         }
         if ((elcc->nominalDiscountRate > 0.30) || (elcc->nominalDiscountRate < -0.30)) {
             ShowWarningError(
                 state,
-                EnergyPlus::format(
+                std::format(
                     "{}: Invalid value in field {}.  This value is the decimal value not a percentage so most values are between 0.02 and 0.15. ",
                     CurrentModuleObject,
                     state.dataIPShortCut->cNumericFieldNames(2)));
@@ -272,14 +272,14 @@ void GetInputLifeCycleCostParameters(EnergyPlusData &state)
         elcc->inflation = NumArray(3);
         if ((elcc->inflationApproach == InflAppr::ConstantDollar) && (!state.dataIPShortCut->lNumericFieldBlanks(3))) {
             ShowWarningError(state,
-                             EnergyPlus::format("{}: Invalid for field {} contain a value when ConstantDollar analysis is be used.",
-                                                CurrentModuleObject,
-                                                state.dataIPShortCut->cNumericFieldNames(3)));
+                             std::format("{}: Invalid for field {} contain a value when ConstantDollar analysis is be used.",
+                                         CurrentModuleObject,
+                                         state.dataIPShortCut->cNumericFieldNames(3)));
         }
         if ((elcc->inflation > 0.30) || (elcc->inflation < -0.30)) {
             ShowWarningError(
                 state,
-                EnergyPlus::format(
+                std::format(
                     "{}: Invalid value in field {}.  This value is the decimal value not a percentage so most values are between 0.02 and 0.15. ",
                     CurrentModuleObject,
                     state.dataIPShortCut->cNumericFieldNames(3)));
@@ -303,10 +303,10 @@ void GetInputLifeCycleCostParameters(EnergyPlusData &state)
         if (elcc->baseDateMonth == -1) {
             elcc->baseDateMonth = 0;
             ShowWarningError(state,
-                             EnergyPlus::format("{}: Invalid month entered in field {}. Using January instead of \"{}\"",
-                                                CurrentModuleObject,
-                                                state.dataIPShortCut->cAlphaFieldNames(4),
-                                                AlphaArray(4)));
+                             std::format("{}: Invalid month entered in field {}. Using January instead of \"{}\"",
+                                         CurrentModuleObject,
+                                         state.dataIPShortCut->cAlphaFieldNames(4),
+                                         AlphaArray(4)));
         }
         // N4,  \field Base Date Year
         //      \type integer
@@ -315,15 +315,15 @@ void GetInputLifeCycleCostParameters(EnergyPlusData &state)
         elcc->baseDateYear = int(NumArray(4));
         if (elcc->baseDateYear > 2100) {
             ShowWarningError(state,
-                             EnergyPlus::format("{}: Invalid value in field {}.  Value greater than 2100 yet it is representing a year. ",
-                                                CurrentModuleObject,
-                                                state.dataIPShortCut->cNumericFieldNames(4)));
+                             std::format("{}: Invalid value in field {}.  Value greater than 2100 yet it is representing a year. ",
+                                         CurrentModuleObject,
+                                         state.dataIPShortCut->cNumericFieldNames(4)));
         }
         if (elcc->baseDateYear < 1900) {
             ShowWarningError(state,
-                             EnergyPlus::format("{}: Invalid value in field {}.  Value less than 1900 yet it is representing a year. ",
-                                                CurrentModuleObject,
-                                                state.dataIPShortCut->cNumericFieldNames(4)));
+                             std::format("{}: Invalid value in field {}.  Value less than 1900 yet it is representing a year. ",
+                                         CurrentModuleObject,
+                                         state.dataIPShortCut->cNumericFieldNames(4)));
         }
         // A5,  \field Service Date Month
         //      \type choice
@@ -344,10 +344,10 @@ void GetInputLifeCycleCostParameters(EnergyPlusData &state)
         if (elcc->serviceDateMonth == -1) {
             elcc->serviceDateMonth = 0;
             ShowWarningError(state,
-                             EnergyPlus::format("{}: Invalid month entered in field {}. Using January instead of \"{}\"",
-                                                CurrentModuleObject,
-                                                state.dataIPShortCut->cAlphaFieldNames(5),
-                                                AlphaArray(5)));
+                             std::format("{}: Invalid month entered in field {}. Using January instead of \"{}\"",
+                                         CurrentModuleObject,
+                                         state.dataIPShortCut->cAlphaFieldNames(5),
+                                         AlphaArray(5)));
         }
         // N5,  \field Service Date Year
         //      \type integer
@@ -356,15 +356,15 @@ void GetInputLifeCycleCostParameters(EnergyPlusData &state)
         elcc->serviceDateYear = int(NumArray(5));
         if (elcc->serviceDateYear > 2100) {
             ShowWarningError(state,
-                             EnergyPlus::format("{}: Invalid value in field {}.  Value greater than 2100 yet it is representing a year. ",
-                                                CurrentModuleObject,
-                                                state.dataIPShortCut->cNumericFieldNames(5)));
+                             std::format("{}: Invalid value in field {}.  Value greater than 2100 yet it is representing a year. ",
+                                         CurrentModuleObject,
+                                         state.dataIPShortCut->cNumericFieldNames(5)));
         }
         if (elcc->serviceDateYear < 1900) {
             ShowWarningError(state,
-                             EnergyPlus::format("{}: Invalid value in field {}.  Value less than 1900 yet it is representing a year. ",
-                                                CurrentModuleObject,
-                                                state.dataIPShortCut->cNumericFieldNames(5)));
+                             std::format("{}: Invalid value in field {}.  Value less than 1900 yet it is representing a year. ",
+                                         CurrentModuleObject,
+                                         state.dataIPShortCut->cNumericFieldNames(5)));
         }
         // N6,  \field Length of Study Period in Years
         //      \type integer
@@ -372,17 +372,16 @@ void GetInputLifeCycleCostParameters(EnergyPlusData &state)
         //      \maximum 100
         elcc->lengthStudyYears = int(NumArray(6));
         if (elcc->lengthStudyYears > 100) {
-            ShowWarningError(
-                state,
-                EnergyPlus::format("{}: Invalid value in field {}.  A value greater than 100 is not reasonable for an economic evaluation. ",
-                                   CurrentModuleObject,
-                                   state.dataIPShortCut->cNumericFieldNames(6)));
+            ShowWarningError(state,
+                             std::format("{}: Invalid value in field {}.  A value greater than 100 is not reasonable for an economic evaluation. ",
+                                         CurrentModuleObject,
+                                         state.dataIPShortCut->cNumericFieldNames(6)));
         }
         if (elcc->lengthStudyYears < 1) {
             ShowWarningError(state,
-                             EnergyPlus::format("{}: Invalid value in field {}.  A value less than 1 is not reasonable for an economic evaluation. ",
-                                                CurrentModuleObject,
-                                                state.dataIPShortCut->cNumericFieldNames(6)));
+                             std::format("{}: Invalid value in field {}.  A value less than 1 is not reasonable for an economic evaluation. ",
+                                         CurrentModuleObject,
+                                         state.dataIPShortCut->cNumericFieldNames(6)));
         }
         elcc->lengthStudyTotalMonths = elcc->lengthStudyYears * 12;
         // N7, \field Tax rate
@@ -391,9 +390,9 @@ void GetInputLifeCycleCostParameters(EnergyPlusData &state)
         elcc->taxRate = NumArray(7);
         if (elcc->taxRate < 0.0 && (!state.dataIPShortCut->lNumericFieldBlanks(7))) {
             ShowWarningError(state,
-                             EnergyPlus::format("{}: Invalid value in field {}.  A value less than 0 is not reasonable for a tax rate. ",
-                                                CurrentModuleObject,
-                                                state.dataIPShortCut->cNumericFieldNames(10)));
+                             std::format("{}: Invalid value in field {}.  A value less than 0 is not reasonable for a tax rate. ",
+                                         CurrentModuleObject,
+                                         state.dataIPShortCut->cNumericFieldNames(10)));
         }
         // A6;  \field Depreciation Method
         //      \type choice

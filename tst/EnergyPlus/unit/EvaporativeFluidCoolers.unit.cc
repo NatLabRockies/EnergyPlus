@@ -454,7 +454,7 @@ TEST_F(EnergyPlusFixture, EvapFluidCooler_SingleSpeed_DesignEnteringWaterIsAutos
     EXPECT_THROW(ptr->SizeEvapFluidCooler(*state), EnergyPlus::FatalError);
     EXPECT_TRUE(compare_err_stream_substring(delimited_string({
         "   ** Severe  ** Error when autosizing the Design Entering Water Temperature for Evaporative Fluid Cooler = BIG EVAPORATIVEFLUIDCOOLER.",
-        "   **   ~~~   ** Design Entering Water Temperature (20.00 C) must be greater than design entering air wet-bulb temperature (25.60 C).",
+        "   **   ~~~   ** Design Entering Water Temperature (20.0000 C) must be greater than design entering air wet-bulb temperature (25.6000 C).",
         "   **   ~~~   ** Check the Sizing:Plant object and the Design Entering Air Wet-bulb Temp input field for the Evaporative Fluid Cooler.",
         "   **  Fatal  ** Review and revise design input values as appropriate.",
     })));
@@ -572,7 +572,7 @@ TEST_F(EnergyPlusFixture, EvapFluidCooler_TwoSpeed_DesignEnteringWaterIsAutosize
     EXPECT_THROW(ptr->SizeEvapFluidCooler(*state), EnergyPlus::FatalError);
     EXPECT_TRUE(compare_err_stream_substring(delimited_string({
         "   ** Severe  ** Error when autosizing the Design Entering Water Temperature for Evaporative Fluid Cooler = BIG EVAPORATIVEFLUIDCOOLER.",
-        "   **   ~~~   ** Design Entering Water Temperature (20.00 C) must be greater than design entering air wet-bulb temperature (25.60 C).",
+        "   **   ~~~   ** Design Entering Water Temperature (20.0000 C) must be greater than design entering air wet-bulb temperature (25.6000 C).",
         "   **   ~~~   ** Check the Sizing:Plant object and the Design Entering Air Wet-bulb Temp input field for the Evaporative Fluid Cooler.",
         "   **  Fatal  ** Review and revise design input values as appropriate.",
     })));
