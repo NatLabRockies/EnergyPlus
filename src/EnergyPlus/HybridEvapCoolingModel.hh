@@ -386,9 +386,11 @@ namespace HybridEvapCoolingModel {
         CSetting oStandBy;
 
         std::vector<CSetting> Settings;
+        std::vector<CSetting> VentilationSettings;        
         // methods
         int CurrentPrimaryMode();
         Real64 CurrentPrimaryRuntimeFraction();
+        void CalculateSettingOutputs(EnergyPlusData &state, CSetting &Setting, CStepInputs StepIns, Real64 Wosa, Real64 Wra, Real64 MinOA_Msa);
         Real64 CalculatePartRuntimeFraction(Real64 MinOA_Msa,
                                             Real64 Mvent,
                                             Real64 RequestedCoolingLoad,
