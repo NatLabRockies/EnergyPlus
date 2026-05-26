@@ -49,12 +49,16 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <format>
 #include <memory>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
 #include <ObjexxFCL/Vector3.hh>
 #include <ObjexxFCL/member.functions.hh>
+
+// Third Party Headers
+#include <WCEMultiLayerOptics.hpp>
 
 // EnergyPlus Headers
 #include <EnergyPlus/CommandLineInterface.hh>
@@ -95,7 +99,6 @@
 #include <EnergyPlus/WindowManagerExteriorData.hh>
 #include <EnergyPlus/WindowModel.hh>
 #include <EnergyPlus/ZoneTempPredictorCorrector.hh>
-#include <WCEMultiLayerOptics.hpp>
 
 namespace EnergyPlus::SolarShading {
 
@@ -185,10 +188,10 @@ void InitSolarCalculations(EnergyPlusData &state)
         if (state.files.outputControl.shd) {
             state.dataSolarShading->shd_stream =
                 std::make_unique<std::fstream>(state.dataStrGlobals->outputShdFilePath, std::ios_base::out | std::ios_base::trunc);
-            if (!state.dataSolarShading->shd_stream) {
+            if (!static_cast<std::fstream *>(state.dataSolarShading->shd_stream.get())->is_open()) {
                 ShowFatalError(state,
                                EnergyPlus::format("InitSolarCalculations: Could not open file \"{}\" for output (write).",
-                                                  state.dataStrGlobals->outputShdFilePath));
+                                                  state.dataStrGlobals->outputShdFilePath.string()));
             }
         } else {
             state.dataSolarShading->shd_stream = std::make_unique<std::iostream>(nullptr);
@@ -632,9 +635,8 @@ void GetShadowingInput(EnergyPlusData &state)
             state.dataSysVars->ReportExtShadingSunlitFrac = false;
             state.dataIPShortCut->cAlphaArgs(aNum) = "No";
         } else {
-            ShowWarningError(state, EnergyPlus::format("{}: invalid {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaFieldNames(aNum)));
-            ShowContinueError(state,
-                              EnergyPlus::format("Value entered=\"{}\", InternalCalculation will be used.", state.dataIPShortCut->cAlphaArgs(aNum)));
+            ShowWarningError(state, std::format("{}: invalid {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaFieldNames(aNum)));
+            ShowContinueError(state, std::format("Value entered=\"{}\", InternalCalculation will be used.", state.dataIPShortCut->cAlphaArgs(aNum)));
         }
     } else {
         state.dataIPShortCut->cAlphaArgs(aNum) = "No";
@@ -649,9 +651,9 @@ void GetShadowingInput(EnergyPlusData &state)
         } else if (Util::SameString(state.dataIPShortCut->cAlphaArgs(aNum), "No")) {
             state.dataIPShortCut->cAlphaArgs(aNum) = "No";
         } else {
-            ShowWarningError(state, EnergyPlus::format("{}: invalid {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaFieldNames(aNum)));
-            ShowContinueError(
-                state, EnergyPlus::format("Value entered=\"{}\", all shading effects would be considered.", state.dataIPShortCut->cAlphaArgs(aNum)));
+            ShowWarningError(state, std::format("{}: invalid {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaFieldNames(aNum)));
+            ShowContinueError(state,
+                              std::format("Value entered=\"{}\", all shading effects would be considered.", state.dataIPShortCut->cAlphaArgs(aNum)));
         }
     } else {
         state.dataIPShortCut->cAlphaArgs(aNum) = "No";
@@ -665,9 +667,9 @@ void GetShadowingInput(EnergyPlusData &state)
         } else if (Util::SameString(state.dataIPShortCut->cAlphaArgs(aNum), "No")) {
             state.dataIPShortCut->cAlphaArgs(aNum) = "No";
         } else {
-            ShowWarningError(state, EnergyPlus::format("{}: invalid {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaFieldNames(aNum)));
-            ShowContinueError(
-                state, EnergyPlus::format("Value entered=\"{}\", all shading effects would be considered.", state.dataIPShortCut->cAlphaArgs(aNum)));
+            ShowWarningError(state, std::format("{}: invalid {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaFieldNames(aNum)));
+            ShowContinueError(state,
+                              std::format("Value entered=\"{}\", all shading effects would be considered.", state.dataIPShortCut->cAlphaArgs(aNum)));
         }
     } else {
         state.dataIPShortCut->cAlphaArgs(aNum) = "No";
@@ -692,23 +694,22 @@ void GetShadowingInput(EnergyPlusData &state)
         ShowWarningError(state, "GetShadowingInput: The shading transmittance for shading devices may change throughout the year.");
         ShowContinueError(
             state,
-            EnergyPlus::format("Choose Shading Calculation Update Frequency Method = Timestep in the {} object to capture all shading impacts.",
-                               cCurrentModuleObject));
+            std::format("Choose Shading Calculation Update Frequency Method = Timestep in the {} object to capture all shading impacts.",
+                        cCurrentModuleObject));
     }
     if (!state.dataSysVars->DetailedSkyDiffuseAlgorithm && s_surf->ShadingTransmittanceVaries &&
         state.dataHeatBal->SolarDistribution != DataHeatBalance::Shadowing::Minimal) {
 
         ShowWarningError(state, "GetShadowingInput: The shading transmittance for shading devices may change throughout the year.");
         ShowContinueError(state, "Simulation has been reset to use DetailedSkyDiffuseModeling. Simulation continues.");
-        ShowContinueError(state,
-                          EnergyPlus::format("Choose DetailedSkyDiffuseModeling in the {} object to remove this warning.", cCurrentModuleObject));
+        ShowContinueError(state, std::format("Choose DetailedSkyDiffuseModeling in the {} object to remove this warning.", cCurrentModuleObject));
         state.dataSysVars->DetailedSkyDiffuseAlgorithm = true;
         state.dataIPShortCut->cAlphaArgs(2) = "DetailedSkyDiffuseModeling";
         if (!state.dataSysVars->DetailedSolarTimestepIntegration && state.dataSolarShading->ShadowingCalcFrequency > 1) {
             ShowContinueError(state,
-                              EnergyPlus::format("Better accuracy may be gained by setting the {} to 1 in the {} object.",
-                                                 state.dataIPShortCut->cNumericFieldNames(1),
-                                                 cCurrentModuleObject));
+                              std::format("Better accuracy may be gained by setting the {} to 1 in the {} object.",
+                                          state.dataIPShortCut->cNumericFieldNames(1),
+                                          cCurrentModuleObject));
         }
     } else if (state.dataSysVars->DetailedSkyDiffuseAlgorithm) {
         if (!s_surf->ShadingTransmittanceVaries || state.dataHeatBal->SolarDistribution == DataHeatBalance::Shadowing::Minimal) {
@@ -717,8 +718,8 @@ void GetShadowingInput(EnergyPlusData &state)
                              "shading devices does not change throughout the year");
             ShowContinueError(state, " or MinimalShadowing has been chosen.");
             ShowContinueError(state, "Simulation should be set to use SimpleSkyDiffuseModeling, but is left at Detailed for simulation.");
-            ShowContinueError(
-                state, EnergyPlus::format("Choose SimpleSkyDiffuseModeling in the {} object to reduce computation time.", cCurrentModuleObject));
+            ShowContinueError(state,
+                              std::format("Choose SimpleSkyDiffuseModeling in the {} object to reduce computation time.", cCurrentModuleObject));
         }
     }
 
@@ -846,7 +847,7 @@ void checkSurfaceExternalShadingSchedules(EnergyPlusData &state)
                     if (state.dataSysVars->shadingMethod == DataSystemVariables::ShadingMethod::Scheduled) {
                         ShowWarningError(
                             state,
-                            EnergyPlus::format(
+                            std::format(
                                 "ShadowCalculation specified \"Scheduled\" for the Shading Calculation Method but no schedule provided for {}.",
                                 thisSurf.Name));
                         ShowContinueError(state,
@@ -858,7 +859,7 @@ void checkSurfaceExternalShadingSchedules(EnergyPlusData &state)
                     } else if (state.dataSysVars->shadingMethod == DataSystemVariables::ShadingMethod::Imported) {
                         ShowWarningError(
                             state,
-                            EnergyPlus::format(
+                            std::format(
                                 "ShadowCalculation specified \"Imported\" for the Shading Calculation Method but no schedule provided for {}.",
                                 thisSurf.Name));
                         ShowContinueError(
@@ -870,9 +871,8 @@ void checkSurfaceExternalShadingSchedules(EnergyPlusData &state)
                     }
                     ShowContinueError(state, "for sunlit fraction if this was not desired. Otherwise, this surface will not be shaded at all.");
                 } else if (numNotDef <= maxErrMessages) {
-                    ShowWarningError(
-                        state,
-                        EnergyPlus::format("No schedule was provided for {} either. See above error message for more details.", thisSurf.Name));
+                    ShowWarningError(state,
+                                     std::format("No schedule was provided for {} either. See above error message for more details.", thisSurf.Name));
                 }
             }
         } else {
@@ -880,18 +880,18 @@ void checkSurfaceExternalShadingSchedules(EnergyPlusData &state)
                 numNotDef += 1;
                 if (numNotDef == 1) {
                     ShowWarningError(state,
-                                     EnergyPlus::format("ShadowCalculation did not specify \"Scheduled\" or \"Imported\" for the Shading Calculation "
-                                                        "Method but schedule provided for {}.",
-                                                        thisSurf.Name));
+                                     std::format("ShadowCalculation did not specify \"Scheduled\" or \"Imported\" for the Shading Calculation "
+                                                 "Method but schedule provided for {}.",
+                                                 thisSurf.Name));
                 } else if (numNotDef <= maxErrMessages) {
-                    ShowWarningError(
-                        state, EnergyPlus::format("Schedule was also provided for {}. See above error message for more details.", thisSurf.Name));
+                    ShowWarningError(state,
+                                     std::format("Schedule was also provided for {}. See above error message for more details.", thisSurf.Name));
                 }
             }
         }
     }
     if (numNotDef > maxErrMessages) {
-        ShowContinueError(state, EnergyPlus::format("This message is only shown for the first {} occurrences of this issue.", maxErrMessages));
+        ShowContinueError(state, std::format("This message is only shown for the first {} occurrences of this issue.", maxErrMessages));
     }
 }
 
@@ -1454,7 +1454,7 @@ void AllocateModuleArrays(EnergyPlusData &state)
                 for (I = 1; I <= NumOfLayers; ++I) {
                     if (state.dataConstruction->Construct(surf.Construction).WindowTypeBSDF) {
                         SetupOutputVariable(state,
-                                            EnergyPlus::format("Surface Window Total Absorbed Shortwave Radiation Rate Layer {}", I),
+                                            std::format("Surface Window Total Absorbed Shortwave Radiation Rate Layer {}", I),
                                             Constant::Units::W,
                                             state.dataHeatBal->SurfWinQRadSWwinAbsLayer(SurfLoop, I),
                                             OutputProcessor::TimeStepType::Zone,
@@ -1463,7 +1463,7 @@ void AllocateModuleArrays(EnergyPlusData &state)
                     }
                     if (state.dataConstruction->Construct(surf.Construction).WindowTypeBSDF || (I == 1)) {
                         SetupOutputVariable(state,
-                                            EnergyPlus::format("Surface Window Front Face Temperature Layer {}", I),
+                                            std::format("Surface Window Front Face Temperature Layer {}", I),
                                             Constant::Units::C,
                                             state.dataHeatBal->SurfWinFenLaySurfTempFront(SurfLoop, I),
                                             OutputProcessor::TimeStepType::Zone,
@@ -1472,7 +1472,7 @@ void AllocateModuleArrays(EnergyPlusData &state)
                     }
                     if (state.dataConstruction->Construct(surf.Construction).WindowTypeBSDF || (I == NumOfLayers)) {
                         SetupOutputVariable(state,
-                                            EnergyPlus::format("Surface Window Back Face Temperature Layer {}", I),
+                                            std::format("Surface Window Back Face Temperature Layer {}", I),
                                             Constant::Units::C,
                                             state.dataHeatBal->SurfWinFenLaySurfTempBack(SurfLoop, I),
                                             OutputProcessor::TimeStepType::Zone,
@@ -2752,8 +2752,8 @@ void AnisoSkyViewFactors(EnergyPlusData &state)
             if (CosIncAngBeamOnSurface > (1.0 + cosine_tolerance)) {
                 ShowSevereError(state, "Cosine of incident angle of beam solar on surface out of range...too high");
                 ShowContinueError(state, "This is a diagnostic error that should not be encountered under normal circumstances");
-                ShowContinueError(state, EnergyPlus::format("Occurs on surface: {}", s_surf->Surface(SurfNum).Name));
-                ShowContinueError(state, EnergyPlus::format("Current value = {} ... should be within [-1, +1]", CosIncAngBeamOnSurface));
+                ShowContinueError(state, std::format("Occurs on surface: {}", s_surf->Surface(SurfNum).Name));
+                ShowContinueError(state, std::format("Current value = {} ... should be within [-1, +1]", CosIncAngBeamOnSurface));
                 ShowFatalError(state, "Anisotropic solar calculation causes fatal error");
             }
             CosIncAngBeamOnSurface = 1.0;
@@ -2761,8 +2761,8 @@ void AnisoSkyViewFactors(EnergyPlusData &state)
             if (CosIncAngBeamOnSurface < (-1.0 - cosine_tolerance)) {
                 ShowSevereError(state, "Cosine of incident angle of beam solar on surface out of range...too low");
                 ShowContinueError(state, "This is a diagnostic error that should not be encountered under normal circumstances");
-                ShowContinueError(state, EnergyPlus::format("Occurs on surface: {}", s_surf->Surface(SurfNum).Name));
-                ShowContinueError(state, EnergyPlus::format("Current value = {} ... should be within [-1, +1]", CosIncAngBeamOnSurface));
+                ShowContinueError(state, std::format("Occurs on surface: {}", s_surf->Surface(SurfNum).Name));
+                ShowContinueError(state, std::format("Current value = {} ... should be within [-1, +1]", CosIncAngBeamOnSurface));
                 ShowFatalError(state, "Anisotropic solar calculation causes fatal error");
             }
             CosIncAngBeamOnSurface = -1.0;
@@ -2860,15 +2860,15 @@ void CHKBKS(EnergyPlusData &state,
         DOTP = dot(CVec, DVec);
         if (DOTP > 0.0009) {
             ShowSevereError(state, "Problem in interior solar distribution calculation (CHKBKS)");
-            ShowContinueError(
-                state, EnergyPlus::format("   Solar Distribution = FullInteriorExterior will not work in Zone={}", s_surf->Surface(NRS).ZoneName));
+            ShowContinueError(state,
+                              std::format("   Solar Distribution = FullInteriorExterior will not work in Zone={}", s_surf->Surface(NRS).ZoneName));
             ShowContinueError(
                 state,
-                EnergyPlus::format("   because one or more of vertices, such as Vertex {} of back surface={}, is in front of receiving surface={}",
-                                   N,
-                                   s_surf->Surface(NBS).Name,
-                                   s_surf->Surface(NRS).Name));
-            ShowContinueError(state, EnergyPlus::format("   (Dot Product indicator={:20.4F})", DOTP));
+                std::format("   because one or more of vertices, such as Vertex {} of back surface={}, is in front of receiving surface={}",
+                            N,
+                            s_surf->Surface(NBS).Name,
+                            s_surf->Surface(NRS).Name));
+            ShowContinueError(state, std::format("   (Dot Product indicator={:20.4F})", DOTP));
             ShowContinueError(state,
                               "   Check surface geometry; if OK, use Solar Distribution = FullExterior instead. Use Output:Diagnostics, "
                               "DisplayExtraWarnings; for more details.");
@@ -3365,8 +3365,7 @@ void ComputeIntSolarAbsorpFactors(EnergyPlusData &state)
             // fill floor area even though surfs not called "Floor", they are roughly horizontal and face upwards.
             thisEnclosure.FloorArea = HorizAreaSum;
             ShowWarningError(state, "ComputeIntSolarAbsorpFactors: Solar distribution model is set to place solar gains on the zone floor,");
-            ShowContinueError(state,
-                              EnergyPlus::format("...Enclosure=\"{}\" has no floor, but has approximate horizontal surfaces.", thisEnclosure.Name));
+            ShowContinueError(state, std::format("...Enclosure=\"{}\" has no floor, but has approximate horizontal surfaces.", thisEnclosure.Name));
             ShowContinueError(state, EnergyPlus::format("...these Tilt > 120 degrees, (area=[{:.2R}] m2) will be used.", HorizAreaSum));
         }
 
@@ -3411,13 +3410,12 @@ void ComputeIntSolarAbsorpFactors(EnergyPlusData &state)
             if (thisEnclosure.ExtWindowArea > 0.0) { // we have a problem, the sun has no floor to go to
                 if (thisEnclosure.FloorArea <= 0.0) {
                     ShowSevereError(state, "ComputeIntSolarAbsorpFactors: Solar distribution model is set to place solar gains on the zone floor,");
-                    ShowContinueError(
-                        state, EnergyPlus::format("but Zone or Enclosure =\"{}\" does not appear to have any floor surfaces.", thisEnclosure.Name));
+                    ShowContinueError(state,
+                                      std::format("but Zone or Enclosure =\"{}\" does not appear to have any floor surfaces.", thisEnclosure.Name));
                     ShowContinueError(state, "Solar gains will be spread evenly on all surfaces in the zone, and the simulation continues...");
                 } else { // Floor Area > 0 but still can't absorb
                     ShowSevereError(state, "ComputeIntSolarAbsorpFactors: Solar distribution model is set to place solar gains on the zone floor,");
-                    ShowContinueError(state,
-                                      EnergyPlus::format("but Zone or Enclosure =\"{}\" floor cannot absorb any solar gains. ", thisEnclosure.Name));
+                    ShowContinueError(state, std::format("but Zone or Enclosure =\"{}\" floor cannot absorb any solar gains. ", thisEnclosure.Name));
                     ShowContinueError(state, "Check the solar absorptance of the inside layer of the floor surface construction/material.");
                     ShowContinueError(state, "Solar gains will be spread evenly on all surfaces in the zone, and the simulation continues...");
                 }
@@ -3674,7 +3672,7 @@ void HTRANS(EnergyPlusData &state,
     //                1 - Compute H.C. of vertices & sides
 
     if (NS > 2 * state.dataSolarShading->MaxHCS) {
-        ShowFatalError(state, EnergyPlus::format("Solar Shading: HTrans: Too many Figures (>{})", state.dataSolarShading->MaxHCS));
+        ShowFatalError(state, std::format("Solar Shading: HTrans: Too many Figures (>{})", state.dataSolarShading->MaxHCS));
     }
 
     state.dataSolarShading->HCNV(NS) = NumVertices;
@@ -3737,7 +3735,7 @@ void HTRANS0(EnergyPlusData &state,
     // Locals
 
     if (NS > 2 * state.dataSolarShading->MaxHCS) {
-        ShowFatalError(state, EnergyPlus::format("Solar Shading: HTrans0: Too many Figures (>{})", state.dataSolarShading->MaxHCS));
+        ShowFatalError(state, std::format("Solar Shading: HTrans0: Too many Figures (>{})", state.dataSolarShading->MaxHCS));
     }
 
     state.dataSolarShading->HCNV(NS) = NumVertices;
@@ -3781,7 +3779,7 @@ void HTRANS1(EnergyPlusData &state,
     // Using/Aliasing
 
     if (NS > 2 * state.dataSolarShading->MaxHCS) {
-        ShowFatalError(state, EnergyPlus::format("Solar Shading: HTrans1: Too many Figures (>{})", state.dataSolarShading->MaxHCS));
+        ShowFatalError(state, std::format("Solar Shading: HTrans1: Too many Figures (>{})", state.dataSolarShading->MaxHCS));
     }
 
     state.dataSolarShading->HCNV(NS) = NumVertices;
@@ -4174,8 +4172,8 @@ void CLIPRECT(EnergyPlusData &state, int const NS2, int const NV1, int &NV3)
     // Re-populate XTEMP/YTEMP
     if (NV3 > 1) {
         int LastEdgeIndex = -1, incr = 0;
-        double cornerXs[4] = {minX, minX, maxX, maxX};
-        double cornerYs[4] = {minY, maxY, maxY, minY};
+        const double cornerXs[4] = {minX, minX, maxX, maxX};
+        const double cornerYs[4] = {minY, maxY, maxY, minY};
         Real64 edges[4] = {minX, maxY, maxX, minY};
         Real64 LastEdgeX, LastEdgeY;
         for (int i = 0; i <= arrc; i++) {
@@ -4286,8 +4284,8 @@ void CLIPRECT(EnergyPlusData &state, int const NS2, int const NV1, int &NV3)
             state.dataSolarShading->YTEMP[0] = arry[0];
         }
         if (NV3 == 0) {
-            double cornerXs[4] = {minX, minX, maxX, maxX};
-            double cornerYs[4] = {minY, maxY, maxY, minY};
+            const double cornerXs[4] = {minX, minX, maxX, maxX};
+            const double cornerYs[4] = {minY, maxY, maxY, minY};
             Real64 cornerX = cornerXs[0];
             Real64 cornerY = cornerYs[0];
             bool insideFlag = true;
@@ -4802,9 +4800,9 @@ void DeterminePolygonOverlap(EnergyPlusData &state,
 
         if (!state.dataSolarShading->TooManyFiguresMessage && !state.dataGlobal->DisplayExtraWarnings) {
             ShowWarningError(state,
-                             EnergyPlus::format("DeterminePolygonOverlap: Too many figures [>{}]  detected in an overlap calculation. Use "
-                                                "Output:Diagnostics,DisplayExtraWarnings; for more details.",
-                                                state.dataSolarShading->MaxHCS));
+                             std::format("DeterminePolygonOverlap: Too many figures [>{}]  detected in an overlap calculation. Use "
+                                         "Output:Diagnostics,DisplayExtraWarnings; for more details.",
+                                         state.dataSolarShading->MaxHCS));
             state.dataSolarShading->TooManyFiguresMessage = true;
         }
 
@@ -4898,9 +4896,9 @@ void DeterminePolygonOverlap(EnergyPlusData &state,
 
         if (!state.dataSolarShading->TooManyVerticesMessage && !state.dataGlobal->DisplayExtraWarnings) {
             ShowWarningError(state,
-                             EnergyPlus::format("DeterminePolygonOverlap: Too many vertices [>{}] detected in an overlap calculation. Use "
-                                                "Output:Diagnostics,DisplayExtraWarnings; for more details.",
-                                                state.dataSolarShading->MaxHCV));
+                             std::format("DeterminePolygonOverlap: Too many vertices [>{}] detected in an overlap calculation. Use "
+                                         "Output:Diagnostics,DisplayExtraWarnings; for more details.",
+                                         state.dataSolarShading->MaxHCV));
             state.dataSolarShading->TooManyVerticesMessage = true;
         }
 
@@ -5414,7 +5412,7 @@ void DetermineShadowingCombinations(EnergyPlusData &state)
                         rPoly.push_back(vPrev.y);
                         rPoly.push_back(vPrev.z);
 
-                        Penumbra::Surface rSurf(rPoly, fmt::format("{} reveal {}", s_surf->Surface(GRSNR).Name, i));
+                        Penumbra::Surface rSurf(rPoly, std::format("{} reveal {}", s_surf->Surface(GRSNR).Name, i));
                         state.dataSolarShading->penumbra->add_surface(rSurf);
                     }
                 } else {
@@ -5686,8 +5684,8 @@ void DetermineShadowingCombinations(EnergyPlusData &state)
                             if (state.dataGlobal->DisplayExtraWarnings) {
                                 ShowWarningError(
                                     state,
-                                    EnergyPlus::format("DetermineShadowingCombinations: Surface=\"{}\" is a receiving surface and is non-convex.",
-                                                       s_surf->Surface(HTSnum).Name));
+                                    std::format("DetermineShadowingCombinations: Surface=\"{}\" is a receiving surface and is non-convex.",
+                                                s_surf->Surface(HTSnum).Name));
                                 ShowContinueError(state,
                                                   "...Shadowing values may be inaccurate. Check .shd report file for more surface shading details");
                             } else {
@@ -5726,8 +5724,8 @@ void DetermineShadowingCombinations(EnergyPlusData &state)
             if (CastingSurface(HTS) && !s_surf->Surface(HTS).IsConvex) {
                 if (state.dataGlobal->DisplayExtraWarnings) {
                     ShowSevereError(state,
-                                    EnergyPlus::format("DetermineShadowingCombinations: Surface=\"{}\" is a casting surface and is non-convex.",
-                                                       s_surf->Surface(HTS).Name));
+                                    std::format("DetermineShadowingCombinations: Surface=\"{}\" is a casting surface and is non-convex.",
+                                                s_surf->Surface(HTS).Name));
                     ShowContinueError(state, "...Shadowing values may be inaccurate. Check .shd report file for more surface shading details");
                 } else {
                     ++state.dataErrTracking->TotalCastingNonConvexSurfaces;
@@ -5736,20 +5734,18 @@ void DetermineShadowingCombinations(EnergyPlusData &state)
         }
 
         if (state.dataErrTracking->TotalReceivingNonConvexSurfaces > 0) {
-            ShowWarningMessage(
-                state,
-                EnergyPlus::format("DetermineShadowingCombinations: There are {} surfaces which are receiving surfaces and are non-convex.",
-                                   state.dataErrTracking->TotalReceivingNonConvexSurfaces));
+            ShowWarningMessage(state,
+                               std::format("DetermineShadowingCombinations: There are {} surfaces which are receiving surfaces and are non-convex.",
+                                           state.dataErrTracking->TotalReceivingNonConvexSurfaces));
             ShowContinueError(state, "...Shadowing values may be inaccurate. Check .shd report file for more surface shading details");
             ShowContinueError(state, "...Add Output:Diagnostics,DisplayExtraWarnings; to see individual warnings for each surface.");
             state.dataErrTracking->TotalWarningErrors += state.dataErrTracking->TotalReceivingNonConvexSurfaces;
         }
 
         if (state.dataErrTracking->TotalCastingNonConvexSurfaces > 0) {
-            ShowSevereMessage(
-                state,
-                EnergyPlus::format("DetermineShadowingCombinations: There are {} surfaces which are casting surfaces and are non-convex.",
-                                   state.dataErrTracking->TotalCastingNonConvexSurfaces));
+            ShowSevereMessage(state,
+                              std::format("DetermineShadowingCombinations: There are {} surfaces which are casting surfaces and are non-convex.",
+                                          state.dataErrTracking->TotalCastingNonConvexSurfaces));
             ShowContinueError(state, "...Shadowing values may be inaccurate. Check .shd report file for more surface shading details");
             ShowContinueError(state, "...Add Output:Diagnostics,DisplayExtraWarnings; to see individual severes for each surface.");
             state.dataErrTracking->TotalSevereErrors += state.dataErrTracking->TotalCastingNonConvexSurfaces;
@@ -10020,8 +10016,8 @@ void WindowShadingManager(EnergyPlusData &state)
                     }
                     break;
                 default:
-                    ShowWarningError(
-                        state, EnergyPlus::format("Invalid Selection of Window Shading Control Type for Surface {}", s_surf->Surface(ISurf).Name));
+                    ShowWarningError(state,
+                                     std::format("Invalid Selection of Window Shading Control Type for Surface {}", s_surf->Surface(ISurf).Name));
                 }
 
                 WinShadingType ShType = s_surf->WindowShadingControl(IShadingCtrl).ShadingType;
@@ -10252,9 +10248,8 @@ void WindowShadingManager(EnergyPlusData &state)
                     if (SurfWinShadingFlagEMS != WinShadingType::Invalid) {
                         s_surf->SurfWinShadingFlag(ISurf) = SurfWinShadingFlagEMS;
                     } else {
-                        ShowWarningError(
-                            state,
-                            EnergyPlus::format("Invalid EMS value of Window Shading Control Type for Surface {}", s_surf->Surface(ISurf).Name));
+                        ShowWarningError(state,
+                                         std::format("Invalid EMS value of Window Shading Control Type for Surface {}", s_surf->Surface(ISurf).Name));
                     }
                 }
             } // End of surface loop
@@ -10471,9 +10466,9 @@ void WindowGapAirflowControl(EnergyPlusData &state)
                         auto const *sched = s_surf->SurfWinAirflowScheds(ISurf);
                         Real64 ScheduleMult = sched->getCurrentVal(); // Multiplier value from schedule
                         if (ScheduleMult < 0.0 || ScheduleMult > 1.0) {
-                            ShowFatalError(state,
-                                           EnergyPlus::format("Airflow schedule has a value outside the range 0.0 to 1.0 for window={}",
-                                                              s_surf->Surface(ISurf).Name));
+                            ShowFatalError(
+                                state,
+                                std::format("Airflow schedule has a value outside the range 0.0 to 1.0 for window={}", s_surf->Surface(ISurf).Name));
                         }
                         s_surf->SurfWinAirflowThisTS(ISurf) = ScheduleMult * s_surf->SurfWinMaxAirflow(ISurf);
                     }
@@ -11705,27 +11700,26 @@ void ReportSurfaceErrors(EnergyPlusData &state)
             }
             TotCount += Count;
             state.dataErrTracking->TotalWarningErrors += Count - 1;
-            ShowWarningError(
-                state,
-                EnergyPlus::format("Base surface does not surround subsurface (CHKSBS), Overlap Status={}",
-                                   state.dataSolarShading->cOverLapStatus(state.dataSolarShading->TrackBaseSubSurround(Loop1).MiscIndex)));
-            ShowContinueError(state, EnergyPlus::format("  The base surround errors occurred {} times.", Count));
+            ShowWarningError(state,
+                             std::format("Base surface does not surround subsurface (CHKSBS), Overlap Status={}",
+                                         state.dataSolarShading->cOverLapStatus(state.dataSolarShading->TrackBaseSubSurround(Loop1).MiscIndex)));
+            ShowContinueError(state, std::format("  The base surround errors occurred {} times.", Count));
             for (Loop2 = 1; Loop2 <= state.dataSolarShading->NumBaseSubSurround; ++Loop2) {
                 if (state.dataSolarShading->TrackBaseSubSurround(Loop1).SurfIndex1 ==
                         state.dataSolarShading->TrackBaseSubSurround(Loop2).SurfIndex1 &&
                     state.dataSolarShading->TrackBaseSubSurround(Loop1).MiscIndex == state.dataSolarShading->TrackBaseSubSurround(Loop2).MiscIndex) {
                     ShowContinueError(state,
-                                      EnergyPlus::format("Surface \"{}\" {} SubSurface \"{}\"",
-                                                         s_surf->Surface(state.dataSolarShading->TrackBaseSubSurround(Loop1).SurfIndex1).Name,
-                                                         MSG(state.dataSolarShading->TrackBaseSubSurround(Loop1).MiscIndex),
-                                                         s_surf->Surface(state.dataSolarShading->TrackBaseSubSurround(Loop2).SurfIndex2).Name));
+                                      std::format("Surface \"{}\" {} SubSurface \"{}\"",
+                                                  s_surf->Surface(state.dataSolarShading->TrackBaseSubSurround(Loop1).SurfIndex1).Name,
+                                                  MSG(state.dataSolarShading->TrackBaseSubSurround(Loop1).MiscIndex),
+                                                  s_surf->Surface(state.dataSolarShading->TrackBaseSubSurround(Loop2).SurfIndex2).Name));
                 }
             }
             SurfErrorReported(state.dataSolarShading->TrackBaseSubSurround(Loop1).SurfIndex1) = true;
         }
         if (TotCount > 0) {
             ShowMessage(state, "");
-            ShowContinueError(state, EnergyPlus::format("  The base surround errors occurred {} times (total).", TotCount));
+            ShowContinueError(state, std::format("  The base surround errors occurred {} times (total).", TotCount));
             ShowMessage(state, "");
         }
 
@@ -11733,7 +11727,7 @@ void ReportSurfaceErrors(EnergyPlusData &state)
         SurfErrorReported = false;
         TotCount = 0;
         if (state.dataSolarShading->NumTooManyVertices > 0) {
-            ShowMessage(state, EnergyPlus::format("Too many vertices [>={}] in shadow overlap errors occurring...", state.dataSolarShading->MaxHCV));
+            ShowMessage(state, std::format("Too many vertices [>={}] in shadow overlap errors occurring...", state.dataSolarShading->MaxHCV));
             ShowMessage(state,
                         "These occur throughout the year and may occur several times for the same surfaces. You "
                         "may be able to reduce them by "
@@ -11754,13 +11748,12 @@ void ReportSurfaceErrors(EnergyPlusData &state)
             TotCount += Count;
             state.dataErrTracking->TotalWarningErrors += Count - 1;
             ShowMessage(state, "");
-            ShowWarningError(state, EnergyPlus::format("Too many vertices [>={}] in a shadow overlap", state.dataSolarShading->MaxHCV));
-            ShowContinueError(
-                state,
-                EnergyPlus::format("Overlapping figure={}, Surface Class=[{}]",
-                                   s_surf->Surface(state.dataSolarShading->TrackTooManyVertices(Loop1).SurfIndex1).Name,
-                                   cSurfaceClass(s_surf->Surface(state.dataSolarShading->TrackTooManyVertices(Loop1).SurfIndex1).Class)));
-            ShowContinueError(state, EnergyPlus::format("  This error occurred {} times.", Count));
+            ShowWarningError(state, std::format("Too many vertices [>={}] in a shadow overlap", state.dataSolarShading->MaxHCV));
+            ShowContinueError(state,
+                              std::format("Overlapping figure={}, Surface Class=[{}]",
+                                          s_surf->Surface(state.dataSolarShading->TrackTooManyVertices(Loop1).SurfIndex1).Name,
+                                          cSurfaceClass(s_surf->Surface(state.dataSolarShading->TrackTooManyVertices(Loop1).SurfIndex1).Class)));
+            ShowContinueError(state, std::format("  This error occurred {} times.", Count));
             for (Loop2 = 1; Loop2 <= state.dataSolarShading->NumTooManyVertices; ++Loop2) {
                 if (state.dataSolarShading->TrackTooManyVertices(Loop1).SurfIndex1 ==
                     state.dataSolarShading->TrackTooManyVertices(Loop2).SurfIndex1) {
@@ -11769,9 +11762,9 @@ void ReportSurfaceErrors(EnergyPlusData &state)
                     }
                     ShowContinueError(
                         state,
-                        EnergyPlus::format("Figure being Overlapped={}, Surface Class=[{}]",
-                                           s_surf->Surface(state.dataSolarShading->TrackTooManyVertices(Loop2).SurfIndex2).Name,
-                                           cSurfaceClass(s_surf->Surface(state.dataSolarShading->TrackTooManyVertices(Loop2).SurfIndex2).Class)));
+                        std::format("Figure being Overlapped={}, Surface Class=[{}]",
+                                    s_surf->Surface(state.dataSolarShading->TrackTooManyVertices(Loop2).SurfIndex2).Name,
+                                    cSurfaceClass(s_surf->Surface(state.dataSolarShading->TrackTooManyVertices(Loop2).SurfIndex2).Class)));
                     SurfErrorReported2(state.dataSolarShading->TrackTooManyVertices(Loop2).SurfIndex2) = true;
                 }
             }
@@ -11779,14 +11772,14 @@ void ReportSurfaceErrors(EnergyPlusData &state)
         }
         if (TotCount > 0) {
             ShowMessage(state, "");
-            ShowContinueError(state, EnergyPlus::format("  The too many vertices errors occurred {} times (total).", TotCount));
+            ShowContinueError(state, std::format("  The too many vertices errors occurred {} times (total).", TotCount));
             ShowMessage(state, "");
         }
 
         SurfErrorReported = false;
         TotCount = 0;
         if (state.dataSolarShading->NumTooManyFigures > 0) {
-            ShowMessage(state, EnergyPlus::format("Too many figures [>={}] in shadow overlap errors occurring...", state.dataSolarShading->MaxHCS));
+            ShowMessage(state, std::format("Too many figures [>={}] in shadow overlap errors occurring...", state.dataSolarShading->MaxHCS));
             ShowMessage(state,
                         "These occur throughout the year and may occur several times for the same surfaces. You "
                         "may be able to reduce them by "
@@ -11806,13 +11799,12 @@ void ReportSurfaceErrors(EnergyPlusData &state)
             TotCount += Count;
             state.dataErrTracking->TotalWarningErrors += Count - 1;
             ShowMessage(state, "");
-            ShowWarningError(state, EnergyPlus::format("Too many figures [>={}] in a shadow overlap", state.dataSolarShading->MaxHCS));
-            ShowContinueError(
-                state,
-                EnergyPlus::format("Overlapping figure={}, Surface Class=[{}]",
-                                   s_surf->Surface(state.dataSolarShading->TrackTooManyFigures(Loop1).SurfIndex1).Name,
-                                   cSurfaceClass(s_surf->Surface(state.dataSolarShading->TrackTooManyFigures(Loop1).SurfIndex1).Class)));
-            ShowContinueError(state, EnergyPlus::format("  This error occurred {} times.", Count));
+            ShowWarningError(state, std::format("Too many figures [>={}] in a shadow overlap", state.dataSolarShading->MaxHCS));
+            ShowContinueError(state,
+                              std::format("Overlapping figure={}, Surface Class=[{}]",
+                                          s_surf->Surface(state.dataSolarShading->TrackTooManyFigures(Loop1).SurfIndex1).Name,
+                                          cSurfaceClass(s_surf->Surface(state.dataSolarShading->TrackTooManyFigures(Loop1).SurfIndex1).Class)));
+            ShowContinueError(state, std::format("  This error occurred {} times.", Count));
             for (Loop2 = 1; Loop2 <= state.dataSolarShading->NumTooManyFigures; ++Loop2) {
                 if (state.dataSolarShading->TrackTooManyFigures(Loop1).SurfIndex1 == state.dataSolarShading->TrackTooManyFigures(Loop2).SurfIndex1) {
                     if (SurfErrorReported2(state.dataSolarShading->TrackTooManyFigures(Loop2).SurfIndex2)) {
@@ -11820,9 +11812,9 @@ void ReportSurfaceErrors(EnergyPlusData &state)
                     }
                     ShowContinueError(
                         state,
-                        EnergyPlus::format("Figure being Overlapped={}, Surface Class=[{}]",
-                                           s_surf->Surface(state.dataSolarShading->TrackTooManyFigures(Loop2).SurfIndex2).Name,
-                                           cSurfaceClass(s_surf->Surface(state.dataSolarShading->TrackTooManyFigures(Loop2).SurfIndex2).Class)));
+                        std::format("Figure being Overlapped={}, Surface Class=[{}]",
+                                    s_surf->Surface(state.dataSolarShading->TrackTooManyFigures(Loop2).SurfIndex2).Name,
+                                    cSurfaceClass(s_surf->Surface(state.dataSolarShading->TrackTooManyFigures(Loop2).SurfIndex2).Class)));
                     SurfErrorReported2(state.dataSolarShading->TrackTooManyFigures(Loop2).SurfIndex2) = true;
                 }
             }
@@ -11830,7 +11822,7 @@ void ReportSurfaceErrors(EnergyPlusData &state)
         }
         if (TotCount > 0) {
             ShowMessage(state, "");
-            ShowContinueError(state, EnergyPlus::format("  The too many figures errors occurred {} times (total).", TotCount));
+            ShowContinueError(state, std::format("  The too many figures errors occurred {} times (total).", TotCount));
             ShowMessage(state, "");
         }
         SurfErrorReported.deallocate();

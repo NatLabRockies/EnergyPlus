@@ -45,6 +45,10 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
+#include <format>
+
+// EnergyPlus Headers
 #include <EnergyPlus/Autosizing/CoolingSHRSizing.hh>
 #include <EnergyPlus/DXCoils.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
@@ -142,7 +146,7 @@ void CoolingSHRSizer::updateSizingString(EnergyPlusData &state)
             this->sizingString = "Low Speed Gross Rated Sensible Heat Ratio";
         }
     } else if (this->coilType == HVAC::CoilType::CoolingDXMultiSpeed) {
-        this->sizingString = fmt::format("Speed {} Rated Sensible Heat Ratio", state.dataSize->DataDXSpeedNum);
+        this->sizingString = std::format("Speed {} Rated Sensible Heat Ratio", state.dataSize->DataDXSpeedNum);
     } else if (this->coilType == HVAC::CoilType::CoolingVRFFluidTCtrl) {
         this->sizingString = "Rated Sensible Heat Ratio";
     } else if (this->coilType == HVAC::CoilType::CoolingDXCurveFit) {

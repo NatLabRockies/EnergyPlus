@@ -152,7 +152,7 @@ namespace Node {
         AirLoopHVACDedicatedOutdoorAirSystem,
         AirLoopHVACExhaustSystem,
         AirLoopHVACMixer,
-        AirLoopHVACOutdoorAirsystem,
+        AirLoopHVACOutdoorAirSystem,
         AirLoopHVACReturnPath,
         AirLoopHVACReturnPlenum,
         AirLoopHVACSplitter,

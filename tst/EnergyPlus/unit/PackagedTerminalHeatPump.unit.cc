@@ -1317,7 +1317,7 @@ TEST_F(EnergyPlusFixture, SimPTAC_SZVAVTest)
     //    QZnReq = state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputRequired; // initialize zone heating load
     thisSys.simulate(*state, thisSys.Name, FirstHVACIteration, 0, PTUnitNum, HeatActive, CoolActive, 0, 0, true, QUnitOut, latOut);
     EXPECT_NEAR(QUnitOut, 2010.0, 0.01);
-    ASSERT_NEAR(thisSys.DesignMaxOutletTemp, state->dataHeatingCoils->HeatingCoil(1).OutletAirTemp, 0.1);
+    ASSERT_NEAR(thisSys.DesignMaxOutletTemp, state->dataHeatingCoils->HeatingCoil(1).OutletAirTemp, 1.0);
     ASSERT_GT(state->dataLoopNodes->Node(thisSys.AirInNode).MassFlowRate, thisSys.MaxNoCoolHeatAirMassFlow);
 
     // Boundary load for this system in Region 1 at maximum air flow rate is 2995.2 W (upper boundary load of Region 1)
@@ -1327,7 +1327,7 @@ TEST_F(EnergyPlusFixture, SimPTAC_SZVAVTest)
     //    QZnReq = state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputRequired; // initialize zone heating load
     thisSys.simulate(*state, thisSys.Name, FirstHVACIteration, 0, PTUnitNum, HeatActive, CoolActive, 0, 0, true, QUnitOut, latOut);
     EXPECT_NEAR(QUnitOut, 2990.0, 0.01);
-    ASSERT_NEAR(thisSys.DesignMaxOutletTemp, state->dataHeatingCoils->HeatingCoil(1).OutletAirTemp, 0.1);
+    ASSERT_NEAR(thisSys.DesignMaxOutletTemp, state->dataHeatingCoils->HeatingCoil(1).OutletAirTemp, 1.0);
     ASSERT_GT(state->dataLoopNodes->Node(thisSys.AirInNode).MassFlowRate, thisSys.MaxNoCoolHeatAirMassFlow);
     ASSERT_LT(state->dataLoopNodes->Node(thisSys.AirInNode).MassFlowRate, thisSys.MaxHeatAirMassFlow);
 

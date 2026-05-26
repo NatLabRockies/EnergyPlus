@@ -47,14 +47,17 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
 #include <ObjexxFCL/Array1D.hh>
 
-// EnergyPlus Headers
+// Third Party Headers
 #include <AirflowNetwork/Elements.hpp>
 #include <AirflowNetwork/Solver.hpp>
+
+// EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataDefineEquip.hh>
 #include <EnergyPlus/DataEnvironment.hh>
@@ -935,11 +938,11 @@ void GetZoneContaminanInputs(EnergyPlusData &state)
 
         if (IHGNumbers(1) < 0.0) {
             ShowSevereError(state,
-                            EnergyPlus::format("{}Negative values are not allowed for {} in {} = {}",
-                                               RoutineName,
-                                               state.dataIPShortCut->cNumericFieldNames(1),
-                                               CurrentModuleObject,
-                                               AlphaName(1)));
+                            std::format("{}Negative values are not allowed for {} in {} = {}",
+                                        RoutineName,
+                                        state.dataIPShortCut->cNumericFieldNames(1),
+                                        CurrentModuleObject,
+                                        AlphaName(1)));
             ShowContinueError(state, EnergyPlus::format("The input value is {:.2R}", IHGNumbers(1)));
             ErrorsFound = true;
         }
@@ -1062,11 +1065,11 @@ void GetZoneContaminanSetPoints(EnergyPlusData &state)
         controlledZone.ActualZoneNum = Util::FindItemInList(state.dataIPShortCut->cAlphaArgs(2), state.dataHeatBal->Zone);
         if (controlledZone.ActualZoneNum == 0) {
             ShowSevereError(state,
-                            EnergyPlus::format("{}=\"{}\" invalid {}=\"{}\" not found.",
-                                               cCurrentModuleObject,
-                                               state.dataIPShortCut->cAlphaArgs(1),
-                                               state.dataIPShortCut->cAlphaFieldNames(2),
-                                               state.dataIPShortCut->cAlphaArgs(2)));
+                            std::format("{}=\"{}\" invalid {}=\"{}\" not found.",
+                                        cCurrentModuleObject,
+                                        state.dataIPShortCut->cAlphaArgs(1),
+                                        state.dataIPShortCut->cAlphaFieldNames(2),
+                                        state.dataIPShortCut->cAlphaArgs(2)));
             ErrorsFound = true;
         } else {
             //      Zone(ContaminantControlledZone(ContControlledZoneNum)%ActualZoneNum)%TempControlledZoneIndex = ContControlledZoneNum
@@ -1411,8 +1414,8 @@ void InitZoneContSetPoints(EnergyPlusData &state)
                 } else {
                     ShowSevereError(
                         state,
-                        EnergyPlus::format("ZoneControl:ContaminantController: a corresponding AirLoopHVAC is not found for the controlled zone ={}",
-                                           state.dataHeatBal->Zone(ZoneNum).Name));
+                        std::format("ZoneControl:ContaminantController: a corresponding AirLoopHVAC is not found for the controlled zone ={}",
+                                    state.dataHeatBal->Zone(ZoneNum).Name));
                     ErrorsFound = true;
                 }
             }

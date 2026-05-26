@@ -1175,10 +1175,10 @@ namespace ReportCoilSelection {
 
     std::string PeakHrMinString(EnergyPlusData &state, const int designDay, const int timeStepAtPeak)
     {
-        return fmt::format("{}/{} {}",
-                           state.dataWeather->DesDayInput(designDay).Month,
-                           state.dataWeather->DesDayInput(designDay).DayOfMonth,
-                           getTimeText(state, timeStepAtPeak));
+        return EnergyPlus::format("{}/{} {}",
+                                  state.dataWeather->DesDayInput(designDay).Month,
+                                  state.dataWeather->DesDayInput(designDay).DayOfMonth,
+                                  getTimeText(state, timeStepAtPeak));
     }
 
     void setCoilCoolingCapacity(EnergyPlusData &state,
@@ -2005,7 +2005,7 @@ namespace ReportCoilSelection {
                     hourPrint = hourCounter - 1;
                 }
                 if (timeStepIndex == timeStepAtPeak) {
-                    returnString = format(DataSizing::PeakHrMinFmt, hourPrint, minutes);
+                    returnString = EnergyPlus::format(DataSizing::PeakHrMinFmt, hourPrint, minutes);
                 }
             }
         }

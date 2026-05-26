@@ -2636,7 +2636,7 @@ namespace WindowComplexManager {
 
         // Deflection
         // Tarcog requires deflection as input parameters.  Deflection is NOT used in EnergyPlus simulations
-        TARCOGParams::DeflectionCalculation CalcDeflection = TARCOGParams::DeflectionCalculation::NONE; // Deflection calculation flag:
+        TARCOGParams::DeflectionCalculation CalcDeflection; // Deflection calculation flag:
         //    0 - no deflection calculations
         //    1 - perform deflection calculation (input is Pressure/Temp)
         //    2 - perform deflection calculation (input is measured deflection)
@@ -2649,7 +2649,7 @@ namespace WindowComplexManager {
         //                 1 - ISO 15099,
         //                 2 - EN673 / ISO 10292 Declared,
         //                 3 - EN673 / ISO 10292 Design.
-        TARCOGParams::TARCOGThermalModel ThermalMod = TARCOGParams::TARCOGThermalModel::ISO15099; // Thermal model:
+        TARCOGParams::TARCOGThermalModel ThermalMod; // Thermal model:
         //                 0 - ISO15099
         //                 1 - Scaled Cavity Width (SCW)
         //                 2 - Convective Scalar Model (CSM)
@@ -3205,6 +3205,7 @@ namespace WindowComplexManager {
                  edgeGlCorrFac);
 
         // process results from TARCOG
+        // cppcheck-suppress knownConditionTrueFalse -- nperr is initialized to 0 but gets modified inside TARCOG90() via reference
         if ((nperr > 0) && (nperr < 1000)) { // process error signal from tarcog
 
             ShowSevereError(state, "Window tarcog returned an error");
@@ -3415,9 +3416,7 @@ namespace WindowComplexManager {
             // Save hcv for use in divider calc with interior or exterior shade (see CalcWinFrameAndDividerTemps)
             if (ShadeFlag == WinShadingType::IntShade) {
                 state.dataSurface->SurfWinConvCoeffWithShade(SurfNum) = 0.0;
-            }
 
-            if (ShadeFlag == WinShadingType::IntShade) {
                 auto const &surfShade = state.dataSurface->surfShades(SurfNum);
                 SurfInsideTemp = theta(2 * ngllayer + 2) - Constant::Kelvin;
 

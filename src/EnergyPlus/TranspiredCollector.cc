@@ -48,6 +48,7 @@
 // C++ Headers
 #include <cassert>
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -670,17 +671,17 @@ namespace TranspiredCollector {
                 SurfID = state.dataTranspiredCollector->UTSC(Item).SurfPtrs(ThisSurf);
                 if (General::rotAzmDiffDeg(state.dataSurface->Surface(SurfID).Azimuth, AvgAzimuth) > 15.0) {
                     ShowWarningError(state,
-                                     EnergyPlus::format("Surface {} has Azimuth different from others in the group associated with {} ={}",
-                                                        state.dataSurface->Surface(SurfID).Name,
-                                                        CurrentModuleObject,
-                                                        state.dataTranspiredCollector->UTSC(Item).Name));
+                                     std::format("Surface {} has Azimuth different from others in the group associated with {} ={}",
+                                                 state.dataSurface->Surface(SurfID).Name,
+                                                 CurrentModuleObject,
+                                                 state.dataTranspiredCollector->UTSC(Item).Name));
                 }
                 if (std::abs(state.dataSurface->Surface(SurfID).Tilt - AvgTilt) > 10.0) {
                     ShowWarningError(state,
-                                     EnergyPlus::format("Surface {} has Tilt different from others in the group associated with {} ={}",
-                                                        state.dataSurface->Surface(SurfID).Name,
-                                                        CurrentModuleObject,
-                                                        state.dataTranspiredCollector->UTSC(Item).Name));
+                                     std::format("Surface {} has Tilt different from others in the group associated with {} ={}",
+                                                 state.dataSurface->Surface(SurfID).Name,
+                                                 CurrentModuleObject,
+                                                 state.dataTranspiredCollector->UTSC(Item).Name));
                 }
 
                 // test that there are no windows.  Now allow windows
@@ -716,9 +717,9 @@ namespace TranspiredCollector {
             state.dataTranspiredCollector->UTSC(Item).PlenGapThick = Numbers(6);
             if (state.dataTranspiredCollector->UTSC(Item).PlenGapThick <= 0.0) {
                 ShowSevereError(state,
-                                EnergyPlus::format("Plenum gap must be greater than Zero in {} ={}",
-                                                   CurrentModuleObject,
-                                                   state.dataTranspiredCollector->UTSC(Item).Name));
+                                std::format("Plenum gap must be greater than Zero in {} ={}",
+                                            CurrentModuleObject,
+                                            state.dataTranspiredCollector->UTSC(Item).Name));
                 continue;
             }
             state.dataTranspiredCollector->UTSC(Item).PlenCrossArea = Numbers(7);
@@ -734,9 +735,9 @@ namespace TranspiredCollector {
             state.dataTranspiredCollector->UTSC(Item).ProjArea = surfaceArea;
             if (state.dataTranspiredCollector->UTSC(Item).ProjArea == 0) {
                 ShowSevereError(state,
-                                EnergyPlus::format("Gross area of underlying surfaces is zero in {} ={}",
-                                                   CurrentModuleObject,
-                                                   state.dataTranspiredCollector->UTSC(Item).Name));
+                                std::format("Gross area of underlying surfaces is zero in {} ={}",
+                                            CurrentModuleObject,
+                                            state.dataTranspiredCollector->UTSC(Item).Name));
                 continue;
             }
             state.dataTranspiredCollector->UTSC(Item).ActualArea =
@@ -939,9 +940,9 @@ namespace TranspiredCollector {
                     if (ControlNode > 0) {
                         if (state.dataLoopNodes->Node(ControlNode).TempSetPoint == Node::SensedNodeFlagValue) {
                             if (!state.dataGlobal->AnyEnergyManagementSystemInModel) {
-                                ShowSevereError(state,
-                                                EnergyPlus::format("Missing temperature setpoint for UTSC {}",
-                                                                   state.dataTranspiredCollector->UTSC(UTSCUnitNum).Name));
+                                ShowSevereError(
+                                    state,
+                                    std::format("Missing temperature setpoint for UTSC {}", state.dataTranspiredCollector->UTSC(UTSCUnitNum).Name));
                                 ShowContinueError(state, " use a Setpoint Manager to establish a setpoint at the unit control node.");
                                 state.dataHVACGlobal->SetPointErrorFlag = true;
                             } else {
@@ -949,8 +950,8 @@ namespace TranspiredCollector {
                                 CheckIfNodeSetPointManagedByEMS(state, ControlNode, HVAC::CtrlVarType::Temp, state.dataHVACGlobal->SetPointErrorFlag);
                                 if (state.dataHVACGlobal->SetPointErrorFlag) {
                                     ShowSevereError(state,
-                                                    EnergyPlus::format("Missing temperature setpoint for UTSC {}",
-                                                                       state.dataTranspiredCollector->UTSC(UTSCUnitNum).Name));
+                                                    std::format("Missing temperature setpoint for UTSC {}",
+                                                                state.dataTranspiredCollector->UTSC(UTSCUnitNum).Name));
                                     ShowContinueError(state, " use a Setpoint Manager to establish a setpoint at the unit control node.");
                                     ShowContinueError(state, "Or add EMS Actuator to provide temperature setpoint at this node");
                                 }
@@ -1129,10 +1130,9 @@ namespace TranspiredCollector {
 
         if ((Vsuction < 0.001) || (Vsuction > 0.08)) { // warn that collector is not sized well
             if (state.dataTranspiredCollector->UTSC(UTSCNum).VsucErrIndex == 0) {
-                ShowWarningMessage(
-                    state,
-                    EnergyPlus::format("Solar Collector:Unglazed Transpired=\"{}\", Suction velocity is outside of range for a good design",
-                                       state.dataTranspiredCollector->UTSC(UTSCNum).Name));
+                ShowWarningMessage(state,
+                                   std::format("Solar Collector:Unglazed Transpired=\"{}\", Suction velocity is outside of range for a good design",
+                                               state.dataTranspiredCollector->UTSC(UTSCNum).Name));
                 ShowContinueErrorTimeStamp(state, EnergyPlus::format("Suction velocity ={:.4R}", Vsuction));
                 if (Vsuction < 0.003) {
                     ShowContinueError(state, "Velocity is low -- suggest decreasing area of transpired collector");
@@ -1575,9 +1575,9 @@ namespace TranspiredCollector {
         }
 
         if (SurfacePtr == 0) {
-            ShowFatalError(state,
-                           EnergyPlus::format("Invalid surface passed to GetTranspiredCollectorIndex, Surface name = {}",
-                                              state.dataSurface->Surface(SurfacePtr).Name));
+            ShowFatalError(
+                state,
+                std::format("Invalid surface passed to GetTranspiredCollectorIndex, Surface name = {}", state.dataSurface->Surface(SurfacePtr).Name));
         }
 
         UTSCNum = 0;
@@ -1593,8 +1593,8 @@ namespace TranspiredCollector {
 
         if (!Found) {
             ShowFatalError(state,
-                           EnergyPlus::format("Did not find surface in UTSC description in GetTranspiredCollectorIndex, Surface name = {}",
-                                              state.dataSurface->Surface(SurfacePtr).Name));
+                           std::format("Did not find surface in UTSC description in GetTranspiredCollectorIndex, Surface name = {}",
+                                       state.dataSurface->Surface(SurfacePtr).Name));
         } else {
 
             UTSCIndex = UTSCNum;
@@ -1646,7 +1646,7 @@ namespace TranspiredCollector {
         if (WhichUTSC != 0) {
             NodeNum = state.dataTranspiredCollector->UTSC(WhichUTSC).InletNode(1);
         } else {
-            ShowSevereError(state, EnergyPlus::format("GetAirInletNodeNum: Could not find TranspiredCollector = \"{}\"", UTSCName));
+            ShowSevereError(state, std::format("GetAirInletNodeNum: Could not find TranspiredCollector = \"{}\"", UTSCName));
             ErrorsFound = true;
             NodeNum = 0;
         }
@@ -1681,7 +1681,7 @@ namespace TranspiredCollector {
         if (WhichUTSC != 0) {
             NodeNum = state.dataTranspiredCollector->UTSC(WhichUTSC).OutletNode(1);
         } else {
-            ShowSevereError(state, EnergyPlus::format("GetAirOutletNodeNum: Could not find TranspiredCollector = \"{}\"", UTSCName));
+            ShowSevereError(state, std::format("GetAirOutletNodeNum: Could not find TranspiredCollector = \"{}\"", UTSCName));
             ErrorsFound = true;
             NodeNum = 0;
         }

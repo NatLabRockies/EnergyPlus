@@ -45,12 +45,16 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include <EnergyPlus/Timer.hh>
-
-#include <fmt/format.h>
+// C++ Headers
 #ifndef NDEBUG
 #    include <stdexcept>
 #endif
+
+// Third Party Headers
+#include <fmt/format.h>
+
+// EnergyPlus Headers
+#include <EnergyPlus/Timer.hh>
 
 namespace EnergyPlus {
 

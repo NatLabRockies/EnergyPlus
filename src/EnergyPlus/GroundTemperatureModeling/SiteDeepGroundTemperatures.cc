@@ -117,7 +117,7 @@ namespace GroundTemp {
             state.dataEnvrn->GroundTempInputs[static_cast<int>(DataEnvironment::GroundTempType::Deep)] = true;
 
         } else if (numCurrObjects > 1) {
-            ShowSevereError(state, fmt::format("{}: Too many objects entered. Only one allowed.", GroundTemp::modelTypeNames[(int)modelType]));
+            ShowSevereError(state, EnergyPlus::format("{}: Too many objects entered. Only one allowed.", GroundTemp::modelTypeNames[(int)modelType]));
             errorsFound = true;
 
         } else {
@@ -132,7 +132,8 @@ namespace GroundTemp {
             return thisModel;
         }
 
-        ShowFatalError(state, fmt::format("{}--Errors getting input for ground temperature model", GroundTemp::modelTypeNames[(int)modelType]));
+        ShowFatalError(state,
+                       EnergyPlus::format("{}--Errors getting input for ground temperature model", GroundTemp::modelTypeNames[(int)modelType]));
         return nullptr;
     }
 

@@ -45,9 +45,12 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
+#include <iostream>
+
+// EnergyPlus Headers
 #include <EnergyPlus/api/EnergyPlusPgm.hh>
 #include <EnergyPlus/api/state.h>
-#include <iostream>
 
 void message_callback_handler(std::string const &message)
 {

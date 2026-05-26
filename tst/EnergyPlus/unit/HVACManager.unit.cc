@@ -698,8 +698,8 @@ TEST_F(EnergyPlusFixture, AirloopFlowBalanceTest)
     std::string error_string =
         delimited_string({"   ** Severe  ** CheckAirLoopFlowBalance: AirLoopHVAC System 1 is unbalanced. Supply is > return plus outdoor air.",
                           "   **   ~~~   **  Environment=, at Simulation time= 00:00 - 00:00",
-                          "   **   ~~~   **   Flows [m3/s at standard density]: Supply=2.000000  Return=1.000000  Outdoor Air=0.000000",
-                          "   **   ~~~   **   Imbalance=1.000000",
+                          "   **   ~~~   **   Flows [m3/s at standard density]: Supply=2.00000  Return=1.00000  Outdoor Air=0.00000",
+                          "   **   ~~~   **   Imbalance=1.00000",
                           "   **   ~~~   **   This error will only be reported once per system."});
     EXPECT_TRUE(compare_err_stream(error_string, true));
 
@@ -717,8 +717,8 @@ TEST_F(EnergyPlusFixture, AirloopFlowBalanceTest)
     error_string =
         delimited_string({"   ** Severe  ** CheckAirLoopFlowBalance: AirLoopHVAC System 2 is unbalanced. Supply is > return plus outdoor air.",
                           "   **   ~~~   **  Environment=, at Simulation time= 00:00 - 00:00",
-                          "   **   ~~~   **   Flows [m3/s at standard density]: Supply=3.000000  Return=2.000000  Outdoor Air=0.990000",
-                          "   **   ~~~   **   Imbalance=1.000000E-002",
+                          "   **   ~~~   **   Flows [m3/s at standard density]: Supply=3.00000  Return=2.00000  Outdoor Air=0.99000",
+                          "   **   ~~~   **   Imbalance=0.01000",
                           "   **   ~~~   **   This error will only be reported once per system."});
     EXPECT_TRUE(compare_err_stream(error_string, true));
 }
@@ -752,9 +752,9 @@ TEST_F(EnergyPlusFixture, HVACConvergenceErrorTest)
         delimited_string({"   **   ~~~   ** Air System Named = AirLoop1 did not converge for mass flow rate",
                           "   **   ~~~   ** Check values should be zero. Most Recent values listed first.",
                           "   **   ~~~   ** Demand-to-Supply interface mass flow rate check value iteration history trace: "
-                          "0.000000,1.000000,2.000000,3.000000,4.000000,5.000000,6.000000,7.000000,8.000000,9.000000,",
+                          "0.00000,1.00000,2.00000,3.00000,4.00000,5.00000,6.00000,7.00000,8.00000,9.00000,",
                           "   **   ~~~   ** Supply-to-demand interface deck 1 mass flow rate check value iteration history trace: "
-                          "0.000000,0.100000,0.200000,0.300000,0.400000,0.500000,0.600000,0.700000,0.800000,0.900000,"});
+                          "0.00000,0.10000,0.20000,0.30000,0.40000,0.50000,0.60000,0.70000,0.80000,0.90000,"});
     EXPECT_TRUE(compare_err_stream(expectedErrString1, true));
 
     // humidity ratio
@@ -770,9 +770,9 @@ TEST_F(EnergyPlusFixture, HVACConvergenceErrorTest)
         delimited_string({"   **   ~~~   ** Air System Named = AirLoop1 did not converge for humidity ratio",
                           "   **   ~~~   ** Check values should be zero. Most Recent values listed first.",
                           "   **   ~~~   ** Demand-to-Supply interface humidity ratio check value iteration history trace: "
-                          "0.000000,1.000000,2.000000,3.000000,4.000000,5.000000,6.000000,7.000000,8.000000,9.000000,",
+                          "0.00000,1.00000,2.00000,3.00000,4.00000,5.00000,6.00000,7.00000,8.00000,9.00000,",
                           "   **   ~~~   ** Supply-to-demand interface deck 1 humidity ratio check value iteration history trace: "
-                          "0.000000,0.100000,0.200000,0.300000,0.400000,0.500000,0.600000,0.700000,0.800000,0.900000,"});
+                          "0.00000,0.10000,0.20000,0.30000,0.40000,0.50000,0.60000,0.70000,0.80000,0.90000,"});
     EXPECT_TRUE(compare_err_stream(expectedErrString2, true));
 
     // temperature
@@ -788,9 +788,9 @@ TEST_F(EnergyPlusFixture, HVACConvergenceErrorTest)
         delimited_string({"   **   ~~~   ** Air System Named = AirLoop1 did not converge for temperature",
                           "   **   ~~~   ** Check values should be zero. Most Recent values listed first.",
                           "   **   ~~~   ** Demand-to-Supply interface temperature check value iteration history trace: "
-                          "0.000000,1.000000,2.000000,3.000000,4.000000,5.000000,6.000000,7.000000,8.000000,9.000000,",
+                          "0.00000,1.00000,2.00000,3.00000,4.00000,5.00000,6.00000,7.00000,8.00000,9.00000,",
                           "   **   ~~~   ** Supply-to-demand interface deck 1 temperature check value iteration history trace: "
-                          "0.000000,0.100000,0.200000,0.300000,0.400000,0.500000,0.600000,0.700000,0.800000,0.900000,"});
+                          "0.00000,0.10000,0.20000,0.30000,0.40000,0.50000,0.60000,0.70000,0.80000,0.90000,"});
     EXPECT_TRUE(compare_err_stream(expectedErrString3, true));
 
     // Energy
@@ -806,9 +806,9 @@ TEST_F(EnergyPlusFixture, HVACConvergenceErrorTest)
         delimited_string({"   **   ~~~   ** Air System Named = AirLoop1 did not converge for energy",
                           "   **   ~~~   ** Check values should be zero. Most Recent values listed first.",
                           "   **   ~~~   ** Demand-to-Supply interface energy check value iteration history trace: "
-                          "0.000000,1.000000,2.000000,3.000000,4.000000,5.000000,6.000000,7.000000,8.000000,9.000000,",
+                          "0.00000,1.00000,2.00000,3.00000,4.00000,5.00000,6.00000,7.00000,8.00000,9.00000,",
                           "   **   ~~~   ** Supply-to-demand interface deck 1 energy check value iteration history trace: "
-                          "0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,"});
+                          "0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,"});
     EXPECT_TRUE(compare_err_stream(expectedErrString4, true));
 
     // CO2
@@ -824,9 +824,9 @@ TEST_F(EnergyPlusFixture, HVACConvergenceErrorTest)
         delimited_string({"   **   ~~~   ** Air System Named = AirLoop1 did not converge for CO2",
                           "   **   ~~~   ** Check values should be zero. Most Recent values listed first.",
                           "   **   ~~~   ** Demand-to-Supply interface CO2 check value iteration history trace: "
-                          "0.000000,1.000000,2.000000,3.000000,4.000000,5.000000,6.000000,7.000000,8.000000,9.000000,",
+                          "0.00000,1.00000,2.00000,3.00000,4.00000,5.00000,6.00000,7.00000,8.00000,9.00000,",
                           "   **   ~~~   ** Supply-to-demand interface deck 1 CO2 check value iteration history trace: "
-                          "0.000000,0.100000,0.200000,0.300000,0.400000,0.500000,0.600000,0.700000,0.800000,0.900000,"});
+                          "0.00000,0.10000,0.20000,0.30000,0.40000,0.50000,0.60000,0.70000,0.80000,0.90000,"});
     EXPECT_TRUE(compare_err_stream(expectedErrString5, true));
 
     // generic contaminant
@@ -843,10 +843,10 @@ TEST_F(EnergyPlusFixture, HVACConvergenceErrorTest)
         delimited_string({"   **   ~~~   ** Air System Named = AirLoop1 did not converge for generic contaminant",
                           "   **   ~~~   ** Check values should be zero. Most Recent values listed first.",
                           "   **   ~~~   ** Demand-to-Supply interface generic contaminant check value iteration history trace: "
-                          "0.000000,1.000000,2.000000,3.000000,4.000000,5.000000,6.000000,7.000000,8.000000,9.000000,",
+                          "0.00000,1.00000,2.00000,3.00000,4.00000,5.00000,6.00000,7.00000,8.00000,9.00000,",
                           "   **   ~~~   ** Supply-to-demand interface deck 1 generic contaminant check value iteration history trace: "
-                          "0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,",
+                          "0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,",
                           "   **   ~~~   ** Supply-to-demand interface deck 2 generic contaminant check value iteration history trace: "
-                          "0.000000,0.100000,0.200000,0.300000,0.400000,0.500000,0.600000,0.700000,0.800000,0.900000,"});
+                          "0.00000,0.10000,0.20000,0.30000,0.40000,0.50000,0.60000,0.70000,0.80000,0.90000,"});
     EXPECT_TRUE(compare_err_stream(expectedErrString6, true));
 }

@@ -45,7 +45,11 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-// EnergyPlus headers
+// Third Party Headers
+#include <WCEMultiLayerOptics.hpp>
+#include <WCETarcog.hpp>
+
+// EnergyPlus Headers
 #include <EnergyPlus/Construction.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
@@ -56,12 +60,6 @@
 #include <EnergyPlus/Material.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
 #include <EnergyPlus/WindowManager.hh>
-
-// Windows library headers
-#include <WCEMultiLayerOptics.hpp>
-#include <WCETarcog.hpp>
-
-// EnergyPlus headers
 #include <EnergyPlus/WindowManagerExteriorThermal.hh>
 
 namespace EnergyPlus {

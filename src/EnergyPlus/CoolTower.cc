@@ -302,7 +302,7 @@ namespace CoolTower {
         }
 
         if (ErrorsFound) {
-            ShowFatalError(state, EnergyPlus::format("{} errors occurred in input.  Program terminates.", CurrentModuleObject));
+            ShowFatalError(state, std::format("{} errors occurred in input.  Program terminates.", CurrentModuleObject));
         }
 
         for (int CoolTowerNum = 1; CoolTowerNum <= NumCoolTowers; ++CoolTowerNum) {
@@ -547,7 +547,7 @@ namespace CoolTower {
 
                 if (OutletTemp < state.dataEnvrn->OutWetBulbTemp) {
                     ShowSevereError(state, "Cooltower outlet temperature exceed the outdoor wet bulb temperature reset to input values");
-                    ShowContinueError(state, EnergyPlus::format("Occurs in Cooltower ={}", coolTower.Name));
+                    ShowContinueError(state, std::format("Occurs in Cooltower ={}", coolTower.Name));
                 }
 
                 WaterFlowRate /= UCFactor;

@@ -61,7 +61,7 @@ int wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int
     std::wstring directory(path);
     size_t pos = directory.find_last_of(L"\\/");
     if (pos != std::wstring::npos) {
-        directory = directory.substr(0, pos); // Extract just the directory path
+        directory.resize(pos); // Extract just the directory path
     }
 
     // Construct the target application path (assuming it's in the same directory)

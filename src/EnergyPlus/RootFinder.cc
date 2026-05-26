@@ -48,9 +48,6 @@
 // C++ Headers
 #include <cmath>
 
-// ObjexxFCL Headers
-// #include <ObjexxFCL/Fmath.hh>
-
 // EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataPrecisionGlobals.hh>
@@ -319,7 +316,7 @@ void InitializeRootFinder(EnergyPlusData &state,
             XMinReset = XMax;
         } else {
             ShowFatalError(
-                state, EnergyPlus::format("InitializeRootFinder: Invalid min/max bounds XMin={:.6T} must be smaller than XMax={:.6T}", XMin, XMax));
+                state, EnergyPlus::format("InitializeRootFinder: Invalid min/max bounds XMin={:.6f} must be smaller than XMax={:.6f}", XMin, XMax));
         }
     }
 
@@ -1127,10 +1124,10 @@ void UpdateBracket(EnergyPlusData &state,
                 } else {
                     // Should never happen if CheckLowerUpperBracket() is called before
                     ShowSevereError(state, "UpdateBracket: Current iterate is smaller than the lower bracket.");
-                    ShowContinueError(state, EnergyPlus::format("UpdateBracket: X={:.15T}, Y={:.15T}", X, Y));
+                    ShowContinueError(state, EnergyPlus::format("UpdateBracket: X={:.15f}, Y={:.15f}", X, Y));
                     ShowContinueError(state,
                                       EnergyPlus::format(
-                                          "UpdateBracket: XLower={:.15T}, YLower={:.15T}", RootFinderData.LowerPoint.X, RootFinderData.LowerPoint.Y));
+                                          "UpdateBracket: XLower={:.15f}, YLower={:.15f}", RootFinderData.LowerPoint.X, RootFinderData.LowerPoint.Y));
                     ShowFatalError(state, "UpdateBracket: Preceding error causes program termination.");
                 }
             }
@@ -1154,10 +1151,10 @@ void UpdateBracket(EnergyPlusData &state,
                 } else {
                     // Should never happen if CheckLowerUpperBracket() is called before
                     ShowSevereError(state, "UpdateBracket: Current iterate is greater than the upper bracket.");
-                    ShowContinueError(state, EnergyPlus::format("UpdateBracket: X={:.15T}, Y={:.15T}", X, Y));
+                    ShowContinueError(state, EnergyPlus::format("UpdateBracket: X={:.15f}, Y={:.15f}", X, Y));
                     ShowContinueError(state,
                                       EnergyPlus::format(
-                                          "UpdateBracket: XUpper={:.15T}, YUpper={:.15T}", RootFinderData.UpperPoint.X, RootFinderData.UpperPoint.Y));
+                                          "UpdateBracket: XUpper={:.15f}, YUpper={:.15f}", RootFinderData.UpperPoint.X, RootFinderData.UpperPoint.Y));
                     ShowFatalError(state, "UpdateBracket: Preceding error causes program termination.");
                 }
             }
@@ -1184,10 +1181,10 @@ void UpdateBracket(EnergyPlusData &state,
                 } else {
                     // Should never happen if CheckLowerUpperBracket() is called before
                     ShowSevereError(state, "UpdateBracket: Current iterate is smaller than the lower bracket.");
-                    ShowContinueError(state, EnergyPlus::format("UpdateBracket: X={:.15T}, Y={:.15T}", X, Y));
+                    ShowContinueError(state, EnergyPlus::format("UpdateBracket: X={:.15f}, Y={:.15f}", X, Y));
                     ShowContinueError(state,
                                       EnergyPlus::format(
-                                          "UpdateBracket: XLower={:.15T}, YLower={:.15T}", RootFinderData.LowerPoint.X, RootFinderData.LowerPoint.Y));
+                                          "UpdateBracket: XLower={:.15f}, YLower={:.15f}", RootFinderData.LowerPoint.X, RootFinderData.LowerPoint.Y));
                     ShowFatalError(state, "UpdateBracket: Preceding error causes program termination.");
                 }
             }
@@ -1211,10 +1208,10 @@ void UpdateBracket(EnergyPlusData &state,
                 } else {
                     // Should never happen if CheckLowerUpperBracket() is called before
                     ShowSevereError(state, "UpdateBracket: Current iterate is greater than the upper bracket.");
-                    ShowContinueError(state, EnergyPlus::format("UpdateBracket: X={:.15T}, Y={:.15T}", X, Y));
+                    ShowContinueError(state, EnergyPlus::format("UpdateBracket: X={:.15f}, Y={:.15f}", X, Y));
                     ShowContinueError(state,
                                       EnergyPlus::format(
-                                          "UpdateBracket: XUpper={:.15T}, YUpper={:.15T}", RootFinderData.UpperPoint.X, RootFinderData.UpperPoint.Y));
+                                          "UpdateBracket: XUpper={:.15f}, YUpper={:.15f}", RootFinderData.UpperPoint.X, RootFinderData.UpperPoint.Y));
                     ShowFatalError(state, "UpdateBracket: Preceding error causes program termination.");
                 }
             }

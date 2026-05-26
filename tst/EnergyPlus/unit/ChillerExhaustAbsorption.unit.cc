@@ -59,6 +59,7 @@
 #include <EnergyPlus/FluidProperties.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
 #include <EnergyPlus/PlantUtilities.hh>
+#include <EnergyPlus/Psychrometrics.hh>
 
 #include "Fixtures/EnergyPlusFixture.hh"
 
@@ -220,10 +221,10 @@ TEST_F(EnergyPlusFixture, ExhAbsorption_GetInput_Test)
         "    Capstone C65 ExhTemp_vs_Inlet_Temp,  !- Exhaust Air Temperature Function of Temperature Curve Name        ",
         "    Capstone C65 ExhTemp_vs_PLR;  !- Exhaust Air Temperature Function of Part Load Ratio Curve Name           ",
         "                                                                                                              ",
-        "  OutdoorAir:Node,                                                                ",
-        "    Capstone C65 Combustion Air Inlet Node,  !- Name                              ",
-        "    -1;                      !- Height Above Ground {m}                           ",
-        "                                                                                  ",
+        "  OutdoorAir:Node,                                                                                            ",
+        "    Capstone C65 Combustion Air Inlet Node,  !- Name                                                          ",
+        "    -1;                      !- Height Above Ground {m}                                                       ",
+        "                                                                                                              ",
         "  Curve:Quadratic,                                                                                            ",
         "    Capstone C65 ExhTemp_vs_Inlet_Temp,  !- Name                                                              ",
         "    1.0,                     !- Coefficient1 Constant                                                         ",

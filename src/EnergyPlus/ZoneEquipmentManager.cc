@@ -48,13 +48,16 @@
 // C++ Headers
 #include <algorithm>
 #include <cmath>
+#include <format>
 #include <string>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
 
-// EnergyPlus Headers
+// Local Headers
 #include <AirflowNetwork/Solver.hpp>
+
+// EnergyPlus Headers
 #include <EnergyPlus/BaseboardElectric.hh>
 #include <EnergyPlus/BaseboardRadiator.hh>
 #include <EnergyPlus/ChilledCeilingPanelSimple.hh>
@@ -3033,10 +3036,9 @@ void updateZoneSizingEndZoneSizingCalc7(EnergyPlusData &state,
         // initialize sizing conditions if they have not been set (i.e., no corresponding load) to zone condition
         // issue 6006, heating coils sizing to 0 when no heating load in zone
         if (zoneSizingF.DesCoolSetPtSeq.empty()) {
-            ShowSevereError(state,
-                            EnergyPlus::format("{}:  Thermostat cooling set point temperatures are not initialized for Zone = {}",
-                                               RoutineName,
-                                               zsFinalSizing.ZoneName));
+            ShowSevereError(
+                state,
+                std::format("{}:  Thermostat cooling set point temperatures are not initialized for Zone = {}", RoutineName, zsFinalSizing.ZoneName));
             ShowFatalError(state, "Please send your input file to the EnergyPlus support/development team for further investigation.");
         } else {
             zsFinalSizing.ZoneTempAtCoolPeak = *std::min_element(zoneSizingF.DesCoolSetPtSeq.begin(), zoneSizingF.DesCoolSetPtSeq.end());
@@ -3183,9 +3185,9 @@ void updateZoneSizingEndZoneSizingCalc7(EnergyPlusData &state,
         // initialize sizing conditions if they have not been set (i.e., no corresponding load) to zone condition
         // issue 6006, heating coils sizing to 0 when no heating load in zone
         if (zoneSizingDDF.DesHeatSetPtSeq.empty()) {
-            ShowSevereError(state,
-                            EnergyPlus::format(
-                                "{}:  Thermostat heating set point temperatures not initialized for Zone = {}", RoutineName, zsFinalSizing.ZoneName));
+            ShowSevereError(
+                state,
+                std::format("{}:  Thermostat heating set point temperatures not initialized for Zone = {}", RoutineName, zsFinalSizing.ZoneName));
             ShowFatalError(state, "Please send your input file to the EnergyPlus support/development team for further investigation.");
         } else {
             zsFinalSizing.ZoneTempAtHeatPeak = *std::max_element(zoneSizingDDF.DesHeatSetPtSeq.begin(), zoneSizingDDF.DesHeatSetPtSeq.end());
@@ -3607,11 +3609,10 @@ void SimZoneEquipment(EnergyPlusData &state, bool const FirstHVACIteration, bool
                 break;
             }
             default: {
-                ShowSevereError(state,
-                                EnergyPlus::format("Error found in Supply Air Path={}", state.dataZoneEquip->SupplyAirPath(SupplyAirPathNum).Name));
-                ShowContinueError(state,
-                                  EnergyPlus::format("Invalid Supply Air Path Component={}",
-                                                     state.dataZoneEquip->SupplyAirPath(SupplyAirPathNum).ComponentType(CompNum)));
+                ShowSevereError(state, std::format("Error found in Supply Air Path={}", state.dataZoneEquip->SupplyAirPath(SupplyAirPathNum).Name));
+                ShowContinueError(
+                    state,
+                    std::format("Invalid Supply Air Path Component={}", state.dataZoneEquip->SupplyAirPath(SupplyAirPathNum).ComponentType(CompNum)));
                 ShowFatalError(state, "Preceding condition causes termination.");
 
                 break;
@@ -4162,11 +4163,10 @@ void SimZoneEquipment(EnergyPlusData &state, bool const FirstHVACIteration, bool
 
             } break;
             default: {
-                ShowSevereError(state,
-                                EnergyPlus::format("Error found in Supply Air Path={}", state.dataZoneEquip->SupplyAirPath(SupplyAirPathNum).Name));
-                ShowContinueError(state,
-                                  EnergyPlus::format("Invalid Supply Air Path Component={}",
-                                                     state.dataZoneEquip->SupplyAirPath(SupplyAirPathNum).ComponentType(CompNum)));
+                ShowSevereError(state, std::format("Error found in Supply Air Path={}", state.dataZoneEquip->SupplyAirPath(SupplyAirPathNum).Name));
+                ShowContinueError(
+                    state,
+                    std::format("Invalid Supply Air Path Component={}", state.dataZoneEquip->SupplyAirPath(SupplyAirPathNum).ComponentType(CompNum)));
                 ShowFatalError(state, "Preceding condition causes termination.");
             } break;
             }
@@ -5228,10 +5228,9 @@ void CalcZoneMassBalance(EnergyPlusData &state, bool const FirstHVACIteration)
                             Real64 sysUnbalancedVolFlow = sysUnbalancedFlow / state.dataEnvrn->StdRhoAir;
                             Real64 unbalancedVolFlow = max(0.0, sysUnbalancedVolFlow - incomingVolFlow);
                             if (unbalancedVolFlow > HVAC::SmallAirVolFlow) {
-                                ShowWarningError(
-                                    state,
-                                    EnergyPlus::format("In zone {} there is unbalanced air flow. Load due to induced outdoor air is neglected.",
-                                                       thisZoneEquip.ZoneName));
+                                ShowWarningError(state,
+                                                 std::format("In zone {} there is unbalanced air flow. Load due to induced outdoor air is neglected.",
+                                                             thisZoneEquip.ZoneName));
                                 ShowContinueErrorTimeStamp(state, "");
                                 ShowContinueError(state,
                                                   EnergyPlus::format("  Flows [m3/s]: Inlets: {:.6R}  Unbalanced exhausts: {:.6R}  Returns: {:.6R}",
@@ -5773,11 +5772,10 @@ void CalcAirFlowSimple(EnergyPlusData &state,
             if (hybridControlVentilation.MinIndoorTemperature > hybridControlVentilation.MaxIndoorTemperature) {
                 ++hybridControlVentilation.IndoorTempErrCount;
                 if (hybridControlVentilation.IndoorTempErrCount < 2) {
-                    ShowWarningError(
-                        state,
-                        EnergyPlus::format("Ventilation indoor temperature control: The minimum indoor temperature is above the maximum indoor "
-                                           "temperature in {}",
-                                           hybridControlVentilation.Name));
+                    ShowWarningError(state,
+                                     std::format("Ventilation indoor temperature control: The minimum indoor temperature is above the maximum indoor "
+                                                 "temperature in {}",
+                                                 hybridControlVentilation.Name));
                     ShowContinueError(state, "The minimum indoor temperature is set to the maximum indoor temperature. Simulation continues.");
                     ShowContinueErrorTimeStamp(state, " Occurrence info:");
                 } else {
@@ -5801,11 +5799,10 @@ void CalcAirFlowSimple(EnergyPlusData &state,
             if (hybridControlVentilation.MinOutdoorTemperature > hybridControlVentilation.MaxOutdoorTemperature) {
                 ++hybridControlVentilation.OutdoorTempErrCount;
                 if (hybridControlVentilation.OutdoorTempErrCount < 2) {
-                    ShowWarningError(
-                        state,
-                        EnergyPlus::format("Ventilation outdoor temperature control: The minimum outdoor temperature is above the maximum "
-                                           "outdoor temperature in {}",
-                                           hybridControlVentilation.Name));
+                    ShowWarningError(state,
+                                     std::format("Ventilation outdoor temperature control: The minimum outdoor temperature is above the maximum "
+                                                 "outdoor temperature in {}",
+                                                 hybridControlVentilation.Name));
                     ShowContinueError(state, "The minimum outdoor temperature is set to the maximum outdoor temperature. Simulation continues.");
                     ShowContinueErrorTimeStamp(state, " Occurrence info:");
                 } else {
@@ -6118,9 +6115,8 @@ void CalcAirFlowSimple(EnergyPlusData &state,
                     if (thisMixing.IndoorTempErrCount < 2) {
                         ShowWarningError(
                             state,
-                            EnergyPlus::format(
-                                "Mixing zone temperature control: The minimum zone temperature is above the maximum zone temperature in {}",
-                                thisMixing.Name));
+                            std::format("Mixing zone temperature control: The minimum zone temperature is above the maximum zone temperature in {}",
+                                        thisMixing.Name));
                         ShowContinueError(state, "The minimum zone temperature is set to the maximum zone temperature. Simulation continues.");
                         ShowContinueErrorTimeStamp(state, " Occurrence info:");
                     } else {
@@ -6156,7 +6152,7 @@ void CalcAirFlowSimple(EnergyPlusData &state,
                     if (thisMixing.SourceTempErrCount < 2) {
                         ShowWarningError(
                             state,
-                            EnergyPlus::format(
+                            std::format(
                                 "Mixing source temperature control: The minimum source temperature is above the maximum source temperature in {}",
                                 thisMixing.Name));
                         ShowContinueError(state, "The minimum source temperature is set to the maximum source temperature. Simulation continues.");
@@ -6193,11 +6189,10 @@ void CalcAirFlowSimple(EnergyPlusData &state,
                 if (MixingTmin > MixingTmax) {
                     ++thisMixing.OutdoorTempErrCount;
                     if (thisMixing.OutdoorTempErrCount < 2) {
-                        ShowWarningError(
-                            state,
-                            EnergyPlus::format("Mixing outdoor temperature control: The minimum outdoor temperature is above the maximum "
-                                               "outdoor temperature in {}",
-                                               thisMixing.Name));
+                        ShowWarningError(state,
+                                         std::format("Mixing outdoor temperature control: The minimum outdoor temperature is above the maximum "
+                                                     "outdoor temperature in {}",
+                                                     thisMixing.Name));
                         ShowContinueError(state, "The minimum outdoor temperature is set to the maximum source temperature. Simulation continues.");
                         ShowContinueErrorTimeStamp(state, " Occurrence info:");
                     } else {
@@ -6390,7 +6385,7 @@ void CalcAirFlowSimple(EnergyPlusData &state,
                     if (thisCrossMixing.IndoorTempErrCount < 2) {
                         ShowWarningError(
                             state,
-                            EnergyPlus::format(
+                            std::format(
                                 "CrossMixing zone temperature control: The minimum zone temperature is above the maximum zone temperature in {}",
                                 thisCrossMixing.Name));
                         ShowContinueError(state, "The minimum zone temperature is set to the maximum zone temperature. Simulation continues.");
@@ -6428,9 +6423,9 @@ void CalcAirFlowSimple(EnergyPlusData &state,
                     if (thisCrossMixing.SourceTempErrCount < 2) {
                         ShowWarningError(
                             state,
-                            EnergyPlus::format("CrossMixing source temperature control: The minimum source temperature is above the maximum source "
-                                               "temperature in {}",
-                                               thisCrossMixing.Name));
+                            std::format("CrossMixing source temperature control: The minimum source temperature is above the maximum source "
+                                        "temperature in {}",
+                                        thisCrossMixing.Name));
                         ShowContinueError(state, "The minimum source temperature is set to the maximum source temperature. Simulation continues.");
                         ShowContinueErrorTimeStamp(state, " Occurrence info:");
                     } else {
@@ -6465,11 +6460,10 @@ void CalcAirFlowSimple(EnergyPlusData &state,
                 if (MixingTmin > MixingTmax) {
                     ++thisCrossMixing.OutdoorTempErrCount;
                     if (thisCrossMixing.OutdoorTempErrCount < 2) {
-                        ShowWarningError(
-                            state,
-                            EnergyPlus::format("CrossMixing outdoor temperature control: The minimum outdoor temperature is above the maximum "
-                                               "outdoor temperature in {}",
-                                               state.dataHeatBal->Mixing(j).Name));
+                        ShowWarningError(state,
+                                         std::format("CrossMixing outdoor temperature control: The minimum outdoor temperature is above the maximum "
+                                                     "outdoor temperature in {}",
+                                                     state.dataHeatBal->Mixing(j).Name));
                         ShowContinueError(state, "The minimum outdoor temperature is set to the maximum source temperature. Simulation continues.");
                         ShowContinueErrorTimeStamp(state, " Occurrence info:");
                     } else {
@@ -7067,7 +7061,7 @@ void AutoCalcDOASControlStrategy(EnergyPlusData &state)
                                            headerAlreadyPrinted);
             }
             if (zoneSizingInput.DOASLowSetpoint > zoneSizingInput.DOASHighSetpoint) {
-                ShowSevereError(state, EnergyPlus::format("For Sizing:Zone = {}", zoneSizingInput.ZoneName));
+                ShowSevereError(state, std::format("For Sizing:Zone = {}", zoneSizingInput.ZoneName));
                 ShowContinueError(state, "... Dedicated Outside Air Low Setpoint for Design must be less than the High Setpoint");
                 ErrorsFound = true;
             }

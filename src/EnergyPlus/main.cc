@@ -45,10 +45,11 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// Third Party Headers
+#include <CLI/CLI11.hpp>
+
 // EnergyPlus Headers
 #include <EnergyPlus/api/EnergyPlusPgm.hh>
-
-#include <CLI/CLI11.hpp>
 
 int main(int argc, char **argv)
 {

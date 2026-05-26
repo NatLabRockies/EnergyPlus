@@ -107,20 +107,19 @@ void SimZoneHybridUnitaryAirConditioners(EnergyPlusData &state,
         if (CompNum < 1 || CompNum > state.dataHybridUnitaryAC->NumZoneHybridEvap) {
             ShowFatalError(
                 state,
-                EnergyPlus::format("SimZoneHybridUnitaryAirConditioners: Invalid CompIndex passed={}, Number of units ={}, Entered Unit name = {}",
-                                   CompNum,
-                                   state.dataHybridUnitaryAC->NumZoneHybridEvap,
-                                   CompName));
+                std::format("SimZoneHybridUnitaryAirConditioners: Invalid CompIndex passed={}, Number of units ={}, Entered Unit name = {}",
+                            CompNum,
+                            state.dataHybridUnitaryAC->NumZoneHybridEvap,
+                            CompName));
         }
         if (state.dataHybridUnitaryAC->CheckZoneHybridEvapName(CompNum)) {
             if (CompName != state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(CompNum).Name) {
                 ShowFatalError(
                     state,
-                    EnergyPlus::format(
-                        "SimZoneHybridUnitaryAirConditioners: Invalid CompIndex passed={}, Unit name={}, stored unit name for that index={}",
-                        CompNum,
-                        CompName,
-                        state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(CompNum).Name));
+                    std::format("SimZoneHybridUnitaryAirConditioners: Invalid CompIndex passed={}, Unit name={}, stored unit name for that index={}",
+                                CompNum,
+                                CompName,
+                                state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(CompNum).Name));
             }
             state.dataHybridUnitaryAC->CheckZoneHybridEvapName(CompNum) = false;
         }
@@ -129,34 +128,33 @@ void SimZoneHybridUnitaryAirConditioners(EnergyPlusData &state,
         InitZoneHybridUnitaryAirConditioners(state, CompNum, ZoneNum);
     } catch (int e) {
         ShowFatalError(state,
-                       EnergyPlus::format("An exception occurred in InitZoneHybridUnitaryAirConditioners{}, Unit name={}, stored unit name for that "
-                                          "index={}. Please check idf.",
-                                          CompNum,
-                                          CompName,
-                                          state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(CompNum).Name));
+                       std::format("An exception occurred in InitZoneHybridUnitaryAirConditioners{}, Unit name={}, stored unit name for that "
+                                   "index={}. Please check idf.",
+                                   CompNum,
+                                   CompName,
+                                   state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(CompNum).Name));
         return;
     }
     try {
         CalcZoneHybridUnitaryAirConditioners(state, CompNum, ZoneNum, SensibleOutputProvided, LatentOutputProvided);
     } catch (int e) {
         ShowFatalError(state,
-                       EnergyPlus::format("An exception occurred in CalcZoneHybridUnitaryAirConditioners{}, Unit name={}, stored unit name for that "
-                                          "index={}. Please check idf.",
-                                          CompNum,
-                                          CompName,
-                                          state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(CompNum).Name));
+                       std::format("An exception occurred in CalcZoneHybridUnitaryAirConditioners{}, Unit name={}, stored unit name for that "
+                                   "index={}. Please check idf.",
+                                   CompNum,
+                                   CompName,
+                                   state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(CompNum).Name));
         return;
     }
     try {
         ReportZoneHybridUnitaryAirConditioners(state, CompNum);
     } catch (int e) {
-        ShowFatalError(
-            state,
-            EnergyPlus::format("An exception occurred in ReportZoneHybridUnitaryAirConditioners{}, Unit name={}, stored unit name for that "
-                               "index={}. Please check idf.",
-                               CompNum,
-                               CompName,
-                               state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(CompNum).Name));
+        ShowFatalError(state,
+                       std::format("An exception occurred in ReportZoneHybridUnitaryAirConditioners{}, Unit name={}, stored unit name for that "
+                                   "index={}. Please check idf.",
+                                   CompNum,
+                                   CompName,
+                                   state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(CompNum).Name));
         return;
     }
 }
@@ -238,9 +236,9 @@ void InitZoneHybridUnitaryAirConditioners(EnergyPlusData &state,
             } else {
                 ShowSevereError(
                     state,
-                    EnergyPlus::format("InitZoneHybridUnitaryAirConditioners: ZoneHVAC:HybridUnitaryHVAC = {}, is not on any ZoneHVAC:EquipmentList. "
-                                       " It will not be simulated.",
-                                       state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(Loop).Name));
+                    std::format("InitZoneHybridUnitaryAirConditioners: ZoneHVAC:HybridUnitaryHVAC = {}, is not on any ZoneHVAC:EquipmentList. "
+                                " It will not be simulated.",
+                                state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(Loop).Name));
             }
         }
     }
@@ -598,8 +596,8 @@ void GetInputZoneHybridUnitaryAirConditioners(EnergyPlusData &state, bool &Error
                 } else if (Util::SameString(Alphas(13), "No")) {
                     hybridUnitaryAC.FanHeatGain = true;
                 } else {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, hybridUnitaryAC.Name));
-                    ShowContinueError(state, EnergyPlus::format("Illegal {} = {}", cAlphaFields(13), Alphas(13)));
+                    ShowSevereError(state, std::format("{} = {}", cCurrentModuleObject, hybridUnitaryAC.Name));
+                    ShowContinueError(state, std::format("Illegal {} = {}", cAlphaFields(13), Alphas(13)));
                     ErrorsFound = true;
                 }
             }
@@ -650,13 +648,19 @@ void GetInputZoneHybridUnitaryAirConditioners(EnergyPlusData &state, bool &Error
             }
 
             // A18, \field Objective Function Minimizes
+            if (!lAlphaBlanks(18) && (hybridUnitaryAC.ObjectiveFunction = static_cast<HybridEvapCoolingModel::ObjectiveFunctionType>(
+                                          getEnumValue(HybridEvapCoolingModel::objectiveFunctionNamesUC, Util::makeUPPER(Alphas(18))))) ==
+                                         HybridEvapCoolingModel::ObjectiveFunctionType::Invalid) {
+                ShowSevereInvalidKey(state, eoh, cAlphaFields(18), Alphas(18));
+                ErrorsFound = true;
+            }
 
             // A19, \ OA requirement pointer
             if (!lAlphaBlanks(19)) {
                 hybridUnitaryAC.OARequirementsPtr = Util::FindItemInList(Alphas(19), state.dataSize->OARequirements);
                 if (hybridUnitaryAC.OARequirementsPtr == 0) {
-                    ShowSevereError(state, EnergyPlus::format("{}: {} = {} invalid data", routineName, cCurrentModuleObject, Alphas(1)));
-                    ShowContinueError(state, EnergyPlus::format("Invalid-not found {}=\"{}\".", cAlphaFields(19), Alphas(19)));
+                    ShowSevereError(state, std::format("{}: {} = {} invalid data", routineName, cCurrentModuleObject, Alphas(1)));
+                    ShowContinueError(state, std::format("Invalid-not found {}=\"{}\".", cAlphaFields(19), Alphas(19)));
                     ErrorsFound = true;
                 } else {
                     hybridUnitaryAC.OutdoorAir = true;
@@ -675,9 +679,9 @@ void GetInputZoneHybridUnitaryAirConditioners(EnergyPlusData &state, bool &Error
             }
 
             for (int modeIter = 0; modeIter <= Numberofoperatingmodes - 1; ++modeIter) {
-                ErrorsFound = hybridUnitaryAC.ParseMode(state, Alphas, cAlphaFields, Numbers, cNumericFields, lAlphaBlanks, cCurrentModuleObject);
+                ErrorsFound = hybridUnitaryAC.ParseMode(state, Alphas, cAlphaFields, Numbers, lAlphaBlanks, lNumericBlanks, cCurrentModuleObject);
                 if (ErrorsFound) {
-                    ShowFatalError(state, EnergyPlus::format("{}: Errors found parsing modes", routineName));
+                    ShowFatalError(state, std::format("{}: Errors found parsing modes", routineName));
                     ShowContinueError(state, "... Preceding condition causes termination.");
                     break;
                 }
@@ -1238,35 +1242,35 @@ void GetInputZoneHybridUnitaryAirConditioners(EnergyPlusData &state, bool &Error
 
         for (auto &thisSetting : hybridUnitaryAC.CurrentOperatingSettings) {
             SetupOutputVariable(state,
-                                EnergyPlus::format("Zone Hybrid Unitary HVAC Runtime Fraction in Setting {}", index),
+                                std::format("Zone Hybrid Unitary HVAC Runtime Fraction in Setting {}", index),
                                 Constant::Units::None,
                                 thisSetting.Runtime_Fraction,
                                 OutputProcessor::TimeStepType::Zone,
                                 OutputProcessor::StoreType::Average,
                                 hybridUnitaryAC.Name);
             SetupOutputVariable(state,
-                                EnergyPlus::format("Zone Hybrid Unitary HVAC Mode in Setting {}", index),
+                                std::format("Zone Hybrid Unitary HVAC Mode in Setting {}", index),
                                 Constant::Units::None,
                                 thisSetting.Mode,
                                 OutputProcessor::TimeStepType::Zone,
                                 OutputProcessor::StoreType::Average,
                                 hybridUnitaryAC.Name);
             SetupOutputVariable(state,
-                                EnergyPlus::format("Zone Hybrid Unitary HVAC Outdoor Air Fraction in Setting {}", index),
+                                std::format("Zone Hybrid Unitary HVAC Outdoor Air Fraction in Setting {}", index),
                                 Constant::Units::kg_s,
                                 thisSetting.Outdoor_Air_Fraction,
                                 OutputProcessor::TimeStepType::Zone,
                                 OutputProcessor::StoreType::Average,
                                 hybridUnitaryAC.Name);
             SetupOutputVariable(state,
-                                EnergyPlus::format("Zone Hybrid Unitary HVAC Supply Air Mass Flow Rate in Setting {}", index),
+                                std::format("Zone Hybrid Unitary HVAC Supply Air Mass Flow Rate in Setting {}", index),
                                 Constant::Units::kg_s,
                                 thisSetting.Unscaled_Supply_Air_Mass_Flow_Rate,
                                 OutputProcessor::TimeStepType::Zone,
                                 OutputProcessor::StoreType::Average,
                                 hybridUnitaryAC.Name);
             SetupOutputVariable(state,
-                                EnergyPlus::format("Zone Hybrid Unitary HVAC Supply Air Mass Flow Rate Ratio in Setting {}", index),
+                                std::format("Zone Hybrid Unitary HVAC Supply Air Mass Flow Rate Ratio in Setting {}", index),
                                 Constant::Units::None,
                                 thisSetting.Supply_Air_Mass_Flow_Rate_Ratio,
                                 OutputProcessor::TimeStepType::Zone,
@@ -1277,7 +1281,7 @@ void GetInputZoneHybridUnitaryAirConditioners(EnergyPlusData &state, bool &Error
     }
     Errors = ErrorsFound;
     if (ErrorsFound) {
-        ShowFatalError(state, EnergyPlus::format("{}: Errors found in getting input.", routineName));
+        ShowFatalError(state, std::format("{}: Errors found in getting input.", routineName));
         ShowContinueError(state, "... Preceding condition causes termination.");
     }
 }

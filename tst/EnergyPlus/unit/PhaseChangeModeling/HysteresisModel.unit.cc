@@ -47,7 +47,6 @@
 
 // Google Test Headers
 #include <EnergyPlus/PhaseChangeModeling/HysteresisModel.hh>
-#include <fstream>
 #include <gtest/gtest.h>
 #include <vector>
 

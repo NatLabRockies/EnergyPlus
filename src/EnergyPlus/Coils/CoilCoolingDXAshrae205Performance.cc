@@ -45,7 +45,13 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
+#include <format>
+
+// Local Headers
 #include "rs0004_factory.h"
+
+// EnergyPlus Headers
 #include <EnergyPlus/Coils/CoilCoolingDXAshrae205Performance.hh>
 #include <EnergyPlus/CurveManager.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
@@ -80,7 +86,7 @@ CoilCoolingDX205Performance::CoilCoolingDX205Performance(EnergyPlus::EnergyPlusD
     auto &ip = state.dataInputProcessing->inputProcessor;
     int numPerformances = ip->getNumObjectsFound(state, CoilCoolingDX205Performance::object_name);
     if (numPerformances <= 0) {
-        ShowSevereError(state, EnergyPlus::format("No {} equipment specified in input file", state.dataIPShortCut->cCurrentModuleObject));
+        ShowSevereError(state, std::format("No {} equipment specified in input file", state.dataIPShortCut->cCurrentModuleObject));
         errorsFound = true;
     }
     auto const &Coil205PerformanceInstances = ip->epJSON.find(state.dataIPShortCut->cCurrentModuleObject).value();
@@ -91,7 +97,7 @@ CoilCoolingDX205Performance::CoilCoolingDX205Performance(EnergyPlus::EnergyPlusD
         name = instance.key();
 
         if (!Util::SameString(name_to_find, name)) {
-            ShowFatalError(state, EnergyPlus::format("Could not find Coil:Cooling:DX:Performance object with name: {}", name_to_find));
+            ShowFatalError(state, std::format("Could not find Coil:Cooling:DX:Performance object with name: {}", name_to_find));
         }
 
         std::string const rep_file_name = ip->getAlphaFieldValue(fields, objectSchemaProps, "representation_file_name");
@@ -104,12 +110,12 @@ CoilCoolingDX205Performance::CoilCoolingDX205Performance(EnergyPlus::EnergyPlusD
             ShowFatalError(state, "Program terminates due to the missing ASHRAE 205 RS0004 representation file.");
         }
         std::shared_ptr<EnergyPlusLogger> coil_logger = std::make_shared<EnergyPlusLogger>();
-        logger_context = std::make_pair(&state, EnergyPlus::format("{} \"{}\"", state.dataIPShortCut->cCurrentModuleObject, name));
+        logger_context = std::make_pair(&state, std::format("{} \"{}\"", state.dataIPShortCut->cCurrentModuleObject, name));
         coil_logger->set_message_context(&logger_context);
         representation =
             std::dynamic_pointer_cast<rs0004_ns::RS0004>(RSInstanceFactory::create("RS0004", rep_file_path.string().c_str(), coil_logger));
         if (nullptr == representation) {
-            ShowSevereError(state, EnergyPlus::format("{} is not an instance of an ASHRAE205 Coil.", rep_file_path.string()));
+            ShowSevereError(state, std::format("{} is not an instance of an ASHRAE205 Coil.", rep_file_path.string()));
             errorsFound = true;
         } else {
             representation->performance.performance_map_cooling.get_logger()->set_message_context(&logger_context);
@@ -136,9 +142,9 @@ CoilCoolingDX205Performance::CoilCoolingDX205Performance(EnergyPlus::EnergyPlusD
 
         if (errorsFound) {
             ShowFatalError(state,
-                           EnergyPlus::format("{} Errors found in getting {} input. Preceding condition(s) causes termination.",
-                                              std::string{routineName},
-                                              object_name));
+                           std::format("{} Errors found in getting {} input. Preceding condition(s) causes termination.",
+                                       std::string{routineName},
+                                       object_name));
         }
     }
 }

@@ -295,7 +295,7 @@ if(LINK_WITH_PYTHON)
   add_compile_definitions(LINK_WITH_PYTHON)
   include_directories(${Python_INCLUDE_DIRS})
   if(CMAKE_HOST_UNIX)
-    #list(APPEND test_src api/datatransfer.unit.cc) # Requires API; will be moved
+    list(APPEND test_src api/datatransfer.unit.cc) # Requires API; will be moved
     list(APPEND test_src PluginManager.unit.cc)
     list(APPEND test_dependencies ${Python_LIBRARIES})
   endif()

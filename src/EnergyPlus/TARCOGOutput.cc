@@ -550,8 +550,6 @@ void WriteModifiedArguments(InputOutputFile &InArgumentsFile,
     for (i = 1; i <= nlayer + 1; ++i) { // loop through gaps:
         if ((i > 1) && (i <= nlayer)) {
             print(InArgumentsFile, Format_1111, i - 1);
-        }
-        if ((i > 1) && (i <= nlayer)) {
             print(InArgumentsFile, Format_1112, gap(i - 1));
         }
         if (i == 1) {

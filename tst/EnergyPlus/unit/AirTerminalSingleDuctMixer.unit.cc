@@ -7937,7 +7937,7 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_SimFCU_ATMInletSideTest)
 
     // check mass flow rates
     EXPECT_NEAR(PrimaryAirMassFlowRate, 0.2, 0.000001);
-    // Tolerance here wwas 0.000001, why?  Why is tolerance of less
+    // Tolerance here was 0.000001, why?  Why is tolerance of less
     // than 1/10th or even 1/100th of a percent needed on anything?
     EXPECT_NEAR(SecondaryAirMassFlowRate, 0.350865, 0.001);
     EXPECT_NEAR(state->dataLoopNodes->Node(thisFanCoil.AirInNode).MassFlowRate, thisFan->inletAirMassFlowRate, 0.000001);

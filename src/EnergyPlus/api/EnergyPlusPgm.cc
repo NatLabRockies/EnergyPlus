@@ -178,6 +178,7 @@
 
 // C++ Headers
 #include <exception>
+#include <format>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -200,14 +201,11 @@
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/DataStringGlobals.hh>
 #include <EnergyPlus/DataSystemVariables.hh>
-#include <EnergyPlus/DataTimings.hh>
 #include <EnergyPlus/DisplayRoutines.hh>
 #include <EnergyPlus/FileSystem.hh>
 #include <EnergyPlus/FluidProperties.hh>
 #include <EnergyPlus/IOFiles.hh>
-#include <EnergyPlus/InputProcessing/IdfParser.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
-#include <EnergyPlus/InputProcessing/InputValidation.hh>
 #include <EnergyPlus/OutputProcessor.hh>
 #include <EnergyPlus/Psychrometrics.hh>
 #include <EnergyPlus/ResultsFramework.hh>
@@ -232,7 +230,7 @@ int EnergyPlusPgm(const std::vector<std::string> &args, std::string const &filep
     std::string datestring; // supposedly returns blank when no date available.
     date_and_time(datestring, _, _, value);
     if (!datestring.empty()) {
-        state.dataStrGlobals->CurrentDateTime = fmt::format(" YMD={:4}.{:02}.{:02} {:02}:{:02}", value(1), value(2), value(3), value(5), value(6));
+        state.dataStrGlobals->CurrentDateTime = std::format(" YMD={:4}.{:02}.{:02} {:02}:{:02}", value(1), value(2), value(3), value(5), value(6));
     } else {
         state.dataStrGlobals->CurrentDateTime = " unknown date/time";
     }
@@ -524,7 +522,7 @@ std::string CreateCurrentDateTimeString()
 
     date_and_time(datestring, _, _, value);
     if (!datestring.empty()) {
-        return EnergyPlus::format(" YMD={:4}.{:02}.{:02} {:02}:{:02}", value(1), value(2), value(3), value(5), value(6));
+        return std::format(" YMD={:4}.{:02}.{:02} {:02}:{:02}", value(1), value(2), value(3), value(5), value(6));
     }
     return " unknown date/time";
 }

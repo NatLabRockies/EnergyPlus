@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -320,7 +321,7 @@ namespace UnitHeater {
                     ShowContinueError(
                         state,
                         EnergyPlus::format(
-                            "...air flow rate ({:.7T}) in fan object {} is less than the unit heater maximum supply air flow rate ({:.7T}).",
+                            "...air flow rate ({:.7f}) in fan object {} is less than the unit heater maximum supply air flow rate ({:.7f}).",
                             FanVolFlow,
                             unitHeat.FanName,
                             unitHeat.MaxAirVolFlow));
@@ -479,8 +480,7 @@ namespace UnitHeater {
                                                    CurrentModuleObject,
                                                    unitHeat.Name));
                 ShowContinueError(state, "..Zone inlet node name is specified in ZoneHVAC:EquipmentConnections object.");
-                ShowContinueError(state,
-                                  EnergyPlus::format("..Unit heater air outlet node name = {}", state.dataLoopNodes->NodeID(unitHeat.AirOutNode)));
+                ShowContinueError(state, std::format("..Unit heater air outlet node name = {}", state.dataLoopNodes->NodeID(unitHeat.AirOutNode)));
                 ErrorsFound = true;
             }
 
@@ -512,7 +512,7 @@ namespace UnitHeater {
         lNumericBlanks.deallocate();
 
         if (ErrorsFound) {
-            ShowFatalError(state, EnergyPlus::format("{}Errors found in input", RoutineName));
+            ShowFatalError(state, std::format("{}Errors found in input", RoutineName));
         }
 
         // Setup Report variables for the Unit Heaters, CurrentModuleObject='ZoneHVAC:UnitHeater'
@@ -641,8 +641,7 @@ namespace UnitHeater {
                                                         _);
                 if (errFlag) {
                     ShowContinueError(
-                        state,
-                        EnergyPlus::format("Reference Unit=\"{}\", type=ZoneHVAC:UnitHeater", state.dataUnitHeaters->UnitHeat(UnitHeatNum).Name));
+                        state, std::format("Reference Unit=\"{}\", type=ZoneHVAC:UnitHeater", state.dataUnitHeaters->UnitHeat(UnitHeatNum).Name));
                     ShowFatalError(state, "InitUnitHeater: Program terminated due to previous condition(s).");
                 }
 
@@ -660,10 +659,9 @@ namespace UnitHeater {
                 if (DataZoneEquipment::CheckZoneEquipmentList(state, "ZoneHVAC:UnitHeater", state.dataUnitHeaters->UnitHeat(Loop).Name)) {
                     continue;
                 }
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format("InitUnitHeater: Unit=[UNIT HEATER,{}] is not on any ZoneHVAC:EquipmentList.  It will not be simulated.",
-                                       state.dataUnitHeaters->UnitHeat(Loop).Name));
+                ShowSevereError(state,
+                                std::format("InitUnitHeater: Unit=[UNIT HEATER,{}] is not on any ZoneHVAC:EquipmentList.  It will not be simulated.",
+                                            state.dataUnitHeaters->UnitHeat(Loop).Name));
             }
         }
 
@@ -965,8 +963,7 @@ namespace UnitHeater {
                                 // If there is no heating Plant Sizing object and autosizing was requested, issue fatal error message
                                 ShowSevereError(state, "Autosizing of water coil requires a heating loop Sizing:Plant object");
                                 ShowContinueError(
-                                    state,
-                                    EnergyPlus::format("Occurs in ZoneHVAC:UnitHeater Object={}", state.dataUnitHeaters->UnitHeat(UnitHeatNum).Name));
+                                    state, std::format("Occurs in ZoneHVAC:UnitHeater Object={}", state.dataUnitHeaters->UnitHeat(UnitHeatNum).Name));
                                 ErrorsFound = true;
                             }
                         }
@@ -1050,8 +1047,8 @@ namespace UnitHeater {
                                 if ((std::abs(MaxVolHotWaterFlowDes - MaxVolHotWaterFlowUser) / MaxVolHotWaterFlowUser) >
                                     state.dataSize->AutoVsHardSizingThreshold) {
                                     ShowMessage(state,
-                                                EnergyPlus::format("SizeUnitHeater: Potential issue with equipment sizing for ZoneHVAC:UnitHeater {}",
-                                                                   state.dataUnitHeaters->UnitHeat(UnitHeatNum).Name));
+                                                std::format("SizeUnitHeater: Potential issue with equipment sizing for ZoneHVAC:UnitHeater {}",
+                                                            state.dataUnitHeaters->UnitHeat(UnitHeatNum).Name));
                                     ShowContinueError(
                                         state, EnergyPlus::format("User-Specified Maximum Hot Water Flow of {:.5R} [m3/s]", MaxVolHotWaterFlowUser));
                                     ShowContinueError(state,
@@ -1155,8 +1152,7 @@ namespace UnitHeater {
                         } else {
                             ShowSevereError(state, "Autosizing of Steam flow requires a heating loop Sizing:Plant object");
                             ShowContinueError(
-                                state,
-                                EnergyPlus::format("Occurs in ZoneHVAC:UnitHeater Object={}", state.dataUnitHeaters->UnitHeat(UnitHeatNum).Name));
+                                state, std::format("Occurs in ZoneHVAC:UnitHeater Object={}", state.dataUnitHeaters->UnitHeat(UnitHeatNum).Name));
                             ErrorsFound = true;
                         }
                         state.dataUnitHeaters->UnitHeat(UnitHeatNum).MaxVolHotSteamFlow = MaxVolHotSteamFlowDes;
@@ -1179,8 +1175,8 @@ namespace UnitHeater {
                                 if ((std::abs(MaxVolHotSteamFlowDes - MaxVolHotSteamFlowUser) / MaxVolHotSteamFlowUser) >
                                     state.dataSize->AutoVsHardSizingThreshold) {
                                     ShowMessage(state,
-                                                EnergyPlus::format("SizeUnitHeater: Potential issue with equipment sizing for ZoneHVAC:UnitHeater {}",
-                                                                   state.dataUnitHeaters->UnitHeat(UnitHeatNum).Name));
+                                                std::format("SizeUnitHeater: Potential issue with equipment sizing for ZoneHVAC:UnitHeater {}",
+                                                            state.dataUnitHeaters->UnitHeat(UnitHeatNum).Name));
                                     ShowContinueError(
                                         state, EnergyPlus::format("User-Specified Maximum Steam Flow of {:.5R} [m3/s]", MaxVolHotSteamFlowUser));
                                     ShowContinueError(

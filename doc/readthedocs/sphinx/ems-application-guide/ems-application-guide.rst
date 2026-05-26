@@ -2523,6 +2523,20 @@ described below.
    used to add energy (i.e. positive numbers only), and the energy used
    is added to the electric heating sub-meter.
 
+A separate actuator, called “CondFD Surface,” is available for exterior
+surfaces that use the Conduction Finite Difference solution algorithm.
+Unlike the material-layer actuators above, this actuator operates on the
+surface as a whole and is identified by the surface name alone (not
+SurfName:MatName).
+
+-  “Sky Longwave Radiation Override”. Has units of [W/m2]. Replaces
+   the default sky longwave radiation term (h_sky * (T_sky - T_surf))
+   in the exterior face heat balance with a user-specified net heat
+   flux. Positive values indicate net radiation into the surface;
+   negative values indicate net radiation leaving the surface (cooling).
+   Only applies to exterior CondFD surfaces. The actuated component
+   unique name is the surface name (e.g. “ZN001:ROOF001”).
+
 Conduction Finite Difference Outputs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -2553,6 +2567,15 @@ CondFD EMS Heat Source Energy After Layer N
 '''''''''''''''''''''''''''''''''''''''''''
 
 This output reports the heat energy added after material layer N
+
+-  Zone,Average,CondFD EMS Sky Longwave Radiation Override Heat Flux [W/m2]
+
+CondFD EMS Sky Longwave Radiation Override Heat Flux
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+This output reports the user-specified net sky longwave radiation heat
+flux applied to the exterior surface via the EMS actuator. Reports 0.0
+when not actuated.
 
 Air Movement
 ------------

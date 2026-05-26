@@ -49,6 +49,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <format>
 #include <limits>
 #include <string>
 #include <string_view>
@@ -57,7 +58,7 @@
 #include <ObjexxFCL/Array.functions.hh>
 #include <ObjexxFCL/Fmath.hh>
 
-// Third-party Headers
+// Third Party Headers
 #include <fast_float/fast_float.h>
 
 // EnergyPlus Headers
@@ -770,40 +771,38 @@ namespace Curve {
             }
 
             if (Numbers(7) > Numbers(8)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+                ShowSevereError(state, std::format("GetCurveInput: For {}: ", CurrentModuleObject));
                 ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(7),
-                                                     Numbers(7),
-                                                     state.dataIPShortCut->cNumericFieldNames(8),
-                                                     Numbers(8)));
+                                  std::format("{} [{:.2f}] > {} [{:.2f}]",
+                                              state.dataIPShortCut->cNumericFieldNames(7),
+                                              Numbers(7),
+                                              state.dataIPShortCut->cNumericFieldNames(8),
+                                              Numbers(8)));
                 ErrorsFound = true;
             }
             if (Numbers(9) > Numbers(10)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+                ShowSevereError(state, std::format("GetCurveInput: For {}: ", CurrentModuleObject));
                 ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(9),
-                                                     Numbers(9),
-                                                     state.dataIPShortCut->cNumericFieldNames(10),
-                                                     Numbers(10)));
+                                  std::format("{} [{:.2f}] > {} [{:.2f}]",
+                                              state.dataIPShortCut->cNumericFieldNames(9),
+                                              Numbers(9),
+                                              state.dataIPShortCut->cNumericFieldNames(10),
+                                              Numbers(10)));
                 ErrorsFound = true;
             }
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
             if (NumAlphas >= 3) {
                 if (!IsCurveInputTypeValid(Alphas(3))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for Y is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Input Unit Type for Y is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
             if (NumAlphas >= 4) {
                 if (!IsCurveOutputTypeValid(Alphas(4))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
         }
@@ -843,39 +842,39 @@ namespace Curve {
             thisCurve->inputLimits[0].min = Numbers(13);
             thisCurve->inputLimits[0].max = Numbers(14);
             if (Numbers(13) > Numbers(14)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+                ShowSevereError(state, std::format("GetCurveInput: For {}: ", CurrentModuleObject));
                 ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(13),
-                                                     Numbers(13),
-                                                     state.dataIPShortCut->cNumericFieldNames(14),
-                                                     Numbers(14)));
+                                  std::format("{} [{:.2f}] > {} [{:.2f}]",
+                                              state.dataIPShortCut->cNumericFieldNames(13),
+                                              Numbers(13),
+                                              state.dataIPShortCut->cNumericFieldNames(14),
+                                              Numbers(14)));
                 ErrorsFound = true;
             }
 
             thisCurve->inputLimits[1].min = Numbers(15);
             thisCurve->inputLimits[1].max = Numbers(16);
             if (Numbers(15) > Numbers(16)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+                ShowSevereError(state, std::format("GetCurveInput: For {}: ", CurrentModuleObject));
                 ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(15),
-                                                     Numbers(15),
-                                                     state.dataIPShortCut->cNumericFieldNames(16),
-                                                     Numbers(16)));
+                                  std::format("{} [{:.2f}] > {} [{:.2f}]",
+                                              state.dataIPShortCut->cNumericFieldNames(15),
+                                              Numbers(15),
+                                              state.dataIPShortCut->cNumericFieldNames(16),
+                                              Numbers(16)));
                 ErrorsFound = true;
             }
 
             thisCurve->inputLimits[2].min = Numbers(17);
             thisCurve->inputLimits[2].max = Numbers(18);
             if (Numbers(17) > Numbers(18)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+                ShowSevereError(state, std::format("GetCurveInput: For {}: ", CurrentModuleObject));
                 ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(17),
-                                                     Numbers(17),
-                                                     state.dataIPShortCut->cNumericFieldNames(18),
-                                                     Numbers(18)));
+                                  std::format("{} [{:.2f}] > {} [{:.2f}]",
+                                              state.dataIPShortCut->cNumericFieldNames(17),
+                                              Numbers(17),
+                                              state.dataIPShortCut->cNumericFieldNames(18),
+                                              Numbers(18)));
                 ErrorsFound = true;
             }
 
@@ -890,25 +889,22 @@ namespace Curve {
 
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
             if (NumAlphas >= 3) {
                 if (!IsCurveInputTypeValid(Alphas(3))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for Y is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Input Unit Type for Y is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
             if (NumAlphas >= 4) {
                 if (!IsCurveInputTypeValid(Alphas(4))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for Z is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Input Unit Type for Z is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
             if (NumAlphas >= 5) {
                 if (!IsCurveOutputTypeValid(Alphas(5))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
         }
@@ -955,24 +951,23 @@ namespace Curve {
             }
 
             if (Numbers(5) > Numbers(6)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+                ShowSevereError(state, std::format("GetCurveInput: For {}: ", CurrentModuleObject));
                 ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(5),
-                                                     Numbers(5),
-                                                     state.dataIPShortCut->cNumericFieldNames(6),
-                                                     Numbers(6)));
+                                  std::format("{} [{:.2f}] > {} [{:.2f}]",
+                                              state.dataIPShortCut->cNumericFieldNames(5),
+                                              Numbers(5),
+                                              state.dataIPShortCut->cNumericFieldNames(6),
+                                              Numbers(6)));
                 ErrorsFound = true;
             }
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
             if (NumAlphas >= 3) {
                 if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
         }
@@ -1018,24 +1013,23 @@ namespace Curve {
             }
 
             if (Numbers(6) > Numbers(7)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+                ShowSevereError(state, std::format("GetCurveInput: For {}: ", CurrentModuleObject));
                 ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(6),
-                                                     Numbers(6),
-                                                     state.dataIPShortCut->cNumericFieldNames(7),
-                                                     Numbers(7)));
+                                  std::format("{} [{:.2f}] > {} [{:.2f}]",
+                                              state.dataIPShortCut->cNumericFieldNames(6),
+                                              Numbers(6),
+                                              state.dataIPShortCut->cNumericFieldNames(7),
+                                              Numbers(7)));
                 ErrorsFound = true;
             }
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
             if (NumAlphas >= 3) {
                 if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
         }
@@ -1081,24 +1075,23 @@ namespace Curve {
             }
 
             if (Numbers(4) > Numbers(5)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+                ShowSevereError(state, std::format("GetCurveInput: For {}: ", CurrentModuleObject));
                 ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(4),
-                                                     Numbers(4),
-                                                     state.dataIPShortCut->cNumericFieldNames(5),
-                                                     Numbers(5)));
+                                  std::format("{} [{:.2f}] > {} [{:.2f}]",
+                                              state.dataIPShortCut->cNumericFieldNames(4),
+                                              Numbers(4),
+                                              state.dataIPShortCut->cNumericFieldNames(5),
+                                              Numbers(5)));
                 ErrorsFound = true;
             }
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
             if (NumAlphas >= 3) {
                 if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
         }
@@ -1146,40 +1139,38 @@ namespace Curve {
             }
 
             if (Numbers(7) > Numbers(8)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+                ShowSevereError(state, std::format("GetCurveInput: For {}: ", CurrentModuleObject));
                 ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(7),
-                                                     Numbers(7),
-                                                     state.dataIPShortCut->cNumericFieldNames(8),
-                                                     Numbers(8)));
+                                  std::format("{} [{:.2f}] > {} [{:.2f}]",
+                                              state.dataIPShortCut->cNumericFieldNames(7),
+                                              Numbers(7),
+                                              state.dataIPShortCut->cNumericFieldNames(8),
+                                              Numbers(8)));
                 ErrorsFound = true;
             }
             if (Numbers(9) > Numbers(10)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+                ShowSevereError(state, std::format("GetCurveInput: For {}: ", CurrentModuleObject));
                 ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(9),
-                                                     Numbers(9),
-                                                     state.dataIPShortCut->cNumericFieldNames(10),
-                                                     Numbers(10)));
+                                  std::format("{} [{:.2f}] > {} [{:.2f}]",
+                                              state.dataIPShortCut->cNumericFieldNames(9),
+                                              Numbers(9),
+                                              state.dataIPShortCut->cNumericFieldNames(10),
+                                              Numbers(10)));
                 ErrorsFound = true;
             }
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
             if (NumAlphas >= 3) {
                 if (!IsCurveInputTypeValid(Alphas(3))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for Y is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Input Unit Type for Y is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
             if (NumAlphas >= 4) {
                 if (!IsCurveOutputTypeValid(Alphas(4))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
         }
@@ -1227,40 +1218,38 @@ namespace Curve {
             }
 
             if (Numbers(7) > Numbers(8)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+                ShowSevereError(state, std::format("GetCurveInput: For {}: ", CurrentModuleObject));
                 ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(7),
-                                                     Numbers(7),
-                                                     state.dataIPShortCut->cNumericFieldNames(8),
-                                                     Numbers(8)));
+                                  std::format("{} [{:.2f}] > {} [{:.2f}]",
+                                              state.dataIPShortCut->cNumericFieldNames(7),
+                                              Numbers(7),
+                                              state.dataIPShortCut->cNumericFieldNames(8),
+                                              Numbers(8)));
                 ErrorsFound = true;
             }
             if (Numbers(9) > Numbers(10)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+                ShowSevereError(state, std::format("GetCurveInput: For {}: ", CurrentModuleObject));
                 ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(9),
-                                                     Numbers(9),
-                                                     state.dataIPShortCut->cNumericFieldNames(10),
-                                                     Numbers(10)));
+                                  std::format("{} [{:.2f}] > {} [{:.2f}]",
+                                              state.dataIPShortCut->cNumericFieldNames(9),
+                                              Numbers(9),
+                                              state.dataIPShortCut->cNumericFieldNames(10),
+                                              Numbers(10)));
                 ErrorsFound = true;
             }
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
             if (NumAlphas >= 3) {
                 if (!IsCurveInputTypeValid(Alphas(3))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for Y is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Input Unit Type for Y is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
             if (NumAlphas >= 4) {
                 if (!IsCurveOutputTypeValid(Alphas(4))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
         }
@@ -1306,24 +1295,23 @@ namespace Curve {
             }
 
             if (Numbers(3) > Numbers(4)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+                ShowSevereError(state, std::format("GetCurveInput: For {}: ", CurrentModuleObject));
                 ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(3),
-                                                     Numbers(3),
-                                                     state.dataIPShortCut->cNumericFieldNames(4),
-                                                     Numbers(4)));
+                                  std::format("{} [{:.2f}] > {} [{:.2f}]",
+                                              state.dataIPShortCut->cNumericFieldNames(3),
+                                              Numbers(3),
+                                              state.dataIPShortCut->cNumericFieldNames(4),
+                                              Numbers(4)));
                 ErrorsFound = true;
             }
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
             if (NumAlphas >= 3) {
                 if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
         }
@@ -1371,40 +1359,38 @@ namespace Curve {
             }
 
             if (Numbers(11) > Numbers(12)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+                ShowSevereError(state, std::format("GetCurveInput: For {}: ", CurrentModuleObject));
                 ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(11),
-                                                     Numbers(11),
-                                                     state.dataIPShortCut->cNumericFieldNames(12),
-                                                     Numbers(12)));
+                                  std::format("{} [{:.2f}] > {} [{:.2f}]",
+                                              state.dataIPShortCut->cNumericFieldNames(11),
+                                              Numbers(11),
+                                              state.dataIPShortCut->cNumericFieldNames(12),
+                                              Numbers(12)));
                 ErrorsFound = true;
             }
             if (Numbers(13) > Numbers(14)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+                ShowSevereError(state, std::format("GetCurveInput: For {}: ", CurrentModuleObject));
                 ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(13),
-                                                     Numbers(13),
-                                                     state.dataIPShortCut->cNumericFieldNames(14),
-                                                     Numbers(14)));
+                                  std::format("{} [{:.2f}] > {} [{:.2f}]",
+                                              state.dataIPShortCut->cNumericFieldNames(13),
+                                              Numbers(13),
+                                              state.dataIPShortCut->cNumericFieldNames(14),
+                                              Numbers(14)));
                 ErrorsFound = true;
             }
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
             if (NumAlphas >= 3) {
                 if (!IsCurveInputTypeValid(Alphas(3))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for Y is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Input Unit Type for Y is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
             if (NumAlphas >= 4) {
                 if (!IsCurveOutputTypeValid(Alphas(4))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
         }
@@ -1478,56 +1464,53 @@ namespace Curve {
             }
 
             if (Numbers(28) > Numbers(29)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+                ShowSevereError(state, std::format("GetCurveInput: For {}: ", CurrentModuleObject));
                 ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(28),
-                                                     Numbers(28),
-                                                     state.dataIPShortCut->cNumericFieldNames(29),
-                                                     Numbers(29)));
+                                  std::format("{} [{:.2f}] > {} [{:.2f}]",
+                                              state.dataIPShortCut->cNumericFieldNames(28),
+                                              Numbers(28),
+                                              state.dataIPShortCut->cNumericFieldNames(29),
+                                              Numbers(29)));
                 ErrorsFound = true;
             }
             if (Numbers(30) > Numbers(31)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+                ShowSevereError(state, std::format("GetCurveInput: For {}: ", CurrentModuleObject));
                 ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(30),
-                                                     Numbers(30),
-                                                     state.dataIPShortCut->cNumericFieldNames(31),
-                                                     Numbers(31)));
+                                  std::format("{} [{:.2f}] > {} [{:.2f}]",
+                                              state.dataIPShortCut->cNumericFieldNames(30),
+                                              Numbers(30),
+                                              state.dataIPShortCut->cNumericFieldNames(31),
+                                              Numbers(31)));
                 ErrorsFound = true;
             }
             if (Numbers(32) > Numbers(33)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+                ShowSevereError(state, std::format("GetCurveInput: For {}: ", CurrentModuleObject));
                 ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(32),
-                                                     Numbers(32),
-                                                     state.dataIPShortCut->cNumericFieldNames(33),
-                                                     Numbers(33)));
+                                  std::format("{} [{:.2f}] > {} [{:.2f}]",
+                                              state.dataIPShortCut->cNumericFieldNames(32),
+                                              Numbers(32),
+                                              state.dataIPShortCut->cNumericFieldNames(33),
+                                              Numbers(33)));
                 ErrorsFound = true;
             }
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
             if (NumAlphas >= 3) {
                 if (!IsCurveInputTypeValid(Alphas(3))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for Y is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Input Unit Type for Y is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
             if (NumAlphas >= 4) {
                 if (!IsCurveInputTypeValid(Alphas(4))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for Z is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Input Unit Type for Z is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
             if (NumAlphas >= 5) {
                 if (!IsCurveOutputTypeValid(Alphas(5))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
         }
@@ -1585,27 +1568,26 @@ namespace Curve {
                 int MinIndex = 2 * i + 4;
                 int MaxIndex = MinIndex + 1;
                 if (Numbers(MinIndex) > Numbers(MaxIndex)) { // error
-                    ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+                    ShowSevereError(state, std::format("GetCurveInput: For {}: ", CurrentModuleObject));
                     ShowContinueError(state,
-                                      EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                         state.dataIPShortCut->cNumericFieldNames(MinIndex),
-                                                         Numbers(MinIndex),
-                                                         state.dataIPShortCut->cNumericFieldNames(MaxIndex),
-                                                         Numbers(MaxIndex)));
+                                      std::format("{} [{:.2f}] > {} [{:.2f}]",
+                                                  state.dataIPShortCut->cNumericFieldNames(MinIndex),
+                                                  Numbers(MinIndex),
+                                                  state.dataIPShortCut->cNumericFieldNames(MaxIndex),
+                                                  Numbers(MaxIndex)));
                     ErrorsFound = true;
                 }
                 int InputTypeIndex = i + 1;
                 if (NumAlphas >= InputTypeIndex) {
                     if (!IsCurveInputTypeValid(Alphas(InputTypeIndex))) {
                         ShowWarningError(
-                            state,
-                            EnergyPlus::format("In {} named {} the Input Unit Type for {} is invalid.", CurrentModuleObject, Alphas(1), VarNames[i]));
+                            state, std::format("In {} named {} the Input Unit Type for {} is invalid.", CurrentModuleObject, Alphas(1), VarNames[i]));
                     }
                 }
             }
             if (NumAlphas >= 6) {
                 if (!IsCurveOutputTypeValid(Alphas(6))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
         }
@@ -1664,27 +1646,26 @@ namespace Curve {
                 int MinIndex = 2 * i + 5;
                 int MaxIndex = MinIndex + 1;
                 if (Numbers(MinIndex) > Numbers(MaxIndex)) { // error
-                    ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+                    ShowSevereError(state, std::format("GetCurveInput: For {}: ", CurrentModuleObject));
                     ShowContinueError(state,
-                                      EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                         state.dataIPShortCut->cNumericFieldNames(MinIndex),
-                                                         Numbers(MinIndex),
-                                                         state.dataIPShortCut->cNumericFieldNames(MaxIndex),
-                                                         Numbers(MaxIndex)));
+                                      std::format("{} [{:.2f}] > {} [{:.2f}]",
+                                                  state.dataIPShortCut->cNumericFieldNames(MinIndex),
+                                                  Numbers(MinIndex),
+                                                  state.dataIPShortCut->cNumericFieldNames(MaxIndex),
+                                                  Numbers(MaxIndex)));
                     ErrorsFound = true;
                 }
                 int InputTypeIndex = i + 1;
                 if (NumAlphas >= InputTypeIndex) {
                     if (!IsCurveInputTypeValid(Alphas(InputTypeIndex))) {
                         ShowWarningError(
-                            state,
-                            EnergyPlus::format("In {} named {} the Input Unit Type for {} is invalid.", CurrentModuleObject, Alphas(1), VarNames[i]));
+                            state, std::format("In {} named {} the Input Unit Type for {} is invalid.", CurrentModuleObject, Alphas(1), VarNames[i]));
                     }
                 }
             }
             if (NumAlphas >= 7) {
                 if (!IsCurveOutputTypeValid(Alphas(7))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
         }
@@ -1722,13 +1703,13 @@ namespace Curve {
             thisCurve->inputLimits[0].max = Numbers(5);
 
             if (Numbers(4) > Numbers(5)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+                ShowSevereError(state, std::format("GetCurveInput: For {}: ", CurrentModuleObject));
                 ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(4),
-                                                     Numbers(4),
-                                                     state.dataIPShortCut->cNumericFieldNames(5),
-                                                     Numbers(5)));
+                                  std::format("{} [{:.2f}] > {} [{:.2f}]",
+                                              state.dataIPShortCut->cNumericFieldNames(4),
+                                              Numbers(4),
+                                              state.dataIPShortCut->cNumericFieldNames(5),
+                                              Numbers(5)));
                 ErrorsFound = true;
             }
 
@@ -1742,13 +1723,12 @@ namespace Curve {
             }
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
             if (NumAlphas >= 3) {
                 if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
         }
@@ -1797,23 +1777,23 @@ namespace Curve {
             }
 
             if (Numbers(5) > Numbers(6)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+                ShowSevereError(state, std::format("GetCurveInput: For {}: ", CurrentModuleObject));
                 ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(5),
-                                                     Numbers(5),
-                                                     state.dataIPShortCut->cNumericFieldNames(6),
-                                                     Numbers(6)));
+                                  std::format("{} [{:.2f}] > {} [{:.2f}]",
+                                              state.dataIPShortCut->cNumericFieldNames(5),
+                                              Numbers(5),
+                                              state.dataIPShortCut->cNumericFieldNames(6),
+                                              Numbers(6)));
                 ErrorsFound = true;
             }
             if (Numbers(7) > Numbers(8)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+                ShowSevereError(state, std::format("GetCurveInput: For {}: ", CurrentModuleObject));
                 ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(7),
-                                                     Numbers(7),
-                                                     state.dataIPShortCut->cNumericFieldNames(8),
-                                                     Numbers(8)));
+                                  std::format("{} [{:.2f}] > {} [{:.2f}]",
+                                              state.dataIPShortCut->cNumericFieldNames(7),
+                                              Numbers(7),
+                                              state.dataIPShortCut->cNumericFieldNames(8),
+                                              Numbers(8)));
                 ErrorsFound = true;
             }
 
@@ -1861,25 +1841,24 @@ namespace Curve {
             }
 
             if (Numbers(5) > Numbers(6)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+                ShowSevereError(state, std::format("GetCurveInput: For {}: ", CurrentModuleObject));
                 ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(5),
-                                                     Numbers(5),
-                                                     state.dataIPShortCut->cNumericFieldNames(6),
-                                                     Numbers(6)));
+                                  std::format("{} [{:.2f}] > {} [{:.2f}]",
+                                              state.dataIPShortCut->cNumericFieldNames(5),
+                                              Numbers(5),
+                                              state.dataIPShortCut->cNumericFieldNames(6),
+                                              Numbers(6)));
                 ErrorsFound = true;
             }
 
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
             if (NumAlphas >= 3) {
                 if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
         } // Exponential Skew Normal
@@ -1926,25 +1905,24 @@ namespace Curve {
             }
 
             if (Numbers(6) > Numbers(7)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+                ShowSevereError(state, std::format("GetCurveInput: For {}: ", CurrentModuleObject));
                 ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(6),
-                                                     Numbers(6),
-                                                     state.dataIPShortCut->cNumericFieldNames(7),
-                                                     Numbers(7)));
+                                  std::format("{} [{:.2f}] > {} [{:.2f}]",
+                                              state.dataIPShortCut->cNumericFieldNames(6),
+                                              Numbers(6),
+                                              state.dataIPShortCut->cNumericFieldNames(7),
+                                              Numbers(7)));
                 ErrorsFound = true;
             }
 
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
             if (NumAlphas >= 3) {
                 if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
         } // Sigmoid
@@ -1991,25 +1969,24 @@ namespace Curve {
             }
 
             if (Numbers(4) > Numbers(5)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+                ShowSevereError(state, std::format("GetCurveInput: For {}: ", CurrentModuleObject));
                 ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(4),
-                                                     Numbers(4),
-                                                     state.dataIPShortCut->cNumericFieldNames(5),
-                                                     Numbers(5)));
+                                  std::format("{} [{:.2f}] > {} [{:.2f}]",
+                                              state.dataIPShortCut->cNumericFieldNames(4),
+                                              Numbers(4),
+                                              state.dataIPShortCut->cNumericFieldNames(5),
+                                              Numbers(5)));
                 ErrorsFound = true;
             }
 
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
             if (NumAlphas >= 3) {
                 if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
         } // Rectangular Hyperbola Type 1
@@ -2056,25 +2033,24 @@ namespace Curve {
             }
 
             if (Numbers(4) > Numbers(5)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+                ShowSevereError(state, std::format("GetCurveInput: For {}: ", CurrentModuleObject));
                 ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(4),
-                                                     Numbers(4),
-                                                     state.dataIPShortCut->cNumericFieldNames(5),
-                                                     Numbers(5)));
+                                  std::format("{} [{:.2f}] > {} [{:.2f}]",
+                                              state.dataIPShortCut->cNumericFieldNames(4),
+                                              Numbers(4),
+                                              state.dataIPShortCut->cNumericFieldNames(5),
+                                              Numbers(5)));
                 ErrorsFound = true;
             }
 
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
             if (NumAlphas >= 3) {
                 if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
         } // Rectangular Hyperbola Type 2
@@ -2121,25 +2097,24 @@ namespace Curve {
             }
 
             if (Numbers(4) > Numbers(5)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+                ShowSevereError(state, std::format("GetCurveInput: For {}: ", CurrentModuleObject));
                 ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(4),
-                                                     Numbers(4),
-                                                     state.dataIPShortCut->cNumericFieldNames(5),
-                                                     Numbers(5)));
+                                  std::format("{} [{:.2f}] > {} [{:.2f}]",
+                                              state.dataIPShortCut->cNumericFieldNames(4),
+                                              Numbers(4),
+                                              state.dataIPShortCut->cNumericFieldNames(5),
+                                              Numbers(5)));
                 ErrorsFound = true;
             }
 
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
             if (NumAlphas >= 3) {
                 if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
         } // Exponential Decay
@@ -2177,13 +2152,13 @@ namespace Curve {
             thisCurve->inputLimits[0].max = Numbers(7);
 
             if (Numbers(6) > Numbers(7)) { // error
-                ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+                ShowSevereError(state, std::format("GetCurveInput: For {}: ", CurrentModuleObject));
                 ShowContinueError(state,
-                                  EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                     state.dataIPShortCut->cNumericFieldNames(6),
-                                                     Numbers(6),
-                                                     state.dataIPShortCut->cNumericFieldNames(7),
-                                                     Numbers(7)));
+                                  std::format("{} [{:.2f}] > {} [{:.2f}]",
+                                              state.dataIPShortCut->cNumericFieldNames(6),
+                                              Numbers(6),
+                                              state.dataIPShortCut->cNumericFieldNames(7),
+                                              Numbers(7)));
                 ErrorsFound = true;
             }
 
@@ -2198,13 +2173,12 @@ namespace Curve {
 
             if (NumAlphas >= 2) {
                 if (!IsCurveInputTypeValid(Alphas(2))) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Input Unit Type for X is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
             if (NumAlphas >= 3) {
                 if (!IsCurveOutputTypeValid(Alphas(3))) {
-                    ShowWarningError(state, EnergyPlus::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
+                    ShowWarningError(state, std::format("In {} named {} the Output Unit Type is invalid.", CurrentModuleObject, Alphas(1)));
                 }
             }
         } // Exponential Decay
@@ -2218,7 +2192,7 @@ namespace Curve {
             if (numOfCPArray != 1) {
                 ShowSevereError(
                     state,
-                    EnergyPlus::format(
+                    std::format(
                         "GetCurveInput: Currently exactly one (\"1\") {} object per simulation is required when using the AirflowNetwork model.",
                         CurrentModuleObject));
                 ErrorsFound = true;
@@ -2248,25 +2222,25 @@ namespace Curve {
                     dirMax = std::max(dirMax, Numbers(j));
                     if (j > 1) {
                         if (windDirs[j - 2] >= windDirs[j - 1]) {
-                            ShowSevereError(state, EnergyPlus::format("GetCurveInput: An {} object ", CurrentModuleObject));
+                            ShowSevereError(state, std::format("GetCurveInput: An {} object ", CurrentModuleObject));
                             ShowContinueError(state,
                                               "has either the same values for two consecutive wind directions, or a lower wind direction value after "
                                               "a higher wind direction value.");
                             ShowContinueError(state, "Wind direction values must be entered in ascending order.");
                             ShowContinueError(state,
-                                              EnergyPlus::format("{} = {:.2R} {} = {:.2R}",
-                                                                 state.dataIPShortCut->cNumericFieldNames(j),
-                                                                 windDirs[j - 2],
-                                                                 state.dataIPShortCut->cNumericFieldNames[j + 1],
-                                                                 windDirs[j - 1]));
+                                              std::format("{} = {:.2f} {} = {:.2f}",
+                                                          state.dataIPShortCut->cNumericFieldNames(j),
+                                                          windDirs[j - 2],
+                                                          state.dataIPShortCut->cNumericFieldNames[j + 1],
+                                                          windDirs[j - 1]));
                             ErrorsFound = true;
                         }
                     }
                 }
                 // Check that the first table value is zero
                 if (dirMin != 0.0) {
-                    ShowSevereError(state, EnergyPlus::format("GetCurveInput: An {} object ", CurrentModuleObject));
-                    ShowContinueError(state, EnergyPlus::format("has a nonzero minimum value of {:.2R}", dirMin));
+                    ShowSevereError(state, std::format("GetCurveInput: An {} object ", CurrentModuleObject));
+                    ShowContinueError(state, std::format("has a nonzero minimum value of {:.2f}", dirMin));
                     ShowContinueError(state, "Wind direction values must begin at zero.");
                     ErrorsFound = true;
                 }
@@ -2298,11 +2272,11 @@ namespace Curve {
                     // Ensure the CP array name should be the same as the name of AirflowNetwork:MultiZone:WindPressureCoefficientArray
                     if (!Util::SameString(Alphas(2), wpcName)) {
                         ShowSevereError(state,
-                                        EnergyPlus::format("GetCurveInput: Invalid {} = {} in {} = ",
-                                                           state.dataIPShortCut->cAlphaFieldNames(2),
-                                                           Alphas(2),
-                                                           CurrentModuleObject));
-                        ShowContinueError(state, EnergyPlus::format("The valid name is {}", wpcName));
+                                        std::format("GetCurveInput: Invalid {} = {} in {} = ",
+                                                    state.dataIPShortCut->cAlphaFieldNames(2),
+                                                    Alphas(2),
+                                                    CurrentModuleObject));
+                        ShowContinueError(state, std::format("The valid name is {}", wpcName));
                         ErrorsFound = true;
                     }
 
@@ -2310,7 +2284,7 @@ namespace Curve {
 
                     thisCurve->curveType = CurveType::BtwxtTableLookup;
 
-                    thisCurve->contextString = EnergyPlus::format("Table:Lookup \"{}\"", Alphas(1));
+                    thisCurve->contextString = std::format("Table:Lookup \"{}\"", Alphas(1));
                     std::pair<EnergyPlusData *, std::string> callbackPair{&state, thisCurve->contextString};
                     state.dataCurveManager->btwxtManager.setLoggingContext(&callbackPair);
 
@@ -2326,12 +2300,12 @@ namespace Curve {
 
                     int MaxTableNums = NumNumbers;
                     if (NumNumbers != numWindDir) {
-                        ShowSevereError(state, EnergyPlus::format("GetCurveInput: For {}: ", CurrentModuleObject));
+                        ShowSevereError(state, std::format("GetCurveInput: For {}: ", CurrentModuleObject));
                         ShowContinueError(
                             state,
-                            EnergyPlus::format("The number of data entries must match the number of wind directions given in the wind pressure "
-                                               "coefficient array. Number of data entries = {}",
-                                               NumNumbers));
+                            std::format("The number of data entries must match the number of wind directions given in the wind pressure "
+                                        "coefficient array. Number of data entries = {}",
+                                        NumNumbers));
                         ErrorsFound = true;
                     } else {
                         std::vector<double> axis;
@@ -2399,7 +2373,7 @@ namespace Curve {
                 // Loop through independent variables in list and add them to the grid
                 for (auto &indVar : fields.at("independent_variables")) {
                     std::string indVarName = Util::makeUPPER(indVar.at("independent_variable_name").get<std::string>());
-                    std::string contextString = EnergyPlus::format("Table:IndependentVariable \"{}\"", indVarName);
+                    std::string contextString = std::format("Table:IndependentVariable \"{}\"", indVarName);
                     std::pair<EnergyPlusData *, std::string> callbackPair{&state, contextString};
                     state.dataCurveManager->btwxtManager.setLoggingContext(&callbackPair);
 
@@ -2412,7 +2386,7 @@ namespace Curve {
                         if (indVarInstance.count("unit_type") != 0u) {
                             std::string unitType = indVarInstance.at("unit_type").get<std::string>();
                             if (!IsCurveInputTypeValid(unitType)) {
-                                ShowSevereError(state, EnergyPlus::format("{}: Unit Type [{}] is invalid", contextString, unitType));
+                                ShowSevereError(state, std::format("{}: Unit Type [{}] is invalid", contextString, unitType));
                             }
                         }
 
@@ -2422,14 +2396,14 @@ namespace Curve {
                             std::string tmp = indVarInstance.at("external_file_name").get<std::string>();
                             fs::path filePath(tmp);
                             if (indVarInstance.count("external_file_column_number") == 0u) {
-                                ShowSevereError(state,
-                                                EnergyPlus::format("{}: No column number defined for external file \"{}\"", contextString, filePath));
+                                ShowSevereError(
+                                    state, std::format("{}: No column number defined for external file \"{}\"", contextString, filePath.string()));
                                 ErrorsFound = true;
                             }
                             if (indVarInstance.count("external_file_starting_row_number") == 0u) {
                                 ShowSevereError(
                                     state,
-                                    EnergyPlus::format("{}: No starting row number defined for external file \"{}\"", contextString, filePath));
+                                    std::format("{}: No starting row number defined for external file \"{}\"", contextString, filePath.string()));
                                 ErrorsFound = true;
                             }
 
@@ -2462,7 +2436,7 @@ namespace Curve {
                                 axis.push_back(value.at("value").get<Real64>());
                             }
                         } else {
-                            ShowSevereError(state, EnergyPlus::format("{}: No values defined.", contextString));
+                            ShowSevereError(state, std::format("{}: No values defined.", contextString));
                             ErrorsFound = true;
                         }
 
@@ -2479,8 +2453,7 @@ namespace Curve {
                         auto extrapIterator = indVarInstance.find("extrapolation_method");
                         if (extrapIterator != indVarInstance.end()) {
                             if (extrapIterator->get<std::string>() == "Unavailable") {
-                                ShowSevereError(state,
-                                                EnergyPlus::format("{}: Extrapolation method \"Unavailable\" is not yet available.", contextString));
+                                ShowSevereError(state, std::format("{}: Extrapolation method \"Unavailable\" is not yet available.", contextString));
                                 ErrorsFound = true;
                             } else if (extrapIterator->get<std::string>() == "Constant") {
                                 extrapMethod = Btwxt::ExtrapolationMethod::constant;
@@ -2511,7 +2484,7 @@ namespace Curve {
 
                     } else {
                         // Independent variable does not exist
-                        ShowSevereError(state, EnergyPlus::format("{}: No Table:IndependentVariable found.", contextString));
+                        ShowSevereError(state, std::format("{}: No Table:IndependentVariable found.", contextString));
                         ErrorsFound = true;
                     }
                 }
@@ -2541,7 +2514,7 @@ namespace Curve {
 
                 std::string indVarListName = Util::makeUPPER(fields.at("independent_variable_list_name").get<std::string>());
 
-                thisCurve->contextString = EnergyPlus::format("Table:Lookup \"{}\"", thisCurve->Name);
+                thisCurve->contextString = std::format("Table:Lookup \"{}\"", thisCurve->Name);
                 std::pair<EnergyPlusData *, std::string> callbackPair{&state, thisCurve->contextString};
                 state.dataCurveManager->btwxtManager.setLoggingContext(&callbackPair);
 
@@ -2549,7 +2522,7 @@ namespace Curve {
                 if (fields.count("output_unit_type") != 0u) {
                     std::string unitType = fields.at("output_unit_type").get<std::string>();
                     if (!IsCurveOutputTypeValid(unitType)) {
-                        ShowSevereError(state, EnergyPlus::format("{}: Output Unit Type [{}] is invalid", thisCurve->contextString, unitType));
+                        ShowSevereError(state, std::format("{}: Output Unit Type [{}] is invalid", thisCurve->contextString, unitType));
                     }
                 }
 
@@ -2618,9 +2591,9 @@ namespace Curve {
                 if (normalizeMethod != NM_NONE && (fields.count("normalization_divisor") != 0u)) {
                     normalizationDivisor = fields.at("normalization_divisor").get<Real64>();
                     if (std::abs(normalizationDivisor) < std::numeric_limits<Real64>::min()) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("Table:Lookup named \"{}\": Normalization divisor entered as zero, which is invalid",
-                                                           thisCurve->Name));
+                        ShowSevereError(
+                            state,
+                            std::format("Table:Lookup named \"{}\": Normalization divisor entered as zero, which is invalid", thisCurve->Name));
                         ErrorsFound = true;
                         continue;
                     }
@@ -2633,13 +2606,13 @@ namespace Curve {
 
                     if (fields.count("external_file_column_number") == 0u) {
                         ShowSevereError(
-                            state, EnergyPlus::format("{}: No column number defined for external file \"{}\"", thisCurve->contextString, filePath));
+                            state, std::format("{}: No column number defined for external file \"{}\"", thisCurve->contextString, filePath.string()));
                         ErrorsFound = true;
                     }
                     if (fields.count("external_file_starting_row_number") == 0u) {
                         ShowSevereError(
                             state,
-                            EnergyPlus::format("{}: No starting row number defined for external file \"{}\"", thisCurve->contextString, filePath));
+                            std::format("{}: No starting row number defined for external file \"{}\"", thisCurve->contextString, filePath.string()));
                         ErrorsFound = true;
                     }
 
@@ -2667,7 +2640,7 @@ namespace Curve {
                         lookupValues.push_back(value.at("output_value").get<Real64>() / normalizationDivisor);
                     }
                 } else {
-                    ShowSevereError(state, EnergyPlus::format("{}: No values defined.", thisCurve->contextString));
+                    ShowSevereError(state, std::format("{}: No values defined.", thisCurve->contextString));
                     ErrorsFound = true;
                 }
 
@@ -2688,9 +2661,9 @@ namespace Curve {
                     if (pointsSpecified && pointsUnspecified) {
                         ShowSevereError(
                             state,
-                            EnergyPlus::format("{}: Table is to be normalized using AutomaticWithDivisor, but not all independent variables define a "
-                                               "normalization reference value. Make sure either:",
-                                               thisCurve->contextString));
+                            std::format("{}: Table is to be normalized using AutomaticWithDivisor, but not all independent variables define a "
+                                        "normalization reference value. Make sure either:",
+                                        thisCurve->contextString));
                         ShowContinueError(state, "  Make sure either:");
                         ShowContinueError(state, "    a) a normalization reference value is defined for each independent variable, or");
                         ShowContinueError(state, "    b) no normalization reference values are defined.");
@@ -2725,7 +2698,7 @@ namespace Curve {
             gridIndex = gridMap.at(indVarListName);
         } else {
             // Independent variable list does not exist
-            ShowSevereError(state, EnergyPlus::format("Table:Lookup \"{}\" : No Table:IndependentVariableList found.", indVarListName));
+            ShowSevereError(state, std::format("Table:Lookup \"{}\" : No Table:IndependentVariableList found.", indVarListName));
             ErrorsFound = true;
         }
         return gridIndex;
@@ -2813,12 +2786,12 @@ namespace Curve {
             if (col >= numColumns) {
                 ShowFatalError(
                     state,
-                    EnergyPlus::format("File \"{}\" : Requested column ({}) exceeds the number of columns ({}).", filePath, col + 1, numColumns));
+                    std::format("File \"{}\" : Requested column ({}) exceeds the number of columns ({}).", filePath.string(), col + 1, numColumns));
             }
             if (row >= numRows) {
                 ShowFatalError(
                     state,
-                    EnergyPlus::format("File \"{}\" : Requested starting row ({}) exceeds the number of rows ({}).", filePath, row + 1, numRows));
+                    std::format("File \"{}\" : Requested starting row ({}) exceeds the number of rows ({}).", filePath.string(), row + 1, numRows));
             }
             std::vector<double> array(numRows - row);
             std::transform(content.begin() + row, content.end(), array.begin(), [](std::string_view str) {
@@ -2857,7 +2830,7 @@ namespace Curve {
             for (int dim = 1; dim <= thisCurve->numDims; ++dim) {
                 std::string numStr = fmt::to_string(dim);
                 SetupOutputVariable(state,
-                                    EnergyPlus::format("Performance Curve Input Variable {} Value", numStr),
+                                    std::format("Performance Curve Input Variable {} Value", numStr),
                                     Constant::Units::None,
                                     thisCurve->inputs[dim - 1],
                                     OutputProcessor::TimeStepType::System,
@@ -3099,7 +3072,7 @@ namespace Curve {
 
         std::string validDimsString = fmt::to_string(validDims[0]);
         for (std::size_t i = 1; i < validDims.size(); i++) {
-            validDimsString += EnergyPlus::format(" or {}", validDims[i]);
+            validDimsString += std::format(" or {}", validDims[i]);
         }
 
         ShowSevereCurveDims(state, eoh, curveFieldText, thisCurve->Name, validDimsString, curveDim);
@@ -3113,10 +3086,10 @@ namespace Curve {
                              std::string_view const validDims,
                              int dim)
     {
-        ShowSevereError(state, fmt::format("{}: {}=\"{}\"", eoh.routineName, eoh.objectType, eoh.objectName));
-        ShowContinueError(state, EnergyPlus::format("...Invalid curve for {}.", fieldName));
-        ShowContinueError(state, EnergyPlus::format("...Input curve=\"{}\" has dimension {}.", curveName, dim));
-        ShowContinueError(state, EnergyPlus::format("...Curve type must have dimension {}.", validDims));
+        ShowSevereError(state, std::format("{}: {}=\"{}\"", eoh.routineName, eoh.objectType, eoh.objectName));
+        ShowContinueError(state, std::format("...Invalid curve for {}.", fieldName));
+        ShowContinueError(state, std::format("...Input curve=\"{}\" has dimension {}.", curveName, dim));
+        ShowContinueError(state, std::format("...Curve type must have dimension {}.", validDims));
     }
 
     std::string GetCurveName(EnergyPlusData &state, int const CurveIndex) // index of curve in curve array
@@ -3374,9 +3347,9 @@ namespace Curve {
             thisCurve->outputLimits.minPresent = true;
         } else {
             ShowSevereError(state,
-                            EnergyPlus::format("SetCurveOutputMinValue: CurveIndex=[{}] not in range of curves=[1:{}].",
-                                               CurveIndex,
-                                               state.dataCurveManager->curves.size()));
+                            std::format("SetCurveOutputMinValue: CurveIndex=[{}] not in range of curves=[1:{}].",
+                                        CurveIndex,
+                                        state.dataCurveManager->curves.size()));
             ErrorsFound = true;
         }
     }
@@ -3404,9 +3377,9 @@ namespace Curve {
             thisCurve->outputLimits.maxPresent = true;
         } else {
             ShowSevereError(state,
-                            EnergyPlus::format("SetCurveOutputMinMaxValues: CurveIndex=[{}] not in range of curves=[1:{}].",
-                                               CurveIndex,
-                                               state.dataCurveManager->curves.size()));
+                            std::format("SetCurveOutputMinMaxValues: CurveIndex=[{}] not in range of curves=[1:{}].",
+                                        CurveIndex,
+                                        state.dataCurveManager->curves.size()));
             ErrorsFound = true;
         }
     }
@@ -3511,8 +3484,8 @@ namespace Curve {
                     PressureCurveType = DataBranchAirLoopPlant::PressureCurveType::Generic;
                     PressureCurveIndex = TempCurveIndex;
                 } else {
-                    ShowSevereError(state, EnergyPlus::format("Plant Pressure Simulation: Found error for curve: {}", PressureCurveName));
-                    ShowContinueError(state, EnergyPlus::format("Curve type detected: {}", objectNames[static_cast<int>(GenericCurveType)]));
+                    ShowSevereError(state, std::format("Plant Pressure Simulation: Found error for curve: {}", PressureCurveName));
+                    ShowContinueError(state, std::format("Curve type detected: {}", objectNames[static_cast<int>(GenericCurveType)]));
                     ShowContinueError(state, "Generic curves should be single independent variable such that DeltaP = f(mdot)");
                     ShowContinueError(state, " Therefore they should be of type: Linear, Quadratic, Cubic, Quartic, or Exponent");
                     ShowFatalError(state, "Errors in pressure simulation input cause program termination");
@@ -3627,8 +3600,8 @@ namespace Curve {
         }
         if (!state.dataCurveManager->FrictionFactorErrorHasOccurred) {
             ShowSevereError(state, "Plant Pressure System: Error in moody friction factor calculation");
-            ShowContinueError(
-                state, EnergyPlus::format("Current Conditions: Roughness Ratio={:.7R}; Reynolds Number={:.1R}", RoughnessRatio, ReynoldsNumber));
+            ShowContinueError(state,
+                              std::format("Current Conditions: Roughness Ratio={:.7f}; Reynolds Number={:.1f}", RoughnessRatio, ReynoldsNumber));
             ShowContinueError(state, "These conditions resulted in an unhandled numeric issue.");
             ShowContinueError(state, "Please contact EnergyPlus support/development team to raise an alert about this issue");
             ShowContinueError(state, "This issue will occur only one time.  The friction factor has been reset to 0.04 for calculations");
@@ -3655,10 +3628,10 @@ namespace Curve {
         if (curveIndex > 0) {
             Real64 const CurveVal = CurveValue(state, curveIndex, Var1);
             if (CurveVal > 1.10 || CurveVal < 0.90) {
-                ShowWarningError(state, EnergyPlus::format("{}=\"{}\" curve values", callingRoutineObj, objectName));
-                ShowContinueError(
-                    state, EnergyPlus::format("... {} = {} output is not equal to 1.0 (+ or - 10%) at rated conditions.", cFieldName, cFieldValue));
-                ShowContinueError(state, EnergyPlus::format("... Curve output at rated conditions = {:.3T}", CurveVal));
+                ShowWarningError(state, std::format("{}=\"{}\" curve values", callingRoutineObj, objectName));
+                ShowContinueError(state,
+                                  std::format("... {} = {} output is not equal to 1.0 (+ or - 10%) at rated conditions.", cFieldName, cFieldValue));
+                ShowContinueError(state, std::format("... Curve output at rated conditions = {:.3f}", CurveVal));
             }
         }
     }
@@ -3682,10 +3655,10 @@ namespace Curve {
         if (curveIndex > 0) {
             Real64 const CurveVal = CurveValue(state, curveIndex, Var1, Var2);
             if (CurveVal > 1.10 || CurveVal < 0.90) {
-                ShowWarningError(state, EnergyPlus::format("{}=\"{}\" curve values", callingRoutineObj, objectName));
-                ShowContinueError(
-                    state, EnergyPlus::format("... {} = {} output is not equal to 1.0 (+ or - 10%) at rated conditions.", cFieldName, cFieldValue));
-                ShowContinueError(state, EnergyPlus::format("... Curve output at rated conditions = {:.3T}", CurveVal));
+                ShowWarningError(state, std::format("{}=\"{}\" curve values", callingRoutineObj, objectName));
+                ShowContinueError(state,
+                                  std::format("... {} = {} output is not equal to 1.0 (+ or - 10%) at rated conditions.", cFieldName, cFieldValue));
+                ShowContinueError(state, std::format("... Curve output at rated conditions = {:.3f}", CurveVal));
             }
         }
     }

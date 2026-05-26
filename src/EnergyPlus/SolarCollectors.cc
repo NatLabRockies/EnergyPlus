@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -606,21 +607,20 @@ namespace SolarCollectors {
                 }
                 if (!state.dataSurface->Surface(SurfNum).ExtSolar) {
                     ShowWarningError(state,
-                                     EnergyPlus::format("{} = {}:  Surface {} is not exposed to exterior radiation.",
-                                                        CurrentModuleObject,
-                                                        state.dataIPShortCut->cAlphaArgs(1),
-                                                        state.dataIPShortCut->cAlphaArgs(3)));
+                                     std::format("{} = {}:  Surface {} is not exposed to exterior radiation.",
+                                                 CurrentModuleObject,
+                                                 state.dataIPShortCut->cAlphaArgs(1),
+                                                 state.dataIPShortCut->cAlphaArgs(3)));
                 }
 
                 // check surface orientation, warn if upside down
                 if ((state.dataSurface->Surface(SurfNum).Tilt < -95.0) || (state.dataSurface->Surface(SurfNum).Tilt > 95.0)) {
                     ShowWarningError(state,
-                                     EnergyPlus::format("Suspected input problem with {} = {}",
-                                                        state.dataIPShortCut->cAlphaFieldNames(3),
-                                                        state.dataIPShortCut->cAlphaArgs(3)));
+                                     std::format("Suspected input problem with {} = {}",
+                                                 state.dataIPShortCut->cAlphaFieldNames(3),
+                                                 state.dataIPShortCut->cAlphaArgs(3)));
                     ShowContinueError(
-                        state,
-                        EnergyPlus::format("Entered in {} = {}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+                        state, std::format("Entered in {} = {}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
                     ShowContinueError(state, "Surface used for solar collector faces down");
                     ShowContinueError(state,
                                       EnergyPlus::format("Surface tilt angle (degrees from ground outward normal) = {:.2R}",
@@ -632,11 +632,11 @@ namespace SolarCollectors {
                 for (int CollectorNum2 = 1; CollectorNum2 <= state.dataSolarCollectors->NumOfCollectors; ++CollectorNum2) {
                     if (state.dataSolarCollectors->Collector(CollectorNum2).Surface == SurfNum) {
                         ShowSevereError(state,
-                                        EnergyPlus::format("{} = {}:  Surface {} is referenced by more than one {}",
-                                                           CurrentModuleObject,
-                                                           state.dataIPShortCut->cAlphaArgs(1),
-                                                           state.dataIPShortCut->cAlphaArgs(3),
-                                                           CurrentModuleObject));
+                                        std::format("{} = {}:  Surface {} is referenced by more than one {}",
+                                                    CurrentModuleObject,
+                                                    state.dataIPShortCut->cAlphaArgs(1),
+                                                    state.dataIPShortCut->cAlphaArgs(3),
+                                                    CurrentModuleObject));
                         ErrorsFound = true;
                         break;
                     }
@@ -650,7 +650,7 @@ namespace SolarCollectors {
                             state.dataSurface->Surface(SurfNum).Area >
                         0.01) {
 
-                    ShowWarningError(state, EnergyPlus::format("{} = {}: ", CurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+                    ShowWarningError(state, std::format("{} = {}: ", CurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
                     ShowContinueError(state, "Gross area of solar collector parameters and surface object differ by more than 1%.");
                     ShowContinueError(state, "Gross collector area is always used in the calculation.  Modify the surface ");
                     ShowContinueError(state, "coordinates to match its area with collector gross area. Otherwise, the underlying ");
@@ -666,20 +666,20 @@ namespace SolarCollectors {
                     int Found = Util::FindItemInList(state.dataSolarCollectors->Collector(CollectorNum).OSCMName, state.dataSurface->OSCM);
                     if (Found == 0) {
                         ShowSevereError(state,
-                                        EnergyPlus::format("{} not found={} in {} ={}",
-                                                           state.dataIPShortCut->cAlphaFieldNames(5),
-                                                           state.dataSolarCollectors->Collector(CollectorNum).OSCMName,
-                                                           CurrentModuleObject,
-                                                           state.dataSolarCollectors->Collector(CollectorNum).Name));
+                                        std::format("{} not found={} in {} ={}",
+                                                    state.dataIPShortCut->cAlphaFieldNames(5),
+                                                    state.dataSolarCollectors->Collector(CollectorNum).OSCMName,
+                                                    CurrentModuleObject,
+                                                    state.dataSolarCollectors->Collector(CollectorNum).Name));
                         ErrorsFound = true;
                     }
                 } else {
                     ShowSevereError(state,
-                                    EnergyPlus::format("{} not found={} in {} ={}",
-                                                       state.dataIPShortCut->cAlphaFieldNames(5),
-                                                       state.dataSolarCollectors->Collector(CollectorNum).BCType,
-                                                       CurrentModuleObject,
-                                                       state.dataSolarCollectors->Collector(CollectorNum).Name));
+                                    std::format("{} not found={} in {} ={}",
+                                                state.dataIPShortCut->cAlphaFieldNames(5),
+                                                state.dataSolarCollectors->Collector(CollectorNum).BCType,
+                                                CurrentModuleObject,
+                                                state.dataSolarCollectors->Collector(CollectorNum).Name));
                     ErrorsFound = true;
                 }
 
@@ -731,7 +731,7 @@ namespace SolarCollectors {
             } // ICSNum
 
             if (ErrorsFound) {
-                ShowFatalError(state, EnergyPlus::format("Errors in {} input.", CurrentModuleObject));
+                ShowFatalError(state, std::format("Errors in {} input.", CurrentModuleObject));
             }
         }
     }
@@ -1248,17 +1248,17 @@ namespace SolarCollectors {
                 if (qEquation < 0.0) {
                     if (this->ErrIndex == 0) {
                         ShowSevereMessage(state,
-                                          EnergyPlus::format("CalcSolarCollector: {}=\"{}\", possible bad input coefficients.",
-                                                             DataPlant::PlantEquipTypeNames[static_cast<int>(this->Type)],
-                                                             this->Name));
+                                          std::format("CalcSolarCollector: {}=\"{}\", possible bad input coefficients.",
+                                                      DataPlant::PlantEquipTypeNames[static_cast<int>(this->Type)],
+                                                      this->Name));
                         ShowContinueError(state,
                                           "...coefficients cause negative quadratic equation part in calculating temperature of stagnant fluid.");
                         ShowContinueError(state, "...examine input coefficients for accuracy. Calculation will be treated as linear.");
                     }
                     ShowRecurringSevereErrorAtEnd(state,
-                                                  EnergyPlus::format("CalcSolarCollector: {}=\"{}\", coefficient error continues.",
-                                                                     DataPlant::PlantEquipTypeNames[static_cast<int>(this->Type)],
-                                                                     this->Name),
+                                                  std::format("CalcSolarCollector: {}=\"{}\", coefficient error continues.",
+                                                              DataPlant::PlantEquipTypeNames[static_cast<int>(this->Type)],
+                                                              this->Name),
                                                   this->ErrIndex,
                                                   qEquation,
                                                   qEquation);
@@ -1278,14 +1278,14 @@ namespace SolarCollectors {
             if (Iteration > 100) {
                 if (this->IterErrIndex == 0) {
                     ShowWarningMessage(state,
-                                       EnergyPlus::format("CalcSolarCollector: {}=\"{}\":  Solution did not converge.",
-                                                          DataPlant::PlantEquipTypeNames[static_cast<int>(this->Type)],
-                                                          this->Name));
+                                       std::format("CalcSolarCollector: {}=\"{}\":  Solution did not converge.",
+                                                   DataPlant::PlantEquipTypeNames[static_cast<int>(this->Type)],
+                                                   this->Name));
                 }
                 ShowRecurringWarningErrorAtEnd(state,
-                                               EnergyPlus::format("CalcSolarCollector: {}=\"{}\", solution not converge error continues.",
-                                                                  DataPlant::PlantEquipTypeNames[static_cast<int>(this->Type)],
-                                                                  this->Name),
+                                               std::format("CalcSolarCollector: {}=\"{}\", solution not converge error continues.",
+                                                           DataPlant::PlantEquipTypeNames[static_cast<int>(this->Type)],
+                                                           this->Name),
                                                this->IterErrIndex);
                 break;
             }
@@ -1341,12 +1341,12 @@ namespace SolarCollectors {
             if (IAM > 10.0) { // Greater than 10 is probably not a possibility
                 ShowSevereError(
                     state,
-                    EnergyPlus::format(
+                    std::format(
                         "IAM Function: SolarCollectorPerformance:FlatPlate = {}:  Incident Angle Modifier is out of bounds due to bad coefficients.",
                         this->Name));
-                ShowContinueError(state, EnergyPlus::format("Coefficient 2 of Incident Angle Modifier = {}", this->iam1));
-                ShowContinueError(state, EnergyPlus::format("Coefficient 3 of Incident Angle Modifier = {}", this->iam2));
-                ShowContinueError(state, EnergyPlus::format("Calculated Incident Angle Modifier = {}", IAM));
+                ShowContinueError(state, std::format("Coefficient 2 of Incident Angle Modifier = {}", this->iam1));
+                ShowContinueError(state, std::format("Coefficient 3 of Incident Angle Modifier = {}", this->iam2));
+                ShowContinueError(state, std::format("Calculated Incident Angle Modifier = {}", IAM));
                 ShowContinueError(state, "Expected Incident Angle Modifier should be approximately 1.5 or less.");
                 ShowFatalError(state, "Errors in SolarCollectorPerformance:FlatPlate input.");
             }
@@ -2173,10 +2173,9 @@ namespace SolarCollectors {
         }
 
         if (!Found) {
-            ShowFatalError(
-                state,
-                EnergyPlus::format("Did not find surface in Exterior Vented Cavity description in GetExtVentedCavityIndex, Surface name = {}",
-                                   state.dataSurface->Surface(SurfacePtr).Name));
+            ShowFatalError(state,
+                           std::format("Did not find surface in Exterior Vented Cavity description in GetExtVentedCavityIndex, Surface name = {}",
+                                       state.dataSurface->Surface(SurfacePtr).Name));
         } else {
 
             VentCavIndex = CavNum;
