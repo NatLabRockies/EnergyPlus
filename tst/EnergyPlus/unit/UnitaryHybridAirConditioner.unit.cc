@@ -2032,10 +2032,10 @@ TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_OptimizeSupplyTempera
     thisUnitary.InitializeModelParams();
     thisUnitary.doStep(*state, RequestedCooling, RequestedHeating, Requested_Humidification, Requested_Dehumidification, DesignMinVR);
 
-    //EXPECT_EQ(thisUnitary.ObjectiveFunction, HybridEvapCoolingModel::ObjectiveFunctionType::SupplyTemperature);
-    //EXPECT_EQ(currentSettings.Mode, 2);
-    //EXPECT_EQ(currentSettings.oMode.ModeName, "Mode2 Optimal Tsa Cool");
-    //EXPECT_EQ(currentSettings.SupplyAirTemperature, 15);
+    // EXPECT_EQ(thisUnitary.ObjectiveFunction, HybridEvapCoolingModel::ObjectiveFunctionType::SupplyTemperature);
+    // EXPECT_EQ(currentSettings.Mode, 2);
+    // EXPECT_EQ(currentSettings.oMode.ModeName, "Mode2 Optimal Tsa Cool");
+    // EXPECT_EQ(currentSettings.SupplyAirTemperature, 15);
 
     // 2. Check that electric power is optimized correctly for unmet cooling
     RequestedHeating = 0;
@@ -2048,10 +2048,10 @@ TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_OptimizeSupplyTempera
     Real64 effectiveRuntimeFraction = thisUnitary.CalculatePartRuntimeFraction(
         DesignMinVR, currentSettings.Supply_Air_Ventilation_Volume * state->dataEnvrn->StdRhoAir, 0, 0, 0, 0, 0, 0);
 
-    //EXPECT_EQ(thisUnitary.ObjectiveFunction, HybridEvapCoolingModel::ObjectiveFunctionType::SupplyTemperature);
-    //EXPECT_EQ(currentSettings.Mode, 1);
-    //EXPECT_EQ(currentSettings.oMode.ModeName, "Mode1 Optimal Power");
-    //EXPECT_EQ(currentSettings.ElectricalPower + currentSettings.SupplyFanElectricPower, 100 * effectiveRuntimeFraction);
+    // EXPECT_EQ(thisUnitary.ObjectiveFunction, HybridEvapCoolingModel::ObjectiveFunctionType::SupplyTemperature);
+    // EXPECT_EQ(currentSettings.Mode, 1);
+    // EXPECT_EQ(currentSettings.oMode.ModeName, "Mode1 Optimal Power");
+    // EXPECT_EQ(currentSettings.ElectricalPower + currentSettings.SupplyFanElectricPower, 100 * effectiveRuntimeFraction);
 
     // 3. Check that supply temperature is optimized correctly for heating
     Tra = 25;
@@ -2070,10 +2070,10 @@ TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_OptimizeSupplyTempera
     thisUnitary.InitializeModelParams();
     thisUnitary.doStep(*state, RequestedCooling, RequestedHeating, Requested_Humidification, Requested_Dehumidification, DesignMinVR);
 
-    //EXPECT_EQ(thisUnitary.ObjectiveFunction, HybridEvapCoolingModel::ObjectiveFunctionType::SupplyTemperature);
-    //EXPECT_EQ(currentSettings.Mode, 3);
-    //EXPECT_EQ(currentSettings.oMode.ModeName, "Mode3 Optimal Tsa Heat");
-    //EXPECT_EQ(currentSettings.SupplyAirTemperature, 35);
+    // EXPECT_EQ(thisUnitary.ObjectiveFunction, HybridEvapCoolingModel::ObjectiveFunctionType::SupplyTemperature);
+    // EXPECT_EQ(currentSettings.Mode, 3);
+    // EXPECT_EQ(currentSettings.oMode.ModeName, "Mode3 Optimal Tsa Heat");
+    // EXPECT_EQ(currentSettings.SupplyAirTemperature, 35);
 
     // 4. Check that electric power is optimized correctly for unmet heating
     RequestedHeating = 1000000.0;
@@ -2086,10 +2086,10 @@ TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_OptimizeSupplyTempera
     effectiveRuntimeFraction = thisUnitary.CalculatePartRuntimeFraction(
         DesignMinVR, currentSettings.Supply_Air_Ventilation_Volume * state->dataEnvrn->StdRhoAir, 0, 0, 0, 0, 0, 0);
 
-    //EXPECT_EQ(thisUnitary.ObjectiveFunction, HybridEvapCoolingModel::ObjectiveFunctionType::SupplyTemperature);
-    //EXPECT_EQ(currentSettings.Mode, 1);
-    //EXPECT_EQ(currentSettings.oMode.ModeName, "Mode1 Optimal Power");
-    //EXPECT_EQ(currentSettings.ElectricalPower + currentSettings.SupplyFanElectricPower, 100 * effectiveRuntimeFraction);
+    // EXPECT_EQ(thisUnitary.ObjectiveFunction, HybridEvapCoolingModel::ObjectiveFunctionType::SupplyTemperature);
+    // EXPECT_EQ(currentSettings.Mode, 1);
+    // EXPECT_EQ(currentSettings.oMode.ModeName, "Mode1 Optimal Power");
+    // EXPECT_EQ(currentSettings.ElectricalPower + currentSettings.SupplyFanElectricPower, 100 * effectiveRuntimeFraction);
 
     // 5. Check that electric power is optimized correctly for ventilation-only
     Tra = 25;
@@ -2111,10 +2111,10 @@ TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_OptimizeSupplyTempera
     effectiveRuntimeFraction = thisUnitary.CalculatePartRuntimeFraction(
         DesignMinVR, currentSettings.Supply_Air_Ventilation_Volume * state->dataEnvrn->StdRhoAir, 0, 0, 0, 0, 0, 0);
 
-    //EXPECT_EQ(thisUnitary.ObjectiveFunction, HybridEvapCoolingModel::ObjectiveFunctionType::SupplyTemperature);
-    //EXPECT_EQ(currentSettings.Mode, 4);
-    //EXPECT_EQ(currentSettings.oMode.ModeName, "Mode4 Optimal Vent Only");
-    //EXPECT_EQ(currentSettings.ElectricalPower + currentSettings.SupplyFanElectricPower, 150 * effectiveRuntimeFraction);
+    // EXPECT_EQ(thisUnitary.ObjectiveFunction, HybridEvapCoolingModel::ObjectiveFunctionType::SupplyTemperature);
+    // EXPECT_EQ(currentSettings.Mode, 4);
+    // EXPECT_EQ(currentSettings.oMode.ModeName, "Mode4 Optimal Vent Only");
+    // EXPECT_EQ(currentSettings.ElectricalPower + currentSettings.SupplyFanElectricPower, 150 * effectiveRuntimeFraction);
 
     // 6. Check that standby is still an available option
     Tra = 25;
@@ -2133,10 +2133,10 @@ TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_OptimizeSupplyTempera
     thisUnitary.InitializeModelParams();
     thisUnitary.doStep(*state, RequestedCooling, RequestedHeating, Requested_Humidification, Requested_Dehumidification, DesignMinVR);
 
-    //EXPECT_EQ(thisUnitary.ObjectiveFunction, HybridEvapCoolingModel::ObjectiveFunctionType::SupplyTemperature);
-    //EXPECT_EQ(currentSettings.Mode, 0);
-    //EXPECT_EQ(currentSettings.oMode.ModeName, "Mode0 Standby");
-    //EXPECT_EQ(currentSettings.ElectricalPower + currentSettings.SupplyFanElectricPower, 5);
+    // EXPECT_EQ(thisUnitary.ObjectiveFunction, HybridEvapCoolingModel::ObjectiveFunctionType::SupplyTemperature);
+    // EXPECT_EQ(currentSettings.Mode, 0);
+    // EXPECT_EQ(currentSettings.oMode.ModeName, "Mode0 Standby");
+    // EXPECT_EQ(currentSettings.ElectricalPower + currentSettings.SupplyFanElectricPower, 5);
 }
 
 } // namespace EnergyPlus

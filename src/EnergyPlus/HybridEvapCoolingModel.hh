@@ -386,7 +386,7 @@ namespace HybridEvapCoolingModel {
         CSetting oStandBy;
 
         std::vector<CSetting> Settings;
-        std::vector<CSetting> VentilationSettings;        
+        std::vector<CSetting> VentilationSettings;
         // methods
         int CurrentPrimaryMode();
         Real64 CurrentPrimaryRuntimeFraction();
