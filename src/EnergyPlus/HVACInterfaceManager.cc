@@ -1129,6 +1129,7 @@ void ManageTwoWayCommonPipe(EnergyPlusData &state, PlantLocation const &plantLoc
                     MdotPri = MdotSec;
                 }
                 PlantLocation thisPlantLoc = {plantLoc.loopNum, DataPlant::LoopSideLocation::Supply, 1, 0};
+                PlantUtilities::SetPlantLocationLinks(state, thisPlantLoc);
                 PlantUtilities::SetActuatedBranchFlowRate(state, MdotPri, NodeNumPriIn, thisPlantLoc, false);
             }
 
@@ -1178,6 +1179,7 @@ void ManageTwoWayCommonPipe(EnergyPlusData &state, PlantLocation const &plantLoc
                     MdotPri = MdotSec;
                 }
                 PlantLocation thisPlantLoc = {plantLoc.loopNum, DataPlant::LoopSideLocation::Supply, 1, 0};
+                PlantUtilities::SetPlantLocationLinks(state, thisPlantLoc);
                 PlantUtilities::SetActuatedBranchFlowRate(state, MdotPri, NodeNumPriIn, thisPlantLoc, false);
             }
 
@@ -1262,7 +1264,7 @@ void SetupCommonPipes(EnergyPlusData &state)
                                 thisPlantLoop.Name);
 
             if (first_supply_component_type == DataPlant::PlantEquipmentType::PumpVariableSpeed) {
-                thisCommonPipe.SupplySideInletPumpType = FlowType::Constant;
+                // thisCommonPipe.SupplySideInletPumpType = FlowType::Constant;
                 // If/when the model supports variable-pumping primary, this can be removed.
                 ShowWarningError(state, "SetupCommonPipes: detected variable speed pump on supply inlet of CommonPipe plant loop");
                 ShowContinueError(state, std::format("Occurs on plant loop name = {}", thisPlantLoop.Name));
@@ -1305,7 +1307,7 @@ void SetupCommonPipes(EnergyPlusData &state)
             if (first_supply_component_type == DataPlant::PlantEquipmentType::PumpConstantSpeed) {
                 thisCommonPipe.SupplySideInletPumpType = FlowType::Constant;
             } else if (first_supply_component_type == DataPlant::PlantEquipmentType::PumpVariableSpeed) {
-                thisCommonPipe.SupplySideInletPumpType = FlowType::Constant;
+                // thisCommonPipe.SupplySideInletPumpType = FlowType::Constant;
                 // If/when the model supports variable-pumping primary, this can be removed.
                 ShowWarningError(state, "SetupCommonPipes: detected variable speed pump on supply inlet of TwoWayCommonPipe plant loop");
                 ShowContinueError(state, std::format("Occurs on plant loop name = {}", thisPlantLoop.Name));
