@@ -382,7 +382,7 @@ namespace HybridEvapCoolingModel {
                 Real64 Msa_val = Min_Msa + ResolutionMsa * i;
                 sol.MassFlowRatio.push_back(Msa_val);
             }
-             sol.MassFlowRatio.push_back(Min_Msa);
+            sol.MassFlowRatio.push_back(Min_Msa);
         }
 
         if (Min_OAF == Max_OAF) {
@@ -397,7 +397,7 @@ namespace HybridEvapCoolingModel {
                 Real64 OAF_val = Min_OAF + ResolutionOAF * i;
                 sol.OutdoorAirFraction.push_back(OAF_val);
             }
-             sol.OutdoorAirFraction.push_back(Min_OAF);
+            sol.OutdoorAirFraction.push_back(Min_OAF);
         }
     }
 
@@ -927,6 +927,7 @@ namespace HybridEvapCoolingModel {
             oStandBy.Mode = 0;
             oStandBy.Mixed_Air_Temperature = Tra;
             oStandBy.Mixed_Air_W = Wra;
+            oStandBy.oMode = Mode0;
         } else {
             // if the solution space is invalid return true that an error occurred.
             return true;
@@ -1438,7 +1439,7 @@ namespace HybridEvapCoolingModel {
                                 VentilationSetting.Mode = Mode.ModeID;
                                 VentilationSetting.Outdoor_Air_Fraction = OSAF;
                                 VentilationSetting.Supply_Air_Mass_Flow_Rate_Ratio = MsaRatio;
-                                VentilationSetting.Unscaled_Supply_Air_Mass_Flow_Rate = min(MinOA_Msa, UnscaledMsa);
+                                VentilationSetting.Unscaled_Supply_Air_Mass_Flow_Rate = UnscaledMsa;
                                 VentilationSetting.ScaledSupply_Air_Mass_Flow_Rate = min(MinOA_Msa, ScaledMsa);
                                 VentilationSetting.ScaledSupply_Air_Ventilation_Volume =
                                     VentilationSetting.ScaledSupply_Air_Mass_Flow_Rate / state.dataEnvrn->StdRhoAir;
@@ -1488,79 +1489,71 @@ namespace HybridEvapCoolingModel {
                 Humidification_load_met = true;
             }
 
-            // Calculate partload fraction required to meet all requirements
-            // Fraction can be above 1 meaning its not able to do it completely in a time step
-            Real64 PartRuntimeFraction = CalculatePartRuntimeFraction(MinOA_Msa,
-                                                                      thisSetting.Supply_Air_Ventilation_Volume * state.dataEnvrn->StdRhoAir,
-                                                                      StepIns.RequestedCoolingLoad,
-                                                                      StepIns.RequestedHeatingLoad,
-                                                                      thisSetting.SensibleZone,
-                                                                      StepIns.ZoneDehumidificationLoad,
-                                                                      StepIns.ZoneMoistureLoad,
-                                                                      thisSetting.LatentZone);
-
-            Real64 RunFractionTotalFuel;
+            Real64 RunFractionTotalFuel(0);
             switch (ObjectiveFunction) {
             default:
             case ObjectiveFunctionType::ElectricityUse:
-                RunFractionTotalFuel = thisSetting.ElectricalPower * PartRuntimeFraction;
+                RunFractionTotalFuel = thisSetting.ElectricalPower * thisSetting.Runtime_Fraction;
                 break;
             case ObjectiveFunctionType::SecondFuelUse:
-                RunFractionTotalFuel = thisSetting.SecondaryFuelConsumptionRate * PartRuntimeFraction;
+                RunFractionTotalFuel = thisSetting.SecondaryFuelConsumptionRate * thisSetting.Runtime_Fraction;
                 break;
             case ObjectiveFunctionType::ThirdFuelUse:
-                RunFractionTotalFuel = thisSetting.ThirdFuelConsumptionRate * PartRuntimeFraction;
+                RunFractionTotalFuel = thisSetting.ThirdFuelConsumptionRate * thisSetting.Runtime_Fraction;
                 break;
             case ObjectiveFunctionType::WaterUse:
-                RunFractionTotalFuel = thisSetting.WaterConsumptionRate * PartRuntimeFraction;
+                RunFractionTotalFuel = thisSetting.WaterConsumptionRate * thisSetting.Runtime_Fraction;
                 break;
             }
-            thisSetting.Runtime_Fraction = PartRuntimeFraction; //
 
+            bool StoreBestSetting = false;
             if (Conditioning_load_met && Humidification_load_met) {
-                // store best performing mode
                 if (RunFractionTotalFuel < OptimalSetting_RunFractionTotalFuel) {
+                    StoreBestSetting = true;
                     OptimalSetting_RunFractionTotalFuel = RunFractionTotalFuel;
+                }
+
+                if (StoreBestSetting) {
                     OptimalSetting = thisSetting;
                     DidWeMeetLoad = true;
                     DidWeMeetHumidification = true;
                 }
             } else {
                 if (!DidWeMeetLoad && !DidWeMeetHumidification) {
-                    bool store_best_attempt = false;
-
                     if (Conditioning_load_met) {
                         DidWeMeetLoad = true;
                         if (HumidificationRequested && (thisSetting.LatentZone < PreviousMaxiumHumidOrDehumidOutput)) {
-                            store_best_attempt = true;
+                            StoreBestSetting = true;
                         }
                         if (DehumidificationRequested && (thisSetting.LatentZone > PreviousMaxiumHumidOrDehumidOutput)) {
-                            store_best_attempt = true;
+                            StoreBestSetting = true;
                         }
-                        if (store_best_attempt) {
+                        if (StoreBestSetting) {
                             PreviousMaxiumHumidOrDehumidOutput = thisSetting.LatentZone;
                         }
                     } else {
                         if (CoolingRequested && (thisSetting.SensibleZone > PreviousMaxiumConditioningOutput)) {
-                            store_best_attempt = true;
+                            StoreBestSetting = true;
                         }
                         if (HeatingRequested && (thisSetting.SensibleZone < PreviousMaxiumConditioningOutput)) {
-                            store_best_attempt = true;
+                            StoreBestSetting = true;
                         }
-                        if (store_best_attempt) {
+                        if (StoreBestSetting) {
                             PreviousMaxiumConditioningOutput = thisSetting.SensibleZone;
-                        } else if (VentilationRequested) {
-                            // Ventilation requirements have already been met or we wouldn't be here (see MinVRMet above)
-                            // Set this for later, in case no loads are met (even partially)
-                            DidWeMeetVentilation = true;
                         }
                     }
-                    if (store_best_attempt) {
+                    if (StoreBestSetting) {
                         OptimalSetting_RunFractionTotalFuel = RunFractionTotalFuel;
                         OptimalSetting = thisSetting;
                         DidWePartlyMeetLoad = true;
                     }
                 }
+            }
+
+            if (!StoreBestSetting && VentilationRequested) {
+                // Ventilation requirements have already been met as a condition for creating this setting (see MinVRMet above)
+                // Set this flag for later in case no loads are met
+                DidWeMeetVentilation = true;
             }
         }
 
@@ -1605,34 +1598,32 @@ namespace HybridEvapCoolingModel {
             else if (DidWeMeetVentilation) {
                 for (auto &thisSetting : VentilationSettings) {
                     CalculateSettingOutputs(state, thisSetting, StepIns, Wosa, Wra, MinOA_Msa);
+
+                    // scale these outputs using the ventilation runtime fraction, because the actual runtime fraction will be overridden to 1 below
+                    Real64 effectiveRuntimeFraction = Model::CalculatePartRuntimeFraction(
+                        MinOA_Msa, thisSetting.Supply_Air_Ventilation_Volume * state.dataEnvrn->StdRhoAir, 0, 0, 0, 0, 0, 0);
+                    thisSetting.ElectricalPower *= effectiveRuntimeFraction;
+                    thisSetting.SupplyFanElectricPower *= effectiveRuntimeFraction;
+                    thisSetting.ExternalStaticPressure *= effectiveRuntimeFraction;
+                    thisSetting.SecondaryFuelConsumptionRate *= effectiveRuntimeFraction;
+                    thisSetting.ThirdFuelConsumptionRate *= effectiveRuntimeFraction;
+                    thisSetting.WaterConsumptionRate *= effectiveRuntimeFraction;
                 }
                 std::sort(VentilationSettings.begin(), VentilationSettings.end(), [](const CSetting &a, const CSetting &b) {
-                    if (a.SupplyFanElectricPower != b.SupplyFanElectricPower) {
-                        return a.SupplyFanElectricPower < b.SupplyFanElectricPower;
-                    }
-                    if (a.ScaledSupply_Air_Mass_Flow_Rate != b.ScaledSupply_Air_Mass_Flow_Rate) {
-                        return a.ScaledSupply_Air_Mass_Flow_Rate > b.ScaledSupply_Air_Mass_Flow_Rate;
-                    }
-                    if (a.ScaledSupply_Air_Ventilation_Volume != b.ScaledSupply_Air_Ventilation_Volume) {
-                        return a.ScaledSupply_Air_Ventilation_Volume > b.ScaledSupply_Air_Ventilation_Volume;
-                    }
-                    if (a.SupplyAirTemperature != b.SupplyAirTemperature) {
-                        return a.SupplyAirTemperature > b.SupplyAirTemperature;
-                    }
-                    return a.Mode < b.Mode;
+                    return a.ElectricalPower + a.SupplyFanElectricPower < a.ElectricalPower + b.SupplyFanElectricPower;
                 });
                 OptimalSetting = VentilationSettings.front();
 
                 ErrorCode = 0;
                 count_DidWeNotMeetLoad++;
                 if (OptimalSetting.ElectricalPower == IMPLAUSIBLE_POWER) {
-                    ShowWarningError(state, "Model was not able to provide cooling for a time step, called in HybridEvapCooling:dostep");
+                    ShowWarningError(state, "Model was not able to provide ventilation for a time step, called in HybridEvapCooling:dostep");
                     OptimalSetting.ElectricalPower = 0;
                 }
                 OptimalSetting.Runtime_Fraction = 1;
                 CurrentOperatingSettings[0] = OptimalSetting;
                 PrimaryMode = OptimalSetting.Mode;
-                PrimaryModeRuntimeFraction = 1;
+                PrimaryModeRuntimeFraction = OptimalSetting.Runtime_Fraction;
             }
             // if we didn't even partially meet the load make sure the operational settings are just the standby mode.
             else {
