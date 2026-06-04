@@ -272,15 +272,15 @@ namespace InternalHeatGains {
         int IOStat;
 
         // Formats
-        static constexpr std::string_view Format_720(" Zone Internal Gains Nominal, {},{:.2R},{:.1R},");
-        static constexpr std::string_view Format_722(" {} Internal Gains Nominal, {},{},{},{:.2R},{:.1R},");
+        static constexpr std::string_view Format_720(" Zone Internal Gains Nominal, {},{:.2f},{:.1f},");
+        static constexpr std::string_view Format_722(" {} Internal Gains Nominal, {},{},{},{:.2f},{:.1f},");
         static constexpr std::string_view Format_723(
             "! <{} Internal Gains Nominal>,Name,Schedule Name,Zone Name,Zone Floor Area {{m2}},# Zone Occupants,{}");
         static constexpr std::string_view Format_724(" {}, {}\n");
 
         auto print_and_divide_if_greater_than_zero = [&](const Real64 numerator, const Real64 denominator) {
             if (denominator > 0.0) {
-                print(state.files.eio, "{:.3R},", numerator / denominator);
+                print(state.files.eio, "{:.3f},", numerator / denominator);
             } else {
                 print(state.files.eio, "N/A,");
             }
@@ -447,12 +447,12 @@ namespace InternalHeatGains {
                     if (Item1 == 1) {
                         if (thisPeople.FractionConvected < 0.0) {
                             ShowSevereError(state,
-                                            EnergyPlus::format("{}{}=\"{}\", {} < 0.0, value ={:.2R}",
-                                                               RoutineName,
-                                                               peopleModuleObject,
-                                                               IHGAlphas(1),
-                                                               IHGNumericFieldNames(4),
-                                                               IHGNumbers(4)));
+                                            std::format("{}{}=\"{}\", {} < 0.0, value ={:.2f}",
+                                                        RoutineName,
+                                                        peopleModuleObject,
+                                                        IHGAlphas(1),
+                                                        IHGNumericFieldNames(4),
+                                                        IHGNumbers(4)));
                             ErrorsFound = true;
                         }
                     }
@@ -483,12 +483,12 @@ namespace InternalHeatGains {
 
                     if (thisPeople.CO2RateFactor < 0.0) {
                         ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} < 0.0, value ={:.2R}",
-                                                           RoutineName,
-                                                           peopleModuleObject,
-                                                           IHGAlphas(1),
-                                                           IHGNumericFieldNames(6),
-                                                           IHGNumbers(6)));
+                                        std::format("{}{}=\"{}\", {} < 0.0, value ={:.2f}",
+                                                    RoutineName,
+                                                    peopleModuleObject,
+                                                    IHGAlphas(1),
+                                                    IHGNumericFieldNames(6),
+                                                    IHGNumbers(6)));
                         ErrorsFound = true;
                     }
 
@@ -546,12 +546,11 @@ namespace InternalHeatGains {
                             NoTCModelSelectedWithSchedules =
                                 CheckThermalComfortSchedules(IHGAlphaFieldBlanks(9), IHGAlphaFieldBlanks(12), IHGAlphaFieldBlanks(13));
                             if (NoTCModelSelectedWithSchedules) {
-                                ShowWarningError(
-                                    state,
-                                    EnergyPlus::format("{}{}=\"{}\" has comfort related schedules but no thermal comfort model selected.",
-                                                       RoutineName,
-                                                       peopleModuleObject,
-                                                       IHGAlphas(1)));
+                                ShowWarningError(state,
+                                                 std::format("{}{}=\"{}\" has comfort related schedules but no thermal comfort model selected.",
+                                                             RoutineName,
+                                                             peopleModuleObject,
+                                                             IHGAlphas(1)));
                                 ShowContinueError(state,
                                                   "If schedules are specified for air velocity, clothing insulation, and/or work efficiency but no "
                                                   "thermal comfort");
@@ -635,13 +634,13 @@ namespace InternalHeatGains {
                                 if (thisPeople.SurfacePtr == 0 && ModelWithAdditionalInputs) {
                                     if (Item1 == 1) {
                                         ShowSevereError(state,
-                                                        EnergyPlus::format("{}{}=\"{}\", {}={} invalid Surface Name={}",
-                                                                           RoutineName,
-                                                                           peopleModuleObject,
-                                                                           IHGAlphas(1),
-                                                                           IHGAlphaFieldNames(7),
-                                                                           IHGAlphas(7),
-                                                                           IHGAlphas(8)));
+                                                        std::format("{}{}=\"{}\", {}={} invalid Surface Name={}",
+                                                                    RoutineName,
+                                                                    peopleModuleObject,
+                                                                    IHGAlphas(1),
+                                                                    IHGAlphaFieldNames(7),
+                                                                    IHGAlphas(7),
+                                                                    IHGAlphas(8)));
                                         ErrorsFound = true;
                                     }
                                 } else {
@@ -649,17 +648,17 @@ namespace InternalHeatGains {
                                     int const thisPeopleRadEnclNum = state.dataHeatBal->space(thisPeople.spaceIndex).radiantEnclosureNum;
                                     if (surfRadEnclNum != thisPeopleRadEnclNum && ModelWithAdditionalInputs) {
                                         ShowSevereError(state,
-                                                        EnergyPlus::format("{}{}=\"{}\", Surface referenced in {}={} in different enclosure.",
-                                                                           RoutineName,
-                                                                           peopleModuleObject,
-                                                                           IHGAlphas(1),
-                                                                           IHGAlphaFieldNames(7),
-                                                                           IHGAlphas(7)));
+                                                        std::format("{}{}=\"{}\", Surface referenced in {}={} in different enclosure.",
+                                                                    RoutineName,
+                                                                    peopleModuleObject,
+                                                                    IHGAlphas(1),
+                                                                    IHGAlphaFieldNames(7),
+                                                                    IHGAlphas(7)));
                                         ShowContinueError(state,
-                                                          EnergyPlus::format("Surface is in Enclosure={} and {} is in Enclosure={}",
-                                                                             state.dataViewFactor->EnclRadInfo(surfRadEnclNum).Name,
-                                                                             peopleModuleObject,
-                                                                             state.dataViewFactor->EnclRadInfo(thisPeopleRadEnclNum).Name));
+                                                          std::format("Surface is in Enclosure={} and {} is in Enclosure={}",
+                                                                      state.dataViewFactor->EnclRadInfo(surfRadEnclNum).Name,
+                                                                      peopleModuleObject,
+                                                                      state.dataViewFactor->EnclRadInfo(thisPeopleRadEnclNum).Name));
                                         ErrorsFound = true;
                                     }
                                 }
@@ -672,12 +671,12 @@ namespace InternalHeatGains {
                             default: { // An invalid keyword was entered--warn but ignore
                                 if (Item1 == 1 && ModelWithAdditionalInputs) {
                                     ShowWarningError(state,
-                                                     EnergyPlus::format("{}{}=\"{}\", invalid {}={}",
-                                                                        RoutineName,
-                                                                        peopleModuleObject,
-                                                                        IHGAlphas(1),
-                                                                        IHGAlphaFieldNames(7),
-                                                                        IHGAlphas(7)));
+                                                     std::format("{}{}=\"{}\", invalid {}={}",
+                                                                 RoutineName,
+                                                                 peopleModuleObject,
+                                                                 IHGAlphas(1),
+                                                                 IHGAlphaFieldNames(7),
+                                                                 IHGAlphas(7)));
                                     ShowContinueError(state, "...Valid values are \"EnclosureAveraged\", \"SurfaceWeighted\", \"AngleFactor\".");
                                 }
                             } break;
@@ -856,17 +855,15 @@ namespace InternalHeatGains {
                     if (state.dataHeatBal->Zone(Loop).FloorArea > 0.0 &&
                         state.dataHeatBal->Zone(Loop).FloorArea / state.dataHeatBal->Zone(Loop).TotOccupants < 0.1) {
                         ShowWarningError(
-                            state,
-                            EnergyPlus::format("{}Zone=\"{}\" occupant density is extremely high.", RoutineName, state.dataHeatBal->Zone(Loop).Name));
+                            state, std::format("{}Zone=\"{}\" occupant density is extremely high.", RoutineName, state.dataHeatBal->Zone(Loop).Name));
                         if (state.dataHeatBal->Zone(Loop).FloorArea > 0.0) {
-                            ShowContinueError(
-                                state,
-                                EnergyPlus::format("Occupant Density=[{:.0R}] person/m2.",
-                                                   state.dataHeatBal->Zone(Loop).TotOccupants / state.dataHeatBal->Zone(Loop).FloorArea));
+                            ShowContinueError(state,
+                                              std::format("Occupant Density=[{:.0f}] person/m2.",
+                                                          state.dataHeatBal->Zone(Loop).TotOccupants / state.dataHeatBal->Zone(Loop).FloorArea));
                         }
                         ShowContinueError(state,
-                                          EnergyPlus::format("Occupant Density=[{:.3R}] m2/person. Problems in Temperature Out of Bounds may result.",
-                                                             state.dataHeatBal->Zone(Loop).FloorArea / state.dataHeatBal->Zone(Loop).TotOccupants));
+                                          std::format("Occupant Density=[{:.3f}] m2/person. Problems in Temperature Out of Bounds may result.",
+                                                      state.dataHeatBal->Zone(Loop).FloorArea / state.dataHeatBal->Zone(Loop).TotOccupants));
                     }
                     Real64 maxOccupLoad = 0.0;
                     int OptionNum = 0;
@@ -883,22 +880,21 @@ namespace InternalHeatGains {
                     if (maxOccupLoad > state.dataHeatBal->Zone(Loop).TotOccupants) {
                         if (state.dataHeatBal->Zone(Loop).FloorArea > 0.0 && state.dataHeatBal->Zone(Loop).FloorArea / maxOccupLoad < 0.1) {
                             ShowWarningError(state,
-                                             EnergyPlus::format("{}Zone=\"{}\" occupant density at a maximum schedule value is extremely high.",
-                                                                RoutineName,
-                                                                state.dataHeatBal->Zone(Loop).Name));
+                                             std::format("{}Zone=\"{}\" occupant density at a maximum schedule value is extremely high.",
+                                                         RoutineName,
+                                                         state.dataHeatBal->Zone(Loop).Name));
                             if (state.dataHeatBal->Zone(Loop).FloorArea > 0.0) {
-                                ShowContinueError(state,
-                                                  EnergyPlus::format("Occupant Density=[{:.0R}] person/m2.",
-                                                                     maxOccupLoad / state.dataHeatBal->Zone(Loop).FloorArea));
+                                ShowContinueError(
+                                    state,
+                                    std::format("Occupant Density=[{:.0f}] person/m2.", maxOccupLoad / state.dataHeatBal->Zone(Loop).FloorArea));
                             }
-                            ShowContinueError(
-                                state,
-                                EnergyPlus::format("Occupant Density=[{:.3R}] m2/person. Problems in Temperature Out of Bounds may result.",
-                                                   state.dataHeatBal->Zone(Loop).FloorArea / maxOccupLoad));
                             ShowContinueError(state,
-                                              EnergyPlus::format("Check values in People={}, Number of People Schedule={}",
-                                                                 state.dataHeatBal->People(OptionNum).Name,
-                                                                 state.dataHeatBal->People(OptionNum).sched->getCurrentVal()));
+                                              std::format("Occupant Density=[{:.3f}] m2/person. Problems in Temperature Out of Bounds may result.",
+                                                          state.dataHeatBal->Zone(Loop).FloorArea / maxOccupLoad));
+                            ShowContinueError(state,
+                                              std::format("Check values in People={}, Number of People Schedule={}",
+                                                          state.dataHeatBal->People(OptionNum).Name,
+                                                          state.dataHeatBal->People(OptionNum).sched->getCurrentVal()));
                         }
                     }
                 }
@@ -1015,8 +1011,8 @@ namespace InternalHeatGains {
                     }
                     if (thisLights.FractionConvected < 0.0) {
                         if (Item1 == 1) {
-                            ShowSevereError(
-                                state, EnergyPlus::format("{}{}=\"{}\", Sum of Fractions > 1.0", RoutineName, lightsModuleObject, thisLights.Name));
+                            ShowSevereError(state,
+                                            std::format("{}{}=\"{}\", Sum of Fractions > 1.0", RoutineName, lightsModuleObject, thisLights.Name));
                             ErrorsFound = true;
                         }
                     }
@@ -1042,12 +1038,12 @@ namespace InternalHeatGains {
                     } else if (IHGAlphas(6) != "YES" && IHGAlphas(6) != "NO") {
                         if (Item1 == 1) {
                             ShowWarningError(state,
-                                             EnergyPlus::format("{}{}=\"{}\", invalid {}, value  ={}",
-                                                                RoutineName,
-                                                                lightsModuleObject,
-                                                                thisLightsInput.Name,
-                                                                IHGAlphaFieldNames(6),
-                                                                IHGAlphas(6)));
+                                             std::format("{}{}=\"{}\", invalid {}, value  ={}",
+                                                         RoutineName,
+                                                         lightsModuleObject,
+                                                         thisLightsInput.Name,
+                                                         IHGAlphaFieldNames(6),
+                                                         IHGAlphas(6)));
                             ShowContinueError(state, ".. Return Air Fraction from Plenum will NOT be calculated.");
                         }
                         thisLights.FractionReturnAirIsCalculated = false;
@@ -1061,11 +1057,11 @@ namespace InternalHeatGains {
                     if (!IHGAlphaFieldBlanks(7)) {
                         if (thisLightsInput.ZoneListActive) {
                             ShowSevereError(state,
-                                            EnergyPlus::format("{}{}=\"{}\": {} must be blank when using a ZoneList.",
-                                                               RoutineName,
-                                                               lightsModuleObject,
-                                                               thisLightsInput.Name,
-                                                               IHGAlphaFieldNames(7)));
+                                            std::format("{}{}=\"{}\": {} must be blank when using a ZoneList.",
+                                                        RoutineName,
+                                                        lightsModuleObject,
+                                                        thisLightsInput.Name,
+                                                        IHGAlphaFieldNames(7)));
                             ErrorsFound = true;
                         } else {
                             thisLights.RetNodeName = IHGAlphas(7);
@@ -1078,7 +1074,7 @@ namespace InternalHeatGains {
                     if ((thisLights.ZoneReturnNum == 0) && (thisLights.FractionReturnAir > 0.0) && (!IHGAlphaFieldBlanks(7))) {
                         ShowSevereError(
                             state,
-                            EnergyPlus::format(
+                            std::format(
                                 "{}{}=\"{}\", invalid {} ={}", RoutineName, lightsModuleObject, IHGAlphas(1), IHGAlphaFieldNames(7), IHGAlphas(7)));
                         ShowContinueError(state, "No matching Zone Return Air Node found.");
                         ErrorsFound = true;
@@ -1088,11 +1084,11 @@ namespace InternalHeatGains {
                     if (!IHGAlphaFieldBlanks(8)) {
                         if (thisLightsInput.ZoneListActive) {
                             ShowSevereError(state,
-                                            EnergyPlus::format("{}{}=\"{}\": {} must be blank when using a ZoneList.",
-                                                               RoutineName,
-                                                               lightsModuleObject,
-                                                               thisLightsInput.Name,
-                                                               IHGAlphaFieldNames(8)));
+                                            std::format("{}{}=\"{}\": {} must be blank when using a ZoneList.",
+                                                        RoutineName,
+                                                        lightsModuleObject,
+                                                        thisLightsInput.Name,
+                                                        IHGAlphaFieldNames(8)));
                             ErrorsFound = true;
                         } else {
                             bool exhaustNodeError = false;
@@ -1111,12 +1107,12 @@ namespace InternalHeatGains {
                             }
                             if (exhaustNodeError) {
                                 ShowSevereError(state,
-                                                EnergyPlus::format("{}{}=\"{}\", invalid {} = {}",
-                                                                   RoutineName,
-                                                                   lightsModuleObject,
-                                                                   IHGAlphas(1),
-                                                                   IHGAlphaFieldNames(8),
-                                                                   IHGAlphas(8)));
+                                                std::format("{}{}=\"{}\", invalid {} = {}",
+                                                            RoutineName,
+                                                            lightsModuleObject,
+                                                            IHGAlphas(1),
+                                                            IHGAlphaFieldNames(8),
+                                                            IHGAlphas(8)));
                                 ShowContinueError(state, "No matching Zone Exhaust Air Node found.");
                                 ErrorsFound = true;
                             } else {
@@ -1126,12 +1122,12 @@ namespace InternalHeatGains {
                                     CheckSharedExhaustFlag = true;
                                 } else {
                                     ShowSevereError(state,
-                                                    EnergyPlus::format("{}{}=\"{}\", {} ={} is not used",
-                                                                       RoutineName,
-                                                                       lightsModuleObject,
-                                                                       IHGAlphas(1),
-                                                                       IHGAlphaFieldNames(8),
-                                                                       IHGAlphas(8)));
+                                                    std::format("{}{}=\"{}\", {} ={} is not used",
+                                                                RoutineName,
+                                                                lightsModuleObject,
+                                                                IHGAlphas(1),
+                                                                IHGAlphaFieldNames(8),
+                                                                IHGAlphas(8)));
                                     ShowContinueError(
                                         state, "No matching Zone Return Air Node found. The Exhaust Node requires Return Node to work together");
                                     ErrorsFound = true;
@@ -1235,14 +1231,14 @@ namespace InternalHeatGains {
                         if (ReturnNum == state.dataHeatBal->Lights(Loop1).ZoneReturnNum &&
                             ExhaustNodeNum != state.dataHeatBal->Lights(Loop1).ZoneExhaustNodeNum) {
                             ShowSevereError(state,
-                                            EnergyPlus::format("{}{}: Duplicated Return Air Node = {} is found, ",
-                                                               RoutineName,
-                                                               lightsModuleObject,
-                                                               state.dataHeatBal->Lights(Loop1).RetNodeName));
+                                            std::format("{}{}: Duplicated Return Air Node = {} is found, ",
+                                                        RoutineName,
+                                                        lightsModuleObject,
+                                                        state.dataHeatBal->Lights(Loop1).RetNodeName));
                             ShowContinueError(state,
-                                              EnergyPlus::format(" in both Lights objects = {} and {}.",
-                                                                 state.dataHeatBal->Lights(Loop).Name,
-                                                                 state.dataHeatBal->Lights(Loop1).Name));
+                                              std::format(" in both Lights objects = {} and {}.",
+                                                          state.dataHeatBal->Lights(Loop).Name,
+                                                          state.dataHeatBal->Lights(Loop1).Name));
                             ErrorsFound = true;
                             ReturnNodeShared(Loop1) = true;
                         }
@@ -1351,8 +1347,8 @@ namespace InternalHeatGains {
                         thisZoneElectric.FractionConvected = 0.0;
                     }
                     if (thisZoneElectric.FractionConvected < 0.0) {
-                        ShowSevereError(
-                            state, EnergyPlus::format("{}{}=\"{}\", Sum of Fractions > 1.0", RoutineName, elecEqModuleObject, thisElecEqInput.Name));
+                        ShowSevereError(state,
+                                        std::format("{}{}=\"{}\", Sum of Fractions > 1.0", RoutineName, elecEqModuleObject, thisElecEqInput.Name));
                         ErrorsFound = true;
                     }
 
@@ -1473,22 +1469,22 @@ namespace InternalHeatGains {
                     }
                     if (thisZoneGas.CO2RateFactor < 0.0) {
                         ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} < 0.0, value ={:.2R}",
-                                                           RoutineName,
-                                                           gasEqModuleObject,
-                                                           thisGasEqInput.Name,
-                                                           IHGNumericFieldNames(7),
-                                                           IHGNumbers(7)));
+                                        std::format("{}{}=\"{}\", {} < 0.0, value ={:.2f}",
+                                                    RoutineName,
+                                                    gasEqModuleObject,
+                                                    thisGasEqInput.Name,
+                                                    IHGNumericFieldNames(7),
+                                                    IHGNumbers(7)));
                         ErrorsFound = true;
                     }
                     if (thisZoneGas.CO2RateFactor > 4.0e-7) {
                         ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} > 4.0E-7, value ={:.2R}",
-                                                           RoutineName,
-                                                           gasEqModuleObject,
-                                                           thisGasEqInput.Name,
-                                                           IHGNumericFieldNames(7),
-                                                           IHGNumbers(7)));
+                                        std::format("{}{}=\"{}\", {} > 4.0E-7, value ={:.2f}",
+                                                    RoutineName,
+                                                    gasEqModuleObject,
+                                                    thisGasEqInput.Name,
+                                                    IHGNumericFieldNames(7),
+                                                    IHGNumbers(7)));
                         ErrorsFound = true;
                     }
                     // FractionConvected is a calculated field
@@ -1935,22 +1931,22 @@ namespace InternalHeatGains {
                     }
                     if (thisZoneOthEq.CO2RateFactor < 0.0) {
                         ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} < 0.0, value ={:.2R}",
-                                                           RoutineName,
-                                                           othEqModuleObject,
-                                                           thisOthEqInput.Name,
-                                                           IHGNumericFieldNames(7),
-                                                           IHGNumbers(7)));
+                                        std::format("{}{}=\"{}\", {} < 0.0, value ={:.2f}",
+                                                    RoutineName,
+                                                    othEqModuleObject,
+                                                    thisOthEqInput.Name,
+                                                    IHGNumericFieldNames(7),
+                                                    IHGNumbers(7)));
                         ErrorsFound = true;
                     }
                     if (thisZoneOthEq.CO2RateFactor > 4.0e-7) {
                         ShowSevereError(state,
-                                        EnergyPlus::format("{}{}=\"{}\", {} > 4.0E-7, value ={:.2R}",
-                                                           RoutineName,
-                                                           othEqModuleObject,
-                                                           thisOthEqInput.Name,
-                                                           IHGNumericFieldNames(7),
-                                                           IHGNumbers(7)));
+                                        std::format("{}{}=\"{}\", {} > 4.0E-7, value ={:.2f}",
+                                                    RoutineName,
+                                                    othEqModuleObject,
+                                                    thisOthEqInput.Name,
+                                                    IHGNumericFieldNames(7),
+                                                    IHGNumbers(7)));
                         ErrorsFound = true;
                     }
 
@@ -2134,12 +2130,12 @@ namespace InternalHeatGains {
                                         }
                                     } else {
                                         ShowSevereError(state,
-                                                        EnergyPlus::format("{}{}=\"{}\", invalid {}, value  [<0.0]={:.3R}",
-                                                                           RoutineName,
-                                                                           itEqModuleObject,
-                                                                           IHGAlphas(1),
-                                                                           IHGNumericFieldNames(3),
-                                                                           IHGNumbers(3)));
+                                                        std::format("{}{}=\"{}\", invalid {}, value  [<0.0]={:.3f}",
+                                                                    RoutineName,
+                                                                    itEqModuleObject,
+                                                                    IHGAlphas(1),
+                                                                    IHGNumericFieldNames(3),
+                                                                    IHGNumbers(3)));
                                         ErrorsFound = true;
                                     }
                                 }
@@ -2689,14 +2685,14 @@ namespace InternalHeatGains {
             if (zone.FloorArea > 0.0) {
                 print(state.files.eio, Format_720, zone.Name, zone.FloorArea, zone.TotOccupants);
                 print_and_divide_if_greater_than_zero(zone.FloorArea, zone.TotOccupants);
-                print(state.files.eio, "{:.3R},", zone.TotOccupants / zone.FloorArea);
-                print(state.files.eio, "{:.3R},", LightTot / zone.FloorArea);
-                print(state.files.eio, "{:.3R},", ElecTot / zone.FloorArea);
-                print(state.files.eio, "{:.3R},", GasTot / zone.FloorArea);
-                print(state.files.eio, "{:.3R},", OthTot / zone.FloorArea);
-                print(state.files.eio, "{:.3R},", HWETot / zone.FloorArea);
-                print(state.files.eio, "{:.3R},", StmTot / zone.FloorArea);
-                print(state.files.eio, "{:.3R},{}\n", zone.InternalHeatGains / zone.FloorArea, BBHeatInd);
+                print(state.files.eio, "{:.3f},", zone.TotOccupants / zone.FloorArea);
+                print(state.files.eio, "{:.3f},", LightTot / zone.FloorArea);
+                print(state.files.eio, "{:.3f},", ElecTot / zone.FloorArea);
+                print(state.files.eio, "{:.3f},", GasTot / zone.FloorArea);
+                print(state.files.eio, "{:.3f},", OthTot / zone.FloorArea);
+                print(state.files.eio, "{:.3f},", HWETot / zone.FloorArea);
+                print(state.files.eio, "{:.3f},", StmTot / zone.FloorArea);
+                print(state.files.eio, "{:.3f},{}\n", zone.InternalHeatGains / zone.FloorArea, BBHeatInd);
             } else {
                 print(state.files.eio, Format_720, zone.Name, zone.FloorArea, zone.TotOccupants);
                 print(state.files.eio, "0.0,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,{}\n", BBHeatInd);
@@ -2735,7 +2731,7 @@ namespace InternalHeatGains {
             auto const &zone = state.dataHeatBal->Zone(people.ZonePtr);
 
             print(state.files.eio, Format_722, "People", people.Name, people.sched->Name, zone.Name, zone.FloorArea, zone.TotOccupants);
-            print(state.files.eio, "{:.1R},", people.NumberOfPeople);
+            print(state.files.eio, "{:.1f},", people.NumberOfPeople);
 
             print_and_divide_if_greater_than_zero(people.NumberOfPeople, zone.FloorArea);
 
@@ -2745,41 +2741,41 @@ namespace InternalHeatGains {
                 print(state.files.eio, "N/A,");
             }
 
-            print(state.files.eio, "{:.3R},", people.FractionRadiant);
-            print(state.files.eio, "{:.3R},", people.FractionConvected);
+            print(state.files.eio, "{:.3f},", people.FractionRadiant);
+            print(state.files.eio, "{:.3f},", people.FractionConvected);
             if (people.UserSpecSensFrac == Constant::AutoCalculate) {
                 print(state.files.eio, "AutoCalculate,");
             } else {
-                print(state.files.eio, "{:.3R},", people.UserSpecSensFrac);
+                print(state.files.eio, "{:.3f},", people.UserSpecSensFrac);
             }
             print(state.files.eio, "{},", people.activityLevelSched->Name);
 
             print(state.files.eio, "{},", yesNoNames[(int)people.Show55Warning]);
-            print(state.files.eio, "{:.4R},", people.CO2RateFactor);
-            print(state.files.eio, "{:.1R},", people.NomMinNumberPeople);
-            print(state.files.eio, "{:.1R},", people.NomMaxNumberPeople);
+            print(state.files.eio, "{:.4E},", people.CO2RateFactor);
+            print(state.files.eio, "{:.1f},", people.NomMinNumberPeople);
+            print(state.files.eio, "{:.1f},", people.NomMaxNumberPeople);
 
             Real64 SchMin, SchMax;
 
             // weekdays
             std::tie(SchMin, SchMax) = people.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::Weekday);
-            print(state.files.eio, "{:.1R},", people.NumberOfPeople * SchMin);
-            print(state.files.eio, "{:.1R},", people.NumberOfPeople * SchMax);
+            print(state.files.eio, "{:.1f},", people.NumberOfPeople * SchMin);
+            print(state.files.eio, "{:.1f},", people.NumberOfPeople * SchMax);
 
             // weekends/holidays
             std::tie(SchMin, SchMax) = people.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WeekEndHoliday);
-            print(state.files.eio, "{:.1R},", people.NumberOfPeople * SchMin);
-            print(state.files.eio, "{:.1R},", people.NumberOfPeople * SchMax);
+            print(state.files.eio, "{:.1f},", people.NumberOfPeople * SchMin);
+            print(state.files.eio, "{:.1f},", people.NumberOfPeople * SchMax);
 
             // summer design days
             std::tie(SchMin, SchMax) = people.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::SummerDesignDay);
-            print(state.files.eio, "{:.1R},", people.NumberOfPeople * SchMin);
-            print(state.files.eio, "{:.1R},", people.NumberOfPeople * SchMax);
+            print(state.files.eio, "{:.1f},", people.NumberOfPeople * SchMin);
+            print(state.files.eio, "{:.1f},", people.NumberOfPeople * SchMax);
 
             // winter design days
             std::tie(SchMin, SchMax) = people.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WinterDesignDay);
-            print(state.files.eio, "{:.1R},", people.NumberOfPeople * SchMin);
-            print(state.files.eio, "{:.1R},", people.NumberOfPeople * SchMax);
+            print(state.files.eio, "{:.1f},", people.NumberOfPeople * SchMin);
+            print(state.files.eio, "{:.1f},", people.NumberOfPeople * SchMax);
 
             if (people.Fanger || people.Pierce || people.KSU || people.CoolingEffectASH55 || people.AnkleDraftASH55) {
 
@@ -2839,42 +2835,42 @@ namespace InternalHeatGains {
 
             print(state.files.eio, Format_722, "Lights", lights.Name, lights.sched->Name, zone.Name, zone.FloorArea, zone.TotOccupants);
 
-            print(state.files.eio, "{:.3R},", lights.DesignLevel);
+            print(state.files.eio, "{:.3f},", lights.DesignLevel);
 
             print_and_divide_if_greater_than_zero(lights.DesignLevel, zone.FloorArea);
             print_and_divide_if_greater_than_zero(lights.DesignLevel, zone.TotOccupants);
 
-            print(state.files.eio, "{:.3R},", lights.FractionReturnAir);
-            print(state.files.eio, "{:.3R},", lights.FractionRadiant);
-            print(state.files.eio, "{:.3R},", lights.FractionShortWave);
-            print(state.files.eio, "{:.3R},", lights.FractionConvected);
-            print(state.files.eio, "{:.3R},", lights.FractionReplaceable);
+            print(state.files.eio, "{:.3f},", lights.FractionReturnAir);
+            print(state.files.eio, "{:.3f},", lights.FractionRadiant);
+            print(state.files.eio, "{:.3f},", lights.FractionShortWave);
+            print(state.files.eio, "{:.3f},", lights.FractionConvected);
+            print(state.files.eio, "{:.3f},", lights.FractionReplaceable);
             print(state.files.eio, "{},", lights.EndUseSubcategory);
-            print(state.files.eio, "{:.3R},", lights.NomMinDesignLevel);
-            print(state.files.eio, "{:.3R},", lights.NomMaxDesignLevel);
+            print(state.files.eio, "{:.3f},", lights.NomMinDesignLevel);
+            print(state.files.eio, "{:.3f},", lights.NomMaxDesignLevel);
 
             auto &light = state.dataHeatBal->Lights(Loop);
 
             Real64 SchMin, SchMax;
             // weekdays
             std::tie(SchMin, SchMax) = light.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::Weekday);
-            print(state.files.eio, "{:.3R},", light.DesignLevel * SchMin);
-            print(state.files.eio, "{:.1R},", light.DesignLevel * SchMax);
+            print(state.files.eio, "{:.3f},", light.DesignLevel * SchMin);
+            print(state.files.eio, "{:.1f},", light.DesignLevel * SchMax);
 
             // weekends/holidays
             std::tie(SchMin, SchMax) = light.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WeekEndHoliday);
-            print(state.files.eio, "{:.3R},", light.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", light.DesignLevel * SchMax);
+            print(state.files.eio, "{:.3f},", light.DesignLevel * SchMin);
+            print(state.files.eio, "{:.3f},", light.DesignLevel * SchMax);
 
             // summer design days
             std::tie(SchMin, SchMax) = light.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::SummerDesignDay);
-            print(state.files.eio, "{:.3R},", light.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", light.DesignLevel * SchMax);
+            print(state.files.eio, "{:.3f},", light.DesignLevel * SchMin);
+            print(state.files.eio, "{:.3f},", light.DesignLevel * SchMax);
 
             // winter design days
             std::tie(SchMin, SchMax) = light.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WinterDesignDay);
-            print(state.files.eio, "{:.3R},", light.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R}\n", light.DesignLevel * SchMax);
+            print(state.files.eio, "{:.3f},", light.DesignLevel * SchMin);
+            print(state.files.eio, "{:.3f}\n", light.DesignLevel * SchMax);
         }
 
         for (int Loop = 1; Loop <= state.dataHeatBal->TotElecEquip; ++Loop) {
@@ -2901,40 +2897,40 @@ namespace InternalHeatGains {
             auto &zone = state.dataHeatBal->Zone(elecEq.ZonePtr);
 
             print(state.files.eio, Format_722, "ElectricEquipment", elecEq.Name, elecEq.sched->Name, zone.Name, zone.FloorArea, zone.TotOccupants);
-            print(state.files.eio, "{:.3R},", elecEq.DesignLevel);
+            print(state.files.eio, "{:.3f},", elecEq.DesignLevel);
 
             print_and_divide_if_greater_than_zero(elecEq.DesignLevel, zone.FloorArea);
             print_and_divide_if_greater_than_zero(elecEq.DesignLevel, zone.TotOccupants);
 
-            print(state.files.eio, "{:.3R},", elecEq.FractionLatent);
-            print(state.files.eio, "{:.3R},", elecEq.FractionRadiant);
-            print(state.files.eio, "{:.3R},", elecEq.FractionLost);
-            print(state.files.eio, "{:.3R},", elecEq.FractionConvected);
+            print(state.files.eio, "{:.3f},", elecEq.FractionLatent);
+            print(state.files.eio, "{:.3f},", elecEq.FractionRadiant);
+            print(state.files.eio, "{:.3f},", elecEq.FractionLost);
+            print(state.files.eio, "{:.3f},", elecEq.FractionConvected);
             print(state.files.eio, "{},", elecEq.EndUseSubcategory);
-            print(state.files.eio, "{:.3R},", elecEq.NomMinDesignLevel);
-            print(state.files.eio, "{:.3R},", elecEq.NomMaxDesignLevel);
+            print(state.files.eio, "{:.3f},", elecEq.NomMinDesignLevel);
+            print(state.files.eio, "{:.3f},", elecEq.NomMaxDesignLevel);
 
             Real64 SchMin, SchMax;
 
             // weekdays
             std::tie(SchMin, SchMax) = elecEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::Weekday);
-            print(state.files.eio, "{:.3R},", elecEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", elecEq.DesignLevel * SchMax);
+            print(state.files.eio, "{:.3f},", elecEq.DesignLevel * SchMin);
+            print(state.files.eio, "{:.3f},", elecEq.DesignLevel * SchMax);
 
             // weekends/holidays
             std::tie(SchMin, SchMax) = elecEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WeekEndHoliday);
-            print(state.files.eio, "{:.3R},", elecEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", elecEq.DesignLevel * SchMax);
+            print(state.files.eio, "{:.3f},", elecEq.DesignLevel * SchMin);
+            print(state.files.eio, "{:.3f},", elecEq.DesignLevel * SchMax);
 
             // summer design days
             std::tie(SchMin, SchMax) = elecEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::SummerDesignDay);
-            print(state.files.eio, "{:.3R},", elecEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", elecEq.DesignLevel * SchMax);
+            print(state.files.eio, "{:.3f},", elecEq.DesignLevel * SchMin);
+            print(state.files.eio, "{:.3f},", elecEq.DesignLevel * SchMax);
 
             // winter design days
             std::tie(SchMin, SchMax) = elecEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WinterDesignDay);
-            print(state.files.eio, "{:.3R},", elecEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R}\n", elecEq.DesignLevel * SchMax);
+            print(state.files.eio, "{:.3f},", elecEq.DesignLevel * SchMin);
+            print(state.files.eio, "{:.3f}\n", elecEq.DesignLevel * SchMax);
         }
 
         for (int Loop = 1; Loop <= state.dataHeatBal->TotGasEquip; ++Loop) {
@@ -2961,39 +2957,39 @@ namespace InternalHeatGains {
             auto &zone = state.dataHeatBal->Zone(gasEq.ZonePtr);
 
             print(state.files.eio, Format_722, "GasEquipment", gasEq.Name, gasEq.sched->Name, zone.Name, zone.FloorArea, zone.TotOccupants);
-            print(state.files.eio, "{:.3R},", gasEq.DesignLevel);
+            print(state.files.eio, "{:.3f},", gasEq.DesignLevel);
 
             print_and_divide_if_greater_than_zero(gasEq.DesignLevel, zone.FloorArea);
             print_and_divide_if_greater_than_zero(gasEq.DesignLevel, zone.TotOccupants);
 
-            print(state.files.eio, "{:.3R},", gasEq.FractionLatent);
-            print(state.files.eio, "{:.3R},", gasEq.FractionRadiant);
-            print(state.files.eio, "{:.3R},", gasEq.FractionLost);
-            print(state.files.eio, "{:.3R},", gasEq.FractionConvected);
+            print(state.files.eio, "{:.3f},", gasEq.FractionLatent);
+            print(state.files.eio, "{:.3f},", gasEq.FractionRadiant);
+            print(state.files.eio, "{:.3f},", gasEq.FractionLost);
+            print(state.files.eio, "{:.3f},", gasEq.FractionConvected);
             print(state.files.eio, "{},", gasEq.EndUseSubcategory);
-            print(state.files.eio, "{:.3R},", gasEq.NomMinDesignLevel);
-            print(state.files.eio, "{:.3R},", gasEq.NomMaxDesignLevel);
+            print(state.files.eio, "{:.3f},", gasEq.NomMinDesignLevel);
+            print(state.files.eio, "{:.3f},", gasEq.NomMaxDesignLevel);
 
             Real64 SchMin, SchMax;
             // weekdays
             std::tie(SchMin, SchMax) = gasEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::Weekday);
-            print(state.files.eio, "{:.3R},", gasEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", gasEq.DesignLevel * SchMax);
+            print(state.files.eio, "{:.3f},", gasEq.DesignLevel * SchMin);
+            print(state.files.eio, "{:.3f},", gasEq.DesignLevel * SchMax);
 
             // weekends/holidays
             std::tie(SchMin, SchMax) = gasEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WeekEndHoliday);
-            print(state.files.eio, "{:.3R},", gasEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", gasEq.DesignLevel * SchMax);
+            print(state.files.eio, "{:.3f},", gasEq.DesignLevel * SchMin);
+            print(state.files.eio, "{:.3f},", gasEq.DesignLevel * SchMax);
 
             // summer design days
             std::tie(SchMin, SchMax) = gasEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::SummerDesignDay);
-            print(state.files.eio, "{:.3R},", gasEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", gasEq.DesignLevel * SchMax);
+            print(state.files.eio, "{:.3f},", gasEq.DesignLevel * SchMin);
+            print(state.files.eio, "{:.3f},", gasEq.DesignLevel * SchMax);
 
             // winter design days
             std::tie(SchMin, SchMax) = gasEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WinterDesignDay);
-            print(state.files.eio, "{:.3R},", gasEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R}\n", gasEq.DesignLevel * SchMax);
+            print(state.files.eio, "{:.3f},", gasEq.DesignLevel * SchMin);
+            print(state.files.eio, "{:.3f}\n", gasEq.DesignLevel * SchMax);
         }
 
         for (int Loop = 1; Loop <= state.dataHeatBal->TotHWEquip; ++Loop) {
@@ -3028,39 +3024,39 @@ namespace InternalHeatGains {
                   zone.FloorArea,
                   zone.TotOccupants);
 
-            print(state.files.eio, "{:.3R},", hotWaterEq.DesignLevel);
+            print(state.files.eio, "{:.3f},", hotWaterEq.DesignLevel);
 
             print_and_divide_if_greater_than_zero(hotWaterEq.DesignLevel, zone.FloorArea);
             print_and_divide_if_greater_than_zero(hotWaterEq.DesignLevel, zone.TotOccupants);
 
-            print(state.files.eio, "{:.3R},", hotWaterEq.FractionLatent);
-            print(state.files.eio, "{:.3R},", hotWaterEq.FractionRadiant);
-            print(state.files.eio, "{:.3R},", hotWaterEq.FractionLost);
-            print(state.files.eio, "{:.3R},", hotWaterEq.FractionConvected);
+            print(state.files.eio, "{:.3f},", hotWaterEq.FractionLatent);
+            print(state.files.eio, "{:.3f},", hotWaterEq.FractionRadiant);
+            print(state.files.eio, "{:.3f},", hotWaterEq.FractionLost);
+            print(state.files.eio, "{:.3f},", hotWaterEq.FractionConvected);
             print(state.files.eio, "{},", hotWaterEq.EndUseSubcategory);
-            print(state.files.eio, "{:.3R},", hotWaterEq.NomMinDesignLevel);
-            print(state.files.eio, "{:.3R},", hotWaterEq.NomMaxDesignLevel);
+            print(state.files.eio, "{:.3f},", hotWaterEq.NomMinDesignLevel);
+            print(state.files.eio, "{:.3f},", hotWaterEq.NomMaxDesignLevel);
 
             Real64 SchMin, SchMax;
             // weekdays
             std::tie(SchMin, SchMax) = hotWaterEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::Weekday);
-            print(state.files.eio, "{:.3R},", hotWaterEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", hotWaterEq.DesignLevel * SchMax);
+            print(state.files.eio, "{:.3f},", hotWaterEq.DesignLevel * SchMin);
+            print(state.files.eio, "{:.3f},", hotWaterEq.DesignLevel * SchMax);
 
             // weekends/holidays
             std::tie(SchMin, SchMax) = hotWaterEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WeekEndHoliday);
-            print(state.files.eio, "{:.3R},", hotWaterEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", hotWaterEq.DesignLevel * SchMax);
+            print(state.files.eio, "{:.3f},", hotWaterEq.DesignLevel * SchMin);
+            print(state.files.eio, "{:.3f},", hotWaterEq.DesignLevel * SchMax);
 
             // summer design days
             std::tie(SchMin, SchMax) = hotWaterEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::SummerDesignDay);
-            print(state.files.eio, "{:.3R},", hotWaterEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", hotWaterEq.DesignLevel * SchMax);
+            print(state.files.eio, "{:.3f},", hotWaterEq.DesignLevel * SchMin);
+            print(state.files.eio, "{:.3f},", hotWaterEq.DesignLevel * SchMax);
 
             // winter design days
             std::tie(SchMin, SchMax) = hotWaterEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WinterDesignDay);
-            print(state.files.eio, "{:.3R},", hotWaterEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R}\n", hotWaterEq.DesignLevel * SchMax);
+            print(state.files.eio, "{:.3f},", hotWaterEq.DesignLevel * SchMin);
+            print(state.files.eio, "{:.3f}\n", hotWaterEq.DesignLevel * SchMax);
         }
 
         for (int Loop = 1; Loop <= state.dataHeatBal->TotStmEquip; ++Loop) {
@@ -3087,39 +3083,39 @@ namespace InternalHeatGains {
             auto &zone = state.dataHeatBal->Zone(steamEq.ZonePtr);
 
             print(state.files.eio, Format_722, "SteamEquipment", steamEq.Name, steamEq.sched->Name, zone.Name, zone.FloorArea, zone.TotOccupants);
-            print(state.files.eio, "{:.3R},", steamEq.DesignLevel);
+            print(state.files.eio, "{:.3f},", steamEq.DesignLevel);
 
             print_and_divide_if_greater_than_zero(steamEq.DesignLevel, zone.FloorArea);
             print_and_divide_if_greater_than_zero(steamEq.DesignLevel, zone.TotOccupants);
 
-            print(state.files.eio, "{:.3R},", steamEq.FractionLatent);
-            print(state.files.eio, "{:.3R},", steamEq.FractionRadiant);
-            print(state.files.eio, "{:.3R},", steamEq.FractionLost);
-            print(state.files.eio, "{:.3R},", steamEq.FractionConvected);
+            print(state.files.eio, "{:.3f},", steamEq.FractionLatent);
+            print(state.files.eio, "{:.3f},", steamEq.FractionRadiant);
+            print(state.files.eio, "{:.3f},", steamEq.FractionLost);
+            print(state.files.eio, "{:.3f},", steamEq.FractionConvected);
             print(state.files.eio, "{},", steamEq.EndUseSubcategory);
-            print(state.files.eio, "{:.3R},", steamEq.NomMinDesignLevel);
-            print(state.files.eio, "{:.3R},", steamEq.NomMaxDesignLevel);
+            print(state.files.eio, "{:.3f},", steamEq.NomMinDesignLevel);
+            print(state.files.eio, "{:.3f},", steamEq.NomMaxDesignLevel);
 
             Real64 SchMin, SchMax;
             // weekdays
             std::tie(SchMin, SchMax) = steamEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::Weekday);
-            print(state.files.eio, "{:.3R},", steamEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", steamEq.DesignLevel * SchMax);
+            print(state.files.eio, "{:.3f},", steamEq.DesignLevel * SchMin);
+            print(state.files.eio, "{:.3f},", steamEq.DesignLevel * SchMax);
 
             // weekends/holidays
             std::tie(SchMin, SchMax) = steamEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WeekEndHoliday);
-            print(state.files.eio, "{:.3R},", steamEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", steamEq.DesignLevel * SchMax);
+            print(state.files.eio, "{:.3f},", steamEq.DesignLevel * SchMin);
+            print(state.files.eio, "{:.3f},", steamEq.DesignLevel * SchMax);
 
             // summer design days
             std::tie(SchMin, SchMax) = steamEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::SummerDesignDay);
-            print(state.files.eio, "{:.3R},", steamEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", steamEq.DesignLevel * SchMax);
+            print(state.files.eio, "{:.3f},", steamEq.DesignLevel * SchMin);
+            print(state.files.eio, "{:.3f},", steamEq.DesignLevel * SchMax);
 
             // winter design days
             std::tie(SchMin, SchMax) = steamEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WinterDesignDay);
-            print(state.files.eio, "{:.3R},", steamEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R}\n", steamEq.DesignLevel * SchMax);
+            print(state.files.eio, "{:.3f},", steamEq.DesignLevel * SchMin);
+            print(state.files.eio, "{:.3f}\n", steamEq.DesignLevel * SchMax);
         }
 
         for (int Loop = 1; Loop <= state.dataHeatBal->TotOthEquip; ++Loop) {
@@ -3146,39 +3142,39 @@ namespace InternalHeatGains {
             auto const &zone = state.dataHeatBal->Zone(otherEq.ZonePtr);
 
             print(state.files.eio, Format_722, "OtherEquipment", otherEq.Name, otherEq.sched->Name, zone.Name, zone.FloorArea, zone.TotOccupants);
-            print(state.files.eio, "{:.3R},", otherEq.DesignLevel);
+            print(state.files.eio, "{:.3f},", otherEq.DesignLevel);
 
             print_and_divide_if_greater_than_zero(otherEq.DesignLevel, zone.FloorArea);
             print_and_divide_if_greater_than_zero(otherEq.DesignLevel, zone.TotOccupants);
 
-            print(state.files.eio, "{:.3R},", otherEq.FractionLatent);
-            print(state.files.eio, "{:.3R},", otherEq.FractionRadiant);
-            print(state.files.eio, "{:.3R},", otherEq.FractionLost);
-            print(state.files.eio, "{:.3R},", otherEq.FractionConvected);
-            print(state.files.eio, "{:.3R},", otherEq.NomMinDesignLevel);
-            print(state.files.eio, "{:.3R},", otherEq.NomMaxDesignLevel);
+            print(state.files.eio, "{:.3f},", otherEq.FractionLatent);
+            print(state.files.eio, "{:.3f},", otherEq.FractionRadiant);
+            print(state.files.eio, "{:.3f},", otherEq.FractionLost);
+            print(state.files.eio, "{:.3f},", otherEq.FractionConvected);
+            print(state.files.eio, "{:.3f},", otherEq.NomMinDesignLevel);
+            print(state.files.eio, "{:.3f},", otherEq.NomMaxDesignLevel);
 
             Real64 SchMin, SchMax;
 
             // weekdays
             std::tie(SchMin, SchMax) = otherEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::Weekday);
-            print(state.files.eio, "{:.3R},", otherEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", otherEq.DesignLevel * SchMax);
+            print(state.files.eio, "{:.3f},", otherEq.DesignLevel * SchMin);
+            print(state.files.eio, "{:.3f},", otherEq.DesignLevel * SchMax);
 
             // weekends/holidays
             std::tie(SchMin, SchMax) = otherEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WeekEndHoliday);
-            print(state.files.eio, "{:.3R},", otherEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", otherEq.DesignLevel * SchMax);
+            print(state.files.eio, "{:.3f},", otherEq.DesignLevel * SchMin);
+            print(state.files.eio, "{:.3f},", otherEq.DesignLevel * SchMax);
 
             // summer design days
             std::tie(SchMin, SchMax) = otherEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::SummerDesignDay);
-            print(state.files.eio, "{:.3R},", otherEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R},", otherEq.DesignLevel * SchMax);
+            print(state.files.eio, "{:.3f},", otherEq.DesignLevel * SchMin);
+            print(state.files.eio, "{:.3f},", otherEq.DesignLevel * SchMax);
 
             // winter design days
             std::tie(SchMin, SchMax) = otherEq.sched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WinterDesignDay);
-            print(state.files.eio, "{:.3R},", otherEq.DesignLevel * SchMin);
-            print(state.files.eio, "{:.3R}\n", otherEq.DesignLevel * SchMax);
+            print(state.files.eio, "{:.3f},", otherEq.DesignLevel * SchMin);
+            print(state.files.eio, "{:.3f}\n", otherEq.DesignLevel * SchMax);
         }
 
         for (int Loop = 1; Loop <= state.dataHeatBal->TotITEquip; ++Loop) {
@@ -3214,7 +3210,7 @@ namespace InternalHeatGains {
                   zone.FloorArea,
                   zone.TotOccupants);
 
-            print(state.files.eio, "{:.3R},", itEq.DesignTotalPower);
+            print(state.files.eio, "{:.3f},", itEq.DesignTotalPower);
 
             print_and_divide_if_greater_than_zero(itEq.DesignTotalPower, zone.FloorArea);
             print_and_divide_if_greater_than_zero(itEq.DesignTotalPower, zone.TotOccupants);
@@ -3225,31 +3221,31 @@ namespace InternalHeatGains {
             print(state.files.eio, "{},", itEq.EndUseSubcategoryCPU);
             print(state.files.eio, "{},", itEq.EndUseSubcategoryFan);
             print(state.files.eio, "{},", itEq.EndUseSubcategoryUPS);
-            print(state.files.eio, "{:.3R},", itEq.NomMinDesignLevel);
-            print(state.files.eio, "{:.3R},", itEq.NomMaxDesignLevel);
+            print(state.files.eio, "{:.3f},", itEq.NomMinDesignLevel);
+            print(state.files.eio, "{:.3f},", itEq.NomMaxDesignLevel);
 
             Real64 SchMin, SchMax;
             // weekdays
             std::tie(SchMin, SchMax) = itEq.operSched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::Weekday);
-            print(state.files.eio, "{:.3R},", itEq.DesignTotalPower * SchMin);
-            print(state.files.eio, "{:.3R},", itEq.DesignTotalPower * SchMax);
+            print(state.files.eio, "{:.3f},", itEq.DesignTotalPower * SchMin);
+            print(state.files.eio, "{:.3f},", itEq.DesignTotalPower * SchMax);
 
             // weekends/holidays
             std::tie(SchMin, SchMax) = itEq.operSched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WeekEndHoliday);
-            print(state.files.eio, "{:.3R},", itEq.DesignTotalPower * SchMin);
-            print(state.files.eio, "{:.3R},", itEq.DesignTotalPower * SchMax);
+            print(state.files.eio, "{:.3f},", itEq.DesignTotalPower * SchMin);
+            print(state.files.eio, "{:.3f},", itEq.DesignTotalPower * SchMax);
 
             // summer design days
             std::tie(SchMin, SchMax) = itEq.operSched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::SummerDesignDay);
-            print(state.files.eio, "{:.3R},", itEq.DesignTotalPower * SchMin);
-            print(state.files.eio, "{:.3R},", itEq.DesignTotalPower * SchMax);
+            print(state.files.eio, "{:.3f},", itEq.DesignTotalPower * SchMin);
+            print(state.files.eio, "{:.3f},", itEq.DesignTotalPower * SchMax);
 
             // winter design days
             std::tie(SchMin, SchMax) = itEq.operSched->getMinMaxValsByDayType(state, Sched::DayTypeGroup::WinterDesignDay);
-            print(state.files.eio, "{:.3R},", itEq.DesignTotalPower * SchMin);
-            print(state.files.eio, "{:.3R},", itEq.DesignTotalPower * SchMax);
+            print(state.files.eio, "{:.3f},", itEq.DesignTotalPower * SchMin);
+            print(state.files.eio, "{:.3f},", itEq.DesignTotalPower * SchMax);
 
-            print(state.files.eio, "{:.10R}\n", itEq.DesignAirVolFlowRate);
+            print(state.files.eio, "{:.10f}\n", itEq.DesignAirVolFlowRate);
         }
 
         for (int Loop = 1; Loop <= state.dataHeatBal->TotBBHeat; ++Loop) {
@@ -3278,12 +3274,12 @@ namespace InternalHeatGains {
                   zone.FloorArea,
                   zone.TotOccupants);
 
-            print(state.files.eio, "{:.3R},", bbHeat.CapatLowTemperature);
-            print(state.files.eio, "{:.3R},", bbHeat.LowTemperature);
-            print(state.files.eio, "{:.3R},", bbHeat.CapatHighTemperature);
-            print(state.files.eio, "{:.3R},", bbHeat.HighTemperature);
-            print(state.files.eio, "{:.3R},", bbHeat.FractionRadiant);
-            print(state.files.eio, "{:.3R},", bbHeat.FractionConvected);
+            print(state.files.eio, "{:.3f},", bbHeat.CapatLowTemperature);
+            print(state.files.eio, "{:.3f},", bbHeat.LowTemperature);
+            print(state.files.eio, "{:.3f},", bbHeat.CapatHighTemperature);
+            print(state.files.eio, "{:.3f},", bbHeat.HighTemperature);
+            print(state.files.eio, "{:.3f},", bbHeat.FractionRadiant);
+            print(state.files.eio, "{:.3f},", bbHeat.FractionConvected);
             print(state.files.eio, "{}\n", bbHeat.EndUseSubcategory);
         }
     }
@@ -3457,8 +3453,7 @@ namespace InternalHeatGains {
             if (inputValue < 0.0) {
                 ShowSevereError(
                     state,
-                    EnergyPlus::format(
-                        "{}{}=\"{}\", invalid {}, value  [<0.0]={:.3R}", RoutineName, objectType, inputObject.Name, fieldName, inputValue));
+                    std::format("{}{}=\"{}\", invalid {}, value  [<0.0]={:.3f}", RoutineName, objectType, inputObject.Name, fieldName, inputValue));
                 ErrorsFound = true;
             }
         } break;
@@ -3468,8 +3463,7 @@ namespace InternalHeatGains {
             if (inputValue <= 0.0) {
                 ShowSevereError(
                     state,
-                    EnergyPlus::format(
-                        "{}{}=\"{}\", invalid {}, value  [<=0.0]={:.3R}", RoutineName, objectType, inputObject.Name, fieldName, inputValue));
+                    std::format("{}{}=\"{}\", invalid {}, value  [<=0.0]={:.3f}", RoutineName, objectType, inputObject.Name, fieldName, inputValue));
                 ErrorsFound = true;
             }
         } break;
