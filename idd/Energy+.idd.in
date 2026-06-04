@@ -37525,7 +37525,7 @@ ZoneHVAC:HybridUnitaryHVAC,
         \type object-list
         \object-list ScheduleNames
     A8, \field Method to Choose Controlled Inputs and Part Runtime Fraction
-        \note Select the method that will be used to choose operating mode(s), supply air flow rate(s), outdoor air fraction(s) and part runtime fraction(s) in each time step. "Automatic" = chooses controlled inputs and part runtime fraction(s) to optimize resource use within each time step while best satisfying requested sensible cooling, dehumidification and ventilation, and subject to constraints. "User Defined" = EMS will be used to choose controlled inputs and part runtime fraction(s) in each time step. If this field is blank, default to "Automatic".
+        \note Select the method that will be used to choose operating mode(s), supply air flow rate(s), outdoor air fraction(s) and part runtime fraction(s) in each time step. "Automatic" = chooses controlled inputs and part runtime fraction(s) to minimize resource use within each time step while best satisfying requested sensible cooling, dehumidification and ventilation, and subject to constraints. "User Defined" = EMS will be used to choose controlled inputs and part runtime fraction(s) in each time step. If this field is blank, default to "Automatic".
         \type choice
         \key Automatic
         \key User Defined
@@ -37648,7 +37648,7 @@ ZoneHVAC:HybridUnitaryHVAC,
         \key Third Fuel Use
         \key Water Use
         \key Supply Temperature
-        \note In each time step, controlled variables will be chosen to optimize the selection in this field, subject to constraints.
+        \note In each time step, controlled variables will be chosen to optimize the selection in this field, subject to constraints. Electricity Use, Second Fuel Use, Third Fuel Use, and Water Use will be minimized. Supply Temperature will be minimized when cooling is required, maximized when heating is required, and electricity use will be minimized when only ventilation is required.
         \note If this field is blank, the default objective function to optimize is Electricity Use.
         \default Electricity Use
    A19, \field Design Specification Outdoor Air Object Name
