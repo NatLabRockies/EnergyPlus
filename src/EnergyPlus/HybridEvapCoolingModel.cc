@@ -1195,7 +1195,7 @@ namespace HybridEvapCoolingModel {
         bool DidWePartlyMeetLoad = false;
         Real64 OptimalSetting_RunFractionTotalFuel = IMPLAUSIBLE_POWER;
         Real64 OptimalSetting_RunFractionSupplyTemperature =
-            CoolingRequested ? std::numeric_limits<Real64>::max() : std::numeric_limits<Real64>::min();
+            CoolingRequested ? std::numeric_limits<Real64>::max() : std::numeric_limits<Real64>::lowest();
         Real64 Tma;
         Real64 Wma;
         Real64 Hsa;
