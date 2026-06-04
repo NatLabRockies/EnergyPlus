@@ -1015,6 +1015,7 @@ void ManageTwoWayCommonPipe(EnergyPlusData &state, PlantLocation const &plantLoc
 
     auto &plantCommonPipe(state.dataHVACInterfaceMgr->PlantCommonPipe(plantLoc.loopNum));
     auto &thisPlantLoop = state.dataPlnt->PlantLoop(plantLoc.loopNum);
+    bool const canRequestPrimaryInletFlow = plantCommonPipe.SupplySideInletPlantLoc.side->FlowLock != DataPlant::FlowLock::Locked;
 
     // fill local node indexes
     int const NodeNumPriIn = thisPlantLoop.LoopSide(DataPlant::LoopSideLocation::Supply).NodeNumIn;
@@ -1136,7 +1137,9 @@ void ManageTwoWayCommonPipe(EnergyPlusData &state, PlantLocation const &plantLoc
                 if (MdotPri < DataBranchAirLoopPlant::MassFlowTolerance) {
                     MdotPri = 0.0;
                 }
-                PlantUtilities::SetActuatedBranchFlowRate(state, MdotPri, NodeNumPriIn, plantCommonPipe.SupplySideInletPlantLoc, false);
+                if (canRequestPrimaryInletFlow) {
+                    PlantUtilities::SetActuatedBranchFlowRate(state, MdotPri, NodeNumPriIn, plantCommonPipe.SupplySideInletPlantLoc, false);
+                }
             }
 
             // eq. 2
@@ -1184,7 +1187,9 @@ void ManageTwoWayCommonPipe(EnergyPlusData &state, PlantLocation const &plantLoc
                 } else {
                     MdotPri = MdotSec;
                 }
-                PlantUtilities::SetActuatedBranchFlowRate(state, MdotPri, NodeNumPriIn, plantCommonPipe.SupplySideInletPlantLoc, false);
+                if (canRequestPrimaryInletFlow) {
+                    PlantUtilities::SetActuatedBranchFlowRate(state, MdotPri, NodeNumPriIn, plantCommonPipe.SupplySideInletPlantLoc, false);
+                }
             }
 
             // eq. 4

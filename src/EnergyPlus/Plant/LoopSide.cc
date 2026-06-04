@@ -966,15 +966,29 @@ namespace DataPlant {
                             case DataPlant::PlantEquipmentType::PumpVariableSpeed:
                             case DataPlant::PlantEquipmentType::PumpBankVariableSpeed:
                                 if (CompIndex > 0) {
-                                    ThisBranchFlowRequestNeedIfOn =
-                                        max(ThisBranchFlowRequestNeedIfOn, state.dataPumps->PumpEquip(CompIndex).MassFlowRateMax);
+                                    auto &primaryPump = state.dataPumps->PumpEquip(CompIndex);
+                                    Real64 const primaryPumpFlowRequest = primaryPump.MassFlowRateMax;
+                                    Real64 const primaryPumpTurnOnRequest = (primaryPump.PumpControl == Pumps::PumpControlType::Continuous)
+                                                                                ? min(primaryPumpFlowRequest, node_with_request.MassFlowRateMaxAvail)
+                                                                                : node_with_request.MassFlowRateRequest;
+                                    ThisBranchFlowRequestNeedIfOn = max(ThisBranchFlowRequestNeedIfOn, primaryPumpFlowRequest);
+                                    ThisBranchFlowRequestNeedAndTurnOn = max(ThisBranchFlowRequestNeedAndTurnOn, primaryPumpTurnOnRequest);
+                                    if ((component.Type == DataPlant::PlantEquipmentType::PumpVariableSpeed ||
+                                         component.Type == DataPlant::PlantEquipmentType::PumpBankVariableSpeed) &&
+                                        (primaryPumpTurnOnRequest > DataBranchAirLoopPlant::MassFlowTolerance)) {
+                                        primaryPump.LoopSolverOverwriteFlag = false;
+                                    }
                                 }
                                 break;
                             case DataPlant::PlantEquipmentType::PumpBankConstantSpeed:
                                 if (CompIndex > 0) {
-                                    ThisBranchFlowRequestNeedIfOn = max(ThisBranchFlowRequestNeedIfOn,
-                                                                        state.dataPumps->PumpEquip(CompIndex).MassFlowRateMax /
-                                                                            state.dataPumps->PumpEquip(CompIndex).NumPumpsInBank);
+                                    auto const &primaryPump = state.dataPumps->PumpEquip(CompIndex);
+                                    Real64 const primaryPumpFlowRequest = primaryPump.MassFlowRateMax / primaryPump.NumPumpsInBank;
+                                    Real64 const primaryPumpTurnOnRequest = (primaryPump.PumpControl == Pumps::PumpControlType::Continuous)
+                                                                                ? min(primaryPumpFlowRequest, node_with_request.MassFlowRateMaxAvail)
+                                                                                : node_with_request.MassFlowRateRequest;
+                                    ThisBranchFlowRequestNeedIfOn = max(ThisBranchFlowRequestNeedIfOn, primaryPumpFlowRequest);
+                                    ThisBranchFlowRequestNeedAndTurnOn = max(ThisBranchFlowRequestNeedAndTurnOn, primaryPumpTurnOnRequest);
                                 }
                                 break;
                             default:
