@@ -2411,9 +2411,9 @@ void InitThermalAndFluxHistories(EnergyPlusData &state)
     }
     // Initialize Kiva convection algorithms
     for (int SurfNum : state.dataSurface->AllHTKivaSurfaceList) {
-        state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].in = KIVA_CONST_CONV(3.076);
-        state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].f = KIVA_HF_DEF;
-        state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].out = KIVA_CONST_CONV(0.0);
+        state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].in = KIVA_CONST_CONV(3.076);
+        state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].f = KIVA_HF_DEF;
+        state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].out = KIVA_CONST_CONV(0.0);
     }
     if (!state.dataHeatBal->SimpleCTFOnly || state.dataGlobal->AnyEnergyManagementSystemInModel) {
         for (int SurfNum : state.dataSurface->AllHTSurfaceList) {
@@ -7777,7 +7777,7 @@ void CalcHeatBalanceInsideSurf(EnergyPlusData &state,
 
         // Initialize Kiva instances ground temperatures
         if (state.dataHeatBal->AnyKiva) {
-            state.dataSurfaceGeometry->kivaManager.initKivaInstances(state);
+            state.dataSurfaceGeometry->kivaManager->initKivaInstances(state);
         }
     }
     if (!state.dataGlobal->BeginEnvrnFlag) {
@@ -7902,11 +7902,11 @@ void CalcHeatBalanceInsideSurf2(EnergyPlusData &state,
 
     // Calculate Kiva instances
     if (state.dataHeatBal->AnyKiva) {
-        if (((state.dataSurfaceGeometry->kivaManager.settings.timestepType == HeatBalanceKivaManager::KivaManager::Settings::HOURLY &&
+        if (((state.dataSurfaceGeometry->kivaManager->settings.timestepType == HeatBalanceKivaManager::KivaManager::Settings::HOURLY &&
               state.dataGlobal->TimeStep == 1) ||
-             state.dataSurfaceGeometry->kivaManager.settings.timestepType == HeatBalanceKivaManager::KivaManager::Settings::TIMESTEP) &&
+             state.dataSurfaceGeometry->kivaManager->settings.timestepType == HeatBalanceKivaManager::KivaManager::Settings::TIMESTEP) &&
             !state.dataGlobal->WarmupFlag) {
-            state.dataSurfaceGeometry->kivaManager.calcKivaInstances(state);
+            state.dataSurfaceGeometry->kivaManager->calcKivaInstances(state);
         }
     }
 
@@ -7916,7 +7916,7 @@ void CalcHeatBalanceInsideSurf2(EnergyPlusData &state,
         state.dataHeatBalSurf->SurfTempInsOld = state.dataHeatBalSurf->SurfTempIn; // Keep track of last iteration's temperature values
 
         if (state.dataHeatBal->AnyKiva) {
-            for (auto const &kivaSurf : state.dataSurfaceGeometry->kivaManager.surfaceMap) {
+            for (auto const &kivaSurf : state.dataSurfaceGeometry->kivaManager->surfaceMap) {
                 state.dataHeatBalSurf->SurfTempIn(kivaSurf.first) = kivaSurf.second.results.Trad - Constant::Kelvin;
             }
         }
@@ -7929,7 +7929,7 @@ void CalcHeatBalanceInsideSurf2(EnergyPlusData &state,
                                                            Inside); // Update the radiation balance
 
         if (state.dataHeatBal->AnyKiva) {
-            for (auto const &kivaSurf : state.dataSurfaceGeometry->kivaManager.surfaceMap) {
+            for (auto const &kivaSurf : state.dataSurfaceGeometry->kivaManager->surfaceMap) {
                 state.dataHeatBalSurf->SurfTempIn(kivaSurf.first) = state.dataHeatBalSurf->SurfTempInsOld(kivaSurf.first);
             }
         }
@@ -8254,7 +8254,7 @@ void CalcHeatBalanceInsideSurf2(EnergyPlusData &state,
                     } else if (surface.HeatTransferAlgorithm == DataSurfaces::HeatTransferModel::Kiva) {
                         // Read Kiva results for each surface
                         state.dataHeatBalSurf->SurfTempInTmp(SurfNum) =
-                            state.dataSurfaceGeometry->kivaManager.surfaceMap[SurfNum].results.Tconv - Constant::Kelvin;
+                            state.dataSurfaceGeometry->kivaManager->surfaceMap[SurfNum].results.Tconv - Constant::Kelvin;
 
                         TH11 = 0.0;
                     }

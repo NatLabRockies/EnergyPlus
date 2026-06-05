@@ -78,6 +78,7 @@
 #include <EnergyPlus/DataZoneEnergyDemands.hh>
 #include <EnergyPlus/DataZoneEquipment.hh>
 #include <EnergyPlus/General.hh>
+#include <EnergyPlus/HeatBalanceKivaManager.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
 #include <EnergyPlus/Material.hh>
 #include <EnergyPlus/Psychrometrics.hh>
@@ -363,7 +364,7 @@ void InitIntConvCoeff(EnergyPlusData &state,
                     state.dataHeatBalSurf->SurfHConvInt(SurfNum) = state.dataSurface->SurfEMSValueForIntConvCoef(SurfNum);
                     if (Surface(SurfNum).ExtBoundCond == DataSurfaces::KivaFoundation) {
                         Real64 hConst = state.dataSurface->SurfEMSValueForIntConvCoef(SurfNum);
-                        state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].in = KIVA_CONST_CONV(hConst);
+                        state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].in = KIVA_CONST_CONV(hConst);
                     }
                 }
 
@@ -486,10 +487,10 @@ void InitExtConvCoeff(EnergyPlusData &state,
 
     case HcExt::ASHRAESimple: {
         if (surface.ExtBoundCond == DataSurfaces::KivaFoundation) {
-            state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].f = [](double, double, double, double windSpeed) -> double {
+            state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].f = [](double, double, double, double windSpeed) -> double {
                 return windSpeed;
             };
-            state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].out = [=](double, double, double hfTerm, double, double) -> double {
+            state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].out = [=](double, double, double hfTerm, double, double) -> double {
                 return CalcASHRAESimpExtConvCoeff(Roughness, hfTerm);
             };
         } else {
@@ -519,12 +520,12 @@ void InitExtConvCoeff(EnergyPlusData &state,
 
         if (surface.ExtBoundCond == DataSurfaces::KivaFoundation) {
             if (surface.Class == SurfaceClass::Wall) {
-                auto const &fnd = state.dataSurfaceGeometry->kivaManager.surfaceMap[SurfNum].get_instance(0).first->foundation;
+                auto const &fnd = state.dataSurfaceGeometry->kivaManager->surfaceMap[SurfNum].get_instance(0).first->foundation;
                 const double length = fnd.netPerimeter;
                 const double height = fnd.wall.heightAboveGrade;
                 const double area = length * height;
                 const double perim = 2.0 * (length + height);
-                state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].f = [=](double, double, double, double windSpeed) -> double {
+                state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].f = [=](double, double, double, double windSpeed) -> double {
                     // Average windward and leeward since all walls use same algorithm
                     double windwardHf = CalcSparrowWindward(Roughness, perim, area, windSpeed);
                     double leewardHf = CalcSparrowLeeward(Roughness, perim, area, windSpeed);
@@ -534,11 +535,11 @@ void InitExtConvCoeff(EnergyPlusData &state,
                 // Assume very large area for grade (relative to perimeter).
                 constexpr double area = 9999999.;
                 constexpr double perim = 1.;
-                state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].f = [=](double, double, double, double windSpeed) -> double {
+                state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].f = [=](double, double, double, double windSpeed) -> double {
                     return CalcSparrowWindward(Roughness, perim, area, windSpeed);
                 };
             }
-            state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].out =
+            state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].out =
                 [=](double Tsurf, double Tamb, double hfTerm, double, double cosTilt) -> double {
                 Real64 Ts = Tsurf;
                 if (HMovInsul > 0.0) {
@@ -571,18 +572,18 @@ void InitExtConvCoeff(EnergyPlusData &state,
     case HcExt::MoWiTTHcOutside: {
         if (surface.ExtBoundCond == DataSurfaces::KivaFoundation) {
             if (surface.Class == SurfaceClass::Wall) {
-                state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].f = [=](double, double, double, double windSpeed) -> double {
+                state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].f = [=](double, double, double, double windSpeed) -> double {
                     // Average windward and leeward since all walls use same algorithm
                     double windwardHf = CalcMoWITTForcedWindward(windSpeed);
                     double leewardHf = CalcMoWITTForcedLeeward(windSpeed);
                     return (windwardHf + leewardHf) / 2.0;
                 };
             } else {
-                state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].f = [=](double, double, double, double windSpeed) -> double {
+                state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].f = [=](double, double, double, double windSpeed) -> double {
                     return CalcMoWITTForcedWindward(windSpeed);
                 };
             }
-            state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].out =
+            state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].out =
                 [=](double Tsurf, double Tamb, double hfTerm, double, double) -> double {
                 Real64 Hn = CalcMoWITTNatural(Tsurf - Tamb);
                 return std::sqrt(pow_2(Hn) + pow_2(hfTerm));
@@ -600,18 +601,18 @@ void InitExtConvCoeff(EnergyPlusData &state,
     case HcExt::DOE2HcOutside: {
         if (surface.ExtBoundCond == DataSurfaces::KivaFoundation) {
             if (surface.Class == SurfaceClass::Wall) {
-                state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].f = [=](double, double, double, double windSpeed) -> double {
+                state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].f = [=](double, double, double, double windSpeed) -> double {
                     // Average windward and leeward since all walls use same algorithm
                     double windwardHf = CalcMoWITTForcedWindward(windSpeed);
                     double leewardHf = CalcMoWITTForcedLeeward(windSpeed);
                     return (windwardHf + leewardHf) / 2.0;
                 };
             } else {
-                state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].f = [=](double, double, double, double windSpeed) -> double {
+                state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].f = [=](double, double, double, double windSpeed) -> double {
                     return CalcMoWITTForcedWindward(windSpeed);
                 };
             }
-            state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].out =
+            state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].out =
                 [=](double Tsurf, double Tamb, double hfTerm, double, double cosTilt) -> double {
                 Real64 Hf = CalcDOE2Forced(Tsurf, Tamb, cosTilt, hfTerm, Roughness);
                 Real64 Ts = Tsurf;
@@ -650,9 +651,9 @@ void InitExtConvCoeff(EnergyPlusData &state,
     if (state.dataSurface->SurfEMSOverrideExtConvCoef(SurfNum)) {
         HExt = state.dataSurface->SurfEMSValueForExtConvCoef(SurfNum);
         if (surface.ExtBoundCond == DataSurfaces::KivaFoundation) {
-            state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].f = KIVA_HF_ZERO;
+            state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].f = KIVA_HF_ZERO;
             Real64 hConst = state.dataSurface->SurfEMSValueForExtConvCoef(SurfNum);
-            state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].out = KIVA_CONST_CONV(hConst);
+            state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].out = KIVA_CONST_CONV(hConst);
         }
     }
 
@@ -1888,7 +1889,7 @@ void CalcASHRAESimpleIntConvCoeff(EnergyPlusData &state,
 {
     auto const &surface = state.dataSurface->Surface(SurfNum);
     if (surface.ExtBoundCond == DataSurfaces::KivaFoundation) {
-        state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].in = [](double Tsurf, double Tamb, double, double, double cosTilt) -> double {
+        state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].in = [](double Tsurf, double Tamb, double, double, double cosTilt) -> double {
             return CalcASHRAESimpleIntConvCoeff(Tsurf, Tamb, cosTilt);
         };
     } else {
@@ -1955,7 +1956,7 @@ void CalcASHRAEDetailedIntConvCoeff(EnergyPlusData &state,
 {
     auto const &surface = state.dataSurface->Surface(SurfNum);
     if (surface.ExtBoundCond == DataSurfaces::KivaFoundation) {
-        state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].in = [](double Tsurf, double Tamb, double, double, double cosTilt) -> double {
+        state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].in = [](double Tsurf, double Tamb, double, double, double cosTilt) -> double {
             return CalcASHRAETARPNatural(Tsurf, Tamb, cosTilt);
         };
     } else {
@@ -2204,7 +2205,7 @@ void CalcCeilingDiffuserIntConvCoeff(EnergyPlusData &state,
             if (surface.ExtBoundCond == DataSurfaces::KivaFoundation) {
                 Real64 height = surface.Height;
                 bool isWindow = state.dataConstruction->Construct(surface.Construction).TypeIsWindow;
-                state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].in =
+                state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].in =
                     [=, &state](double Tsurf, double Tamb, double, double, double cosTilt) -> double {
                     return CalcCeilingDiffuserIntConvCoeff(state, ACH, Tsurf, Tamb, cosTilt, AirHumRat, height, isWindow);
                 };
@@ -2543,8 +2544,8 @@ Real64 SetExtConvCoeff(EnergyPlusData &state, int const SurfNum) // Surface Numb
     case OverrideType::Value: {
         HExt = userExtConvModel.OverrideValue;
         if (surface.ExtBoundCond == DataSurfaces::KivaFoundation) {
-            state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].f = KIVA_HF_ZERO;
-            state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].out = KIVA_CONST_CONV(HExt);
+            state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].f = KIVA_HF_ZERO;
+            state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].out = KIVA_CONST_CONV(HExt);
         }
         surfExtConv.hfModelEq = HcExt::UserValue; // reporting
         surfExtConv.hnModelEq = HcExt::None;      // reporting
@@ -2554,8 +2555,8 @@ Real64 SetExtConvCoeff(EnergyPlusData &state, int const SurfNum) // Surface Numb
         HExt = userExtConvModel.sched->getCurrentVal();
         // Need to check for validity
         if (surface.ExtBoundCond == DataSurfaces::KivaFoundation) {
-            state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].f = KIVA_HF_ZERO;
-            state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].out = KIVA_CONST_CONV(HExt);
+            state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].f = KIVA_HF_ZERO;
+            state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].out = KIVA_CONST_CONV(HExt);
         }
         surfExtConv.hfModelEq = HcExt::UserSchedule; // reporting
         surfExtConv.hnModelEq = HcExt::None;         // reporting
@@ -2608,7 +2609,7 @@ Real64 SetIntConvCoeff(EnergyPlusData &state, int const SurfNum) // Surface Numb
     case OverrideType::Value: {
         HInt = userIntConvModel.OverrideValue;
         if (surface.ExtBoundCond == DataSurfaces::KivaFoundation) {
-            state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].in = KIVA_CONST_CONV(HInt);
+            state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].in = KIVA_CONST_CONV(HInt);
         }
         surfIntConv.hcModelEq = HcInt::UserValue; // reporting
         surfIntConv.hcModelEqRpt = HcIntReportVals[(int)surfIntConv.hcModelEq];
@@ -2618,7 +2619,7 @@ Real64 SetIntConvCoeff(EnergyPlusData &state, int const SurfNum) // Surface Numb
         HInt = userIntConvModel.sched->getCurrentVal();
         // Need to check for validity
         if (surface.ExtBoundCond == DataSurfaces::KivaFoundation) {
-            state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].in = KIVA_CONST_CONV(HInt);
+            state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].in = KIVA_CONST_CONV(HInt);
         }
         surfIntConv.hcModelEq = HcInt::UserSchedule; // reporting
         surfIntConv.hcModelEqRpt = HcIntReportVals[(int)surfIntConv.hcModelEq];
@@ -3220,7 +3221,7 @@ Real64 EvaluateIntHcModels(EnergyPlusData &state, int const SurfNum, HcInt const
     Real64 const Tsurface = state.dataHeatBalSurf->SurfInsideTempHist(1)(SurfNum);
     Real64 const Tzone = state.dataZoneTempPredictorCorrector->spaceHeatBalance(spaceNum).MAT;
 
-    auto &HnFn = state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].in;
+    auto &HnFn = state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].in;
     // now call appropriate function to calculate Hc
     switch (ConvModelEquationNum) {
 
@@ -3622,7 +3623,7 @@ Real64 EvaluateExtHcModels(EnergyPlusData &state, int const SurfNum, HcExt const
         if (surface.ExtBoundCond == DataSurfaces::KivaFoundation) {
             HnFn = [=, &state](double Tsurf, double Tamb, double HfTerm, double Roughness, double CosTilt) -> double {
                 // Remove Hfterm since this is only used for the natural convection portion
-                return state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].out(Tsurf, Tamb, HfTerm, Roughness, CosTilt) - HfTerm;
+                return state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].out(Tsurf, Tamb, HfTerm, Roughness, CosTilt) - HfTerm;
             };
         }
     } break;
@@ -3710,8 +3711,8 @@ Real64 EvaluateExtHcModels(EnergyPlusData &state, int const SurfNum, HcExt const
     case HcExt::UserCurve: {
         Hf = CalcUserDefinedExtHcModel(state, SurfNum, surfExtConv.hfUserCurveNum);
         if (surface.ExtBoundCond == DataSurfaces::KivaFoundation) {
-            HfTermFn = state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].f;
-            HnFn = state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].out;
+            HfTermFn = state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].f;
+            HnFn = state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].out;
         }
     } break;
 
@@ -3725,7 +3726,7 @@ Real64 EvaluateExtHcModels(EnergyPlusData &state, int const SurfNum, HcExt const
             HfTermFn = [=](double, double, double, double windSpeed) -> double { return CalcSparrowWindward(Roughness, perim, area, windSpeed); };
         } else {
             if (surface.ExtBoundCond == DataSurfaces::KivaFoundation) {
-                auto const &fnd = state.dataSurfaceGeometry->kivaManager.surfaceMap[SurfNum].get_instance(0).first->foundation;
+                auto const &fnd = state.dataSurfaceGeometry->kivaManager->surfaceMap[SurfNum].get_instance(0).first->foundation;
                 const double length = fnd.netPerimeter;
                 const double height = fnd.wall.heightAboveGrade;
                 const double area = length * height;
@@ -3750,7 +3751,7 @@ Real64 EvaluateExtHcModels(EnergyPlusData &state, int const SurfNum, HcExt const
             HfTermFn = [=](double, double, double, double windSpeed) -> double { return CalcSparrowLeeward(Roughness, perim, area, windSpeed); };
         } else {
             if (surface.ExtBoundCond == DataSurfaces::KivaFoundation) {
-                auto const &fnd = state.dataSurfaceGeometry->kivaManager.surfaceMap[SurfNum].get_instance(0).first->foundation;
+                auto const &fnd = state.dataSurfaceGeometry->kivaManager->surfaceMap[SurfNum].get_instance(0).first->foundation;
                 const double length = fnd.netPerimeter;
                 const double height = fnd.wall.heightAboveGrade;
                 const double area = length * height;
@@ -3868,7 +3869,7 @@ Real64 EvaluateExtHcModels(EnergyPlusData &state, int const SurfNum, HcExt const
             };
         } else {
             if (surface.ExtBoundCond == DataSurfaces::KivaFoundation) {
-                auto const &fnd = state.dataSurfaceGeometry->kivaManager.surfaceMap[SurfNum].get_instance(0).first->foundation;
+                auto const &fnd = state.dataSurfaceGeometry->kivaManager->surfaceMap[SurfNum].get_instance(0).first->foundation;
                 const double length = fnd.netPerimeter;
                 const double height = fnd.wall.heightAboveGrade;
                 const double area = length * height;
@@ -3913,8 +3914,8 @@ Real64 EvaluateExtHcModels(EnergyPlusData &state, int const SurfNum, HcExt const
     Real64 Hc = Hf + Hn;
 
     if (surface.ExtBoundCond == DataSurfaces::KivaFoundation) {
-        state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].f = HfTermFn;
-        state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].out =
+        state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].f = HfTermFn;
+        state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].out =
             [=](double Tsurf, double Tamb, double HfTerm, double Roughness, double cosTilt) -> double {
             Real64 hcExt = HfFn(Tsurf, Tamb, HfTerm, Roughness, cosTilt) + HnFn(Tsurf, Tamb, HfTerm, Roughness, cosTilt);
             if (hcExt < AdaptiveHcExtLowLimit) {
@@ -3951,7 +3952,7 @@ void DynamicExtConvSurfaceClassification(EnergyPlusData &state, int const SurfNu
     ) {
         Real64 DeltaTemp =
             (surface.ExtBoundCond == DataSurfaces::KivaFoundation)
-                ? (state.dataSurfaceGeometry->kivaManager.surfaceMap[SurfNum].results.Tconv - state.dataSurface->SurfOutDryBulbTemp(SurfNum))
+                ? (state.dataSurfaceGeometry->kivaManager->surfaceMap[SurfNum].results.Tconv - state.dataSurface->SurfOutDryBulbTemp(SurfNum))
                 : (state.dataHeatBalSurf->SurfOutsideTempHist(1)(SurfNum) - state.dataSurface->SurfOutDryBulbTemp(SurfNum));
 
         surfExtConv.convClass = (DeltaTemp < 0.0) ? ExtConvClass::RoofStable : ExtConvClass::RoofUnstable;
@@ -4841,7 +4842,7 @@ Real64 CalcUserDefinedIntHcModel(EnergyPlusData &state, int const SurfNum, int c
     }
 
     if (state.dataSurface->Surface(SurfNum).ExtBoundCond == DataSurfaces::KivaFoundation) {
-        state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].in =
+        state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].in =
             [=](double Tsurf, double Tamb, double HfTerm, double Roughness, double CosTilt) -> double {
             return HcFnTempDiffFn(Tsurf, Tamb, HfTerm, Roughness, CosTilt) + HcFnTempDiffDivHeightFn(Tsurf, Tamb, HfTerm, Roughness, CosTilt) +
                    HcFnACH + HcFnACHDivPerimLength;
@@ -4923,8 +4924,8 @@ Real64 CalcUserDefinedExtHcModel(EnergyPlusData &state, int const SurfNum, int c
     }
 
     if (surface.ExtBoundCond == DataSurfaces::KivaFoundation) {
-        state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].f = HfFnWindSpeedFn;
-        state.dataSurfaceGeometry->kivaManager.surfaceConvMap[SurfNum].out =
+        state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].f = HfFnWindSpeedFn;
+        state.dataSurfaceGeometry->kivaManager->surfaceConvMap[SurfNum].out =
             [=](double Tsurf, double Tamb, double HfTerm, double Roughness, double CosTilt) -> double {
             return HnFnTempDiffFn(Tsurf, Tamb, HfTerm, Roughness, CosTilt) + HnFnTempDiffDivHeightFn(Tsurf, Tamb, HfTerm, Roughness, CosTilt) +
                    HfTerm;

@@ -59,6 +59,7 @@
 #include <ObjexxFCL/string.functions.hh>
 
 // EnergyPlus Headers
+#include "EnergyPlus/HeatBalanceKivaManager.hh"
 #include <EnergyPlus/Construction.hh>
 #include <EnergyPlus/CurveManager.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
@@ -322,7 +323,7 @@ namespace HeatBalanceManager {
         // following is done so that people are gotten before for thermal comfort calculations
         // Setup Kiva instances
         if (state.dataHeatBal->AnyKiva) {
-            state.dataSurfaceGeometry->kivaManager.setupKivaInstances(state);
+            state.dataSurfaceGeometry->kivaManager->setupKivaInstances(state);
         }
     }
 

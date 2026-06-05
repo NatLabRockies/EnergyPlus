@@ -56,16 +56,20 @@
 #include <EnergyPlus/DataVectorTypes.hh>
 #include <EnergyPlus/DataViewFactorInformation.hh>
 #include <EnergyPlus/EnergyPlus.hh>
-#include <EnergyPlus/HeatBalanceKivaManager.hh>
 #include <EnergyPlus/Vectors.hh>
 
 // C++ Headers
 #include <map>
+#include <memory>
 
 namespace EnergyPlus {
 
 // Forward declarations
 struct EnergyPlusData;
+
+namespace HeatBalanceKivaManager {
+    class KivaManager;
+}
 
 namespace SurfaceGeometry {
 
@@ -476,7 +480,7 @@ struct SurfaceGeometryData : BaseGlobalStruct
     Array1D<DataSurfaces::SurfaceClass> const BaseSurfIDs;
     Array1D<DataSurfaces::SurfaceClass> const SubSurfIDs;
     Array1D<SurfaceGeometry::SurfaceData> SurfaceTmp; // Allocated/Deallocated during input processing
-    HeatBalanceKivaManager::KivaManager kivaManager;
+    std::unique_ptr<HeatBalanceKivaManager::KivaManager> kivaManager;
     SurfaceGeometry::ExposedFoundationPerimeter exposedFoundationPerimeter;
 
     int ErrCount = 0;
@@ -502,60 +506,13 @@ struct SurfaceGeometryData : BaseGlobalStruct
     {
     }
 
-    void init_state([[maybe_unused]] EnergyPlusData &state) override
-    {
-    }
+    // Moved to .cc to keep KivaManager definition out of header
+    void init_state([[maybe_unused]] EnergyPlusData &state) override;
 
-    void clear_state() override
-    {
-        ProcessSurfaceVerticesOneTimeFlag = true;
-        checkSubSurfAzTiltNormErrCount = 0;
-        Xpsv.deallocate();
-        Ypsv.deallocate();
-        Zpsv.deallocate();
-        // Following are used only during getting vertices, so are module variables here.
-        CosBldgRelNorth = 0.0;
-        SinBldgRelNorth = 0.0;
-        CosBldgRotAppGonly = 0.0;
-        SinBldgRotAppGonly = 0.0;
-        CosZoneRelNorth.deallocate();
-        SinZoneRelNorth.deallocate();
-        NoGroundTempObjWarning = true;
-        NoFCGroundTempObjWarning = true;
-        RectSurfRefWorldCoordSystem = false;
-        Warning1Count = 0;
-        Warning2Count = 0;
-        Warning3Count = 0;
-        SurfaceTmp.deallocate();
-        GetSurfaceDataOneTimeFlag = false;
-        UniqueSurfaceNames.clear();
-        kivaManager = HeatBalanceKivaManager::KivaManager();
-        firstTime = true;
-        noTransform = true;
-        CheckConvexityFirstTime = true;
-        ErrCount = 0;
-        WarningDisplayed = false;
-        ErrCount2 = 0;
-        ErrCount3 = 0;
-        ErrCount4 = 0;
-        ErrCount5 = 0;
-        ShowZoneSurfaceHeaders = true;
-    }
+    void clear_state() override;
 
-    // Default Constructor
-    SurfaceGeometryData()
-        : BaseSurfCls(3, {"WALL", "FLOOR", "ROOF"}),
-          SubSurfCls(6, {"WINDOW", "DOOR", "GLASSDOOR", "SHADING", "TUBULARDAYLIGHTDOME", "TUBULARDAYLIGHTDIFFUSER"}),
-          BaseSurfIDs(3, {DataSurfaces::SurfaceClass::Wall, DataSurfaces::SurfaceClass::Floor, DataSurfaces::SurfaceClass::Roof}),
-          SubSurfIDs(6,
-                     {DataSurfaces::SurfaceClass::Window,
-                      DataSurfaces::SurfaceClass::Door,
-                      DataSurfaces::SurfaceClass::GlassDoor,
-                      DataSurfaces::SurfaceClass::Shading,
-                      DataSurfaces::SurfaceClass::TDD_Dome,
-                      DataSurfaces::SurfaceClass::TDD_Diffuser})
-    {
-    }
+    SurfaceGeometryData();
+    ~SurfaceGeometryData();
 };
 } // namespace EnergyPlus
 
