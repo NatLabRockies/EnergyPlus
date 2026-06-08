@@ -1,10 +1,12 @@
 # Single page
+# mkdir -p single_dir/
+#
 # pandoc \
 #   --to=html5 \
 #   --mathml \
 #   --standalone=true \
 #   --table-of-contents=true \
-#   --output=input-output-reference-bootstrap.html \
+#   --output=single_dir/input-output-reference-bootstrap.html \
 #   --template template.html \
 #   --css=style.css \
 #   --include-in-header header.html \
@@ -13,6 +15,11 @@
 #   --lua-filter=bootstrap-tables.lua \
 #   --lua-filter=object-index.lua \
 #   input-output-reference.tex
+#
+# cp style.css single_dir/
+# cp -R media single_dir/
+# cp ../../release/ep_nobg.png chunked/media/
+
 #
 # Multi page
 # rm -Rf chunked_default/
