@@ -64,13 +64,26 @@
 #   lines......: 7.9% (28765 of 364658 lines)
 #   functions......: 19.6% (2224 of 11327 functions)
 
+import re
 from pathlib import Path
 
+ANSI_ESCAPE = re.compile(r"\x1b\[[0-?]*[ -/]*[@-~]")
+
+
+def find_coverage_summary(text, label):
+    matches = re.findall(rf"^\s*{re.escape(label)}\.*:\s*(.+)$", text, re.MULTILINE)
+    if matches:
+        return matches[-1].strip()
+    tail = "\n".join(text.splitlines()[-10:])
+    raise RuntimeError(f"Could not find {label} coverage summary in cover.txt. Recent output:\n{tail}")
+
+
 cover_input = Path.cwd() / "cover.txt"
-lines = cover_input.read_text().strip().split("\n")
-line_coverage = lines[-2].strip().split(":")[1].strip()
-line_percent = line_coverage.split(" ")[0]
-function_coverage = lines[-1].strip().split(":")[1].strip()
+cover_text = cover_input.read_text(encoding="utf-8", errors="replace")
+cover_text = ANSI_ESCAPE.sub("", cover_text)
+line_coverage = find_coverage_summary(cover_text, "lines")
+line_percent = line_coverage.split()[0]
+function_coverage = find_coverage_summary(cover_text, "functions")
 cover_output = Path.cwd() / "cover.md"
 content = f"""
 <details>
@@ -79,4 +92,4 @@ content = f"""
   - {line_coverage}
   - {function_coverage}
 </details>"""
-cover_output.write_text(content)
+cover_output.write_text(content, encoding="utf-8")
